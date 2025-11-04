@@ -38,9 +38,22 @@
     <div class="card border">
       <div class="card-header overflow-hidden">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-6">
-					<h5 class="card-title mb-3 mb-md-0">
-						{{ __('cycles.Screening results') }}
-					</h5>
+          <div>
+            <h5 class="card-title mb-1">
+              {{ __('cycles.Screening results') }}
+              @if(request('program_id'))
+                <span class="badge bg-label-primary ms-2">
+                  @php
+                    $selectedProgram = $cycles->firstWhere('id', request('program_id'));
+                    echo $selectedProgram ? $selectedProgram->title : '';
+                  @endphp
+                </span>
+              @endif
+            </h5>
+            @if(request('program_id'))
+              <p class="text-muted mb-0 small">{{ $l == 'en' ? 'Viewing screening results for selected program' : 'عرض نتائج الفحص للبرنامج المحدد' }}</p>
+            @endif
+          </div>
           <div class="d-flex flex-wrap gap-2 align-items-center">            
             <!-- Search Input -->
             <div class="search-wrapper position-relative">
@@ -79,15 +92,17 @@
 
         <!-- Enhanced Filter Section -->
 				<div class="row g-2 align-items-center mb-4 pb-3 border-bottom">
-					<!-- Cycle Filter -->
-					<div class="col-lg-2 col-md-4 col-sm-6">
-						<select id="screening-cycle-filter" class="form-select">
-							<option value="">{{ __('cycles.All_Cycles') }}</option>
-							@foreach ($cycles as $cycle)
-								<option value="{{ $cycle->id }}">{{ $cycle->title }}</option>
-							@endforeach
-						</select>
-					</div>
+					        <!-- Program Filter -->
+        <div class="col-lg-3 col-md-4 col-sm-6">
+          <select id="screening-cycle-filter" class="form-select" onchange="updateProgramFilter(this.value)">
+            <option value="">{{ __('cycles.All_Cycles') }}</option>
+            @foreach ($cycles as $cycle)
+              <option value="{{ $cycle->id }}" {{ request('program_id') == $cycle->id ? 'selected' : '' }}>
+                {{ $cycle->title }}
+              </option>
+            @endforeach
+          </select>
+        </div>
 
 					<!-- Step Filter -->
 					<div class="col-lg-2 col-md-4 col-sm-6">
@@ -171,14 +186,8 @@
                 }
               }
               
-              // Determine primary status for filtering
-              $primaryStatus = 'not-evaluated';
-              if ($hasPublished && !$hasDraft && !$hasNotEvaluated) {
-                $primaryStatus = 'published';
-              } elseif ($hasDraft) {
-                $primaryStatus = 'draft';
-              }
-              
+              // Determine primary status for filtering - use the actual company status from database
+              $primaryStatus = strtolower(str_replace(' ', '-', $company->status ?? 'not-evaluated'));
               // Create searchable category string
               $categories = is_string($company->business_categories) ? json_decode($company->business_categories, true) : $company->business_categories;
               $categoryString = is_array($categories) ? implode(' ', array_filter($categories ?? [])) : ($company->business_categories ?? '');
@@ -240,7 +249,7 @@
             
             <div class="col-xl-4 col-lg-6 col-md-12 company-card" 
                   data-company-name="{{ strtolower($company->name ?? '') }}"
-                  data-user-name="{{ strtolower($company->user->name ?? '') }}"
+                  data-user-name="{{ strtolower($company?->user?->name ?? '') }}"
                   data-category="{{ strtolower($categoryString ?? '') }}"
                   data-score="{{ $filterScore ?? 0 }}"
                   data-status="{{ $primaryStatus ?? 'not-evaluated' }}"
@@ -311,9 +320,9 @@
                   <!-- User Information -->
                   <div class="user-info bg-label-light border rounded-3 p-2 mb-4">
                     <div class="d-flex align-items-center">
-                      <a href="/dashboard/users/{{ $company->user->id }}/edit" class="text-decoration-none">
+                      <a href="/dashboard/users/{{ $company?->user?->id }}/edit" class="text-decoration-none">
                         <img
-                          src="{{ $company->user->image_url ?? '/icons/account.svg' }}"
+                          src="{{ $company?->user?->image_url ?? '/icons/account.svg' }}"
                           alt="img"
                           class="rounded-circle me-3 shadow-sm"
                           height="40"
@@ -321,9 +330,9 @@
                         />
                       </a>
                       <div class="flex-grow-1">
-                        <a href="/dashboard/users/{{ $company->user->id }}/edit" class="text-decoration-none">
-                          <h6 class="mb-0 fw-semibold text-dark">{{ $company->user->name }}</h6>
-                          <small class="text-muted">{{ $company->user->title ?: __('cycles.No title') }}</small>
+                        <a href="/dashboard/users/{{ $company?->user?->id }}/edit" class="text-decoration-none">
+                          <h6 class="mb-0 fw-semibold text-dark">{{ $company?->user?->name }}</h6>
+                          <small class="text-muted">{{ $company?->user?->title ?: __('cycles.No title') }}</small>
                         </a>
                       </div>
                     </div>
@@ -499,6 +508,14 @@
 			// Enable debug mode by setting: window.debugFilters = true in browser console
 			if (window.debugFilters) {
 				console.log('Regular Screening filtration system initialized with', screeningCompanyCards.length, 'companies');
+				
+				// Show status distribution
+				const statusCounts = {};
+				screeningCompanyCards.forEach(card => {
+					const status = $(card).data('status') || 'undefined';
+					statusCounts[status] = (statusCounts[status] || 0) + 1;
+				});
+				console.log('Status distribution:', statusCounts);
 			}
 		}
 
@@ -511,7 +528,7 @@
 				console.log('Visible cards:', $('.company-card:visible').length);
 				
 				// Sample data from first few cards
-				screeningCompanyCards.slice(0, 3).forEach((card, index) => {
+				screeningCompanyCards.slice(0, 5).forEach((card, index) => {
 					const $card = $(card);
 					console.log(`Card ${index + 1} data:`, {
 						companyName: $card.data('company-name'),
@@ -519,12 +536,19 @@
 						category: $card.data('category'),
 						score: $card.data('score'),
 						status: $card.data('status'),
+						statusRaw: $card.attr('data-status'),
 						evaluationStatuses: $card.data('evaluation-statuses'),
+						evaluationStatusesRaw: $card.attr('data-evaluation-statuses'),
 						judgeIds: $card.data('judge-ids'),
 						cycleId: $card.data('cycle-id'),
 						stepId: $card.data('step-id')
 					});
 				});
+				
+				// Show unique status values
+				const allStatuses = screeningCompanyCards.map(card => $(card).data('status')).filter(s => s);
+				const uniqueStatuses = [...new Set(allStatuses)];
+				console.log('Unique status values found:', uniqueStatuses);
 			};
 		}
 	});
@@ -646,28 +670,17 @@
 				if (window.debugFilters) console.log('After score filter:', filteredCards.length);
 			}
 
-			// Apply status filter
+			// Apply status filter - based purely on company status
 			if (screeningCurrentFilters.status) {
 				filteredCards = filteredCards.filter(card => {
 					const $card = $(card);
-					const primaryStatus = String($card.data('status') || 'not-evaluated');
-					const evaluationStatusesString = String($card.data('evaluation-statuses') || '');
-					const evaluationStatuses = evaluationStatusesString ? evaluationStatusesString.split(',').filter(status => status.trim()) : [];
+					const companyStatus = String($card.data('status') || 'not-evaluated').toLowerCase();
 					
-					switch (screeningCurrentFilters.status) {
-						case 'published':
-							// Show companies where ALL evaluations are published (primaryStatus === 'published')
-							// OR companies with at least some published evaluations (for mixed cases)
-							return primaryStatus === 'published' || evaluationStatuses.includes('published');
-						case 'draft':
-							return primaryStatus === 'draft' || evaluationStatuses.includes('draft');
-						case 'not-evaluated':
-							return primaryStatus === 'not-evaluated' || 
-											evaluationStatuses.length === 0 || 
-											evaluationStatuses.every(status => status === 'not-evaluated' || status === '');
-						default:
-							return true;
+					if (window.debugFilters) {
+						console.log('Filtering card with company status:', companyStatus, 'filter:', screeningCurrentFilters.status);
 					}
+					
+					return companyStatus === screeningCurrentFilters.status;
 				});
 				if (window.debugFilters) console.log('After status filter:', filteredCards.length);
 			}
@@ -1175,4 +1188,16 @@
 			}, 2000);
 		});
 	}
+  // Update program filter and reload the page with the selected program
+  function updateProgramFilter(programId) {
+    const url = new URL(window.location.href);
+    if (programId) {
+      url.searchParams.set('program_id', programId);
+    } else {
+      url.searchParams.delete('program_id');
+    }
+    // Also clear any step filter when changing programs
+    url.searchParams.delete('step_id');
+    window.location.href = url.toString();
+  }
 </script>

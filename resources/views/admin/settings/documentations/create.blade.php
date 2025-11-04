@@ -16,10 +16,10 @@
             <div class="row">
               <div class="col-md-12">
                 <div class="card">
-                  <div class="card-header">
-                    <h4 class="card-title">{{ __('admin.Add new document') }}</h4>
+                  <div class="card-header border-bottom">
+                    <h5 class="card-title mb-0">{{ __('admin.Add new document') }}</h5>
                   </div>
-                  <div class="card-content">
+                  <div class="card-content mt-6">
                     <div class="card-body">
                       @if (session()->has('msg'))
                         <div class="alert alert-danger alert-dismissible" role="alert">

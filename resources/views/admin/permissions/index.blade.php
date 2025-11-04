@@ -1,159 +1,187 @@
 @extends('layouts.admin')
-@section('style')
-<link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
-@stop
+
 @section('title', __('Users Permissions') )
 @section('subTitle', __('Permissions list'))
+
 @section('content')
-<!-- BEGIN: Content-->
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="content-overlay"></div>
-    
-        <div class="content-header mb-4"> <h4 class="content-card-title">{{ $l == 'en' ? 'Permissions List' : 'قائمة الصلاحيات' }}</h4> </div>
-        <div class="content-body">
-          <section id="basic-datatable">
-            <div class="row">
-              <div class="col-12">
-                <div class="card">
-                    <div class="card-header mb-4">
-                        <a href="{{route('permissions.create')}}" class="mx-2 btn btn-primary glow"> <i class="ti ti-plus me-1"></i> {{ __('admin.Add New')}} </a>
-                        <a href="{{route('permission-groups.index')}}" class="mx-2 btn btn-dark glow"> <i class="ti ti-list me-1"></i> {{ __('admin.permissionGroups')}} </a>
-                    </div>
-                            <div class="card-content">
-                                <div class="card-body card-dashboard">
-                                    @if(session()->has('msg'))
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <div class="alert alert-success alert-dismissible mb-2" role="alert">
-                                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                                    <div class="d-flex align-items-center">
-                                                        <i class="ti ti-check"></i>
-                                                        <span>
-                                                            {{ __('admin.'.session()->get('msg')) }}
-                                                            {{ Session::forget('msg') }}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endif
-                                    <div class="table-responsive">
-                                        <table class="table zero-configuration">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>{{ __('ID')}}</th>
-                                                    <th>{{ __('Title')}}</th>
-                                                    <th>{{ $l == 'en' ? 'Assigned To' : 'الموظفين المُستخدمين'}}</th>
-                                                    <th>{{ __('Edit/ Delete')}}</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                            @foreach($_permissions as $key => $permission)
-                                                    <tr>
-                                                        <td> {{ $permission->id ?? '' }} </td>
-                                                        <td>
-                                                            @if( $permission->core )
-                                                            <i title="Core Permission" class="fas fa-fw fa-check-circle text-success"></i>
-                                                            @endif
-                                                            {{ $permission->name  ?? '' }}
-                                                        </td>
-                                                        <td>
-                                                            @foreach( $permission->roles as $role )
-                                                                <a target="_blank" href="{{ route('roles.edit', ['role' => $role->id]) }}" class="mx-2 btn btn-xs btn-label-primary">{{ $role->name ?? '' }} </a/>
-                                                            @endforeach
-                                                        </td>
-                                                        <td>
-                                                            <a href="{{route('permissions.edit', ['permission' => $permission->id])}}" class="btn btn-label-info"><i class="ti ti-edit text-info"> </i></a>
-                                                            {{--  <button id='deleteAction' data-id='{{$permission->id}}' data-url="{{route('permissions.destroy', ['permission' => $permission->id])}}" type="button" class="btn btn-label-danger"><i class="ti ti-trash text-danger"> </i></button>  --}}
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    @if(session()->has('msg'))
+      <div class="row">
+        <div class="col-12">
+          <div class="alert alert-success alert-dismissible mb-2" role="alert">
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <div class="d-flex align-items-center">
+              <i class="ti ti-check"></i>
+              <span>
+                {{ __('admin.'.session()->get('msg')) }}
+                {{ Session::forget('msg') }}
+              </span>
             </div>
-        </section>
+          </div>
+        </div>
+      </div>
+    @endif
+
+    <div class="card">
+      <div class="card-header border-bottom">
+        <div class="d-flex flex-wrap justify-content-between align-items-center">
+          <h5 class="card-title mb-3 mb-md-0">{{ $l == 'en' ? 'Permissions List' : 'قائمة الصلاحيات' }}</h5>
+          <div class="d-flex flex-wrap align-items-center gap-3">
+            <div class="dropdown">
+              <button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="ti ti-file-export me-2"></i> {{ __('admin.Export') }}
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                <li><a class="dropdown-item" href="javascript:void(0)" id="exportExcel"><i class="ti ti-file-spreadsheet me-2"></i>Excel</a></li>
+                <li><a class="dropdown-item" href="javascript:void(0)" id="exportCsv"><i class="ti ti-file-text me-2"></i>CSV</a></li>
+              </ul>
+            </div>
+            <a href="{{route('permission-groups.index')}}" class="btn btn-label-primary"> 
+              <i class="ti ti-list me-2"></i>
+              {{ __('admin.permissionGroups')}} 
+            </a>
+            <a href="{{route('permissions.create')}}" class="btn btn-primary"> 
+              <i class="ti ti-plus me-2"></i> 
+              {{ __('admin.Add New')}} 
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <table class="table table-responsive permissions-table">
+          <thead class="table-light">
+            <tr>
+              <th>{{ __('admin.ID')}}</th>
+              <th>{{ __('admin.Title')}}</th>
+              <th>{{ $l == 'en' ? 'Assigned To' : 'الموظفين المُستخدمين' }}</th>
+              <th>{{ __('admin.Actions')}}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach($_permissions as $key => $permission)
+            <tr id="row_{{ $permission->id }}">
+              <td> {{ $permission->id ?? '' }} </td>
+              <td>
+                @if( $permission->core )
+                <i title="Core Permission" class="ti ti-circle-check text-success"></i>
+                @endif
+                {{ $permission->name ?? '' }}
+              </td>
+              <td>
+                <div class="d-flex flex-wrap gap-1">
+                  @foreach( $permission->roles as $role )
+                    <a 
+                      target="_blank" 
+                      href="{{ route('roles.edit', ['role' => $role->id]) }}"
+                      class="btn btn-xs btn-label-primary">
+                      <small>{{ $role->name ?? '' }}</small>
+                    </a>
+                  @endforeach
+                </div>
+              </td>
+              <td>
+                <a href="{{route('permissions.edit', ['permission' => $permission->id])}}"
+                  class="btn btn-icon rounded-circle btn-label-info">
+                  <i class="ti ti-edit"></i>
+                </a>
+                {{-- <button id='deleteAction' data-id='{{$permission->id}}'
+                  data-url="{{route('permissions.destroy', ['permission' => $permission->id])}}"
+                  type="button" class="btn btn-label-danger"><i class="ti ti-trash text-danger">
+                  </i></button> --}}
+              </td>
+            </tr>
+            @endforeach
+          </tbody>
+        </table>
+      </div>
     </div>
+  </div>
 </div>
 @stop
+
 @section('scripts')
-    @if($l=='ar')
-        <script type="text/javascript">
-            $(document).ready(function() {
-                $('.zero-configuration').DataTable({
-                    "language": {
-                        "sEmptyTable":     "ليست هناك بيانات متاحة في الجدول",
-                        "sLoadingRecords": "جارٍ التحميل...",
-                        "sProcessing":   "جارٍ التحميل...",
-                        "sLengthMenu":   "أظهر _MENU_ مدخلات",
-                        "sZeroRecords":  "لم يعثر على أية سجلات",
-                        "sInfo":         "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-                        "sInfoEmpty":    "يعرض 0 إلى 0 من أصل 0 سجل",
-                        "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-                        "sInfoPostFix":  "",
-                        "sSearch":       "ابحث:",
-                        "sUrl":          "",
-                        "oPaginate": {
-                            "sFirst":    "الأول",
-                            "sPrevious": "السابق",
-                            "sNext":     "التالي",
-                            "sLast":     "الأخير"
-                        },
-                        "oAria": {
-                            "sSortAscending":  ": تفعيل لترتيب العمود تصاعدياً",
-                            "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
-                        }
-                    }
-                } );
-            });
-        </script>
-    @endif
-    <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
-    <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
-    <script src="/app-assets/js/scripts/datatables/datatable.js"></script>
-    <script src="/app-assets/js/scripts/modal/components-modal.js"></script>
-    <script>
-        $(document).on("click", "#deleteAction", function (e) {
-            var url = $(this).data('url');
-            var token = '{{ csrf_token() }}';
-            Swal.fire({
-                title: "{{__('admin.SureDelete')}}",
-                text: "{{__('admin.Recover')}}",
-                type: "warning",
-                showCancelButton: true,
-                confirmButtonClass: "btn-danger",
-                confirmButtonText: "{{__('admin.DYes')}}",
-                cancelButtonText: "{{__('admin.No')}}!",
-            })
-                .then((result) => {
-                    if (result.value) {
+<script>
+  $(document).ready(function() {
+    const isRtl = {{ $l == 'ar' ? 'true' : 'false' }};
 
-                        $.post(url, {'_method':'DELETE' , '_token':token},
-                            function(response){
-                                Swal.fire(
-                                    '{{__('admin.Deleted')}}!',
-                                    '{{__('admin.FileDeleted')}}.',
-                                    'success'
-                                );
+    // Initialize DataTable
+    var table = $('.permissions-table').DataTable({
+      responsive: true,
+      pageLength: 10,
+      lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "{{ __('admin.All') }}"]],
+      language: isRtl ? { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/ar.json' } : {},
+      dom: '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-2"l><"col-sm-12 col-md-7 filters"><"col-sm-12 col-md-3"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+      buttons: [
+        {
+          extend: 'excel',
+          title: '{{ $l == "en" ? "Permissions List" : "قائمة الأذونات" }}',
+          exportOptions: {
+            columns: [0, 1, 2],
+          }
+        },
+        {
+          extend: 'csv',
+          title: '{{ $l == "en" ? "Permissions List" : "قائمة الأذونات" }}',
+          exportOptions: {
+            columns: [0, 1, 2],
+          }
+        },
+      ],
+    });
 
-                                location.reload();
-                            }
-                        ).fail(
-                            function(error) {
-                                console.log(error);
-                            }
-                        );
-                    }else{
-                        console.log('Canceled')
-                    }
-                })
-        });
-    </script>
+    // Handle export buttons
+    $('#exportCsv').on('click', function() {
+      table.button('.buttons-csv').trigger();
+    });
+
+    $('#exportExcel').on('click', function() {
+      table.button('.buttons-excel').trigger();
+    });
+
+    // Handle delete action
+    $(document).on("click", "#deleteAction", function (e) {
+      e.preventDefault();
+      var url = $(this).data('url');
+      var id = $(this).data('id');
+      var token = '{{ csrf_token() }}';
+      
+      Swal.fire({
+        title: "{{__('admin.SureDelete')}}",
+        text: "{{__('admin.Recover')}}",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "{{ __('admin.DYes') }}",
+        cancelButtonText: "{{ __('admin.No') }}",
+        reverseButtons: true,
+        customClass: {
+            confirmButton: 'btn btn-danger me-2',
+            cancelButton: 'btn btn-label-secondary',
+        },
+        buttonsStyling: false,
+      })
+      .then((result) => {
+        if (result.value) {
+          $.post(url, {'_method': 'DELETE' , '_token': token},
+            function(response) {
+              // Remove the row from DataTable
+              table.row('#row_' + id).remove().draw();
+
+              releaseSuccessAlert({
+                title: "{{ __('admin.Deleted') }}!",
+                message: "{{ __('admin.DeletedSuccessfully') }}.",
+              });
+            }
+          ).fail(function(error) { 
+            releaseFailureAlert({
+							title: "{{ __('admin.Error') }}!",
+							message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
+						});
+          });
+        }
+      });
+    });
+  });
+</script>
 @stop

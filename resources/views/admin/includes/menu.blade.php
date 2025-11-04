@@ -180,13 +180,15 @@
       </li>
     @endif
 
-    @if( $_user->ableTo('messages.view', $permissions) )
-      <li class="{{ Request::is('dashboard/mymsg') ? 'active' : '' }} menu-item">
-        <a href="/dashboard/mymsg" class="menu-link"><i class="bx bx-support"></i>
-          <i class="menu-icon tf-icons ti ti-world"></i>
-          <span class="menu-item">{{ __('admin.contactus') }}</span>
-        </a>
-      </li>
+    @if (!$_user->hasAnyRole('Judger'))
+      @if( $_user->ableTo('messages.view', $permissions) )
+        <li class="{{ Request::is('dashboard/mymsg') ? 'active' : '' }} menu-item">
+          <a href="/dashboard/mymsg" class="menu-link"><i class="bx bx-support"></i>
+            <i class="menu-icon tf-icons ti ti-world"></i>
+            <span class="menu-item">{{ __('admin.contactus') }}</span>
+          </a>
+        </li>
+      @endif
     @endif
 
     {{-- @if( $_user->ableToAny(['messages.index'], $permissions) )
@@ -251,7 +253,7 @@
       @endif
     @endif
   
-    @if ($_user->hasAnyRole('Mentor|Registered|Admin'))
+    @if ($_user->hasAnyRole('Mentor|Registered|Admin|organizationManager'))
       @if( $_user->ableTo('mentors.list', $permissions) )
       <li class="{{ Request::is('dashboard/show/Mentors') ? 'active' : '' }} menu-item"><a
           href="/dashboard/show/Mentors" class="menu-link">
@@ -262,7 +264,7 @@
       @endif
     @endif
 
-    @if ($_user->hasAnyRole('Admin|Registered|Mentor|organizationManager|Judger'))
+    @if ($_user->hasAnyRole('Admin|Registered|Mentor|organizationManager'))
     @if( $_user->ableTo('users.view_companies', $permissions) )
      <li class="{{ Request::is('dashboard/companies') ? 'active' : '' }} menu-item">
         <a class="menu-link" href="{{ route('users.view_companies') }}">
@@ -769,7 +771,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/answerOption*
 
       @if (!$_user->hasAnyRole('Mentor|Judger'))
         <li
-          class="{{ Request::is('*services*', '', 'dashboard/requests/all') ? 'sidebar-group-active open' : '' }} menu-item">
+          class="{{ Request::is('*services*', '*serviceCategories*', 'dashboard/requests/all') ? 'sidebar-group-active open' : '' }} menu-item">
           <a class="menu-link menu-toggle">
             <i class="menu-icon tf-icons ti ti-arrows-move"></i>
             <div>{{ __('admin.Services') }}</div>
@@ -941,7 +943,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/answerOption*
    @endif
 
    @if ($_user->hasAnyRole('Admin|organizationManager'))
-    <li class="{{ Request::is('dashboard/admin/notification-templates*') ? 'sidebar-group-active open' : '' }} menu-item">
+    <li class="{{ Request::is('dashboard/admin/notification-templates*', 'dashboard/admin/notification-triggers*') ? 'sidebar-group-active open' : '' }} menu-item">
       <a class="menu-link menu-toggle">
         <i class="menu-icon tf-icons ti ti-mail"></i>
         <div>{{ __('settings.Notification_Templates') }}</div>
@@ -953,7 +955,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/answerOption*
             <span class="menu-item">{{ __('settings.Create_Template') }}</span>
           </a>
         </li>
-        <li class="{{ Request::is('dashboard/admin/notification-templates', 'dashboard/admin/notification-templates/*/edit', 'dashboard/admin/notification-templates/*') ? 'active' : '' }} menu-item">
+        <li class="{{ Request::is('dashboard/admin/notification-templates', 'dashboard/admin/notification-templates/*/edit') ? 'active' : '' }} menu-item">
           <a class="menu-link" href="{{ route('notification-templates.index') }}">
             <i class="bx bx-{{ $arrow ?? 'right' }}-arrow-alt"></i>
             <span class="menu-item">{{ __('settings.Manage_Templates') }}</span>

@@ -38,7 +38,7 @@
 
 		<div class="card">
 			<div class="card-header border-bottom d-flex justify-content-between align-items-center">
-				<h4 class="card-title mb-0">{{__('admin.Survey_Results')}}</h4>
+				<h5 class="card-title mb-0">{{__('admin.Survey_Results')}}</h5>
 				<div class="dropdown">
 					<button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
 						<i class="ti ti-file-export me-2"></i> {{ __('admin.Export') }}
@@ -52,7 +52,7 @@
 			<div class="card-body">
 				<div class="row mt-6">
 					<div class="col-12 col-md-2">
-						<select id="scope-filter" class="form-select form-select-sm">
+						<select id="scope-filter" class="form-select form-select-sm mb-2 mb-md-0">
 							<option value="">{{ __('admin.Scope') }}</option>
 							<option value="">{{ __('admin.All') }}</option>
 							@foreach($scopes as $scope)
@@ -62,7 +62,7 @@
 					</div>
 					@if($isAdmin)
 					<div class="col-12 col-md-2">
-						<select id="org-filter" class="form-select form-select-sm">
+						<select id="org-filter" class="form-select form-select-sm mb-2 mb-md-0">
 							<option value="">{{ __('admin.Organization') }}</option>
 							<option value="">{{ __('admin.All') }}</option>
 							@foreach($organizations as $org)
@@ -72,7 +72,7 @@
 					</div>
 					@endif
 					<div class="col-12 col-md-2">
-						<select id="session-filter" class="form-select form-select-sm">
+						<select id="session-filter" class="form-select form-select-sm mb-2 mb-md-0">
 							<option value="">{{ __('admin.surveyTriggerAfterSession') }}</option>
 							<option value="">{{ __('admin.All') }}</option>
 							<option value="1">{{ __('admin.surveyTriggerAllowed') }}</option>
@@ -80,7 +80,7 @@
 						</select>
 					</div>
 					<div class="col-12 col-md-2">
-						<select id="cycle-filter" class="form-select form-select-sm">
+						<select id="cycle-filter" class="form-select form-select-sm mb-2 mb-md-0">
 							<option value="">{{ __('admin.surveyTriggerAfterCycle') }}</option>
 							<option value="">{{ __('admin.All') }}</option>
 							<option value="1">{{ __('admin.surveyTriggerAllowed') }}</option>
@@ -115,11 +115,18 @@
 							<td class="text-center">{{ ($survey_scope->scope ?? '') }}</td>
 							<td>
 								@role('Admin')
-								<a href="{{ URL::to('dashboard/surveys/' . $survey->id . '/edit') }}">{!! $survey->title
-									!!}</a>
+								@if($survey)
+								<a href="{{ URL::to('dashboard/surveys/' . $survey->id . '/edit') }}">{!! $survey->title !!}</a>
+								@else
+								<span>N/A</span>
+								@endif
 								@endrole
 								@role('organizationManager')
+								@if($survey)
 								{{ $survey->title }}
+								@else
+								<span>N/A</span>
+								@endif
 								@endrole
 							</td>
 							@role('Admin')
@@ -154,10 +161,12 @@
 							</td>
 	
 							<td class="text-center">
+								@if($survey)
 								<a href="{{ route('surveys.results_view', ['survey' => $survey->id]) }}?target={{ $survey_scope->scope }}"
 									class="btn btn-xs btn-outline-info"> <i class="ti ti-checklist"></i> {{
 									__('admin.surveyResults') }}
 								</a>
+								@endif
 							</td>
 						</tr>
 						@endforeach

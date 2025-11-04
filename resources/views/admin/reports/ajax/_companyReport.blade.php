@@ -4,7 +4,7 @@
     <div class="card-header border-bottom d-flex justify-content-between align-items-center">
       <h4 class="d-flex align-items-center mb-0">
         <img 
-          src="{{ $company->cycledata->organization->image_url }}" 
+          src="{{ asset($company->logo) }}" 
           alt="avatar" 
           class="rounded-circle border shadow-sm" 
           height="40"
@@ -16,16 +16,16 @@
         </a>
       </h4>
       <div class="chip" style="cursor: pointer;">
-        <a href="/dashboard/show/UserProfile/{{ $company->user->id }}" class="d-flex align-items-center">
+        <a href="/dashboard/show/UserProfile/{{ $company?->user?->id }}" class="d-flex align-items-center">
           <img 
             class="rounded-circle border shadow-sm" 
-            src="{{ $company->user->image_url }}" 
+            src="{{ asset($company?->user?->image_url) }}" 
             alt="User img" 
             height="30"
             width="30" 
           />
           <span class="ms-2 fw-bold text-primary">
-            {{ $company->user->name }} <small class="text-muted">({{ $l == 'en' ? 'Startup Leader' : 'قائد الشركة' }})</small>
+            {{ $company?->user?->name }} <small class="text-muted">({{ $l == 'en' ? 'Startup Leader' : 'قائد الشركة' }})</small>
           </span>
         </a>
       </div>
@@ -37,7 +37,7 @@
       <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mt-3">
         <div class="d-flex align-items-center">
           <img 
-            src="{{ $company->cycledata->organization->image_url }}" 
+            src="{{ asset($company->cycledata->organization->image_url) }}" 
             alt="avatar" 
             class="rounded-circle border shadow-sm"
             height="40"
@@ -145,10 +145,10 @@
   <div class="row">
     <div class="col-md-12">
       <div>
-        <h4 class="card-title align-items-center mb-3">
+        <h5 class="card-title align-items-center mb-3">
           <i class='ti ti-card ti-28px'></i>
-          <span class="mx-2">{{ __('admin.Mentorship Sessions') }}:</span>
-        </h4>
+          <span class="ms-2">{{ __('admin.Mentorship Sessions') }}:</span>
+        </h5>
         <div id="mentorshipSessionsSection" class="card-body" style="height: 600px; overflow-y: auto;">
           @if($mentorship_sessions->count())
           <div class="card">
@@ -218,7 +218,7 @@
 
 <div class="col-md-12 mt-6">
   <div>
-    <h4 class="card-title align-items-center mb-3">
+    <h5 class="card-title align-items-center mb-3">
       <i class='ti ti-card ti-28px'></i>
       <span class="mx-2">{{ __('admin.Training sessions') }}:</span>
     </h4>

@@ -438,7 +438,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                   @endif
                   
                   @if($leaderOrnot->count() > 0)
-                    @if (app()->environment('local', 'dev'))
+                    @if (app()->environment('local', 'dev', 'test'))
                       <form method="POST" action="/dashboard/hackathon/deleteTeamInfo" id="deleteTeamForm">
                         <div class="modal-body">
                           @csrf
@@ -1612,19 +1612,10 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
               $('#member-count').text(currentCount - 1);
             });
           }).fail(function(error) { 
-            console.log(error);
-            Swal.fire({
-              icon: 'error',
-              title: "{{ __('admin.Error') }}!",
-              text: "{{ __('admin.DeleteFailed') }}",
-              showCancelButton: false,
-              showConfirmButton: true,
-              confirmButtonText: "{{ __('admin.OK') }}",
-              customClass: {
-                confirmButton: 'btn btn-primary',
-              },
-              buttonsStyling: false,
-            });
+            releaseFailureAlert({
+							title: "{{ __('admin.Error') }}!",
+							message: error?.message || "{{ __('admin.DeleteFailed') }}",
+						});
           });
       }
     });
@@ -1666,17 +1657,9 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
             });
           }).fail(function(error) { 
             console.log(error);
-            Swal.fire({
-              icon: 'error',
+            releaseFailureAlert({
               title: "{{ __('admin.Error') }}!",
-              text: "{{ __('admin.CancelFailed') }}",
-              showCancelButton: false,
-              showConfirmButton: true,
-              confirmButtonText: "{{ __('admin.OK') }}",
-              customClass: {
-                confirmButton: 'btn btn-primary',
-              },
-              buttonsStyling: false,
+              message: error?.message || "{{ __('admin.CancelFailed') }}",
             });
           });
       }
@@ -2036,7 +2019,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
       if (data.status === 'success') {
         releaseSuccessAlert({
           title: l === 'en' ? "File Uploaded!" : "تم رفع الملف!",
-          message: data.message || (l === 'en' ? "Your file has been uploaded successfully." : "تم رفع الملف بنجاح."),
+          message: l === 'en' ? "Your file has been uploaded successfully." : "تم رفع الملف بنجاح.",
         });
         createListItem(file);
       } else {

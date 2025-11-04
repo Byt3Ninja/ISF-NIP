@@ -171,13 +171,8 @@
                 }
               }
               
-              // Determine primary status for filtering
-              $primaryStatus = 'not-evaluated';
-              if ($hasPublished && !$hasDraft && !$hasNotEvaluated) {
-                $primaryStatus = 'published';
-              } elseif ($hasDraft) {
-                $primaryStatus = 'draft';
-              }
+              // Use company status for filtering
+              $primaryStatus = strtolower(str_replace(' ', '-', $company->status ?? 'not-evaluated'));
               
               // Create searchable category string
               $categories = is_string($company->business_categories) ? json_decode($company->business_categories, true) : $company->business_categories;
@@ -236,7 +231,7 @@
             
             <div class="col-xl-4 col-lg-6 col-md-12 company-card" 
                   data-company-name="{{ strtolower($company->name ?? '') }}"
-                  data-user-name="{{ strtolower($company->user->name ?? '') }}"
+                  data-user-name="{{ strtolower($company?->user?->name ?? '') }}"
                   data-category="{{ strtolower($categoryString ?? '') }}"
                   data-score="{{ $filterScore ?? 0 }}"
                   data-status="{{ $primaryStatus ?? 'not-evaluated' }}"
@@ -307,9 +302,9 @@
                   <!-- User Information -->
                   <div class="user-info bg-label-light border rounded-3 p-2 mb-4">
                     <div class="d-flex align-items-center">
-                      <a href="/dashboard/users/{{ $company->user->id }}/edit" class="text-decoration-none">
+                      <a href="/dashboard/users/{{ $company?->user?->id }}/edit" class="text-decoration-none">
                         <img
-                          src="{{ $company->user->image_url ?? '/icons/account.svg' }}"
+                          src="{{ $company?->user?->image_url ?? '/icons/account.svg' }}"
                           alt="img"
                           class="rounded-circle me-3 shadow-sm"
                           height="40"
@@ -317,9 +312,9 @@
                         />
                       </a>
                       <div class="flex-grow-1">
-                        <a href="/dashboard/users/{{ $company->user->id }}/edit" class="text-decoration-none">
-                          <h6 class="mb-0 fw-semibold text-dark">{{ $company->user->name }}</h6>
-                          <small class="text-muted">{{ $company->user->title ?: __('cycles.No title') }}</small>
+                        <a href="/dashboard/users/{{ $company?->user?->id }}/edit" class="text-decoration-none">
+                          <h6 class="mb-0 fw-semibold text-dark">{{ $company?->user?->name }}</h6>
+                          <small class="text-muted">{{ $company?->user?->title ?: __('cycles.No title') }}</small>
                         </a>
                       </div>
                     </div>
@@ -641,28 +636,13 @@
 			if (window.debugFilters) console.log('After score filter:', filteredCards.length);
 		}
 
-		// Apply status filter
+		// Apply status filter - based purely on company status
 		if (finalScreeningCurrentFilters.status) {
 			filteredCards = filteredCards.filter(card => {
 				const $card = $(card);
-				const primaryStatus = String($card.data('status') || 'not-evaluated');
-				const evaluationStatusesString = String($card.data('evaluation-statuses') || '');
-				const evaluationStatuses = evaluationStatusesString ? evaluationStatusesString.split(',').filter(status => status.trim()) : [];
+				const companyStatus = String($card.data('status') || 'not-evaluated').toLowerCase();
 				
-				switch (finalScreeningCurrentFilters.status) {
-					case 'published':
-						// Show companies where ALL evaluations are published (primaryStatus === 'published')
-						// OR companies with at least some published evaluations (for mixed cases)
-						return primaryStatus === 'published' || evaluationStatuses.includes('published');
-					case 'draft':
-						return primaryStatus === 'draft' || evaluationStatuses.includes('draft');
-					case 'not-evaluated':
-						return primaryStatus === 'not-evaluated' || 
-										evaluationStatuses.length === 0 || 
-										evaluationStatuses.every(status => status === 'not-evaluated' || status === '');
-					default:
-						return true;
-				}
+				return companyStatus === finalScreeningCurrentFilters.status;
 			});
 			if (window.debugFilters) console.log('After status filter:', filteredCards.length);
 		}

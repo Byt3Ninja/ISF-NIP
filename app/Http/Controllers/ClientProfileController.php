@@ -169,6 +169,7 @@ class ClientProfileController extends Controller
     }
     public function update(UpdateClientProfileRequest $request)
     {
+      
         try {
             $first_name_ar = substr($request->first_name_en, 0, 250);
             $last_name_ar = substr($request->last_name_en, 0, 250);
@@ -263,8 +264,73 @@ class ClientProfileController extends Controller
                         ->notify(new ConfirmEmailUpdateNotification($verificationUrl));
                     return redirect()->route('user.profile_view')->with(['msg' => 'UpdateEmailSent', 'class' => 'success']);
                 }
+            }
 
-
+            // Debug: Dump request data and company info
+            \Log::info('Full request data:', $request->all());
+            \Log::info('Current user ID: ' . $user->id);
+            \Log::info('Tech tags received:', ['tech_tags' => $request->tech_tags]);
+            
+            if ($request->has('tech_tags') && !empty($request->tech_tags)) {                
+                // If it's a string, try to decode it as JSON
+                if (is_string($techTags)) {
+                    $techTags = json_decode($techTags, true);
+                    \Log::info('Tech tags after JSON decode:', ['techTags' => $techTags]);
+                }
+                
+                // If we have a valid array of technologies
+                if (is_array($techTags) && !empty($techTags)) {
+                    \Log::info('Processing tech tags array:', $techTags);
+                    // Filter out any empty values and trim whitespace
+                    $technologies = array_filter(array_map('trim', $techTags));
+                    
+                    // Eager load the company relationship if not already loaded
+                    if (!$user->relationLoaded('company')) {
+                        $user->load('company');
+                    }
+                    
+                    // Update or create company with technologies
+                    if ($user->company) {
+                        // Log before update
+                        \Log::info('Current technologies_used in DB:', [
+                            'before' => $user->company->technologies_used,
+                            'will_update_to' => $technologies
+                        ]);
+                        
+                        // Force update to bypass any model events
+                        $updateResult = \DB::table('companies')
+                            ->where('id', $user->company->id)
+                            ->update(['technologies_used' => implode(',', $technologies)]);
+                            
+                        \Log::info('Direct DB update result:', ['success' => $updateResult]);
+                        
+                        // Refresh the company model
+                        $user->load('company');
+                        \Log::info('After update - technologies_used in DB:', [
+                            'after' => $user->company->technologies_used
+                        ]);
+                        $techString = implode(',', array_unique($technologies));
+                        \Log::info('Updating company with technologies:', ['company_id' => $user->company->id, 'technologies' => $techString]);
+                        $result = $user->company->update([
+                            'technologies_used' => $techString
+                        ]);
+                        \Log::info('Update result:', ['success' => $result]);
+                    } else {
+                        // If company doesn't exist, create it with the user_id
+                        $techString = implode(',', array_unique($technologies));
+                        \Log::info('Creating new company with technologies:', ['user_id' => $user->id, 'technologies' => $techString]);
+                        $company = new \App\Company([
+                            'user_id' => $user->id,
+                            'name_en' => $user->name,
+                            'technologies_used' => $techString
+                        ]);
+                        $result = $user->company()->save($company);
+                        \Log::info('Create company result:', ['success' => (bool)$result, 'company_id' => $company->id ?? null]);
+                    }
+                } else if ($user->company) {
+                    // If technologies_used is empty, clear the field
+                    $user->company->update(['technologies_used' => null]);
+                }
             }
 
             if ($result)
@@ -395,7 +461,7 @@ class ClientProfileController extends Controller
         $programFilter = $request->input('programFilter');
         $enrolledInProgramFilter = $request->input('enrolledInProgramFilter');
         if ($setting->mentor_list == 1) {
-            if (Auth::user()->hasanyRole('Mentor|Registered|Admin')) {
+            if (Auth::user()->hasanyRole('Mentor|Registered|Admin|OrganizationManager')) {
                 $l = app()->getLocale();
                 $firstNameColumn = $l == 'ar' ? 'first_name_en' : 'first_name_en';
                 $lastNameColumn = $l == 'ar' ? 'first_name_en' : 'last_name_en';
@@ -469,7 +535,7 @@ class ClientProfileController extends Controller
             }
         } else {
 
-            if (Auth::user()->hasanyRole('Admin')) {
+            if (Auth::user()->hasanyRole('Admin|OrganizationManager')) {
                 $l = app()->getLocale();
                 $firstNameColumn = $l == 'ar' ? 'first_name_en' : 'first_name_en';
                 $lastNameColumn = $l == 'ar' ? 'first_name_en' : 'last_name_en';
@@ -505,9 +571,11 @@ class ClientProfileController extends Controller
                 }
                 // Program filter - filter by specific program/cycle
                 if (!empty($programFilter)) {
-                    $mentors = $mentors->whereHas('mentorCycles', function ($query) use ($programFilter) {
-                        $query->where('cycle_id', $programFilter);
-                    });
+                   $mentors = $mentors->whereHas('mentorCycles', function ($query) use ($programFilter) {
+                    $query->when(!is_null($programFilter), function ($q) use ($programFilter) {
+                        $q->where('cycle_id', $programFilter);
+                     });
+                });
                 }
                 // Enrolled in program filter - All/Yes/No options
                 if ($enrolledInProgramFilter !== null && $enrolledInProgramFilter !== '') {

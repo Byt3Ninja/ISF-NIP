@@ -20,7 +20,7 @@
                     <div class="col-md-8 col-lg-6">
                         <div class="card shadow-sm border-0">
                             <div class="card-header">
-                                <h4 class="card-title mb-0">{{__('admin.Add new service category')}}</h4>
+                                <h5 class="card-title mb-0">{{__('admin.Add new service category')}}</h5>
                             </div>
                             <div class="card-body">
                                 @if(session()->has('msg'))
@@ -45,7 +45,7 @@
                                 <form method="post" action="{{route('serviceCategories.store')}}">
                                     {!! csrf_field() !!}
                                     <div class="mb-3 {{ $isOrgMan ? 'd-none' : '' }}">
-                                        <label for="organization_id" class="form-label fw-bold">{{ __('cycles.Select_Organization')}}</label>
+                                        <label for="organization_id" class="form-label">{{ __('cycles.Select_Organization')}}</label>
                                         <select required class="form-select" id="organization_id" name="organization_id" data-placeholder="{{ __('cycles.Select_Organization') }}">
                                             @if( !$isOrgMan ) <option selected disabled value="">{{ __('cycles.Select_Organization') }}</option>  @endif
                                             @foreach( \App\Organization::all() as $org )
@@ -55,20 +55,20 @@
                                         </select>
                                     </div>
                                     <div class="mb-3">
-                                        <label for="name_en" class="form-label fw-bold">{{ __('admin.English Name')}}</label>
+                                        <label for="name_en" class="form-label">{{ __('admin.English Name')}}</label>
                                         <input style="direction: ltr;" type="text" class="form-control" id="name_en" name='name_en'
                                             required placeholder="{{__('admin.English Name')}}"
                                             value="{{ old('name_en') }}">
                                     </div>
                                     <div class="mb-3">
-                                        <label for="name_ar" class="form-label fw-bold">{{__('admin.Arabic Name')}}</label>
+                                        <label for="name_ar" class="form-label">{{__('admin.Arabic Name')}}</label>
                                         <input style="direction: rtl;" type="text" class="form-control" id="name_ar" name='name_ar'
                                             required placeholder="{{__('admin.Arabic Name')}}"
                                             value="{{ old('name_ar') }}">
                                     </div>
                                     @if( $_user->ableToAny(['serviceCategories.create', 'serviceCategories.store'], $permissions) )
-                                    <div class="d-flex justify-content-end mt-4">
-                                        <button type="submit" class="btn btn-primary px-4">{{__('admin.Save')}}</button>
+                                    <div class="d-flex justify-content-end mt-8">
+                                        <button type="submit" class="btn btn-primary">{{__('admin.Save')}}</button>
                                     </div>
                                     @endif
                                 </form>

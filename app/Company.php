@@ -2,8 +2,8 @@
 
 namespace App;
 
+use App\User;
 use App\Like;
-
 use App\Traits\Auditable;
 use Illuminate\Support\Facades\App;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +12,22 @@ class Company extends Model
 {
     // use Auditable;
     public static $module = 'Company';
+    
+    /**
+     * Get the user that owns the company.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function resolveUser()
+    {
+        return $this->user ? : $this->users->first();
+    }
+
     protected $fillable = [
+        'user_id',
         'country_id',
         'state_id',
         'city_id',
@@ -87,7 +102,8 @@ class Company extends Model
         'Tax_Card',
         'Country_Register_id',
         'targeted_market',
-        'industries'
+        'industries',
+        'technologies_used'
     ];
 
 
@@ -149,10 +165,6 @@ class Company extends Model
     }
 
     // ==========> Relations <==============
-    public function user()
-    {
-        return $this->hasOne(User::class);
-    }
 
     public function sectoR()
     {

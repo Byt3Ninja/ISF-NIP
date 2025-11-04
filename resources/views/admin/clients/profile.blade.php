@@ -143,7 +143,7 @@
                     <h3 class="h5 cart-title">{{ __('admin.ProfileSummary') }}</h3>
                     <p>
                       {{ $l == 'ar' 
-                          ? optional($client->bio)->bio_ar ?? __('admin.N/A') 
+                          ? optional($client->bio)->bio_ar ?? __('admin.No bio has been added yet') 
                           : optional($client->bio)->bio_en ?? __('admin.No bio has been added yet') }}
                     </p>
                   </div>
@@ -151,7 +151,7 @@
 
                 {{-- Statistics Cards --}}
                 @if(auth()->user()->id == $client->id)
-                  <div class="row">
+                  <div class="row mb-4">
                     <div class="col-6 col-md-4">
                       <article class="card card-border-shadow-primary h-100">
                         <div class="card-body">

@@ -43,7 +43,7 @@ return [
     'Specialization' => 'Specialization',
     'Linkedin' => 'Linkedin',
     'Request' => 'Request',
-    'Add mentorship session with' => 'Add mentorship session with',
+    'Add mentorship session with' => 'Request Mentorship Session With',
     'Start meeting Date/ Time' => 'Start meeting Date/ Time',
     'Meeting duration' => 'Meeting duration',
     'Minutes' => 'Minutes',

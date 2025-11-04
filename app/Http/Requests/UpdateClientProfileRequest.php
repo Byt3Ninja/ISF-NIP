@@ -37,8 +37,9 @@ class UpdateClientProfileRequest extends FormRequest
                             'unique:users,email,' . $id,
                             'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/'
                         ],
-            'HaveCompany'=>'nullable|max:1',
-
+            'HaveCompany' => 'nullable|max:1',
+            'technologies_used' => 'nullable|array',
+            'technologies_used.*' => 'nullable|string|max:50',
         ];
     }
 }

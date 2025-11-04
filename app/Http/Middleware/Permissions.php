@@ -32,6 +32,7 @@ class Permissions
         'messages*',
         'users/search',
         'cycles.completion_status_check',
+        'trainings.time_tracking',
     ];
 
     private $exceptControllers = [

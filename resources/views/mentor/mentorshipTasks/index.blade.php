@@ -2,8 +2,6 @@
 
 @section('vendorstyle')
 	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/jkanban/jkanban.css" />
-	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
-	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
 	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
 	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
 	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
@@ -151,7 +149,7 @@
 		<!-- View Task Modal -->
 		<div class="modal fade" id="viewTaskModal" tabindex="-1" aria-labelledby="viewTaskModalLabel" aria-hidden="true">
 			<div class="modal-dialog modal-lg">
-				<div class="modal-content rounded overflow-hidden bg-label-light p-md-4">
+				<div class="modal-content rounded overflow-hidden bg-label-light p-4">
 					<div class="mb-4 p-4 p-md-0">
 						<div class="d-flex justify-content-between align-items-center w-100">
 							<div class="d-flex align-items-center gap-3">
@@ -288,11 +286,11 @@
 							</div>
 						</div>
 					</div>
-					<div class="bg-white rounded border border-light p-2 p-md-4">
+					<div class="bg-white rounded border border-light p-4">
 						<form action="#" method="POST">
 							<div class="mb-3">
 								<label for="task-name" class="form-label">{{ __('admin.Task_Name') }}</label>
-								<input type="text" class="form-control" id="task-name" name="task-name" />
+								<input type="text" class="form-control" id="task-name" name="task-name" placeholder="{{ __('admin.Task_Name') }}" />
 							</div>
 							<div class="mb-3">
 								<label for="task-content" class="form-label">{{ __('admin.Description') }}</label>
@@ -359,7 +357,7 @@
 										<option value="2">User 2</option>
 										<option value="3">User 3</option>
 									</select> --}}
-									<input id="task-assignee" name="task-assignee" class="form-control" placeholder="{{ __('admin.Select_User') }}" value="" />
+									<input id="task-assignee" name="task-assignee" class="form-control" placeholder="{{ __('admin.Select_Users') }}" value="" />
 								</div>
 							</div>
 							<div class="row mb-3">
@@ -391,7 +389,7 @@
 							</div>
 						</form>
 					</div>
-					<div class="mt-4 d-flex align-items-center gap-3">
+					<div class="mt-md-4 d-flex align-items-center gap-3 p-4 p-md-0">
 						<button type="button" class="btn btn-label-secondary w-px-100" data-bs-dismiss="modal">{{ __('admin.Cancel') }}</button>
 						<button id="createTask" type="button" class="btn btn-primary w-px-100">
 							{{ __('admin.Create') }}
@@ -405,7 +403,7 @@
 		<!-- Edit Task Modal -->
 		<div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModal" aria-hidden="true">
 			<div class="modal-dialog modal-md">
-				<div class="modal-content rounded overflow-hidden bg-label-light p-md-4">
+				<div class="modal-content rounded overflow-hidden bg-label-light p-4">
 					<div class="mb-4 p-4 p-md-0">
 						<div class="d-flex justify-content-between align-items-center w-100">
 							<h6 class="modal-title" id="form-modal-title">{{ __('admin.Edit_Task') }}</h6>
@@ -418,7 +416,7 @@
 						<form action="#" method="POST" id="editTaskForm">
 							<div class="mb-3">
 								<label for="task-name" class="form-label">{{ __('admin.Task_Name') }}</label>
-								<input type="text" class="form-control" id="edit-task-name" name="edit-task-name" />
+								<input type="text" class="form-control" id="edit-task-name" name="edit-task-name" placeholder="{{ __('admin.Task_Name') }}" />
 							</div>
 							<div class="mb-3">
 								<label class="form-label">{{ __('admin.Description') }}</label>
@@ -529,7 +527,7 @@
 							</div>
 						</form>
 					</div>
-					<div class="mt-4 d-flex align-items-center gap-3">
+					<div class="mt-md-4 d-flex align-items-center gap-3 p-4 p-md-0">
 						<input type="hidden" id="edit-task-id" name="edit-task-id" value="0" />
 						<button type="button" class="btn btn-label-secondary w-px-100" data-bs-dismiss="modal">{{ __('admin.Cancel') }}</button>
 						<button id="editTaskBtn" type="button" class="btn btn-primary w-px-100">
@@ -549,7 +547,6 @@
 
 @section('scripts')
 	<script src="/vuexy/assets/vendor/libs/jkanban/jkanban.js"></script>
-	<script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
 	<script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script>
 	<script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
 	<script src="/vuexy/assets/vendor/libs/bloodhound/bloodhound.js"></script>
@@ -655,7 +652,10 @@
 					}
 				},
 				error: function(error) {
-					console.error('Error uploading files:', error);
+					releaseFailureAlert({
+						title: "{{ __('admin.Error') }}!",
+						message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
+					});
 				}
 			});
 		}
@@ -745,7 +745,10 @@
 							}
 						},
 						error: function(error) {
-							console.error('Error deleting file:', error);
+							releaseFailureAlert({
+								title: "{{ __('admin.Error') }}!",
+								message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
+							});
 						}
 					});
 					return;
@@ -970,7 +973,11 @@
 							$('#viewTaskModal').modal('show');
 						},
 						error: function(error) {
-							releaseFailureAlert({ message: '{{ __('admin.An unexpected error occurred, please try again later') }}' });
+							console.log('error', error);
+							releaseFailureAlert({
+								title: "{{ __('admin.Error') }}!",
+								message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
+							});
 						}
 					});
 				},
@@ -1018,10 +1025,14 @@
 						},
 						error: function(error) {
 							reloadKanban();
-							if( error.status == 422 )
-							{
+							if( error.status == 422 ) {
 								for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { releaseFailureAlert({ message }); }); }
-							} else { releaseFailureAlert({ message: '{{ __('admin.An unexpected error occurred, please try again later') }}' }); }
+								return;
+							} 
+							releaseFailureAlert({
+								title: "{{ __('admin.Error') }}!",
+								message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
+							});
 						}
 					});
 				}
@@ -1265,7 +1276,10 @@
 							} else { releaseFailureAlert({ message: response.message }); }
 						},
 						error: function(error) {
-							console.error('Error deleting file:', error);
+							releaseFailureAlert({
+								title: "{{ __('admin.Error') }}!",
+								message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
+							});
 						}
 					});
 					return;
@@ -1455,7 +1469,10 @@
 					$('#editTaskModal').modal('show');
 				},
 				error: function(error) {
-					releaseFailureAlert({ message: '{{ __('admin.An unexpected error occurred, please try again later') }}' });
+					releaseFailureAlert({
+						title: "{{ __('admin.Error') }}!",
+						message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
+					});
 				}
 			});
 		});
@@ -1500,10 +1517,15 @@
 							} else { releaseFailureAlert({ message: response.message }); }
 						},
 						error: function(error) {
-							if( error.status == 422 )
-							{
+							if( error.status == 422 ) {
 								for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { releaseFailureAlert({message: message}); }); }
+								return;
 							}
+
+							releaseFailureAlert({
+								title: "{{ __('admin.Error') }}!",
+								message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
+							});
 						}
 					});
 				}
@@ -1557,10 +1579,15 @@
 						} else { releaseFailureAlert({ message: response.message }); }
 					},
 					error: function(error) {
-						if( error.status == 422 )
-						{
+						if( error.status == 422 ) {
 							for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { releaseFailureAlert({ message }); }); }
+							return;
 						}
+
+						releaseFailureAlert({
+							title: "{{ __('admin.Error') }}!",
+							message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
+						});
 					}
 				});
 			}
@@ -1607,22 +1634,32 @@
 						refreshLabelsForCreate();
 						$('#task-name').val('');
 						$('#task-content').val('');
-						editQuill.root.innerHTML = '';
+						quill.root.innerHTML = '';
 						$("#task-due-date").val('');
 						$('#task-status').val('pending');
 						$("#task-priority").val('low');
 						$("#task-labels").val('');
 						$("#task-assignee").val('');
+						// Reset attachments
+						$('#createFileList').empty();
+						$('#createAttachmentCount').text('0');
+						$('#createFileInput').val('');
 						releaseSuccessAlert({ message: response.message, title: response.title });
 						reloadKanban();
 					} else { releaseFailureAlert({ message: response.message }); }
 				},
 				error: function(error) {
 					$spinner.addClass('d-none');
-					if( error.status == 422 )
-					{
+					
+					if( error.status == 422 ) {
 						for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { releaseFailureAlert({ message }); }); }
+						return;
 					}
+
+					releaseFailureAlert({
+						title: "{{ __('admin.Error') }}!",
+						message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
+					});
 				}
 			});
 		});
@@ -1673,10 +1710,15 @@
 				},
 				error: function(error) {
 					$spinner.addClass('d-none');
-					if( error.status == 422 )
-					{
+					if( error.status == 422 ) {
 						for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { releaseFailureAlert({ message }); }); }
+						return;
 					}
+
+					releaseFailureAlert({
+						title: "{{ __('admin.Error') }}!",
+						message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
+					});
 				}
 			});
 		});
@@ -1723,6 +1765,11 @@
 			$('#formTaskModal').on('show.bs.modal', function() {
 				quill.root.innerHTML = '';
 				document.getElementById('task-content').value = '';
+				// Reset attachments when modal opens
+				$('#createFileList').empty();
+				$('#createAttachmentCount').text('0');
+				$('#createFileInput').val('');
+				pendingCreateAttachments = [];
 			});
 		});
 	</script>

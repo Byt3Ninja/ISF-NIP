@@ -189,22 +189,29 @@
                       <a href="/dashboard/programlist/show/{{ $cycle->id }}" class="text-primary fs-5 fw-bold mb-4 mb-md-0">
                         {{ $cycle->title }}
                       </a>
-                      <div class="d-flex d-md-none align-items-center gap-2 mb-3">
+                      <div class="d-flex flex-wrap d-md-none align-items-center gap-2 mb-3">
                         <div class="badge bg-{{ $cycle->type == 'General_Program' ? 'success' : 'warning  ' }} rounded-lg p-2">
                           {{ __('cycles.' . $cycle->type) }}
                         </div>
-                         <a href="{{ route('programs.report',$cycle->id) }}" class="btn btn-sm btn-light">
-                            {{ __('cycles.View Report') }}
-                            <i class="ti ti-clipboard-data ti-sm ms-2"></i>
-                          </a>
+                        <a href="{{ route('programs.report',$cycle->id) }}" class="btn btn-sm btn-light">
+                          {{ __('cycles.View Report') }}
+                          <i class="ti ti-clipboard-data ti-sm ms-2"></i>
+                        </a>
+                        @if (!empty($cycle->private))
+                          <div class="badge text-center text-dark cursor-pointer" onclick="copyToClipboard('{{ url('dashboard/cycles/view/' . $cycle->private) }}')" >
+                            <span style="font-size: 12px;" class="fw-medium menu-item">
+                              {{  __('cycles.Private Link') }}:
+                            </span>
+                            <i class="ti ti-rosette-discount-check text-success ms-2"></i>
+                          </div>
+                        @endif
                       </div>
                     </div>
 
 
                     <div class="d-flex align-items-center gap-4">
                       @if (!empty($cycle->private))
-                        <div class="badge text-center text-dark cursor-pointer" onclick="copyToClipboard('{{ url('dashboard/cycles/view/' . $cycle->private) }}')" >
-
+                        <div class="badge text-center text-dark d-none d-md-inline cursor-pointer" onclick="copyToClipboard('{{ url('dashboard/cycles/view/' . $cycle->private) }}')" >
                           <span style="font-size: 12px;" class="fw-medium mx-1 menu-item">
                             {{  __('cycles.Private Link') }}:
                           </span>

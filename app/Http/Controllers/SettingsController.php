@@ -1149,13 +1149,14 @@ class SettingsController extends Controller
 						];
 					})->values()->toArray();
 				} else {
-					$sectorsList = $allSectors->map(function ($sector) use ($l) {
-						return [
-							'id'   => $sector->id,
-							'name' => $sector->{"name_$l"} ?? $sector->name_en ?? 'N/A',
-							'created_at' => $sector->created_at
-						];
-					})->values()->toArray();
+					// $sectorsList = $allSectors->map(function ($sector) use ($l) {
+					// 	return [
+					// 		'id'   => $sector->id,
+					// 		'name' => $sector->{"name_$l"} ?? $sector->name_en ?? 'N/A',
+					// 		'created_at' => $sector->created_at
+					// 	];
+					// })->values()->toArray();
+					$sectorsList = [];
 				}
 				return [
 					'id'       => $industry->id,
@@ -1165,6 +1166,7 @@ class SettingsController extends Controller
 				];
 				
 			});
+			
 		
 			return view('admin.settings.industry.index', compact('data', 'technologies'));
 		}

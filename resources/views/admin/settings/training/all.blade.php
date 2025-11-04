@@ -17,7 +17,7 @@
         {{-- Card Header --}}
         <div class="card-header border-bottom">
           <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-            <h4 class="card-title mb-0">{{ __('cycles.all courses') }}</h4>
+            <h5 class="card-title mb-0">{{ __('cycles.all courses') }}</h5>
             <div class="d-flex align-items-center gap-3">
               @if ($_user->hasAnyRole('organizationManager|Mentor|Admin'))
                 <div class="dropdown">
@@ -436,7 +436,6 @@
               releaseFailureAlert({
                 title: "{{ __('admin.Error') }}",
                 message: "{{ __('admin.An unexpected error occurred, please try again later') }}",
-                icon: "error",
               });
             }
           });

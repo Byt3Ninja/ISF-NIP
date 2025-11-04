@@ -9,6 +9,7 @@ use App\Cycle;
 use App\Sector;
 use App\Company;
 use App\Service;
+use App\ServiceCategory;
 use App\Calendar;
 use App\Currency;
 use App\Messages;
@@ -950,7 +951,7 @@ class HomeController extends Controller
                     $company = $user->company ?? null;
                     $startupComplete = $company
                         && filled($company->name_en ?? '')
-                        && filled($company->sector ?? '')
+                        && filled($company->est_date ?? '')
                         && filled($company->address_en ?? '')
                         && filled($company->stage ?? '');
                 } 
@@ -2323,7 +2324,7 @@ class HomeController extends Controller
             
         
                 $user = Auth::user();
-			if(isset($user->team_member) && $user->team_member->teamFormation->user->company->cycle != null){
+			if(isset($user->team_member) && $user->team_member->teamFormation->user->company?->cycle != null){
 				$cycle = $user->team_member->teamFormation->user->company->cycle;
             }elseif(isset($user->company) && $user->company->cycle != null){
                     $cycle = $user->company->cycle;
@@ -3118,17 +3119,25 @@ class HomeController extends Controller
     {
         $t = $request->input('type');
         $find = $request->input('find');
-        $services = Service::whereNotNull('id');
-        if ($t) {
-            $services = $services->where('service_category_id', $t);
-        }
-        if ($find) {
-            $services = $services->where(function ($query) use ($find) {
-                $query->where('services.name_en', 'like', '%' . $find . '%')
-                    ->orWhere('services.name_ar', 'like', '%' . $find . '%');
+        $services = Service::with('serviceCategory')
+            ->whereHas('organizations')
+            ->get()
+            ->map(function ($service) {
+                $service->category_name_en = $service->serviceCategory->name_en ?? null;
+                $service->category_name_ar = $service->serviceCategory->name_ar ?? null;
+                return $service;
             });
-        }
-        $services = Service::whereHas('organizations')->get();
+        
+        // if ($t) {
+        //     $services = $services->where('service_category_id', $t);
+        // }
+        // if ($find) {
+        //     $services = $services->where(function ($query) use ($find) {
+        //         $query->where('services.name_en', 'like', '%' . $find . '%')
+        //             ->orWhere('services.name_ar', 'like', '%' . $find . '%');
+        //     });
+        // }
+
         $setting = Settings::where('id', 1)->first();
         $currency = Currency::where('id', $setting->Currency)->first();
         return view('admin.clients.directory')->with('services', $services)->with('setting', $setting)->with('currency', $currency);
@@ -3235,8 +3244,9 @@ class HomeController extends Controller
         if (!$startupComplete) {
             $preRequests[] = [
                 'id' => 'complete_startup',
-                'url' => route('company.profile_view_mine', $user->company_id),
-                'label' => __('admin.Complete Startup/Idea')
+                'url' => route('company.profile_view_mine', ['company' => $user->company_id]),
+                'label' => __('admin.Complete Startup/Idea'),
+                'action' => 'complete-profile'
             ];
         }
 

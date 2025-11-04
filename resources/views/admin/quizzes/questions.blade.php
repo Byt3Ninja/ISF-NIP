@@ -77,9 +77,9 @@
 
       <div class="content-header row px-md-6 mb-6 mt-3 px-0">
         <div class="col-md-6 d-flex align-items-center">
-          <h3 class="fw-bold mb-0">{{ __('admin.manageQuestions') }}</h3>
+          <h4 class="fw-bold mb-3 mb-md-0">{{ __('admin.manageQuestions') }}</h4>
         </div>
-        <div class="col-md-6 d-flex justify-content-end align-items-center gap-2">
+        <div class="col-md-6 d-flex flex-wrap justify-content-md-end align-items-md-center gap-2">
           <button class="btn btn-label-primary" data-bs-toggle="modal"
             data-bs-target="#addQuestionsModal" type="button">
             {{ __('admin.AddQuestions') }}
@@ -124,12 +124,13 @@
                     class="d-flex justify-content-between align-items-center w-100 border-bottom mb-4 pb-2">
                     <div class="d-flex align-items-center">
                       <span
-                        class="badge badge-center bg-primary rounded-circle d-flex justify-content-center align-items-center"
+                        class="badge badge-center bg-primary rounded-circle d-flex flex-shrink-0 justify-content-center align-items-center"
                         style="width: 30px; height: 30px;">
                         {{ $key + 1 }}
                       </span>
-                      <h5 class="card-title fs-semibold mb-0 ms-2">
-                        {{ $question->question }}</h5>
+                      <h6 class="card-title fs-semibold mb-0 ms-2">
+                        {{ $question->question }}
+                      </h6>
                     </div>
                     <div class="d-flex align-items-center gap-4">
                       <input
@@ -647,7 +648,7 @@
         reverseButtons: true,
         customClass: {
           confirmButton: 'btn btn-danger me-2',
-          cancelButton: 'btn btn-secondary'
+          cancelButton: 'btn btn-label-secondary'
         },
         buttonsStyling: false
       }).then((result) => {

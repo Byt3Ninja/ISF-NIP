@@ -103,9 +103,9 @@
           action="/dashboard/builder/2" method="POST">
           @csrf
           <div class="col-sm-12 mb-6">
-            <label class="form-label" for="mtitle">{{ __('admin.Form Name') }}</label>
+            <label class="form-label" for="mtitle">{{ __('builder.Form_Title') }}</label>
             <input type="text" id="mtitle" class="form-control dt-form-name" name="title"
-              placeholder="{{ __('admin.Enter Form Name') }}" aria-label="{{ __('admin.Enter Form Name') }}"  required/>
+              placeholder="{{ __('builder.Form_Title') }}" aria-label="{{ __('builder.Form_Title') }}"  required/>
           </div>
           <div class="col-sm-12 mb-6">
             <label class="form-label" for="organization_id">{{ __('admin.Assigned to Organizations') }}</label>
@@ -151,9 +151,9 @@
           <input type="hidden" name="_token" value="{{ csrf_token() }}">
           <input type="hidden" name="id" class="form_id" id="id">
           <div class="col-sm-12 mb-6">
-            <label class="form-label" for="mtitle">{{ __('admin.Form Name') }}</label>
+            <label class="form-label" for="mtitle">{{ __('builder.Form_Title') }}</label>
             <input type="text" id="mtitle" class="form-control dt-form-name" name="title"
-              placeholder="{{ __('admin.Enter Form Name') }}" aria-label="{{ __('admin.Enter Form Name') }}" required />
+              placeholder="{{ __('builder.Form_Title') }}" aria-label="{{ __('builder.Form_Title') }}" required />
           </div>
           <div class="col-sm-12 mb-6">
             <label class="form-label" for="organization_id">{{ __('admin.Assigned to Organizations') }}</label>
@@ -192,6 +192,9 @@
 @stop
 
 @section('pagescripts')
+<script>
+  let isOrgManager = @json(auth()->user()->hasAnyRole(['organizationManager']));
+</script>
 <script src="/vuexy/assets/js/form-list.js"></script>
 
 <script>
@@ -222,7 +225,8 @@
         success: function(response) {
           if (response) {
             // console.log(response);
-            location.href = 'show-builder/' + (response || '');        
+            const url = 'show-builder/' + (response || '');
+            location.href = isOrgManager ? url : url + '?org_id=' + organization_id;        
           }
         },
         error: function(error) {

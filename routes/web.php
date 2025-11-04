@@ -363,6 +363,7 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::post('/EditCompanyMileStone/{id?}', 'ClientCompanyController@EditMileStone')->name('company.profile_milestones_edit');
     Route::post('/DeleteCompanyMileStone/{id?}', 'ClientCompanyController@DeleteMileStone')->name('company.profile_milestones_delete');
     Route::post('/delete-document', 'ClientCompanyController@deleteDocument')->name('company.profile_documents_delete');
+    Route::post('/delete-image/{id?}', 'ClientCompanyController@deleteImage')->name('company.profile_images_delete');
 
     //Industry
     Route::post('/industries/technologies', 'TechnologyController@create_technologies')->name('settings.create_technologies');

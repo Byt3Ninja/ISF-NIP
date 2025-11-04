@@ -1,8 +1,6 @@
 @extends('layouts.admin')
 
 @section('vendorstyle')
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
@@ -44,14 +42,13 @@
           <div class="row match-height">
             <div class="col-xl-12 col-md-12 col-sm-12">
               <div class="card mb-4">
-                <div class="card-header" style="padding-bottom: 15px;">
-                  <h4 class="card-title">{{ __('cycles.Portal Final Screening list') }}</h4>
+                <div class="card-header border-bottom">
+                  <h5 class="card-title mb-0">{{ __('cycles.Portal Final Screening list') }}</h5>
                 </div>
-                <hr>
-                <div class="card-body">
-                  <div class="row">
-                    <div class="col-12 col-lg-6">
-                      <label class="fs-6 fw-semibold mb-1">{{ __('cycles.Select step from list to manage') }}</label>
+                <div class="card-body mt-6">
+                  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
+                    <div class="form-group mb-4 mb-md-0 w-50 d-none d-md-block">
+                      <label class="form-label">{{ __('cycles.Select step from list to manage') }}</label>
                       <select id="cstep" class="select2 form-select"
                         onchange="window.open('/dashboard/'+this.options[this.selectedIndex].value+'/final','_self');">
                         @foreach ($steps as $step)
@@ -63,25 +60,37 @@
                         @endforeach
                       </select>
                     </div>
-                    <div class="col-12 col-lg-6">
-                      <div class="d-flex align-items-end h-100 flex-wrap gap-2 mt-3 mt-lg-0">
-                        <button type="button" class="btn btn-label-info" onclick="DoChange(1)">
-                          <i class="ti ti-edit"></i>
-                          <span class="mx-1">{{ __('cycles.Edit') }}</span>
-                        </button>
-                        <button type="button" class="btn btn-label-secondary"
-                          onclick="window.location.href='/dashboard/final/results/{{ $id }}'">
-                          <i class="ti ti-user"></i> <span class="mx-1">{{ __('cycles.Results') }}</span>
-                        </button>
-                        <a class="btn btn-label-success" href="/dashboard/cycles/{{ $cstep->cycle_id ?? null }}">
-                          <i class="ti ti-pencil"></i>
-                          <span class="mx-1">{{ __('cycles.Cycle') }}</span>
-                        </a>
-                        <button type="button" class="btn btn-label-danger" onclick="DoChange(2)">
-                          <i class="ti ti-trash"></i>
-                          <span class="mx-1">{{ __('cycles.Delete') }}</span>
-                        </button>
-                      </div>
+                    <div class="form-group mb-4 mb-md-0 w-100 d-md-none">
+                      <label class="form-label">{{ __('cycles.Select step from list to manage') }}</label>
+                      <select id="cstep" class="select2 form-select"
+                        onchange="window.open('/dashboard/'+this.options[this.selectedIndex].value+'/final','_self');">
+                        @foreach ($steps as $step)
+                          <option value="{{ $step->id }}" {{ $step->id == $id ? 'selected' : '' }}>{{ $step->title }}
+                            ({{ __('cycles.Cycle') }} "{{ $step->cycle->title }}" - {{ __('cycles.Start') }}
+                            {{ $step->from->format('d-m-Y') ?? '-' }})
+                            - {{ optional(optional($step->cycle)->organization)->name }}
+                          </option>
+                        @endforeach
+                      </select>
+                    </div>
+                    <div class="d-flex justify-content-start justify-content-md-end flex-wrap flex-md-nowrap gap-2">
+                      <button 
+                        type="button" 
+                        class="btn btn-label-secondary"
+                        style="height: fit-content;"
+                        onclick="window.location.href='/dashboard/final/results/{{ $id }}'"
+                      >
+                        <i class="ti ti-chart-bar me-2"></i> {{ __('cycles.Results') }}
+                      </button>
+                      <a class="btn btn-label-success" style="height: fit-content;" href="/dashboard/cycles/{{ $cstep->cycle_id ?? null }}">
+                        <i class="ti ti-components me-2"></i> {{ __('cycles.Cycle') }}
+                      </a>
+                      <button type="button" class="btn btn-label-info" style="height: fit-content;" onclick="DoChange(1)">
+                        <i class="ti ti-pencil me-2"></i> {{ __('cycles.Edit') }}
+                      </button>
+                      <button type="button" class="btn btn-label-danger" style="height: fit-content;" onclick="DoChange(2)">
+                        <i class="ti ti-trash me-2"></i> {{ __('cycles.Delete') }}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -107,28 +116,33 @@
                 <form id="judges-form" action="/dashboard/final/update" method="POST" enctype="multipart/form-data">
                   {!! csrf_field() !!}
                   <div class="card-header border-bottom">
-                    <div class="d-flex justify-content-between align-items-center">
-                      <div>
-                        <h4 class="card-title mb-1">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                      <div class="mb-3 mb-md-0">
+                        <h5 class="card-title mb-1">
                           {{ $l == 'en' ? 'Startups Final Screening' : $cstep->title }}
-                        </h4>
+                        </h5>
                         <p class="text-muted mb-1">{{ __('cycles.Select judges from the menu') }}.</p>
-                        <small class="text-muted">
-                          {{ __('cycles.from') }} {{ $cstep->from->format('d-m-Y') ?? '-' }} 
-                          {{ __('cycles.to') }} {{ $cstep->to->format('d-m-Y') ?? '-' }}
-                        </small>
+                        <div class="d-flex align-items-center text-muted">
+                          <i class="ti ti-calendar-event me-2"></i>
+                          <small class="text-muted">
+                            {{ __('cycles.from') }} {{ $cstep->from->format('d-m-Y') ?? '-' }} 
+                            {{ __('cycles.to') }} {{ $cstep->to->format('d-m-Y') ?? '-' }}
+                          </small>
+                        </div>
                       </div>
                       {{-- <span class="badge bg-label-primary">
                         {{ count($companies) }} {{ __('cycles.Companies') }}
                       </span> --}}
-                      <div class="btn-group">
-                        <button type="button" class="btn btn-outline-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="teamsExportBtn">
-                          <i class="bi bi-download me-1"></i> {{ $l == 'ar' ? 'تصدير' : 'Export' }}
-                        </button>
-                        <ul class="dropdown-menu">
-                          <li><a class="dropdown-item" href="javascript:void(0)" onclick="exportTable('mentorstable', 'csv')"><i class="bi bi-filetype-csv me-2"></i>{{ $l == 'ar' ? 'تصدير CSV' : 'Export CSV' }}</a></li>
-                          <li><a class="dropdown-item" href="javascript:void(0)" onclick="exportTable('mentorstable', 'excel')"><i class="bi bi-file-earmark-excel me-2"></i>{{ $l == 'ar' ? 'تصدير Excel' : 'Export Excel' }}</a></li>
-                        </ul>
+                      <div>
+                        <div class="dropdown">
+                          <button type="button" class="btn btn-label-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="teamsExportBtn">
+                            <i class="ti ti-file-export me-2"></i> {{ $l == 'ar' ? 'تصدير' : 'Export' }}
+                          </button>
+                          <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="javascript:void(0)" onclick="exportTable('mentorstable', 'csv')"><i class="ti ti-file-spreadsheet me-2"></i>{{ $l == 'ar' ? 'تصدير CSV' : 'Export CSV' }}</a></li>
+                            <li><a class="dropdown-item" href="javascript:void(0)" onclick="exportTable('mentorstable', 'excel')"><i class="ti ti-file-text me-2 me-2"></i>{{ $l == 'ar' ? 'تصدير Excel' : 'Export Excel' }}</a></li>
+                          </ul>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -214,16 +228,16 @@
                                   </a>
                                 </td>
                                 <td>
-                                  <a href="/dashboard/users/{{ $company->user->id }}/edit" class="d-flex align-items-center gap-2">
+                                  <a href="/dashboard/users/{{ $company->resolveUser()->id }}/edit" class="d-flex align-items-center gap-2">
                                     @if( !in_array(env('APP_ENV', 'local'), ['local']) )
                                       <img
-                                        src="{{ isset($company->user->img_url) ? asset("191014/{$company->user->img_url}") : asset('icons/account.svg') }}"
+                                        src="{{ isset($company->resolveUser()->img_url) ? asset("191014/{$company->resolveUser()->img_url}") : asset('icons/account.svg') }}"
                                         onerror="if(this.src!='/icons/account.svg'){this.onerror=null;this.src='/icons/account.svg';}" alt="avatar" class="rounded-circle"
                                         height="40" width="40" />
                                     @endif
                                     <div class="media-body">
-                                      <h6 class="media-heading mb-0">{{ $company->user->name }} </h6>
-                                      <span class="font-small-2">{{ $company->user->title }}</span>
+                                      <h6 class="media-heading mb-0">{{ $company->resolveUser()->name }} </h6>
+                                      <span class="font-small-2">{{ $company->resolveUser()->title }}</span>
                                     </div>
                                   </a>
                                 </td>
@@ -342,7 +356,7 @@
             enctype="multipart/form-data">
             {!! csrf_field() !!}
             <div class="modal-header">
-              <h4 class="modal-title">{{ __('cycles.Edit_Step') }}</h4>
+              <h5 class="modal-title mb-0">{{ __('cycles.Edit_Step') }}</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -356,22 +370,22 @@
                 <input type="text" id="step-range-picker" class="form-control" name="date_range" />
               </div>
               <div class="form-group mb-3">
-                <label class="fs-6 mb-1">{{ __('cycles.Title') }}: </label>
+                <label class="form-label">{{ __('cycles.Title') }}: </label>
                 <input value="{{ $cstep->title }}" name='title' type="text" placeholder="Title"
                   class="form-control" required>
               </div>
               {{-- <div class="form-group mb-3">
-            <label class="fs-6 mb-1">{{ __('cycles.from') }}: </label>
+            <label class="form-label">{{ __('cycles.from') }}: </label>
             <input value="{{ $cstep->from->format('Y-m-d') }}" name='fromDate' type="text" class="form-control dateTime"
               required>
           </div>
           <div class="form-group mb-3">
-            <label class="fs-6 mb-1">{{ __('cycles.to') }}: </label>
+            <label class="form-label">{{ __('cycles.to') }}: </label>
             <input value="{{ $cstep->to->format('Y-m-d') }}" name='toDate' type="text" class="form-control dateTime"
               required> 
           </div> --}}
               <div class="form-group mb-0">
-                <label class="fs-6 mb-1">{{ __('cycles.Description') }}: </label>
+                <label class="form-label">{{ __('cycles.Description') }}: </label>
                 <textarea name='description' placeholder="Description" class="form-control">{{ $cstep->description }}</textarea>
               </div>
             </div>
@@ -393,7 +407,7 @@
             autocomplete="off">
             @csrf
             <div class="modal-header">
-              <h4 class="modal-title white">{{ __('cycles.Add new zoom session') }}</h4>
+              <h5 class="modal-title mb-0 white">{{ __('cycles.Add new zoom session') }}</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -401,7 +415,7 @@
               <input type="hidden" name="step" value="{{ $cstep->id }}" id="sid">
               <input type="hidden" name="company" value="0" id="cid">
               <div class="form-group mb-3" id="showdates mb-3">
-                <label class="fs-6 mb-1">{{ __('cycles.Date/Time') }}:</label>
+                <label class="form-label">{{ __('cycles.Date/Time') }}:</label>
                 <input type="hidden" name="date" id="neededZoomDateTime" />
                 <input class='width-200 form-control zoomDateTime' type="text" id="date"
                   placeholder="{{ __('cycles.Date/Time') }}" required>
@@ -410,7 +424,7 @@
                 </div>
               </div>
               <div class="form-group mb-3">
-                <label class="fs-6 mb-1">{{ __('cycles.Meeting period') }}:</label>
+                <label class="form-label">{{ __('cycles.Meeting period') }}:</label>
                 <select name="period" class="select form-control">
                   <option value="30">30 {{ __('cycles.Minutes') }}</option>
                   <option value="60" selected>1 {{ __('cycles.Hour') }}</option>
@@ -437,7 +451,7 @@
           <form id="edit-zoom-form" method="post" action="/dashboard/final/addzoom" enctype="multipart/form-data">
             @csrf
             <div class="modal-header">
-              <h4 class="modal-title">{{ __('cycles.Modify Final Screen') }} </h4>
+              <h5 class="modal-title mb-0">{{ __('cycles.Modify Final Screen') }} </h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -445,7 +459,7 @@
               <input type="hidden" name="step" value="{{ $cstep->id }}" id="sid">
               <input type="hidden" name="company" value="" id="cid" class="cid">
               <div class="form-group mb-3" id="showdates mb-3">
-                <label class="fs-6 mb-1">{{ __('cycles.Date/Time') }}:</label>
+                <label class="form-label">{{ __('cycles.Date/Time') }}:</label>
                 <input type="hidden" name="date" id="editNeededZoomDateTime" />
                 <input class='width-200 form-control editZoomDateTime' type="text" id="sdate"
                   placeholder="{{ __('cycles.Date/Time') }}" required />
@@ -454,7 +468,7 @@
                 </div>
               </div>
               <div class="form-group mb-3">
-                <label class="fs-6 mb-1">{{ __('cycles.Meeting period') }}:</label>
+                <label class="form-label">{{ __('cycles.Meeting period') }}:</label>
                 <select name="period" class="select form-control" id="period">
                   <option value="30">30 {{ __('cycles.Minutes') }}</option>
                   <option value="60">1 {{ __('cycles.Hour') }}</option>
@@ -524,13 +538,8 @@
 @stop
 
 @section('scripts')
-  <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
-  <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
-  <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
   <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
   <script src="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
-  <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
-  <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
   <script src="/app-assets/plugins/alertify/alertify.min.js"></script>
 @stop
 

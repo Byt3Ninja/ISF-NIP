@@ -31,11 +31,22 @@
 						<div class="card">
 							<div class="card-content">
                 <div class="card-header border-bottom d-flex flex-wrap justify-content-between align-items-center">
-                  <h4 class="card-title">{{__('admin.Questions Categories` List')}}</h4>
-									<a href="{{ route('question-categories.create') }}" class="btn btn-primary">
-										<i class="ti ti-plus me-2"></i>
-										{{ __('admin.Add New')}} 
-									</a>
+                  <h5 class="card-title mb-3 mb-md-0">{{__('admin.Questions Categories` List')}}</h5>
+									<div class="d-flex align-items-center gap-3">
+										<div class="dropdown">
+											<button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+												<i class="ti ti-file-export me-2"></i>{{ __('admin.Export') }}
+											</button>
+											<ul class="dropdown-menu" aria-labelledby="exportDropdown">
+												<li><a class="dropdown-item" href="javascript:void(0)" id="exportExcel"><i class="ti ti-file-spreadsheet me-2"></i>Excel</a></li>
+												<li><a class="dropdown-item" href="javascript:void(0)" id="exportCsv"><i class="ti ti-file-text me-2"></i>CSV</a></li>
+											</ul>
+										</div>
+										<a href="{{ route('question-categories.create') }}" class="btn btn-primary">
+											<i class="ti ti-plus me-2"></i>
+											{{ __('admin.Add New')}} 
+										</a>
+									</div>
                 </div>
 								<div class="card-body">
 									<!-- datatable start -->
@@ -94,8 +105,9 @@
 @section('scripts')
 	<script type="text/javascript">
 		$(document).ready(function() {
+			const isArabic = "{{ $l }}" === "ar";
 			// Initialize DataTable
-			$('#categoriesTable').DataTable({
+			const table = $('#categoriesTable').DataTable({
 				responsive: true,
 				pageLength: 10,
 				lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "{{ __('admin.All') }}"]],
@@ -131,8 +143,24 @@
 						orderable: false,
 						searchable: false
 					}
-				]
+				],
+				buttons: [
+					{
+						extend: 'excel',
+						title: isArabic ? 'فئات الأسئلة' : 'Question Categories',
+						exportOptions: { columns: [0, 1, 2, 3] }
+					},
+					{
+						extend: 'csv',
+						title: isArabic ? 'فئات الأسئلة' : 'Question Categories',
+						exportOptions: { columns: [0, 1, 2, 3] }
+					},
+				],
 			});
+
+			// Export button handlers
+			$('#exportExcel').on('click', () => table.button('.buttons-excel').trigger());
+			$('#exportCsv').on('click', () => table.button('.buttons-csv').trigger());
 
 			// Handle delete action
 			$(document).on("click", "#deleteAction", function (e) {
@@ -172,14 +200,12 @@
 									buttonsStyling: false,
 								});
 								// Remove the row from DataTable
-								$('#categoriesTable').DataTable().row('#row_' + id).remove().draw();
+								table.row('#row_' + id).remove().draw();
 							}
 						).fail(function(error) { 
-							console.log(error);
-							Swal.fire({
-								icon: 'error',
+							releaseFailureAlert({
 								title: "{{ __('admin.Error') }}!",
-								text: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
+								message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
 							});
 						});
 					}

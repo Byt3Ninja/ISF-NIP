@@ -162,7 +162,7 @@
                   @endphp
                   @foreach ($companies as $company)
                   @php
-                  $cc = \App\TrainingCompleted::where('user_id', $company->user->id)
+                  $cc = \App\TrainingCompleted::where('user_id', $company?->user?->id)
                   ->where('course_id', $csession->training_Address)
                   ->count();
                   $per = $contents ? ($cc / $contents) * 100 : '0';
@@ -178,7 +178,7 @@
                     <td>
                       <div class="d-flex align-items-center gap-1">
                         <input type="checkbox" class="chboxTresult" do="{{ $company->id }}"
-                          userid="{{ $company->user->id }}" value="1" name="chboxcyclesReg[]">
+                          userid="{{ $company?->user?->id }}" value="1" name="chboxcyclesReg[]">
                       </div>
                     </td>
                     <td>
@@ -203,21 +203,21 @@
                     <td>
                       <div class="d-flex align-items-center gap-2">
                         <a class="w-px-40 h-px-40 rounded-circle border d-flex align-items-center justify-content-center overflow-hidden"
-                          href="/dashboard/users/{{ $company->user->id }}/edit">
-                          @if ($company->user->img_url)
-                          <img src="/191014/{{ $company->user->img_url }}"
+                          href="/dashboard/users/{{ $company?->user?->id ?? '0' }}/edit">
+                          @if ($company?->user?->img_url)
+                          <img src="/191014/{{ $company?->user?->img_url }}"
                             alt="avatar" class="img-fluid w-100 h-100">
                           @else
                           <img src="/icons/account.svg" class="img-fluid" />
                           @endif
                         </a>
-                        <a href="/dashboard/users/{{ $company->user->id }}/edit">
+                        <a href="/dashboard/users/{{ $company?->user?->id ?? '0' }}/edit">
                           <div class="text-black d-flex flex-column">
                             <strong>
-                              {{ $company->user->{'first_name_' . $l} }}
-                              {{ $company->user->{'last_name_' . $l} }}
+                              {{ $company?->user?->{'first_name_' . $l} }}
+                              {{ $company?->user?->{'last_name_' . $l} }}
                             </strong>
-                            <small class="text-muted">{{ $company->user->{'title_' . $l} }}</small>
+                            <small class="text-muted">{{ $company?->user?->{'title_' . $l} }}</small>
                           </div>
                         </a>
                       </div>

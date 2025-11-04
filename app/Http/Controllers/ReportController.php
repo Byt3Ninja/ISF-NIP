@@ -26,7 +26,8 @@ use stdClass;
 
 class ReportController extends Controller
 {
-    public function index(){
+    public function index()
+    {
         $organization_id = auth()->user()->organization_id;
         $cycles = Cycle::when(!is_null($organization_id),function ($q)use($organization_id){
             $q->where('organization_id',$organization_id);
@@ -37,10 +38,8 @@ class ReportController extends Controller
             });
         })->get();
 
-
         $data['mentorRequests'] =  MentorshipRequest::all();
         $available_surveys = SurveyResponses::whereIn('user_id', $data['mentorRequests']->pluck('mentor_id'))->whereIn('triggered_at', $data['mentorRequests']->pluck('id'))->where('triggered_by', 'session')->get();
-
 
         return view('admin.reports.index',compact('companies','cycles','available_surveys'));
     }
@@ -50,7 +49,7 @@ class ReportController extends Controller
 
         switch ($type){
             case 'mentorship':
-                $data = $this->mentorshipReport($organization_id, $program_id);
+                $data = $this->mentorshipReport($organization_id, $program_id,$request);
                 $view = '_mentorshipReport';
                 break;
             case 'training':
@@ -133,7 +132,7 @@ class ReportController extends Controller
         return $data;
     }
  // =============> ajax report MentorSurvey <=============
-    protected function mentorSurveyReport($organization_id){
+    protected function mentorSurveyReport($organization_id, $program_id = null){
         $mentorRequestsQuery = MentorshipRequest::query()
         ->whereHas('mentor', function($q) use ($organization_id) {
             $q->where('organization_id', $organization_id);
@@ -178,20 +177,25 @@ class ReportController extends Controller
     }
 
 
-    protected function mentorshipReport($organization_id, $program_id = null){
+    protected function mentorshipReport($organization_id, $program_id = null,Request $request) {
         $mentorRequests =  MentorshipRequest::when(!is_null($organization_id),function ($q)use ($organization_id){
             $q->where('organization_id',$organization_id);
         })->when(!is_null($program_id), function ($q) use ($program_id) {
             $q->where('cycle_id', $program_id);
         });
 
-        $data['cycle_mentors'] = User::whereHas('mentorSessions',function ($q)use ($organization_id, $program_id){
-            $q->when(!is_null($organization_id),function ($query)use($organization_id){
-                $query->where('organization_id',$organization_id);
-            })->when(!is_null($program_id), function ($query) use ($program_id) {
-                $query->where('cycle_id', $program_id);
-            });
-        })->get();
+        $enrolledInProgramFilter = $request->input('enrolledInProgramFilter', '1'); // default = 1
+
+        $data['cycle_mentors'] = User::query();
+
+    if ($enrolledInProgramFilter == '1') {
+        $data['cycle_mentors'] = $data['cycle_mentors']->has('mentorCycles');
+    } elseif ($enrolledInProgramFilter == '0') {
+        $data['cycle_mentors'] = $data['cycle_mentors']->doesntHave('mentorCycles');
+    }
+    $data['cycle_mentors'] = $data['cycle_mentors']->get();
+
+
         
         // Get all sessions with relationships
         $data['sessions'] = MentorshipRequest::with(['user.company', 'mentor', 'cycle'])
@@ -236,7 +240,7 @@ class ReportController extends Controller
         $data['new_sessions_count'] = MentorshipRequest::when(!is_null($organization_id),function ($q)use ($organization_id){
             $q->where('organization_id',$organization_id);
         })->whereNull('approved')->count();
-        $data['cycle_mentors_count'] =count($data['cycle_mentors']);
+        $data['cycle_mentors_count'] = count($data['cycle_mentors']);
         return $data;
     }
 
@@ -325,6 +329,7 @@ class ReportController extends Controller
                 });
             });
         })->where('type','online')->count();
+        
         return $data;
     }
 
@@ -596,57 +601,100 @@ class ReportController extends Controller
         $data['startups'] = $startups;
         $data['judges'] = $judges;
 
-        
         return $data;
     }
 
-    protected function screeningReport($organization_id, $program_id = null){
-        $l = app()->getLocale();
+    protected function screeningReport($organization_id, $program_id = null)
+    {
+        // First get steps based on program filter
+        $stepsQuery = Step::where('stype', 2)
+            ->whereNull('deleted_at')
+            ->when(!is_null($organization_id), function($q) use ($organization_id) {
+                return $q->whereHas('cycle', function($query) use ($organization_id) {
+                    $query->where('organization_id', $organization_id);
+                });
+            })
+            ->when(!is_null($program_id), function($q) use ($program_id) {
+                return $q->where('cycle_id', $program_id);
+            });
+            
+        $steps = $stepsQuery->get();
+        $metadata = collect([]);
+        
+        // Only process metadata for the filtered steps
+        foreach($steps as $step) {
+            $metadata->push(ScreeningEvaluationResults::metadata($step->id));
+        }
 
-        $steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
-            return $q->whereHas('cycle', function ($query) use ($organization_id) {
-                $query->where('organization_id', $organization_id);
-            });
-        })->when(!is_null($program_id), function ($q) use ($program_id) {
-            return $q->whereHas('cycle', function ($query) use ($program_id) {
-                $query->where('id', $program_id);
-            });
-        })->where('stype', 2)->orderBy('from')->get();
+        $l = app()->getLocale();
+        
+        // Use the already filtered steps query and order them
+        $steps = $stepsQuery->orderBy('from')->get();
         
         $cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
             return $q->where('organization_id', $organization_id);
         })->when(!is_null($program_id), function ($q) use ($program_id) {
             return $q->where('id', $program_id);
         })->get();
-        
-        $metadata = ScreeningEvaluationResults::metadataReport($steps->pluck('id')->toArray());
 
-        $allCompanies = collect();
+        $steps_ids = $steps->pluck('id')->toArray();
+
         $_allSteps = collect();
         $allJudges = collect();
         $allResults = collect();
+        $allCompanies = collect();
         $_allCompanies = collect();
-        
-        foreach ($metadata as $stepId => $data) {
-            $allCompanies = $allCompanies->concat($data['companies']);
-            $_allSteps = $_allSteps->concat($data['_steps']);
-            $allJudges = $allJudges->concat($data['judges']);
-            $allResults = $allResults->concat($data['results']);
-            $_allCompanies = $_allCompanies->concat($data['_companies']);
+        $_allEvaluations = collect();
+
+        if( count( $steps_ids ) > 0 )
+        {
+            // $metadata = ScreeningEvaluationResults::metadataReport( $steps_ids );
+            foreach( $metadata as $stepId => $data )
+            {
+                $allCompanies = $allCompanies->concat($data['companies']);
+                $_allSteps = $_allSteps->concat($data['_steps']);
+                $allJudges = $allJudges->concat($data['judges']);
+                $allResults = $allResults->concat($data['results']);
+                $_allCompanies = $_allCompanies->concat($data['_companies']);
+                if( !is_null($data['evaluation']) ) { $_allEvaluations = $_allEvaluations->push($data['evaluation']); }
+            }
         }
-        
-        $allCompanies = $allCompanies->unique('id')->values();
-        $allJudges = $allJudges->unique('id')->values();
         $_allCompanies = $_allCompanies->unique('id')->values();
+        $_allCompanies = $_allCompanies->map(function( $c ) use ($l) {
+            $c = clone $c;
+            $id = $c->id;
+            $output = new stdClass;
+            $output->id = $c->id;
+            $output->name = $c->{'name_' . $l};
+            $output->score = $c->average_score;
+            $output->judges = $c->judges->map(function($judge) use ($id) {
+                $judge = clone $judge;
+                $oneResult = $judge->companies->where('id', $id)->first();
+                $judge->result = $oneResult;
+                return $judge;
+            });
+            $statuses = $output->judges
+                ->pluck('result.status')
+                ->filter()
+                ->unique()
+                ->values();
+
+            $output->status = $statuses->count() === 1 ? $statuses->first() : 'Draft';
+            return $output;
+        })->values();
+        $allJudges = $allJudges->unique('id')->values();
 
         // Calculate KPI data for screening
-        $screening_count = $allCompanies->count();
-        $pending_screenings = $allCompanies->filter(function($company) use ($allResults) {
+        $screening_count = $_allCompanies->count();
+        $pending_screenings = $_allCompanies->filter(function($company) use ($allResults) {
             return $allResults->where('company_id', $company->id)->isEmpty();
-        })->count();
-        
-        $draft_screenings = $allResults->where('status', 0)->unique('company_id')->count();
-        $published_screenings = $allResults->where('status', 1)->unique('company_id')->count();
+        })->values();
+        $non_pending_companies = $_allCompanies->filter(function($company) use ($allResults) {
+            return !$allResults->where('company_id', $company->id)->isEmpty();
+        })->values();
+        $draft_screenings = $non_pending_companies->where('status', 'Draft')->count();
+        $published_screenings = $non_pending_companies->where('status', 'Published')->count();
+        $not_evaluated_screenings = $non_pending_companies->where('status', 'Not Evaluated')->count();
         
         $judgers_count = $allJudges->count();
 
@@ -654,13 +702,13 @@ class ReportController extends Controller
         $kpiData = [
             [ 'value' => $judgers_count, 'label' => 'Judgers', 'icon' => 'user', 'color' => 'info'],
             [ 'value' => $screening_count, 'label' => 'Total', 'icon' => 'gavel', 'color' => 'primary'],
-            [ 'value' => $pending_screenings, 'label' => 'Not Evaluated', 'icon' => 'trending-up-2', 'color' => 'danger'],
+            [ 'value' => $pending_screenings->count() + $not_evaluated_screenings, 'label' => 'Not Evaluated', 'icon' => 'trending-up-2', 'color' => 'danger'],
             [ 'value' => $draft_screenings, 'label' => 'In Progress', 'icon' => 'pencil-check', 'color' => 'secondary'],
             [ 'value' => $published_screenings, 'label' => 'Published', 'icon' => 'progress-check', 'color' => 'success'],
         ];
 
         // Process companies with their evaluation data
-        $startups = $allCompanies->map(function ($company) use ($allJudges, $allResults) {
+        $startups = $allCompanies->map(function ($company) use ($allJudges, $allResults, $_allCompanies) {
             // Get evaluations for this company
             $companyResults = $allResults->where('company_id', $company->id);
             
@@ -671,7 +719,10 @@ class ReportController extends Controller
             // Attach calculated data to company
             $company->average_score = round($averageScore, 1);
             $company->evaluation_results = $companyResults;
-            
+            $scoped = $_allCompanies->where('id', $company->id)->first();
+            $company->score = $scoped->score;
+            $company->judges = $scoped->judges;
+            $company->status = $scoped->status;
             return $company;
         });
 
@@ -976,7 +1027,7 @@ class ReportController extends Controller
 
     protected function companiesReport($organization_id,$company_id, $program_id = null){
         $data['company']= Company::find($company_id);
-        $mentorRequests =  MentorshipRequest::where('user_id',$data['company']->user->id);
+        $mentorRequests =  MentorshipRequest::where('user_id',$data['company']?->user?->id);
         $training_sessions = TrainingSession::whereHas('step',function ($q)use ($organization_id,$company_id){
             $q->where('stype',4)->whereHas('companies',function ($q)use ($company_id){
              $q->where('companies.id',$company_id);

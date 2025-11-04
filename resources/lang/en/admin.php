@@ -746,7 +746,7 @@ return [
 	'Show' => 'Show',
 
 	'TimeSheet' => 'Time Sheet',
-	'UserTimeSheet' => 'Time Sheet Users',
+	'UserTimeSheet'=>'Users Timesheets',
 	'Financial Report' => ' Financial Report ',
 	'all TimeSheets' => 'Time Sheets',
 	'Add new Time' => ' Add New Time',
@@ -832,7 +832,7 @@ return [
 	'Problem_We_Are_Facing' => 'Problem We Are Facing',
 	'solution_problem' => 'Solution to the Problem',
 	'Achieved_Milestones' => 'Achieved Milestones',
-	'Milestone_Name' => 'Milestone Name',
+	'Milestone_Name' => 'Milestone Title',
 	'Archived_Milestones' => 'Archived Milestones',
 	'Planned_Milestones' => 'Planned Milestones',
 	'investor_name' => 'Investor Name',
@@ -2475,9 +2475,15 @@ return [
 	'settings_saved' => 'Settings Saved Successfully',
 	'Complete Profile' => 'Complete Profile',
 	'Complete Startup/Idea' => 'Complete Startup Profile',
+	'please_complete_startup_info' => 'Please complete your Startup Information before proceeding',
 	'Is_Required' => 'Is Required',
 	'Is_Required_Survey_Description' => 'If checked, the survey will be mandatory for users to complete.',
 	'Create_form' => 'Create Form',
 	'Traditional_Evaluation_pending' => 'Traditional Evaluation Pending',
 	'Select_Founder' => 'Select Founder',
+	'All_Options' => 'All Options',
+	'Select_Users' => 'Select Users',
+	'Evaluation' => 'Evaluation',
+	
+	'dont_have_permission' => 'You do not have permission to perform this action',
 ];

@@ -223,6 +223,7 @@ class ScreeningEvaluationResults extends Model
 			});
 
 			$_companies[$companies_index]->average_score = $average_score ?? 0;
+			$_companies[$companies_index]->judges = $judges;
 		}
 
 		return [
@@ -236,7 +237,7 @@ class ScreeningEvaluationResults extends Model
 		];
 	}
 
-	public static function metadataReport($step_ids, $company_id = null)
+	public static function metadataReport( $step_ids )
 	{
 		$step_ids = is_array($step_ids) ? $step_ids : [$step_ids];
 
