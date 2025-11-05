@@ -228,7 +228,7 @@
                     </div>
                   </td>
                   <td>
-                    @if (count($company?->user?->mentorship) > 0)
+                    @if ( optional($company->user)->mentorship && $company->user->mentorship->count() > 0 )
                       <div class="d-flex align-items-center bg-light border rounded p-2" style="height: 100px; width: 300px; overflow-x: auto;">
                         @foreach ($company?->user?->mentorship as $session)
                           @if ($session->approved == 'Yes')
