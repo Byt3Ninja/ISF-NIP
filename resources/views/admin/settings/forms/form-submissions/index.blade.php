@@ -245,7 +245,7 @@
               },
               search: `${t.search || 'Search'}:`,
               searchPlaceholder: `${t.search || 'Search'}...`,
-              lengthMenu: `${t.show} <select class="form-select form-select-sm mb-3 mb-md-0">` +
+              lengthMenu: `${t.show} <select class="form-select form-select-sm mb-2">` +
                 `<option value="7">7</option>` +
                 `<option value="10">10</option>` +
                 `<option value="25">25</option>` +
@@ -270,7 +270,7 @@
                 @if(auth()->user()->hasRole('OrganizationManager'))
                 ''
                 @else
-                const orgFilter = $(`<select id="orgFilter" class="form-select form-select-sm ms-md-12 me-md-3 w-px-150 mb-3 mb-md-0"><option value="">${t.allOrganizations}</option></select>`)
+                const orgFilter = $(`<select id="orgFilter" class="form-select form-select-sm ms-md-4 me-md-2 w-px-150 mb-2"><option value="">${t.allOrganizations}</option></select>`)
                 .appendTo('.dataTables_length')
                 .on('change', function () {
                   const val = $.fn.dataTable.util.escapeRegex($(this).val());
@@ -284,7 +284,7 @@
                 @endif
 
               // Program filter
-              const programFilter = $(`<select id="programFilter" class="form-select form-select-sm w-px-150 mb-3 mb-md-0"><option value="">${t.allPrograms}</option></select>`)
+              const programFilter = $(`<select id="programFilter" class="form-select form-select-sm w-px-120 mb-2"><option value="">${t.allPrograms}</option></select>`)
                 .appendTo('.dataTables_length')
                 .on('change', function () {
                   const val = $.fn.dataTable.util.escapeRegex($(this).val());
@@ -292,7 +292,7 @@
                 });
 
               // Step filter
-              const stepFilter = $(`<select id="stepFilter" class="form-select form-select-sm w-px-150 mb-md-0"><option value="">${t.allSteps}</option></select>`)
+              const stepFilter = $(`<select id="stepFilter" class="form-select form-select-sm w-px-120"><option value="">${t.allSteps}</option></select>`)
                 .appendTo('.dataTables_length')
                 .on('change', function () {
                   const val = $.fn.dataTable.util.escapeRegex($(this).val());
