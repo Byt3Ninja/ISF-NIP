@@ -603,8 +603,18 @@ class TrainingController extends Controller
 			if ($id == 0) {
 				$id = $steps->pluck('id')->first();
 			}
+			if($request->company_id != 0) { 
+				$company = Company::find($request->company_id);
+				$id = $company->step;
+			 }
+			
 			// $sessions = TrainingSession::where('step_id', $id)->with('reports')->orderBy('datetime', 'ASC');
-			$sessions = TrainingSession::with('reports')->orderBy('datetime', 'ASC')->get();
+			$sessions = TrainingSession::with('reports')->orderBy('datetime', 'ASC');
+			if($request->company_id != 0) { 
+				$company = Company::find($request->company_id);
+				$sessions = $sessions->where('step_id', $company->step);
+			 }
+			 $sessions = $sessions->get();
 
 			$cycles = TrainingSession::with('step.cycle')->get()->pluck('step.cycle')->unique('id');
 			
