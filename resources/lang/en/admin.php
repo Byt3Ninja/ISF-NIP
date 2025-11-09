@@ -2488,4 +2488,5 @@ return [
 	'dont_have_permission' => 'You do not have permission to perform this action',
 	'Companies_hub' => 'Startups',
 	'No_training_sessions_available' => 'No training sessions available',
+	'Cohort' => 'Cohort',
 ];
