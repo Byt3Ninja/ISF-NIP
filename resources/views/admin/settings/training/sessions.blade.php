@@ -747,7 +747,7 @@
       order: [[4, 'desc']],
       language: {
         @if ($l == 'ar')
-          sEmptyTable: "ليست هناك بيانات متاحة في الجدول",
+          sEmptyTable: "     {{ __('admin.No_training_sessions_available') }}",
           sLoadingRecords: "جارٍ التحميل...",
           sProcessing: "جارٍ التحميل...",
           sLengthMenu: "أظهر _MENU_ مدخلات",
