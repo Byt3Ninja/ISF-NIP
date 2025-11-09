@@ -1,0 +1,32 @@
+<?php
+
+return [
+  'startup_not_found' => 'لم يتم العثور على الشركة الناشئة',
+
+  'saving' => 'جارٍ الحفظ...',
+
+  'milestone_title_required' => 'يرجى إدخال عنوان المرحلة الانتقالية',
+  'milestone_title_max_length' => 'يجب ألا يتجاوز عنوان المرحلة الانتقالية 300 حرف',
+
+  'milestone_description_required' => 'يرجى إدخال وصف المرحلة الانتقالية',
+  'milestone_description_max_length' => 'يجب ألا يتجاوز وصف المرحلة الانتقالية 1000 حرف',
+
+  'completion_percentage_required' => 'يرجى إدخال نسبة المرحلة الانتقالية',
+  'completion_percentage_numeric' => 'يجب أن تكون نسبة المرحلة الانتقالية رقمًا',
+  'completion_percentage_range' => 'يجب أن تكون نسبة المرحلة الانتقالية بين 0 و 100',
+
+  'document_invalid_file' => 'يجب أن يكون كل مستند ملفًا صالحًا',
+  'document_invalid_type' => 'يُسمح فقط بملفات PDF و JPG و PNG و DOCX و XLSX',
+  'document_too_large' => 'الملف كبير جدًا. الحد الأقصى المسموح به هو 10 ميغابايت',
+
+  'milestone_submit_success' => 'تم تقديم المرحلة الانتقالية بنجاح',
+  'milestone_delete_success' => 'تم حذف المرحلة الانتقالية بنجاح',
+
+  'milestone_delete_confirm' => 'هل أنت متأكد أنك تريد حذف هذه المرحلة الانتقالية نهائيًا؟',
+  'milestone_document_delete_confirm' => 'أنت على وشك حذف هذا المستند. هل أنت متأكد؟',
+
+  'milestone_delete_failed' => 'فشل حذف المرحلة الانتقالية. يرجى المحاولة مرة أخرى لاحقًا.',
+  'milestone_unknown_error' => 'حدث خطأ غير معروف. يرجى المحاولة مرة أخرى لاحقًا.',
+  'milestone_not_found' => 'لم يتم العثور على المرحلة الانتقالية.',
+  'milestone_id_required' => 'معرف المرحلة الانتقالية مطلوب.',
+];

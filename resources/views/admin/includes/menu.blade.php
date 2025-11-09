@@ -180,13 +180,15 @@
       </li>
     @endif
 
-    @if( $_user->ableTo('messages.view', $permissions) )
-      <li class="{{ Request::is('dashboard/mymsg') ? 'active' : '' }} menu-item">
-        <a href="/dashboard/mymsg" class="menu-link"><i class="bx bx-support"></i>
-          <i class="menu-icon tf-icons ti ti-world"></i>
-          <span class="menu-item">{{ __('admin.contactus') }}</span>
-        </a>
-      </li>
+    @if (!$_user->hasAnyRole('Judger'))
+      @if( $_user->ableTo('messages.view', $permissions) )
+        <li class="{{ Request::is('dashboard/mymsg') ? 'active' : '' }} menu-item">
+          <a href="/dashboard/mymsg" class="menu-link"><i class="bx bx-support"></i>
+            <i class="menu-icon tf-icons ti ti-world"></i>
+            <span class="menu-item">{{ __('admin.contactus') }}</span>
+          </a>
+        </li>
+      @endif
     @endif
 
     {{-- @if( $_user->ableToAny(['messages.index'], $permissions) )
@@ -251,7 +253,7 @@
       @endif
     @endif
   
-    @if ($_user->hasAnyRole('Mentor|Registered|Admin'))
+    @if ($_user->hasAnyRole('Mentor|Registered|Admin|organizationManager'))
       @if( $_user->ableTo('mentors.list', $permissions) )
       <li class="{{ Request::is('dashboard/show/Mentors') ? 'active' : '' }} menu-item"><a
           href="/dashboard/show/Mentors" class="menu-link">
@@ -262,7 +264,7 @@
       @endif
     @endif
 
-    @if ($_user->hasAnyRole('Admin|Registered|Mentor|organizationManager|Judger'))
+    @if ($_user->hasAnyRole('Admin|Registered|Mentor|organizationManager'))
     @if( $_user->ableTo('users.view_companies', $permissions) )
      <li class="{{ Request::is('dashboard/companies') ? 'active' : '' }} menu-item">
         <a class="menu-link" href="{{ route('users.view_companies') }}">

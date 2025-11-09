@@ -49,7 +49,7 @@ class ReportController extends Controller
 
         switch ($type){
             case 'mentorship':
-                $data = $this->mentorshipReport($organization_id, $program_id);
+                $data = $this->mentorshipReport($organization_id, $program_id,$request);
                 $view = '_mentorshipReport';
                 break;
             case 'training':
@@ -177,20 +177,25 @@ class ReportController extends Controller
     }
 
 
-    protected function mentorshipReport($organization_id, $program_id = null){
+    protected function mentorshipReport($organization_id, $program_id = null,Request $request) {
         $mentorRequests =  MentorshipRequest::when(!is_null($organization_id),function ($q)use ($organization_id){
             $q->where('organization_id',$organization_id);
         })->when(!is_null($program_id), function ($q) use ($program_id) {
             $q->where('cycle_id', $program_id);
         });
 
-        $data['cycle_mentors'] = User::whereHas('mentorSessions',function ($q)use ($organization_id, $program_id){
-            $q->when(!is_null($organization_id),function ($query)use($organization_id){
-                $query->where('organization_id',$organization_id);
-            })->when(!is_null($program_id), function ($query) use ($program_id) {
-                $query->where('cycle_id', $program_id);
-            });
-        })->get();
+        $enrolledInProgramFilter = $request->input('enrolledInProgramFilter', '1'); // default = 1
+
+        $data['cycle_mentors'] = User::query();
+
+    if ($enrolledInProgramFilter == '1') {
+        $data['cycle_mentors'] = $data['cycle_mentors']->has('mentorCycles');
+    } elseif ($enrolledInProgramFilter == '0') {
+        $data['cycle_mentors'] = $data['cycle_mentors']->doesntHave('mentorCycles');
+    }
+    $data['cycle_mentors'] = $data['cycle_mentors']->get();
+
+
         
         // Get all sessions with relationships
         $data['sessions'] = MentorshipRequest::with(['user.company', 'mentor', 'cycle'])
@@ -235,7 +240,7 @@ class ReportController extends Controller
         $data['new_sessions_count'] = MentorshipRequest::when(!is_null($organization_id),function ($q)use ($organization_id){
             $q->where('organization_id',$organization_id);
         })->whereNull('approved')->count();
-        $data['cycle_mentors_count'] =count($data['cycle_mentors']);
+        $data['cycle_mentors_count'] = count($data['cycle_mentors']);
         return $data;
     }
 
@@ -324,6 +329,7 @@ class ReportController extends Controller
                 });
             });
         })->where('type','online')->count();
+        
         return $data;
     }
 

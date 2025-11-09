@@ -438,7 +438,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                   @endif
                   
                   @if($leaderOrnot->count() > 0)
-                    @if (app()->environment('local', 'dev'))
+                    @if (app()->environment('local', 'dev', 'test'))
                       <form method="POST" action="/dashboard/hackathon/deleteTeamInfo" id="deleteTeamForm">
                         <div class="modal-body">
                           @csrf
@@ -2019,7 +2019,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
       if (data.status === 'success') {
         releaseSuccessAlert({
           title: l === 'en' ? "File Uploaded!" : "تم رفع الملف!",
-          message: data.message || (l === 'en' ? "Your file has been uploaded successfully." : "تم رفع الملف بنجاح."),
+          message: l === 'en' ? "Your file has been uploaded successfully." : "تم رفع الملف بنجاح.",
         });
         createListItem(file);
       } else {

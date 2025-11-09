@@ -415,8 +415,8 @@
                                 {{ $index + 1 }}
                               @endif
                             </div> --}}
-                            <div class="flex-grow-1">
-                              <h6 class="mb-0 fw-semibold">{{ $milestone->name }}</h6>
+                            <div class="flex-grow-1" style="max-width: calc(100% - 10px);">
+                              <h6 class="mb-0 fw-semibold line-clamp-2">{{ $milestone->name }}</h6>
                               {{-- <small class="text-muted">
                                 {{ $l == 'ar' ? 'إنجاز' : 'Milestone' }} {{ $index + 1 }}
                               </small> --}}
@@ -862,7 +862,7 @@
                 </tr>
               </tbody>
             </table>
-            @php($fdata = \App\Formdata::where('user_id', $company->user->id)->with(['field'])->get())
+            @php($fdata = \App\Formdata::where('user_id', $company?->user?->id)->with(['field'])->get())
             <br /><br />
             <h5 class="mb-4 pb-3">
               {{ __('admin.Data collected through Cycle') }}

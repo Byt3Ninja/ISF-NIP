@@ -84,4 +84,6 @@ return [
     'Organization_required' => 'يرجى تحديد المؤسسة',
     'Remove_Section' => 'إزالة القسم',
     'Section_title_optional' => 'عنوان القسم (اختياري)',
+    'Submit_Form' => 'إرسال النموذج',
+    'Other' => 'Other',
 ];

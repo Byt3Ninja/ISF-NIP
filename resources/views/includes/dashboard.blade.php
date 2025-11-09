@@ -417,7 +417,7 @@
 								</div>
 							</div>
 							@else
-							 <div class="card mt-10">
+							 <div class="card">
     <div class="card-header border-bottom">
         <h5 class="card-title d-flex align-items-center">
             <i class="ti ti-clipboard-list ti-28px"></i>
