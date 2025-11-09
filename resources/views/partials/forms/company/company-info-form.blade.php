@@ -40,7 +40,7 @@
         @endphp
         <div class="col-md-6 mb-3">
           <div class="form-group">
-            <label class="form-label fs-6 fw-semibold mb-2" for="country_id">{{ __('admin.Country') }}</label>
+            <label class="form-label fs-6 fw-semibold mb-2" for="country_id">{{ __('admin.Country') }} *</label>
             <select class="form-select select2" id="country_id" name="country_id" required>
               <option value="">{{ __('admin.Country') }}</option>
               @foreach ($countries as $country)

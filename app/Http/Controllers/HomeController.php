@@ -1737,7 +1737,7 @@ class HomeController extends Controller
             ];
             $data['countCards'][] = [
                 'color' => 'primary',
-                'href' => '/dashboard/users#search=Judger',
+                'href' => route('users.judger'),
                 'icon' => 'ti-certificate',
                 'text' => 'Judgers',
                 'permissions' => ['users.index', 'dashboard.widgets_cards_judgers_view'],
