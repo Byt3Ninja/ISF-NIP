@@ -33,8 +33,8 @@ return [
   // Employee
   'Employee' => 'Employee',
   'Employees' => 'Employees',
-  'employee_name_required' => "Please enter employee's name",
-  'employee_job_title_required' => "Please enter employee's job title",
+  'employee_name_required' => "Please enter employee name",
+  'employee_job_title_required' => "Please enter employee job title",
   'employee_gender_required' => 'Please select gender',
   'employee_employment_required' => 'Please select employment type',
   'employee_hiring_date_required' => 'Please enter the hiring date',

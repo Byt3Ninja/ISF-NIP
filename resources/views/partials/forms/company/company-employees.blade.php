@@ -3,28 +3,34 @@
   <div id="employees-container" class="col-12">
     <!-- Template for a single employee card (will be cloned by JS) -->
     <template id="employee-card-template">
-      <div class="card shadow-sm border mb-3 employee-card">
-        <div class="card-body">
-          <!-- Card Header -->
-          <h6 class="border-bottom d-flex pb-2 align-items-center justify-content-between">
-            <div class="d-flex align-items-center gap-2 grow w-100">
-              <div 
-                class="badge bg-primary rounded-circle w-px-30 h-px-30 d-flex justify-content-center align-items-center employee-number">
+      <div class="card shadow-sm border mb-4 employee-card position-relative overflow-hidden">
+        <!-- Status indicator -->
+        <div class="position-absolute top-0 start-0 w-100 h-px-3 bg-primary employee-status-bar"></div>
+        
+        <div class="card-body p-4">
+          <!-- Enhanced Card Header -->
+          <div class="d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom">
+            <div class="d-flex align-items-center gap-3">
+              <span class="badge bg-primary rounded-circle w-px-30 h-px-30 d-flex justify-content-center align-items-center employee-number">
                 <!-- Employee number goes here -->
-              </div>
-              <h5 class="card-title mb-0 me-2 text-truncate employee-name-display w-50">{{ __('startup.Employee') }}</h5>
+              </span>
+              <h5 class="card-title mb-1 employee-name-display">{{ __('startup.Employee') }}</h5>
             </div>
             <div class="employee-header-actions d-flex gap-2">
-              <!-- Remove button for unsaved cards (initially hidden by JS) -->
-              <button type="button" class="btn btn-sm btn-label-danger remove-unsaved-employee-btn d-none">
+              <!-- Status badge -->
+              <span class="badge bg-label-success employee-status-badge d-none">
+                <i class="ti ti-check me-1"></i>{{ $l == 'ar' ? 'محفوظ' : 'Saved' }}
+              </span>
+              <!-- Remove button for unsaved cards -->
+              <button type="button" class="btn btn-sm btn-label-danger remove-unsaved-employee-btn d-none" title="{{ __('admin.Remove') }}">
                 <i class="ti ti-trash me-1"></i>{{ __('admin.Remove') }}
               </button>
-              <!-- Delete button for saved cards (initially hidden by JS) -->
-              <button type="button" class="btn btn-sm btn-label-danger delete-employee-btn d-none">
+              <!-- Delete button for saved cards -->
+               <button type="button" class="btn btn-sm btn-label-danger delete-employee-btn d-none" title="{{ __('admin.Remove') }}">
                 <i class="ti ti-trash me-1"></i>{{ __('admin.Delete') }}
               </button>
             </div>
-          </h6>
+          </div>
 
           <!-- Form for adding/editing an employee -->
           <div class="employee-form-section">
@@ -117,53 +123,71 @@
             </div>
           </div>
 
-          <!-- Display section for submitted employees -->
+          <!-- Enhanced Display section for submitted employees -->
           <div class="employee-display-section d-none">
-            <div class="mb-3">
-              <div class="row">
-                <div class="col-md-6 mb-2">
-                  <strong>{{ $l == 'ar' ? 'الاسم الكامل:' : 'Full Name:' }}</strong>
-                  <p class="text-muted mb-0 employee-name-display-preview"></p>
+            <!-- Personal Information Card -->
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <div class="bg-label-primary rounded p-3 h-100">
+                  <div class="d-flex align-items-center mb-2">
+                    <i class="ti ti-user-circle text-primary me-2"></i>
+                    <h6 class="mb-0 text-primary">{{ $l == 'ar' ? 'المعلومات الشخصية' : 'Personal Information' }}</h6>
+                  </div>
+                  <div class="mb-2">
+                    <small class="text-muted d-block">{{ $l == 'ar' ? 'الاسم الكامل' : 'Full Name' }}</small>
+                    <strong class="employee-name-display-preview"></strong>
+                  </div>
+                  <div>
+                    <small class="text-muted d-block">{{ $l == 'ar' ? 'النوع' : 'Gender' }}</small>
+                    <span class="badge bg-label-info employee-gender-display"></span>
+                  </div>
                 </div>
-                <div class="col-md-6 mb-2">
-                  <strong>{{ $l == 'ar' ? 'المسمى الوظيفي:' : 'Job Title:' }}</strong>
-                  <p class="text-muted mb-0 employee-job-title-display"></p>
+              </div>
+              <div class="col-md-6">
+                <div class="bg-label-success rounded p-3 h-100">
+                  <div class="d-flex align-items-center mb-2">
+                    <i class="ti ti-briefcase text-success me-2"></i>
+                    <h6 class="mb-0 text-success">{{ $l == 'ar' ? 'معلومات العمل' : 'Work Information' }}</h6>
+                  </div>
+                  <div class="mb-2">
+                    <small class="text-muted d-block">{{ $l == 'ar' ? 'المسمى الوظيفي' : 'Job Title' }}</small>
+                    <strong class="employee-job-title-display"></strong>
+                  </div>
+                  <div class="mb-2">
+                    <small class="text-muted d-block">{{ $l == 'ar' ? 'نوع التوظيف' : 'Employment Type' }}</small>
+                    <span class="badge bg-label-success employee-employment-type-display"></span>
+                  </div>
+                  <div>
+                    <small class="text-muted d-block">{{ $l == 'ar' ? 'تاريخ البدء' : 'Start Date' }}</small>
+                    <span class="text-body employee-hiring-date-display"></span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div class="mb-3 pb-3 border-bottom">
-              <div class="row">
-                <div class="col-md-4 mb-2">
-                  <strong>{{ $l == 'ar' ? 'النوع:' : 'Gender:' }}</strong>
-                  <p class="text-muted mb-0 employee-gender-display"></p>
+            <!-- Documents Section -->
+            <div class="supporting-documents-display mb-4">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="d-flex align-items-center gap-2">
+                  <i class="ti ti-files text-info"></i>
+                  <h6 class="mb-0">{{ $l == 'ar' ? 'المستندات الداعمة' : 'Supporting Documents' }}</h6>
                 </div>
-                <div class="col-md-4 mb-2">
-                  <strong>{{ $l == 'ar' ? 'نوع التوظيف:' : 'Employment Type:' }}</strong>
-                  <p class="text-muted mb-0 employee-employment-type-display"></p>
-                </div>
-                <div class="col-md-4 mb-2">
-                  <strong>{{ $l == 'ar' ? 'تاريخ البدء:' : 'Start Date:' }}</strong>
-                  <p class="text-muted mb-0 employee-hiring-date-display"></p>
-                </div>
+                <span class="badge bg-label-secondary employee-documents-count">0</span>
               </div>
-            </div>
-
-            <div class="supporting-documents-display mb-3">
-              <div class="d-flex align-items-center justify-content-between mb-2">
-                <strong>{{ $l == 'ar' ? 'المستندات الداعمة' : 'Supporting Documents' }}:</strong>
-                <span class="badge bg-light text-muted employee-documents-count">0</span>
-              </div>
-              <ul class="list-unstyled uploaded-files-list">
+              
+              <div class="uploaded-files-list">
                 <!-- Display uploaded file names with download links -->
-              </ul>
-              <div class="text-muted employee-no-documents d-none">
-                <small>{{ $l == 'ar' ? 'لا توجد مستندات مرفقة' : 'No documents attached' }}</small>
+              </div>
+              
+              <div class="text-center py-4 employee-no-documents d-none">
+                <i class="ti ti-file-x text-muted mb-2" style="font-size: 2rem;"></i>
+                <p class="text-muted mb-0">{{ $l == 'ar' ? 'لا توجد مستندات مرفقة' : 'No documents attached' }}</p>
               </div>
             </div>
 
-            <div class="d-flex w-100 gap-2 justify-content-end">
-              <button type="button" class="btn btn-sm btn-label-primary edit-employee-btn">
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+              <button type="button" class="btn-sm btn-label-primary edit-employee-btn">
                 <i class="ti ti-pencil me-2"></i>{{ __('admin.Edit') }}
               </button>
             </div>
@@ -237,6 +261,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function loadExistingEmployees() {
     @if(auth()->user() && auth()->user()->company)
+    const existingEmployees = [{
+      name: 'Kareem',
+      jobTitle: 'ddddd'  
+    }]
+    existingEmployees.forEach((employee, index) => {
+      const employeeCard = createEmployeeCard(index === 0, employee);
+      populateEmployeeCard(employeeCard, employee);
+    });
       @if(auth()->user()->company->employees && auth()->user()->company->employees->count() > 0)
         const existingEmployees = @json(auth()->user()->company->employees);
         
@@ -320,14 +352,27 @@ document.addEventListener('DOMContentLoaded', function () {
     if (documents.length > 0) {
       noDocumentsDiv.classList.add('d-none');
       documents.forEach(doc => {
-        const listItem = document.createElement('li');
+        const listItem = document.createElement('div');
         listItem.className = 'mb-2';
         listItem.innerHTML = `
-          <a href="${doc.url}" target="_blank" class="d-flex align-items-center gap-2 bg-label-secondary rounded p-2">
-            <i class="${getFileIcon(doc.name)}"></i>
-            <span class="text-decoration-none flex-grow-1">${doc.name}</span>
-            <i class="ti ti-external-link text-muted"></i>
-          </a>
+          <div class="card border-0 bg-light">
+            <div class="card-body p-3">
+              <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="avatar avatar-sm bg-label-primary rounded">
+                    <i class="${getFileIcon(doc.name)}"></i>
+                  </div>
+                  <div>
+                    <h6 class="mb-0">${doc.name}</h6>
+                    <small class="text-muted">{{ $l == 'ar' ? 'مستند داعم' : 'Supporting Document' }}</small>
+                  </div>
+                </div>
+                <a href="${doc.url}" target="_blank" class="btn btn-sm btn-outline-primary">
+                  <i class="ti ti-download me-1"></i>{{ $l == 'ar' ? 'تحميل' : 'Download' }}
+                </a>
+              </div>
+            </div>
+          </div>
         `;
         uploadedFilesList.appendChild(listItem);
       });
@@ -430,7 +475,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const inputs = card.querySelectorAll('.employee-name, .employee-job-title, .employee-gender, .employee-employment-type, .employee-hiring-date, .employee-documents');
     inputs.forEach(input => {
       ['input', 'change', 'keyup'].forEach(eventType => {
-        input.addEventListener(eventType, () => clearSingleValidation(input));
+        input.addEventListener(eventType, () => {
+          clearSingleValidation(input);
+          // Remove leading whitespace for name and job title inputs
+          if (input.classList.contains('employee-name') || input.classList.contains('employee-job-title')) {
+            const cursorPos = input.selectionStart;
+            const trimmedValue = input.value.replace(/^\s+/, '');
+            if (input.value !== trimmedValue) {
+              input.value = trimmedValue;
+              input.setSelectionRange(Math.max(0, cursorPos - (input.value.length - trimmedValue.length)), Math.max(0, cursorPos - (input.value.length - trimmedValue.length)));
+            }
+          }
+        });
       });
     });
   }
@@ -473,11 +529,16 @@ document.addEventListener('DOMContentLoaded', function () {
       card.employeeData = data.employee;
     }
 
-    // Update button visibility
+    // Update button visibility and status
     card.querySelector('.remove-unsaved-employee-btn').classList.add('d-none');
     card.querySelector('.delete-employee-btn').classList.remove('d-none');
+    card.querySelector('.employee-status-badge').classList.remove('d-none');
+    card.querySelector('.employee-status-bar').classList.remove('bg-warning');
+    card.querySelector('.employee-status-bar').classList.add('bg-success');
 
     // Update display content
+    card.querySelector('.employee-name-display').textContent = inputs.name.value;
+    card.querySelector('.employee-job-preview').textContent = inputs.jobTitle.value;
     card.querySelector('.employee-name-display-preview').textContent = inputs.name.value;
     card.querySelector('.employee-job-title-display').textContent = inputs.jobTitle.value;
     card.querySelector('.employee-gender-display').textContent = GENDER_LABELS[inputs.gender.value] || inputs.gender.value;
@@ -496,14 +557,27 @@ document.addEventListener('DOMContentLoaded', function () {
     if (documents.length > 0) {
       noDocumentsDiv.classList.add('d-none');
       documents.forEach(doc => {
-        const listItem = document.createElement('li');
+        const listItem = document.createElement('div');
         listItem.className = 'mb-2';
         listItem.innerHTML = `
-          <a href="${doc.url}" target="_blank" class="d-flex align-items-center gap-2 bg-label-secondary rounded p-2">
-            <i class="${getFileIcon(doc.name)}"></i>
-            <span class="text-decoration-none flex-grow-1">${doc.name}</span>
-            <i class="ti ti-external-link text-muted"></i>
-          </a>
+          <div class="card border-0 bg-light">
+            <div class="card-body p-3">
+              <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="avatar avatar-sm bg-label-primary rounded">
+                    <i class="${getFileIcon(doc.name)}"></i>
+                  </div>
+                  <div>
+                    <h6 class="mb-0">${doc.name}</h6>
+                    <small class="text-muted">{{ $l == 'ar' ? 'مستند داعم' : 'Supporting Document' }}</small>
+                  </div>
+                </div>
+                <a href="${doc.url}" target="_blank" class="btn btn-sm btn-outline-primary">
+                  <i class="ti ti-download me-1"></i>{{ $l == 'ar' ? 'تحميل' : 'Download' }}
+                </a>
+              </div>
+            </div>
+          </div>
         `;
         uploadedFilesList.appendChild(listItem);
       });
