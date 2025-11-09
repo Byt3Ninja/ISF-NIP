@@ -341,6 +341,7 @@ class CyclesController extends Controller
             $cycle->start = Carbon::parse($request->start);
             $cycle->end = Carbon::parse($request->end);
             $cycle->private = $private;
+            $cycle->cohort = $request->cohort;
             $cycle->allow_non_company = $request->has('allow_non_company') ? 1 : 0;
             $cycle->step_type = $request->program_step_type;
 
@@ -764,6 +765,7 @@ class CyclesController extends Controller
                 $cycle->start = Carbon::parse($request->start);
                 $cycle->end = Carbon::parse($request->end);
                 $cycle->private = $private;
+                $cycle->cohort = $request->cohort;
                 $cycle->allow_non_company = $request->has('allow_non_company') ? 1 : 0;
                 $cycle->auto_approve_mentorship_requests = $request->has('auto_approve_mentorship_requests') ? 1 : 0;
                 // Check if file is uploaded

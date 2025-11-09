@@ -76,6 +76,25 @@
       @endif
     </div>
   </div>
+  
+   <div class="col-md-6">
+    <div class="form-group mb-4">
+      <label for="program-title" class="form-label fs-6 fw-semibold">
+        {{ __('admin.Cohort') }}
+      </label>
+      <input 
+        type="text" 
+        class="form-control" 
+        id="cohort" 
+        name="cohort" 
+        placeholder="{{ __('admin.Cohort') }}"
+        oninput="this.value = this.value.trimStart()"
+        value="{{ isset($ccycle) && $ccycle->cohort ? $ccycle->cohort : '' }}"
+      />
+      <div class="invalid-feedback"></div>
+    </div>
+  </div>
+
 
   <!-- Date Range Picker -->
   <div class="col-md-6">

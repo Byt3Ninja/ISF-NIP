@@ -2536,4 +2536,5 @@ return [
 	'dont_have_permission' => 'ليس لديك إذن لأداء هذا الإجراء',
 	'Companies_hub' => 'كافة الشركات',
 	'No_training_sessions_available' => 'لا يوجد جلسات تدريب متاحة',
+	'Cohort' => 'مجموعة',
 ];
