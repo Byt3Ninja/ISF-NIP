@@ -4213,6 +4213,36 @@
                 ]
             },
             {
+                "name": "company.employees_delete",
+                "description": "Delete employee from Company",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "company.employees_edit",
+                "description": "Edit employee from Company",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "company.employees_add",
+                "description": "Add employee from Company",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
                 "name": "company.profile_documents_delete",
                 "description": "Delete Document (General)",
                 "guard_name": "web",

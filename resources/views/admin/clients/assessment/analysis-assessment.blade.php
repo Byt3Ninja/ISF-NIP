@@ -90,14 +90,15 @@
       <div class="row mb-4">
         <div class="col-12">
           <div class="card shadow-sm w-100">
-            <div class="card-header d-flex flex-grow-1 justify-content-between align-items-center border-bottom mb-6">
-              <h5 class="card-title mb-0">{{ __('admin.Analysis_Assessment') }}</h5>
+            <div class="card-header d-flex flex-column flex-md-row align-items-md-center flex-grow-1 justify-content-between border-bottom mb-6">
+              <h5 class="card-title mb-4 mb-md-0">{{ __('admin.Analysis_Assessment') }}</h5>
               <div class="d-flex align-items-center gap-2">
                 <span class="text-xs text-secondary">{{ __('admin.Created at') }}</span>
                 <div class="badge bg-label-secondary">
                   <i class="ti ti-calendar ti-18px text-info"></i>
-                  <span
-                    class="fw-semibold text-xs text-dark ms-1">{{ $assessment == null ? 'None' : $assessment->created_at }}</span>
+                  <span class="fw-semibold text-xs text-dark ms-1">
+                    {{ $assessment == null ? 'None' : $assessment->created_at }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -115,18 +116,10 @@
                     <a href="{{ route('assessments.assign') }}" class="btn btn-sm btn-primary">
                       {{ __('admin.Make_a_new_assessment') }}
                     </a>
-                  @else
-                    <button class="btn btn-sm btn-light disabled" style="cursor: not-allowed;">
-                      {{ __('admin.Make_a_new_assessment') }}
-                    </button>
                   @endif
 
                   @if ($assessment && $assessment->end_date)
                     <a href="{{ route('assessments.results_export_pdf') }}" class="btn btn-sm btn-primary ms-3">
-                      {{ __('admin.Export_assessment_pdf') }}
-                    </a>
-                  @else
-                    <a class="btn btn-sm btn-light disabled ms-3" style="cursor: not-allowed;">
                       {{ __('admin.Export_assessment_pdf') }}
                     </a>
                   @endif
