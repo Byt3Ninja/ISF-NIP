@@ -45,7 +45,7 @@ return [
   'employee_add_success' => 'تم إضافة الموظف بنجاح',
   'employee_edit_success' => 'تم تحديث الموظف بنجاح',
   'employee_delete_success' => 'تم حذف الموظف بنجاح',
-  'employee_delete_confirm' => 'هل أنت متأكد من حذف هذا الموظف؟ لا يمكن التراجع عن هذا الإجراء.',
+  'employee_delete_confirm' => 'هل أنت متأكد من حذف هذا الموظف؟.',
   'document_delete_confirm' => 'هل أنت متأكد من إزالة هذا المستند؟',
   'unexpected_error' => 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.',
   'employee_delete_failed' => 'فشل في حذف الموظف',

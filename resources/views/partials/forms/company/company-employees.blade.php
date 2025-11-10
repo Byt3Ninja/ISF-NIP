@@ -261,14 +261,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function loadExistingEmployees() {
     @if(auth()->user() && auth()->user()->company)
-    const existingEmployees = [{
-      name: 'Kareem',
-      jobTitle: 'ddddd'  
-    }]
-    existingEmployees.forEach((employee, index) => {
-      const employeeCard = createEmployeeCard(index === 0, employee);
-      populateEmployeeCard(employeeCard, employee);
-    });
       @if(auth()->user()->company->employees && auth()->user()->company->employees->count() > 0)
         const existingEmployees = @json(auth()->user()->company->employees);
         
