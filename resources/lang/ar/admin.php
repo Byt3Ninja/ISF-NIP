@@ -2539,4 +2539,5 @@ return [
 	'Cohort' => 'مجموعة',
 	'SelectIndustries' => 'اختر الصناعات',
 	'SelectMultiIndustries' => 'اختر الصناعات المتعددة',
+	'Expertise_Settings' => 'إعدادات الخبرة',
 ];

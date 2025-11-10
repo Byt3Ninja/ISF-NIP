@@ -1044,6 +1044,12 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/answerOption*
               <div>{{ __('admin.Industry_Settings') }}</div>
             </a>
           </li>
+          <li class="{{ Request::is('dashboard/expertise-settings') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="/dashboard/expertise-settings">
+              <i class="menu-livicon" data-icon="globe"></i>
+              <div>{{ __('admin.Expertise_Settings') }}</div>
+            </a>
+          </li>
         </ul>
       </li>
 

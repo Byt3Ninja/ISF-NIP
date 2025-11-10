@@ -2490,4 +2490,5 @@ return [
 	'Cohort' => 'Cohort',
 	'SelectIndustries' => 'Select Industries',
 	'SelectMultiIndustries' => 'Select Multiple Industries',
+	'Expertise_Settings' => 'Expertise Settings'
 ];
