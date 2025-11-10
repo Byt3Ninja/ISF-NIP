@@ -172,6 +172,7 @@
                             </a>
                           </td>
                           <td>
+                           
                             <a class="d-flex align-items-center gap-2" href="/dashboard/users/{{ $company->user->id ?? '0'  }}/edit">
                               <img 
                                 src="/191014/{{ $company->user->img_url ?? '/icons/account.svg' }}"

@@ -1019,6 +1019,7 @@
 																$start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
 																$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+' . $session->period .' minutes'));
 															@endphp
+															
 															@if( $now >= $start_time )
 																@if( $now <= $end_time )
 																<a href="{{ $session->start_url }}" target="_blank">

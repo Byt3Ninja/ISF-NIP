@@ -365,6 +365,11 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::post('/delete-document', 'ClientCompanyController@deleteDocument')->name('company.profile_documents_delete');
     Route::post('/delete-image/{id?}', 'ClientCompanyController@deleteImage')->name('company.profile_images_delete');
 
+    // Company Profile Employees
+    Route::delete('/employees/delete/{id}','ClientCompanyController@deleteEmployee')->name('company.employees_delete');
+    Route::post('/employees/edit/{id}', 'ClientCompanyController@editEmployee')->name('company.employees_edit');
+    Route::post('/employees/add/{id}', 'ClientCompanyController@addEmployee')->name('company.employees_add');
+
     //Industry
     Route::post('/industries/technologies', 'TechnologyController@create_technologies')->name('settings.create_technologies');
     Route::put('/industries/tech/{id}', 'TechnologyController@update_technologies')->name('settings.update_technologies');

@@ -1,0 +1,983 @@
+<div class="row">
+  <!-- Employee Cards Container -->
+  <div id="employees-container" class="col-12">
+    <!-- Template for a single employee card (will be cloned by JS) -->
+    <template id="employee-card-template">
+      <div class="card shadow-sm border mb-4 employee-card position-relative overflow-hidden">
+        <!-- Status indicator -->
+        <div class="position-absolute top-0 start-0 w-100 h-px-3 bg-primary employee-status-bar"></div>
+        
+        <div class="card-body p-4">
+          <!-- Enhanced Card Header -->
+          <div class="d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom">
+            <div class="d-flex align-items-center gap-3">
+              <span class="badge bg-primary rounded-circle w-px-30 h-px-30 d-flex justify-content-center align-items-center employee-number">
+                <!-- Employee number goes here -->
+              </span>
+              <h5 class="card-title mb-1 employee-name-display">{{ __('startup.Employee') }}</h5>
+            </div>
+            <div class="employee-header-actions d-flex gap-2">
+              <!-- Status badge -->
+              <span class="badge bg-label-success employee-status-badge d-none">
+                <i class="ti ti-check me-1"></i>{{ $l == 'ar' ? 'محفوظ' : 'Saved' }}
+              </span>
+              <!-- Remove button for unsaved cards -->
+              <button type="button" class="btn btn-sm btn-label-danger remove-unsaved-employee-btn d-none" title="{{ __('admin.Remove') }}">
+                <i class="ti ti-trash me-1"></i>{{ __('admin.Remove') }}
+              </button>
+              <!-- Delete button for saved cards -->
+               <button type="button" class="btn btn-sm btn-label-danger delete-employee-btn d-none" title="{{ __('admin.Remove') }}">
+                <i class="ti ti-trash me-1"></i>{{ __('admin.Delete') }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Form for adding/editing an employee -->
+          <div class="employee-form-section">
+            <div class="mb-3">
+              <label for="employee-name-input" class="form-label">{{ $l == 'ar' ? 'الاسم الكامل' : 'Full Name' }}</label>
+              <input 
+                type="text" 
+                id="employee-name-input" 
+                class="form-control employee-name" 
+                placeholder="{{ $l == 'ar' ? 'الاسم الكامل' : 'Full Name' }}"
+                maxlength="100"
+              />
+              <div class="invalid-feedback employee-name-error"></div>
+            </div>
+
+            <div class="mb-3">
+              <label for="employee-job-title-input" class="form-label">{{ $l == 'ar' ? 'المسمى الوظيفي / الدور' : 'Job Title / Role' }}</label>
+              <input 
+                type="text" 
+                id="employee-job-title-input" 
+                class="form-control employee-job-title" 
+                placeholder="{{ $l == 'ar' ? 'المسمى الوظيفي / الدور' : 'Job Title / Role' }}"
+                maxlength="100"
+              />
+              <div class="invalid-feedback employee-job-title-error"></div>
+            </div>
+
+            <div class="mb-3">
+              <label for="employee-gender-select" class="form-label">{{ $l == 'ar' ? 'النوع' : 'Gender' }}</label>
+              <select 
+                id="employee-gender-select" 
+                class="form-select employee-gender"
+              >
+                <option value="">{{ $l == 'ar' ? 'اختر النوع' : 'Select Gender' }}</option>
+                <option value="male">{{ $l == 'ar' ? 'ذكر' : 'Male' }}</option>
+                <option value="female">{{ $l == 'ar' ? 'أنثى' : 'Female' }}</option>
+              </select>
+              <div class="invalid-feedback employee-gender-error"></div>
+            </div>
+
+            <div class="mb-3">
+              <label for="employee-employment-type-select" class="form-label">{{ $l == 'ar' ? 'نوع التوظيف' : 'Employment Type' }}</label>
+              <select 
+                id="employee-employment-type-select" 
+                class="form-select employee-employment-type"
+              >
+                <option value="">{{ $l == 'ar' ? 'اختر نوع التوظيف' : 'Select Employment Type' }}</option>
+                <option value="full-time">{{ $l == 'ar' ? 'دوام كامل' : 'Full-time' }}</option>
+                <option value="part-time">{{ $l == 'ar' ? 'دوام جزئي' : 'Part-time' }}</option>
+                <option value="contractor">{{ $l == 'ar' ? 'متعاقد' : 'Contractor' }}</option>
+                <option value="intern">{{ $l == 'ar' ? 'متدرب' : 'Intern' }}</option>
+              </select>
+              <div class="invalid-feedback employee-employment-type-error"></div>
+            </div>
+
+            <div class="mb-3">
+              <label for="employee-hiring-date" class="form-label">{{ $l == 'ar' ? 'تاريخ التوظيق' : 'Hiring Date' }}</label>
+              <input 
+                type="text" 
+                id="employee-hiring-date" 
+                class="form-control employee-hiring-date"
+                placeholder="{{ $l == 'ar' ? 'تاريخ التوظيق' : 'Hiring Date' }}"
+              />
+              <div class="invalid-feedback employee-hiring-date-error"></div>
+            </div>
+
+            <div class="mb-3">
+              <label for="employee-documents-input" class="form-label">
+                {{ $l == 'ar' ? 'المستندات الداعمة' : 'Supporting Documents' }}
+              </label>
+              <input 
+                type="file" 
+                id="employee-documents-input" 
+                class="form-control employee-documents" 
+                multiple
+                accept=".pdf,.jpg,.jpeg,.png,.docx"
+              />
+              <div class="invalid-feedback employee-documents-error"></div>
+              <small class="form-text text-muted">
+                {{ $l == 'ar' ? 'تنسيق الملفات المسموح به: PDF، JPG، PNG، و DOCX. الحد الأقصى للحجم = 10 ميجابايت لكل ملف.' : 'Allowed file formats: PDF, JPG, PNG, and DOCX. Max size = 10 MB per file.' }}
+              </small>
+              <div class="uploaded-documents mt-2">
+                <!-- Uploaded files will be listed here by JS -->
+              </div>
+            </div>
+
+            <div class="d-flex w-100 gap-2 justify-content-end">
+              <button type="button" class="btn btn-primary submit-employee-btn">{{ __('admin.Save') }}</button>
+              <button type="button" class="btn btn-label-secondary cancel-edit-btn d-none">{{ __('admin.Cancel') }}</button>
+            </div>
+          </div>
+
+          <!-- Enhanced Display section for submitted employees -->
+          <div class="employee-display-section d-none">
+            <!-- Personal Information Card -->
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <div class="bg-label-primary rounded p-3 h-100">
+                  <div class="d-flex align-items-center mb-2">
+                    <i class="ti ti-user-circle text-primary me-2"></i>
+                    <h6 class="mb-0 text-primary">{{ $l == 'ar' ? 'المعلومات الشخصية' : 'Personal Information' }}</h6>
+                  </div>
+                  <div class="mb-2">
+                    <small class="text-muted d-block">{{ $l == 'ar' ? 'الاسم الكامل' : 'Full Name' }}</small>
+                    <strong class="employee-name-display-preview"></strong>
+                  </div>
+                  <div>
+                    <small class="text-muted d-block">{{ $l == 'ar' ? 'النوع' : 'Gender' }}</small>
+                    <span class="badge bg-label-info employee-gender-display"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="bg-label-success rounded p-3 h-100">
+                  <div class="d-flex align-items-center mb-2">
+                    <i class="ti ti-briefcase text-success me-2"></i>
+                    <h6 class="mb-0 text-success">{{ $l == 'ar' ? 'معلومات العمل' : 'Work Information' }}</h6>
+                  </div>
+                  <div class="mb-2">
+                    <small class="text-muted d-block">{{ $l == 'ar' ? 'المسمى الوظيفي' : 'Job Title' }}</small>
+                    <strong class="employee-job-title-display"></strong>
+                  </div>
+                  <div class="mb-2">
+                    <small class="text-muted d-block">{{ $l == 'ar' ? 'نوع التوظيف' : 'Employment Type' }}</small>
+                    <span class="badge bg-label-success employee-employment-type-display"></span>
+                  </div>
+                  <div>
+                    <small class="text-muted d-block">{{ $l == 'ar' ? 'تاريخ البدء' : 'Start Date' }}</small>
+                    <span class="text-body employee-hiring-date-display"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Documents Section -->
+            <div class="supporting-documents-display mb-4">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="d-flex align-items-center gap-2">
+                  <i class="ti ti-files text-info"></i>
+                  <h6 class="mb-0">{{ $l == 'ar' ? 'المستندات الداعمة' : 'Supporting Documents' }}</h6>
+                </div>
+                <span class="badge bg-label-secondary employee-documents-count">0</span>
+              </div>
+              
+              <div class="uploaded-files-list">
+                <!-- Display uploaded file names with download links -->
+              </div>
+              
+              <div class="text-center py-4 employee-no-documents d-none">
+                <i class="ti ti-file-x text-muted mb-2" style="font-size: 2rem;"></i>
+                <p class="text-muted mb-0">{{ $l == 'ar' ? 'لا توجد مستندات مرفقة' : 'No documents attached' }}</p>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+              <button type="button" class="btn-sm btn-label-primary edit-employee-btn">
+                <i class="ti ti-pencil me-2"></i>{{ __('admin.Edit') }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- Dynamic Employee Cards will be inserted here by JavaScript -->
+  </div>
+
+  <!-- Add New Employee Button (always visible) -->
+  <div class="col-12 text-center mt-4">
+    <button id="add-employee-btn" class="btn btn-outline-primary">
+      <i class="ti ti-plus me-2"></i>{{ $l == 'ar' ? 'إضافة موظف جديد' : 'Add New Employee' }}
+    </button>
+  </div>
+</div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const employeesContainer = document.getElementById('employees-container');
+  const addEmployeeBtn = document.getElementById('add-employee-btn');
+  const employeeCardTemplate = document.getElementById('employee-card-template');
+  let nextEmployeeId = 1;
+  
+  const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+  
+  @if(auth()->user() && auth()->user()->company)
+    const companyId = {{ auth()->user()->company->id }};
+  @else
+    const companyId = null;
+  @endif
+
+  // Constants for validation messages and allowed file types
+  const MESSAGES = {
+    nameRequired: "{{ __('startup.employee_name_required') }}",
+    jobTitleRequired: "{{ __('startup.employee_job_title_required') }}",
+    genderRequired: "{{ __('startup.employee_gender_required') }}",
+    employmentTypeRequired: "{{ __('startup.employee_employment_required') }}",
+    hiringDateRequired: "{{ __('startup.employee_hiring_date_required') }}",
+    fileType: "{{ __('startup.employee_document_invalid_type') }}",
+    fileSize: "{{ __('startup.document_too_large') }}",
+    uploadFailed: "{{ __('startup.document_upload_failed') }}",
+    saving: "{{ __('startup.saving') }}",
+    addSuccess: "{{  __('startup.employee_add_success') }}",
+    editSuccess: "{{  __('startup.employee_edit_success') }}",
+    deleteSuccess: "{{ __('startup.employee_delete_success') }}",
+    deleteConfirm: "{{ __('startup.employee_delete_confirm') }}",
+    documentDeleteConfirm: "{{ __('startup.document_delete_confirm') }}",
+    error: "{{ __('startup.unexpected_error') }}",
+    deleteError: "{{ __('startup.employee_delete_failed') }}"
+  };
+
+  const ALLOWED_FILE_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
+  // Gender and Employment Type translations
+  const GENDER_LABELS = {
+    male: "{{ $l == 'ar' ? 'ذكر' : 'Male' }}",
+    female: "{{ $l == 'ar' ? 'أنثى' : 'Female' }}"
+  };
+
+  const EMPLOYMENT_TYPE_LABELS = {
+    'full-time': "{{ $l == 'ar' ? 'دوام كامل' : 'Full-time' }}",
+    'part-time': "{{ $l == 'ar' ? 'دوام جزئي' : 'Part-time' }}",
+    'contractor': "{{ $l == 'ar' ? 'متعاقد' : 'Contractor' }}",
+    'intern': "{{ $l == 'ar' ? 'متدرب' : 'Intern' }}"
+  };
+
+  function loadExistingEmployees() {
+    @if(auth()->user() && auth()->user()->company)
+    const existingEmployees = [{
+      name: 'Kareem',
+      jobTitle: 'ddddd'  
+    }]
+    existingEmployees.forEach((employee, index) => {
+      const employeeCard = createEmployeeCard(index === 0, employee);
+      populateEmployeeCard(employeeCard, employee);
+    });
+      @if(auth()->user()->company->employees && auth()->user()->company->employees->count() > 0)
+        const existingEmployees = @json(auth()->user()->company->employees);
+        
+        existingEmployees.forEach((employee, index) => {
+          const employeeCard = createEmployeeCard(index === 0, employee);
+          populateEmployeeCard(employeeCard, employee);
+        });
+        updateEmployeeNumbers();
+      @else
+        createEmployeeCard(true);
+      @endif
+    @else
+      createEmployeeCard(true);
+    @endif
+  }
+
+  // Utility functions
+  function parseDocuments(documents) {
+    if (typeof documents === 'string') {
+      try {
+        documents = JSON.parse(documents);
+      } catch (e) {
+        console.warn('Failed to parse employee documents JSON:', e);
+        return [];
+      }
+    }
+    return Array.isArray(documents) ? documents : [];
+  }
+
+  function getFileIcon(fileName) {
+    const extension = fileName.split('.').pop().toLowerCase();
+    const iconMap = {
+      pdf: 'ti ti-file-type-pdf text-danger',
+      jpg: 'ti ti-photo text-info',
+      jpeg: 'ti ti-photo text-info',
+      png: 'ti ti-photo text-info',
+      docx: 'ti ti-file-type-docx text-primary',
+      doc: 'ti ti-file-type-docx text-primary'
+    };
+    return iconMap[extension] || 'ti ti-file';
+  }
+
+  function formatDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('{{ $l == "ar" ? "ar-EG" : "en-US" }}', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+
+  function populateEmployeeCard(card, employee) {
+    Object.assign(card.dataset, { employeeId: employee.id, isNew: false });
+    card.employeeData = employee;
+    
+    // Toggle display mode
+    card.querySelector('.employee-form-section').classList.add('d-none');
+    card.querySelector('.employee-display-section').classList.remove('d-none');
+    
+    // Button visibility
+    card.querySelector('.remove-unsaved-employee-btn').classList.add('d-none');
+    card.querySelector('.delete-employee-btn').classList.remove('d-none');
+    
+    // Populate text data
+    card.querySelector('.employee-name-display-preview').textContent = employee.full_name;
+    card.querySelector('.employee-job-title-display').textContent = employee.job_title;
+    card.querySelector('.employee-gender-display').textContent = GENDER_LABELS[employee.gender] || employee.gender;
+    card.querySelector('.employee-employment-type-display').textContent = EMPLOYMENT_TYPE_LABELS[employee.employment_type] || employee.employment_type;
+    card.querySelector('.employee-hiring-date-display').textContent = formatDate(employee.hiring_data);
+    
+    // Handle documents
+    const documents = parseDocuments(employee.documents);
+    const uploadedFilesList = card.querySelector('.uploaded-files-list');
+    const documentsCount = card.querySelector('.employee-documents-count');
+    const noDocumentsDiv = card.querySelector('.employee-no-documents');
+    
+    uploadedFilesList.innerHTML = '';
+    documentsCount.textContent = documents.length;
+    
+    if (documents.length > 0) {
+      noDocumentsDiv.classList.add('d-none');
+      documents.forEach(doc => {
+        const listItem = document.createElement('div');
+        listItem.className = 'mb-2';
+        listItem.innerHTML = `
+          <div class="card border-0 bg-light">
+            <div class="card-body p-3">
+              <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="avatar avatar-sm bg-label-primary rounded">
+                    <i class="${getFileIcon(doc.name)}"></i>
+                  </div>
+                  <div>
+                    <h6 class="mb-0">${doc.name}</h6>
+                    <small class="text-muted">{{ $l == 'ar' ? 'مستند داعم' : 'Supporting Document' }}</small>
+                  </div>
+                </div>
+                <a href="${doc.url}" target="_blank" class="btn btn-sm btn-outline-primary">
+                  <i class="ti ti-download me-1"></i>{{ $l == 'ar' ? 'تحميل' : 'Download' }}
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+        uploadedFilesList.appendChild(listItem);
+      });
+    } else {
+      noDocumentsDiv.classList.remove('d-none');
+    }
+    
+    addValidationClearListeners(card);
+  }
+
+  function createEmployeeCard(isInitialCard = false, existingData = null) {
+    const newCard = employeeCardTemplate.content.cloneNode(true).querySelector('.employee-card');
+    
+    const currentEmployeeId = existingData ? existingData.id : `temp_${nextEmployeeId++}`;
+    Object.assign(newCard.dataset, {
+      employeeId: currentEmployeeId,
+      isNew: !existingData
+    });
+
+    if (isInitialCard) {
+      newCard.classList.add('initial-employee-card');
+      newCard.dataset.isNew = false;
+    }
+
+    // Set initial content
+    const employeeText = '{{ $l == 'ar' ? 'موظف' : 'Employee' }}';
+    const employeeNumber = employeesContainer.children.length + 1;
+    
+    newCard.querySelector('.employee-number').textContent = employeeNumber;
+    newCard.querySelector('.employee-name-display').textContent = `${employeeText} ${employeeNumber}`;
+
+    // Button visibility
+    const removeBtn = newCard.querySelector('.remove-unsaved-employee-btn');
+    const deleteBtn = newCard.querySelector('.delete-employee-btn');
+    
+    removeBtn.classList.toggle('d-none', isInitialCard);
+    deleteBtn.classList.add('d-none');
+
+    employeesContainer.appendChild(newCard);
+    updateEmployeeNumbers();
+    addValidationClearListeners(newCard);
+    
+    return newCard;
+  }
+
+  function updateEmployeeNumbers() {
+    const employeeText = '{{ $l == 'ar' ? 'موظف' : 'Employee' }}';
+    document.querySelectorAll('.employee-card').forEach((card, index) => {
+      const number = index + 1;
+      card.querySelector('.employee-number').textContent = number;
+      const nameDisplay = card.querySelector('.employee-name-display');
+      if (nameDisplay && !card.querySelector('.employee-display-section').classList.contains('d-none')) {
+        // Only update if in display mode
+        const savedName = card.querySelector('.employee-name-display-preview')?.textContent;
+        if (savedName) {
+          nameDisplay.textContent = savedName;
+        }
+      } else if (nameDisplay) {
+        nameDisplay.textContent = `${employeeText} ${number}`;
+      }
+    });
+  }
+
+  function clearValidation(card) {
+    card.querySelectorAll('.form-control, .form-select').forEach(input => input.classList.remove('is-invalid'));
+    card.querySelectorAll('.invalid-feedback').forEach(errorDiv => errorDiv.textContent = '');
+  }
+
+  function showValidationError(inputElement, errorDiv, message) {
+    if (inputElement) inputElement.classList.add('is-invalid');
+    if (errorDiv) errorDiv.textContent = message;
+  }
+
+  function clearSingleValidation(inputElement) {
+    if (!inputElement) return;
+    
+    inputElement.classList.remove('is-invalid');
+    const card = inputElement.closest('.employee-card');
+    if (!card) return;
+
+    const errorClassMap = {
+      'employee-name': '.employee-name-error',
+      'employee-job-title': '.employee-job-title-error',
+      'employee-gender': '.employee-gender-error',
+      'employee-employment-type': '.employee-employment-type-error',
+      'employee-hiring-date': '.employee-hiring-date-error',
+      'employee-documents': '.employee-documents-error'
+    };
+    
+    for (const [inputClass, errorClass] of Object.entries(errorClassMap)) {
+      if (inputElement.classList.contains(inputClass)) {
+        const errorDiv = card.querySelector(errorClass);
+        if (errorDiv) errorDiv.textContent = '';
+        break;
+      }
+    }
+  }
+
+  function addValidationClearListeners(card) {
+    const inputs = card.querySelectorAll('.employee-name, .employee-job-title, .employee-gender, .employee-employment-type, .employee-hiring-date, .employee-documents');
+    inputs.forEach(input => {
+      ['input', 'change', 'keyup'].forEach(eventType => {
+        input.addEventListener(eventType, () => {
+          clearSingleValidation(input);
+          // Remove leading whitespace for name and job title inputs
+          if (input.classList.contains('employee-name') || input.classList.contains('employee-job-title')) {
+            const cursorPos = input.selectionStart;
+            const trimmedValue = input.value.replace(/^\s+/, '');
+            if (input.value !== trimmedValue) {
+              input.value = trimmedValue;
+              input.setSelectionRange(Math.max(0, cursorPos - (input.value.length - trimmedValue.length)), Math.max(0, cursorPos - (input.value.length - trimmedValue.length)));
+            }
+          }
+        });
+      });
+    });
+  }
+
+  function handleServerValidationErrors(card, errors) {
+    const fieldMap = {
+      full_name: { errorSelector: '.employee-name-error', inputSelector: '.employee-name' },
+      job_title: { errorSelector: '.employee-job-title-error', inputSelector: '.employee-job-title' },
+      gender: { errorSelector: '.employee-gender-error', inputSelector: '.employee-gender' },
+      employment_type: { errorSelector: '.employee-employment-type-error', inputSelector: '.employee-employment-type' },
+      hiring_data: { errorSelector: '.employee-hiring-date-error', inputSelector: '.employee-hiring-date' },
+      documents: { errorSelector: '.employee-documents-error', inputSelector: '.employee-documents' }
+    };
+
+    Object.entries(errors).forEach(([field, messages]) => {
+      const fieldKey = field.startsWith('documents.') ? 'documents' : field;
+      const mapping = fieldMap[fieldKey];
+      
+      if (mapping) {
+        const errorElement = card.querySelector(mapping.errorSelector);
+        const inputElement = card.querySelector(mapping.inputSelector);
+        if (errorElement && inputElement) {
+          showValidationError(inputElement, errorElement, messages[0]);
+        }
+      }
+    });
+  }
+
+  function handleSuccessfulSubmission(card, data, inputs) {
+    // Switch to display mode
+    card.querySelector('.employee-form-section').classList.add('d-none');
+    card.querySelector('.employee-display-section').classList.remove('d-none');
+
+    // Update card state
+    card.dataset.isNew = false;
+    if (data.employee?.id) card.dataset.employeeId = data.employee.id;
+    
+    // Update employee data for future edits
+    if (data.employee) {
+      card.employeeData = data.employee;
+    }
+
+    // Update button visibility and status
+    card.querySelector('.remove-unsaved-employee-btn').classList.add('d-none');
+    card.querySelector('.delete-employee-btn').classList.remove('d-none');
+    card.querySelector('.employee-status-badge').classList.remove('d-none');
+    card.querySelector('.employee-status-bar').classList.remove('bg-warning');
+    card.querySelector('.employee-status-bar').classList.add('bg-success');
+
+    // Update display content
+    card.querySelector('.employee-name-display').textContent = inputs.name.value;
+    card.querySelector('.employee-job-preview').textContent = inputs.jobTitle.value;
+    card.querySelector('.employee-name-display-preview').textContent = inputs.name.value;
+    card.querySelector('.employee-job-title-display').textContent = inputs.jobTitle.value;
+    card.querySelector('.employee-gender-display').textContent = GENDER_LABELS[inputs.gender.value] || inputs.gender.value;
+    card.querySelector('.employee-employment-type-display').textContent = EMPLOYMENT_TYPE_LABELS[inputs.employmentType.value] || inputs.employmentType.value;
+    card.querySelector('.employee-hiring-date-display').textContent = formatDate(inputs.startDate.value);
+
+    // Update documents list
+    const documents = data.employee?.documents ? parseDocuments(data.employee.documents) : [];
+    const uploadedFilesList = card.querySelector('.uploaded-files-list');
+    const documentsCount = card.querySelector('.employee-documents-count');
+    const noDocumentsDiv = card.querySelector('.employee-no-documents');
+    
+    uploadedFilesList.innerHTML = '';
+    documentsCount.textContent = documents.length;
+    
+    if (documents.length > 0) {
+      noDocumentsDiv.classList.add('d-none');
+      documents.forEach(doc => {
+        const listItem = document.createElement('div');
+        listItem.className = 'mb-2';
+        listItem.innerHTML = `
+          <div class="card border-0 bg-light">
+            <div class="card-body p-3">
+              <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="avatar avatar-sm bg-label-primary rounded">
+                    <i class="${getFileIcon(doc.name)}"></i>
+                  </div>
+                  <div>
+                    <h6 class="mb-0">${doc.name}</h6>
+                    <small class="text-muted">{{ $l == 'ar' ? 'مستند داعم' : 'Supporting Document' }}</small>
+                  </div>
+                </div>
+                <a href="${doc.url}" target="_blank" class="btn btn-sm btn-outline-primary">
+                  <i class="ti ti-download me-1"></i>{{ $l == 'ar' ? 'تحميل' : 'Download' }}
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+        uploadedFilesList.appendChild(listItem);
+      });
+    } else {
+      noDocumentsDiv.classList.remove('d-none');
+    }
+
+    releaseSuccessAlert({
+      title: '{{ __('admin.Success!') }}',
+      message: data.state || (data.employee?.id ? MESSAGES.editSuccess : MESSAGES.addSuccess),
+    });
+  }
+
+  function handleEmployeeDelete(card) {
+    const isLastCard = document.querySelectorAll('.employee-card').length === 1;
+    
+    Swal.fire({
+      title: "{{ __('Are you sure?') }}",
+      text: MESSAGES.deleteConfirm,
+      icon: 'warning',
+      showCancelButton: true,
+      customClass: {
+        confirmButton: 'btn btn-danger',
+        cancelButton: 'btn btn-label-secondary'
+      },
+      confirmButtonText: "{{ __('admin.DYes') }}",
+      cancelButtonText: "{{ __('Cancel') }}"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const formData = new FormData();
+        formData.append('_token', csrfToken);
+        formData.append('id', card.dataset.employeeId);
+        
+        fetch(`{{ route('company.employees_delete', '') }}/${companyId}`, {
+          method: 'DELETE',
+          body: formData,
+          headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+        })
+        .then(response => {
+          if (!response.ok) {
+            return response.json().then(data => {
+              const errorMsg = data.errors?.general?.[0] || data.errors?.employee?.[0] || 'Server error';
+              throw new Error(errorMsg);
+            });
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success || data.state) {
+            card.remove();
+            if (isLastCard) createEmployeeCard(true);
+            else updateEmployeeNumbers();
+            
+            releaseSuccessAlert({
+              title: "{{ __('admin.Deleted') }}",
+              message: MESSAGES.deleteSuccess
+            });
+          } else {
+            throw new Error(MESSAGES.deleteError);
+          }
+        })
+        .catch(error => {
+          releaseFailureAlert({
+            title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+            message: error.message || MESSAGES.deleteError
+          });
+        });
+      }
+    });
+  }
+
+  function populateExistingDocumentsInForm(card) {
+    const uploadedDocumentsContainer = card.querySelector('.uploaded-documents');
+    uploadedDocumentsContainer.innerHTML = '';
+    
+    const employee = card.employeeData;
+    if (!employee?.documents) return;
+    
+    const documents = parseDocuments(employee.documents);
+    
+    if (documents.length > 0) {
+      const documentsTitle = document.createElement('small');
+      documentsTitle.className = 'form-text text-muted mb-2 d-block';
+      documentsTitle.textContent = '{{ $l == "ar" ? "الملفات الحالية:" : "Current files:" }}';
+      uploadedDocumentsContainer.appendChild(documentsTitle);
+      
+      documents.forEach((doc, index) => {
+        const docElement = document.createElement('div');
+        docElement.className = 'existing-document d-flex align-items-center justify-content-between p-2 mb-2 border rounded';
+        docElement.dataset.documentIndex = index;
+        
+        docElement.innerHTML = `
+          <div class="d-flex align-items-center">
+            <i class="ti ti-file me-2"></i>
+            <a href="${doc.url}" target="_blank" class="text-decoration-none">${doc.name}</a>
+          </div>
+          <button type="button" class="btn btn-sm btn-outline-danger remove-document-btn">
+            <i class="ti ti-trash"></i>
+          </button>
+        `;
+        
+        uploadedDocumentsContainer.appendChild(docElement);
+      });
+    }
+  }
+
+  function handleDocumentRemoval(removeBtn) {
+    const documentElement = removeBtn.closest('.existing-document');
+    
+    Swal.fire({
+      title: "{{ __('Are you sure?') }}",
+      text: MESSAGES.documentDeleteConfirm,
+      icon: 'warning',
+      showCancelButton: true,
+      customClass: {
+        confirmButton: 'btn btn-danger',
+        cancelButton: 'btn btn-label-secondary'
+      },
+      confirmButtonText: "{{ __('admin.DYes') }}",
+      cancelButtonText: "{{ __('Cancel') }}"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        documentElement.classList.add('document-to-remove');
+        Object.assign(documentElement.style, {
+          opacity: '0.5',
+          textDecoration: 'line-through'
+        });
+        
+        removeBtn.innerHTML = '<i class="ti ti-rotate-clockwise"></i>';
+        removeBtn.className = 'btn btn-sm btn-outline-secondary restore-document-btn';
+        removeBtn.title = '{{ $l == "ar" ? "استعادة المستند" : "Restore document" }}';
+      }
+    });
+  }
+
+  function handleDocumentRestore(restoreBtn) {
+    const documentElement = restoreBtn.closest('.existing-document');
+    
+    documentElement.classList.remove('document-to-remove');
+    Object.assign(documentElement.style, {
+      opacity: '',
+      textDecoration: ''
+    });
+    
+    restoreBtn.innerHTML = '<i class="ti ti-trash"></i>';
+    restoreBtn.className = 'btn btn-sm btn-outline-danger remove-document-btn';
+    restoreBtn.title = '';
+  }
+
+  function handleEditMode(card) {
+    // Toggle sections
+    card.querySelector('.employee-form-section').classList.remove('d-none');
+    card.querySelector('.employee-display-section').classList.add('d-none');
+    card.querySelector('.cancel-edit-btn').classList.remove('d-none');
+
+    // Button visibility during edit
+    card.querySelector('.delete-employee-btn').classList.add('d-none');
+    const showRemoveBtn = !card.classList.contains('initial-employee-card') && card.dataset.isNew === 'true';
+    card.querySelector('.remove-unsaved-employee-btn').classList.toggle('d-none', !showRemoveBtn);
+
+    // Populate form with saved data
+    const employee = card.employeeData;
+    if (employee) {
+      card.querySelector('.employee-name').value = employee.full_name || '';
+      card.querySelector('.employee-job-title').value = employee.job_title || '';
+      card.querySelector('.employee-gender').value = employee.gender || '';
+      card.querySelector('.employee-employment-type').value = employee.employment_type || '';
+      card.querySelector('.employee-hiring-date').value = employee.hiring_data || '';
+    }
+
+    populateExistingDocumentsInForm(card);
+    clearValidation(card);
+  }
+
+  function handleCancelEdit(card) {
+    clearValidation(card);
+
+    if (card.dataset.isNew === 'true') {
+      card.remove();
+      updateEmployeeNumbers();
+    } else {
+      // Revert to display mode
+      card.querySelector('.employee-form-section').classList.add('d-none');
+      card.querySelector('.employee-display-section').classList.remove('d-none');
+      card.querySelector('.cancel-edit-btn').classList.add('d-none');
+
+      // Clear uploaded documents and restore buttons
+      card.querySelector('.uploaded-documents').innerHTML = '';
+      card.querySelector('.delete-employee-btn').classList.remove('d-none');
+      card.querySelector('.remove-unsaved-employee-btn').classList.add('d-none');
+    }
+  }
+
+  // Initial load: Load existing employees or create one empty card
+  loadExistingEmployees();
+
+  // Add new employee card on button click
+  addEmployeeBtn.addEventListener('click', function () {
+    createEmployeeCard(false);
+  });
+
+  // Handle file input changes to check against existing documents
+  employeesContainer.addEventListener('change', function (event) {
+    if (event.target.classList.contains('employee-documents')) {
+      const documentsInput = event.target;
+      const card = documentsInput.closest('.employee-card');
+      const files = documentsInput.files;
+      
+      if (files.length > 0) {
+        const existingDocs = card.employeeData?.documents ? parseDocuments(card.employeeData.documents) : [];
+        const existingNames = existingDocs.filter(doc => !card.querySelector(`[data-document-index="${existingDocs.indexOf(doc)}"].document-to-remove`)).map(doc => doc.name);
+        
+        for (const file of files) {
+          if (existingNames.includes(file.name)) {
+            showValidationError(documentsInput, card.querySelector('.employee-documents-error'), '{{ $l == "ar" ? "هذا الملف موجود بالفعل" : "This file already exists" }}');
+            documentsInput.value = '';
+            return;
+          }
+        }
+        clearSingleValidation(documentsInput);
+      }
+    }
+  });
+
+  // Event delegation for actions within employee cards
+  employeesContainer.addEventListener('click', function (event) {
+    const card = event.target.closest('.employee-card');
+    if (!card) return;
+
+    const submitBtn = event.target.closest('.submit-employee-btn');
+    const editBtn = event.target.closest('.edit-employee-btn');
+    const deleteBtn = event.target.closest('.delete-employee-btn');
+    const removeUnsavedBtn = event.target.closest('.remove-unsaved-employee-btn');
+    const cancelEditBtn = event.target.closest('.cancel-edit-btn');
+
+    if (submitBtn) {
+      // Handle Submit
+      const nameInput = card.querySelector('.employee-name');
+      const jobTitleInput = card.querySelector('.employee-job-title');
+      const genderInput = card.querySelector('.employee-gender');
+      const employmentTypeInput = card.querySelector('.employee-employment-type');
+      const startDateInput = card.querySelector('.employee-hiring-date');
+      const documentsInput = card.querySelector('.employee-documents');
+
+      // Clear previous errors
+      clearValidation(card);
+
+      let isValid = true;
+      let firstInvalidInput = null;
+
+      // Validation rules
+      const validationRules = [
+        { input: nameInput, errorSelector: '.employee-name-error', message: MESSAGES.nameRequired, validate: () => !nameInput.value.trim() },
+        { input: jobTitleInput, errorSelector: '.employee-job-title-error', message: MESSAGES.jobTitleRequired, validate: () => !jobTitleInput.value.trim() },
+        { input: genderInput, errorSelector: '.employee-gender-error', message: MESSAGES.genderRequired, validate: () => !genderInput.value },
+        { input: employmentTypeInput, errorSelector: '.employee-employment-type-error', message: MESSAGES.employmentTypeRequired, validate: () => !employmentTypeInput.value },
+        { input: startDateInput, errorSelector: '.employee-hiring-date-error', message: MESSAGES.hiringDateRequired, validate: () => !startDateInput.value }
+      ];
+
+      // Validate inputs
+      const processedInputs = new Set();
+      validationRules.forEach(rule => {
+        if (!processedInputs.has(rule.input) && rule.validate()) {
+          showValidationError(rule.input, card.querySelector(rule.errorSelector), rule.message);
+          processedInputs.add(rule.input);
+          isValid = false;
+          if (!firstInvalidInput) firstInvalidInput = rule.input;
+        }
+      });
+
+      // Validate documents
+      const files = documentsInput.files;
+      if (files.length > 0) {
+        const existingDocs = card.employeeData?.documents ? parseDocuments(card.employeeData.documents) : [];
+        const existingNames = existingDocs.filter(doc => !card.querySelector(`[data-document-index="${existingDocs.indexOf(doc)}"].document-to-remove`)).map(doc => doc.name);
+        
+        for (const file of files) {
+          if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+            showValidationError(documentsInput, card.querySelector('.employee-documents-error'), MESSAGES.fileType);
+            isValid = false;
+            if (!firstInvalidInput) firstInvalidInput = documentsInput;
+            break;
+          }
+          if (file.size > MAX_FILE_SIZE) {
+            showValidationError(documentsInput, card.querySelector('.employee-documents-error'), MESSAGES.fileSize);
+            isValid = false;
+            if (!firstInvalidInput) firstInvalidInput = documentsInput;
+            break;
+          }
+          if (existingNames.includes(file.name)) {
+            showValidationError(documentsInput, card.querySelector('.employee-documents-error'), '{{ $l == "ar" ? "هذا الملف موجود بالفعل" : "This file already exists" }}');
+            isValid = false;
+            if (!firstInvalidInput) firstInvalidInput = documentsInput;
+            break;
+          }
+        }
+      }
+
+      if (isValid) {
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>${MESSAGES.saving}`;
+        
+        // Prepare form data
+        const formData = new FormData();
+        Object.entries({
+          '_token': csrfToken,
+          'full_name': nameInput.value,
+          'job_title': jobTitleInput.value,
+          'gender': genderInput.value,
+          'employment_type': employmentTypeInput.value,
+          'hiring_data': startDateInput.value
+        }).forEach(([key, value]) => formData.append(key, value));
+        
+        // Add files
+        Array.from(files).forEach((file, index) => {
+          formData.append(`documents[${index}]`, file);
+        });
+        
+        // Collect documents marked for removal
+        const documentsToRemove = Array.from(card.querySelectorAll('.existing-document.document-to-remove'))
+          .map(doc => parseInt(doc.dataset.documentIndex));
+        
+        if (documentsToRemove.length > 0) {
+          formData.append('remove_documents', JSON.stringify(documentsToRemove));
+        }
+        
+        // Determine if editing
+        const isEditing = card.dataset.isNew === 'false' && 
+                         card.dataset.employeeId && 
+                         !card.dataset.employeeId.toString().startsWith('temp_');
+        
+        const url = isEditing 
+          ? `{{ route('company.employees_edit', '') }}/${companyId}`
+          : `{{ route('company.employees_add', '') }}/${companyId}`;
+        
+        // Only append id for editing existing employees
+        if (isEditing) {
+          formData.append('id', card.dataset.employeeId);
+        }
+
+        // Make API call
+        fetch(url, {
+          method: 'POST',
+          body: formData,
+          headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+        })
+        .then(response => response.ok ? response.json() : Promise.reject(`HTTP ${response.status}: ${response.statusText}`))
+        .then(data => {
+          if (data.errors) {
+            handleServerValidationErrors(card, data.errors);
+          } else if (data.state || data.success) {
+            handleSuccessfulSubmission(card, data, {
+              name: nameInput,
+              jobTitle: jobTitleInput,
+              gender: genderInput,
+              employmentType: employmentTypeInput,
+              startDate: startDateInput
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          releaseFailureAlert({
+            title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+            message: MESSAGES.error
+          });
+        })
+        .finally(() => {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '{{ __("admin.Save") }}';
+        });
+      } else {
+        if (firstInvalidInput) {
+          firstInvalidInput.focus();
+        }
+      }
+    } else if (editBtn) {
+      handleEditMode(card);
+    } else if (deleteBtn) {
+      handleEmployeeDelete(card);
+    } else if (removeUnsavedBtn) {
+      const isLastCard = document.querySelectorAll('.employee-card').length === 1;
+      card.remove();
+      
+      if (isLastCard) createEmployeeCard(true);
+      else updateEmployeeNumbers();
+    } else if (event.target.closest('.remove-document-btn')) {
+      handleDocumentRemoval(event.target.closest('.remove-document-btn'));
+    } else if (event.target.closest('.restore-document-btn')) {
+      handleDocumentRestore(event.target.closest('.restore-document-btn'));
+    } else if (cancelEditBtn) {
+      handleCancelEdit(card);
+    }
+  });
+
+  // Initialize Flatpickr for employee hiring date
+  flatpickr(".employee-hiring-date", {
+    dateFormat: "Y-m-d",
+  });
+});
+</script>
+@endpush
