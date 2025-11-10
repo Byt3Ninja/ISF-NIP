@@ -354,7 +354,7 @@ class ClientCompanyController extends Controller
                 }
                 return [
                     'id'       => $industry->id,
-                    'name'     => $industry->name,
+                    'name'     => $industry->name ?? $industry->name_en,
                     'selected' => $industry->id == $selectedIndustryId,
                     'sectors'  => $sectorsList,
                 ];
@@ -364,6 +364,13 @@ class ClientCompanyController extends Controller
            $technologies = DB::table('technologies')->get();
             $data = [];
         }
+        $industries = $industries->map(function($industry) {
+            if( empty( $industry->name_ar ) || is_null( $industry->name_ar ) || !trim( $industry->name_ar ) )
+            {
+                $industry->name_ar = $industry->name_en;
+            }
+            return $industry;
+        });
             return view('admin/clients/company', compact(
                 'client',
                 '_countries',
