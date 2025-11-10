@@ -362,7 +362,7 @@ class ReportController extends Controller
         $evaluation_ids = ScreeningEvaluation::whereIn('step_id', $final_screening_steps)->pluck('id');
 
    
-      $finals = DB::table('finalscreenings AS fs')
+        $finals = DB::table('finalscreenings AS fs')
             ->select([
                 'fs.id',
                 'fs.company_id',
