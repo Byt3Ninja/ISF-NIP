@@ -138,9 +138,9 @@ class ClientProfileController extends Controller
             ->whereNotNull('rating') // تأكد أن عمود التقييم يحتوي على قيم
             ->avg('rating');
 
-        $almuni = Almuni::where('user_id', $client->id)->get();
+        // $almuni = Almuni::where('user_id', $client->id)->get();
         
-        return view('admin/clients/profile', compact('client', 'mentors', 'mentorshipTasks', 'mentrequests_count', 'mentrequests_period', 'average_rating', 'almuni'));
+        return view('admin/clients/profile', compact('client', 'mentors', 'mentorshipTasks', 'mentrequests_count', 'mentrequests_period', 'average_rating'));
     }
     /**
      * Update the specified resource in storage.
