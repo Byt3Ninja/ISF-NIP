@@ -12,9 +12,9 @@ class Settings extends Model
     protected $guarded = ['id', 'created_at', 'updated_at', 'deleted_at'];
     protected $fillable = ['PUSHER_APP_KEY', 'PUSHER_APP_SECRET', 'PUSHER_APP_ID', 'PUSHER_APP_CLUSTER', 'BroadCast'];
 
-
-
-    
-
-
+    protected $casts = [
+        'enable_email' => 'boolean',
+        'enable_whatsapp' => 'boolean',
+        'enable_pusher' => 'boolean',
+    ];
 }

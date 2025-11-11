@@ -9,6 +9,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Password;
 use App\Broadcasting\WhatsAppChannel;
+use App\Services\GlobalNotificationSettingsService;
 
 class CustomEmailNotification extends Notification implements ShouldQueue
 {
@@ -30,16 +31,19 @@ class CustomEmailNotification extends Notification implements ShouldQueue
     public function via(object $notifiable): array
     {
         if ($notifiable instanceof \Illuminate\Notifications\AnonymousNotifiable) {
-            return ['mail'];
+            return GlobalNotificationSettingsService::isEmailEnabled() ? ['mail'] : ['database'];
         }
         $channels = ['database'];
-        if (!empty($notifiable->accept_whatsapp)) {
+        // WhatsApp if enabled globally AND user accepts it
+        if (GlobalNotificationSettingsService::isWhatsAppEnabled() && !empty($notifiable->accept_whatsapp)) {
             $channels[] = WhatsAppChannel::class;
         }
-        if (!empty($notifiable->accept_pusher)) {
+        // Pusher if enabled globally AND user accepts it
+        if (GlobalNotificationSettingsService::isPusherEnabled() && !empty($notifiable->accept_pusher)) {
             $channels[] = 'broadcast';
         }
-        if (!empty($notifiable->accept_email) || count($channels) === 1) {
+        // Email if enabled globally AND user accepts it OR as default when nothing else is active
+        if ((GlobalNotificationSettingsService::isEmailEnabled() && !empty($notifiable->accept_email)) || count($channels) === 1) {
             $channels[] = 'mail';
         }
         return $channels;
