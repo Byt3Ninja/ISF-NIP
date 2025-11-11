@@ -224,6 +224,8 @@ class ScreeningEvaluationResults extends Model
 
 			$_companies[$companies_index]->average_score = $average_score ?? 0;
 			$_companies[$companies_index]->judges = $judges;
+			$_companies[$companies_index]->company_step_id = $getStep->id;
+			$_companies[$companies_index]->company_cycle_id = $getStep->cycle_id;
 		}
 
 		return [

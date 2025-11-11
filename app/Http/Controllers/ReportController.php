@@ -525,75 +525,135 @@ class ReportController extends Controller
         $draft_screenings_count = $_companies->where('status', 'draft')->values();
         $Judges = $judges->count();
 
+        $l = app()->getLocale();
+        $steps_ids = $steps->pluck('id')->toArray();
+        $metadata = collect([]);
+        // Only process metadata for the filtered steps
+        foreach($steps as $step) {
+            $metadata->push(ScreeningEvaluationResults::metadata($step->id));
+        }
+        $_allSteps = collect();
+        $allJudges = collect();
+        $allResults = collect();
+        $allCompanies = collect();
+        $_allCompanies = collect();
+        $_allEvaluations = collect();
+
+        if( count( $steps_ids ) > 0 )
+        {
+            // $metadata = ScreeningEvaluationResults::metadataReport( $steps_ids );
+            foreach( $metadata as $stepId => $data )
+            {
+                $allCompanies = $allCompanies->concat($data['companies']);
+                $_allSteps = $_allSteps->concat($data['_steps']);
+                $allJudges = $allJudges->concat($data['judges']);
+                $allResults = $allResults->concat($data['results']);
+                $_allCompanies = $_allCompanies->concat($data['_companies']);
+                if( !is_null($data['evaluation']) ) { $_allEvaluations = $_allEvaluations->push($data['evaluation']); }
+            }
+        }
+        // $_allCompanies = $_allCompanies->unique('id')->values();
+        $_allCompanies = $_allCompanies->map(function( $c ) use ($l) {
+            $c = clone $c;
+            $id = $c->id;
+            $output = new stdClass;
+            $output->id = $c->id;
+            $output->name = $c->{'name_' . $l};
+            $output->score = $c->average_score;
+            $output->step_id = $c->company_step_id;
+            $output->cycle_id = $c->company_cycle_id;
+            $output->judges = $c->judges->map(function($judge) use ($id) {
+                $judge = clone $judge;
+                $oneResult = $judge->companies->where('id', $id)->first();
+                $judge->result = $oneResult;
+                return $judge;
+            });
+            $statuses = $output->judges
+                ->pluck('result.status')
+                ->filter()
+                ->unique()
+                ->values();
+
+            $output->status = $statuses->count() === 1 ? $statuses->first() : 'Draft';
+            return $output;
+        })->values();
+
+        $allJudges = $allJudges->unique('id')->values();
+
+        // Calculate KPI data for screening
+        $screening_count = $_allCompanies->count();
+        $pending_screenings = $_allCompanies->filter(function($company) use ($allResults) {
+            return $allResults->where('company_id', $company->id)->isEmpty();
+        })->values();
+        $non_pending_companies = $_allCompanies->filter(function($company) use ($allResults) {
+            return !$allResults->where('company_id', $company->id)->isEmpty();
+        })->values();
+        $draft_screenings = $non_pending_companies->where('status', 'Draft')->count();
+        $published_screenings = $non_pending_companies->where('status', 'Published')->count();
+        $not_evaluated_screenings = $non_pending_companies->where('status', 'Not Evaluated')->count();
 
         // Kpi Cards Data (Dont' remove)
         $kpiData = [
-            [ 'value' => $Judges ?? 0, 'label' => 'Judgers', 'icon' => 'user', 'color' => 'info'],
-            [ 'value' => $final_screening_count ?? 0, 'label' => 'Total', 'icon' => 'gavel', 'color' => 'primary'],
-            [ 'value' => $final_pending_screening_count->count() ?? 0, 'label' => 'Not Evaluated', 'icon' => 'trending-up-2', 'color' => 'danger'],
-            [ 'value' => $draft_screenings_count->count() ?? 0, 'label' => 'In Progress', 'icon' => 'pencil-check', 'color' => 'secondary'],
-            [ 'value' => $final_done_screening_count->count() ?? 0, 'label' => 'Published', 'icon' => 'progress-check', 'color' => 'success'],
+            [ 'value' => $allJudges?->count() ?? 0, 'label' => 'Judgers', 'icon' => 'user', 'color' => 'info'],
+            [ 'value' => $_allCompanies?->count() ?? 0, 'label' => 'Total', 'icon' => 'gavel', 'color' => 'primary'],
+            [ 'value' => $pending_screenings->count() + $not_evaluated_screenings, 'label' => 'Not Evaluated', 'icon' => 'trending-up-2', 'color' => 'danger'],
+            [ 'value' => $draft_screenings, 'label' => 'In Progress', 'icon' => 'pencil-check', 'color' => 'secondary'],
+            [ 'value' => $published_screenings, 'label' => 'Published', 'icon' => 'progress-check', 'color' => 'success'],
         ];
 
-        // Get real startups data from database
-        $startups = Company::with(['user', 'stepdata.cycle.organization'])
-            ->whereHas('stepdata', function ($q) use ($organization_id, $program_id) {
-                $q->when(!is_null($organization_id), function ($q) use ($organization_id) {
-                    return $q->whereHas('cycle', function ($query) use ($organization_id) {
-                        $query->where('organization_id', $organization_id);
-                    });
-                })->when(!is_null($program_id), function ($q) use ($program_id) {
-                    return $q->whereHas('cycle', function ($query) use ($program_id) {
-                        $query->where('id', $program_id);
-                    });
-                })->where('stype', 5); // Final screening steps
-            })->get();
+        // Process companies with their evaluation data
+        $startups = $_allCompanies->map(function ($company) use ($allJudges, $allResults, $allCompanies, $steps) {
+            $scoped = $allCompanies->where('id', $company->id)->first();
+            $c = clone $scoped;
+            
+            // Get evaluations for this company
+            $companyResults = $allResults->where('company_id', $c->id);
+            
+            // Calculate scores and status
+            $publishedResults = $companyResults->where('status', 1);
+            $averageScore = $publishedResults->count() > 0 ? $publishedResults->avg('score') : 0;
+            
+            // Attach calculated data to company
+            $c->average_score = round($averageScore, 1);
+            $c->evaluation_results = $companyResults;
 
-        // Get real judges data with their evaluations
-        $judges = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
-            ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
-            ->where('roles.default_for', 'judger')
-            ->select('users.*')
-            ->get()
-            ->map(function ($judge) use ($final_screening_steps, $evaluation_ids, $program_id) {
-                // Get companies this judge evaluates through Finalscreening table
-                $finalScreenings = Finalscreening::whereIn('step_id', $final_screening_steps)
-                    ->when(!is_null($program_id), function ($q) use ($program_id) {
-                        $q->whereHas('step.cycle', function ($query) use ($program_id) {
-                            $query->where('id', $program_id);
-                        });
-                    })
-                    ->whereJsonContains('judges', (string) $judge->id)
-                    ->get();
-                
-                $companies = $finalScreenings->map(function ($screening) use ($judge, $evaluation_ids) {
-                    // Get the screening evaluation results for this company and judge
-                    $results = ScreeningEvaluationResults::whereIn('evaluation_id', $evaluation_ids)
-                        ->where('company_id', $screening->company_id)
-                        ->where('user_id', $judge->id)
-                        ->get();
-                    
-                    $status = 'Not Evaluated';
-                    $score = 0;
-                    
-                    if ($results->isNotEmpty()) {
-                        $status = $results->contains('status', 0) ? 'Draft' : 'Published';
-                        $score = $results->sum('score');
-                    }
-                    
+            $c->company_step_id = $company->step_id;
+            $c->company_cycle_id = $company->cycle_id;
+            $c->score = $company->score;
+            $_judges = $company->judges;
+            $c->status = $company->status;
+            $c->stepInfo = $steps->where('id', $company->step_id)->first();
+            $judges = clone $_judges;
+            $companyId = $c->id;
+            $judges = $judges->filter(function($judge) use ($companyId) {
+                return in_array($companyId, $judge->companies->pluck('id')->unique()->values()->toArray());
+            })->values();
+            $c->judges = $judges;
+            return $c;
+        })->values();
+
+        // Process judges with their evaluation data
+        $judges = $allJudges->map(function ($judge) use ($allResults, $allCompanies) {
+            $judgeResults = $allResults->where('user_id', $judge->id);
+            
+            $companies = $judgeResults->map(function ($result) use ($allCompanies) {
+                $company = $allCompanies->where('id', $result->company_id)->first();
+                if ($company) {
                     return (object) [
-                        'id' => $screening->company_id,
-                        'status' => $status,
-                        'score' => $score
+                        'id' => $result->company_id,
+                        'status' => $result->status == 1 ? 'Published' : 'Draft',
+                        'score' => $result->score
                     ];
-                });
-
-                $judge->companies_ids = $companies->pluck('id')->toArray();
-                $judge->startups = $judge->companies_ids;
-                $judge->companies = $companies->toArray();
-
-                return $judge;
-            });
+                }
+                return null;
+            })->filter();
+            
+            $judge->companies_ids = $companies->pluck('id')->toArray();
+            $judge->startups = collect($judge->companies_ids);
+            $judge->companies = $companies->toArray();
+            
+            return $judge;
+        });
 
         $data['cycles'] = $cycles;
         $data['steps'] = $steps;
