@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Otp;
 use App\User;
 use App\Cycle;
+use App\Almuni;
 use App\Country;
 use App\Activity;
 use App\Currency;
@@ -17,19 +18,20 @@ use App\MentorshipTask;
 use App\MentorshipRequest;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use App\Notifications\ConfirmEmailUpdateNotification;
-use Illuminate\Support\Facades\Notification;
 use App\Services\WhatsAppService;
-use App\Services\NotificationSettingsService;
 use PragmaRX\Google2FA\Google2FA;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
+use App\Services\NotificationSettingsService;
 use App\Http\Requests\UpdateClientProfileRequest;
 use Storage, Hash, Exception, Session, URL, File;
 use Intervention\Image\ImageManagerStatic as Image;
+use App\Notifications\ConfirmEmailUpdateNotification;
 use App\Http\Requests\UpdateClientProfilePasswordRequest;
+use App\StaticCategory;
 
 class ClientProfileController extends Controller
 {
@@ -57,6 +59,7 @@ class ClientProfileController extends Controller
             $client = Auth::user();
             $countries = Country::all();
             $expertises = Expertise::where('parent_id', null)->get();
+            $industries = StaticCategory::get();
             $Currencies = Currency::where('enabled', 1)->get();
             $json = File::get(base_path('database/dbFiles/countries.json'));
             $_countries = json_decode($json, true);
@@ -103,7 +106,7 @@ class ClientProfileController extends Controller
         $activities = Activity::where('user_id', Auth::user()->id)
         ->orderBy('activity_time', 'desc')
         ->get();
-            return view('admin/clients/profile/editProfile', compact('client', 'Currencies', 'countries', 'expertises', 'data','activities'));
+            return view('admin/clients/profile/editProfile', compact('client', 'Currencies', 'countries', 'expertises', 'data','activities', 'industries'));
         } catch (Exception $e) {
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);
@@ -134,6 +137,9 @@ class ClientProfileController extends Controller
             ->where('approved', 'Yes')
             ->whereNotNull('rating') // تأكد أن عمود التقييم يحتوي على قيم
             ->avg('rating');
+
+        // $almuni = Almuni::where('user_id', $client->id)->get();
+        
         return view('admin/clients/profile', compact('client', 'mentors', 'mentorshipTasks', 'mentrequests_count', 'mentrequests_period', 'average_rating'));
     }
     /**
@@ -146,6 +152,7 @@ class ClientProfileController extends Controller
 
     public function Updatebio(Request $request)
     {
+        
         $user = Auth::user();
         // Mentor Bio section
         if ($request->mentor_section) {
@@ -155,6 +162,7 @@ class ClientProfileController extends Controller
                 'linkedin' => $request->linkedin,
                 'entrepreneurial_experience' => $request->entrepreneurial_experience,
                 'profile_privacy' => $request->profile_privacy,
+                'industries' => $request->industries,
                 'mentorship_approach' => json_encode($request->mentorship_approach),
             ];
             if ($request->entrepreneurial_experience == 1) {
@@ -169,7 +177,7 @@ class ClientProfileController extends Controller
     }
     public function update(UpdateClientProfileRequest $request)
     {
-      
+        
         try {
             $first_name_ar = substr($request->first_name_en, 0, 250);
             $last_name_ar = substr($request->last_name_en, 0, 250);

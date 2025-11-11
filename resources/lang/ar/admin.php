@@ -2537,4 +2537,7 @@ return [
 	'Companies_hub' => 'كافة الشركات',
 	'No_training_sessions_available' => 'لا يوجد جلسات تدريب متاحة',
 	'Cohort' => 'مجموعة',
+	'SelectIndustries' => 'اختر الصناعات',
+	'SelectMultiIndustries' => 'اختر الصناعات المتعددة',
+	'Expertise_Settings' => 'إعدادات الخبرة',
 ];

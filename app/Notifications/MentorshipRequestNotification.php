@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Messages\BroadcastMessage;
+use App\Services\GlobalNotificationSettingsService;
 
 class MentorshipRequestNotification extends Notification implements ShouldQueue
 {
@@ -36,18 +37,18 @@ class MentorshipRequestNotification extends Notification implements ShouldQueue
         // Always store in database
         $channels[] = 'database';
 
-        // WhatsApp if enabled
-        if (!empty($notifiable->accept_whatsapp)) {
+        // WhatsApp if enabled globally AND user accepts it
+        if (GlobalNotificationSettingsService::isWhatsAppEnabled() && !empty($notifiable->accept_whatsapp)) {
             $channels[] = WhatsAppChannel::class;
         }
 
-        // Pusher (broadcast) if enabled
-        if (!empty($notifiable->accept_pusher)) {
+        // Pusher (broadcast) if enabled globally AND user accepts it
+        if (GlobalNotificationSettingsService::isPusherEnabled() && !empty($notifiable->accept_pusher)) {
             $channels[] = 'broadcast';
         }
 
-        // Email if user accepts OR default to email if nothing else (besides database) selected
-        if (!empty($notifiable->accept_email) || count($channels) === 1) { // only 'database' present
+        // Email if enabled globally AND user accepts it OR as default when nothing else is active
+        if ((GlobalNotificationSettingsService::isEmailEnabled() && !empty($notifiable->accept_email)) || count($channels) === 1) { // only 'database' present
             $channels[] = 'mail';
         }
 

@@ -200,6 +200,15 @@
                 ]
             },
             {
+                "name": "settings.expertise_view",
+                "description": "View Expertise Settings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
                 "name": "settings.industry_view",
                 "description": "View Industry Settings",
                 "guard_name": "web",
@@ -7147,6 +7156,32 @@
                 ]
             },
 
+                      {
+                "name":"settings.notification_update",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+
+
+                      {
+                "name":"settings.notification_view",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+
+
+
+            
                         {
                 "name":"notification-templates.create",
                 "description":"List Notification Templates",

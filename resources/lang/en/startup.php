@@ -44,7 +44,7 @@ return [
   'employee_add_success' => 'Employee added successfully',
   'employee_edit_success' => 'Employee updated successfully',
   'employee_delete_success' => 'Employee deleted successfully',
-  'employee_delete_confirm' => 'Are you sure you want to delete this employee? This action cannot be undone.',
+  'employee_delete_confirm' => 'Are you sure you want to delete this employee?',
   'document_delete_confirm' => 'Are you sure you want to remove this document?',
   'unexpected_error' => 'An unexpected error occurred. Please try again.',
   'employee_delete_failed' => 'Failed to delete employee',
