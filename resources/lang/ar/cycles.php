@@ -99,7 +99,7 @@ return [
     'Judges' => 'المحكمين',
     'Screening results' => 'نتائج المراجعة',
     'show screening results' => 'عرض نتائج المراجعة',
-    'Select screening from list' => 'اختر مرحلة مراجعة من القائمة لعرضها',
+    'Select final screening step' => 'اختر مرحلة مراجعة من القائمة لعرضها',
     'AVG degree' => 'متوسط الدرجات',
     'Cycles Mentors' => 'مرشدين البرنامج',
     'Manage Cycle mentors' => 'إدارة مرشدي البرنامج',
