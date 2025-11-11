@@ -94,7 +94,7 @@
 						<select id="final-screening-step-filter" class="form-select">
 							<option value="">{{ __('cycles.AllـSteps') }}</option>
 							@foreach ($steps as $step)
-								<option value="{{ $step->id }}">{{ $step->title }}</option>
+								<option value="{{ $step->id }}">{{ $step->title }} [id: #{{ $step->id }}]</option>
 							@endforeach
 						</select>
 					</div>
@@ -217,13 +217,14 @@
               
               // Get judge IDs for this company
               $companyJudgeIds = [];
-              foreach ($judges as $judge) {
-                // Check if the judge has evaluated this company
-                $scoped_company = collect($judge->companies)->where('id', $company->id)->first();
-                if ($scoped_company) {
-                  $companyJudgeIds[] = $judge->id;
-                }
-              }
+              // foreach ($judges as $judge) {
+              //   // Check if the judge has evaluated this company
+              //   $scoped_company = collect($judge->companies)->where('id', $company->id)->first();
+              //   if ($scoped_company) {
+              //     $companyJudgeIds[] = $judge->id;
+              //   }
+              // }
+			  $companyJudgeIds = $company->judges->pluck('id')->toArray();
               $scoped_judges = $judges->filter(function($judge) use ($company) {
                 return collect($judge->companies)->where('id', $company->id)->isNotEmpty();
               })->values();
