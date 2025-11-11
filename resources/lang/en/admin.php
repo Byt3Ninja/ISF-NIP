@@ -2490,5 +2490,7 @@ return [
 	'Cohort' => 'Cohort',
 	'SelectIndustries' => 'Select Industries',
 	'SelectMultiIndustries' => 'Select Multiple Industries',
-	'Expertise_Settings' => 'Expertise Settings'
+	'Expertise_Settings' => 'Expertise Settings',
+	'Expertises_Name' => 'Expertise Name',
+	'Register_Disabled' => 'Registration Disabled',
 ];
