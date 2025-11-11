@@ -93,8 +93,8 @@
         <!-- Enhanced Filter Section -->
 				<div class="row g-2 align-items-center mb-4 pb-3 border-bottom">
 					        <!-- Program Filter -->
-        <div class="col-lg-3 col-md-4 col-sm-6">
-          <select id="screening-cycle-filter" class="form-select" onchange="updateProgramFilter(this.value)">
+        <div class="col-lg-2 col-md-4 col-sm-6">
+          <select id="screening-cycle-filter" class="form-select">
             <option value="">{{ __('cycles.All_Cycles') }}</option>
             @foreach ($cycles as $cycle)
               <option value="{{ $cycle->id }}" {{ request('program_id') == $cycle->id ? 'selected' : '' }}>
@@ -109,7 +109,7 @@
 						<select id="screening-step-filter" class="form-select">
 							<option value="">{{ __('cycles.AllـSteps') }}</option>
 							@foreach ($steps as $step)
-								<option value="{{ $step->id }}">{{ $step->title }}</option>
+								<option value="{{ $step->id }}">{{ $step->title }} [id: #{{ $step->id }}]</option>
 							@endforeach
 						</select>
 					</div>
@@ -231,19 +231,19 @@
               
               // Get judge IDs for this company
               $companyJudgeIds = [];
-              foreach ($judges as $judge) {
-                // Check if the judge has evaluated this company
-                $scoped_company = collect($judge->companies)->where('id', $company->id)->first();
-                if ($scoped_company) {
-                  $companyJudgeIds[] = $judge->id;
-                }
-              }
+              // foreach ($judges as $judge) {
+              //   // Check if the judge has evaluated this company
+              //   $scoped_company = collect($judge->companies)->where('id', $company->id)->first();
+              //   if ($scoped_company) {
+              //     $companyJudgeIds[] = $judge->id;
+              //   }
+              // }
+			  $companyJudgeIds = $company->judges->pluck('id')->toArray();
               $scoped_judges = $judges->filter(function($judge) use ($company) {
                 return collect($judge->companies)->where('id', $company->id)->isNotEmpty();
               })->values();
               
               // Ensure data consistency
-              $companyJudgeIds = array_filter($companyJudgeIds);
               $evaluationStatuses = array_filter($evaluationStatuses);
             @endphp
             
