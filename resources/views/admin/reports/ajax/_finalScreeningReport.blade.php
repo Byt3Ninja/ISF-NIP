@@ -257,7 +257,7 @@
                       </a>
                       <div>
                         <a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none">
-                          <h6 class="mb-1 fw-bold text-dark">{{ Str::limit($company->name, 20) }}ddd</h6>
+                          <h6 class="mb-1 fw-bold text-dark">{{ Str::limit($company->name, 20) }}</h6>
                         </a>
                         <small class="text-muted line-clamp-1">
                           @php
