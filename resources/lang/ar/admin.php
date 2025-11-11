@@ -2540,4 +2540,6 @@ return [
 	'SelectIndustries' => 'اختر الصناعات',
 	'SelectMultiIndustries' => 'اختر الصناعات المتعددة',
 	'Expertise_Settings' => 'إعدادات الخبرة',
+	'Expertises_Name' => 'اسم الخبرة',
+	'Register_Disabled' => ' التسجيل مغلق ',
 ];
