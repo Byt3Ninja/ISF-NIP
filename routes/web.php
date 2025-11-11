@@ -227,6 +227,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::any('settings', 'SettingsController@get_settings')->name('settings.system_general_view');
     Route::get('industry-settings', 'SettingsController@industrySettings')->name('settings.industry_view');
     Route::get('expertise-settings', 'SettingsController@expertiseSettings')->name('settings.expertise_view');
+    Route::get('notification-settings', 'SettingsController@notificationSettings')->name('settings.notification_view');
+    Route::put('notification-settings', 'SettingsController@updateNotificationSettings')->name('settings.notification_update');
     Route::post('update_settings', 'SettingsController@update_settings')->name('settings.system_general_update');
     Route::any('setaboutus', 'SettingsController@get_aboutus');
     Route::post('updateaboutus', 'SettingsController@update_aboutus');

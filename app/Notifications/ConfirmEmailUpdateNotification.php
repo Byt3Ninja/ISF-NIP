@@ -8,6 +8,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use App\Broadcasting\WhatsAppChannel;
+use App\Services\GlobalNotificationSettingsService;
 
 class ConfirmEmailUpdateNotification extends Notification implements ShouldQueue
 {
@@ -21,18 +22,21 @@ class ConfirmEmailUpdateNotification extends Notification implements ShouldQueue
     {
         // If we're routing to a raw email (AnonymousNotifiable), only mail makes sense
         if ($notifiable instanceof \Illuminate\Notifications\AnonymousNotifiable) {
-            return ['mail'];
+            return GlobalNotificationSettingsService::isEmailEnabled() ? ['mail'] : ['database'];
         }
 
         $channels = ['database'];
 
-        if (!empty($notifiable->accept_whatsapp)) {
+        // WhatsApp if enabled globally AND user accepts it
+        if (GlobalNotificationSettingsService::isWhatsAppEnabled() && !empty($notifiable->accept_whatsapp)) {
             $channels[] = WhatsAppChannel::class;
         }
-        if (!empty($notifiable->accept_pusher)) {
+        // Pusher if enabled globally AND user accepts it
+        if (GlobalNotificationSettingsService::isPusherEnabled() && !empty($notifiable->accept_pusher)) {
             $channels[] = 'broadcast';
         }
-        if (!empty($notifiable->accept_email) || count($channels) === 1) { // only 'database'
+        // Email if enabled globally AND user accepts it OR as default when nothing else is active
+        if ((GlobalNotificationSettingsService::isEmailEnabled() && !empty($notifiable->accept_email)) || count($channels) === 1) { // only 'database'
             $channels[] = 'mail';
         }
         return $channels;

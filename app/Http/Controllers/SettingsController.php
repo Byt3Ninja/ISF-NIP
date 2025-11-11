@@ -51,6 +51,7 @@ class SettingsController extends Controller
 		$countries = Country::all();
 		$currencies = Currency::where('enabled',1)->get();
 		$states= State::all();
+		$settings = Settings::find(1);
 		$json = File::get(base_path('database/dbFiles/countries.json'));
 		$_countries = json_decode($json, true);
 		$_countries = collect( $_countries )->map(function ($country) {
@@ -68,7 +69,8 @@ class SettingsController extends Controller
 		return view('admin.settings.editegeneral')
 				->with('Title',$Title)->with('Icons',$Icons)->with('Img1',$Img1)
 				->with('Img2',$Img2)->with('Img3',$Img3)->with('Counters',$Counters)
-				->with('countries', $countries)->with('states', $states)->with('currencies',$currencies);
+				->with('countries', $countries)->with('states', $states)->with('currencies',$currencies)
+				->with('settings', $settings);
 	}
 
 	public function update_settings(Request $request)
@@ -1174,5 +1176,50 @@ class SettingsController extends Controller
 	public function expertiseSettings(Request $request) 
 	{		
 		return view('admin.settings.expertise.index');
+	}
+
+	/**
+	 * Display notification settings page
+	 */
+	public function notificationSettings(Request $request)
+	{
+		$settings = \App\Settings::find(1);
+		
+		if (!$settings) {
+			$settings = new \App\Settings();
+			$settings->id = 1;
+			$settings->enable_email = true;
+			$settings->enable_whatsapp = true;
+			$settings->enable_pusher = true;
+			$settings->save();
+		}
+
+		return view('admin.settings.notifications.index', compact('settings'));
+	}
+
+	/**
+	 * Update notification settings
+	 */
+	public function updateNotificationSettings(Request $request)
+	{
+		$request->validate([
+			'enable_email' => 'nullable|in:0,1',
+			'enable_whatsapp' => 'nullable|in:0,1',
+			'enable_pusher' => 'nullable|in:0,1',
+		]);
+
+		$settings = \App\Settings::find(1);
+		
+		if (!$settings) {
+			$settings = new \App\Settings();
+			$settings->id = 1;
+		}
+
+		$settings->enable_email = $request->has('enable_email') ? true : false;
+		$settings->enable_whatsapp = $request->has('enable_whatsapp') ? true : false;
+		$settings->enable_pusher = $request->has('enable_pusher') ? true : false;
+		$settings->save();
+
+		return redirect()->back()->with('message', 'Notification settings updated successfully');
 	}
 }
