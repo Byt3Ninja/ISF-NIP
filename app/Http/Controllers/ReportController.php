@@ -719,7 +719,7 @@ class ReportController extends Controller
                 if( !is_null($data['evaluation']) ) { $_allEvaluations = $_allEvaluations->push($data['evaluation']); }
             }
         }
-        $_allCompanies = $_allCompanies->unique('id')->values();
+        // $_allCompanies = $_allCompanies->unique('id')->values();
         $_allCompanies = $_allCompanies->map(function( $c ) use ($l) {
             $c = clone $c;
             $id = $c->id;
@@ -727,6 +727,8 @@ class ReportController extends Controller
             $output->id = $c->id;
             $output->name = $c->{'name_' . $l};
             $output->score = $c->average_score;
+            $output->step_id = $c->company_step_id;
+            $output->cycle_id = $c->company_cycle_id;
             $output->judges = $c->judges->map(function($judge) use ($id) {
                 $judge = clone $judge;
                 $oneResult = $judge->companies->where('id', $id)->first();
@@ -768,23 +770,35 @@ class ReportController extends Controller
         ];
 
         // Process companies with their evaluation data
-        $startups = $allCompanies->map(function ($company) use ($allJudges, $allResults, $_allCompanies) {
+        $startups = $_allCompanies->map(function ($company) use ($allJudges, $allResults, $allCompanies, $steps) {
+            $scoped = $allCompanies->where('id', $company->id)->first();
+            $c = clone $scoped;
+            
             // Get evaluations for this company
-            $companyResults = $allResults->where('company_id', $company->id);
+            $companyResults = $allResults->where('company_id', $c->id);
             
             // Calculate scores and status
             $publishedResults = $companyResults->where('status', 1);
             $averageScore = $publishedResults->count() > 0 ? $publishedResults->avg('score') : 0;
             
             // Attach calculated data to company
-            $company->average_score = round($averageScore, 1);
-            $company->evaluation_results = $companyResults;
-            $scoped = $_allCompanies->where('id', $company->id)->first();
-            $company->score = $scoped->score;
-            $company->judges = $scoped->judges;
-            $company->status = $scoped->status;
-            return $company;
-        });
+            $c->average_score = round($averageScore, 1);
+            $c->evaluation_results = $companyResults;
+
+            $c->company_step_id = $company->step_id;
+            $c->company_cycle_id = $company->cycle_id;
+            $c->score = $company->score;
+            $_judges = $company->judges;
+            $c->status = $company->status;
+            $c->stepInfo = $steps->where('id', $c->company_step_id)->first();
+            $judges = clone $_judges;
+            $companyId = $c->id;
+            $judges = $judges->filter(function($judge) use ($companyId) {
+                return in_array($companyId, $judge->companies->pluck('id')->unique()->values()->toArray());
+            })->values();
+            $c->judges = $judges;
+            return $c;
+        })->values();
 
         // Process judges with their evaluation data
         $judges = $allJudges->map(function ($judge) use ($allResults, $allCompanies) {
