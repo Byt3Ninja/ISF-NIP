@@ -98,7 +98,7 @@ return [
     'Judges' => 'Judges',
     'Screening results' => 'Screening Results',
     'show screening results' => 'show screening results',
-    'Select screening from list' => 'Select screening from list',
+    'Select final screening step' => 'Select final screening step',
     'AVG degree' => 'AVG degree',
     'Cycles Mentors' => 'Programs Mentors',
     'Manage Cycle mentors' => 'Manage Program mentors',
