@@ -87,6 +87,40 @@
       overflow-x: auto -webkit-overflow-scrolling: touch;
       background-color: #fff;
     }
+    .uploader {
+      border: 2px dashed #dee2e6;
+      border-radius: .75rem;
+      padding: 1.25rem;
+      text-align: center;
+      cursor: pointer;
+      transition: background-color .15s, border-color .15s;
+      }
+      .uploader.dragover {
+      background-color: #f8fafc;
+      border-color: #86b7fe;
+      box-shadow: 0 0 0 .25rem rgba(13,110,253,.08);
+      }
+      .avatar-preview {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #e9ecef;
+      background: #f8f9fa;
+      }
+      .file-input {
+      display: none;
+      }
+
+      .register-card-wrapper {
+        width: 100%;
+      }
+
+      @media screen and (min-width: 900px) {
+      .register-card-wrapper {
+        width: 50%;
+      }
+      }
   </style>
 
   <!-- Helpers -->
@@ -177,12 +211,13 @@
       </ul>
     </div>
   </nav>
+  
   <!-- Toggle theme and language -->  
   <div class="container-xxl">
     <div class="authentication-wrapper authentication-basic container-p-y">
-      <div class="authentication-inner py-6">
+      <div class="register-card-wrapper py-6">
         <!-- Register Card -->
-        <div class="card">
+        <div class="card mt-6 mt-lg-0">
           <div class="px-4 px-md-4 py-6">
             <!-- Logo -->
             <div class="app-brand justify-content-center mb-4">
@@ -228,8 +263,48 @@
                   </div>
                 </div>
               @endif
-                
-                <div class="col-12 mb-6">
+
+              <div class="col-12 mb-6">
+                <label class="form-label fs-6 fw-bold d-block text-{{ $l == 'ar' ? 'end' : 'start' }}">
+                  {{ $l == 'en' ? 'Profile photo' : 'الصورة الشخصية' }}
+                </label>
+                <div id="uploader" class="uploader" tabindex="0">
+                  <div class="d-flex gap-5 align-items-center justify-content-center">
+                    <img id="avatarPreview" class="avatar-preview" src="/images/user-avatar.png" alt="avatar preview">
+                    <div class="text-{{ $l == 'ar' ? 'end' : 'start' }}">
+                      <strong id="uploaderTitle">
+                        {{ $l == 'en' ? 'Drag & drop or click to upload' : 'اسحب وأفلت أو انقر للتحميل' }}
+                      </strong>
+                      <div class="small text-muted">
+                        {{ $l == 'en' ? 'PNG, JPG, JPEG up to 10 MB' : 'PNG، JPG، JPEG بحد أقصى 10 MB' }}
+                      </div>
+                      <div class="mt-2 text-start">
+                        <button type="button" id="chooseBtn" class="btn btn-sm btn-label-primary">
+                          {{ $l == 'en' ? 'Upload' : 'تحميل' }}
+                          <i class="ti ti-upload ti-xs ms-1"></i>
+                        </button>
+                        <button type="button" id="removeBtn" class="btn btn-sm btn-label-secondary d-none">
+                          {{ $l == 'en' ? 'Reset' : 'حذف' }}
+                          <i class="ti ti-reload ti-xs ms-1"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <input id="fileInput" class="file-input" type="file" accept="image/png, image/jpeg" name="img_url">
+
+                <div class="mt-3">
+                  <div class="progress" style="height:6px; display:none;">
+                    <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                  </div>
+                  @error('img_url')
+                    <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                  @enderror
+                </div>
+              </div>
+
+               {{-- <div class="col-12 mb-6">
                   <label for="file1" class="d-flex justify-content-center align-items-center position-relative rounded"
                     style="height: 140px; cursor: pointer; width: 200px; margin: 0 auto;">
                     <img 
@@ -242,11 +317,7 @@
                     <input type="file" class="form-control d-none" id="file1" name="img_url">
                     <i class="ti ti-camera-plus position-absolute fs-3 text-dark end-0 bottom-0 m-4 z-1"></i>
                   </label>
-                  @error('img_url')
-                    <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
-                  @enderror
-                </div>
-
+               </div> --}}
 
                 <div class="col-12 mb-3">
                   <label for="first_name_en" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('auth.firstName') }}</label>
@@ -433,8 +504,8 @@
             </div>
           </div>
         </div>
+        <!--/ Register Card -->
       </div>
-      <!--/ Register Card -->
     </div>
   </div>
   <!-- / Content -->
@@ -545,26 +616,115 @@ document.querySelectorAll('.role-input').forEach(input => {
 </script>
 
 <script>
-	const fileInput = document.getElementById('file1');
-	const previewImage = document.querySelector('label[for="file1"] img');
+  // Elements
+  const uploader = document.getElementById('uploader');
+  const fileInput = document.getElementById('fileInput');
+  const chooseBtn = document.getElementById('chooseBtn');
+  const removeBtn = document.getElementById('removeBtn');
+  const avatarPreview = document.getElementById('avatarPreview');
+  const progressBarWrap = document.querySelector('.progress');
+  const progressBar = document.getElementById('progressBar');
+  // const fileError = document.getElementById('fileError');
 
-	fileInput.addEventListener('change', (event) => {
-		const file = event.target.files[0];
-		if (file) {
-			const reader = new FileReader();
-			reader.onload = (event) => {
-				previewImage.src = event.target.result;
-			};
-			reader.onerror = () => {
-				alert('Error loading file');
-			};
-			reader.readAsDataURL(file);
-		}
-	});
+  // const MAX_SIZE = 3 * 1024 * 1024; // 3MB
+  // const ALLOWED_TYPES = ['image/png', 'image/jpeg'];
 
-	document.getElementById('company-logo').addEventListener('click', () => {
-		document.getElementById('file1').click();
-	});
+  // Helpers
+  function resetUploader() {
+    avatarPreview.src = '/images/user-avatar.png';
+    removeBtn.classList.add('d-none');
+    progressBar.style.width = '0%';
+    progressBarWrap.style.display = 'none';
+    // fileError.style.display = 'none';
+  }
+
+  // function showError(msg) {
+  //   fileError.textContent = msg;
+  //   fileError.style.display = 'block';
+  // }
+
+  function handleFile(file) {
+    // Validate
+    // if (!ALLOWED_TYPES.includes(file.type)) {
+    //   showError('Unsupported file type — use PNG or JPG.');
+    //   return;
+    // }
+    // if (file.size > MAX_SIZE) {
+    //   showError('File too large — must be under 3 MB.');
+    //   return;
+    // }
+
+    // Read with progress
+    const reader = new FileReader();
+    progressBarWrap.style.display = 'block';
+    progressBar.style.width = '0%';
+    // fileError.style.display = 'none';
+
+    reader.onprogress = (e) => {
+      if (e.lengthComputable) {
+        const percent = Math.round((e.loaded / e.total) * 100);
+        progressBar.style.width = percent + '%';
+      }
+    };
+
+    reader.onload = () => {
+      // preview + save base64 hidden field
+      avatarPreview.src = reader.result;
+      removeBtn.classList.remove('d-none');
+      progressBar.style.width = '100%';
+      setTimeout(() => { progressBarWrap.style.display = 'none'; }, 600);
+    };
+
+    reader.onerror = () => {
+      // showError('Error reading file. Try another image.');
+      progressBarWrap.style.display = 'none';
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  // Click handlers
+  uploader.addEventListener('click', () => fileInput.click());
+  chooseBtn.addEventListener('click', (e) => { e.stopPropagation(); fileInput.click(); });
+
+  removeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    fileInput.value = '';
+    resetUploader();
+  });
+
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files && e.target.files[0]) handleFile(e.target.files[0]);
+  });
+
+  // Drag & drop
+  ['dragenter','dragover'].forEach(evt => {
+    uploader.addEventListener(evt, (e) => {
+      e.preventDefault(); e.stopPropagation();
+      uploader.classList.add('dragover');
+    });
+  });
+  ['dragleave','drop'].forEach(evt => {
+    uploader.addEventListener(evt, (e) => {
+      e.preventDefault(); e.stopPropagation();
+      uploader.classList.remove('dragover');
+    });
+  });
+
+  uploader.addEventListener('drop', (e) => {
+    const dt = e.dataTransfer;
+    if (!dt) return;
+    const file = dt.files && dt.files[0];
+    if (file) handleFile(file);
+  });
+
+  // Keyboard accessibility: allow Enter to open file dialog
+  uploader.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+  });
+
+  // init
+  resetUploader();
 </script>
 </body>
 </html>
