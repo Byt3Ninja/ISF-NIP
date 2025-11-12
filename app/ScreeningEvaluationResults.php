@@ -52,7 +52,7 @@ class ScreeningEvaluationResults extends Model
 		$getStep = Step::find( $step_id );
 		if( $getStep )
 		{
-			$companies = Company::where('cycle', $getStep->cycle_id)->get();
+			$companies = Company::where('cycle', $getStep->cycle_id)->where('step', $step_id)->get();
 			$_steps = Step::whereIn('cycle_id', $companies->pluck('cycle')->unique())->orderBy('arr')->get();
 			$evaluation = ScreeningEvaluation::getEvaluationData( $getStep->id );
 			$results = self::where('evaluation_id', $evaluation?->id )->get();
