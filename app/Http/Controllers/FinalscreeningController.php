@@ -278,7 +278,7 @@ class FinalscreeningController extends Controller
             $MSG = new TemplateEmail;
             $MSG->Message=["New Final Screen session - VI portal","Dear ".$startup_owner_name.",","Kindly note you have a New Final Screen session with '".$judges_names."', Session will start:".$request->date.
                 ", Check your account to join the session ","/dashboard"];
-            if( !in_array(env('APP_ENV', 'local'), ['local']) )
+            if( !in_array(env('APP_ENV', 'local'), ['local']) || env('APP_NAME', 'incubator') != "BIAC" )
             {
                 try {
                     $user->notify($MSG);

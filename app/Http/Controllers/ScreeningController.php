@@ -382,7 +382,7 @@ class ScreeningController extends Controller
 		
 			// $recipients = User::role("Registered")->where('email', $company_owner->email)->get();
 			// // Notify all recipients
-			// if( !in_array(env('APP_ENV', 'local'), ['local']) ){
+			// if( !in_array(env('APP_ENV', 'local'), ['local']) || env('APP_NAME', 'incubator') != "BIAC" ){
 			// 	try {
 			// 		foreach( $recipients as $recipient ) {
 			// 			$recipient->notify(new ChangeCycle($data));

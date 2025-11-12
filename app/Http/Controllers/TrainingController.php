@@ -184,7 +184,7 @@ class TrainingController extends Controller
 					$mail = new ChangeCycle($data);
 					// $MSG = new TemplateEmail;
 					// $MSG->Message=["Step changed - VI portal","Dear ".$rfullname.",","Your step into Cycle changed, check your account now.","/dashboard"];
-					if (!in_array(env('APP_ENV', 'local'), ['local'])) {
+					if (!in_array(env('APP_ENV', 'local'), ['local']) || env('APP_NAME', 'incubator') != "BIAC") {
 						try {
 							$company_owner->notify($mail);
 						} catch (\Throwable $th) {
