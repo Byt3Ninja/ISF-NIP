@@ -496,7 +496,7 @@ return [
 	'screening pending sessions' => ' جلسات المراجعة المنتظرة',
 	'screening done sessions' => ' جلسات المراجعة المنتهية',
 	'SelectCompany' => 'اختار الشركة',
-	'SelectOrSearchCompany' => 'يمكن البحث باسم الشركة',
+	'SelectOrSearchCompany' => 'يمكنك البحث باسم الشركة',
 	'SelectCycle' => 'اختار البرنامج',
 	'SelectOrSearchCycle' => 'يمكن البحث باسم البرنامج',
 	'Subscribe Startups in Cycle' => 'عدد الشركات المشاركة بالبرنامج',

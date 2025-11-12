@@ -3,7 +3,7 @@
 @section('content')
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
-    <ul class="nav nav-pills mb-6" role="tablist">
+    <ul class="nav nav-pills flex-nowrap mb-6" role="tablist" style="max-width: 100%; overflow-x: auto;">
       <li class="nav-item me-2" role="presentation">
         <a class="nav-link active" id="enrolled-programs-tab" data-bs-toggle="tab" href="#enrolled-programs" role="tab" aria-controls="enrolled-programs" aria-selected="true">
           <i class="ti ti-components me-2"></i>{{ __('mentor.enrolled_programs') }}
@@ -184,8 +184,16 @@ $(document).ready(function() {
   $('#mentorship-sessions-table').DataTable({
     responsive: true,
     pageLength: 10,
-    order: [[2, 'desc']],
-    language: isRtl ? { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/ar.json' } : {}
+    order: [[2, 'desc']]
+    @if (app()->getLocale() == 'ar')
+    ,language: {
+      search: 'ابحث:',
+      lengthMenu: 'أظهر _MENU_ مدخلات',
+      info: 'إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل',
+      paginate: { previous: 'السابق', next: 'التالي' },
+      emptyTable: 'لا توجد بيانات'
+    }
+    @endif
   });
 });
 </script>
