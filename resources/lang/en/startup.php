@@ -1,6 +1,10 @@
 <?php
 
 return [
+  'startup_profile_heading' => 'Startup Profile / Idea',
+  'registered' => 'Registered',
+  'not_registered' => 'Not Registered',
+  
   'startup_not_found' => 'Startup not found',
 
   'saving' => 'Saving...',
@@ -29,4 +33,23 @@ return [
   'milestone_unknown_error' => 'An unknown error occurred. Please try again later.',
   'milestone_not_found' => 'Milestone not found.',
   'milestone_id_required' => 'Milestone ID is required.',
+
+  // Employee
+  'Employee' => 'Employee',
+  'Employees' => 'Employees',
+  'employee_name_required' => "Please enter employee name",
+  'employee_job_title_required' => "Please enter employee job title",
+  'employee_gender_required' => 'Please select gender',
+  'employee_employment_required' => 'Please select employment type',
+  'employee_hiring_date_required' => 'Please enter the hiring date',
+  'employee_document_invalid_type' => 'Invalid document type. Only PDF, JPG, PNG, and DOCX files are allowed',
+  'document_too_large' => 'Document size must be less than 10MB',
+  'document_upload_failed' => 'Document upload failed',
+  'employee_add_success' => 'Employee added successfully',
+  'employee_edit_success' => 'Employee updated successfully',
+  'employee_delete_success' => 'Employee deleted successfully',
+  'employee_delete_confirm' => 'Are you sure you want to delete this employee?',
+  'document_delete_confirm' => 'Are you sure you want to remove this document?',
+  'unexpected_error' => 'An unexpected error occurred. Please try again.',
+  'employee_delete_failed' => 'Failed to delete employee',
 ];

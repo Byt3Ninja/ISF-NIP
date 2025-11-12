@@ -226,6 +226,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     // Settings Routes
     Route::any('settings', 'SettingsController@get_settings')->name('settings.system_general_view');
     Route::get('industry-settings', 'SettingsController@industrySettings')->name('settings.industry_view');
+    Route::get('expertise-settings', 'SettingsController@expertiseSettings')->name('settings.expertise_view');
+    Route::get('notification-settings', 'SettingsController@notificationSettings')->name('settings.notification_view');
+    Route::put('notification-settings', 'SettingsController@updateNotificationSettings')->name('settings.notification_update');
     Route::post('update_settings', 'SettingsController@update_settings')->name('settings.system_general_update');
     Route::any('setaboutus', 'SettingsController@get_aboutus');
     Route::post('updateaboutus', 'SettingsController@update_aboutus');
@@ -364,6 +367,11 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::post('/DeleteCompanyMileStone/{id?}', 'ClientCompanyController@DeleteMileStone')->name('company.profile_milestones_delete');
     Route::post('/delete-document', 'ClientCompanyController@deleteDocument')->name('company.profile_documents_delete');
     Route::post('/delete-image/{id?}', 'ClientCompanyController@deleteImage')->name('company.profile_images_delete');
+
+    // Company Profile Employees
+    Route::delete('/employees/delete/{id}','ClientCompanyController@deleteEmployee')->name('company.employees_delete');
+    Route::post('/employees/edit/{id}', 'ClientCompanyController@editEmployee')->name('company.employees_edit');
+    Route::post('/employees/add/{id}', 'ClientCompanyController@addEmployee')->name('company.employees_add');
 
     //Industry
     Route::post('/industries/technologies', 'TechnologyController@create_technologies')->name('settings.create_technologies');

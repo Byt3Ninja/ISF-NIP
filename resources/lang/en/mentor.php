@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'enrolled_programs' => 'Enrolled Programs',
+    
     'mentorshipTasks' => [
         'index'=>'Tasks of Mentorship sessions',
         'create'=>'Add a new task',

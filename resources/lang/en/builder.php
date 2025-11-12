@@ -85,4 +85,5 @@ return [
     'Remove_Section' => 'Remove Section',
     'Section_title_optional' => 'Section title (optional)',
     'Submit_Form' => 'Submit Form',
+    'Other' => 'Other',
 ];

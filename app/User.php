@@ -48,14 +48,13 @@ class User extends Authenticatable implements MustVerifyEmail
 
 	public function sendPasswordResetNotification($token)
 	{
-        if( !in_array(env('APP_ENV', 'local'), ['local']) )
-        {
+
             try {
                 $this->notify(new ResetPasswordNotification($token));
             } catch (\Throwable $th) {
-                // throw $th;
-            }
-        }
+                 throw $th;
+          }
+        
 	}
     public function sendEmailVerificationNotification()
     {

@@ -48,6 +48,11 @@
                     @php
                       $roles = $client->getRoleNames();
                       $translatedRoles = $roles->map(fn($role) => __('admin.' . strtolower($role)))->implode(', ');
+                      if(!empty($client->bio->industries)) {
+                        $industery = $client->bio->industry($client->bio->industries);
+                      }else{
+                        $industery = [];
+                      }
                     @endphp
                     
                     <h2 class="fw-medium h5">
@@ -281,6 +286,17 @@
                       <strong class="mx-2 text-nowrap">{{ $l == 'ar' ? 'الايميل:' : 'Email:' }}</strong>
                       <span class="text-truncate">{{ $client->email }}</span>
                     </li>
+                    
+                    <li class="d-flex align-items-center mb-4">
+                      <i class="ti ti-briefcase ti-lg"></i>
+                      <strong class="mx-2 text-nowrap">{{ $l == 'ar' ? 'الصناعة:' : 'Industry:' }}</strong>
+                      <span>
+                        @foreach ($industery as $industry)
+                    {{ $industry->{'name_' . $l} }}
+                    @endforeach
+                  </span>
+                    </li>
+
                   </ul>
                 </div>
               </article>

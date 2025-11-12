@@ -1,6 +1,10 @@
 <?php
 
 return [
+  'startup_profile_heading' => 'تفاصيل الشركة الناشئة / الفكرة',
+  'registered' => 'مسجلة',
+  'not_registered' => 'ليست مسجلة بعد',
+
   'startup_not_found' => 'لم يتم العثور على الشركة الناشئة',
 
   'saving' => 'جارٍ الحفظ...',
@@ -29,4 +33,24 @@ return [
   'milestone_unknown_error' => 'حدث خطأ غير معروف. يرجى المحاولة مرة أخرى لاحقًا.',
   'milestone_not_found' => 'لم يتم العثور على المرحلة الانتقالية.',
   'milestone_id_required' => 'معرف المرحلة الانتقالية مطلوب.',
+
+  // Employee
+  'Employee' => 'موظف',
+  'Employees' => 'الموظفين',
+  'employee_name_required' => "يرجى إدخال اسم الموظف",
+  'employee_job_title_required' => "يرجى إدخال المسمى الوظيفي للموظف",
+  'employee_gender_required' => "يرجى اختيار الجنس",
+  'employee_employment_required' => "يرجى اختيار نوع التوظيف",
+  'employee_hiring_date_required' => "يرجى إدخال تاريخ التعيين",
+  'employee_document_invalid_type' => 'نوع المستند غير صالح. يُسمح فقط بملفات PDF و JPG و PNG و DOCX',
+  'document_too_large' => 'حجم المستند يجب أن يكون أقل من 10 ميجابايت',
+  'document_upload_failed' => 'فشل في رفع المستند',
+  'saving' => 'جاري الحفظ...',
+  'employee_add_success' => 'تم إضافة الموظف بنجاح',
+  'employee_edit_success' => 'تم تحديث الموظف بنجاح',
+  'employee_delete_success' => 'تم حذف الموظف بنجاح',
+  'employee_delete_confirm' => 'هل أنت متأكد من حذف هذا الموظف؟.',
+  'document_delete_confirm' => 'هل أنت متأكد من إزالة هذا المستند؟',
+  'unexpected_error' => 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.',
+  'employee_delete_failed' => 'فشل في حذف الموظف',
 ];

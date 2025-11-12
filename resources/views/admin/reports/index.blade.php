@@ -1,65 +1,5 @@
 @extends('layouts.admin')
 
-@section('style')
-<style>
-  /* Custom styles for program selection card */
-  @media (max-width: 768px) {
-    .card-body .row > div {
-      margin-bottom: 1rem;
-    }
-
-    .card-body .row > div:last-child {
-      margin-bottom: 0;
-    }
-
-    #programSelect {
-      font-size: 16px; /* Prevents zoom on iOS */
-    }
-  }
-
-  /* Select2 customization for better mobile experience */
-  .select2-container--default .select2-selection--single {
-    border: 1px solid #d9dee3;
-    border-radius: 0.375rem;
-    min-height: 38px;
-    padding: 0.375rem 0.75rem;
-  }
-
-  .select2-container--default .select2-selection--single .select2-selection__rendered {
-    color: #6f6b7d;
-    line-height: 1.5;
-    padding: 0;
-  }
-
-  .select2-container--default .select2-selection--single .select2-selection__placeholder {
-    color: #a8aaae;
-  }
-
-  .select2-container--default .select2-selection--single .select2-selection__arrow {
-    height: 36px;
-    right: 10px;
-  }
-
-  .select2-container--default .select2-selection--single .select2-selection__arrow b {
-    border-color: #6f6b7d transparent transparent transparent;
-    border-style: solid;
-    border-width: 5px 4px 0 4px;
-    height: 0;
-    left: 50%;
-    margin-left: -4px;
-    margin-top: -2px;
-    position: absolute;
-    top: 50%;
-    width: 0;
-  }
-
-  .select2-container--open .select2-selection--single .select2-selection__arrow b {
-    border-color: transparent transparent #6f6b7d transparent;
-    border-width: 0 4px 5px 4px;
-  }
-</style>
-@stop
-
 @section('title', __('admin.Reports'))
 @section('subTitle', __('admin.View and analyze reports'))
 
@@ -87,29 +27,6 @@
           </div>
         @endif
     
-        <!-- Program Selection -->
-        <div class="card mb-4">
-          <div class="card-body py-3">
-            <div class="row align-items-center">
-              <div class="col-md-3 col-lg-2">
-                <div class="d-flex align-items-center gap-2">
-                  <i class="ti ti-components ti-lg text-primary"></i>
-                  <label for="programSelect" class="form-label mb-0 fw-semibold">{{ __('admin.Select Program') }}:</label>
-                </div>
-              </div>
-              <div class="col-md-9 col-lg-10">
-                <select class="form-select select2" id="programSelect" style="width: 100%;">
-                  <option value="">{{ __('admin.All Programs') }}</option>
-                  @foreach ($cycles as $cycle)
-                    <option value="{{ $cycle->id }}" data-title="{{ $cycle->title }}">{{ $cycle->title }}</option>
-                  @endforeach
-                </select>
-                <small class="form-text text-muted mt-1">{{ __('admin.Select program to filter reports') }}</small>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- Navigation Pills -->
         @php
           $pills = [
@@ -118,14 +35,14 @@
             'screening'          => ['label' => __('admin.Screening'),  'icon' => 'ti ti-scale'],
             'finalScreening'          => ['label' => __('admin.Final Screening'),  'icon' => 'ti ti-gavel'],
             'cycles'         => ['label' => __('admin.Cycles'),          'icon' => 'ti ti-components'],
-            'companies'      => ['label' => __('admin.Companies'),       'icon' => 'ti ti-building'],
+            'companies'      => ['label' => __('admin.Companies_hub'),       'icon' => 'ti ti-building'],
             'mentorSurveys'  => ['label' => __('admin.Surveys_Mentor'),  'icon' => 'ti ti-clipboard-check'],
             'startupSurveys' => ['label' => __('cycles.Startup_Surveys'), 'icon' => 'ti ti-clipboard-list'],
           ];
         @endphp
 
         <div class="overflow-auto">
-          <ul class="nav nav-pills mb-4 flex-nowrap" id="reportTabs" role="tablist">
+          <ul class="nav nav-pills mb-6 flex-nowrap" id="reportTabs" role="tablist">
             @foreach($pills as $key => $data)
             <li class="nav-item" role="presentation">
               <button 
@@ -146,35 +63,48 @@
           </ul>
         </div>
 
+        
+        <!-- Program Selection -->
+        <div class="card card-body mb-6" id="programSelectionCard">
+          <div class="form-group d-flex flex-column gap-1">
+            <label for="programSelect" class="form-label fs-6 fw-semibold">{{ __('admin.Select Program') }}:</label>
+            <select class="form-select select2" id="programSelect" style="width: 100%;" data-placeholder="{{ __('admin.Select Program') }}">
+              <option value="" selected>{{ __('admin.Select Program') }}</option>
+              @foreach ($cycles as $cycle)
+                <option value="{{ $cycle->id }}" data-title="{{ $cycle->title }}">{{ $cycle->title }}</option>
+              @endforeach
+            </select>
+            <small class="form-text text-muted">{{ __('admin.Select program to filter reports') }}</small>
+          </div>
+        </div>
+
         <!-- Tab Content -->
         <div class="tab-content p-0 w-100 h-100" id="reportTabsContent">
           @foreach($pills as $key => $label)
-          <div 
-            class="w-100 h-100 tab-pane fade @if($loop->first) show active @endif" 
-            id="{{ $key }}" 
-            role="tabpanel" 
-            aria-labelledby="{{ $key }}-tab"
-          >
-            <div class="card h-100 w-100">
-              <div class="card-body py-3 h-100 w-100">
-                @if ($key === 'companies')
-                  <h5>{{ __('admin.SelectCompany') }}</h5>
-                  <p>{{ __('admin.SelectOrSearchCompany') }}</p>
-                  <select class="form-control select2" id="companiesSelectOptions">
-                    @foreach ($companies as $company)
-                      <option value="{{ $company->id }}">{{ $company->name }}</option>
-                    @endforeach
-                  </select>
-                @else
-                  {{-- <div class="text-muted">{{ __('admin.LoadingReport') }}...</div> --}}
-                @endif
+            <div 
+              class="w-100 h-100 tab-pane fade @if($loop->first) show active @endif" 
+              id="{{ $key }}" 
+              role="tabpanel" 
+              aria-labelledby="{{ $key }}-tab"
+            >
+              <div class="card">
+                <div class="card-body">
+                  @if ($key === 'companies')
+                    <label class="form-label fs-5 mb-2">{{ __('admin.SelectCompany') }}</label>
+                    <h6 class="text-muted">{{ __('admin.SelectOrSearchCompany') }}</h6>
+                    <select class="form-control select2" id="companiesSelectOptions" data-placeholder="{{ __('cycles.Select Startup') }}">
+                      <option value="">{{ __('cycles.Select Startup') }}</option>
+                      @foreach ($companies as $company)
+                        <option value="{{ $company->id }}">{{ $company->name }}</option>
+                      @endforeach
+                    </select>
+                  @endif
 
-                <!-- Report Content Area -->
-                <div class="report-content mt-3" id="report-{{ $key }}"></div>
-
+                  <!-- Report Content Area -->
+                  <div class="report-content mt-3" id="report-{{ $key }}"></div>
+                </div>
               </div>
             </div>
-          </div>
           @endforeach
         </div>
       </div>
@@ -247,13 +177,6 @@
       return $('#programSelect').val() || '';
     }
 
-    // Initialize Select2 for program selection
-    $('#programSelect').select2({
-      placeholder: '{{ __("admin.Select a program") }}',
-      allowClear: true,
-      width: '100%'
-    });
-
     // Clear content of inactive tabs when switching
     $('button[data-bs-toggle="pill"]').on('hide.bs.tab', function (e) {
       var previousType = $(e.target).data('bs-target').replace('#','');
@@ -264,6 +187,13 @@
     // Load report when tab is shown
     $('button[data-bs-toggle="pill"]').on('shown.bs.tab', function (e) {
       var type = $(e.target).data('bs-target').replace('#',''); // e.g. "mentorship"
+
+      // Hide/show program selection card based on active tab
+      if (type === 'companies' || type === 'cycles') {
+        $('#programSelectionCard').hide();
+      } else {
+        $('#programSelectionCard').show();
+      }
 
       // Clear all other tab contents first to ensure only active tab has content
       $('.report-content').each(function() {
