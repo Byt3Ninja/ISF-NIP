@@ -2534,4 +2534,12 @@ return [
 	'Select_Users' => 'اختر المستخدمين',
 	'Evaluation' => 'التقييم',
 	'dont_have_permission' => 'ليس لديك إذن لأداء هذا الإجراء',
+	'Companies_hub' => 'كافة الشركات',
+	'No_training_sessions_available' => 'لا يوجد جلسات تدريب متاحة',
+	'Cohort' => 'مجموعة',
+	'SelectIndustries' => 'اختر الصناعات',
+	'SelectMultiIndustries' => 'اختر الصناعات المتعددة',
+	'Expertise_Settings' => 'إعدادات الخبرة',
+	'Expertises_Name' => 'اسم الخبرة',
+	'Register_Disabled' => ' التسجيل مغلق ',
 ];

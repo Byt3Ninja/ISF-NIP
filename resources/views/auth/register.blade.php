@@ -87,6 +87,40 @@
       overflow-x: auto -webkit-overflow-scrolling: touch;
       background-color: #fff;
     }
+    .uploader {
+      border: 2px dashed #dee2e6;
+      border-radius: .75rem;
+      padding: 1.25rem;
+      text-align: center;
+      cursor: pointer;
+      transition: background-color .15s, border-color .15s;
+      }
+      .uploader.dragover {
+      background-color: #f8fafc;
+      border-color: #86b7fe;
+      box-shadow: 0 0 0 .25rem rgba(13,110,253,.08);
+      }
+      .avatar-preview {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #e9ecef;
+      background: #f8f9fa;
+      }
+      .file-input {
+      display: none;
+      }
+
+      .register-card-wrapper {
+        width: 100%;
+      }
+
+      @media screen and (min-width: 900px) {
+      .register-card-wrapper {
+        width: 50%;
+      }
+      }
   </style>
 
   <!-- Helpers -->
@@ -111,7 +145,7 @@
   $privacyUrl = setting('privacy_url','#');
   @endphp
 
-  @if (App\Settings::findOrFail(1)->set_order)
+
   <!-- Content -->
   <!-- Toggle theme and language -->
   <nav 
@@ -177,12 +211,13 @@
       </ul>
     </div>
   </nav>
+  
   <!-- Toggle theme and language -->  
   <div class="container-xxl">
     <div class="authentication-wrapper authentication-basic container-p-y">
-      <div class="authentication-inner py-6">
+      <div class="register-card-wrapper py-6">
         <!-- Register Card -->
-        <div class="card">
+        <div class="card mt-6 mt-lg-0">
           <div class="px-4 px-md-4 py-6">
             <!-- Logo -->
             <div class="app-brand justify-content-center mb-4">
@@ -195,216 +230,258 @@
             <h4 class="mb-1 text-center lh-base text-capitalize">{{ __('auth.formHeading') }} 🚀</h4>
             <p class="mb-6 text-center">{{ __('auth.formSubHeading') }}</p>
 
+              @if (App\Settings::findOrFail(1)->set_order)
+                <form id="registerForm" class="mb-6 px-md-8" method="POST" action="{{ route('register') }}" enctype="multipart/form-data">
+                  @csrf
+                  <div class="row">
+                    <!-- Switch Role -->
             
-            <form id="registerForm" class="mb-6 px-md-8" method="POST" action="{{ route('register') }}" enctype="multipart/form-data">
-              @csrf
-              <div class="row">
-                <!-- Switch Role -->
-        
-                @foreach($accountRoles as $key => $role)
-                <div class="col-6 mb-4">
-                  <label for="{{$role}}Role" style="display: grid; place-items: center;" class="form-check custom-option custom-option-icon cursor-pointer">
-                    <div class="d-flex align-items-center">
-                      <input name="role" class="form-check-input role-input" type="radio" value="{{$key == 0 ? 4 : '3'}}" id="{{$role}}Role" checked={{ $key==0 ? 'true' : '' }} required />
-                      <div class="form-check-label custom-option-content d-flex align-items-center">
-                        <i class="ti ti-{{ $key==0 ? 'user' : 'businessplan' }} me-2"></i>
-                        <span class="custom-option-title">{{ __('admin.'. $role) }}</span>
+                    @foreach($accountRoles as $key => $role)
+                    <div class="col-6 mb-4">
+                      <label for="{{$role}}Role" style="display: grid; place-items: center;" class="form-check custom-option custom-option-icon cursor-pointer">
+                        <div class="d-flex align-items-center">
+                          <input name="role" class="form-check-input role-input" type="radio" value="{{$key == 0 ? '8' : '8'}}" id="{{$role}}Role" checked={{ $key==0 ? 'true' : '' }} required />
+                          <div class="form-check-label custom-option-content d-flex align-items-center">
+                            <i class="ti ti-{{ $key==0 ? 'user' : 'businessplan' }} me-2"></i>
+                            <span class="custom-option-title">{{ __('admin.'. $role) }}</span>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                    @endforeach
+                    <!--/ Switch Role -->
+
+                    <div>
+                      @if (session('error'))
+                        <div class="row">
+                          <div class="col-md-12">
+                            <div class="alert alert-danger">
+                              <ul>
+                                <li>{{ session('error') }} </li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      @endif
+
+                      <div class="col-12 mb-6">
+                        <label class="form-label fs-6 fw-bold d-block text-{{ $l == 'ar' ? 'end' : 'start' }}">
+                          {{ $l == 'en' ? 'Profile photo' : 'الصورة الشخصية' }}
+                        </label>
+                        <div id="uploader" class="uploader" tabindex="0">
+                          <div class="d-flex gap-5 align-items-center justify-content-center">
+                            <img id="avatarPreview" class="avatar-preview" src="/images/user-avatar.png" alt="avatar preview">
+                            <div class="text-{{ $l == 'ar' ? 'end' : 'start' }}">
+                              <strong id="uploaderTitle">
+                                {{ $l == 'en' ? 'Drag & drop or click to upload' : 'اسحب وأفلت أو انقر للتحميل' }}
+                              </strong>
+                              <div class="small text-muted">
+                                {{ $l == 'en' ? 'PNG, JPG, JPEG up to 10 MB' : 'PNG، JPG، JPEG بحد أقصى 10 MB' }}
+                              </div>
+                              <div class="mt-2 text-start">
+                                <button type="button" id="chooseBtn" class="btn btn-sm btn-label-primary">
+                                  {{ $l == 'en' ? 'Upload' : 'تحميل' }}
+                                  <i class="ti ti-upload ti-xs ms-1"></i>
+                                </button>
+                                <button type="button" id="removeBtn" class="btn btn-sm btn-label-secondary d-none">
+                                  {{ $l == 'en' ? 'Reset' : 'حذف' }}
+                                  <i class="ti ti-reload ti-xs ms-1"></i>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <input id="fileInput" class="file-input" type="file" accept="image/png, image/jpeg" name="img_url">
+
+                        <div class="mt-3">
+                          <div class="progress" style="height:6px; display:none;">
+                            <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                          </div>
+                          @error('img_url')
+                            <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                          @enderror
+                        </div>
+                      </div>
+
+                      {{-- <div class="col-12 mb-6">
+                          <label for="file1" class="d-flex justify-content-center align-items-center position-relative rounded"
+                            style="height: 140px; cursor: pointer; width: 200px; margin: 0 auto;">
+                            <img 
+                              src="{{'/images/user-placeholder.jpeg' }}"
+                              onerror="this.src='/images/user-placeholder.jpeg'"
+                              alt="Organization Logo" 
+                              class="rounded img-fluid border shadow-sm"
+                              style="height: 140px; width: 200px; object-fit: cover;" 
+                            />
+                            <input type="file" class="form-control d-none" id="file1" name="img_url">
+                            <i class="ti ti-camera-plus position-absolute fs-3 text-dark end-0 bottom-0 m-4 z-1"></i>
+                          </label>
+                      </div> --}}
+
+                      <div class="col-12 mb-3">
+                        <label for="first_name_en" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('auth.firstName') }}</label>
+                        <div class="input-group input-group-merge">
+                          <input name="first_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="first_name_en" placeholder="{{ __('auth.First English Name') }}" required autofocus />
+                          @error('first_name')
+                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                        @enderror
+                        </div>
+                      </div>
+
+                      <div class="col-12 mb-3">
+                        <label for="last_name_en" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __("auth.secondName") }}</label>
+                        <div class="input-group input-group-merge">
+                          <input name="last_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="last_name_en" placeholder="{{ __('auth.Last English Name') }}" required />
+                        </div>
+                        @error('last_name')
+                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                        @enderror
+                      </div>
+
+                      <div class="col-12 mb-3">
+                        <label for="email" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('auth.E-Mail') }}</label>
+                        <div class="input-group input-group-merge">
+                          <input name="email" type="email" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" placeholder="{{ __('auth.E-Mail') }}" required />
+                        </div>
+                        @error('email')
+                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                        @enderror
+                      </div>
+
+                      <div class="col-12 mb-4 form-password-toggle">
+                        <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="password">{{ __('auth.Password') }}</label>
+                        <div class="input-group input-group-merge">
+                          <input type="password" class="form-control" id="password" placeholder="{{ __('auth.Password') }}" name="password" required aria-describedby="password" />
+                          <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
+                        </div>
+                        @error('password')
+                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                        @enderror
+                      </div>
+
+                      <div class="col-12 mb-4 form-password-toggle">
+                        <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="password_confirmation">{{ __('auth.Confirm') }}</label>
+                        <div class="input-group input-group-merge">
+                          <input type="password" class="form-control" id="password_confirmation" placeholder="{{ __('auth.Password') }}" name="password_confirmation" required aria-describedby="new-password" />
+                          <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
+                        </div>
+                        @error('password_confirmation')
+                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                        @enderror
+                      </div>
+
+                      <div class="col-12 mb-4">
+                        <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="gender">{{ __('auth.gender') }}</label>
+                        <select class="form-select select2 text-{{ $l == 'ar' ? 'end' : 'start' }}" name="gender" id="gender" required>
+                          <option value="Male">{{ __('Male') }}</option>
+                          <option value="Female">{{ __('Female') }}</option>
+                        </select>
+
+                        @error('gender')
+                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                        @enderror
+                      </div>
+
+                      <div class="col-12 mb-4 d-grid">
+                        <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="phone">{{ __('auth.Phone') }}</label>
+                        <input id="phone" type="tel" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" placeholder="{{ __('auth.Phone') }}" name="phone" required />
+                        <small class="text-danger mt-1" id="phone-error" style="display: none;"></small>
+                        <input type="hidden" name="country_code" id="phone_code" value="20">
+                        @error('phone')
+                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                        @enderror
+                        @error('country_code')
+                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                        @enderror
+                      </div>
+                      <div id="mentorInputsWrapper" style="display: none;">
+                        <div class="col-12 mb-3">
+                          <label for="Title" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('admin.JobTitleEn') }}</label>
+                          <div class="input-group input-group-merge">
+                            <input name="title_en" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="Title" placeholder="{{ __('admin.JobTitleEn') }}" autocomplete="title_en" oninput="this.value = this.value.trimStart()" />
+                          </div>
+                          @error('title_en')
+                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                          @enderror
+                        </div>
+
+                      <div class="col-12 mb-3">
+                        <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="expertise">{{ __('admin.Industry Expertise') }}</label>
+                        <div class="form-group">
+                          <select name="expertise[]" class="select2 form-select text-{{ $l == 'ar' ? 'end' : 'start' }}" multiple="multiple" id="expertise" data-placeholder="{{__('admin.Select Expertise')}}" required>
+                            @php
+                            $expertises = App\Expertise::where('parent_id', null)->get();
+                            @endphp
+                            @foreach ($expertises as $expertise_group)
+                            <optgroup label="{{ $expertise_group->title }}">
+                              @foreach ($expertise_group->children as $expertise)
+                              <option value="{{ $expertise->id }}"> {{ $expertise->title }} </option>
+                              @endforeach
+                            </optgroup>
+                            @endforeach
+                          </select>
+                        </div>
+                        @error('expertise')
+                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                        @enderror
+                      </div>
+
+                      <div class="col-12 mb-3">
+                        <label for="bio_en" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('admin.userbio') }}</label>
+                        <div class="input-group">
+                          <textarea name="bio_en" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="bio_en" placeholder="{{ __('admin.userbio') }}" autocomplete="userbio" oninput="this.value = this.value.trimStart()"></textarea>
+                        </div>
+                        @error('bio_en')
+                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                        @enderror
+                      </div>
+
+                      <div class="col-12 mb-3">
+                        <label for="Linkedin" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('admin.Linkedin') }}</label>
+                        <div class="input-group">
+                          <input value="{{ old('Linkedin') }}" name="Linkedin" type="url" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="Linkedin" placeholder="{{ __('admin.Linkedin') }}" autocomplete="Linkedin" />
+                        </div>
+                        @error('Linkedin')
+                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                        @enderror
                       </div>
                     </div>
-                  </label>
-                </div>
-                @endforeach
-                <!--/ Switch Role -->
 
-            <div>
-              @if (session('error'))
-                <div class="row">
-                  <div class="col-md-12">
-                    <div class="alert alert-danger">
-                      <ul>
-                        <li>{{ session('error') }} </li>
-                      </ul>
+                      <div class="mb-6 mt-2">
+                        @if(!empty($termsUrl) && !empty($privacyUrl))
+                            <p class="ms-2">
+                                {!! __('admin.signup_agreement', [
+                                    'terms' => '<a href="'. $termsUrl .'" target="_blank">'. __('admin.terms') .'</a>',
+                                    'privacy' => '<a href="'. $privacyUrl .'" target="_blank">'. __('admin.privacy') .'</a>'
+                                ]) !!}
+                            </p>
+                        @elseif(!empty($termsUrl))
+                            <p class="ms-2">
+                                {!! __('admin.signup_agreement_terms', [
+                                    'terms' => '<a href="'. $termsUrl .'" target="_blank">'. __('admin.terms') .'</a>'
+                                ]) !!}
+                            </p>
+                        @elseif(!empty($privacyUrl))
+                            <p class="ms-2">
+                                {!! __('admin.signup_agreement_privacy', [
+                                    'privacy' => '<a href="'. $privacyUrl .'" target="_blank">'. __('admin.privacy') .'</a>'
+                                ]) !!}
+                            </p>
+                        @endif
+                    </div>
+                  
+                    <div class="col-12">
+                      <button type="submit" class="btn btn-primary w-100 mb-4"> {{ __('auth.Register') }}</button>
                     </div>
                   </div>
+                </form>
+              @else
+                <div class="alert alert-warning text-center col-12">
+                  <span class="">{{ __('admin.Register_Disabled') }}</span>
                 </div>
               @endif
-                
-                <div class="col-12 mb-6">
-                  <label for="file1" class="d-flex justify-content-center align-items-center position-relative rounded"
-                    style="height: 140px; cursor: pointer; width: 200px; margin: 0 auto;">
-                    <img 
-                      src="{{'/images/user-placeholder.jpeg' }}"
-                      onerror="this.src='/images/user-placeholder.jpeg'"
-                      alt="Organization Logo" 
-                      class="rounded img-fluid border shadow-sm"
-                      style="height: 140px; width: 200px; object-fit: cover;" 
-                    />
-                    <input type="file" class="form-control d-none" id="file1" name="img_url">
-                    <i class="ti ti-camera-plus position-absolute fs-3 text-dark end-0 bottom-0 m-4 z-1"></i>
-                  </label>
-                  @error('img_url')
-                    <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
-                  @enderror
-                </div>
 
-
-                <div class="col-12 mb-3">
-                  <label for="first_name_en" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('auth.firstName') }}</label>
-                  <div class="input-group input-group-merge">
-                    <input name="first_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="first_name_en" placeholder="{{ __('auth.First English Name') }}" required autofocus />
-                    @error('first_name')
-                    <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
-                  @enderror
-                  </div>
-                </div>
-
-                <div class="col-12 mb-3">
-                  <label for="last_name_en" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __("auth.secondName") }}</label>
-                  <div class="input-group input-group-merge">
-                    <input name="last_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="last_name_en" placeholder="{{ __('auth.Last English Name') }}" required />
-                  </div>
-                  @error('last_name')
-                    <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
-                  @enderror
-                </div>
-
-                <div class="col-12 mb-3">
-                  <label for="email" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('auth.E-Mail') }}</label>
-                  <div class="input-group input-group-merge">
-                    <input name="email" type="email" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" placeholder="{{ __('auth.E-Mail') }}" required />
-                  </div>
-                  @error('email')
-                    <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
-                  @enderror
-                </div>
-
-                <div class="col-12 mb-4 form-password-toggle">
-                  <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="password">{{ __('auth.Password') }}</label>
-                  <div class="input-group input-group-merge">
-                    <input type="password" class="form-control" id="password" placeholder="{{ __('auth.Password') }}" name="password" required aria-describedby="password" />
-                    <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
-                  </div>
-                  @error('password')
-                    <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
-                  @enderror
-                </div>
-
-                <div class="col-12 mb-4 form-password-toggle">
-                  <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="password_confirmation">{{ __('auth.Confirm') }}</label>
-                  <div class="input-group input-group-merge">
-                    <input type="password" class="form-control" id="password_confirmation" placeholder="{{ __('auth.Password') }}" name="password_confirmation" required aria-describedby="new-password" />
-                    <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
-                  </div>
-                  @error('password_confirmation')
-                    <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
-                  @enderror
-                </div>
-
-                <div class="col-12 mb-4">
-                  <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="gender">{{ __('auth.gender') }}</label>
-                  <select class="form-select select2 text-{{ $l == 'ar' ? 'end' : 'start' }}" name="gender" id="gender" required>
-                    <option value="Male">{{ __('Male') }}</option>
-                    <option value="Female">{{ __('Female') }}</option>
-                  </select>
-
-                  @error('gender')
-                    <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
-                  @enderror
-                </div>
-
-                <div class="col-12 mb-4 d-grid">
-                  <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="phone">{{ __('auth.Phone') }}</label>
-                  <input id="phone" type="tel" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" placeholder="{{ __('auth.Phone') }}" name="phone" required />
-                  <small class="text-danger mt-1" id="phone-error" style="display: none;"></small>
-                  <input type="hidden" name="country_code" id="phone_code" value="20">
-                  @error('phone')
-                    <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
-                  @enderror
-                  @error('country_code')
-                    <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
-                  @enderror
-                </div>
-                <div id="mentorInputsWrapper" style="display: none;">
-                  <div class="col-12 mb-3">
-                    <label for="Title" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('admin.JobTitleEn') }}</label>
-                    <div class="input-group input-group-merge">
-                      <input name="title_en" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="Title" placeholder="{{ __('admin.JobTitleEn') }}" autocomplete="title_en" oninput="this.value = this.value.trimStart()" />
-                    </div>
-                    @error('title_en')
-                    <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
-                    @enderror
-                  </div>
-
-                  <div class="col-12 mb-3">
-                    <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="expertise">{{ __('admin.Industry Expertise') }}</label>
-                    <div class="form-group">
-                      <select name="expertise[]" class="select2 form-select text-{{ $l == 'ar' ? 'end' : 'start' }}" multiple="multiple" id="expertise" data-placeholder="{{__('admin.Select Expertise')}}" required>
-                        @php
-                        $expertises = App\Expertise::where('parent_id', null)->get();
-                        @endphp
-                        @foreach ($expertises as $expertise_group)
-                        <optgroup label="{{ $expertise_group->title }}">
-                          @foreach ($expertise_group->children as $expertise)
-                          <option value="{{ $expertise->id }}"> {{ $expertise->title }} </option>
-                          @endforeach
-                        </optgroup>
-                        @endforeach
-                      </select>
-                    </div>
-                    @error('expertise')
-                      <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
-                    @enderror
-                  </div>
-
-                  <div class="col-12 mb-3">
-                    <label for="bio_en" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('admin.userbio') }}</label>
-                    <div class="input-group">
-                      <textarea name="bio_en" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="bio_en" placeholder="{{ __('admin.userbio') }}" autocomplete="userbio" oninput="this.value = this.value.trimStart()"></textarea>
-                    </div>
-                    @error('bio_en')
-                      <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
-                    @enderror
-                  </div>
-
-                  <div class="col-12 mb-3">
-                    <label for="Linkedin" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('admin.Linkedin') }}</label>
-                    <div class="input-group">
-                      <input value="{{ old('Linkedin') }}" name="Linkedin" type="url" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="Linkedin" placeholder="{{ __('admin.Linkedin') }}" autocomplete="Linkedin" />
-                    </div>
-                    @error('Linkedin')
-                      <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
-                    @enderror
-                  </div>
-                </div>
-
-                <div class="mb-6 mt-2">
-                  @if(!empty($termsUrl) && !empty($privacyUrl))
-                      <p class="ms-2">
-                          {!! __('admin.signup_agreement', [
-                              'terms' => '<a href="'. $termsUrl .'" target="_blank">'. __('admin.terms') .'</a>',
-                              'privacy' => '<a href="'. $privacyUrl .'" target="_blank">'. __('admin.privacy') .'</a>'
-                          ]) !!}
-                      </p>
-                  @elseif(!empty($termsUrl))
-                      <p class="ms-2">
-                          {!! __('admin.signup_agreement_terms', [
-                              'terms' => '<a href="'. $termsUrl .'" target="_blank">'. __('admin.terms') .'</a>'
-                          ]) !!}
-                      </p>
-                  @elseif(!empty($privacyUrl))
-                      <p class="ms-2">
-                          {!! __('admin.signup_agreement_privacy', [
-                              'privacy' => '<a href="'. $privacyUrl .'" target="_blank">'. __('admin.privacy') .'</a>'
-                          ]) !!}
-                      </p>
-                  @endif
-              </div>
-              
-                <div class="col-12">
-                  <button type="submit" class="btn btn-primary w-100 mb-4"> {{ __('auth.Register') }}</button>
-                </div>
-              </div>
-            </form>
             <p class="text-center">
               <span>{{ __('Already have account') }}{{ $l == 'ar' ? '؟' : '?' }}</span>
               <a href="{{ route('login') }}">
@@ -433,12 +510,12 @@
             </div>
           </div>
         </div>
+        <!--/ Register Card -->
       </div>
-      <!--/ Register Card -->
     </div>
   </div>
   <!-- / Content -->
-  @endif
+
 
   <!-- Core JS -->
   <!-- build:js assets/vendor/js/core.js -->
@@ -545,26 +622,115 @@ document.querySelectorAll('.role-input').forEach(input => {
 </script>
 
 <script>
-	const fileInput = document.getElementById('file1');
-	const previewImage = document.querySelector('label[for="file1"] img');
+  // Elements
+  const uploader = document.getElementById('uploader');
+  const fileInput = document.getElementById('fileInput');
+  const chooseBtn = document.getElementById('chooseBtn');
+  const removeBtn = document.getElementById('removeBtn');
+  const avatarPreview = document.getElementById('avatarPreview');
+  const progressBarWrap = document.querySelector('.progress');
+  const progressBar = document.getElementById('progressBar');
+  // const fileError = document.getElementById('fileError');
 
-	fileInput.addEventListener('change', (event) => {
-		const file = event.target.files[0];
-		if (file) {
-			const reader = new FileReader();
-			reader.onload = (event) => {
-				previewImage.src = event.target.result;
-			};
-			reader.onerror = () => {
-				alert('Error loading file');
-			};
-			reader.readAsDataURL(file);
-		}
-	});
+  // const MAX_SIZE = 3 * 1024 * 1024; // 3MB
+  // const ALLOWED_TYPES = ['image/png', 'image/jpeg'];
 
-	document.getElementById('company-logo').addEventListener('click', () => {
-		document.getElementById('file1').click();
-	});
+  // Helpers
+  function resetUploader() {
+    avatarPreview.src = '/images/user-avatar.png';
+    removeBtn.classList.add('d-none');
+    progressBar.style.width = '0%';
+    progressBarWrap.style.display = 'none';
+    // fileError.style.display = 'none';
+  }
+
+  // function showError(msg) {
+  //   fileError.textContent = msg;
+  //   fileError.style.display = 'block';
+  // }
+
+  function handleFile(file) {
+    // Validate
+    // if (!ALLOWED_TYPES.includes(file.type)) {
+    //   showError('Unsupported file type — use PNG or JPG.');
+    //   return;
+    // }
+    // if (file.size > MAX_SIZE) {
+    //   showError('File too large — must be under 3 MB.');
+    //   return;
+    // }
+
+    // Read with progress
+    const reader = new FileReader();
+    progressBarWrap.style.display = 'block';
+    progressBar.style.width = '0%';
+    // fileError.style.display = 'none';
+
+    reader.onprogress = (e) => {
+      if (e.lengthComputable) {
+        const percent = Math.round((e.loaded / e.total) * 100);
+        progressBar.style.width = percent + '%';
+      }
+    };
+
+    reader.onload = () => {
+      // preview + save base64 hidden field
+      avatarPreview.src = reader.result;
+      removeBtn.classList.remove('d-none');
+      progressBar.style.width = '100%';
+      setTimeout(() => { progressBarWrap.style.display = 'none'; }, 600);
+    };
+
+    reader.onerror = () => {
+      // showError('Error reading file. Try another image.');
+      progressBarWrap.style.display = 'none';
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  // Click handlers
+  uploader.addEventListener('click', () => fileInput.click());
+  chooseBtn.addEventListener('click', (e) => { e.stopPropagation(); fileInput.click(); });
+
+  removeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    fileInput.value = '';
+    resetUploader();
+  });
+
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files && e.target.files[0]) handleFile(e.target.files[0]);
+  });
+
+  // Drag & drop
+  ['dragenter','dragover'].forEach(evt => {
+    uploader.addEventListener(evt, (e) => {
+      e.preventDefault(); e.stopPropagation();
+      uploader.classList.add('dragover');
+    });
+  });
+  ['dragleave','drop'].forEach(evt => {
+    uploader.addEventListener(evt, (e) => {
+      e.preventDefault(); e.stopPropagation();
+      uploader.classList.remove('dragover');
+    });
+  });
+
+  uploader.addEventListener('drop', (e) => {
+    const dt = e.dataTransfer;
+    if (!dt) return;
+    const file = dt.files && dt.files[0];
+    if (file) handleFile(file);
+  });
+
+  // Keyboard accessibility: allow Enter to open file dialog
+  uploader.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+  });
+
+  // init
+  resetUploader();
 </script>
 </body>
 </html>

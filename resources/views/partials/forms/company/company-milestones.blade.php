@@ -153,14 +153,14 @@ document.addEventListener('DOMContentLoaded', function () {
     descriptionMaxLength: "{{ __('startup.milestone_description_max_length') }}",
     completionRequired: "{{ __('startup.completion_percentage_required') }}",
     completionRange: "{{ __('startup.completion_percentage_range') }}",
-    fileType: "{{ __('startup.document_invalid_type') }}",
+    fileType: "{{ __('startup.milestone_document_invalid_type') }}",
     fileSize: "{{ __('startup.document_too_large') }}",
     saving: "{{ __('startup.saving') }}",
     success: "{{ __('startup.milestone_submit_success') }}",
     deleteSuccess: "{{ __('startup.milestone_delete_success') }}",
     deleteConfirm: "{{ __('startup.milestone_delete_confirm') }}",
-    documentDeleteConfirm: "{{ __('startup.milestone_document_delete_confirm') }}",
-    error: "{{ __('startup.milestone_unknown_error') }}",
+    documentDeleteConfirm: "{{ __('startup.document_delete_confirm') }}",
+    error: "{{ __('startup.unexpected_error') }}",
     deleteError: "{{ __('startup.milestone_delete_failed') }}"
   };
 

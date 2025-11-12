@@ -18,7 +18,7 @@ class Company extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'id', 'company_id');
     }
 
     public function resolveUser()
@@ -175,6 +175,7 @@ class Company extends Model
     {
         return $this->hasMany(User::class);
     }
+
     public function country()
     {
         return $this->belongsTo(Country::class);

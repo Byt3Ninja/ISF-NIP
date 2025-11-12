@@ -249,10 +249,13 @@
           </select>
         </div>
         
-        @if(Auth::user()->hasAnyRole(['Registered']))
+        {{--  @if(Auth::user()->hasAnyRole(['Registered']))
         <!-- Technologies Used -->
         @php
           $technologies = $client->company ? explode(',', $client->company->technologies_used) : [];
+          $technologies = collect($technologies)->filter(function($tech) {
+            return trim($tech);
+          })->values()->toArray();
         @endphp
         <div class="mb-4 col-12">
           <label for="technologies_used" class="form-label fs-6 fw-bold">{{ __('Technologies Used') }} <span class="text-danger">*</span></label>
@@ -263,7 +266,7 @@
           </select>
           <small class="form-text text-muted">{{ __('Enter technologies separated by commas') }}</small>
         </div>
-        @endif
+        @endif  --}}
         
         <div class="mb-4 col-md-6">
           <label for="timeZones" class="form-label fs-6 fw-bold">{{ __('admin.Timezone') }}</label>

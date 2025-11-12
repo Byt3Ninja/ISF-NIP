@@ -52,7 +52,7 @@ return [
 	'formSubHeading' => 'Make your app management easy and fun!',
 	'firstName' => 'First Name',
 	'secondName' => 'Last Name',
-	'gender'=> 'gender',
+	'gender'=> 'Gender',
 	'googleSignIn' => 'Sign in with Google',
 	'linkdinSignIn' => 'Sign in with Linkedin'
 

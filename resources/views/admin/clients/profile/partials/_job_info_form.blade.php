@@ -95,6 +95,29 @@
           </div>
         </div>
       </div>
+      
+      <div class="row">
+        <div class="col-12">
+          <div class="form-group mb-6 d-grid">
+            <label for="SelectIndustries" class="form-label fs-6 fw-bold">
+              {{ __('admin.SelectIndustries') }}
+            </label>
+            <small class="mb-3">{{ __('admin.SelectMultiIndustries') }}.</small>
+            <select 
+              name="industries[]" 
+              class="form-select select2" 
+              multiple="multiple" 
+              id="SelectIndustries"
+            >
+              @foreach ($industries as $industry)
+                <option  value="{{ $industry->id }}" @if (!empty($client->bio->industries) && in_array($industry->id, $client->bio->industries)) selected @endif > {{ $industry->{'name_'. $l} }} </option>
+              @endforeach
+            </select>
+          </div>
+        </div>
+      </div>
+
+
       <div class="form-group mb-6">
         <label for="entrepreneurial_experience" class="form-label fs-6 fw-bold">
             {{ __('admin.Entrepreneurial Experience') }}

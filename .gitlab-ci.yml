@@ -16,7 +16,7 @@ beta:
     - ssh-keyscan -p22 185.250.36.20 >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
-    - ssh -p22 root@185.250.36.20 'cd /var/www/beta && git pull && php artisan migrate --force'
+    - ssh -p22 root@185.250.36.20 'cd /var/www/beta && git pull && php artisan migrate --force && php artisan db:seed --class=defaultRolesPermissionSeeder'
   only:
     - beta
 
@@ -34,27 +34,25 @@ testing:
     - ssh-keyscan -p22 185.250.36.20 >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
-    - ssh -p22 root@185.250.36.20 'cd /var/www/test && git pull && php artisan migrate --force'
+    - ssh -p22 root@185.250.36.20 'cd /var/www/test && git pull && php artisan migrate --force && php artisan db:seed --class=defaultRolesPermissionSeeder'
   only:
     - testing
 
 
 
 dev:
-    stage: dev
-    image: ubuntu:latest
-    allow_failure: true
-    before_script:
-      - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-      - eval $(ssh-agent -s)
-      - ssh-add <(echo "$dev_ssh_key")
-      - mkdir -p ~/.ssh
-      - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
-      - chmod 700 ~/.ssh
-      - ssh-keyscan -p22 54.144.48.46 >> ~/.ssh/known_hosts
-      - chmod 644 ~/.ssh/known_hosts
-    script:
-      - ssh -p22 -o StrictHostKeyChecking=no root@54.144.48.46 "cd /home/app/incubator && git pull && docker exec incubator-app php artisan migrate --force"
-
-    only:
-      - beta
+  stage: dev
+  image: ubuntu:latest
+  before_script:
+    - apt-get update -y && apt-get install -y openssh-client
+    - eval $(ssh-agent -s)
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+    - ssh-add <(echo "$TESTING_SSH_KEY")
+    - ssh-keyscan -p22 185.250.36.20 >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+  script:
+    - ssh -p22 root@185.250.36.20 'cd /var/www/dev && git pull && php artisan migrate --force && php artisan db:seed --class=defaultRolesPermissionSeeder'
+  only:
+    - dev

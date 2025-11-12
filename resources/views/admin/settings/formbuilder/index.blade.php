@@ -30,9 +30,7 @@
 
     $mode = !request()->segment(3) ? 'ADD' : 'EDIT';
 
-    $orgIdParam = request()->get('org_id');
-//   dd($data['builder_data']);
-    //   $builder_data = $data['builder_data'];
+    $orgIdParam = request()->get('org_id') || (isset($title->organization_id) ? $title->organization_id : null);
 @endphp
 
 @section('content')
@@ -496,22 +494,22 @@
                     optionsContainer.innerHTML = `
                         <div>
                             <div class="d-flex align-items-center gap-3 mb-3">
-                                <select class="scale-from form-select">
+                                <select class="scale-from form-select" disabled>
                                     <option value="0">0</option>
                                     <option value="1" selected>1</option>
                                 </select>
                                 <span class="text-muted small">{{ __('builder.to') }}</span>
-                                <select class="scale-to form-select">
+                                <select class="scale-to form-select" disabled>
                                     <option value="5" selected>5</option>
                                     <option value="10">10</option>
                                 </select>
                             </div>
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <input type="text" class="scale-label-low form-control" placeholder="{{ __('builder.Label_low') }}" value="{{ __('builder.Low') }}">
+                                    <input type="text" class="scale-label-low form-control" placeholder="{{ __('builder.Label_low') }}" value="{{ __('builder.Low') }}" disabled>
                                 </div>
                                 <div class="col-md-6">
-                                    <input type="text" class="scale-label-high form-control" placeholder="{{ __('builder.Label_high') }}" value="{{ __('builder.High') }}">
+                                    <input type="text" class="scale-label-high form-control" placeholder="{{ __('builder.Label_high') }}" value="{{ __('builder.High') }}" disabled>
                                 </div>
                             </div>
                         </div>
@@ -1025,16 +1023,16 @@
                     return;
                 }
 
-                // setTimeout(() => {    
-                //     if (data.id) {
-                //         if (currentMode === 'EDIT') {
-                //             window.location.href = `/dashboard/show-form/${data.id}`;
-                //             return;
-                //         }
-                //         window.location.href = redirectUrl;
-                //     }
+                setTimeout(() => {    
+                    if (data.id) {
+                        if (currentMode === 'EDIT') {
+                            window.location.href = `/dashboard/show-form/${data.id}`;
+                            return;
+                        }
+                        window.location.href = redirectUrl;
+                    }
 
-                // }, 2000);
+                }, 2000);
 
             })
             .catch(error => {
@@ -1096,8 +1094,8 @@
             }
 
             if (builderData && Array.isArray(builderData)) {
-                builderData.forEach(field => {
-                    populateField(field);
+                builderData.forEach(item => {
+                    populateSection(item);
                 });
             }
         }
@@ -1269,60 +1267,84 @@
         }
 
         function populateQuestionData(questionCard, questionData) {
+            // Map new data structure to old one
+            const mappedData = {
+                title: questionData.label,
+                question_type: questionData.type,
+                required: questionData.is_required,
+                options: questionData.options,
+                logic: questionData.logic,
+                scale: questionData.scale // Assuming scale might exist
+            };
+
             // Set title
             const titleInput = questionCard.querySelector('.question-title');
-            if (titleInput) titleInput.value = questionData.title || '';
+            if (titleInput) titleInput.value = mappedData.title || '';
 
             // Set type
             const typeSelect = questionCard.querySelector('.question-type');
             if (typeSelect) {
-                typeSelect.value = questionData.question_type || 'short_answer';
-                updateQuestionOptions(typeSelect);
+                typeSelect.value = mappedData.question_type || 'short_answer';
+                updateQuestionOptions(typeSelect); // This will create default options
             }
 
             // Set required
             const requiredCheckbox = questionCard.querySelector('.question-required');
-            if (requiredCheckbox) requiredCheckbox.checked = questionData.required || false;
+            if (requiredCheckbox) requiredCheckbox.checked = mappedData.required || false;
 
             // Set options if applicable
-            if (['multiple_choice', 'checkboxes', 'dropdown'].includes(questionData.question_type) && questionData.options) {
-                const optionInputs = questionCard.querySelectorAll('.option-input');
-                questionData.options.forEach((option, idx) => {
-                    let displayValue = option;
-                    if (option === '__OTHER__') {
-                        displayValue = '{{ __("builder.Other_value") }}';
+            if (['multiple_choice', 'checkboxes', 'dropdown'].includes(mappedData.question_type) && mappedData.options) {
+                const optionsList = questionCard.querySelector('.options-list');
+                
+                // Clear the default options created by updateQuestionOptions
+                optionsList.querySelectorAll('.d-flex.align-items-center.gap-2').forEach(opt => opt.remove());
+
+                let hasOther = false;
+                const regularOptions = mappedData.options.filter(opt => {
+                    if (opt === '__OTHER__') {
+                        hasOther = true;
+                        return false;
                     }
-                    if (optionInputs[idx]) {
-                        optionInputs[idx].value = displayValue;
-                    } else {
-                        // Add more options if needed
-                        const addButton = questionCard.querySelector('.options-list .d-flex.gap-2.mt-2 button');
-                        if (addButton && addButton.onclick) {
-                            addButton.click();
-                            const newInputs = questionCard.querySelectorAll('.option-input');
-                            if (newInputs[newInputs.length - 1]) {
-                                newInputs[newInputs.length - 1].value = displayValue;
-                            }
-                        }
-                    }
+                    return true;
                 });
+
+                regularOptions.forEach((option, idx) => {
+                    const newOptionHTML = createOptionHTML(mappedData.question_type, idx + 1, option);
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = newOptionHTML;
+                    const newOptionElement = tempDiv.firstElementChild;
+                    
+                    const buttonContainer = optionsList.querySelector('.d-flex.gap-2.mt-2') || optionsList.querySelector('button[onclick^="addOption"]');
+                    optionsList.insertBefore(newOptionElement, buttonContainer);
+                });
+
+                if (hasOther) {
+                    const otherButton = optionsList.querySelector('button[onclick^="addOtherOption"]');
+                    if (otherButton) {
+                        addOtherOption(otherButton, mappedData.question_type);
+                    }
+                }
+
+                if (mappedData.question_type === 'dropdown') {
+                    updateDropdownNumbers(optionsList);
+                }
             }
 
             // Set scale if linear_scale
-            if (questionData.question_type === 'linear_scale' && questionData.scale) {
+            if (mappedData.question_type === 'linear_scale' && mappedData.scale) {
                 const scaleFrom = questionCard.querySelector('.scale-from');
                 const scaleTo = questionCard.querySelector('.scale-to');
                 const labelLow = questionCard.querySelector('.scale-label-low');
                 const labelHigh = questionCard.querySelector('.scale-label-high');
-                if (scaleFrom) scaleFrom.value = questionData.scale.from || 1;
-                if (scaleTo) scaleTo.value = questionData.scale.to || 5;
-                if (labelLow) labelLow.value = questionData.scale.label_low || '{{ __("builder.Low") }}';
-                if (labelHigh) labelHigh.value = questionData.scale.label_high || '{{ __("builder.High") }}';
+                if (scaleFrom) scaleFrom.value = mappedData.scale.from || 1;
+                if (scaleTo) scaleTo.value = mappedData.scale.to || 5;
+                if (labelLow) labelLow.value = mappedData.scale.label_low || '{{ __("builder.Low") }}';
+                if (labelHigh) labelHigh.value = mappedData.scale.label_high || '{{ __("builder.High") }}';
             }
 
             // Set logic if applicable
-            if (['multiple_choice', 'dropdown', 'checkboxes'].includes(questionData.question_type)) {
-                addLogicPanel(questionCard, questionData.logic || {});
+            if (['multiple_choice', 'dropdown', 'checkboxes'].includes(mappedData.question_type)) {
+                addLogicPanel(questionCard, mappedData.logic || {});
             }
         }
 

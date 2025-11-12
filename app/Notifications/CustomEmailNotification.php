@@ -9,6 +9,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Password;
 use App\Broadcasting\WhatsAppChannel;
+use App\Services\GlobalNotificationSettingsService;
 
 class CustomEmailNotification extends Notification implements ShouldQueue
 {
@@ -27,21 +28,34 @@ class CustomEmailNotification extends Notification implements ShouldQueue
         ], false));
     }
 
-    public function via(object $notifiable): array
+   public function via(object $notifiable): array
     {
-        if ($notifiable instanceof \Illuminate\Notifications\AnonymousNotifiable) {
-            return ['mail'];
-        }
-        $channels = ['database'];
-        if (!empty($notifiable->accept_whatsapp)) {
+
+ 
+        $channels = [];
+        // Always store in database for audit/history
+    
+
+        // WhatsApp if enabled globally AND user accepts it
+        if (GlobalNotificationSettingsService::isWhatsAppEnabled()==true && $notifiable->accept_whatsapp ==true) {
             $channels[] = WhatsAppChannel::class;
         }
-        if (!empty($notifiable->accept_pusher)) {
+
+        // Pusher (broadcast) if enabled globally AND user accepts it
+        if (GlobalNotificationSettingsService::isPusherEnabled()==true && $notifiable->accept_pusher==true) {
             $channels[] = 'broadcast';
         }
-        if (!empty($notifiable->accept_email) || count($channels) === 1) {
+
+        // Email if enabled globally AND user accepts it OR as default when nothing else is active
+        if (GlobalNotificationSettingsService::isEmailEnabled() ==true && $notifiable->accept_email ==true ) { // only 'database' present
             $channels[] = 'mail';
         }
+
+        if (!empty($channels)) {
+               $channels[] = 'database';
+        }
+
+
         return $channels;
     }
 

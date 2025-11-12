@@ -94,7 +94,7 @@
 						<select id="final-screening-step-filter" class="form-select">
 							<option value="">{{ __('cycles.AllـSteps') }}</option>
 							@foreach ($steps as $step)
-								<option value="{{ $step->id }}">{{ $step->title }}</option>
+								<option value="{{ $step->id }}">{{ $step->title }} [id: #{{ $step->id }}]</option>
 							@endforeach
 						</select>
 					</div>
@@ -182,7 +182,7 @@
               // Calculate average score from judge evaluations
               $totalScore = 0;
               $publishedEvaluations = 0;
-              $averageScore = 0;
+              $averageScore = $company?->score ?? 0;
               
               // Calculate average score for display (published only)
               foreach ($judges as $judge) {
@@ -193,9 +193,9 @@
                 }
               }
               
-              if ($publishedEvaluations > 0) {
-                $averageScore = round($totalScore / $publishedEvaluations, 1);
-              }
+              // if ($publishedEvaluations > 0) {
+              //   $averageScore = round($totalScore / $publishedEvaluations, 1);
+              // }
               
               // Calculate filter score (includes published AND draft with scores)
               $filterTotalScore = 0;
@@ -217,13 +217,14 @@
               
               // Get judge IDs for this company
               $companyJudgeIds = [];
-              foreach ($judges as $judge) {
-                // Check if the judge has evaluated this company
-                $scoped_company = collect($judge->companies)->where('id', $company->id)->first();
-                if ($scoped_company) {
-                  $companyJudgeIds[] = $judge->id;
-                }
-              }
+              // foreach ($judges as $judge) {
+              //   // Check if the judge has evaluated this company
+              //   $scoped_company = collect($judge->companies)->where('id', $company->id)->first();
+              //   if ($scoped_company) {
+              //     $companyJudgeIds[] = $judge->id;
+              //   }
+              // }
+			  $companyJudgeIds = $company->judges->pluck('id')->toArray();
               $scoped_judges = $judges->filter(function($judge) use ($company) {
                 return collect($judge->companies)->where('id', $company->id)->isNotEmpty();
               })->values();
@@ -233,12 +234,12 @@
                   data-company-name="{{ strtolower($company->name ?? '') }}"
                   data-user-name="{{ strtolower($company?->user?->name ?? '') }}"
                   data-category="{{ strtolower($categoryString ?? '') }}"
-                  data-score="{{ $filterScore ?? 0 }}"
+                  data-score="{{ $averageScore ?? 0 }}"
                   data-status="{{ $primaryStatus ?? 'not-evaluated' }}"
                   data-evaluation-statuses="{{ implode(',', array_filter($evaluationStatuses)) }}"
                   data-judge-ids="{{ implode(',', array_filter($companyJudgeIds)) }}"
-                  data-cycle-id="{{ $company->stepdata->cycle->id ?? ($company->cycledata->id ?? '') }}"
-                  data-step-id="{{ $company->stepdata->id ?? $company->step ?? '' }}">
+                  data-cycle-id="{{ $company->company_cycle_id }}"
+                  data-step-id="{{ $company->company_step_id }}">
               <div class="card border rounded-3 h-100">
                 <!-- Company Header -->
                 <div class="card-header bg-transparent border-0 pb-2">
@@ -338,12 +339,12 @@
 													{{ Str::limit($company->cycledata->title, 23) }}
 												</small>
 											@endif
-											@if($company->stepdata)
+											@if($company->stepInfo)
 												<small class="badge bg-label-primary text-primary rounded-pill px-2 py-1 small" 
-															title="{{ __('cycles.Step') }}: {{ $company->stepdata->title }}"
+															title="{{ __('cycles.Step') }}: {{ $company->stepInfo->title }}"
 															data-bs-toggle="tooltip" data-bs-placement="top">
 													<i class="ti ti-step-into ti-16px me-1"></i>
-													{{ Str::limit($company->stepdata->title, 18) }}
+													{{ Str::limit($company->stepInfo->title, 18) }}
 												</small>
 											@endif
 										</div>
@@ -355,11 +356,11 @@
                       <i class="ti ti-users me-2 text-primary"></i>
                       <span>{{ __('cycles.Judges Evaluation') }}</span>
                       <span class="badge bg-label-primary bg-opacity-10 text-primary ms-2 rounded-pill">
-                        {{ $scoped_judges->count() }}
+                        {{ $company->judges->count() }}
                       </span>
                     </h6>
                     <div class="judges-list">
-                      @foreach ($scoped_judges->take(3) as $judge)
+                      @foreach ($company->judges->take(3) as $judge)
                         @php($scoped_company = collect($judge->companies)->where('id', $company->id)->first())
                         @if( $scoped_company ) {{-- Check if judge has evaluated this company --}}
                           <div class="judge-evaluation-item bg-transparent rounded-3 border px-2 py-1 mb-2">
@@ -388,9 +389,9 @@
                           </div>
                         @endif
                       @endforeach
-                      @if( $scoped_judges->count() > 3 )
+                      @if( $company->judges->count() > 3 )
                         <div class="text-center">
-                          <small class="text-muted">+{{ $scoped_judges->count() - 3 }} {{ __('cycles.more judges') }}</small>
+                          <small class="text-muted">+{{ $company->judges->count() - 3 }} {{ __('cycles.more judges') }}</small>
                         </div>
                       @endif
                     </div>
@@ -403,7 +404,7 @@
                     <button
                       class="show-company-evaluation btn btn-primary btn-sm rounded-pill shadow-sm"
                       data-company="{{ $company->id }}"
-                      data-step="{{ $company->stepdata->id ?? $company->step ?? null }}"
+                      data-step="{{ $company->company_step_id }}"
                     >
                       <i class="ti ti-eye me-2"></i>
                       {{ __('cycles.View Complete Evaluation') }}
@@ -638,6 +639,7 @@
 
 		// Apply status filter - based purely on company status
 		if (finalScreeningCurrentFilters.status) {
+			console.log('action triggered here');
 			filteredCards = filteredCards.filter(card => {
 				const $card = $(card);
 				const companyStatus = String($card.data('status') || 'not-evaluated').toLowerCase();
