@@ -130,7 +130,7 @@ $setting = \App\settings::where('id', 1)->first();
                                                 <tr>
                                                     <td class="pad" style="width:100%;">
                                                         <div align="center" class="alignment" style="line-height:10px">
-                                                            <div style="max-width: 640px;"><img alt="I'm an image" height="auto" src="{{ $setting->footer ? asset('images/logo/' . $setting->footer) : asset('images/logo/logo.jpeg') }}" style="display: block; height: auto; border: 0; width: 100%;" title="GrowthLab" width="640"/></div>
+                                                            {{-- <div style="max-width: 640px;"><img alt="I'm an image" height="auto" src="{{ $setting->footer ? asset('images/logo/' . $setting->footer) : asset('images/logo/logo.jpeg') }}" style="display: block; height: auto; border: 0; width: 100%;" title="GrowthLab" width="640"/></div> --}}
                                                         </div>
                                                     </td>
                                                 </tr>
