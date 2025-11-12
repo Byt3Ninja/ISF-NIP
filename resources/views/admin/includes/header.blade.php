@@ -114,7 +114,7 @@
 
     // Companies
     [
-        'label' => $l == 'en' ? 'Companies' : 'الشركات',
+        'label' => $l == 'en' ? 'Startup Hub' : 'الشركات',
         'icon' => 'ti ti-building ti-md me-2 me-lg-4 ti-lg',
         'route' => 'users.view_companies',
         'permission' => 'users.view_companies',
@@ -128,7 +128,7 @@
         'icon' => 'ti ti-users ti-md me-2 me-lg-4 ti-lg',
         'route' => '/dashboard/show/Mentors',
         'permission' => 'mentors.list',
-        'isVisible' => '$_user->hasAnyRole("Mentor|Registered|Admin")',
+        'isVisible' => '$_user->hasAnyRole("Registered|Mentor|organizationManager")',
         'subItems' => []
     ],
 
@@ -705,16 +705,6 @@
         'subItems' => []
     ],
 
-    // Importer Tool (Organization Manager)
-    [
-        'label' => $l == 'en' ? 'Organization Importer' : 'مستورد المنظمة',
-        'icon' => 'ti ti-file-import',
-        'route' => 'importer.index',
-        'permission' => 'importer.index',
-        'isVisible' => '$_user->hasRole("organizationManager")',
-        'subItems' => []
-    ],
-
     // Documentation
     [
         'label' => $l == 'en' ? 'Documentations' : 'التوثيق',
@@ -750,7 +740,7 @@
         'label' => $l == 'en' ? 'Notification Templates' : 'قوالب الإشعارات',
         'icon' => 'ti ti-mail',
         'route' => null,
-        'permission' => ['notification-templates.index', 'notification-triggers.index'],
+        'permission' => null,
         'isVisible' => '$_user->hasAnyRole("Admin|organizationManager")',
         'subItems' => [
             [
@@ -764,14 +754,14 @@
                 'label' => $l == 'en' ? 'Manage Templates' : 'إدارة القوالب',
                 'icon' => 'ti ti-template',
                 'route' => 'notification-templates.index',
-                'permission' => 'notification-templates.index',
+                'permission' => null,
                 'isVisible' => true
             ],
             [
                 'label' => $l == 'en' ? 'Manage Triggers' : 'إدارة المشغلات',
                 'icon' => 'ti ti-bolt',
                 'route' => 'notification-triggers.index',
-                'permission' => 'notification-triggers.index',
+                'permission' => null,
                 'isVisible' => true
             ]
         ]
@@ -782,8 +772,8 @@
         'label' => $l == 'en' ? 'System Settings' : 'إعدادات النظام',
         'icon' => 'ti ti-settings',
         'route' => null,
-        'permission' => ['settings.system_general_view', 'currencies.index', 'queue.jobs'],
-        'isVisible' => '$_user->hasRole("Admin")',
+        'permission' => ['settings.system_general_view', 'currencies.index', 'importer.index', 'queue.jobs'],
+        'isVisible' => '$_user->hasAnyRole("Admin|organizationManager")',
         'subItems' => [
             [
                 'label' => $l == 'en' ? 'General Settings' : 'الإعدادات العامة',

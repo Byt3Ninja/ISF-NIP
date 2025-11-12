@@ -471,37 +471,41 @@
 
 
       <!-- Start Time Sheets -->
-      <li
-        class="{{ Request::is('dashboard/TimeSheet*', 'dashboard/UserTimeSheet*', 'dashboard/Category*', 'dashboard/show/FinanceTimeSheet*') ? 'sidebar-group-active open' : '' }} menu-item">
-        <a class="menu-link menu-toggle">
-          <i class="ti ti-clock-hour-2 me-3 ti-md"></i>
-          <div>{{ __('admin.TimeSheet') }}</div>
-        </a>
-        <ul class="menu-sub">
-          <li class="{{ Request::is('dashboard/TimeSheet*') ? 'active' : '' }} menu-item">
-            <a href="{{ route('TimeSheet.index') }}" class="menu-link">
-              <span class="menu-item">{{ __('admin.TimeSheet') }}</span>
-              <i class="bx bx-message"></i>
-            </a>
-          </li>
-          <li class="{{ Request::is('dashboard/show/FinanceTimeSheet*') ? 'active' : '' }} menu-item">
-            <a href="{{ route('time_sheets.reports.finance.view') }}" class="menu-link">
-              <span class="menu-item">{{ __('admin.Financial Report') }}</span>
-              <i class="bx bx-message"></i>
-            </a>
-          </li>
-
-          <li class="{{ Request::is('dashboard/UserTimeSheet*') ? 'active' : '' }} menu-item">
-            <a href="{{ route('time_sheets.view.mine') }}" class="menu-link">
-              <span class="menu-item">{{ __('admin.UserTimeSheet') }}</span>
-              <i class="bx bx-message"></i>
-            </a>
-          </li>
-
-          
-        </ul>
-      </li>
-
+      @if ($_user->ableToAny(['TimeSheet.index', 'time_sheets.reports.finance.view', 'time_sheets.view.mine'], $permissions))
+        <li
+          class="{{ Request::is('dashboard/TimeSheet*', 'dashboard/UserTimeSheet*', 'dashboard/Category*', 'dashboard/show/FinanceTimeSheet*') ? 'sidebar-group-active open' : '' }} menu-item">
+          <a class="menu-link menu-toggle">
+            <i class="ti ti-clock-hour-2 me-3 ti-md"></i>
+            <div>{{ $l == 'en' ? 'Timesheets' : 'الجداول الزمنية' }}</div>
+          </a>
+          <ul class="menu-sub">
+            @if ($_user->ableToAny(['TimeSheet.index'], $permissions))
+              <li class="{{ Request::is('dashboard/TimeSheet*') ? 'active' : '' }} menu-item">
+                <a href="{{ route('TimeSheet.index') }}" class="menu-link">
+                  <span class="menu-item">{{ $l == 'en' ? 'Timesheets List' : 'قائمة الجداول الزمنية' }}</span>
+                  <i class="bx bx-message"></i>
+                </a>
+              </li>
+            @endif
+            @if ($_user->ableToAny(['time_sheets.reports.finance.view'], $permissions))
+              <li class="{{ Request::is('dashboard/show/FinanceTimeSheet*') ? 'active' : '' }} menu-item">
+                <a href="{{ route('time_sheets.reports.finance.view') }}" class="menu-link">
+                  <span class="menu-item">{{ __('admin.Financial Report') }}</span>
+                  <i class="bx bx-message"></i>
+                </a>
+              </li>
+            @endif
+            @if ($_user->ableToAny(['time_sheets.view.mine'], $permissions))
+              <li class="{{ Request::is('dashboard/UserTimeSheet*') ? 'active' : '' }} menu-item">
+                <a href="{{ route('time_sheets.view.mine') }}" class="menu-link">
+                  <span class="menu-item">{{ $l == 'en' ? 'Users TimeSheets' : 'الجدول الزمني للمستخدمين' }}</span>
+                  <i class="bx bx-message"></i>
+                </a>
+              </li>
+            @endif
+          </ul>
+        </li>
+      @endif
       <!-- End Time Sheets -->
 
       
@@ -808,75 +812,67 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/answerOption*
     @endif
    
     @if ($_user->hasAnyRole('organizationManager|Admin'))
-     
-        <li class="{{ Request::is('*users*', 'dashboard/judger') ? 'sidebar-group-active open' : '' }} menu-item">
-          <a class="menu-link menu-toggle">
-            <i class="menu-icon tf-icons ti ti-users"></i>
-            <div>{{ __('admin.Users') }}</div>
-          </a>
-          <ul class="menu-sub">
-            @if( $_user->ableToAny(['users.index '], $permissions) )
+      <li class="{{ Request::is('*users*', 'dashboard/judger', '*roles', '*activities*', '*audit-logs*') ? 'sidebar-group-active open' : '' }} menu-item">
+        <a class="menu-link menu-toggle">
+          <i class="menu-icon tf-icons ti ti-users"></i>
+          <div>{{ __('admin.Users') }}</div>
+        </a>
+        <ul class="menu-sub">
+          @if( $_user->ableToAny(['users.create'], $permissions) )
             <li class="{{ Request::is('dashboard/users/create') ? 'active' : '' }} menu-item">
               <a class="menu-link" href="{{ route('users.create') }}">
                 <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
                 <span class="menu-item">{{ __('admin.Add New') }}</span>
               </a>
             </li>
+          @endif
+
+          @if( $_user->ableToAny(['users.index'], $permissions) )
             <li class="{{ Request::is('dashboard/users', 'dashboard/users/*/edit') ? 'active' : '' }} menu-item">
               <a class="menu-link" href="{{ route('users.index') }}">
                 <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
                 <span class="menu-item">{{ __('admin.List All') }}</span>
               </a>
             </li>
+          @endif
 
+          @if( $_user->ableToAny(['users.judger'], $permissions) )
             <li class="{{ Request::is('dashboard/judger') ? 'active' : '' }} menu-item">
               <a class="menu-link" href="{{ route('users.judger') }}">
                 <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
                 <span class="menu-item">{{ __('admin.Judgers') }}</span>
               </a>
             </li>
-            
-         
+          @endif
+          
+        
+          @if( $_user->ableTo('roles.index', $permissions) )
             <li class="{{ Request::is('*roles') ? 'active' : '' }} menu-item">
               <a href="{{ route('roles.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-user-cog"></i>
                 <div>{{ __('admin.Roles_and_permissions') }}</div>
               </a>
             </li>
-            @if( $_user->ableTo('permissions.index', $permissions) )
-              {{-- <li class="{{ Request::is('dashboard/permissions*') ? 'active' : '' }} menu-item">
-            <a href="{{ route('permissions.index') }}">
-              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-              <span class="menu-item">{{ __('admin.Permissions') }}</span>
-            </a>
-          </li>
-          <li class="{{ Request::is('dashboard/roles*') ? 'active' : '' }} menu-item">
-            <a href="{{ route('roles.index') }}">
-              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-              <span class="menu-item">{{ __('admin.Roles') }}</span>
-            </a>
-          </li> --}}
-            @endif
-             @endif
-            @if( $_user->ableTo('audit-logs.index', $permissions) )
-              <li class="{{ Request::is('*audit-logs*') ? 'active' : '' }} menu-item">
+          @endif
+          
+          @if( $_user->ableTo('audit-logs.index', $permissions) )
+            <li class="{{ Request::is('*audit-logs*') ? 'active' : '' }} menu-item">
               <a class="menu-link" href="/dashboard/audit-logs">
                 <i class="menu-icon tf-icons ti ti-wood"></i>
-              <div>{{ __('admin.Log viewer') }}</div>
-            </a>
-             </li>
-            @endif
-            @if( $_user->ableTo('activities.index', $permissions) )
+                <div>{{ __('admin.Log viewer') }}</div>
+              </a>
+            </li>
+          @endif
+          @if( $_user->ableTo('activities.index', $permissions) )
             <li class="{{ Request::is('*activities*') ? 'active' : '' }} menu-item">
               <a class="menu-link" href="{{ route('activities.index') }}">
                 <i class="menu-icon tf-icons ti ti-activity"></i>
-                  <div>{{ __('admin.Activities') }}</div>
-               </a>
+                <div>{{ __('admin.Activities') }}</div>
+              </a>
             </li>
-            @endif
-          </ul>
-          
-        </li>
+          @endif
+        </ul>
+      </li>
      
 
       @if ($_user->hasAnyRole('organizationManager|Admin'))
