@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'enrolled_programs' => 'البرامج المسجلة',
+    
     'mentorshipTasks' => [
         'index'=>'مهام جلسات الارشاد',
         'create'=>'اضافة مهمة جديدة',

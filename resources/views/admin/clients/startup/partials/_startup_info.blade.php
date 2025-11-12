@@ -6,8 +6,9 @@
         <div class="col-12">
           <div class="d-flex flex-column flex-md-row align-items-start" style="gap: 1.5rem;">
             <div class="flex-shrink-0">
-              <div class="company-logo me-4 me-md-0">
-                <img src="{{ $company->logo ? asset( $company->logo) : '/images/logo-placeholder.png' }}"
+              <div class="company-logo me-4 me-md-0 shadow-xs border rounded">
+                <img 
+                  src="{{ $company->logo ? asset( $company->logo) : '/images/logo-placeholder.png' }}""
                   onerror="this.src='/images/logo-placeholder.png'" 
                   class="rounded-3" alt="Company Logo" 
                   style="width: 170px; height: 150px; object-fit: cover;" />
@@ -20,20 +21,16 @@
                     <i class="ti ti-building-skyscraper ti-lg me-2 text-primary"></i>
                     <div class="company-name">
                       @if ($company->website)
-                        <h4 class="mb-0 fw-bold">
-                          <a href="{{ strpos($company->website, 'http') === 0 ? $company->website : 'http://' . $company->website }}" 
-                             target="_blank" 
-                             class="text-heading text-decoration-none">
-                            {{ $company->{'name_' . $l} }}
-                          </a>
-                        </h4>
+                      <a href="{{ strpos($company->website, 'http') === 0 ? $company->website : 'http://' . $company->website }}"  target="_blank" class="text-heading text-decoration-none">
+                        <h5 class="mb-0 fw-bold text-heading">{{ $company->{'name_' . $l} }}</h5>
+                      </a>
                       @else
-                        <h4 class="mb-0 fw-bold text-heading">{{ $company->{'name_' . $l} }}</h4>
+                        <h5 class="mb-0 fw-bold text-heading">{{ $company->{'name_' . $l} }}</h5>
                       @endif
                     </div>
                   </div>
                   @if ($company->est_date)
-                  <div class="mb-2">
+                  <div class="mb-2 mb-md-0">
                     <span class="badge bg-label-info rounded-pill">
                       <i class="ti ti-calendar ti-xs me-1"></i>
                       {{ __('admin.Established in') }} {{ \Carbon\Carbon::parse($company->est_date)->format('Y') }}
@@ -64,7 +61,7 @@
                        target="_blank"
                        class="btn btn-icon btn-label-success rounded-pill waves-effect waves-light"
                        data-bs-toggle="tooltip" data-bs-placement="top" title="WhatsApp">
-                      <i class="fa-brands fa-whatsapp"></i>
+                      <i class="fa-brands fa-whatsapp fs-5"></i>
                     </a>
                     @endif
                     @if ($company->twitter)
@@ -107,7 +104,7 @@
                 @if ($company->info_company)
                 <div class="mb-4">
                   <div>
-                    <h6 class="mb-2">{{ __('admin.Description') }}</h6>
+                    <h6 class="mb-0">{{ __('admin.Description') }}</h6>
                     <small class="mb-0 text-secondary">{{ $company->info_company }}</small>
                   </div>
                 </div>
@@ -119,7 +116,7 @@
                   @if(!empty($industry) || (!empty($sectors) && $sectors->count() > 0))
                   <div class="col-12 col-lg-6 mb-3 mb-lg-0">
                     <div>
-                      <h6 class="mb-3">
+                      <h6 class="mb-2">
                         {{ $l == 'en' ? 'Industry' : 'الصناعة' }}
                         @if(!empty($sectors) && $sectors->count() > 0)
                           {{ $l == 'en' ? ' & Sectors' : ' والقطاعات' }}
@@ -127,14 +124,27 @@
                       </h6>
                       <div class="d-flex flex-wrap gap-2">
                         @if(!empty($industry))
-                          <div class="badge bg-label-primary rounded-pill">{{ $industry->name ?? 'N/A' }}</div>
+                          <div class="badge bg-label-primary rounded-pill">{{ $industry->{'name_' . $l} ?? $industry->name_en ?? $industry->name ?? 'N/A' }}</div>
                         @endif
                         @if(!empty($sectors) && $sectors->count() > 0)
-                          @foreach($sectors as $sector)
+                          @php
+                            $maxSectors = 6;
+                            $visibleSectors = $sectors->take($maxSectors);
+                            $remainingSectors = $sectors->skip($maxSectors);
+                          @endphp
+                          @foreach($visibleSectors as $sector)
                             <div class="badge bg-label-secondary rounded-pill">
                               {{ $sector->{'name_' . $l} ?? $sector->name_en ?? $sector->name ?? 'N/A' }}
                             </div>
                           @endforeach
+                          @if($remainingSectors->count() > 0)
+                            <div class="badge bg-label-info rounded-pill" 
+                                 style="cursor: pointer;" 
+                                 data-bs-toggle="modal" 
+                                 data-bs-target="#sectorsModal">
+                              +{{ $remainingSectors->count() }}
+                            </div>
+                          @endif
                         @endif
                       </div>
                     </div>
@@ -144,7 +154,7 @@
                   @if(!empty($technologies) && $technologies->count() > 0)
                   <div class="col-12 col-lg-6 mb-3 mb-lg-0">
                     <div>
-                      <h6 class="mb-3">{{ $l == 'en' ? 'Technologies' : 'التقنيات' }}</h6>
+                      <h6 class="mb-2">{{ $l == 'en' ? 'Technologies' : 'التقنيات' }}</h6>
                       <div class="d-flex flex-wrap gap-2">
                         @foreach($technologies as $technology)
                           <div class="badge bg-label-secondary rounded-pill">
@@ -169,6 +179,54 @@
                   </div>
                 </div>
                 @endif
+                
+                <!-- Attachments -->
+                @if ($_user->hasAnyRole("Registered|Admin|organizationManager"))
+                  @if($company->CreatedTax == '1' && ($company->Commercial_Register || $company->Tax_Card))
+                    <div class="mb-4">
+                      <h6 class="mb-2">{{ $l == 'en' ? 'Attachments' : 'المرفقات' }}</h6>
+                      <div class="d-flex flex-wrap gap-3">
+                        @if($company->Commercial_Register)
+                          @php
+                            $fileUrl = $company->Commercial_Register;
+                            $extension = strtolower(pathinfo($fileUrl, PATHINFO_EXTENSION));
+                          @endphp
+                          <div class="d-flex align-items-center gap-2">
+                            @if(in_array($extension, ['jpg','jpeg','png']))
+                              <i class="ti ti-photo text-secondary fs-5"></i>
+                            @elseif($extension === 'pdf')
+                              <i class="ti ti-file-type-pdf text-danger fs-5"></i>
+                            @else
+                              <i class="ti ti-file text-secondary fs-5"></i>
+                            @endif
+                            <a class="badge bg-label-secondary" href="{{ $fileUrl }}" target="_blank">
+                              {{ $l == 'en' ? 'Commercial Register' : 'السجل التجاري' }}
+                            </a>
+                          </div>
+                        @endif
+                        @if($company->Tax_Card)
+                          @php
+                            $fileUrl = $company->Tax_Card;
+                            $extension = strtolower(pathinfo($fileUrl, PATHINFO_EXTENSION));
+                          @endphp
+                          <div class="d-flex align-items-center gap-2">
+                            @if(in_array($extension, ['jpg','jpeg','png']))
+                              <i class="ti ti-photo text-secondary fs-5"></i>
+                            @elseif($extension === 'pdf')
+                              <i class="ti ti-file-type-pdf text-danger fs-5"></i>
+                            @else
+                              <i class="ti ti-file text-secondary fs-5"></i>
+                            @endif
+                            <a class="badge bg-label-secondary" href="{{ $fileUrl }}" target="_blank">
+                              {{ $l == 'en' ? 'Tax Card' : 'البطاقة الضريبية' }}
+                            </a>
+                          </div>
+                        @endif
+                      </div>
+                    </div>
+                  @endif
+                @endif
+
                 <!-- Contact Information -->
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-start">
                   <!-- Location -->
@@ -232,3 +290,35 @@
   </div>
   <!-- / Company Info Card -->
 </section>
+
+<!-- Sectors Modal -->
+@if(!empty($sectors) && $sectors->count() > 6)
+<div class="modal fade" id="sectorsModal" tabindex="-1" aria-labelledby="sectorsModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="sectorsModalLabel">{{ $l == 'en' ? 'Industry & Sectors' : 'الصناعة والقطاعات' }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        @if(!empty($industry))
+        <div class="mb-3">
+          <h6 class="mb-2">{{ $l == 'en' ? 'Industry' : 'الصناعة' }}</h6>
+          <div class="badge bg-label-primary rounded-pill">{{ $industry->{'name_' . $l} ?? $industry->name_en ?? $industry->name ?? 'N/A' }}</div>
+        </div>
+        @endif
+        <div>
+          <h6 class="mb-2">{{ $l == 'en' ? 'Sectors' : 'القطاعات' }}</h6>
+          <div class="d-flex flex-wrap gap-2">
+            @foreach($sectors as $sector)
+              <div class="badge bg-label-secondary rounded-pill">
+                {{ $sector->{'name_' . $l} ?? $sector->name_en ?? $sector->name ?? 'N/A' }}
+              </div>
+            @endforeach
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+@endif

@@ -141,6 +141,16 @@
         'isVisible' => '$_user->hasRole("Mentor")',
         'subItems' => []
     ],
+ 
+    // Enrolled Programs (for Mentors)
+    [
+        'label' => __('mentor.enrolled_programs'),
+        'icon' => 'ti ti-device-desktop-code ti-md me-2 me-lg-4 ti-lg',
+        'route' => '/dashboard/program/show',
+        'permission' => null,
+        'isVisible' => '$_user->hasRole("Mentor")',
+        'subItems' => []
+    ],
 
     // Hackathon
     [
