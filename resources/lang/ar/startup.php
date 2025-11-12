@@ -1,6 +1,10 @@
 <?php
 
 return [
+  'startup_profile_heading' => 'تفاصيل الشركة الناشئة / الفكرة',
+  'registered' => 'مسجلة',
+  'not_registered' => 'ليست مسجلة بعد',
+
   'startup_not_found' => 'لم يتم العثور على الشركة الناشئة',
 
   'saving' => 'جارٍ الحفظ...',

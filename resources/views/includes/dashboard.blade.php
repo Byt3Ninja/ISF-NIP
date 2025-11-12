@@ -886,7 +886,7 @@
 						<div class="row">
 							<div class="col-md-12">
 								<div class="card">
-									<div class="card-header border-bottom mb-4">
+									<div class="card-header mb-4">
 										<div class="d-flex justify-content-between align-items-center">
 											<div class="d-flex align-items-center">
 												<i class="ti ti-calendar-plus ti-24px"></i>
@@ -946,7 +946,7 @@
 													@endforeach
 													@if( $my_schedules->count() == 0 )
 													<tr>
-														<td class="text-center" colspan="5">no data</td>
+														<td class="text-center" colspan="5">{{ __('cycles.No data available in table') }}</td>
 													</tr>
 													@endif
 												</tbody>
@@ -968,7 +968,7 @@
 						<div class="row">
 							<div class="col-md-12">
 								<div class="card">
-									<div class="card-header border-bottom mb-4">
+									<div class="card-header mb-4">
 										<h5 class="card-title align-items-center">
 											<i class="ti ti-calendar-stats ti-24px"></i>
 											<span class="mx-2">{{ __("dashboard.My next mentorship sessions") }}</span>
@@ -1043,7 +1043,7 @@
 													@endforeach
 													@if( $upcoming_sessions->count() == 0 )
 													<tr>
-														<td class="text-center" colspan="6">no data</td>
+														<td class="text-center" colspan="6">{{ __('cycles.No data available in table') }}</td>
 													</tr>
 													@endif
 												</tbody>
