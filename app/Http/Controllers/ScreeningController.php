@@ -303,6 +303,7 @@ class ScreeningController extends Controller
 				$query->where('organization_id', $organization_id);
 			});
 		})->where('stype', 2)->orderBy('from')->get();
+		
 		if ($id == 0) {
 			$id = $steps->pluck('id')->first();
 			$cstep = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
@@ -331,6 +332,7 @@ class ScreeningController extends Controller
 		$svgs = ['notebook', 'search', 'idea', 'comments', 'trophy'];
 
 		$_companies = $companies;
+	
 		return view('admin.settings.screening.results', compact('cstep', 'judges', 'form', 'steps', '_steps', 'id', 'svgs', '_companies', 'evaluation', 'results'));
 	}
 
