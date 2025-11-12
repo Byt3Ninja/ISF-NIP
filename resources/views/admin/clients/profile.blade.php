@@ -48,7 +48,11 @@
                     @php
                       $roles = $client->getRoleNames();
                       $translatedRoles = $roles->map(fn($role) => __('admin.' . strtolower($role)))->implode(', ');
-                      $industery = $client->bio->industry($client->bio->industries)
+                      if(!empty($client->bio->industries)) {
+                        $industery = $client->bio->industry($client->bio->industries);
+                      }else{
+                        $industery = [];
+                      }
                     @endphp
                     
                     <h2 class="fw-medium h5">
