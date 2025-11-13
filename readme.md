@@ -87,7 +87,7 @@ Our platform has evolved significantly through **12 major releases**, delivering
 
 ### Documentation
 
-For detailed information about each release, please refer to our [Complete Release Notes](./enhanced_consolidated_release_notes.md).
+For detailed information about each release, please refer to our [Complete Release Notes](./changelog.md).
 
 ---
 
