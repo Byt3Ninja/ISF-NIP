@@ -286,7 +286,7 @@
                                           <div class="col-12 col-md-6">
                                             <div class="form-group mb-4">
                                               <label for="score_{{ $subCriteria->id }}" class="form-label">{{ __('admin.Score') }}</label>
-                                              <select class="form-select score-select" id="score_{{ $subCriteria->id }}" name="score_{{ $subCriteria->id }}">
+                                              <select class="form-select score-select mb-1" id="score_{{ $subCriteria->id }}" name="score_{{ $subCriteria->id }}">
                                                 <option value="">{{ __('admin.Select score') }}</option>
                                                 <option value="1" {{ $subCriteria?->result?->score == 1 ? 'selected' : '' }}>1</option>
                                                 <option value="2" {{ $subCriteria?->result?->score == 2 ? 'selected' : '' }}>2</option>
@@ -294,6 +294,9 @@
                                                 <option value="4" {{ $subCriteria?->result?->score == 4 ? 'selected' : '' }}>4</option>
                                                 <option value="5" {{ $subCriteria?->result?->score == 5 ? 'selected' : '' }}>5</option>
                                               </select>
+                                              <small class="text-muted">
+                                                {{ $l == 'en' ? "'Score 1 = Lowest, 5 = Highest'" : "'1 = الأدنى، 5 = الأعلى'" }}
+                                              </small>
                                             </div>
                                           </div>
                                           <div class="col-12">

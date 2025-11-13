@@ -134,7 +134,7 @@
                             <div class="label-icon bg-label-primary bg-opacity-10 rounded-circle p-2 me-3 border border-primary">
                               <i class="ti ti-list text-primary"></i>
                             </div>
-                            <span>{{ __('cycles.Select screening from list') }}</span>
+                            <span>{{ __('cycles.Select final screening step') }}</span>
                             <span class="badge bg-info bg-opacity-10 text-info ms-2 px-2 py-1 rounded-pill">
                               {{ count($steps) }} {{ __('cycles.Available') }}
                             </span>

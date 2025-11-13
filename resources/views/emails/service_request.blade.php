@@ -172,11 +172,11 @@ $setting = \App\settings::where('id', 1)->first();
                                         <tr>
                                             <td class="pad" style="padding-left:40px;padding-right:40px;width:100%;">
                                                 <div align="center" class="alignment" style="line-height:10px">
-                                                    <div style="max-width: 560px;"><img alt="I'm an image" height="auto"
+                                                    {{-- <div style="max-width: 560px;"><img alt="I'm an image" height="auto"
                                                                                         src="{{ $setting->header ? asset('images/logo/' . $setting->header) : asset('images/logo/logo.jpeg') }}"
                                                                                         style="display: block; height: auto; border: 0; width: 100%;"
                                                                                         title="I'm an image"
-                                                                                        width="560"/></div>
+                                                                                        width="560"/></div> --}}
                                                 </div>
                                             </td>
                                         </tr>
@@ -332,11 +332,11 @@ $setting = \App\settings::where('id', 1)->first();
                                         <tr>
                                             <td class="pad" style="width:100%;">
                                                 <div align="center" class="alignment" style="line-height:10px">
-                                                    <div style="max-width: 640px;"><img alt="I'm an image" height="auto"
+                                                    {{-- <div style="max-width: 640px;"><img alt="I'm an image" height="auto"
                                                                                         src="{{ $setting->footer ? asset('images/logo/' . $setting->footer) : asset('images/logo/logo.jpeg') }}"
                                                                                         style="display: block; height: auto; border: 0; width: 100%;"
                                                                                         title="I'm an image"
-                                                                                        width="640"/></div>
+                                                                                        width="640"/></div> --}}
                                                 </div>
                                             </td>
                                         </tr>

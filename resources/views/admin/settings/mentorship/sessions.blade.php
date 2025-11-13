@@ -159,6 +159,7 @@
                         <th>{{ __('cycles.Mentor') }}</th>
                         <th>{{ __('cycles.Cycle') }}</th>
                         <th>{{ __('cycles.Rate/Comment') }}</th>
+                        <th class="text-nowrap">{{ __('cycles.Created At') }}</th>
                         <th>{{ __('cycles.Date/Time') }}</th>
                         <th>{{ __('cycles.Approved') }}</th>
                         <th>{{ __('cycles.Done') }}</th>
@@ -210,6 +211,9 @@
                           </td>
                           <td>
                             <small>{!! $session->rate_comment ? str_repeat('<i class="ti tis-star text-warning"></i>', $session->rating) . '<br>' . $session->rate_comment : $session->comment !!}</small>
+                          </td>
+                          <td>
+                            <small>{{ $session->created_at }}</small>
                           </td>
                           <td>
                             <small>{{ $session->zoom_date }} ({{ $session->period }}M)</small>
@@ -864,8 +868,8 @@
       @endif
        },
       buttons: [
-        { extend: 'csv', text: '<i class="ti ti-file-text me-1"></i>CSV', className: 'd-none', title: `Mentorship_Sessions_Export_${new Date().toISOString().slice(0, 10)}`, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7] } },
-        { extend: 'excel', text: '<i class="ti ti-file-spreadsheet me-1"></i>Excel', className: 'd-none', title: `Mentorship_Sessions_Export_${new Date().toISOString().slice(0, 10)}`, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7] } }
+        { extend: 'csv', text: '<i class="ti ti-file-text me-1"></i>CSV', className: 'd-none', title: `Mentorship_Sessions_Export_${new Date().toISOString().slice(0, 10)}`, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 9] } },
+        { extend: 'excel', text: '<i class="ti ti-file-spreadsheet me-1"></i>Excel', className: 'd-none', title: `Mentorship_Sessions_Export_${new Date().toISOString().slice(0, 10)}`, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 9] } }
       ]
       });
 

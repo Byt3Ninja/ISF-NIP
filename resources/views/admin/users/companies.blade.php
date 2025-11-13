@@ -149,7 +149,7 @@
                 <div class="mt-2 border shadow-sm rounded text-center p-4 w-100">
                   <img src="{{ $company->logo ? $company->logo : '/images/logo-placeholder.png' }}"
                     onerror="this.src='/images/logo-placeholder.png'" class="rounded"
-                    style="height: 120px; width: 100%; object-fit: contain;" alt="logo" />
+                    style="height: 110px; width: 100%; object-fit: contain;" alt="logo" />
                 </div>
               </div>
               <div class="w-100 d-flex align-items-center justify-content-between mt-2">
@@ -161,7 +161,7 @@
                 </h6>
                 @if ($company->stage && optional($company->stagE)->{'name_' . $l})
                 <div class="badge bg-label-secondary text-dark d-flex align-items-center">
-                  <i class="ti ti-building-estate me-1 text-primary"></i>
+                  <i class="ti ti-building-estate ti-xs me-1 text-primary"></i>
                   <span class="line-clamp-1">
                     {{ optional($company->stagE)->{'name_' . $l} }}
                   </span>
@@ -173,8 +173,8 @@
                 $Sustainables = json_decode($company->Sustainable_development);
                 @endphp
                 @if (!empty($Sustainables) && count($Sustainables) > 0)
-                <a class="btn btn-label-secondary" href="#" data-bs-toggle="modal"
-                  style="width: 30px; margin-inline-start: -0.5rem;" data-bs-target="#EditLabor"><i
+                <a class="btn btn-label-secondary ms-2" href="#" data-bs-toggle="modal"
+                  style="width: 30px;" data-bs-target="#EditLabor"><i
                     class="ti ti-target-arrow ti-16px text-primary"></i>
                 </a>
                 <div class="modal fade" id="EditLabor" tabindex="-1" aria-hidden="true">
@@ -289,7 +289,7 @@
                         <div class="btn btn-xs btn-outline-secondary d-flex align-items-center gap-1 rounded-pill">
                           <img src="{{ $founder->image ? $founder->image : '/icons/account.svg' }}"
                             onerror="if(this.src!='/icons/account.svg'){this.onerror=null;this.src='/icons/account.svg';}"
-                            class="rounded-circle" width="24" height="24" />
+                            class="rounded-circle" width="20" height="20" />
                           <small class="text-nowrap">
                             {{ $founder->Name }}
                           </small>
@@ -302,31 +302,16 @@
               </div>
               @endif
 
-              <!-- Established Date -->
-              <div class="d-flex align-items-center justify-content-between mt-2">
-                <div class="d-flex align-items-center gap-1">
-                  <i class="ti ti-calendar text-info"></i>
-                  <small class="text-muted">
-                    {{ __('admin.Established date') }}
-                  </small>
-                </div>
-                <span class="border px-2 rounded">
-                  <small class="fw-bold">
-                    {{ $company->est_date ?: 'N/A' }}
-                  </small>
-                </span>
-              </div>
-
               <!-- Program/Cycle Information -->
               <div class="d-flex align-items-center justify-content-between mt-2">
                 <div class="d-flex align-items-center gap-1">
-                  <i class="ti ti-components text-success"></i>
+                  <i class="ti ti-components text-primary"></i>
                   <small class="text-muted">
                     {{ __('cycles.Cycle') }}
                   </small>
                 </div>
                 <span class="border px-2 rounded bg-label-secondary">
-                  <small class="fw-bold text-success">
+                  <small class="fw-semibold text-primary">
                     @if ($company->cycle && optional($company->cycleRelation))
                       {{ optional($company->cycleRelation)->title }}
                     @else
@@ -346,7 +331,7 @@
                   </small>
                 </div>
                 <span class="border px-2 rounded bg-label-secondary">
-                  <small class="fw-bold text-info">
+                  <small class="fw-semibold text-info">
                     @if ($company->cycleRelation && optional($company->cycleRelation->organization))
                       {{ optional($company->cycleRelation->organization)->{'name_' . $l} }}
                     @else
@@ -357,18 +342,42 @@
               </div>
               @endrole
 
-              <div class="d-flex align-items-center justify-content-between mt-3">
+              <!-- Established Date -->
+              <div class="d-flex align-items-center justify-content-between mt-2">
                 <div class="d-flex align-items-center gap-1">
-                  <i class="ti ti-map-pin text-danger"></i>
-                  <small class="text-muted">{{ optional($company->state)->{'name_' . $l} }}</small>
-                </div>
-                <div class="border px-2 rounded">
-                  <small class="fw-bold">
-                    {{ optional($company->city)->{'name_' . $l} }},
-                    {{ optional($company->country)->{'name_' . $l} }}
+                  <i class="ti ti-calendar text-dark"></i>
+                  <small class="text-muted">
+                    {{ __('admin.Established date') }}
                   </small>
                 </div>
+                <span class="border px-2 rounded">
+                  <small class="fw-semibold text-dark">
+                    {{ $company->est_date ?: 'N/A' }}
+                  </small>
+                </span>
               </div>
+
+              @if (isset($company->country) || isset($company->city))
+                <div class="d-flex align-items-center justify-content-between mt-3 mb-3">
+                  <div class="d-flex align-items-center gap-1">
+                    <i class="ti ti-map-pin text-danger"></i>
+                    <small class="text-muted">{{ optional($company->state)->{'name_' . $l} }}</small>
+                  </div>
+                  <div class="border px-2 rounded">
+                    <small class="fw-semibold">
+                      {{ optional($company->city)->{'name_' . $l} }} {{ isset($company->city) ? ',' : '' }}
+                      {{ optional($company->country)->{'name_' . $l} }}
+                    </small>
+                  </div>
+                </div>
+              @endif
+
+              @if (isset($company->id) && $_user->ableTo('company.profile_view', $permissions))
+                <a href="{{ route('company.profile_view', $company->id) }}" class="btn btn-primary">
+                  {{ __('admin.View Profile') }}
+                  <i class="ti ti-viewfinder ms-2"></i>
+                </a>
+              @endif
             </div>
           </div>
           @endforeach

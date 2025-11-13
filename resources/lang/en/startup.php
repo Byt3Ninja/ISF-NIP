@@ -1,6 +1,10 @@
 <?php
 
 return [
+  'startup_profile_heading' => 'Startup Profile / Idea',
+  'registered' => 'Registered',
+  'not_registered' => 'Not Registered',
+  
   'startup_not_found' => 'Startup not found',
 
   'saving' => 'Saving...',

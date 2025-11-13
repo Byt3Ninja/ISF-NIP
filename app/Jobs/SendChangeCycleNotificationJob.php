@@ -53,25 +53,24 @@ class SendChangeCycleNotificationJob implements ShouldQueue
         $data['emailCompany'] = $company_owner->email;
         $data['status'] = $this->step != "0" ? 'in' : 'out';
 
-        Log::info("notifying data: ", $data); 
-        // إرسال الحدث بالبث
-        broadcast(new ChangeStep($data));
-            log::info(" notifying user: " . $company_owner->email);
-        // إشعار المستخدمين
+        // Log::info("notifying data: ", $data); 
+        // // إرسال الحدث بالبث
+        // broadcast(new ChangeStep($data));
+        //     log::info(" notifying user: " . $company_owner->email);
         $recipients = User::role("Registered")
             ->where('email', $company_owner->email)
             ->get();
 
-        if (!in_array(env('APP_ENV', 'local'), ['local'])) {
+             
             foreach ($recipients as $recipient) {
                 try {
-                    $recipient->notify(new ChangeCycle($data));
+                    $recipient->notify(new ChangeCycle( $data));
                 } catch (\Throwable $th) {
                     // يمكنك التسجيل هنا بدلاً من الرمي
                     Log::error("Error notifying user: " . $th->getMessage());
                 }
             }
-        }
+        
          
     }
 }

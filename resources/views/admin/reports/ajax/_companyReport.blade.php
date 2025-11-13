@@ -1,265 +1,239 @@
 <div class="col-md-12">
-  <!-- users view card details start -->
-  <div class="card shadow-sm mb-4">
-    <div class="card-header border-bottom d-flex justify-content-between align-items-center">
-      <h4 class="d-flex align-items-center mb-0">
-        <img 
-          src="{{ asset($company->logo) }}" 
-          alt="avatar" 
-          class="rounded-circle border shadow-sm" 
-          height="40"
-          width="40" 
-        />
-        <a href="/dashboard/companyProfile/{{ $company->id }}"
-          class="ms-2 text-decoration-none text-dark">
-          {{ $company->name }}
-        </a>
-      </h4>
-      <div class="chip" style="cursor: pointer;">
+  <!-- Startup card details start -->
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
+      <div class="d-flex align-items-center">
+        <div class="avatar avatar-lg me-3">
+          <img src="{{ asset($company->logo) }}" alt="logo" class="rounded">
+        </div>
+        <div>
+          <h4 class="mb-1">
+            <a href="/dashboard/companyProfile/{{ $company->id }}" class="text-heading">
+              {{ $company->name }}
+            </a>
+          </h4>
+          <p class="mb-0 text-muted">{{ $l == 'en' ? 'Startup Company' : 'شركة ناشئة' }}</p>
+        </div>
+      </div>
+      <div class="user-profile-header-banner">
         <a href="/dashboard/show/UserProfile/{{ $company?->user?->id }}" class="d-flex align-items-center">
-          <img 
-            class="rounded-circle border shadow-sm" 
-            src="{{ asset($company?->user?->image_url) }}" 
-            alt="User img" 
-            height="30"
-            width="30" 
-          />
-          <span class="ms-2 fw-bold text-primary">
-            {{ $company?->user?->name }} <small class="text-muted">({{ $l == 'en' ? 'Startup Leader' : 'قائد الشركة' }})</small>
-          </span>
+          <div class="avatar avatar-sm me-2">
+            <img src="{{ asset($company?->user?->image_url) }}" alt="avatar" class="rounded">
+          </div>
+          <div class="d-flex flex-column">
+            <span class="fw-medium text-heading">{{ $company?->user?->name }}</span>
+            <small class="text-muted">{{ $l == 'en' ? 'Startup Leader' : 'قائد الشركة' }}</small>
+          </div>
         </a>
       </div>
     </div>
-    <div class="card-body mt-5">
-      <p class="card-text">
-        <strong class="text-success">{{ $company->cycledata->title }}</strong> <small class="text-muted">({{ $l == 'en' ? 'Program' : 'البرنامج' }})</small> ({{ __('dashboard.start from') }}: <span class="fw-bold text-info">{{ $company->cycledata->start_format }}</span> {{ __('dashboard.to') }}: <span class="fw-bold text-info">{{ $company->cycledata->end_format }}</span>) - <span class="fw-bold text-warning">{{ $company->stepdata->title }}</span> <small class="text-muted">({{ $l == 'en' ? 'Step' : 'المرحلة' }})</small>
-      </p>
-      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mt-3">
+    <div class="card-body">
+      <div class="d-flex flex-wrap gap-2 mb-4">
+        <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 me-0 me-md-6">
+          <span class="fw-semibold">{{ __('cycles.Program') }}</span>
+          <span class="badge bg-label-success">
+            <i class="ti ti-components ti-xs me-1"></i>
+            {{ $company->cycledata->title }}
+          </span>
+        </div>
+        <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 me-0 me-md-6">
+          <span class="fw-semibold">{{ __('admin.Duration') }}</span>
+          <span class="badge bg-label-info">
+            <i class="ti ti-calendar ti-xs me-1"></i>
+            {{ $company->cycledata->start_format }} - {{ $company->cycledata->end_format }}
+          </span>
+        </div>
+        <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 me-0 me-md-6">
+          <span class="fw-semibold">{{ __('cycles.Step') }}</span>
+          <span class="badge bg-label-warning">
+            <i class="ti ti-stairs ti-xs me-1"></i>
+            {{ $company->stepdata->title }}
+          </span>
+        </div>
+      </div>
+      <div class="d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center">
-          <img 
-            src="{{ asset($company->cycledata->organization->image_url) }}" 
-            alt="avatar" 
-            class="rounded-circle border shadow-sm"
-            height="40"
-            width="40" 
-          />
-          <div class="ms-2">
-            <p class="mb-0 fw-bold text-secondary">{{ $company->cycledata->organization->name }} <small class="text-muted">({{ $l == 'en' ? 'Organization' : 'المنظمة' }})</small></p>
+          <div class="avatar avatar-sm me-2">
+            <img src="{{ asset($company->cycledata->organization->image_url) }}" alt="logo" class="rounded">
+          </div>
+          <div class="d-flex flex-column">
+            <div class="text-dark fs-6">{{ $company->cycledata->organization->name }}</div>
+            <small class="text-muted">{{ $l == 'en' ? 'Organization' : 'المؤسسة' }}</small>
           </div>
         </div>
-        <a href="/dashboard/companyProfile/{{ $company->id }}" class="btn btn-primary">
-          {{ $l == 'en' ? 'View Startup Details' : 'عرض تفاصيل الشركة' }}
-          <i class="ti ti-eye ms-2"></i>
+        <a href="/dashboard/companyProfile/{{ $company->id }}" class="btn btn-sm btn-primary">
+          <i class="ti ti-eye me-1"></i>
+          {{ $l == 'en' ? 'Details' : 'التفاصيل' }}
         </a>
       </div>
     </div>
   </div>
-  <!-- users view card details ends -->
+  <!-- Startup card details ends -->
+</div>
+
+@php
+$cards = [
+  ['col' => 'col-lg-2 col-sm-6', 'href' => '#mentorshipSessionsSection', 'color' => 'primary', 'icon' => 'ti-telescope', 'value' => $mentorRequests_count, 'title' => __('admin.Mentorship Sessions')],
+  ['col' => 'col-lg-2 col-sm-6', 'href' => '#mentorshipSessionsSection', 'color' => 'secondary', 'icon' => 'ti-calendar-event', 'value' => $mentorships_period, 'title' => __('admin.Mentorship Sessions Duration')],
+  ['col' => 'col-lg-2 col-sm-6', 'href' => '/dashboard/mentorship/sessions?show=all', 'color' => 'danger', 'icon' => 'ti-user-screen', 'value' => (int) $mentorship_attendance_rate . '%', 'title' => __('admin.Company Attendance Rate')],
+  ['col' => 'col-lg-2 col-sm-6', 'href' => '/dashboard/training/sessions?company_id=' . $company->id, 'color' => 'warning', 'icon' => 'ti-book', 'value' => $training_sessions_count, 'title' => __('admin.Training sessions')],
+  ['col' => 'col-lg-2 col-sm-6', 'href' => '/dashboard/training/sessions', 'color' => 'success', 'icon' => 'ti-clock', 'value' => $training_sessions_period, 'title' => __('admin.Training sessions Duration')]
+];
+@endphp
+
+<div class="col-12 mt-6">
+  <div class="row justify-content-center g-4">
+    @foreach($cards as $card)
+    <div class="{{ $card['col'] }}">
+      <a href="{{ $card['href'] }}" class="text-decoration-none">
+        <div class="card card-border-shadow-{{ $card['color'] }} h-100 cursor-pointer">
+          <div class="card-body text-center">
+            <div class="d-flex align-items-center justify-content-center mb-2">
+              <div class="avatar avatar-sm me-4">
+                <div class="avatar-initial rounded bg-label-{{ $card['color'] }}">
+                  <i class="ti {{ $card['icon'] }} ti-xs"></i>
+                </div>
+              </div>
+              <h5 class="mb-0">{{ $card['value'] }}</h5>
+            </div>
+            <small class="text-center">{{ $card['title'] }}</small>
+          </div>
+        </div>
+      </a>
+    </div>
+    @endforeach
+  </div>
 </div>
 
 <div class="col-12 mt-6">
-  <div class="row g-6">
-    <a href="#mentorshipSessionsSection" class="col-lg-4 col-sm-6">
-      <div class="card card-border-shadow-primary h-100">
-        <div class="card-body" style="display: grid; place-items: center;">
-          <div class="d-flex align-items-center mb-2">
-            <div class="avatar me-4">
-              <span class="avatar-initial rounded bg-label-primary">
-                <i class="ti ti-telescope ti-28px"></i>
-              </span>
-            </div>
-            <h4 class="mb-0">{{ $mentorRequests_count }}</h4>
-          </div>
-          <p class="mb-1">{{ __('admin.Mentorship Sessions') }}</p>
+  <div class="card">
+    <div class="card-header d-flex align-items-center">
+      <div class="avatar me-3">
+        <div class="avatar-initial rounded bg-label-primary">
+          <i class="ti ti-users ti-lg"></i>
         </div>
       </div>
-    </a>
-
-    <a href="#mentorshipSessionsSection" class="col-lg-4 col-sm-6">
-      <div class="card card-border-shadow-primary h-100">
-        <div class="card-body" style="display: grid; place-items: center;">
-          <div class="d-flex align-items-center mb-2">
-            <div class="avatar me-4">
-              <span class="avatar-initial rounded bg-label-secondary">
-                <i class="ti ti-calendar-event ti-28px"></i>
-              </span>
-            </div>
-            <h4 class="mb-0">{{ $mentorships_period }}</h4>
-          </div>
-          <p class="mb-1">{{ __('admin.Mentorship Sessions Duration') }}</p>
-        </div>
-      </div>
-    </a>
-
-    <a href="/dashboard/mentorship/sessions?show=all" class="col-lg-4 col-sm-6">
-      <div class="card card-border-shadow-primary h-100">
-        <div class="card-body" style="display: grid; place-items: center;">
-          <div class="d-flex align-items-center mb-2">
-            <div class="avatar me-4">
-              <span class="avatar-initial rounded bg-label-danger">
-                <i class="ti ti-user-screen ti-28px"></i>
-              </span>
-            </div>
-            <h4 class="mb-0">{{ (int) $mentorship_attendance_rate }} %</h4>
-          </div>
-          <p class="mb-1">{{ __('admin.Company Attendance Rate') }}</p>
-        </div>
-      </div>
-    </a>
-
-    <a href="/dashboard/training/sessions?company_id={{ $company->id }}" class="col-lg-6 col-sm-6">
-      <div class="card card-border-shadow-primary h-100">
-        <div class="card-body" style="display: grid; place-items: center;">
-          <div class="d-flex align-items-center mb-2">
-            <div class="avatar me-4">
-              <span class="avatar-initial rounded bg-label-warning">
-                <i class="ti ti-book ti-28px"></i>
-              </span>
-            </div>
-            <h4 class="mb-0">{{ $training_sessions_count }}</h4>
-          </div>
-          <p class="mb-1">{{ __('admin.Training sessions') }}</p>
-        </div>
-      </div>
-    </a>
-
-    <a href="/dashboard/training/sessions" class="col-lg-6 col-sm-6">
-      <div class="card card-border-shadow-primary h-100">
-        <div class="card-body" style="display: grid; place-items: center;">
-          <div class="d-flex align-items-center mb-2">
-            <div class="avatar me-4">
-              <span class="avatar-initial rounded bg-label-success">
-                <i class="ti ti-clock ti-28px"></i>
-              </span>
-            </div>
-            <h4 class="mb-0">{{ $training_sessions_period }}</h4>
-          </div>
-          <p class="mb-1">{{ __('admin.Training sessions Duration') }}</p>
-        </div>
-      </div>
-    </a>
-  </div>
-</div>
-
-<div class="col-12 mt-10">
-  <div class="row">
-    <div class="col-md-12">
-      <div>
-        <h5 class="card-title align-items-center mb-3">
-          <i class='ti ti-card ti-28px'></i>
-          <span class="ms-2">{{ __('admin.Mentorship Sessions') }}:</span>
-        </h5>
-        <div id="mentorshipSessionsSection" class="card-body" style="height: 600px; overflow-y: auto;">
-          @if($mentorship_sessions->count())
-          <div class="card">
-            <div class="table-responsive">
-              <table class="table mb-0" id="mentorshipSessionsTable">
-                <thead class="bg-label-secondary">
-                  <tr>
-                    <th>{{ __('cycles.Mentor') }}</th>
-                    <th>{{ __('cycles.Rate/Comment') }}</th>
-                    <th>{{ __('cycles.Date/Time') }}</th>
-                    <th>{{ __('cycles.Approved') }}</th>
-                    <th>{{ __('cycles.Attendance') }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @foreach ($mentorship_sessions as $session)
-                  <tr>
-                    <td>
-                      <div style="cursor: pointer;" class="chip mr-1">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar">
-                            <img class="img-fluid" src="{{ $session->mentor->image_url }}" alt="pic" height="20"
-                              width="20">
-                          </div>
-                          <span class="mx-2">
-                            {{ $session->mentor->name }}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <small>{!! $session->rate_comment
-                        ? str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>', $session->rating) .
-                        '<br>' .
-                        $session->rate_comment
-                        : $session->comment !!}</small>
-                    </td>
-                    <td>
-                      {{ $session->zoom_date }}
-                      <br>({{ $session->period }}M)
-                    </td>
-                    <td>
-                      <div class="d-flex align-items-center gap-1">
-                        {!! __($session->approved) ?? '<span class="warning">' . __('Waiting') . '</span>' !!}
-                      </div>
-                    </td>
-                    <td>
-                      {{ $session->done ? __('Yes') : __('No') }}
-                    </td>
-                  </tr>
-                  @endforeach
-                </tbody>
-              </table>
-            </div>
-          </div>
-          @else
-          <div class="text-center py-5">
-            <i class="ti ti-calendar-x text-secondary" style="font-size: 3rem;"></i>
-            <p class="mt-3 mb-0">{{ __('admin.No_Mentorship_Sessions_Startup') }}</p>
-          </div>
-          @endif
-        </div>
+      <h5 class="mb-0">{{ __('admin.Mentorship Sessions') }}</h5>
+    </div>
+    <div id="mentorshipSessionsSection" class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover" id="mentorshipSessionsTable">
+          <thead class="table-light">
+            <tr>
+              <th>{{ __('cycles.Mentor') }}</th>
+              <th>{{ __('cycles.Rate/Comment') }}</th>
+              <th>{{ __('cycles.Date/Time') }}</th>
+              <th>{{ __('cycles.Approved') }}</th>
+              <th>{{ __('cycles.Attendance') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach ($mentorship_sessions as $session)
+            <tr>
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="avatar avatar-sm me-2">
+                    <img src="{{ $session->mentor->image_url }}" alt="img" class="rounded">
+                  </div>
+                  <span class="fw-medium">{{ $session->mentor->name }}</span>
+                </div>
+              </td>
+              <td>
+                @if($session->rate_comment)
+                  <div class="mb-1">
+                    @for($i = 1; $i <= $session->rating; $i++)
+                      <i class="ti ti-star-filled text-warning"></i>
+                    @endfor
+                  </div>
+                  <small class="text-muted">{{ $session->rate_comment }}</small>
+                @else
+                  <small class="text-muted">{{ $session->comment }}</small>
+                @endif
+              </td>
+              <td>
+                <span class="fw-medium">{{ $session->zoom_date }}</span><br>
+                <small class="text-muted">({{ $session->period }}M)</small>
+              </td>
+              <td>
+                <span class="badge {{ $session->approved ? 'bg-label-success' : 'bg-label-warning' }}">{{ $session->approved ? __($session->approved) : __('Waiting') }}</span>
+              </td>
+              <td>
+                <span class="badge {{ $session->done ? 'bg-label-success' : 'bg-label-secondary' }}">{{ $session->done ? __('Yes') : __('No') }}</span>
+              </td>
+            </tr>
+            @endforeach
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 </div>
 
-<div class="col-md-12 mt-6">
-  <div>
-    <h5 class="card-title align-items-center mb-3">
-      <i class='ti ti-card ti-28px'></i>
-      <span class="mx-2">{{ __('admin.Training sessions') }}:</span>
-    </h4>
+<div class="col-12 mt-6">
+  <div class="card">
+    <div class="card-header d-flex align-items-center">
+      <div class="avatar me-3">
+        <div class="avatar-initial rounded bg-label-warning">
+          <i class="ti ti-book ti-lg"></i>
+        </div>
+      </div>
+      <h5 class="mb-0">{{ __('admin.Training sessions') }}</h5>
+    </div>
     <div class="card-body">
-      <div class="card ">
-        <div class="table-responsive">
-          <table class="table mb-0" id="userstable">
-            <thead class="bg-label-secondary">
-              <tr>
-                <th>{{ __('cycles.Type') }}</th>
-                <th>{{ __('cycles.Title') }}</th>
-                <th>{{ __('cycles.Start') }}</th>
-                <th>{{ __('cycles.End') }}</th>
-                <th>{{ __('cycles.details') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              @foreach ($training_sessions as $session)
-              <tr>
-                <td>{{ __('cycles.' . $session->type) }}</td>
-                <td>{{ $session->title }}</td>
-                <td>{{ $session->datetime }}</td>
-                <td>{{ $session->enddatetime ?? '-' }}</td>
-                <td>
-                  @if ($session->type == 'sessions')
-                  {{ __('cycles.Duration') }}: {{ $session->duration }} {{ __('cycles.Minutes') }}
-                  @elseif ($session->type == 'offline')
-                  <b>{{ __('cycles.trainer name') }}:</b>
-                  {{ $session->trainer_name }}<br><b>{{ __('cycles.training location') }}:</b>
-                  {{ $session->location }} <br>
-                  @else
-                  <a href="/dashboard/training/all/{{ $session->location }}">{{ optional($session->course)->title }}
-                  </a>
-                  @endif
-                </td>
-              </tr>
-              @endforeach
-            </tbody>
-          </table>
-        </div>
+      <div class="table-responsive">
+        <table class="table table-hover startup-tblTraining">
+          <thead class="table-light">
+            <tr>
+              <th>{{ __('cycles.Type') }}</th>
+              <th>{{ __('cycles.Title') }}</th>
+              <th>{{ __('cycles.Start') }}</th>
+              <th>{{ __('cycles.End') }}</th>
+              <th>{{ __('cycles.details') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach ($training_sessions as $session)
+            <tr>
+              <td><span class="badge bg-label-info">{{ __('cycles.' . $session->type) }}</span></td>
+              <td class="fw-medium">{{ $session->title }}</td>
+              <td>{{ $session->datetime }}</td>
+              <td>{{ $session->enddatetime ?? '-' }}</td>
+              <td>
+                @if ($session->type == 'sessions')
+                  <small class="text-muted">{{ __('cycles.Duration') }}: {{ $session->duration }} {{ __('cycles.Minutes') }}</small>
+                @elseif ($session->type == 'offline')
+                  <div class="d-flex flex-column">
+                    <small><strong>{{ __('cycles.trainer name') }}:</strong> {{ $session->trainer_name }}</small>
+                    <small><strong>{{ __('cycles.training location') }}:</strong> {{ $session->location }}</small>
+                  </div>
+                @else
+                  <a href="/dashboard/training/all/{{ $session->location }}" class="text-primary">{{ optional($session->course)->title }}</a>
+                @endif
+              </td>
+            </tr>
+            @endforeach
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 </div>
+
+<script>
+$(document).ready(function() {
+  $('.startup-tblTraining, #mentorshipSessionsTable').DataTable({
+    responsive: true,
+    pageLength: 10,
+    order: [[2, 'desc']]
+    @if (app()->getLocale() == 'ar')
+    ,language: {
+      search: 'ابحث:',
+      lengthMenu: 'أظهر _MENU_ مدخلات',
+      info: 'إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل',
+      paginate: { previous: 'السابق', next: 'التالي' },
+      emptyTable: 'لا توجد بيانات'
+    }
+    @endif
+  });
+});
+</script>

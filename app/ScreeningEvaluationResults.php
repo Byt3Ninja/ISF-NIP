@@ -52,7 +52,7 @@ class ScreeningEvaluationResults extends Model
 		$getStep = Step::find( $step_id );
 		if( $getStep )
 		{
-			$companies = Company::where('cycle', $getStep->cycle_id)->get();
+			$companies = Company::where('cycle', $getStep->cycle_id)->where('step', $step_id)->get();
 			$_steps = Step::whereIn('cycle_id', $companies->pluck('cycle')->unique())->orderBy('arr')->get();
 			$evaluation = ScreeningEvaluation::getEvaluationData( $getStep->id );
 			$results = self::where('evaluation_id', $evaluation?->id )->get();
@@ -224,6 +224,8 @@ class ScreeningEvaluationResults extends Model
 
 			$_companies[$companies_index]->average_score = $average_score ?? 0;
 			$_companies[$companies_index]->judges = $judges;
+			$_companies[$companies_index]->company_step_id = $getStep->id;
+			$_companies[$companies_index]->company_cycle_id = $getStep->cycle_id;
 		}
 
 		return [
