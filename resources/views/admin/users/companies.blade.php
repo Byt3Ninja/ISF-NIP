@@ -154,7 +154,7 @@
                     style="height: 110px; width: 100%; object-fit: contain;" alt="logo" />
 
                   {{-- Alumni Badge --}}
-                  @if (!$company->alumni)
+                  @if ($company->alumni == '1' || $company->alumni == 1)
                     <div class="position-absolute bottom-0 start-0">
                       <span class="badge bg-label-danger">
                         {{ __('startup.alumni') }}
