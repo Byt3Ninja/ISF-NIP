@@ -1,10 +1,16 @@
 <?php
 
 return [
+  'all_startups' => 'All Startups',
   'startup_profile_heading' => 'Startup Profile / Idea',
   'registered' => 'Registered',
   'not_registered' => 'Not Registered',
-  
+
+  'alumni' => 'Alumni',
+  'alumni_status' => 'Alumni Status',
+  'alumni_only' => 'Alumni Only',
+  'non_alumni' => 'Non-Alumni',
+
   'startup_not_found' => 'Startup not found',
 
   'saving' => 'Saving...',

@@ -2060,6 +2060,14 @@ class ClientCompanyController extends Controller
                 $filters['sectors'] = $sectors;
             }
         }
+
+        // Handle Alumni filter
+        if ($request->filled('alumni')) {
+            $alumni = $request->get('alumni');
+            if ($alumni !== 'all') {
+                $filters['is_alumni'] = $alumni;
+            }
+        }
         
         $companies = $this->companyService->getCompanies($filters, isApi: false);
         

@@ -1,9 +1,15 @@
 <?php
 
 return [
+  'all_startups' => 'كل الشركات',
   'startup_profile_heading' => 'تفاصيل الشركة الناشئة / الفكرة',
   'registered' => 'مسجلة',
   'not_registered' => 'ليست مسجلة بعد',
+
+  'alumni' => 'خريج',
+  'alumni_status' => 'حالة الخريجين',
+  'alumni_only' => 'خريجين فقط' ,
+  'non_alumni' => 'غير الخريجين', 
 
   'startup_not_found' => 'لم يتم العثور على الشركة الناشئة',
 
