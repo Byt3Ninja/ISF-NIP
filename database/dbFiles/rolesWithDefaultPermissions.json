@@ -391,6 +391,83 @@
         ]
     },
     {
+        "name": "Expertise",
+        "description": null,
+        "permissions": [
+            {
+                "name": "expertises.index",
+                "description": "List Expertise",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "expertises.create",
+                "description": "Create Expertise ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "expertises.store",
+                "description": "Save New Expertise",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "expertises.show",
+                "description": "View Expertise Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "expertises.edit",
+                "description": "Edit Expertise Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "expertises.update",
+                "description": "Save Expertise Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "expertises.destroy",
+                "description": "Delete Expertise",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }
+        ]
+    },
+    {
         "name": "Documentation",
         "description": null,
         "permissions": [
@@ -4277,6 +4354,17 @@
             {
                 "name": "company.profile_images_delete",
                 "description": "Delete Document (General)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "company.getEmployees",
+                "description": " Get Company Employees",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
