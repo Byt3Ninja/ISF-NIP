@@ -22,6 +22,8 @@
     ['SocialMediaLinks', 'ti-share', __('settings.SocialMediaLinks')],
     ['teamMembers', 'ti-users', __('settings.teamMembers')],
     ['WhatsApp', 'ti-brand-whatsapp', __('admin.WhatsApp')],
+    ['smtp', 'ti-mail', 'SMTP'],
+    ['notifications', 'ti-bell', __('admin.Notifications')],
     // ['Schedule', 'ti-calendar-bolt', __('admin.Schedule')],
   ])->map(function ($tab) {
     return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
@@ -111,6 +113,12 @@
                         @break
                       @case('WhatsApp')
                         @include('partials.forms.whatsapp-settings-form')
+                        @break
+                      @case('smtp')
+                        @include('admin.organizations.partials.smtp')
+                        @break
+                      @case('notifications')
+                        @include('admin.organizations.partials.notifications')
                         @break
                       @case('Schedule')
                         @include('partials.forms.schedule')

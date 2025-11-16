@@ -121,6 +121,8 @@
                     "organizationmanager"
                 ]
             },
+
+            
             {
                 "name": "whatsapp.session.status",
                 "description": "WhatsApp Sessions Status",
@@ -4055,7 +4057,18 @@
                     "registered",
                     "organizationmanager"
                 ]
+            },
+            {
+                "name": "settings.organization.notifications_update",
+                "description": "Update Organization Notification Settings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "organizationmanager"
+                ]
             }
+
+            
         ]
     },
     {
@@ -7167,6 +7180,17 @@
                 ]
             },
 
+
+
+                      {
+                "name":"settings.organization.smtp_update",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "organizationmanager"
+                ]
+            },
 
                       {
                 "name":"settings.notification_view",

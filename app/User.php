@@ -173,7 +173,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     // ===============>  Organization Manager Relations < =========================
     public function organization(){
-        return $this->hasOne(Organization::class,'user_id');
+        return $this->belongsTo(Organization::class)->withTrashed();
     }
 
     // ============> Judger Relations <======================

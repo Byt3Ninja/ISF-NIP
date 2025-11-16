@@ -2,7 +2,7 @@
 
 namespace App\Notifications;
 
-use Log;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Bus\Queueable;
 use App\Broadcasting\WhatsAppChannel;
 use Illuminate\Notifications\Notification;
@@ -10,12 +10,38 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use App\Services\GlobalNotificationSettingsService;
+use Throwable;
 
 class MentorshipRequestNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    /**
+     * The number of times the job may be attempted.
+     *
+     * @var int
+     */
+    public $tries = 3;
+
+    /**
+     * The number of seconds to wait before retrying the job.
+     *
+     * @var int
+     */
+    public $backoff = 60;
+
+    /**
+     * Notification data.
+     *
+     * @var array
+     */
     public $data;
+
+    /**
+     * Reminder flag.
+     *
+     * @var string|null
+     */
     public $reminder;
     /**
      * Create a new notification instance.
@@ -26,38 +52,51 @@ class MentorshipRequestNotification extends Notification implements ShouldQueue
         $this->reminder = $reminder;
     }
 
-    /**
+   /**
      * Get the notification's delivery channels.
      *
      * @return array<int, string>
      */
-   public function via(object $notifiable): array
+    public function via(object $notifiable): array
     {
+        $org = $notifiable->organization;
+        $smtpSettings = $org?->organizationSettings;
+        
+        // Configure SMTP if settings exist
+        $this->configureSmtp($smtpSettings);
+        
+        // Organization channel toggles (default to true when not configured)
+        $orgAcceptEmail = $smtpSettings?->accept_email ?? true;
+        $orgAcceptWhatsapp = $smtpSettings?->accept_whatsapp ?? true;
+        $orgAcceptPusher = $smtpSettings?->accept_pusher ?? true;
 
- 
         $channels = [];
-        // Always store in database for audit/history
-    
 
-        // WhatsApp if enabled globally AND user accepts it
-        if (GlobalNotificationSettingsService::isWhatsAppEnabled()==true && $notifiable->accept_whatsapp ==true) {
+        // WhatsApp if enabled globally AND organization/user accepts it
+        if (GlobalNotificationSettingsService::isWhatsAppEnabled() 
+            && $orgAcceptWhatsapp 
+            && $notifiable->accept_whatsapp) {
             $channels[] = WhatsAppChannel::class;
         }
 
-        // Pusher (broadcast) if enabled globally AND user accepts it
-        if (GlobalNotificationSettingsService::isPusherEnabled()==true && $notifiable->accept_pusher==true) {
+        // Pusher (broadcast) if enabled globally AND organization/user accepts it
+        if (GlobalNotificationSettingsService::isPusherEnabled() 
+            && $orgAcceptPusher 
+            && $notifiable->accept_pusher) {
             $channels[] = 'broadcast';
         }
 
-        // Email if enabled globally AND user accepts it OR as default when nothing else is active
-        if (GlobalNotificationSettingsService::isEmailEnabled() ==true && $notifiable->accept_email ==true ) { // only 'database' present
+        // Email if enabled globally AND organization/user accepts it
+        if (GlobalNotificationSettingsService::isEmailEnabled() 
+            && $orgAcceptEmail 
+            && $notifiable->accept_email) {
             $channels[] = 'mail';
         }
 
+        // Always store in database for audit/history if any channels are active
         if (!empty($channels)) {
-               $channels[] = 'database';
+            $channels[] = 'database';
         }
-
 
         return $channels;
     }
@@ -65,8 +104,13 @@ class MentorshipRequestNotification extends Notification implements ShouldQueue
     /**
      * Get the mail representation of the notification.
      */
-    public function toMail(object $notifiable): MailMessage
+    public function toMail($notifiable)
     {
+        $org = $notifiable->organization;
+        $smtpSettings = $org?->organizationSettings;
+        
+        // Get from address and name
+        $from = $this->getFromAddress($smtpSettings);
         if($this->reminder == 'Reminder'){
             return (new MailMessage)
             ->subject( __('emails.mentorship_request_reminder.subject', ['startup' => $this->data['company_name']]))
@@ -126,6 +170,22 @@ class MentorshipRequestNotification extends Notification implements ShouldQueue
     {
         Log::info("Notification sent to user {$notifiable->id}", [
             'type' => static::class,
+        ]);
+    }
+
+    /**
+     * Handle a job failure.
+     *
+     * @param Throwable $exception
+     * @return void
+     */
+    public function failed(Throwable $exception): void
+    {
+        Log::error('MentorshipRequestNotification failed after all retries', [
+            'error' => $exception->getMessage(),
+            'trace' => $exception->getTraceAsString(),
+            'data' => $this->data,
+            'reminder' => $this->reminder,
         ]);
     }
 }
