@@ -371,6 +371,10 @@ class ClientCompanyController extends Controller
             }
             return $industry;
         });
+        $employees = Team_member::where('Company_id', $id)
+                                    ->where('TeamMember', 'Employee')
+                                    ->get();
+                                    
             return view('admin/clients/company', compact(
                 'client',
                 '_countries',
@@ -391,6 +395,7 @@ class ClientCompanyController extends Controller
                 'Stages',
                 'technologies',
                 'industries',
+                'employees',
                 'data'
             ));
         } catch (Exception $e) {
@@ -2319,4 +2324,5 @@ class ClientCompanyController extends Controller
             ], 500);
         }
     }
+   
 }
