@@ -260,6 +260,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::put('organizations/settings/updateMeeting', 'SettingsController@meetingSetting')->name('settings.organization_meeting_manage');
     Route::put('organizations/settings/socialLogin', 'SettingsController@socialSetting')->name('settings.organization_social_manage');
     Route::put('organizations/settings/general', 'SettingsController@generalSetting')->name('settings.organization.general.manage');
+    Route::put('organizations/settings/smtp', 'OrganizationSettingsController@updateSmtp')->name('settings.organization.smtp_update');
+    Route::put('organizations/settings/notifications', 'OrganizationSettingsController@updateNotifications')->name('settings.organization.notifications_update');
     Route::post('organizations/settings/invite', 'SettingsController@inviteUser')->name('organization.users_invite');
     Route::post('organizations/settings/resend-invitation/{invitationId}', 'SettingsController@resendInvitation')->name('organization.users_invitations_resend');
     Route::delete('organizations/settings/cancel-invitation/{invitationId}', 'SettingsController@cancelInvitation')->name('organization.users_invitations_cancel');

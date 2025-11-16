@@ -3,19 +3,53 @@
 namespace App\Notifications;
 
 use App\Services\GlobalNotificationSettingsService;
+use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Facades\Log;
 use App\Broadcasting\WhatsAppChannel;
 use Illuminate\Notifications\Messages\BroadcastMessage;
+use Throwable;
 
 class InviteToHackathon extends Notification implements ShouldQueue
 {
-    use Queueable;
+  use Queueable, ConfiguresSmtp;
 
+    /**
+     * The number of times the job may be attempted.
+     *
+     * @var int
+     */
+    public $tries = 3;
+
+    /**
+     * The number of seconds to wait before retrying the job.
+     *
+     * @var int
+     */
+    public $backoff = 60;
+
+    /**
+     * Team leader.
+     *
+     * @var mixed
+     */
     public $teamLeader;
+
+    /**
+     * Team name.
+     *
+     * @var string
+     */
     public $team_q;
+
+    /**
+     * Team member.
+     *
+     * @var mixed
+     */
     public $teamMember;
 
     public function __construct($teamLeader, $team_q, $teamMember)
@@ -25,39 +59,65 @@ class InviteToHackathon extends Notification implements ShouldQueue
         $this->teamMember = $teamMember;
     }
 
-   public function via(object $notifiable): array
+ /**
+     * Get the notification's delivery channels.
+     *
+     * @return array<int, string>
+     */
+    public function via(object $notifiable): array
     {
+        $org = $notifiable->organization;
+        $smtpSettings = $org?->organizationSettings;
+        
+        // Configure SMTP if settings exist
+        $this->configureSmtp($smtpSettings);
+        
+        // Organization channel toggles (default to true when not configured)
+        $orgAcceptEmail = $smtpSettings?->accept_email ?? true;
+        $orgAcceptWhatsapp = $smtpSettings?->accept_whatsapp ?? true;
+        $orgAcceptPusher = $smtpSettings?->accept_pusher ?? true;
 
- 
         $channels = [];
-        // Always store in database for audit/history
-    
 
-        // WhatsApp if enabled globally AND user accepts it
-        if (GlobalNotificationSettingsService::isWhatsAppEnabled()==true && $notifiable->accept_whatsapp ==true) {
+        // WhatsApp if enabled globally AND organization/user accepts it
+        if (GlobalNotificationSettingsService::isWhatsAppEnabled() 
+            && $orgAcceptWhatsapp 
+            && $notifiable->accept_whatsapp) {
             $channels[] = WhatsAppChannel::class;
         }
 
-        // Pusher (broadcast) if enabled globally AND user accepts it
-        if (GlobalNotificationSettingsService::isPusherEnabled()==true && $notifiable->accept_pusher==true) {
+        // Pusher (broadcast) if enabled globally AND organization/user accepts it
+        if (GlobalNotificationSettingsService::isPusherEnabled() 
+            && $orgAcceptPusher 
+            && $notifiable->accept_pusher) {
             $channels[] = 'broadcast';
         }
 
-        // Email if enabled globally AND user accepts it OR as default when nothing else is active
-        if (GlobalNotificationSettingsService::isEmailEnabled() ==true && $notifiable->accept_email ==true ) { // only 'database' present
+        // Email if enabled globally AND organization/user accepts it
+        if (GlobalNotificationSettingsService::isEmailEnabled() 
+            && $orgAcceptEmail 
+            && $notifiable->accept_email) {
             $channels[] = 'mail';
         }
 
+        // Always store in database for audit/history if any channels are active
         if (!empty($channels)) {
-               $channels[] = 'database';
+            $channels[] = 'database';
         }
-
 
         return $channels;
     }
 
+    /**
+     * Get the mail representation of the notification.
+     */
     public function toMail($notifiable)
     {
+        $org = $notifiable->organization;
+        $smtpSettings = $org?->organizationSettings;
+        
+        // Get from address and name
+        $from = $this->getFromAddress($smtpSettings);
         // return (new MailMessage)
         //     ->subject('Invitation to Join a Hackathon Team')
         //     ->greeting('Hello ' . $notifiable->first_name)
@@ -91,6 +151,21 @@ class InviteToHackathon extends Notification implements ShouldQueue
             'subject' => __('admin.Invitation_to_Join_a_Hackathon_Team'),
             'message' => __('notifications.hackathon_invite.broadcast', ['team' => $this->team_q]),
             'time' => now()->toDateTimeString(),
+        ]);
+    }
+
+    /**
+     * Handle a job failure.
+     *
+     * @param Throwable $exception
+     * @return void
+     */
+    public function failed(Throwable $exception): void
+    {
+        Log::error('InviteToHackathon notification failed after all retries', [
+            'error' => $exception->getMessage(),
+            'trace' => $exception->getTraceAsString(),
+            'team' => $this->team_q,
         ]);
     }
 }

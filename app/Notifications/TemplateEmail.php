@@ -9,12 +9,45 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Throwable;
 
 class TemplateEmail extends Notification implements ShouldQueue
 {
     use Queueable;
+
+    /**
+     * The number of times the job may be attempted.
+     *
+     * @var int
+     */
+    public $tries = 3;
+
+    /**
+     * The number of seconds to wait before retrying the job.
+     *
+     * @var int
+     */
+    public $backoff = 60;
+
+    /**
+     * Message array.
+     *
+     * @var array
+     */
     public $Message;
+
+    /**
+     * Action text.
+     *
+     * @var string
+     */
     public $ActionText = 'Open VI portal';
+
+    /**
+     * Action URL.
+     *
+     * @var string|null
+     */
     public $ActionUrl = null;
     /**
      * Create a new notification instance.
@@ -73,5 +106,20 @@ class TemplateEmail extends Notification implements ShouldQueue
         return [
             'message' => $this->Message[4],
         ];
+    }
+
+    /**
+     * Handle a job failure.
+     *
+     * @param Throwable $exception
+     * @return void
+     */
+    public function failed(Throwable $exception): void
+    {
+        Log::error('TemplateEmail notification failed after all retries', [
+            'error' => $exception->getMessage(),
+            'trace' => $exception->getTraceAsString(),
+            'message' => $this->Message,
+        ]);
     }
 }
