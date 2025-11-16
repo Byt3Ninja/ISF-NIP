@@ -43,9 +43,6 @@ class Organization extends Model
 		return self::image_handler( $image );
 	}
 	// =============> Relations <=================
-	/**
-	 * @return BelongsTo
-	 **/
 
 	public function user()
 	{
@@ -65,6 +62,11 @@ class Organization extends Model
 	public function questions()
 	{
 		return $this->belongsToMany(QuestionsBank::class, 'organization_question_bank', 'organization_id', 'question_id');
+	}
+
+	public function organizationSettings()
+	{
+		return $this->hasOne(OrganizationSettings::class, 'organization_id');
 	}
 
 	public function getLocalizedNameAttribute(): string

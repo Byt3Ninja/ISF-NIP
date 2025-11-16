@@ -10,14 +10,52 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Throwable;
 
 class TemplateNotification extends Notification implements ShouldQueue
 {
     use Queueable, SerializesModels, InteractsWithQueue;
 
+    /**
+     * The number of times the job may be attempted.
+     *
+     * @var int
+     */
+    public $tries = 3;
+
+    /**
+     * The number of seconds to wait before retrying the job.
+     *
+     * @var int
+     */
+    public $backoff = 60;
+
+    /**
+     * Template name.
+     *
+     * @var string
+     */
     protected $templateName;
+
+    /**
+     * Template data.
+     *
+     * @var array
+     */
     protected $templateData;
+
+    /**
+     * Channels override.
+     *
+     * @var array
+     */
     protected $channels;
+
+    /**
+     * Template instance.
+     *
+     * @var NotificationTemplate
+     */
     protected $template;
 
     /**
@@ -288,5 +326,21 @@ class TemplateNotification extends Notification implements ShouldQueue
     public function getTemplate(): NotificationTemplate
     {
         return $this->template;
+    }
+
+    /**
+     * Handle a job failure.
+     *
+     * @param Throwable $exception
+     * @return void
+     */
+    public function failed(Throwable $exception): void
+    {
+        Log::error('TemplateNotification failed after all retries', [
+            'error' => $exception->getMessage(),
+            'trace' => $exception->getTraceAsString(),
+            'template_name' => $this->templateName,
+            'template_data' => $this->templateData,
+        ]);
     }
 }

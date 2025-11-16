@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Notifications\Notification;
@@ -10,12 +11,45 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use App\Broadcasting\WhatsAppChannel;
 use App\Services\GlobalNotificationSettingsService;
+use Throwable;
 
 class MentorshipSession extends Notification implements ShouldQueue
 {
-    use Queueable;
+  use Queueable, ConfiguresSmtp;
+
+    /**
+     * The number of times the job may be attempted.
+     *
+     * @var int
+     */
+    public $tries = 3;
+
+    /**
+     * The number of seconds to wait before retrying the job.
+     *
+     * @var int
+     */
+    public $backoff = 60;
+
+    /**
+     * Message array.
+     *
+     * @var array
+     */
     public $Message;
+
+    /**
+     * Action text.
+     *
+     * @var string
+     */
     public $ActionText = 'Open VI portal';
+
+    /**
+     * Action URL.
+     *
+     * @var string|null
+     */
     public $ActionUrl = null;
 
     /**
@@ -31,33 +65,46 @@ class MentorshipSession extends Notification implements ShouldQueue
      *
      * @return array<int, string>
      */
-   public function via(object $notifiable): array
+    public function via(object $notifiable): array
     {
+        $org = $notifiable->organization;
+        $smtpSettings = $org?->organizationSettings;
+        
+        // Configure SMTP if settings exist
+        $this->configureSmtp($smtpSettings);
+        
+        // Organization channel toggles (default to true when not configured)
+        $orgAcceptEmail = $smtpSettings?->accept_email ?? true;
+        $orgAcceptWhatsapp = $smtpSettings?->accept_whatsapp ?? true;
+        $orgAcceptPusher = $smtpSettings?->accept_pusher ?? true;
 
- 
         $channels = [];
-        // Always store in database for audit/history
-    
 
-        // WhatsApp if enabled globally AND user accepts it
-        if (GlobalNotificationSettingsService::isWhatsAppEnabled()==true && $notifiable->accept_whatsapp ==true) {
+        // WhatsApp if enabled globally AND organization/user accepts it
+        if (GlobalNotificationSettingsService::isWhatsAppEnabled() 
+            && $orgAcceptWhatsapp 
+            && $notifiable->accept_whatsapp) {
             $channels[] = WhatsAppChannel::class;
         }
 
-        // Pusher (broadcast) if enabled globally AND user accepts it
-        if (GlobalNotificationSettingsService::isPusherEnabled()==true && $notifiable->accept_pusher==true) {
+        // Pusher (broadcast) if enabled globally AND organization/user accepts it
+        if (GlobalNotificationSettingsService::isPusherEnabled() 
+            && $orgAcceptPusher 
+            && $notifiable->accept_pusher) {
             $channels[] = 'broadcast';
         }
 
-        // Email if enabled globally AND user accepts it OR as default when nothing else is active
-        if (GlobalNotificationSettingsService::isEmailEnabled() ==true && $notifiable->accept_email ==true ) { // only 'database' present
+        // Email if enabled globally AND organization/user accepts it
+        if (GlobalNotificationSettingsService::isEmailEnabled() 
+            && $orgAcceptEmail 
+            && $notifiable->accept_email) {
             $channels[] = 'mail';
         }
 
+        // Always store in database for audit/history if any channels are active
         if (!empty($channels)) {
-               $channels[] = 'database';
+            $channels[] = 'database';
         }
-
 
         return $channels;
     }
@@ -65,8 +112,13 @@ class MentorshipSession extends Notification implements ShouldQueue
     /**
      * Get the mail representation of the notification.
      */
-   public function toMail($notifiable)
+    public function toMail($notifiable)
     {
+        $org = $notifiable->organization;
+        $smtpSettings = $org?->organizationSettings;
+        
+        // Get from address and name
+        $from = $this->getFromAddress($smtpSettings);
         $url = is_null($this->ActionUrl) ? url($this->Message[3]) : $this->ActionUrl;
         return (new MailMessage)
             ->subject($this->Message[0])
@@ -111,6 +163,21 @@ class MentorshipSession extends Notification implements ShouldQueue
             'subject' => $this->Message[0] ?? __('notifications.mentorship_session.broadcast', ['title' => '']),
             'message' => __('notifications.mentorship_session.broadcast', ['title' => $this->Message[0] ?? '']),
             'time' => now()->toDateTimeString(),
+        ]);
+    }
+
+    /**
+     * Handle a job failure.
+     *
+     * @param Throwable $exception
+     * @return void
+     */
+    public function failed(Throwable $exception): void
+    {
+        Log::error('MentorshipSession notification failed after all retries', [
+            'error' => $exception->getMessage(),
+            'trace' => $exception->getTraceAsString(),
+            'message' => $this->Message,
         ]);
     }
 }
