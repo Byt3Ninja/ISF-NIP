@@ -1080,8 +1080,6 @@
   function populateExpertiseDropdown() {
     const select = document.getElementById('specialization-expertise');
     select.innerHTML = '<option value="">' + (isRtl ? 'اختر مجال الخبرة' : 'Select area of expertise') + '</option>';
-
-    console.log('expertiseData',expertiseData)
     
     expertiseData.forEach(expertise => {
       const option = document.createElement('option');
