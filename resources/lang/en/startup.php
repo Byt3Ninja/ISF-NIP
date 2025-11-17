@@ -5,6 +5,15 @@ return [
   'startup_profile_heading' => 'Startup Profile / Idea',
   'registered' => 'Registered',
   'not_registered' => 'Not Registered',
+  'edit_info' => 'Edit Info',
+  'overview' => 'Overview',
+  'pitch_deck' => 'Pitch Deck / Video',
+  'programs_summary' => 'programs & summary',
+  'team' => 'Team',
+
+  'about_challenges' => 'About & Challenges',
+  'about_problem' => 'About Problem',
+  'about_monetization' => 'About Monetization',
 
   'alumni' => 'Alumni',
   'alumni_status' => 'Alumni Status',
@@ -15,6 +24,7 @@ return [
 
   'saving' => 'Saving...',
 
+  'milestones' => 'Milestones',
   'milestone_title_required' => 'Please enter a milestone title',
   'milestone_title_max_length' => 'Milestone title must not exceed 300 characters',
 
@@ -40,6 +50,8 @@ return [
   'milestone_not_found' => 'Milestone not found.',
   'milestone_id_required' => 'Milestone ID is required.',
 
+  'no_milestones_added_yet' => 'No milestones added yet.',
+
   // Employee
   'Employee' => 'Employee',
   'Employees' => 'Employees',
@@ -58,4 +70,23 @@ return [
   'document_delete_confirm' => 'Are you sure you want to remove this document?',
   'unexpected_error' => 'An unexpected error occurred. Please try again.',
   'employee_delete_failed' => 'Failed to delete employee',
+
+  // Profile Programs
+  'totalMentorshipHours' => 'Total Mentorship Hours',
+  'totalTrainingHours' => 'Total Training Hours',
+  'avgFinalScreening' => 'Average Final Screening Score',
+  'avgAttendanceRate' => 'Average Attendance Rate',
+  'program_Name' => 'Program Name',
+  'organization' => 'Organization',
+  'cohort' => 'Cohort',
+  'start_date' => 'Start Date',
+  'completion_date' => 'Completion Date',
+  'final_screening_score' => 'Final Screening Score',
+  'status' => 'Status',
+  'actions' => 'Actions',
+  'view_details' => 'View Details',
+
+  'upcoming' => 'Upcoming',
+  'ongoing' => 'Ongoing',
+  'completed' => 'Completed',
 ];

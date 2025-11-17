@@ -57,6 +57,7 @@
               <thead>
                 <tr>
                   <th></th>
+                  <th>{{ $l == 'ar' ? 'المعرف' : 'ID' }}</th>
                   <th>{{ $l == 'ar' ? 'الاسم' : 'Name' }}</th>
                   <th>{{ $l == 'ar' ? 'الوصف' : 'Description' }}</th>
                   <th>{{ $l == 'ar' ? 'التخصصات' : 'Specializations' }}</th>
@@ -99,6 +100,7 @@
               <thead>
                 <tr>
                   <th></th>
+                  <th>{{ $l == 'ar' ? 'المعرف' : 'ID' }}</th>
                   <th>{{ $l == 'ar' ? 'الاسم' : 'Name' }}</th>
                   <th>{{ $l == 'ar' ? 'مجال الخبرة' : 'Area of Expertise' }}</th>
                   <th>{{ $l == 'ar' ? 'الوصف' : 'Description' }}</th>
@@ -377,6 +379,7 @@
         data: expertiseData,
         columns: [
           { data: null },
+          { data: 'id' },
           { data: 'name' },
           { data: 'description' },
           { data: 'specializations' },
@@ -398,12 +401,19 @@
             targets: 1,
             responsivePriority: 4,
             render: function (data, type, full, meta) {
+              return '<span class="fw-medium">' + full['id'] + '</span>';
+            }
+          },
+          {
+            targets: 2,
+            responsivePriority: 4,
+            render: function (data, type, full, meta) {
               var $name = full['name'];
               return '<span class="fw-medium">' + $name + '</span>';
             }
           },
           {
-            targets: 2,
+            targets: 3,
             render: function (data, type, full, meta) {
               var $description = full['description'] || '';
               return `
@@ -416,14 +426,14 @@
             }
           },
           {
-            targets: 3,
+            targets: 4,
             render: function (data, type, full, meta) {
               var $count = full['specializations'] || 0;
               return '<span class="badge bg-label-primary">' + $count + '</span>';
             }
           },
           {
-            targets: 4,
+            targets: 5,
             render: function (data, type, full, meta) {
               var $status = full['status'];
               var statusObj = {
@@ -501,6 +511,7 @@
         data: specializationData,
         columns: [
           { data: null },
+          { data: 'id' },
           { data: 'name' },
           { data: 'expertise_name' },
           { data: 'description' },
@@ -522,19 +533,26 @@
             targets: 1,
             responsivePriority: 4,
             render: function (data, type, full, meta) {
+              return '<span class="fw-medium">' + full['id'] + '</span>';
+            }
+          },
+          {
+            targets: 2,
+            responsivePriority: 4,
+            render: function (data, type, full, meta) {
               var $name = full['name'];
               return '<span class="fw-medium">' + $name + '</span>';
             }
           },
           {
-            targets: 2,
+            targets: 3,
             render: function (data, type, full, meta) {
               var $expertise = full['expertise_name'] || '';
               return '<span class="badge bg-label-info">' + $expertise + '</span>';
             }
           },
           {
-            targets: 3,
+            targets: 4,
             render: function (data, type, full, meta) {
               var $description = full['description'] || '';
               return `
@@ -547,7 +565,7 @@
             }
           },
           {
-            targets: 4,
+            targets: 5,
             render: function (data, type, full, meta) {
               var $status = full['status'];
               var statusObj = {
