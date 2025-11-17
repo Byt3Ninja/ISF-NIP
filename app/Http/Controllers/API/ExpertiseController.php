@@ -88,7 +88,15 @@ class ExpertiseController extends Controller
         $addExpertise->status = $request->input('status');
         $addExpertise->save();
 
-        return response()->json($addExpertise);
+        $doneExpertise = [
+            'id' => $addExpertise->id,
+            'name' => $addExpertise->title,
+            'description' => $addExpertise->description,
+            'specializations' => 0,
+            'status' => $addExpertise->status
+        ];
+
+        return response()->json($doneExpertise);
 
     }
 
@@ -117,7 +125,17 @@ class ExpertiseController extends Controller
         }
         $updateExpertise->status = $request->input('status');
         $updateExpertise->save();
-        return response()->json($updateExpertise);
+
+        $doneUpdate = [
+            'id'             => $updateExpertise->id,
+            'name'           => $updateExpertise->title,
+            'expertise_id'   => $updateExpertise->parent_id,
+            'expertise_name' => $updateExpertise->parent ? $updateExpertise->parent->title : null,
+            'description'    => $updateExpertise->description,
+            'status'         => $updateExpertise->status,
+        ];
+
+        return response()->json($doneUpdate);
     }
     public function destroy($id)
     {
