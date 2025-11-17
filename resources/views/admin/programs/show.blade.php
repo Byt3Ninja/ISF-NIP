@@ -302,10 +302,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <div class="d-flex flex-column flex-md-row justify-content-between mb-3 mb-md-0">
                   <h4 class="text-primary mb-3 mb-md-0">{{ $cycle->title }}</h4>                 
                   <div class="d-flex flex-column flex-md-row align-items-md-center gap-4">
-                    <div class="d-flex align-items-center">
-                      <h6 class="mb-0">{{ $l == 'en' ? 'Cohort' : 'الدفعة' }}:</h6>
-                      <span class="badge fs-6 bg-label-primary ms-2">{{ $cycle->cohort }}:</span>
-                    </div>
+                    @if ($cycle->cohort)
+                      <div class="d-flex align-items-center">
+                        <h6 class="mb-0">{{ $l == 'en' ? 'Cohort' : 'الدفعة' }}:</h6>
+                        <span class="badge fs-6 bg-label-primary ms-2">{{ $cycle->cohort }}:</span>
+                      </div>
+                    @endif
                     @if(!empty($cycle->private))
                       <div class="btn btn-transparent" onclick="copyToClipboard('{{ url('dashboard/cycles/view/' . $cycle->private) }}')" >
                       {{__('cycles.Private Link')}}
