@@ -353,15 +353,6 @@
       initializeDataTables();
       
     } catch (error) {
-      // Swal.fire({
-      //   icon: 'error',
-      //   title: isRtl ? 'خطأ' : 'Error',
-      //   text: isRtl ? 'فشل تحميل البيانات' : 'Failed to load data',
-      //   customClass: {
-      //     confirmButton: 'btn btn-primary'
-      //   },
-      //   buttonsStyling: false
-      // });
       console.error('Load data error:', error);
       initializeDataTables();
     }
@@ -371,6 +362,14 @@
   function initializeDataTables() {
     var dt_expertise_table = $('.datatables-expertise-list'),
       dt_specialization_table = $('.datatables-specialization-list');
+
+    // Destroy existing DataTables if they exist
+    if ($.fn.DataTable.isDataTable(dt_expertise_table)) {
+      dt_expertise_table.DataTable().destroy();
+    }
+    if ($.fn.DataTable.isDataTable(dt_specialization_table)) {
+      dt_specialization_table.DataTable().destroy();
+    }
 
     // Expertise DataTable
     if (dt_expertise_table.length) {
@@ -646,6 +645,12 @@
 
   // Initialize event handlers
   function initializeEventHandlers() {
+    // Remove any existing event handlers first to prevent duplicates
+    $(document).off('click', '.edit-expertise');
+    $(document).off('click', '.edit-specialization');
+    $(document).off('click', '.delete-expertise');
+    $(document).off('click', '.delete-specialization');
+
     // Edit expertise
     $(document).on('click', '.edit-expertise', function () {
       const id = $(this).data('id');
@@ -698,8 +703,23 @@
           const deleteResult = await api.delete(API_ENDPOINTS.expertise.delete(id));
           
           if (deleteResult.success) {
-            // Reload data to get updated counts
-            await loadData();
+            // Remove from local data
+            expertiseData = expertiseData.filter(e => e.id != id);
+            
+            // Remove related specializations from local data
+            specializationData = specializationData.filter(s => s.expertise_id != id);
+            
+            // Update DataTable without refetching
+            dt_expertise.clear();
+            dt_expertise.rows.add(expertiseData);
+            dt_expertise.draw();
+            
+            // Also update specialization table if it exists
+            if (dt_specialization) {
+              dt_specialization.clear();
+              dt_specialization.rows.add(specializationData);
+              dt_specialization.draw();
+            }
             
             releaseSuccessAlert({
               title: isRtl ? 'تم الحذف!' : 'Deleted!',
@@ -723,6 +743,8 @@
     // Delete specialization
     $(document).on('click', '.delete-specialization', async function () {
       const id = $(this).data('id');
+      const specialization = specializationData.find(s => s.id == id);
+      
       Swal.fire({
         title: isRtl ? 'هل أنت متأكد؟' : 'Are you sure?',
         text: isRtl ? 'لن تتمكن من التراجع عن هذا!' : 'You won\'t be able to revert this!',
@@ -740,8 +762,26 @@
           const deleteResult = await api.delete(API_ENDPOINTS.specialization.delete(id));
           
           if (deleteResult.success) {
-            // Reload data to get updated counts
-            await loadData();
+            // Remove from local data
+            specializationData = specializationData.filter(s => s.id != id);
+            
+            // Update specialization count for the expertise
+            if (specialization && specialization.expertise_id) {
+              const expertise = expertiseData.find(e => e.id == specialization.expertise_id);
+              if (expertise) {
+                expertise.specializations = Math.max(0, (expertise.specializations || 0) - 1);
+                
+                // Update expertise table
+                dt_expertise.clear();
+                dt_expertise.rows.add(expertiseData);
+                dt_expertise.draw();
+              }
+            }
+            
+            // Update specialization table
+            dt_specialization.clear();
+            dt_specialization.rows.add(specializationData);
+            dt_specialization.draw();
             
             releaseSuccessAlert({
               title: isRtl ? 'تم الحذف!' : 'Deleted!',
@@ -819,8 +859,31 @@
       }
 
       if (result.success) {
-        // Reload data
-        await loadData();
+        // Update local data instead of refetching
+        if (isEditing) {
+          // Update existing expertise
+          const index = expertiseData.findIndex(e => e.id == editingExpertiseId);
+          if (index !== -1) {
+            expertiseData[index] = {
+              ...expertiseData[index],
+              ...data,
+              id: editingExpertiseId
+            };
+          }
+        } else {
+          // Add new expertise (use returned ID from API if available)
+          const newExpertise = {
+            id: result.data.id || Date.now(), // Use API ID or fallback
+            ...data,
+            specializations: 0
+          };
+          expertiseData.unshift(newExpertise); // Add to beginning
+        }
+
+        // Update DataTable without refetching
+        dt_expertise.clear();
+        dt_expertise.rows.add(expertiseData);
+        dt_expertise.draw();
 
         // Hide offcanvas
         $('#offcanvasAddExpertise').offcanvas('hide');
@@ -918,8 +981,69 @@
       }
 
       if (result.success) {
-        // Reload data
-        await loadData();
+        // Get expertise name for display
+        const expertise = expertiseData.find(e => e.id == data.expertise_id);
+        const expertiseName = expertise ? expertise.name : '';
+        
+        // Update local data instead of refetching
+        if (isEditing) {
+          // Track old expertise_id to update counts
+          const oldSpecialization = specializationData.find(s => s.id == editingSpecializationId);
+          const oldExpertiseId = oldSpecialization ? oldSpecialization.expertise_id : null;
+          
+          // Update existing specialization
+          const index = specializationData.findIndex(s => s.id == editingSpecializationId);
+          if (index !== -1) {
+            specializationData[index] = {
+              ...specializationData[index],
+              ...data,
+              expertise_name: expertiseName,
+              id: editingSpecializationId
+            };
+          }
+          
+          // Update specialization counts if expertise changed
+          if (oldExpertiseId && oldExpertiseId != data.expertise_id) {
+            // Decrease old expertise count
+            const oldExpertise = expertiseData.find(e => e.id == oldExpertiseId);
+            if (oldExpertise) {
+              oldExpertise.specializations = Math.max(0, (oldExpertise.specializations || 0) - 1);
+            }
+            
+            // Increase new expertise count
+            if (expertise) {
+              expertise.specializations = (expertise.specializations || 0) + 1;
+            }
+            
+            // Update expertise table
+            dt_expertise.clear();
+            dt_expertise.rows.add(expertiseData);
+            dt_expertise.draw();
+          }
+        } else {
+          // Add new specialization (use returned ID from API if available)
+          const newSpecialization = {
+            id: result.data.id || Date.now(), // Use API ID or fallback
+            ...data,
+            expertise_name: expertiseName
+          };
+          specializationData.unshift(newSpecialization); // Add to beginning
+          
+          // Increase expertise count
+          if (expertise) {
+            expertise.specializations = (expertise.specializations || 0) + 1;
+            
+            // Update expertise table
+            dt_expertise.clear();
+            dt_expertise.rows.add(expertiseData);
+            dt_expertise.draw();
+          }
+        }
+
+        // Update specialization DataTable without refetching
+        dt_specialization.clear();
+        dt_specialization.rows.add(specializationData);
+        dt_specialization.draw();
 
         // Hide offcanvas
         $('#offcanvasAddSpecialization').offcanvas('hide');
@@ -956,14 +1080,14 @@
   function populateExpertiseDropdown() {
     const select = document.getElementById('specialization-expertise');
     select.innerHTML = '<option value="">' + (isRtl ? 'اختر مجال الخبرة' : 'Select area of expertise') + '</option>';
+
+    console.log('expertiseData',expertiseData)
     
     expertiseData.forEach(expertise => {
-      if (expertise.status === 'active') {
-        const option = document.createElement('option');
-        option.value = expertise.id;
-        option.textContent = expertise.name;
-        select.appendChild(option);
-      }
+      const option = document.createElement('option');
+      option.value = expertise.id;
+      option.textContent = expertise.name;
+      select.appendChild(option);
     });
   }
 
@@ -1032,8 +1156,26 @@
         const result = await api.post(API_ENDPOINTS.expertise.import, { items: jsonData });
 
         if (result.success) {
-          // Reload data
-          await loadData();
+          // Add imported items to local data (if API returns them)
+          if (result.data.items && Array.isArray(result.data.items)) {
+            result.data.items.forEach(item => {
+              const exists = expertiseData.find(e => e.id == item.id);
+              if (!exists) {
+                expertiseData.unshift(item);
+              }
+            });
+          } else {
+            // If API doesn't return items, refetch only expertise data
+            const expertiseResult = await api.get(API_ENDPOINTS.expertise.list);
+            if (expertiseResult.success) {
+              expertiseData = expertiseResult.data;
+            }
+          }
+          
+          // Update DataTable
+          dt_expertise.clear();
+          dt_expertise.rows.add(expertiseData);
+          dt_expertise.draw();
 
           const importedCount = result.data.imported || 0;
           const skippedCount = result.data.skipped || 0;
@@ -1109,8 +1251,45 @@
         const result = await api.post(API_ENDPOINTS.specialization.import, { items: jsonData });
 
         if (result.success) {
-          // Reload data
-          await loadData();
+          // Add imported items to local data and update counts
+          if (result.data.items && Array.isArray(result.data.items)) {
+            result.data.items.forEach(item => {
+              const exists = specializationData.find(s => s.id == item.id);
+              if (!exists) {
+                specializationData.unshift(item);
+                
+                // Update expertise count
+                const expertise = expertiseData.find(e => e.id == item.expertise_id);
+                if (expertise) {
+                  expertise.specializations = (expertise.specializations || 0) + 1;
+                }
+              }
+            });
+            
+            // Update both tables
+            dt_expertise.clear();
+            dt_expertise.rows.add(expertiseData);
+            dt_expertise.draw();
+          } else {
+            // If API doesn't return items, refetch both data sets
+            const specializationResult = await api.get(API_ENDPOINTS.specialization.list);
+            if (specializationResult.success) {
+              specializationData = specializationResult.data;
+            }
+            
+            const expertiseResult = await api.get(API_ENDPOINTS.expertise.list);
+            if (expertiseResult.success) {
+              expertiseData = expertiseResult.data;
+              dt_expertise.clear();
+              dt_expertise.rows.add(expertiseData);
+              dt_expertise.draw();
+            }
+          }
+          
+          // Update specialization DataTable
+          dt_specialization.clear();
+          dt_specialization.rows.add(specializationData);
+          dt_specialization.draw();
 
           const importedCount = result.data.imported || 0;
           const skippedCount = result.data.skipped || 0;
@@ -1160,23 +1339,13 @@
   document.getElementById('expertise-import-file').addEventListener('change', handleExpertiseImport);
   document.getElementById('specialization-import-file').addEventListener('change', handleSpecializationImport);
 
-  // Tab switch event handler
-  $('a[data-bs-toggle="pill"]').on('shown.bs.tab', async function (e) {
+  // Tab switch event handler - just redraw with existing data
+  $('a[data-bs-toggle="pill"]').on('shown.bs.tab', function (e) {
     const target = $(e.target).attr('data-bs-target');
     
-    if (target === '#specializations') {
-      // Reload specialization data when switching to specializations tab
-      const specializationResult = await api.get(API_ENDPOINTS.specialization.list);
-      if (specializationResult.success) {
-        specializationData = specializationResult.data;
-        
-        // Refresh the DataTable with new data
-        if (dt_specialization) {
-          dt_specialization.clear();
-          dt_specialization.rows.add(specializationData);
-          dt_specialization.draw();
-        }
-      }
+    // Just redraw the table with existing data
+    if (target === '#specializations' && dt_specialization) {
+      dt_specialization.draw();
     }
   });
 
