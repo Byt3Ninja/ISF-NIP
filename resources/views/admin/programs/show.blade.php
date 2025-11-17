@@ -76,7 +76,23 @@
   $minutesm = $totalMentorperiod1 % 60;
   $totalMentorperiod = "{$hoursm} h {$minutesm} m";
 
-  $totalMentorrating = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $cycle->id)->whereNotNull('rating')->avg('rating');
+  // $mentorrating = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $cycle->id)->get();
+  //       $company = app(\App\Company::class)->where('cycle', '=', $cycle->id)->count();
+  //       $session_report = app(\App\SessionReport::class)->whereIn('mentorship_request_id', $mentorrating->pluck('id'))->count(); 
+
+        $mentorshipRequests = \App\MentorshipRequest::where('cycle_id', $cycle->id)->get();
+        $totalRequests = $mentorshipRequests->count();
+
+        $companiesCount = \App\Company::where('cycle', $cycle->id)->count();
+
+        $sessionReportsCount = \App\SessionReport::whereIn('mentorship_request_id', $mentorshipRequests->pluck('id'))->count();
+
+        $totalMentorrating = 0;
+
+        if ($totalRequests > 0) {
+            $totalMentorrating = ($sessionReportsCount / $totalRequests) * 100;
+        }
+        
   $totalStepsIdsCount = 0;
   $totalDurationSum = 0;
   $totalDurationSum1 = 0;
@@ -128,7 +144,7 @@ $orgCollection = collect([
 [__('admin.Mentors'), 'user', $mentors->count(), 'light'],
 [__('cycles.All requests'), 'report', $totalMentorRequest, 'warning'],
 [__('admin.Mentorship_sessions_duration_(hours)'), 'clock-hour-5', $totalMentorperiod, 'success'],
-[__('admin.Company_Attendance_Rate'), 'heart-rate-monitor', '5 / '.number_format($totalMentorrating, 2), 'danger'],
+[__('admin.Company_Attendance_Rate'), 'heart-rate-monitor', number_format($totalMentorrating, 2) . ' %', 'danger'],
 [__('admin.Training sessions'), 'layers-subtract', $totalStepsIdsCount, 'light'],
 [__('admin.Startups_trainings_Hours'), 'clock-hour-5', $totalDurationSum, 'success'],
 [__('admin.Traditional_Evaluation_pending'), 'transform', $answerspinding, 'warning'],
