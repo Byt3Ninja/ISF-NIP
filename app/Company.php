@@ -359,6 +359,11 @@ class Company extends Model
      return $this->hasMany(Team_member::class, 'Company_id');
    }
 
+   public function employees()
+   {
+     return $this->hasMany(Employee::class, 'company_id');
+   }
+
    public function milestones()
    {
       return $this->hasMany(Milestone::class, 'Company_id');

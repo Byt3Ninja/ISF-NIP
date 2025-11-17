@@ -17,6 +17,7 @@ use App\Settings;
 use App\Milestone;
 use App\Technology;
 use App\Team_member;
+use App\Employee;
 use App\FundingRound;
 use App\Organization;
 use App\StaticCategory;
@@ -2102,14 +2103,14 @@ class ClientCompanyController extends Controller
                 'job_title' => 'required|string|max:255',
                 'gender' => 'required|in:male,female',
                 'employment_type' => 'required|in:full-time,part-time,contractor,intern',
-                'hiring_data' => 'required|date',
+                'hiring_date' => 'required|date',
                 'documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,docx|max:10240'
             ], [
                 'full_name.required' => 'Employee name is required',
                 'job_title.required' => 'Job title is required',
                 'gender.required' => 'Gender is required',
                 'employment_type.required' => 'Employment type is required',
-                'hiring_data.required' => 'Hiring date is required',
+                'hiring_date.required' => 'Hiring date is required',
                 'documents.*.mimes' => 'Documents must be PDF, JPG, PNG, or DOCX files',
                 'documents.*.max' => 'Each document must be less than 10MB'
             ]);
@@ -2120,14 +2121,13 @@ class ClientCompanyController extends Controller
                 ], 422);
             }
 
-            $employee = new Team_member();
-            $employee->Company_id = $id;
-            $employee->Name = $request->full_name;
-            $employee->RoleShereholder = $request->job_title;
+            $employee = new Employee();
+            $employee->company_id = $id;
+            $employee->full_name = $request->full_name;
+            $employee->job_title = $request->job_title;
             $employee->gender = $request->gender;
             $employee->employment_type = $request->employment_type;
             $employee->hiring_date = $request->hiring_date;
-            $employee->TeamMember = 'Employee';
 
             // Handle document uploads
             if ($request->hasFile('documents')) {
@@ -2138,7 +2138,7 @@ class ClientCompanyController extends Controller
                     
                     $documents[] = [
                         'name' => $file->getClientOriginalName(),
-                        'url' => Storage::disk('public')->url($path),
+                        'url' => asset('storage/' . $path),
                         'path' => $path
                     ];
                 }
@@ -2176,12 +2176,12 @@ class ClientCompanyController extends Controller
             }
 
             $validator = Validator::make($request->all(), [
-                'id' => 'required|exists:team_members,id',
+                'id' => 'required|exists:employees,id',
                 'full_name' => 'required|string|max:255',
                 'job_title' => 'required|string|max:255',
                 'gender' => 'required|in:male,female',
                 'employment_type' => 'required|in:full-time,part-time,contractor,intern',
-                'hiring_data' => 'required|date',
+                'hiring_date' => 'required|date',
                 'documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,docx|max:10240',
                 'remove_documents' => 'nullable|string'
             ], [
@@ -2191,7 +2191,7 @@ class ClientCompanyController extends Controller
                 'job_title.required' => 'Job title is required',
                 'gender.required' => 'Gender is required',
                 'employment_type.required' => 'Employment type is required',
-                'hiring_data.required' => 'Hiring date is required',
+                'hiring_date.required' => 'Hiring date is required',
                 'documents.*.mimes' => 'Documents must be PDF, JPG, PNG, or DOCX files',
                 'documents.*.max' => 'Each document must be less than 10MB'
             ]);
@@ -2202,16 +2202,15 @@ class ClientCompanyController extends Controller
                 ], 422);
             }
 
-            $employee = Team_member::where('id', $request->id)
-                                 ->where('Company_id', $id)
-                                 ->where('TeamMember', 'Employee')
+            $employee = Employee::where('id', $request->id)
+                                 ->where('company_id', $id)
                                  ->firstOrFail();
 
-            $employee->Name = $request->full_name;
-            $employee->RoleShereholder = $request->job_title;
+            $employee->full_name = $request->full_name;
+            $employee->job_title = $request->job_title;
             $employee->gender = $request->gender;
             $employee->employment_type = $request->employment_type;
-            $employee->hiring_date = $request->hiring_data;
+            $employee->hiring_date = $request->hiring_date;
 
             // Handle existing documents
             $existingDocs = $employee->documents ?: [];
@@ -2245,7 +2244,7 @@ class ClientCompanyController extends Controller
                     
                     $newDocuments[] = [
                         'name' => $file->getClientOriginalName(),
-                        'url' => Storage::disk('public')->url($path),
+                        'url' => asset('storage/' . $path),
                         'path' => $path
                     ];
                 }
@@ -2283,8 +2282,31 @@ class ClientCompanyController extends Controller
                 ], 403);
             }
 
-            $validator = Validator::make($request->all(), [
-                'id' => 'required|exists:team_members,id'
+            // Get employee ID from request - handle both JSON and form data
+            $employeeId = null;
+            
+            // Try to get from JSON body first (for DELETE requests with JSON)
+            $contentType = $request->header('Content-Type');
+            if ($contentType && strpos($contentType, 'application/json') !== false) {
+                $jsonData = json_decode($request->getContent(), true);
+                if ($jsonData && isset($jsonData['id'])) {
+                    $employeeId = $jsonData['id'];
+                }
+            }
+            
+            // Fallback to input/get methods (for form data)
+            if (!$employeeId) {
+                $employeeId = $request->input('id') ?? $request->get('id');
+            }
+            
+            if (!$employeeId) {
+                return response()->json([
+                    'errors' => ['id' => ['Employee ID is required']]
+                ], 422);
+            }
+
+            $validator = Validator::make(['id' => $employeeId], [
+                'id' => 'required|exists:employees,id'
             ], [
                 'id.required' => 'Employee ID is required',
                 'id.exists' => 'Employee not found'
@@ -2296,9 +2318,8 @@ class ClientCompanyController extends Controller
                 ], 422);
             }
 
-            $employee = Team_member::where('id', $request->id)
-                                 ->where('Company_id', $id)
-                                 ->where('TeamMember', 'Employee')
+            $employee = Employee::where('id', $employeeId)
+                                 ->where('company_id', $id)
                                  ->firstOrFail();
 
             // Delete associated documents
