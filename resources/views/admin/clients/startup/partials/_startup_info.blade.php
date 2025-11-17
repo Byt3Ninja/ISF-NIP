@@ -29,14 +29,21 @@
                       @endif
                     </div>
                   </div>
-                  @if ($company->est_date)
-                  <div class="mb-2 mb-md-0">
-                    <span class="badge bg-label-info rounded-pill">
-                      <i class="ti ti-calendar ti-xs me-1"></i>
-                      {{ __('admin.Established in') }} {{ \Carbon\Carbon::parse($company->est_date)->format('Y') }}
-                    </span>
+                  <div class="d-flex align-items-center gap-4 mb-d mb-md-0">
+                    @if ($company->est_date)
+                      <span class="badge bg-label-info rounded-pill">
+                        <i class="ti ti-calendar ti-xs me-1"></i>
+                        {{ __('admin.Established in') }} {{ \Carbon\Carbon::parse($company->est_date)->format('Y') }}
+                      </span>
+                    @endif
+                    {{-- Alumni Badge --}}
+                    @if ($company->alumni == '1' || $company->alumni == 1)
+                      <span class="badge bg-label-danger rounded-pill">
+                        <i class="ti ti-pennant ti-xs me-1"></i>
+                        {{ __('startup.alumni') }}
+                      </span>
+                    @endif
                   </div>
-                  @endif
                 </div>
                 <div class="social-links d-flex align-items-center justify-content-start justify-content-md-end">
                   <div class="d-flex align-items-center gap-2">
