@@ -9,6 +9,10 @@ class Team_member extends Model
 {
     protected $table = 'team_members';
     protected $guarded = [];
+    
+    protected $casts = [
+        'documents' => 'array',
+    ];
 
     public function projects() 
     {
