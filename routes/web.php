@@ -76,6 +76,10 @@ Route::get('search', 'IndexController@search');
 Route::get('event/{id}', 'IndexController@event');
 Route::post('eventregister', 'IndexController@eventregister');
 
+Route::get('/provider-registration', 'serviceProviderController@registration');
+Route::post('/provider-registration', 'serviceProviderController@registration_request')->name('provider-registration');
+Route::get('/provider-registration/files/{files?}', 'serviceProviderController@get_media')->where('files', '.*');
+
 // test middleware
 Route::get('/testting', function () {
     $stamp = '1746024780';
@@ -296,7 +300,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('/myProfile', 'ClientProfileController@update')->name('user.profile_update_basic');
     Route::post('/myProfile/bio', 'ClientProfileController@Updatebio')->name('user.profile_update_bio');
     Route::post('/myProfile/password', 'ClientProfileController@updatePassword')->name('user.account_update_password');
-Route::post('/myProfile/notification-settings', 'ClientProfileController@updateNotificationSettings')->name('user.notification_settings_update');
+    Route::post('/myProfile/notification-settings', 'ClientProfileController@updateNotificationSettings')->name('user.notification_settings_update');
     Route::get('/show/UserProfile/{id}', 'ClientProfileController@showMintorprofile')->name('mentors.profile_view');
     Route::get('/show/Mentors', 'ClientProfileController@showMintors')->name('mentors.list');
     // lowercase alias for backward-compatibility / ease of testing
@@ -815,8 +819,6 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
         }
     });
 });
-
-
 
 ///// Reports routes
 //Route::group(['prefix' => 'reports',  'middleware' => ['auth', 'verified']], function(){

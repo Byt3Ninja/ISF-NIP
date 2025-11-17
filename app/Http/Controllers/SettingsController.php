@@ -1173,10 +1173,10 @@ class SettingsController extends Controller
 			return view('admin.settings.industry.index', compact('data', 'technologies'));
 		}
 		
-	public function expertiseSettings(Request $request) 
-	{		
-		return view('admin.settings.expertise.index');
-	}
+	// public function expertiseSettings(Request $request) 
+	// {		
+	// 	return view('admin.settings.expertise.index');
+	// }
 
 	/**
 	 * Display notification settings page

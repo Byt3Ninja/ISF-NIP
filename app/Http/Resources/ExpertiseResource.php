@@ -15,11 +15,15 @@ class ExpertiseResource extends JsonResource
     public function toArray(Request $request): array
     {
         $lang = app()->getLocale();
-        $title = $lang === 'ar' ? $this->title_ar : $this->title;
+        $title = $this->title;
 
         return [
             'id' => $this->id,
             'title' => $title,
+            'name' => $title,
+            'description' => $this->description,
+            'specializations' => $this->children ? $this->children->count() : 0,
+            'status' => $this->status
         ];
     }
 }

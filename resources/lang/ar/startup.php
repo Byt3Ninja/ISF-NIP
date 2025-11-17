@@ -5,6 +5,15 @@ return [
   'startup_profile_heading' => 'تفاصيل الشركة الناشئة / الفكرة',
   'registered' => 'مسجلة',
   'not_registered' => 'ليست مسجلة بعد',
+  'edit_info' => 'تعديل المعلومات',
+  'overview' => 'نظرة عامة',
+  'pitch_deck' => 'فكرة التقدم / الفيديو',
+  'programs_summary' => 'البرامج والملخص',
+  'team' => 'فريق العمل',
+
+  'about_challenges' => 'حول الشركة والتحديات',
+  'about_problem' => 'حول المشكلة',
+  'about_monetization' => 'حول تحقيق الربح',
 
   'alumni' => 'خريج',
   'alumni_status' => 'حالة الخريجين',
@@ -15,6 +24,7 @@ return [
 
   'saving' => 'جارٍ الحفظ...',
 
+  'milestones' => 'المراحل الانتقالية',
   'milestone_title_required' => 'يرجى إدخال عنوان المرحلة الانتقالية',
   'milestone_title_max_length' => 'يجب ألا يتجاوز عنوان المرحلة الانتقالية 300 حرف',
 
@@ -40,6 +50,8 @@ return [
   'milestone_not_found' => 'لم يتم العثور على المرحلة الانتقالية.',
   'milestone_id_required' => 'معرف المرحلة الانتقالية مطلوب.',
 
+  'no_milestones_added_yet' => 'لا توجد مراحل انتقالية اضيفت بعد.',
+
   // Employee
   'Employee' => 'موظف',
   'Employees' => 'الموظفين',
@@ -59,4 +71,23 @@ return [
   'document_delete_confirm' => 'هل أنت متأكد من إزالة هذا المستند؟',
   'unexpected_error' => 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.',
   'employee_delete_failed' => 'فشل في حذف الموظف',
+
+  // Profile Programs
+  'totalMentorshipHours' => 'إجمالي ساعات الإرشاد',
+  'totalTrainingHours' => 'إجمالي ساعات التدريب',
+  'avgFinalScreening' => 'متوسط درجة الفحص النهائي',
+  'avgAttendanceRate' => 'متوسط معدل الحضور',
+  'program_Name' => 'اسم البرنامج',
+  'organization' => 'المنظمة',
+  'cohort' => 'الدفعة',
+  'start_date' => 'تاريخ البداية',
+  'completion_date' => 'تاريخ الانتهاء',
+  'final_screening_score' => 'درجة الفحص النهائي',
+  'status' => 'الحالة',
+  'actions' => 'الإجراءات',
+  'view_details' => 'عرض التفاصيل',
+
+  'upcoming' => 'قادمة',
+  'ongoing' => 'جارية',
+  'completed' => 'مكتملة',
 ];
