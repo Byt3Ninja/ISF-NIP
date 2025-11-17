@@ -186,39 +186,3 @@
 </div>
 
 {{-- @include('admin.clients.startup.partials._working_team') --}}
-
-<!-- Sustainable Development Icons -->
-@php
-// تحويل السلسلة إلى مصفوفة بعد إزالة الشرطات المائلة
-// $Sustainables = explode(',', $company->Sustainable_development);
-$Sustainables = json_decode($company->Sustainable_development);
-@endphp
-@if (!empty($Sustainables) && count($Sustainables) > 0)
-<section class="row">
-  <div class="col-12">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">
-          {{ $l == 'en' ? 'Sustainability Goals' : 'اهداف الاستدامة' }}
-        </h5>
-        <div class="row w-75">
-          @foreach ($Sustainables as $Sustainable)
-          @php
-          $icon = App\SustainableIcon::where('title', $Sustainable)->first();
-          @endphp
-          <div class="col-md-2 mb-2">
-            <div class="border light-shadow radius-15" style="display: grid; place-items: center;">
-              @if ($icon && $icon->icon_ar)
-              <img src="/images/sustainability/{{ $l }}/{{ $icon->icon_ar ?? '1.png' }}" alt="icon"
-                style="width: 100px; height: 100px;">
-              @endif
-            </div>
-          </div>
-          @endforeach
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-@endif
-<!-- / Sustainable Development Icons -->
