@@ -148,6 +148,78 @@ class ExpertiseController extends Controller
         return response()->json($deleteExpertise);
     }
 
+    public function import(Request $request)
+    {
+      $request->validate([
+          'items' => 'required|array',
+      ]);
+
+      $imported = [];
+
+      foreach ($request->input('items') as $data) {
+          if (!isset($data['name'], $data['status'])) {
+              continue;
+          }
+
+          $expertise = new Expertise();
+          $expertise->title = $data['name'];
+          $expertise->title_ar = $data['name'];
+          $expertise->description = $data['description'] ?? null;
+          $expertise->status = $data['status'];
+          $expertise->save();
+
+          $imported[] = [
+              'id' => $expertise->id,
+              'name' => $expertise->title,
+              'description' => $expertise->description,
+              'status' => $expertise->status
+          ];
+      }
+
+      return response()->json([
+          'imported_count' => count($imported),
+          'imported' => $imported
+      ]);
+
+    }
+    public function importSpecialization(Request $request)
+    {
+      $request->validate([
+          'items' => 'required|array',
+      ]);
+
+      $imported = [];
+
+      foreach ($request->input('items') as $data) {
+          if (!isset($data['name'], $data['status'])) {
+              continue;
+          }
+
+          $expertise = new Expertise();
+          $expertise->title = $data['name'];
+          $expertise->title_ar = $data['name'];
+          $expertise->parent_id = $data['expertise_id'];
+          $expertise->description = $data['description'] ?? null;
+          $expertise->status = $data['status'];
+          $expertise->save();
+
+          $imported[] = [
+              'id' => $expertise->id,
+              'name' => $expertise->title,
+              'expertise_id' => $expertise->parent_id,
+              'expertise_name' => $expertise->parent ? $expertise->parent->title : null,
+              'description' => $expertise->description,
+              'status' => $expertise->status
+          ];
+      }
+
+      return response()->json([
+          'imported_count' => count($imported),
+          'imported' => $imported
+      ]);
+
+    }
+
 
 
 }
