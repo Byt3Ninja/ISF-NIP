@@ -19,7 +19,10 @@ class ExpertiseResource extends JsonResource
 
         return [
             'id' => $this->id,
-            'title' => $title,
+            'name' => $title,
+            'description' => $this->description,
+            'specializations' => $this->children ? $this->children->count() : 0,
+            'status' => $this->status
         ];
     }
 }
