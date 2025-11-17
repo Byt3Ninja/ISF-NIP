@@ -405,7 +405,7 @@
                     @elseif($team->project->status == 80)
                       <span class="badge bg-label-success">{{ __('admin.Ready for Pitch') }}</span>
                     @elseif($team->project->status == 100)
-                      <span class="badge bg-label-dark">{{ __('admin.Submitted') }}</span>
+                      <span class="badge bg-label-dark">{{ __('admin.Project Submitted') }}</span>
                     @else
                       <span class="badge bg-label-secondary">{{ $l == 'en' ? 'Not Set' : 'غير محدد' }}</span>
                     @endif
