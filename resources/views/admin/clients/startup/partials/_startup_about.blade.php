@@ -1,8 +1,8 @@
 <div class="mb-6">
-  <div class="row gy-4">
+  <div class="row gy-6">
 
     {{-- About Problem --}}
-    <div class="col-12 mb-6">
+    <div class="col-12">
       <div class="card shadow-sm">
         <div class="card-body">
 
@@ -51,7 +51,7 @@
     @endphp
 
     @if (!empty($Sustainables) && count($Sustainables) > 0)
-    <div class="col-12 mb-6">
+    <div class="col-12">
       <div class="card shadow-sm">
         <div class="card-body">
           <h5 class="card-title">
@@ -79,7 +79,7 @@
     <!-- / Sustainable Development Icons -->
 
     {{-- Business Model --}}
-    <div class="col-12 mb-6">
+    <div class="col-12">
       <div class="card shadow-sm">
         <div class="card-body">
 
@@ -139,7 +139,7 @@
 
     {{-- Financial Plan --}}
     @if ($company->financial_plan || $company->financial_plan_description)
-      <div class="col-12 mb-6">
+      <div class="col-12">
         <div class="card shadow-sm">
           <div class="card-body">
 

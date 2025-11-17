@@ -10,7 +10,8 @@ return [
   'pitch_deck' => 'Pitch Deck / Video',
   'programs_summary' => 'programs & summary',
   'team' => 'Team',
-
+  'team_info' => 'Team Info',
+  
   'about_challenges' => 'About & Challenges',
   'about_problem' => 'About Problem',
   'about_monetization' => 'About Monetization',

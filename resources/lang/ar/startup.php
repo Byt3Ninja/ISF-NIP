@@ -10,6 +10,8 @@ return [
   'pitch_deck' => 'فكرة التقدم / الفيديو',
   'programs_summary' => 'البرامج والملخص',
   'team' => 'فريق العمل',
+  'team_info' => 'معلومات الفريق',
+  
 
   'about_challenges' => 'حول الشركة والتحديات',
   'about_problem' => 'حول المشكلة',

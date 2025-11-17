@@ -1,6 +1,6 @@
 <!-- Shareholders Column -->
 <div class="col-12 mb-3">
-  <div class="card shadow-sm" style="border-radius: 15px;">
+  <div class="card shadow-sm">
     <div class="p-4">
       <h5 class="card-title border-bottom pb-2 mb-6">{{ __('admin.shareholders') }}</h5>
       <form
@@ -97,7 +97,7 @@
         <div class="row">
           @foreach ($Shareholders as $Shareholder)
           <div class="col-md-6">
-            <div class="card shadow-sm mb-4 position-relative" style="border-radius: 15px;">
+            <div class="card shadow-sm mb-4 position-relative">
               <span class="position-absolute cursor-pointer top-0 end-0 p-4" onclick="togglePopup({{ $Shareholder->id }})">
                 <i class="ti ti-dots-vertical fs-5"></i>
               </span>
