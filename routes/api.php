@@ -54,11 +54,13 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::get('/expertise',[ExpertiseController::class, 'index']);
 Route::post('/expertise',[ExpertiseController::class, 'store']);
 Route::put('/expertise/{id}',[ExpertiseController::class, 'update']);
+Route::post('/expertise/import',[ExpertiseController::class, 'import']);
 Route::delete('/expertise/{id}',[ExpertiseController::class, 'destroy']);
 Route::get('/specializations',[ExpertiseController::class, 'children']);
 Route::post('/specializations',[ExpertiseController::class, 'store']);
 Route::put('/specializations/{id}',[ExpertiseController::class, 'update']);
 Route::delete('/specializations/{id}',[ExpertiseController::class, 'destroy']);
+Route::post('/specializations/import',[ExpertiseController::class, 'importSpecialization']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 Route::middleware('sanctum.custom')->group(function () {
