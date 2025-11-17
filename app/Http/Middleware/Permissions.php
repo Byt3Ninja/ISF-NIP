@@ -12,6 +12,7 @@ use Spatie\Permission\PermissionRegistrar;
 class Permissions
 {
     private $exceptNames = [
+        'provider-registration',
         'filemanager*',
         'dashboard',
         'dashboard/dashboard',
