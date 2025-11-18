@@ -62,6 +62,7 @@
                   <th>{{ $l == 'ar' ? 'الوصف' : 'Description' }}</th>
                   <th>{{ $l == 'ar' ? 'التخصصات' : 'Specializations' }}</th>
                   <th>{{ $l == 'ar' ? 'الحالة' : 'Status' }}</th>
+                  <th>{{ $l == 'ar' ? 'تاريخ الإنشاء' : 'Created At' }}</th>
                   <th>{{ $l == 'ar' ? 'الإجراءات' : 'Actions' }}</th>
                 </tr>
               </thead>
@@ -105,6 +106,7 @@
                   <th>{{ $l == 'ar' ? 'مجال الخبرة' : 'Area of Expertise' }}</th>
                   <th>{{ $l == 'ar' ? 'الوصف' : 'Description' }}</th>
                   <th>{{ $l == 'ar' ? 'الحالة' : 'Status' }}</th>
+                  <th>{{ $l == 'ar' ? 'تاريخ الإنشاء' : 'Created At' }}</th>
                   <th>{{ $l == 'ar' ? 'الإجراءات' : 'Actions' }}</th>
                 </tr>
               </thead>
@@ -383,6 +385,7 @@
           { data: 'description' },
           { data: 'specializations' },
           { data: 'status' },
+          { data: 'createdAt' },
           { data: null }
         ],
         columnDefs: [
@@ -416,7 +419,7 @@
             render: function (data, type, full, meta) {
               var $description = full['description'] || '';
               return `
-                <div class="d-flex align-items-center" style="width: 400px;">
+                <div class="d-flex align-items-center" style="max-width: 400px;">
                   <span class="text-truncate" style="max-width: 100%;">
                     ${$description}
                   </span>
@@ -449,6 +452,12 @@
             }
           },
           {
+            targets: 6,
+            render: function (data, type, full, meta) {
+              return full['createdAt'] ? moment(full['createdAt']).format('YYYY-MM-DD HH:mm:ss') : '';
+            }
+          },
+          {
             targets: -1,
             title: isRtl ? 'الإجراءات' : 'Actions',
             searchable: false,
@@ -463,7 +472,7 @@
             }
           }
         ],
-        order: [[1, 'desc']],
+        order: [[6, 'desc']],
         dom:
           '<"row me-2"' +
           '<"col-md-2"<"me-3"l>>' +
@@ -472,8 +481,16 @@
           '<"row mx-2"' +
           '<"col-sm-12 col-md-6"i>' +
           '<"col-sm-12 col-md-6"p>' +
-          '>',
-        language: isRtl ? { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/ar.json' } : {},
+          '>'
+        @if (app()->getLocale() == 'ar')
+        ,language: {
+          search: 'ابحث:',
+          lengthMenu: 'أظهر _MENU_ مدخلات',
+          info: 'إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل',
+          paginate: { previous: 'السابق', next: 'التالي' },
+          emptyTable: 'لا توجد بيانات'
+        }
+        @endif,
         buttons: [
           {
             extend: 'collection',
@@ -485,7 +502,7 @@
                 text: '<i class="ti ti-file-text me-2" ></i>Csv',
                 className: 'dropdown-item',
                 exportOptions: {
-                  columns: [1, 2, 3, 4]
+                  columns: [1, 2, 3, 4, 5, 6]
                 }
               },
               {
@@ -493,7 +510,7 @@
                 text: '<i class="ti ti-file-spreadsheet me-2"></i>Excel',
                 className: 'dropdown-item',
                 exportOptions: {
-                  columns: [1, 2, 3, 4]
+                  columns: [1, 2, 3, 4, 5, 6]
                 }
               }
             ]
@@ -515,6 +532,7 @@
           { data: 'expertise_name' },
           { data: 'description' },
           { data: 'status' },
+          { data: 'createdAt' },
           { data: null }
         ],
         columnDefs: [
@@ -555,7 +573,7 @@
             render: function (data, type, full, meta) {
               var $description = full['description'] || '';
               return `
-                <div class="d-flex align-items-center" style="width: 400px;">
+                <div class="d-flex align-items-center" style="max-width: 400px;">
                   <span class="text-truncate" style="max-width: 100%;">
                     ${$description}
                   </span>
@@ -581,6 +599,12 @@
             }
           },
           {
+            targets: 6,
+            render: function (data, type, full, meta) {
+              return full['createdAt'] ? moment(full['createdAt']).format('YYYY-MM-DD HH:mm:ss') : '';
+            }
+          },
+          {
             targets: -1,
             title: isRtl ? 'الإجراءات' : 'Actions',
             searchable: false,
@@ -595,7 +619,7 @@
             }
           }
         ],
-        order: [[1, 'desc']],
+        order: [[6, 'desc']],
         dom:
           '<"row me-2"' +
           '<"col-md-2"<"me-3"l>>' +
@@ -604,8 +628,16 @@
           '<"row mx-2"' +
           '<"col-sm-12 col-md-6"i>' +
           '<"col-sm-12 col-md-6"p>' +
-          '>',
-        language: isRtl ? { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/ar.json' } : {},
+          '>'
+        @if (app()->getLocale() == 'ar')
+        ,language: {
+          search: 'ابحث:',
+          lengthMenu: 'أظهر _MENU_ مدخلات',
+          info: 'إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل',
+          paginate: { previous: 'السابق', next: 'التالي' },
+          emptyTable: 'لا توجد بيانات'
+        }
+        @endif,
         buttons: [
           {
             extend: 'collection',
@@ -617,7 +649,7 @@
                 text: '<i class="ti ti-file-text me-2" ></i>Csv',
                 className: 'dropdown-item',
                 exportOptions: {
-                  columns: [1, 2, 3, 4]
+                  columns: [1, 2, 3, 4, 5, 6]
                 }
               },
               {
@@ -625,7 +657,7 @@
                 text: '<i class="ti ti-file-spreadsheet me-2"></i>Excel',
                 className: 'dropdown-item',
                 exportOptions: {
-                  columns: [1, 2, 3, 4]
+                  columns: [1, 2, 3, 4, 5, 6]
                 }
               }
             ]

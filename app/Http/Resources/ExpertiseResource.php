@@ -23,7 +23,9 @@ class ExpertiseResource extends JsonResource
             'name' => $title,
             'description' => $this->description,
             'specializations' => $this->children ? $this->children->count() : 0,
-            'status' => $this->status
+            'status' => $this->status,
+            'createdAt' => $this->created_at,
+            'updatedAt' => $this->updated_at,
         ];
     }
 }
