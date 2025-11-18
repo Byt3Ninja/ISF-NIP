@@ -42,17 +42,17 @@
 
     @if (!empty($Sustainables) && count($Sustainables) > 0)
     <div class="col-12">
-      <div class="card shadow-sm pe-12">
+      <div class="card shadow-sm pe-md-12">
         <div class="card-body">
           <h5 class="card-title mb-4">
             {{ $l == 'en' ? 'Sustainability Goals' : 'اهداف الاستدامة' }}
           </h5>
-          <div class="row g-6 pe-12">
+          <div class="row g-6 pe-md-12">
             @foreach ($Sustainables as $Sustainable)
             @php
             $icon = App\SustainableIcon::where('title', $Sustainable)->first();
             @endphp
-            <div class="col-md-2">
+            <div class="col-6 col-md-2">
               <div class="card p-3 shadow-sm border d-flex align-items-center justify-content-center">
                 @if ($icon && $icon->icon_ar)
                   <img src="/images/sustainability/{{ $l }}/{{ $icon->icon_ar ?? '1.png' }}" alt="icon"
@@ -121,10 +121,7 @@
 
             @if ($company->financial_plan_description)
               <h6 class="text-muted mb-1">{{ __('admin.financial_plan_description') }}</h6>
-              <div class="d-flex align-items-start mb-4">
-                <i class="ti ti-flag text-primary me-2"></i>
-                <span>{{ $company->financial_plan_description }}</span>
-              </div>
+              <p>{{ $company->financial_plan_description }}</p>
             @endif
 
             @if ($company->financial_plan)

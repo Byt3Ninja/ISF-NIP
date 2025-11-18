@@ -2,7 +2,7 @@
   <div class="w-100 d-flex flex-column flex-md-row" style="gap: 2rem;">
     <div class="section-3">
       <div class="row">
-        <div class="col-6 col-md-4 mb-4">
+        <div class="col-12 col-md-4 mb-4">
           <div class="card" style="height: 170px; background-color: #c4b5fd;">
             <div class="card-body">
               <div class="align-self-center d-flex flex-column text-center align-items-center">
@@ -19,7 +19,7 @@
             </div>
           </div>
         </div>
-        <div class="col-6 col-md-4 mb-4">
+        <div class="col-12 col-md-4 mb-4">
           <div class="card" style="height: 170px; background-color: #7dd3fc;">
             <div class="card-body">
               <div class="align-self-center d-flex flex-column text-center align-items-center">
@@ -38,7 +38,7 @@
             </div>
           </div>
         </div>
-        <div class="col-6 col-md-4 mb-4">
+        <div class="col-12 col-md-4 mb-4">
           <div class="card" style="height: 170px; background-color: #fdba74;">
             <div class="card-body">
               <div class="align-self-center d-flex flex-column text-center align-items-center">
@@ -63,7 +63,7 @@
             </div>
           </div>
         </div>
-        <div class="col-6 col-md-4 mb-4">
+        <div class="col-12 col-md-4 mb-4">
           <div class="card" style="height: 170px; background-color: #5eead4; overflow: hidden;">
               <div class="py-6 px-2">
               <div class="align-self-center d-flex flex-column text-center align-items-center w-100">
@@ -115,7 +115,7 @@
               </div>
           </div>
         </div>
-        <div class="col-6 col-md-4 mb-4">
+        <div class="col-12 col-md-4 mb-4">
           <div class="card" style="height: 170px; background-color: #fca5a5;">
             <div class="card-body">
               <div class="align-self-center d-flex flex-column text-center align-items-center">
@@ -132,7 +132,7 @@
             </div>
           </div>
         </div>
-        <div class="col-6 col-md-4 mb-4">
+        <div class="col-12 col-md-4 mb-4">
           <div class="card bg-light">
             <div class="card-body">
               <div class="align-self-center d-flex flex-column text-center align-items-center">

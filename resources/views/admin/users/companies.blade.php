@@ -163,16 +163,16 @@
                   @endif
                 </div>
 
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                  <h6 class="fw-semibold text-capitalize line-clamp-1 mb-0">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                  <h6 class="fw-semibold text-capitalize line-clamp-2 mb-0">
                     @php
                       $sector = App\Sector::where('id', $company->sector)->first();
                     @endphp
                     {{ $sector ? $sector->{'name_' . $l} : $company->sector }}
                   </h6>
-                  <div>
+                  <div class="d-flex flex-nowrap align-items-center gap-2">
                     @if ($company->stage && optional($company->stagE)->{'name_' . $l})
-                      <span class="badge bg-label-secondary text-dark">
+                      <span class="badge bg-label-secondary text-dark text-truncate">
                         <i class="ti ti-building-estate ti-xs me-1 text-primary"></i>
                         {{ optional($company->stagE)->{'name_' . $l} }}
                       </span>
@@ -181,9 +181,9 @@
                       $Sustainables = json_decode($company->Sustainable_development);
                     @endphp
                     @if (!empty($Sustainables) && count($Sustainables) > 0)
-                      <a class="btn btn-sm btn-icon btn-label-secondary" href="#" data-bs-toggle="modal"
+                      <a class="badge bg-label-secondary" href="#" data-bs-toggle="modal"
                         data-bs-target="#sustainabilityModal{{ $company->id }}"><i
-                          class="ti ti-target-arrow text-primary"></i></a>
+                          class="ti ti-target-arrow text-primary ti-xs"></i></a>
                       <div class="modal fade" id="sustainabilityModal{{ $company->id }}" tabindex="-1"
                         aria-hidden="true">
                         <div class="modal-dialog modal-lg modal-simple modal-edit-user">
@@ -230,7 +230,7 @@
                 @endphp
 
                 @if (count($founders) > 0)
-                  <div class="d-flex align-items-center mb-3">
+                  <div class="d-flex align-items-center mb-3 mt-4">
                     <span class="fw-semibold me-2">
                       {{ count($founders) > 1 ? __('admin.Founders') : __('admin.Founder') }}:
                     </span>
