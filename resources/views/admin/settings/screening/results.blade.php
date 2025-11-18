@@ -553,7 +553,14 @@
                             <!-- User Information -->
                             <div class="user-info bg-label-light border rounded-3 p-2 mb-4">
                               <div class="d-flex align-items-center">
-                                <a href="/dashboard/users/{{ $company->resolveUser()->id }}/edit" class="text-decoration-none">
+                                <a
+                                  @if (isset($company->resolveUser()->id)) 
+                                    href="/dashboard/users/{{ $company->resolveUser()->id }}/edit" 
+                                  @else
+                                    href="javascript:void(0)"
+                                  @endif
+                                  class="text-decoration-none"
+                                >
                                   <img
                                     src="{{ $company->resolveUser()->image_url ?? '/icons/account.svg' }}"
                                     alt="img"
