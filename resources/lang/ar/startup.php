@@ -12,10 +12,11 @@ return [
   'team' => 'فريق العمل',
   'team_info' => 'معلومات الفريق',
   
-
   'about_challenges' => 'حول الشركة والتحديات',
   'about_problem' => 'حول المشكلة',
   'about_monetization' => 'حول تحقيق الربح',
+  'business_plan_attachment' => 'مرفق خطة العمل',
+  'financial_plan_attachment' => 'مرفق الخطة المالية',
 
   'alumni' => 'خريج',
   'alumni_status' => 'حالة الخريجين',

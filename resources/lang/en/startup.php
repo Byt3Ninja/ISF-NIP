@@ -15,6 +15,8 @@ return [
   'about_challenges' => 'About & Challenges',
   'about_problem' => 'About Problem',
   'about_monetization' => 'About Monetization',
+  'business_plan_attachment' => 'Business Plan Attachment',
+  'financial_plan_attachment' => 'Financial Plan Attachment',
 
   'alumni' => 'Alumni',
   'alumni_status' => 'Alumni Status',
