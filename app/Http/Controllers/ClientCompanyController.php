@@ -364,9 +364,7 @@ class ClientCompanyController extends Controller
             }
             return $industry;
         });
-        $employees = Team_member::where('Company_id', $id)
-                                    ->where('TeamMember', 'Employee')
-                                    ->get();
+        $employees = Employee::where('company_id', $id)->get();
 
          // Load all milestones for this company (new unified structure)
         $milestones = Milestone::where('company_id', $id)
@@ -1713,8 +1711,7 @@ class ClientCompanyController extends Controller
         try {
             // Get company from authenticated user or provided ID
             if ($id) {
-                $user = User::where('company_id', $id)->first();
-                $companyId = $user ? $user->company_id : $id;
+                $companyId = $id;
                 
                 // Verify that current user has access to this company (allow admins)
                 if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager')) {
@@ -1921,9 +1918,8 @@ class ClientCompanyController extends Controller
     {
         try {
             // Get company from authenticated user or provided ID
-            if ($id) {
-                $user = User::where('company_id', $id)->first();
-                $companyId = $user ? $user->company_id : $id;
+             if ($id) {
+                $companyId = $id;
                 
                 // Verify that current user has access to this company (allow admins)
                 if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager')) {
@@ -2082,15 +2078,17 @@ class ClientCompanyController extends Controller
     {
         // dd($request->all());
         try {
-            // Validate company access
-            $user = Auth::user();
-            $company = Company::findOrFail($id);
-            
-            // Check permissions
-            if ($user->company_id !== $company->id && !$user->hasAnyRole('Admin|organizationManager')) {
-                return response()->json([
-                    'errors' => ['permission' => ['You do not have permission to add employees to this company.']]
-                ], 403);
+            if ($id) {
+                $companyId = $id;
+                
+                // Verify that current user has access to this company (allow admins)
+                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager')) {
+                    return response()->json([
+                        'errors' => ['permission' => [__('You do not have permission to access this company.')]],
+                    ], 403);
+                }
+            } else {
+                $companyId = Auth::user()->company_id;
             }
 
             $validator = Validator::make($request->all(), [
@@ -2117,7 +2115,7 @@ class ClientCompanyController extends Controller
             }
 
             $employee = new Employee();
-            $employee->company_id = $id;
+            $employee->company_id = $companyId;
             $employee->full_name = $request->full_name;
             $employee->job_title = $request->job_title;
             $employee->gender = $request->gender;
@@ -2159,16 +2157,19 @@ class ClientCompanyController extends Controller
     public function editEmployee(Request $request, $id)
     {
         try {
-            // Validate company access
-            $user = Auth::user();
-            $company = Company::findOrFail($id);
-            
-            // Check permissions
-            if ($user->company_id !== $company->id && !$user->hasAnyRole('Admin|organizationManager')) {
-                return response()->json([
-                    'errors' => ['permission' => ['You do not have permission to edit employees in this company.']]
-                ], 403);
+          if ($id) {
+                $companyId = $id;
+                
+                // Verify that current user has access to this company (allow admins)
+                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager')) {
+                    return response()->json([
+                        'errors' => ['permission' => [__('You do not have permission to access this company.')]],
+                    ], 403);
+                }
+            } else {
+                $companyId = Auth::user()->company_id;
             }
+
 
             $validator = Validator::make($request->all(), [
                 'id' => 'required|exists:employees,id',
@@ -2198,7 +2199,7 @@ class ClientCompanyController extends Controller
             }
 
             $employee = Employee::where('id', $request->id)
-                                 ->where('company_id', $id)
+                                 ->where('company_id', $companyId)
                                  ->firstOrFail();
 
             $employee->full_name = $request->full_name;
@@ -2266,15 +2267,17 @@ class ClientCompanyController extends Controller
     public function deleteEmployee(Request $request, $id)
     {
         try {
-            // Validate company access
-            $user = Auth::user();
-            $company = Company::findOrFail($id);
-            
-            // Check permissions
-            if ($user->company_id !== $company->id && !$user->hasAnyRole('Admin|organizationManager')) {
-                return response()->json([
-                    'errors' => ['permission' => ['You do not have permission to delete employees from this company.']]
-                ], 403);
+           if ($id) {
+                $companyId = $id;
+                
+                // Verify that current user has access to this company (allow admins)
+                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager')) {
+                    return response()->json([
+                        'errors' => ['permission' => [__('You do not have permission to access this company.')]],
+                    ], 403);
+                }
+            } else {
+                $companyId = Auth::user()->company_id;
             }
 
             // Get employee ID from request - handle both JSON and form data
@@ -2314,7 +2317,7 @@ class ClientCompanyController extends Controller
             }
 
             $employee = Employee::where('id', $employeeId)
-                                 ->where('company_id', $id)
+                                 ->where('company_id', $companyId)
                                  ->firstOrFail();
 
             // Delete associated documents
