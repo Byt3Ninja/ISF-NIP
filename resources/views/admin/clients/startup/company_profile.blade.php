@@ -141,8 +141,17 @@
 @stop
 
 @php
-$pills = ['overview', 'milestones', 'team', 'pitch_deck', 'programs_summary'];
-$pillsIcons = ['briefcase', 'target', 'users', 'file-text', 'components'];
+$env = env('APP_ENV');
+
+$pills = 
+  $env == 'dev' 
+    ? ['overview', 'milestones', 'team', 'pitch_deck', 'programs_summary']
+    : ['overview', 'milestones', 'team', 'pitch_deck'];
+
+  $pillsIcons = 
+    $env == 'dev' 
+      ? ['briefcase', 'target', 'users', 'file-text', 'components']
+      : ['briefcase', 'target', 'users', 'file-text'];
 
 // Static Programs List
 $programs = [
@@ -188,7 +197,6 @@ $programsSummary = [
 @endphp
 
 @section('content')
-
 @if($_user->hasRole('Judger'))
   @include('admin.clients.startup.partials._startup_screening_canvas')
 @endif
