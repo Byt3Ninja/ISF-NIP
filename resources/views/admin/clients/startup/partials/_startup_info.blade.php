@@ -46,7 +46,7 @@
                   </div>
                 </div>
                 <div class="social-links d-flex align-items-center justify-content-start justify-content-md-end">
-                  <div class="d-flex align-items-center gap-2">
+                  <div class="d-flex flex-wrap flex-md-nowrap align-items-center gap-2">
                     @if ($company->facebook)
                     <a href="{{ strpos($company->facebook, 'http') === 0 ? $company->facebook : 'http://' . $company->facebook }}"
                        target="_blank" 
@@ -101,6 +101,20 @@
                        class="btn btn-icon btn-label-secondary rounded-pill waves-effect waves-light"
                        data-bs-toggle="tooltip" data-bs-placement="top" title="TikTok">
                       <i class="fa-brands fa-tiktok"></i>
+                    </a>
+                    @endif
+                    @if ($company->phone)
+                    <a href="tel:{{ $company->country_code . $company->phone }}" 
+                       class="btn btn-icon btn-label-primary rounded-pill waves-effect waves-light"
+                       data-bs-toggle="tooltip" data-bs-placement="top" title="Call {{ $company->country_code . $company->phone }}">
+                      <i class="ti ti-phone ti-sm"></i>
+                    </a>
+                    @endif
+                    @if ($company->email)
+                    <a href="mailto:{{ $company->email }}" 
+                       class="btn btn-icon btn-label-primary rounded-pill waves-effect waves-light"
+                       data-bs-toggle="tooltip" data-bs-placement="top" title="Email {{ $company->email }}">
+                      <i class="ti ti-mail ti-sm"></i>
                     </a>
                     @endif
                   </div>
@@ -253,25 +267,7 @@
                         </span>
                       @endif
                     </div>
-                  </div>
-                  
-                  <!-- Contact Actions -->
-                  <div class="d-flex align-items-center gap-2">
-                    @if ($company->phone)
-                    <a href="tel:{{ $company->country_code . $company->phone }}" 
-                       class="btn btn-icon btn-label-primary rounded-pill waves-effect waves-light"
-                       data-bs-toggle="tooltip" data-bs-placement="top" title="Call {{ $company->country_code . $company->phone }}">
-                      <i class="ti ti-phone ti-sm"></i>
-                    </a>
-                    @endif
-                    @if ($company->email)
-                    <a href="mailto:{{ $company->email }}" 
-                       class="btn btn-icon btn-label-primary rounded-pill waves-effect waves-light"
-                       data-bs-toggle="tooltip" data-bs-placement="top" title="Email {{ $company->email }}">
-                      <i class="ti ti-mail ti-sm"></i>
-                    </a>
-                    @endif
-                  </div>
+                  </div>                  
                 </div>
               </div>
             </div>
