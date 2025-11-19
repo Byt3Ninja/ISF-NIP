@@ -520,6 +520,7 @@ class ScreeningController extends Controller
 				cfv.id AS id,
 				cf.name AS field,
 				cfv.value AS value,
+				cfv.is_approved AS is_approved,
 				cfv.user_id AS judger_id,
 				u.first_name_en AS judger_first_name_en,
 				u.last_name_en AS judger_last_name_en,

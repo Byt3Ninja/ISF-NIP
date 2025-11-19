@@ -6,6 +6,9 @@
 
 @section('style')
 <style>
+.resize-none {
+  resize: none !important;
+}
 
 .radius-15 {
   border-radius: 15px !important;
@@ -141,8 +144,17 @@
 @stop
 
 @php
-$pills = ['overview', 'milestones', 'team', 'pitch_deck', 'programs_summary'];
-$pillsIcons = ['briefcase', 'target', 'users', 'file-text', 'components'];
+$env = env('APP_ENV');
+
+$pills = 
+  $env == 'dev' 
+    ? ['overview', 'milestones', 'team', 'pitch_deck', 'programs_summary']
+    : ['overview', 'milestones', 'team', 'pitch_deck'];
+
+  $pillsIcons = 
+    $env == 'dev' 
+      ? ['briefcase', 'target', 'users', 'file-text', 'components']
+      : ['briefcase', 'target', 'users', 'file-text'];
 
 // Static Programs List
 $programs = [
@@ -188,7 +200,6 @@ $programsSummary = [
 @endphp
 
 @section('content')
-
 @if($_user->hasRole('Judger'))
   @include('admin.clients.startup.partials._startup_screening_canvas')
 @endif
@@ -570,6 +581,7 @@ $programsSummary = [
           final_comment: ''
         };
         var tempEvalMap = {};
+        var tempFormDataMap = {};
         data.forEach(item => {
           const name = item.name;
           const value = item.value;
@@ -577,8 +589,14 @@ $programsSummary = [
               result.id = parseInt(value);
           } else if (name === 'evaluation_program_id') {
               result.program = parseInt(value);
+          } else if (name === 'is_approved') {
+              result.is_approved = value;
           } else if (name === 'final_comments') {
               result.final_comment = value;
+          } else if (name.startsWith('formComment_')) {
+              const formDataId = name.split('_')[1];
+              tempFormDataMap[formDataId] = tempFormDataMap[formDataId] || { id: parseInt(formDataId), comment: '' };
+              tempFormDataMap[formDataId].comment = value ? value.trim() : null;
           } else if (name.startsWith('score_')) {
               const evalId = name.split('_')[1];
               tempEvalMap[evalId] = tempEvalMap[evalId] || { id: parseInt(evalId), score: null, comment: '' };
@@ -590,6 +608,7 @@ $programsSummary = [
           }
         });
         result.evaluation = Object.values(tempEvalMap).filter(entry => entry.score !== null || entry.comment !== '');
+        result.comments = Object.values(tempFormDataMap).filter(entry => entry.comment !== '');
 
         // Show a loading indicator
         const saveBtn = document.getElementById('save_screening_btn');

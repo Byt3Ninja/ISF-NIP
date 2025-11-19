@@ -205,6 +205,7 @@ return [
     'No answers submitted yet' => 'No answers submitted yet',
     'Select company from menu above' => 'Select Startup from menu above',
     'for' => 'for',
+    'no_submissions_yet' => 'No submissions yet',
     'Services' => 'Services',
     'Service list' => 'Service\'s List',
     'Request from' => 'Request from',
