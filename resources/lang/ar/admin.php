@@ -2542,4 +2542,7 @@ return [
 	'Expertise_Settings' => 'إعدادات الخبرة',
 	'Expertises_Name' => 'اسم الخبرة',
 	'Register_Disabled' => ' التسجيل مغلق ',
+	'Expertises' => 'الخبرات',
+	'all_Expertises' => 'كافة الخبرات',
+	'Expertises_Created' => ' تاريخ ',
 ];

@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use App\CyclesMentors;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 
 if (! function_exists('in_array_2d')) {
@@ -53,6 +54,7 @@ if (!function_exists('getPusherConfig')) {
         return DB::table('settings')->select('PUSHER_APP_KEY', 'PUSHER_APP_CLUSTER')->first();
     }
 }
+
 if (!function_exists('FormatDate')) {
     function FormatDate($stamp, $format)
     {
@@ -220,4 +222,43 @@ if (! function_exists('route_exists')) {
     function route_exists(string $name): bool {
         return \Illuminate\Support\Facades\Route::has($name);
     }
+}
+
+if( !function_exists('URLSlug') )
+{
+	function URLSlug( $url )
+	{
+		return str_replace(' ', '-', $url);
+	}
+}
+
+if( !function_exists('uploader') )
+{
+	function uploader( $disk, $file, $target, $get_path = false )
+	{
+        $original_name = $file->getClientOriginalName();
+        $file_extension = $file->getClientOriginalExtension();
+		$location = trim( $target ) ? $target . '/' .  $original_name : $original_name;
+        $check_file = Storage::disk($disk)->missing( $location );
+		if( !$check_file )
+		{
+			$counter = 1;
+			do {
+				$file_name = str_replace( '.' . $file_extension, '', $original_name ) . '-' . $counter++ . '.' . $file_extension;
+				$file_location = trim( $target ) ? $target . '/' .  $file_name : $file_name;
+				$check_file = Storage::disk($disk)->missing( $file_location );
+			} while ( !$check_file );
+		} else { $file_name = $original_name; }
+		$raw_name = str_replace( '.' . $file_extension, '', $file_name );
+		$file_name = URLSlug( $file_name );
+		$file_name = strtolower( $file_name );
+		$path = Storage::disk($disk)->putFileAs($target, $file, $file_name);
+		if( $get_path === true )
+		{
+			$url = str_replace( '/index.php', '', URL::to("provider-registration/files/$path") );
+			$url = strtolower( $url );
+			return ['url' => $url, 'raw' => $raw_name, 'file' => $file_name ];
+		}
+		return $file_name;
+	}
 }

@@ -26,7 +26,7 @@
 @endif
 
 <div class="row TapPageTeam">
-  <div class="col-md-12 mb-3">
+  {{-- <div class="col-md-12 mb-3">
     <div class="card shadow-sm" style="border-radius: 15px;">
       <div class="p-4">
         <h5 class="card-title border-bottom pb-2 mb-6">{{ __('admin.Working_Team_Details') }}</h5>
@@ -83,7 +83,7 @@
         </form>
       </div>
     </div>
-  </div>
+  </div> --}}
   @include('partials.forms.company._founder_team')
   @include('partials.forms.company._shareholder_team')
   @include('partials.forms.company._investor_team')

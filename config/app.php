@@ -178,10 +178,9 @@ return [
         App\Providers\RouteServiceProvider::class,
 
         Spatie\Permission\PermissionServiceProvider::class,
-
         Laravel\Socialite\SocialiteServiceProvider::class,
-
         \Torann\GeoIP\GeoIPServiceProvider::class,
+        \App\Providers\RepositoryServiceProvider::class,
 
 
     ],

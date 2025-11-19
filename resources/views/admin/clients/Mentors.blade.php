@@ -90,7 +90,7 @@
           @if(count($mentors) > 0)
           @foreach ($mentors as $key => $mentor)
           <!-- Mentor Card -->
-          <div class="col-md-4 rounded mb-3">
+          <div class="col-md-4 rounded mb-6">
             <div class="position-relative">
               <img 
                 src="{{ $mentor->image_url ?? '/images/placeholder.jpg' }}" 
@@ -179,9 +179,7 @@
                       <small class="fw-semibold me-2">{{ __('admin.Rating') }}</small>
                       @php
                       $rateMentorAVG = \App\MentorshipRequest::where('mentor_id', $mentor->id)
-                      ->where(function ($query) {
-                      $query->where('approved', 'Yes')->orWhereNull('approved');
-                      })
+                      ->where('approved', 'Yes')
                       ->avg('rating');
                       @endphp
                       <span class="fw-bold text-dark">{{ number_format($rateMentorAVG ?: 0, 1) }}</span>

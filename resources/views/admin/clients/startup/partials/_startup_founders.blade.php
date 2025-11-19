@@ -1,5 +1,5 @@
-<div class="col-md-4 mt-6">
-  <div class="card shadow-sm" style="border-radius: 15px; height: 300px; overflow-y: hidden;">
+<div class="col-md-4">
+  <div class="card shadow-sm" style="height: 300px; overflow-y: hidden;">
     <div class="py-4 px-8">
       <h5 class="card-title mb-3">{{ __('admin.Founders') }} ( {{count($fonders)}} )</h5>
       @if (count($fonders) > 0)
@@ -17,7 +17,7 @@
 
         @foreach ($fonders as $fonder)
         <div class="founder-col-2 col-12 mb-2">
-          <div class="p-3 shadow-sm border overflow-hidden" style="border-radius: 15px;">
+          <div class="p-3 shadow-sm border overflow-hidden">
             <div class="d-flex align-items-center">
               <div class="border d-flex radius-15 d-flex flex-shrink-0" style="width: 80px; height: 80px;">
                 <img src="/images/background/logo.png" class="img-fluid m-auto" alt="logo" />

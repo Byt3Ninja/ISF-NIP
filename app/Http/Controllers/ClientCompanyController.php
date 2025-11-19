@@ -17,6 +17,7 @@ use App\Settings;
 use App\Milestone;
 use App\Technology;
 use App\Team_member;
+use App\Employee;
 use App\FundingRound;
 use App\Organization;
 use App\StaticCategory;
@@ -190,10 +191,6 @@ class ClientCompanyController extends Controller
                         ->where('Company_id', auth()->user()->company->id)->get();
                     $Investors = Team_Member::where('TeamMember', 'Investor')
                         ->where('Company_id', auth()->user()->company->id)->get();
-
-                    // Load all milestones for this company (new unified structure)
-                    $milestones = Milestone::where('Company_id', auth()->user()->company->id)
-                        ->orderBy('created_at')->get();
                     
                     // For backward compatibility, create empty collections
                     $Achieveds = collect();
@@ -278,10 +275,6 @@ class ClientCompanyController extends Controller
                         ->where('Company_id', $client->company->id)->get();
                     $Investors = Team_Member::where('TeamMember', 'Investor')
                         ->where('Company_id', $client->company->id)->get();
-
-                    // Load all milestones for this company (new unified structure)
-                    $milestones = Milestone::where('Company_id', $client->company->id)
-                        ->orderBy('created_at')->get();
                     
                     // For backward compatibility, create empty collections
                     $Achieveds = collect();
@@ -371,6 +364,14 @@ class ClientCompanyController extends Controller
             }
             return $industry;
         });
+        $employees = Team_member::where('Company_id', $id)
+                                    ->where('TeamMember', 'Employee')
+                                    ->get();
+
+         // Load all milestones for this company (new unified structure)
+        $milestones = Milestone::where('company_id', $id)
+            ->orderBy('created_at')->get();
+                                    
             return view('admin/clients/company', compact(
                 'client',
                 '_countries',
@@ -391,6 +392,7 @@ class ClientCompanyController extends Controller
                 'Stages',
                 'technologies',
                 'industries',
+                'employees',
                 'data'
             ));
         } catch (Exception $e) {
@@ -1615,8 +1617,7 @@ class ClientCompanyController extends Controller
         try {
             // Get company from authenticated user or provided ID
             if ($id) {
-                $user = User::where('company_id', $id)->first();
-                $companyId = $user ? $user->company_id : $id;
+                $companyId = $id;
                 
                 // Verify that current user has access to this company (allow admins)
                 if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager')) {
@@ -2060,6 +2061,14 @@ class ClientCompanyController extends Controller
                 $filters['sectors'] = $sectors;
             }
         }
+
+        // Handle Alumni filter
+        if ($request->filled('alumni')) {
+            $alumni = $request->get('alumni');
+            if ($alumni !== 'all') {
+                $filters['is_alumni'] = $alumni;
+            }
+        }
         
         $companies = $this->companyService->getCompanies($filters, isApi: false);
         
@@ -2071,243 +2080,265 @@ class ClientCompanyController extends Controller
     
     public function addEmployee(Request $request, $id)
     {
-        // try {
-        //     // Validate company access
-        //     $user = Auth::user();
-        //     $company = Company::findOrFail($id);
+        // dd($request->all());
+        try {
+            // Validate company access
+            $user = Auth::user();
+            $company = Company::findOrFail($id);
             
-        //     // Check permissions
-        //     if ($user->company_id !== $company->id && !$user->hasAnyRole('Admin|organizationManager')) {
-        //         return response()->json([
-        //             'errors' => ['permission' => ['You do not have permission to add employees to this company.']]
-        //         ], 403);
-        //     }
+            // Check permissions
+            if ($user->company_id !== $company->id && !$user->hasAnyRole('Admin|organizationManager')) {
+                return response()->json([
+                    'errors' => ['permission' => ['You do not have permission to add employees to this company.']]
+                ], 403);
+            }
 
-        //     $validator = Validator::make($request->all(), [
-        //         'full_name' => 'required|string|max:255',
-        //         'job_title' => 'required|string|max:255',
-        //         'gender' => 'required|in:male,female',
-        //         'employment_type' => 'required|in:full-time,part-time,contractor,intern',
-        //         'hiring_data' => 'required|date',
-        //         'documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,docx|max:10240'
-        //     ], [
-        //         'full_name.required' => 'Employee name is required',
-        //         'job_title.required' => 'Job title is required',
-        //         'gender.required' => 'Gender is required',
-        //         'employment_type.required' => 'Employment type is required',
-        //         'hiring_data.required' => 'Hiring date is required',
-        //         'documents.*.mimes' => 'Documents must be PDF, JPG, PNG, or DOCX files',
-        //         'documents.*.max' => 'Each document must be less than 10MB'
-        //     ]);
+            $validator = Validator::make($request->all(), [
+                'full_name' => 'required|string|max:255',
+                'job_title' => 'required|string|max:255',
+                'gender' => 'required|in:male,female',
+                'employment_type' => 'required|in:full-time,part-time,contractor,intern',
+                'hiring_date' => 'required|date',
+                'documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,docx|max:10240'
+            ], [
+                'full_name.required' => 'Employee name is required',
+                'job_title.required' => 'Job title is required',
+                'gender.required' => 'Gender is required',
+                'employment_type.required' => 'Employment type is required',
+                'hiring_date.required' => 'Hiring date is required',
+                'documents.*.mimes' => 'Documents must be PDF, JPG, PNG, or DOCX files',
+                'documents.*.max' => 'Each document must be less than 10MB'
+            ]);
 
-        //     if ($validator->fails()) {
-        //         return response()->json([
-        //             'errors' => $validator->errors()
-        //         ], 422);
-        //     }
+            if ($validator->fails()) {
+                return response()->json([
+                    'errors' => $validator->errors()
+                ], 422);
+            }
 
-        //     $employee = new Team_member();
-        //     $employee->Company_id = $id;
-        //     $employee->full_name = $request->full_name;
-        //     $employee->job_title = $request->job_title;
-        //     $employee->gender = $request->gender;
-        //     $employee->employment_type = $request->employment_type;
-        //     $employee->hiring_data = $request->hiring_data;
-        //     $employee->TeamMember = 'Employee';
+            $employee = new Employee();
+            $employee->company_id = $id;
+            $employee->full_name = $request->full_name;
+            $employee->job_title = $request->job_title;
+            $employee->gender = $request->gender;
+            $employee->employment_type = $request->employment_type;
+            $employee->hiring_date = $request->hiring_date;
 
-        //     // Handle document uploads
-        //     if ($request->hasFile('documents')) {
-        //         $documents = [];
-        //         foreach ($request->file('documents') as $index => $file) {
-        //             $fileName = time() . '_' . $index . '_' . $file->getClientOriginalName();
-        //             $path = $file->storeAs('employees/' . $id . '/documents', $fileName, 'public');
+            // Handle document uploads
+            if ($request->hasFile('documents')) {
+                $documents = [];
+                foreach ($request->file('documents') as $index => $file) {
+                    $fileName = time() . '_' . $index . '_' . $file->getClientOriginalName();
+                    $path = $file->storeAs('employees/' . $id . '/documents', $fileName, 'public');
                     
-        //             $documents[] = [
-        //                 'name' => $file->getClientOriginalName(),
-        //                 'url' => Storage::disk('public')->url($path),
-        //                 'path' => $path
-        //             ];
-        //         }
-        //         $employee->documents = $documents;
-        //     }
-
-        //     $employee->save();
-
-        //     return response()->json([
-        //         'success' => true,
-        //         'employee' => $employee,
-        //         'state' => 'Employee added successfully'
-        //     ]);
+                    $documents[] = [
+                        'name' => $file->getClientOriginalName(),
+                        'url' => asset('storage/' . $path),
+                        'path' => $path
+                    ];
+                }
+                $employee->documents = $documents;
+            }
             
-        // } catch (Exception $e) {
-        //     Log::error('Error adding employee: ' . $e->getMessage());
-        //     return response()->json([
-        //         'errors' => ['general' => ['An error occurred while adding the employee.']]
-        //     ], 500);
-        // }
+            $employee->save();
+            // dd($employee);
+            return response()->json([
+                'success' => true,
+                'employee' => $employee,
+                'state' => 'Employee added successfully'
+            ]);
+            
+        } catch (Exception $e) {
+            Log::error('Error adding employee: ' . $e->getMessage());
+            return response()->json([
+                'errors' => ['general' => ['An error occurred while adding the employee.']]
+            ], 500);
+        }
     }
 
     public function editEmployee(Request $request, $id)
     {
-        // try {
-        //     // Validate company access
-        //     $user = Auth::user();
-        //     $company = Company::findOrFail($id);
+        try {
+            // Validate company access
+            $user = Auth::user();
+            $company = Company::findOrFail($id);
             
-        //     // Check permissions
-        //     if ($user->company_id !== $company->id && !$user->hasAnyRole('Admin|organizationManager')) {
-        //         return response()->json([
-        //             'errors' => ['permission' => ['You do not have permission to edit employees in this company.']]
-        //         ], 403);
-        //     }
+            // Check permissions
+            if ($user->company_id !== $company->id && !$user->hasAnyRole('Admin|organizationManager')) {
+                return response()->json([
+                    'errors' => ['permission' => ['You do not have permission to edit employees in this company.']]
+                ], 403);
+            }
 
-        //     $validator = Validator::make($request->all(), [
-        //         'id' => 'required|exists:team_members,id',
-        //         'full_name' => 'required|string|max:255',
-        //         'job_title' => 'required|string|max:255',
-        //         'gender' => 'required|in:male,female',
-        //         'employment_type' => 'required|in:full-time,part-time,contractor,intern',
-        //         'hiring_data' => 'required|date',
-        //         'documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,docx|max:10240',
-        //         'remove_documents' => 'nullable|string'
-        //     ], [
-        //         'id.required' => 'Employee ID is required',
-        //         'id.exists' => 'Employee not found',
-        //         'full_name.required' => 'Employee name is required',
-        //         'job_title.required' => 'Job title is required',
-        //         'gender.required' => 'Gender is required',
-        //         'employment_type.required' => 'Employment type is required',
-        //         'hiring_data.required' => 'Hiring date is required',
-        //         'documents.*.mimes' => 'Documents must be PDF, JPG, PNG, or DOCX files',
-        //         'documents.*.max' => 'Each document must be less than 10MB'
-        //     ]);
+            $validator = Validator::make($request->all(), [
+                'id' => 'required|exists:employees,id',
+                'full_name' => 'required|string|max:255',
+                'job_title' => 'required|string|max:255',
+                'gender' => 'required|in:male,female',
+                'employment_type' => 'required|in:full-time,part-time,contractor,intern',
+                'hiring_date' => 'required|date',
+                'documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,docx|max:10240',
+                'remove_documents' => 'nullable|string'
+            ], [
+                'id.required' => 'Employee ID is required',
+                'id.exists' => 'Employee not found',
+                'full_name.required' => 'Employee name is required',
+                'job_title.required' => 'Job title is required',
+                'gender.required' => 'Gender is required',
+                'employment_type.required' => 'Employment type is required',
+                'hiring_date.required' => 'Hiring date is required',
+                'documents.*.mimes' => 'Documents must be PDF, JPG, PNG, or DOCX files',
+                'documents.*.max' => 'Each document must be less than 10MB'
+            ]);
 
-        //     if ($validator->fails()) {
-        //         return response()->json([
-        //             'errors' => $validator->errors()
-        //         ], 422);
-        //     }
+            if ($validator->fails()) {
+                return response()->json([
+                    'errors' => $validator->errors()
+                ], 422);
+            }
 
-        //     $employee = Team_member::where('id', $request->id)
-        //                          ->where('Company_id', $id)
-        //                          ->where('TeamMember', 'Employee')
-        //                          ->firstOrFail();
+            $employee = Employee::where('id', $request->id)
+                                 ->where('company_id', $id)
+                                 ->firstOrFail();
 
-        //     $employee->full_name = $request->full_name;
-        //     $employee->job_title = $request->job_title;
-        //     $employee->gender = $request->gender;
-        //     $employee->employment_type = $request->employment_type;
-        //     $employee->hiring_data = $request->hiring_data;
+            $employee->full_name = $request->full_name;
+            $employee->job_title = $request->job_title;
+            $employee->gender = $request->gender;
+            $employee->employment_type = $request->employment_type;
+            $employee->hiring_date = $request->hiring_date;
 
-        //     // Handle existing documents
-        //     $existingDocs = $employee->documents ?: [];
+            // Handle existing documents
+            $existingDocs = $employee->documents ?: [];
             
-        //     // Handle document removals
-        //     if ($request->has('remove_documents')) {
-        //         $removeDocuments = json_decode($request->input('remove_documents'), true);
-        //         if (is_array($removeDocuments)) {
-        //             foreach ($removeDocuments as $index) {
-        //                 if (isset($existingDocs[$index])) {
-        //                     $document = $existingDocs[$index];
-        //                     // Delete physical file
-        //                     if (isset($document['path']) && Storage::disk('public')->exists($document['path'])) {
-        //                         Storage::disk('public')->delete($document['path']);
-        //                     }
-        //                 }
-        //             }
-        //             // Remove documents from array
-        //             $existingDocs = array_values(array_filter($existingDocs, function($doc, $index) use ($removeDocuments) {
-        //                 return !in_array($index, $removeDocuments);
-        //             }, ARRAY_FILTER_USE_BOTH));
-        //         }
-        //     }
+            // Handle document removals
+            if ($request->has('remove_documents')) {
+                $removeDocuments = json_decode($request->input('remove_documents'), true);
+                if (is_array($removeDocuments)) {
+                    foreach ($removeDocuments as $index) {
+                        if (isset($existingDocs[$index])) {
+                            $document = $existingDocs[$index];
+                            // Delete physical file
+                            if (isset($document['path']) && Storage::disk('public')->exists($document['path'])) {
+                                Storage::disk('public')->delete($document['path']);
+                            }
+                        }
+                    }
+                    // Remove documents from array
+                    $existingDocs = array_values(array_filter($existingDocs, function($doc, $index) use ($removeDocuments) {
+                        return !in_array($index, $removeDocuments);
+                    }, ARRAY_FILTER_USE_BOTH));
+                }
+            }
 
-        //     // Handle new document uploads
-        //     if ($request->hasFile('documents')) {
-        //         $newDocuments = [];
-        //         foreach ($request->file('documents') as $index => $file) {
-        //             $fileName = time() . '_' . $index . '_' . $file->getClientOriginalName();
-        //             $path = $file->storeAs('employees/' . $id . '/documents', $fileName, 'public');
+            // Handle new document uploads
+            if ($request->hasFile('documents')) {
+                $newDocuments = [];
+                foreach ($request->file('documents') as $index => $file) {
+                    $fileName = time() . '_' . $index . '_' . $file->getClientOriginalName();
+                    $path = $file->storeAs('employees/' . $id . '/documents', $fileName, 'public');
                     
-        //             $newDocuments[] = [
-        //                 'name' => $file->getClientOriginalName(),
-        //                 'url' => Storage::disk('public')->url($path),
-        //                 'path' => $path
-        //             ];
-        //         }
-        //         $existingDocs = array_merge($existingDocs, $newDocuments);
-        //     }
+                    $newDocuments[] = [
+                        'name' => $file->getClientOriginalName(),
+                        'url' => asset('storage/' . $path),
+                        'path' => $path
+                    ];
+                }
+                $existingDocs = array_merge($existingDocs, $newDocuments);
+            }
             
-        //     $employee->documents = $existingDocs;
-        //     $employee->save();
+            $employee->documents = $existingDocs;
+            $employee->save();
 
-        //     return response()->json([
-        //         'success' => true,
-        //         'employee' => $employee,
-        //         'state' => 'Employee updated successfully'
-        //     ]);
+            return response()->json([
+                'success' => true,
+                'employee' => $employee,
+                'state' => 'Employee updated successfully'
+            ]);
             
-        // } catch (Exception $e) {
-        //     Log::error('Error editing employee: ' . $e->getMessage());
-        //     return response()->json([
-        //         'errors' => ['general' => ['An error occurred while updating the employee.']]
-        //     ], 500);
-        // }
+        } catch (Exception $e) {
+            Log::error('Error editing employee: ' . $e->getMessage());
+            return response()->json([
+                'errors' => ['general' => ['An error occurred while updating the employee.']]
+            ], 500);
+        }
     }
 
     public function deleteEmployee(Request $request, $id)
     {
-        // try {
-        //     // Validate company access
-        //     $user = Auth::user();
-        //     $company = Company::findOrFail($id);
+        try {
+            // Validate company access
+            $user = Auth::user();
+            $company = Company::findOrFail($id);
             
-        //     // Check permissions
-        //     if ($user->company_id !== $company->id && !$user->hasAnyRole('Admin|organizationManager')) {
-        //         return response()->json([
-        //             'errors' => ['permission' => ['You do not have permission to delete employees from this company.']]
-        //         ], 403);
-        //     }
+            // Check permissions
+            if ($user->company_id !== $company->id && !$user->hasAnyRole('Admin|organizationManager')) {
+                return response()->json([
+                    'errors' => ['permission' => ['You do not have permission to delete employees from this company.']]
+                ], 403);
+            }
 
-        //     $validator = Validator::make($request->all(), [
-        //         'id' => 'required|exists:team_members,id'
-        //     ], [
-        //         'id.required' => 'Employee ID is required',
-        //         'id.exists' => 'Employee not found'
-        //     ]);
-
-        //     if ($validator->fails()) {
-        //         return response()->json([
-        //             'errors' => $validator->errors()
-        //         ], 422);
-        //     }
-
-        //     $employee = Team_member::where('id', $request->id)
-        //                          ->where('Company_id', $id)
-        //                          ->where('TeamMember', 'Employee')
-        //                          ->firstOrFail();
-
-        //     // Delete associated documents
-        //     if ($employee->documents && is_array($employee->documents)) {
-        //         foreach ($employee->documents as $document) {
-        //             if (isset($document['path']) && Storage::disk('public')->exists($document['path'])) {
-        //                 Storage::disk('public')->delete($document['path']);
-        //             }
-        //         }
-        //     }
-
-        //     $employee->delete();
-
-        //     return response()->json([
-        //         'success' => true,
-        //         'state' => 'Employee deleted successfully'
-        //     ]);
+            // Get employee ID from request - handle both JSON and form data
+            $employeeId = null;
             
-        // } catch (Exception $e) {
-        //     Log::error('Error deleting employee: ' . $e->getMessage());
-        //     return response()->json([
-        //         'errors' => ['general' => ['An error occurred while deleting the employee.']]
-        //     ], 500);
-        // }
+            // Try to get from JSON body first (for DELETE requests with JSON)
+            $contentType = $request->header('Content-Type');
+            if ($contentType && strpos($contentType, 'application/json') !== false) {
+                $jsonData = json_decode($request->getContent(), true);
+                if ($jsonData && isset($jsonData['id'])) {
+                    $employeeId = $jsonData['id'];
+                }
+            }
+            
+            // Fallback to input/get methods (for form data)
+            if (!$employeeId) {
+                $employeeId = $request->input('id') ?? $request->get('id');
+            }
+            
+            if (!$employeeId) {
+                return response()->json([
+                    'errors' => ['id' => ['Employee ID is required']]
+                ], 422);
+            }
+
+            $validator = Validator::make(['id' => $employeeId], [
+                'id' => 'required|exists:employees,id'
+            ], [
+                'id.required' => 'Employee ID is required',
+                'id.exists' => 'Employee not found'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $employee = Employee::where('id', $employeeId)
+                                 ->where('company_id', $id)
+                                 ->firstOrFail();
+
+            // Delete associated documents
+            if ($employee->documents && is_array($employee->documents)) {
+                foreach ($employee->documents as $document) {
+                    if (isset($document['path']) && Storage::disk('public')->exists($document['path'])) {
+                        Storage::disk('public')->delete($document['path']);
+                    }
+                }
+            }
+
+            $employee->delete();
+
+            return response()->json([
+                'success' => true,
+                'state' => 'Employee deleted successfully'
+            ]);
+            
+        } catch (Exception $e) {
+            Log::error('Error deleting employee: ' . $e->getMessage());
+            return response()->json([
+                'errors' => ['general' => ['An error occurred while deleting the employee.']]
+            ], 500);
+        }
     }
+   
 }

@@ -76,6 +76,10 @@ Route::get('search', 'IndexController@search');
 Route::get('event/{id}', 'IndexController@event');
 Route::post('eventregister', 'IndexController@eventregister');
 
+Route::get('/provider-registration', 'serviceProviderController@registration');
+Route::post('/provider-registration', 'serviceProviderController@registration_request')->name('provider-registration');
+Route::get('/provider-registration/files/{files?}', 'serviceProviderController@get_media')->where('files', '.*');
+
 // test middleware
 Route::get('/testting', function () {
     $stamp = '1746024780';
@@ -226,7 +230,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     // Settings Routes
     Route::any('settings', 'SettingsController@get_settings')->name('settings.system_general_view');
     Route::get('industry-settings', 'SettingsController@industrySettings')->name('settings.industry_view');
-    Route::get('expertise-settings', 'SettingsController@expertiseSettings')->name('settings.expertise_view');
+    Route::get('expertise-settings', 'ExpertiseController@index')->name('settings.expertise_view');
     Route::get('notification-settings', 'SettingsController@notificationSettings')->name('settings.notification_view');
     Route::put('notification-settings', 'SettingsController@updateNotificationSettings')->name('settings.notification_update');
     Route::post('update_settings', 'SettingsController@update_settings')->name('settings.system_general_update');
@@ -260,6 +264,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::put('organizations/settings/updateMeeting', 'SettingsController@meetingSetting')->name('settings.organization_meeting_manage');
     Route::put('organizations/settings/socialLogin', 'SettingsController@socialSetting')->name('settings.organization_social_manage');
     Route::put('organizations/settings/general', 'SettingsController@generalSetting')->name('settings.organization.general.manage');
+    Route::put('organizations/settings/smtp', 'OrganizationSettingsController@updateSmtp')->name('settings.organization.smtp_update');
+    Route::put('organizations/settings/notifications', 'OrganizationSettingsController@updateNotifications')->name('settings.organization.notifications_update');
     Route::post('organizations/settings/invite', 'SettingsController@inviteUser')->name('organization.users_invite');
     Route::post('organizations/settings/resend-invitation/{invitationId}', 'SettingsController@resendInvitation')->name('organization.users_invitations_resend');
     Route::delete('organizations/settings/cancel-invitation/{invitationId}', 'SettingsController@cancelInvitation')->name('organization.users_invitations_cancel');
@@ -285,6 +291,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     //Partners Manager routes
     Route::resource('partners', 'PartnersController');
     Route::resource('stages', 'StageController');
+    Route::resource('expertises', 'ExpertiseController');
     //Press Manger routes
     Route::resource('press', 'PressController');
     //Client's Profile
@@ -293,7 +300,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('/myProfile', 'ClientProfileController@update')->name('user.profile_update_basic');
     Route::post('/myProfile/bio', 'ClientProfileController@Updatebio')->name('user.profile_update_bio');
     Route::post('/myProfile/password', 'ClientProfileController@updatePassword')->name('user.account_update_password');
-Route::post('/myProfile/notification-settings', 'ClientProfileController@updateNotificationSettings')->name('user.notification_settings_update');
+    Route::post('/myProfile/notification-settings', 'ClientProfileController@updateNotificationSettings')->name('user.notification_settings_update');
     Route::get('/show/UserProfile/{id}', 'ClientProfileController@showMintorprofile')->name('mentors.profile_view');
     Route::get('/show/Mentors', 'ClientProfileController@showMintors')->name('mentors.list');
     // lowercase alias for backward-compatibility / ease of testing
@@ -369,6 +376,7 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::post('/delete-image/{id?}', 'ClientCompanyController@deleteImage')->name('company.profile_images_delete');
 
     // Company Profile Employees
+    Route::get('/employees/{id}', 'ClientCompanyController@getEmployees')->name('company.getEmployees');
     Route::delete('/employees/delete/{id}','ClientCompanyController@deleteEmployee')->name('company.employees_delete');
     Route::post('/employees/edit/{id}', 'ClientCompanyController@editEmployee')->name('company.employees_edit');
     Route::post('/employees/add/{id}', 'ClientCompanyController@addEmployee')->name('company.employees_add');
@@ -811,8 +819,6 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
         }
     });
 });
-
-
 
 ///// Reports routes
 //Route::group(['prefix' => 'reports',  'middleware' => ['auth', 'verified']], function(){

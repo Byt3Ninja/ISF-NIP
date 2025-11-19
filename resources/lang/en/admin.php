@@ -1975,7 +1975,7 @@ return [
 	'Workshop Type Distribution' => 'Workshop Type Distribution',
 	'Average Trainer Ratings' => 'Average Trainer Ratings',
 	'No survey responses found' => 'No survey responses found',
-	'No companies found' => 'No companies found',
+	'No companies found' => 'No Startups found',
 	'Final Company Evaluations' => 'Final Company Evaluations',
 	'Score Distribution' => 'Score Distribution',
 	'Evaluator Status' => 'Evaluator Status',
@@ -1998,7 +1998,6 @@ return [
 	'Evaluator Name' => 'Evaluator Name',
 	'Total Evaluations' => 'Total Evaluations',
 	'No evaluators found' => 'No evaluators found',
-	'No companies found' => 'No companies found',
 	'company_name' => 'Startup Name',
 	'Auto-mapping completed' => 'Auto-mapping completed',
 	'Course Name' => 'Course Name',
@@ -2493,4 +2492,8 @@ return [
 	'Expertise_Settings' => 'Expertise Settings',
 	'Expertises_Name' => 'Expertise Name',
 	'Register_Disabled' => 'Registration Disabled',
+	'Expertises' => 'Expertises',
+	'all_Expertises' => 'All Expertises',
+	'Expertises_Created' => 'Expertises Created',
+	
 ];

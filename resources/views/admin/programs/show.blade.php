@@ -76,7 +76,23 @@
   $minutesm = $totalMentorperiod1 % 60;
   $totalMentorperiod = "{$hoursm} h {$minutesm} m";
 
-  $totalMentorrating = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $cycle->id)->whereNotNull('rating')->avg('rating');
+  // $mentorrating = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $cycle->id)->get();
+  //       $company = app(\App\Company::class)->where('cycle', '=', $cycle->id)->count();
+  //       $session_report = app(\App\SessionReport::class)->whereIn('mentorship_request_id', $mentorrating->pluck('id'))->count(); 
+
+        $mentorshipRequests = \App\MentorshipRequest::where('cycle_id', $cycle->id)->get();
+        $totalRequests = $mentorshipRequests->count();
+
+        $companiesCount = \App\Company::where('cycle', $cycle->id)->count();
+
+        $sessionReportsCount = \App\SessionReport::whereIn('mentorship_request_id', $mentorshipRequests->pluck('id'))->count();
+
+        $totalMentorrating = 0;
+
+        if ($totalRequests > 0) {
+            $totalMentorrating = ($sessionReportsCount / $totalRequests) * 100;
+        }
+        
   $totalStepsIdsCount = 0;
   $totalDurationSum = 0;
   $totalDurationSum1 = 0;
@@ -128,7 +144,7 @@ $orgCollection = collect([
 [__('admin.Mentors'), 'user', $mentors->count(), 'light'],
 [__('cycles.All requests'), 'report', $totalMentorRequest, 'warning'],
 [__('admin.Mentorship_sessions_duration_(hours)'), 'clock-hour-5', $totalMentorperiod, 'success'],
-[__('admin.Company_Attendance_Rate'), 'heart-rate-monitor', '5 / '.number_format($totalMentorrating, 2), 'danger'],
+[__('admin.Company_Attendance_Rate'), 'heart-rate-monitor', number_format($totalMentorrating, 2) . ' %', 'danger'],
 [__('admin.Training sessions'), 'layers-subtract', $totalStepsIdsCount, 'light'],
 [__('admin.Startups_trainings_Hours'), 'clock-hour-5', $totalDurationSum, 'success'],
 [__('admin.Traditional_Evaluation_pending'), 'transform', $answerspinding, 'warning'],
@@ -257,10 +273,10 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
     <div class="row">
       <input type="hidden" id="ccycleOrg" value="{{ $cycle->organization_id }}" >
       <div class="col-12 mb-4">
-        <div class="card" style="border-radius: 1rem;">
+        <div class="card">
           <div class="card-body">
             <div class="d-flex gap-6">
-              <div class="d-none d-md-flex flex-shrink-0 w-px-100">
+              <div class="d--flex flex-shrink-0 w-px-100">
                 <div class="w-px-70 h-px-100">
                   @if(!empty($cycle->organization->image_url))
                   @php
@@ -283,35 +299,26 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 </div>
               </div>
               <div class="flex-grow-1">
-                <div class="d-flex justify-content-between mb-2">
-                  <h4 class="text-primary mb-0">{{ $cycle->title }}</h4>
-                  {{-- <a href="#" class="btn btn-primary">
-                    <i class="ti ti-file-analytics me-2"></i> {{ __('admin.Results') }}
-                  </a> --}}
-                </div>
-                {{-- <div class="d-flex justify-content-end mb-2">
-                  <div class="btn btn-label-light rounded-pill px-2 h-px-30">
-                    <img src="/icons/star.svg" width="17" height="17" class="me-1" />
-                    <span class="text-warning fw-bold">4.5</span>
+                <div class="d-flex flex-column flex-md-row justify-content-between mb-3 mb-md-0">
+                  <h4 class="text-primary mb-3 mb-md-0">{{ $cycle->title }}</h4>                 
+                  <div class="d-flex flex-column flex-md-row align-items-md-center gap-4">
+                    @if ($cycle->cohort)
+                      <div class="d-flex align-items-center">
+                        <h6 class="mb-0">{{ $l == 'en' ? 'Cohort' : 'الدفعة' }}:</h6>
+                        <span class="badge fs-6 bg-label-primary ms-2">{{ $cycle->cohort }}:</span>
+                      </div>
+                    @endif
+                    @if(!empty($cycle->private))
+                      <div class="btn btn-transparent" onclick="copyToClipboard('{{ url('dashboard/cycles/view/' . $cycle->private) }}')" >
+                      {{__('cycles.Private Link')}}
+                        <i class="ti ti-circle-check ms-2 text-success ti-24px"></i>
+                      </div>
+                    @endif
                   </div>
-                </div> --}}
-                <div class="d-flex justify-content-between mb-4">
-                  <h5 class="mb-0">{{ $cycle->organization['name_' . $l] }}</h5>
-                  
-                  @if(!empty($cycle->private))
-                        {{-- <a 
-                          href="cycles/view/{{ $cycle->private }}"
-                          class="btn btn-transparent"
-                          target="_blank"
-                          id="private-link"
-                        > --}}
-                        <div class="btn btn-transparent" onclick="copyToClipboard('{{ url('dashboard/cycles/view/' . $cycle->private) }}')" >
-                        {{__('cycles.Private Link')}}
-                          <i class="ti ti-circle-check ms-2 text-success ti-24px"></i>
-                        </div>
-                        {{-- </a> --}}
-                        @endif
                 </div>
+
+                <h5 class="mb-3">{{ $cycle->organization['name_' . $l] }}</h5>
+
                 <div class="row border radius-15 py-3 mb-3">
                   @foreach ($orgCountList as $item)
                     <div class="col-md-4 mb-2">
@@ -486,7 +493,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 
       @if($step->stype == 1)
       <div class="col-12 mb-4">
-        <div class="card" style="border-radius: 1rem;">
+        <div class="card">
           <div class="card-body">
             <div class="row mt-4 mt-md-0">
               <div class="col-12">
@@ -593,7 +600,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
         
           @endphp
       <div class="col-12 mb-4">
-        <div class="card" style="border-radius: 1rem;">
+        <div class="card">
           <div class="card-body">
             <div class="row mt-4 mt-md-0">
               <div class="col-12">
@@ -834,7 +841,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 
 
         @endphp
-        <div class="card" style="border-radius: 1rem;">
+        <div class="card">
           <div class="card-body">
             <div class="row mt-md-0">
               <div class="col-12">
@@ -1067,7 +1074,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
      
       <!-- Training Step -->
       <div class="col-12 mb-4">
-        <div class="card" style="border-radius: 1rem;">
+        <div class="card">
           <div class="card-body">
             <div class="row mt-md-0">
               <div class="col-12">
@@ -1257,7 +1264,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 
   
         @endphp
-        <div class="card" style="border-radius: 1rem;">
+        <div class="card">
           <div class="card-body">
             <div class="row mt-4 mt-md-0">
               <div class="col-12">
