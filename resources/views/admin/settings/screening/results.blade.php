@@ -562,7 +562,7 @@
                                   class="text-decoration-none"
                                 >
                                   <img
-                                    src="{{ $company->resolveUser()->image_url ?? '/icons/account.svg' }}"
+                                    src="{{ $company->resolveUser()?->image_url ?? '/icons/account.svg' }}"
                                     alt="img"
                                     class="rounded-circle me-3 shadow-sm"
                                     height="40"
