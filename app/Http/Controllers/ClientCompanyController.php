@@ -124,29 +124,27 @@ class ClientCompanyController extends Controller
             if( !empty( $evaluationForm ) )
             {
                 $current_step = $company->stepdata;
-                if( $current_step->stype == 2 ) { $form = Step::where('cycle_id', $current_step?->cycle_id)->where('arr', $current_step?->arr - 1)->first(); }
-                else
-                {
-                    $form = Step::where('cycle_id', $current_step?->cycle_id)->where('arr', $current_step?->arr)->first();
-                    if(empty( $form )){
-                        return redirect()->back()->with('message2', 'No Form Found');
-                    }
-                }
+                $form = Company::form( $company );
+                if( $current_step->stype != 2 && empty( $form ) ) { return redirect()->back()->with('message2', 'No Form Found'); }
+
                 $formData = $form?->formData;
-                if( !empty( $formData ) ) { $formData = $formData->where('company_id', $company->id)->values(); }
+                $formTitle = $form?->form?->form_name ?? '';
+                /* if( !empty( $formData ) ) { $formData = $formData->where('company_id', $company->id)->values(); }
                 $formData = $formData->map(function ($item) {
                     $field = $item->field()->first();
                     $field_type = '';
                     if( isset( $field?->options?->type ) ) { $field_type = $field?->options?->type; }
                     $item->field_type = $field_type;
+                    $item->comment = '';
                     return $item;
-                });
-                
+                }); */
+
                 $myResponses = ScreeningEvaluationResults::where('company_id', $company->id)->where('evaluation_id', $evaluationForm->id)->where('user_id', $user_id)->get();
                 $isResponsesPublished = $myResponses->where('status', true)->count() > 0 ? true : false;
                 $myComment = ScreeningEvaluation::getMyFinalComment( $evaluationForm->id, $user_id, $company->id );
                 $final_comment = $myComment->value;
                 $evaluationForm->final_comment = $final_comment;
+                $evaluationForm->is_approved = $myComment->is_approved;
                 $evaluationForm->categories->map(function ( $category ) use ( $myResponses ) {
                     $category->subCriteria->map(function ( $subCategory ) use ( $myResponses ) {
                         $checkResponse = $myResponses->where('criteria_id', $subCategory->id)->first();
@@ -158,8 +156,18 @@ class ClientCompanyController extends Controller
                     return $category;
                 });
                 $evaluationForm->isPublished = $isResponsesPublished;
+                $form_data_ids = $formData->pluck('id')->toArray();
+                if( count( $form_data_ids ) > 0 )
+                {
+                    $comments = DB::table('form_data_judges_comments')->where('user_id', $user_id)->whereIn('form_data_id', $form_data_ids)->get();
+                    $formData = $formData->map(function( $fd ) use ( $comments ) {
+                        $fd->question = trim( $fd->question );
+                        $fd->comment = $comments->where('form_data_id', $fd->id)->first() ?? '';
+                        return $fd;
+                    });
+                } else { $comments = collect([]); }
             }
-            return view('admin/clients/startup/company_profile', compact('company', 'formData', 'evaluationForm', 'Currencies', 'milestones', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile', 'technologies', 'sectors', 'industry'));
+            return view('admin/clients/startup/company_profile', compact('company', 'formTitle', 'formData', 'evaluationForm', 'Currencies', 'milestones', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile', 'technologies', 'sectors', 'industry'));
         // } catch (Exception $e) {
         //     //log what happend
         //     Log::channel('system_exceptions')->info('Exceptions:', [$e]);
