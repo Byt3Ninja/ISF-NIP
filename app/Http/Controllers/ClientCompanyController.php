@@ -9,15 +9,16 @@ use App\User;
 use App\Cycle;
 use App\Stage;
 use App\State;
+use App\Almuni;
 use App\Sector;
 use App\Company;
 use App\Country;
 use App\Currency;
+use App\Employee;
 use App\Settings;
 use App\Milestone;
 use App\Technology;
 use App\Team_member;
-use App\Employee;
 use App\FundingRound;
 use App\Organization;
 use App\StaticCategory;
@@ -119,6 +120,7 @@ class ClientCompanyController extends Controller
             $isResponsesPublished = false;
             $final_comment = null;
             $formData = collect([]);
+           
             if( !empty( $evaluationForm ) )
             {
                 $current_step = $company->stepdata;
@@ -126,8 +128,11 @@ class ClientCompanyController extends Controller
                 else
                 {
                     $form = Step::where('cycle_id', $current_step?->cycle_id)->where('arr', $current_step?->arr)->first();
+                    if(empty( $form )){
+                        return redirect()->back()->with('message2', 'No Form Found');
+                    }
                 }
-                $formData = $form->formData;
+                $formData = $form?->formData;
                 if( !empty( $formData ) ) { $formData = $formData->where('company_id', $company->id)->values(); }
                 $formData = $formData->map(function ($item) {
                     $field = $item->field()->first();
@@ -136,6 +141,7 @@ class ClientCompanyController extends Controller
                     $item->field_type = $field_type;
                     return $item;
                 });
+                
                 $myResponses = ScreeningEvaluationResults::where('company_id', $company->id)->where('evaluation_id', $evaluationForm->id)->where('user_id', $user_id)->get();
                 $isResponsesPublished = $myResponses->where('status', true)->count() > 0 ? true : false;
                 $myComment = ScreeningEvaluation::getMyFinalComment( $evaluationForm->id, $user_id, $company->id );
@@ -2082,7 +2088,7 @@ class ClientCompanyController extends Controller
                 $companyId = $id;
                 
                 // Verify that current user has access to this company (allow admins)
-                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager')) {
+                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager|registered')) {
                     return response()->json([
                         'errors' => ['permission' => [__('You do not have permission to access this company.')]],
                     ], 403);
@@ -2161,7 +2167,7 @@ class ClientCompanyController extends Controller
                 $companyId = $id;
                 
                 // Verify that current user has access to this company (allow admins)
-                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager')) {
+                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager|registered')) {
                     return response()->json([
                         'errors' => ['permission' => [__('You do not have permission to access this company.')]],
                     ], 403);
@@ -2271,7 +2277,7 @@ class ClientCompanyController extends Controller
                 $companyId = $id;
                 
                 // Verify that current user has access to this company (allow admins)
-                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager')) {
+                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager|registered')) {
                     return response()->json([
                         'errors' => ['permission' => [__('You do not have permission to access this company.')]],
                     ], 403);
@@ -2342,6 +2348,77 @@ class ClientCompanyController extends Controller
                 'errors' => ['general' => ['An error occurred while deleting the employee.']]
             ], 500);
         }
+    }
+
+    public function addCompanyAlumni(Request $request, $id)
+    {
+        
+        try {
+            $user = Auth::user();
+            $company = Company::findOrFail($id);
+            $company_relations = CompanyRelation::where('company_id', $id)->where('user_id', $company->user->id)->get();
+            $almuni = new Almuni();
+            $almuni->user_id = $company->user->id;
+            $almuni->cycle_id = $company->cycle;
+            $almuni->company_id = $id;
+            $almuni->alumni = '1';
+            $almuni->established_date = date('Y-m-d H:i:s');
+           
+            //Relations Data
+            $relations_data = $company_relations->map(function ($relation) {
+                                    return [
+                                        'Industry'    => $relation->industry?->name_en,
+                                        'Sector'      => $relation->sector?->name_en,
+                                        'Technology'  => $relation->technology?->name_en,
+                                    ];
+                                })->values();
+            $basic_startup_information = [
+                    'ID' => $company->id,
+                    'Startup_Name' => $company->name_en,
+                    'Alumni' => 'Yes',
+                    'Established_Date' => date('Y-m-d H:i:s'),
+                    'Location' => implode(', ', array_filter([
+                        $company->city->name_en,
+                        $company->country->name_en
+                    ])),
+                    'Country' => $company->country->name_en,
+                    'Business_Type' => $company->business_type,
+                    'Relations'     => $relations_data,
+                    'Website_Link' => $company->website,
+                    'Social Media Links' => [
+                        'Facebook' => $company->facebook,
+                        'Twitter' => $company->twitter,
+                        'Linkedin' => $company->linkedin,
+                        'Instagram' => $company->instagram,
+                        'Youtube' => $company->youtube,
+                        'Google_Map' => $company->google_map,
+                        'tiktok' => $company->tiktok,
+                    ],
+                ];
+            $almuni->basic_startup_information = json_encode($basic_startup_information);
+
+            $team_leader = Team_member::where('company_id', $id)->where('TeamMember', 'hackathon')->first();
+                $startup_leader_information = [
+                    'ID' => $team_leader->id,
+                    'Full_Name' => $team_leader->Name,
+                    'Country' => $company->country->name_en,
+                    'Email' => $team_leader->Email,
+                    'Phone_Number' => $team_leader->Phone,
+                ];
+            $almuni->startup_leader_information = json_encode($startup_leader_information);
+
+
+            $almuni->save();
+           
+               $dattt = json_decode($almuni->basic_startup_information);
+               dd($dattt);
+        } catch (Exception $e) {
+            Log::error('Error deleting employee: ' . $e->getMessage());
+            return response()->json([
+                'errors' => ['general' => ['An error occurred while deleting the employee.']]
+            ], 500);
+        }
+
     }
    
 }
