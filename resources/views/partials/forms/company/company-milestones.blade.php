@@ -166,8 +166,6 @@ document.addEventListener('DOMContentLoaded', function () {
   function loadExistingMilestones() {
     @if($milestones && $milestones->count() > 0)
       const existingMilestones = @json($milestones);
-
-      console.log('existingMilestones', existingMilestones)
       
       existingMilestones.forEach((milestone, index) => {
         const milestoneCard = createMilestoneCard(index === 0, milestone);
