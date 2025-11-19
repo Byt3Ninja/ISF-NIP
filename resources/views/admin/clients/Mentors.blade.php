@@ -90,7 +90,7 @@
           @if(count($mentors) > 0)
           @foreach ($mentors as $key => $mentor)
           <!-- Mentor Card -->
-          <div class="col-md-4 rounded mb-3">
+          <div class="col-md-4 rounded mb-6">
             <div class="position-relative">
               <img 
                 src="{{ $mentor->image_url ?? '/images/placeholder.jpg' }}" 
