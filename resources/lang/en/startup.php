@@ -39,7 +39,7 @@ return [
   'completion_percentage_range' => 'Completion percentage must be between 0 and 100',
 
   'document_invalid_file' => 'Each document must be a valid file',
-  'document_invalid_type' => 'Only PDF, JPG, PNG, DOCX, and XLSX files are allowed',
+  'milestone_document_invalid_type' => 'Only PDF, JPG, PNG, DOCX, and XLSX files are allowed',
   'document_too_large' => 'File too large. Maximum size allowed is 10 MB',
 
   'milestone_submit_success' => 'Milestone submitted successfully',
