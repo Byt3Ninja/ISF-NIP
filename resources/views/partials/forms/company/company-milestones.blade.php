@@ -139,8 +139,8 @@ document.addEventListener('DOMContentLoaded', function () {
   
   const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
   
-  const companyId = {{ request()->route('id') ? request()->route('id') : auth()->user()->company->id }};
-
+  const companyId = {{ request()->route('id') ? request()->route('id') : auth()->user()->company?->id }};
+  
   // Constants for validation messages and allowed file types
   const MESSAGES = {
     titleRequired: "{{ __('startup.milestone_title_required') }}",
