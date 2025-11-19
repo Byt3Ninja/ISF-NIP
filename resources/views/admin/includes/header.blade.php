@@ -1181,13 +1181,13 @@ $flattenedMenuItems = flattenMenuItems($filteredMenuItems);
             @if ($l == 'ar')
               <a class="dropdown-item" href="/lang/en" 
               data-language="en" data-text-direction="ltr">
-                <i class="flag-icon flag-icon-us"></i>
+                <i class="flag-icon flag-icon-us me-2"></i>
                 <span class="selected-language">English</span>
               </a>
             @else
               <a class="dropdown-item" href="/lang/ar" 
               data-language="ar" data-text-direction="rtl">
-                <i class="flag-icon flag-icon-sa"></i>
+                <i class="flag-icon flag-icon-sa me-2"></i>
                 <span class="selected-language">عربي</span>
               </a>
             @endif
