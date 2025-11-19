@@ -1,7 +1,6 @@
 @extends('layouts.admin')
 
 @section('style')
-  <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
   <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
 @stop
 
@@ -50,8 +49,7 @@
           <div class="col-xl-12 col-md-12 col-sm-12">
             <div class="card">
               <div class="card-header border-bottom">
-                <h5 class="card-title align-items-center">
-                  <i class='bx bx-card font-medium-4 mr-1'></i>
+                <h5 class="card-title">
                   {{ $l == 'en' ? 'Mentorship Sessions' : 'جلسات الارشاد' }}
                 </h5>
               </div>
@@ -106,7 +104,7 @@
                                 class="rounded-circle w-px-40 h-px-40 border border-light"
                                 onerror="this.src='/icons/account.svg';"
                               />
-                              <div class="">
+                              <div class="text-start">
                                 <h6 class="media-heading mb-0 text-nowrap">{{$session->user->name }} </h6>
                                 <span class="font-small-2 text-nowrap">{{$session->user->title }}</span>
                               </div>
@@ -164,7 +162,7 @@
 
                             <a href="{{ route('mentorshipTasks.index',['mentorship_id'=>$session->id]) }}"
                               title="{{ __('mentor.mentorshipTasks.tasks') }}"
-                              class="btn {{ $session->mentorshipTasks()->whereNull('title')->count()?'btn-label-warning':'btn-label-primary'  }}">
+                              class="btn btn-sm {{ $session->mentorshipTasks()->whereNull('title')->count()?'btn-label-warning':'btn-label-primary'  }}">
                               <i class="ti ti-eye me-2"></i>
                               {{ $l == 'en' ? 'View' : 'عرض' }}</a>
                               
@@ -227,13 +225,11 @@
 @stop
 
 @section('pagescripts')
-  <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
-  <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
   <script src="/js/jquery.datetimepicker.full.min.js"></script>
   <script>
     $(document).ready(function() {
       $('.table').DataTable({
-          "responsive": true, "searching": true, "lengthChange": false, "paging": true, "bInfo": false,
+          "responsive": true, "searching": true, "lengthChange": true, "paging": true, "bInfo": false,
           "columnDefs": [
               {"orderable": false, "targets":  [5]},
           ],

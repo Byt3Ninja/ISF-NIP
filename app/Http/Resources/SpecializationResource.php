@@ -21,6 +21,8 @@ class SpecializationResource extends JsonResource
             'expertise_name' => $this->parent ? $this->parent->title : null,
             'description'    => $this->description,
             'status'         => $this->status,
+            'createdAt'      => $this->created_at,
+            'updatedAt'      => $this->updated_at,
         ];
     }
 }

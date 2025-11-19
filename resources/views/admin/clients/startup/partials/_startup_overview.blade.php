@@ -2,7 +2,7 @@
   <div class="w-100 d-flex flex-column flex-md-row" style="gap: 2rem;">
     <div class="section-3">
       <div class="row">
-        <div class="col-6 col-md-4 mb-4">
+        <div class="col-12 col-md-4 mb-4">
           <div class="card" style="height: 170px; background-color: #c4b5fd;">
             <div class="card-body">
               <div class="align-self-center d-flex flex-column text-center align-items-center">
@@ -19,7 +19,7 @@
             </div>
           </div>
         </div>
-        <div class="col-6 col-md-4 mb-4">
+        <div class="col-12 col-md-4 mb-4">
           <div class="card" style="height: 170px; background-color: #7dd3fc;">
             <div class="card-body">
               <div class="align-self-center d-flex flex-column text-center align-items-center">
@@ -38,7 +38,7 @@
             </div>
           </div>
         </div>
-        <div class="col-6 col-md-4 mb-4">
+        <div class="col-12 col-md-4 mb-4">
           <div class="card" style="height: 170px; background-color: #fdba74;">
             <div class="card-body">
               <div class="align-self-center d-flex flex-column text-center align-items-center">
@@ -63,7 +63,7 @@
             </div>
           </div>
         </div>
-        <div class="col-6 col-md-4 mb-4">
+        <div class="col-12 col-md-4 mb-4">
           <div class="card" style="height: 170px; background-color: #5eead4; overflow: hidden;">
               <div class="py-6 px-2">
               <div class="align-self-center d-flex flex-column text-center align-items-center w-100">
@@ -115,7 +115,7 @@
               </div>
           </div>
         </div>
-        <div class="col-6 col-md-4 mb-4">
+        <div class="col-12 col-md-4 mb-4">
           <div class="card" style="height: 170px; background-color: #fca5a5;">
             <div class="card-body">
               <div class="align-self-center d-flex flex-column text-center align-items-center">
@@ -132,7 +132,7 @@
             </div>
           </div>
         </div>
-        <div class="col-6 col-md-4 mb-4">
+        <div class="col-12 col-md-4 mb-4">
           <div class="card bg-light">
             <div class="card-body">
               <div class="align-self-center d-flex flex-column text-center align-items-center">
@@ -186,39 +186,3 @@
 </div>
 
 {{-- @include('admin.clients.startup.partials._working_team') --}}
-
-<!-- Sustainable Development Icons -->
-@php
-// تحويل السلسلة إلى مصفوفة بعد إزالة الشرطات المائلة
-// $Sustainables = explode(',', $company->Sustainable_development);
-$Sustainables = json_decode($company->Sustainable_development);
-@endphp
-@if (!empty($Sustainables) && count($Sustainables) > 0)
-<section class="row">
-  <div class="col-12">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">
-          {{ $l == 'en' ? 'Sustainability Goals' : 'اهداف الاستدامة' }}
-        </h5>
-        <div class="row w-75">
-          @foreach ($Sustainables as $Sustainable)
-          @php
-          $icon = App\SustainableIcon::where('title', $Sustainable)->first();
-          @endphp
-          <div class="col-md-2 mb-2">
-            <div class="border light-shadow radius-15" style="display: grid; place-items: center;">
-              @if ($icon && $icon->icon_ar)
-              <img src="/images/sustainability/{{ $l }}/{{ $icon->icon_ar ?? '1.png' }}" alt="icon"
-                style="width: 100px; height: 100px;">
-              @endif
-            </div>
-          </div>
-          @endforeach
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-@endif
-<!-- / Sustainable Development Icons -->

@@ -191,10 +191,6 @@ class ClientCompanyController extends Controller
                         ->where('Company_id', auth()->user()->company->id)->get();
                     $Investors = Team_Member::where('TeamMember', 'Investor')
                         ->where('Company_id', auth()->user()->company->id)->get();
-
-                    // Load all milestones for this company (new unified structure)
-                    $milestones = Milestone::where('Company_id', auth()->user()->company->id)
-                        ->orderBy('created_at')->get();
                     
                     // For backward compatibility, create empty collections
                     $Achieveds = collect();
@@ -279,10 +275,6 @@ class ClientCompanyController extends Controller
                         ->where('Company_id', $client->company->id)->get();
                     $Investors = Team_Member::where('TeamMember', 'Investor')
                         ->where('Company_id', $client->company->id)->get();
-
-                    // Load all milestones for this company (new unified structure)
-                    $milestones = Milestone::where('Company_id', $client->company->id)
-                        ->orderBy('created_at')->get();
                     
                     // For backward compatibility, create empty collections
                     $Achieveds = collect();
@@ -375,6 +367,10 @@ class ClientCompanyController extends Controller
         $employees = Team_member::where('Company_id', $id)
                                     ->where('TeamMember', 'Employee')
                                     ->get();
+
+         // Load all milestones for this company (new unified structure)
+        $milestones = Milestone::where('company_id', $id)
+            ->orderBy('created_at')->get();
                                     
             return view('admin/clients/company', compact(
                 'client',
@@ -1621,8 +1617,7 @@ class ClientCompanyController extends Controller
         try {
             // Get company from authenticated user or provided ID
             if ($id) {
-                $user = User::where('company_id', $id)->first();
-                $companyId = $user ? $user->company_id : $id;
+                $companyId = $id;
                 
                 // Verify that current user has access to this company (allow admins)
                 if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager')) {

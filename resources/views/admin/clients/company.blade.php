@@ -38,7 +38,8 @@
       ['company-contact-info', 'ti-phone', $l == 'en' ? 'Contact Info' : 'معلومات الاتصال'],
       ['company-description', 'ti-file-description', $l == 'en' ? 'Description' : 'الوصف'],
       ['company-financial-info', 'ti-currency-dollar', $l == 'en' ? 'Financial' : ' المالية'],
-      ['team-info', 'ti-users-group', __('startup.Employees')],
+      ['team-info', 'ti-briefcase', __('startup.team_info')],
+      ['employess', 'ti-users-group', __('startup.Employees')],
       ['pitch-deck', 'ti-presentation', $l == 'en' ? 'Pitch Deck' : 'الوثائق'],
       ['company-milestones', 'ti-flag', $l == 'en' ? 'Milestones' : 'الإنجازات'],
       ['business_model', 'ti-presentation', $l == 'en' ? 'Business Model' : ' نموذج الاعمال '],
@@ -138,6 +139,9 @@
                   @include('partials.forms.company.company-financial', ['heading' => $tab['label']])
                 @break
                 @case('team-info')
+                  @include('partials.forms.company.company-team-info', ['heading' => $tab['label']])
+                @break
+                @case('employess')
                   @include('partials.forms.company.company-employees', ['heading' => $tab['label']])
                 @break
                 @case('pitch-deck')

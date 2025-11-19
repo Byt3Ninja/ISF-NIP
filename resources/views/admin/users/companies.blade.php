@@ -1,14 +1,5 @@
 @extends('layouts.admin')
 
-@section('style')
-<link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
-@stop
-
-@php
-  // Vriable for Alumni startups which have complete their programs
-  $isProgramCompleted = true;
-@endphp
-
 @section('content')
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
@@ -104,197 +95,201 @@
       <section class="mb-10 mt-4">
         <div class="row" id="companiesContainer">
           @if (count($companies) == 0)
-          <div class="col-12" id="noCompaniesResult">
-            @if(request()->has('programFilter') && request('programFilter') != '')
-              @include('includes.no-result', ['message' => __('admin.No_Subscribed_Startups')])
-            @else
-              @include('includes.no-result', ['message' => __('admin.No Companies Found')])
-            @endif
-          </div>
+            <div class="col-12" id="noCompaniesResult">
+              @if(request()->has('programFilter') && request('programFilter') != '')
+                @include('includes.no-result', ['message' => __('admin.No_Subscribed_Startups')])
+              @else
+                @include('includes.no-result', ['message' => __('admin.No Companies Found')])
+              @endif
+            </div>
           @else
-          @foreach ($companies as $company)
-          <!-- Company Card -->
-          <div class="col-md-4 mb-6">
-            <div class="card h-100">
-              <div class="card-body d-flex flex-column">
-                @php
-                  $client = App\User::where('company_id', $company->id)->first();
-                @endphp
-                <div class="d-flex justify-content-between align-items-center">
-                  <a href="/dashboard/companyProfile/{{ $company->id }}" class="w-75">
-                    <h5 class="text-dark mb-0 fw-bold line-clamp-1 text-truncate">
-                      {{ $company->{'name_' . $l} }}
-                    </h5>
-                  </a>
-                  <div class="d-flex align-items-center gap-2">
-                    @if ($company->facebook)
-                      <a href="{{ strpos($company->facebook, 'http') === 0 ? $company->facebook : 'http://' . $company->facebook }}"
-                        target='_blank' class="text-body">
-                        <i class="ti ti-brand-facebook"></i>
-                      </a>
-                    @endif
-                    @if ($company->linkedin)
-                      <a href="{{ strpos($company->linkedin, 'http') === 0 ? $company->linkedin : 'http://' . $company->linkedin }}"
-                        target='_blank' class="text-body">
-                        <i class="ti ti-brand-linkedin"></i>
-                      </a>
-                    @endif
-                    @if ($company->country_code_w_a && $company->whatsapp)
-                      <a href="{{ 'https://wa.me/' . $company->country_code_w_a . $company->whatsapp }}" target="_blank"
-                        class="text-body">
-                        <i class="ti ti-brand-whatsapp"></i>
-                      </a>
+            @foreach ($companies as $company)
+            <!-- Company Card -->
+            <div class="col-md-4 mb-6">
+              <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                  @php
+                    $client = App\User::where('company_id', $company->id)->first();
+                  @endphp
+                  <div class="d-flex justify-content-between align-items-center">
+                    <a href="/dashboard/companyProfile/{{ $company->id }}" class="w-75">
+                      <h5 class="text-dark mb-0 fw-bold line-clamp-1 text-truncate">
+                        {{ $company->{'name_' . $l} }}
+                      </h5>
+                    </a>
+                    <div class="d-flex align-items-center gap-2">
+                      @if ($company->facebook)
+                        <a href="{{ strpos($company->facebook, 'http') === 0 ? $company->facebook : 'http://' . $company->facebook }}"
+                          target='_blank' class="text-body">
+                          <i class="ti ti-brand-facebook"></i>
+                        </a>
+                      @endif
+                      @if ($company->linkedin)
+                        <a href="{{ strpos($company->linkedin, 'http') === 0 ? $company->linkedin : 'http://' . $company->linkedin }}"
+                          target='_blank' class="text-body">
+                          <i class="ti ti-brand-linkedin"></i>
+                        </a>
+                      @endif
+                      @if ($company->country_code_w_a && $company->whatsapp)
+                        <a href="{{ 'https://wa.me/' . $company->country_code_w_a . $company->whatsapp }}" target="_blank"
+                          class="text-body">
+                          <i class="ti ti-brand-whatsapp"></i>
+                        </a>
+                      @endif
+                    </div>
+                  </div>
+
+                  <div class="text-center mt-2 mb-4 position-relative border rounded">
+                    <img src="{{ $company->logo ? $company->logo : '/images/logo-placeholder.png' }}"
+                      onerror="this.src='/images/logo-placeholder.png'" class="rounded"
+                      style="height: 110px; width: 100%; object-fit: contain;" alt="logo" />
+
+                    {{-- Alumni Badge --}}
+                    @if ($company->alumni == '1' || $company->alumni == 1)
+                      <div class="position-absolute bottom-0 start-0">
+                        <span class="badge bg-label-danger">
+                          {{ __('startup.alumni') }}
+                        </span>
+                      </div>
                     @endif
                   </div>
-                </div>
 
-                <div class="text-center mt-2 mb-4 position-relative border rounded">
-                  <img src="{{ $company->logo ? $company->logo : '/images/logo-placeholder.png' }}"
-                    onerror="this.src='/images/logo-placeholder.png'" class="rounded"
-                    style="height: 110px; width: 100%; object-fit: contain;" alt="logo" />
-
-                  {{-- Alumni Badge --}}
-                  @if ($company->alumni == '1' || $company->alumni == 1)
-                    <div class="position-absolute bottom-0 start-0">
-                      <span class="badge bg-label-danger">
-                        {{ __('startup.alumni') }}
-                      </span>
-                    </div>
-                  @endif
-                </div>
-
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                  <h6 class="fw-semibold text-capitalize line-clamp-1 mb-0">
-                    @php
-                      $sector = App\Sector::where('id', $company->sector)->first();
-                    @endphp
-                    {{ $sector ? $sector->{'name_' . $l} : $company->sector }}
-                  </h6>
-                  <div>
-                    @if ($company->stage && optional($company->stagE)->{'name_' . $l})
-                      <span class="badge bg-label-secondary text-dark">
-                        <i class="ti ti-building-estate ti-xs me-1 text-primary"></i>
-                        {{ optional($company->stagE)->{'name_' . $l} }}
-                      </span>
-                    @endif
-                    @php
-                      $Sustainables = json_decode($company->Sustainable_development);
-                    @endphp
-                    @if (!empty($Sustainables) && count($Sustainables) > 0)
-                      <a class="btn btn-sm btn-icon btn-label-secondary" href="#" data-bs-toggle="modal"
-                        data-bs-target="#sustainabilityModal{{ $company->id }}"><i
-                          class="ti ti-target-arrow text-primary"></i></a>
-                      <div class="modal fade" id="sustainabilityModal{{ $company->id }}" tabindex="-1"
-                        aria-hidden="true">
-                        <div class="modal-dialog modal-lg modal-simple modal-edit-user">
-                          <div class="modal-content">
-                            <div class="modal-body">
-                              <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                aria-label="Close"></button>
-                              <div class="text-center mb-4">
-                                <h4 class="mb-3 fw-bold">
-                                  {{ $l == 'en' ? 'Sustainability Goals' : 'اهداف الاستدامة' }}</h4>
-                                <div class="row justify-content-center">
-                                  @foreach ($Sustainables as $Sustainable)
-                                    @php
-                                      $icon = App\SustainableIcon::where('title', $Sustainable)->first();
-                                    @endphp
-                                    <div class="col-md-3 col-sm-4 col-6 mb-3">
-                                      <div class="border shadow-sm rounded p-3 d-flex justify-content-center align-items-center"
-                                        style="height: 120px;">
-                                        @if ($icon && $icon->icon_ar)
-                                          <img
-                                            src="/images/sustainability/{{ $l }}/{{ $icon->icon_ar ?? '1.png' }}"
-                                            alt="icon" class="img-fluid"
-                                            style="max-width: 100%; max-height: 100%;">
-                                        @endif
+                  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <h6 class="fw-semibold text-capitalize line-clamp-2 mb-0">
+                      @php
+                        $sector = App\Sector::where('id', $company->sector)->first();
+                      @endphp
+                      {{ $sector ? $sector->{'name_' . $l} : $company->sector }}
+                    </h6>
+                    <div class="d-flex flex-nowrap align-items-center gap-2">
+                      @if ($company->stage && optional($company->stagE)->{'name_' . $l})
+                        <span class="badge bg-label-secondary text-dark text-truncate">
+                          <i class="ti ti-building-estate ti-xs me-1 text-primary"></i>
+                          {{ optional($company->stagE)->{'name_' . $l} }}
+                        </span>
+                      @endif
+                      @php
+                        $Sustainables = json_decode($company->Sustainable_development);
+                      @endphp
+                      @if (!empty($Sustainables) && count($Sustainables) > 0)
+                        <a class="badge bg-label-secondary" href="#" data-bs-toggle="modal"
+                          data-bs-target="#sustainabilityModal{{ $company->id }}"><i
+                            class="ti ti-target-arrow text-primary ti-xs"></i></a>
+                        <div class="modal fade" id="sustainabilityModal{{ $company->id }}" tabindex="-1"
+                          aria-hidden="true">
+                          <div class="modal-dialog modal-lg modal-simple modal-edit-user">
+                            <div class="modal-content">
+                              <div class="modal-body">
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                  aria-label="Close"></button>
+                                <div class="text-center mb-4">
+                                  <h4 class="mb-3 fw-bold">
+                                    {{ $l == 'en' ? 'Sustainability Goals' : 'اهداف الاستدامة' }}</h4>
+                                  <div class="row justify-content-center">
+                                    @foreach ($Sustainables as $Sustainable)
+                                      @php
+                                        $icon = App\SustainableIcon::where('title', $Sustainable)->first();
+                                      @endphp
+                                      <div class="col-md-3 col-sm-4 col-6 mb-3">
+                                        <div class="border shadow-sm rounded p-3 d-flex justify-content-center align-items-center"
+                                          style="height: 120px;">
+                                          @if ($icon && $icon->icon_ar)
+                                            <img
+                                              src="/images/sustainability/{{ $l }}/{{ $icon->icon_ar ?? '1.png' }}"
+                                              alt="icon" class="img-fluid"
+                                              style="max-width: 100%; max-height: 100%;">
+                                          @endif
+                                        </div>
                                       </div>
-                                    </div>
-                                  @endforeach
+                                    @endforeach
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    @endif
-                  </div>
-                </div>
-
-               <!-- Founders -->
-                @php
-                $founders = App\Team_member::where([
-                    ['TeamMember', 'Founder'],
-                    ['Company_id', $company->id],
-                ])->get();
-                @endphp
-
-                @if (count($founders) > 0)
-                  <div class="d-flex align-items-center mb-3">
-                    <span class="fw-semibold me-2">
-                      {{ count($founders) > 1 ? __('admin.Founders') : __('admin.Founder') }}:
-                    </span>
-
-                    <div class="d-flex align-items-center">
-                      <ul class="list-unstyled d-flex align-items-center mb-0">
-                        @foreach ($founders->take(2) as $founder)
-                          <li class="badge badge-pill bg-label-secondary me-1">
-                            <span class="fw-semibold text-secondary">{{ $founder->Name }}</span>
-                          </li>
-                        @endforeach
-
-                        @if (count($founders) > 2)
-                          <li class="fw-semibold text-secondary">
-                            +{{ count($founders) - 2 }}
-                          </li>
-                        @endif
-                      </ul>
+                      @endif
                     </div>
                   </div>
-                @endif
+
+                <!-- Founders -->
+                  @php
+                  $founders = App\Team_member::where([
+                      ['TeamMember', 'Founder'],
+                      ['Company_id', $company->id],
+                  ])->get();
+                  @endphp
+
+                  @if (count($founders) > 0)
+                    <div class="d-flex align-items-center mb-3 mt-4">
+                      <span class="fw-semibold me-2">
+                        {{ count($founders) > 1 ? __('admin.Founders') : __('admin.Founder') }}:
+                      </span>
+
+                      <div class="d-flex align-items-center">
+                        <ul class="list-unstyled d-flex align-items-center mb-0">
+                          @foreach ($founders->take(2) as $founder)
+                            <li class="badge badge-pill bg-label-secondary me-1">
+                              <span class="fw-semibold text-secondary">{{ $founder->Name }}</span>
+                            </li>
+                          @endforeach
+
+                          @if (count($founders) > 2)
+                            <li class="fw-semibold text-secondary">
+                              +{{ count($founders) - 2 }}
+                            </li>
+                          @endif
+                        </ul>
+                      </div>
+                    </div>
+                  @endif
 
 
-                <div class="mt-auto">
-                  <ul class="list-unstyled mb-4">
-                    @role('Admin')
+                  <div class="mt-auto">
+                    <ul class="list-unstyled mb-4">
+                      @role('Admin')
+                        <li class="d-flex align-items-center mb-2">
+                          <i class="ti ti-building text-info"></i>
+                          <span class="fw-semibold mx-2">{{ __('admin.Organization') }}:</span>
+                          <span
+                            class="text-muted">{{ optional(optional($company->cycleRelation)->organization)->{'name_' . $l} ?? 'N/A' }}</span>
+                        </li>
+                      @endrole
                       <li class="d-flex align-items-center mb-2">
-                        <i class="ti ti-building text-info"></i>
-                        <span class="fw-semibold mx-2">{{ __('admin.Organization') }}:</span>
-                        <span
-                          class="text-muted">{{ optional(optional($company->cycleRelation)->organization)->{'name_' . $l} ?? 'N/A' }}</span>
+                        <i class="ti ti-components text-primary"></i>
+                        <span class="fw-semibold mx-2">{{ __('cycles.Cycle') }}:</span>
+                        <span class="text-muted">{{ optional($company->cycleRelation)->title ?? 'N/A' }}</span>
                       </li>
-                    @endrole
-                    <li class="d-flex align-items-center mb-2">
-                      <i class="ti ti-components text-primary"></i>
-                      <span class="fw-semibold mx-2">{{ __('cycles.Cycle') }}:</span>
-                      <span class="text-muted">{{ optional($company->cycleRelation)->title ?? 'N/A' }}</span>
-                    </li>
-                    <li class="d-flex align-items-center mb-2">
-                      <i class="ti ti-calendar text-dark"></i>
-                      <span class="fw-semibold mx-2">{{ __('admin.Established date') }}:</span>
-                      <span class="text-muted">{{ $company->est_date ?: 'N/A' }}</span>
-                    </li>
-                    @if (isset($company->country) || isset($company->city))
-                      <li class="d-flex align-items-center">
-                        <i class="ti ti-map-pin text-muted"></i>
-                        <span class="fw-semibold mx-2">{{ __('admin.Location') }}:</span>
-                        <span class="text-muted">{{ optional($company->city)->{'name_' . $l} }},
-                          {{ optional($company->country)->{'name_' . $l} }}</span>
+                      <li class="d-flex align-items-center mb-2">
+                        <i class="ti ti-calendar text-dark"></i>
+                        <span class="fw-semibold mx-2">{{ __('admin.Established date') }}:</span>
+                        <span class="text-muted">{{ $company->est_date ?: 'N/A' }}</span>
                       </li>
-                    @endif
-                  </ul>
+                      @if (isset($company->country) || isset($company->city))
+                        <li class="d-flex align-items-center">
+                          <i class="ti ti-map-pin text-muted"></i>
+                          <span class="fw-semibold mx-2">{{ __('admin.Location') }}:</span>
+                          <span class="text-muted">{{ optional($company->city)->{'name_' . $l} }},
+                            {{ optional($company->country)->{'name_' . $l} }}</span>
+                        </li>
+                      @endif
+                    </ul>
+                  </div>
                 </div>
+                @if (isset($company->id) && $_user->ableTo('company.profile_view', $permissions))
+                  <div class="card-footer border-top-0">
+                    <a href="{{ route('company.profile_view', $company->id) }}" class="btn btn-primary w-100">
+                      {{ __('admin.View Profile') }}
+                    </a>
+                  </div>
+                @endif
               </div>
-              @if (isset($company->id) && $_user->ableTo('company.profile_view', $permissions))
-                <div class="card-footer border-top-0">
-                  <a href="{{ route('company.profile_view', $company->id) }}" class="btn btn-primary w-100">
-                    {{ __('admin.View Profile') }}
-                  </a>
-                </div>
-              @endif
             </div>
-          </div>
-          @endforeach
+            @endforeach
+
+            <div class="mt-8">
+              {{ $companies->links('pagination::bootstrap-5') }}
+            </div>
           @endif
           
           <!-- Hidden No Search Results Template -->
@@ -388,14 +383,12 @@
             <label for="stageFilter" class="form-label">{{ __('admin.stage') }}</label>
             <select name="stage" id="stageFilter" class="form-select select2">
               <option value="">{{ __('admin.All_Stages') }}</option>
-              @php $stages = App\Stage::all(); @endphp
+              @php
+                $stages = App\Stage::all()->unique('name_' . $l);
+              @endphp
               @foreach ($stages as $stage)
                 <option value="{{ $stage->id }}" {{ request('stage') == $stage->id ? 'selected' : '' }}>
-                 @if(str_contains('name_' . $l, 'ar') || str_contains('name_' . $l, 'en'))
-                    {{ $stage->{'name_' . $l} }}
-                  @else
-                    {{ $stage->name }}
-                  @endif
+                  {{ $stage->{'name_' . $l} }}
                 </option>
               @endforeach
             </select>

@@ -213,7 +213,7 @@ $programsSummary = [
     @else
       <div class="d-flex flex-wrap justify-content-between align-items-md-center mb-4">
         <div class="d-flex align-items-center">
-          <h4 class="fw-bold mb-0">{{ __('startup.startup_profile_heading') }}</h4>
+          <h4 class="fw-bold mb-3 mb-md-0">{{ __('startup.startup_profile_heading') }}</h4>
           <h6 class="mb-0 ms-2">
             ( {{ $company && $company->CreatedTax == '1' ? __('startup.registered') : __('startup.not_registered') }} )
           </h6>
