@@ -45,7 +45,7 @@
                   </p>
                   <span class="fs-5">
                     <!-- Total Companies Count -->
-                    {{ count($companies) }}
+                    {{ $companies->total() }}
                   </span>
                 </div>
               </div>

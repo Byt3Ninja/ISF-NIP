@@ -34,36 +34,38 @@
                 {{ $l == 'en' ? 'Your browser does not support iframes.' : 'متصفحك لا يدعم إطارات iframe.' }}
               </p>
             </iframe>
-            <div class="mt-auto d-flex flex-column mb-6">
-              <span class="text-muted">
-                {{ $l == 'en' ? 'To get analysis for your pitch deck please' : 'للحصول على تحليل لعرضك التقديمي، يرجى' }}
-              </span>
-              @if($_user->hasAnyRole('Registered'))
-              <a role="button"
-                onclick="window.location.href='{{ route('company.profile_view_mine') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 0)"
-                class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
-                {{ $l == 'en' ? 'Click here' : 'اضغط هنا' }}
-              </a>
-              @endif
-            </div>
+
+            @if($_user->hasAnyRole('Registered'))
+              <div class="mt-auto d-flex flex-column mb-6">
+                <span class="text-muted">
+                  {{ $l == 'en' ? 'To get analysis for your pitch deck please' : 'للحصول على تحليل لعرضك التقديمي، يرجى' }}
+                </span>
+                <a role="button"
+                  onclick="window.location.href='{{ route('company.profile_view_mine') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 0)"
+                  class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
+                  {{ $l == 'en' ? 'Click here' : 'اضغط هنا' }}
+                </a>
+              </div>
+            @endif
           </div>
         </div>
         @else
         <div class="card-body text-center h-100">
           <div class="d-flex flex-column justify-content-between align-items-center h-100">
             <img src="/images/deck.svg" style="width: 350px; height: 350px;" />
-            <div class="mt-auto d-flex flex-column mb-6">
-              <span class="text-muted">
-                {{ $l == 'en' ? 'To get analysis for your pitch deck please upload your pitch deck' : 'للحصول على تحليل لعرضك التقديمي، يرجى تحميل عرضك التقديمي' }}
-              </span>
-              @if($_user->hasAnyRole('Registered'))
-              <a role="button"
-                onclick="window.location.href='{{ route('company.profile_view_mine') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 0)"
-                class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
-                {{ $l == 'en' ? 'Click here' : 'اضغط هنا' }}
-              </a>
-              @endif
-            </div>
+
+            @if($_user->hasAnyRole('Registered'))
+              <div class="mt-auto d-flex flex-column mb-6">
+                <span class="text-muted">
+                  {{ $l == 'en' ? 'To get analysis for your pitch deck please upload your pitch deck' : 'للحصول على تحليل لعرضك التقديمي، يرجى تحميل عرضك التقديمي' }}
+                </span>
+                <a role="button"
+                  onclick="window.location.href='{{ route('company.profile_view_mine') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 0)"
+                  class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
+                  {{ $l == 'en' ? 'Click here' : 'اضغط هنا' }}
+                </a>
+              </div>
+            @endif
           </div>
         </div>
         @endif
@@ -115,18 +117,18 @@
           <img id="deck-video-image" src="/images/deck-video.svg" style="width: 350px; height: height: 350px;" />
           @endif
 
-          <div class="mt-auto d-flex flex-column pt-4 text-center">
-            <span class="text-muted">
-              {{ __('admin.To get analysis for your pitch deck please upload your pitch deck video') }}
-            </span>
-            @if($_user->hasAnyRole('Registered'))
-            <a role="button"
-              onclick="window.location.href='{{ route('company.profile_view_mine') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 1)"
-              class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
-              {{ $l == 'en' ? 'Click here' : 'اضغط هنا' }}
-            </a>
-            @endif
-          </div>
+          @if($_user->hasAnyRole('Registered'))
+            <div class="mt-auto d-flex flex-column pt-4 text-center">
+              <span class="text-muted">
+                {{ __('admin.To get analysis for your pitch deck please upload your pitch deck video') }}
+              </span>
+              <a role="button"
+                onclick="window.location.href='{{ route('company.profile_view_mine') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 1)"
+                class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
+                {{ $l == 'en' ? 'Click here' : 'اضغط هنا' }}
+              </a>
+            </div>
+          @endif
         </div>
       </div>
     </div>
