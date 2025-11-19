@@ -202,6 +202,7 @@ return [
     'No answers submitted yet' => 'لم تضاف تقييمات بعد',
     'Select company from menu above' => 'أختر شركة من القائمة بأعلى',
     'for' => 'لـ',
+    'no_submissions_yet' => 'لا توجد أي تقديمات حتى الآن',
     'Services' => 'الخدمات',
     'Service list' => 'قائمة الخدمات',
     'Add New' => 'إضافة جديد',
