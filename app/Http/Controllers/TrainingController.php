@@ -523,34 +523,33 @@ class TrainingController extends Controller
 		
 		Log::info($request->all());
 		$user= Auth::user();
-		if(!$user->hasAnyRole('registered')){
-			return back()->withInput()->with(['class' => 'danger', 'message' => 'ErrorNoPermissions']);
+		if($user->hasRole('Registered')){
+			
+		 	$request->validate([
+				'duration_minutes' => 'required|integer|min:1',
+				'trainingId' => 'required|integer',
+			]);
+
+			$training = TrainingSession::where('training_Address', $request->trainingId)->where('step_id', $user->company->step)->first();
+
+			TrainingDuration::create([
+				'user_id' => $user->id,
+				'company_id' => $user->company_id,
+				'cycle_id' => $user->company->cycle,
+				'step_id' => $user->company->step,
+				'training_sessions_id' => $training->id,
+				'page_url' => $request->page_url,
+				'duration_minutes' => $request->duration_minutes,
+			]);
+
+			$totalDuration = TrainingDuration::where('training_sessions_id', $training->id)->sum('duration_minutes');
+
+			TrainingSession::where('id', $training->id)->update([
+				'duration' => $totalDuration,
+			]);
+
+			return response()->json(['status' => 'success']);
 		}
-		
-		 $request->validate([
-            'duration_minutes' => 'required|integer|min:1',
-			'trainingId' => 'required|integer',
-        ]);
-
-		$training = TrainingSession::where('training_Address', $request->trainingId)->where('step_id', $user->company->step)->first();
-
-        TrainingDuration::create([
-            'user_id' => $user->id,
-			'company_id' => $user->company_id,
-			'cycle_id' => $user->company->cycle,
-			'step_id' => $user->company->step,
-			'training_sessions_id' => $training->id,
-            'page_url' => $request->page_url,
-            'duration_minutes' => $request->duration_minutes,
-        ]);
-
-		$totalDuration = TrainingDuration::where('training_sessions_id', $training->id)->sum('duration_minutes');
-
-		TrainingSession::where('id', $training->id)->update([
-			'duration' => $totalDuration,
-		]);
-
-        return response()->json(['status' => 'success']);
 	}
 
 	public function results($id = 0)
