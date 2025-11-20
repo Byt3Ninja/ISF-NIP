@@ -10,6 +10,16 @@ class UsersBio extends Model
     protected $guarded = ['id', 'created_at', 'updated_at'];
     protected $fillable = [
         'industries',
+        'mentorship_approach',
+        'entrepreneurial_experience',
+        'entrepreneurial_experience_brief',
+        'bio_ar',
+        'bio_en',
+        'linkedin',
+        'profile_privacy',
+        'user_id',
+        'created_at',
+        'updated_at',
     ];
     protected $casts = [
         'industries' => 'array',

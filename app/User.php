@@ -156,7 +156,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     // =================> mentor Relations <=============================
     public function bio() {
-        return $this->hasOne(UsersBio::class);
+        return $this->hasOne(UsersBio::class, 'user_id');
     }
     public function mentorSessions() {
         return $this->hasMany(MentorshipRequest::class,'mentor_id');

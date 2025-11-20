@@ -152,10 +152,11 @@ class ClientProfileController extends Controller
 
     public function Updatebio(Request $request)
     {
-        
+       
         $user = Auth::user();
         // Mentor Bio section
-        if ($request->mentor_section) {
+        if ($request->mentor_section == 1) {
+            
             $data = [
                 'bio_ar' => $request->bio_ar,
                 'bio_en' => $request->bio_en,
