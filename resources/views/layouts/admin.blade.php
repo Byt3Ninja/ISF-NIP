@@ -19,12 +19,15 @@
     <div class="layout-wrapper layout-content-navbar">
       <div class="layout-container">
         <!-- Sidebar Menu -->
-        @include('admin.includes.menu')
+        @if ($_user->hasRole('Registered'))
+          @include('partials.menu-startup')
+        @else
+          @include('admin.includes.menu')
+        @endif
 
         <div class="layout-page">
           <!-- Navbar -->
           @include('admin.includes.header')
-
 
           <!-- Content -->
           @yield('content')

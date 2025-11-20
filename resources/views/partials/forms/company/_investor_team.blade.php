@@ -1,6 +1,6 @@
 <!-- Investors Column -->
 <div class="col-md-12 mb-3">
-  <div class="card shadow-sm" style="border-radius: 15px;">
+  <div class="card shadow-sm">
     <div class="p-4">
       <form id="investor-form">
         @csrf
@@ -82,7 +82,7 @@
         <div class="row px-4 mt-4">
           @foreach ($Investors as $Investor)
           <div class="col-md-6">
-            <div class="card shadow-sm mb-4 position-relative" style="border-radius: 15px;">
+            <div class="card shadow-sm mb-4 position-relative">
               <span class="position-absolute cursor-pointer top-0 end-0 p-4" onclick="togglePopup({{ $Investor->id }})">
                 <i class="ti ti-dots-vertical fs-5"></i>
               </span>

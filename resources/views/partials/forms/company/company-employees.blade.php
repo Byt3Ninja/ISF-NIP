@@ -217,11 +217,7 @@ document.addEventListener('DOMContentLoaded', function () {
   
   const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
   
-  @if(auth()->user() && auth()->user()->company)
-    const companyId = {{ auth()->user()->company->id }};
-  @else
-    const companyId = null;
-  @endif
+  const companyId = {{ request()->route('id') ? request()->route('id') : auth()->user()->company?->id }};
 
   // Constants for validation messages and allowed file types
   const MESSAGES = {
@@ -260,32 +256,27 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   function loadExistingEmployees() {
-    @if(auth()->user() && auth()->user()->company)
-      @php
-        $employees = auth()->user()->company->employees()->get()
-            ->map(function($emp) {
-                return [
-                    'id' => $emp->id,
-                    'full_name' => $emp->full_name,
-                    'job_title' => $emp->job_title,
-                    'gender' => $emp->gender,
-                    'employment_type' => $emp->employment_type,
-                    'hiring_date' => $emp->hiring_date ? $emp->hiring_date->format('Y-m-d') : null,
-                    'documents' => $emp->documents
-                ];
-            });
-      @endphp
-      @if($employees->count() > 0)
-        const existingEmployees = @json($employees);
-        
-        existingEmployees.forEach((employee, index) => {
-          const employeeCard = createEmployeeCard(index === 0, employee);
-          populateEmployeeCardInForm(employeeCard, employee);
-        });
-        updateEmployeeNumbers();
-      @else
-        createEmployeeCard(true);
-      @endif
+    @if($employees && $employees->count() > 0)
+    @php
+      $employees->map(function($emp) {
+        return [
+          'id' => $emp->id,
+          'full_name' => $emp->full_name,
+          'job_title' => $emp->job_title,
+          'gender' => $emp->gender,
+          'employment_type' => $emp->employment_type,
+          'hiring_date' => $emp->hiring_date ? $emp->hiring_date->format('Y-m-d') : null,
+          'documents' => $emp->documents
+        ];
+      });
+    @endphp
+    const existingEmployees = @json($employees);
+      
+      existingEmployees.forEach((employee, index) => {
+        const employeeCard = createEmployeeCard(index === 0, employee);
+        populateEmployeeCardInForm(employeeCard, employee);
+      });
+      updateEmployeeNumbers();
     @else
       createEmployeeCard(true);
     @endif
@@ -411,7 +402,7 @@ document.addEventListener('DOMContentLoaded', function () {
     card.querySelector('.employee-job-title').value = employee.job_title || '';
     card.querySelector('.employee-gender').value = employee.gender || '';
     card.querySelector('.employee-employment-type').value = employee.employment_type || '';
-    card.querySelector('.employee-hiring-date').value = employee.hiring_date || '';
+    card.querySelector('.employee-hiring-date').value = employee.hiring_date ? moment(employee.hiring_date).format('YYYY-MM-DD') : '';
     
     // Populate existing documents
     populateExistingDocumentsInForm(card);
@@ -458,6 +449,11 @@ document.addEventListener('DOMContentLoaded', function () {
     employeesContainer.appendChild(newCard);
     updateEmployeeNumbers();
     addValidationClearListeners(newCard);
+
+    // Initialize Flatpickr for employee hiring date
+    $('.employee-hiring-date').flatpickr({
+      dateFormat: "Y-m-d",
+    });
     
     return newCard;
   }
@@ -577,7 +573,7 @@ document.addEventListener('DOMContentLoaded', function () {
           job_title: data.employee.job_title,
           gender: data.employee.gender,
           employment_type: data.employee.employment_type,
-          hiring_date: data.employee.hiring_date,
+          hiring_date: data.employee.hiring_date ? moment(data.employee.hiring_date).format('YYYY-MM-DD') : '',
           documents: data.employee.documents
         };
       }
@@ -647,7 +643,7 @@ document.addEventListener('DOMContentLoaded', function () {
           employmentTypeInput.value = data.employee.employment_type;
         }
         if (hiringDateInput && data.employee.hiring_date) {
-          hiringDateInput.value = data.employee.hiring_date;
+          hiringDateInput.value = data.employee.hiring_date ? moment(data.employee.hiring_date).format('YYYY-MM-DD') : '';
         }
       }
 
@@ -1137,7 +1133,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   // Initialize Flatpickr for employee hiring date
-  flatpickr(".employee-hiring-date", {
+  $('.employee-hiring-date').flatpickr({
     dateFormat: "Y-m-d",
   });
 });

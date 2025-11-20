@@ -44,13 +44,23 @@ use App\Http\Controllers\API\Startup\MentorshipSessionController;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
 Route::match(['post', 'get'], 'register-company', [RegistrationController::class, 'register']);
 Route::get('uploads/companies/{path}', [RegistrationController::class, 'showImage'])->where('path', '.*');
 Route::get('company', [RegistrationController::class, 'getCompany']);
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
-Route::get('/expertises',[ExpertiseController::class, 'index']);
+Route::get('/expertise',[ExpertiseController::class, 'index']);
+Route::post('/expertise',[ExpertiseController::class, 'store']);
+Route::put('/expertise/{id}',[ExpertiseController::class, 'update']);
+Route::post('/expertise/import',[ExpertiseController::class, 'import']);
+Route::delete('/expertise/{id}',[ExpertiseController::class, 'destroy']);
+Route::get('/specializations',[ExpertiseController::class, 'children']);
+Route::post('/specializations',[ExpertiseController::class, 'store']);
+Route::put('/specializations/{id}',[ExpertiseController::class, 'update']);
+Route::delete('/specializations/{id}',[ExpertiseController::class, 'destroy']);
+Route::post('/specializations/import',[ExpertiseController::class, 'importSpecialization']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 Route::middleware('sanctum.custom')->group(function () {
@@ -156,7 +166,7 @@ Route::middleware('sanctum.custom')->group(function () {
     Route::apiResource('permissions', PermissionController::class);
     Route::apiResource('permission-groups', PermissionGroupController::class);
 });
-    Route::prefix('dashboard')->group(function () {
+Route::prefix('dashboard')->group(function () {
     Route::get('/summary', [MentorshipReportController::class, 'summary']);
     Route::get('/weekly-trends', [MentorshipReportController::class, 'weeklyTrends']);
     Route::get('/mentor-hours', [MentorshipReportController::class, 'mentorHours']);

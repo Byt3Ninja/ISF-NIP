@@ -177,52 +177,54 @@
 
             {{-- Statistics Cards --}}
             @hasanyrole('Admin|organizationManager')
-              <div class="col-lg-3 col-sm-6">
-                <article class="card card-border-shadow-primary h-100">
-                  <div class="card-body">
-                    <div class="d-flex justify-content-center align-items-center mb-2">
-                      <div class="avatar me-4">
-                        <span class="avatar-initial rounded bg-label-primary">
-                          <i class="ti-brand-my-oppo text-primary ti-28px"></i>
-                        </span>
+              <div class="row mb-6">
+                <div class="col-6 col-md-4">
+                  <article class="card card-border-shadow-primary h-100">
+                    <div class="card-body">
+                      <div class="d-flex justify-content-center align-items-center mb-2">
+                        <div class="avatar me-4">
+                          <span class="avatar-initial rounded bg-label-primary">
+                            <i class="ti-brand-my-oppo text-primary ti-28px"></i>
+                          </span>
+                        </div>
+                        <p class="mb-0 text-center h4">{{ $mentrequests_count }}</p>
                       </div>
-                      <p class="mb-0 text-center h4">{{ $mentrequests_count }}</p>
+                      <p class="mb-1 text-center">{{ __('admin.Mentorship requests') }}</p>
                     </div>
-                    <p class="mb-1 text-center">{{ __('admin.Mentorship requests') }}</p>
-                  </div>
-                </article>
-              </div>
-
-              <div class="col-lg-3 col-sm-6">
-                <article class="card card-border-shadow-primary h-100">
-                  <div class="card-body">
-                    <div class="d-flex justify-content-center align-items-center mb-2">
-                      <div class="avatar me-4">
-                        <span class="avatar-initial rounded bg-label-primary">
-                          <i class="ti-calendar-event text-primary ti-28px"></i>
-                        </span>
+                  </article>
+                </div>
+  
+                <div class="col-6 col-md-4">
+                  <article class="card card-border-shadow-primary h-100">
+                    <div class="card-body">
+                      <div class="d-flex justify-content-center align-items-center mb-2">
+                        <div class="avatar me-4">
+                          <span class="avatar-initial rounded bg-label-primary">
+                            <i class="ti-calendar-event text-primary ti-28px"></i>
+                          </span>
+                        </div>
+                        <p class="mb-0 text-center h4">{{ $mentrequests_period }}</p>
                       </div>
-                      <p class="mb-0 text-center h4">{{ $mentrequests_period }}</p>
+                      <p class="mb-1 text-center">{{ __('admin.Mentorship requests Duration') }}</p>
                     </div>
-                    <p class="mb-1 text-center">{{ __('admin.Mentorship requests Duration') }}</p>
-                  </div>
-                </article>
-              </div>
-
-              <div class="col-lg-3 col-sm-6">
-                <article class="card card-border-shadow-primary h-100">
-                  <div class="card-body">
-                    <div class="d-flex justify-content-center align-items-center mb-2">
-                      <div class="avatar me-4">
-                        <span class="avatar-initial rounded bg-label-primary">
-                          <i class="ti-calendar-event text-primary ti-28px"></i>
-                        </span>
+                  </article>
+                </div>
+  
+                <div class="col-6 col-md-4">
+                  <article class="card card-border-shadow-primary h-100">
+                    <div class="card-body">
+                      <div class="d-flex justify-content-center align-items-center mb-2">
+                        <div class="avatar me-4">
+                          <span class="avatar-initial rounded bg-label-primary">
+                            <i class="ti-calendar-event text-primary ti-28px"></i>
+                          </span>
+                        </div>
+                        <p class="mb-0 text-center h4">{{ number_format($average_rating ?? 0, 1) }}</p>
                       </div>
-                      <p class="mb-0 text-center h4">{{ number_format($average_rating ?? 0, 1) }}</p>
+                      <p class="mb-1 text-center">{{ __('admin.Mentorship Avr Rating') }}</p>
                     </div>
-                    <p class="mb-1 text-center">{{ __('admin.Mentorship Avr Rating') }}</p>
-                  </div>
-                </article>
+                  </article>
+                </div>
               </div>
             @endhasanyrole
           </section>

@@ -10,9 +10,10 @@ class ScreeningEvaluationFieldsValues extends Model
 	use HasFactory;
 
 	protected $table = 'screening_evaluation_fields_values';
-	protected $fillable = ['custom_field_id', 'value', 'user_id', 'company_id'];
+	protected $fillable = ['custom_field_id', 'value', 'is_approved', 'user_id', 'company_id'];
 	protected $casts = [
 		'value' => 'string',
+		'is_approved' => 'boolean',
 		'custom_field_id' => 'integer',
 		'user_id' => 'integer',
 		'company_id' => 'integer',

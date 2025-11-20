@@ -79,6 +79,12 @@ return [
             'url' => env('APP_URL') . '/images/resource',
             'visibility' => 'public',
         ],
+        'serviceProvider' => [
+            'driver' => 'local',
+            'root' => storage_path('app/uploads/service_provider'),
+            'url' => env('APP_URL') . '/dashboard/uploads/service_provider',
+            'visibility' => 'public',
+        ],
         'UsersDisk' => [
             'driver' => 'local',
             'root' => storage_path('app/uploads'),
