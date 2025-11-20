@@ -326,13 +326,24 @@ class ClientCompanyController extends Controller
                 $selectedIndustryId   = $companyRelations->pluck('industry_id')->filter()->first();
                 $selectedSectorIds    = $companyRelations->pluck('sector_id')->filter()->toArray();
                 $selectedTechnologyIds = $companyRelations->pluck('technology_id')->filter()->toArray();
-                $technologies = DB::table('technologies')->get()->map(function ($tech) use ($l, $selectedTechnologyIds) {
+                
+                // Get all technologies for the select2 dropdown
+                $allTechnologies = DB::table('technologies')->get()->map(function ($tech) {
                     return [
-                        'id'       => $tech->id,
-                        'name'     => $tech->name,
-                        'selected' => in_array($tech->id, $selectedTechnologyIds),
+                        'id'   => $tech->id,
+                        'name' => $tech->name,
                     ];
                 })->values()->toArray();
+                
+                // Get selected technologies as names (for display in tags)
+                $selectedTechnologies = DB::table('technologies')
+                    ->whereIn('id', $selectedTechnologyIds)
+                    ->pluck('name')
+                    ->toArray();
+                
+                $technologies = $allTechnologies; // All technologies for select2
+                $technologiesSelected = $selectedTechnologies; // Selected tech names for tags
+                
                 $allSectors = DB::table('sectors')->get();
                 $industries = StaticCategory::with('sectors')->get();
             $data = $industries->map(function ($industry) use ($l, $allSectors, $selectedIndustryId, $selectedSectorIds) {
@@ -345,13 +356,8 @@ class ClientCompanyController extends Controller
                         ];
                     })->values()->toArray();
                 } else {
-                    $sectorsList = $allSectors->map(function ($sector) use ($l, $selectedSectorIds) {
-                        return [
-                            'id'       => $sector->id,
-                            'name'     => $sector->{"name_$l"} ?? $sector->name_en ?? 'N/A',
-                            'selected' => in_array($sector->id, $selectedSectorIds),
-                        ];
-                    })->values()->toArray();
+                    // When industry has no sectors, return empty array (not all sectors)
+                    $sectorsList = [];
                 }
                 return [
                     'id'       => $industry->id,
@@ -362,7 +368,13 @@ class ClientCompanyController extends Controller
             });
         }else{
            $industries = StaticCategory::with('sectors')->get();
-           $technologies = DB::table('technologies')->get();
+           $technologies = DB::table('technologies')->get()->map(function ($tech) {
+               return [
+                   'id'   => $tech->id,
+                   'name' => $tech->name,
+               ];
+           })->values()->toArray();
+           $technologiesSelected = [];
             $data = [];
         }
         $industries = $industries->map(function($industry) {
@@ -395,6 +407,7 @@ class ClientCompanyController extends Controller
                 'Setting',
                 'Stages',
                 'technologies',
+                'technologiesSelected',
                 'industries',
                 'employees',
                 'data'
@@ -458,6 +471,12 @@ class ClientCompanyController extends Controller
                 $company = Company::find( $companyId );
             }
             $data = $request->all();
+            
+            // Update $data with decoded values if they were decoded in validation
+            if ($request->has('tech_tags') && is_array($request->tech_tags)) {
+                $data['tech_tags'] = $request->tech_tags;
+            }
+            
             if( $companyId )
             {
                 $result = Company::find( $companyId );
@@ -964,6 +983,26 @@ class ClientCompanyController extends Controller
                     ]
                 ]);
 
+                    // Decode tech_tags if it's a JSON string
+                    $requestData = $request->all();
+                    if (!empty($requestData['tech_tags']) && is_string($requestData['tech_tags'])) {
+                        try {
+                            $decoded = json_decode($requestData['tech_tags'], true);
+                            if (is_array($decoded)) {
+                                $requestData['tech_tags'] = $decoded;
+                            } else {
+                                $requestData['tech_tags'] = [];
+                            }
+                        } catch (\Exception $e) {
+                            $requestData['tech_tags'] = [];
+                        }
+                    } elseif (empty($requestData['tech_tags'])) {
+                        $requestData['tech_tags'] = [];
+                    }
+                    
+                    // Merge decoded data back into request
+                    $request->merge($requestData);
+                    
                     $rules = [
                         'industry_id' => 'required|exists:static_categories,id',
                         'sector_ids' => 'required',
@@ -987,6 +1026,17 @@ class ClientCompanyController extends Controller
                     ];
 
                     $validator = \Validator::make($request->all(), $rules, $messages);
+                    
+                    if ($validator->fails()) {
+                        if ($request->ajax()) {
+                            return response()->json([
+                                'success' => false,
+                                'message' => $validator->errors()->first(),
+                                'errors' => $validator->errors()
+                            ], 422);
+                        }
+                        return redirect()->back()->withErrors($validator)->withInput();
+                    }
 
                 // Normalize incoming sector and technology inputs
                 // Process sector IDs
@@ -1020,6 +1070,12 @@ class ClientCompanyController extends Controller
                             'error' => $e->getMessage(),
                             'raw_data' => $data['sector_ids']
                         ]);
+                        if ($request->ajax()) {
+                            return response()->json([
+                                'success' => false,
+                                'message' => __('admin.error_processing_sectors')
+                            ], 400);
+                        }
                         return redirect()->back()->with([
                             'msg' => __('admin.error_processing_sectors'), 
                             'class' => 'danger'
@@ -1045,26 +1101,47 @@ class ClientCompanyController extends Controller
                         $techIds = array_values(array_unique($validTechIds));
                     }
                 }
-
-                // Process new tech tags
-                $techTags = [];
-                if (!empty($request->tech_tags)) {
-                    if (is_array($request->tech_tags)) {
-                        $techTags = array_filter(array_map('trim', $request->tech_tags));
-                    } elseif (is_string($request->tech_tags)) {
+                
+                // Process tech_tags if provided (from the form)
+                if (isset($data['tech_tags'])) {
+                    $techTags = [];
+                    if (is_string($data['tech_tags'])) {
                         try {
-                            $decoded = json_decode($request->tech_tags, true);
-                            if (is_array($decoded)) {
-                                $techTags = array_filter(array_map('trim', $decoded));
+                            $techTags = json_decode($data['tech_tags'], true);
+                            if (!is_array($techTags)) {
+                                $techTags = [$techTags];
                             }
                         } catch (\Exception $e) {
-                            Log::error('Error processing tech tags', ['error' => $e->getMessage()]);
+                            Log::error('Error decoding tech_tags', ['error' => $e->getMessage()]);
+                            $techTags = [];
+                        }
+                    } elseif (is_array($data['tech_tags'])) {
+                        $techTags = $data['tech_tags'];
+                    }
+                    
+                    // Process tech tags to get or create technologies
+                    foreach ($techTags as $tag) {
+                        if (empty(trim($tag))) continue;
+                        
+                        $tech = Technology::firstOrCreate(
+                            ['name' => trim($tag)],
+                            ['name' => trim($tag)]
+                        );
+                        
+                        if ($tech && !in_array($tech->id, $techIds)) {
+                            $techIds[] = $tech->id;
                         }
                     }
                 }
 
                 // Require at least one technology selection
                 if (empty($techIds) && empty($techTags) && empty($request->other_tech)) {
+                    if ($request->ajax()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => __('admin.please_select_technology')
+                        ], 422);
+                    }
                     return redirect()->back()->with([
                         'msg' => __('admin.please_select_technology'),
                         'class' => 'danger'
@@ -1118,6 +1195,12 @@ class ClientCompanyController extends Controller
                             'name' => $sectorName ?? null,
                             'error' => $e->getMessage()
                         ]);
+                        if ($request->ajax()) {
+                            return response()->json([
+                                'success' => false,
+                                'message' => __('admin.error_creating_sector')
+                            ], 400);
+                        }
                         return redirect()->back()->with([
                             'msg' => __('admin.error_creating_sector'),
                             'class' => 'danger'
@@ -1158,6 +1241,12 @@ class ClientCompanyController extends Controller
                             'name' => $techName ?? null,
                             'error' => $e->getMessage()
                         ]);
+                        if ($request->ajax()) {
+                            return response()->json([
+                                'success' => false,
+                                'message' => __('admin.error_creating_technology')
+                            ], 400);
+                        }
                         return redirect()->back()->with([
                             'msg' => __('admin.error_creating_technology'),
                             'class' => 'danger'
@@ -1185,39 +1274,132 @@ class ClientCompanyController extends Controller
                     }
                 }
 
+                // Ensure company is saved and has an ID
+                if (empty($result->id)) {
+                    $result->save();
+                }
+                
+                if (empty($result->id)) {
+                    Log::error('Company ID is missing', [
+                        'company_data' => $result->toArray()
+                    ]);
+                    if ($request->ajax()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => __('admin.error_company_not_saved')
+                        ], 400);
+                    }
+                    return redirect()->back()
+                        ->with('msg', __('admin.error_company_not_saved'))
+                        ->with('class', 'danger')
+                        ->withInput();
+                }
+                
+                // Validate industry_id exists
+                if (!empty($data['industry_id'])) {
+                    $industryExists = \DB::table('static_categories')->where('id', $data['industry_id'])->exists();
+                    if (!$industryExists) {
+                        Log::error('Invalid industry_id', ['industry_id' => $data['industry_id']]);
+                        if ($request->ajax()) {
+                            return response()->json([
+                                'success' => false,
+                                'message' => __('admin.invalid_industry_selected')
+                            ], 400);
+                        }
+                        return redirect()->back()
+                            ->with('msg', __('admin.invalid_industry_selected'))
+                            ->with('class', 'danger')
+                            ->withInput();
+                    }
+                }
+                
                 DB::beginTransaction();
                 try {
-                    // Remove existing relations
-                    CompanyRelation::where('company_id', $result->id)
-                        ->where('user_id', $user->id)
-                        ->delete();
-
                     $timestamp = now();
                     $relations = [];
-
-                    // Add sector relations
+                    
+                    // Get existing relations to determine what needs to be updated
+                    $existingRelations = CompanyRelation::where('company_id', $result->id)
+                        ->where('user_id', $user->id)
+                        ->get();
+                    
+                    // Process sector relations
+                    $processedSectorIds = [];
                     foreach ($sectorIds as $sectorId) {
-                        $relations[] = [
-                            'company_id' => $result->id,
-                            'user_id' => $user->id,
-                            'industry_id' => $data['industry_id'],
-                            'sector_id' => $sectorId,
-                            'created_at' => $timestamp,
-                            'updated_at' => $timestamp
-                        ];
+                        if (empty($sectorId)) continue;
+                        
+                        // Validate sector exists
+                        $sectorExists = \DB::table('sectors')->where('id', $sectorId)->exists();
+                        if (!$sectorExists) {
+                            Log::warning('Invalid sector_id skipped', ['sector_id' => $sectorId]);
+                            continue;
+                        }
+                        
+                        // Check if this relation already exists
+                        $existingRelation = $existingRelations->where('sector_id', $sectorId)->first();
+                        
+                        if ($existingRelation) {
+                            // Update existing relation
+                            $existingRelation->update([
+                                'industry_id' => $data['industry_id'],
+                                'updated_at' => $timestamp
+                            ]);
+                        } else {
+                            // Add new relation
+                            $relations[] = [
+                                'company_id' => $result->id,
+                                'user_id' => $user->id,
+                                'industry_id' => $data['industry_id'],
+                                'sector_id' => $sectorId,
+                                'created_at' => $timestamp,
+                                'updated_at' => $timestamp
+                            ];
+                        }
+                        $processedSectorIds[] = $sectorId;
                     }
-
-                    // Add technology relations
+                    
+                    // Process technology relations
+                    $processedTechIds = [];
                     foreach ($techIds as $techId) {
-                        $relations[] = [
-                            'company_id' => $result->id,
-                            'user_id' => $user->id,
-                            'industry_id' => $data['industry_id'],
-                            'technology_id' => $techId,
-                            'created_at' => $timestamp,
-                            'updated_at' => $timestamp
-                        ];
+                        if (empty($techId)) continue;
+                        
+                        // Validate technology exists
+                        $techExists = \DB::table('technologies')->where('id', $techId)->exists();
+                        if (!$techExists) {
+                            Log::warning('Invalid technology_id skipped', ['technology_id' => $techId]);
+                            continue;
+                        }
+                        
+                        // Check if this relation already exists
+                        $existingRelation = $existingRelations->where('technology_id', $techId)->first();
+                        
+                        if ($existingRelation) {
+                            // Update existing relation
+                            $existingRelation->update([
+                                'industry_id' => $data['industry_id'],
+                                'updated_at' => $timestamp
+                            ]);
+                        } else {
+                            // Add new relation
+                            $relations[] = [
+                                'company_id' => $result->id,
+                                'user_id' => $user->id,
+                                'industry_id' => $data['industry_id'],
+                                'technology_id' => $techId,
+                                'created_at' => $timestamp,
+                                'updated_at' => $timestamp
+                            ];
+                        }
+                        $processedTechIds[] = $techId;
                     }
+                    
+                    // Remove relations that are no longer selected
+                    $existingRelations->each(function($relation) use ($processedSectorIds, $processedTechIds) {
+                        if (($relation->sector_id && !in_array($relation->sector_id, $processedSectorIds)) ||
+                            ($relation->technology_id && !in_array($relation->technology_id, $processedTechIds))) {
+                            $relation->delete();
+                        }
+                    });
 
                     // Bulk insert all relations
                     if (!empty($relations)) {
@@ -1228,14 +1410,26 @@ class ClientCompanyController extends Controller
                     Log::info('Company relations updated', [
                         'company_id' => $result->id,
                         'sector_count' => count($sectorIds),
-                        'tech_count' => count($techIds)
+                        'tech_count' => count($techIds),
+                        'relations_count' => count($relations)
                     ]);
                 } catch (\Exception $e) {
                     DB::rollBack();
                     Log::error('Failed to update company relations', [
                         'error' => $e->getMessage(),
-                        'company_id' => $result->id
+                        'trace' => $e->getTraceAsString(),
+                        'company_id' => $result->id ?? null,
+                        'sector_ids' => $sectorIds,
+                        'tech_ids' => $techIds,
+                        'industry_id' => $data['industry_id'] ?? null
                     ]);
+                    
+                    if ($data['CompanyN'] == 14 && $request->ajax()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => __('admin.error_updating_company_relations') . ': ' . $e->getMessage()
+                        ], 400);
+                    }
                     
                     return redirect()->back()
                         ->with('msg', __('admin.error_updating_company_relations'))
@@ -1254,15 +1448,45 @@ class ClientCompanyController extends Controller
 
                 // Use the result's ID if $id is null (new company creation)
                 $redirectId = $id ?: $result->id;
+                
+                // Return JSON response for AJAX requests (CompanyN == 14 is classification form)
+                if ($data['CompanyN'] == 14 && $request->ajax()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => __('admin.Startup_Info_Updated_Successfully')
+                    ]);
+                }
+                
                 return redirect()->route('company.profile_view_mine', $redirectId)->with(['msg' => 'Startup_Info_Updated_Successfully', 'class' => 'success']);
-            } else { return back()->withInput()->with(['msg' => 'Startup_Info_Updated_Failed', 'class' => 'danger']); }
+            } else { 
+                if ($data['CompanyN'] == 14 && $request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => __('admin.Startup_Info_Updated_Failed')
+                    ], 400);
+                }
+                return back()->withInput()->with(['msg' => 'Startup_Info_Updated_Failed', 'class' => 'danger']); 
+            }
         } catch (ValidationException $e) {
             // عند وجود خطأ في التحقق، إرجاع رسائل الأخطاء للمستخدم
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                    'errors' => $e->errors()
+                ], 422);
+            }
             return redirect()->back()->withErrors($e->validator)->withInput();
         } catch (Exception $e) {
             // dd($e);
             // تسجيل الأخطاء الأخرى
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('admin.please_complete_startup_info')
+                ], 500);
+            }
             return redirect()->back()->with(['msg' => 'please_complete_startup_info', 'class' => 'danger']);
         }
     }
