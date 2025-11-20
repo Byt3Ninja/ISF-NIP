@@ -120,6 +120,7 @@ class ClientCompanyController extends Controller
             $isResponsesPublished = false;
             $final_comment = null;
             $formData = collect([]);
+            $formTitle = '';
            
             if( !empty( $evaluationForm ) )
             {
@@ -1627,23 +1628,9 @@ class ClientCompanyController extends Controller
     public function AddMileStone(Request $request, $id = null)
     {
         try {
-            // Get company from authenticated user or provided ID
-            if ($id) {
-                $companyId = $id;
-                
-                // Verify that current user has access to this company (allow admins)
-                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager')) {
-                    return response()->json([
-                        'errors' => ['permission' => [__('You do not have permission to access this company.')]],
-                    ], 403);
-                }
-            } else {
-                $companyId = Auth::user()->company_id;
-            }
-
-            if (!$companyId) {
+            if (!$id) {
                 return response()->json([
-                    'errors' => ['company' => [__('Startup not found')]],
+                    'errors' => ['company' => [__('startup.startup_not_found')]],
                 ], 422);
             }
 
@@ -1678,7 +1665,7 @@ class ClientCompanyController extends Controller
             $milestone->name = $request->name;
             $milestone->description = $request->description;
             $milestone->completion_percentage = $request->completion_percentage;
-            $milestone->Company_id = $companyId;
+            $milestone->Company_id = $id;
             $milestone->save();
 
             // Handle file uploads if any
@@ -1686,7 +1673,7 @@ class ClientCompanyController extends Controller
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $index => $file) {
                     $fileName = time() . '_' . $index . '_' . $file->getClientOriginalName();
-                    $filePath = $file->storeAs('milestones/' . $companyId, $fileName, 'public');
+                    $filePath = $file->storeAs('milestones/' . $id, $fileName, 'public');
                     
                     $documents[] = [
                         'name' => $file->getClientOriginalName(),
@@ -1723,23 +1710,9 @@ class ClientCompanyController extends Controller
     public function EditMileStone(Request $request, $id = null)
     {
         try {
-            // Get company from authenticated user or provided ID
-            if ($id) {
-                $companyId = $id;
-                
-                // Verify that current user has access to this company (allow admins)
-                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager')) {
-                    return response()->json([
-                        'errors' => ['permission' => [__('You do not have permission to access this company.')]],
-                    ], 403);
-                }
-            } else {
-                $companyId = Auth::user()->company_id;
-            }
-
-            if (!$companyId) {
+            if (!$id) {
                 return response()->json([
-                    'errors' => ['company' => [__('Startup not found')]],
+                    'errors' => ['company' => [__('startup.startup_not_found')]],
                 ], 422);
             }
 
@@ -1775,7 +1748,7 @@ class ClientCompanyController extends Controller
 
             // Find the milestone and ensure it belongs to the company
             $milestone = Milestone::where('id', $request->id)
-                                ->where('Company_id', $companyId)
+                                ->where('Company_id', $id)
                                 ->first();
 
             if (!$milestone) {
@@ -1869,7 +1842,7 @@ class ClientCompanyController extends Controller
                 
                 foreach ($request->file('documents') as $index => $file) {
                     $fileName = time() . '_' . $index . '_' . $file->getClientOriginalName();
-                    $filePath = $file->storeAs('milestones/' . $companyId, $fileName, 'public');
+                    $filePath = $file->storeAs('milestones/' . $id, $fileName, 'public');
                     
                     \Log::info('EditMileStone: File uploaded', [
                         'original_name' => $file->getClientOriginalName(),
@@ -1931,23 +1904,9 @@ class ClientCompanyController extends Controller
     public function DeleteMileStone(Request $request, $id = null)
     {
         try {
-            // Get company from authenticated user or provided ID
-             if ($id) {
-                $companyId = $id;
-                
-                // Verify that current user has access to this company (allow admins)
-                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager')) {
-                    return response()->json([
-                        'errors' => ['permission' => [__('You do not have permission to access this company.')]],
-                    ], 403);
-                }
-            } else {
-                $companyId = Auth::user()->company_id;
-            }
-
-            if (!$companyId) {
+            if (!$id) {
                 return response()->json([
-                    'errors' => ['company' => [__('admin.Company not found')]],
+                    'errors' => ['company' => [__('startup.startup_not_found')]],
                 ], 422);
             }
 
@@ -1967,12 +1926,12 @@ class ClientCompanyController extends Controller
 
             // Find the milestone and ensure it belongs to the company
             $milestone = Milestone::where('id', $request->id)
-                                ->where('Company_id', $companyId)
+                                ->where('Company_id', $id)
                                 ->first();
 
             if (!$milestone) {
                 return response()->json([
-                    'errors' => ['milestone' => [__('Milestone not found or you do not have permission to delete it.')]],
+                    'errors' => ['milestone' => [__('startup.milestone_not_found')]],
                 ], 404);
             }
 
@@ -1990,19 +1949,19 @@ class ClientCompanyController extends Controller
             $milestone->delete();
 
             return response()->json([
-                'state' => __('admin.MileStone_deleted'),
+                'state' => __('startup.milestone_delete_success'),
                 'success' => true,
             ]);
             
         } catch (\Exception $e) {
             \Log::error('Error deleting milestone: ' . $e->getMessage(), [
                 'milestone_id' => $request->id ?? 'unknown',
-                'company_id' => $companyId ?? 'unknown',
+                'company_id' => $id ?? 'unknown',
                 'user_id' => Auth::id(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
             return response()->json([
-                'errors' => ['general' => [__('An error occurred while deleting the milestone.')]],
+                'errors' => ['general' => [__('startup.milestone_delete_failed')]],
             ], 500);
         }
     }
