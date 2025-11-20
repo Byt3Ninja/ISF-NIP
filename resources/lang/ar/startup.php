@@ -24,6 +24,9 @@ return [
   'non_alumni' => 'غير الخريجين', 
 
   'startup_not_found' => 'لم يتم العثور على الشركة الناشئة',
+  'startup_logo_deleted' => 'تم حذف شعار الشركة الناشئة بنجاح',
+  'startup_logo_delete_failed' => 'فشل حذف شعار الشركة الناشئة',
+  'startup_logo_delete_confirm' => 'هل أنت متأكد أنك تريد حذف الشعار؟',
 
   'saving' => 'جارٍ الحفظ...',
 

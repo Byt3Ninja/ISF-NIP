@@ -24,6 +24,9 @@ return [
   'non_alumni' => 'Non-Alumni',
 
   'startup_not_found' => 'Startup not found',
+  'startup_logo_delete_confirm' => 'Are you sure you want to delete logo?',
+  'startup_logo_deleted' => 'Startup logo deleted successfully',
+  'startup_logo_delete_failed' => 'Failed to delete startup logo',
 
   'saving' => 'Saving...',
 
