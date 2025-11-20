@@ -157,7 +157,7 @@ class ClientCompanyController extends Controller
                     return $category;
                 });
                 $evaluationForm->isPublished = $isResponsesPublished;
-                $form_data_ids = $formData->pluck('id')->toArray();
+                $form_data_ids = $formData ? $formData->pluck('id')->toArray() : [];
                 if( count( $form_data_ids ) > 0 )
                 {
                     $comments = DB::table('form_data_judges_comments')->where('user_id', $user_id)->whereIn('form_data_id', $form_data_ids)->get();
@@ -2269,6 +2269,11 @@ class ClientCompanyController extends Controller
         $l = app()->getLocale();
 
         return view('admin/users/companies', compact('companies', 'l'));
+    }
+
+    public function companyAlumni(Request $request)
+    {
+        return view('admin.clients.startup.company_alumni');
     }
     
     public function addEmployee(Request $request, $id)

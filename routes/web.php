@@ -10,6 +10,7 @@ use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ImporterController;
 use App\Http\Controllers\ActivityControlller;
+use App\Http\Controllers\ClientCompanyController;
 use App\Http\Controllers\HackathonController;
 use App\Http\Controllers\Mentor\MentorProgramController;
 use App\Http\Controllers\Mentor\MentorshipTaskController;
@@ -374,6 +375,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('/DeleteCompanyMileStone/{id?}', 'ClientCompanyController@DeleteMileStone')->name('company.profile_milestones_delete');
     Route::post('/delete-document', 'ClientCompanyController@deleteDocument')->name('company.profile_documents_delete');
     Route::post('/delete-image/{id?}', 'ClientCompanyController@deleteImage')->name('company.profile_images_delete');
+
+    // Company Alumni
+    Route::get('/companyProfile/{id}/alumni/{cycle_id}', [ClientCompanyController::class, 'companyAlumni'])->name('company.alumni_view');
 
     // Company Profile Employees
     Route::get('/employees/{id}', 'ClientCompanyController@getEmployees')->name('company.getEmployees');

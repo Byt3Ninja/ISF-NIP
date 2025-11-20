@@ -57,9 +57,10 @@
         </td>
         <td class="text-center">
           {{-- <a href="{{ route('program.participation', $program->id) }}" class="btn btn-sm btn-outline-primary"> --}}
-          <a href="#" class="btn btn-sm btn-label-primary text-nowrap">
-            <i class="ti ti-eye me-1"></i>
-            {{ __('startup.view_details') }}
+          <a href="{{ route('company.alumni_view', ['id' => $company->id, 'cycle_id' => $program->id]) }}"
+            class="btn btn-sm btn-label-primary text-nowrap">
+              <i class="ti ti-eye me-1"></i>
+              {{ __('startup.view_details') }}
           </a>
         </td>
       </tr>

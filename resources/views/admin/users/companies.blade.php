@@ -154,7 +154,7 @@
                     @endif
                   </div>
 
-                  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                     <h6 class="fw-semibold text-capitalize line-clamp-2 mb-0">
                       @php
                         $sector = App\Sector::where('id', $company->sector)->first();
@@ -221,7 +221,7 @@
                   @endphp
 
                   @if (count($founders) > 0)
-                    <div class="d-flex align-items-center mb-3 mt-4">
+                    <div class="d-flex align-items-center mb-3">
                       <span class="fw-semibold me-2">
                         {{ count($founders) > 1 ? __('admin.Founders') : __('admin.Founder') }}:
                       </span>
