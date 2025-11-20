@@ -12,30 +12,30 @@ class ExpertiseController extends Controller
      */
     public function index()
     {
-        $expertises = Expertise::where('parent_id', null)->with('children')
-                    ->orderBy('id', 'desc')
-                    ->get();
+        // $expertises = Expertise::where('parent_id', null)->with('children')
+        //             ->orderBy('id', 'desc')
+        //             ->get();
         
-        $expertises = $expertises->map(function ($parent) {
-            return [
-                'id' => $parent->id,
-                'title' => $parent->title,
-                'children' => $parent->children->map(function ($child) use ($parent) {
-                    return [
-                        'id' => $child->id,
-                        'title' => $child->title,
-                        'parent' => $parent->id 
-                    ];
-                })->toArray(), 
-            ];
-        });
+        // $expertises = $expertises->map(function ($parent) {
+        //     return [
+        //         'id' => $parent->id,
+        //         'title' => $parent->title,
+        //         'children' => $parent->children->map(function ($child) use ($parent) {
+        //             return [
+        //                 'id' => $child->id,
+        //                 'title' => $child->title,
+        //                 'parent' => $parent->id 
+        //             ];
+        //         })->toArray(), 
+        //     ];
+        // });
         
-        $parent_expertises = Expertise::where('parent_id', null)->get();
-        $child_expertises = Expertise::where('parent_id', '!=', null)->get();
+        // $parent_expertises = Expertise::where('parent_id', null)->get();
+        // $child_expertises = Expertise::where('parent_id', '!=', null)->get();
 
-        dd($expertises);
+        // dd($expertises);
         
-        return view('admin.settings.expertise.index', compact('expertises', 'parent_expertises', 'child_expertises'));
+        return view('admin.settings.expertise.index');
     }
 
     /**

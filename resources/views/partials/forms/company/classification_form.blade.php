@@ -1,10 +1,8 @@
 <div class="card">
-  <div class="card-header">
-    <h5 class="card-title">
+  <div class="card-body">
+    <h5 class="card-title border-bottom pb-2 mb-6">
       {{ $l == 'en' ? 'Industry' : 'الصناعة' }} ({{ $l == 'en' ? 'Sectors & Technologies' : 'القطاعات والتقنيات' }})
     </h5>
-  </div>
-  <div class="card-body">
     <form 
       id="classificationForm" 
       method="post" 

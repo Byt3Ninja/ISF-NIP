@@ -189,47 +189,43 @@
         <div class="col-12 mt-6">
          <h5 class="pb-2 mb-6 border-bottom">{{ __('admin.financial_plan') }}</h5>
           <div class="position-relative">
-
-            @if (optional($client->company)->financial_plan != null)
-                      <div class="card shadow-sm"
-                        style="border-radius: 15px; max-height: 300px;  overflow-y: auto;">
-                        <div class="card-body">
-                          <div
-                            class="d-flex justify-content-between align-items-center">
-                            <div class="d-flex align-items-center gap-3">
-                              <i class="ti ti-file fs-1 text-warning"></i>
-                              <span>{{ basename($client->company->financial_plan) }}</span>
-                            </div>
-                            <a class="btn btn-transparent"
-                              href="{{ $client->company->financial_plan }}" target="_blank"
-                              download="{{ basename($client->company->financial_plan) }}">
-                              <i class="ti ti-download fs-3 text-primary"></i>
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    @endif
-
-                    <div class="col-12 mb-4">
+             <div class="col-12 mb-6">
                       <label for="financial_plan_description"
                         class="form-label fs-6 fw-semibold mb-1">{{ __('admin.financial_plan_description') }}</label>
                       <div class="position-relative">
                           <textarea
                           oninput="this.value = this.value.trimStart()"
-                           class="form-control px-10"
+                           class="form-control"
                           id="financial_plan_description" placeholder="{{ __('admin.financial_plan_description') }}" name="financial_plan_description" autocomplete="financial_plan_description">{{ $client->company ? $client->company->financial_plan_description : old('financial_plan_description') }}</textarea>
-                        <i class="ti ti-chart-bar fs-5 position-absolute top-50 translate-middle-y me-3 text-primary"
-                          style="left: 7px;"></i>
                       </div>
                     </div>
 
-              <div >
+                     <div >
                 <label for="financial_plan" class="form-label fs-6 fw-semibold mb-1">{{ __('admin.Financial plan attachment') }}</label>
                   <input id="financial_plan"
                     class="form-control px-8 "
                     type="file" name="financial_plan" value="">
                   
                 </div>
+
+            @if (optional($client->company)->financial_plan != null)
+                      <div class="card shadow-sm border mt-6">
+                        <div class="p-4">
+                          <div
+                            class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-3">
+                              <i class="ti ti-file text-warning"></i>
+                              <span>{{ basename($client->company->financial_plan) }}</span>
+                            </div>
+                            <a class="btn btn-transparent"
+                              href="{{ $client->company->financial_plan }}" target="_blank"
+                              download="{{ basename($client->company->financial_plan) }}">
+                              <i class="ti ti-download text-primary"></i>
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    @endif        
           </div>
         </div>
 

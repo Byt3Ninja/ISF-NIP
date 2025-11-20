@@ -553,9 +553,16 @@
                             <!-- User Information -->
                             <div class="user-info bg-label-light border rounded-3 p-2 mb-4">
                               <div class="d-flex align-items-center">
-                                <a href="/dashboard/users/{{ $company->resolveUser()->id }}/edit" class="text-decoration-none">
+                                <a
+                                  @if (isset($company->resolveUser()?->id)) 
+                                    href="/dashboard/users/{{ $company->resolveUser()?->id }}/edit" 
+                                  @else
+                                    href="javascript:void(0)"
+                                  @endif
+                                  class="text-decoration-none"
+                                >
                                   <img
-                                    src="{{ $company->resolveUser()->image_url ?? '/icons/account.svg' }}"
+                                    src="{{ $company->resolveUser()?->image_url ?? '/icons/account.svg' }}"
                                     alt="img"
                                     class="rounded-circle me-3 shadow-sm"
                                     height="40"
@@ -563,9 +570,16 @@
                                   />
                                 </a>
                                 <div class="flex-grow-1">
-                                  <a href="/dashboard/users/{{ $company->resolveUser()->id }}/edit" class="text-decoration-none">
-                                    <h6 class="mb-0 fw-semibold text-dark">{{ $company->resolveUser()->name }}</h6>
-                                    <small class="text-muted">{{ $company->resolveUser()->title ?: __('cycles.No title') }}</small>
+                                  <a
+                                    @if (isset($company->resolveUser()?->id)) 
+                                      href="/dashboard/users/{{ $company->resolveUser()?->id }}/edit" 
+                                    @else
+                                      href="javascript:void(0)"
+                                    @endif 
+                                    class="text-decoration-none"
+                                  >
+                                    <h6 class="mb-0 fw-semibold text-dark">{{ $company->resolveUser()?->{'first_name_' . app()->getLocale() } . ' ' . $company->resolveUser()?->{'last_name_' . app()->getLocale() } }}</h6>
+                                    <small class="text-muted">{{ $company->resolveUser()?->title ?: __('cycles.No title') }}</small>
                                   </a>
                                 </div>
                               </div>

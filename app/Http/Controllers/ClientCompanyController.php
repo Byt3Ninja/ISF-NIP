@@ -9,15 +9,16 @@ use App\User;
 use App\Cycle;
 use App\Stage;
 use App\State;
+use App\Almuni;
 use App\Sector;
 use App\Company;
 use App\Country;
 use App\Currency;
+use App\Employee;
 use App\Settings;
 use App\Milestone;
 use App\Technology;
 use App\Team_member;
-use App\Employee;
 use App\FundingRound;
 use App\Organization;
 use App\StaticCategory;
@@ -119,28 +120,32 @@ class ClientCompanyController extends Controller
             $isResponsesPublished = false;
             $final_comment = null;
             $formData = collect([]);
+            $formTitle = '';
+           
             if( !empty( $evaluationForm ) )
             {
                 $current_step = $company->stepdata;
-                if( $current_step->stype == 2 ) { $form = Step::where('cycle_id', $current_step?->cycle_id)->where('arr', $current_step?->arr - 1)->first(); }
-                else
-                {
-                    $form = Step::where('cycle_id', $current_step?->cycle_id)->where('arr', $current_step?->arr)->first();
-                }
-                $formData = $form->formData;
-                if( !empty( $formData ) ) { $formData = $formData->where('company_id', $company->id)->values(); }
+                $form = Company::form( $company );
+                if( $current_step->stype != 2 && empty( $form ) ) { return redirect()->back()->with('message2', 'No Form Found'); }
+
+                $formData = $form?->formData;
+                $formTitle = $form?->form?->form_name ?? '';
+                /* if( !empty( $formData ) ) { $formData = $formData->where('company_id', $company->id)->values(); }
                 $formData = $formData->map(function ($item) {
                     $field = $item->field()->first();
                     $field_type = '';
                     if( isset( $field?->options?->type ) ) { $field_type = $field?->options?->type; }
                     $item->field_type = $field_type;
+                    $item->comment = '';
                     return $item;
-                });
+                }); */
+
                 $myResponses = ScreeningEvaluationResults::where('company_id', $company->id)->where('evaluation_id', $evaluationForm->id)->where('user_id', $user_id)->get();
                 $isResponsesPublished = $myResponses->where('status', true)->count() > 0 ? true : false;
                 $myComment = ScreeningEvaluation::getMyFinalComment( $evaluationForm->id, $user_id, $company->id );
                 $final_comment = $myComment->value;
                 $evaluationForm->final_comment = $final_comment;
+                $evaluationForm->is_approved = $myComment->is_approved;
                 $evaluationForm->categories->map(function ( $category ) use ( $myResponses ) {
                     $category->subCriteria->map(function ( $subCategory ) use ( $myResponses ) {
                         $checkResponse = $myResponses->where('criteria_id', $subCategory->id)->first();
@@ -152,8 +157,18 @@ class ClientCompanyController extends Controller
                     return $category;
                 });
                 $evaluationForm->isPublished = $isResponsesPublished;
+                $form_data_ids = $formData->pluck('id')->toArray();
+                if( count( $form_data_ids ) > 0 )
+                {
+                    $comments = DB::table('form_data_judges_comments')->where('user_id', $user_id)->whereIn('form_data_id', $form_data_ids)->get();
+                    $formData = $formData->map(function( $fd ) use ( $comments ) {
+                        $fd->question = trim( $fd->question );
+                        $fd->comment = $comments->where('form_data_id', $fd->id)->first() ?? '';
+                        return $fd;
+                    });
+                } else { $comments = collect([]); }
             }
-            return view('admin/clients/startup/company_profile', compact('company', 'formData', 'evaluationForm', 'Currencies', 'milestones', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile', 'technologies', 'sectors', 'industry'));
+            return view('admin/clients/startup/company_profile', compact('company', 'formTitle', 'formData', 'evaluationForm', 'Currencies', 'milestones', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile', 'technologies', 'sectors', 'industry'));
         // } catch (Exception $e) {
         //     //log what happend
         //     Log::channel('system_exceptions')->info('Exceptions:', [$e]);
@@ -191,10 +206,6 @@ class ClientCompanyController extends Controller
                         ->where('Company_id', auth()->user()->company->id)->get();
                     $Investors = Team_Member::where('TeamMember', 'Investor')
                         ->where('Company_id', auth()->user()->company->id)->get();
-
-                    // Load all milestones for this company (new unified structure)
-                    $milestones = Milestone::where('Company_id', auth()->user()->company->id)
-                        ->orderBy('created_at')->get();
                     
                     // For backward compatibility, create empty collections
                     $Achieveds = collect();
@@ -279,10 +290,6 @@ class ClientCompanyController extends Controller
                         ->where('Company_id', $client->company->id)->get();
                     $Investors = Team_Member::where('TeamMember', 'Investor')
                         ->where('Company_id', $client->company->id)->get();
-
-                    // Load all milestones for this company (new unified structure)
-                    $milestones = Milestone::where('Company_id', $client->company->id)
-                        ->orderBy('created_at')->get();
                     
                     // For backward compatibility, create empty collections
                     $Achieveds = collect();
@@ -384,9 +391,11 @@ class ClientCompanyController extends Controller
             }
             return $industry;
         });
-        $employees = Team_member::where('Company_id', $id)
-                                    ->where('TeamMember', 'Employee')
-                                    ->get();
+        $employees = Employee::where('company_id', $id)->get();
+
+         // Load all milestones for this company (new unified structure)
+        $milestones = Milestone::where('company_id', $id)
+            ->orderBy('created_at')->get();
                                     
             return view('admin/clients/company', compact(
                 'client',
@@ -1843,24 +1852,9 @@ class ClientCompanyController extends Controller
     public function AddMileStone(Request $request, $id = null)
     {
         try {
-            // Get company from authenticated user or provided ID
-            if ($id) {
-                $user = User::where('company_id', $id)->first();
-                $companyId = $user ? $user->company_id : $id;
-                
-                // Verify that current user has access to this company (allow admins)
-                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager')) {
-                    return response()->json([
-                        'errors' => ['permission' => [__('You do not have permission to access this company.')]],
-                    ], 403);
-                }
-            } else {
-                $companyId = Auth::user()->company_id;
-            }
-
-            if (!$companyId) {
+            if (!$id) {
                 return response()->json([
-                    'errors' => ['company' => [__('Startup not found')]],
+                    'errors' => ['company' => [__('startup.startup_not_found')]],
                 ], 422);
             }
 
@@ -1895,7 +1889,7 @@ class ClientCompanyController extends Controller
             $milestone->name = $request->name;
             $milestone->description = $request->description;
             $milestone->completion_percentage = $request->completion_percentage;
-            $milestone->Company_id = $companyId;
+            $milestone->Company_id = $id;
             $milestone->save();
 
             // Handle file uploads if any
@@ -1903,7 +1897,7 @@ class ClientCompanyController extends Controller
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $index => $file) {
                     $fileName = time() . '_' . $index . '_' . $file->getClientOriginalName();
-                    $filePath = $file->storeAs('milestones/' . $companyId, $fileName, 'public');
+                    $filePath = $file->storeAs('milestones/' . $id, $fileName, 'public');
                     
                     $documents[] = [
                         'name' => $file->getClientOriginalName(),
@@ -1940,24 +1934,9 @@ class ClientCompanyController extends Controller
     public function EditMileStone(Request $request, $id = null)
     {
         try {
-            // Get company from authenticated user or provided ID
-            if ($id) {
-                $user = User::where('company_id', $id)->first();
-                $companyId = $user ? $user->company_id : $id;
-                
-                // Verify that current user has access to this company (allow admins)
-                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager')) {
-                    return response()->json([
-                        'errors' => ['permission' => [__('You do not have permission to access this company.')]],
-                    ], 403);
-                }
-            } else {
-                $companyId = Auth::user()->company_id;
-            }
-
-            if (!$companyId) {
+            if (!$id) {
                 return response()->json([
-                    'errors' => ['company' => [__('Startup not found')]],
+                    'errors' => ['company' => [__('startup.startup_not_found')]],
                 ], 422);
             }
 
@@ -1993,7 +1972,7 @@ class ClientCompanyController extends Controller
 
             // Find the milestone and ensure it belongs to the company
             $milestone = Milestone::where('id', $request->id)
-                                ->where('Company_id', $companyId)
+                                ->where('Company_id', $id)
                                 ->first();
 
             if (!$milestone) {
@@ -2087,7 +2066,7 @@ class ClientCompanyController extends Controller
                 
                 foreach ($request->file('documents') as $index => $file) {
                     $fileName = time() . '_' . $index . '_' . $file->getClientOriginalName();
-                    $filePath = $file->storeAs('milestones/' . $companyId, $fileName, 'public');
+                    $filePath = $file->storeAs('milestones/' . $id, $fileName, 'public');
                     
                     \Log::info('EditMileStone: File uploaded', [
                         'original_name' => $file->getClientOriginalName(),
@@ -2149,24 +2128,9 @@ class ClientCompanyController extends Controller
     public function DeleteMileStone(Request $request, $id = null)
     {
         try {
-            // Get company from authenticated user or provided ID
-            if ($id) {
-                $user = User::where('company_id', $id)->first();
-                $companyId = $user ? $user->company_id : $id;
-                
-                // Verify that current user has access to this company (allow admins)
-                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager')) {
-                    return response()->json([
-                        'errors' => ['permission' => [__('You do not have permission to access this company.')]],
-                    ], 403);
-                }
-            } else {
-                $companyId = Auth::user()->company_id;
-            }
-
-            if (!$companyId) {
+            if (!$id) {
                 return response()->json([
-                    'errors' => ['company' => [__('admin.Company not found')]],
+                    'errors' => ['company' => [__('startup.startup_not_found')]],
                 ], 422);
             }
 
@@ -2186,12 +2150,12 @@ class ClientCompanyController extends Controller
 
             // Find the milestone and ensure it belongs to the company
             $milestone = Milestone::where('id', $request->id)
-                                ->where('Company_id', $companyId)
+                                ->where('Company_id', $id)
                                 ->first();
 
             if (!$milestone) {
                 return response()->json([
-                    'errors' => ['milestone' => [__('Milestone not found or you do not have permission to delete it.')]],
+                    'errors' => ['milestone' => [__('startup.milestone_not_found')]],
                 ], 404);
             }
 
@@ -2209,19 +2173,19 @@ class ClientCompanyController extends Controller
             $milestone->delete();
 
             return response()->json([
-                'state' => __('admin.MileStone_deleted'),
+                'state' => __('startup.milestone_delete_success'),
                 'success' => true,
             ]);
             
         } catch (\Exception $e) {
             \Log::error('Error deleting milestone: ' . $e->getMessage(), [
                 'milestone_id' => $request->id ?? 'unknown',
-                'company_id' => $companyId ?? 'unknown',
+                'company_id' => $id ?? 'unknown',
                 'user_id' => Auth::id(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
             return response()->json([
-                'errors' => ['general' => [__('An error occurred while deleting the milestone.')]],
+                'errors' => ['general' => [__('startup.milestone_delete_failed')]],
             ], 500);
         }
     }
@@ -2311,15 +2275,17 @@ class ClientCompanyController extends Controller
     {
         // dd($request->all());
         try {
-            // Validate company access
-            $user = Auth::user();
-            $company = Company::findOrFail($id);
-            
-            // Check permissions
-            if ($user->company_id !== $company->id && !$user->hasAnyRole('Admin|organizationManager')) {
-                return response()->json([
-                    'errors' => ['permission' => ['You do not have permission to add employees to this company.']]
-                ], 403);
+            if ($id) {
+                $companyId = $id;
+                
+                // Verify that current user has access to this company (allow admins)
+                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager|registered')) {
+                    return response()->json([
+                        'errors' => ['permission' => [__('You do not have permission to access this company.')]],
+                    ], 403);
+                }
+            } else {
+                $companyId = Auth::user()->company_id;
             }
 
             $validator = Validator::make($request->all(), [
@@ -2346,7 +2312,7 @@ class ClientCompanyController extends Controller
             }
 
             $employee = new Employee();
-            $employee->company_id = $id;
+            $employee->company_id = $companyId;
             $employee->full_name = $request->full_name;
             $employee->job_title = $request->job_title;
             $employee->gender = $request->gender;
@@ -2388,16 +2354,19 @@ class ClientCompanyController extends Controller
     public function editEmployee(Request $request, $id)
     {
         try {
-            // Validate company access
-            $user = Auth::user();
-            $company = Company::findOrFail($id);
-            
-            // Check permissions
-            if ($user->company_id !== $company->id && !$user->hasAnyRole('Admin|organizationManager')) {
-                return response()->json([
-                    'errors' => ['permission' => ['You do not have permission to edit employees in this company.']]
-                ], 403);
+          if ($id) {
+                $companyId = $id;
+                
+                // Verify that current user has access to this company (allow admins)
+                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager|registered')) {
+                    return response()->json([
+                        'errors' => ['permission' => [__('You do not have permission to access this company.')]],
+                    ], 403);
+                }
+            } else {
+                $companyId = Auth::user()->company_id;
             }
+
 
             $validator = Validator::make($request->all(), [
                 'id' => 'required|exists:employees,id',
@@ -2427,7 +2396,7 @@ class ClientCompanyController extends Controller
             }
 
             $employee = Employee::where('id', $request->id)
-                                 ->where('company_id', $id)
+                                 ->where('company_id', $companyId)
                                  ->firstOrFail();
 
             $employee->full_name = $request->full_name;
@@ -2495,15 +2464,17 @@ class ClientCompanyController extends Controller
     public function deleteEmployee(Request $request, $id)
     {
         try {
-            // Validate company access
-            $user = Auth::user();
-            $company = Company::findOrFail($id);
-            
-            // Check permissions
-            if ($user->company_id !== $company->id && !$user->hasAnyRole('Admin|organizationManager')) {
-                return response()->json([
-                    'errors' => ['permission' => ['You do not have permission to delete employees from this company.']]
-                ], 403);
+           if ($id) {
+                $companyId = $id;
+                
+                // Verify that current user has access to this company (allow admins)
+                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager|registered')) {
+                    return response()->json([
+                        'errors' => ['permission' => [__('You do not have permission to access this company.')]],
+                    ], 403);
+                }
+            } else {
+                $companyId = Auth::user()->company_id;
             }
 
             // Get employee ID from request - handle both JSON and form data
@@ -2543,7 +2514,7 @@ class ClientCompanyController extends Controller
             }
 
             $employee = Employee::where('id', $employeeId)
-                                 ->where('company_id', $id)
+                                 ->where('company_id', $companyId)
                                  ->firstOrFail();
 
             // Delete associated documents
@@ -2568,6 +2539,77 @@ class ClientCompanyController extends Controller
                 'errors' => ['general' => ['An error occurred while deleting the employee.']]
             ], 500);
         }
+    }
+
+    public function addCompanyAlumni(Request $request, $id)
+    {
+        
+        try {
+            $user = Auth::user();
+            $company = Company::findOrFail($id);
+            $company_relations = CompanyRelation::where('company_id', $id)->where('user_id', $company->user->id)->get();
+            $almuni = new Almuni();
+            $almuni->user_id = $company->user->id;
+            $almuni->cycle_id = $company->cycle;
+            $almuni->company_id = $id;
+            $almuni->alumni = '1';
+            $almuni->established_date = date('Y-m-d H:i:s');
+           
+            //Relations Data
+            $relations_data = $company_relations->map(function ($relation) {
+                                    return [
+                                        'Industry'    => $relation->industry?->name_en,
+                                        'Sector'      => $relation->sector?->name_en,
+                                        'Technology'  => $relation->technology?->name_en,
+                                    ];
+                                })->values();
+            $basic_startup_information = [
+                    'ID' => $company->id,
+                    'Startup_Name' => $company->name_en,
+                    'Alumni' => 'Yes',
+                    'Established_Date' => date('Y-m-d H:i:s'),
+                    'Location' => implode(', ', array_filter([
+                        $company->city->name_en,
+                        $company->country->name_en
+                    ])),
+                    'Country' => $company->country->name_en,
+                    'Business_Type' => $company->business_type,
+                    'Relations'     => $relations_data,
+                    'Website_Link' => $company->website,
+                    'Social Media Links' => [
+                        'Facebook' => $company->facebook,
+                        'Twitter' => $company->twitter,
+                        'Linkedin' => $company->linkedin,
+                        'Instagram' => $company->instagram,
+                        'Youtube' => $company->youtube,
+                        'Google_Map' => $company->google_map,
+                        'tiktok' => $company->tiktok,
+                    ],
+                ];
+            $almuni->basic_startup_information = json_encode($basic_startup_information);
+
+            $team_leader = Team_member::where('company_id', $id)->where('TeamMember', 'hackathon')->first();
+                $startup_leader_information = [
+                    'ID' => $team_leader->id,
+                    'Full_Name' => $team_leader->Name,
+                    'Country' => $company->country->name_en,
+                    'Email' => $team_leader->Email,
+                    'Phone_Number' => $team_leader->Phone,
+                ];
+            $almuni->startup_leader_information = json_encode($startup_leader_information);
+
+
+            $almuni->save();
+           
+               $dattt = json_decode($almuni->basic_startup_information);
+               dd($dattt);
+        } catch (Exception $e) {
+            Log::error('Error deleting employee: ' . $e->getMessage());
+            return response()->json([
+                'errors' => ['general' => ['An error occurred while deleting the employee.']]
+            ], 500);
+        }
+
     }
    
 }

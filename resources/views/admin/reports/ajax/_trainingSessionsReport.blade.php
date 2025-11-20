@@ -68,8 +68,9 @@
     <div class="row d-flex justify-content-end mb-2" id="tblTraining-filters">
       <div class="col-12 col-md-2">
         <div class="from-group mb-2 mb-md-0">
-          <select class="form-select form-select-sm" id="type-filter">
+          <select class="form-select form-select-sm" id="type-filter" placeholder="dddddd">
             <option value="" selected>{{ __('cycles.Select_Training_Type') }}</option>
+            <option value="">{{ __('cycles.All') }}</option>
             @foreach(['Online_Training', 'Online_Session', 'Offline_Session'] as $type)
               <option value="{{ $type }}">{{ __('cycles.'.$type) }}</option>
             @endforeach
@@ -79,7 +80,7 @@
       <div class="col-12 col-md-3">
         <div class="from-group mb-2 mb-md-0">
           <select class="form-select form-select-sm" id="cycle-filter">
-            <option value="" selected>{{ __('cycles.Select_Cycle') }}</option>
+            <option value="" selected>{{ __('cycles.All_Cycles') }}</option>
             @foreach($cycles as $cycle)
               <option value="{{ $cycle->id }}">{{ $cycle->title }}</option>
             @endforeach
@@ -89,7 +90,8 @@
       <div class="col-12 col-md-3">
         <div class="from-group mb-2 mb-md-0">
           <select class="form-select form-select-sm" id="step-filter">
-            <option value="" selected>{{ __('cycles.Select_Step') }}</option>
+            <option value="" selected>{{ __('admin.All_Steps') }}</option>
+            <option value="">{{ __('cycles.All') }}</option>
             @foreach ($steps as $step)
               <option value="{{ $step->id }}">{{ $step->title }}
             @endforeach

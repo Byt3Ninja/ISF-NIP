@@ -139,12 +139,8 @@ document.addEventListener('DOMContentLoaded', function () {
   
   const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
   
-  @if(auth()->user() && auth()->user()->company)
-    const companyId = {{ auth()->user()->company->id }};
-  @else
-    const companyId = null;
-  @endif
-
+  const companyId = {{ request()->route('id') ? request()->route('id') : auth()->user()->company?->id }};
+  
   // Constants for validation messages and allowed file types
   const MESSAGES = {
     titleRequired: "{{ __('startup.milestone_title_required') }}",
@@ -168,18 +164,14 @@ document.addEventListener('DOMContentLoaded', function () {
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
   function loadExistingMilestones() {
-    @if(auth()->user() && auth()->user()->company)
-      @if(auth()->user()->company->milestones && auth()->user()->company->milestones->count() > 0)
-        const existingMilestones = @json(auth()->user()->company->milestones);
-        
-        existingMilestones.forEach((milestone, index) => {
-          const milestoneCard = createMilestoneCard(index === 0, milestone);
-          populateMilestoneCard(milestoneCard, milestone);
-        });
-        updateMilestoneNumbers();
-      @else
-        createMilestoneCard(true);
-      @endif
+    @if($milestones && $milestones->count() > 0)
+      const existingMilestones = @json($milestones);
+      
+      existingMilestones.forEach((milestone, index) => {
+        const milestoneCard = createMilestoneCard(index === 0, milestone);
+        populateMilestoneCard(milestoneCard, milestone);
+      });
+      updateMilestoneNumbers();
     @else
       createMilestoneCard(true);
     @endif

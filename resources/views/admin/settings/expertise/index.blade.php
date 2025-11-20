@@ -57,10 +57,12 @@
               <thead>
                 <tr>
                   <th></th>
+                  <th>{{ $l == 'ar' ? 'المعرف' : 'ID' }}</th>
                   <th>{{ $l == 'ar' ? 'الاسم' : 'Name' }}</th>
                   <th>{{ $l == 'ar' ? 'الوصف' : 'Description' }}</th>
                   <th>{{ $l == 'ar' ? 'التخصصات' : 'Specializations' }}</th>
                   <th>{{ $l == 'ar' ? 'الحالة' : 'Status' }}</th>
+                  <th>{{ $l == 'ar' ? 'تاريخ الإنشاء' : 'Created At' }}</th>
                   <th>{{ $l == 'ar' ? 'الإجراءات' : 'Actions' }}</th>
                 </tr>
               </thead>
@@ -99,10 +101,12 @@
               <thead>
                 <tr>
                   <th></th>
+                  <th>{{ $l == 'ar' ? 'المعرف' : 'ID' }}</th>
                   <th>{{ $l == 'ar' ? 'الاسم' : 'Name' }}</th>
                   <th>{{ $l == 'ar' ? 'مجال الخبرة' : 'Area of Expertise' }}</th>
                   <th>{{ $l == 'ar' ? 'الوصف' : 'Description' }}</th>
                   <th>{{ $l == 'ar' ? 'الحالة' : 'Status' }}</th>
+                  <th>{{ $l == 'ar' ? 'تاريخ الإنشاء' : 'Created At' }}</th>
                   <th>{{ $l == 'ar' ? 'الإجراءات' : 'Actions' }}</th>
                 </tr>
               </thead>
@@ -351,15 +355,6 @@
       initializeDataTables();
       
     } catch (error) {
-      // Swal.fire({
-      //   icon: 'error',
-      //   title: isRtl ? 'خطأ' : 'Error',
-      //   text: isRtl ? 'فشل تحميل البيانات' : 'Failed to load data',
-      //   customClass: {
-      //     confirmButton: 'btn btn-primary'
-      //   },
-      //   buttonsStyling: false
-      // });
       console.error('Load data error:', error);
       initializeDataTables();
     }
@@ -370,6 +365,14 @@
     var dt_expertise_table = $('.datatables-expertise-list'),
       dt_specialization_table = $('.datatables-specialization-list');
 
+    // Destroy existing DataTables if they exist
+    if ($.fn.DataTable.isDataTable(dt_expertise_table)) {
+      dt_expertise_table.DataTable().destroy();
+    }
+    if ($.fn.DataTable.isDataTable(dt_specialization_table)) {
+      dt_specialization_table.DataTable().destroy();
+    }
+
     // Expertise DataTable
     if (dt_expertise_table.length) {
       dt_expertise = dt_expertise_table.DataTable({
@@ -377,10 +380,12 @@
         data: expertiseData,
         columns: [
           { data: null },
+          { data: 'id' },
           { data: 'name' },
           { data: 'description' },
           { data: 'specializations' },
           { data: 'status' },
+          { data: 'createdAt' },
           { data: null }
         ],
         columnDefs: [
@@ -398,16 +403,23 @@
             targets: 1,
             responsivePriority: 4,
             render: function (data, type, full, meta) {
+              return '<span class="fw-medium">' + full['id'] + '</span>';
+            }
+          },
+          {
+            targets: 2,
+            responsivePriority: 4,
+            render: function (data, type, full, meta) {
               var $name = full['name'];
               return '<span class="fw-medium">' + $name + '</span>';
             }
           },
           {
-            targets: 2,
+            targets: 3,
             render: function (data, type, full, meta) {
               var $description = full['description'] || '';
               return `
-                <div class="d-flex align-items-center" style="width: 400px;">
+                <div class="d-flex align-items-center" style="max-width: 400px;">
                   <span class="text-truncate" style="max-width: 100%;">
                     ${$description}
                   </span>
@@ -416,14 +428,14 @@
             }
           },
           {
-            targets: 3,
+            targets: 4,
             render: function (data, type, full, meta) {
               var $count = full['specializations'] || 0;
               return '<span class="badge bg-label-primary">' + $count + '</span>';
             }
           },
           {
-            targets: 4,
+            targets: 5,
             render: function (data, type, full, meta) {
               var $status = full['status'];
               var statusObj = {
@@ -437,6 +449,12 @@
                 statusObj[$status].title +
                 '</span>'
               );
+            }
+          },
+          {
+            targets: 6,
+            render: function (data, type, full, meta) {
+              return full['createdAt'] ? moment(full['createdAt']).format('YYYY-MM-DD HH:mm:ss') : '';
             }
           },
           {
@@ -454,7 +472,7 @@
             }
           }
         ],
-        order: [[1, 'desc']],
+        order: [[6, 'desc']],
         dom:
           '<"row me-2"' +
           '<"col-md-2"<"me-3"l>>' +
@@ -463,8 +481,16 @@
           '<"row mx-2"' +
           '<"col-sm-12 col-md-6"i>' +
           '<"col-sm-12 col-md-6"p>' +
-          '>',
-        language: isRtl ? { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/ar.json' } : {},
+          '>'
+        @if (app()->getLocale() == 'ar')
+        ,language: {
+          search: 'ابحث:',
+          lengthMenu: 'أظهر _MENU_ مدخلات',
+          info: 'إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل',
+          paginate: { previous: 'السابق', next: 'التالي' },
+          emptyTable: 'لا توجد بيانات'
+        }
+        @endif,
         buttons: [
           {
             extend: 'collection',
@@ -476,7 +502,7 @@
                 text: '<i class="ti ti-file-text me-2" ></i>Csv',
                 className: 'dropdown-item',
                 exportOptions: {
-                  columns: [1, 2, 3, 4]
+                  columns: [1, 2, 3, 4, 5, 6]
                 }
               },
               {
@@ -484,7 +510,7 @@
                 text: '<i class="ti ti-file-spreadsheet me-2"></i>Excel',
                 className: 'dropdown-item',
                 exportOptions: {
-                  columns: [1, 2, 3, 4]
+                  columns: [1, 2, 3, 4, 5, 6]
                 }
               }
             ]
@@ -501,10 +527,12 @@
         data: specializationData,
         columns: [
           { data: null },
+          { data: 'id' },
           { data: 'name' },
           { data: 'expertise_name' },
           { data: 'description' },
           { data: 'status' },
+          { data: 'createdAt' },
           { data: null }
         ],
         columnDefs: [
@@ -522,23 +550,30 @@
             targets: 1,
             responsivePriority: 4,
             render: function (data, type, full, meta) {
+              return '<span class="fw-medium">' + full['id'] + '</span>';
+            }
+          },
+          {
+            targets: 2,
+            responsivePriority: 4,
+            render: function (data, type, full, meta) {
               var $name = full['name'];
               return '<span class="fw-medium">' + $name + '</span>';
             }
           },
           {
-            targets: 2,
+            targets: 3,
             render: function (data, type, full, meta) {
               var $expertise = full['expertise_name'] || '';
               return '<span class="badge bg-label-info">' + $expertise + '</span>';
             }
           },
           {
-            targets: 3,
+            targets: 4,
             render: function (data, type, full, meta) {
               var $description = full['description'] || '';
               return `
-                <div class="d-flex align-items-center" style="width: 400px;">
+                <div class="d-flex align-items-center" style="max-width: 400px;">
                   <span class="text-truncate" style="max-width: 100%;">
                     ${$description}
                   </span>
@@ -547,7 +582,7 @@
             }
           },
           {
-            targets: 4,
+            targets: 5,
             render: function (data, type, full, meta) {
               var $status = full['status'];
               var statusObj = {
@@ -561,6 +596,12 @@
                 statusObj[$status].title +
                 '</span>'
               );
+            }
+          },
+          {
+            targets: 6,
+            render: function (data, type, full, meta) {
+              return full['createdAt'] ? moment(full['createdAt']).format('YYYY-MM-DD HH:mm:ss') : '';
             }
           },
           {
@@ -578,7 +619,7 @@
             }
           }
         ],
-        order: [[1, 'desc']],
+        order: [[6, 'desc']],
         dom:
           '<"row me-2"' +
           '<"col-md-2"<"me-3"l>>' +
@@ -587,8 +628,16 @@
           '<"row mx-2"' +
           '<"col-sm-12 col-md-6"i>' +
           '<"col-sm-12 col-md-6"p>' +
-          '>',
-        language: isRtl ? { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/ar.json' } : {},
+          '>'
+        @if (app()->getLocale() == 'ar')
+        ,language: {
+          search: 'ابحث:',
+          lengthMenu: 'أظهر _MENU_ مدخلات',
+          info: 'إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل',
+          paginate: { previous: 'السابق', next: 'التالي' },
+          emptyTable: 'لا توجد بيانات'
+        }
+        @endif,
         buttons: [
           {
             extend: 'collection',
@@ -600,7 +649,7 @@
                 text: '<i class="ti ti-file-text me-2" ></i>Csv',
                 className: 'dropdown-item',
                 exportOptions: {
-                  columns: [1, 2, 3, 4]
+                  columns: [1, 2, 3, 4, 5, 6]
                 }
               },
               {
@@ -608,7 +657,7 @@
                 text: '<i class="ti ti-file-spreadsheet me-2"></i>Excel',
                 className: 'dropdown-item',
                 exportOptions: {
-                  columns: [1, 2, 3, 4]
+                  columns: [1, 2, 3, 4, 5, 6]
                 }
               }
             ]
@@ -628,6 +677,12 @@
 
   // Initialize event handlers
   function initializeEventHandlers() {
+    // Remove any existing event handlers first to prevent duplicates
+    $(document).off('click', '.edit-expertise');
+    $(document).off('click', '.edit-specialization');
+    $(document).off('click', '.delete-expertise');
+    $(document).off('click', '.delete-specialization');
+
     // Edit expertise
     $(document).on('click', '.edit-expertise', function () {
       const id = $(this).data('id');
@@ -680,8 +735,23 @@
           const deleteResult = await api.delete(API_ENDPOINTS.expertise.delete(id));
           
           if (deleteResult.success) {
-            // Reload data to get updated counts
-            await loadData();
+            // Remove from local data
+            expertiseData = expertiseData.filter(e => e.id != id);
+            
+            // Remove related specializations from local data
+            specializationData = specializationData.filter(s => s.expertise_id != id);
+            
+            // Update DataTable without refetching
+            dt_expertise.clear();
+            dt_expertise.rows.add(expertiseData);
+            dt_expertise.draw();
+            
+            // Also update specialization table if it exists
+            if (dt_specialization) {
+              dt_specialization.clear();
+              dt_specialization.rows.add(specializationData);
+              dt_specialization.draw();
+            }
             
             releaseSuccessAlert({
               title: isRtl ? 'تم الحذف!' : 'Deleted!',
@@ -705,6 +775,8 @@
     // Delete specialization
     $(document).on('click', '.delete-specialization', async function () {
       const id = $(this).data('id');
+      const specialization = specializationData.find(s => s.id == id);
+      
       Swal.fire({
         title: isRtl ? 'هل أنت متأكد؟' : 'Are you sure?',
         text: isRtl ? 'لن تتمكن من التراجع عن هذا!' : 'You won\'t be able to revert this!',
@@ -722,8 +794,26 @@
           const deleteResult = await api.delete(API_ENDPOINTS.specialization.delete(id));
           
           if (deleteResult.success) {
-            // Reload data to get updated counts
-            await loadData();
+            // Remove from local data
+            specializationData = specializationData.filter(s => s.id != id);
+            
+            // Update specialization count for the expertise
+            if (specialization && specialization.expertise_id) {
+              const expertise = expertiseData.find(e => e.id == specialization.expertise_id);
+              if (expertise) {
+                expertise.specializations = Math.max(0, (expertise.specializations || 0) - 1);
+                
+                // Update expertise table
+                dt_expertise.clear();
+                dt_expertise.rows.add(expertiseData);
+                dt_expertise.draw();
+              }
+            }
+            
+            // Update specialization table
+            dt_specialization.clear();
+            dt_specialization.rows.add(specializationData);
+            dt_specialization.draw();
             
             releaseSuccessAlert({
               title: isRtl ? 'تم الحذف!' : 'Deleted!',
@@ -801,8 +891,31 @@
       }
 
       if (result.success) {
-        // Reload data
-        await loadData();
+        // Update local data instead of refetching
+        if (isEditing) {
+          // Update existing expertise
+          const index = expertiseData.findIndex(e => e.id == editingExpertiseId);
+          if (index !== -1) {
+            expertiseData[index] = {
+              ...expertiseData[index],
+              ...data,
+              id: editingExpertiseId
+            };
+          }
+        } else {
+          // Add new expertise (use returned ID from API if available)
+          const newExpertise = {
+            id: result.data.id || Date.now(), // Use API ID or fallback
+            ...data,
+            specializations: 0
+          };
+          expertiseData.unshift(newExpertise); // Add to beginning
+        }
+
+        // Update DataTable without refetching
+        dt_expertise.clear();
+        dt_expertise.rows.add(expertiseData);
+        dt_expertise.draw();
 
         // Hide offcanvas
         $('#offcanvasAddExpertise').offcanvas('hide');
@@ -900,8 +1013,69 @@
       }
 
       if (result.success) {
-        // Reload data
-        await loadData();
+        // Get expertise name for display
+        const expertise = expertiseData.find(e => e.id == data.expertise_id);
+        const expertiseName = expertise ? expertise.name : '';
+        
+        // Update local data instead of refetching
+        if (isEditing) {
+          // Track old expertise_id to update counts
+          const oldSpecialization = specializationData.find(s => s.id == editingSpecializationId);
+          const oldExpertiseId = oldSpecialization ? oldSpecialization.expertise_id : null;
+          
+          // Update existing specialization
+          const index = specializationData.findIndex(s => s.id == editingSpecializationId);
+          if (index !== -1) {
+            specializationData[index] = {
+              ...specializationData[index],
+              ...data,
+              expertise_name: expertiseName,
+              id: editingSpecializationId
+            };
+          }
+          
+          // Update specialization counts if expertise changed
+          if (oldExpertiseId && oldExpertiseId != data.expertise_id) {
+            // Decrease old expertise count
+            const oldExpertise = expertiseData.find(e => e.id == oldExpertiseId);
+            if (oldExpertise) {
+              oldExpertise.specializations = Math.max(0, (oldExpertise.specializations || 0) - 1);
+            }
+            
+            // Increase new expertise count
+            if (expertise) {
+              expertise.specializations = (expertise.specializations || 0) + 1;
+            }
+            
+            // Update expertise table
+            dt_expertise.clear();
+            dt_expertise.rows.add(expertiseData);
+            dt_expertise.draw();
+          }
+        } else {
+          // Add new specialization (use returned ID from API if available)
+          const newSpecialization = {
+            id: result.data.id || Date.now(), // Use API ID or fallback
+            ...data,
+            expertise_name: expertiseName
+          };
+          specializationData.unshift(newSpecialization); // Add to beginning
+          
+          // Increase expertise count
+          if (expertise) {
+            expertise.specializations = (expertise.specializations || 0) + 1;
+            
+            // Update expertise table
+            dt_expertise.clear();
+            dt_expertise.rows.add(expertiseData);
+            dt_expertise.draw();
+          }
+        }
+
+        // Update specialization DataTable without refetching
+        dt_specialization.clear();
+        dt_specialization.rows.add(specializationData);
+        dt_specialization.draw();
 
         // Hide offcanvas
         $('#offcanvasAddSpecialization').offcanvas('hide');
@@ -940,12 +1114,10 @@
     select.innerHTML = '<option value="">' + (isRtl ? 'اختر مجال الخبرة' : 'Select area of expertise') + '</option>';
     
     expertiseData.forEach(expertise => {
-      if (expertise.status === 'active') {
-        const option = document.createElement('option');
-        option.value = expertise.id;
-        option.textContent = expertise.name;
-        select.appendChild(option);
-      }
+      const option = document.createElement('option');
+      option.value = expertise.id;
+      option.textContent = expertise.name;
+      select.appendChild(option);
     });
   }
 
@@ -1014,8 +1186,26 @@
         const result = await api.post(API_ENDPOINTS.expertise.import, { items: jsonData });
 
         if (result.success) {
-          // Reload data
-          await loadData();
+          // Add imported items to local data (if API returns them)
+          if (result.data.items && Array.isArray(result.data.items)) {
+            result.data.items.forEach(item => {
+              const exists = expertiseData.find(e => e.id == item.id);
+              if (!exists) {
+                expertiseData.unshift(item);
+              }
+            });
+          } else {
+            // If API doesn't return items, refetch only expertise data
+            const expertiseResult = await api.get(API_ENDPOINTS.expertise.list);
+            if (expertiseResult.success) {
+              expertiseData = expertiseResult.data;
+            }
+          }
+          
+          // Update DataTable
+          dt_expertise.clear();
+          dt_expertise.rows.add(expertiseData);
+          dt_expertise.draw();
 
           const importedCount = result.data.imported || 0;
           const skippedCount = result.data.skipped || 0;
@@ -1091,8 +1281,45 @@
         const result = await api.post(API_ENDPOINTS.specialization.import, { items: jsonData });
 
         if (result.success) {
-          // Reload data
-          await loadData();
+          // Add imported items to local data and update counts
+          if (result.data.items && Array.isArray(result.data.items)) {
+            result.data.items.forEach(item => {
+              const exists = specializationData.find(s => s.id == item.id);
+              if (!exists) {
+                specializationData.unshift(item);
+                
+                // Update expertise count
+                const expertise = expertiseData.find(e => e.id == item.expertise_id);
+                if (expertise) {
+                  expertise.specializations = (expertise.specializations || 0) + 1;
+                }
+              }
+            });
+            
+            // Update both tables
+            dt_expertise.clear();
+            dt_expertise.rows.add(expertiseData);
+            dt_expertise.draw();
+          } else {
+            // If API doesn't return items, refetch both data sets
+            const specializationResult = await api.get(API_ENDPOINTS.specialization.list);
+            if (specializationResult.success) {
+              specializationData = specializationResult.data;
+            }
+            
+            const expertiseResult = await api.get(API_ENDPOINTS.expertise.list);
+            if (expertiseResult.success) {
+              expertiseData = expertiseResult.data;
+              dt_expertise.clear();
+              dt_expertise.rows.add(expertiseData);
+              dt_expertise.draw();
+            }
+          }
+          
+          // Update specialization DataTable
+          dt_specialization.clear();
+          dt_specialization.rows.add(specializationData);
+          dt_specialization.draw();
 
           const importedCount = result.data.imported || 0;
           const skippedCount = result.data.skipped || 0;
@@ -1142,23 +1369,13 @@
   document.getElementById('expertise-import-file').addEventListener('change', handleExpertiseImport);
   document.getElementById('specialization-import-file').addEventListener('change', handleSpecializationImport);
 
-  // Tab switch event handler
-  $('a[data-bs-toggle="pill"]').on('shown.bs.tab', async function (e) {
+  // Tab switch event handler - just redraw with existing data
+  $('a[data-bs-toggle="pill"]').on('shown.bs.tab', function (e) {
     const target = $(e.target).attr('data-bs-target');
     
-    if (target === '#specializations') {
-      // Reload specialization data when switching to specializations tab
-      const specializationResult = await api.get(API_ENDPOINTS.specialization.list);
-      if (specializationResult.success) {
-        specializationData = specializationResult.data;
-        
-        // Refresh the DataTable with new data
-        if (dt_specialization) {
-          dt_specialization.clear();
-          dt_specialization.rows.add(specializationData);
-          dt_specialization.draw();
-        }
-      }
+    // Just redraw the table with existing data
+    if (target === '#specializations' && dt_specialization) {
+      dt_specialization.draw();
     }
   });
 
