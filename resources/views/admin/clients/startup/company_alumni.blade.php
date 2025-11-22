@@ -6,22 +6,22 @@
     <div class="row g-3 align-items-center mb-4">
       <div class="col-12 col-md-6">
         <h4 class="mb-1">
-          Startup Alumni Report
+          {{ __('startup.alumni_report_title') }}
         </h4>
         <p class="text-muted mb-0 small">
-          Program based alumni insights for a single startup
+          {{ __('startup.alumni_report_subtitle') }}
         </p>
       </div>
       <div id="header-actions" class="col-12 col-md-6 d-flex justify-content-md-end gap-2 flex-wrap">
         <span class="badge bg-label-success pe-4 rounded-pill d-inline-flex align-items-center">
           <i class="ti ti-point-filled me-1"></i>
-          <span>Alumni</span>
+          <span>{{ __('startup.alumni') }}</span>
         </span>
         <button id="export-pdf-button" class="btn btn-primary btn-sm">
-          <i class="ti ti-file-type-pdf me-1"></i>Export PDF
+          <i class="ti ti-file-type-pdf me-1"></i>{{ __('startup.export_pdf') }}
         </button>
         <a id="export-csv" class="btn btn-outline-secondary btn-sm">
-          <i class="ti ti-file-type-csv me-1"></i>Export CSV
+          <i class="ti ti-file-type-csv me-1"></i>{{ __('startup.export_csv') }}
         </a>
       </div>
     </div>
@@ -41,14 +41,14 @@
                   </div>
                   <span>PayLinkx</span>
                 </h5>
-                <p class="text-muted small mb-0">Modern fintech platform for seamless payment solutions</p>
+                <p class="text-muted small mb-0">{{ __('startup.overview_description') }}</p>
               </div>
               <div class="d-flex flex-wrap gap-2">
                 <span class="badge bg-label-primary rounded-pill">
                   <i class="ti ti-building me-1"></i>Growthlabs
                 </span>
                 <span class="badge bg-label-secondary rounded-pill">
-                  <i class="ti ti-cloud me-1"></i>SaaS
+                  <i class="ti ti-cloud me-1"></i>{{ __('startup.badge_saas') }}
                 </span>
                 <span class="badge bg-label-info rounded-pill">
                   <i class="ti ti-map-pin me-1"></i>Egypt · Cairo
@@ -59,35 +59,35 @@
               <div class="text-center">
                 <small
                   class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
-                  <i class="ti ti-calendar-event text-info"></i>Est. Date
+                  <i class="ti ti-calendar-event text-info"></i>{{ __('startup.est_date') }}
                 </small>
                 <h6 class="fw-bold text-dark mb-0">2019-05-01</h6>
               </div>
               <div class="text-center">
                 <small
                   class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
-                  <i class="ti ti-briefcase text-warning"></i>Business Type
+                  <i class="ti ti-briefcase text-warning"></i>{{ __('startup.business_type') }}
                 </small>
                 <h6 class="fw-bold text-dark mb-0">B2B</h6>
               </div>
               <div class="text-center">
                 <small
                   class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
-                  <i class="ti ti-device-gamepad-3 text-success"></i>Industry
+                  <i class="ti ti-device-gamepad-3 text-success"></i>{{ __('startup.industry') }}
                 </small>
                 <h6 class="fw-bold text-dark mb-0">Financial Services</h6>
               </div>
               <div class="text-center">
                 <small
                   class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
-                  <i class="ti ti-packages text-danger"></i>Sector
+                  <i class="ti ti-packages text-danger"></i>{{ __('startup.sector') }}
                 </small>
                 <h6 class="fw-bold text-dark mb-0">Payments</h6>
               </div>
               <div class="text-center">
                 <small
                   class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
-                  <i class="ti ti-users text-primary"></i>Team Size
+                  <i class="ti ti-users text-primary"></i>{{ __('startup.team_size') }}
                 </small>
                 <h6 class="fw-bold text-dark mb-0">25+</h6>
               </div>
@@ -96,28 +96,28 @@
               <div class="text-center">
                 <small
                   class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
-                  <i class="ti ti-components text-secondary"></i>Program Name
+                  <i class="ti ti-components text-secondary"></i>{{ __('startup.program_Name') }}
                 </small>
                 <h6 class="fw-bold text-dark mb-0">Fintech Accelerator 2025</h6>
               </div>
               <div class="text-center">
                 <small
                   class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
-                  <i class="ti ti-color-swatch text-danger"></i>Program Cohort
+                  <i class="ti ti-color-swatch text-danger"></i>{{ __('startup.program_cohort') }}
                 </small>
                 <h6 class="fw-bold text-dark mb-0">Cohort 3</h6>
               </div>
               <div class="text-center">
                 <small
                   class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
-                  <i class="ti ti-calendar-stats text-muted"></i>Program Start
+                  <i class="ti ti-calendar-stats text-muted"></i>{{ __('startup.program_start') }}
                 </small>
                 <h6 class="fw-bold text-dark mb-0">10 Jan 2025</h6>
               </div>
               <div class="text-center">
                 <small
                   class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
-                  <i class="ti ti-calendar-check text-success"></i>Program End
+                  <i class="ti ti-calendar-check text-success"></i>{{ __('startup.program_end') }}
                 </small>
                 <h6 class="fw-bold text-dark mb-0">15 Jun 2025</h6>
               </div>
@@ -125,15 +125,15 @@
             <div class="pt-5 d-flex flex-wrap gap-4 border-top">
               <a href="#"
                 class="d-inline-flex align-items-center fw-medium text-decoration-none link-primary hover-animate">
-                <i class="ti ti-world me-2"></i>Website <i class="ti ti-external-link ms-1 small"></i>
+                <i class="ti ti-world me-2"></i>{{ __('startup.website') }} <i class="ti ti-external-link ms-1 small"></i>
               </a>
               <a href="#"
                 class="d-inline-flex align-items-center fw-medium text-decoration-none link-primary hover-animate">
-                <i class="ti ti-brand-linkedin me-2"></i>LinkedIn <i class="ti ti-external-link ms-1 small"></i>
+                <i class="ti ti-brand-linkedin me-2"></i>{{ __('startup.linkedin') }} <i class="ti ti-external-link ms-1 small"></i>
               </a>
               <a href="#"
                 class="d-inline-flex align-items-center fw-medium text-decoration-none link-primary hover-animate">
-                <i class="ti ti-brand-twitter me-2"></i>Twitter <i class="ti ti-external-link ms-1 small"></i>
+                <i class="ti ti-brand-twitter me-2"></i>{{ __('startup.twitter') }} <i class="ti ti-external-link ms-1 small"></i>
               </a>
             </div>
           </div>
@@ -157,7 +157,7 @@
                   </div>
                   <h5 class="mb-0">4.3 / 5</h5>
                 </div>
-                <small class="text-center">Screening Score</small>
+                <small class="text-center">{{ __('startup.screening_score') }}</small>
               </div>
             </div>
           </div>
@@ -174,7 +174,7 @@
                   </div>
                   <h5 class="mb-0">4.6 / 5</h5>
                 </div>
-                <small class="text-center">Final Screening Score</small>
+                <small class="text-center">{{ __('startup.final_screening_score') }}</small>
               </div>
             </div>
           </div>
@@ -191,7 +191,7 @@
                   </div>
                   <h5 class="mb-0">32h 15m</h5>
                 </div>
-                <small class="text-center">Training Hours</small>
+                <small class="text-center">{{ __('startup.training_hours') }}</small>
               </div>
             </div>
           </div>
@@ -208,7 +208,7 @@
                   </div>
                   <h5 class="mb-0">24h 30m</h5>
                 </div>
-                <small class="text-center">Mentorship Hours</small>
+                <small class="text-center">{{ __('startup.mentorship_hours') }}</small>
               </div>
             </div>
           </div>
@@ -225,7 +225,7 @@
                   </div>
                   <h5 class="mb-0">94%</h5>
                 </div>
-                <small class="text-center">Attendance Rate</small>
+                <small class="text-center">{{ __('startup.attendance_rate') }}</small>
               </div>
             </div>
           </div>
@@ -242,7 +242,7 @@
                   </div>
                   <h5 class="mb-0">7 / 8</h5>
                 </div>
-                <small class="text-center">Milestones Completed</small>
+                <small class="text-center">{{ __('startup.milestones_completed') }}</small>
               </div>
             </div>
           </div>
@@ -259,7 +259,7 @@
                   </div>
                   <h5 class="mb-0">12 / 12</h5>
                 </div>
-                <small class="text-center">Quizzes Completed</small>
+                <small class="text-center">{{ __('startup.quizzes_completed') }}</small>
               </div>
             </div>
           </div>
@@ -276,7 +276,7 @@
                   </div>
                   <h5 class="mb-0">87%</h5>
                 </div>
-                <small class="text-center">Avg Quiz Score</small>
+                <small class="text-center">{{ __('startup.avg_quiz_score') }}</small>
               </div>
             </div>
           </div>
@@ -293,7 +293,7 @@
                   </div>
                   <h5 class="mb-0">8</h5>
                 </div>
-                <small class="text-center">In-Kind Services</small>
+                <small class="text-center">{{ __('startup.in_kind_services') }}</small>
               </div>
             </div>
           </div>
@@ -305,12 +305,12 @@
                 <div class="d-flex align-items-center justify-content-center mb-2">
                   <div class="avatar avatar-md me-4">
                     <div class="avatar-initial rounded bg-label-primary">
-                      <i class="ti ti-mood-smile ti-xs"></i>
+                      <i class="ti ti-mood-smile ti-md"></i>
                     </div>
                   </div>
                   <h5 class="mb-0">5 / 5</h5>
                 </div>
-                <small class="text-center">Surveys Completed</small>
+                <small class="text-center">{{ __('startup.surveys_completed') }}</small>
               </div>
             </div>
           </div>
@@ -320,12 +320,12 @@
                 <div class="d-flex align-items-center justify-content-center mb-2">
                   <div class="avatar avatar-md me-4">
                     <div class="avatar-initial rounded bg-label-primary">
-                      <i class="ti ti-checklist ti-xs"></i>
+                      <i class="ti ti-checklist ti-md"></i>
                     </div>
                   </div>
                   <h5 class="mb-0">24 / 26</h5>
                 </div>
-                <small class="text-center">Tasks Completed</small>
+                <small class="text-center">{{ __('startup.tasks_completed') }}</small>
               </div>
             </div>
           </div>
@@ -341,73 +341,73 @@
             <li class="nav-item" role="presentation">
               <a type="button" class="nav-link active" id="tab-basic-trigger" href="#tab-basic" role="tab"
                 aria-controls="tab-basic" aria-selected="true">
-                <i class="ti ti-info-square me-1"></i>Startup info
+                <i class="ti ti-info-square me-1"></i>{{ __('startup.startup_info_tab') }}
               </a>
             </li>
             <li class="nav-item" role="presentation">
               <a type="button" class="nav-link" id="tab-team-trigger" href="#tab-team" role="tab"
                 aria-controls="tab-team" aria-selected="false">
-                <i class="ti ti-users me-1"></i>Team
+                <i class="ti ti-users me-1"></i>{{ __('startup.team_tab') }}
               </a>
             </li>
             <li class="nav-item" role="presentation">
               <a type="button" class="nav-link" id="tab-ownership-trigger" href="#tab-ownership" role="tab"
                 aria-controls="tab-ownership" aria-selected="false">
-                <i class="ti ti-briefcase me-1"></i>Ownership &amp; investors
+                <i class="ti ti-briefcase me-1"></i>{{ __('startup.ownership_investors_tab') }}
               </a>
             </li>
             <li class="nav-item" role="presentation">
               <a type="button" class="nav-link" id="tab-screening-trigger" href="#tab-screening" role="tab"
                 aria-controls="tab-screening" aria-selected="false">
-                <i class="ti ti-search me-1"></i>Screening
+                <i class="ti ti-search me-1"></i>{{ __('startup.screening_tab') }}
               </a>
             </li>
             <li class="nav-item" role="presentation">
               <a type="button" class="nav-link" id="tab-training-trigger" href="#tab-training" role="tab"
                 aria-controls="tab-book" aria-selected="false">
-                <i class="ti ti-school me-1"></i>Training
+                <i class="ti ti-school me-1"></i>{{ __('startup.training_tab') }}
               </a>
             </li>
             <li class="nav-item" role="presentation">
               <a type="button" class="nav-link" id="tab-mentorship-trigger" href="#tab-mentorship" role="tab"
                 aria-controls="tab-mentorship" aria-selected="false">
-                <i class="ti ti-school me-1"></i>Mentorship
+                <i class="ti ti-school me-1"></i>{{ __('startup.mentorship_tab') }}
               </a>
             </li>
             <li class="nav-item" role="presentation">
               <a type="button" class="nav-link" id="tab-milestones-trigger" href="#tab-milestones" role="tab"
                 aria-controls="tab-milestones" aria-selected="false">
-                <i class="ti ti-flag-check me-1"></i>Milestones
+                <i class="ti ti-flag-check me-1"></i>{{ __('startup.milestones_tab') }}
               </a>
             </li>
             <li class="nav-item" role="presentation">
               <a type="button" class="nav-link" id="tab-tasks-trigger" href="#tab-tasks" role="tab"
                 aria-controls="tab-tasks" aria-selected="false">
-                <i class="ti ti-checklist me-1"></i>Tasks
+                <i class="ti ti-checklist me-1"></i>{{ __('startup.tasks_tab') }}
               </a>
             </li>
             <li class="nav-item" role="presentation">
               <a type="button" class="nav-link" id="tab-quizzes-trigger" href="#tab-quizzes" role="tab"
                 aria-controls="tab-quizzes" aria-selected="false">
-                <i class="ti ti-help me-1"></i>Quizzes
+                <i class="ti ti-help me-1"></i>{{ __('startup.quizzes_tab') }}
               </a>
             </li>
             <li class="nav-item" role="presentation">
               <a type="button" class="nav-link" id="tab-surveys-trigger" href="#tab-surveys" role="tab"
                 aria-controls="tab-surveys" aria-selected="false">
-                <i class="ti ti-mood-smile me-1"></i>Surveys
+                <i class="ti ti-mood-smile me-1"></i>{{ __('startup.surveys_tab') }}
               </a>
             </li>
             <li class="nav-item" role="presentation">
               <a type="button" class="nav-link" id="tab-services-trigger" href="#tab-services" role="tab"
                 aria-controls="tab-services" aria-selected="false">
-                <i class="ti ti-gift me-1"></i>Services
+                <i class="ti ti-gift me-1"></i>{{ __('startup.services_tab') }}
               </a>
             </li>
             <li class="nav-item" role="presentation">
               <a type="button" class="nav-link" id="tab-forms-trigger" href="#tab-forms" role="tab"
                 aria-controls="tab-forms" aria-selected="false">
-                <i class="ti ti-file-text me-1"></i>Forms
+                <i class="ti ti-file-text me-1"></i>{{ __('startup.forms_tab') }}
               </a>
             </li>
           </ul>
@@ -421,9 +421,9 @@
           <div class="card-header d-flex justify-content-between align-it">
             <div>
               <h5 class="card-title mb-0 d-flex align-items-center gap-2">
-                <i class="ti ti-file-info text-primary"></i>Basic startup information
+                <i class="ti ti-file-info text-primary"></i>{{ __('startup.basic_info_title') }}
               </h5>
-              <small class="text-muted">Static data per startup record</small>
+              <small class="text-muted">{{ __('startup.static_data_note') }}</small>
             </div>
             <span class="badge bg-label-success rounded-pill" style="height: fit-content;">
               <i class="ti ti-check me-1"></i>Alumni
@@ -434,7 +434,7 @@
               <div class="col-12 col-md-4">
                 <div class="p-3 rounded bg-light-subtle border">
                   <small class="text-muted text-uppercase fw-semibold d-block mb-1">
-                    <i class="ti ti-briefcase me-1"></i>Startup name
+                    <i class="ti ti-briefcase me-1"></i>{{ __('startup.startup_name') }}
                   </small>
                   <p class="mb-0 fw-bold text-dark">PayLinkx</p>
                 </div>
@@ -442,7 +442,7 @@
               <div class="col-12 col-md-4">
                 <div class="p-3 rounded bg-light-subtle border">
                   <small class="text-muted text-uppercase fw-semibold d-block mb-1">
-                    <i class="ti ti-calendar me-1"></i>Established date
+                    <i class="ti ti-calendar me-1"></i>{{ __('startup.established_date') }}
                   </small>
                   <p class="mb-0 fw-bold text-dark">2019-05-01</p>
                 </div>
@@ -450,7 +450,7 @@
               <div class="col-12 col-md-4">
                 <div class="p-3 rounded bg-light-subtle border">
                   <small class="text-muted text-uppercase fw-semibold d-block mb-1">
-                    <i class="ti ti-map-pin me-1"></i>Location
+                    <i class="ti ti-map-pin me-1"></i>{{ __('startup.location') }}
                   </small>
                   <p class="mb-0 fw-bold text-dark">Cairo, Egypt</p>
                 </div>
@@ -458,7 +458,7 @@
               <div class="col-12 col-md-4">
                 <div class="p-3 rounded bg-light-subtle border">
                   <small class="text-muted text-uppercase fw-semibold d-block mb-1">
-                    <i class="ti ti-building me-1"></i>Business type
+                    <i class="ti ti-building me-1"></i>{{ __('startup.business_type') }}
                   </small>
                   <p class="mb-0 fw-bold text-dark">B2B</p>
                 </div>
@@ -466,7 +466,7 @@
               <div class="col-12 col-md-4">
                 <div class="p-3 rounded bg-light-subtle border">
                   <small class="text-muted text-uppercase fw-semibold d-block mb-1">
-                    <i class="ti ti-bulb me-1"></i>Technology
+                    <i class="ti ti-bulb me-1"></i>{{ __('startup.technology') }}
                   </small>
                   <p class="mb-0 fw-bold text-dark">AI, APIs, Cloud</p>
                 </div>
@@ -474,7 +474,7 @@
               <div class="col-12 col-md-4">
                 <div class="p-3 rounded bg-light-subtle border">
                   <small class="text-muted text-uppercase fw-semibold d-block mb-1">
-                    <i class="ti ti-world me-1"></i>Website
+                    <i class="ti ti-world me-1"></i>{{ __('startup.website') }}
                   </small>
                   <p class="mb-0">
                     <a href="#" class="fw-bold text-decoration-none link-primary">paylinkx.com</a>
@@ -484,17 +484,17 @@
               <div class="col-12 col-md-8">
                 <div class="p-3 rounded bg-light-subtle border">
                   <small class="text-muted text-uppercase fw-semibold d-block mb-2">
-                    <i class="ti ti-share me-1"></i>Social media
+                    <i class="ti ti-share me-1"></i>{{ __('startup.social_media') }}
                   </small>
                   <div class="d-flex flex-wrap gap-3 mb-0">
                     <a href="#" class="badge bg-label-primary text-decoration-none">
-                      <i class="ti ti-brand-linkedin me-1"></i>LinkedIn
+                      <i class="ti ti-brand-linkedin me-1"></i>{{ __('startup.linkedin') }}
                     </a>
                     <a href="#" class="badge bg-label-secondary text-decoration-none">
                       <i class="ti ti-brand-facebook me-1"></i>Facebook
                     </a>
                     <a href="#" class="badge bg-label-info text-decoration-none">
-                      <i class="ti ti-brand-twitter me-1"></i>Twitter
+                      <i class="ti ti-brand-twitter me-1"></i>{{ __('startup.twitter') }}
                     </a>
                   </div>
                 </div>
@@ -504,31 +504,31 @@
             <div class="row g-4">
               <div class="col-12 col-md-6">
                 <h6 class="mb-3 fw-bold d-flex align-items-center gap-2">
-                  <i class="ti ti-target text-success"></i>Sustainability goals
+                  <i class="ti ti-target text-success"></i>{{ __('startup.sustainability_goals') }}
                 </h6>
                 <ul class="list-group list-group-flush rounded border">
                   <li class="list-group-item d-flex justify-content-between align-items-center py-3">
                     <span class="fw-medium">SDG 8 — Decent work &amp; economic growth</span>
-                    <span class="badge bg-label-primary">Primary</span>
+                    <span class="badge bg-label-primary">{{ __('startup.primary') }}</span>
                   </li>
                   <li class="list-group-item d-flex justify-content-between align-items-center py-3">
                     <span class="fw-medium">SDG 9 — Industry innovation &amp; infrastructure</span>
-                    <span class="badge bg-label-secondary">Secondary</span>
+                    <span class="badge bg-label-secondary">{{ __('startup.secondary') }}</span>
                   </li>
                 </ul>
               </div>
               <div class="col-12 col-md-6">
                 <h6 class="mb-3 fw-bold d-flex align-items-center gap-2">
-                  <i class="ti ti-shield-check text-warning"></i>Legal information
+                  <i class="ti ti-shield-check text-warning"></i>{{ __('startup.legal_information') }}
                 </h6>
                 <div class="border rounded p-3">
                   <dl class="row mb-0 gy-2">
-                    <dt class="col-5 text-muted fw-normal small">Legal status</dt>
-                    <dd class="col-7 mb-0 text-end fw-bold text-dark">Registered</dd>
-                    <dt class="col-5 text-muted fw-normal small">Commercial register</dt>
-                    <dd class="col-7 mb-0 text-end fw-bold text-dark">CR-123456-2020</dd>
-                    <dt class="col-5 text-muted fw-normal small">Tax card</dt>
-                    <dd class="col-7 mb-0 text-end fw-bold text-dark">TC-7891011-EG</dd>
+                    <dt class="col-5 text-muted fw-normal small">{{ __('startup.legal_status') }}</dt>
+                    <dd class="col-7 mb-0 text-end fw-bold text-dark">{{ __('startup.registered') }}</dd>
+                    <dt class="col-5 text-muted fw-normal small">{{ __('startup.commercial_register') }}</dt>
+                    <dd class="col-7 mb-0 text-end fw-bold text-dark"><a href="#" class="fw-medium text-primary"><i class="ti ti-download me-1"></i>{{ __('startup.download') }}</a></dd>
+                    <dt class="col-5 text-muted fw-normal small">{{ __('startup.tax_card') }}</dt>
+                    <dd class="col-7 mb-0 text-end fw-bold text-dark"><a href="#" class="fw-medium text-primary"><i class="ti ti-download me-1"></i>{{ __('startup.download') }}</a></dd>
                   </dl>
                 </div>
               </div>
@@ -536,13 +536,13 @@
             <hr class="my-4" />
             <div>
               <h6 class="mb-3 fw-bold d-flex align-items-center gap-2">
-                <i class="ti ti-presentation text-info"></i>Pitch deck and video
+                <i class="ti ti-presentation text-info"></i>{{ __('startup.pitch_deck_and_video') }}
               </h6>
               <div class="row g-3">
                 <div class="col-12 col-md-6">
                   <a href="#" class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-between">
                     <span class="d-flex align-items-center gap-2">
-                      <i class="ti ti-slideshow"></i>Pitch deck file
+                      <i class="ti ti-slideshow"></i>{{ __('startup.pitch_deck_file') }}
                     </span>
                     <i class="ti ti-download"></i>
                   </a>
@@ -550,7 +550,7 @@
                 <div class="col-12 col-md-6">
                   <a href="#" class="btn btn-outline-info w-100 d-flex align-items-center justify-content-between">
                     <span class="d-flex align-items-center gap-2">
-                      <i class="ti ti-video"></i>Pitch video
+                      <i class="ti ti-video"></i>{{ __('startup.pitch_video') }}
                     </span>
                     <i class="ti ti-play-circle"></i>
                   </a>
@@ -566,12 +566,12 @@
           <div class="card-header d-flex justify-content-between align-items-center">
             <div>
               <h5 class="card-title mb-0 d-flex align-items-center gap-2">
-                <i class="ti ti-users-group text-primary"></i>Team
+                <i class="ti ti-users-group text-primary"></i>{{ __('startup.team_tab') }}
               </h5>
-              <small class="text-muted">Leader, founders, employees</small>
+              <small class="text-muted">{{ __('startup.team_section_subtitle') }}</small>
             </div>
             <span class="badge bg-label-info">
-              <i class="ti ti-users me-1"></i>Team size: 8
+              <i class="ti ti-users me-1"></i>{{ __('startup.team_size_badge', ['count' => 8]) }}
             </span>
           </div>
           <div class="card-body">
@@ -580,7 +580,7 @@
                 <div class="card card-body border h-100 shadow-sm"
                   style="background: linear-gradient(135deg, rgba(88, 86, 214, 0.08) 0%, transparent 100%);">
                   <h6 class="mb-3 fw-bold d-flex align-items-center gap-2">
-                    <i class="ti ti-crown text-warning"></i>Startup leader
+                    <i class="ti ti-crown text-warning"></i>{{ __('startup.startup_leader') }}
                   </h6>
                   <dl class="row mb-0 gy-3">
                     <dt class="col-5 text-secondary fw-normal small">ID</dt>
@@ -600,27 +600,27 @@
               <div class="col-12 col-lg-8">
                 <div class="card card-body border h-100 shadow-sm">
                   <h6 class="mb-3 fw-bold d-flex align-items-center gap-2">
-                    <i class="ti ti-users text-info"></i>Founders
+                    <i class="ti ti-users text-info"></i>{{ __('startup.founders') }}
                   </h6>
                   <div class="table-responsive">
                     <table class="table table-sm mb-0 align-middle">
                       <thead class="table-light">
                         <tr>
-                          <th class="fw-bold text-muted"><i class="ti ti-user me-1"></i>Name</th>
-                          <th class="fw-bold text-muted"><i class="ti ti-mail me-1"></i>Email</th>
-                          <th class="fw-bold text-muted text-end"><i class="ti ti-link me-1"></i>LinkedIn</th>
+                          <th class="fw-bold text-muted"><i class="ti ti-user me-1"></i>{{ __('startup.name') }}</th>
+                          <th class="fw-bold text-muted"><i class="ti ti-mail me-1"></i>{{ __('startup.email') }}</th>
+                          <th class="fw-bold text-muted text-end"><i class="ti ti-link me-1"></i>{{ __('startup.linkedin') }}</th>
                         </tr>
                       </thead>
                       <tbody>
                         <tr class="border-top">
                           <td class="fw-medium">Omar Hassan</td>
                           <td>omar@example.com</td>
-                          <td class="text-end"><a href="#" class="fw-medium text-primary">View profile</a></td>
+                          <td class="text-end"><a href="#" class="fw-medium text-primary">{{ __('startup.linkedin_view_profile') }}</a></td>
                         </tr>
                         <tr>
                           <td class="fw-medium">Sara Ali</td>
                           <td>sara@example.com</td>
-                          <td class="text-end"><a href="#" class="fw-medium text-primary">View profile</a></td>
+                          <td class="text-end"><a href="#" class="fw-medium text-primary">{{ __('startup.linkedin_view_profile') }}</a></td>
                         </tr>
                       </tbody>
                     </table>
@@ -632,21 +632,21 @@
             <div class="card card-body border shadow-sm mt-6">
               <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="card-title mb-0 fw-bold d-flex align-items-center gap-2">
-                  <i class="ti ti-briefcase text-success"></i>Employees
+                  <i class="ti ti-briefcase text-success"></i>{{ __('startup.Employees') }}
                 </h5>
                 <span class="badge bg-label-secondary">
-                  <i class="ti ti-users me-1"></i>Count 8
+                  <i class="ti ti-users me-1"></i>{{ __('startup.count_label', ['value' => 8]) }}
                 </span>
               </div>
               <div class="table-responsive">
                 <table class="table table-sm mb-0">
                   <thead class="table-light">
                     <tr>
-                      <th class="fw-bold text-muted"><i class="ti ti-user me-1"></i>Full name</th>
-                      <th class="fw-bold text-muted"><i class="ti ti-briefcase me-1"></i>Job title</th>
-                      <th class="fw-bold text-muted"><i class="ti ti-gender-male me-1"></i>Gender</th>
-                      <th class="fw-bold text-muted"><i class="ti ti-clock me-1"></i>Employment type</th>
-                      <th class="fw-bold text-muted"><i class="ti ti-calendar me-1"></i>Start date</th>
+                      <th class="fw-bold text-muted"><i class="ti ti-user me-1"></i>{{ __('startup.full_name') }}</th>
+                      <th class="fw-bold text-muted"><i class="ti ti-briefcase me-1"></i>{{ __('startup.job_title') }}</th>
+                      <th class="fw-bold text-muted"><i class="ti ti-gender-male me-1"></i>{{ __('startup.gender') }}</th>
+                      <th class="fw-bold text-muted"><i class="ti ti-clock me-1"></i>{{ __('startup.employment_type') }}</th>
+                      <th class="fw-bold text-muted"><i class="ti ti-calendar me-1"></i>{{ __('startup.start_date_label') }}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -678,9 +678,9 @@
           <div class="card-header">
             <div>
               <h5 class="card-title mb-0 d-flex align-items-center gap-2">
-                <i class="ti ti-chart-pie text-success"></i>Ownership and investors
+                <i class="ti ti-chart-pie text-success"></i>{{ __('startup.ownership_and_investors') }}
               </h5>
-              <small class="text-muted">Shareholders and funding information</small>
+              <small class="text-muted">{{ __('startup.shareholders_funding_note') }}</small>
             </div>
           </div>
           <div class="card-body">
@@ -688,31 +688,31 @@
               <div class="col-12 col-xl-6">
                 <div class="card card-body border shadow-sm h-100">
                   <h6 class="mb-3 fw-bold d-flex align-items-center gap-2">
-                    <i class="ti ti-users text-primary"></i>Shareholders
+                    <i class="ti ti-users text-primary"></i>{{ __('startup.shareholders') }}
                   </h6>
                   <div class="table-responsive">
                     <table class="table table-sm mb-0 align-middle">
                       <thead class="table-light">
                         <tr>
-                          <th class="fw-bold text-muted"><i class="ti ti-user me-1"></i>Name</th>
-                          <th class="fw-bold text-muted"><i class="ti ti-briefcase me-1"></i>Role</th>
-                          <th class="fw-bold text-muted text-end"><i class="ti ti-percent me-1"></i>Ownership</th>
+                          <th class="fw-bold text-muted"><i class="ti ti-user me-1"></i>{{ __('startup.name') }}</th>
+                          <th class="fw-bold text-muted"><i class="ti ti-briefcase me-1"></i>{{ __('startup.role') }}</th>
+                          <th class="fw-bold text-muted text-end"><i class="ti ti-percent me-1"></i>{{ __('startup.ownership') }}</th>
                         </tr>
                       </thead>
                       <tbody>
                         <tr class="border-top">
                           <td class="fw-medium">Omar Hassan</td>
-                          <td><span class="badge bg-label-primary">Founder</span></td>
+                          <td><span class="badge bg-label-primary">{{ __('startup.founder_role') }}</span></td>
                           <td class="text-end fw-bold text-primary">40%</td>
                         </tr>
                         <tr>
                           <td class="fw-medium">Sara Ali</td>
-                          <td><span class="badge bg-label-info">Co-founder</span></td>
+                          <td><span class="badge bg-label-info">{{ __('startup.cofounder_role') }}</span></td>
                           <td class="text-end fw-bold text-info">30%</td>
                         </tr>
                         <tr>
                           <td class="fw-medium">ABC Ventures</td>
-                          <td><span class="badge bg-label-success">Investor</span></td>
+                          <td><span class="badge bg-label-success">{{ __('startup.investor_role') }}</span></td>
                           <td class="text-end fw-bold text-success">20%</td>
                         </tr>
                       </tbody>
@@ -723,24 +723,24 @@
               <div class="col-12 col-xl-6">
                 <div class="card card-body border shadow-sm h-100">
                   <h6 class="mb-3 fw-bold d-flex align-items-center gap-2">
-                    <i class="ti ti-coin text-warning"></i>Investors
+                    <i class="ti ti-coin text-warning"></i>{{ __('startup.investors') }}
                   </h6>
                   <div class="table-responsive">
                     <table class="table table-sm mb-0 align-middle">
                       <thead class="table-light">
                         <tr>
-                          <th class="fw-bold text-muted"><i class="ti ti-building me-1"></i>Name</th>
-                          <th class="fw-bold text-muted text-end"><i class="ti ti-tag me-1"></i>Type</th>
+                          <th class="fw-bold text-muted"><i class="ti ti-building me-1"></i>{{ __('startup.name') }}</th>
+                          <th class="fw-bold text-muted text-end"><i class="ti ti-tag me-1"></i>{{ __('startup.type') }}</th>
                         </tr>
                       </thead>
                       <tbody>
                         <tr class="border-top">
                           <td class="fw-medium">ABC Ventures</td>
-                          <td class="text-end"><span class="badge bg-label-warning">VC</span></td>
+                          <td class="text-end"><span class="badge bg-label-warning">{{ __('startup.vc') }}</span></td>
                         </tr>
                         <tr>
                           <td class="fw-medium">XYZ Angels Syndicate</td>
-                          <td class="text-end"><span class="badge bg-label-secondary">Angel group</span></td>
+                          <td class="text-end"><span class="badge bg-label-secondary">{{ __('startup.angel_group') }}</span></td>
                         </tr>
                       </tbody>
                     </table>
@@ -757,9 +757,9 @@
         <div id="program-screening" class="card mb-6 shadow-sm">
           <div class="card-header">
             <h5 class="card-title mb-0 d-flex align-items-center gap-2">
-              <i class="ti ti-search text-primary"></i>Screening
+              <i class="ti ti-search text-primary"></i>{{ __('startup.screening_tab') }}
             </h5>
-            <small class="text-muted">Initial and final evaluations</small>
+            <small class="text-muted">{{ __('startup.screening_note') }}</small>
           </div>
           <div class="card-body">
             <div class="row g-4">
@@ -768,40 +768,38 @@
                   <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
                     <div>
                       <h5 class="card-title mb-0 fw-bold d-flex align-items-center gap-2">
-                        <i class="ti ti-circle-check text-info"></i>Initial screening
+                        <i class="ti ti-circle-check text-info"></i>{{ __('startup.initial_screening') }}
                       </h5>
-                      <small class="text-muted">Screening committee evaluation</small>
+                      <small class="text-muted">{{ __('startup.committee_evaluation') }}</small>
                     </div>
-                    <span class="badge bg-label-info">
-                      <i class="ti ti-tag me-1"></i>Step STP-001
-                    </span>
+                      <span class="badge bg-label-info">
+                      <i class="ti ti-tag me-1"></i>{{ __('startup.step_with_id', ['id' => 'STP-001']) }}
+                      </span>
                   </div>
                   <div class="row g-3 mb-4">
                     <div class="col">
                       <div class="p-3 rounded bg-light-subtle border h-100">
-                        <small class="text-muted d-block fw-semibold mb-1"><i class="ti ti-star me-1"></i>Overall
-                          score</small>
+                        <small class="text-muted d-block fw-semibold mb-1"><i class="ti ti-star me-1"></i>{{ __('startup.overall_score') }}</small>
                         <h4 class="mb-0 text-primary fw-bold">4.3 <small class="text-muted fw-normal">/ 5</small></h4>
                       </div>
                     </div>
                     <div class="col">
                       <div class="p-3 rounded bg-light-subtle border h-100">
-                        <small class="text-muted d-block fw-semibold mb-1"><i
-                            class="ti ti-calendar me-1"></i>Date</small>
+                        <small class="text-muted d-block fw-semibold mb-1"><i class="ti ti-calendar me-1"></i>{{ __('startup.date') }}</small>
                         <p class="mb-0 fw-bold text-dark">Jan 2025</p>
                       </div>
                     </div>
                   </div>
                   <h6 class="mt-4 mb-3 fw-bold d-flex align-items-center gap-2">
-                    <i class="ti ti-checklist text-success"></i>Criteria
+                    <i class="ti ti-checklist text-success"></i>{{ __('startup.criteria') }}
                   </h6>
                   <div class="table-responsive">
                     <table class="table table-sm mb-0 align-middle">
                       <thead class="table-light">
                         <tr>
-                          <th class="fw-bold text-muted"><i class="ti ti-ruler-measure me-1"></i>Criterion</th>
-                          <th class="fw-bold text-muted text-center"><i class="ti ti-percent me-1"></i>Weight</th>
-                          <th class="fw-bold text-muted text-end"><i class="ti ti-star me-1"></i>Score</th>
+                          <th class="fw-bold text-muted"><i class="ti ti-ruler-measure me-1"></i>{{ __('startup.criterion') }}</th>
+                          <th class="fw-bold text-muted text-center"><i class="ti ti-percent me-1"></i>{{ __('startup.weight') }}</th>
+                          <th class="fw-bold text-muted text-end"><i class="ti ti-star me-1"></i>{{ __('startup.score') }}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -824,16 +822,16 @@
                     </table>
                   </div>
                   <h6 class="mt-4 mb-3 fw-bold d-flex align-items-center gap-2">
-                    <i class="ti ti-user-check text-warning"></i>Judges evaluations
+                    <i class="ti ti-user-check text-warning"></i>{{ __('startup.judges_evaluations') }}
                   </h6>
                   <div class="table-responsive">
                     <table class="table table-sm mb-0 align-middle">
                       <thead class="table-light">
                         <tr>
-                          <th class="fw-bold text-muted"><i class="ti ti-user me-1"></i>Judge</th>
-                          <th class="fw-bold text-muted"><i class="ti ti-hash me-1"></i>ID</th>
-                          <th class="fw-bold text-muted text-center"><i class="ti ti-star me-1"></i>Score</th>
-                          <th class="fw-bold text-muted"><i class="ti ti-message me-1"></i>Comments</th>
+                          <th class="fw-bold text-muted"><i class="ti ti-user me-1"></i>{{ __('startup.judge') }}</th>
+                          <th class="fw-bold text-muted"><i class="ti ti-hash me-1"></i>{{ __('startup.id') }}</th>
+                          <th class="fw-bold text-muted text-center"><i class="ti ti-star me-1"></i>{{ __('startup.score') }}</th>
+                          <th class="fw-bold text-muted"><i class="ti ti-message me-1"></i>{{ __('startup.comments') }}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -859,12 +857,12 @@
                   <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
                     <div>
                       <h5 class="card-title mb-0 fw-bold d-flex align-items-center gap-2">
-                        <i class="ti ti-award text-success"></i>Final screening
+                        <i class="ti ti-award text-success"></i>{{ __('startup.final_screening') }}
                       </h5>
-                      <small class="text-muted">Investment committee evaluation</small>
+                      <small class="text-muted">{{ __('startup.investment_committee_evaluation') }}</small>
                     </div>
                     <span class="badge bg-label-success">
-                      <i class="ti ti-tag me-1"></i>Step STP-010
+                      <i class="ti ti-tag me-1"></i>{{ __('startup.step_with_id', ['id' => 'STP-010']) }}
                     </span>
                   </div>
                   <div class="row g-3 mb-4">
@@ -884,15 +882,15 @@
                     </div>
                   </div>
                   <h6 class="mt-4 mb-3 fw-bold d-flex align-items-center gap-2">
-                    <i class="ti ti-checklist text-success"></i>Criteria
+                    <i class="ti ti-checklist text-success"></i>{{ __('startup.criteria') }}
                   </h6>
                   <div class="table-responsive">
                     <table class="table table-sm mb-0 align-middle">
                       <thead class="table-light">
                         <tr>
-                          <th class="fw-bold text-muted"><i class="ti ti-ruler-measure me-1"></i>Criterion</th>
-                          <th class="fw-bold text-muted text-center"><i class="ti ti-percent me-1"></i>Weight</th>
-                          <th class="fw-bold text-muted text-end"><i class="ti ti-star me-1"></i>Score</th>
+                          <th class="fw-bold text-muted"><i class="ti ti-ruler-measure me-1"></i>{{ __('startup.criterion') }}</th>
+                          <th class="fw-bold text-muted text-center"><i class="ti ti-percent me-1"></i>{{ __('startup.weight') }}</th>
+                          <th class="fw-bold text-muted text-end"><i class="ti ti-star me-1"></i>{{ __('startup.score') }}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -910,16 +908,16 @@
                     </table>
                   </div>
                   <h6 class="mt-4 mb-3 fw-bold d-flex align-items-center gap-2">
-                    <i class="ti ti-user-check text-warning"></i>Judges evaluations
+                    <i class="ti ti-user-check text-warning"></i>{{ __('startup.judges_evaluations') }}
                   </h6>
                   <div class="table-responsive">
                     <table class="table table-sm mb-0 align-middle">
                       <thead class="table-light">
                         <tr>
-                          <th class="fw-bold text-muted"><i class="ti ti-user me-1"></i>Judge</th>
-                          <th class="fw-bold text-muted"><i class="ti ti-hash me-1"></i>ID</th>
-                          <th class="fw-bold text-muted text-center"><i class="ti ti-star me-1"></i>Score</th>
-                          <th class="fw-bold text-muted"><i class="ti ti-message me-1"></i>Comments</th>
+                          <th class="fw-bold text-muted"><i class="ti ti-user me-1"></i>{{ __('startup.judge') }}</th>
+                          <th class="fw-bold text-muted"><i class="ti ti-hash me-1"></i>{{ __('startup.id') }}</th>
+                          <th class="fw-bold text-muted text-center"><i class="ti ti-star me-1"></i>{{ __('startup.score') }}</th>
+                          <th class="fw-bold text-muted"><i class="ti ti-message me-1"></i>{{ __('startup.comments') }}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -946,22 +944,22 @@
             <h5 class="card-title mb-0 d-flex align-items-center gap-2">
               <i class="ti ti-school text-info"></i>Training
             </h5>
-            <small class="text-muted">Sessions attended during the program</small>
+            <small class="text-muted">{{ __('startup.sessions_attended_note') }}</small>
           </div>
           <div class="card-body">
             <div class="table-responsive">
               <table class="table table-sm mb-0 align-middle">
                 <thead class="table-light">
                   <tr>
-                    <th class="fw-bold text-muted"><i class="ti ti-hash me-1"></i>Session ID</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-file-text me-1"></i>Title</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-hash me-1"></i>Course ID</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-book me-1"></i>Course name</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-calendar me-1"></i>Date</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-steps me-1"></i>Step</th>
-                    <th class="fw-bold text-muted text-center"><i class="ti ti-clock me-1"></i>Duration (h)</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-flag me-1"></i>Program Step</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-users me-1"></i>Attendance</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-hash me-1"></i>{{ __('startup.session_id') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-file-text me-1"></i>{{ __('startup.title') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-hash me-1"></i>{{ __('startup.course_id') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-book me-1"></i>{{ __('startup.course_name') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-calendar me-1"></i>{{ __('startup.date') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-steps me-1"></i>{{ __('startup.step') }}</th>
+                    <th class="fw-bold text-muted text-center"><i class="ti ti-clock me-1"></i>{{ __('startup.duration_hours') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-flag me-1"></i>{{ __('startup.program_step') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-users me-1"></i>{{ __('startup.attendance') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -974,7 +972,7 @@
                     <td><span class="badge bg-label-info">Bootcamp</span></td>
                     <td class="text-center fw-bold">3</td>
                     <td>Training week 1</td>
-                    <td><span class="badge bg-label-success">Founder + 2</span></td>
+                    <td><span class="badge bg-label-success">{{ __('startup.founder_role') }} + 2</span></td>
                   </tr>
                 </tbody>
               </table>
@@ -989,24 +987,24 @@
         <div id="program-mentorship" class="card mb-6 shadow-sm">
           <div class="card-header">
             <h5 class="card-title mb-0 d-flex align-items-center gap-2">
-              <i class="ti ti-message-circle text-success"></i>Mentorship
+              <i class="ti ti-message-circle text-success"></i>{{ __('startup.mentorship_tab') }}
             </h5>
-            <small class="text-muted">Mentor interactions and feedback</small>
+            <small class="text-muted">{{ __('startup.mentor_interactions_note') }}</small>
           </div>
           <div class="card-body">
             <div class="table-responsive">
               <table class="table table-sm mb-0 align-middle">
                 <thead class="table-light">
                   <tr>
-                    <th class="fw-bold text-muted"><i class="ti ti-user me-1"></i>Mentor name</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-hash me-1"></i>Mentor ID</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-flag me-1"></i>Step name</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-hash me-1"></i>Step ID</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-calendar me-1"></i>Date</th>
-                    <th class="fw-bold text-muted text-center"><i class="ti ti-clock me-1"></i>Duration (h)</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-user-check me-1"></i>Founder attended</th>
-                    <th class="fw-bold text-muted text-center"><i class="ti ti-star me-1"></i>Rating</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-message me-1"></i>Comments</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-user me-1"></i>{{ __('startup.mentor_name') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-hash me-1"></i>{{ __('startup.mentor_id') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-flag me-1"></i>{{ __('startup.step_name') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-hash me-1"></i>{{ __('startup.step_id') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-calendar me-1"></i>{{ __('startup.date') }}</th>
+                    <th class="fw-bold text-muted text-center"><i class="ti ti-clock me-1"></i>{{ __('startup.duration_hours') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-user-check me-1"></i>{{ __('startup.founder_attended') }}</th>
+                    <th class="fw-bold text-muted text-center"><i class="ti ti-star me-1"></i>{{ __('startup.rating') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-message me-1"></i>{{ __('startup.comments') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1034,7 +1032,7 @@
         <div id="program-milestones" class="card mb-6 shadow-sm">
           <div class="card-header">
             <h5 class="card-title mb-0 d-flex align-items-center gap-2">
-              <i class="ti ti-flag-check text-warning"></i>Milestones and deliverables
+              <i class="ti ti-flag-check text-warning"></i>{{ __('startup.milestones_and_deliverables') }}
             </h5>
             <small class="text-muted">Planned progress versus completion</small>
           </div>
@@ -1043,11 +1041,11 @@
               <table class="table table-sm mb-0 align-middle">
                 <thead class="table-light">
                   <tr>
-                    <th class="fw-bold text-muted"><i class="ti ti-flag me-1"></i>Milestone title</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-file-text me-1"></i>Description</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-calendar-due me-1"></i>Due date</th>
-                    <th class="fw-bold text-muted text-center"><i class="ti ti-progress me-1"></i>Completion</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-paperclip me-1"></i>Deliverables</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-flag me-1"></i>{{ __('startup.milestone_title_label') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-file-text me-1"></i>{{ __('startup.description') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-calendar-due me-1"></i>{{ __('startup.due_date') }}</th>
+                    <th class="fw-bold text-muted text-center"><i class="ti ti-progress me-1"></i>{{ __('startup.completion') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-paperclip me-1"></i>{{ __('startup.deliverables') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1086,25 +1084,25 @@
         <div id="program-tasks" class="card mb-6 shadow-sm">
           <div class="card-header">
             <h5 class="card-title mb-0 d-flex align-items-center gap-2">
-              <i class="ti ti-checklist text-primary"></i>Program tasks
+              <i class="ti ti-checklist text-primary"></i>{{ __('startup.program_tasks') }}
             </h5>
-            <small class="text-muted">Tasks assigned to the startup</small>
+            <small class="text-muted">{{ __('startup.tasks_assigned_note') }}</small>
           </div>
           <div class="card-body">
             <div class="table-responsive">
               <table class="table table-sm mb-0 align-middle">
                 <thead class="table-light">
                   <tr>
-                    <th class="fw-bold text-muted"><i class="ti ti-file-text me-1"></i>Task title</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-hash me-1"></i>Task ID</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-hash me-1"></i>Session ID</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-file-text me-1"></i>Session title</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-file-text me-1"></i>Description</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-calendar-due me-1"></i>Due date</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-calendar-check me-1"></i>Completion</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-user me-1"></i>Mentor</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-user-circle me-1"></i>Created by</th>
-                    <th class="fw-bold text-muted text-center"><i class="ti ti-badge me-1"></i>Status</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-file-text me-1"></i>{{ __('startup.task_title') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-hash me-1"></i>{{ __('startup.task_id') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-hash me-1"></i>{{ __('startup.session_id') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-file-text me-1"></i>{{ __('startup.session_title') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-file-text me-1"></i>{{ __('startup.description') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-calendar-due me-1"></i>{{ __('startup.due_date_label') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-calendar-check me-1"></i>{{ __('startup.completion_date_label') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-user me-1"></i>{{ __('startup.mentor') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-user-circle me-1"></i>{{ __('startup.created_by') }}</th>
+                    <th class="fw-bold text-muted text-center"><i class="ti ti-badge me-1"></i>{{ __('startup.status') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1134,21 +1132,21 @@
         <div id="program-quizzes" class="card mb-6 shadow-sm">
           <div class="card-header">
             <h5 class="card-title mb-0 d-flex align-items-center gap-2">
-              <i class="ti ti-help text-info"></i>Quizzes
+              <i class="ti ti-help text-info"></i>{{ __('startup.quizzes_tab') }}
             </h5>
-            <small class="text-muted">Knowledge checks completed by the startup</small>
+            <small class="text-muted">{{ __('startup.knowledge_checks_note') }}</small>
           </div>
           <div class="card-body">
             <div class="table-responsive">
               <table class="table table-sm mb-0 align-middle">
                 <thead class="table-light">
                   <tr>
-                    <th class="fw-bold text-muted"><i class="ti ti-hash me-1"></i>Quiz ID</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-file-text me-1"></i>Quiz title</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-calendar me-1"></i>Date completed</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-user me-1"></i>Founder</th>
-                    <th class="fw-bold text-muted text-center"><i class="ti ti-percent me-1"></i>Score</th>
-                    <th class="fw-bold text-muted text-center"><i class="ti ti-badge me-1"></i>Status</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-hash me-1"></i>{{ __('startup.quiz_id') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-file-text me-1"></i>{{ __('startup.quiz_title') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-calendar me-1"></i>{{ __('startup.date_completed') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-user me-1"></i>{{ __('startup.founder') }}</th>
+                    <th class="fw-bold text-muted text-center"><i class="ti ti-percent me-1"></i>{{ __('startup.score') }}</th>
+                    <th class="fw-bold text-muted text-center"><i class="ti ti-badge me-1"></i>{{ __('startup.status') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1159,7 +1157,7 @@
                     <td>Omar Hassan</td>
                     <td class="text-center"><span class="badge bg-label-warning">90%</span></td>
                     <td class="text-center"><span class="badge bg-label-success">
-                        <i class="ti ti-check me-1"></i>Passed
+                        <i class="ti ti-check me-1"></i>{{ __('startup.passed') }}
                       </span></td>
                   </tr>
                 </tbody>
@@ -1174,20 +1172,20 @@
         <div id="program-surveys" class="card mb-6 shadow-sm">
           <div class="card-header">
             <h5 class="card-title mb-0 d-flex align-items-center gap-2">
-              <i class="ti ti-mood-smile text-warning"></i>Surveys
+              <i class="ti ti-mood-smile text-warning"></i>{{ __('startup.surveys_tab') }}
             </h5>
-            <small class="text-muted">Feedback during the program</small>
+            <small class="text-muted">{{ __('startup.feedback_note') }}</small>
           </div>
           <div class="card-body">
             <div class="table-responsive">
               <table class="table table-sm mb-0 align-middle">
                 <thead class="table-light">
                   <tr>
-                    <th class="fw-bold text-muted"><i class="ti ti-hash me-1"></i>Survey ID</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-file-text me-1"></i>Survey title</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-flag me-1"></i>Program step</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-calendar me-1"></i>Date completed</th>
-                    <th class="fw-bold text-muted text-center"><i class="ti ti-file me-1"></i>Answers</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-hash me-1"></i>{{ __('startup.survey_id') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-file-text me-1"></i>{{ __('startup.survey_title') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-flag me-1"></i>{{ __('startup.program_step') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-calendar me-1"></i>{{ __('startup.date_completed') }}</th>
+                    <th class="fw-bold text-muted text-center"><i class="ti ti-file me-1"></i>{{ __('startup.answers') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1212,18 +1210,18 @@
         <div id="program-services" class="card mb-6 shadow-sm">
           <div class="card-header">
             <h5 class="card-title mb-0 d-flex align-items-center gap-2">
-              <i class="ti ti-gift text-success"></i>Services provided
+              <i class="ti ti-gift text-success"></i>{{ __('startup.services_provided') }}
             </h5>
-            <small class="text-muted">Perks and services delivered</small>
+            <small class="text-muted">{{ __('startup.perks_note') }}</small>
           </div>
           <div class="card-body">
             <div class="table-responsive">
               <table class="table table-sm mb-0 align-middle">
                 <thead class="table-light">
                   <tr>
-                    <th class="fw-bold text-muted"><i class="ti ti-gift me-1"></i>Service name</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-hash me-1"></i>Service ID</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-file-text me-1"></i>Description</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-gift me-1"></i>{{ __('startup.service_name') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-hash me-1"></i>{{ __('startup.service_id') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-file-text me-1"></i>{{ __('startup.description') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1252,9 +1250,9 @@
           <div class="card-header d-flex align-items-center justify-content-between">
             <div>
               <h5 class="card-title mb-0 d-flex align-items-center gap-2">
-                <i class="ti ti-file-text text-success"></i>Submitted forms
+                <i class="ti ti-file-text text-success"></i>{{ __('startup.submitted_forms') }}
               </h5>
-              <small class="text-muted">Custom forms filled during the program</small>
+              <small class="text-muted">{{ __('startup.custom_forms_note') }}</small>
             </div>
           </div>
           <div class="card-body">
@@ -1262,12 +1260,12 @@
               <table class="table table-sm mb-0 align-middle">
                 <thead class="table-light">
                   <tr>
-                    <th class="fw-bold text-muted"><i class="ti ti-file-text me-1"></i>Form title</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-hash me-1"></i>Form ID</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-flag me-1"></i>Custom form step</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-hash me-1"></i>Step ID</th>
-                    <th class="fw-bold text-muted"><i class="ti ti-calendar me-1"></i>Submission date</th>
-                    <th class="fw-bold text-muted text-center"><i class="ti ti-file me-1"></i>Details</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-file-text me-1"></i>{{ __('startup.form_title') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-hash me-1"></i>{{ __('startup.form_id') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-flag me-1"></i>{{ __('startup.custom_form_step') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-hash me-1"></i>{{ __('startup.step_id') }}</th>
+                    <th class="fw-bold text-muted"><i class="ti ti-calendar me-1"></i>{{ __('startup.submission_date') }}</th>
+                    <th class="fw-bold text-muted text-center"><i class="ti ti-file me-1"></i>{{ __('startup.details') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1280,7 +1278,7 @@
                     <td class="text-center">
                       <a type="button" class="btn btn-sm btn-link px-0 text-primary" data-toggle="form-details"
                         data-target="#form-details-1">
-                        <i class="ti ti-eye me-1"></i>View inputs
+                        <i class="ti ti-eye me-1"></i>{{ __('startup.view_inputs') }}
                       </a>
                     </td>
                   </tr>
@@ -1291,41 +1289,41 @@
             <div id="form-details-1" class="border rounded mt-3 p-4 d-none mx-3 mb-3">
               <div class="d-flex justify-content-between align-items-center mb-3">
                 <h6 class="mb-0 fw-bold d-flex align-items-center gap-2">
-                  <i class="ti ti-list-details text-primary"></i>Form inputs for Startup profiling form
+                  <i class="ti ti-list-details text-primary"></i>{{ __('startup.form_inputs_for', ['form' => 'Startup profiling form']) }}
                 </h6>
                 <a type="button" class="btn btn-sm btn-link px-0 text-muted" data-toggle="form-details"
                   data-target="#form-details-1">
-                  <i class="ti ti-x me-1"></i>Hide
+                  <i class="ti ti-x me-1"></i>{{ __('startup.hide') }}
                 </a>
               </div>
               <div class="table-responsive">
                 <table class="table table-sm mb-0 align-middle">
                   <thead class="table-light">
                     <tr>
-                      <th class="fw-bold text-muted"><i class="ti ti-field me-1"></i>Field name</th>
-                      <th class="fw-bold text-muted"><i class="ti ti-database me-1"></i>Field type</th>
-                      <th class="fw-bold text-muted"><i class="ti ti-file-text me-1"></i>Submitted value</th>
-                      <th class="fw-bold text-muted text-center"><i class="ti ti-paperclip me-1"></i>Attachment</th>
+                      <th class="fw-bold text-muted"><i class="ti ti-field me-1"></i>{{ __('startup.field_name') }}</th>
+                      <th class="fw-bold text-muted"><i class="ti ti-database me-1"></i>{{ __('startup.field_type') }}</th>
+                      <th class="fw-bold text-muted"><i class="ti ti-file-text me-1"></i>{{ __('startup.submitted_value') }}</th>
+                      <th class="fw-bold text-muted text-center"><i class="ti ti-paperclip me-1"></i>{{ __('startup.attachment') }}</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr class="border-top">
                       <td class="fw-medium">Company description</td>
-                      <td><span class="badge bg-label-info">Text</span></td>
+                      <td><span class="badge bg-label-info">{{ __('startup.text') }}</span></td>
                       <td class="small">AI powered payment orchestration platform for SMEs.</td>
                       <td class="text-center">&mdash;</td>
                     </tr>
                     <tr>
                       <td class="fw-medium">Pitch deck file</td>
-                      <td><span class="badge bg-label-warning">File</span></td>
-                      <td class="small"><span class="badge bg-label-success">Uploaded</span></td>
+                      <td><span class="badge bg-label-warning">{{ __('startup.file') }}</span></td>
+                      <td class="small"><span class="badge bg-label-success">{{ __('startup.uploaded') }}</span></td>
                       <td class="text-center"><a href="#" class="fw-medium text-primary">
-                          <i class="ti ti-download me-1"></i>Download
+                          <i class="ti ti-download me-1"></i>{{ __('startup.download') }}
                         </a></td>
                     </tr>
                     <tr>
                       <td class="fw-medium">Industry</td>
-                      <td><span class="badge bg-label-info">Selection</span></td>
+                      <td><span class="badge bg-label-info">{{ __('startup.selection') }}</span></td>
                       <td class="small">Financial services</td>
                       <td class="text-center">&mdash;</td>
                     </tr>
@@ -1340,7 +1338,7 @@
 
     <div class="alert alert-info d-flex align-items-center">
       <i class="ti ti-info-circle me-2"></i>
-      “This is a snapshot; it reflects the startup’s details and performance at the time of program completion.”
+      {{ __('startup.snapshot_note') }}
     </div>
   </div>
 </div>
@@ -1368,7 +1366,7 @@
     const button = document.getElementById("export-pdf-button");
 
 
-    button.innerHTML = "Generating PDF...";
+    button.innerHTML = "{{ __('startup.generating_pdf') }}";
     button.disabled = true; // optional
 
     try {
@@ -1402,7 +1400,7 @@
     }
 
     // Restore button text
-    button.innerHTML = `<i class="ti ti-file-type-pdf me-1"></i>Export PDF`;
+    button.innerHTML = `<i class="ti ti-file-type-pdf me-1"></i>{{ __('startup.export_pdf') }}`;
     button.disabled = false; // optional
   }
 
