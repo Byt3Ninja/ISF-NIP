@@ -121,8 +121,6 @@
                     "organizationmanager"
                 ]
             },
-
-            
             {
                 "name": "whatsapp.session.status",
                 "description": "WhatsApp Sessions Status",
@@ -2071,8 +2069,7 @@
                     "admin"
                 ]
             },
-
-                        {
+            {
                 "name": "users.companies_export",
                 "description": "List Users",
                 "guard_name": "web",
@@ -2081,8 +2078,6 @@
                     "admin"
                 ]
             },
-
-            
             {
                 "name": "users.create",
                 "description": "Create User Form",
@@ -3010,7 +3005,6 @@
                 "default_for": [
                     "admin",
                     "organizationmanager"
-                   
                 ]
             },
             {
@@ -3021,7 +3015,6 @@
                 "default_for": [
                     "admin",
                     "organizationmanager"
-                   
                 ]
             },
             {
@@ -3033,7 +3026,6 @@
                     "admin",
                     "organizationmanager",
                     "registered"
-                   
                 ]
             },
             {
@@ -3045,7 +3037,6 @@
                     "admin",
                     "organizationmanager",
                     "registered"
-                   
                 ]
             },
             {
@@ -3057,7 +3048,6 @@
                     "admin",
                     "organizationmanager",
                     "registered"
-                   
                 ]
             },
             {
@@ -3069,7 +3059,6 @@
                     "admin",
                     "organizationmanager",
                     "registered"
-                   
                 ]
             },
             {
@@ -3081,7 +3070,6 @@
                     "admin",
                     "organizationmanager",
                     "registered"
-                   
                 ]
             },
             {
@@ -3093,7 +3081,6 @@
                     "admin",
                     "organizationmanager",
                     "registered"
-                   
                 ]
             },
             {
@@ -3105,7 +3092,6 @@
                     "admin",
                     "organizationmanager",
                     "registered"
-                   
                 ]
             },
             {
@@ -3117,7 +3103,6 @@
                     "admin",
                     "organizationmanager",
                     "registered"
-                   
                 ]
             },
             {
@@ -3132,7 +3117,6 @@
                     "mentor"
                 ]
             }
-
         ]
     },
     {
@@ -4125,7 +4109,6 @@
                     "organizationmanager"
                 ]
             },
-
             {
                 "name": "user.notification_settings_update",
                 "description": "Update Own Profile Notification Settings",
@@ -4148,8 +4131,6 @@
                     "organizationmanager"
                 ]
             }
-
-            
         ]
     },
     {
@@ -4190,7 +4171,6 @@
                     "organizationmanager"
                 ]
             },
-
             {
                 "name": "mentors.add",
                 "description": "Add New Mentor",
@@ -4720,6 +4700,46 @@
             {
                 "name": "form_submission_details.index",
                 "description": "Show Form Submissions Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "forms_submissions.export.status",
+                "description": "Check Advanced Export Status",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "forms_submissions.export.generate",
+                "description": "Generate Advanced Export",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "forms_submissions.export.download",
+                "description": "Download Advanced Export",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "forms_submissions.export.progress",
+                "description": "Check Export Progress",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -6742,7 +6762,6 @@
                     "organizationmanager"
                 ]
             },
-
             {
                 "name": "mentorship.schedule_store",
                 "description": " Add Mentorship Schedule",
@@ -6753,7 +6772,6 @@
                     "organizationmanager"
                 ]
             },
-
             {
                 "name": "mentorship.schedule_update",
                 "description": " Update Mentorship Schedule",
@@ -6765,7 +6783,7 @@
                 ]
             },
             {
-            "name": "mentorship.schedule_destroy",
+                "name": "mentorship.schedule_destroy",
                 "description": " Delete Mentorship Schedule",
                 "guard_name": "web",
                 "is_core": 0,
@@ -7183,427 +7201,353 @@
         "name": "Activity Log",
         "description": null,
         "permissions": [
-        {
-            "name": "activities.index",
-            "description": "View Activity Log Page",
-            "guard_name": "web",
-            "is_core": 0,
-            "default_for": [
-                "admin",
-                "organizationmanager"
-            ]
-        },
-        {
-            "name": "activity.log",
-            "description": "Create Activity Log",
-            "guard_name": "web",
-            "is_core": 0,
-            "default_for": [
-                "admin",
-                "organizationmanager"
-            ]
-        },
-        {
-            "name": "activities.destroy",
-            "description": "Delete Activity Log",
-            "guard_name": "web",
-            "is_core": 0,
-            "default_for": [
-                "admin",
-                "organizationmanager"
-            ]
-        },
-        {
-            "name": "activities.force-logout",
-            "description": "Force Logout User",
-            "guard_name": "web",
-            "is_core": 0,
-            "default_for": [
-                "admin",
-                "organizationmanager"
-            ]
-        },
-        {
-            "name": "activities.reset-password",
-            "description": "Reset User Password",
-            "guard_name": "web",
-            "is_core": 0,
-            "default_for": [
-                "admin",
-                "organizationmanager"
-            ]
-        },
-        {
-            "name": "activities.block-ip",
-            "description": "Block IP Address",
-            "guard_name": "web",
-            "is_core": 0,
-            "default_for": [
-                "admin",
-                "organizationmanager"
-            ]
-        },
-        {
-            "name": "activities.load-more",
-            "description": "Load More Activities",
-            "guard_name": "web",
-            "is_core": 0,
-            "default_for": [
-                "admin",
-                "organizationmanager"
-            ]
-        }
-    ]
-
-
-    },
-    {
-        "name":"Notification",
-        "description":"Notification Templates",
-        "permissions":[
             {
-                "name":"notification-templates.index",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+                "name": "activities.index",
+                "description": "View Activity Log Page",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
                     "organizationmanager"
                 ]
             },
-
-                      {
-                "name":"settings.notification_update",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
-                    "admin",
-                    "organizationmanager"
-                ]
-            },
-
-
-
-                      {
-                "name":"settings.organization.smtp_update",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
-                    "organizationmanager"
-                ]
-            },
-
-                      {
-                "name":"settings.notification_view",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
-                    "admin",
-                    "organizationmanager"
-                ]
-            },
-
-
-
-            
-                        {
-                "name":"notification-templates.create",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
-                    "admin",
-                    "organizationmanager"
-                ]
-            },
-
-
-                        {
-                "name":"notification-templates.store",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
-                    "admin",
-                    "organizationmanager"
-                ]
-            },
-
-
-                        {
-                "name":"notification-templates.show",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
-                    "admin",
-                    "organizationmanager"
-                ]
-            },
-
-                                    {
-                "name":"notification-templates.edit",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
-                    "admin",
-                    "organizationmanager"
-                ]
-            },
-
-
-
-                                    {
-                "name":"notification-templates.update",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
-                    "admin",
-                    "organizationmanager"
-                ]
-            },
-
-
-
-                                    {
-                "name":"notification-templates.destroy",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
-                    "admin",
-                    "organizationmanager"
-                ]
-            },
-
-
-
-                                    {
-                "name":"notification-templates.variables",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
-                    "admin",
-                    "organizationmanager"
-                ]
-            },
-
-
-                                                {
-                "name":"notification-templates.preview",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
-                    "admin",
-                    "organizationmanager"
-                ]
-            },
-
-
-
-
-                                                {
-                "name":"notification-templates.clone",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
-                    "admin",
-                    "organizationmanager"
-                ]
-            },
-
-
-
-
             {
-                "name":"notification-templates.test-send",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+                "name": "activity.log",
+                "description": "Create Activity Log",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "activities.destroy",
+                "description": "Delete Activity Log",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "activities.force-logout",
+                "description": "Force Logout User",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "activities.reset-password",
+                "description": "Reset User Password",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "activities.block-ip",
+                "description": "Block IP Address",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "activities.load-more",
+                "description": "Load More Activities",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
                     "organizationmanager"
                 ]
             }
-
-            
         ]
     },
     {
-        "name":"notification triggers",
-        "description":"Notification Triggers",
-        "permissions":[
+        "name": "Notification",
+        "description": "Notification Templates",
+        "permissions": [
             {
-                "name":"notification-triggers.events",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+                "name": "notification-templates.index",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
                     "organizationmanager"
                 ]
             },
-
-                        {
-                "name":"notification-triggers.recipient-types",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+            {
+                "name": "settings.notification_update",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
                     "organizationmanager"
                 ]
             },
-
-
-
-                        {
-                "name":"notification-triggers.sample-conditions",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+            {
+                "name": "settings.organization.smtp_update",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "settings.notification_view",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
                     "organizationmanager"
                 ]
             },
-
-
-
-                        {
-                "name":"notification-triggers.toggle-active",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+            {
+                "name": "notification-templates.create",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
                     "organizationmanager"
                 ]
             },
-
-
-
-                        {
-                "name":"notification-triggers.clone",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+            {
+                "name": "notification-templates.store",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
                     "organizationmanager"
                 ]
             },
-
-
-
-
-                        {
-                "name":"notification-triggers.test",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+            {
+                "name": "notification-templates.show",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
                     "organizationmanager"
                 ]
             },
-
-
-                                    {
-                "name":"notification-triggers.show",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+            {
+                "name": "notification-templates.edit",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
                     "organizationmanager"
                 ]
             },
-
-
-
-
-                                    {
-                "name":"notification-triggers.index",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+            {
+                "name": "notification-templates.update",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
                     "organizationmanager"
                 ]
             },
-
-
-
-
-                                    {
-                "name":"notification-triggers.create",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+            {
+                "name": "notification-templates.destroy",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
                     "organizationmanager"
                 ]
             },
-
-
-
-
-                                    {
-                "name":"notification-triggers.store",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+            {
+                "name": "notification-templates.variables",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
                     "organizationmanager"
                 ]
             },
-
-
-                                                {
-                "name":"notification-triggers.edit",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+            {
+                "name": "notification-templates.preview",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
                     "organizationmanager"
                 ]
             },
-
-
-
-                                                {
-                "name":"notification-triggers.update",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+            {
+                "name": "notification-templates.clone",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
                     "organizationmanager"
                 ]
             },
-
-
-
-
-                                                {
-                "name":"notification-triggers.destroy",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+            {
+                "name": "notification-templates.test-send",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "notification triggers",
+        "description": "Notification Triggers",
+        "permissions": [
+            {
+                "name": "notification-triggers.events",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "notification-triggers.recipient-types",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "notification-triggers.sample-conditions",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "notification-triggers.toggle-active",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "notification-triggers.clone",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "notification-triggers.test",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "notification-triggers.show",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "notification-triggers.index",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "notification-triggers.create",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "notification-triggers.store",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "notification-triggers.edit",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "notification-triggers.update",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "notification-triggers.destroy",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
                     "organizationmanager"
                 ]
@@ -7626,8 +7570,7 @@
                     "organizationmanager"
                 ]
             },
-
-                        {
+            {
                 "name": "chat.index",
                 "description": "View Chat Messages",
                 "guard_name": "web",
@@ -7639,8 +7582,7 @@
                     "organizationmanager"
                 ]
             },
-
-                                    {
+            {
                 "name": "chat.users",
                 "description": "View Chat Messages",
                 "guard_name": "web",
@@ -7652,8 +7594,7 @@
                     "organizationmanager"
                 ]
             },
-
-                                               {
+            {
                 "name": "chat.conversation",
                 "description": "View Chat Messages",
                 "guard_name": "web",
@@ -7665,8 +7606,7 @@
                     "organizationmanager"
                 ]
             },
-
-                                               {
+            {
                 "name": "chat.conversation.create",
                 "description": "View Chat Messages",
                 "guard_name": "web",
@@ -7678,8 +7618,7 @@
                     "organizationmanager"
                 ]
             },
-
-                                                           {
+            {
                 "name": "chat.conversation.messages",
                 "description": "View Chat Messages",
                 "guard_name": "web",
@@ -7691,8 +7630,7 @@
                     "organizationmanager"
                 ]
             },
-
-                                                                       {
+            {
                 "name": "chat.typing",
                 "description": "Typing indicator",
                 "guard_name": "web",
@@ -7704,10 +7642,6 @@
                     "organizationmanager"
                 ]
             },
-
-
-            
-            
             {
                 "name": "chat.groups",
                 "description": "View Chat Groups",
@@ -7841,130 +7775,177 @@
         ]
     },
     {
-       "name": "Mentorship Dashboard",
-       "description": "View and analyze mentorship program reports and statistics",
-       "permissions": [
-     {
-      "name": "dashboard.summary",
-      "description": "View mentorship summary KPIs",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin","organizationmanager"]
-     },
-    {
-      "name": "dashboard.weekly_trends",
-      "description": "View weekly mentorship trends",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin","organizationmanager"]
+        "name": "Mentorship Dashboard",
+        "description": "View and analyze mentorship program reports and statistics",
+        "permissions": [
+            {
+                "name": "dashboard.summary",
+                "description": "View mentorship summary KPIs",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.weekly_trends",
+                "description": "View weekly mentorship trends",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.mentor_hours",
+                "description": "View mentor hours contributed",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.mentor_performance",
+                "description": "Analyze mentor performance",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.startup_engagement",
+                "description": "View startup engagement metrics",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.trends_by_program",
+                "description": "View program-based mentorship trends",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.peak_activity",
+                "description": "View mentorship peak activity times",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }
+        ]
     },
     {
-      "name": "dashboard.mentor_hours",
-      "description": "View mentor hours contributed",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin","organizationmanager"]
-    },
-    {
-      "name": "dashboard.mentor_performance",
-      "description": "Analyze mentor performance",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin", "organizationmanager"]
-    },
-    {
-      "name": "dashboard.startup_engagement",
-      "description": "View startup engagement metrics",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin", "organizationmanager"]
-    },
-    {
-      "name": "dashboard.trends_by_program",
-      "description": "View program-based mentorship trends",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin", "organizationmanager"]
-    },
-    {
-      "name": "dashboard.peak_activity",
-      "description": "View mentorship peak activity times",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin", "organizationmanager"]
+        "name": "Training Dashboard",
+        "description": "View and analyze training program reports and statistics",
+        "permissions": [
+            {
+                "name": "training.summary",
+                "description": "View training summary KPIs",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "training.session_types",
+                "description": "View training session type counts",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "training.monthly_trends",
+                "description": "View monthly training session trends",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "training.type_breakdown",
+                "description": "View session type distribution breakdown",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "training.hours_trend",
+                "description": "View training hours trend per month",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "training.trainers",
+                "description": "Analyze trainer performance and contribution",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "training.topics",
+                "description": "Analyze training topics and engagement",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "training.recent_sessions",
+                "description": "View list of recent training sessions",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.sessions_join",
+                "description": " Attendance to Training Session",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered",
+                    "mentor"
+                ]
+            }
+        ]
     }
-    ]
-    },
-    {
-     "name": "Training Dashboard",
-     "description": "View and analyze training program reports and statistics",
-     "permissions": [
-    {
-      "name": "training.summary",
-      "description": "View training summary KPIs",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin", "organizationmanager"]
-    },
-    {
-      "name": "training.session_types",
-      "description": "View training session type counts",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin", "organizationmanager"]
-    },
-    {
-      "name": "training.monthly_trends",
-      "description": "View monthly training session trends",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin", "organizationmanager"]
-    },
-    {
-      "name": "training.type_breakdown",
-      "description": "View session type distribution breakdown",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin", "organizationmanager"]
-    },
-    {
-      "name": "training.hours_trend",
-      "description": "View training hours trend per month",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin", "organizationmanager"]
-    },
-    {
-      "name": "training.trainers",
-      "description": "Analyze trainer performance and contribution",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin", "organizationmanager"]
-    },
-    {
-      "name": "training.topics",
-      "description": "Analyze training topics and engagement",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin", "organizationmanager"]
-    },
-    {
-      "name": "training.recent_sessions",
-      "description": "View list of recent training sessions",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin", "organizationmanager"]
-    },
-    {
-      "name": "trainings.sessions_join",
-      "description": " Attendance to Training Session",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin", "organizationmanager", "registered", "mentor"]
-    }
-   ]
-}
-
-
-
 ]
