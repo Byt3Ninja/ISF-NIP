@@ -141,7 +141,7 @@ class ScreeningEvaluationResults extends Model
 		}
 		elseif( $getStep?->data != 'grouptogroup' ) { foreach( $judges as $index => $judge ) { $judges[$index]->startups = $companies->pluck('id'); } }
 
-		$scoped_comments = $comments->where('evaluation_id', $evaluation->id)->values();
+		$scoped_comments = $comments->where('evaluation_id', $evaluation?->id)->values();
 		foreach( $judges as $index => $judge )
 		{
 			$judges[$index]->companies = collect([]);
