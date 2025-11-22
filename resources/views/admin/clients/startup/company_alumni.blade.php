@@ -45,7 +45,7 @@
               </div>
               <div class="d-flex flex-wrap gap-2">
                 <span class="badge bg-label-primary rounded-pill">
-                  <i class="ti ti-brand-codesandbox me-1"></i>Fintech
+                  <i class="ti ti-building me-1"></i>Growthlabs
                 </span>
                 <span class="badge bg-label-secondary rounded-pill">
                   <i class="ti ti-cloud me-1"></i>SaaS
@@ -103,28 +103,21 @@
               <div class="text-center">
                 <small
                   class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
-                  <i class="ti ti-building text-light"></i>Organization
-                </small>
-                <h6 class="fw-bold text-dark mb-0">GrowthLabs</h6>
-              </div>
-              <div class="text-center">
-                <small
-                  class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
-                  <i class="ti ti-color-swatch text-danger"></i>Cohort
+                  <i class="ti ti-color-swatch text-danger"></i>Program Cohort
                 </small>
                 <h6 class="fw-bold text-dark mb-0">Cohort 3</h6>
               </div>
               <div class="text-center">
                 <small
                   class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
-                  <i class="ti ti-calendar-stats text-muted"></i>Start Date
+                  <i class="ti ti-calendar-stats text-muted"></i>Program Start
                 </small>
                 <h6 class="fw-bold text-dark mb-0">10 Jan 2025</h6>
               </div>
               <div class="text-center">
                 <small
                   class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
-                  <i class="ti ti-calendar-check text-success"></i>Completion Date
+                  <i class="ti ti-calendar-check text-success"></i>Program End
                 </small>
                 <h6 class="fw-bold text-dark mb-0">15 Jun 2025</h6>
               </div>
