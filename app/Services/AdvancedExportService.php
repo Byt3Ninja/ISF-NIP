@@ -59,18 +59,10 @@ class AdvancedExportService
         // Fetch Data
         $request = new Request();
         if ($organizationId) {
-            // We need to simulate the request context or modify Formdata::formsData to accept direct params
-            // But Formdata::formsData uses $request->organization (name) not ID directly in some clauses, 
-            // but it checks auth()->user()->organization_id inside.
-            // Assuming the user triggering this is the admin of that org or super admin.
-            // If super admin wants to export specific org, we might need to pass it.
-            // For now, let's assume the auth context is sufficient or we pass what's needed.
-            // Actually Formdata::formsData uses auth()->user() to filter by org ID.
+
         }
 
-        // We might need to temporarily set the request parameters if we want to reuse that method exactly
-        // Or better, just replicate the query logic for cleaner service code without Request dependency if possible.
-        // But reusing is safer for consistency.
+
 
         $submissions = Formdata::formsData($request);
         $totalSubmissions = $submissions->count();
@@ -82,14 +74,9 @@ class AdvancedExportService
         foreach ($submissions as $submission) {
             $startupName = $this->sanitizeFileName($submission->startup_name ?? 'Unknown Startup');
             $startupDir = $tempDir . '/' . $startupName;
-            $filesDir = $startupDir . '/files';
 
             if (!File::exists($startupDir)) {
                 File::makeDirectory($startupDir, 0755, true);
-            }
-
-            if (!File::exists($filesDir)) {
-                File::makeDirectory($filesDir, 0755, true);
             }
 
             // Create Data File
@@ -110,12 +97,7 @@ class AdvancedExportService
                     if (is_array($val) && isset($val['type']) && $val['type'] == 'file') {
                         $content .= "{$label}: [FILE] {$val['file_name']}\n";
 
-                        // Copy file to files subfolder
-                        // $val['path'] is relative to public or storage? 
-                        // Usually asset() returns URL, but we need file path.
-                        // Formdata::formsData returns asset() url in 'file_url' and path in 'path'.
-                        // The path in DB is usually relative to public or storage/app.
-                        // Let's assume it's in public folder or storage linked.
+
 
                         $sourcePath = public_path($val['path']); // Try public path first
                         if (!File::exists($sourcePath)) {
@@ -123,10 +105,10 @@ class AdvancedExportService
                         }
 
                         if (File::exists($sourcePath)) {
-                            $destPath = $filesDir . '/' . $val['file_name'];
+                            $destPath = $startupDir . '/' . $val['file_name'];
                             // Avoid overwrite if multiple files have same name
                             if (File::exists($destPath)) {
-                                $destPath = $filesDir . '/' . uniqid() . '_' . $val['file_name'];
+                                $destPath = $startupDir . '/' . uniqid() . '_' . $val['file_name'];
                             }
                             File::copy($sourcePath, $destPath);
                         } else {
@@ -225,11 +207,7 @@ class AdvancedExportService
 
     protected function getTotalEntries($organizationId)
     {
-        // Reusing Formdata logic efficiently or just count
-        // For accurate count matching the export, we should use the same query logic
-        // But for performance, maybe a simpler count query if possible.
-        // Let's stick to Formdata::formsData($request)->count() for consistency for now, 
-        // unless it's too heavy.
+
         $request = new Request();
         return Formdata::formsData($request)->count();
     }
