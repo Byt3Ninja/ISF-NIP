@@ -2,8 +2,7 @@
 
 @section('content')
 <div class="content-wrapper">
-  <!-- Content -->
-  <div class="container-xxl flex-grow-1 container-p-y" id="contentToExport">
+  <div class="container-xxl grow container-p-y" id="contentToExport">
     <div class="row g-3 align-items-center mb-4">
       <div class="col-12 col-md-6">
         <h4 class="mb-1">
@@ -21,24 +20,28 @@
         <button id="export-pdf-button" class="btn btn-primary btn-sm">
           <i class="ti ti-file-type-pdf me-1"></i>Export PDF
         </button>
-        <a 
-          {{-- href="{{ route('admin.clients.startup.alumni.export.csv', ['startup' => $startup->id, 'program' => $program->id]) }}"  --}}
-          id="export-csv" 
-          class="btn btn-outline-secondary btn-sm">
+        <a id="export-csv" class="btn btn-outline-secondary btn-sm">
           <i class="ti ti-file-type-csv me-1"></i>Export CSV
         </a>
       </div>
     </div>
 
-    <div class="row g-4 mb-4">
-      <div class="col-12 col-xl-8">
-        <div class="card h-100 shadow-sm">
+    <!-- Startup Profile Card -->
+    <div class="row mb-6">
+      <div class="col-12">
+        <div class="card h-100 shadow-sm border-0">
           <div class="card-body">
-            <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 border-bottom pb-4">
-              <div>
-                <h5 class="mb-2 fw-bold text-dark d-flex align-items-center gap-2">
-                  <i class="ti ti-building-skyscraper text-primary"></i>PayLinkx
+            <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 pb-5 border-bottom">
+              <div class="grow">
+                <h5 class="mb-2 fw-bold text-dark d-flex align-items-center gap-3">
+                  <div class="avatar avatar-lg">
+                    <div class="avatar-initial rounded-circle bg-label-primary">
+                      <i class="ti ti-building-skyscraper ti-xl"></i>
+                    </div>
+                  </div>
+                  <span>PayLinkx</span>
                 </h5>
+                <p class="text-muted small mb-0">Modern fintech platform for seamless payment solutions</p>
               </div>
               <div class="d-flex flex-wrap gap-2">
                 <span class="badge bg-label-primary rounded-pill">
@@ -52,167 +55,365 @@
                 </span>
               </div>
             </div>
-            <div class="row row-cols-2 row-cols-md-4 g-4 py-4">
+            <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-4 py-5 border-bottom">
               <div class="text-center">
-                <small class="text-muted text-uppercase fw-semibold d-block mb-2">Established</small>
+                <small
+                  class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
+                  <i class="ti ti-calendar-event text-info"></i>Est. Date
+                </small>
                 <h6 class="fw-bold text-dark mb-0">2019-05-01</h6>
-                <small class="text-muted">6 years</small>
               </div>
               <div class="text-center">
-                <small class="text-muted text-uppercase fw-semibold d-block mb-2">Business type</small>
+                <small
+                  class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
+                  <i class="ti ti-briefcase text-warning"></i>Business Type
+                </small>
                 <h6 class="fw-bold text-dark mb-0">B2B</h6>
               </div>
               <div class="text-center">
-                <small class="text-muted text-uppercase fw-semibold d-block mb-2">Industry</small>
+                <small
+                  class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
+                  <i class="ti ti-device-gamepad-3 text-success"></i>Industry
+                </small>
                 <h6 class="fw-bold text-dark mb-0">Financial Services</h6>
               </div>
               <div class="text-center">
-                <small class="text-muted text-uppercase fw-semibold d-block mb-2">Sector</small>
+                <small
+                  class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
+                  <i class="ti ti-packages text-danger"></i>Sector
+                </small>
                 <h6 class="fw-bold text-dark mb-0">Payments</h6>
               </div>
+              <div class="text-center">
+                <small
+                  class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
+                  <i class="ti ti-users text-primary"></i>Team Size
+                </small>
+                <h6 class="fw-bold text-dark mb-0">25+</h6>
+              </div>
             </div>
-            <div class="pt-4 d-flex flex-wrap gap-4 border-top">
-              <a href="#" class="d-inline-flex align-items-center fw-medium text-decoration-none link-primary hover-animate">
+            <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-4 py-5">
+              <div class="text-center">
+                <small
+                  class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
+                  <i class="ti ti-components text-secondary"></i>Program Name
+                </small>
+                <h6 class="fw-bold text-dark mb-0">Fintech Accelerator 2025</h6>
+              </div>
+              <div class="text-center">
+                <small
+                  class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
+                  <i class="ti ti-building text-light"></i>Organization
+                </small>
+                <h6 class="fw-bold text-dark mb-0">GrowthLabs</h6>
+              </div>
+              <div class="text-center">
+                <small
+                  class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
+                  <i class="ti ti-color-swatch text-danger"></i>Cohort
+                </small>
+                <h6 class="fw-bold text-dark mb-0">Cohort 3</h6>
+              </div>
+              <div class="text-center">
+                <small
+                  class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
+                  <i class="ti ti-calendar-stats text-muted"></i>Start Date
+                </small>
+                <h6 class="fw-bold text-dark mb-0">10 Jan 2025</h6>
+              </div>
+              <div class="text-center">
+                <small
+                  class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
+                  <i class="ti ti-calendar-check text-success"></i>Completion Date
+                </small>
+                <h6 class="fw-bold text-dark mb-0">15 Jun 2025</h6>
+              </div>
+            </div>
+            <div class="pt-5 d-flex flex-wrap gap-4 border-top">
+              <a href="#"
+                class="d-inline-flex align-items-center fw-medium text-decoration-none link-primary hover-animate">
                 <i class="ti ti-world me-2"></i>Website <i class="ti ti-external-link ms-1 small"></i>
               </a>
-              <a href="#" class="d-inline-flex align-items-center fw-medium text-decoration-none link-primary hover-animate">
+              <a href="#"
+                class="d-inline-flex align-items-center fw-medium text-decoration-none link-primary hover-animate">
                 <i class="ti ti-brand-linkedin me-2"></i>LinkedIn <i class="ti ti-external-link ms-1 small"></i>
               </a>
-              <a href="#" class="d-inline-flex align-items-center fw-medium text-decoration-none link-primary hover-animate">
+              <a href="#"
+                class="d-inline-flex align-items-center fw-medium text-decoration-none link-primary hover-animate">
                 <i class="ti ti-brand-twitter me-2"></i>Twitter <i class="ti ti-external-link ms-1 small"></i>
               </a>
             </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="col-12 col-xl-4">
-        <div class="card h-100 shadow-sm">
-          <div class="card-header border-bottom bg-label-secondary">
-            <div>
-              <h6 class="mb-0 fw-bold d-flex align-items-center gap-2">
-                <i class="ti ti-camera-selfie text-info"></i>Program details
-              </h6>
-              <small class="text-secondary">Fintech Accelerator 2025</small>
+    <!-- Outcome Summary Section -->
+    <div class="row mb-6">
+      <div class="col-12">
+        <div class="row gy-6">
+          <!-- Screening Score -->
+          <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+            <div class="card card-border-shadow-primary h-100 cursor-pointer">
+              <div class="card-body text-center">
+                <div class="d-flex align-items-center justify-content-center mb-2">
+                  <div class="avatar avatar-md me-4">
+                    <div class="avatar-initial rounded bg-label-primary">
+                      <i class="ti ti-search ti-md"></i>
+                    </div>
+                  </div>
+                  <h5 class="mb-0">4.3 / 5</h5>
+                </div>
+                <small class="text-center">Screening Score</small>
+              </div>
             </div>
           </div>
-          <div class="card-body pt-3">
-            <dl class="row mb-0 gy-3 gx-1 pb-4">
-              <dt class="col-5 text-muted fw-normal small">Program ID</dt>
-              <dd class="col-7 text-end fw-semibold text-dark">PR-FT-2025-01</dd>
-              <dt class="col-5 text-muted fw-normal small">Organization</dt>
-              <dd class="col-7 text-end fw-semibold text-dark">GrowthLabs</dd>
-              <dt class="col-5 text-muted fw-normal small">Cohort</dt>
-              <dd class="col-7 text-end fw-semibold text-dark">Cohort 3</dd>
-              <dt class="col-5 text-muted fw-normal small">Start</dt>
-              <dd class="col-7 text-end fw-semibold text-dark">10 Jan 2025</dd>
-              <dt class="col-5 text-muted fw-normal small">Completion</dt>
-              <dd class="col-7 text-end fw-semibold text-dark">15 Jun 2025</dd>
-            </dl>
-            <div class="row g-2 pt-4 border-top">
-              <div class="col-4">
-                <div class="border rounded-3 text-center p-3 bg-light-subtle">
-                  <small class="text-muted d-block fw-semibold mb-2">
-                    <i class="ti ti-book me-1"></i>Trainings
-                  </small>
-                  <h5 class="mb-0 text-primary fw-bold">18</h5>
+
+          <!-- Final Screening Score -->
+          <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+            <div class="card card-border-shadow-success h-100 cursor-pointer">
+              <div class="card-body text-center">
+                <div class="d-flex align-items-center justify-content-center mb-2">
+                  <div class="avatar avatar-md me-4">
+                    <div class="avatar-initial rounded bg-label-success">
+                      <i class="ti ti-award ti-md"></i>
+                    </div>
+                  </div>
+                  <h5 class="mb-0">4.6 / 5</h5>
                 </div>
+                <small class="text-center">Final Screening Score</small>
               </div>
-              <div class="col-4">
-                <div class="border rounded-3 text-center p-3 bg-light-subtle">
-                  <small class="text-muted d-block fw-semibold mb-2">
-                    <i class="ti ti-users me-1"></i>Mentorship
-                  </small>
-                  <h5 class="mb-0 text-info fw-bold">32h</h5>
+            </div>
+          </div>
+
+          <!-- Training Hours -->
+          <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+            <div class="card card-border-shadow-warning h-100 cursor-pointer">
+              <div class="card-body text-center">
+                <div class="d-flex align-items-center justify-content-center mb-2">
+                  <div class="avatar avatar-md me-4">
+                    <div class="avatar-initial rounded bg-label-warning">
+                      <i class="ti ti-book ti-md"></i>
+                    </div>
+                  </div>
+                  <h5 class="mb-0">32h 15m</h5>
                 </div>
+                <small class="text-center">Training Hours</small>
               </div>
-              <div class="col-4">
-                <div class="border rounded-3 text-center p-3 bg-light-subtle">
-                  <small class="text-muted d-block fw-semibold mb-2">
-                    <i class="ti ti-checklist me-1"></i>Tasks
-                  </small>
-                  <h5 class="mb-0 text-success fw-bold">24 / 26</h5>
+            </div>
+          </div>
+
+          <!-- Mentorship Hours -->
+          <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+            <div class="card card-border-shadow-info h-100 cursor-pointer">
+              <div class="card-body text-center">
+                <div class="d-flex align-items-center justify-content-center mb-2">
+                  <div class="avatar avatar-md me-4">
+                    <div class="avatar-initial rounded bg-label-info">
+                      <i class="ti ti-school ti-md"></i>
+                    </div>
+                  </div>
+                  <h5 class="mb-0">24h 30m</h5>
                 </div>
+                <small class="text-center">Mentorship Hours</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Attendance Rate -->
+          <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+            <div class="card card-border-shadow-success h-100 cursor-pointer">
+              <div class="card-body text-center">
+                <div class="d-flex align-items-center justify-content-center mb-2">
+                  <div class="avatar avatar-md me-4">
+                    <div class="avatar-initial rounded bg-label-success">
+                      <i class="ti ti-user-check ti-md"></i>
+                    </div>
+                  </div>
+                  <h5 class="mb-0">94%</h5>
+                </div>
+                <small class="text-center">Attendance Rate</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Milestones Completed -->
+          <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+            <div class="card card-border-shadow-primary h-100 cursor-pointer">
+              <div class="card-body text-center">
+                <div class="d-flex align-items-center justify-content-center mb-2">
+                  <div class="avatar avatar-md me-4">
+                    <div class="avatar-initial rounded bg-label-primary">
+                      <i class="ti ti-flag-check ti-md"></i>
+                    </div>
+                  </div>
+                  <h5 class="mb-0">7 / 8</h5>
+                </div>
+                <small class="text-center">Milestones Completed</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quizzes Completed -->
+          <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+            <div class="card card-border-shadow-warning h-100 cursor-pointer">
+              <div class="card-body text-center">
+                <div class="d-flex align-items-center justify-content-center mb-2">
+                  <div class="avatar avatar-md me-4">
+                    <div class="avatar-initial rounded bg-label-warning">
+                      <i class="ti ti-help ti-md"></i>
+                    </div>
+                  </div>
+                  <h5 class="mb-0">12 / 12</h5>
+                </div>
+                <small class="text-center">Quizzes Completed</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Average Quiz Score -->
+          <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+            <div class="card card-border-shadow-success h-100 cursor-pointer">
+              <div class="card-body text-center">
+                <div class="d-flex align-items-center justify-content-center mb-2">
+                  <div class="avatar avatar-md me-4">
+                    <div class="avatar-initial rounded bg-label-success">
+                      <i class="ti ti-chart-bar ti-md"></i>
+                    </div>
+                  </div>
+                  <h5 class="mb-0">87%</h5>
+                </div>
+                <small class="text-center">Avg Quiz Score</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- In-Kind Services -->
+          <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+            <div class="card card-border-shadow-info h-100 cursor-pointer">
+              <div class="card-body text-center">
+                <div class="d-flex align-items-center justify-content-center mb-2">
+                  <div class="avatar avatar-md me-4">
+                    <div class="avatar-initial rounded bg-label-info">
+                      <i class="ti ti-gift ti-md"></i>
+                    </div>
+                  </div>
+                  <h5 class="mb-0">8</h5>
+                </div>
+                <small class="text-center">In-Kind Services</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Surveys Completed -->
+          <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+            <div class="card card-border-shadow-primary h-100 cursor-pointer">
+              <div class="card-body text-center">
+                <div class="d-flex align-items-center justify-content-center mb-2">
+                  <div class="avatar avatar-md me-4">
+                    <div class="avatar-initial rounded bg-label-primary">
+                      <i class="ti ti-mood-smile ti-xs"></i>
+                    </div>
+                  </div>
+                  <h5 class="mb-0">5 / 5</h5>
+                </div>
+                <small class="text-center">Surveys Completed</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+            <div class="card card-border-shadow-primary h-100 cursor-pointer">
+              <div class="card-body text-center">
+                <div class="d-flex align-items-center justify-content-center mb-2">
+                  <div class="avatar avatar-md me-4">
+                    <div class="avatar-initial rounded bg-label-primary">
+                      <i class="ti ti-checklist ti-xs"></i>
+                    </div>
+                  </div>
+                  <h5 class="mb-0">24 / 26</h5>
+                </div>
+                <small class="text-center">Tasks Completed</small>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+    <!-- / Outcome Summary Section -->
 
     <div id="navigation-pills" class="card mb-4 shadow-sm">
       <div class="card-body px-4 pt-4 pb-0">
         <div class="nav-align-top">
           <ul class="nav nav-pills flex-nowrap gap-2 pb-4" style="max-width: 100%; overflow-x: auto;" role="tablist">
             <li class="nav-item" role="presentation">
-              <a type="button" class="nav-link active" id="tab-basic-trigger"
-                href="#tab-basic" role="tab" aria-controls="tab-basic" aria-selected="true">
+              <a type="button" class="nav-link active" id="tab-basic-trigger" href="#tab-basic" role="tab"
+                aria-controls="tab-basic" aria-selected="true">
                 <i class="ti ti-info-square me-1"></i>Startup info
               </a>
             </li>
             <li class="nav-item" role="presentation">
-              <a type="button" class="nav-link" id="tab-team-trigger"
-                href="#tab-team" role="tab" aria-controls="tab-team" aria-selected="false">
+              <a type="button" class="nav-link" id="tab-team-trigger" href="#tab-team" role="tab"
+                aria-controls="tab-team" aria-selected="false">
                 <i class="ti ti-users me-1"></i>Team
               </a>
             </li>
             <li class="nav-item" role="presentation">
-              <a type="button" class="nav-link" id="tab-ownership-trigger"
-                href="#tab-ownership" role="tab" aria-controls="tab-ownership" aria-selected="false">
+              <a type="button" class="nav-link" id="tab-ownership-trigger" href="#tab-ownership" role="tab"
+                aria-controls="tab-ownership" aria-selected="false">
                 <i class="ti ti-briefcase me-1"></i>Ownership &amp; investors
               </a>
             </li>
             <li class="nav-item" role="presentation">
-              <a type="button" class="nav-link" id="tab-screening-trigger"
-                href="#tab-screening" role="tab" aria-controls="tab-screening" aria-selected="false">
+              <a type="button" class="nav-link" id="tab-screening-trigger" href="#tab-screening" role="tab"
+                aria-controls="tab-screening" aria-selected="false">
                 <i class="ti ti-search me-1"></i>Screening
               </a>
             </li>
             <li class="nav-item" role="presentation">
-              <a type="button" class="nav-link" id="tab-training-trigger"
-                href="#tab-training" role="tab" aria-controls="tab-training" aria-selected="false">
+              <a type="button" class="nav-link" id="tab-training-trigger" href="#tab-training" role="tab"
+                aria-controls="tab-book" aria-selected="false">
                 <i class="ti ti-school me-1"></i>Training
               </a>
             </li>
             <li class="nav-item" role="presentation">
-              <a type="button" class="nav-link" id="tab-mentorship-trigger"
-                href="#tab-mentorship" role="tab" aria-controls="tab-mentorship" aria-selected="false">
-                <i class="ti ti-message-circle me-1"></i>Mentorship
+              <a type="button" class="nav-link" id="tab-mentorship-trigger" href="#tab-mentorship" role="tab"
+                aria-controls="tab-mentorship" aria-selected="false">
+                <i class="ti ti-school me-1"></i>Mentorship
               </a>
             </li>
             <li class="nav-item" role="presentation">
-              <a type="button" class="nav-link" id="tab-milestones-trigger"
-                href="#tab-milestones" role="tab" aria-controls="tab-milestones" aria-selected="false">
+              <a type="button" class="nav-link" id="tab-milestones-trigger" href="#tab-milestones" role="tab"
+                aria-controls="tab-milestones" aria-selected="false">
                 <i class="ti ti-flag-check me-1"></i>Milestones
               </a>
             </li>
             <li class="nav-item" role="presentation">
-              <a type="button" class="nav-link" id="tab-tasks-trigger"
-                href="#tab-tasks" role="tab" aria-controls="tab-tasks" aria-selected="false">
+              <a type="button" class="nav-link" id="tab-tasks-trigger" href="#tab-tasks" role="tab"
+                aria-controls="tab-tasks" aria-selected="false">
                 <i class="ti ti-checklist me-1"></i>Tasks
               </a>
             </li>
             <li class="nav-item" role="presentation">
-              <a type="button" class="nav-link" id="tab-quizzes-trigger"
-                href="#tab-quizzes" role="tab" aria-controls="tab-quizzes" aria-selected="false">
+              <a type="button" class="nav-link" id="tab-quizzes-trigger" href="#tab-quizzes" role="tab"
+                aria-controls="tab-quizzes" aria-selected="false">
                 <i class="ti ti-help me-1"></i>Quizzes
               </a>
             </li>
             <li class="nav-item" role="presentation">
-              <a type="button" class="nav-link" id="tab-surveys-trigger"
-                href="#tab-surveys" role="tab" aria-controls="tab-surveys" aria-selected="false">
+              <a type="button" class="nav-link" id="tab-surveys-trigger" href="#tab-surveys" role="tab"
+                aria-controls="tab-surveys" aria-selected="false">
                 <i class="ti ti-mood-smile me-1"></i>Surveys
               </a>
             </li>
             <li class="nav-item" role="presentation">
-              <a type="button" class="nav-link" id="tab-services-trigger"
-                href="#tab-services" role="tab" aria-controls="tab-services" aria-selected="false">
+              <a type="button" class="nav-link" id="tab-services-trigger" href="#tab-services" role="tab"
+                aria-controls="tab-services" aria-selected="false">
                 <i class="ti ti-gift me-1"></i>Services
               </a>
             </li>
             <li class="nav-item" role="presentation">
-              <a type="button" class="nav-link" id="tab-forms-trigger"
-                href="#tab-forms" role="tab" aria-controls="tab-forms" aria-selected="false">
+              <a type="button" class="nav-link" id="tab-forms-trigger" href="#tab-forms" role="tab"
+                aria-controls="tab-forms" aria-selected="false">
                 <i class="ti ti-file-text me-1"></i>Forms
               </a>
             </li>
@@ -346,8 +547,7 @@
               </h6>
               <div class="row g-3">
                 <div class="col-12 col-md-6">
-                  <a href="#"
-                    class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-between">
+                  <a href="#" class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-between">
                     <span class="d-flex align-items-center gap-2">
                       <i class="ti ti-slideshow"></i>Pitch deck file
                     </span>
@@ -355,8 +555,7 @@
                   </a>
                 </div>
                 <div class="col-12 col-md-6">
-                  <a href="#"
-                    class="btn btn-outline-info w-100 d-flex align-items-center justify-content-between">
+                  <a href="#" class="btn btn-outline-info w-100 d-flex align-items-center justify-content-between">
                     <span class="d-flex align-items-center gap-2">
                       <i class="ti ti-video"></i>Pitch video
                     </span>
@@ -385,7 +584,8 @@
           <div class="card-body">
             <div class="row g-6">
               <div class="col-12 col-lg-4">
-                <div class="card card-body border h-100 shadow-sm" style="background: linear-gradient(135deg, rgba(88, 86, 214, 0.08) 0%, transparent 100%);">
+                <div class="card card-body border h-100 shadow-sm"
+                  style="background: linear-gradient(135deg, rgba(88, 86, 214, 0.08) 0%, transparent 100%);">
                   <h6 class="mb-3 fw-bold d-flex align-items-center gap-2">
                     <i class="ti ti-crown text-warning"></i>Startup leader
                   </h6>
@@ -397,7 +597,8 @@
                     <dt class="col-5 text-secondary fw-normal small">Country</dt>
                     <dd class="col-7 text-end fw-bold text-dark">Egypt</dd>
                     <dt class="col-5 text-secondary fw-normal small">Email</dt>
-                    <dd class="col-7 text-end"><a href="mailto:omar@example.com" class="fw-medium text-primary">omar@example.com</a></dd>
+                    <dd class="col-7 text-end"><a href="mailto:omar@example.com"
+                        class="fw-medium text-primary">omar@example.com</a></dd>
                     <dt class="col-5 text-secondary fw-normal small">Phone</dt>
                     <dd class="col-7 text-end fw-bold text-dark">+20 100 000 0000</dd>
                   </dl>
@@ -585,13 +786,15 @@
                   <div class="row g-3 mb-4">
                     <div class="col">
                       <div class="p-3 rounded bg-light-subtle border h-100">
-                        <small class="text-muted d-block fw-semibold mb-1"><i class="ti ti-star me-1"></i>Overall score</small>
+                        <small class="text-muted d-block fw-semibold mb-1"><i class="ti ti-star me-1"></i>Overall
+                          score</small>
                         <h4 class="mb-0 text-primary fw-bold">4.3 <small class="text-muted fw-normal">/ 5</small></h4>
                       </div>
                     </div>
                     <div class="col">
                       <div class="p-3 rounded bg-light-subtle border h-100">
-                        <small class="text-muted d-block fw-semibold mb-1"><i class="ti ti-calendar me-1"></i>Date</small>
+                        <small class="text-muted d-block fw-semibold mb-1"><i
+                            class="ti ti-calendar me-1"></i>Date</small>
                         <p class="mb-0 fw-bold text-dark">Jan 2025</p>
                       </div>
                     </div>
@@ -674,13 +877,15 @@
                   <div class="row g-3 mb-4">
                     <div class="col">
                       <div class="p-3 rounded bg-light-subtle border h-100">
-                        <small class="text-muted d-block fw-semibold mb-1"><i class="ti ti-star me-1"></i>Overall score</small>
+                        <small class="text-muted d-block fw-semibold mb-1"><i class="ti ti-star me-1"></i>Overall
+                          score</small>
                         <h4 class="mb-0 text-success fw-bold">4.6 <small class="text-muted fw-normal">/ 5</small></h4>
                       </div>
                     </div>
                     <div class="col">
                       <div class="p-3 rounded bg-light-subtle border h-100">
-                        <small class="text-muted d-block fw-semibold mb-1"><i class="ti ti-calendar me-1"></i>Date</small>
+                        <small class="text-muted d-block fw-semibold mb-1"><i
+                            class="ti ti-calendar me-1"></i>Date</small>
                         <p class="mb-0 fw-bold text-dark">Mar 2025</p>
                       </div>
                     </div>
@@ -786,7 +991,8 @@
 
       </div>
 
-      <div class="tab-pane fade show active" id="tab-mentorship" role="tabpanel" aria-labelledby="tab-mentorship-trigger">
+      <div class="tab-pane fade show active" id="tab-mentorship" role="tabpanel"
+        aria-labelledby="tab-mentorship-trigger">
         <div id="program-mentorship" class="card mb-6 shadow-sm">
           <div class="card-header">
             <h5 class="card-title mb-0 d-flex align-items-center gap-2">
@@ -819,7 +1025,7 @@
                     <td>2025-03-10</td>
                     <td class="text-center"><span class="badge bg-label-info">1.5h</span></td>
                     <td class="fw-medium">Omar Hassan</td>
-                    <td class="text-center"><span class="badge bg-warning">5★</span></td>
+                    <td class="text-center"><span class="badge bg-label-warning">5★</span></td>
                     <td class="small">Helpful session on pricing strategy and B2B sales pipeline.</td>
                   </tr>
                 </tbody>
@@ -830,7 +1036,8 @@
 
       </div>
 
-      <div class="tab-pane fade show active" id="tab-milestones" role="tabpanel" aria-labelledby="tab-milestones-trigger">
+      <div class="tab-pane fade show active" id="tab-milestones" role="tabpanel"
+        aria-labelledby="tab-milestones-trigger">
         <div id="program-milestones" class="card mb-6 shadow-sm">
           <div class="card-header">
             <h5 class="card-title mb-0 d-flex align-items-center gap-2">
@@ -866,11 +1073,11 @@
                     <td>
                       <ul class="list-unstyled mb-0 small">
                         <li><a href="#" class="fw-medium text-primary">
-                          <i class="ti ti-file-pdf me-1"></i>Technical architecture PDF
-                        </a></li>
+                            <i class="ti ti-file-pdf me-1"></i>Technical architecture PDF
+                          </a></li>
                         <li><a href="#" class="fw-medium text-primary">
-                          <i class="ti ti-video me-1"></i>MVP demo video
-                        </a></li>
+                            <i class="ti ti-video me-1"></i>MVP demo video
+                          </a></li>
                       </ul>
                     </td>
                   </tr>
@@ -919,8 +1126,8 @@
                     <td>Mentor A</td>
                     <td>Program manager</td>
                     <td class="text-center"><span class="badge bg-label-success">
-                      <i class="ti ti-check me-1"></i>Completed
-                    </span></td>
+                        <i class="ti ti-check me-1"></i>Completed
+                      </span></td>
                   </tr>
                 </tbody>
               </table>
@@ -957,10 +1164,10 @@
                     <td class="fw-medium">Lean startup quiz</td>
                     <td>2025-02-05</td>
                     <td>Omar Hassan</td>
-                    <td class="text-center"><span class="badge bg-warning">90%</span></td>
+                    <td class="text-center"><span class="badge bg-label-warning">90%</span></td>
                     <td class="text-center"><span class="badge bg-label-success">
-                      <i class="ti ti-check me-1"></i>Passed
-                    </span></td>
+                        <i class="ti ti-check me-1"></i>Passed
+                      </span></td>
                   </tr>
                 </tbody>
               </table>
@@ -997,8 +1204,8 @@
                     <td>Mid review step</td>
                     <td>2025-03-01</td>
                     <td class="text-center"><a href="#" class="btn btn-sm btn-link px-0 text-primary">
-                      <i class="ti ti-eye me-1"></i>View
-                    </a></td>
+                        <i class="ti ti-eye me-1"></i>View
+                      </a></td>
                   </tr>
                 </tbody>
               </table>
@@ -1030,12 +1237,14 @@
                   <tr class="border-top">
                     <td class="fw-medium">Cloud credits</td>
                     <td><span class="badge bg-label-primary">SRV-001</span></td>
-                    <td class="small">Cloud infrastructure credits for twelve months to support product development.</td>
+                    <td class="small">Cloud infrastructure credits for twelve months to support product development.
+                    </td>
                   </tr>
                   <tr>
                     <td class="fw-medium">Legal advisory session</td>
                     <td><span class="badge bg-label-primary">SRV-002</span></td>
-                    <td class="small">One-on-one session with legal partner for company setup and shareholder agreement review.</td>
+                    <td class="small">One-on-one session with legal partner for company setup and shareholder agreement
+                      review.</td>
                   </tr>
                 </tbody>
               </table>
@@ -1118,8 +1327,8 @@
                       <td><span class="badge bg-label-warning">File</span></td>
                       <td class="small"><span class="badge bg-label-success">Uploaded</span></td>
                       <td class="text-center"><a href="#" class="fw-medium text-primary">
-                        <i class="ti ti-download me-1"></i>Download
-                      </a></td>
+                          <i class="ti ti-download me-1"></i>Download
+                        </a></td>
                     </tr>
                     <tr>
                       <td class="fw-medium">Industry</td>
@@ -1135,7 +1344,11 @@
         </div>
       </div>
     </div>
-    <!-- / Content -->
+
+    <div class="alert alert-info d-flex align-items-center">
+      <i class="ti ti-info-circle me-2"></i>
+      “This is a snapshot; it reflects the startup’s details and performance at the time of program completion.”
+    </div>
   </div>
 </div>
 @stop
