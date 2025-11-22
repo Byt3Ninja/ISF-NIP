@@ -246,7 +246,7 @@
     @if($_user->ableTo('quizzes.dashboard_view', $permissions))
       <li class="{{ active('dashboard/quizzes/my*') }} menu-item">
         <a href="/dashboard/quizzes/my" class="menu-link">
-          <i class="menu-icon tf-icons ti ti-question-mark"></i>
+          <i class="menu-icon tf-icons ti ti-help-octagon"></i>
           <span>{{ __('admin.My Quizzes') }}</span>
         </a>
       </li>
