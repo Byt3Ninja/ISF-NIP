@@ -223,7 +223,7 @@ class JudgerScreeningController extends Controller
                     {
                         $final_comment = $request->final_comment;
                         $is_approved = $request->has('is_approved') ? (
-                            intval( $request->input('is_approved', '0') ) == 1 ? true : ( intval( $request->input('is_approved', '0') ) == 0 ? false : null )
+                            intval( $request->input('is_approved', '0') ) == 1 ? true : ( ( $request->input('is_approved', '0') === null || trim($request->input('is_approved', '0')) === '' ) ? null : false )
                         ) : null;
                         $myComment = ScreeningEvaluation::getMyFinalComment( $evaluation_id, $user_id, $company->id );
                         $myComment->value = $final_comment;
