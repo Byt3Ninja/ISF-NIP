@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Judger;
 
 use App\Company;
 use App\ScreeningEvaluation;
+use App\FormDataJudgesComments;
 use App\ScreeningEvaluationResults;
 use App\ScreeningEvaluationCustomFields;
 use App\ScreeningEvaluationFieldsValues;
@@ -167,6 +168,14 @@ class JudgerScreeningController extends Controller
         ];
         $statuses = ['not-started', 'in-progress', 'completed'];
 
+        $companies = $companies->map(function( $company ) {
+            $step_id = $company->step->id;
+            $company->evaluation = ScreeningEvaluation::getEvaluationData( $step_id );
+            return $company;
+        })->filter(function( $company ) {
+            $status = trim( strtolower( $company?->evaluation?->status ) ) ?? 'draft';
+            return $status == 'published' ? true : false;
+        })->values();
         // Add your logic here
         return view('judger.screening.index', compact('companies', 'screeningData', 'statusData', 'statuses'));
     }
@@ -188,6 +197,7 @@ class JudgerScreeningController extends Controller
         if( $type == $request->type )
         {
             $company = Company::find( $request->program );
+            $form = Company::form( $company );
             $evaluationForm = ScreeningEvaluation::getEvaluationData( $company->step );
             if( $evaluationForm->id == $request->id )
             {
@@ -195,17 +205,53 @@ class JudgerScreeningController extends Controller
                 if( $evaluationForm->status == 'Published' )
                 {
                     $toCreate = [];
+                    $commentToCreate = [];
+                    $myComments = collect([]);
                     $myResponses = ScreeningEvaluationResults::where('company_id', $company->id)->where('evaluation_id', $evaluation_id)->where('user_id', $user_id)->get();
+                    if( !empty( $form ) )
+                    {
+                        $formData = $form->formData;
+                        if( $formData->count() > 0 )
+                        {
+                            $ids = $formData->pluck('id')->toArray();
+                            $myComments = FormDataJudgesComments::where('user_id', $user_id)->whereIn('form_data_id', $ids)->get();
+                        }
+                    }
                     $have_published = $myResponses->where('status', true);
                     if( $have_published->count() > 0 ) { return response()->json(['status' => false, 'title' => 'Error', 'message' => 'You have already published an evaluation form'], 200); }
                     else
                     {
                         $final_comment = $request->final_comment;
+                        $is_approved = $request->has('is_approved') ? (
+                            intval( $request->input('is_approved', '0') ) == 1 ? true : ( intval( $request->input('is_approved', '0') ) == 0 ? false : null )
+                        ) : null;
                         $myComment = ScreeningEvaluation::getMyFinalComment( $evaluation_id, $user_id, $company->id );
                         $myComment->value = $final_comment;
                         $myComment->company_id = $company->id;
+                        $myComment->is_approved = $is_approved;
                         $myComment->save();
-                        foreach( $request->evaluation as $element )
+
+                        $comments = collect( $request->comments );
+                        foreach( $comments as $oneComment )
+                        {
+                            $checkCommentResponse = $myComments->where('form_data_id', $oneComment['id'])->where('user_id', $user_id)->first();
+                            if( empty( $checkCommentResponse ) )
+                            {
+                                $commentToCreate[] = [
+                                    'form_data_id' => $oneComment['id'],
+                                    'user_id' => $user_id,
+                                    'comment' => $oneComment['comment'],
+                                ];
+                            }
+                            else
+                            {
+                                $checkCommentResponse->form_data_id = $oneComment['id'];
+                                $checkCommentResponse->comment = $oneComment['comment'];
+                                $checkCommentResponse->save();
+                            }
+                        }
+                        $evaluations = collect( $request->evaluation );
+                        foreach( $evaluations as $element )
                         {
                             $checkResponse = $myResponses->where('criteria_id', $element['id'])->where('user_id', $user_id)->first();
                             if( empty( $checkResponse ) )
@@ -228,10 +274,8 @@ class JudgerScreeningController extends Controller
                                 $checkResponse->save();
                             }
                         }
-                        if( count( $toCreate ) )
-                        {
-                            ScreeningEvaluationResults::insert( $toCreate );
-                        }
+                        if( count( $toCreate ) ) { ScreeningEvaluationResults::insert( $toCreate ); }
+                        if( count( $commentToCreate ) ) { FormDataJudgesComments::insert( $commentToCreate ); }
                         return response()->json(['status' => true, 'title' => 'Success', 'message' => 'Evaluation form saved successfully'], 200);
                     }
                 } else { return response()->json(['status' => false, 'title' => 'Error', 'message' => 'Evaluation form is not published'], 200); }

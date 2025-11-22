@@ -187,25 +187,46 @@
             <div class="tab-pane fade" id="pills-form-data" role="tabpanel" aria-labelledby="pills-form-data-tab">
               <div class="row mb-6">
                   <div class="col-12">
-                    <h5 class="mb-0">{{ __('admin.Submissions')}}</h5>
+                    <h5 class="mb-0">
+                      {{  __('admin.Submissions') . ' ' .  __('cycles.for') }}  {{ trim( $formTitle ) ?  ' | ' . trim( $formTitle ) : '' }}
+                    </h5>
                   </div>
                   <div class="col-12 my-6">
-                    <table class="table table-bordered table-hover">
-                      <tbody>
-                        @foreach( $formData as $dataEntry )
-                        <tr>
-                          <td> {{ $dataEntry->question }} </td>
-                          <td>
-                            @if( $dataEntry->field_type == 'file' )
-                              <a target="_blank" href="{{ URL::to('/'. $dataEntry->answer) }}"> {{ __('admin.Download File') }} </a>
-                            @else
-                              {{ $dataEntry->answer }}
-                            @endif
-                          </td>
-                        </tr>
-                        @endforeach
-                      </tbody>
-                    </table>
+                    <div class="container-fluid px-0">
+                      @if( $formData->count() > 0 )
+                        <div class="accordion" id="formSubmissionAccordion">
+                          @foreach( $formData as $index => $dataEntry )
+                            <div class="accordion-item">
+                              <h2 class="accordion-header">
+                                <button class="accordion-button {{ $loop->first ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $index }}" aria-expanded="{{ $loop->first ? 'true' : 'false' }}" aria-controls="collapse{{ $index }}">
+                                  {{ $dataEntry->question }}
+                                </button>
+                              </h2>
+                              <div id="collapse{{ $index }}" class="accordion-collapse collapse {{ $loop->first ? 'show' : '' }}" data-bs-parent="#formSubmissionAccordion">
+                                <div class="accordion-body pt-4">
+                                  @if( $dataEntry->field_type == 'file' )
+                                    <a target="_blank" href="{{ URL::to('/'. $dataEntry->answer) }}"> {{ __('admin.Download File') }} </a>
+                                  @else
+                                    {{ $dataEntry->answer }}
+                                  @endif
+                                  <div class="mt-5">
+                                    <div class="form-group">
+                                      <label for="formComment_{{ $dataEntry->id }}" class="form-label">{{ __('admin.Comment') }}</label>
+                                      <textarea class="form-control resize-none" id="formComment_{{ $dataEntry->id }}" name="formComment_{{ $dataEntry->id }}" rows="6"
+                                        placeholder="{{ __('admin.Enter your comment here...') }}">{{ $dataEntry?->comment->comment ?? '' }}</textarea>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          @endforeach
+                        </div>
+                      @else
+                        <div class="text-center">
+                          {{ __('cycles.no_submissions_yet') }}
+                        </div>
+                      @endif
+                    </div>
                   </div>
               </div>
             </div>
@@ -335,6 +356,14 @@
               </div>
             </div>
             <div class="tab-pane fade" id="pills-final-comments" role="tabpanel" aria-labelledby="pills-final-comments-tab">
+              <div class="form-group mb-5">
+                <label for="is_approved" class="form-label">{{ __('admin.Your Decision')}}</label>
+                <select class="form-select" name="is_approved" id="is_approved">
+                  <option value="" {{ is_null( $evaluationForm->is_approved ) ? 'selected' : '' }}>{{ __('admin.Not Decided yet') }}</option>
+                  <option value="1" {{ ( $evaluationForm->is_approved === 1 || $evaluationForm->is_approved === true ) ? 'selected' : '' }}>{{ __('admin.Decision Approved') }}</option>
+                  <option value="0" {{ ( $evaluationForm->is_approved === 0 || $evaluationForm->is_approved === false ) ? 'selected' : '' }}>{{ __('admin.Decision Disapproved') }}</option>
+                </select>
+              </div>
               <div class="form-group">
                 <label for="final_comments" class="form-label">{{ __('admin.Final Comments')}}</label>
                 <textarea 

@@ -105,11 +105,12 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
               <div class="d-flex flex-column align-items-center justify-content-center gap-3">
                 <h4 class="text-center mb-0">{{ __('admin.No_Assessment') }}</h4>
                 <h6 class="text-center text-secondary">{{ __('admin.No_Assessment_right_now') }}</h6>
-                <a 
-                  href="{{ route('assessments.assign') }}"
-                  class="btn btn-lg btn-primary">
+                <button 
+                  id="startAssessmentBtn"
+                  class="btn btn-lg btn-primary"
+                  data-loading-text="<span class='spinner-border spinner-border-sm' role='status' aria-hidden='true'></span> {{ __('admin.Creating_Assessment') }}...">
                   {{ __('admin.Make_a_new_assessment') }}
-                </a>
+                </button>
               </div>
             </div>
           </div>
@@ -302,6 +303,72 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
 
 @section('pagescripts')
 <script>
+  // Handle assessment creation
+  $(document).on('click', '#startAssessmentBtn', function() {
+    const $btn = $(this);
+    const originalText = $btn.html();
+    
+    // Show loading state
+    $btn.prop('disabled', true).html($btn.data('loading-text'));
+    
+    // Make AJAX request to create assessment
+    $.ajax({
+      url: '{{ route("assessments.assign") }}',
+      type: 'POST',
+      data: {
+        _token: '{{ csrf_token() }}',
+        _method: 'POST'
+      },
+      dataType: 'json',
+      success: function(response) {
+        if (response.success) {
+          // Redirect to assessment page on success
+          window.location.href = response.redirect;
+        } else {
+          // Show error message
+          showToast('error', response.message || '{{ __("An error occurred. Please try again.") }}');
+          if (response.redirect) {
+            // Redirect to profile if needed
+            setTimeout(() => {
+              window.location.href = response.redirect;
+            }, 2000);
+          } else {
+            // Re-enable button
+            $btn.prop('disabled', false).html(originalText);
+          }
+        }
+      },
+      error: function(xhr) {
+        let errorMessage = '{{ __("An error occurred. Please try again.") }}';
+        if (xhr.responseJSON && xhr.responseJSON.message) {
+          errorMessage = xhr.responseJSON.message;
+        }
+        showToast('error', errorMessage);
+        $btn.prop('disabled', false).html(originalText);
+      }
+    });
+  });
+  
+  // Helper function to show toast messages
+  function showToast(type, message) {
+    const toast = `
+      <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body">
+              ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    $('.toast-container').remove(); // Remove any existing toasts
+    $('body').append(toast);
+    $('.toast').toast({ autohide: true, delay: 5000 }).toast('show');
+  }
+
   // Get the total count of current category
   const getSubCategoryTotalCount = (userScores) => {
     if (!userScores || userScores.length === 0) return;
