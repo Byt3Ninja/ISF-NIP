@@ -54,121 +54,125 @@ class ClientCompanyController extends Controller
     public function show($id)
     {
         // try {
-            $user = auth()->user();
-            $user_id = $user->id;
-            $company = Company::with('state')->with(['city', 'user', 'stage'])->find($id);
-            if( empty( $company ) ) { return abort(404); }
+        $user = auth()->user();
+        $user_id = $user->id;
+        $company = Company::with('state')->with(['city', 'user', 'stage'])->find($id);
+        if (empty($company)) {
+            return abort(404);
+        }
 
-            if (!empty($company->Sustainable_development)) {
-                $sustainableDevelopment = json_decode($company->Sustainable_development, true);
+        if (!empty($company->Sustainable_development)) {
+            $sustainableDevelopment = json_decode($company->Sustainable_development, true);
 
-                $icons = SustainableIcon::whereIn('title', $sustainableDevelopment)->get();
-            } else {
-                $icons = '';
+            $icons = SustainableIcon::whereIn('title', $sustainableDevelopment)->get();
+        } else {
+            $icons = '';
+        }
+        // استرجاع الأيقونات المناسبة
+        // $icons = SustainableIcon::where('title', $sustainableDevelopment)->get();
+
+        $fonders = Team_Member::where('TeamMember', 'Founder')
+            ->where('Company_id', $id)
+            ->get();
+        $Shareholders = Team_Member::where('TeamMember', 'Shareholder')
+            ->where('Company_id', $id)->get();
+        $Investors = Team_Member::where('TeamMember', 'Investor')
+            ->where('Company_id', $id)->get();
+
+
+        // Load all milestones for this company (new unified structure)
+        $milestones = Milestone::where('Company_id', $id)->orderBy('created_at')->get();
+
+        // For backward compatibility, create empty collections for old template variables
+        $Achieved_Milestones = collect();
+        $Planned_Milestones = collect();
+        $Currencies = Currency::where('enabled', 1)->get(); // جلب جميع الأعضاء
+
+        // Startup Technologies
+        $technologies = CompanyRelation::where('company_id', $id)
+            ->whereNotNull('technology_id')
+            ->with('technology')
+            ->get()
+            ->pluck('technology')
+            ->filter();
+
+        // Startup Sectors
+        $sectors = CompanyRelation::where('company_id', $id)
+            ->whereNotNull('sector_id')
+            ->with('sector')
+            ->get()
+            ->pluck('sector')
+            ->filter();
+
+        // Startup Industry
+        $industry = CompanyRelation::where('company_id', $id)
+            ->whereNotNull('industry_id')
+            ->with('industry')
+            ->get()
+            ->pluck('industry')
+            ->filter()
+            ->first(); // Usually one industry per company
+
+        // مسار الملف
+        $pathToFile = storage_path($company->pitch_deck);
+        // تحقق من وجود الملف
+        $fileExists = file_exists($pathToFile);
+        $company_current_step = $company->step;
+        $evaluationForm = ScreeningEvaluation::getEvaluationData($company->step);
+        $isResponsesPublished = false;
+        $final_comment = null;
+        $formData = collect([]);
+        $formTitle = '';
+
+        if (!empty($evaluationForm)) {
+            $current_step = $company->stepdata;
+            $form = Company::form($company);
+            if ($current_step->stype != 2 && empty($form)) {
+                return redirect()->back()->with('message2', 'No Form Found');
             }
-            // استرجاع الأيقونات المناسبة
-            // $icons = SustainableIcon::where('title', $sustainableDevelopment)->get();
 
-            $fonders = Team_Member::where('TeamMember', 'Founder')
-                ->where('Company_id', $id)
-                ->get();
-            $Shareholders = Team_Member::where('TeamMember', 'Shareholder')
-                ->where('Company_id', $id)->get();
-            $Investors = Team_Member::where('TeamMember', 'Investor')
-                ->where('Company_id', $id)->get();
+            $formData = $form?->formData;
+            $formTitle = $form?->form?->form_name ?? '';
+            /* if( !empty( $formData ) ) { $formData = $formData->where('company_id', $company->id)->values(); }
+            $formData = $formData->map(function ($item) {
+                $field = $item->field()->first();
+                $field_type = '';
+                if( isset( $field?->options?->type ) ) { $field_type = $field?->options?->type; }
+                $item->field_type = $field_type;
+                $item->comment = '';
+                return $item;
+            }); */
 
-
-            // Load all milestones for this company (new unified structure)
-            $milestones = Milestone::where('Company_id', $id)->orderBy('created_at')->get();
-            
-            // For backward compatibility, create empty collections for old template variables
-            $Achieved_Milestones = collect();
-            $Planned_Milestones = collect();
-            $Currencies = Currency::where('enabled',1)->get(); // جلب جميع الأعضاء
-            
-            // Startup Technologies
-            $technologies = CompanyRelation::where('company_id', $id)
-                ->whereNotNull('technology_id')
-                ->with('technology')
-                ->get()
-                ->pluck('technology')
-                ->filter();
-            
-            // Startup Sectors
-            $sectors = CompanyRelation::where('company_id', $id)
-                ->whereNotNull('sector_id')
-                ->with('sector')
-                ->get()
-                ->pluck('sector')
-                ->filter();
-            
-            // Startup Industry
-            $industry = CompanyRelation::where('company_id', $id)
-                ->whereNotNull('industry_id')
-                ->with('industry')
-                ->get()
-                ->pluck('industry')
-                ->filter()
-                ->first(); // Usually one industry per company
-                
-            // مسار الملف
-            $pathToFile = storage_path($company->pitch_deck);
-            // تحقق من وجود الملف
-            $fileExists = file_exists($pathToFile);
-            $company_current_step = $company->step;
-            $evaluationForm = ScreeningEvaluation::getEvaluationData( $company->step );
-            $isResponsesPublished = false;
-            $final_comment = null;
-            $formData = collect([]);
-            $formTitle = '';
-           
-            if( !empty( $evaluationForm ) )
-            {
-                $current_step = $company->stepdata;
-                $form = Company::form( $company );
-                if( $current_step->stype != 2 && empty( $form ) ) { return redirect()->back()->with('message2', 'No Form Found'); }
-
-                $formData = $form?->formData;
-                $formTitle = $form?->form?->form_name ?? '';
-                /* if( !empty( $formData ) ) { $formData = $formData->where('company_id', $company->id)->values(); }
-                $formData = $formData->map(function ($item) {
-                    $field = $item->field()->first();
-                    $field_type = '';
-                    if( isset( $field?->options?->type ) ) { $field_type = $field?->options?->type; }
-                    $item->field_type = $field_type;
-                    $item->comment = '';
-                    return $item;
-                }); */
-
-                $myResponses = ScreeningEvaluationResults::where('company_id', $company->id)->where('evaluation_id', $evaluationForm->id)->where('user_id', $user_id)->get();
-                $isResponsesPublished = $myResponses->where('status', true)->count() > 0 ? true : false;
-                $myComment = ScreeningEvaluation::getMyFinalComment( $evaluationForm->id, $user_id, $company->id );
-                $final_comment = $myComment->value;
-                $evaluationForm->final_comment = $final_comment;
-                $evaluationForm->is_approved = $myComment->is_approved;
-                $evaluationForm->categories->map(function ( $category ) use ( $myResponses ) {
-                    $category->subCriteria->map(function ( $subCategory ) use ( $myResponses ) {
-                        $checkResponse = $myResponses->where('criteria_id', $subCategory->id)->first();
-                        $subCategory->result = new stdClass;
-                        $subCategory->result->score = $checkResponse?->score;
-                        $subCategory->result->comment = $checkResponse?->comment;
-                        return $subCategory;
-                    });
-                    return $category;
+            $myResponses = ScreeningEvaluationResults::where('company_id', $company->id)->where('evaluation_id', $evaluationForm->id)->where('user_id', $user_id)->get();
+            $isResponsesPublished = $myResponses->where('status', true)->count() > 0 ? true : false;
+            $myComment = ScreeningEvaluation::getMyFinalComment($evaluationForm->id, $user_id, $company->id);
+            $final_comment = $myComment->value;
+            $evaluationForm->final_comment = $final_comment;
+            $evaluationForm->is_approved = $myComment->is_approved;
+            $evaluationForm->categories->map(function ($category) use ($myResponses) {
+                $category->subCriteria->map(function ($subCategory) use ($myResponses) {
+                    $checkResponse = $myResponses->where('criteria_id', $subCategory->id)->first();
+                    $subCategory->result = new stdClass;
+                    $subCategory->result->score = $checkResponse?->score;
+                    $subCategory->result->comment = $checkResponse?->comment;
+                    return $subCategory;
                 });
-                $evaluationForm->isPublished = $isResponsesPublished;
-                $form_data_ids = $formData->pluck('id')->toArray();
-                if( count( $form_data_ids ) > 0 )
-                {
-                    $comments = DB::table('form_data_judges_comments')->where('user_id', $user_id)->whereIn('form_data_id', $form_data_ids)->get();
-                    $formData = $formData->map(function( $fd ) use ( $comments ) {
-                        $fd->question = trim( $fd->question );
-                        $fd->comment = $comments->where('form_data_id', $fd->id)->first() ?? '';
-                        return $fd;
-                    });
-                } else { $comments = collect([]); }
+                return $category;
+            });
+            $evaluationForm->isPublished = $isResponsesPublished;
+            $form_data_ids = $formData ? $formData->pluck('id')->toArray() : [];
+            if (count($form_data_ids) > 0) {
+                $comments = DB::table('form_data_judges_comments')->where('user_id', $user_id)->whereIn('form_data_id', $form_data_ids)->get();
+                $formData = $formData->map(function ($fd) use ($comments) {
+                    $fd->question = trim($fd->question);
+                    $fd->comment = $comments->where('form_data_id', $fd->id)->first() ?? '';
+                    return $fd;
+                });
+            } else {
+                $comments = collect([]);
             }
-            return view('admin/clients/startup/company_profile', compact('company', 'formTitle', 'formData', 'evaluationForm', 'Currencies', 'milestones', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile', 'technologies', 'sectors', 'industry'));
+        }
+        return view('admin/clients/startup/company_profile', compact('company', 'formTitle', 'formData', 'evaluationForm', 'Currencies', 'milestones', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile', 'technologies', 'sectors', 'industry'));
         // } catch (Exception $e) {
         //     //log what happend
         //     Log::channel('system_exceptions')->info('Exceptions:', [$e]);
@@ -189,10 +193,10 @@ class ClientCompanyController extends Controller
                 $client = User::where('HaveCompany', 1)->with('company')
                     ->with('company.city')
                     ->find(Auth::id());
-                    if (empty($client)) {
+                if (empty($client)) {
                     return redirect()->route('user.profile_view')->with(['msg' => 'NoHaveCompany', 'class' => 'danger']);
                 }
-                
+
                 $countries = Country::all();
                 $states = State::all();
                 $Setting = Settings::where('id', 1)->first();
@@ -206,7 +210,7 @@ class ClientCompanyController extends Controller
                         ->where('Company_id', auth()->user()->company->id)->get();
                     $Investors = Team_Member::where('TeamMember', 'Investor')
                         ->where('Company_id', auth()->user()->company->id)->get();
-                    
+
                     // For backward compatibility, create empty collections
                     $Achieveds = collect();
                     $Planneds = collect();
@@ -222,7 +226,7 @@ class ClientCompanyController extends Controller
                 }
                 $Stages = Stage::all();
 
-                $Currencies = Currency::where('enabled',1)->get(); // جلب جميع الأعضاء
+                $Currencies = Currency::where('enabled', 1)->get(); // جلب جميع الأعضاء
                 $json = File::get(base_path('database/dbFiles/countries.json'));
                 $_countries = json_decode($json, true);
                 $_countries = collect($_countries)->map(function ($country) {
@@ -242,11 +246,11 @@ class ClientCompanyController extends Controller
                     return $country;
                 });
             } else {
-                
+
                 // if (!Auth::user()->hasAnyRole('Admin|organizationManager')) {
                 //     return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
                 // }
-             
+
                 if (Auth::user()->hasRole('organizationManager')) {
                     $userorg = Organization::where('user_id', Auth::id())->first();
                     $cycles = Cycle::where('organization_id', $userorg->id)->with('companies')->get();
@@ -290,7 +294,7 @@ class ClientCompanyController extends Controller
                         ->where('Company_id', $client->company->id)->get();
                     $Investors = Team_Member::where('TeamMember', 'Investor')
                         ->where('Company_id', $client->company->id)->get();
-                    
+
                     // For backward compatibility, create empty collections
                     $Achieveds = collect();
                     $Planneds = collect();
@@ -306,7 +310,7 @@ class ClientCompanyController extends Controller
                 }
                 $Stages = Stage::all();
 
-                $Currencies = Currency::where('enabled',1)->get(); // جلب جميع الأعضاء
+                $Currencies = Currency::where('enabled', 1)->get(); // جلب جميع الأعضاء
                 $json = File::get(base_path('database/dbFiles/countries.json'));
                 $_countries = json_decode($json, true);
                 $_countries = collect($_countries)->map(function ($country) {
@@ -330,73 +334,72 @@ class ClientCompanyController extends Controller
             $l = app()->getLocale();
             if ($client->company) {
                 $companyRelations = CompanyRelation::where('company_id', $client->company->id)->get();
-                $selectedIndustryId   = $companyRelations->pluck('industry_id')->filter()->first();
-                $selectedSectorIds    = $companyRelations->pluck('sector_id')->filter()->toArray();
+                $selectedIndustryId = $companyRelations->pluck('industry_id')->filter()->first();
+                $selectedSectorIds = $companyRelations->pluck('sector_id')->filter()->toArray();
                 $selectedTechnologyIds = $companyRelations->pluck('technology_id')->filter()->toArray();
-                
+
                 // Get all technologies for the select2 dropdown
                 $allTechnologies = DB::table('technologies')->get()->map(function ($tech) {
                     return [
-                        'id'   => $tech->id,
+                        'id' => $tech->id,
                         'name' => $tech->name,
                     ];
                 })->values()->toArray();
-                
+
                 // Get selected technologies as names (for display in tags)
                 $selectedTechnologies = DB::table('technologies')
                     ->whereIn('id', $selectedTechnologyIds)
                     ->pluck('name')
                     ->toArray();
-                
+
                 $technologies = $allTechnologies; // All technologies for select2
                 $technologiesSelected = $selectedTechnologies; // Selected tech names for tags
-                
+
                 $allSectors = DB::table('sectors')->get();
                 $industries = StaticCategory::with('sectors')->get();
-            $data = $industries->map(function ($industry) use ($l, $allSectors, $selectedIndustryId, $selectedSectorIds) {
-                if ($industry->sectors->isNotEmpty()) {
-                    $sectorsList = $industry->sectors->map(function ($sector) use ($l, $selectedSectorIds) {
-                        return [
-                            'id'       => $sector->id,
-                            'name'     => $sector->{"name_$l"} ?? $sector->name_en ?? 'N/A',
-                            'selected' => in_array($sector->id, $selectedSectorIds),
-                        ];
-                    })->values()->toArray();
-                } else {
-                    // When industry has no sectors, return empty array (not all sectors)
-                    $sectorsList = [];
-                }
-                return [
-                    'id'       => $industry->id,
-                    'name'     => $industry->name ?? $industry->name_en,
-                    'selected' => $industry->id == $selectedIndustryId,
-                    'sectors'  => $sectorsList,
-                ];
-            });
-        }else{
-           $industries = StaticCategory::with('sectors')->get();
-           $technologies = DB::table('technologies')->get()->map(function ($tech) {
-               return [
-                   'id'   => $tech->id,
-                   'name' => $tech->name,
-               ];
-           })->values()->toArray();
-           $technologiesSelected = [];
-            $data = [];
-        }
-        $industries = $industries->map(function($industry) {
-            if( empty( $industry->name_ar ) || is_null( $industry->name_ar ) || !trim( $industry->name_ar ) )
-            {
-                $industry->name_ar = $industry->name_en;
+                $data = $industries->map(function ($industry) use ($l, $allSectors, $selectedIndustryId, $selectedSectorIds) {
+                    if ($industry->sectors->isNotEmpty()) {
+                        $sectorsList = $industry->sectors->map(function ($sector) use ($l, $selectedSectorIds) {
+                            return [
+                                'id' => $sector->id,
+                                'name' => $sector->{"name_$l"} ?? $sector->name_en ?? 'N/A',
+                                'selected' => in_array($sector->id, $selectedSectorIds),
+                            ];
+                        })->values()->toArray();
+                    } else {
+                        // When industry has no sectors, return empty array (not all sectors)
+                        $sectorsList = [];
+                    }
+                    return [
+                        'id' => $industry->id,
+                        'name' => $industry->name ?? $industry->name_en,
+                        'selected' => $industry->id == $selectedIndustryId,
+                        'sectors' => $sectorsList,
+                    ];
+                });
+            } else {
+                $industries = StaticCategory::with('sectors')->get();
+                $technologies = DB::table('technologies')->get()->map(function ($tech) {
+                    return [
+                        'id' => $tech->id,
+                        'name' => $tech->name,
+                    ];
+                })->values()->toArray();
+                $technologiesSelected = [];
+                $data = [];
             }
-            return $industry;
-        });
-        $employees = Employee::where('company_id', $id)->get();
+            $industries = $industries->map(function ($industry) {
+                if (empty($industry->name_ar) || is_null($industry->name_ar) || !trim($industry->name_ar)) {
+                    $industry->name_ar = $industry->name_en;
+                }
+                return $industry;
+            });
+            $employees = Employee::where('company_id', $id)->get();
 
-         // Load all milestones for this company (new unified structure)
-        $milestones = Milestone::where('company_id', $id)
-            ->orderBy('created_at')->get();
-                                    
+            // Load all milestones for this company (new unified structure)
+            $milestones = Milestone::where('company_id', $id)
+                ->orderBy('created_at')->get();
+
             return view('admin/clients/company', compact(
                 'client',
                 '_countries',
@@ -428,14 +431,14 @@ class ClientCompanyController extends Controller
         }
     }
 
-     public function deleteImage($id)
-     {
+    public function deleteImage($id)
+    {
         $user = Auth::user();
-        $company = Company::where('id', $user->company_id)->first(); 
+        $company = Company::where('id', $user->company_id)->first();
         $company->logo = null;
         $company->save();
         return response()->json(['status' => 'success']);
-     }
+    }
     /**
      * Update/Store the specified resource in storage.
      *
@@ -444,13 +447,13 @@ class ClientCompanyController extends Controller
      */
     public function updateOrStore(StoreUpdateClientCompanyRequest $request, $id = null)
     {
-         try {
+        try {
             $user = Auth::user();
-            if( !is_null( $id ) )
-            {
-                if( !$user->hasanyRole('Admin|organizationManager') ) { return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']); }
-                if( $user->hasRole('organizationManager') )
-                {
+            if (!is_null($id)) {
+                if (!$user->hasanyRole('Admin|organizationManager')) {
+                    return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
+                }
+                if ($user->hasRole('organizationManager')) {
                     $check = DB::select("SELECT
                             *
                         FROM
@@ -463,86 +466,83 @@ class ClientCompanyController extends Controller
                             c.id = $id 
                             AND o.user_id = " . $user->id);
 
-                    $check = collect( $check )->first();
-                    if( empty( $check ) ) { return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']); }
-                    else
-                    {
+                    $check = collect($check)->first();
+                    if (empty($check)) {
+                        return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
+                    } else {
                         $id = $check->id;
                     }
                 }
-                if( is_null( $id ) ) { return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']); }
-                $companyId = intval( $id );
-                $company = Company::find( $companyId );
-            }
-            else
-            {
-                $companyId = intval( $user->company_id );
-                $company = Company::find( $companyId );
+                if (is_null($id)) {
+                    return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
+                }
+                $companyId = intval($id);
+                $company = Company::find($companyId);
+            } else {
+                $companyId = intval($user->company_id);
+                $company = Company::find($companyId);
             }
             $data = $request->all();
-            
+
             // Update $data with decoded values if they were decoded in validation
             if ($request->has('tech_tags') && is_array($request->tech_tags)) {
                 $data['tech_tags'] = $request->tech_tags;
             }
-            
-            if( $companyId )
-            {
-                $result = Company::find( $companyId );
-                if( empty( $result ) )
-                {
+
+            if ($companyId) {
+                $result = Company::find($companyId);
+                if (empty($result)) {
                     $result = new Company();
                     $msgtype = 'AddComp';
-                } else { $msgtype = 'UpdateComp'; }
-            }
-            else
-            {
+                } else {
+                    $msgtype = 'UpdateComp';
+                }
+            } else {
                 $result = new Company();
                 $msgtype = 'AddComp';
             }
 
-            if( $data['CompanyN'] == 1 )
-            {
+            if ($data['CompanyN'] == 1) {
 
                 $l = $request->input('locale', app()->getLocale());
-                if($l == 'en'){
-                $allCategories = [
-                            'Food & Beverage',
-                            'Technology',
-                            'App / Website',
-                            'Housewares / Home Design',
-                            'Health / Wellness / Nutrition',
-                            'Fitness',
-                            'Sports',
-                            'Beauty',
-                            'Clothing / Fashion',
-                            'Toys / Games',
-                            'Children',
-                            'Entertainment / Experiential',
-                            'Pets',
-                            'Music',
-                            'Holiday',
-                            'Other',
-                        ];
-                }else{
-                        $allCategories = [
-                            'الأطعمة والمشروبات',
-                                'التكنولوجيا',
-                                'تطبيق / موقع إلكتروني',
-                                'الأدوات المنزلية / تصميم المنزل',
-                                'الصحة / العافية / التغذية',
-                                'اللياقة البدنية',
-                                'الرياضة',
-                                'الجمال',
-                                'الملابس / الأزياء',
-                                'الألعاب / الألعاب الإلكترونية',
-                                'الأطفال',
-                                'الترفيه / التجارب',
-                                'الحيوانات الأليفة',
-                                'الموسيقى',
-                                'العطلات',
-                                'أخرى',
-                        ];
+                if ($l == 'en') {
+                    $allCategories = [
+                        'Food & Beverage',
+                        'Technology',
+                        'App / Website',
+                        'Housewares / Home Design',
+                        'Health / Wellness / Nutrition',
+                        'Fitness',
+                        'Sports',
+                        'Beauty',
+                        'Clothing / Fashion',
+                        'Toys / Games',
+                        'Children',
+                        'Entertainment / Experiential',
+                        'Pets',
+                        'Music',
+                        'Holiday',
+                        'Other',
+                    ];
+                } else {
+                    $allCategories = [
+                        'الأطعمة والمشروبات',
+                        'التكنولوجيا',
+                        'تطبيق / موقع إلكتروني',
+                        'الأدوات المنزلية / تصميم المنزل',
+                        'الصحة / العافية / التغذية',
+                        'اللياقة البدنية',
+                        'الرياضة',
+                        'الجمال',
+                        'الملابس / الأزياء',
+                        'الألعاب / الألعاب الإلكترونية',
+                        'الأطفال',
+                        'الترفيه / التجارب',
+                        'الحيوانات الأليفة',
+                        'الموسيقى',
+                        'العطلات',
+                        'أخرى',
+                    ];
                 }
                 $validatedData = $request->validate([
                     'name_en' => 'required|string|max:255',
@@ -569,20 +569,31 @@ class ClientCompanyController extends Controller
                     'years_of_operations.required' => __('admin.Years of Operations is required'),
                     'product_or_service.required' => __('admin.Product or Service is required'),
                     'product_or_service.in' => __('admin.Invalid Product or Service selection'),
-                    'Commercial_Register.file'     => __('admin.File_is_not_valid'),
-                    'Commercial_Register.mimes'    => __('admin.Invalid_file_type'),
-                    'Commercial_Register.max'      => __('admin.File_size_must_be_less_than_10MB'),
-                    'Tax_Card.file'     => __('admin.File_is_not_valid'),
-                    'Tax_Card.mimes'    => __('admin.Invalid_file_type'),
-                    'Tax_Card.max'      => __('admin.File_size_must_be_less_than_10MB'),
+                    'Commercial_Register.file' => __('admin.invalid_file_format'),
+                    'Commercial_Register.mimes' => __('admin.invalid_file_format'),
+                    'Commercial_Register.max' => __('admin.file_size_exceeds'),
+                    'Tax_Card.file' => __('admin.invalid_file_format'),
+                    'Tax_Card.mimes' => __('admin.invalid_file_format'),
+                    'Tax_Card.max' => __('admin.file_size_exceeds'),
                 ]);
 
+                // Custom Validation for Mandatory Files if "Have Registered Startup" is Yes
+                if ($data['CreatedTax'] == 1) {
+                    $hasCommercialRegister = $request->hasFile('Commercial_Register') || ($company->Commercial_Register && $company->Commercial_Register != 'null');
+                    $hasTaxCard = $request->hasFile('Tax_Card') || ($company->Tax_Card && $company->Tax_Card != 'null');
+
+                    if (!$hasCommercialRegister) {
+                        throw ValidationException::withMessages(['Commercial_Register' => __('admin.commercial_register_required')]);
+                    }
+                    if (!$hasTaxCard) {
+                        throw ValidationException::withMessages(['Tax_Card' => __('admin.tax_card_required')]);
+                    }
+                }
+
                 // Handle "Other" category logic
-                if( in_array('Other', $validatedData['business_categories'] ?? []) )
-                {
+                if (in_array('Other', $validatedData['business_categories'] ?? [])) {
                     $validatedData['business_categories'] = array_diff($validatedData['business_categories'], ['Other']);
-                    if( !empty( $validatedData['other_category'] ?? '') )
-                    {
+                    if (!empty($validatedData['other_category'] ?? '')) {
                         $validatedData['business_categories'][] = 'Other';
                         $validatedData['business_categories'][] = $validatedData['other_category'];
                     }
@@ -590,28 +601,25 @@ class ClientCompanyController extends Controller
 
                 $validatedData['business_categories'] = json_encode($validatedData['business_categories']);
 
-                if( $data['CreatedTax'] == 0 )
-                {
+                if ($data['CreatedTax'] == 0) {
                     $CreatedTax = 0;
                     $cuntryReg = 0;
                     $Commercial_Register = '';
                     $Tax_Card = '';
-                }
-                else
-                {
-                    if( $request->hasFile('Commercial_Register') )
-                    {
+                } else {
+                    if ($request->hasFile('Commercial_Register')) {
                         $file = $request->file('Commercial_Register');
                         $originalName = $file->getClientOriginalName();
                         $path = $companyId . '/documents/'; // بدون documents
-                        
+
                         $file->storeAs($path, $originalName, [
                             'disk' => 'document'
                         ]);
                         $Commercial_Register = '/documents/' . $path . $originalName;
-                    }else { $Commercial_Register = $company->Commercial_Register ?? 'null'; }
-                    if( $request->hasFile('Tax_Card') )
-                    {
+                    } else {
+                        $Commercial_Register = $company->Commercial_Register ?? 'null';
+                    }
+                    if ($request->hasFile('Tax_Card')) {
                         $file = $request->file('Tax_Card');
                         $originalName = $file->getClientOriginalName();
                         $path = $companyId . '/documents/';
@@ -619,8 +627,10 @@ class ClientCompanyController extends Controller
                         $file->storeAs($path, $originalName, [
                             'disk' => 'document'
                         ]);
-                        $Tax_Card = '/documents/'. $path . $originalName;
-                    } else { $Tax_Card = $company->Tax_Card ?? 'null'; }
+                        $Tax_Card = '/documents/' . $path . $originalName;
+                    } else {
+                        $Tax_Card = $company->Tax_Card ?? 'null';
+                    }
                     $CreatedTax = $data['CreatedTax'];
                     $cuntryReg = $data['Country_Register'];
                     // $Commercial_Register = $data['Commercial_Register'];
@@ -642,8 +652,7 @@ class ClientCompanyController extends Controller
                 $result->Tax_Card = $Tax_Card;
                 $result->Country_Register_id = $cuntryReg ?? 0;
             }
-            if( $data['CompanyN'] == 2 )
-            {
+            if ($data['CompanyN'] == 2) {
                 $validatedData = $request->validate([
                     'phone' => 'required|numeric|digits_between:8,15',
                     'WhatsApp' => 'nullable',
@@ -675,8 +684,7 @@ class ClientCompanyController extends Controller
                 ]);
 
                 // في الميثود التي تعالج الطلب
-                if( $request->hasFile('img_url') )
-                {
+                if ($request->hasFile('img_url')) {
                     // الحصول على الصورة
                     $image = $request->file('img_url');
                     // حفظ الصورة داخل القرص 'public_uploads'
@@ -684,7 +692,9 @@ class ClientCompanyController extends Controller
 
                     // إنشاء رابط الصورة
                     $img_url = Storage::disk('public_uploads')->url($img_path);
-                } else { $img_url = $company->logo ?? 'null'; }
+                } else {
+                    $img_url = $company->logo ?? 'null';
+                }
 
                 $result->country_code = $data['country_code'];  // مثال لإضافة حقل الهاتف
                 $result->phone = $data['phone'];  // مثال لإضافة حقل الهاتف
@@ -701,8 +711,7 @@ class ClientCompanyController extends Controller
                 $result->instagram = $data['instagram'];
                 $result->tiktok = $data['tiktok'];
             }
-            if( $data['CompanyN'] == 3 )
-            {
+            if ($data['CompanyN'] == 3) {
                 $validatedData = $request->validate([
                     'company_description' => 'nullable|string|max:500',
                     'Sustainable_development' => 'nullable|array',
@@ -714,7 +723,7 @@ class ClientCompanyController extends Controller
                 ]);
                 if (isset($data['Sustainable_development'])) {
                     $result->Sustainable_development = json_encode($data['Sustainable_development']);
-                }else{
+                } else {
                     $result->Sustainable_development = '';
                 }
 
@@ -726,8 +735,7 @@ class ClientCompanyController extends Controller
                 $result->about_monetize = $data['about_monetize'];
                 $result->about_challenges = $data['about_challenges'];
             }
-            if( $data['CompanyN'] == 4 )
-            {
+            if ($data['CompanyN'] == 4) {
                 $request->validate([
                     'Currency' => 'nullable',
                     'pre_money_valuation' => 'nullable|numeric|min:0',
@@ -745,13 +753,13 @@ class ClientCompanyController extends Controller
                 ]);
 
                 $data['Funding_Target'] = $data['Funding_Target'] == null ? 0 : $data['Funding_Target'];
-                if( !isset( $data['targeted_market'] ) || $data['targeted_market'] == null ) { $data['targeted_market'] = ['null']; }
+                if (!isset($data['targeted_market']) || $data['targeted_market'] == null) {
+                    $data['targeted_market'] = ['null'];
+                }
 
-                if( $request->hasFile('financial_plan') )
-                {
+                if ($request->hasFile('financial_plan')) {
                     $file = $request->file('financial_plan'); // التعامل مع ملف واحد فقط
-                    if( $file->isValid() )
-                    {
+                    if ($file->isValid()) {
                         $originalName = $file->getClientOriginalName();
                         $folder = match (true) {
                             str_starts_with($file->getMimeType(), 'image/') => 'images',
@@ -766,7 +774,9 @@ class ClientCompanyController extends Controller
                         ]);
                         $uploadedFile = 'financial_plan/' . $path . $originalName;
                     }
-                } else { $uploadedFile = $company->financial_plan; }
+                } else {
+                    $uploadedFile = $company->financial_plan;
+                }
 
                 $data['financial_plan_description'] = $data['financial_plan_description'] == null ? '0' : $data['financial_plan_description'];
 
@@ -781,8 +791,7 @@ class ClientCompanyController extends Controller
                 $result->financial_plan = $uploadedFile;
                 $result->financial_plan_description = $data['financial_plan_description'];
             }
-            if( $data['CompanyN'] == 5 )
-            {
+            if ($data['CompanyN'] == 5) {
                 $request->validate([
                     'team_num' => 'required|string',
                 ], [
@@ -792,8 +801,7 @@ class ClientCompanyController extends Controller
                 $result->team_num = $data['team_num'];
                 $result->working_team_summary = $data['working_team_summary'];
             }
-            if( $data['CompanyN'] == 6 )
-            {
+            if ($data['CompanyN'] == 6) {
                 $validator = Validator::make($request->all(), [
                     'pitch_deck_info' => 'nullable', // يجب أن يكون إما نعم أو لا
                     'pitch_deck_summary' => 'nullable|string|max:500', // نص من 500 حرف كحد أقصى
@@ -811,8 +819,7 @@ class ClientCompanyController extends Controller
                 $result->problem = $data['problem_facing'];
                 $result->solution = $data['solution_problem'];
             }
-            if( $data['CompanyN'] == 8 )
-            {
+            if ($data['CompanyN'] == 8) {
                 $validator = Validator::make($request->all(), [
                     'website' => 'nullable|url', // يجب أن يكون ملف PDF أو PPT وحجمه أقل من 10MB
                     'img_url' => 'nullable', // يجب أن يكون رابط صالح
@@ -835,15 +842,16 @@ class ClientCompanyController extends Controller
                 ]);
 
                 // في الميثود التي تعالج الطلب
-                if( $request->hasFile('img_url') )
-                {
+                if ($request->hasFile('img_url')) {
                     // الحصول على الصورة
                     $image = $request->file('img_url');
                     // حفظ الصورة داخل القرص 'public_uploads'
                     $img_path = $image->store('images/logo', 'public_uploads');
                     // إنشاء رابط الصورة
                     $img_url = Storage::disk('public_uploads')->url($img_path);
-                } else { $img_url = $company->logo; }
+                } else {
+                    $img_url = $company->logo;
+                }
 
                 $result->website = $data['website'];
                 $result->logo = $img_url;
@@ -855,8 +863,7 @@ class ClientCompanyController extends Controller
                 $result->instagram = $data['instagram'];
                 $result->tiktok = $data['tiktok'];
             }
-            if( $data['CompanyN'] == 9 )
-            {
+            if ($data['CompanyN'] == 9) {
                 $validator = Validator::make($request->all(), [
                     'pitch_deck' => 'nullable|mimes:pdf,ppt,pptx|max:10240', // يجب أن يكون ملف PDF أو PPT وحجمه أقل من 10MB
                 ], [
@@ -864,8 +871,7 @@ class ClientCompanyController extends Controller
                     'pitch_deck.max' => __('admin.Pitch_Deck max size is 10MB'),
                 ]);
 
-                if( $request->hasFile('pitch_deck') )
-                {
+                if ($request->hasFile('pitch_deck')) {
                     $file = $request->file('pitch_deck');
                     $originalName = $file->getClientOriginalName();
                     $path = $companyId . '/pitch_decks/';
@@ -873,30 +879,29 @@ class ClientCompanyController extends Controller
                     $file->storeAs($path, $originalName, [
                         'disk' => 'pitch_deck'
                     ]);
-                    $pitch_deck = 'pitch_decks/'. $path . $originalName;
-                } else { return redirect()->back()->with(['msg' => 'No_Document_Found', 'class' => 'danger'])->withInput(); }
+                    $pitch_deck = 'pitch_decks/' . $path . $originalName;
+                } else {
+                    return redirect()->back()->with(['msg' => 'No_Document_Found', 'class' => 'danger'])->withInput();
+                }
 
                 $result->pitch_deck = $pitch_deck;
             }
-            if( $data['CompanyN'] == 10 )
-            {
+            if ($data['CompanyN'] == 10) {
                 $validator = Validator::make($request->all(), [
                     'pitch_deck_video' => 'nullable', // يجب أن يكون ملف PDF او PPT وحجمه لا يتجاوز 20MB
                 ]);
 
-                if( $request->pitch_deck_video == null ) { return redirect()->back()->with(['msg' => 'No_Video_Found', 'class' => 'danger'])->withInput(); }
+                if ($request->pitch_deck_video == null) {
+                    return redirect()->back()->with(['msg' => 'No_Video_Found', 'class' => 'danger'])->withInput();
+                }
                 $result->pitch_deck_video = $request->pitch_deck_video;
             }
-            if( $data['CompanyN'] == 11 )
-            {
-                if( $request->hasFile('documents') )
-                {
-                    $files = $request->file('documents'); 
-                    $uploadedFiles = []; 
-                    foreach( $files as $file )
-                    {
-                        if( $file->isValid() )
-                        {
+            if ($data['CompanyN'] == 11) {
+                if ($request->hasFile('documents')) {
+                    $files = $request->file('documents');
+                    $uploadedFiles = [];
+                    foreach ($files as $file) {
+                        if ($file->isValid()) {
                             $originalName = $file->getClientOriginalName();
                             $folder = match (true) {
                                 str_starts_with($file->getMimeType(), 'image/') => 'images',
@@ -912,12 +917,13 @@ class ClientCompanyController extends Controller
                             $uploadedFiles[] = 'pitch_decks/' . $path . $originalName;
                         }
                     }
-                } else { return redirect()->back()->with(['msg' => 'No_Document_Found', 'class' => 'danger'])->withInput(); }
+                } else {
+                    return redirect()->back()->with(['msg' => 'No_Document_Found', 'class' => 'danger'])->withInput();
+                }
 
                 $result->documents = json_encode($uploadedFiles);
             }
-            if( $data['CompanyN'] == 12 )
-            {
+            if ($data['CompanyN'] == 12) {
                 $request->validate([
                     'about_problem' => 'required',
                     'about_market_opportunity' => 'required',
@@ -938,8 +944,7 @@ class ClientCompanyController extends Controller
                 $result->about_monetize = $data['about_monetize'];
                 $result->about_challenges = $data['about_challenges'];
             }
-            if( $data['CompanyN'] == 13 )
-            {
+            if ($data['CompanyN'] == 13) {
                 $request->validate([
                     'business_model' => 'required',
                     'business_model_description' => 'required|string|max:255',
@@ -949,11 +954,9 @@ class ClientCompanyController extends Controller
                     'business_model_description.required' => __('admin.business_model_description is required'),
                 ]);
 
-                if( $request->hasFile('business_plan') )
-                {
+                if ($request->hasFile('business_plan')) {
                     $file = $request->file('business_plan'); // التعامل مع ملف واحد فقط
-                    if( $file->isValid() )
-                    {
+                    if ($file->isValid()) {
                         $originalName = $file->getClientOriginalName();
                         $folder = match (true) {
                             str_starts_with($file->getMimeType(), 'image/') => 'images',
@@ -968,7 +971,9 @@ class ClientCompanyController extends Controller
                         ]);
                         $uploadedFile = 'business_plan/' . $path . $originalName;
                     }
-                } else { return redirect()->back()->with(['msg' => 'Business Plan file not selected', 'class' => 'danger'])->withInput(); }
+                } else {
+                    return redirect()->back()->with(['msg' => 'Business Plan file not selected', 'class' => 'danger'])->withInput();
+                }
 
                 $result->business_model = $data['business_model'];
                 $result->other_business_model = $data['other_business_model'];
@@ -976,8 +981,7 @@ class ClientCompanyController extends Controller
                 $result->business_plan = $uploadedFile;
             }
             $result->save();
-            if( $data['CompanyN'] == 14 )
-            {               
+            if ($data['CompanyN'] == 14) {
                 // Set up debug logging using Laravel's Log facade
                 Log::debug('Starting company update process', [
                     'company_id' => $id,
@@ -992,67 +996,67 @@ class ClientCompanyController extends Controller
                     ]
                 ]);
 
-                    // Decode tech_tags if it's a JSON string
-                    $requestData = $request->all();
-                    if (!empty($requestData['tech_tags']) && is_string($requestData['tech_tags'])) {
-                        try {
-                            $decoded = json_decode($requestData['tech_tags'], true);
-                            if (is_array($decoded)) {
-                                $requestData['tech_tags'] = $decoded;
-                            } else {
-                                $requestData['tech_tags'] = [];
-                            }
-                        } catch (\Exception $e) {
+                // Decode tech_tags if it's a JSON string
+                $requestData = $request->all();
+                if (!empty($requestData['tech_tags']) && is_string($requestData['tech_tags'])) {
+                    try {
+                        $decoded = json_decode($requestData['tech_tags'], true);
+                        if (is_array($decoded)) {
+                            $requestData['tech_tags'] = $decoded;
+                        } else {
                             $requestData['tech_tags'] = [];
                         }
-                    } elseif (empty($requestData['tech_tags'])) {
+                    } catch (\Exception $e) {
                         $requestData['tech_tags'] = [];
                     }
-                    
-                    // Merge decoded data back into request
-                    $request->merge($requestData);
-                    
-                    $rules = [
-                        'industry_id' => 'required|exists:static_categories,id',
-                        'sector_ids' => 'required',
-                        'tech_tags' => 'nullable|array',
-                        'tech_tags.*' => 'nullable|string|max:50',
-                        'other_sector' => 'nullable|regex:/^[A-Za-z0-9\s\-\.]+$/|max:255',
-                        'other_tech' => 'nullable|regex:/^[A-Za-z0-9\s\-\.]+$/|max:50',
-                    ];
+                } elseif (empty($requestData['tech_tags'])) {
+                    $requestData['tech_tags'] = [];
+                }
 
-                    $messages = [
-                        'industry_id.required' => __('admin.industry is required'),
-                        'industry_id.exists' => __('admin.invalid industry selected'),
-                        'sector_ids.required' => __('admin.sectors is required'),
-                        'tech_tags.array' => __('admin.technologies must be an array'),
-                        'tech_tags.*.string' => __('admin.technology name must be text'),
-                        'tech_tags.*.max' => __('admin.technology name too long'), 
-                        'other_sector.regex' => __('admin.other sector contains invalid characters'),
-                        'other_tech.regex' => __('admin.other technology contains invalid characters'),
-                        'other_sector.max' => __('admin.other sector name too long'),
-                        'other_tech.max' => __('admin.other technology name too long'),
-                    ];
+                // Merge decoded data back into request
+                $request->merge($requestData);
 
-                    $validator = \Validator::make($request->all(), $rules, $messages);
-                    
-                    if ($validator->fails()) {
-                        if ($request->ajax()) {
-                            return response()->json([
-                                'success' => false,
-                                'message' => $validator->errors()->first(),
-                                'errors' => $validator->errors()
-                            ], 422);
-                        }
-                        return redirect()->back()->withErrors($validator)->withInput();
+                $rules = [
+                    'industry_id' => 'required|exists:static_categories,id',
+                    'sector_ids' => 'required',
+                    'tech_tags' => 'nullable|array',
+                    'tech_tags.*' => 'nullable|string|max:50',
+                    'other_sector' => 'nullable|regex:/^[A-Za-z0-9\s\-\.]+$/|max:255',
+                    'other_tech' => 'nullable|regex:/^[A-Za-z0-9\s\-\.]+$/|max:50',
+                ];
+
+                $messages = [
+                    'industry_id.required' => __('admin.industry is required'),
+                    'industry_id.exists' => __('admin.invalid industry selected'),
+                    'sector_ids.required' => __('admin.sectors is required'),
+                    'tech_tags.array' => __('admin.technologies must be an array'),
+                    'tech_tags.*.string' => __('admin.technology name must be text'),
+                    'tech_tags.*.max' => __('admin.technology name too long'),
+                    'other_sector.regex' => __('admin.other sector contains invalid characters'),
+                    'other_tech.regex' => __('admin.other technology contains invalid characters'),
+                    'other_sector.max' => __('admin.other sector name too long'),
+                    'other_tech.max' => __('admin.other technology name too long'),
+                ];
+
+                $validator = \Validator::make($request->all(), $rules, $messages);
+
+                if ($validator->fails()) {
+                    if ($request->ajax()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => $validator->errors()->first(),
+                            'errors' => $validator->errors()
+                        ], 422);
                     }
+                    return redirect()->back()->withErrors($validator)->withInput();
+                }
 
                 // Normalize incoming sector and technology inputs
                 // Process sector IDs
                 $sectorIds = [];
                 if (!empty($data['sector_ids'])) {
                     Log::debug('Processing sector IDs', ['raw' => $data['sector_ids']]);
-                    
+
                     try {
                         if (is_string($data['sector_ids'])) {
                             $decoded = json_decode($data['sector_ids'], true);
@@ -1066,14 +1070,14 @@ class ClientCompanyController extends Controller
                         // Validate sectors exist
                         $validSectorIds = Sector::whereIn('id', $sectorIds)->pluck('id')->toArray();
                         $invalidSectorIds = array_diff($sectorIds, $validSectorIds);
-                        
+
                         if (!empty($invalidSectorIds)) {
                             Log::warning('Invalid sector IDs provided', ['invalid_ids' => $invalidSectorIds]);
                             throw new \Exception(__('admin.invalid_sectors_selected'));
                         }
-                        
+
                         $sectorIds = $validSectorIds;
-                        
+
                     } catch (\Exception $e) {
                         Log::error('Error processing sector IDs', [
                             'error' => $e->getMessage(),
@@ -1086,7 +1090,7 @@ class ClientCompanyController extends Controller
                             ], 400);
                         }
                         return redirect()->back()->with([
-                            'msg' => __('admin.error_processing_sectors'), 
+                            'msg' => __('admin.error_processing_sectors'),
                             'class' => 'danger'
                         ])->withInput();
                     }
@@ -1110,7 +1114,7 @@ class ClientCompanyController extends Controller
                         $techIds = array_values(array_unique($validTechIds));
                     }
                 }
-                
+
                 // Process tech_tags if provided (from the form)
                 if (isset($data['tech_tags'])) {
                     $techTags = [];
@@ -1127,16 +1131,17 @@ class ClientCompanyController extends Controller
                     } elseif (is_array($data['tech_tags'])) {
                         $techTags = $data['tech_tags'];
                     }
-                    
+
                     // Process tech tags to get or create technologies
                     foreach ($techTags as $tag) {
-                        if (empty(trim($tag))) continue;
-                        
+                        if (empty(trim($tag)))
+                            continue;
+
                         $tech = Technology::firstOrCreate(
                             ['name' => trim($tag)],
                             ['name' => trim($tag)]
                         );
-                        
+
                         if ($tech && !in_array($tech->id, $techIds)) {
                             $techIds[] = $tech->id;
                         }
@@ -1156,7 +1161,7 @@ class ClientCompanyController extends Controller
                         'class' => 'danger'
                     ])->withInput();
                 }
-                
+
                 // Validate that we have valid arrays after decoding
                 if (!is_array($sectorIds)) {
                     $sectorIds = [];
@@ -1164,17 +1169,17 @@ class ClientCompanyController extends Controller
                 if (!is_array($techIds)) {
                     $techIds = [];
                 }
-                
+
                 // Process "Other" sector if provided
                 if (!empty(trim($data['other_sector'] ?? ''))) {
                     try {
                         $sectorName = trim($data['other_sector']);
-                        
+
                         // Check if sector with similar name already exists (case-insensitive)
                         $existingSector = Sector::whereRaw('LOWER(name_en) = ?', [strtolower($sectorName)])
                             ->orWhereRaw('LOWER(name_ar) = ?', [strtolower($sectorName)])
                             ->first();
-                            
+
                         if ($existingSector) {
                             $sectorIds[] = $existingSector->id;
                             Log::info('Using existing sector', [
@@ -1187,13 +1192,13 @@ class ClientCompanyController extends Controller
                             $addSector->name_en = $sectorName;
                             $addSector->name_ar = $sectorName; // Consider translation if needed
                             $addSector->save();
-                            
+
                             // Associate with industry
                             $industry = StaticCategory::findOrFail($data['industry_id']);
                             $industry->sectors()->attach($addSector->id);
-                            
+
                             $sectorIds[] = $addSector->id;
-                            
+
                             Log::info('Created new sector', [
                                 'name' => $sectorName,
                                 'id' => $addSector->id
@@ -1216,16 +1221,16 @@ class ClientCompanyController extends Controller
                         ])->withInput();
                     }
                 }
-                
+
                 // Process "Other" technology if provided
                 if (!empty(trim($data['other_tech'] ?? ''))) {
                     try {
                         $techName = trim($data['other_tech']);
-                        
+
                         // Check if technology with similar name exists
                         $existingTech = Technology::whereRaw('LOWER(name) = ?', [strtolower($techName)])
                             ->first();
-                            
+
                         if ($existingTech) {
                             $techIds[] = $existingTech->id;
                             Log::info('Using existing technology', [
@@ -1237,9 +1242,9 @@ class ClientCompanyController extends Controller
                             $addTech = new Technology();
                             $addTech->name = $techName;
                             $addTech->save();
-                            
+
                             $techIds[] = $addTech->id;
-                            
+
                             Log::info('Created new technology', [
                                 'name' => $techName,
                                 'id' => $addTech->id
@@ -1287,7 +1292,7 @@ class ClientCompanyController extends Controller
                 if (empty($result->id)) {
                     $result->save();
                 }
-                
+
                 if (empty($result->id)) {
                     Log::error('Company ID is missing', [
                         'company_data' => $result->toArray()
@@ -1303,7 +1308,7 @@ class ClientCompanyController extends Controller
                         ->with('class', 'danger')
                         ->withInput();
                 }
-                
+
                 // Validate industry_id exists
                 if (!empty($data['industry_id'])) {
                     $industryExists = \DB::table('static_categories')->where('id', $data['industry_id'])->exists();
@@ -1321,32 +1326,33 @@ class ClientCompanyController extends Controller
                             ->withInput();
                     }
                 }
-                
+
                 DB::beginTransaction();
                 try {
                     $timestamp = now();
                     $relations = [];
-                    
+
                     // Get existing relations to determine what needs to be updated
                     $existingRelations = CompanyRelation::where('company_id', $result->id)
                         ->where('user_id', $user->id)
                         ->get();
-                    
+
                     // Process sector relations
                     $processedSectorIds = [];
                     foreach ($sectorIds as $sectorId) {
-                        if (empty($sectorId)) continue;
-                        
+                        if (empty($sectorId))
+                            continue;
+
                         // Validate sector exists
                         $sectorExists = \DB::table('sectors')->where('id', $sectorId)->exists();
                         if (!$sectorExists) {
                             Log::warning('Invalid sector_id skipped', ['sector_id' => $sectorId]);
                             continue;
                         }
-                        
+
                         // Check if this relation already exists
                         $existingRelation = $existingRelations->where('sector_id', $sectorId)->first();
-                        
+
                         if ($existingRelation) {
                             // Update existing relation
                             $existingRelation->update([
@@ -1366,22 +1372,23 @@ class ClientCompanyController extends Controller
                         }
                         $processedSectorIds[] = $sectorId;
                     }
-                    
+
                     // Process technology relations
                     $processedTechIds = [];
                     foreach ($techIds as $techId) {
-                        if (empty($techId)) continue;
-                        
+                        if (empty($techId))
+                            continue;
+
                         // Validate technology exists
                         $techExists = \DB::table('technologies')->where('id', $techId)->exists();
                         if (!$techExists) {
                             Log::warning('Invalid technology_id skipped', ['technology_id' => $techId]);
                             continue;
                         }
-                        
+
                         // Check if this relation already exists
                         $existingRelation = $existingRelations->where('technology_id', $techId)->first();
-                        
+
                         if ($existingRelation) {
                             // Update existing relation
                             $existingRelation->update([
@@ -1401,11 +1408,13 @@ class ClientCompanyController extends Controller
                         }
                         $processedTechIds[] = $techId;
                     }
-                    
+
                     // Remove relations that are no longer selected
-                    $existingRelations->each(function($relation) use ($processedSectorIds, $processedTechIds) {
-                        if (($relation->sector_id && !in_array($relation->sector_id, $processedSectorIds)) ||
-                            ($relation->technology_id && !in_array($relation->technology_id, $processedTechIds))) {
+                    $existingRelations->each(function ($relation) use ($processedSectorIds, $processedTechIds) {
+                        if (
+                            ($relation->sector_id && !in_array($relation->sector_id, $processedSectorIds)) ||
+                            ($relation->technology_id && !in_array($relation->technology_id, $processedTechIds))
+                        ) {
                             $relation->delete();
                         }
                     });
@@ -1432,49 +1441,50 @@ class ClientCompanyController extends Controller
                         'tech_ids' => $techIds,
                         'industry_id' => $data['industry_id'] ?? null
                     ]);
-                    
+
                     if ($data['CompanyN'] == 14 && $request->ajax()) {
                         return response()->json([
                             'success' => false,
                             'message' => __('admin.error_updating_company_relations') . ': ' . $e->getMessage()
                         ], 400);
                     }
-                    
+
                     return redirect()->back()
                         ->with('msg', __('admin.error_updating_company_relations'))
                         ->with('class', 'danger')
                         ->withInput();
-                }   
+                }
             }
-            if( is_null( $id ) )
-            {
+            if (is_null($id)) {
                 User::where('id', $user->id)->update(['company_id' => $result->id]);
                 $msgtype = 'NewComp';
             }
 
-            if( $result ) {
-                if( !in_array(env('APP_ENV', 'local'), ['local']) ) { event(new WebMessage($msgtype, $user->first_name_en)); } 
+            if ($result) {
+                if (!in_array(env('APP_ENV', 'local'), ['local'])) {
+                    event(new WebMessage($msgtype, $user->first_name_en));
+                }
 
                 // Use the result's ID if $id is null (new company creation)
                 $redirectId = $id ?: $result->id;
-                
+
                 // Return JSON response for AJAX requests (CompanyN == 14 is classification form)
                 if ($data['CompanyN'] == 14 && $request->ajax()) {
                     return response()->json([
                         'success' => true,
-                        'message' => __('admin.Startup_Info_Updated_Successfully')
+                        'message' => __('admin.startup_info_updated')
                     ]);
                 }
-                
-                return redirect()->route('company.profile_view_mine', $redirectId)->with(['msg' => 'Startup_Info_Updated_Successfully', 'class' => 'success']);
-            } else { 
+
+                return redirect()->route('company.profile_view_mine', $redirectId)->with(['msg' => __('admin.startup_info_updated'), 'class' => 'success']);
+            } else {
                 if ($data['CompanyN'] == 14 && $request->ajax()) {
                     return response()->json([
                         'success' => false,
                         'message' => __('admin.Startup_Info_Updated_Failed')
                     ], 400);
                 }
-                return back()->withInput()->with(['msg' => 'Startup_Info_Updated_Failed', 'class' => 'danger']); 
+                return back()->withInput()->with(['msg' => 'Startup_Info_Updated_Failed', 'class' => 'danger']);
             }
         } catch (ValidationException $e) {
             // عند وجود خطأ في التحقق، إرجاع رسائل الأخطاء للمستخدم
@@ -1551,15 +1561,14 @@ class ClientCompanyController extends Controller
 
     public function AddTeams(Request $request, $id = null)
     {
-        if( isset( $id ) && !is_null( $id ) ) { $user = User::where('company_id', $id)->first(); }
-        else
-        {
+        if (isset($id) && !is_null($id)) {
+            $user = User::where('company_id', $id)->first();
+        } else {
             $user = auth()->user();
         }
         // $user = Auth::user();
         $companyId = $user->company_id;
-        if ($request->TeamsNo == "Founders")
-        {
+        if ($request->TeamsNo == "Founders") {
             // تحقق من صحة البيانات
             $validator = Validator::make($request->all(), [
                 'founder_name' => 'required|string|max:255',
@@ -1573,16 +1582,12 @@ class ClientCompanyController extends Controller
             ]);
 
             // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
-            if ($validator->fails())
-            {
-                if( $request->ajax() )
-                {
+            if ($validator->fails()) {
+                if ($request->ajax()) {
                     return response()->json([
                         'errors' => $validator->errors(),
                     ], 422); // حالة الخطأ 422
-                }
-                else
-                {
+                } else {
                     return redirect()->back()->with('error', 'inputs error')->withErrors($validator)->withInput();
                 }
             }
@@ -1590,10 +1595,12 @@ class ClientCompanyController extends Controller
             $email = $request->input('founder_email');
             $mail = Team_member::where('Email', $email)->where('Company_id', $companyId)->where('TeamMember', 'Founder')->first();
 
-            if( $mail != null )
-            {
-                if( $request->ajax() ) { return response()->json(['state' => __('admin.founder_email_exist'),]); }
-                else { return redirect()->back()->with('error', __('admin.founder_email_exist')); }
+            if ($mail != null) {
+                if ($request->ajax()) {
+                    return response()->json(['state' => __('admin.founder_email_exist'),]);
+                } else {
+                    return redirect()->back()->with('error', __('admin.founder_email_exist'));
+                }
             }
             // $linkedin = $request->input('founder_linkedin');
             // $linked = Team_member::where('LinkedIn', $linkedin)->where('Company_id', $companyId)->where('TeamMember', 'Founder')->first();
@@ -1614,11 +1621,13 @@ class ClientCompanyController extends Controller
             $teamMember->save();
 
             // استجابة بعد الحفظ
-            if( $request->ajax() ) { return response()->json(['state' => __('admin.founder_added'),]); }
-            else { return redirect()->back()->with('success', __('admin.founder_added')); }
+            if ($request->ajax()) {
+                return response()->json(['state' => __('admin.founder_added'),]);
+            } else {
+                return redirect()->back()->with('success', __('admin.founder_added'));
+            }
         }
-        if ($request->TeamsNo == "Shareholders")
-        {
+        if ($request->TeamsNo == "Shareholders") {
             // تحقق من صحة البيانات
             $validator = Validator::make($request->all(), [
                 'shareholder_name' => 'required|string|max:255',
@@ -1636,26 +1645,26 @@ class ClientCompanyController extends Controller
             $newPercentage = $request->shareholder_ownership_percentage;
 
             // تحقق من أن النسبة المئوية الجديدة لا تتجاوز 100%
-            if ($totalPercentage + $newPercentage > 100)
-            {
-                if( $request->ajax() )
-                {
+            if ($totalPercentage + $newPercentage > 100) {
+                if ($request->ajax()) {
                     return response()->json([
                         'errors' => [
                             'shareholder_ownership_percentage' => [__('admin.Total ownership percentage cannot exceed 100%')],
                         ],
                     ], 422); // حالة الخطأ 422
-                } else { return redirect()->back()->with('error', 'inputs error')->withErrors(__('admin.Total ownership percentage cannot exceed 100%'))->withInput(); } 
+                } else {
+                    return redirect()->back()->with('error', 'inputs error')->withErrors(__('admin.Total ownership percentage cannot exceed 100%'))->withInput();
+                }
             }
             // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
-            if ($validator->fails())
-            {
-                if( $request->ajax() )
-                {
+            if ($validator->fails()) {
+                if ($request->ajax()) {
                     return response()->json([
                         'errors' => $validator->errors(),
                     ], 422); // حالة الخطأ 422
-                } else { return redirect()->back()->with('error', 'inputs error')->withErrors($validator)->withInput(); }
+                } else {
+                    return redirect()->back()->with('error', 'inputs error')->withErrors($validator)->withInput();
+                }
             }
             $founder = 'Shareholder';
             // إنشاء وحفظ بيانات العضو في قاعدة البيانات
@@ -1668,12 +1677,14 @@ class ClientCompanyController extends Controller
             $teamMember->save();
 
             // استجابة بعد الحفظ
-            if( $request->ajax() ) { return response()->json(['state' => __('admin.Investor_added'),]); }
-            else { return redirect()->back()->with('success', __('admin.founder_added')); }
+            if ($request->ajax()) {
+                return response()->json(['state' => __('admin.Investor_added'),]);
+            } else {
+                return redirect()->back()->with('success', __('admin.founder_added'));
+            }
         }
 
-        if ($request->TeamsNo == "Investors")
-        {
+        if ($request->TeamsNo == "Investors") {
             // تحقق من صحة البيانات
             $validator = Validator::make($request->all(), [
                 'investor_name' => 'required|string|max:255',
@@ -1683,14 +1694,14 @@ class ClientCompanyController extends Controller
                 'investment_type.required' => __('admin.Type is Required Investor'),
             ]);
 
-            if ($validator->fails())
-            {
-                if( $request->ajax() )
-                {
+            if ($validator->fails()) {
+                if ($request->ajax()) {
                     return response()->json([
                         'errors' => $validator->errors(),
                     ], 422); // حالة الخطأ 422
-                } else { return redirect()->back()->with('error', 'inputs error')->withErrors($validator)->withInput(); }
+                } else {
+                    return redirect()->back()->with('error', 'inputs error')->withErrors($validator)->withInput();
+                }
             }
 
             $founder = 'Investor';
@@ -1703,21 +1714,24 @@ class ClientCompanyController extends Controller
             $teamMember->save();
 
             // استجابة بعد الحفظ 
-            if( $request->ajax() ) { return response()->json(['state' => __('admin.Investor_added'),]); }
-            else { return response()->json(['state' => __('admin.Investor_added'),]);  }
+            if ($request->ajax()) {
+                return response()->json(['state' => __('admin.Investor_added'),]);
+            } else {
+                return response()->json(['state' => __('admin.Investor_added'),]);
+            }
         }
     }
 
     public function EditTeams(Request $request, $id = null)
     {
-        if( isset( $id ) && !is_null( $id ) ) { $user = User::where('company_id', $id)->first(); }
-        else
-        {
+        if (isset($id) && !is_null($id)) {
+            $user = User::where('company_id', $id)->first();
+        } else {
             $user = auth()->user();
         }
         // $user = Auth::user();
         $companyId = $user->company_id;
-        
+
         // إنشاء وحفظ بيانات العضو في قاعدة البيانات
         $teamMember = Team_member::where('id', $request->id)->first(); // افترض أن لديك موديل اسمه TeamMember
         if ($teamMember->TeamMember == "Founder") {
@@ -1898,14 +1912,14 @@ class ClientCompanyController extends Controller
                 foreach ($request->file('documents') as $index => $file) {
                     $fileName = time() . '_' . $index . '_' . $file->getClientOriginalName();
                     $filePath = $file->storeAs('milestones/' . $id, $fileName, 'public');
-                    
+
                     $documents[] = [
                         'name' => $file->getClientOriginalName(),
                         'url' => asset('storage/' . $filePath),
                         'path' => $filePath,
                     ];
                 }
-                
+
                 // Store documents info in milestone (you might want to create a separate table for this)
                 $milestone->documents = json_encode($documents);
                 $milestone->save();
@@ -1922,7 +1936,7 @@ class ClientCompanyController extends Controller
                     'documents' => $documents,
                 ],
             ]);
-            
+
         } catch (\Exception $e) {
             \Log::error('Error adding milestone: ' . $e->getMessage());
             return response()->json([
@@ -1972,8 +1986,8 @@ class ClientCompanyController extends Controller
 
             // Find the milestone and ensure it belongs to the company
             $milestone = Milestone::where('id', $request->id)
-                                ->where('Company_id', $id)
-                                ->first();
+                ->where('Company_id', $id)
+                ->first();
 
             if (!$milestone) {
                 return response()->json([
@@ -1991,7 +2005,7 @@ class ClientCompanyController extends Controller
             // Force model to refresh and apply casts
             $milestone->refresh();
             $existingDocuments = $milestone->documents;
-            
+
             \Log::info('EditMileStone: Initial request info', [
                 'milestone_id' => $milestone->id,
                 'has_files' => $request->hasFile('documents'),
@@ -1999,14 +2013,14 @@ class ClientCompanyController extends Controller
                 'all_input' => array_keys($request->all()),
                 'files_in_documents' => $request->hasFile('documents') ? count($request->file('documents')) : 0
             ]);
-            
+
             \Log::info('EditMileStone: Processing existing documents', [
                 'milestone_id' => $milestone->id,
                 'documents_type' => gettype($existingDocuments),
                 'documents_value' => $existingDocuments,
                 'has_files' => $request->hasFile('documents')
             ]);
-            
+
             // Ensure existing documents is an array (handle JSON string or null)
             if (is_string($existingDocuments)) {
                 try {
@@ -2023,7 +2037,7 @@ class ClientCompanyController extends Controller
             } elseif (!is_array($existingDocuments)) {
                 $existingDocuments = [];
             }
-            
+
             // Handle document removals
             if ($request->has('remove_documents')) {
                 $removeDocuments = json_decode($request->input('remove_documents'), true);
@@ -2032,12 +2046,12 @@ class ClientCompanyController extends Controller
                         'remove_indices' => $removeDocuments,
                         'milestone_id' => $milestone->id
                     ]);
-                    
+
                     // Remove documents from file system and filter from existing documents
                     foreach ($removeDocuments as $index) {
                         if (isset($existingDocuments[$index])) {
                             $document = $existingDocuments[$index];
-                            
+
                             // Delete physical file if it exists
                             if (isset($document['path']) && \Storage::disk('public')->exists($document['path'])) {
                                 \Storage::disk('public')->delete($document['path']);
@@ -2048,14 +2062,14 @@ class ClientCompanyController extends Controller
                             }
                         }
                     }
-                    
+
                     // Remove documents from array by filtering out the specified indices
-                    $existingDocuments = array_values(array_filter($existingDocuments, function($doc, $index) use ($removeDocuments) {
+                    $existingDocuments = array_values(array_filter($existingDocuments, function ($doc, $index) use ($removeDocuments) {
                         return !in_array($index, $removeDocuments);
                     }, ARRAY_FILTER_USE_BOTH));
                 }
             }
-            
+
             $newDocuments = [];
 
             if ($request->hasFile('documents')) {
@@ -2063,36 +2077,36 @@ class ClientCompanyController extends Controller
                     'files_count' => count($request->file('documents')),
                     'milestone_id' => $milestone->id
                 ]);
-                
+
                 foreach ($request->file('documents') as $index => $file) {
                     $fileName = time() . '_' . $index . '_' . $file->getClientOriginalName();
                     $filePath = $file->storeAs('milestones/' . $id, $fileName, 'public');
-                    
+
                     \Log::info('EditMileStone: File uploaded', [
                         'original_name' => $file->getClientOriginalName(),
                         'stored_path' => $filePath,
                         'index' => $index
                     ]);
-                    
+
                     $newDocuments[] = [
                         'name' => $file->getClientOriginalName(),
                         'url' => asset('storage/' . $filePath),
                         'path' => $filePath,
                     ];
                 }
-                
+
                 // Merge existing and new documents
                 $allDocuments = array_merge($existingDocuments, $newDocuments);
                 $milestone->documents = json_encode($allDocuments);
                 $milestone->save();
-                
+
                 \Log::info('EditMileStone: Documents saved', [
                     'existing_count' => count($existingDocuments),
                     'new_count' => count($newDocuments),
                     'total_count' => count($allDocuments),
                     'milestone_id' => $milestone->id
                 ]);
-                
+
                 // Return the merged documents directly
                 $finalDocuments = $allDocuments;
             } else {
@@ -2105,7 +2119,7 @@ class ClientCompanyController extends Controller
                 'final_documents_count' => count($finalDocuments),
                 'final_documents' => $finalDocuments
             ]);
-            
+
             return response()->json([
                 'state' => __('admin.MileStone_Edited'),
                 'success' => true,
@@ -2117,7 +2131,7 @@ class ClientCompanyController extends Controller
                     'documents' => $finalDocuments,
                 ],
             ]);
-            
+
         } catch (\Exception $e) {
             \Log::error('Error editing milestone: ' . $e->getMessage());
             return response()->json([
@@ -2150,8 +2164,8 @@ class ClientCompanyController extends Controller
 
             // Find the milestone and ensure it belongs to the company
             $milestone = Milestone::where('id', $request->id)
-                                ->where('Company_id', $id)
-                                ->first();
+                ->where('Company_id', $id)
+                ->first();
 
             if (!$milestone) {
                 return response()->json([
@@ -2176,7 +2190,7 @@ class ClientCompanyController extends Controller
                 'state' => __('startup.milestone_delete_success'),
                 'success' => true,
             ]);
-            
+
         } catch (\Exception $e) {
             \Log::error('Error deleting milestone: ' . $e->getMessage(), [
                 'milestone_id' => $request->id ?? 'unknown',
@@ -2192,47 +2206,47 @@ class ClientCompanyController extends Controller
 
 
     public function deleteDocument(Request $request)
-{
-    $index = $request->input('index');
-    $file = $request->input('file');
-    
-    // جلب الشركة الخاصة بالمستخدم
-    $company = $request->user()->company;  // تأكد من استخدام العلاقة الصحيحة
-    $documents = json_decode($company->documents, true);
+    {
+        $index = $request->input('index');
+        $file = $request->input('file');
 
-    // التأكد من وجود الملف على الفهرس المحدد
-    if (isset($documents[$index])) {
-        $document = $documents[$index];
+        // جلب الشركة الخاصة بالمستخدم
+        $company = $request->user()->company;  // تأكد من استخدام العلاقة الصحيحة
+        $documents = json_decode($company->documents, true);
 
-        // حذف الملف من قاعدة البيانات
-        unset($documents[$index]);
-        $company->documents = json_encode($documents);
-        $company->save();
+        // التأكد من وجود الملف على الفهرس المحدد
+        if (isset($documents[$index])) {
+            $document = $documents[$index];
 
-        // حذف الملف من التخزين
-        Storage::disk('pitch_deck')->delete($document);
-        
-        return response()->json(['success' => true]);
+            // حذف الملف من قاعدة البيانات
+            unset($documents[$index]);
+            $company->documents = json_encode($documents);
+            $company->save();
+
+            // حذف الملف من التخزين
+            Storage::disk('pitch_deck')->delete($document);
+
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'الملف غير موجود.']);
     }
-
-    return response()->json(['success' => false, 'message' => 'الملف غير موجود.']);
-}
 
     public function companies(Request $request)
     {
         // Map the form parameters to the expected filter parameters
         $filters = [];
-        
+
         // Handle search
         if ($request->filled('search')) {
             $filters['search'] = $request->get('search');
         }
-        
+
         // Handle organization filter (Admin only)
         if ($request->filled('orgnization')) {
             $filters['organization'] = $request->get('orgnization');
         }
-        
+
         // Handle program/cycle filter
         if ($request->filled('programFilter')) {
             $programFilter = $request->get('programFilter');
@@ -2240,12 +2254,12 @@ class ClientCompanyController extends Controller
                 $filters['programId'] = $programFilter;
             }
         }
-        
+
         // Handle stage filter
         if ($request->filled('stage')) {
             $filters['stage'] = $request->get('stage');
         }
-        
+
         // Handle sectors filter (multiple sectors)
         if ($request->filled('sectors')) {
             $sectors = $request->get('sectors');
@@ -2262,22 +2276,27 @@ class ClientCompanyController extends Controller
                 $filters['is_alumni'] = $alumni;
             }
         }
-        
+
         $companies = $this->companyService->getCompanies($filters, isApi: false);
-        
+
         // Pass the language variable
         $l = app()->getLocale();
 
         return view('admin/users/companies', compact('companies', 'l'));
     }
-    
+
+    public function companyAlumni(Request $request)
+    {
+        return view('admin.clients.startup.company_alumni');
+    }
+
     public function addEmployee(Request $request, $id)
     {
         // dd($request->all());
         try {
             if ($id) {
                 $companyId = $id;
-                
+
                 // Verify that current user has access to this company (allow admins)
                 if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager|registered')) {
                     return response()->json([
@@ -2325,7 +2344,7 @@ class ClientCompanyController extends Controller
                 foreach ($request->file('documents') as $index => $file) {
                     $fileName = time() . '_' . $index . '_' . $file->getClientOriginalName();
                     $path = $file->storeAs('employees/' . $id . '/documents', $fileName, 'public');
-                    
+
                     $documents[] = [
                         'name' => $file->getClientOriginalName(),
                         'url' => asset('storage/' . $path),
@@ -2334,7 +2353,7 @@ class ClientCompanyController extends Controller
                 }
                 $employee->documents = $documents;
             }
-            
+
             $employee->save();
             // dd($employee);
             return response()->json([
@@ -2342,7 +2361,7 @@ class ClientCompanyController extends Controller
                 'employee' => $employee,
                 'state' => 'Employee added successfully'
             ]);
-            
+
         } catch (Exception $e) {
             Log::error('Error adding employee: ' . $e->getMessage());
             return response()->json([
@@ -2354,9 +2373,9 @@ class ClientCompanyController extends Controller
     public function editEmployee(Request $request, $id)
     {
         try {
-          if ($id) {
+            if ($id) {
                 $companyId = $id;
-                
+
                 // Verify that current user has access to this company (allow admins)
                 if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager|registered')) {
                     return response()->json([
@@ -2396,8 +2415,8 @@ class ClientCompanyController extends Controller
             }
 
             $employee = Employee::where('id', $request->id)
-                                 ->where('company_id', $companyId)
-                                 ->firstOrFail();
+                ->where('company_id', $companyId)
+                ->firstOrFail();
 
             $employee->full_name = $request->full_name;
             $employee->job_title = $request->job_title;
@@ -2407,7 +2426,7 @@ class ClientCompanyController extends Controller
 
             // Handle existing documents
             $existingDocs = $employee->documents ?: [];
-            
+
             // Handle document removals
             if ($request->has('remove_documents')) {
                 $removeDocuments = json_decode($request->input('remove_documents'), true);
@@ -2422,7 +2441,7 @@ class ClientCompanyController extends Controller
                         }
                     }
                     // Remove documents from array
-                    $existingDocs = array_values(array_filter($existingDocs, function($doc, $index) use ($removeDocuments) {
+                    $existingDocs = array_values(array_filter($existingDocs, function ($doc, $index) use ($removeDocuments) {
                         return !in_array($index, $removeDocuments);
                     }, ARRAY_FILTER_USE_BOTH));
                 }
@@ -2434,7 +2453,7 @@ class ClientCompanyController extends Controller
                 foreach ($request->file('documents') as $index => $file) {
                     $fileName = time() . '_' . $index . '_' . $file->getClientOriginalName();
                     $path = $file->storeAs('employees/' . $id . '/documents', $fileName, 'public');
-                    
+
                     $newDocuments[] = [
                         'name' => $file->getClientOriginalName(),
                         'url' => asset('storage/' . $path),
@@ -2443,7 +2462,7 @@ class ClientCompanyController extends Controller
                 }
                 $existingDocs = array_merge($existingDocs, $newDocuments);
             }
-            
+
             $employee->documents = $existingDocs;
             $employee->save();
 
@@ -2452,7 +2471,7 @@ class ClientCompanyController extends Controller
                 'employee' => $employee,
                 'state' => 'Employee updated successfully'
             ]);
-            
+
         } catch (Exception $e) {
             Log::error('Error editing employee: ' . $e->getMessage());
             return response()->json([
@@ -2464,9 +2483,9 @@ class ClientCompanyController extends Controller
     public function deleteEmployee(Request $request, $id)
     {
         try {
-           if ($id) {
+            if ($id) {
                 $companyId = $id;
-                
+
                 // Verify that current user has access to this company (allow admins)
                 if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager|registered')) {
                     return response()->json([
@@ -2479,7 +2498,7 @@ class ClientCompanyController extends Controller
 
             // Get employee ID from request - handle both JSON and form data
             $employeeId = null;
-            
+
             // Try to get from JSON body first (for DELETE requests with JSON)
             $contentType = $request->header('Content-Type');
             if ($contentType && strpos($contentType, 'application/json') !== false) {
@@ -2488,12 +2507,12 @@ class ClientCompanyController extends Controller
                     $employeeId = $jsonData['id'];
                 }
             }
-            
+
             // Fallback to input/get methods (for form data)
             if (!$employeeId) {
                 $employeeId = $request->input('id') ?? $request->get('id');
             }
-            
+
             if (!$employeeId) {
                 return response()->json([
                     'errors' => ['id' => ['Employee ID is required']]
@@ -2514,8 +2533,8 @@ class ClientCompanyController extends Controller
             }
 
             $employee = Employee::where('id', $employeeId)
-                                 ->where('company_id', $companyId)
-                                 ->firstOrFail();
+                ->where('company_id', $companyId)
+                ->firstOrFail();
 
             // Delete associated documents
             if ($employee->documents && is_array($employee->documents)) {
@@ -2532,7 +2551,7 @@ class ClientCompanyController extends Controller
                 'success' => true,
                 'state' => 'Employee deleted successfully'
             ]);
-            
+
         } catch (Exception $e) {
             Log::error('Error deleting employee: ' . $e->getMessage());
             return response()->json([
@@ -2543,7 +2562,7 @@ class ClientCompanyController extends Controller
 
     public function addCompanyAlumni(Request $request, $id)
     {
-        
+
         try {
             $user = Auth::user();
             $company = Company::findOrFail($id);
@@ -2554,55 +2573,55 @@ class ClientCompanyController extends Controller
             $almuni->company_id = $id;
             $almuni->alumni = '1';
             $almuni->established_date = date('Y-m-d H:i:s');
-           
+
             //Relations Data
             $relations_data = $company_relations->map(function ($relation) {
-                                    return [
-                                        'Industry'    => $relation->industry?->name_en,
-                                        'Sector'      => $relation->sector?->name_en,
-                                        'Technology'  => $relation->technology?->name_en,
-                                    ];
-                                })->values();
-            $basic_startup_information = [
-                    'ID' => $company->id,
-                    'Startup_Name' => $company->name_en,
-                    'Alumni' => 'Yes',
-                    'Established_Date' => date('Y-m-d H:i:s'),
-                    'Location' => implode(', ', array_filter([
-                        $company->city->name_en,
-                        $company->country->name_en
-                    ])),
-                    'Country' => $company->country->name_en,
-                    'Business_Type' => $company->business_type,
-                    'Relations'     => $relations_data,
-                    'Website_Link' => $company->website,
-                    'Social Media Links' => [
-                        'Facebook' => $company->facebook,
-                        'Twitter' => $company->twitter,
-                        'Linkedin' => $company->linkedin,
-                        'Instagram' => $company->instagram,
-                        'Youtube' => $company->youtube,
-                        'Google_Map' => $company->google_map,
-                        'tiktok' => $company->tiktok,
-                    ],
+                return [
+                    'Industry' => $relation->industry?->name_en,
+                    'Sector' => $relation->sector?->name_en,
+                    'Technology' => $relation->technology?->name_en,
                 ];
+            })->values();
+            $basic_startup_information = [
+                'ID' => $company->id,
+                'Startup_Name' => $company->name_en,
+                'Alumni' => 'Yes',
+                'Established_Date' => date('Y-m-d H:i:s'),
+                'Location' => implode(', ', array_filter([
+                    $company->city->name_en,
+                    $company->country->name_en
+                ])),
+                'Country' => $company->country->name_en,
+                'Business_Type' => $company->business_type,
+                'Relations' => $relations_data,
+                'Website_Link' => $company->website,
+                'Social Media Links' => [
+                    'Facebook' => $company->facebook,
+                    'Twitter' => $company->twitter,
+                    'Linkedin' => $company->linkedin,
+                    'Instagram' => $company->instagram,
+                    'Youtube' => $company->youtube,
+                    'Google_Map' => $company->google_map,
+                    'tiktok' => $company->tiktok,
+                ],
+            ];
             $almuni->basic_startup_information = json_encode($basic_startup_information);
 
             $team_leader = Team_member::where('company_id', $id)->where('TeamMember', 'hackathon')->first();
-                $startup_leader_information = [
-                    'ID' => $team_leader->id,
-                    'Full_Name' => $team_leader->Name,
-                    'Country' => $company->country->name_en,
-                    'Email' => $team_leader->Email,
-                    'Phone_Number' => $team_leader->Phone,
-                ];
+            $startup_leader_information = [
+                'ID' => $team_leader->id,
+                'Full_Name' => $team_leader->Name,
+                'Country' => $company->country->name_en,
+                'Email' => $team_leader->Email,
+                'Phone_Number' => $team_leader->Phone,
+            ];
             $almuni->startup_leader_information = json_encode($startup_leader_information);
 
 
             $almuni->save();
-           
-               $dattt = json_decode($almuni->basic_startup_information);
-               dd($dattt);
+
+            $dattt = json_decode($almuni->basic_startup_information);
+            dd($dattt);
         } catch (Exception $e) {
             Log::error('Error deleting employee: ' . $e->getMessage());
             return response()->json([
@@ -2611,5 +2630,5 @@ class ClientCompanyController extends Controller
         }
 
     }
-   
+
 }

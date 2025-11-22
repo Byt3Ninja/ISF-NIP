@@ -374,7 +374,7 @@ return [
 	'Back'=> 'Back', 
 	'No Fields' => 'No Fields',
 	'ErrorNoPermissions' => 'Error, You do not have permissions to access this contents',
-	'My courses' => 'My courses',
+	'My courses' => 'My Courses',
 	'Screening by' => 'Screening by',
 	'You need to select judges and companies to update'=> 'You need to select judges and companies to update',
 	'comment' => 'Comment',
