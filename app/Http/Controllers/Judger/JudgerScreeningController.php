@@ -173,7 +173,7 @@ class JudgerScreeningController extends Controller
             $company->evaluation = ScreeningEvaluation::getEvaluationData( $step_id );
             return $company;
         })->filter(function( $company ) {
-            $status = trim( strtolower( $company->evaluation->status ) );
+            $status = trim( strtolower( $company?->evaluation?->status ) ) ?? 'draft';
             return $status == 'published' ? true : false;
         })->values();
         // Add your logic here
