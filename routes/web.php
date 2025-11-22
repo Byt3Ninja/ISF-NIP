@@ -15,11 +15,12 @@ use App\Http\Controllers\HackathonController;
 use App\Http\Controllers\Mentor\MentorProgramController;
 use App\Http\Controllers\Mentor\MentorshipTaskController;
 use App\Http\Controllers\Judger\JudgerScreeningController;
+use App\Http\Controllers\AdvancedExportController;
 /* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
 
 Route::get('test', function () {
-    $user = User::find(1); 
-$user->notify(new WelcomeUserNotification($user,'12345'));
+    $user = User::find(1);
+    $user->notify(new WelcomeUserNotification($user, '12345'));
 });
 
 Route::get('default-permissions', function () {
@@ -126,7 +127,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     // Chat
     Route::get('chat', 'ChatController@index');
-    
+
     // Chat API routes (using web session authentication)
     Route::get('chat/messages', 'ChatController@messages')->name('chat.messages');
     Route::get('chat/users', 'ChatController@getUsers')->name('chat.users');
@@ -183,7 +184,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     //waiting list
     Route::post('hackathon/leaveTeam', 'HackathonController@leaveTeam')->name('hackathon.leaveTeam');
     // Route::get('hackathon/manage', [HackathonController::class, 'manage']);
-    
+
     Route::get('hackathon/details/{id}', [HackathonController::class, 'show']);
     Route::post('hackathon/likeProject', [HackathonController::class, 'likeProject']);
 
@@ -381,7 +382,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     // Company Profile Employees
     Route::get('/employees/{id}', 'ClientCompanyController@getEmployees')->name('company.getEmployees');
-    Route::delete('/employees/delete/{id}','ClientCompanyController@deleteEmployee')->name('company.employees_delete');
+    Route::delete('/employees/delete/{id}', 'ClientCompanyController@deleteEmployee')->name('company.employees_delete');
     Route::post('/employees/edit/{id}', 'ClientCompanyController@editEmployee')->name('company.employees_edit');
     Route::post('/employees/add/{id}', 'ClientCompanyController@addEmployee')->name('company.employees_add');
 
@@ -389,7 +390,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('/industries/technologies', 'TechnologyController@create_technologies')->name('settings.create_technologies');
     Route::put('/industries/tech/{id}', 'TechnologyController@update_technologies')->name('settings.update_technologies');
     Route::delete('/industries/technologies/{id}', 'TechnologyController@delete_technologies')->name('settings.delete_technologies');
-    
+
     Route::post('/industries', 'IndustryController@store')->name('settings.create_industries');
     Route::put('/industries/industry/{id}', 'IndustryController@update')->name('settings.update_industries');
     Route::delete('/industries/{id}', 'IndustryController@destroy')->name('settings.delete_industries');
@@ -429,7 +430,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('/send_message', 'MessengerController@sendmsg');
     Route::get('/sendmessage', 'MessengerController@sendmessage')->name('messages.send');
     Route::post('/sendmessage', 'MessengerController@savemessage')->name('messages.save');
-    Route::post('/sendteammessage','HackathonController@sendTeamMessage')->name('messages.send_team_message');
+    Route::post('/sendteammessage', 'HackathonController@sendTeamMessage')->name('messages.send_team_message');
     Route::post('/sendReplymessage', 'MessengerController@sendReplyMessage')->name('messages.reply');
     Route::get('/get-users-by-cycle', 'MessengerController@getUsersByProgram')->name('messages.recipients_list_by_program');
 
@@ -482,6 +483,12 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('forms-submissions/export/{type}', 'FormController@export');
     Route::get('submission-details/{id}', 'FormController@submissionDetails')->name('form_submission_details.index');
 
+    // Advanced Export
+    Route::get('forms-submissions/advanced-export/status', 'AdvancedExportController@status')->name('forms_submissions.export.status');
+    Route::post('forms-submissions/advanced-export/generate', 'AdvancedExportController@generate')->name('forms_submissions.export.generate');
+    Route::get('forms-submissions/advanced-export/download', 'AdvancedExportController@download')->name('forms_submissions.export.download');
+    Route::get('forms-submissions/advanced-export/progress', 'AdvancedExportController@progress')->name('forms_submissions.export.progress');
+
     //BuilderForm Builder
     Route::get('show-builder/{id?}', 'FormBuilderController@showBuilder')->name('forms.builder_view');
     Route::get('show-form/{id}', 'FormBuilderController@showForm')->name('forms.render_view');
@@ -492,7 +499,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     //Cycles
     Route::get('cycles/{id?}', 'CyclesController@index')->name('cycles.list');
     Route::get('cycles/{id}/registered', 'CyclesController@users')->name('cycles.users_manage');
-    
+
     Route::post('cycles/{id}/add_page', 'CycleCustomPagesController@add');
     Route::post('cycles/{id}/show_page', 'CycleCustomPagesController@view');
     Route::post('cycles/{id}/update_page', 'CycleCustomPagesController@update');
@@ -500,7 +507,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('cycles/{id}/toggle_status', 'CycleCustomPagesController@toggle_status');
     Route::post('cycles/{id}/toggle_visibility', 'CycleCustomPagesController@toggle_visibility');
     Route::post('cycles/{id}/delete_page', 'CycleCustomPagesController@delete');
-    
+
     Route::post('cycles/modify', 'CyclesController@modify')->name('cycles.modify');
     Route::post('cycles/validate-url', 'CyclesController@validateURL');
     Route::get('cycles/view/{c?}/{s?}', 'CyclesController@view')->name('cycles.view');
@@ -592,7 +599,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('training/viewCourse/{id}', 'TrainingController@showCourse')->name('trainings.course_view');
     Route::get('quizResults', 'quizzesController@quizResults')->name('quizzes.quiz_Results_view');
     Route::get('quizResults/{id}', 'quizzesController@quizResultsdetails')->name('quizzes.quiz_results_view_details');
-    Route::post('/track-duration',  'TrainingController@timeTracking')->name('trainings.time_tracking');
+    Route::post('/track-duration', 'TrainingController@timeTracking')->name('trainings.time_tracking');
 
 
 
@@ -642,7 +649,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('surveys/start/{id?}', 'surveysController@survey_taking')->name('surveys.take');
     Route::post('surveys/start/{id?}', 'surveysController@survey_submit')->name('surveys.submit');
     Route::post('surveys/{survey}/questions/delete', 'surveysController@delete_questions')->name('surveys.questions_delete');
-    
+
 
     //Rooms routes
     Route::resource('rooms', 'RoomsController');
@@ -755,10 +762,10 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
         Route::get('notification-templates/{notificationTemplate}/preview', 'NotificationTemplateController@preview')->name('notification-templates.preview');
         Route::post('notification-templates/{notificationTemplate}/clone', 'NotificationTemplateController@clone')->name('notification-templates.clone');
         Route::post('notification-templates/{notificationTemplate}/test-send', 'NotificationTemplateController@testSend')->name('notification-templates.test-send');
-        
+
         // Resource routes come last
         Route::resource('notification-templates', 'NotificationTemplateController');
-        
+
         /* Notification Triggers Routes - MOVED INSIDE DASHBOARD GROUP */
         // Define specific routes BEFORE resource routes to avoid conflicts
         Route::get('notification-triggers/events', 'NotificationTriggerController@getEvents')->name('notification-triggers.events');
@@ -767,18 +774,18 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
         Route::post('notification-triggers/{notificationTrigger}/toggle-active', 'NotificationTriggerController@toggleActive')->name('notification-triggers.toggle-active');
         Route::post('notification-triggers/{notificationTrigger}/clone', 'NotificationTriggerController@clone')->name('notification-triggers.clone');
         Route::post('notification-triggers/{notificationTrigger}/test', 'NotificationTriggerController@test')->name('notification-triggers.test');
-        
+
         // Resource routes come last
         Route::resource('notification-triggers', 'NotificationTriggerController');
     });
 
 
 
-     /* Start of Activities Routes */
+    /* Start of Activities Routes */
     Route::get('/activities', [ActivityControlller::class, 'index'])->name('activities.index');
     Route::post('/log-activity', [ActivityControlller::class, 'logActivity'])->name('activity.log');
     Route::delete('/activities/{id}', [ActivityControlller::class, 'destroy'])->name('activities.destroy');
-    
+
     // Security actions for suspicious logins
     Route::post('/activities/force-logout', [ActivityControlller::class, 'forceLogout'])->name('activities.force-logout');
     Route::post('/activities/reset-password', [ActivityControlller::class, 'resetPassword'])->name('activities.reset-password');
@@ -839,8 +846,8 @@ Route::get('/callback/{provider}', 'SocialController@callback');
 Route::get('/auth/google', 'SocialController@redirectToGoogle');
 Route::get('/auth/google/callback', 'SocialController@handleGoogleCallback');
 
-Route::get('/auth/microsoft/redirect/{mentorship_id}',  'MicrosoftController@redirect')->name('integrations.auth_microsoft_redirect');
-Route::get('/auth/microsoft/callback',  'MicrosoftController@callback')->name('integrations.auth_microsoft_callback');
+Route::get('/auth/microsoft/redirect/{mentorship_id}', 'MicrosoftController@redirect')->name('integrations.auth_microsoft_redirect');
+Route::get('/auth/microsoft/callback', 'MicrosoftController@callback')->name('integrations.auth_microsoft_callback');
 
 // --------------------> Linked In <-------------------
 Route::get('/auth/linkedin/{data?}', 'SocialController@redirectToLinkedIn')->name('integrations.auth_linkedin_login');
