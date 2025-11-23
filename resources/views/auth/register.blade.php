@@ -433,14 +433,9 @@
   </div>
   <!-- / Content -->
 
-
-  <!-- Core JS -->
-  <!-- build:js assets/vendor/js/core.js -->
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
   <script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
   <script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
-  <script src="/app-assets/js/1.js"></script>
   <!-- endbuild -->
 
   <!-- Vendors JS -->
@@ -457,42 +452,9 @@
   <script src="/vuexy/assets/js/forms-selects.js"></script>
 
   <script>
-    const lang = '{{ $l }}';
 
-    // Initialize the phone input
-    const phoneInput = document.getElementById("phone");
-    const phoneError = document.getElementById('phone-error');
-    const countryCodeInput = document.querySelector("#phone_code");
 
-    const iti = intlTelInput(phoneInput, {
-      initialCountry: 'eg',
-      preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
-      utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
-      formatOnDisplay: false,
-      separateDialCode: true,
-      autoPlaceholder: "aggressive",
-      
-      customPlaceholder: (placeholder) => "e.g. " + placeholder,
-    });
 
-        // Set initial country code
-    countryCodeInput.value = iti.getSelectedCountryData().dialCode;
-
-    // Update country code when country changes
-    phoneInput.addEventListener('countrychange', function() {
-      const countryData = iti.getSelectedCountryData();
-      countryCodeInput.value = countryData.dialCode;
-    });
-
-    // Handle validation
-    phoneInput.addEventListener("input", (e) => {
-      if (!iti.isValidNumber()) {
-        phoneError.style.display = 'block';
-        phoneError.innerText = lang == 'en' ? 'Invalid phone number' : 'رقم الهاتف غير صحيح';
-      } else {
-        phoneError.style.display = 'none';
-      }
-    });
   </script>
 <script>
 // Role-specific configuration
@@ -535,9 +497,22 @@ function updateMentorFieldsVisibility(selectedRole) {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-  const checkedRole = document.querySelector('input[name="role"]:checked');
-  if (checkedRole) {
-    updateMentorFieldsVisibility(checkedRole.value);
+  const urlParams = new URLSearchParams(window.location.search);
+  const type = urlParams.get('type');
+  const data = urlParams.get('data');
+
+  const mentorRadio = document.getElementById('MentorRole');
+
+  if ((type === 'mentor' || data === '2520') && mentorRadio) {
+    mentorRadio.checked = true;
+    // We need to trigger the change event to make sure other scripts depending on it run.
+    mentorRadio.dispatchEvent(new Event('change'));
+  } else {
+    // Manually trigger for the default case
+    const checkedRole = document.querySelector('input[name="role"]:checked');
+    if (checkedRole) {
+      updateMentorFieldsVisibility(checkedRole.value);
+    }
   }
 });
 
