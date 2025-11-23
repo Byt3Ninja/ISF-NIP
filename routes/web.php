@@ -482,6 +482,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('forms-submissions', 'FormController@submissions')->name('forms_submissions.index');
     Route::get('forms-submissions/export/{type}', 'FormController@export');
     Route::get('submission-details/{id}', 'FormController@submissionDetails')->name('form_submission_details.index');
+    Route::get('submission-export/{id?}', 'FormController@exportSubmissionDetails')->name('form_submission_details.export');
 
     // Advanced Export
     Route::get('forms-submissions/advanced-export/status', 'AdvancedExportController@status')->name('forms_submissions.export.status');
