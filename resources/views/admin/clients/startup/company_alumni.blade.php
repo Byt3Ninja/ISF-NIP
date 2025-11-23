@@ -1276,60 +1276,14 @@
                     <td>STP-FM-01</td>
                     <td>2025-01-05 14:22</td>
                     <td class="text-center">
-                      <a type="button" class="btn btn-sm btn-link px-0 text-primary" data-toggle="form-details"
-                        data-target="#form-details-1">
+                      <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                        data-bs-target="#formDetailsModal-1">
                         <i class="ti ti-eye me-1"></i>{{ __('startup.view_inputs') }}
-                      </a>
+                      </button>
                     </td>
                   </tr>
                 </tbody>
               </table>
-            </div>
-
-            <div id="form-details-1" class="border rounded mt-3 p-4 d-none mx-3 mb-3">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="mb-0 fw-bold d-flex align-items-center gap-2">
-                  <i class="ti ti-list-details text-primary"></i>{{ __('startup.form_inputs_for', ['form' => 'Startup profiling form']) }}
-                </h6>
-                <a type="button" class="btn btn-sm btn-link px-0 text-muted" data-toggle="form-details"
-                  data-target="#form-details-1">
-                  <i class="ti ti-x me-1"></i>{{ __('startup.hide') }}
-                </a>
-              </div>
-              <div class="table-responsive">
-                <table class="table table-sm mb-0 align-middle">
-                  <thead class="table-light">
-                    <tr>
-                      <th class="fw-bold text-muted"><i class="ti ti-field me-1"></i>{{ __('startup.field_name') }}</th>
-                      <th class="fw-bold text-muted"><i class="ti ti-database me-1"></i>{{ __('startup.field_type') }}</th>
-                      <th class="fw-bold text-muted"><i class="ti ti-file-text me-1"></i>{{ __('startup.submitted_value') }}</th>
-                      <th class="fw-bold text-muted text-center"><i class="ti ti-paperclip me-1"></i>{{ __('startup.attachment') }}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr class="border-top">
-                      <td class="fw-medium">Company description</td>
-                      <td><span class="badge bg-label-info">{{ __('startup.text') }}</span></td>
-                      <td class="small">AI powered payment orchestration platform for SMEs.</td>
-                      <td class="text-center">&mdash;</td>
-                    </tr>
-                    <tr>
-                      <td class="fw-medium">Pitch deck file</td>
-                      <td><span class="badge bg-label-warning">{{ __('startup.file') }}</span></td>
-                      <td class="small"><span class="badge bg-label-success">{{ __('startup.uploaded') }}</span></td>
-                      <td class="text-center"><a href="#" class="fw-medium text-primary">
-                          <i class="ti ti-download me-1"></i>{{ __('startup.download') }}
-                        </a></td>
-                    </tr>
-                    <tr>
-                      <td class="fw-medium">Industry</td>
-                      <td><span class="badge bg-label-info">{{ __('startup.selection') }}</span></td>
-                      <td class="small">Financial services</td>
-                      <td class="text-center">&mdash;</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
             </div>
           </div>
         </div>
@@ -1339,6 +1293,75 @@
     <div class="alert alert-info d-flex align-items-center">
       <i class="ti ti-info-circle me-2"></i>
       {{ __('startup.snapshot_note') }}
+    </div>
+  </div>
+</div>
+
+<!-- Form Details Modal -->
+<div class="modal fade" id="formDetailsModal-1" tabindex="-1" aria-labelledby="formDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="formDetailsModalLabel">
+          {{ __('startup.form_inputs_for', ['form' => 'Startup profiling form']) }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th class="fw-bold text-muted"><i class="ti ti-field me-1"></i>{{ __('startup.field_name') }}</th>
+                <th class="fw-bold text-muted"><i class="ti ti-database me-1"></i>{{ __('startup.field_type') }}</th>
+                <th class="fw-bold text-muted"><i class="ti ti-file-text me-1"></i>{{ __('startup.submitted_value') }}</th>
+                <th class="fw-bold text-muted text-center"><i class="ti ti-paperclip me-1"></i>{{ __('startup.attachment') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="fw-medium">Company description</td>
+                <td><span class="badge bg-label-info">{{ __('startup.text') }}</span></td>
+                <td class="small">AI powered payment orchestration platform for SMEs.</td>
+                <td class="text-center">&mdash;</td>
+              </tr>
+              <tr>
+                <td class="fw-medium">Pitch deck file</td>
+                <td><span class="badge bg-label-warning">{{ __('startup.file') }}</span></td>
+                <td class="small"><span class="badge bg-label-success">{{ __('startup.uploaded') }}</span></td>
+                <td class="text-center">
+                  <a href="#" class="btn btn-sm btn-link text-primary p-0" title="Download">
+                    <i class="ti ti-download"></i>
+                  </a>
+                </td>
+              </tr>
+              <tr>
+                <td class="fw-medium">Industry</td>
+                <td><span class="badge bg-label-info">{{ __('startup.selection') }}</span></td>
+                <td class="small">Financial services</td>
+                <td class="text-center">&mdash;</td>
+              </tr>
+              <tr>
+                <td class="fw-medium">Team size</td>
+                <td><span class="badge bg-label-secondary">{{ __('startup.number') }}</span></td>
+                <td class="small">25</td>
+                <td class="text-center">&mdash;</td>
+              </tr>
+              <tr>
+                <td class="fw-medium">Business model</td>
+                <td><span class="badge bg-label-info">{{ __('startup.selection') }}</span></td>
+                <td class="small">B2B SaaS</td>
+                <td class="text-center">&mdash;</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+          <i class="ti ti-x me-1"></i>{{ __('admin.close') }}
+        </button>
+      </div>
     </div>
   </div>
 </div>
