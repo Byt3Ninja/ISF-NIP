@@ -4708,6 +4708,16 @@
                 ]
             },
             {
+                "name": "form_submission_details.export",
+                "description": "Export Form Submissions Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
                 "name": "forms_submissions.export.status",
                 "description": "Check Advanced Export Status",
                 "guard_name": "web",
