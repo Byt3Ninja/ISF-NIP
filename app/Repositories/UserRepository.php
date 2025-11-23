@@ -122,7 +122,7 @@ class UserRepository
                         $user->img_url = $img_url;
                     }
 
-                if ($data['role'] == "4" && !auth()?->user()?->hasRole('admin')) {
+                if ($data['role'] == "6" && !auth()?->user()?->hasRole('admin')) {
                
                     UsersBio::create([
                         'user_id' => $user->id,
