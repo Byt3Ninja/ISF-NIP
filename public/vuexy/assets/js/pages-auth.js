@@ -12,11 +12,11 @@ const translations = {
       notEmpty: 'Please enter username',
       stringLength: 'Username must be more than 6 characters'
     },
-    first_name_en: {
+    first_name: {
       notEmpty: 'Please enter first name',
       stringOnly: 'This field letters letters only.'
     },
-    last_name_en: {
+    last_name: {
       notEmpty: 'Please enter last name',
       stringOnly: 'This field letters letters only.'
     },
@@ -69,11 +69,11 @@ const translations = {
       notEmpty: 'يرجى إدخال اسم المستخدم',
       stringLength: 'يجب أن يكون اسم المستخدم أكثر من 6 أحرف'
     },
-    first_name_en: {
+    first_name: {
       notEmpty: 'يرجى إدخال الاسم الأول',
       stringOnly: 'هذا الحقل يقبل الحروف فقط'
     },
-    last_name_en: {
+    last_name: {
       notEmpty: 'يرجى إدخال الاسم الأخير',
       stringOnly: 'هذا الحقل يقبل الحروف فقط'
     },
@@ -137,25 +137,25 @@ function getValidationConfig(lang, isMentor) {
           }
         }
       },
-      first_name_en: {
+      first_name: {
         validators: {
           notEmpty: {
-            message: translations[lang].first_name_en.notEmpty
+            message: translations[lang].first_name.notEmpty
           },
           // regexp: {
           //   regexp: /^[a-zA-Z\u0621-\u064A]*$/i,
-          //   message: translations[lang].first_name_en.stringOnly
+          //   message: translations[lang].first_name.stringOnly
           // }
         }
       },
-      last_name_en: {
+      last_name: {
         validators: {
           notEmpty: {
-            message: translations[lang].last_name_en.notEmpty
+            message: translations[lang].last_name.notEmpty
           },
           // regexp: {
           //   regexp: /^[a-zA-Z\u0621-\u064A]*$/i,
-          //   message: translations[lang].last_name_en.stringOnly
+          //   message: translations[lang].last_name.stringOnly
           // }
         }
       },
@@ -265,7 +265,7 @@ function getValidationConfig(lang, isMentor) {
         }
       }
     };
-    config.fields.userbio = {
+    config.fields.bio_en = {
       validators: {
         notEmpty: {
           message: translations[lang].bio.notEmpty

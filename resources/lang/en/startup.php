@@ -293,6 +293,7 @@ return [
   'download' => 'Download',
   'text' => 'Text',
   'file' => 'File',
+  'number' => 'Number',
   'selection' => 'Selection',
   'uploaded' => 'Uploaded',
 

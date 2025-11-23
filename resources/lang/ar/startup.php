@@ -294,6 +294,7 @@ return [
   'download' => 'تنزيل',
   'text' => 'نص',
   'file' => 'ملف',
+  'number' => 'رقم',
   'selection' => 'اختيار',
   'uploaded' => 'تم الرفع',
 

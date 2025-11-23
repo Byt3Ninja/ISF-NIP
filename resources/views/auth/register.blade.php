@@ -14,7 +14,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
-  <meta name="description" content="VI Login">
+  <meta name="description" content="Register a new account">
   <meta name="author" content="info@growthlabs.app">
   <title>
     {{ $l == 'en' ? 'Register New Account' : 'تسجيل حساب جديد'}}
@@ -42,86 +42,11 @@
 
   <!-- Vendors CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/node-waves/node-waves.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/typeahead-js/typeahead.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/swiper/swiper.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-checkboxes-jquery/datatables.checkboxes.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
   
   <!-- Page CSS -->
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/page-auth.css" />
-
-  <style>
-    div[data-validator] {
-      width: 100% !important;
-      text-align: {{ $l == 'ar' ? 'end' : 'start' }} !important;
-    }
-
-    #switcher-container {
-      position: absolute;
-      top: 1rem;
-      width: 100px;
-    }
-
-    .iti__country-list {
-      position: absolute;
-      left: 1rem;
-      /* right: 0; */
-      z-index: 9999;
-      list-style: none;
-      text-align: left;
-      padding: 0;
-      margin: 0 0 0 -1px;
-      box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
-      background-color: white;
-      border: 1px solid #CCC;
-      white-space: nowrap;
-      max-height: 200px;
-      width: 350px;
-      overflow-y: scroll;
-      overflow-x: auto -webkit-overflow-scrolling: touch;
-      background-color: #fff;
-    }
-    .uploader {
-      border: 2px dashed #dee2e6;
-      border-radius: .75rem;
-      padding: 1.25rem;
-      text-align: center;
-      cursor: pointer;
-      transition: background-color .15s, border-color .15s;
-      }
-      .uploader.dragover {
-      background-color: #f8fafc;
-      border-color: #86b7fe;
-      box-shadow: 0 0 0 .25rem rgba(13,110,253,.08);
-      }
-      .avatar-preview {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid #e9ecef;
-      background: #f8f9fa;
-      }
-      .file-input {
-      display: none;
-      }
-
-      .register-card-wrapper {
-        width: 100%;
-      }
-
-      @media screen and (min-width: 900px) {
-      .register-card-wrapper {
-        width: 50%;
-      }
-      }
-  </style>
 
   <!-- Helpers -->
   <script src="/vuexy/assets/vendor/js/helpers.js"></script>
@@ -140,11 +65,10 @@
   @php
   $setting = App\Settings::first();
   $logo =setting('Logo','images/background/logo.png');
-  $accountRoles = ['Mentor', 'Founder'];
+  $accountRoles = ['Founder', 'Mentor'];
   $termsUrl = setting('terms_url','#') ;
   $privacyUrl = setting('privacy_url','#');
   @endphp
-
 
   <!-- Content -->
   <!-- Toggle theme and language -->
@@ -240,11 +164,19 @@
                     <div class="col-6 mb-4">
                       <label for="{{$role}}Role" style="display: grid; place-items: center;" class="form-check custom-option custom-option-icon cursor-pointer">
                         <div class="d-flex align-items-center">
-                          <input name="role" class="form-check-input role-input" type="radio" value="{{$key == 0 ? '8' : '8'}}" id="{{$role}}Role" checked={{ $key==0 ? 'true' : '' }} required />
-                          <div class="form-check-label custom-option-content d-flex align-items-center">
-                            <i class="ti ti-{{ $key==0 ? 'user' : 'businessplan' }} me-2"></i>
-                            <span class="custom-option-title">{{ __('admin.'. $role) }}</span>
-                          </div>
+                          @if($role === 'Founder')
+                            <input name="role" class="form-check-input role-input" type="radio" value="8" id="{{$role}}Role" checked required />
+                            <div class="form-check-label custom-option-content d-flex align-items-center">
+                              <i class="ti ti-businessplan me-2"></i>
+                              <span class="custom-option-title">{{ __('admin.'. $role) }}</span>
+                            </div>
+                          @else
+                            <input name="role" class="form-check-input role-input" type="radio" value="6" id="{{$role}}Role" required />
+                            <div class="form-check-label custom-option-content d-flex align-items-center">
+                              <i class="ti ti-user me-2"></i>
+                              <span class="custom-option-title">{{ __('admin.'. $role) }}</span>
+                            </div>
+                          @endif
                         </div>
                       </label>
                     </div>
@@ -304,25 +236,10 @@
                         </div>
                       </div>
 
-                      {{-- <div class="col-12 mb-6">
-                          <label for="file1" class="d-flex justify-content-center align-items-center position-relative rounded"
-                            style="height: 140px; cursor: pointer; width: 200px; margin: 0 auto;">
-                            <img 
-                              src="{{'/images/user-placeholder.jpeg' }}"
-                              onerror="this.src='/images/user-placeholder.jpeg'"
-                              alt="Organization Logo" 
-                              class="rounded img-fluid border shadow-sm"
-                              style="height: 140px; width: 200px; object-fit: cover;" 
-                            />
-                            <input type="file" class="form-control d-none" id="file1" name="img_url">
-                            <i class="ti ti-camera-plus position-absolute fs-3 text-dark end-0 bottom-0 m-4 z-1"></i>
-                          </label>
-                      </div> --}}
-
                       <div class="col-12 mb-3">
-                        <label for="first_name_en" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('auth.firstName') }}</label>
+                        <label for="first_name" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('auth.firstName') }}</label>
                         <div class="input-group input-group-merge">
-                          <input name="first_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="first_name_en" placeholder="{{ __('auth.First English Name') }}" required autofocus />
+                          <input name="first_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="first_name" placeholder="{{ __('auth.First English Name') }}" required autofocus />
                           @error('first_name')
                           <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
                         @enderror
@@ -330,9 +247,9 @@
                       </div>
 
                       <div class="col-12 mb-3">
-                        <label for="last_name_en" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __("auth.secondName") }}</label>
+                        <label for="last_name" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __("auth.secondName") }}</label>
                         <div class="input-group input-group-merge">
-                          <input name="last_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="last_name_en" placeholder="{{ __('auth.Last English Name') }}" required />
+                          <input name="last_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="last_name" placeholder="{{ __('auth.Last English Name') }}" required />
                         </div>
                         @error('last_name')
                           <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
@@ -342,7 +259,7 @@
                       <div class="col-12 mb-3">
                         <label for="email" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('auth.E-Mail') }}</label>
                         <div class="input-group input-group-merge">
-                          <input name="email" type="email" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" placeholder="{{ __('auth.E-Mail') }}" required />
+                          <input name="email" type="email" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" placeholder="{{ __('auth.E-Mail') }}" required autocomplete="off" />
                         </div>
                         @error('email')
                           <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
@@ -352,7 +269,7 @@
                       <div class="col-12 mb-4 form-password-toggle">
                         <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="password">{{ __('auth.Password') }}</label>
                         <div class="input-group input-group-merge">
-                          <input type="password" class="form-control" id="password" placeholder="{{ __('auth.Password') }}" name="password" required aria-describedby="password" />
+                          <input type="password" class="form-control" id="password" placeholder="{{ __('auth.Password') }}" name="password" required aria-describedby="password" autocomplete="new-password" />
                           <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
                         </div>
                         @error('password')
@@ -363,7 +280,7 @@
                       <div class="col-12 mb-4 form-password-toggle">
                         <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="password_confirmation">{{ __('auth.Confirm') }}</label>
                         <div class="input-group input-group-merge">
-                          <input type="password" class="form-control" id="password_confirmation" placeholder="{{ __('auth.Password') }}" name="password_confirmation" required aria-describedby="new-password" />
+                          <input type="password" class="form-control" id="password_confirmation" placeholder="{{ __('auth.Password') }}" name="password_confirmation" required aria-describedby="new-password" autocomplete="new-password" />
                           <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
                         </div>
                         @error('password_confirmation')
@@ -522,26 +439,15 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
   <script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
-  {{-- <script src="/vuexy/assets/vendor/libs/popper/popper.js"></script> --}}
   <script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
-  <script src="/vuexy/assets/vendor/libs/node-waves/node-waves.js"></script>
-  <script src="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-  <script src="/vuexy/assets/vendor/libs/hammer/hammer.js"></script>
-  <script src="/vuexy/assets/vendor/libs/i18n/i18n.js"></script>
-  <script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
-  <script src="/vuexy/assets/vendor/js/menu.js"></script>
   <script src="/app-assets/js/1.js"></script>
   <!-- endbuild -->
 
   <!-- Vendors JS -->
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
-  <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
-  <script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
-  <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
-  {{-- <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script> --}}
 
   <!-- Main JS -->
   <script src="/vuexy/assets/js/main.js"></script>
@@ -549,7 +455,6 @@
   <!-- Page JS -->
   <script src="/vuexy/assets/js/pages-auth.js"></script>
   <script src="/vuexy/assets/js/forms-selects.js"></script>
-  {{-- <script src="/vuexy/assets/js/pages-account-settings-account.js"></script> --}}
 
   <script>
     const lang = '{{ $l }}';
@@ -579,43 +484,75 @@
       countryCodeInput.value = countryData.dialCode;
     });
 
-    // Optional: Handle validation
+    // Handle validation
     phoneInput.addEventListener("input", (e) => {
-      console.log(e.target.value);
       if (!iti.isValidNumber()) {
         phoneError.style.display = 'block';
         phoneError.innerText = lang == 'en' ? 'Invalid phone number' : 'رقم الهاتف غير صحيح';
       } else {
         phoneError.style.display = 'none';
-        // console.error("Invalid number");
       }
     });
   </script>
 <script>
+// Role-specific configuration
+const ROLE_CONFIG = {
+  '8': {
+    name: 'founder',
+    hash: '2521',
+    type: '3',
+    showMentorFields: false
+  },
+  '6': {
+    name: 'mentor',
+    hash: '2520',
+    type: 'mentor',
+    showMentorFields: true
+  }
+};
+
 const mentorWrapper = document.getElementById('mentorInputsWrapper');
 const mentorFields = mentorWrapper.querySelectorAll('input, select, textarea');
 
+// Update mentor fields visibility based on role
+function updateMentorFieldsVisibility(selectedRole) {
+  const config = ROLE_CONFIG[selectedRole];
+  
+  if (config.showMentorFields) {
+    mentorWrapper.style.display = 'block';
+    mentorFields.forEach(f => {
+      f.disabled = false;
+      f.removeAttribute('disabled');
+    });
+  } else {
+    mentorWrapper.style.display = 'none';
+    mentorFields.forEach(f => {
+      f.disabled = false;
+      f.removeAttribute('disabled');
+    });
+  }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+  const checkedRole = document.querySelector('input[name="role"]:checked');
+  if (checkedRole) {
+    updateMentorFieldsVisibility(checkedRole.value);
+  }
+});
+
+// Handle role change
 document.querySelectorAll('.role-input').forEach(input => {
-  input.addEventListener('change', function () {
-    let selectedRole = this.value;
-    let selectedRoleHash, typeValue;
-
-    if (selectedRole === '4') {
-      selectedRoleHash = "2520";
-      typeValue = "mentor";
-      mentorWrapper.style.display = 'block';
-      mentorFields.forEach(f => f.disabled = false);
-    } else {
-      selectedRoleHash = "2521";
-      typeValue = "3";
-      mentorWrapper.style.display = 'none';
-      mentorFields.forEach(f => f.disabled = true);
-    }
-
-    // تحديث الرابط بنفس الصفحة مع إضافة type و data
+  input.addEventListener('change', function() {
+    const selectedRole = this.value;
+    const config = ROLE_CONFIG[selectedRole];
+    
+    updateMentorFieldsVisibility(selectedRole);
+    
+    // Update URL with role data
     const url = new URL(window.location.href);
-    url.searchParams.set('type', typeValue);
-    url.searchParams.set('data', selectedRoleHash);
+    url.searchParams.set('type', config.type);
+    url.searchParams.set('data', config.hash);
     window.history.pushState({}, '', url);
   });
 });
@@ -630,10 +567,6 @@ document.querySelectorAll('.role-input').forEach(input => {
   const avatarPreview = document.getElementById('avatarPreview');
   const progressBarWrap = document.querySelector('.progress');
   const progressBar = document.getElementById('progressBar');
-  // const fileError = document.getElementById('fileError');
-
-  // const MAX_SIZE = 3 * 1024 * 1024; // 3MB
-  // const ALLOWED_TYPES = ['image/png', 'image/jpeg'];
 
   // Helpers
   function resetUploader() {
@@ -641,30 +574,13 @@ document.querySelectorAll('.role-input').forEach(input => {
     removeBtn.classList.add('d-none');
     progressBar.style.width = '0%';
     progressBarWrap.style.display = 'none';
-    // fileError.style.display = 'none';
   }
 
-  // function showError(msg) {
-  //   fileError.textContent = msg;
-  //   fileError.style.display = 'block';
-  // }
-
   function handleFile(file) {
-    // Validate
-    // if (!ALLOWED_TYPES.includes(file.type)) {
-    //   showError('Unsupported file type — use PNG or JPG.');
-    //   return;
-    // }
-    // if (file.size > MAX_SIZE) {
-    //   showError('File too large — must be under 3 MB.');
-    //   return;
-    // }
-
     // Read with progress
     const reader = new FileReader();
     progressBarWrap.style.display = 'block';
     progressBar.style.width = '0%';
-    // fileError.style.display = 'none';
 
     reader.onprogress = (e) => {
       if (e.lengthComputable) {
@@ -682,7 +598,6 @@ document.querySelectorAll('.role-input').forEach(input => {
     };
 
     reader.onerror = () => {
-      // showError('Error reading file. Try another image.');
       progressBarWrap.style.display = 'none';
     };
 
