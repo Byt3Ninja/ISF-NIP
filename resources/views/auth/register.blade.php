@@ -440,7 +440,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
   <script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
   <script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
-  <script src="/app-assets/js/1.js"></script>
   <!-- endbuild -->
 
   <!-- Vendors JS -->
