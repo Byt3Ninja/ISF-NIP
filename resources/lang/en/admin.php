@@ -411,6 +411,7 @@ return [
 	'Last edited by' => 'Last edited by',
 	'Sure del cal' => 'Are you sure, delete current calendar item?',
 	'Private' => 'Private',
+	'Not_Private' => 'Not Private',
 	'Service request' => 'Service request',
 	'request sent' => 'Your request sent successfully, and waiting system manager approval',
 	'just now' => 'Just now',
@@ -2518,5 +2519,7 @@ return [
 	'Expertises' => 'Expertises',
 	'all_Expertises' => 'All Expertises',
 	'Expertises_Created' => 'Expertises Created',
-
+	'manage_hackathon' => 'Manage Hackathon',
+	'manage_steps' => 'Manage Steps',
+	'manage_startups' => 'Manage Startups',
 ];
