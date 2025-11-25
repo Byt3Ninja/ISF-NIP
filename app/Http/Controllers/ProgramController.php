@@ -42,30 +42,30 @@ class ProgramController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        $search = $request->input('search'); // التحقق من وجود البحث في الطلب
+        $search = $request->input('search');
 
-        if (Auth()->user()->hasRole('Admin')) {
-            // إذا كان المستخدم Admin
+        if (auth()->user()->hasRole('Admin')) {
             $cycles = Cycle::when($search, function ($query, $search) {
-                return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
+                return $query->where('title', 'like', '%' . $search . '%');
             });
-        } else if (Auth()->user()->hasRole('organizationManager')) {
-            $cycles = Cycle::where('organization_id', $user->organization_id)->when($search, function ($query, $search) {
-                return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
-            });
+        } else if (auth()->user()->hasRole('organizationManager')) {
+            $cycles = Cycle::where('organization_id', $user->organization_id)
+                ->when($search, function ($query, $search) {
+                    return $query->where('title', 'like', '%' . $search . '%');
+                });
         } else {
-            // إذا كان المستخدم ليس Admin
             $Organization = Organization::where('user_id', auth()->user()->id)->first();
 
             if (!empty($Organization)) {
                 $cycles = Cycle::where('organization_id', $Organization->id)
                     ->when($search, function ($query, $search) {
-                        return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
+                        return $query->where('title', 'like', '%' . $search . '%');
                     });
             } else {
-                $cycles = Cycle::where('id', 0); // لا توجد دورات إذا لم يكن لدى المستخدم منظمة
+                $cycles = Cycle::where('id', 0);
             }
         }
+
         if ($request->organization_id != 0) {
             $cycles = $cycles->where('organization_id', $request->organization_id);
         }
@@ -82,27 +82,32 @@ class ProgramController extends Controller
             $cycles = $cycles->whereNull('private');
         }
         if ($request->filled('program_type')) {
-         $cycles->where('type', $request->program_type);
+            $cycles->where('type', $request->program_type);
         }
-        $cycles = $cycles->orderBy('id', 'desc')->with(['organization'])->get();
-        $cycles = $cycles->map(function( $cycle ) {
-            $cycle->join_url = null;
-            if( $cycle->is_public == 0 ) { return $cycle; }
-            else
-            {
-                $org = $cycle->organization;
-                $slug = $cycle->public_slug;
-                if( !empty( $slug ) && trim( $slug ) && !empty( $org ) )
-                {
-                    $short_code = $org->short_code;
-                    $cycle->join_url = URL::to("/$short_code/program/$slug");
+
+        // 📌 Use paginate instead of get()
+        $cycles = $cycles->orderBy('id', 'desc')
+            ->with('organization')
+            ->paginate(9)                      // ← paginate 9 per page
+            ->through(function ($cycle) {      // ← apply mapping AFTER pagination
+                $cycle->join_url = null;
+
+                if ($cycle->is_public != 0) {
+                    $org = $cycle->organization;
+                    $slug = $cycle->public_slug;
+
+                    if (!empty($slug) && trim($slug) && !empty($org)) {
+                        $short_code = $org->short_code;
+                        $cycle->join_url = URL::to("/$short_code/program/$slug");
+                    }
                 }
-            }
-            return $cycle;
-        });
+                return $cycle;
+            });
+
         return view('admin.programs.index', compact('cycles'));
     }
 
+    
     /**
      * Show the form for creating a new resource.
      */

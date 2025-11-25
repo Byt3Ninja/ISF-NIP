@@ -70,6 +70,7 @@ return [
     'Public URL available' => 'Public URL available',
     'Public URL not available' => 'The slug <strong> :slug </strong> is already in use. Please choose another one.',
     'copy public link' => 'copy public link',
+    'copy private link' => 'copy private link',
     'Title' => 'Title',
     'Save' => 'Save',
     'steps' => 'Steps',
@@ -593,5 +594,8 @@ return [
     'type_by_time' => 'Run by Time',
     'type_by_cycle_helper' => 'Steps begin automatically on the program start date and progress sequentially.',
     'type_by_time_helper' => 'Steps follow the specific start date you set for each one.',
-	"Programs_Startups" => "Programs Startups",
+	  'Programs_Startups' => 'Programs Startups',
+    'general' => 'General',
+    'public_link_copied_successfully' => 'Public link copied successfully',
+    'private_link_copied_successfully' => 'Private link copied successfully',
 ];

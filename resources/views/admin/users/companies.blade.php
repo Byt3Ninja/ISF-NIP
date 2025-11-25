@@ -40,7 +40,7 @@
                   <img src="/icons/filled-rocket.svg" width="25" height="25" alt="Companies" />
                 </div>
                 <div class="mx-4" style="height: 50px;">
-                  <p class="text-black fw-medium fs-5" style="margin-bottom: -3px;">
+                  <p class="text-dark fw-semibold fs-5" style="margin-bottom: -3px;">
                     {{ $l == 'en' ? 'Startups' : 'الشركات' }}
                   </p>
                   <span class="fs-5">
@@ -63,7 +63,7 @@
                                     (request()->has('sectors') && !empty(request('sectors')));
                 @endphp
                 @if($hasActiveFilters)
-                  <a href="{{ route('users.view_companies') }}" class="btn btn-outline-secondary" title="{{ __('admin.Reset_Filters') }}">
+                  <a href="{{ route('users.view_companies') }}" class="btn btn-outline-secondary" title="{{ __('admin.Reset') }}">
                     <i class="ti ti-refresh me-2"></i>
                     {{ __('admin.Reset') }}
                   </a>
