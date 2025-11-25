@@ -438,36 +438,10 @@
     @if( $_user->ableToAny(['cycles.list', 'programlist.index'], $permissions) )
       <li
         class="{{ Request::is('dashboard/cycles*', 'dashboard/programlist*') ? 'active' : '' }} menu-item">
-        <a class="menu-link">
+        <a href="{{ route('programlist.index') }}" class="menu-link">
           <i class="menu-icon tf-icons ti ti-components"></i>
           <div>{{ __('admin.Cycles') }}</div>
         </a>
-        {{-- <ul class="menu-sub">
-          <li class="{{ Request::is('dashboard/programlist*') ? 'active' : '' }} menu-item">
-            <a href="/dashboard/programlist" class="menu-link">
-              <span class="menu-item">{{ __('admin.ProgramList') }}</span>
-              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-            </a>
-          </li>
-          <li class="{{ Request::is('dashboard/hackathon*') ? 'active' : '' }} menu-item">
-            <a href="/dashboard/hackathon" class="menu-link">
-              <span class="menu-item">{{ __('admin.Hackathons') }}</span>
-              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-            </a>
-          </li>
-          <li class="{{ preg_match('#^dashboard/cycles(/\d+)?$#', Request::path()) ? 'active' : '' }} menu-item">
-            <a href="/dashboard/cycles" class="menu-link">
-              <span class="menu-item">{{ __('cycles.steps') }}</span>
-              <i class="bx bx-message"></i>
-            </a>
-          </li>
-          <li class="{{ Request::is('dashboard/cycles/*/registered') ? 'active' : '' }} menu-item">
-            <a href="/dashboard/cycles/0/registered" class="menu-link">
-              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-              <span class="menu-item"> {{ __('admin.Startups') }}</span>
-            </a>
-          </li>
-        </ul> --}}
       </li>
 
 
