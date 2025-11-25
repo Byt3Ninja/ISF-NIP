@@ -70,6 +70,7 @@ return [
     'Public URL available' => 'رابط الوصول متاح',
     'Public URL not available' => 'اسم الرابط <strong> :slug </strong> مستخدم بالفعل. يرجى اختيار اسم اخر',
     'copy public link' => 'نسخ رابط الوصول',
+    'copy private link' => 'نسخ رابط الوصول الخاص',
     'Title' => 'العنوان',
     'Save' => 'حفظ',
     'steps' => 'المراحل',
@@ -588,5 +589,7 @@ return [
     'type_by_time_helper' => 'في هذا الوضع، تتبع الخطوات تاريخ البدء المحدد الذي قمت بتعيينه لكل منها.',
   	"Programs_Startups" => "شركات البرامج",
     'general' => 'عام',
+    'public_link_copied_successfully' => 'تم نسخ الرابط العام بنجاح',
+    'private_link_copied_successfully' => 'تم نسخ الرابط الخاص بنجاح',
 ];
 
