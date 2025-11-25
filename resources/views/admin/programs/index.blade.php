@@ -97,7 +97,7 @@
                   @if ($cycle->img_url)
                     <img 
                       src="{{ $cycle->img_url }}"
-                      alt="Logo"
+                      alt="{{ __('admin.Logo') }}"
                       class="img-fluid w-100 h-100 object-cover"
                     />
                   @else
