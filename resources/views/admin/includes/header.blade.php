@@ -268,7 +268,7 @@
             [
                 'label' => $l == 'en' ? 'Forms List' : 'قائمة النماذج',
                 'icon' => 'ti ti-list',
-                'route' => '/dashboard/forms-list',
+                'route' => '/dashboard/forms',
                 'permission' => 'forms.index',
                 'isVisible' => true
             ],

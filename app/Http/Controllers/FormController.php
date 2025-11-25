@@ -14,6 +14,7 @@ class FormController extends Controller
 {
 	public function index()
 	{
+		$request = request();
 		$user = Auth::user();
 		$data = [];
 		$l = app()->getLocale();
@@ -50,6 +51,7 @@ class FormController extends Controller
 			$data->form_id = $form->BF_id ?? 'null';
 			$data->form_name = $form->BF_form_name ?? 'null';
 			$data->assigned_organization = $form->{'o_name_'.$l} ?? 'null';
+			$data->org_id = $form->o_id ?? 'null';
 			$data->last_modified = $form->BF_updated_at ?? 'null';
 			$data->created_date = $form->BF_created_at ?? 'null';
 			$filteredSteps = $steps->whereIn('data', $form->BF_id) ?? 'null';
@@ -58,8 +60,56 @@ class FormController extends Controller
 			return $data;
 		});
 
-		// return response()->json($data);
-		return view('admin.settings.forms.index', compact('data'));
+		$submissionsData = Formdata::formsData( $request )->all();
+		$submissions = collect($submissionsData);
+
+		$top_organizations = collect();
+
+		$formsCountByOrg = $data
+				->filter(fn($item) => $item->submissions > 0)
+				->groupBy('assigned_organization')
+				->map(fn($items) => $items->count());
+
+		$submissionsCountByOrg = $submissions
+				->groupBy('organization_name')
+				->map(fn($items) => $items->count());
+
+
+		foreach ($formsCountByOrg as $org => $formsCount) {
+				$top_organizations[$org] = [
+						'forms_with_submissions' => $formsCount,
+						'total_submissions'      => $submissionsCountByOrg[$org] ?? 0,
+				];
+		}
+
+		$top_organizations = $top_organizations
+				->sortByDesc('total_submissions')
+				->take(6)
+				->toArray();
+
+
+		$analytics = [
+				'total_forms' => $data->count(),
+				'total_submissions' => $data->sum(function ($item) {
+						return $item->submissions;
+				}),
+				'total_organizations' => $data
+						->pluck('assigned_organization')
+						->filter(fn($org) => $org !== 'null')
+						->unique()
+						->count(),
+				'total_submitters' => $submissions
+						->pluck('submitted_by')
+						->filter()
+						->map(fn($names) => explode(',', $names))
+						->flatten()
+						->map(fn($name) => trim($name))
+						->unique()
+						->count(),
+				'top_organizations' => $top_organizations,
+		];
+
+		return view('admin.settings.forms.index', compact('data', 'submissionsData', 'analytics'));
 	}
 	
 	public function submissions()

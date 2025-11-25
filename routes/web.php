@@ -477,7 +477,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::resource('faqs', 'FaqsController');
 
     // Forms
-    Route::get('forms-list', 'FormController@index')->name('forms.index');
+    Route::get('forms', 'FormController@index')->name('forms.index');
 
     Route::get('forms-submissions', 'FormController@submissions')->name('forms_submissions.index');
     Route::get('forms-submissions/export/{type}', 'FormController@export');
