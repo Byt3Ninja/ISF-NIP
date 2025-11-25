@@ -407,15 +407,16 @@
         </a>
      </li>
     @endif
-@if( $_user->hasAnyrole('Admin|organizationManager') )
-    <li class="{{ Request::is('dashboard/forms-list*', 'dashboard/show-builder*', 'dashboard/forms-submissions*', 'dashboard/submission-details*') ? 'sidebar-group-active open' : '' }} menu-item">
-      <a class="menu-link menu-toggle">
+    
+    @if( $_user->hasAnyrole('Admin|organizationManager') )
+    <li class="{{ Request::is('dashboard/forms*', 'dashboard/show-builder*', 'dashboard/forms-submissions*', 'dashboard/submission-details*') ? 'active' : '' }} menu-item">
+      <a href="/dashboard/forms" class="menu-link">
         <i class="menu-icon tf-icons ti ti-forms"></i>
         <div>{{ __('admin.Forms') }}</div>
       </a>
-      <ul class="menu-sub">
-        <li class="{{ Request::is('dashboard/forms-list*') ? 'active' : '' }} menu-item">
-          <a href="/dashboard/forms-list" class="menu-link">
+      {{-- <ul class="menu-sub">
+        <li class="{{ Request::is('dashboard/forms*') ? 'active' : '' }} menu-item">
+          <a href="/dashboard/forms" class="menu-link">
             <div>{{ __('admin.Forms List') }}</div>
           </a>
         </li>
@@ -431,9 +432,9 @@
             <div>{{ __('admin.Forms Submissions') }}</div>
           </a>
         </li>
-      </ul>
+      </ul> --}}
     </li>
-@endif
+    @endif
 
     @if( $_user->ableToAny(['cycles.list', 'programlist.index'], $permissions) )
       <li
