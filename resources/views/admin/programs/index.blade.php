@@ -92,11 +92,11 @@
           @endphp
           <div class="col-md-4">
             <div class="card h-100 shadow-sm">
-              <div class="card-header d-flex align-items-center justify-content-between">
-                <div class="w-px-52 h-px-52 bg-white rounded me-2 border shadow-xs d-flex justify-content-center align-items-center">
+              <div class="card-header d-flex align-items-center justify-content-between pb-3">
+                <div class="w-px-52 h-px-52 bg-white rounded overflow-hidden me-2 border shadow-xs d-flex justify-content-center align-items-center">
                   @if ($cycle->img_url)
                     <img 
-                      src="{{ $cycle->img_url }}"
+                      src="{{ asset($cycle->img_url) }}"
                       alt="{{ __('admin.Logo') }}"
                       class="img-fluid w-100 h-100 object-cover"
                     />
