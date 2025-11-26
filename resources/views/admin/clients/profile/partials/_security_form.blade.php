@@ -27,7 +27,7 @@ $passwordRules = [
     <div class="tab-pane fade show active" id="change_password">
       <!-- Change Password -->
       {{-- <h5 class="mb-3">{{ __('admin.Change_Password') }}</h5> --}}
-      <form id="changePasswordForm" method="post" action="{{ route('user.profile_update_password') }}"
+      <form id="changePasswordForm" method="post" action="{{ route('user.profile_update_my_password') }}"
         enctype="multipart/form-data">
         {!! csrf_field() !!}
         <div class="row">
