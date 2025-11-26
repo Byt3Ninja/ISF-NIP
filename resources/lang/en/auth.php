@@ -79,4 +79,9 @@ return [
 	'validate_terms_agreement_required' => 'You must agree to the terms and conditions',
 	'validate_terms_agreement_in' => 'You must agree to the terms and conditions',
 	'provider_registration_recorded' => 'Your registration has been recorded. Please wait for admin approval. You will receive an email when approved.',
+	'submittedAt' => 'Submitted At',
+	'ActionTaken' => 'Action Taken',
+	'ActionTakenBy' => 'Action Taken By',
+	'rejectionReason' => 'Rejection Reason',
+	'serviceProviderRequestHaveActionTakenAlready' => 'This request already has an action taken.',
 ];

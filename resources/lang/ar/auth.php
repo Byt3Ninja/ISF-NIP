@@ -78,5 +78,10 @@ return [
 	'validate_terms_agreement_required' => 'يجب الموافقة على شروط الخدمة',
 	'validate_terms_agreement_in' => 'يجب الموافقة على شروط الخدمة',
 	'provider_registration_recorded' => 'تم تسجيل طلبك بنجاح. يرجى الانتظار حتى يتم الموافقة عليه. سوف تتلقى بريد الكتروني عند الموافقة.',
+	'submittedAt' => 'وقت تقديم الطلب',
+	'ActionTaken' => 'الإجراء المتخذ',
+	'ActionTakenBy' => 'الإجراء المتخذ بواسطة',
+	'rejectionReason' => 'سبب الرفض',
+	'serviceProviderRequestHaveActionTakenAlready' => 'هذا الطلب لديه اجراء متخذ بالفعل.',
 ];
 

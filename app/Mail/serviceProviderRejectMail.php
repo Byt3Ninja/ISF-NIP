@@ -1,0 +1,36 @@
+<?php
+
+namespace App\Mail;
+
+use App\Services\GlobalNotificationSettingsService;
+use App\Traits\ConfiguresSmtp;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
+use Illuminate\Mail\Mailable;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Queue\SerializesModels;
+use Throwable;
+
+class serviceProviderRejectMail extends Mailable implements ShouldQueue
+{
+	use Queueable, SerializesModels;
+
+	public $reason;
+	public $contact_name;
+	
+	/**
+	 * Create a new message instance.
+	 */
+	public function __construct($contact_name, $reason)
+	{
+		$this->reason = $reason;
+		$this->contact_name = $contact_name;
+	}
+
+	public function build()
+	{
+		return $this->subject('Update on Your Request - تحديث بخصوص طلبكم')->view('emails.service-providers.reject', ['contact_name' => $this->contact_name, 'reason' => $this->reason]);
+	}
+}

@@ -167,6 +167,27 @@ class UserController extends Controller
 	}
 
 	/**
+	 * Update the specified resource in storage.
+	 *
+	 * @param  \Illuminate\Http\Request  $request
+	 * @param  \App\User  $User
+	 * @return \Illuminate\Http\Response
+	 */
+	public function updateMyPassword(UpdateUserPasswordRequest $request)
+	{
+		$this->authorize('updateMyPassword', Auth::user());
+	
+		$user = Auth::user();
+		$result = $this->userService->updatePassword($user, $request->all());
+
+		if ($result) {
+			return redirect()->back()->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
+		} else {
+			return back()->withInput()->with(['msg' => 'FailedStore', 'class' => 'danger']);
+		}
+	}
+
+	/**
 	 * Remove the specified resource from storage.
 	 *
 	 * @param  \App\User  $User
