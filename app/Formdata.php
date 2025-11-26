@@ -21,6 +21,11 @@ class Formdata extends Model
     {
         return $this->belongsTo(Formfield::class, 'field_id', 'id');
     }
+    public function step()
+    {
+        return $this->belongsTo(Step::class, 'step_id', 'id');
+    }
+
 
     public static function formsData( $request )
     {

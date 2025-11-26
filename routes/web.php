@@ -386,6 +386,10 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('/employees/edit/{id}', 'ClientCompanyController@editEmployee')->name('company.employees_edit');
     Route::post('/employees/add/{id}', 'ClientCompanyController@addEmployee')->name('company.employees_add');
 
+    // Almuni 
+    Route::get('/AddCompanyalumni/{id}', 'ClientCompanyController@addCompanyAlumni')->name('company.addCompanyAlumni');
+
+
     //Industry
     Route::post('/industries/technologies', 'TechnologyController@create_technologies')->name('settings.create_technologies');
     Route::put('/industries/tech/{id}', 'TechnologyController@update_technologies')->name('settings.update_technologies');
