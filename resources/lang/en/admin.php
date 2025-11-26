@@ -2522,4 +2522,5 @@ return [
 	'manage_hackathon' => 'Manage Hackathon',
 	'manage_steps' => 'Manage Steps',
 	'manage_startups' => 'Manage Startups',
+	'HaveCompany' => 'Has a company',
 ];

@@ -2575,4 +2575,5 @@ return [
 	'manage_hackathon' => 'ادارة الهاكاثون',
 	'manage_steps' => 'ادارة المراحل',
 	'manage_startups' => 'ادارة الشركات',
+	'HaveCompany' => 'لديه شركة',
 ];
