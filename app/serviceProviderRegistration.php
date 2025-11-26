@@ -20,19 +20,27 @@ class serviceProviderRegistration extends Model
 		'company_name',
 		'contact_name',
 		'email',
+		'country_code',
 		'phone',
 		'status',
 		'user_id',
+		'action_by',
+		'action_at',
+		'reason',
 		'ip_address',
 	];
 
 	protected $casts = [
 		'company_name' => 'string',
-		'contact_name' => 'integer',
+		'contact_name' => 'string',
 		'email' => 'string',
+		'country_code' => 'string',
 		'phone' => 'string',
 		'status' => 'boolean',
 		'user_id' => 'integer',
+		'action_by' => 'integer',
+		'action_at' => 'datetime',
+		'reason' => 'string',
 		'ip_address' => 'string',
 	];
 
