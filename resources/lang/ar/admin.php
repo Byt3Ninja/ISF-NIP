@@ -69,6 +69,7 @@ return [
 	'About Settings' => 'إعدادات عنا',
 	'Contact Settings' => 'إعدادات اتصل بنا',
 	'Services Categories' => 'فئات الخدمات',
+	'Service Status' => 'حالة الخدمة',
 	'Add new service category' => 'إضافة فئة ',
 	'English Name' => 'إسم الشركة باللغة الإنجليزية',
 	'Arabic Name' => 'إسم الشركة باللغة العربية',
@@ -2588,4 +2589,5 @@ return [
 	'ConfirmRejectMessage' => 'هل أنت متأكد من رفض هذا الطلب؟ <br /> سيتم إرسال بريد إلكتروني إلى المستخدم مع سبب الرفض',
 	'RejectRequest' => 'رفض الطلب',
 	'ReasonIsRequired' => 'سبب الرفض مطلوب',
+	'Service Provider' => 'مقدم الخدمة',
 ];
