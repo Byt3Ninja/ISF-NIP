@@ -54,6 +54,7 @@ return [
 	'About Settings' => 'About Settings',
 	'Contact Settings' => 'Contact Settings',
 	'Services Categories' => 'Services Categories',
+	'Service Status' => 'Service Status',
 	'Add new service category' => 'Add new service category',
 	'English Name' => 'Startup Name',
 	'Arabic Name' => 'Name in arabic',
@@ -2535,4 +2536,5 @@ return [
 	'ConfirmRejectMessage' => 'Are you sure you reject this request ? <br /> A mail will be sent to user with the rejection reason',
 	'RejectRequest' => 'Reject Request',
 	'ReasonIsRequired' => 'Rejection Reason is required',
+	'Service Provider' => 'Service Provider',
 ];

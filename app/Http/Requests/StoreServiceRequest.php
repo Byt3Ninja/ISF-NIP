@@ -23,7 +23,7 @@ class StoreServiceRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+        $rules = [
             'name_en' => 'required',
             'description_en' => 'required',
             'img_url' => 'nullable',
@@ -34,5 +34,16 @@ class StoreServiceRequest extends FormRequest
             'organization_ids' => 'nullable|array',
             'organization_ids.*' => 'exists:organizations,id',
         ];
+
+        if( auth()->check() )
+        {
+            $user = auth()->user();
+            if( !$user->hasRole('serviceProvider') )
+            {
+
+                $rules['service_provider_id'] = 'required|exists:service_providers,id';
+            }
+        }
+        return $rules;
     }
 }

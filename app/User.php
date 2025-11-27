@@ -190,7 +190,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(MentorshipRequest::class, 'mentor_id');
     }
 
-      public function scores()
+    public function scores()
     {
         return $this->hasMany(UserScore::class,'user_id');
     }
@@ -334,7 +334,7 @@ class User extends Authenticatable implements MustVerifyEmail
      return $this->hasVerifiedEmail();
     }
 
-     public function teamformation()
+    public function teamformation()
     {
         return $this->hasOne(TeamFormation::class, 'user_id');
     }
@@ -382,7 +382,7 @@ class User extends Authenticatable implements MustVerifyEmail
         // You can also use latest('created_at') if you prefer
     }
 
-     public function removeParticipantFromGroup(Conversation $conversation, Model $participantToRemove): bool
+    public function removeParticipantFromGroup(Conversation $conversation, Model $participantToRemove): bool
     {
         // 1. Basic Validation: Ensure this is a group conversation.
         abort_if(
@@ -433,21 +433,26 @@ class User extends Authenticatable implements MustVerifyEmail
         return true;
     }
 
-     public function hasCompletedProfile(): bool
-{
-        return filled($this->phone)
-        && filled($this->country_id)
-        && filled($this->address)
-        && filled($this->timezone);
-}
+    public function hasCompletedProfile(): bool
+    {
+            return filled($this->phone)
+            && filled($this->country_id)
+            && filled($this->address)
+            && filled($this->timezone);
+    }
 
-public function hasCompletedStartup(): bool
-{
-    return $this->company
-        && filled($this->company->name_en)
-        && filled($this->company->address_en)
-        && filled($this->company->est_date)
-        && filled($this->company->stage);
-}
+    public function hasCompletedStartup(): bool
+    {
+        return $this->company
+            && filled($this->company->name_en)
+            && filled($this->company->address_en)
+            && filled($this->company->est_date)
+            && filled($this->company->stage);
+    }
+
+    public function service_provider()
+    {
+        return $this->hasOne(serviceProviders::class, 'user_id');
+    }
 
 }
