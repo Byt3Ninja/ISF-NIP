@@ -7,6 +7,7 @@ use App\Settings;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\serviceProviders;
 use App\serviceProviderRegistration;
 use App\Mail\serviceProviderRejectMail;
 use App\Mail\serviceProviderApproveMail;
@@ -165,6 +166,7 @@ class serviceProviderController extends Controller
 			$phone = $registration->phone;
 			$country_code = $registration->country_code;
 			$contact_name = $registration->contact_name;
+			$company_name = $registration->company_name;
 			if( $request->request_action == 'approve' )
 			{
 				try {
@@ -178,31 +180,35 @@ class serviceProviderController extends Controller
 					DB::beginTransaction();
 					$password = Str::password(10, symbols: true);
 
-					$provider = new User;
-					$provider->first_name_en = $first_name;
-					$provider->last_name_en = $last_name;
-					$provider->first_name_ar = $first_name;
-					$provider->last_name_ar = $last_name;
-					$provider->email = $email;
-					$provider->phone = $phone;
-					$provider->country_code = $country_code;
-					$provider->email_verified_at = date('Y-m-d H:i:s');
-					$provider->password = Hash::make( $password );
-					$provider->save();
-					$provider->allotRole('serviceProvider');
+					$provider_user = new User;
+					$provider_user->first_name_en = $first_name;
+					$provider_user->last_name_en = $last_name;
+					$provider_user->first_name_ar = $first_name;
+					$provider_user->last_name_ar = $last_name;
+					$provider_user->email = $email;
+					$provider_user->phone = $phone;
+					$provider_user->country_code = $country_code;
+					$provider_user->email_verified_at = date('Y-m-d H:i:s');
+					$provider_user->password = Hash::make( $password );
+					$provider_user->save();
+					$provider_user->allotRole('serviceProvider');
 
 					$registration->status = true;
 					$registration->action_by = $user->id;
 					$registration->action_at = now();
-					$registration->user_id = $provider->id;
+					$registration->user_id = $provider_user->id;
 					$registration->save();
+
+					$provider = new serviceProviders;
+					$provider->company_name = $company_name;
+					$provider->contact_name = $contact_name;
+					$provider->email = $email;
+					$provider->phone = $phone;
+					$provider->status = true;
+					$provider->user_id = $provider_user->id;
+					$provider->save();
+
 					DB::commit();
-					return view('emails.service-providers.approve', [
-						'contact_name' => $contact_name,
-						'email' => $email,
-						'password' => $password,
-						'login_url' => $login_url
-					]);
 					if( !in_array(env('APP_ENV', 'local'), ['local']) )
 					{
 						Mail::to( $email )->queue(new serviceProviderApproveMail( $contact_name, $email, $password, $login_url ));
