@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use stdClass;
 
 class serviceProviderController extends Controller
 {
@@ -246,13 +247,45 @@ class serviceProviderController extends Controller
 
 	public function index()
 	{
-		dd('here to list');
 		$user = auth()->user();
-		$surveys = Surveys::with('organization')
-			->when($user->organization_id, function ($query) use ($user) {
-				return $query->where('organization_id', $user->organization_id);
-			})
-			->get();
-		return view('admin.surveys.index', compact('surveys'));
+		$l = app()->getLocale();
+		$providers = DB::table('service_providers AS sp')
+			->select([
+				'sp.id',
+				'sp.company_name',
+				'sp.contact_name',
+				'sp.email',
+				'sp.phone',
+				'sp.status',
+				'sp.user_id',
+            	DB::raw("CONCAT(u.first_name_en, ' ', u.last_name_en) as user_name_en"),
+            	DB::raw("CONCAT(u.first_name_ar, ' ', u.last_name_ar) as user_name_ar"),
+				'u.phone AS user_phone',
+				'u.email AS user_email',
+				'u.img_url AS user_img_url',
+			])
+			->leftJoin('users as u', 'u.id', '=', 'sp.user_id')
+		->get();
+
+		$providers = $providers->map(function( $provider ) use ( $l ) {
+			$_user = new stdClass;
+			$output = new stdClass;
+			$output->id = $provider->id;
+    		$output->company_name = $provider->company_name;
+			$output->contact_name = $provider->contact_name;
+			$output->email = $provider->email;
+			$output->phone = $provider->phone;
+			$output->status = $provider->status;
+
+			$_user->id = $provider->user_id;
+			$_user->name_en = $provider->user_name_en;
+			$_user->name_ar = $provider->user_name_ar;
+			$_user->phone = $provider->user_phone;
+			$_user->email = $provider->user_email;
+			$_user->img_url = User::image_handler( $provider->user_img_url );
+			$output->user = $_user;
+			return $output;
+		});
+		return view('admin.serviceProviders.index', compact('providers'));
 	}
 }

@@ -7,16 +7,21 @@ use Illuminate\Support\Facades\Auth;
 
 class Service extends Model
 {
-	protected $fillable = ['organization_id', 'service_category_id', 'name_en', 'name_ar','price', 'description_en', 'description_ar', 'img_url','vendor_name','vendor_email','vendor_phone','hide_price','hide_vendor_info'];
+	protected $fillable = ['organization_id', 'service_category_id', 'service_provider_id', 'name_en', 'name_ar','price', 'status', 'description_en', 'description_ar', 'img_url','vendor_name','vendor_email','vendor_phone','hide_price','hide_vendor_info'];
 
 	public function getNameAttribute()
 	{
 		return $this->{"name_".app()->getLocale()} ;
 	}
 
+	public function provider()
+	{
+		return $this->belongsTo(serviceProviders::class, 'service_provider_id');
+	}
+
 	public function serviceCategory()
 	{
-	   return $this->belongsTo(ServiceCategory::class,'service_category_id');
+		return $this->belongsTo(ServiceCategory::class,'service_category_id');
 	}
 
 	public function totalRate()
@@ -32,7 +37,7 @@ class Service extends Model
 	}
 
 	public function organizations()
-  {
-      return $this->belongsToMany(Organization::class, 'organization_service');
-  }
+	{
+		return $this->belongsToMany(Organization::class, 'organization_service');
+	}
 }
