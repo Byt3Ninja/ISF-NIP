@@ -2522,6 +2522,7 @@ return [
 	'Expertises' => 'Expertises',
 	'all_Expertises' => 'All Expertises',
 	'Expertises_Created' => 'Expertises Created',
+	'No final comments provided' => 'No final comments provided',
 	'manage_hackathon' => 'Manage Hackathon',
 	'manage_steps' => 'Manage Steps',
 	'manage_startups' => 'Manage Startups',

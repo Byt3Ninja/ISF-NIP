@@ -4461,14 +4461,24 @@
                 ]
             },
             {
-                "name": "company.alumni_view",
-                "description": "View company program details (alumni)",
+                "name": "company.addCompanyAlumni",
+                "description": " Add Alumni to Company",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "registered",
                     "organizationmanager"
+                ]
+            },
+            {
+                "name": "company.alumni_view",
+                "description": " View company program details (alumni)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
                 ]
             }
         ]

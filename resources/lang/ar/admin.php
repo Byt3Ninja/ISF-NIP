@@ -2575,6 +2575,7 @@ return [
 	'Expertises' => 'الخبرات',
 	'all_Expertises' => 'كافة الخبرات',
 	'Expertises_Created' => ' تاريخ ',
+	'No final comments provided' => 'لا توجد تعليقات',
 	'manage_hackathon' => 'ادارة الهاكاثون',
 	'manage_steps' => 'ادارة المراحل',
 	'manage_startups' => 'ادارة الشركات',
