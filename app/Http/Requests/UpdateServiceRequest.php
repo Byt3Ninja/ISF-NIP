@@ -27,6 +27,7 @@ class UpdateServiceRequest extends FormRequest
         $rules = [
             'name_en' => 'required',
             'description_en' => 'required',
+            'status' => 'required|boolean',
             'service_category_id' => 'required|exists:service_categories,id',
             'vendor_name' => 'nullable|string|max:50',
             'vendor_email' => [
@@ -39,6 +40,14 @@ class UpdateServiceRequest extends FormRequest
             'organization_ids' => 'nullable|array',
             'organization_ids.*' => 'exists:organizations,id',
         ];
+        if( auth()->check() )
+        {
+            $user = auth()->user();
+            if( !$user->hasRole('serviceProvider') )
+            {
+                $rules['service_provider_id'] = 'required|exists:service_providers,id';
+            }
+        }
         if( UpdateServiceRequest::hasFile('img_url') ) { $rules['img_url'] = 'required'; }
         return $rules;
     }

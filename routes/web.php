@@ -188,6 +188,12 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('hackathon/details/{id}', [HackathonController::class, 'show']);
     Route::post('hackathon/likeProject', [HackathonController::class, 'likeProject']);
 
+    // Service Providers
+
+    Route::resource('services_providers', 'serviceProviderController');
+    Route::get('services-providers/mails/{name?}', 'serviceProviderController@tst_view');
+    Route::get('services-providers/requests', 'serviceProviderController@requests')->name('services_providers.requests');
+    Route::post('services-providers/requests/take-action', 'serviceProviderController@takeAction')->name('services_providers.takeAction');
 
     Route::get('calendar/{id}/edit', 'SettingsController@editcal')->name('calendar.events_edit');
     Route::post('calendar/{id}/update', 'SettingsController@updatecal')->name('calendar.events_update');
@@ -412,6 +418,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::resource('users', 'UserController');
     Route::get('/judger', 'UserController@judger')->name('users.judger');
     Route::post('/users/password', 'UserController@updatePassword')->name('user.profile_update_password');
+    Route::post('/users/update_my_password', 'UserController@updateMyPassword')->name('user.profile_update_my_password');
     Route::get('/companies', 'ClientCompanyController@companies')->name('users.view_companies');
     // Export startups (CSV / Excel) - preserves current filters passed as query params
     Route::get('/companies/export', 'CompanyExportController@export')->name('users.companies_export');

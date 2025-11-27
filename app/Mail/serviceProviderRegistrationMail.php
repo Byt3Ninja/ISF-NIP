@@ -27,9 +27,8 @@ class serviceProviderRegistrationMail extends Mailable implements ShouldQueue
 		$this->contact_name = $contact_name;
 	}
 
-	 public function build()
+	public function build()
 	{
-		return $this->subject('Registration request received - تم استقبال طلب التسجيل')
-				->view('emails.service-provider-registration', ['contact_name' => $this->contact_name]);
+		return $this->subject('Registration request received - تم استقبال طلب التسجيل')->view('emails.service-providers.registration', ['contact_name' => $this->contact_name]);
 	}
 }
