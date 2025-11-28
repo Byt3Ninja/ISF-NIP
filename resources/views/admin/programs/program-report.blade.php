@@ -226,6 +226,10 @@
     document.addEventListener("DOMContentLoaded", function () {
       const currentLanguage = document.documentElement.lang || 'en';
       const ctx = document.getElementById('summaryStatusDistributionChart').getContext('2d');
+      const existingChart = Chart.getChart('summaryStatusDistributionChart');
+      if (existingChart) {
+          existingChart.destroy();
+      }
       const chart = new Chart(ctx, {
         type: 'doughnut', 
         data: {
@@ -255,7 +259,7 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-
+      let summaryStatusChart = null;
             const chartFont = { family: 'Cairo' };
             const chartColors = ['#0d6efd', '#198754', '#ffc107', '#6f42c1', '#fd7e14', '#dc3545', '#0dcaf0'];
             const chartBorderColors = chartColors.map(color => color.replace('0.8', '1'));
@@ -634,16 +638,11 @@
 
                     const ctxSummaryStatus = document.getElementById('summaryStatusDistributionChart')?.getContext('2d');
                     if(ctxSummaryStatus) {
-                        // Log to check if element exists and has context
-                        // console.log('Canvas element:', document.getElementById('summaryStatusDistributionChart'));
-                        // console.log('Canvas context:', ctxSummaryStatus);
-                        // console.log('Status counts:', statusCounts);
-
-                        // Check if chart container has height
-                        const container = document.getElementById('summaryStatusDistributionChart').parentElement;
-                        console.log('Container height:', container.offsetHeight);
-
-                        new Chart(ctxSummaryStatus, {
+                        const existingChart = Chart.getChart('summaryStatusDistributionChart');
+                        if (existingChart) {
+                            existingChart.destroy();
+                        }
+                        summaryStatusChart = new Chart(ctxSummaryStatus, {
                             type: 'pie',
                             data: {
                                 labels: Object.keys(statusCounts),
