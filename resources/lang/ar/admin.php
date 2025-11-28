@@ -2591,4 +2591,9 @@ return [
 	'RejectRequest' => 'رفض الطلب',
 	'ReasonIsRequired' => 'سبب الرفض مطلوب',
 	'Service Provider' => 'مقدم الخدمة',
+	'Allow_Offline_Sessions' => 'السماح بجلسات خارجية',
+	'Default_Offline_Session_Location' => 'موقع جلسة خارجية الافتراضية',
+	'Map_Location' => 'موقع الخريطة',
+	'Offline_Sessions' => 'جلسات خارجية',
+	'Offline_Sessions_Description' => 'تكوين الاعدادات لجلسات خارجية',
 ];

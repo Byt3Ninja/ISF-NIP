@@ -2538,4 +2538,9 @@ return [
 	'RejectRequest' => 'Reject Request',
 	'ReasonIsRequired' => 'Rejection Reason is required',
 	'Service Provider' => 'Service Provider',
+	'Allow_Offline_Sessions' => 'Allow Offline Sessions',
+	'Default_Offline_Session_Location' => 'Default Offline Session Location',
+	'Map_Location' => 'Map Location',
+	'Offline_Sessions' => 'Offline Sessions',
+	'Offline_Sessions_Description' => 'Configure settings for in-person-meetings',
 ];
