@@ -14,6 +14,7 @@ class ServicesRequests extends Model
     {
         return $this->belongsTo(User::class,'user_id','id');
     }
+
     public function service()
     {
         return $this->belongsTo(Service::class,'service_id','id');

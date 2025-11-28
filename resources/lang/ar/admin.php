@@ -413,7 +413,7 @@ return [
 	'Private' => 'خاص',
 	'Not_Private' => 'غير خاص',
 	'Service request' => 'طلب خدمة',
-	'request sent' => 'تم إرسال طلبك بنجاح، وفي انتظار موافقة الإدارة',
+	'request sent' => 'تم إرسال طلبك بنجاح، وفي انتظار موافقة مقدم الخدمة',
 	'just now' => 'الآن',
 	'Waiting' => 'إنتظار الإدارة',
 	'SelState' => 'إختر المنطقة',
@@ -2592,4 +2592,7 @@ return [
 	'ReasonIsRequired' => 'سبب الرفض مطلوب',
 	'Service Provider' => 'مقدم الخدمة',
 	
+	'Service not found' => 'خدمة غير موجودة',
+	'Service request not found' => 'طلب خدمة غير موجود',
+	'Service request rated, thank you for your feedback' => 'تم تقييم طلب الخدمة, شكرا لتعليقك',
 ];

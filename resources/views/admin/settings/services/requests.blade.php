@@ -3,7 +3,24 @@
 @section('content')
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
-      
+      <div class="row">
+        @if( session()->has('success') )
+        <div class="col-md-12 mb-2">
+          <div role="alert" class="alert alert-success alert-dismissible">
+            {{ session()->get('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        </div>
+        @endif
+        @if( session()->has('error') )
+        <div class="col-md-12 mb-2">
+          <div role="alert" class="alert alert-danger alert-dismissible">
+            {{ session()->get('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        </div>
+        @endif
+      </div>
       <div class="card">
         <div class="card-header d-flex flex-wrap justify-content-between align-items-center border-bottom">
           <h5 class="card-title text-capitalize mb-3 mb-md-0">{{ __('cycles.Services requests') }}</h5>
@@ -187,10 +204,10 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-label-primary" data-bs-dismiss="modal" onclick="approve('Yes')">
+          <button type="button" class="btn btn-label-primary" data-bs-dismiss="modal" onclick="serviceRequestAction('approve')">
             <span class="d-none d-sm-block">{{ __('cycles.Approve') }}</span>
           </button>
-          <button type="button" class="btn btn-label-danger ml-1" onclick="approve('No')">
+          <button type="button" class="btn btn-label-danger ml-1" onclick="serviceRequestAction('reject')">
             <span class="d-none d-sm-block">{{ __('cycles.Disapprove') }}</span>
           </button>
         </div>
@@ -309,18 +326,48 @@
     $('#ReplyModal').modal('show');
   }
 
-  function approve(stat) {
+  function serviceRequestAction(stat) {
     const comment = $('#admin_comment').val();
     const id = $('#resid').val();
     $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
-    $.post('/dashboard/requests/approve', { id, stat, comment })
-      .done(() => {
-        location.reload();
+    $.post('/dashboard/requests/take_action', { id, stat, comment })
+      .done((response) => {
+        if( response.status )
+        {
+					Swal.fire({
+						icon: 'success',
+						title: response.title || 'Success',
+						html: response.message || 'Service request ' + stat + 'd successfully',
+						timer: 2500,
+						timerProgressBar: true,
+						showCancelButton: false,
+						confirmButtonText: 'Close',
+						customClass: {
+							confirmButton: 'btn mx-1 bg-primary text-white',
+						}
+					}).then((result) => { location.reload(); });
+        }
+        else
+        {
+					Swal.fire({
+						icon: 'warning',
+						title: response.title || 'Failed',
+						html: response.message || 'Something went wrong',
+						timer: 2500,
+						timerProgressBar: true,
+						showCancelButton: false,
+						confirmButtonText: 'OK',
+						customClass: {
+							confirmButton: 'btn mx-1 bg-primary text-white',
+						}
+					});
+        }
       })
       .fail(err => {
+        var response = err.responseJSON;
         releaseFailureAlert({
-          title: "{{ __('admin.Error') }}",
-          message: "{{ __('admin.An unexpected error occurred, please try again later') }}",
+          title: response.title || "{{ __('admin.Error') }}",
+          message: response.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
         });
       });
   }
