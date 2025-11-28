@@ -182,5 +182,12 @@ return [
 	'Delete_Industry_Confirmation' => 'Are you sure you want to delete this industry?',
 	'Delete_Sector_Confirmation' => 'Are you sure you want to delete this sector?',
 	'Delete_Technology_Confirmation' => 'Are you sure you want to delete this technology?',
-	'Select_Industry' => 'Select Industry'
+	'Select_Industry' => 'Select Industry',
+	'Allow_Offline_Sessions' => 'Allow Offline Sessions',
+	'Default_Offline_Session_Location' => 'Default Offline Session Location',
+	'Map_Location' => 'Map Location',
+	'Offline_Sessions' => 'Offline Sessions',
+	'Offline_Sessions_Description' => 'Configure settings for in-person-meetings',
+	'Default_Offline_Session_Location_Description' => 'this will be used as the defualt location for offline sessions',
+	'Map_Location_Description' => 'pin the exact location on map for partisipants',
 ];

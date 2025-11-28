@@ -186,4 +186,11 @@ return [
 	'GOOGLE_CALENDAR_CLIENT_ID' => 'معرف عميل جوجل التقويم',
 	'GOOGLE_CALENDAR_CLIENT_SECRET' => 'سرية عميل جوجل التقويم',
 	'GOOGLE_CALENDAR_REDIRECT' => 'عنوان تحويل جوجل التقويم',
+	'Allow_Offline_Sessions' => 'السماح بجلسات خارجية',
+	'Default_Offline_Session_Location' => 'موقع جلسة خارجية الافتراضية',
+	'Map_Location' => 'موقع الخريطة',
+	'Offline_Sessions' => 'جلسات خارجية',
+	'Offline_Sessions_Description' => 'تكوين الاعدادات لجلسات خارجية',
+	'Default_Offline_Session_Location_Description' => 'هذا سيكون الموقع الافتراضي لجلسات خارجية',
+	'Map_Location_Description' => 'هذا سيكون الموقع الافتراضي لجلسات خارجية',
 ];
