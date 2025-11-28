@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const dropdownHtml = `
       <div class="dropdown ms-2 d-inline-block">
         <button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown${id}" data-bs-toggle="dropdown" aria-expanded="false">
-          Export
+          @lang('admin.Export')
         </button>
         <ul class="dropdown-menu" aria-labelledby="exportDropdown${id}">
           <li><a class="dropdown-item" href="#" data-type="csv"><i class="ti ti-file-type-csv me-1"></i>CSV</a></li>

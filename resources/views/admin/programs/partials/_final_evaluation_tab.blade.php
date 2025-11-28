@@ -31,7 +31,7 @@
     </div>
     <!-- Content from final evaluation report -->
     <div class="row mt-4">
-        <div class="col-lg-8">
+        <div class="col-lg-6 border-0 border-lg-1 border-end pe-lg-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h4 class="fw-semibold border-bottom border-2 border-primary"><i
                         class="fas fa-clipboard-list me-2 text-primary"></i> {{ __('admin.Final Company Evaluations') }}
@@ -92,7 +92,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-4">
+        <div class="col-lg-6 ps-lg-4">
             <!-- Evaluator Status -->
             <div class="mb-4">
                 <h4 class="fw-semibold border-bottom border-2 border-primary"><i
@@ -116,11 +116,7 @@
                                 <td>{{ $evaluator['draft_evaluations'] }}</td>
                             </tr>
                             @endforeach
-                            @if ($evaluatorStatus->isEmpty())
-                            <tr>
-                                <td colspan="4" class="text-center">{{ __('admin.No evaluators found') }}</td>
-                            </tr>
-                            @endif
+                          
                         </tbody>
                     </table>
                 </div>

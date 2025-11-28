@@ -1,9 +1,6 @@
 @extends('layouts.admin')
 
 @section('style')
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
-
 <!-- Custom CSS (Combined & Refined) -->
 <style>
   .chart-container {
@@ -721,136 +718,70 @@
         });
   </script>
 
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
-
-<!-- For Excel export -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-
-<!-- For PDF export -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-
 <script>
-$(document).ready(function () {
-  // Get current language
-  const currentLang = document.documentElement.lang || 'en';
-  
-  // Define translations
-  const translations = {
-    ar: {
-      show: 'عرض',
-      entries: 'مدخلات',
-      search: 'بحث:',
-      first: 'الأول',
-      last: 'الأخير',
-      next: 'التالي',
-      previous: 'السابق',
-      noData: 'لا توجد بيانات متاحة في الجدول',
-      noMatching: 'لم يتم العثور على سجلات مطابقة',
-      showingEmpty: 'عرض 0 إلى 0 من أصل 0 مدخلات',
-      showing: 'عرض _START_ إلى _END_ من أصل _TOTAL_ مدخلات',
-      filtered: '(مرشح من _MAX_ إجمالي المدخلات)',
-      processing: 'جاري المعالجة...'
-    },
-    en: {
-      show: 'Show',
-      entries: 'entries',
-      search: 'Search:',
-      first: 'First',
-      last: 'Last',
-      next: 'Next',
-      previous: 'Previous',
-      noData: 'No data available in table',
-      noMatching: 'No matching records found',
-      showingEmpty: 'Showing 0 to 0 of 0 entries',
-      showing: 'Showing _START_ to _END_ of _TOTAL_ entries',
-      filtered: '(filtered from _MAX_ total entries)',
-      processing: 'Processing...'
-    }
-  };
-
-  $('#workshopTable').DataTable({
-    dom: 'Bfrtip',
-    buttons: [
-      {
-        extend: 'pdfHtml5',
-        text: '<i class="fas fa-file-pdf me-1"></i> PDF',
-        className: 'btn btn-label-danger btn-sm',
-        exportOptions: {
-          columns: ':visible'
-        }
-      },
-      {
-        extend: 'excelHtml5',
-        text: '<i class="fas fa-file-excel me-1"></i> Excel',
-        className: 'btn btn-label-success btn-sm',
-        exportOptions: {
-          columns: ':visible'
-        }
-      }
-    ],
-    language: {
-      lengthMenu: `${translations[currentLang].show} _MENU_ ${translations[currentLang].entries}`,
-      search: translations[currentLang].search,
-      paginate: {
-        first: translations[currentLang].first,
-        last: translations[currentLang].last,
-        next: translations[currentLang].next,
-        previous: translations[currentLang].previous
-      },
-      emptyTable: translations[currentLang].noData,
-      zeroRecords: translations[currentLang].noMatching,
-      infoEmpty: translations[currentLang].showingEmpty,
-      info: translations[currentLang].showing,
-      infoFiltered: translations[currentLang].filtered,
-      processing: translations[currentLang].processing
-    }
+  document.addEventListener("DOMContentLoaded", function () {
+    // Initialize DataTable
+    DataTableInit(".table");
   });
 
-   $('#finalEvalTable').DataTable({
-    dom: 'Bfrtip',
-    buttons: [
-      {
-        extend: 'pdfHtml5',
-        text: '<i class="fas fa-file-pdf me-1"></i> PDF',
-        className: 'btn btn-label-danger btn-sm',
-        exportOptions: {
-          columns: ':visible'
-        }
+  // Helper to create export dropdown HTML
+  function createExportDropdown(table) {
+    const dropdownHtml = `
+      <div class="dropdown ms-2 d-inline-block">
+        <button class="btn btn-sm btn-label-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+          @lang('admin.Export')
+        </button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="#" data-type="csv">CSV</a></li>
+          <li><a class="dropdown-item" href="#" data-type="excel">Excel</a></li>
+        </ul>
+      </div>
+    `;
+
+    const container = $(table.table().container()).find('.dataTables_filter');
+    container.append(dropdownHtml);
+
+    container.find('.dropdown-item').on('click', function (e) {
+      e.preventDefault();
+      const type = $(this).data('type');
+
+      if (type === 'csv') table.button('.buttons-csv').trigger();
+      if (type === 'excel') table.button('.buttons-excel').trigger();
+    });
+  }
+
+  // DataTable Initialization with RTL support and export buttons
+  function DataTableInit(selector, options = {}) {
+    const isRTL = document.documentElement.dir === "rtl";
+
+    const defaultOptions = {
+      responsive: true,
+      processing: true,
+      serverSide: false,
+      pageLength: 10,
+      language: {
+        url: isRTL
+          ? "https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json"
+          : "https://cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json",
       },
-      {
-        extend: 'excelHtml5',
-        text: '<i class="fas fa-file-excel me-1"></i> Excel',
-        className: 'btn btn-label-success btn-sm',
-        exportOptions: {
-          columns: ':visible'
-        }
-      }
-    ],
-    language: {
-      lengthMenu: `${translations[currentLang].show} _MENU_ ${translations[currentLang].entries}`,
-      search: translations[currentLang].search,
-      paginate: {
-        first: translations[currentLang].first,
-        last: translations[currentLang].last,
-        next: translations[currentLang].next,
-        previous: translations[currentLang].previous
+      dom:
+        "<'row'<'col-sm-12 col-md-5'l><'col-sm-12 col-md-7'fB>>" +
+        "<'row'<'col-sm-12'tr>>" +
+        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+      buttons: [
+        { extend: 'csvHtml5', className: 'd-none' },
+        { extend: 'excelHtml5', className: 'd-none' }
+      ],
+
+      initComplete: function () {
+        createExportDropdown(this.api());
+
+        if (isRTL) $(selector).addClass("datatable-rtl");
       },
-      emptyTable: translations[currentLang].noData,
-      zeroRecords: translations[currentLang].noMatching,
-      infoEmpty: translations[currentLang].showingEmpty,
-      info: translations[currentLang].showing,
-      infoFiltered: translations[currentLang].filtered,
-      processing: translations[currentLang].processing
-    }
-  });
-});
+    };
+
+    const finalOptions = { ...defaultOptions, ...options };
+    return $(selector).DataTable(finalOptions);
+  }
 </script>
-
-
-
-
 @stop
