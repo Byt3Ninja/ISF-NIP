@@ -535,6 +535,10 @@ class SettingsController extends Controller
 		$ZOOM_CLIENT_SECRET = $request->input('ZOOM_CLIENT_SECRET');
 		$ZOOM_ACCOUNT_ID = $request->input('ZOOM_ACCOUNT_ID');
 
+		$allow_offline_sessions = $request->input('allow_offline_sessions') == 1 ? 1 : 0;
+		$default_offline_session_location = $request->input('default_offline_session_location');
+		$map_location = $request->input('map_location');
+
 		$updateSittings = Settings::where('id', $id)->first();
 		$updateSittings->Meeting = $Meeting;
 
@@ -546,6 +550,9 @@ class SettingsController extends Controller
 			$updateSittings->MICROSOFT_CLIENT_SECRET_ID = $MICROSOFT_CLIENT_SECRET_ID;
 			$updateSittings->MICROSOFT_APP_EMAIL = $MICROSOFT_APP_EMAIL;
 			$updateSittings->MICROSOFT_REDIRECT_URI = $MICROSOFT_REDIRECT_URI;
+			$updateSittings->allow_offline_sessions = $allow_offline_sessions;
+			$updateSittings->default_offline_session_location = $default_offline_session_location;
+			$updateSittings->map_location = $map_location;
 			$updateSittings->save();
 		}
 		if( strtolower($Meeting) == 'zoom' )
@@ -553,6 +560,9 @@ class SettingsController extends Controller
 			$updateSittings->ZOOM_CLIENT_ID = $ZOOM_CLIENT_ID;
 			$updateSittings->ZOOM_CLIENT_SECRET = $ZOOM_CLIENT_SECRET;
 			$updateSittings->ZOOM_ACCOUNT_ID = $ZOOM_ACCOUNT_ID;
+			$updateSittings->allow_offline_sessions = $allow_offline_sessions;
+			$updateSittings->default_offline_session_location = $default_offline_session_location;
+			$updateSittings->map_location = $map_location;
 			$updateSittings->save();
 		}
 
