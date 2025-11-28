@@ -2316,6 +2316,52 @@ class HomeController extends Controller
 
         $notRated_men = DB::select($notRated_men, [$dateRate, Auth::id()]);
         $notRated_men = collect($notRated_men);
+        // check for rating services
+
+        $service_requests = DB::table('services_requests AS sr')
+            ->select([
+                'sr.id AS id',
+                'sr.service_id AS service_id',
+                's.name_en AS service_name_en',
+                's.name_ar AS service_name_ar',
+                's.service_provider_id AS service_provider_id',
+                'sp.company_name AS provider_name',
+                'sp.email AS provider_email',
+                'sp.phone AS provider_phone',
+                'sr.comment AS comment',
+                'sr.date_time AS date_time',
+                'sr.rate AS rate',
+                'sr.rate_comment AS rate_comment',
+                'sr.done AS done',
+            ])
+            ->leftJoin('services AS s', 's.id', '=', 'sr.service_id')
+            ->leftJoin('service_providers AS sp', 'sp.id', '=', 's.service_provider_id')
+            ->where('sr.user_id', $user->id)
+            ->where('sr.approved', 'Yes')
+            ->whereNull('sr.rate')
+            ->whereNull('sr.done')
+            ->whereNull('sr.deleted_at')
+            ->get();
+
+        $service_requests = $service_requests->map(function ( $item ) use ($l) {
+            $_request = new stdClass;
+            $_request->id = $item->id;
+            $_request->service = new stdClass;
+            $_request->service->id = $item->service_id;
+            $_request->service->name = $item->{'service_name_' . $l};
+            $_request->provider = new stdClass;
+            $_request->provider->id = $item->service_provider_id;
+            $_request->provider->name = $item->provider_name;
+            $_request->provider->email = $item->provider_email;
+            $_request->provider->phone = $item->provider_phone;
+            $_request->comment = $item->comment;
+            $_request->date_time = $item->date_time;
+            $_request->rate = $item->rate;
+            $_request->rate_comment = $item->rate_comment;
+            $_request->done = $item->done;
+            return $_request;
+        });
+        $data['unrated_services_requests'] = $service_requests;
         $data['notrated_mens'] = $notRated_men;
         $data['initial_screening_steps'] = $filtration;
         $data['final_screening_steps'] = $evaluation;
@@ -3117,9 +3163,11 @@ class HomeController extends Controller
 
     public function directory(Request $request)
     {
+        // deprecated and moved to ServiceController.php
         $t = $request->input('type');
         $find = $request->input('find');
         $services = Service::with('serviceCategory')
+            ->where('status', true)
             ->whereHas('organizations')
             ->get()
             ->map(function ($service) {
@@ -3144,6 +3192,7 @@ class HomeController extends Controller
     }
     public function rateservice($id, Request $request)
     {
+        // deprecated and moved to ServiceController.php
         if ($request && $id) {
             $request->done ? $done = 1 : $done = null;
             ServicesRequests::updateOrInsert(['id' => $id], ['rate' => $request->rate, 'rate_comment' => $request->comment, 'done' => $done]);
@@ -3153,6 +3202,7 @@ class HomeController extends Controller
     }
     public function showone($id, Request $request)
     {
+        // deprecated and moved to ServiceController.php
         if ($request && $id) {
             $service = Service::findOrFail($id);
             $rate = (int)$service->myRate();
@@ -3164,6 +3214,7 @@ class HomeController extends Controller
 
     public function servicereq(Request $request)
     {
+        // deprecated and moved to ServiceController.php
         if ($request) {
             $serviceRequest = ServicesRequests::create([
                 'service_id' => $request->id,
@@ -3176,7 +3227,8 @@ class HomeController extends Controller
 
             $service = Service::find($request->id);
 
-            if ($service && $service->vendor_email) {
+            if( $service && $service->vendor_email && !in_array(env('APP_ENV', 'local'), ['local']) )
+            {
                 // Create anonymous notifiable for vendor email
                 Notification::route('mail', $service->vendor_email)->notify(new ServiceRequestNotification($serviceRequest));
             }

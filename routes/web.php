@@ -283,17 +283,20 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     //services categories Manager routes
     Route::resource('serviceCategories', 'ServiceCategoryController');
     //Services Manager routes
+    
     Route::resource('services', 'ServiceController');
-    //Services requests
+    // Services requests
     Route::get('requests/all', 'ServiceController@requests')->name('service_requests.list_all');
     Route::get('requests/old', 'ServiceController@oldrequests')->name('service_requests.list_archived');
-    Route::post('requests/approve', 'ServiceController@approve');
-    Route::get('requests/mine', 'ServiceController@myrequests')->name('service_requests.list_mine');
-    //Services Directory
-    Route::get('directory', 'HomeController@directory')->name('users.directory_view');
-    Route::post('directory/{id}', 'HomeController@showone');
-    Route::post('directory/{id}/rate', 'HomeController@rateservice');
-    Route::post('servicerequest', 'HomeController@servicereq');
+    Route::post('requests/take_action', 'ServiceController@serviceAction')->name('service_requests.take_action');
+    Route::get('requests/mine', 'ServiceController@myRequests')->name('service_requests.list_mine');
+
+    // Services Directory
+    Route::get('directory', 'ServiceController@availableServices')->name('users.directory_view');
+    Route::post('directory/{id}', 'ServiceController@details');
+    Route::post('directory/{id}/rate', 'ServiceController@rate');
+    Route::post('service/request', 'ServiceController@book_service')->name('services.request_service');
+
     //Types Manager routes
     Route::resource('types', 'TypeController');
     //Partners Manager routes
@@ -391,6 +394,10 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::delete('/employees/delete/{id}', 'ClientCompanyController@deleteEmployee')->name('company.employees_delete');
     Route::post('/employees/edit/{id}', 'ClientCompanyController@editEmployee')->name('company.employees_edit');
     Route::post('/employees/add/{id}', 'ClientCompanyController@addEmployee')->name('company.employees_add');
+
+    // Almuni 
+    Route::get('/AddCompanyalumni/{id}', 'ClientCompanyController@addCompanyAlumni')->name('company.addCompanyAlumni');
+
 
     //Industry
     Route::post('/industries/technologies', 'TechnologyController@create_technologies')->name('settings.create_technologies');

@@ -571,8 +571,8 @@ return [
     'Filter by' => 'تصفية حسب',
     'Go to judges page' => 'الذهاب إلى صفحة الحكام',
     'No_Mentors_Found' => 'لم يتم العثور على مرشدين',
-  'No_Mentors_Enrolled' => 'لا يوجد مرشدين مسجلين في برنامج',
-  'No_Mentors_For_Selected_Program' => 'لا يوجد مرشدين متاحين للبرنامج المختار',
+    'No_Mentors_Enrolled' => 'لا يوجد مرشدين مسجلين في برنامج',
+    'No_Mentors_For_Selected_Program' => 'لا يوجد مرشدين متاحين للبرنامج المختار',
     'Request_Mentorship' => 'طلب ارشاد',
     'Show_Filters' => 'إظهار الفلاتر',
     'Any_Rating' => 'أي تقييم',
@@ -591,5 +591,5 @@ return [
     'general' => 'عام',
     'public_link_copied_successfully' => 'تم نسخ الرابط العام بنجاح',
     'private_link_copied_successfully' => 'تم نسخ الرابط الخاص بنجاح',
+    'No Old Requests' => 'لا توجد طلبات قديمة',
 ];
-

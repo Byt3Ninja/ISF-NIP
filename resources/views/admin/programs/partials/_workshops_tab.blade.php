@@ -136,7 +136,7 @@
               </tr>
             </thead>
             <tbody>
-              @forelse($quizzesResults as $result)
+              @foreach($quizzesResults as $result)
               <tr>
                 <td>{{ $result->{'c_company_name_'.$l} ?? '-' }}</td>
                 <td> 
@@ -151,12 +151,7 @@
                  !!}
                 </td>
               </tr>
-              @empty
-              <tr>
-                <td colspan="3">{{ __('admin.No companies found') }}</td>
-              </tr>
-              @endforelse
-
+              @endforeach
             </tbody>
           </table>
         </div>

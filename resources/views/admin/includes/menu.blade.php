@@ -285,7 +285,7 @@
         }} menu-item"
       >
         <a href="{{ route('mentorships.sessions_list_detailed') }}" class="menu-link">
-          <i class="ti ti-layout-kanban ti-md me-2 me-lg-4 ti-lg"></i>
+          <i class="menu-icon tf-icons ti ti-layout-kanban"></i>
           <div>{{ __('mentor.mentorshipTasks.index') }}</div>
         </a>
       </li>
@@ -295,7 +295,7 @@
 
     <li class="{{ Request::is('dashboard/hackathon') ? 'active' : '' }} menu-item"><a
           href="/dashboard/hackathon" class="menu-link">
-          <i class="ti ti-activity ti-md me-2 me-lg-4 ti-lg"></i>
+          <i class="menu-icon tf-icons ti ti-activity"></i>
           <div>{{ __('admin.Hackathon') }}</div>
         </a>
       </li>

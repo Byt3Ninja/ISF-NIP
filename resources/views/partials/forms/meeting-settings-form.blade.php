@@ -69,6 +69,31 @@
           id="ZOOM_ACCOUNT_ID">
       </div>
     </div>
+
+
+<hr>
+<h3>{{__('settings.Offline_Sessions')}}</h3>
+<p>{{__('settings.Offline_Sessions_Description')}}</p>
+    <div>
+      <div class="form-group mb-3">
+        <label class="form-label mb-1" for="allow_offline_sessions">{{ __('settings.Allow_Offline_Sessions') }}</label>
+        <input id="allow_offline_sessions" type="checkbox" value="1" name="allow_offline_sessions" {{ $Title->allow_offline_sessions == 1 ? 'checked' : '' }}>
+      </div>
+      <div class="form-group mb-3">
+        <label class="form-label mb-1" for="default_offline_session_location">{{ __('settings.Default_Offline_Session_Location') }}</label>
+        <input type="text" class="form-control" value="{{ $Title->default_offline_session_location }}" name="default_offline_session_location"
+          id="default_offline_session_location">
+          <p>{{__('settings.Default_Offline_Session_Location_Description')}}</p>
+      </div>
+      <div class="form-group mb-3">
+        <label class="form-label mb-1" for="map_location">{{ __('settings.Map_Location') }}</label>
+        <input type="text" class="form-control" value="{{ $Title->map_location }}" name="map_location"
+          id="map_location">
+          <p>{{__('settings.Map_Location_Description')}}</p>
+      </div>
+    </div>
+
+
   </div>
 
   <div class="form-group d-flex justify-content-end mt-auto">
