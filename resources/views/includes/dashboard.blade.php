@@ -1296,8 +1296,7 @@
 		</div>
 		
 		<div class="row mt-6">
-			@if( $_user->ableTo('mentorship.sessions_Rate', $permissions))
-			@if( $notrated_mens )
+			@if( $_user->ableTo('mentorship.sessions_Rate', $permissions) && $notrated_mens)
 			<div class="col-12">
 				<div class="card shadow-sm">
 					<div class="card-header py-3 d-flex justify-content-between align-items-center">
@@ -1382,6 +1381,70 @@
 				</div>
 			</div>
 			@endif
+
+			@if( $_user->ableTo('services.rate', $permissions) && $unrated_services_requests->count() > 0 )
+			<div class="col-12 my-10">
+				<div class="card shadow-sm">
+					<div class="card-header py-3 d-flex justify-content-between align-items-center">
+						<h5 class="card-title mb-0">
+							{{ __('dashboard.Rate') . ' ' . __('dashboard.service') }} 
+						</h5>
+					</div>
+					<div class="card-body p-4">
+						<div class="accordion stick-top accordion-custom-button" id="rateServicesAccordion">
+							@foreach($unrated_services_requests as $index => $service_request)
+								<div class="accordion-item">
+									<h2 class="accordion-header">
+										<button class="accordion-button {{ $loop->first ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $index }}" aria-expanded="{{ $loop->first ? 'true' : 'false' }}" aria-controls="collapse{{ $index }}">
+											{{ $service_request->service->name }} By {{ $service_request->provider->name }}
+										</button>
+									</h2>
+									<div id="collapse{{ $index }}" class="accordion-collapse collapse {{ $loop->first ? 'show' : '' }}" data-bs-parent="#rateServicesAccordion">
+										<div class="accordion-body pt-4">
+											<form method="POST" action="/dashboard/directory/{{ $service_request->id }}/rate" enctype="multipart/form-data" autocomplete="off">
+												@csrf
+												<div class="form-group mb-4 row">
+													<div class="col-9">
+														{{ __('dashboard.Your request was in') }}
+													</div>
+													<div class="col-3 text-end">
+														<strong> {{ $service_request->date_time }} </strong>
+													</div>
+												</div>
+
+												<fieldset class="form-group mb-4">
+													<label class="form-label" for="is_service_done_{{ $service_request->id }}"> {{ __('dashboard.Did you get this service?') }} </label>
+													<select class="select2 form-control" required id="is_service_done_{{ $service_request->id }}" name="is_service_done_{{ $service_request->id }}">
+														<option value="Yes">{{ __('admin.Yes') }}</option>
+														<option value="No">{{ __('admin.No') }}</option>
+													</select>
+												</fieldset>
+
+												<fieldset class="form-group mb-4">
+													<label class="form-label" for="service_rate_{{ $service_request->id }}"> {{ __('dashboard.Rate from 1 star "bad" to 5 stars "best"') }} </label>
+													<input type="hidden" name="service_rate_{{ $service_request->id }}" value="0" id="service_rate_{{ $service_request->id }}">
+													<div class="full-services-star-ratings" data-element="{{ $service_request->id }}" data-rateyo-full-star="true"></div>
+												</fieldset>
+
+												<fieldset class="form-group mb-4">
+													<label class="form-label" for="service_comment_{{ $service_request->id }}"> {{ __('dashboard.Your opinion important kindly write any notes about this service') }} </label>
+													<textarea class="form-control" id="service_comment_{{ $service_request->id }}" name='service_comment_{{ $service_request->id }}' rows="4" required placeholder="{{__('dashboard.Write your notes here')}}" ></textarea>
+												</fieldset>
+
+												<div class="row mt-4">
+													<div class="col-12 text-end">
+														<button type="submit" class="btn btn-primary ml-1"> {{ __('dashboard.Submit') }} </button>
+													</div>
+												</div>
+											</form>
+										</div>
+									</div>
+								</div>
+							@endforeach
+						</div>
+					</div>
+				</div>
+			</div>
 			@endif
 		</div>
 	</div>
@@ -1564,204 +1627,203 @@ document.addEventListener('DOMContentLoaded', function() {
 @if( array_intersect(['dashboard.widgets_tables_my_current_schedule_view'], $permissions) )
 	<script src="/vuexy/assets/js/mentor-schedule.js"></script>
 @endif
-<script>
-window.handleJoinClick = function(button) {
-    const cycleId = button.getAttribute('data-cycle-id');
-    const hasPreRequests = button.getAttribute('data-has-pre');
-    const joinUrl = button.getAttribute('data-join-url');
-    const preRequests = JSON.parse(button.getAttribute('data-pre-requests') || '[]');
+	<script>
+		window.handleJoinClick = function(button) {
+			const cycleId = button.getAttribute('data-cycle-id');
+			const hasPreRequests = button.getAttribute('data-has-pre');
+			const joinUrl = button.getAttribute('data-join-url');
+			const preRequests = JSON.parse(button.getAttribute('data-pre-requests') || '[]');
 
-    if (hasPreRequests === 'true') {
-        // Populate modal
-        const list = document.getElementById('prerequisitesList');
-        list.innerHTML = '';
-        preRequests.forEach(pr => {
-            const li = document.createElement('li');
-            li.className = 'list-group-item d-flex align-items-center';
-            li.innerHTML = `
-                <i class="ti ti-circle-check me-2 text-warning"></i>
-                <a href="${pr.url}?action=complete-profile" target="_blank" class="text-decoration-none flex-grow-1">${pr.label}</a>
-            `;
-            list.appendChild(li);
-        });
+			if (hasPreRequests === 'true') {
+				// Populate modal
+				const list = document.getElementById('prerequisitesList');
+				list.innerHTML = '';
+				preRequests.forEach(pr => {
+					const li = document.createElement('li');
+					li.className = 'list-group-item d-flex align-items-center';
+					li.innerHTML = `
+						<i class="ti ti-circle-check me-2 text-warning"></i>
+						<a href="${pr.url}?action=complete-profile" target="_blank" class="text-decoration-none flex-grow-1">${pr.label}</a>
+					`;
+					list.appendChild(li);
+				});
 
-        // Set buttons
-        document.getElementById('completePrerequisitesBtn').onclick = function() {
-            if (preRequests.length > 0) {
-                const firstReq = preRequests[0];
-                if (firstReq.action === 'complete-profile') {
-                    window.location.href = firstReq.url + '?action=complete-profile';
-                } else {
-                    localStorage.setItem('prerequisitesOpened', 'true');
-                    window.open(`${firstReq.url}?action=complete-profile`, '_blank');
-                }
-            }
-            $('#prerequisitesModal').modal('hide');
-        };
+				// Set buttons
+				document.getElementById('completePrerequisitesBtn').onclick = function() {
+					if (preRequests.length > 0) {
+						const firstReq = preRequests[0];
+						if (firstReq.action === 'complete-profile') {
+							window.location.href = firstReq.url + '?action=complete-profile';
+						} else {
+							localStorage.setItem('prerequisitesOpened', 'true');
+							window.open(`${firstReq.url}?action=complete-profile`, '_blank');
+						}
+					}
+					$('#prerequisitesModal').modal('hide');
+				};
 
-        // Show modal
-        $('#prerequisitesModal').modal('show');
-    } else {
-        window.location.href = joinUrl;
-    }
-}
-
-// Check if page should refresh when user returns from completing prerequisites
-window.addEventListener('focus', function() {
-    if (localStorage.getItem('prerequisitesOpened') === 'true') {
-        localStorage.removeItem('prerequisitesOpened');
-        // Refresh the page to update prerequisite status
-        window.location.reload();
-    }
-});
-
-// Real-time completion status checking
-let completionCheckInterval;
-
-function startCompletionStatusCheck() {
-    // Check every 5 seconds to reduce API calls
-    completionCheckInterval = setInterval(function() {
-        fetch('{{ route('cycles.completion_status_check') }}', {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            updateUIWithCompletionStatus(data);
-        })
-        .catch(error => {
-            console.log('Error checking completion status:', error);
-        });
-    }, 5000); // Check every 5 seconds to reduce API calls
-}
-
-function updateUIWithCompletionStatus(data) {
-    const hasPreRequests = data.has_pre_requests;
-    const preRequests = data.pre_requests || [];
-		
-    // Find all join buttons
-    const joinButtons = document.querySelectorAll('button[onclick*="handleJoinClick"]');
-    if (joinButtons.length === 0) {
-        console.log('No join buttons found');
-        return;
-    }
-
-    // Update each button appearance and text
-    joinButtons.forEach(joinButton => {
-			joinButton.className = 'btn btn-primary';
-			joinButton.innerHTML = '<span class="me-2">{{ __('dashboard.Join now') }}</span><i class="ti ti-arrows-join"></i>';
-  
-			// Update button data attributes
-			joinButton.setAttribute('data-has-pre', hasPreRequests ? 'true' : 'false');
-			joinButton.setAttribute('data-pre-requests', JSON.stringify(preRequests.map(pr => ({
-					url: `${pr.url}?action=complete-profile`,
-					label: pr.label,
-			}))));
-	});
-
-    // Find all prerequisites alerts
-    const alertDivs = document.querySelectorAll('.alert.alert-info');
-    alertDivs.forEach(alertDiv => {
-        if (hasPreRequests) {
-            // Update the alert content
-            const listElement = alertDiv.querySelector('.list-unstyled');
-            if (listElement) {
-                listElement.innerHTML = '';
-                preRequests.forEach(pr => {
-                    const li = document.createElement('li');
-                    li.className = 'pre-request-item';
-                    li.innerHTML = `
-                        <a href="${pr.url}?action=complete-profile" class="btn btn-sm btn-outline-info d-flex align-items-center gap-2" role="button" aria-label="${pr.label}">
-                            <i class="ti ti-external-link"></i>
-                            <span>${pr.label}</span>
-                        </a>
-                    `;
-                    listElement.appendChild(li);
-                });
-            }
-            alertDiv.style.display = 'block';
-        } else {
-            // Hide the alert if no prerequisites
-            alertDiv.style.display = 'none';
-        }
-    });
-}
-
-// Start checking when page loads
-@if(isset($pollingNeeded) && $pollingNeeded)
-document.addEventListener('DOMContentLoaded', function() {
-    startCompletionStatusCheck();
-});
-@endif
-</script>
-<script>
-	// Initialize DataTable with pagination configuration
-    $(document).on('click', '.show-passcode', function(e) {
-      e.preventDefault();
-      let passcode = $(this).data('passcode');
-      alertify.defaults.transition = 'zoom';
-      alertify.defaults.theme.ok = 'btn btn-sm btn-danger';
-      alertify.defaults.theme.cancel = 'btn btn-sm btn-info';
-      alertify.defaults.theme.input = 'form-control';
-
-      alertify.alert('Meeting Passcode', `The passcode for this meeting is: <strong>${passcode}</strong>`, function() {});
-    });
-	$(document).ready(function() {
-		$("#ratingsTable").DataTable({
-			"pageLength": 5,
-			"lengthMenu": [5, 10, 25, 50],
-			"searching": true,
-			"ordering": true,
-			"info": true,
-			"responsive": true,
-			@if( $l == 'ar' )
-			"language": {
-				"sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
-				"sLoadingRecords": "جارٍ التحميل...", 
-				"sProcessing": "جارٍ التحميل...",
-				"sLengthMenu": "أظهر _MENU_ مدخلات", 
-				"sZeroRecords": "لم يعثر على أية سجلات",
-				"sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-				"sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل", 
-				"sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-				"sInfoPostFix": "", 
-				"sSearch": "ابحث:", 
-				"sUrl": "",
-				"oPaginate": {"sFirst": "الأول", "sPrevious": "السابق", "sNext": "التالي", "sLast": "الأخير"},
-				"oAria": {"sSortAscending": ": تفعيل لترتيب العمود تصاعدياً", "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"}
+				// Show modal
+				$('#prerequisitesModal').modal('show');
+			} else {
+				window.location.href = joinUrl;
 			}
-			@endif
-		});
-	});
-</script>
-<script>
-	$(document).ready(function() {
-		var today = new Date().toISOString().split('T')[0]; // الحصول على تاريخ اليوم بصيغة yyyy-mm-dd
-		$('#dfrom, #dto').datepicker({
-			format: 'yyyy-mm-dd',
-			autoclose: true,
-			todayHighlight: true,
+		}
+
+		// Check if page should refresh when user returns from completing prerequisites
+		window.addEventListener('focus', function() {
+			if (localStorage.getItem('prerequisitesOpened') === 'true') {
+				localStorage.removeItem('prerequisitesOpened');
+				// Refresh the page to update prerequisite status
+				window.location.reload();
+			}
 		});
 
+		// Real-time completion status checking
+		let completionCheckInterval;
+
+		function startCompletionStatusCheck() {
+			// Check every 5 seconds to reduce API calls
+			completionCheckInterval = setInterval(function() {
+				fetch('{{ route('cycles.completion_status_check') }}', {
+					method: 'GET',
+					headers: {
+						'X-Requested-With': 'XMLHttpRequest',
+						'Content-Type': 'application/json',
+						'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+					}
+				})
+				.then(response => response.json())
+				.then(data => {
+					updateUIWithCompletionStatus(data);
+				})
+				.catch(error => {
+					console.log('Error checking completion status:', error);
+				});
+			}, 5000); // Check every 5 seconds to reduce API calls
+		}
+
+		function updateUIWithCompletionStatus(data) {
+			const hasPreRequests = data.has_pre_requests;
+			const preRequests = data.pre_requests || [];
+				
+			// Find all join buttons
+			const joinButtons = document.querySelectorAll('button[onclick*="handleJoinClick"]');
+			if (joinButtons.length === 0) {
+				console.log('No join buttons found');
+				return;
+			}
+
+			// Update each button appearance and text
+			joinButtons.forEach(joinButton => {
+					joinButton.className = 'btn btn-primary';
+					joinButton.innerHTML = '<span class="me-2">{{ __('dashboard.Join now') }}</span><i class="ti ti-arrows-join"></i>';
 		
-		$('.DatePicker').datepicker({
-			format: 'yyyy-m-d H:i',
-			onGenerate: function( ct ) { jQuery(this).find('.xdsoft_date').toggleClass('xdsoft_disabled'); },
-			autoclose: true,
-			todayHighlight: true,
-			startDate: today,
-			maxDate: '{{date('Y/m/d',strtotime("-1 days"))}}',
-			timepicker: true
+					// Update button data attributes
+					joinButton.setAttribute('data-has-pre', hasPreRequests ? 'true' : 'false');
+					joinButton.setAttribute('data-pre-requests', JSON.stringify(preRequests.map(pr => ({
+							url: `${pr.url}?action=complete-profile`,
+							label: pr.label,
+					}))));
+			});
+
+			// Find all prerequisites alerts
+			const alertDivs = document.querySelectorAll('.alert.alert-info');
+			alertDivs.forEach(alertDiv => {
+				if (hasPreRequests) {
+					// Update the alert content
+					const listElement = alertDiv.querySelector('.list-unstyled');
+					if (listElement) {
+						listElement.innerHTML = '';
+						preRequests.forEach(pr => {
+							const li = document.createElement('li');
+							li.className = 'pre-request-item';
+							li.innerHTML = `
+								<a href="${pr.url}?action=complete-profile" class="btn btn-sm btn-outline-info d-flex align-items-center gap-2" role="button" aria-label="${pr.label}">
+									<i class="ti ti-external-link"></i>
+									<span>${pr.label}</span>
+								</a>
+							`;
+							listElement.appendChild(li);
+						});
+					}
+					alertDiv.style.display = 'block';
+				} else {
+					// Hide the alert if no prerequisites
+					alertDiv.style.display = 'none';
+				}
+			});
+		}
+
+		// Start checking when page loads
+		@if(isset($pollingNeeded) && $pollingNeeded)
+		document.addEventListener('DOMContentLoaded', function() {
+			startCompletionStatusCheck();
+		});
+		@endif
+	</script>
+	<script>
+		// Initialize DataTable with pagination configuration
+		$(document).on('click', '.show-passcode', function(e) {
+		e.preventDefault();
+		let passcode = $(this).data('passcode');
+		alertify.defaults.transition = 'zoom';
+		alertify.defaults.theme.ok = 'btn btn-sm btn-danger';
+		alertify.defaults.theme.cancel = 'btn btn-sm btn-info';
+		alertify.defaults.theme.input = 'form-control';
+
+		alertify.alert('Meeting Passcode', `The passcode for this meeting is: <strong>${passcode}</strong>`, function() {});
 		});
 
+		$(document).ready(function() {
+			$("#ratingsTable").DataTable({
+				"pageLength": 5,
+				"lengthMenu": [5, 10, 25, 50],
+				"searching": true,
+				"ordering": true,
+				"info": true,
+				"responsive": true,
+				@if( $l == 'ar' )
+				"language": {
+					"sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
+					"sLoadingRecords": "جارٍ التحميل...", 
+					"sProcessing": "جارٍ التحميل...",
+					"sLengthMenu": "أظهر _MENU_ مدخلات", 
+					"sZeroRecords": "لم يعثر على أية سجلات",
+					"sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+					"sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل", 
+					"sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+					"sInfoPostFix": "", 
+					"sSearch": "ابحث:", 
+					"sUrl": "",
+					"oPaginate": {"sFirst": "الأول", "sPrevious": "السابق", "sNext": "التالي", "sLast": "الأخير"},
+					"oAria": {"sSortAscending": ": تفعيل لترتيب العمود تصاعدياً", "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"}
+				}
+				@endif
+			});
 		});
-</script>
-<script>
-	// User distribution by country
+	</script>
+	<script>
+		$(document).ready(function() {
+			var today = new Date().toISOString().split('T')[0]; // الحصول على تاريخ اليوم بصيغة yyyy-mm-dd
+			$('#dfrom, #dto').datepicker({
+				format: 'yyyy-mm-dd',
+				autoclose: true,
+				todayHighlight: true,
+			});
+
+			$('.DatePicker').datepicker({
+				format: 'yyyy-m-d H:i',
+				onGenerate: function( ct ) { jQuery(this).find('.xdsoft_date').toggleClass('xdsoft_disabled'); },
+				autoclose: true,
+				todayHighlight: true,
+				startDate: today,
+				maxDate: '{{date('Y/m/d',strtotime("-1 days"))}}',
+				timepicker: true
+			});
+		});
+	</script>
+	<script>
+		// User distribution by country
 		const userDistributionData = @json($countries);
 
 		// Sector Breakdown Chart Data
@@ -1812,15 +1874,15 @@ document.addEventListener('DOMContentLoaded', function() {
 		const cyclesStartupName = '';
 		const cyclesStartupLabels = null;
 		const cyclesStartupData = null;
-</script>
-<script src="/app-assets/vendors/js/extensions/jquery.rateyo.min.js"></script>
-<script src="/vuexy/assets/js/app-admin-dashboard.js"></script>
-<script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
-<script src="/vuexy/assets/js/charts-apex.js"></script>
-<script src="/vuexy/assets/js/charts-chartjs.js"></script>
-<script src="/vuexy/assets/js/mentorship-session.js"></script>
-<script>
-	function redirectWithDays(showValue) {
+	</script>
+	<script src="/app-assets/vendors/js/extensions/jquery.rateyo.min.js"></script>
+	<script src="/vuexy/assets/js/app-admin-dashboard.js"></script>
+	<script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
+	<script src="/vuexy/assets/js/charts-apex.js"></script>
+	<script src="/vuexy/assets/js/charts-chartjs.js"></script>
+	<script src="/vuexy/assets/js/mentorship-session.js"></script>
+	<script>
+		function redirectWithDays(showValue) {
 			// الحصول على قيم التواريخ
 			const forteendays = document.getElementById('forteenDays').value;
 			const sevendays = document.getElementById('sevenDays').value;
@@ -1838,10 +1900,19 @@ document.addEventListener('DOMContentLoaded', function() {
 			var instance = fullStar.rateYo({rtl: isRtl});
 			// Rating onSet Event
 			if( instance.length ) { instance.rateYo({rtl: isRtl}).on('rateyo.set', function (e, data) { $('#rate').val(data.rating); }); }
+
+			var fullServiceStar = $('.full-services-star-ratings');
+			fullServiceStar.each(function (index, oneInstance) {
+				var oneServiceInstance = $(oneInstance).rateYo({rtl: isRtl});
+				if( oneServiceInstance.length )
+				{
+					oneServiceInstance.rateYo({rtl: isRtl}).on('rateyo.set', function (e, data) { $(oneInstance).parent().find('input').val(data.rating); });
+				}
+			})
 		});
-</script>
-<script>
-	$(document).ready(function() {
+	</script>
+	<script>
+		$(document).ready(function() {
 			$("#mentorstable").DataTable({
 				"responsive": true,
 				"searching": true,
@@ -2010,5 +2081,5 @@ document.addEventListener('DOMContentLoaded', function() {
 			}
 		  });
 		});
-</script>
+	</script>
 @stop

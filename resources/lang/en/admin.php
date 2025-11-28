@@ -415,7 +415,7 @@ return [
 	'Private' => 'Private',
 	'Not_Private' => 'Not Private',
 	'Service request' => 'Service request',
-	'request sent' => 'Your request sent successfully, and waiting system manager approval',
+	'request sent' => 'Your request sent successfully, and waiting service provider approval',
 	'just now' => 'Just now',
 	'Waiting' => 'Waiting',
 	'SelState' => 'Choose State',
@@ -2538,4 +2538,7 @@ return [
 	'RejectRequest' => 'Reject Request',
 	'ReasonIsRequired' => 'Rejection Reason is required',
 	'Service Provider' => 'Service Provider',
+	'Service not found' => 'Service not found',
+	'Service request not found' => 'Service request not found',
+	'Service request rated, thank you for your feedback' => 'Service request rated, thank you for your feedback',
 ];

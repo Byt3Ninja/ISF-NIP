@@ -74,7 +74,18 @@ class Permissions
                 {
                     if( $this->match( $route ) && !$user->ableTo( $permission ) )
                     {
-                        abort('401', $permission);
+                        if( $request->expectsJson() )
+                        {
+                            return response()->json([
+                                'status' => false,
+                                'title' => 'Unauthorized',
+                                'message' => 'You are not authorized to perform this action.'
+                            ], 401);
+                        }
+                        else
+                        {
+                            abort('401', $permission);
+                        }
                     }
                 }
             }

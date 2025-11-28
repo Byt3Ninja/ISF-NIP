@@ -42,7 +42,7 @@
                 <tr>
                   <td>{{ $num + 1 }}</td>
                   <td>
-                    <a href="javascript:void(0)" onclick="openservice({{ $row->id }})">{{ $row->{'name_' . $l} }}</a>
+                    <a href="javascript:void(0)" onclick="openServiceDetails({{ $row->id }})">{{ $row->{'name_' . $l} }}</a>
                   </td>
                   <td>{{ substr(strip_tags($row->{'description_' . $l}), 0, 40) }}...</td>
                   <td>{{ $row->{'category_name_' . $l} }}</td>
@@ -74,7 +74,7 @@
                     </span>
                   </td>
                   <td>
-                    <button class="btn btn-primary btn-sm" onclick="openservice({{ $row->id }})">
+                    <button class="btn btn-primary btn-sm" onclick="openServiceDetails({{ $row->id }})">
                       {{ __('dashboard.Request') }}
                     </button>
                   </td>
@@ -214,7 +214,7 @@
       // time_24hr: true,
     });
 
-    function openservice(id) {
+    function openServiceDetails(id) {
       $.ajaxSetup({
         headers: {
           'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -223,20 +223,23 @@
       $.ajax({
         type: "POST",
         url: "/dashboard/directory/" + id,
-        success: function(response) {
-          let img = '<img class="img-fluid" src="/191014/' + response.img_url + '">';
-          $('#title').text(response.name_{{ $l }});
-          $('#description').html(response.description_{{ $l }});
-          $('#simg').html(img);
-          $('#sid').val(response.id);
-           // Handle Price Visibility
-           if (response.hide_price && !response.is_admin) {
-                $('#price').closest('div').hide();
+        success: function(res) {
+          if( res.status )
+          {
+            var response = res.service;
+            let img = '<img class="img-fluid" src="/191014/' + response.img_url + '">';
+            $('#title').text(response.name_{{ $l }});
+            $('#description').html(response.description_{{ $l }});
+            $('#simg').html(img);
+            $('#sid').val(response.id);
+            // Handle Price Visibility
+            if (response.hide_price && !response.is_admin) {
+              $('#price').closest('div').hide();
             } else {
-                $('#price').closest('div').show();
-                $('#price').html(response.price + ' {{ __('EGP') }}');
+              $('#price').closest('div').show();
+              $('#price').html(response.price + ' {{ __('EGP') }}');
             }
-
+  
             // Handle Vendor Info Visibility
             if (response.hide_vendor_info && !response.is_admin) {
                 $('#vendor-info').hide();
@@ -245,9 +248,24 @@
                 $('#vendor-name').html(response.vendor_name);
                 $('#vendor-phone').html(response.vendor_phone);
                 $('#vendor-email').html(response.vendor_email);
-            }
-
-          $('#service-data').modal('show');
+            }  
+            $('#service-data').modal('show');
+          }
+          else
+          {
+						Swal.fire({
+							icon: 'warning',
+							title: res.title || 'Failed',
+							html: res.message || 'Something went wrong',
+							timer: 2500,
+							timerProgressBar: true,
+							showCancelButton: false,
+							confirmButtonText: 'OK',
+							customClass: {
+								confirmButton: 'btn mx-1 bg-primary text-white',
+							}
+						});
+          }
         },
         error: function(error) {
           console.log(error);
@@ -272,7 +290,7 @@
       console.log(id + '-' + comment);
       $.ajax({
         type: "POST",
-        url: "/dashboard/servicerequest",
+        url: "/dashboard/service/request",
         data: {
           "id": id,
           "comment": comment,
