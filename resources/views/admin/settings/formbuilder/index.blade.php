@@ -30,7 +30,7 @@
 
     $mode = !request()->segment(3) ? 'ADD' : 'EDIT';
 
-    $orgIdParam = request()->get('org_id') || (isset($title->organization_id) ? $title->organization_id : null);
+    $orgIdParam = request()->get('org_id') ?? $title->organization_id ?? $title->organization_id ?? null
 @endphp
 
 @section('content')

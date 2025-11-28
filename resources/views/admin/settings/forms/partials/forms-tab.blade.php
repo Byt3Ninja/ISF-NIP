@@ -30,7 +30,7 @@
                 $submissions = $form->submissions ?? 0;
                 $updated = (isset($form->last_modified) && $form->last_modified != 'null') ? \Carbon\Carbon::parse($form->last_modified)->format('Y-m-d') : '—';
                 $created = (isset($form->created_date) && $form->created_date != 'null') ? \Carbon\Carbon::parse($form->created_date)->format('Y-m-d') : '—';
-                $org_id = $form->organization_id ?? '';
+                $org_id = $form->org_id ?? '';
               @endphp
               <tr data-org="{{ $assignedOrg }}">
                 <td>{{ $form_id }}</td>
