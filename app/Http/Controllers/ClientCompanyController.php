@@ -22,10 +22,12 @@ use App\Formdata;
 use App\Settings;
 use App\Training;
 use App\Milestone;
+use App\Screening;
 use App\Technology;
 use App\Team_member;
 use App\FundingRound;
 use App\Organization;
+use App\Finalscreening;
 use App\MentorshipTask;
 use App\StaticCategory;
 use App\CompanyRelation;
@@ -42,6 +44,7 @@ use App\Services\CompanyService;
 use App\ScreeningEvaluationResults;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use App\ScreeningEvaluationCustomFields;
 use Illuminate\Support\Facades\Validator;
 use \Illuminate\Validation\ValidationException;
 use Intervention\Image\ImageManagerStatic as Image;
@@ -2750,38 +2753,244 @@ class ClientCompanyController extends Controller
                     ];
                 $almuni->program = json_encode($cycle);
 
-                //     $screening[] = [
-                //         'Overall evaluation score' => $company->cycledata->title ?? '',
-                //         'Step' =>  $company->cycledata->id ?? '',
-                //         'Step ID' =>  $company->cycledata->organization ?? '',
-                //         'criterion For each judge' => '', // Scoring breakdown by criteria (criterion).For each judge:
-                //         'weight For each judge' =>  '', // Scoring breakdown by criteria (weight).For each judge:
-                //         'score For each judge' => '', // Scoring breakdown by criteria (score).For each judge:
-                //         'Judge name' =>  '',
-                //         'Judge ID' =>  '',
-                //         'Individual evaluation score' => '',
-                //         'Individual comments' => '',
-                //         'Individual feedback' => '',
-                //     ];
 
-                // $almuni->screening = json_encode($screening);
+            $company_id = $company->id;
+            $cycle_id = $company->cycle;
+
+            $_steps = Step::where('cycle_id', $cycle_id)
+                ->where('stype', 2)
+                ->orderBy('arr')
+                ->get();
+            $companies = Company::where('cycle', $cycle_id)->get();
+            $stepsData = collect();
+            $l = app()->getLocale();
+            foreach ($_steps as $step) {
+                $evaluation = ScreeningEvaluation::where('step_id', $step->id)->first();
+                $results = ScreeningEvaluationResults::where('evaluation_id', $evaluation?->id)->get();
+                $get_comments = ScreeningEvaluationCustomFields::where('name', 'final_comment')
+                    ->where('evaluation_id', $evaluation?->id)
+                    ->with('values')
+                    ->first();
+
+                $comments = collect([]);
+                if($get_comments && $get_comments->values) {
+                    $comments = $get_comments->values->map(function($c) {
+                        $c->evaluation_id = $c->evaluation_id;
+                        return $c;
+                    });
+                }
+                $getUsers = Screening::where('step_id', $step->id)->with('user')->get();
+                $judges = $getUsers->map(function($item) use ($l) {
+                    $user = $item->user;
+                    $j = new stdClass;
+                    $j->id = $user->id ?? 0;
+                    $j->name = ($user->{'first_name_' . $l} ?? '') . ' ' . ($user->{'last_name_' . $l} ?? '');
+                    $j->phone = $user->phone ?? '';
+                    $j->email = $user->email ?? '';
+                    $j->image_url = $user->image_url ?? '';
+                    return $j;
+                })->unique('id')->values();
+                $judges = $judges->map(function($judge) use ($getUsers) {
+                    $startups = $getUsers->where('user_id', $judge->id)
+                        ->map(fn($i) => $i->users)
+                        ->flatten()
+                        ->unique()
+                        ->filter()
+                        ->values();
+                    $judge->startups = $startups->pluck('id')->values();
+                    return $judge;
+                });
+                foreach ($judges as $jdx => $judge) {
+                    $judges[$jdx]->companies = collect([]);
+                    foreach ($judge->startups as $cid) {
+
+                        $_comment = '';
+                        $_approval = 'pending';
+
+                        $judge_comment = $comments->where('user_id', $judge->id)
+                            ->where('company_id', $cid)
+                            ->first();
+
+                        if($judge_comment) {
+                            $_comment = $judge_comment->value ?? '';
+                            $_approval = intval($judge_comment->is_approved) === 1
+                                ? 'approved'
+                                : (intval($judge_comment->is_approved) === 2 ? 'disapproved' : 'pending');
+                        }
+
+                        $_results = $results->where('company_id', $cid)
+                            ->where('user_id', $judge->id)
+                            ->values();
+
+                        $_company = new stdClass;
+                        $_company->id = $cid;
+                        $_company->status = $_results->count() > 0
+                            ? ($_results->where('status', 0)->count() > 0 ? 'Draft' : 'Published')
+                            : 'Not Evaluated';
+                        $_company->comment = $_comment;
+                        $_company->approval = $_approval;
+                        $_company->results = $_results;
+
+                        $judges[$jdx]->companies->push($_company);
+                    }
+                }
+                foreach ($companies as $cidx => $comp) {
+                    $avg = $judges
+                        ->filter(fn($j) => $j->companies->where('status', 'Published')->where('id', $comp->id)->isNotEmpty())
+                        ->avg(function($j) use ($comp) {
+                            $item = $j->companies->where('status', 'Published')->where('id', $comp->id)->first();
+                            return $item ? $item->results->sum(fn($r) => $r->score ?? 0) : null;
+                        });
+                    $companies[$cidx]->average_score = $avg ?? 0;
+                }
+                $stepsData->push([
+                    'step_id' => $step->id,
+                    'step_title' => $step->title,
+                    'companies' => $companies->map(function($c) { 
+                        return [
+                            'company_id' => $c->id,
+                            'average_score' => $c->average_score
+                        ];
+                    })->values(),
+                    'judges' => $judges->map(function($j) {
+                        return [
+                            'judge_id' => $j->id,
+                            'judge_name' => $j->name,
+                            'phone' => $j->phone,
+                            'email' => $j->email,
+                            'image_url' => $j->image_url,
+                            'evaluations' => $j->companies->map(function($c) {
+                                return [
+                                    'company_id' => $c->id,
+                                    'score' => $c->results->sum(fn($r) => $r->score ?? 0),
+                                    'status' => $c->status,
+                                    'comment' => $c->comment,
+                                    'approval' => $c->approval
+                                ];
+                            })->values()
+                        ];
+                    })->values()
+                ]);
+            }
+            $screeningData = $stepsData;
+
+
+
+        // return or view
+        //  dd($screeningData);
+
+
+                $almuni->screening = json_encode($screeningData);
 
                     //Final Screening
-                //     $final_screening[] = [
-                //         'Overall evaluation score' => $company->cycledata->title ?? '',
-                //         'Step' =>  $company->cycledata->id ?? '',
-                //         'Step ID' =>  $company->cycledata->organization ?? '',
-                //         'criterion For each judge' => '', // Scoring breakdown by criteria (criterion).For each judge:
-                //         'weight For each judge' =>  '', // Scoring breakdown by criteria (weight).For each judge:
-                //         'score For each judge' => '', // Scoring breakdown by criteria (score).For each judge:
-                //         'Judge name' =>  '',
-                //         'Judge ID' =>  '',
-                //         'Individual evaluation score' => '',
-                //         'Individual comments' => '',
-                //         'Individual feedback' => '',
-                //     ];
+                $company_id = $company->id;
+                $cycle_id = $company->cycle;
+                $_steps = Step::where('cycle_id', $cycle_id)
+                    ->where('stype', 5)
+                    ->orderBy('arr')
+                    ->get();
+                $companies = Company::where('cycle', $cycle_id)->get();
+                $finalstepsData = collect();
 
-                // $almuni->screening = json_encode($final_screening);
+                $l = app()->getLocale();
+
+                foreach ($_steps as $step) {
+
+                    $finals = Finalscreening::where('step_id', $step->id)
+                        ->with(['company', 'company.users'])
+                        ->get()
+                        ->map(function($f) {
+                            $f->judgers_ids = array_map(fn($i) => intval($i), $f->judges);
+                            return $f;
+                        });
+
+                    $users_ids = $finals
+                        ->map(fn($f) => array_map(fn($i) => intval($i), $f->judges))
+                        ->flatten()
+                        ->unique()
+                        ->values();
+
+                    $judges = User::whereIn('id', $users_ids)
+                        ->get()
+                        ->map(function($user) use ($l) {
+                            $j = new stdClass;
+                            $j->id = $user->id ?? 0;
+                            $j->name = ($user->{'first_name_' . $l} ?? '') . ' ' . ($user->{'last_name_' . $l} ?? '');
+                            $j->phone = $user->phone ?? '';
+                            $j->email = $user->email ?? '';
+                            $j->image_url = $user->image_url ?? '';
+                            return $j;
+                        })->unique('id')->values();
+                    $judges = $judges->map(function($item) use ($finals) {
+                        $startups = $finals
+                            ->filter(fn($f) => in_array($item->id, $f->judgers_ids))
+                            ->values()
+                            ->map(fn($f) => $f?->company?->users)
+                            ->flatten()
+                            ->unique()
+                            ->filter(fn($i) => !is_null($i))
+                            ->values();
+
+                        $item->startups = $startups;
+                        return $item;
+                    });
+                    foreach ($judges as $idx => $judge) {
+                        $startup_ids = $judge->startups->pluck('id')->toArray();
+                        $get_companies = $companies->filter(fn($c) => $c->users->whereIn('id', $startup_ids)->count() > 0);
+                        $judges[$idx]->startups = $get_companies->pluck('id');
+                    }
+                    $judges = $judges->map(function($judge) use ($companies) {
+                        $judge->companies = collect([]);
+                        foreach ($judge->startups as $company_id) {
+                            $_company = new stdClass;
+                            $_company->id = $company_id;
+                            $_company->status = 'Not Evaluated';
+                            $_company->results = collect([]);
+                            $_company->comment = '';
+                            $_company->approval = 'pending';
+                            $judge->companies->push($_company);
+                        }
+                        return $judge;
+                    });
+                    $_companies = $companies->map(function($comp) use ($judges, $step) {
+                        $average_score = $judges
+                            ->filter(fn($j) => in_array($comp->id, $j->startups->toArray()))
+                            ->avg(fn($j) => $j->companies->where('id', $comp->id)->first()->results->sum(fn($r) => $r->score ?? 0));
+                        $comp->average_score = $average_score ?? 0;
+                        $comp->judges = $judges;
+                        $comp->company_step_id = $step->id;
+                        $comp->company_cycle_id = $step->cycle_id;
+                        return $comp;
+                    });
+                    $stepsData->push([
+                        'step_id' => $step->id,
+                        'step_title' => $step->title,
+                        'companies' => $_companies->map(fn($c) => [
+                            'company_id' => $c->id,
+                            'average_score' => $c->average_score
+                        ])->values(),
+                        'judges' => $judges->map(function($j) {
+                            return [
+                                'judge_id' => $j->id,
+                                'judge_name' => $j->name,
+                                'phone' => $j->phone,
+                                'email' => $j->email,
+                                'image_url' => $j->image_url,
+                                'evaluations' => $j->companies->map(fn($c) => [
+                                    'company_id' => $c->id,
+                                    'score' => $c->results->sum(fn($r) => $r->score ?? 0),
+                                    'status' => $c->status,
+                                    'comment' => $c->comment,
+                                    'approval' => $c->approval
+                                ])->values()
+                            ];
+                        })->values()
+                    ]);
+                }
+                $FinalscreeningData = $finalstepsData;
+
+                // dd($FinalscreeningData);
+                $almuni->final_screening = json_encode($FinalscreeningData);
 
 
                  // Training
@@ -2947,120 +3156,120 @@ class ClientCompanyController extends Controller
                 $user = $company->user;
                 $l =  app()->getLocale();
                 $forms = DB::table('form_data as FD')
-        ->select([
-            'FD.company_id as FD_company_id',
-            'FD.user_id as FD_user_id',
-            'FD.step_id as FD_step_id',
-            'FD.question as FD_question',
-            'FD.answer as FD_answer',
-            'FD.created_at as FD_created_at',
-            'FD.updated_at as FD_updated_at',
-            'FD.deleted_at as FD_deleted_at',
-            'C.name_en as C_name_en',
-            'C.name_ar as C_name_ar',
-            'C.id as C_id',
-            DB::raw("CONCAT(U.first_name_en, ' ', U.last_name_en) as user_name_en"),
-            DB::raw("CONCAT(U.first_name_ar, ' ', U.last_name_ar) as user_name_ar"),
-            'U.id as U_id',
-            'S.title as S_title',
-            'S.id as S_id',
-            'S.cycle_id as S_cycle_id',
-            'CYC.title as CYC_title',
-            'CYC.id as CYC_id',
-            'CYC.organization_id as CYC_organization_id',
-            'O.name_en as O_name_en',
-            'O.name_ar as O_name_ar',
-            'O.id as O_id'
-        ])
-        ->leftJoin('companies as C', 'C.id', '=', 'FD.company_id')
-        ->leftJoin('users as U', 'U.id', '=', 'FD.user_id')
-        ->leftJoin('steps as S', 'S.id', '=', 'FD.step_id')
-        ->leftJoin('cycles as CYC', 'CYC.id', '=', 'S.cycle_id')
-        ->leftJoin('organizations as O', 'O.id', '=', 'CYC.organization_id')
-        ->whereNull('FD.deleted_at')
-        ->where('FD.user_id', $company->user->id)
-        ->when($company->cycledata->organization_id != null, function ($query) use ($company) {
-            return $query->where('CYC.organization_id', $company->cycledata->organization_id);
-        })
-        ->get();
+                ->select([
+                    'FD.company_id as FD_company_id',
+                    'FD.user_id as FD_user_id',
+                    'FD.step_id as FD_step_id',
+                    'FD.question as FD_question',
+                    'FD.answer as FD_answer',
+                    'FD.created_at as FD_created_at',
+                    'FD.updated_at as FD_updated_at',
+                    'FD.deleted_at as FD_deleted_at',
+                    'C.name_en as C_name_en',
+                    'C.name_ar as C_name_ar',
+                    'C.id as C_id',
+                    DB::raw("CONCAT(U.first_name_en, ' ', U.last_name_en) as user_name_en"),
+                    DB::raw("CONCAT(U.first_name_ar, ' ', U.last_name_ar) as user_name_ar"),
+                    'U.id as U_id',
+                    'S.title as S_title',
+                    'S.id as S_id',
+                    'S.cycle_id as S_cycle_id',
+                    'CYC.title as CYC_title',
+                    'CYC.id as CYC_id',
+                    'CYC.organization_id as CYC_organization_id',
+                    'O.name_en as O_name_en',
+                    'O.name_ar as O_name_ar',
+                    'O.id as O_id'
+                ])
+                ->leftJoin('companies as C', 'C.id', '=', 'FD.company_id')
+                ->leftJoin('users as U', 'U.id', '=', 'FD.user_id')
+                ->leftJoin('steps as S', 'S.id', '=', 'FD.step_id')
+                ->leftJoin('cycles as CYC', 'CYC.id', '=', 'S.cycle_id')
+                ->leftJoin('organizations as O', 'O.id', '=', 'CYC.organization_id')
+                ->whereNull('FD.deleted_at')
+                ->where('FD.user_id', $company->user->id)
+                ->when($company->cycledata->organization_id != null, function ($query) use ($company) {
+                    return $query->where('CYC.organization_id', $company->cycledata->organization_id);
+                })
+                ->get();
 
-        $C = 1;
-        $grouped = $forms->groupBy('FD_step_id');
-        $data = $grouped->map(function ($group, $stepId) use ($l, &$C) {
-            $first = $group->first();
+                $C = 1;
+                $grouped = $forms->groupBy('FD_step_id');
+                $data = $grouped->map(function ($group, $stepId) use ($l, &$C) {
+                    $first = $group->first();
 
-            $item = new stdClass;
-            $item->submission_id = $C++;
-            $item->step_id = $stepId;
-            $item->startup_name = $first->{'C_name_' . $l};
-            $item->submitted_by = $group->pluck('user_name_' . $l)->unique()->implode(', ') ?? '';
-            $item->step_name = $first->S_title;
-            $item->program_name = $first->CYC_title;
-            $item->organization_name = $first->O_name_en;
-            $item->created_at = $first->FD_created_at;
-            $item->answers = $group->map(function ($item) use ($l) {
-                $value = $item->FD_answer;
+                    $item = new stdClass;
+                    $item->submission_id = $C++;
+                    $item->step_id = $stepId;
+                    $item->startup_name = $first->{'C_name_' . $l};
+                    $item->submitted_by = $group->pluck('user_name_' . $l)->unique()->implode(', ') ?? '';
+                    $item->step_name = $first->S_title;
+                    $item->program_name = $first->CYC_title;
+                    $item->organization_name = $first->O_name_en;
+                    $item->created_at = $first->FD_created_at;
+                    $item->answers = $group->map(function ($item) use ($l) {
+                        $value = $item->FD_answer;
 
-                if( is_string( $value ) && (strpos($value, '/') !== false || strpos($value, '\\') !== false) )
-                {
-                    $filename = basename($value);
-                    $value = [
-                        'type' => 'file',
-                        'path' => $value,
-                        'file_name' => $filename,
-                        'file_url' => asset($value),
-                    ];
-                }
+                        if( is_string( $value ) && (strpos($value, '/') !== false || strpos($value, '\\') !== false) )
+                        {
+                            $filename = basename($value);
+                            $value = [
+                                'type' => 'file',
+                                'path' => $value,
+                                'file_name' => $filename,
+                                'file_url' => asset($value),
+                            ];
+                        }
 
-                $submission = new stdClass;
-                $submission->user_id = $item->FD_user_id;
-                $submission->name = $item->{'user_name_' . $l};
-                $submission->label = trim( $item->FD_question );
-                $submission->value = $value;
-                $submission->created_at = $item->FD_created_at;
-                return $submission;
-            })->groupBy('user_id')->values();
-            return $item;
-        })->values();
-                // dd($data);
-                
-                foreach ($data as $item) {
+                        $submission = new stdClass;
+                        $submission->user_id = $item->FD_user_id;
+                        $submission->name = $item->{'user_name_' . $l};
+                        $submission->label = trim( $item->FD_question );
+                        $submission->value = $value;
+                        $submission->created_at = $item->FD_created_at;
+                        return $submission;
+                    })->groupBy('user_id')->values();
+                    return $item;
+                })->values();
+                        // dd($data);
+                        
+                        foreach ($data as $item) {
 
-                    // كل answers عبارة عن Collection جوا Collection
-                    $answers = $item->answers->collapse(); // ده بيفك الـ nesting
+                            // كل answers عبارة عن Collection جوا Collection
+                            $answers = $item->answers->collapse(); // ده بيفك الـ nesting
 
-                    foreach ($answers as $answer) {
+                            foreach ($answers as $answer) {
 
-                        // تجهيز الفيلد
-                        $fieldType = is_array($answer->value) ? 'file' : 'text';
+                                // تجهيز الفيلد
+                                $fieldType = is_array($answer->value) ? 'file' : 'text';
 
-                        $formSubmissions[] = [
-                            'Form_Title'      => $item->step_name,
-                            'ID'              => $item->submission_id,
-                            'step_title'      => $item->step_name,
-                            'Step_ID'         => $item->step_id,
-                            'Submission_Date' => $item->created_at,
+                                $formSubmissions[] = [
+                                    'Form_Title'      => $item->step_name,
+                                    'ID'              => $item->submission_id,
+                                    'step_title'      => $item->step_name,
+                                    'Step_ID'         => $item->step_id,
+                                    'Submission_Date' => $item->created_at,
 
-                            'Field_Name'      => $answer->label,
-                            'Field_Type'      => $fieldType,
-                            'Submitted_Value' => is_array($answer->value) ? $answer->value['file_name'] : $answer->value,
-                            'Attachment_Link' => is_array($answer->value) ? $answer->value['file_url'] : null,
+                                    'Field_Name'      => $answer->label,
+                                    'Field_Type'      => $fieldType,
+                                    'Submitted_Value' => is_array($answer->value) ? $answer->value['file_name'] : $answer->value,
+                                    'Attachment_Link' => is_array($answer->value) ? $answer->value['file_url'] : null,
 
-                            'Form_Inputs' => [
-                                'Field_Name'      => $answer->label,
-                                'Field_Type'      => $fieldType,
-                                'Submitted_Value' => is_array($answer->value) ? $answer->value['file_name'] : $answer->value,
-                                'Attachment_Link' => is_array($answer->value) ? $answer->value['file_url'] : null,
-                            ],
-                        ];
-                    }
-                }
+                                    'Form_Inputs' => [
+                                        'Field_Name'      => $answer->label,
+                                        'Field_Type'      => $fieldType,
+                                        'Submitted_Value' => is_array($answer->value) ? $answer->value['file_name'] : $answer->value,
+                                        'Attachment_Link' => is_array($answer->value) ? $answer->value['file_url'] : null,
+                                    ],
+                                ];
+                            }
+                        }
              
                 $almuni->submitted_forms = json_encode($formSubmissions);
 
             $almuni->save();
            
-               $dattt = json_decode($almuni->submitted_forms);
+               $dattt = json_decode($almuni->screening);
                dd($dattt);
         } catch (Exception $e) {
             dd($e->getMessage());
