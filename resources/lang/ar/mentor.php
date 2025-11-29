@@ -29,6 +29,6 @@ return [
     'mentorshipRequests'=>[
         'all'=>'عرض جلسات الارشارد',
         'withoutTasks'=>'عدد الجلسات بدون مهام'
-    ]
-
+    ],
+    'availability' => 'التواجد',
 ];

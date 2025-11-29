@@ -1118,7 +1118,8 @@ class MentorsController extends Controller
 		}
 	}
 
-	
-
-	
+	public function availability()
+	{
+			return view('mentor.availability.index');
+	}
 }

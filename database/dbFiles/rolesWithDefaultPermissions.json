@@ -8104,5 +8104,20 @@
                 ]
             }
         ]
+    },
+    {
+        "name": "slots",
+        "description": "Slots management for mentors",
+        "permissions": [
+            {
+                "name": "slots.index",
+                "description": "View mentor availability slots",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "mentor"
+                ]
+            }
+        ]
     }
 ]

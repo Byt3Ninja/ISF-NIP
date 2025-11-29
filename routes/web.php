@@ -565,7 +565,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('zoom/{id}/update', 'MeetingController@update');
     Route::post('zoom/{id}/delete', 'MeetingController@destroy');
     Route::get('zoom/{id}/registrants', 'MeetingController@registrants');
+
     //Mentors
+    Route::get('/availability', 'MentorsController@availability')->name('slots.index');
     Route::post('mentors/modify', 'MentorsController@modify')->name('mentors.settings_modify');
 
     Route::get('program/show', 'Mentor\MentorProgramController@show');

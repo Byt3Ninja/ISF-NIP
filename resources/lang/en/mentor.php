@@ -28,5 +28,6 @@ return [
     'mentorshipRequests'=>[
         'all'=>'Mentorship Sessions',
         'withoutTasks'=>'Sessions Without Tasks',
-    ]
+    ],
+    'availability' => 'Availability',
 ];

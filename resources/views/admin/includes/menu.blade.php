@@ -73,6 +73,15 @@
         <div>{{ __('admin.Profile') }}</div>
       </a>
     </li>
+    
+    @if ($_user->ableTo('slots.index', $permissions))
+      <li class="{{ Request::is('*availability') ? 'active' : '' }} menu-item">
+        <a href="{{ route('slots.index') }}" class="menu-link">
+          <i class="ti ti-calendar-cog me-3 ti-md"></i>
+          <div>{{ __('mentor.availability') }}</div>
+        </a>
+      </li>
+    @endif
 
     @if( $_user->HaveCompany == 1 && !$_user->company && $_user->ableToAny(['company.profile_view', 'assessments.results_analysis_view', 'swot.view'], $permissions) )
       <li class="{{ Request::is('*companyProfile') ? 'active' : '' }} menu-item">

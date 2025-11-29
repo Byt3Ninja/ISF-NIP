@@ -199,8 +199,9 @@
 						@else
 						<div class="widget-todo-title-wrapper d-flex justify-content-between align-items-center mb-75">
 							<div class="widget-todo-title-area d-flex align-items-center">
-								<span class="widget-todo-title ml-50"> <i class="bx bxs-bell-ring text-danger"></i> {{ __('dashboard.No
-									services added') }}.</span>
+								<span class="widget-todo-title ml-50"> <i class="bx bxs-bell-ring text-danger"></i> 
+								{{ __('dashboard.No services added') }}.
+								</span>
 							</div>
 						</div>
 						@endif
