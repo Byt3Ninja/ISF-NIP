@@ -1045,7 +1045,14 @@
                                 {{$myfinal->datetime < now() ?__('Yes'):__('No')}}
                               </td>
                               <td>
-                                <a href="{{$myfinal->join_url}}" target="_blank">({{__('dashboard.Join now')}})</a>
+                                @php
+                                  $endTime = \Carbon\Carbon::parse($myfinal->datetime)->addMinutes($myfinal->duration);
+                                @endphp
+                                @if(now() > $endTime)
+                                  <span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
+                                @else
+                                  <a href="{{$myfinal->join_url}}" target="_blank">({{__('dashboard.Join now')}})</a>
+                                @endif
                               </td>
                             </tr>
                           </tbody>
@@ -1252,7 +1259,14 @@
 														{{$session->done?__('Yes'):__('No')}}
 													</td>
 													<td>
-														<a href="{{$session->join_url}}" target="_blank">({{__('dashboard.Join now')}})</a>
+														@php
+															$endTime = \Carbon\Carbon::parse($session->zoom_date)->addMinutes($session->period);
+														@endphp
+														@if(now() > $endTime)
+															<span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
+														@else
+															<a href="{{$session->join_url}}" target="_blank">({{__('dashboard.Join now')}})</a>
+														@endif
 													</td>
 												</tr>
 											@endforeach

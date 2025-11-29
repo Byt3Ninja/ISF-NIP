@@ -590,7 +590,15 @@
 													</td>
 													<td> {{ $myFinal->datetime }} <br>({{ $myFinal->duration }}M) </td>
 													<td> {{ $myFinal->datetime < now() ? __('Yes') : __('No') }} </td>
-													<td> <a href="{{ $myFinal->join_url }}" target="_blank">({{__('dashboard.Join now')}})</a>
+													<td> 
+														@php
+															$endTime = \Carbon\Carbon::parse($myFinal->datetime)->addMinutes($myFinal->duration);
+														@endphp
+														@if(now() > $endTime)
+															<span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
+														@else
+															<a href="{{ $myFinal->join_url }}" target="_blank">({{__('dashboard.Join now')}})</a>
+														@endif
 													</td>
 												</tr>
 											</tbody>
@@ -778,7 +786,7 @@
 																</a>
 															</span>
 															@else
-																<span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
+																<span class="text-danger"> <i class="ti ti-alarm"></i> {{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }} </span>
 															@endif
 															@else 
 																<span class="text-warning"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }} </span>

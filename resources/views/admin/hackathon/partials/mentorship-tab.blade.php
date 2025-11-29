@@ -42,11 +42,18 @@
                         <td>
                           @if( $session->type == 'sessions' )
                           {{ __('cycles.Duration') }}: {{ $session->duration }} {{ __('cycles.Minutes') }} :
+                          @php
+                            $endTime = \Carbon\Carbon::parse($session->datetime)->addMinutes($session->duration);
+                          @endphp
+                          @if(now() > $endTime)
+                            <span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
+                          @else
                           <a href="{{ $session->join_url }}" target="_blank">
                             <button title="Join only" type="button"
                               class="btn btn-icon rounded-circle btn-light-primary"> <i class="ti ti-brand-zoom"></i>
                             </button>
                           </a>
+                          @endif
                           @elseif ($session->type == 'offline')
                           <b>{{ __('cycles.trainer name') }}:</b> {{ $session->trainer_name }}<br>
                           <b>{{ __('cycles.training location') }}:</b>
@@ -161,10 +168,17 @@
                         </td>
                         <td> {{ $session->done ?__('Yes') : __('No') }} </td>
                         <td>
+                          @php
+                            $endTime = \Carbon\Carbon::parse($session->zoom_date)->addMinutes($session->period);
+                          @endphp
+                          @if(now() > $endTime)
+                            <span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
+                          @else
                           <a class="btn btn-sm btn-label-primary" href="{{ $session->join_url }}" target="_blank">
                             <i class="ti ti-brand-zoom me-2"></i>
                             {{ __('dashboard.Join now') }}
                           </a>
+                          @endif
                         </td>
                       </tr>
                       @endforeach
