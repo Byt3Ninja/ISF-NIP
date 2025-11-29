@@ -1,5 +1,4 @@
 <form
-  class="form d-flex flex-column h-100"
   action="{{ route('settings.system_meeting_integration_update') }}"
   method="POST"
   enctype="multipart/form-data"
@@ -8,252 +7,254 @@
   {!! csrf_field() !!}
   @method('PUT')
 
-  <input
-    type="hidden"
-    name="id"
-    value="{{ $Title->id }}"
-  />
+  <input type="hidden" name="id" value="{{ $Title->id }}"/>
 
-  <div class="form-content flex-grow-1">
-
-    <div class="card border shadow-sm mb-6">
-      <div class="card-header">
-        <h6 class="card-title mb-0">{{ __('settings.meeting_integration') }}</h6>
-        <span class="text-muted">{{ __('settings.meeting_integration_description') }}</span>
-      </div>
-      <div class="card-body">
-        <!-- Meeting Type -->
-        <div class="form-group mb-4">
-          <label class="form-label">{{ __('settings.meeting_platform') }}</label>
-          <select
-            class="form-select Meeting"
-            id="Meeting"
-            name="Meeting"
-            required
-          >
-            <option value="0">{{ __('settings.select_platform') }}</option>
-            <option
-              value="zoom"
-              {{ strtolower($Title->Meeting) == 'zoom' ? 'selected' : '' }}
-            >
-              {{ __('admin.Zoom') }}
-            </option>
-            <option
-              value="teams"
-              {{ strtolower($Title->Meeting) == 'teams' ? 'selected' : '' }}
-            >
-              {{ __('admin.Teams') }}
-            </option>
-          </select>
-        </div>
-
-        <!-- Teams Credentials -->
-        <div
-          id="teams_credentials"
-          @if ($Title->Meeting != 'Teams') style="display: none;" @endif
-        >
-          <div class="form-group mb-4">
-            <label class="form-label" for="MICROSOFT_CLIENT_ID">
-              {{ __('settings.MICROSOFT_CLIENT_ID') }}
-            </label>
-            <input
-              id="MICROSOFT_CLIENT_ID"
-              type="text"
-              class="form-control"
-              name="MICROSOFT_CLIENT_ID"
-              value="{{ $Title->MICROSOFT_CLIENT_ID }}"
-            />
-          </div>
-
-          <div class="form-group mb-4">
-            <label class="form-label" for="MICROSOFT_CLIENT_SECRET_VALUE">
-              {{ __('settings.MICROSOFT_CLIENT_SECRET_VALUE') }}
-            </label>
-            <input
-              id="MICROSOFT_CLIENT_SECRET_VALUE"
-              type="text"
-              class="form-control"
-              name="MICROSOFT_CLIENT_SECRET_VALUE"
-              value="{{ $Title->MICROSOFT_CLIENT_SECRET_VALUE }}"
-            />
-          </div>
-
-          <div class="form-group mb-4">
-            <label class="form-label" for="MICROSOFT_TENANT_ID">
-              {{ __('settings.MICROSOFT_TENANT_ID') }}
-            </label>
-            <input
-              id="MICROSOFT_TENANT_ID"
-              type="text"
-              class="form-control"
-              name="MICROSOFT_TENANT_ID"
-              value="{{ $Title->MICROSOFT_TENANT_ID }}"
-            />
-          </div>
-
-          <div class="form-group mb-4">
-            <label class="form-label" for="MICROSOFT_CLIENT_SECRET_ID">
-              {{ __('settings.MICROSOFT_CLIENT_SECRET_ID') }}
-            </label>
-            <input
-              id="MICROSOFT_CLIENT_SECRET_ID"
-              type="text"
-              class="form-control"
-              name="MICROSOFT_CLIENT_SECRET_ID"
-              value="{{ $Title->MICROSOFT_CLIENT_SECRET_ID }}"
-            />
-          </div>
-
-          <div class="form-group mb-4">
-            <label class="form-label" for="MICROSOFT_APP_EMAIL">
-              {{ __('settings.MICROSOFT_APP_EMAIL') }}
-            </label>
-            <input
-              id="MICROSOFT_APP_EMAIL"
-              type="text"
-              class="form-control"
-              name="MICROSOFT_APP_EMAIL"
-              value="{{ $Title->MICROSOFT_APP_EMAIL }}"
-            />
-          </div>
-
-          <div class="form-group mb-4">
-            <label class="form-label" for="MICROSOFT_REDIRECT_URI">
-              {{ __('settings.MICROSOFT_REDIRECT_URI') }}
-            </label>
-            <input
-              id="MICROSOFT_REDIRECT_URI"
-              type="text"
-              class="form-control"
-              name="MICROSOFT_REDIRECT_URI"
-              value="{{ $Title->MICROSOFT_REDIRECT_URI }}"
-            />
-          </div>
-        </div>
-
-        <!-- Zoom Credentials -->
-        <div
-          id="zoom_credentials"
-          @if ($Title->Meeting != 'Zoom') style="display: none;" @endif
-        >
-          <div class="form-group mb-4">
-            <label class="form-label" for="ZOOM_CLIENT_ID">
-              {{ __('settings.ZOOM_CLIENT_ID') }}
-            </label>
-            <input
-              id="ZOOM_CLIENT_ID"
-              type="text"
-              class="form-control"
-              name="ZOOM_CLIENT_ID"
-              value="{{ $Title->ZOOM_CLIENT_ID }}"
-            />
-          </div>
-
-          <div class="form-group mb-4">
-            <label class="form-label" for="ZOOM_CLIENT_SECRET">
-              {{ __('settings.ZOOM_CLIENT_SECRET') }}
-            </label>
-            <input
-              id="ZOOM_CLIENT_SECRET"
-              type="text"
-              class="form-control"
-              name="ZOOM_CLIENT_SECRET"
-              value="{{ $Title->ZOOM_CLIENT_SECRET }}"
-            />
-          </div>
-
-          <div class="form-group mb-4">
-            <label class="form-label" for="ZOOM_ACCOUNT_ID">
-              {{ __('settings.ZOOM_ACCOUNT_ID') }}
-            </label>
-            <input
-              id="ZOOM_ACCOUNT_ID"
-              type="text"
-              class="form-control"
-              name="ZOOM_ACCOUNT_ID"
-              value="{{ $Title->ZOOM_ACCOUNT_ID }}"
-            />
-          </div>
-        </div>
-      </div>
+  <div class="card border shadow-sm mb-6">
+    <div class="card-header">
+      <h6 class="card-title mb-0">{{ __('settings.meeting_integration') }}</h6>
+      <span class="text-muted">{{ __('settings.meeting_integration_description') }}</span>
     </div>
-    
-    <div class="card border shadow-sm">
-      <div class="card-header">
-        <h6 class="card-title mb-0">{{ __('settings.Offline_Sessions') }}</h6>
-        <span class="text-muted">{{ __('settings.Offline_Sessions_Description') }}</span>
+    <div class="card-body">
+      <!-- Meeting Type -->
+      <div class="form-group mb-4">
+        <label class="form-label">{{ __('settings.meeting_platform') }}</label>
+        <select
+          class="form-select Meeting"
+          id="Meeting"
+          name="Meeting"
+          required
+        >
+          <option value="0">{{ __('settings.select_platform') }}</option>
+          <option
+            value="zoom"
+            {{ strtolower($Title->Meeting) == 'zoom' ? 'selected' : '' }}
+          >
+            {{ __('admin.Zoom') }}
+          </option>
+          <option
+            value="teams"
+            {{ strtolower($Title->Meeting) == 'teams' ? 'selected' : '' }}
+          >
+            {{ __('admin.Teams') }}
+          </option>
+        </select>
       </div>
-      <div class="card-body">
-        <div class="form-group d-flex justify-content-between align-items-center mb-4">
-          <div class="d-flex flex-column">
-            <label class="form-label" for="allow_offline_sessions">
-              {{ __('settings.Allow_Offline_Sessions') }}
-            </label>
-            <span class="text-muted">{{ __('settings.Allow_Offline_Sessions_Description') }}</span>
-          </div>
-          <div class="form-check form-switch">
-            <input
-              class="form-check-input w-px-40 h-px-20"
-              id="allow_offline_sessions"
-              type="checkbox"
-              name="allow_offline_sessions"
-              value="1"
-              {{ $Title->allow_offline_sessions == 1 ? 'checked' : '' }}
-            />
-          </div>
+
+      <!-- Teams Credentials -->
+      <div
+        id="teams_credentials"
+        @if ($Title->Meeting != 'Teams') style="display: none;" @endif
+      >
+        <div class="form-group mb-4">
+          <label class="form-label" for="MICROSOFT_CLIENT_ID">
+            {{ __('settings.MICROSOFT_CLIENT_ID') }}
+          </label>
+          <input
+            id="MICROSOFT_CLIENT_ID"
+            type="text"
+            class="form-control"
+            name="MICROSOFT_CLIENT_ID"
+            value="{{ $Title->MICROSOFT_CLIENT_ID }}"
+            placeholder="{{ __('settings.MICROSOFT_CLIENT_ID_Placeholder') }}"
+          />
         </div>
-        <div id="offline_sessions_fields" @if ($Title->allow_offline_sessions != 1) style="display: none;" @endif>
-          <div class="form-group mb-4">
-            <label class="form-label" for="default_offline_session_location">
-              {{ __('settings.Default_Offline_Session_Location') }}
-            </label>
-            <input
-              id="default_offline_session_location"
-              type="text"
-              class="form-control mb-1"
-              name="default_offline_session_location"
-              value="{{ $Title->default_offline_session_location }}"
-              placeholder="{{ __('settings.Default_Offline_Session_Location_Placeholder') }}"
-            />
-            <small class="text-muted">{{ __('settings.Default_Offline_Session_Location_Description') }}</small>
-          </div>
-          <div class="form-group mb-4">
-            <label class="form-label" for="map_location">
-              {{ __('settings.Map_Location') }}
-            </label>
-            <div class="input-group mb-1">
-              <input
-                id="map_location"
-                type="text"
-                class="form-control"
-                name="map_location"
-                value="{{ $Title->map_location }}"
-                placeholder="{{ __('settings.Map_Location_Placeholder') }}"
-              />
-              <button 
-                type="button" 
-                class="btn btn-outline-primary" 
-                id="openLocationModal"
-              >
-                <i class="ti ti-map-pin me-2"></i> {{ __('settings.Search_Location') }}
-              </button>
-              <button 
-                type="button" 
-                class="btn btn-outline-secondary" 
-                id="clearLocation"
-                {{ empty($Title->map_location) ? 'style=display:none;' : '' }}
-              >
-                <i class="ti ti-x"></i>
-              </button>
-            </div>
-            <small class="text-muted">{{ __('settings.Map_Location_Description') }}</small>
-          </div>
+
+        <div class="form-group mb-4">
+          <label class="form-label" for="MICROSOFT_CLIENT_SECRET_VALUE">
+            {{ __('settings.MICROSOFT_CLIENT_SECRET_VALUE') }}
+          </label>
+          <input
+            id="MICROSOFT_CLIENT_SECRET_VALUE"
+            type="text"
+            class="form-control"
+            name="MICROSOFT_CLIENT_SECRET_VALUE"
+            value="{{ $Title->MICROSOFT_CLIENT_SECRET_VALUE }}"
+            placeholder="{{ __('settings.MICROSOFT_CLIENT_SECRET_VALUE_Placeholder') }}"
+          />
+        </div>
+
+        <div class="form-group mb-4">
+          <label class="form-label" for="MICROSOFT_TENANT_ID">
+            {{ __('settings.MICROSOFT_TENANT_ID') }}
+          </label>
+          <input
+            id="MICROSOFT_TENANT_ID"
+            type="text"
+            class="form-control"
+            name="MICROSOFT_TENANT_ID"
+            value="{{ $Title->MICROSOFT_TENANT_ID }}"
+            placeholder="{{ __('settings.MICROSOFT_TENANT_ID_Placeholder') }}"
+          />
+        </div>
+
+        <div class="form-group mb-4">
+          <label class="form-label" for="MICROSOFT_CLIENT_SECRET_ID">
+            {{ __('settings.MICROSOFT_CLIENT_SECRET_ID') }}
+          </label>
+          <input
+            id="MICROSOFT_CLIENT_SECRET_ID"
+            type="text"
+            class="form-control"
+            name="MICROSOFT_CLIENT_SECRET_ID"
+            value="{{ $Title->MICROSOFT_CLIENT_SECRET_ID }}"
+            placeholder="{{ __('settings.MICROSOFT_CLIENT_SECRET_ID_Placeholder') }}"
+          />
+        </div>
+
+        <div class="form-group mb-4">
+          <label class="form-label" for="MICROSOFT_APP_EMAIL">
+            {{ __('settings.MICROSOFT_APP_EMAIL') }}
+          </label>
+          <input
+            id="MICROSOFT_APP_EMAIL"
+            type="text"
+            class="form-control"
+            name="MICROSOFT_APP_EMAIL"
+            value="{{ $Title->MICROSOFT_APP_EMAIL }}"
+            placeholder="{{ __('settings.MICROSOFT_APP_EMAIL_Placeholder') }}"
+          />
+        </div>
+
+        <div class="form-group mb-4">
+          <label class="form-label" for="MICROSOFT_REDIRECT_URI">
+            {{ __('settings.MICROSOFT_REDIRECT_URI') }}
+          </label>
+          <input
+            id="MICROSOFT_REDIRECT_URI"
+            type="text"
+            class="form-control"
+            name="MICROSOFT_REDIRECT_URI"
+            value="{{ $Title->MICROSOFT_REDIRECT_URI }}"
+            placeholder="{{ __('settings.MICROSOFT_REDIRECT_URI_Placeholder') }}"
+          />
+        </div>
+      </div>
+
+      <!-- Zoom Credentials -->
+      <div
+        id="zoom_credentials"
+        @if ($Title->Meeting != 'Zoom') style="display: none;" @endif
+      >
+        <div class="form-group mb-4">
+          <label class="form-label" for="ZOOM_CLIENT_ID">
+            {{ __('settings.ZOOM_CLIENT_ID') }}
+          </label>
+          <input
+            id="ZOOM_CLIENT_ID"
+            type="text"
+            class="form-control"
+            name="ZOOM_CLIENT_ID"
+            value="{{ $Title->ZOOM_CLIENT_ID }}"
+            placeholder="{{ __('settings.ZOOM_CLIENT_ID_Placeholder') }}"
+          />
+        </div>
+
+        <div class="form-group mb-4">
+          <label class="form-label" for="ZOOM_CLIENT_SECRET">
+            {{ __('settings.ZOOM_CLIENT_SECRET') }}
+          </label>
+          <input
+            id="ZOOM_CLIENT_SECRET"
+            type="text"
+            class="form-control"
+            name="ZOOM_CLIENT_SECRET"
+            value="{{ $Title->ZOOM_CLIENT_SECRET }}"
+            placeholder="{{ __('settings.ZOOM_CLIENT_SECRET_Placeholder') }}"
+          />
+        </div>
+
+        <div class="form-group mb-4">
+          <label class="form-label" for="ZOOM_ACCOUNT_ID">
+            {{ __('settings.ZOOM_ACCOUNT_ID') }}
+          </label>
+          <input
+            id="ZOOM_ACCOUNT_ID"
+            type="text"
+            class="form-control"
+            name="ZOOM_ACCOUNT_ID"
+            value="{{ $Title->ZOOM_ACCOUNT_ID }}"
+            placeholder="{{ __('settings.ZOOM_ACCOUNT_ID_Placeholder') }}"
+          />
         </div>
       </div>
     </div>
   </div>
-
-  <div class="d-flex justify-content-end mt-12">
+  
+  <div class="card border shadow-sm mb-6">
+    <div class="card-header">
+      <h6 class="card-title mb-0">{{ __('settings.Offline_Sessions') }}</h6>
+      <span class="text-muted">{{ __('settings.Offline_Sessions_Description') }}</span>
+    </div>
+    <div class="card-body">
+      <div class="form-group d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex flex-column">
+          <label class="form-label" for="allow_offline_sessions">
+            {{ __('settings.Allow_Offline_Sessions') }}
+          </label>
+          <span class="text-muted">{{ __('settings.Allow_Offline_Sessions_Description') }}</span>
+        </div>
+        <div class="form-check form-switch">
+          <input
+            class="form-check-input w-px-40 h-px-20"
+            id="allow_offline_sessions"
+            type="checkbox"
+            name="allow_offline_sessions"
+            value="1"
+            {{ $Title->allow_offline_sessions == 1 ? 'checked' : '' }}
+          />
+        </div>
+      </div>
+      <div id="offline_sessions_fields" @if ($Title->allow_offline_sessions != 1) style="display: none;" @endif>
+        <div class="form-group mb-4">
+          <label class="form-label" for="default_offline_session_location">
+            {{ __('settings.Default_Offline_Session_Location') }}
+          </label>
+          <input
+            id="default_offline_session_location"
+            type="text"
+            class="form-control mb-1"
+            name="default_offline_session_location"
+            value="{{ $Title->default_offline_session_location }}"
+            placeholder="{{ __('settings.Default_Offline_Session_Location_Placeholder') }}"
+          />
+          <small class="text-muted">{{ __('settings.Default_Offline_Session_Location_Description') }}</small>
+        </div>
+        <div class="form-group mb-4">
+          <label class="form-label" for="map_location">
+            {{ __('settings.Map_Location') }}
+          </label>
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <input
+              id="map_location"
+              type="text"
+              class="form-control"
+              name="map_location"
+              value="{{ $Title->map_location }}"
+              placeholder="{{ __('settings.Map_Location_Placeholder') }}"
+            />
+            <button
+              type="button"
+              class="btn btn-label-primary text-nowrap flex-shrink-0"
+              id="openLocationModal"
+            >
+              <i class="ti ti-map-pin me-2"></i> {{ __('settings.Search_Location') }}
+            </button>
+            <button
+              type="button"
+              class="btn btn-icon btn-label-secondary"
+              id="clearLocation"
+              {{ empty($Title->map_location) ? 'style=display:none;' : '' }}
+            >
+              <i class="ti ti-x"></i>
+            </button>
+          </div>
+          <small class="text-muted">{{ __('settings.Map_Location_Description') }}</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="d-flex justify-content-end">
     <button type="submit" class="btn btn-primary">
       {{ __('settings.Submit') }}
     </button>
@@ -305,267 +306,372 @@
 
 @push('scripts')
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-    let selectedLocation = null;
-    let fv;
+var settingsTranslations = {!! json_encode(__('settings')) !!};
+$(document).ready(function () {
+  let selectedLocation = null;
 
-    // Config
-    const meetingSelect = document.getElementById("Meeting");
-    const offlineCheckbox = document.getElementById("allow_offline_sessions");
-    const offlineContainer = document.getElementById("offline_sessions_fields");
-    const offlineFields = ["default_offline_session_location", "map_location"];
-    const teamsFields = [
-        "MICROSOFT_CLIENT_ID",
-        "MICROSOFT_CLIENT_SECRET_VALUE",
-        "MICROSOFT_TENANT_ID",
-        "MICROSOFT_CLIENT_SECRET_ID",
-        "MICROSOFT_APP_EMAIL",
-        "MICROSOFT_REDIRECT_URI",
-    ];
-    const zoomFields = ["ZOOM_CLIENT_ID", "ZOOM_CLIENT_SECRET", "ZOOM_ACCOUNT_ID"];
+  const $meetingForm = $("#meetingIntegrationForm");
+  const $meetingSelect = $("#Meeting");
+  const $offlineCheckbox = $("#allow_offline_sessions");
+  const $offlineContainer = $("#offline_sessions_fields");
 
-    /* ---------------------------
-       UI Toggling helpers
-       --------------------------- */
-    function toggleCredentialsUI() {
-        const value = meetingSelect.value;
-        document.getElementById("zoom_credentials").style.display = value === "zoom" ? "block" : "none";
-        document.getElementById("teams_credentials").style.display = value === "teams" ? "block" : "none";
-    }
+  /* ---------------------------
+    UI Toggles
+  --------------------------- */
+  function toggleCredentialsUI() {
+    const val = $meetingSelect.val();
+    $("#zoom_credentials").toggle(val === "zoom");
+    $("#teams_credentials").toggle(val === "teams");
+  }
 
-    function toggleOfflineUI() {
-        offlineContainer.style.display = offlineCheckbox.checked ? "block" : "none";
-    }
+  function toggleOfflineUI() {
+    $offlineContainer.toggle($offlineCheckbox.is(":checked"));
+  }
 
-    meetingSelect.addEventListener("change", toggleCredentialsUI);
-    offlineCheckbox.addEventListener("change", toggleOfflineUI);
-    toggleCredentialsUI();
-    toggleOfflineUI();
+  $meetingSelect.on("change", toggleCredentialsUI);
+  $offlineCheckbox.on("change", toggleOfflineUI);
 
-    /* ---------------------------
-       Location search & modal
-       --------------------------- */
-    async function searchLocation(query) {
-        try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`);
-            const data = await res.json();
-            const list = document.getElementById("searchResultsList");
-            list.innerHTML = "";
+  toggleCredentialsUI();
+  toggleOfflineUI();
 
-            if (!data || data.length === 0) {
-                document.getElementById("searchResults").style.display = "none";
-                alert("No results found");
-                return;
-            }
+  /* ---------------------------
+    Search Location
+  --------------------------- */
+  async function searchLocation(query) {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`
+      );
+      const data = await res.json();
 
-            document.getElementById("searchResults").style.display = "block";
-            data.forEach(r => {
-                const a = document.createElement("a");
-                a.href = "#";
-                a.className = "list-group-item list-group-item-action";
-                a.innerHTML = `<div class="d-flex w-100 justify-content-between"><h6 class="mb-1">${r.display_name}</h6></div><small class="text-muted">${r.type}</small>`;
-                a.addEventListener("click", (e) => {
-                    e.preventDefault();
-                    selectedLocation = { lat: parseFloat(r.lat), lng: parseFloat(r.lon), address: r.display_name };
-                    document.getElementById("selectedLocationText").textContent = r.display_name;
-                    document.getElementById("selectedLatitude").value = r.lat;
-                    document.getElementById("selectedLongitude").value = r.lon;
-                    document.getElementById("selectedAddress").value = r.display_name;
-                    document.getElementById("searchResults").style.display = "none";
-                });
-                list.appendChild(a);
-            });
-        } catch (err) {
-            console.error("Search error:", err);
-            alert("Search error occurred");
-        }
-    }
+      const $results = $("#searchResults");
+      const $list = $("#searchResultsList").empty();
 
-    document.getElementById("openLocationModal").addEventListener("click", () => {
-        const modal = new bootstrap.Modal(document.getElementById("locationModal"));
-        modal.show();
+      if (!data.length) {
+        $results.hide();
+        alert(settingsTranslations.validation_no_results_found_alert);
+        return;
+      }
 
-        document.getElementById("locationSearch").value = "";
-        document.getElementById("searchResults").style.display = "none";
-        document.getElementById("selectedLocationText").textContent = "No location selected";
-        selectedLocation = null;
-
-        const existing = document.getElementById("map_location").value;
-        if (existing) {
-            try {
-                const parsed = JSON.parse(existing);
-                const addr = parsed.address || parsed.display_name || existing;
-                document.getElementById("selectedLocationText").textContent = addr;
-                document.getElementById("selectedLatitude").value = parsed.lat || "";
-                document.getElementById("selectedLongitude").value = parsed.lng || parsed.lon || "";
-                document.getElementById("selectedAddress").value = addr;
-                selectedLocation = {
-                    lat: parsed.lat ? parseFloat(parsed.lat) : null,
-                    lng: parsed.lng ? parseFloat(parsed.lng) : parsed.lon ? parseFloat(parsed.lon) : null,
-                    address: addr,
-                };
-            } catch (e) {
-                document.getElementById("selectedLocationText").textContent = existing;
-                document.getElementById("selectedAddress").value = existing;
-                selectedLocation = { lat: null, lng: null, address: existing };
-            }
-        }
-    });
-
-    document.getElementById("searchLocationBtn").addEventListener("click", () => {
-        const q = document.getElementById("locationSearch").value.trim();
-        if (q) searchLocation(q);
-    });
-    document.getElementById("locationSearch").addEventListener("keypress", (e) => {
-        if (e.key === "Enter") {
+      $results.show();
+      data.forEach(r => {
+        $("<a href='#' class='list-group-item list-group-item-action'></a>")
+          .html(`
+            <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1">${r.display_name}</h6>
+            </div>
+            <small class="text-muted">${r.type}</small>
+          `)
+          .on("click", function (e) {
             e.preventDefault();
-            const q = e.target.value.trim();
-            if (q) searchLocation(q);
-        }
-    });
+            selectedLocation = {
+              lat: parseFloat(r.lat),
+              lng: parseFloat(r.lon),
+              address: r.display_name
+            };
 
-    document.getElementById("confirmLocation").addEventListener("click", () => {
-        if (selectedLocation && selectedLocation.address) {
-            document.getElementById("map_location").value = selectedLocation.address;
-            document.getElementById("clearLocation").style.display = "inline-block";
-            bootstrap.Modal.getInstance(document.getElementById("locationModal")).hide();
-            if (fv) fv.revalidateField("map_location");
-        } else {
-            alert("Please select a location");
-        }
-    });
+            $("#selectedLocationText").text(r.display_name);
+            $("#selectedLatitude").val(r.lat);
+            $("#selectedLongitude").val(r.lon);
+            $("#selectedAddress").val(r.display_name);
+            $results.hide();
+          })
+          .appendTo($list);
+      });
 
-    document.getElementById("clearLocation").addEventListener("click", function () {
-        document.getElementById("map_location").value = "";
-        this.style.display = "none";
-        if (fv) fv.revalidateField("map_location");
-    });
-
-    const mapLocationInput = document.getElementById("map_location");
-    const clearLocationBtn = document.getElementById("clearLocation");
-    function updateMapLocationState() {
-        const v = mapLocationInput.value.trim();
-        if (v) {
-            clearLocationBtn.style.display = "inline-block";
-            document.getElementById("selectedAddress").value = v;
-            selectedLocation = { lat: null, lng: null, address: v };
-        } else {
-            clearLocationBtn.style.display = "none";
-            document.getElementById("selectedAddress").value = "";
-            selectedLocation = null;
-        }
-        if (fv) fv.revalidateField("map_location");
+    } catch (err) {
+      console.error("Search error:", err);
+      alert(settingsTranslations.validation_search_error_alert);
     }
-    mapLocationInput.addEventListener("input", updateMapLocationState);
-    updateMapLocationState();
+  }
 
-    /* ---------------------------
-       Helpers: validators enable/disable & reset
-       --------------------------- */
-    function enableFieldValidators(field, validators = ["notEmpty", "stringLength"]) {
-        validators.forEach(v => fv.enableValidator(field, v));
+  /* ---------------------------
+    Modal Handling
+  --------------------------- */
+  $("#openLocationModal").on("click", function () {
+    const modal = new bootstrap.Modal("#locationModal");
+    modal.show();
+
+    $("#locationSearch").val("");
+    $("#searchResults").hide();
+    $("#selectedLocationText").text(settingsTranslations.No_Location_Selected);
+    selectedLocation = null;
+
+    // Load existing location if exists
+    const existing = $("#map_location").val();
+    if (existing) {
+      try {
+        const p = JSON.parse(existing);
+        const addr = p.address || p.display_name || existing;
+
+        $("#selectedLocationText").text(addr);
+        $("#selectedLatitude").val(p.lat || "");
+        $("#selectedLongitude").val(p.lng || p.lon || "");
+        $("#selectedAddress").val(addr);
+
+        selectedLocation = {
+          lat: p.lat ? parseFloat(p.lat) : null,
+          lng: p.lng ? parseFloat(p.lng) : p.lon ? parseFloat(p.lon) : null,
+          address: addr
+        };
+      } catch {
+        $("#selectedLocationText").text(existing);
+        $("#selectedAddress").val(existing);
+        selectedLocation = { lat: null, lng: null, address: existing };
+      }
     }
-    function disableFieldValidatorsAndClear(field, validators = ["notEmpty", "stringLength"]) {
-        validators.forEach(v => fv.disableValidator(field, v));
-        fv.resetField(field, true);           // clear error UI & state
-        fv.updateFieldStatus(field, "Valid"); // ensure FV treats it as valid for submit
+  });
+
+  $("#searchLocationBtn").on("click", function () {
+    const q = $("#locationSearch").val().trim();
+    if (q) searchLocation(q);
+  });
+
+  $("#locationSearch").on("keypress", function (e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const q = $(this).val().trim();
+      if (q) searchLocation(q);
     }
+  });
 
-    /* ---------------------------
-       FormValidation init
-       --------------------------- */
-    fv = FormValidation.formValidation(document.getElementById("meetingIntegrationForm"), {
-        fields: {
-            Meeting: {
-                validators: {
-                    notEmpty: { message: "Meeting platform is required" },
-                    callback: {
-                        message: "Meeting platform is required",
-                        callback: input => input.value !== "0"
-                    }
-                }
-            },
-            MICROSOFT_CLIENT_ID: { validators: { notEmpty: { enabled: false }, stringLength: { enabled: false, min: 36, max: 36 }, regexp: { enabled: false, regexp: /^[0-9a-fA-F-]{36}$/ } } },
-            MICROSOFT_CLIENT_SECRET_VALUE: { validators: { notEmpty: { enabled: false }, stringLength: { enabled: false, min: 20, max: 100 } } },
-            MICROSOFT_TENANT_ID: { validators: { notEmpty: { enabled: false }, stringLength: { enabled: false, min: 36, max: 36 }, regexp: { enabled: false, regexp: /^[0-9a-fA-F-]{36}$/ } } },
-            MICROSOFT_CLIENT_SECRET_ID: { validators: { notEmpty: { enabled: false }, stringLength: { enabled: false, min: 36, max: 36 }, regexp: { enabled: false, regexp: /^[0-9a-fA-F-]{36}$/ } } },
-            MICROSOFT_APP_EMAIL: { validators: { notEmpty: { enabled: false }, emailAddress: { enabled: false }, stringLength: { enabled: false, min: 5, max: 255 } } },
-            MICROSOFT_REDIRECT_URI: { validators: { notEmpty: { enabled: false }, uri: { enabled: false }, stringLength: { enabled: false, min: 10, max: 500 } } },
-            ZOOM_CLIENT_ID: { validators: { notEmpty: { enabled: false }, stringLength: { enabled: false, min: 10, max: 100 } } },
-            ZOOM_CLIENT_SECRET: { validators: { notEmpty: { enabled: false }, stringLength: { enabled: false, min: 10, max: 100 } } },
-            ZOOM_ACCOUNT_ID: { validators: { notEmpty: { enabled: false }, stringLength: { enabled: false, min: 10, max: 100 } } },
-            default_offline_session_location: { validators: { notEmpty: { enabled: false }, stringLength: { enabled: false, min: 3, max: 255 } } },
-            map_location: { validators: { notEmpty: { enabled: false }, stringLength: { enabled: false, min: 10, max: 1000 } } }
-        },
-        plugins: {
-            trigger: new FormValidation.plugins.Trigger(),
-            bootstrap5: new FormValidation.plugins.Bootstrap5({ eleValidClass: "", rowSelector: ".form-group" }),
-            submitButton: new FormValidation.plugins.SubmitButton(),
-            autoFocus: new FormValidation.plugins.AutoFocus()
-        }
-    });
-
-    /* ---------------------------
-       Meeting change: enable/disable platform validators
-       --------------------------- */
-    meetingSelect.addEventListener("change", () => {
-        const sel = meetingSelect.value;
-
-        teamsFields.forEach(field => {
-            if (sel === "teams") {
-                enableFieldValidators(field);
-                if (field === "MICROSOFT_APP_EMAIL") fv.enableValidator(field, "emailAddress");
-                if (field === "MICROSOFT_REDIRECT_URI") fv.enableValidator(field, "uri");
-                if (["MICROSOFT_CLIENT_ID", "MICROSOFT_TENANT_ID", "MICROSOFT_CLIENT_SECRET_ID"].includes(field)) fv.enableValidator(field, "regexp");
-            } else {
-                // disable and clear
-                fv.disableValidator(field, "notEmpty");
-                fv.disableValidator(field, "stringLength");
-                fv.disableValidator(field, "emailAddress");
-                fv.disableValidator(field, "uri");
-                fv.disableValidator(field, "regexp");
-                fv.resetField(field, true);
-                fv.updateFieldStatus(field, "Valid");
-            }
-        });
-
-        zoomFields.forEach(field => {
-            if (sel === "zoom") {
-                enableFieldValidators(field);
-            } else {
-                fv.disableValidator(field, "notEmpty");
-                fv.disableValidator(field, "stringLength");
-                fv.resetField(field, true);
-                fv.updateFieldStatus(field, "Valid");
-            }
-        });
-
-        fv.revalidateField("Meeting");
-    });
-
-    /* ---------------------------
-       Offline checkbox: enable/disable offline validators (uses helpers)
-       --------------------------- */
-    offlineCheckbox.addEventListener("change", () => {
-        if (offlineCheckbox.checked) {
-            offlineFields.forEach(f => enableFieldValidators(f));
-            offlineFields.forEach(f => fv.revalidateField(f));
-        } else {
-            offlineFields.forEach(f => disableFieldValidatorsAndClear(f));
-        }
-    });
-
-    /* ---------------------------
-       Initial state
-       --------------------------- */
-    meetingSelect.dispatchEvent(new Event("change"));
-
-    if (offlineCheckbox.checked) {
-        offlineFields.forEach(f => enableFieldValidators(f));
-        offlineFields.forEach(f => fv.revalidateField(f));
+  $("#confirmLocation").on("click", function () {
+    if (selectedLocation?.address) {
+      $("#map_location").val(selectedLocation.address);
+      $("#clearLocation").show();
+      bootstrap.Modal.getInstance($("#locationModal")[0]).hide();
     } else {
-        offlineFields.forEach(f => disableFieldValidatorsAndClear(f));
+      alert(settingsTranslations.validation_select_location_alert);
     }
+  });
+
+  $("#clearLocation").on("click", function () {
+    $("#map_location").val("");
+    $(this).hide();
+  });
+
+  /* ---------------------------
+    Sync map_location state
+  --------------------------- */
+  const $mapInput = $("#map_location");
+  const $clearBtn = $("#clearLocation");
+
+  function updateMapLocationState() {
+    const v = $mapInput.val().trim();
+    if (v) {
+      $clearBtn.show();
+      $("#selectedAddress").val(v);
+      selectedLocation = { lat: null, lng: null, address: v };
+    } else {
+      $clearBtn.hide();
+      $("#selectedAddress").val("");
+      selectedLocation = null;
+    }
+  }
+
+  $mapInput.on("input", updateMapLocationState);
+  updateMapLocationState();
+
+  /* ---------------------------
+    Form Validation
+  --------------------------- */
+  const validationConfig = {
+    fields: {
+      /* ------------------------------
+          Meeting Platform
+      ------------------------------ */
+      Meeting: {
+        validators: {
+          notEmpty: {
+            message: settingsTranslations.validation_select_meeting_platform
+          }
+        }
+      },
+
+      /* ------------------------------
+          Zoom Fields
+      ------------------------------ */
+      ZOOM_CLIENT_ID: {
+        validators: {
+          callback: {
+            message: settingsTranslations.validation_zoom_client_id_required,
+            callback: function (input) {
+              const meet = $("#Meeting").val();
+              if (meet !== "zoom") return true;
+              return input.value.trim().length >= 5;
+            }
+          }
+        }
+      },
+      ZOOM_CLIENT_SECRET: {
+        validators: {
+          callback: {
+            message: settingsTranslations.validation_zoom_client_secret_required,
+            callback: function (input) {
+              const meet = $("#Meeting").val();
+              if (meet !== "zoom") return true;
+              return input.value.trim().length >= 5;
+            }
+          }
+        }
+      },
+      ZOOM_ACCOUNT_ID: {
+        validators: {
+          callback: {
+            message: settingsTranslations.validation_zoom_account_id_required,
+            callback: function (input) {
+              const meet = $("#Meeting").val();
+              if (meet !== "zoom") return true;
+              return input.value.trim().length >= 5;
+            }
+          }
+        }
+      },
+
+      /* ------------------------------
+          Teams Fields
+      ------------------------------ */
+      MICROSOFT_CLIENT_ID: {
+        validators: {
+          callback: {
+            message: settingsTranslations.validation_microsoft_client_id_required,
+            callback: function (input) {
+              const meet = $("#Meeting").val();
+              if (meet !== "teams") return true;
+              return input.value.trim().length >= 5;
+            }
+          }
+        }
+      },
+      MICROSOFT_CLIENT_SECRET_VALUE: {
+        validators: {
+          callback: {
+            message: settingsTranslations.validation_microsoft_secret_value_required,
+            callback: function (input) {
+              const meet = $("#Meeting").val();
+              if (meet !== "teams") return true;
+              return input.value.trim().length >= 5;
+            }
+          }
+        }
+      },
+      MICROSOFT_TENANT_ID: {
+        validators: {
+          callback: {
+            message: settingsTranslations.validation_microsoft_tenant_id_required,
+            callback: function (input) {
+              const meet = $("#Meeting").val();
+              if (meet !== "teams") return true;
+              return input.value.trim().length >= 5;
+            }
+          }
+        }
+      },
+      MICROSOFT_CLIENT_SECRET_ID: {
+        validators: {
+          callback: {
+            message: settingsTranslations.validation_microsoft_client_secret_id_required,
+            callback: function (input) {
+              const meet = $("#Meeting").val();
+              if (meet !== "teams") return true;
+              return input.value.trim().length >= 5;
+            }
+          }
+        }
+      },
+      MICROSOFT_APP_EMAIL: {
+        validators: {
+          callback: {
+            message: settingsTranslations.validation_microsoft_app_email_required,
+            callback: function (input) {
+              const meet = $("#Meeting").val();
+              if (meet !== "teams") return true;
+              return input.value.trim().length >= 5;
+            }
+          }
+        }
+      },
+      MICROSOFT_REDIRECT_URI: {
+        validators: {
+          callback: {
+            message: settingsTranslations.validation_microsoft_redirect_uri_required,
+            callback: function (input) {
+              const meet = $("#Meeting").val();
+              if (meet !== "teams") return true;
+              return input.value.trim().length >= 10;
+            }
+          }
+        }
+      },
+
+      /* ------------------------------
+          Offline Fields
+      ------------------------------ */
+      default_offline_session_location: {
+        validators: {
+          stringLength: {
+            min: 3,
+            max: 255,
+            message: settingsTranslations.validation_default_offline_location_length,
+          },
+          callback: {
+            message: settingsTranslations.validation_default_offline_location_required,
+            callback: function (input) {
+              const ok = $("#allow_offline_sessions").is(":checked");
+              if (!ok) return true;
+              return input.value.trim().length >= 3;
+            }
+          }
+        }
+      },
+      map_location: {
+        validators: {
+          stringLength: {
+            min: 3,
+            max: 255,
+            message: settingsTranslations.validation_map_location_length,
+          },
+        }
+      }
+    },
+
+    plugins: {
+      /* Bootstrap integration */
+      bootstrap5: new FormValidation.plugins.Bootstrap5({
+        rowSelector: ".form-group",
+        eleValidClass: '',
+      }),
+
+      /* Submit handler */
+      submitButton: new FormValidation.plugins.SubmitButton(),
+      defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
+      autoFocus: new FormValidation.plugins.AutoFocus(),
+
+      /* Trigger validator on input/blur/change */
+      trigger: new FormValidation.plugins.Trigger(),
+    }
+  };
+
+  const fv = FormValidation.formValidation($meetingForm[0], validationConfig);
+
+  /* ---------------------------------
+      LIVE updating of dynamic rules
+  ---------------------------------- */
+  $("#Meeting, #allow_offline_sessions").on("change", function () {
+    fv.revalidateField("ZOOM_CLIENT_ID");
+    fv.revalidateField("ZOOM_CLIENT_SECRET");
+    fv.revalidateField("ZOOM_ACCOUNT_ID");
+
+    fv.revalidateField("MICROSOFT_CLIENT_ID");
+    fv.revalidateField("MICROSOFT_CLIENT_SECRET_VALUE");
+    fv.revalidateField("MICROSOFT_TENANT_ID");
+    fv.revalidateField("MICROSOFT_CLIENT_SECRET_ID");
+    fv.revalidateField("MICROSOFT_APP_EMAIL");
+    fv.revalidateField("MICROSOFT_REDIRECT_URI");
+
+    fv.revalidateField("default_offline_session_location");
+    fv.revalidateField("map_location");
+  });
 });
 </script>
 @endpush
