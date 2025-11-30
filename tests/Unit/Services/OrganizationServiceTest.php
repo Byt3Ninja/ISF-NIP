@@ -113,29 +113,24 @@ class OrganizationServiceTest extends TestCase
             'password' => 'password123',
         ];
 
-        DB::beginTransaction();
-        
-        try {
-            $result = $this->organizationService->createOrganization($data, $file, 'US');
+        // Service handles transactions internally, no need for manual transaction
+        $result = $this->organizationService->createOrganization($data, $file, 'US');
 
-            $this->assertInstanceOf(Organization::class, $result);
-            $this->assertDatabaseHas('organizations', [
-                'name_en' => 'Test Organization',
-                'status' => 1,
-            ]);
-            $this->assertDatabaseHas('users', [
-                'email' => 'manager@example.com',
-                'first_name_en' => 'John',
-            ]);
-            
-            $user = User::where('email', 'manager@example.com')->first();
-            $this->assertTrue($user->hasRole('organizationManager'));
-            $this->assertEquals($result->id, $user->organization_id);
-            
-            Mail::assertQueued(\App\Mail\OrganizationCreatedMail::class);
-        } finally {
-            DB::rollBack();
-        }
+        $this->assertInstanceOf(Organization::class, $result);
+        $this->assertDatabaseHas('organizations', [
+            'name_en' => 'Test Organization',
+            'status' => 1,
+        ]);
+        $this->assertDatabaseHas('users', [
+            'email' => 'manager@example.com',
+            'first_name_en' => 'John',
+        ]);
+        
+        $user = User::where('email', 'manager@example.com')->first();
+        $this->assertTrue($user->hasRole('organizationManager'));
+        $this->assertEquals($result->id, $user->organization_id);
+        
+        Mail::assertQueued(\App\Mail\OrganizationCreatedMail::class);
     }
 
     /** @test */
@@ -154,16 +149,11 @@ class OrganizationServiceTest extends TestCase
             'password' => 'password123',
         ];
 
-        DB::beginTransaction();
-        
-        try {
-            $result = $this->organizationService->createOrganization($data, null, 'US');
+        // Service handles transactions internally
+        $result = $this->organizationService->createOrganization($data, null, 'US');
 
-            $this->assertInstanceOf(Organization::class, $result);
-            $this->assertEquals('/images/background/logo.png', $result->img_url);
-        } finally {
-            DB::rollBack();
-        }
+        $this->assertInstanceOf(Organization::class, $result);
+        $this->assertEquals('/images/background/logo.png', $result->img_url);
     }
 
     /** @test */
@@ -181,17 +171,12 @@ class OrganizationServiceTest extends TestCase
             'status' => 1,
         ];
 
-        DB::beginTransaction();
-        
-        try {
-            $result = $this->organizationService->updateOrganization($organization, $updateData, null);
+        // Service handles transactions internally
+        $result = $this->organizationService->updateOrganization($organization, $updateData, null);
 
-            $this->assertInstanceOf(Organization::class, $result);
-            $this->assertEquals('Updated Organization', $result->name_en);
-            $this->assertEquals('Updated', $user->fresh()->first_name_en);
-        } finally {
-            DB::rollBack();
-        }
+        $this->assertInstanceOf(Organization::class, $result);
+        $this->assertEquals('Updated Organization', $result->name_en);
+        $this->assertEquals('Updated', $user->fresh()->first_name_en);
     }
 
     /** @test */
@@ -209,16 +194,11 @@ class OrganizationServiceTest extends TestCase
             'name' => 'Updated Organization',
         ];
 
-        DB::beginTransaction();
-        
-        try {
-            $result = $this->organizationService->updateOrganization($organization, $updateData, $file);
+        // Service handles transactions internally
+        $result = $this->organizationService->updateOrganization($organization, $updateData, $file);
 
-            $this->assertNotEquals('old-logo.jpg', $result->img_url);
-            $this->assertStringContainsString('organizations/', $result->img_url);
-        } finally {
-            DB::rollBack();
-        }
+        $this->assertNotEquals('old-logo.jpg', $result->img_url);
+        $this->assertStringContainsString('organizations/', $result->img_url);
     }
 
     /** @test */
@@ -237,16 +217,11 @@ class OrganizationServiceTest extends TestCase
             'password' => 'newpassword123',
         ];
 
-        DB::beginTransaction();
-        
-        try {
-            $result = $this->organizationService->updateOrganization($organization, $updateData, null);
+        // Service handles transactions internally
+        $result = $this->organizationService->updateOrganization($organization, $updateData, null);
 
-            $this->assertNotEquals($oldPassword, $user->fresh()->password);
-            $this->assertTrue(\Hash::check('newpassword123', $user->fresh()->password));
-        } finally {
-            DB::rollBack();
-        }
+        $this->assertNotEquals($oldPassword, $user->fresh()->password);
+        $this->assertTrue(\Hash::check('newpassword123', $user->fresh()->password));
     }
 
     /** @test */
