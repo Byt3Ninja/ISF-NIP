@@ -4834,6 +4834,16 @@
                 ]
             },
             {
+                "name": "forms.delete",
+                "description": "Delete Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
                 "name": "forms_submissions.index",
                 "description": "Show Form Submissions",
                 "guard_name": "web",
