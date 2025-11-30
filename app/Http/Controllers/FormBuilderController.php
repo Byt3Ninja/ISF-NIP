@@ -283,15 +283,6 @@ class FormBuilderController extends Controller
        
 
 
-        // return response()->json($data);
-
-    
-
-        // $form_id_toshow = $id;
-        // $the_form = BuilderForm::findOrFail($form_id_toshow);
-        // $field_map_ids = BuilderField::where('builder_form_id', $form_id_toshow)->select('id')->pluck('id')->toArray();
-
-        // $data = [
         //     'title' => 'the form',
         //     'fields' => $the_form->fields()->orderBy('builder_fields.id', 'asc')->get(),
         //     'buolderform_id' => $form_id_toshow,
@@ -568,5 +559,69 @@ class FormBuilderController extends Controller
             'data' => $output,
             'appear' => $appear
         ]);
+    }
+
+    /**
+     * Delete a form with validation
+     */
+    public function deleteForm($id)
+    {
+        try {
+            $form = BuilderForm::findOrFail($id);
+            
+            // Check if form is used in any program steps
+            $usedInSteps = $form->steps()->count();
+            if ($usedInSteps > 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'form_used_in_steps',
+                    'message_en' => 'This form cannot be deleted because it is used in program steps.',
+                    'message_ar' => 'لا يمكن حذف هذا النموذج لأنه مستخدم في خطوات البرنامج'
+                ], 422);
+            }
+            
+            $builderFieldIds = BuilderField::where('builder_form_id', $id)->pluck('id');
+            $hasSubmissions = false;
+            
+            if ($builderFieldIds->isNotEmpty()) {
+                $hasSubmissions = DB::table('form_data')
+                    ->whereIn('field_id', $builderFieldIds)
+                    ->exists();
+            }
+                
+            if ($hasSubmissions) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'form_has_submissions',
+                    'message_en' => 'You cannot delete this form because it has existing submissions.',
+                    'message_ar' => 'لا يمكنك حذف هذا النموذج لأنه يحتوي على تقديمات'
+                ], 422);
+            }
+            
+            // Delete form fields relationship
+            $form->fields()->detach();
+            
+            // Delete builder fields
+            BuilderField::where('builder_form_id', $id)->delete();
+            
+            // Delete the form
+            $form->delete();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'form_deleted_successfully',
+                'message_en' => 'Form deleted successfully.',
+                'message_ar' => 'تم حذف النموذج بنجاح'
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'error_deleting_form',
+                'message_en' => 'An error occurred while deleting the form.',
+                'message_ar' => 'حدث خطأ أثناء حذف النموذج',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
