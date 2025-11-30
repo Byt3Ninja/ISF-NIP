@@ -29,9 +29,12 @@ class OrganizationModelTest extends TestCase
     public function it_uses_soft_deletes()
     {
         $organization = Organization::factory()->create();
+        $organizationId = $organization->id;
         $organization->delete();
 
-        $this->assertSoftDeleted('organizations', ['id' => $organization->id]);
+        $this->assertSoftDeleted('organizations', ['id' => $organizationId]);
+        $this->assertNull(Organization::find($organizationId));
+        $this->assertNotNull(Organization::withTrashed()->find($organizationId));
     }
 
     /** @test */
@@ -39,6 +42,9 @@ class OrganizationModelTest extends TestCase
     {
         $user = User::factory()->create();
         $organization = Organization::factory()->create(['user_id' => $user->id]);
+        
+        // Refresh to load relationship
+        $organization->refresh();
 
         $this->assertInstanceOf(User::class, $organization->user);
         $this->assertEquals($user->id, $organization->user->id);
@@ -49,8 +55,12 @@ class OrganizationModelTest extends TestCase
     {
         $organization = Organization::factory()->create();
         Cycle::factory()->count(3)->create(['organization_id' => $organization->id]);
+        
+        // Refresh to load relationship
+        $organization->refresh();
 
         $this->assertCount(3, $organization->cycles);
+        $this->assertTrue($organization->cycles->every(fn($cycle) => $cycle->organization_id === $organization->id));
     }
 
     /** @test */
@@ -72,6 +82,9 @@ class OrganizationModelTest extends TestCase
             'name_en' => 'Test Organization',
             'name_ar' => 'منظمة تجريبية',
         ]);
+        
+        // Refresh to ensure attributes are loaded
+        $organization->refresh();
 
         $this->assertEquals('Test Organization', $organization->name);
     }
@@ -84,6 +97,9 @@ class OrganizationModelTest extends TestCase
             'name_en' => 'Test Organization',
             'name_ar' => 'منظمة تجريبية',
         ]);
+        
+        // Refresh to ensure attributes are loaded
+        $organization->refresh();
 
         $this->assertEquals('منظمة تجريبية', $organization->name);
     }
@@ -92,16 +108,22 @@ class OrganizationModelTest extends TestCase
     public function it_has_image_url_attribute()
     {
         $organization = Organization::factory()->create(['img_url' => 'test-logo.jpg']);
+        
+        // Refresh to ensure attributes are loaded
+        $organization->refresh();
 
-        $this->assertStringContainsString('test-logo.jpg', $organization->image_url);
+        $this->assertEquals('test-logo.jpg', $organization->image_url);
     }
 
     /** @test */
     public function it_returns_placeholder_when_no_image()
     {
         $organization = Organization::factory()->create(['img_url' => null]);
+        
+        // Refresh to ensure attributes are loaded
+        $organization->refresh();
 
-        $this->assertStringContainsString('placeholder', $organization->image_url);
+        $this->assertEquals('/app-assets/images/logo_placeholder.png', $organization->image_url);
     }
 
     /** @test */
@@ -112,10 +134,15 @@ class OrganizationModelTest extends TestCase
             'name_en' => 'English Name',
             'name_ar' => 'Arabic Name',
         ]);
+        
+        // Refresh to ensure attributes are loaded
+        $organization->refresh();
 
         $this->assertEquals('English Name', $organization->localized_name);
 
         app()->setLocale('ar');
+        // Need to refresh after locale change to get updated value
+        $organization->refresh();
         $this->assertEquals('Arabic Name', $organization->localized_name);
     }
 
@@ -146,6 +173,10 @@ class OrganizationModelTest extends TestCase
         $organization = Organization::factory()->create();
         $cycle = Cycle::factory()->create(['organization_id' => $organization->id]);
         Company::factory()->count(5)->create(['cycle' => $cycle->id]);
+        
+        // Refresh and eager load relationships
+        $organization->refresh();
+        $organization->load('cycles.companies');
 
         $this->assertCount(1, $organization->cycles);
         $this->assertCount(5, $organization->cycles->first()->companies);
