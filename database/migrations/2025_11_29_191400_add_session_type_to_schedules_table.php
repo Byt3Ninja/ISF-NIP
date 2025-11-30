@@ -14,8 +14,9 @@ return new class extends Migration
     public function up()
     {
         Schema::table('schedules', function (Blueprint $table) {
-            $table->enum('session_type', ['Online', 'Offline', 'Both'])->default('Both')->after('active');
-            $table->date('date')->nullable()->after('session_type');
+            $table->dropColumn('status');
+            $table->string('session_type')->default('Both')->comment('Both,Online,Offline');
+            $table->date('Session_date')->nullable()->comment('Session_date');
         });
     }
 
