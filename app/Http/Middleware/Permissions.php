@@ -76,11 +76,20 @@ class Permissions
                     {
                         if( $request->expectsJson() )
                         {
-                            return response()->json([
+                            // Force English locale for JSON responses to ensure consistent API responses
+                            $currentLocale = app()->getLocale();
+                            app()->setLocale('en');
+
+                            $response = response()->json([
                                 'status' => false,
-                                'title' => 'Unauthorized',
-                                'message' => 'You are not authorized to perform this action.'
+                                'title' => __('auth.unauthorized'),
+                                'message' => __('auth.not_authorized_permission') . " ($permission)",
                             ], 401);
+
+                            // Restore original locale
+                            app()->setLocale($currentLocale);
+
+                            return $response;
                         }
                         else
                         {

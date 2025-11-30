@@ -77,11 +77,7 @@
                   <th>{{ __('admin.Role') }}</th>
                   <th>{{ __('admin.HaveCompany') }}</th>
                   <th>{{ __('admin.CreatedAt') }}</th>
-                  <th>
-                    @if( $_user->ableTo('users.destroy', $permissions) )
-                    {{ __('admin.Delete') }}
-                    @endif
-                  </th>
+                  <th>{{ __('admin.Actions') }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -107,14 +103,20 @@
                     <small>{{ $user->company ? __('admin.Yes') : __('admin.No') }}</small>
                   </td>
                   <td><small class="text-nowrap">{{ $user->created_at }}</small></td>
-                  <td style="padding: 0px;font-size: small;">
-                    @if( $_user->ableTo('users.destroy', $permissions) )
-                    <button id='deleteAction' data-id='{{ $user->id }}'
-                      data-url="{{ route('users.destroy', ['user' => $user->id]) }}" type="button"
-                      class="btn btn-label-danger btn-sm">
-                      <i class="ti ti-trash text-danger"> </i>
-                    </button>
-                    @endif
+                  <td>
+                    <div class="d-flex align-items-center gap-1">
+                      <button data-bs-toggle="modal" data-bs-target="#MessageModal"
+                        class="btn btn-icon btn-label-primary btn-sm">
+                        <i class="ti ti-message"></i>
+                      </button>   
+                      @if( $_user->ableTo('users.destroy', $permissions) )
+                        <button id='deleteAction' data-id='{{ $user->id }}'
+                          data-url="{{ route('users.destroy', ['user' => $user->id]) }}" type="button"
+                          class="btn btn-icon btn-label-danger btn-sm">
+                          <i class="ti ti-trash"> </i>
+                        </button>
+                      @endif
+                    </div>
                   </td>
                 </tr>
                 @endforeach
@@ -123,6 +125,43 @@
           </div>
           <!-- datatable ends -->
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade text-left" id="MessageModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33" aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" id="myModalLabel33">{{ __('messages.SendMessageTo') }} {{$user->{'first_name_'.$l} }}
+            {{ $user->{'last_name_'.$l} }}.</h4>
+        </div>
+        <form method="post" action="/dashboard/send_message" enctype="multipart/form-data">
+          {!! csrf_field() !!}
+          <input type="hidden" name="sender" value="{{Auth::user()->id}}">
+          <input type="hidden" name="receiver" value="{{$user->id}}">
+          <div class="modal-body">
+            <div class="form-group mb-3">
+              <label class="form-label">{{ __('messages.Subject') }}:</label>
+              <input name="subject" type="text" placeholder="{{ __('messages.Subject') }}" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ __('messages.Message') }}: </label>
+              <textarea class="form-control" id="message" name='message' rows="8"
+                placeholder="{{__('messages.Write your message')}}" required></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+              {{__('messages.Close')}}
+            </button>
+            <button type="submit" class="btn btn-primary ml-1">
+              <i class="ti ti-send me-2"></i>
+              {{__('messages.Send')}}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -139,6 +178,7 @@
       responsive: true,
       pageLength: 10,
       language: isRtl ? { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/ar.json' } : {},
+      order: [[7, 'desc']],
       dom: '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-2"l><"col-sm-12 col-md-7 filters"><"col-sm-12 col-md-3"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
       initComplete: function() {
         $('.filters').append( $('#datatable-filters') );

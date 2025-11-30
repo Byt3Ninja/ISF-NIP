@@ -1,5 +1,9 @@
 @extends('layouts.admin')
 
+@section('vendorstyle')
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+@stop
+
 @section('style')
 <link rel="stylesheet" href="/css/whatsapp-auth.css" />
 <style>
@@ -14,20 +18,20 @@
 $title = $l == 'en' ? 'Settings' : 'الإعدادات';
 
 $tabs = collect([
-['general', 'ti-settings', __('settings.General Settings')],
-['analysis', 'ti-graph', __('settings.Analysis Settings')],
-['SMTP', 'ti-mail', __('settings.SMTP Configuration')],
-['app-identity', 'ti-id-badge', __('settings.Application Identity')],
-['Notification', 'ti-bell', __('settings.Push Notification Settings')],
-['NotificationChannels', 'ti-bell-ringing', 'Notification Channels'],
-['MeetingTab', 'ti-device-computer-camera', __('settings.Meeting Setting')],
-['SocialMediaLinks', 'ti-share', __('settings.SocialMediaLinks')],
-['SocialMediaLogin', 'ti-brand-facebook', __('settings.SocialMediaLogin')],
-['HomePage', 'ti-home', __('admin.HomePageSetting')],
-['WhatsApp', 'ti-brand-whatsapp', __('admin.WhatsApp')],
-])->map(function ($tab) {
-return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
-})->toArray();
+  ['general', 'ti-settings', __('settings.General Settings')],
+  ['analysis', 'ti-graph', __('settings.Analysis Settings')],
+  ['SMTP', 'ti-mail', __('settings.SMTP Configuration')],
+  ['app-identity', 'ti-id-badge', __('settings.Application Identity')],
+  ['Notification', 'ti-bell', __('settings.Push Notification Settings')],
+  ['NotificationChannels', 'ti-bell-ringing', 'Notification Channels'],
+  ['MeetingTab', 'ti-device-computer-camera', __('settings.Meeting Setting')],
+  ['SocialMediaLinks', 'ti-share', __('settings.SocialMediaLinks')],
+  ['SocialMediaLogin', 'ti-brand-facebook', __('settings.SocialMediaLogin')],
+  ['HomePage', 'ti-home', __('admin.HomePageSetting')],
+  ['WhatsApp', 'ti-brand-whatsapp', __('admin.WhatsApp')],
+  ])->map(function ($tab) {
+    return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
+  })->toArray();
 @endphp
 
 @section('content')
@@ -160,6 +164,12 @@ return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
 <!-- / Content wrapper -->
 @stop
 
+@section('scripts')
+<script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
+<script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
+<script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+@stop
+
 @section('pagescripts')
 <script>
   $(document).ready(function() {
@@ -170,11 +180,6 @@ return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
       $('#state_id').change(function() {
         getCities($(this).val());
       });
-
-     
-
-     
-        
     });
 
     function getStates(country_id) {

@@ -29,6 +29,18 @@ return [
     'mentorshipRequests'=>[
         'all'=>'عرض جلسات الارشارد',
         'withoutTasks'=>'عدد الجلسات بدون مهام'
-    ]
-
+    ],
+    'availability' => 'التواجد',
+    'days_date' => 'الأيام / التاريخ',
+    'start_time' => 'وقت البدء',
+    'end_time' => 'وقت الانتهاء',
+    'session_type' => 'نوع الجلسة',
+    'my_availability_slots' => 'جداول التواجد الخاصة بي',
+    'online' => 'اونلاين',
+    'offline' => 'اوفلاين',
+    'both' => 'اونلاين او اوفلاين',
+    'manage_availability' => 'إدارة التواجد',
+    'delete_slot_confirm' => 'هل أنت متأكد أنك تريد حذف فترة التواجد هذا؟',
+    'slot_removed_success' => 'تم حذف فترة التواجد بنجاح',
+    'slot_removed_error' => 'حدث خطأ أثناء حذف فترة التواجد',
 ];

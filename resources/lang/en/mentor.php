@@ -28,5 +28,18 @@ return [
     'mentorshipRequests'=>[
         'all'=>'Mentorship Sessions',
         'withoutTasks'=>'Sessions Without Tasks',
-    ]
+    ],
+    'availability' => 'Availability',
+    'days_date' => 'Days / Date',
+    'start_time' => 'Start Time',
+    'end_time' => 'End Time',
+    'session_type' => 'Session Type',
+    'my_availability_slots' => 'My Availability Slots',
+    'online' => 'Online',
+    'offline' => 'Offline',
+    'both' => 'Both',
+    'manage_availability' => 'Manage Availability',
+    'delete_slot_confirm' => 'Are you sure you want to delete this slot?',
+    'slot_removed_success' => 'Availability slot has been deleted successfully',
+    'slot_removed_error' => 'An error occurred while deleting the availability slot',
 ];

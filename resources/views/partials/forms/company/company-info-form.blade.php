@@ -123,7 +123,25 @@
           </div>
         </div>
        
-        <div class="col-md-12 col-12 mb-4">
+        <div class="col-md-6 col-12 mb-4">
+          <div class="form-group">
+            <label class="form-label fw-semibold fs-6 mb-2" for="team_num">{{ __('startup.startup_size') }}</label>
+            <select class="form-select select2" id="team_num" name="team_num">
+              <option value="" disabled>{{ __('startup.startup_size') }}</option>
+              <option value="1" {{ $client->company && $client->company->team_num == '1' ? 'selected' : '' }}>{{ __('startup.startup_size_1') }}</option>
+              <option value="2" {{ $client->company && $client->company->team_num == '2' ? 'selected' : '' }}>{{ __('startup.startup_size_2') }}</option>
+              <option value="3" {{ $client->company && $client->company->team_num == '3' ? 'selected' : '' }}>{{ __('startup.startup_size_3') }}</option>
+              <option value="4" {{ $client->company && $client->company->team_num == '4' ? 'selected' : '' }}>{{ __('startup.startup_size_4') }}</option>
+              <option value="5" {{ $client->company && $client->company->team_num == '5' ? 'selected' : '' }}>{{ __('startup.startup_size_5') }}</option>
+              <option value="6" {{ $client->company && $client->company->team_num == '6' ? 'selected' : '' }}>{{ __('startup.startup_size_6') }}</option>
+              <option value="7" {{ $client->company && $client->company->team_num == '7' ? 'selected' : '' }}>{{ __('startup.startup_size_7') }}</option>
+              <option value="8" {{ $client->company && $client->company->team_num == '8' ? 'selected' : '' }}>{{ __('startup.startup_size_8') }}</option>
+              <option value="9" {{ $client->company && $client->company->team_num == '9' ? 'selected' : '' }}>{{ __('startup.startup_size_9') }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-12 mb-4">
           <div class="form-group">
             <label class="form-label fs-6 fw-semibold mb-2" for="est_date">{{ __('admin.est_date') }}</label>
             <input class="form-control" id="est-date" name="est_date" type="text" value="{{ $client->company ? $client->company->est_date : old('est_date') }}" placeholder="YYYY-MM-DD" />

@@ -29,13 +29,38 @@
                       @endif
                     </div>
                   </div>
-                  <div class="d-flex align-items-center gap-4 mb-d mb-md-0">
+                  <div class="d-flex align-items-center gap-2 mb-d mb-md-0">
                     @if ($company->est_date)
                       <span class="badge bg-label-info rounded-pill">
                         <i class="ti ti-calendar ti-xs me-1"></i>
                         {{ __('admin.Established in') }} {{ \Carbon\Carbon::parse($company->est_date)->format('Y') }}
                       </span>
                     @endif
+                    @if ($company->team_num)
+                      <span class="badge bg-label-warning rounded-pill">
+                        <i class="ti ti-users-group ti-xs me-1"></i>
+                        {{ __('startup.startup_size') }}:
+
+                        @php
+                            $singleDigits = ['1','2','3','4','5','6','7','8','9'];
+                            
+                            if (in_array($company->team_num, $singleDigits)) {
+                                echo __('startup.startup_size_' . $company->team_num);
+                            } else {
+                                // Translate "employees" based on language
+                                $numRange = $company->team_num; // e.g., "11-50 employees"
+                                if ($l === 'ar') {
+                                    $numRange = str_replace('employees', 'موظف', $numRange);
+                                } else {
+                                    // Keep English as is
+                                    $numRange = str_replace('موظف', 'employees', $numRange);
+                                }
+                                echo $numRange;
+                            }
+                        @endphp
+                      </span>
+                    @endif
+
                     {{-- Alumni Badge --}}
                     @if ($company->alumni == '1' || $company->alumni == 1)
                       <span class="badge bg-label-danger rounded-pill">
