@@ -268,7 +268,7 @@
             [
                 'label' => $l == 'en' ? 'Forms List' : 'قائمة النماذج',
                 'icon' => 'ti ti-list',
-                'route' => '/dashboard/forms-list',
+                'route' => '/dashboard/forms',
                 'permission' => 'forms.index',
                 'isVisible' => true
             ],
@@ -1260,7 +1260,13 @@ $flattenedMenuItems = flattenMenuItems($filteredMenuItems);
                 </div>
                 <div class="flex-grow-1">
                   <h6 class="mb-0">{{ Auth::user()->name }}</h6>
-                  <small class="text-muted">{{ Auth::user()->title }}</small>
+                  <small class="text-muted">
+                    @php
+                      $roles = Auth::user()->getRoleNames();
+                      $translatedRoles = $roles->map(fn($role) => __('admin.' . strtolower($role)))->implode(', ');
+                    @endphp
+                    {{ $translatedRoles }}
+                  </small>
                 </div>
               </div>
             </a>

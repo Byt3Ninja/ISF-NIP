@@ -188,6 +188,12 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('hackathon/details/{id}', [HackathonController::class, 'show']);
     Route::post('hackathon/likeProject', [HackathonController::class, 'likeProject']);
 
+    // Service Providers
+
+    Route::resource('services_providers', 'serviceProviderController');
+    Route::get('services-providers/mails/{name?}', 'serviceProviderController@tst_view');
+    Route::get('services-providers/requests', 'serviceProviderController@requests')->name('services_providers.requests');
+    Route::post('services-providers/requests/take-action', 'serviceProviderController@takeAction')->name('services_providers.takeAction');
 
     Route::get('calendar/{id}/edit', 'SettingsController@editcal')->name('calendar.events_edit');
     Route::post('calendar/{id}/update', 'SettingsController@updatecal')->name('calendar.events_update');
@@ -277,17 +283,20 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     //services categories Manager routes
     Route::resource('serviceCategories', 'ServiceCategoryController');
     //Services Manager routes
+    
     Route::resource('services', 'ServiceController');
-    //Services requests
+    // Services requests
     Route::get('requests/all', 'ServiceController@requests')->name('service_requests.list_all');
     Route::get('requests/old', 'ServiceController@oldrequests')->name('service_requests.list_archived');
-    Route::post('requests/approve', 'ServiceController@approve');
-    Route::get('requests/mine', 'ServiceController@myrequests')->name('service_requests.list_mine');
-    //Services Directory
-    Route::get('directory', 'HomeController@directory')->name('users.directory_view');
-    Route::post('directory/{id}', 'HomeController@showone');
-    Route::post('directory/{id}/rate', 'HomeController@rateservice');
-    Route::post('servicerequest', 'HomeController@servicereq');
+    Route::post('requests/take_action', 'ServiceController@serviceAction')->name('service_requests.take_action');
+    Route::get('requests/mine', 'ServiceController@myRequests')->name('service_requests.list_mine');
+
+    // Services Directory
+    Route::get('directory', 'ServiceController@availableServices')->name('users.directory_view');
+    Route::post('directory/{id}', 'ServiceController@details');
+    Route::post('directory/{id}/rate', 'ServiceController@rate');
+    Route::post('service/request', 'ServiceController@book_service')->name('services.request_service');
+
     //Types Manager routes
     Route::resource('types', 'TypeController');
     //Partners Manager routes
@@ -386,6 +395,10 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('/employees/edit/{id}', 'ClientCompanyController@editEmployee')->name('company.employees_edit');
     Route::post('/employees/add/{id}', 'ClientCompanyController@addEmployee')->name('company.employees_add');
 
+    // Almuni 
+    Route::get('/AddCompanyalumni/{id}', 'ClientCompanyController@addCompanyAlumni')->name('company.addCompanyAlumni');
+
+
     //Industry
     Route::post('/industries/technologies', 'TechnologyController@create_technologies')->name('settings.create_technologies');
     Route::put('/industries/tech/{id}', 'TechnologyController@update_technologies')->name('settings.update_technologies');
@@ -408,6 +421,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::resource('users', 'UserController');
     Route::get('/judger', 'UserController@judger')->name('users.judger');
     Route::post('/users/password', 'UserController@updatePassword')->name('user.profile_update_password');
+    Route::post('/users/update_my_password', 'UserController@updateMyPassword')->name('user.profile_update_my_password');
     Route::get('/companies', 'ClientCompanyController@companies')->name('users.view_companies');
     // Export startups (CSV / Excel) - preserves current filters passed as query params
     Route::get('/companies/export', 'CompanyExportController@export')->name('users.companies_export');
@@ -477,11 +491,12 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::resource('faqs', 'FaqsController');
 
     // Forms
-    Route::get('forms-list', 'FormController@index')->name('forms.index');
+    Route::get('forms', 'FormController@index')->name('forms.index');
 
     Route::get('forms-submissions', 'FormController@submissions')->name('forms_submissions.index');
     Route::get('forms-submissions/export/{type}', 'FormController@export');
     Route::get('submission-details/{id}', 'FormController@submissionDetails')->name('form_submission_details.index');
+    Route::get('submission-export/{id?}', 'FormController@exportSubmissionDetails')->name('form_submission_details.export');
 
     // Advanced Export
     Route::get('forms-submissions/advanced-export/status', 'AdvancedExportController@status')->name('forms_submissions.export.status');
@@ -496,6 +511,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('builder/{set}', 'FormBuilderController@modifyForm');
     Route::post('submit-form', 'FormBuilderController@handleFormRequest')->name('forms.submissions_create');
     Route::get('builder/organization/{id?}', 'FormBuilderController@builderByOrganization');
+    Route::delete('form/{id}/delete', 'FormBuilderController@deleteForm')->name('forms.delete');
     //Cycles
     Route::get('cycles/{id?}', 'CyclesController@index')->name('cycles.list');
     Route::get('cycles/{id}/registered', 'CyclesController@users')->name('cycles.users_manage');
@@ -550,8 +566,11 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('zoom/{id}/update', 'MeetingController@update');
     Route::post('zoom/{id}/delete', 'MeetingController@destroy');
     Route::get('zoom/{id}/registrants', 'MeetingController@registrants');
+
     //Mentors
+    Route::get('/availability', 'MentorsController@availability')->name('slots.index');
     Route::post('mentors/modify', 'MentorsController@modify')->name('mentors.settings_modify');
+    Route::post('availability/remove-slot/{id}', 'MentorsController@removeSlot')->name('slots.destroy');
 
     Route::get('program/show', 'Mentor\MentorProgramController@show');
 

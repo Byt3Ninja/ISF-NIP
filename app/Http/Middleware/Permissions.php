@@ -74,7 +74,27 @@ class Permissions
                 {
                     if( $this->match( $route ) && !$user->ableTo( $permission ) )
                     {
-                        abort('401', $permission);
+                        if( $request->expectsJson() )
+                        {
+                            // Force English locale for JSON responses to ensure consistent API responses
+                            $currentLocale = app()->getLocale();
+                            app()->setLocale('en');
+
+                            $response = response()->json([
+                                'status' => false,
+                                'title' => __('auth.unauthorized'),
+                                'message' => __('auth.not_authorized_permission') . " ($permission)",
+                            ], 401);
+
+                            // Restore original locale
+                            app()->setLocale($currentLocale);
+
+                            return $response;
+                        }
+                        else
+                        {
+                            abort('401', $permission);
+                        }
                     }
                 }
             }

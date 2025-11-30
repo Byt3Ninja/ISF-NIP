@@ -298,7 +298,7 @@
                             class="progress-circle position-absolute w-100 h-100"
                             style="
                               background: conic-gradient(
-                                {{ $averageScore >= 75 ? '#28a745' : ($averageScore >= 50 ? '#17a2b8' : ($averageScore >= 25 ? '#ffc107' : '#dc3545')) }}
+                                {{ $averageScore >= 75 ? 'var(--bs-success)' : ($averageScore >= 50 ? 'var(--bs-info)' : ($averageScore >= 25 ? 'var(--bs-warning)' : 'var(--bs-danger)')) }}
                                   {{ $averageScore * 3.6 }}deg,
                                 #e9ecef {{ $averageScore * 3.6 }}deg
                               );
@@ -306,7 +306,7 @@
                             "
                           ></div>
                           <span class="fw-bold text-dark position-relative" style="font-size: 0.875rem">
-                            {{ $averageScore }} %
+														{{ number_format($averageScore, 1) }} %
                           </span>
                         </div>
                         <div class="small text-muted text-nowrap">{{ __('cycles.Avg Score') }}</div>
@@ -840,7 +840,7 @@
 									<div class="circular-progress-large position-relative d-inline-flex align-items-center justify-content-center" style="width: 90px; height: 90px;">
 										<div class="progress-circle position-absolute w-100 h-100" style="
 											background: conic-gradient(
-												${totalScore >= 75 ? '#28a745' : (totalScore >= 50 ? '#17a2b8' : (totalScore >= 25 ? '#ffc107' : '#dc3545'))}
+												${totalScore >= 75 ? 'var(--bs-primary)' : (totalScore >= 50 ? 'var(--bs-info)' : (totalScore >= 25 ? 'var(--bs-warning)' : 'var(--bs-danger)'))}
 												${totalScore * 3.6}deg,
 												rgba(255,255,255,0.3) ${totalScore * 3.6}deg
 											);

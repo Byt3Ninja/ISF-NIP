@@ -73,6 +73,15 @@
         <div>{{ __('admin.Profile') }}</div>
       </a>
     </li>
+    
+    @if ($_user->ableTo('slots.index', $permissions))
+      <li class="{{ Request::is('*availability') ? 'active' : '' }} menu-item">
+        <a href="{{ route('slots.index') }}" class="menu-link">
+          <i class="ti ti-calendar-cog me-3 ti-md"></i>
+          <div>{{ __('mentor.availability') }}</div>
+        </a>
+      </li>
+    @endif
 
     @if( $_user->HaveCompany == 1 && !$_user->company && $_user->ableToAny(['company.profile_view', 'assessments.results_analysis_view', 'swot.view'], $permissions) )
       <li class="{{ Request::is('*companyProfile') ? 'active' : '' }} menu-item">
@@ -175,7 +184,7 @@
       <li class="{{ Request::is('dashboard/messages') ? 'active' : '' }} menu-item">
         <a href="/dashboard/messages" class="menu-link">
           <i class="menu-icon tf-icons ti ti-messages"></i>
-          <span class="menu-item">{{ __('admin.Messages') }}</span>
+          <div>{{ __('admin.Messages') }}</div>
         </a>
       </li>
     @endif
@@ -183,9 +192,9 @@
     @if (!$_user->hasAnyRole('Judger'))
       @if( $_user->ableTo('messages.view', $permissions) )
         <li class="{{ Request::is('dashboard/mymsg') ? 'active' : '' }} menu-item">
-          <a href="/dashboard/mymsg" class="menu-link"><i class="bx bx-support"></i>
+          <a href="/dashboard/mymsg" class="menu-link">
             <i class="menu-icon tf-icons ti ti-world"></i>
-            <span class="menu-item">{{ __('admin.contactus') }}</span>
+            <div>{{ __('admin.contactus') }}</div>
           </a>
         </li>
       @endif
@@ -246,7 +255,7 @@
       @if( $_user->ableTo('users.directory_view', $permissions) )
       <li class="{{ Request::is('dashboard/directory') ? 'active' : '' }} menu-item"><a href="/dashboard/directory"
           class="menu-link">
-          <i class="ti ti-search ti-md me-2 me-lg-4 ti-lg"></i>
+          <i class="menu-icon tf-icons ti ti-search"></i>
           <div>{{ __('admin.Services') }}</div>
         </a>
       </li>
@@ -257,7 +266,7 @@
       @if( $_user->ableTo('mentors.list', $permissions) )
       <li class="{{ Request::is('dashboard/show/Mentors') ? 'active' : '' }} menu-item"><a
           href="/dashboard/show/Mentors" class="menu-link">
-          <i class="ti ti-users ti-md me-2 me-lg-4 ti-lg"></i>
+          <i class="menu-icon tf-icons ti ti-users"></i>
           <div>{{ __('admin.Mentors') }}</div>
         </a>
       </li>
@@ -268,8 +277,8 @@
     @if( $_user->ableTo('users.view_companies', $permissions) )
      <li class="{{ Request::is('dashboard/companies') ? 'active' : '' }} menu-item">
         <a class="menu-link" href="{{ route('users.view_companies') }}">
-          <i class="ti ti-building ti-md me-2 me-lg-4 ti-lg"></i>
-          <span class="menu-item">{{ __('admin.Companies') }}</span>
+          <i class="menu-icon tf-icons ti ti-building-skyscraper"></i>
+          <div>{{ __('admin.Companies') }}</div>
         </a>
       </li>
     @endif
@@ -285,7 +294,7 @@
         }} menu-item"
       >
         <a href="{{ route('mentorships.sessions_list_detailed') }}" class="menu-link">
-          <i class="ti ti-layout-kanban ti-md me-2 me-lg-4 ti-lg"></i>
+          <i class="menu-icon tf-icons ti ti-layout-kanban"></i>
           <div>{{ __('mentor.mentorshipTasks.index') }}</div>
         </a>
       </li>
@@ -295,7 +304,7 @@
 
     <li class="{{ Request::is('dashboard/hackathon') ? 'active' : '' }} menu-item"><a
           href="/dashboard/hackathon" class="menu-link">
-          <i class="ti ti-activity ti-md me-2 me-lg-4 ti-lg"></i>
+          <i class="menu-icon tf-icons ti ti-activity"></i>
           <div>{{ __('admin.Hackathon') }}</div>
         </a>
       </li>
@@ -392,7 +401,7 @@
     @if ($_user->hasAnyRole('Admin'))
       <li class="{{ Request::is('*organizations') ? 'active' : '' }} menu-item">
         <a href="{{ route('organizations.index') }}" class="menu-link">
-          <i class="menu-icon tf-icons ti ti-layout-board"></i>
+          <i class="menu-icon tf-icons ti ti-building"></i>
           <div>{{ __('admin.Manage Organizations') }}</div>
         </a>
       </li>
@@ -407,15 +416,16 @@
         </a>
      </li>
     @endif
-@if( $_user->hasAnyrole('Admin|organizationManager') )
-    <li class="{{ Request::is('dashboard/forms-list*', 'dashboard/show-builder*', 'dashboard/forms-submissions*', 'dashboard/submission-details*') ? 'sidebar-group-active open' : '' }} menu-item">
-      <a class="menu-link menu-toggle">
+    
+    @if( $_user->hasAnyrole('Admin|organizationManager') )
+    <li class="{{ Request::is('dashboard/forms*', 'dashboard/show-builder*', 'dashboard/forms-submissions*', 'dashboard/submission-details*') ? 'active' : '' }} menu-item">
+      <a href="/dashboard/forms" class="menu-link">
         <i class="menu-icon tf-icons ti ti-forms"></i>
         <div>{{ __('admin.Forms') }}</div>
       </a>
-      <ul class="menu-sub">
-        <li class="{{ Request::is('dashboard/forms-list*') ? 'active' : '' }} menu-item">
-          <a href="/dashboard/forms-list" class="menu-link">
+      {{-- <ul class="menu-sub">
+        <li class="{{ Request::is('dashboard/forms*') ? 'active' : '' }} menu-item">
+          <a href="/dashboard/forms" class="menu-link">
             <div>{{ __('admin.Forms List') }}</div>
           </a>
         </li>
@@ -431,43 +441,17 @@
             <div>{{ __('admin.Forms Submissions') }}</div>
           </a>
         </li>
-      </ul>
+      </ul> --}}
     </li>
-@endif
+    @endif
 
     @if( $_user->ableToAny(['cycles.list', 'programlist.index'], $permissions) )
       <li
-        class="{{ Request::is('dashboard/cycles*', 'dashboard/programlist*') ? 'sidebar-group-active open' : '' }} menu-item">
-        <a class="menu-link menu-toggle">
+        class="{{ Request::is('dashboard/cycles*', 'dashboard/programlist*') ? 'active' : '' }} menu-item">
+        <a href="{{ route('programlist.index') }}" class="menu-link">
           <i class="menu-icon tf-icons ti ti-components"></i>
           <div>{{ __('admin.Cycles') }}</div>
         </a>
-        <ul class="menu-sub">
-          <li class="{{ Request::is('dashboard/programlist*') ? 'active' : '' }} menu-item">
-            <a href="/dashboard/programlist" class="menu-link">
-              <span class="menu-item">{{ __('admin.ProgramList') }}</span>
-              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-            </a>
-          </li>
-          <li class="{{ Request::is('dashboard/hackathon*') ? 'active' : '' }} menu-item">
-            <a href="/dashboard/hackathon" class="menu-link">
-              <span class="menu-item">{{ __('admin.Hackathons') }}</span>
-              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-            </a>
-          </li>
-          <li class="{{ preg_match('#^dashboard/cycles(/\d+)?$#', Request::path()) ? 'active' : '' }} menu-item">
-            <a href="/dashboard/cycles" class="menu-link">
-              <span class="menu-item">{{ __('cycles.steps') }}</span>
-              <i class="bx bx-message"></i>
-            </a>
-          </li>
-          <li class="{{ Request::is('dashboard/cycles/*/registered') ? 'active' : '' }} menu-item">
-            <a href="/dashboard/cycles/0/registered" class="menu-link">
-              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-              <span class="menu-item"> {{ __('admin.Startups') }}</span>
-            </a>
-          </li>
-        </ul>
       </li>
 
 

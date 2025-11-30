@@ -1255,7 +1255,9 @@ class HomeController extends Controller
                 s.tfrom,
                 s.tto,
                 s.notes,
-                s.active
+                s.active,
+                s.session_type,
+                s.date
             FROM
                 schedules s
             WHERE
@@ -1263,31 +1265,31 @@ class HomeController extends Controller
         ";
         $my_schedules = collect(DB::select($my_schedules_q))->map(function ($schedule) {
             $schedule->active = $schedule->active == 1 || $schedule->active == true ? true : false;
-            $date_from = Carbon::parse($schedule->dfrom)->format('d-m-Y');
-            $date_to = Carbon::parse($schedule->dto)->format('d-m-Y');
-            $_days = '';
-            switch ($schedule->type) {
-                case 'Weekly': {
-                        $_days = 'Weekly (' . str_replace(['[', ']', '"'], ' ', json_encode($schedule->days)) . ')';
-                        break;
-                    }
-                case 'WorkingDays': {
-                        $_days = __('dashboard.All working days');
-                        break;
-                    }
-                case 'Period': {
-                        $_days = __('dashboard.from') . $date_from . __('dashboard.to') . $date_to;
-                        break;
-                    }
-                default: {
-                        $_days = $date_to;
-                    }
-            }
-            $schedule->_days = $_days;
+            // $date_from = Carbon::parse($schedule->dfrom)->format('d-m-Y');
+            // $date_to = Carbon::parse($schedule->dto)->format('d-m-Y');
             $schedule->t_from = substr($schedule->tfrom, 0, 5);
             $schedule->t_to = substr($schedule->tto, 0, 5);
             $schedule->notes ? $schedule->notes : '...';
-            return $schedule;
+
+            if ($schedule->type === 'Weekly') {
+                return [
+                    'id' => $schedule->id,
+                    'weekday' => $schedule->days,
+                    'start_time' => $schedule->t_from,
+                    'end_time' => $schedule->t_to,
+                    'session_type' => $schedule->session_type,
+                    'weekly' => true
+                ];
+            } else {
+                return [
+                    'id' => $schedule->id,
+                    'date' => $schedule->date ?? $schedule->date_to ?? null,
+                    'start_time' => $schedule->t_from,
+                    'end_time' => $schedule->t_to,
+                    'session_type' => $schedule->session_type,
+                    'weekly' => false
+                ];
+            }
         });
 
         $setting = collect(DB::select("SELECT * FROM settings where `id` = 1 limit 1"))->first();
@@ -2316,6 +2318,52 @@ class HomeController extends Controller
 
         $notRated_men = DB::select($notRated_men, [$dateRate, Auth::id()]);
         $notRated_men = collect($notRated_men);
+        // check for rating services
+
+        $service_requests = DB::table('services_requests AS sr')
+            ->select([
+                'sr.id AS id',
+                'sr.service_id AS service_id',
+                's.name_en AS service_name_en',
+                's.name_ar AS service_name_ar',
+                's.service_provider_id AS service_provider_id',
+                'sp.company_name AS provider_name',
+                'sp.email AS provider_email',
+                'sp.phone AS provider_phone',
+                'sr.comment AS comment',
+                'sr.date_time AS date_time',
+                'sr.rate AS rate',
+                'sr.rate_comment AS rate_comment',
+                'sr.done AS done',
+            ])
+            ->leftJoin('services AS s', 's.id', '=', 'sr.service_id')
+            ->leftJoin('service_providers AS sp', 'sp.id', '=', 's.service_provider_id')
+            ->where('sr.user_id', $user->id)
+            ->where('sr.approved', 'Yes')
+            ->whereNull('sr.rate')
+            ->whereNull('sr.done')
+            ->whereNull('sr.deleted_at')
+            ->get();
+
+        $service_requests = $service_requests->map(function ( $item ) use ($l) {
+            $_request = new stdClass;
+            $_request->id = $item->id;
+            $_request->service = new stdClass;
+            $_request->service->id = $item->service_id;
+            $_request->service->name = $item->{'service_name_' . $l};
+            $_request->provider = new stdClass;
+            $_request->provider->id = $item->service_provider_id;
+            $_request->provider->name = $item->provider_name;
+            $_request->provider->email = $item->provider_email;
+            $_request->provider->phone = $item->provider_phone;
+            $_request->comment = $item->comment;
+            $_request->date_time = $item->date_time;
+            $_request->rate = $item->rate;
+            $_request->rate_comment = $item->rate_comment;
+            $_request->done = $item->done;
+            return $_request;
+        });
+        $data['unrated_services_requests'] = $service_requests;
         $data['notrated_mens'] = $notRated_men;
         $data['initial_screening_steps'] = $filtration;
         $data['final_screening_steps'] = $evaluation;
@@ -3117,9 +3165,11 @@ class HomeController extends Controller
 
     public function directory(Request $request)
     {
+        // deprecated and moved to ServiceController.php
         $t = $request->input('type');
         $find = $request->input('find');
         $services = Service::with('serviceCategory')
+            ->where('status', true)
             ->whereHas('organizations')
             ->get()
             ->map(function ($service) {
@@ -3144,6 +3194,7 @@ class HomeController extends Controller
     }
     public function rateservice($id, Request $request)
     {
+        // deprecated and moved to ServiceController.php
         if ($request && $id) {
             $request->done ? $done = 1 : $done = null;
             ServicesRequests::updateOrInsert(['id' => $id], ['rate' => $request->rate, 'rate_comment' => $request->comment, 'done' => $done]);
@@ -3153,6 +3204,7 @@ class HomeController extends Controller
     }
     public function showone($id, Request $request)
     {
+        // deprecated and moved to ServiceController.php
         if ($request && $id) {
             $service = Service::findOrFail($id);
             $rate = (int)$service->myRate();
@@ -3164,6 +3216,7 @@ class HomeController extends Controller
 
     public function servicereq(Request $request)
     {
+        // deprecated and moved to ServiceController.php
         if ($request) {
             $serviceRequest = ServicesRequests::create([
                 'service_id' => $request->id,
@@ -3176,7 +3229,8 @@ class HomeController extends Controller
 
             $service = Service::find($request->id);
 
-            if ($service && $service->vendor_email) {
+            if( $service && $service->vendor_email && !in_array(env('APP_ENV', 'local'), ['local']) )
+            {
                 // Create anonymous notifiable for vendor email
                 Notification::route('mail', $service->vendor_email)->notify(new ServiceRequestNotification($serviceRequest));
             }

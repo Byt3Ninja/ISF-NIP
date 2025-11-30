@@ -11,7 +11,17 @@ return [
   'programs_summary' => 'البرامج والملخص',
   'team' => 'فريق العمل',
   'team_info' => 'معلومات الفريق',
-  
+  'startup_size' => 'حجم الشركة',
+  'startup_size_1' => 'عمل لحسابه الخاص',
+  'startup_size_2' => '1-10 موظفين',
+  'startup_size_3' => '11-50 موظف',
+  'startup_size_4' => '51-200 موظف',
+  'startup_size_5' => '201-500 موظف',
+  'startup_size_6' => '501-1000 موظف',
+  'startup_size_7' => '1001-5000 موظف',
+  'startup_size_8' => '5001-10000 موظف',
+  'startup_size_9' => '10001+ موظف',
+    
   'about_challenges' => 'حول الشركة والتحديات',
   'about_problem' => 'حول المشكلة',
   'about_monetization' => 'حول تحقيق الربح',
@@ -92,6 +102,7 @@ return [
   'status' => 'الحالة',
   'actions' => 'الإجراءات',
   'view_details' => 'عرض التفاصيل',
+  'view_startup_profile' => 'عرض ملف الشركة',
 
   'upcoming' => 'قادمة',
   'ongoing' => 'جارية',
@@ -294,6 +305,7 @@ return [
   'download' => 'تنزيل',
   'text' => 'نص',
   'file' => 'ملف',
+  'number' => 'رقم',
   'selection' => 'اختيار',
   'uploaded' => 'تم الرفع',
 

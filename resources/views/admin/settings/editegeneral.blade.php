@@ -1,16 +1,15 @@
 @extends('layouts.admin')
 
+@section('vendorstyle')
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+@stop
+
 @section('style')
 <link rel="stylesheet" href="/css/whatsapp-auth.css" />
 <style>
-  .custom-container {
-    width: 100%;
-  }
-
-  @media screen and (min-width: 768px) {
-    .custom-container {
-      width: 75%;
-    }
+  .sidebar-sticky {
+    position: sticky;
+    top: 20px;
   }
 </style>
 @stop
@@ -19,20 +18,20 @@
 $title = $l == 'en' ? 'Settings' : 'الإعدادات';
 
 $tabs = collect([
-['general', 'ti-settings', __('settings.General Settings')],
-['analysis', 'ti-graph', __('settings.Analysis Settings')],
-['SMTP', 'ti-mail', __('settings.SMTP Configuration')],
-['app-identity', 'ti-id-badge', __('settings.Application Identity')],
-['Notification', 'ti-bell', __('settings.Push Notification Settings')],
-['NotificationChannels', 'ti-bell-ringing', 'Notification Channels'],
-['MeetingTab', 'ti-device-computer-camera', __('settings.Meeting Setting')],
-['SocialMediaLinks', 'ti-share', __('settings.SocialMediaLinks')],
-['SocialMediaLogin', 'ti-brand-facebook', __('settings.SocialMediaLogin')],
-['HomePage', 'ti-home', __('admin.HomePageSetting')],
-['WhatsApp', 'ti-brand-whatsapp', __('admin.WhatsApp')],
-])->map(function ($tab) {
-return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
-})->toArray();
+  ['general', 'ti-settings', __('settings.General Settings')],
+  ['analysis', 'ti-graph', __('settings.Analysis Settings')],
+  ['SMTP', 'ti-mail', __('settings.SMTP Configuration')],
+  ['app-identity', 'ti-id-badge', __('settings.Application Identity')],
+  ['Notification', 'ti-bell', __('settings.Push Notification Settings')],
+  ['NotificationChannels', 'ti-bell-ringing', 'Notification Channels'],
+  ['MeetingTab', 'ti-device-computer-camera', __('settings.Meeting Setting')],
+  ['SocialMediaLinks', 'ti-share', __('settings.SocialMediaLinks')],
+  ['SocialMediaLogin', 'ti-brand-facebook', __('settings.SocialMediaLogin')],
+  ['HomePage', 'ti-home', __('admin.HomePageSetting')],
+  ['WhatsApp', 'ti-brand-whatsapp', __('admin.WhatsApp')],
+  ])->map(function ($tab) {
+    return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
+  })->toArray();
 @endphp
 
 @section('content')
@@ -80,29 +79,30 @@ return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
       </ul>
     </div>
     <!-- / Tabs (mobile) -->
-    <div class="d-flex justify-content-start w-100 mb-6">
-      <nav class="nav-align-left nav-tabs-shadow mb-6 p-4 bg-white position-fixed d-none d-md-block"
-        style="min-height: 500px; min-width: 18%; max-width: 18%;">
-        <!-- Tabs -->
-        <ul class="nav nav-tabs nav-fill border-none m-auto" role="tablist">
-          @foreach ($tabs as $key => $tab)
-          <li class="nav-item bg-label-light mb-2 rounded overflow-x-hidden d-flex align-items-center">
-            <a href="#navs-left-{{ $tab['target'] }}" class="nav-link {{ $key == 0 ? 'active' : '' }} py-3"
-              data-bs-toggle="tab" role="tab">
-              <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
-              {{ $tab['label'] }}
-            </a>
-          </li>
-          @endforeach
-        </ul>
-        <!-- / Tabs -->
-      </nav>
+    <div class="row">
+      <div class="col-lg-3">
+        <nav class="nav-align-left nav-tabs-shadow mb-6 p-4 bg-white d-none d-md-block sidebar-sticky">
+          <!-- Tabs -->
+          <ul class="nav nav-tabs nav-fill border-none m-auto" role="tablist">
+            @foreach ($tabs as $key => $tab)
+            <li class="nav-item bg-label-light mb-2 rounded overflow-x-hidden d-flex align-items-center">
+              <a href="#navs-left-{{ $tab['target'] }}" class="nav-link {{ $key == 0 ? 'active' : '' }} py-3"
+                data-bs-toggle="tab" role="tab">
+                <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
+                {{ $tab['label'] }}
+              </a>
+            </li>
+            @endforeach
+          </ul>
+          <!-- / Tabs -->
+        </nav>
+      </div>
       <!-- Tab Content On Tab Click -->
-      <div class="tab-content p-0 overflow-y-auto custom-container mb-6"
-        style="{{ $l == 'en' ? 'margin-left: auto' : 'margin-right: auto' }}">
-        @foreach ($tabs as $index => $tab)
-        <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }} mb-6" id="navs-left-{{ $tab['target'] }}">
-          <div class="card mb-6">
+      <div class="col-lg-9">
+        <div class="tab-content p-0 overflow-y-auto mb-6">
+          @foreach ($tabs as $index => $tab)
+          <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }} mb-6" id="navs-left-{{ $tab['target'] }}">
+            <div class="card mb-6">
             <div class="card-header">
               @if($index !== 9)
               <h5 class="card-title pb-3 border-bottom">{{ $tab['label'] }}</h5>
@@ -155,12 +155,19 @@ return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
         </div>
         @endforeach
       </div>
-      <!-- / Tab Content On Tab Click -->
+    </div>
+    <!-- / Tab Content On Tab Click -->
     </div>
   </div>
   <!-- / Content -->
 </div>
 <!-- / Content wrapper -->
+@stop
+
+@section('scripts')
+<script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
+<script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
+<script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
 @stop
 
 @section('pagescripts')
@@ -173,11 +180,6 @@ return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
       $('#state_id').change(function() {
         getCities($(this).val());
       });
-
-     
-
-     
-        
     });
 
     function getStates(country_id) {

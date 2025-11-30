@@ -409,7 +409,7 @@ return $state;
 }
 
 
-$('.lfm').filemanager('file');
+// $('.lfm').filemanager('file');
 
 
 $('#founder-form #founder_name').on('input', function() {

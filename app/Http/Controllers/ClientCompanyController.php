@@ -13,18 +13,30 @@ use App\Almuni;
 use App\Sector;
 use App\Company;
 use App\Country;
+use App\Quizzes;
+use App\Service;
+use App\Surveys;
 use App\Currency;
 use App\Employee;
+use App\Formdata;
 use App\Settings;
+use App\Training;
 use App\Milestone;
+use App\Screening;
 use App\Technology;
 use App\Team_member;
 use App\FundingRound;
 use App\Organization;
+use App\Finalscreening;
+use App\MentorshipTask;
 use App\StaticCategory;
 use App\CompanyRelation;
+use App\ServiceCategory;
 use App\SustainableIcon;
+use App\TrainingSession;
+use App\ServicesRequests;
 use App\Events\WebMessage;
+use App\MentorshipRequest;
 use App\ScreeningEvaluation;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -32,6 +44,7 @@ use App\Services\CompanyService;
 use App\ScreeningEvaluationResults;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use App\ScreeningEvaluationCustomFields;
 use Illuminate\Support\Facades\Validator;
 use \Illuminate\Validation\ValidationException;
 use Intervention\Image\ImageManagerStatic as Image;
@@ -2526,15 +2539,16 @@ class ClientCompanyController extends Controller
                 'id.exists' => 'Employee not found'
             ]);
 
-            if ($validator->fails()) {
-                return response()->json([
-                    'errors' => $validator->errors()
-                ], 422);
-            }
+        //     if ($validator->fails()) {
+        //         return response()->json([
+        //             'errors' => $validator->errors()
+        //         ], 422);
+        //     }
 
-            $employee = Employee::where('id', $employeeId)
-                ->where('company_id', $companyId)
-                ->firstOrFail();
+        //     $employee = Team_member::where('id', $request->id)
+        //                          ->where('Company_id', $id)
+        //                          ->where('TeamMember', 'Employee')
+        //                          ->firstOrFail();
 
             // Delete associated documents
             if ($employee->documents && is_array($employee->documents)) {
@@ -2551,7 +2565,7 @@ class ClientCompanyController extends Controller
                 'success' => true,
                 'state' => 'Employee deleted successfully'
             ]);
-
+            
         } catch (Exception $e) {
             Log::error('Error deleting employee: ' . $e->getMessage());
             return response()->json([
@@ -2562,7 +2576,7 @@ class ClientCompanyController extends Controller
 
     public function addCompanyAlumni(Request $request, $id)
     {
-
+        
         try {
             $user = Auth::user();
             $company = Company::findOrFail($id);
@@ -2573,56 +2587,692 @@ class ClientCompanyController extends Controller
             $almuni->company_id = $id;
             $almuni->alumni = '1';
             $almuni->established_date = date('Y-m-d H:i:s');
-
+           
             //Relations Data
             $relations_data = $company_relations->map(function ($relation) {
-                return [
-                    'Industry' => $relation->industry?->name_en,
-                    'Sector' => $relation->sector?->name_en,
-                    'Technology' => $relation->technology?->name_en,
-                ];
-            })->values();
+                                    return [
+                                        'Industry'    => $relation->industry?->name_en,
+                                        'Sector'      => $relation->sector?->name_en,
+                                        'Technology'  => $relation->technology?->name_en,
+                                    ];
+                                })->values();
             $basic_startup_information = [
-                'ID' => $company->id,
-                'Startup_Name' => $company->name_en,
-                'Alumni' => 'Yes',
-                'Established_Date' => date('Y-m-d H:i:s'),
-                'Location' => implode(', ', array_filter([
-                    $company->city->name_en,
-                    $company->country->name_en
-                ])),
-                'Country' => $company->country->name_en,
-                'Business_Type' => $company->business_type,
-                'Relations' => $relations_data,
-                'Website_Link' => $company->website,
-                'Social Media Links' => [
-                    'Facebook' => $company->facebook,
-                    'Twitter' => $company->twitter,
-                    'Linkedin' => $company->linkedin,
-                    'Instagram' => $company->instagram,
-                    'Youtube' => $company->youtube,
-                    'Google_Map' => $company->google_map,
-                    'tiktok' => $company->tiktok,
-                ],
-            ];
+                    'ID' => $company->id,
+                    'Startup_Name' => $company->name_en,
+                    'Alumni' => 'Yes',
+                    'Established_Date' => date('Y-m-d H:i:s'),
+                    'Location' => implode(', ', array_filter([
+                        $company->city->name_en ?? '',
+                        $company->country->name_en ?? '',
+                    ])),
+                    'Country' => $company->country->name_en,
+                    'Business_Type' => $company->business_type,
+                    'Relations'     => $relations_data,
+                    'Website_Link' => $company->website,
+                    'Social Media Links' => [
+                        'Facebook' => $company->facebook,
+                        'Twitter' => $company->twitter,
+                        'Linkedin' => $company->linkedin,
+                        'Instagram' => $company->instagram,
+                        'Youtube' => $company->youtube,
+                        'Google_Map' => $company->google_map,
+                        'tiktok' => $company->tiktok,
+                    ],
+                ];
             $almuni->basic_startup_information = json_encode($basic_startup_information);
 
-            $team_leader = Team_member::where('company_id', $id)->where('TeamMember', 'hackathon')->first();
-            $startup_leader_information = [
-                'ID' => $team_leader->id,
-                'Full_Name' => $team_leader->Name,
-                'Country' => $company->country->name_en,
-                'Email' => $team_leader->Email,
-                'Phone_Number' => $team_leader->Phone,
-            ];
-            $almuni->startup_leader_information = json_encode($startup_leader_information);
+            
+                $team_leaders = Team_member::where('company_id', $id)
+                    ->where('TeamMember', 'hackathon')
+                    ->get();
 
+                $startup_leader_information = [];
+
+                foreach ($team_leaders as $leader) {
+                    $startup_leader_information[] = [
+                        'ID' => $leader->id,
+                        'Full_Name' => $leader->Name,
+                        'Country' => $company->country->name_en ?? '',
+                        'Email' => $leader->Email,
+                        'Phone_Number' => $leader->Phone,
+                    ];
+                }
+
+                $almuni->startup_leader_information = json_encode($startup_leader_information);
+
+                $startup_founders = Team_member::where('company_id', $id)
+                    ->where('TeamMember', 'Founder')
+                    ->get();
+
+                $founders = [];
+
+                foreach ($startup_founders as $founder) {
+                    $founders[] = [
+                        'ID' => $founder->id,
+                        'Full_Name' => $founder->Name,
+                        'Country' => $company->country->name_en ?? '',
+                        'Email' => $founder->Email,
+                        'Phone_Number' => $founder->Phone,
+                        'LinkedIn Profile' => $founder->LinkedIn
+                    ];
+                }
+
+                $almuni->founders = json_encode($founders);
+
+                $startup_employees = Team_member::where('company_id', $id)
+                    ->where('TeamMember', 'Employee')
+                    ->get();
+
+                $employees = [];
+
+                foreach ($startup_employees as $employee) {
+                    $employees[] = [
+                        'ID' => $employee->id,
+                        'Full_Name' => $employee->Name,
+                        'Country' => $company->country->name_en ?? '',
+                        'Email' => $employee->Email,
+                        'Phone_Number' => $employee->Phone,
+                        'Job Title' => $employee->RoleShereholder,
+                        'Gender' => $employee->gender,
+                        'Employment Type' => $employee->employment_type,
+                        'Start Date' => $employee->hiring_date
+                        
+                    ];
+                }
+
+                $almuni->employees = json_encode($employees);
+
+                $startup_shareholders = Team_member::where('company_id', $id)
+                    ->where('TeamMember', 'Shareholder')
+                    ->get();
+
+                $shareholders = [];
+
+                foreach ($startup_shareholders as $shareholder) {
+                    $shareholders[] = [
+                        'ID' => $shareholder->id,
+                        'Full_Name' => $shareholder->Name,
+                        'Country' => $company->country->name_en ?? '',
+                        'Email' => $shareholder->Email,
+                        'Phone_Number' => $shareholder->Phone,
+                        'Role' => $shareholder->RoleShereholder,
+                        'Ownership Percentage' => $shareholder->PresentagShereholder
+                    ];
+                }
+
+                $almuni->shareholders = json_encode($shareholders);
+
+
+                $startup_investors = Team_member::where('company_id', $id)
+                    ->where('TeamMember', 'Investor')
+                    ->get();
+
+                $investors = [];
+
+                foreach ($startup_investors as $investor) {
+                    $investors[] = [
+                        'ID' => $investor->id,
+                        'Full_Name' => $investor->Name,
+                        'Country' => $company->country->name_en ?? '',
+                        'Email' => $investor->Email,
+                        'Phone_Number' => $investor->Phone,
+                        'Type' => $investor->investorType
+                    ];
+                }
+
+                $almuni->investors = json_encode($investors);
+
+                $almuni->sustainability_goals = $company->Sustainable_development;
+
+
+                    $pitch_deck[] = [
+                        'pitch deck' => $company->pitch_deck ?? '',
+                        'pitch deck video' => $company->pitch_deck_video ?? '',
+                        'pitch deck description' => $company->pitch_deck_description ?? '',
+                        'pitch deck summary' => $company->pitch_deck_summary ?? '',
+                    ];
+                $almuni->pitch_deck = json_encode($pitch_deck);
+
+
+                $legal_information[] = [
+                        'Registered' => $company->Commercial_Register  ? 'Registered' : 'Not Registered',
+                        'Commercial Register' => $company->Commercial_Register ?? '',
+                        'Tax Card' => $company->Tax_Card ?? '',
+                        'Country Register id' => $company->Country_Register_id ?? '',
+                    ];
+                $almuni->legal_information = json_encode($legal_information);
+
+                    $cycle[] = [
+                        'Program Name' => $company->cycledata->title ?? '',
+                        'ID' =>  $company->cycledata->id ?? '',
+                        'Organization' =>  $company->cycledata->organization ?? '',
+                        'Cohort' =>  $company->cycledata->cohort ?? '',
+                        'Start Date' => $company->cycledata->start->format('Y-m-d H:i') ?? '',
+                        'Completion Date' => $company->cycledata->end->format('Y-m-d H:i') ?? '',
+                        'Type' => $company->cycledata->type ?? '',
+                    ];
+                $almuni->program = json_encode($cycle);
+
+
+            $company_id = $company->id;
+            $cycle_id = $company->cycle;
+
+            $_steps = Step::where('cycle_id', $cycle_id)
+                ->where('stype', 2)
+                ->orderBy('arr')
+                ->get();
+            $companies = Company::where('cycle', $cycle_id)->get();
+            $stepsData = collect();
+            $l = app()->getLocale();
+            foreach ($_steps as $step) {
+                $evaluation = ScreeningEvaluation::where('step_id', $step->id)->first();
+                $results = ScreeningEvaluationResults::where('evaluation_id', $evaluation?->id)->get();
+                $get_comments = ScreeningEvaluationCustomFields::where('name', 'final_comment')
+                    ->where('evaluation_id', $evaluation?->id)
+                    ->with('values')
+                    ->first();
+
+                $comments = collect([]);
+                if($get_comments && $get_comments->values) {
+                    $comments = $get_comments->values->map(function($c) {
+                        $c->evaluation_id = $c->evaluation_id;
+                        return $c;
+                    });
+                }
+                $getUsers = Screening::where('step_id', $step->id)->with('user')->get();
+                $judges = $getUsers->map(function($item) use ($l) {
+                    $user = $item->user;
+                    $j = new stdClass;
+                    $j->id = $user->id ?? 0;
+                    $j->name = ($user->{'first_name_' . $l} ?? '') . ' ' . ($user->{'last_name_' . $l} ?? '');
+                    $j->phone = $user->phone ?? '';
+                    $j->email = $user->email ?? '';
+                    $j->image_url = $user->image_url ?? '';
+                    return $j;
+                })->unique('id')->values();
+                $judges = $judges->map(function($judge) use ($getUsers) {
+                    $startups = $getUsers->where('user_id', $judge->id)
+                        ->map(fn($i) => $i->users)
+                        ->flatten()
+                        ->unique()
+                        ->filter()
+                        ->values();
+                    $judge->startups = $startups->pluck('id')->values();
+                    return $judge;
+                });
+                foreach ($judges as $jdx => $judge) {
+                    $judges[$jdx]->companies = collect([]);
+                    foreach ($judge->startups as $cid) {
+
+                        $_comment = '';
+                        $_approval = 'pending';
+
+                        $judge_comment = $comments->where('user_id', $judge->id)
+                            ->where('company_id', $cid)
+                            ->first();
+
+                        if($judge_comment) {
+                            $_comment = $judge_comment->value ?? '';
+                            $_approval = intval($judge_comment->is_approved) === 1
+                                ? 'approved'
+                                : (intval($judge_comment->is_approved) === 2 ? 'disapproved' : 'pending');
+                        }
+
+                        $_results = $results->where('company_id', $cid)
+                            ->where('user_id', $judge->id)
+                            ->values();
+
+                        $_company = new stdClass;
+                        $_company->id = $cid;
+                        $_company->status = $_results->count() > 0
+                            ? ($_results->where('status', 0)->count() > 0 ? 'Draft' : 'Published')
+                            : 'Not Evaluated';
+                        $_company->comment = $_comment;
+                        $_company->approval = $_approval;
+                        $_company->results = $_results;
+
+                        $judges[$jdx]->companies->push($_company);
+                    }
+                }
+                foreach ($companies as $cidx => $comp) {
+                    $avg = $judges
+                        ->filter(fn($j) => $j->companies->where('status', 'Published')->where('id', $comp->id)->isNotEmpty())
+                        ->avg(function($j) use ($comp) {
+                            $item = $j->companies->where('status', 'Published')->where('id', $comp->id)->first();
+                            return $item ? $item->results->sum(fn($r) => $r->score ?? 0) : null;
+                        });
+                    $companies[$cidx]->average_score = $avg ?? 0;
+                }
+                $stepsData->push([
+                    'step_id' => $step->id,
+                    'step_title' => $step->title,
+                    'companies' => $companies->map(function($c) { 
+                        return [
+                            'company_id' => $c->id,
+                            'average_score' => $c->average_score
+                        ];
+                    })->values(),
+                    'judges' => $judges->map(function($j) {
+                        return [
+                            'judge_id' => $j->id,
+                            'judge_name' => $j->name,
+                            'phone' => $j->phone,
+                            'email' => $j->email,
+                            'image_url' => $j->image_url,
+                            'evaluations' => $j->companies->map(function($c) {
+                                return [
+                                    'company_id' => $c->id,
+                                    'score' => $c->results->sum(fn($r) => $r->score ?? 0),
+                                    'status' => $c->status,
+                                    'comment' => $c->comment,
+                                    'approval' => $c->approval
+                                ];
+                            })->values()
+                        ];
+                    })->values()
+                ]);
+            }
+            $screeningData = $stepsData;
+
+
+
+        // return or view
+        //  dd($screeningData);
+
+
+                $almuni->screening = json_encode($screeningData);
+
+                    //Final Screening
+                $company_id = $company->id;
+                $cycle_id = $company->cycle;
+                $_steps = Step::where('cycle_id', $cycle_id)
+                    ->where('stype', 5)
+                    ->orderBy('arr')
+                    ->get();
+                $companies = Company::where('cycle', $cycle_id)->get();
+                $finalstepsData = collect();
+
+                $l = app()->getLocale();
+
+                foreach ($_steps as $step) {
+
+                    $finals = Finalscreening::where('step_id', $step->id)
+                        ->with(['company', 'company.users'])
+                        ->get()
+                        ->map(function($f) {
+                            $f->judgers_ids = array_map(fn($i) => intval($i), $f->judges);
+                            return $f;
+                        });
+
+                    $users_ids = $finals
+                        ->map(fn($f) => array_map(fn($i) => intval($i), $f->judges))
+                        ->flatten()
+                        ->unique()
+                        ->values();
+
+                    $judges = User::whereIn('id', $users_ids)
+                        ->get()
+                        ->map(function($user) use ($l) {
+                            $j = new stdClass;
+                            $j->id = $user->id ?? 0;
+                            $j->name = ($user->{'first_name_' . $l} ?? '') . ' ' . ($user->{'last_name_' . $l} ?? '');
+                            $j->phone = $user->phone ?? '';
+                            $j->email = $user->email ?? '';
+                            $j->image_url = $user->image_url ?? '';
+                            return $j;
+                        })->unique('id')->values();
+                    $judges = $judges->map(function($item) use ($finals) {
+                        $startups = $finals
+                            ->filter(fn($f) => in_array($item->id, $f->judgers_ids))
+                            ->values()
+                            ->map(fn($f) => $f?->company?->users)
+                            ->flatten()
+                            ->unique()
+                            ->filter(fn($i) => !is_null($i))
+                            ->values();
+
+                        $item->startups = $startups;
+                        return $item;
+                    });
+                    foreach ($judges as $idx => $judge) {
+                        $startup_ids = $judge->startups->pluck('id')->toArray();
+                        $get_companies = $companies->filter(fn($c) => $c->users->whereIn('id', $startup_ids)->count() > 0);
+                        $judges[$idx]->startups = $get_companies->pluck('id');
+                    }
+                    $judges = $judges->map(function($judge) use ($companies) {
+                        $judge->companies = collect([]);
+                        foreach ($judge->startups as $company_id) {
+                            $_company = new stdClass;
+                            $_company->id = $company_id;
+                            $_company->status = 'Not Evaluated';
+                            $_company->results = collect([]);
+                            $_company->comment = '';
+                            $_company->approval = 'pending';
+                            $judge->companies->push($_company);
+                        }
+                        return $judge;
+                    });
+                    $_companies = $companies->map(function($comp) use ($judges, $step) {
+                        $average_score = $judges
+                            ->filter(fn($j) => in_array($comp->id, $j->startups->toArray()))
+                            ->avg(fn($j) => $j->companies->where('id', $comp->id)->first()->results->sum(fn($r) => $r->score ?? 0));
+                        $comp->average_score = $average_score ?? 0;
+                        $comp->judges = $judges;
+                        $comp->company_step_id = $step->id;
+                        $comp->company_cycle_id = $step->cycle_id;
+                        return $comp;
+                    });
+                    $stepsData->push([
+                        'step_id' => $step->id,
+                        'step_title' => $step->title,
+                        'companies' => $_companies->map(fn($c) => [
+                            'company_id' => $c->id,
+                            'average_score' => $c->average_score
+                        ])->values(),
+                        'judges' => $judges->map(function($j) {
+                            return [
+                                'judge_id' => $j->id,
+                                'judge_name' => $j->name,
+                                'phone' => $j->phone,
+                                'email' => $j->email,
+                                'image_url' => $j->image_url,
+                                'evaluations' => $j->companies->map(fn($c) => [
+                                    'company_id' => $c->id,
+                                    'score' => $c->results->sum(fn($r) => $r->score ?? 0),
+                                    'status' => $c->status,
+                                    'comment' => $c->comment,
+                                    'approval' => $c->approval
+                                ])->values()
+                            ];
+                        })->values()
+                    ]);
+                }
+                $FinalscreeningData = $finalstepsData;
+
+                // dd($FinalscreeningData);
+                $almuni->final_screening = json_encode($FinalscreeningData);
+
+
+                 // Training
+                 $steps = Step::where('cycle_id', $company->cycledata->id)->get();
+                 
+                $startup_training = TrainingSession::whereIn('step_id', $steps->pluck('id'))
+                    ->get();
+                  
+                $trainings = [];
+                // dd($startup_training[3]->attendance);
+                // dd($startup_training[3]->course->title);
+                foreach ($startup_training as $training) {
+                    $trainings[] = [
+                        'ID' => $training->id,
+                        'title' => $training->title,
+                        'Trainer_course_ID' => $training->course->id ?? '',
+                        'trainer_course_name' => $training->course->title ?? '',
+                        'date' => $training->datetime->format('Y-m-d H:i') ?? '',
+                        'duration' => $training->duration,
+                        'step' => $training->step->title,
+                        'step_ID' => $training->step->id,
+                        'attendance' => $training->attendance->where('user_id', $company->user->id)->first() ? 'Attended' : 'Not Attended',
+                    ];
+                }
+
+                $almuni->training = json_encode($trainings);
+                    
+                $steps = Step::where('cycle_id', $company->cycledata->id)->get();
+                $startup_mentorship = MentorshipRequest::where('cycle_id', $company->cycledata->id)
+                ->where('approved', 'Yes')
+                ->where('user_id', $company->user->id)
+                ->get();
+                  
+                $mentorships = [];
+                // dd($startup_mentorship[3]);
+                // dd($startup_training[3]->course->title);
+                foreach ($startup_mentorship as $mentorship) {
+                    $mentorships[] = [
+                        'mentor_name' => $mentorship->mentor->first_name_en ." ". $mentorship->mentor->last_name_en,
+                        'mentor_ID' => $mentorship->mentor->id ?? '',
+                        // 'step_name' => $training->course->id ?? '',
+                        // 'step_ID' => $training->course->title ?? '',
+                        'date' => $mentorship->zoom_date->format('Y-m-d H:i') ?? '',
+                        'duration' => $mentorship->duration,
+                        'attended' => $mentorship->done == '1' ? 'Attended' : 'Not Attended',
+                        'rating' => $mentorship->rating,
+                        'comments' => $mentorship->rate_comment,
+                    ];
+                }
+
+                $almuni->mentorship = json_encode($mentorships);
+        
+
+                
+                $startup_milestones = Milestone::where('company_id', $company->id)
+                    ->get();
+                  
+                $milestones = [];
+                // dd($startup_mentorship[3]);
+                // dd($startup_training[3]->course->title);
+                foreach ($startup_milestones as $milestone) {
+                    $milestones[] = [
+                        'Milestone_title.' => $milestone->name,
+                        'Description' => $milestone->description?? '',
+                        'Due_date' => $milestone->created_at->format('Y-m-d H:i') ?? '',
+                        'Completion_percentage' => $milestone->completion_percentage,
+                        // 'Linked_deliverables' => $milestone->done == '1' ? 'Attended' : 'Not Attended',
+                        'download' => $milestone->documents,
+                    ];
+                }
+                // dd($milestones);
+                $almuni->milestones = json_encode($milestones);
+
+
+                // Mentor Tasks
+                $startup_MentorTasks = MentorshipTask::where('company_id', $company->id)->get();
+                $MentorTasks = [];
+                // dd($startup_mentorship[3]);
+                // dd($startup_training[3]->course->title);
+                foreach ($startup_MentorTasks as $MentorTask) {
+                    $MentorTasks[] = [
+                        'Task_ID' => $MentorTask->id ?? '',
+                        'Task_title' => $MentorTask->title ?? '',
+                        'Session_ID' => $MentorTask->mentorshipRequest->id ?? '',
+                        'Description' => $MentorTask->description ?? '',
+                        'Due_date' => $MentorTask->due_date ?? '',
+                        'Status' => $MentorTask->status ?? '',
+                        'Completion_date' => $MentorTask->status == 'completed' ? $MentorTask->date : '',
+                        'Assigned_mentor' => $MentorTask->mentor->first_name_en ." ". $MentorTask->mentor->last_name_en ?? '',
+                        'Who_created_task' => $MentorTask->mentor->first_name_en ." ". $MentorTask->mentor->last_name_en ?? '',
+                    ];
+                }
+                $almuni->tasks = json_encode($MentorTasks);
+
+                $startup_quizzes= Quizzes::where('organization_id', $company->cycledata->organization_id)->get();
+                $quizzes = [];
+                // dd($startup_quizzes);
+                // dd($startup_training[3]->course->title);
+                foreach ($startup_quizzes as $quizze) {
+
+                    $result = $quizze->results->first(); // ممكن يرجع null
+                    $user   = $result?->user;            // برضه ممكن يكون null
+
+                    $quizzes[] = [
+                        'Quiz_ID' => $quizze->id ?? '',
+                        'Quiz_title' => $quizze->title ?? '',
+                        'Date_completed' => $result?->ended_at
+                            ? $result->ended_at->format('Y-m-d H:i')
+                            : '',
+                        'founder_completed_quiz' => $user
+                            ? ($user->first_name_en . " " . $user->last_name_en)
+                            : '',
+                        'Score' => $result?->score ?? '',
+                        'Status' => $quizze->status ?? '',
+                    ];
+                }
+
+                
+                $almuni->quizzes = json_encode($quizzes);
+
+                $startup_surveys= Surveys::where('organization_id', $company->cycledata->organization_id)->get();
+                $surveys = [];
+                foreach ($startup_surveys as $survey) {
+                    $answers = $survey->responses
+                        ->flatMap(function ($res) {
+
+                            $decoded = json_decode($res->responses, true);
+
+                            return collect($decoded)->map(function ($item) {
+                                return [
+                                    'question' => $item['question'] ?? '',
+                                    'answer'   => $item['answer'] ?? '',
+                                ];
+                            });
+                        })
+                        ->filter()  
+                        ->values();
+                    $surveys[] = [
+                        'Survey_ID' => $survey->id ?? '',
+                        'Survey_title' => $survey->title ?? '',
+                        'Survey_answers' => $answers ?? '',
+                    ];
+                }
+                
+                $almuni->surveys = json_encode($surveys);
+
+                $startup_services= ServicesRequests::where('user_id', $company->user->id)->get();
+                $services = [];
+                
+                foreach ($startup_services as $service) {
+                    $services[] = [
+                        'Service_name' => $service->service->name_en ?? '',
+                        'Service_ID' => $service->service->id ?? '',
+                        'Description' => $service->service->description_en ?? '',
+                        'Price' => $service->service->price ?? '',
+                    ];
+                }
+               
+                $almuni->services = json_encode($services);
+
+                // $startup_formSubmissions= Formdata::where('user_id', $company->user->id)->get();
+                $formSubmissions = [];
+                $user = $company->user;
+                $l =  app()->getLocale();
+                $forms = DB::table('form_data as FD')
+                ->select([
+                    'FD.company_id as FD_company_id',
+                    'FD.user_id as FD_user_id',
+                    'FD.step_id as FD_step_id',
+                    'FD.question as FD_question',
+                    'FD.answer as FD_answer',
+                    'FD.created_at as FD_created_at',
+                    'FD.updated_at as FD_updated_at',
+                    'FD.deleted_at as FD_deleted_at',
+                    'C.name_en as C_name_en',
+                    'C.name_ar as C_name_ar',
+                    'C.id as C_id',
+                    DB::raw("CONCAT(U.first_name_en, ' ', U.last_name_en) as user_name_en"),
+                    DB::raw("CONCAT(U.first_name_ar, ' ', U.last_name_ar) as user_name_ar"),
+                    'U.id as U_id',
+                    'S.title as S_title',
+                    'S.id as S_id',
+                    'S.cycle_id as S_cycle_id',
+                    'CYC.title as CYC_title',
+                    'CYC.id as CYC_id',
+                    'CYC.organization_id as CYC_organization_id',
+                    'O.name_en as O_name_en',
+                    'O.name_ar as O_name_ar',
+                    'O.id as O_id'
+                ])
+                ->leftJoin('companies as C', 'C.id', '=', 'FD.company_id')
+                ->leftJoin('users as U', 'U.id', '=', 'FD.user_id')
+                ->leftJoin('steps as S', 'S.id', '=', 'FD.step_id')
+                ->leftJoin('cycles as CYC', 'CYC.id', '=', 'S.cycle_id')
+                ->leftJoin('organizations as O', 'O.id', '=', 'CYC.organization_id')
+                ->whereNull('FD.deleted_at')
+                ->where('FD.user_id', $company->user->id)
+                ->when($company->cycledata->organization_id != null, function ($query) use ($company) {
+                    return $query->where('CYC.organization_id', $company->cycledata->organization_id);
+                })
+                ->get();
+
+                $C = 1;
+                $grouped = $forms->groupBy('FD_step_id');
+                $data = $grouped->map(function ($group, $stepId) use ($l, &$C) {
+                    $first = $group->first();
+
+                    $item = new stdClass;
+                    $item->submission_id = $C++;
+                    $item->step_id = $stepId;
+                    $item->startup_name = $first->{'C_name_' . $l};
+                    $item->submitted_by = $group->pluck('user_name_' . $l)->unique()->implode(', ') ?? '';
+                    $item->step_name = $first->S_title;
+                    $item->program_name = $first->CYC_title;
+                    $item->organization_name = $first->O_name_en;
+                    $item->created_at = $first->FD_created_at;
+                    $item->answers = $group->map(function ($item) use ($l) {
+                        $value = $item->FD_answer;
+
+                        if( is_string( $value ) && (strpos($value, '/') !== false || strpos($value, '\\') !== false) )
+                        {
+                            $filename = basename($value);
+                            $value = [
+                                'type' => 'file',
+                                'path' => $value,
+                                'file_name' => $filename,
+                                'file_url' => asset($value),
+                            ];
+                        }
+
+                        $submission = new stdClass;
+                        $submission->user_id = $item->FD_user_id;
+                        $submission->name = $item->{'user_name_' . $l};
+                        $submission->label = trim( $item->FD_question );
+                        $submission->value = $value;
+                        $submission->created_at = $item->FD_created_at;
+                        return $submission;
+                    })->groupBy('user_id')->values();
+                    return $item;
+                })->values();
+                        // dd($data);
+                        
+                        foreach ($data as $item) {
+
+                            // كل answers عبارة عن Collection جوا Collection
+                            $answers = $item->answers->collapse(); // ده بيفك الـ nesting
+
+                            foreach ($answers as $answer) {
+
+                                // تجهيز الفيلد
+                                $fieldType = is_array($answer->value) ? 'file' : 'text';
+
+                                $formSubmissions[] = [
+                                    'Form_Title'      => $item->step_name,
+                                    'ID'              => $item->submission_id,
+                                    'step_title'      => $item->step_name,
+                                    'Step_ID'         => $item->step_id,
+                                    'Submission_Date' => $item->created_at,
+
+                                    'Field_Name'      => $answer->label,
+                                    'Field_Type'      => $fieldType,
+                                    'Submitted_Value' => is_array($answer->value) ? $answer->value['file_name'] : $answer->value,
+                                    'Attachment_Link' => is_array($answer->value) ? $answer->value['file_url'] : null,
+
+                                    'Form_Inputs' => [
+                                        'Field_Name'      => $answer->label,
+                                        'Field_Type'      => $fieldType,
+                                        'Submitted_Value' => is_array($answer->value) ? $answer->value['file_name'] : $answer->value,
+                                        'Attachment_Link' => is_array($answer->value) ? $answer->value['file_url'] : null,
+                                    ],
+                                ];
+                            }
+                        }
+             
+                $almuni->submitted_forms = json_encode($formSubmissions);
 
             $almuni->save();
-
-            $dattt = json_decode($almuni->basic_startup_information);
-            dd($dattt);
+           
+               $dattt = json_decode($almuni->screening);
+               dd($dattt);
         } catch (Exception $e) {
+            dd($e->getMessage());
             Log::error('Error deleting employee: ' . $e->getMessage());
             return response()->json([
                 'errors' => ['general' => ['An error occurred while deleting the employee.']]

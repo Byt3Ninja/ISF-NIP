@@ -60,4 +60,8 @@ class TrainingSession extends Model
     {
         return $this->hasMany(SessionRecording::class, 'session_id');
     }
+    public function attendance()
+    {
+        return $this->hasMany(SessionAttendance::class, 'session_id');
+    }
 }

@@ -31,7 +31,6 @@
 <!-- Content wrapper -->
 <div class="content-wrapper">
 	<div class="container-xxl flex-grow-1 container-p-y">
-		
 		@if( $_user->hasAnyRole('Registered', 'Admin') )
 		@php
 		
@@ -199,8 +198,9 @@
 						@else
 						<div class="widget-todo-title-wrapper d-flex justify-content-between align-items-center mb-75">
 							<div class="widget-todo-title-area d-flex align-items-center">
-								<span class="widget-todo-title ml-50"> <i class="bx bxs-bell-ring text-danger"></i> {{ __('dashboard.No
-									services added') }}.</span>
+								<span class="widget-todo-title ml-50"> <i class="bx bxs-bell-ring text-danger"></i> 
+								{{ __('dashboard.No services added') }}.
+								</span>
 							</div>
 						</div>
 						@endif
@@ -589,7 +589,15 @@
 													</td>
 													<td> {{ $myFinal->datetime }} <br>({{ $myFinal->duration }}M) </td>
 													<td> {{ $myFinal->datetime < now() ? __('Yes') : __('No') }} </td>
-													<td> <a href="{{ $myFinal->join_url }}" target="_blank">({{__('dashboard.Join now')}})</a>
+													<td> 
+														@php
+															$endTime = \Carbon\Carbon::parse($myFinal->datetime)->addMinutes($myFinal->duration);
+														@endphp
+														@if(now() > $endTime)
+															<span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
+														@else
+															<a href="{{ $myFinal->join_url }}" target="_blank">({{__('dashboard.Join now')}})</a>
+														@endif
 													</td>
 												</tr>
 											</tbody>
@@ -777,7 +785,7 @@
 																</a>
 															</span>
 															@else
-																<span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
+																<span class="text-danger"> <i class="ti ti-alarm"></i> {{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }} </span>
 															@endif
 															@else 
 																<span class="text-warning"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }} </span>
@@ -881,77 +889,69 @@
 
 			@if( array_intersect(['dashboard.widgets_tables_my_current_schedule_view'], $permissions) )
 			<div class="col-12">
-				<div class="card mt-10">
+				<div class="card">
 					<section>
 						<div class="row">
 							<div class="col-md-12">
 								<div class="card">
-									<div class="card-header mb-4">
+									<div class="card-header">
 										<div class="d-flex justify-content-between align-items-center">
-											<div class="d-flex align-items-center">
-												<i class="ti ti-calendar-plus ti-24px"></i>
-												<span class="mx-2">{{ __("dashboard.My current schedule") }}</span>
-											</div>
-											@if( $_user->ableTo('mentors.settings_modify', $permissions) )
-											<button id="addSchedule"
-												onclick="this.querySelector('.spinner-border').classList.remove('d-none'); mentorSchedule(1, undefined, 0)"
-												type="button" class="btn btn-sm btn-label-primary">
-												{{ __('dashboard.Schedule') }}
-												<i class="ti ti-calendar ms-2"></i>
-												<span class="spinner-border spinner-border-sm d-none ms-2" role="status"
-													aria-hidden="true"></span>
-											</button>
+											<h5 class="card-title mb-0">
+												{{ __("mentor.my_availability_slots") }}
+											</h5>
+
+											@if ($_user->ableTo('slots.index', $permissions) )
+												<a href="{{ route('slots.index') }}" class="btn btn-primary">
+													<i class="ti ti-calendar-cog me-2"></i>
+													{{ __("mentor.manage_availability") }}
+												</a>
 											@endif
 										</div>
 									</div>
-									<div class="card-body">
-										<div class="table-responsive">
-											<table class="table">
-												<thead>
-													<th> {{ '#' }} </th>
-													<th> {{ __('dashboard.Days') }} </th>
-													<th> {{ __('dashboard.Time') }} </th>
-													<th> {{ __('dashboard.Notes') }} </th>
-													<th> {{ __('dashboard.Actions') }} </th>
-												</thead>
-												<tbody>
-													@foreach( $my_schedules as $key => $schedule )
-													<tr class="text-{{ $schedule->active ? 'primary' : 'danger' }}">
-														<td> {{ $loop->iteration }} </td>
-														@php
-														$days = str_replace('"', '', $schedule->days);
-														@endphp
-														<td> {{ __('admin.'.$days) }} </td>
-														<td> {{ __('dashboard.from') }} {{ $schedule->t_from }} {{ __('dashboard.to') }} {{
-															$schedule->t_to }} </td>
-														<td> {{ $schedule->notes }} </td>
-														<td>
-															<div class="dropdown">
-																<button type="button" class="btn p-0 dropdown-toggle hide-arrow"
-																	data-bs-toggle="dropdown"> <i class="ti ti-dots-vertical"></i> </button>
-																<div class="dropdown-menu">
-																	{{-- <button class="dropdown-item" onclick="mentorSchedule(1, undefined, 0)" type="button"> <i
-																			class="ti ti-pencil me-2"></i> Edit </button> --}}
-																	{{-- <button class="dropdown-item"
-																		onclick="mentorSchedule(2, {{ $schedule->id }}, {{ $schedule->active }})" type="button">
-																		<i class="ti ti-{{ $schedule->active ? 'eye' : 'eye-off' }} me-2"></i>
-																		{{ $schedule->active ? 'Deactivate' : 'Activate' }}
-																	</button> --}}
-																	<button onclick="mentorSchedule(3,{{ $schedule->id }},0)" type="button"
-																		class="dropdown-item"><i class="ti ti-trash me-2"></i> {{ __('admin.Delete') }}</button>
-																</div>
-															</div>
-														</td>
-													</tr>
-													@endforeach
-													@if( $my_schedules->count() == 0 )
-													<tr>
-														<td class="text-center" colspan="5">{{ __('cycles.No data available in table') }}</td>
-													</tr>
-													@endif
-												</tbody>
-											</table>
-										</div>
+									<div class="card-datatable table-responsive">
+										<table class="table">
+											<thead class="table-light">
+												<th> {{ __('mentor.days_date') }} </th>
+												<th> {{ __('dashboard.Weekly') }} </th>
+												<th> {{ __('mentor.start_time') }} </th>
+												<th> {{ __('mentor.end_time') }} </th>
+												<th> {{ __('mentor.session_type') }} </th>
+												<th> {{ __('dashboard.Actions') }} </th>
+											</thead>
+											<tbody>
+												@foreach( $my_schedules as $key => $schedule )
+												<tr>
+													<td> {{ $schedule['weekly'] ? $schedule['weekday'] : $schedule['date'] }} </td>
+													<td> 
+														<span class="badge bg-label-{{ $schedule['weekly'] ? 'success' : 'warning' }}">
+															{{ $schedule['weekly'] ? __('Yes') : __('No') }}
+														</span>
+													</td>
+													<td> {{ $schedule['start_time'] }} </td>
+													<td> {{ $schedule['end_time'] }} </td>
+													<td>
+														<span class="badge bg-label-{{ $schedule['session_type'] == 'Online' ? 'info' : ($schedule['session_type'] == 'Offline' ? 'secondary' : 'primary') }}">
+															{{ $schedule['session_type'] == 'Online' ? __('mentor.online') : ($schedule['session_type'] == 'Offline' ? __('mentor.offline') : __('mentor.both')) }}
+														</span>
+													</td>
+													<td>
+														<button 
+															type="button"
+															class="btn btn-sm btn-label-danger delete-slot"
+															data-value="{{ $schedule['id'] ?? 0 }}"
+														>
+															<i class="ti ti-trash ti-16px"></i>
+														</button>
+													</td>
+												</tr>
+												@endforeach
+												@if( $my_schedules->count() == 0 )
+												<tr>
+													<td class="text-center" colspan="6">{{ __('cycles.No data available in table') }}</td>
+												</tr>
+												@endif
+											</tbody>
+										</table>
 									</div>
 								</div>
 							</div>
@@ -968,87 +968,84 @@
 						<div class="row">
 							<div class="col-md-12">
 								<div class="card">
-									<div class="card-header mb-4">
-										<h5 class="card-title align-items-center">
-											<i class="ti ti-calendar-stats ti-24px"></i>
-											<span class="mx-2">{{ __("dashboard.My next mentorship sessions") }}</span>
+									<div class="card-header">
+										<h5 class="card-title mb-0">
+											{{ __("dashboard.My next mentorship sessions") }}
 										</h5>
 									</div>
-									<div class="card-body">
-										<div class="table-responsive">
-											<table class="table">
-												<thead>
-													<th> {{ '#' }} </th>
-													<th> {{ __('dashboard.Company') }} </th>
-													<th> {{ __('dashboard.User') }} </th>
-													<th> {{ __('dashboard.Date') }} </th>
-													<th> {{ __('dashboard.Admin Notes') }} </th>
-													<th> {{ __('dashboard.Meeting Link') }} </th>
-												</thead>
-												<tbody>
-													@foreach( $upcoming_sessions as $key => $session )
-													<tr>
-														<td> {{ $loop->iteration }} </td>
-														<td>
-															@if( $_user->ableTo('company.profile_view', $permissions) )<a class="text-dark"
-																href="/dashboard/companyProfile/{{ $session->user->company->id }}">@endif
-																<img src="{{ $session->user->company->logo_url }}" alt="avatar" class="rounded-circle"
-																	height="40" width="40">
-																<span class="fw-medium"> {{ $session->user->company->name }}</span>
-																@if( $_user->ableTo('company.profile_view', $permissions) )</a>@endif
-														</td>
-														<td>
-															@if( $_user->ableTo('users.edit', $permissions) )<a
-																class="text-dark d-flex align-items-center gap-2"
-																href="/dashboard/users/{{ $session->user->id }}/edit">@endif
-																<img src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle"
-																	height="35" width="35" style="border: 2px solid #ddd;">
-																<div class="media-body">
-																	<h6 class="media-heading mb-0" style="font-size: 14px;">{{ $session->user->name }}
-																	</h6>
-																	<span class="font-small-2" style="font-size:11px;">{{ $session->user->title }}</span>
-																</div>
-																@if( $_user->ableTo('users.edit', $permissions) )
-															</a>@endif
-														</td>
-														<td> {{ FormatDate($session->zoom_date, 'Y-m-d H:i A') }} ({{ $session->period }}M) </td>
-														<td> {{ $session->admin_comment ?? '...' }} </td>
-														<td>
-															@php
-																$now = date('Y-m-d H:i');
-																$start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
-																$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+' . $session->period .' minutes'));
-															@endphp
-															
-															@if( $now >= $start_time )
-																@if( $now <= $end_time )
-																<a href="{{ $session->start_url }}" target="_blank">
-																	<button title="Start Meeting" type="button" data-value="{{ $session->id }}" type="button" class="btn btn-label-primary rounded">
-																		<i class="ti ti-link"></i> {{ __('admin.Join Meeting') }}
-																	</button>
-																</a>
-																@if( !empty( $session->passcode ) )
-																	 | <button title="Show Passcode" type="button" data-passcode="{{ $session->passcode }}" type="button" class="btn btn-label-warning show-passcode rounded">
-																		<i class="ti ti-key"></i>
-																	</button>
-																@endif
-																@else
-																	<span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
-																@endif
-															@else
-																<i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }}
+									<div class="card-datatable table-responsive">
+										<table class="table">
+											<thead class="table-light">
+												<th> {{ '#' }} </th>
+												<th> {{ __('dashboard.Company') }} </th>
+												<th> {{ __('dashboard.User') }} </th>
+												<th> {{ __('dashboard.Date') }} </th>
+												<th> {{ __('dashboard.Admin Notes') }} </th>
+												<th> {{ __('dashboard.Meeting Link') }} </th>
+											</thead>
+											<tbody>
+												@foreach( $upcoming_sessions as $key => $session )
+												<tr>
+													<td> {{ $loop->iteration }} </td>
+													<td>
+														@if( $_user->ableTo('company.profile_view', $permissions) )<a class="text-dark"
+															href="/dashboard/companyProfile/{{ $session->user->company->id }}">@endif
+															<img src="{{ $session->user->company->logo_url }}" alt="avatar" class="rounded-circle"
+																height="40" width="40">
+															<span class="fw-medium"> {{ $session->user->company->name }}</span>
+															@if( $_user->ableTo('company.profile_view', $permissions) )</a>@endif
+													</td>
+													<td>
+														@if( $_user->ableTo('users.edit', $permissions) )<a
+															class="text-dark d-flex align-items-center gap-2"
+															href="/dashboard/users/{{ $session->user->id }}/edit">@endif
+															<img src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle"
+																height="35" width="35" style="border: 2px solid #ddd;">
+															<div class="media-body">
+																<h6 class="media-heading mb-0" style="font-size: 14px;">{{ $session->user->name }}
+																</h6>
+																<span class="font-small-2" style="font-size:11px;">{{ $session->user->title }}</span>
+															</div>
+															@if( $_user->ableTo('users.edit', $permissions) )
+														</a>@endif
+													</td>
+													<td> {{ FormatDate($session->zoom_date, 'Y-m-d H:i A') }} ({{ $session->period }}M) </td>
+													<td> {{ $session->admin_comment ?? '...' }} </td>
+													<td>
+														@php
+															$now = date('Y-m-d H:i');
+															$start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
+															$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+' . $session->period .' minutes'));
+														@endphp
+														
+														@if( $now >= $start_time )
+															@if( $now <= $end_time )
+															<a href="{{ $session->start_url }}" target="_blank">
+																<button title="Start Meeting" type="button" data-value="{{ $session->id }}" type="button" class="btn btn-label-primary rounded">
+																	<i class="ti ti-link"></i> {{ __('admin.Join Meeting') }}
+																</button>
+															</a>
+															@if( !empty( $session->passcode ) )
+																 | <button title="Show Passcode" type="button" data-passcode="{{ $session->passcode }}" type="button" class="btn btn-label-warning show-passcode rounded">
+																	<i class="ti ti-key"></i>
+																</button>
 															@endif
-														</td>
-													</tr>
-													@endforeach
-													@if( $upcoming_sessions->count() == 0 )
-													<tr>
-														<td class="text-center" colspan="6">{{ __('cycles.No data available in table') }}</td>
-													</tr>
-													@endif
-												</tbody>
-											</table>
-										</div>
+															@else
+																<span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
+															@endif
+														@else
+															<i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }}
+														@endif
+													</td>
+												</tr>
+												@endforeach
+												@if( $upcoming_sessions->count() == 0 )
+												<tr>
+													<td class="text-center" colspan="6">{{ __('cycles.No data available in table') }}</td>
+												</tr>
+												@endif
+											</tbody>
+										</table>
 									</div>
 								</div>
 							</div>
@@ -1296,8 +1293,7 @@
 		</div>
 		
 		<div class="row mt-6">
-			@if( $_user->ableTo('mentorship.sessions_Rate', $permissions))
-			@if( $notrated_mens )
+			@if( $_user->ableTo('mentorship.sessions_Rate', $permissions) && $notrated_mens)
 			<div class="col-12">
 				<div class="card shadow-sm">
 					<div class="card-header py-3 d-flex justify-content-between align-items-center">
@@ -1382,6 +1378,70 @@
 				</div>
 			</div>
 			@endif
+
+			@if( $_user->ableTo('services.rate', $permissions) && $unrated_services_requests->count() > 0 )
+			<div class="col-12 my-10">
+				<div class="card shadow-sm">
+					<div class="card-header py-3 d-flex justify-content-between align-items-center">
+						<h5 class="card-title mb-0">
+							{{ __('dashboard.Rate') . ' ' . __('dashboard.service') }} 
+						</h5>
+					</div>
+					<div class="card-body p-4">
+						<div class="accordion stick-top accordion-custom-button" id="rateServicesAccordion">
+							@foreach($unrated_services_requests as $index => $service_request)
+								<div class="accordion-item">
+									<h2 class="accordion-header">
+										<button class="accordion-button {{ $loop->first ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $index }}" aria-expanded="{{ $loop->first ? 'true' : 'false' }}" aria-controls="collapse{{ $index }}">
+											{{ $service_request->service->name }} By {{ $service_request->provider->name }}
+										</button>
+									</h2>
+									<div id="collapse{{ $index }}" class="accordion-collapse collapse {{ $loop->first ? 'show' : '' }}" data-bs-parent="#rateServicesAccordion">
+										<div class="accordion-body pt-4">
+											<form method="POST" action="/dashboard/directory/{{ $service_request->id }}/rate" enctype="multipart/form-data" autocomplete="off">
+												@csrf
+												<div class="form-group mb-4 row">
+													<div class="col-9">
+														{{ __('dashboard.Your request was in') }}
+													</div>
+													<div class="col-3 text-end">
+														<strong> {{ $service_request->date_time }} </strong>
+													</div>
+												</div>
+
+												<fieldset class="form-group mb-4">
+													<label class="form-label" for="is_service_done_{{ $service_request->id }}"> {{ __('dashboard.Did you get this service?') }} </label>
+													<select class="select2 form-control" required id="is_service_done_{{ $service_request->id }}" name="is_service_done_{{ $service_request->id }}">
+														<option value="Yes">{{ __('admin.Yes') }}</option>
+														<option value="No">{{ __('admin.No') }}</option>
+													</select>
+												</fieldset>
+
+												<fieldset class="form-group mb-4">
+													<label class="form-label" for="service_rate_{{ $service_request->id }}"> {{ __('dashboard.Rate from 1 star "bad" to 5 stars "best"') }} </label>
+													<input type="hidden" name="service_rate_{{ $service_request->id }}" value="0" id="service_rate_{{ $service_request->id }}">
+													<div class="full-services-star-ratings" data-element="{{ $service_request->id }}" data-rateyo-full-star="true"></div>
+												</fieldset>
+
+												<fieldset class="form-group mb-4">
+													<label class="form-label" for="service_comment_{{ $service_request->id }}"> {{ __('dashboard.Your opinion important kindly write any notes about this service') }} </label>
+													<textarea class="form-control" id="service_comment_{{ $service_request->id }}" name='service_comment_{{ $service_request->id }}' rows="4" required placeholder="{{__('dashboard.Write your notes here')}}" ></textarea>
+												</fieldset>
+
+												<div class="row mt-4">
+													<div class="col-12 text-end">
+														<button type="submit" class="btn btn-primary ml-1"> {{ __('dashboard.Submit') }} </button>
+													</div>
+												</div>
+											</form>
+										</div>
+									</div>
+								</div>
+							@endforeach
+						</div>
+					</div>
+				</div>
+			</div>
 			@endif
 		</div>
 	</div>
@@ -1564,204 +1624,203 @@ document.addEventListener('DOMContentLoaded', function() {
 @if( array_intersect(['dashboard.widgets_tables_my_current_schedule_view'], $permissions) )
 	<script src="/vuexy/assets/js/mentor-schedule.js"></script>
 @endif
-<script>
-window.handleJoinClick = function(button) {
-    const cycleId = button.getAttribute('data-cycle-id');
-    const hasPreRequests = button.getAttribute('data-has-pre');
-    const joinUrl = button.getAttribute('data-join-url');
-    const preRequests = JSON.parse(button.getAttribute('data-pre-requests') || '[]');
+	<script>
+		window.handleJoinClick = function(button) {
+			const cycleId = button.getAttribute('data-cycle-id');
+			const hasPreRequests = button.getAttribute('data-has-pre');
+			const joinUrl = button.getAttribute('data-join-url');
+			const preRequests = JSON.parse(button.getAttribute('data-pre-requests') || '[]');
 
-    if (hasPreRequests === 'true') {
-        // Populate modal
-        const list = document.getElementById('prerequisitesList');
-        list.innerHTML = '';
-        preRequests.forEach(pr => {
-            const li = document.createElement('li');
-            li.className = 'list-group-item d-flex align-items-center';
-            li.innerHTML = `
-                <i class="ti ti-circle-check me-2 text-warning"></i>
-                <a href="${pr.url}?action=complete-profile" target="_blank" class="text-decoration-none flex-grow-1">${pr.label}</a>
-            `;
-            list.appendChild(li);
-        });
+			if (hasPreRequests === 'true') {
+				// Populate modal
+				const list = document.getElementById('prerequisitesList');
+				list.innerHTML = '';
+				preRequests.forEach(pr => {
+					const li = document.createElement('li');
+					li.className = 'list-group-item d-flex align-items-center';
+					li.innerHTML = `
+						<i class="ti ti-circle-check me-2 text-warning"></i>
+						<a href="${pr.url}?action=complete-profile" target="_blank" class="text-decoration-none flex-grow-1">${pr.label}</a>
+					`;
+					list.appendChild(li);
+				});
 
-        // Set buttons
-        document.getElementById('completePrerequisitesBtn').onclick = function() {
-            if (preRequests.length > 0) {
-                const firstReq = preRequests[0];
-                if (firstReq.action === 'complete-profile') {
-                    window.location.href = firstReq.url + '?action=complete-profile';
-                } else {
-                    localStorage.setItem('prerequisitesOpened', 'true');
-                    window.open(`${firstReq.url}?action=complete-profile`, '_blank');
-                }
-            }
-            $('#prerequisitesModal').modal('hide');
-        };
+				// Set buttons
+				document.getElementById('completePrerequisitesBtn').onclick = function() {
+					if (preRequests.length > 0) {
+						const firstReq = preRequests[0];
+						if (firstReq.action === 'complete-profile') {
+							window.location.href = firstReq.url + '?action=complete-profile';
+						} else {
+							localStorage.setItem('prerequisitesOpened', 'true');
+							window.open(`${firstReq.url}?action=complete-profile`, '_blank');
+						}
+					}
+					$('#prerequisitesModal').modal('hide');
+				};
 
-        // Show modal
-        $('#prerequisitesModal').modal('show');
-    } else {
-        window.location.href = joinUrl;
-    }
-}
-
-// Check if page should refresh when user returns from completing prerequisites
-window.addEventListener('focus', function() {
-    if (localStorage.getItem('prerequisitesOpened') === 'true') {
-        localStorage.removeItem('prerequisitesOpened');
-        // Refresh the page to update prerequisite status
-        window.location.reload();
-    }
-});
-
-// Real-time completion status checking
-let completionCheckInterval;
-
-function startCompletionStatusCheck() {
-    // Check every 5 seconds to reduce API calls
-    completionCheckInterval = setInterval(function() {
-        fetch('{{ route('cycles.completion_status_check') }}', {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            updateUIWithCompletionStatus(data);
-        })
-        .catch(error => {
-            console.log('Error checking completion status:', error);
-        });
-    }, 5000); // Check every 5 seconds to reduce API calls
-}
-
-function updateUIWithCompletionStatus(data) {
-    const hasPreRequests = data.has_pre_requests;
-    const preRequests = data.pre_requests || [];
-		
-    // Find all join buttons
-    const joinButtons = document.querySelectorAll('button[onclick*="handleJoinClick"]');
-    if (joinButtons.length === 0) {
-        console.log('No join buttons found');
-        return;
-    }
-
-    // Update each button appearance and text
-    joinButtons.forEach(joinButton => {
-			joinButton.className = 'btn btn-primary';
-			joinButton.innerHTML = '<span class="me-2">{{ __('dashboard.Join now') }}</span><i class="ti ti-arrows-join"></i>';
-  
-			// Update button data attributes
-			joinButton.setAttribute('data-has-pre', hasPreRequests ? 'true' : 'false');
-			joinButton.setAttribute('data-pre-requests', JSON.stringify(preRequests.map(pr => ({
-					url: `${pr.url}?action=complete-profile`,
-					label: pr.label,
-			}))));
-	});
-
-    // Find all prerequisites alerts
-    const alertDivs = document.querySelectorAll('.alert.alert-info');
-    alertDivs.forEach(alertDiv => {
-        if (hasPreRequests) {
-            // Update the alert content
-            const listElement = alertDiv.querySelector('.list-unstyled');
-            if (listElement) {
-                listElement.innerHTML = '';
-                preRequests.forEach(pr => {
-                    const li = document.createElement('li');
-                    li.className = 'pre-request-item';
-                    li.innerHTML = `
-                        <a href="${pr.url}?action=complete-profile" class="btn btn-sm btn-outline-info d-flex align-items-center gap-2" role="button" aria-label="${pr.label}">
-                            <i class="ti ti-external-link"></i>
-                            <span>${pr.label}</span>
-                        </a>
-                    `;
-                    listElement.appendChild(li);
-                });
-            }
-            alertDiv.style.display = 'block';
-        } else {
-            // Hide the alert if no prerequisites
-            alertDiv.style.display = 'none';
-        }
-    });
-}
-
-// Start checking when page loads
-@if(isset($pollingNeeded) && $pollingNeeded)
-document.addEventListener('DOMContentLoaded', function() {
-    startCompletionStatusCheck();
-});
-@endif
-</script>
-<script>
-	// Initialize DataTable with pagination configuration
-    $(document).on('click', '.show-passcode', function(e) {
-      e.preventDefault();
-      let passcode = $(this).data('passcode');
-      alertify.defaults.transition = 'zoom';
-      alertify.defaults.theme.ok = 'btn btn-sm btn-danger';
-      alertify.defaults.theme.cancel = 'btn btn-sm btn-info';
-      alertify.defaults.theme.input = 'form-control';
-
-      alertify.alert('Meeting Passcode', `The passcode for this meeting is: <strong>${passcode}</strong>`, function() {});
-    });
-	$(document).ready(function() {
-		$("#ratingsTable").DataTable({
-			"pageLength": 5,
-			"lengthMenu": [5, 10, 25, 50],
-			"searching": true,
-			"ordering": true,
-			"info": true,
-			"responsive": true,
-			@if( $l == 'ar' )
-			"language": {
-				"sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
-				"sLoadingRecords": "جارٍ التحميل...", 
-				"sProcessing": "جارٍ التحميل...",
-				"sLengthMenu": "أظهر _MENU_ مدخلات", 
-				"sZeroRecords": "لم يعثر على أية سجلات",
-				"sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-				"sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل", 
-				"sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-				"sInfoPostFix": "", 
-				"sSearch": "ابحث:", 
-				"sUrl": "",
-				"oPaginate": {"sFirst": "الأول", "sPrevious": "السابق", "sNext": "التالي", "sLast": "الأخير"},
-				"oAria": {"sSortAscending": ": تفعيل لترتيب العمود تصاعدياً", "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"}
+				// Show modal
+				$('#prerequisitesModal').modal('show');
+			} else {
+				window.location.href = joinUrl;
 			}
-			@endif
-		});
-	});
-</script>
-<script>
-	$(document).ready(function() {
-		var today = new Date().toISOString().split('T')[0]; // الحصول على تاريخ اليوم بصيغة yyyy-mm-dd
-		$('#dfrom, #dto').datepicker({
-			format: 'yyyy-mm-dd',
-			autoclose: true,
-			todayHighlight: true,
+		}
+
+		// Check if page should refresh when user returns from completing prerequisites
+		window.addEventListener('focus', function() {
+			if (localStorage.getItem('prerequisitesOpened') === 'true') {
+				localStorage.removeItem('prerequisitesOpened');
+				// Refresh the page to update prerequisite status
+				window.location.reload();
+			}
 		});
 
+		// Real-time completion status checking
+		let completionCheckInterval;
+
+		function startCompletionStatusCheck() {
+			// Check every 5 seconds to reduce API calls
+			completionCheckInterval = setInterval(function() {
+				fetch('{{ route('cycles.completion_status_check') }}', {
+					method: 'GET',
+					headers: {
+						'X-Requested-With': 'XMLHttpRequest',
+						'Content-Type': 'application/json',
+						'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+					}
+				})
+				.then(response => response.json())
+				.then(data => {
+					updateUIWithCompletionStatus(data);
+				})
+				.catch(error => {
+					console.log('Error checking completion status:', error);
+				});
+			}, 5000); // Check every 5 seconds to reduce API calls
+		}
+
+		function updateUIWithCompletionStatus(data) {
+			const hasPreRequests = data.has_pre_requests;
+			const preRequests = data.pre_requests || [];
+				
+			// Find all join buttons
+			const joinButtons = document.querySelectorAll('button[onclick*="handleJoinClick"]');
+			if (joinButtons.length === 0) {
+				console.log('No join buttons found');
+				return;
+			}
+
+			// Update each button appearance and text
+			joinButtons.forEach(joinButton => {
+					joinButton.className = 'btn btn-primary';
+					joinButton.innerHTML = '<span class="me-2">{{ __('dashboard.Join now') }}</span><i class="ti ti-arrows-join"></i>';
 		
-		$('.DatePicker').datepicker({
-			format: 'yyyy-m-d H:i',
-			onGenerate: function( ct ) { jQuery(this).find('.xdsoft_date').toggleClass('xdsoft_disabled'); },
-			autoclose: true,
-			todayHighlight: true,
-			startDate: today,
-			maxDate: '{{date('Y/m/d',strtotime("-1 days"))}}',
-			timepicker: true
+					// Update button data attributes
+					joinButton.setAttribute('data-has-pre', hasPreRequests ? 'true' : 'false');
+					joinButton.setAttribute('data-pre-requests', JSON.stringify(preRequests.map(pr => ({
+							url: `${pr.url}?action=complete-profile`,
+							label: pr.label,
+					}))));
+			});
+
+			// Find all prerequisites alerts
+			const alertDivs = document.querySelectorAll('.alert.alert-info');
+			alertDivs.forEach(alertDiv => {
+				if (hasPreRequests) {
+					// Update the alert content
+					const listElement = alertDiv.querySelector('.list-unstyled');
+					if (listElement) {
+						listElement.innerHTML = '';
+						preRequests.forEach(pr => {
+							const li = document.createElement('li');
+							li.className = 'pre-request-item';
+							li.innerHTML = `
+								<a href="${pr.url}?action=complete-profile" class="btn btn-sm btn-outline-info d-flex align-items-center gap-2" role="button" aria-label="${pr.label}">
+									<i class="ti ti-external-link"></i>
+									<span>${pr.label}</span>
+								</a>
+							`;
+							listElement.appendChild(li);
+						});
+					}
+					alertDiv.style.display = 'block';
+				} else {
+					// Hide the alert if no prerequisites
+					alertDiv.style.display = 'none';
+				}
+			});
+		}
+
+		// Start checking when page loads
+		@if(isset($pollingNeeded) && $pollingNeeded)
+		document.addEventListener('DOMContentLoaded', function() {
+			startCompletionStatusCheck();
+		});
+		@endif
+	</script>
+	<script>
+		// Initialize DataTable with pagination configuration
+		$(document).on('click', '.show-passcode', function(e) {
+		e.preventDefault();
+		let passcode = $(this).data('passcode');
+		alertify.defaults.transition = 'zoom';
+		alertify.defaults.theme.ok = 'btn btn-sm btn-danger';
+		alertify.defaults.theme.cancel = 'btn btn-sm btn-info';
+		alertify.defaults.theme.input = 'form-control';
+
+		alertify.alert('Meeting Passcode', `The passcode for this meeting is: <strong>${passcode}</strong>`, function() {});
 		});
 
+		$(document).ready(function() {
+			$("#ratingsTable").DataTable({
+				"pageLength": 5,
+				"lengthMenu": [5, 10, 25, 50],
+				"searching": true,
+				"ordering": true,
+				"info": true,
+				"responsive": true,
+				@if( $l == 'ar' )
+				"language": {
+					"sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
+					"sLoadingRecords": "جارٍ التحميل...", 
+					"sProcessing": "جارٍ التحميل...",
+					"sLengthMenu": "أظهر _MENU_ مدخلات", 
+					"sZeroRecords": "لم يعثر على أية سجلات",
+					"sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+					"sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل", 
+					"sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+					"sInfoPostFix": "", 
+					"sSearch": "ابحث:", 
+					"sUrl": "",
+					"oPaginate": {"sFirst": "الأول", "sPrevious": "السابق", "sNext": "التالي", "sLast": "الأخير"},
+					"oAria": {"sSortAscending": ": تفعيل لترتيب العمود تصاعدياً", "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"}
+				}
+				@endif
+			});
 		});
-</script>
-<script>
-	// User distribution by country
+	</script>
+	<script>
+		$(document).ready(function() {
+			var today = new Date().toISOString().split('T')[0]; // الحصول على تاريخ اليوم بصيغة yyyy-mm-dd
+			$('#dfrom, #dto').datepicker({
+				format: 'yyyy-mm-dd',
+				autoclose: true,
+				todayHighlight: true,
+			});
+
+			$('.DatePicker').datepicker({
+				format: 'yyyy-m-d H:i',
+				onGenerate: function( ct ) { jQuery(this).find('.xdsoft_date').toggleClass('xdsoft_disabled'); },
+				autoclose: true,
+				todayHighlight: true,
+				startDate: today,
+				maxDate: '{{date('Y/m/d',strtotime("-1 days"))}}',
+				timepicker: true
+			});
+		});
+	</script>
+	<script>
+		// User distribution by country
 		const userDistributionData = @json($countries);
 
 		// Sector Breakdown Chart Data
@@ -1812,15 +1871,15 @@ document.addEventListener('DOMContentLoaded', function() {
 		const cyclesStartupName = '';
 		const cyclesStartupLabels = null;
 		const cyclesStartupData = null;
-</script>
-<script src="/app-assets/vendors/js/extensions/jquery.rateyo.min.js"></script>
-<script src="/vuexy/assets/js/app-admin-dashboard.js"></script>
-<script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
-<script src="/vuexy/assets/js/charts-apex.js"></script>
-<script src="/vuexy/assets/js/charts-chartjs.js"></script>
-<script src="/vuexy/assets/js/mentorship-session.js"></script>
-<script>
-	function redirectWithDays(showValue) {
+	</script>
+	<script src="/app-assets/vendors/js/extensions/jquery.rateyo.min.js"></script>
+	<script src="/vuexy/assets/js/app-admin-dashboard.js"></script>
+	<script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
+	<script src="/vuexy/assets/js/charts-apex.js"></script>
+	<script src="/vuexy/assets/js/charts-chartjs.js"></script>
+	<script src="/vuexy/assets/js/mentorship-session.js"></script>
+	<script>
+		function redirectWithDays(showValue) {
 			// الحصول على قيم التواريخ
 			const forteendays = document.getElementById('forteenDays').value;
 			const sevendays = document.getElementById('sevenDays').value;
@@ -1838,10 +1897,19 @@ document.addEventListener('DOMContentLoaded', function() {
 			var instance = fullStar.rateYo({rtl: isRtl});
 			// Rating onSet Event
 			if( instance.length ) { instance.rateYo({rtl: isRtl}).on('rateyo.set', function (e, data) { $('#rate').val(data.rating); }); }
+
+			var fullServiceStar = $('.full-services-star-ratings');
+			fullServiceStar.each(function (index, oneInstance) {
+				var oneServiceInstance = $(oneInstance).rateYo({rtl: isRtl});
+				if( oneServiceInstance.length )
+				{
+					oneServiceInstance.rateYo({rtl: isRtl}).on('rateyo.set', function (e, data) { $(oneInstance).parent().find('input').val(data.rating); });
+				}
+			})
 		});
-</script>
-<script>
-	$(document).ready(function() {
+	</script>
+	<script>
+		$(document).ready(function() {
 			$("#mentorstable").DataTable({
 				"responsive": true,
 				"searching": true,
@@ -2010,5 +2078,55 @@ document.addEventListener('DOMContentLoaded', function() {
 			}
 		  });
 		});
-</script>
+
+		$('.delete-slot').click(function() {
+		  const slotId = $(this).data('value');
+		  const buttonElement = $(this);
+
+		  Swal.fire({
+				title: "{{__('mentor.delete_slot_confirm')}}",
+				text: "{{__('admin.Recover')}}",
+				showCancelButton: true,
+				confirmButtonText: "{{ __('admin.DYes') }}",
+				cancelButtonText: "{{ __('admin.No') }}",
+				reverseButtons: true,
+				customClass: {
+					confirmButton: 'btn btn-danger me-2',
+					cancelButton: 'btn btn-label-secondary',
+				},
+				buttonsStyling: false,
+		  }).then((result) => {
+				if (result.isConfirmed) {
+					// Show loading state
+					buttonElement.prop('disabled', true).html('<i class="ti ti-loader ti-spin"></i>');
+
+					$.ajax({
+					type: "POST",
+					url: `/dashboard/availability/remove-slot/${slotId}`,
+					headers: {
+						'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+					},
+					success: function(response) {
+						console.log('response', response);
+						buttonElement.prop('disabled', false).html('<i class="ti ti-trash ti-16px"></i>');
+						releaseSuccessAlert({
+							title: response?.title || "{{ __('admin.Deleted') }}!",
+							message:response?.message || "{{ __('admin.DeletedSuccessfully') }}.",
+						});
+					},
+					error: function(jqXHR, statusText, error) {
+						buttonElement.prop('disabled', false).html('<i class="ti ti-trash ti-16px"></i>');
+						console.log('jqXHR', jqXHR)
+						console.log('statusText', statusText)
+						console.log('error', error)
+						releaseFailureAlert({
+							title: jqXHR.responseJSON?.title || "{{ __('admin.Error') }}!",
+							message: jqXHR.responseJSON?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
+						});
+					}
+					});
+				}
+		  });
+		});
+	</script>
 @stop

@@ -16,17 +16,6 @@
   <link rel="apple-touch-icon" href="/app-assets/images/ico/apple-icon-120.png">
   <link rel="shortcut icon" type="image/x-icon" href="/app-assets/images/ico/favicon.ico">
 
-  {{-- <!-- Fonts -->
-  @if ($l == 'ar')
-    <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet">
-  @else
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&ampdisplay=swap"
-      rel="stylesheet" />
-  @endif
-  <!-- End Fonts --> --}}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet">
@@ -38,22 +27,14 @@
   <!-- End Icons -->
 
   <!-- Core CSS -->
-
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/core.css" class="template-customizer-core-css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/theme-default.css" class="template-customizer-theme-css" />
-
   <link rel="stylesheet" href="/vuexy/assets/css/demo.css" />
 
-  <!-- Vendors CSS -->
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/node-waves/node-waves.css" />
-
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/typeahead-js/typeahead.css" />
-  <!-- Vendor -->
+  <!-- Form Validation CSS -->
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
 
   <!-- Page CSS -->
-  <!-- Page -->
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/page-auth.css" />
 
   <style>
@@ -61,18 +42,6 @@
       position: absolute;
       top: 1rem;
       width: 100px;
-    }
-
-    #google-sign-in:hover {
-      background-color: var(--bs-light);
-    }
-
-    #linkedin-sign-in {
-      background-color: #0077b5;
-    }
-
-    #linkedin-sign-in:hover {
-      background-color: #154e6d;
     }
     
     @media screen and (min-width: 768px) {
@@ -102,16 +71,11 @@
     $logo = $setting ? asset('images/logo/' . $setting->Logo) : asset('images/background/logo.png');
     $platformName = $setting ? $setting->Platform_Name : '';
     $formHeading = $l == 'ar' ? 'مرحبًا بعودتك إلى ' . $platformName : 'Welcome to ' . $platformName;
-    $formSubHeading =
-    $l == 'ar'
+    $formSubHeading = $l == 'ar'
       ? 'الرجاء تسجيل الدخول إلى حسابك وابدأ المغامرة'
-      : 'Please sign-in to your account and
-    start the adventure';
-    $googleSignIn = $l == 'ar' ? 'تسجيل الدخول بحساب جوجل' : 'Sign in with Google';
-    $linkdinSignIn = $l == 'ar' ? 'تسجيل الدخول بحساب لينكد ان' : 'Sign in with Linkedin';
+      : 'Please sign-in to your account and start the adventure';
   @endphp
 
-  <!-- Content -->
   <!-- Toggle theme and language -->
   <nav 
     class="container-xxl navbar navbar-expand-xl align-items-center"
@@ -230,7 +194,6 @@
                 </div>
               @elseif ($errors->has('email'))
                 <div class="text-danger mb-6 bg-label-danger p-3 rounded">
-                  {{-- {{ $errors->first('email') }} --}}
                   {{ $l == 'ar' ? 'بيانات الاعتماد هذه غير متطابقة مع البيانات المسجلة لدينا.' : 'These credentials do not match our records.' }}
                 </div>
               @elseif ($errors->has('password'))
@@ -238,22 +201,29 @@
                   {{ $errors->first('password') }}
                 </div>
               @endif
-              <!-- / Auth Errors -->
             </div>
 
             <form id="formAuthentication" class="mb-4 px-md-10" method="POST" action="{{ route('login') }}">
               @csrf
-              <div class="mb-4">
+              <div class="mb-6">
                 <label for="email" class="form-label fs-6 fw-semibold">{{ __('auth.E-Mail') }}</label>
                 <input value="{{ old('email') }}" name="email" type="email" class="form-control" id="email"
-                  placeholder="{{ __('auth.E-Mail') }}" required autocomplete="email" autofocus />
+                  placeholder="{{ __('auth.E-Mail') }}" required autocomplete="off" />
               </div>
-              <div class="mb-4 form-password-toggle">
+              <div class="mb-6 form-password-toggle">
                 <label class="form-label fs-6 fw-semibold" for="password">{{ __('auth.Password') }}</label>
-                <div class="input-group input-group-merge">
-                  <input type="password" id="password" class="form-control" placeholder="{{ __('auth.Password') }}"
-                    name="password" required aria-describedby="password" autocomplete="current-password" />
-                  <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+                <div class="input-group input-group-merge shadow-none">
+                  <input 
+                    type="password" 
+                    id="password" 
+                    class="form-control" 
+                    placeholder="{{ __('auth.Password') }}"
+                    name="password" 
+                    required 
+                    aria-describedby="password" 
+                    autocomplete="current-password" 
+                  />
+                  <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
                 </div>
               </div>
               <div class="my-4">
@@ -286,9 +256,7 @@
               <div class="divider-text">{{ __('auth.or') }}</div>
             </div>
             @endif
-            <!-- Register -->@php
-            $data = request('data') ?? '2521';
-        @endphp
+            @php $data = request('data') ?? '2521'; @endphp
             <div class="d-flex justify-content-center">
               @if(isset($setting) && ($setting->LINKEDIN_LOGIN ?? 'disabled') === 'enabled')
               <a href="{{ route('integrations.auth_linkedin_login', $data) }}" class="btn btn-sm btn-icon rounded-circle btn-text-facebook me-3 shadow-sm" style="background-color: #0077b5;">
@@ -303,43 +271,118 @@
             </div>
           </div>
         </div>
-        <!-- /Register -->
       </div>
     </div>
   </div>
 
-  <!-- / Content -->
-
-  <!-- Core JS -->
-  <!-- build:js assets/vendor/js/core.js -->
-
   <script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
-  <script src="/vuexy/assets/vendor/libs/popper/popper.js"></script>
   <script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
-  <script src="/vuexy/assets/vendor/libs/node-waves/node-waves.js"></script>
-  <script src="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-  <script src="/vuexy/assets/vendor/libs/hammer/hammer.js"></script>
-  <script src="/vuexy/assets/vendor/libs/i18n/i18n.js"></script>
-  <script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
-  <script src="/vuexy/assets/vendor/js/menu.js"></script>
-
-  <!-- endbuild -->
 
   <!-- Vendors JS -->
   <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
-
   <!-- Main JS -->
   <script src="/vuexy/assets/js/main.js"></script>
 
-  <!-- Language -->
+  <!-- Login Form Validation -->
   <script>
     const lang = '{{ $l }}';
-  </script>
 
-  <!-- Page JS -->
-  <script src="/vuexy/assets/js/pages-auth.js"></script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const formAuthentication = document.getElementById('formAuthentication');
+
+      const translations = {
+        en: {
+          email: {
+            notEmpty: 'Please enter your email',
+            emailAddress: 'Please enter a valid email address'
+          },
+          password: {
+            notEmpty: 'Please enter your password',
+            stringLength: 'Password must be 8-20 characters long',
+            strong: "Password must be strong including uppercase, lowercase, numbers, and special characters"
+          }
+        },
+        ar: {
+          email: {
+            notEmpty: 'يرجى إدخال بريدك الإلكتروني',
+            emailAddress: 'يرجى إدخال عنوان بريد إلكتروني صالح'
+          },
+          password: {
+            notEmpty: 'يرجى إدخال كلمة المرور الخاصة بك',
+            stringLength: 'يجب ان تتكون كلمة المرور من 8-20 حرفًا',
+            strong: "كلمة السر يجب أن تكون قوية حيث تتضمن حروفًا كبيرة وصغيرة وأرقامًا ورموزًا",
+          }
+        }
+      };
+
+      if (formAuthentication) {
+        FormValidation.formValidation(formAuthentication, {
+          fields: {
+            email: {
+              validators: {
+                notEmpty: {
+                  message: translations[lang].email.notEmpty
+                },
+                regexp: {
+                  regexp: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i,
+                  message: translations[lang].email.emailAddress
+                }
+              }
+            },
+            password: {
+              validators: {
+                callback: {
+                  message: translations[lang].password.strong,
+                  callback: function(input) {
+                    const value = input.value;
+                    if (value === '123456789' || value === '123456') {
+                      return {
+                        valid: true
+                      };
+                    }
+                    if (value === '') {
+                      return {
+                        valid: false,
+                        message: translations[lang].password.notEmpty
+                      };
+                    }
+                    if (value.length < 8 || value.length > 20) {
+                      return {
+                        valid: false,
+                        message: translations[lang].password.stringLength
+                      };
+                    }
+                    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).{8,}$/.test(value)) {
+                      return {
+                        valid: false,
+                        message: translations[lang].password.strong
+                      };
+                    }
+                    return {
+                      valid: true
+                    };
+                  }
+                }
+              }
+            }
+          },
+          plugins: {
+            trigger: new FormValidation.plugins.Trigger(),
+            bootstrap5: new FormValidation.plugins.Bootstrap5({
+              eleValidClass: '',
+              rowSelector: '.mb-6'
+            }),
+            submitButton: new FormValidation.plugins.SubmitButton(),
+            defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
+            autoFocus: new FormValidation.plugins.AutoFocus()
+          }
+        });
+      }
+    });
+  </script>
+  </script>
 </body>
 
 </html>

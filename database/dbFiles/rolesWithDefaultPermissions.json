@@ -476,7 +476,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "registered"
+                    "registered",
+                    "serviceProvider"
                 ]
             },
             {
@@ -900,6 +901,95 @@
         ]
     },
     {
+        "name": "Services Provider",
+        "description": null,
+        "permissions": [
+            {
+                "name": "services_providers.index",
+                "description": "List All Services Providers",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "services_providers.create",
+                "description": "Create Service Provider Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "services_providers.store",
+                "description": "Save New Service Provider",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "services_providers.show",
+                "description": "Show Service Provider Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "services_providers.edit",
+                "description": "Edit Service Provider Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "services_providers.update",
+                "description": "Save Service Provider Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "services_providers.destroy",
+                "description": "Delete Service Provider",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "services_providers.requests",
+                "description": "List Service Provider Register Requests",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "services_providers.takeAction",
+                "description": "Approve / Reject Service Provider Register Requests",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
         "name": "Services",
         "description": null,
         "permissions": [
@@ -911,7 +1001,8 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
-                    "registered"
+                    "registered",
+                    "serviceProvider"
                 ]
             },
             {
@@ -921,7 +1012,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "serviceProvider"
                 ]
             },
             {
@@ -931,7 +1023,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "serviceProvider"
                 ]
             },
             {
@@ -942,7 +1035,8 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
-                    "registered"
+                    "registered",
+                    "serviceProvider"
                 ]
             },
             {
@@ -952,7 +1046,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "serviceProvider"
                 ]
             },
             {
@@ -962,7 +1057,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "serviceProvider"
                 ]
             },
             {
@@ -973,6 +1069,25 @@
                 "default_for": [
                     "admin",
                     "organizationmanager"
+                ]
+            },
+            {
+                "name": "services.request_service",
+                "description": "Request Service (Startups)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "services.rate",
+                "description": "Rate Service",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "registered"
                 ]
             },
             {
@@ -3909,7 +4024,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "serviceProvider"
                 ]
             },
             {
@@ -3920,7 +4036,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "serviceProvider"
                 ]
             },
             {
@@ -3931,7 +4048,19 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "service_requests.take_action",
+                "description": "Take Action on a Service Request (Approve, Disapprove)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "serviceProvider"
                 ]
             },
             {
@@ -4007,7 +4136,8 @@
                     "mentor",
                     "judger",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "serviceProvider"
                 ]
             },
             {
@@ -4033,7 +4163,8 @@
                     "mentor",
                     "judger",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "serviceProvider"
                 ]
             },
             {
@@ -4050,7 +4181,7 @@
                 ]
             },
             {
-                "name": "user.profile_update_password",
+                "name": "user.profile_update_my_password",
                 "description": "Update Own Profile Password",
                 "guard_name": "web",
                 "is_core": 0,
@@ -4058,7 +4189,9 @@
                     "admin",
                     "mentor",
                     "judger",
-                    "organizationmanager"
+                    "registered",
+                    "organizationmanager",
+                    "serviceProvider"
                 ]
             },
             {
@@ -4068,7 +4201,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "serviceProvider"
                 ]
             },
             {
@@ -4093,7 +4227,8 @@
                     "mentor",
                     "judger",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "serviceProvider"
                 ]
             },
             {
@@ -4119,7 +4254,8 @@
                     "mentor",
                     "judger",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "serviceProvider"
                 ]
             },
             {
@@ -4358,14 +4494,24 @@
                 ]
             },
             {
-                "name": "company.alumni_view",
-                "description": "View company program details (alumni)",
+                "name": "company.addCompanyAlumni",
+                "description": " Add Alumni to Company",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "registered",
                     "organizationmanager"
+                ]
+            },
+            {
+                "name": "company.alumni_view",
+                "description": " View company program details (alumni)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
                 ]
             }
         ]
@@ -4688,6 +4834,16 @@
                 ]
             },
             {
+                "name": "forms.delete",
+                "description": "Delete Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
                 "name": "forms_submissions.index",
                 "description": "Show Form Submissions",
                 "guard_name": "web",
@@ -4700,6 +4856,16 @@
             {
                 "name": "form_submission_details.index",
                 "description": "Show Form Submissions Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "form_submission_details.export",
+                "description": "Export Form Submissions Details",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -5853,7 +6019,8 @@
                     "mentor",
                     "judger",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "serviceProvider"
                 ]
             },
             {
@@ -7943,6 +8110,48 @@
                     "admin",
                     "organizationmanager",
                     "registered",
+                    "mentor"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "slots",
+        "description": "Slots management for mentors",
+        "permissions": [
+            {
+                "name": "slots.index",
+                "description": "View mentor availability slots",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "mentor"
+                ]
+            },
+            {
+                "name": "slots.create",
+                "description": "Create new mentor availability slots",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "mentor"
+                ]
+            },
+            {
+                "name": "slots.store",
+                "description": "Store new mentor availability slots",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "mentor"
+                ]
+            },
+            {
+                "name": "slots.destroy",
+                "description": "Delete mentor availability slots",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "mentor"
                 ]
             }

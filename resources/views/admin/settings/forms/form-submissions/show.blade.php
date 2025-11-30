@@ -10,6 +10,9 @@
     <div class="d-flex justify-content-between mb-4">
       <h4 class="mb-0 fw-bold">{{ __('admin.Form Submission Details') }}</h4>
       <div class="d-flex align-items-center gap-3">
+        <a href="{{ route('form_submission_details.export', ['id' => $id]) }}" target="_blank" class="btn btn-sm btn-label-success btn-excel">
+          <i class="fas fa-file-excel"></i> <span class="d-none d-md-inline ms-2">{{ __('admin.exportExcel') }}</span>
+        </a>
         <button class="btn btn-sm btn-label-primary btn-print" onclick="window.print();">
           <i class="fas fa-print"></i> <span class="d-none d-md-inline ms-2">{{ __('admin.Print') }}</span>
         </button>
@@ -276,7 +279,7 @@
             title: '{{ __('admin.Deleted') }}',
             text: '{{ __('admin.Deleted Successfully') }}',
             icon: 'success',
-          	showCancelButton: false,
+            showCancelButton: false,
             showConfirmButton: true,
             confirmButtonText: "{{ __('admin.OK') }}",
             customClass: {

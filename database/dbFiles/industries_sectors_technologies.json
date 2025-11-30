@@ -1,0 +1,988 @@
+[
+    {
+        "industry": {
+            "en": "Agritech",
+            "ar": "تكنولوجيا الزراعة"
+        },
+        "sectors": [
+            {
+                "en": "Crop Production Solutions",
+                "ar": "حلول إنتاج المحاصيل"
+            },
+            {
+                "en": "Precision Agriculture",
+                "ar": "الزراعة الدقيقة"
+            },
+            {
+                "en": "Farm Management Software",
+                "ar": "برمجيات إدارة المزارع"
+            },
+            {
+                "en": "Agricultural Supply Chain Platforms",
+                "ar": "منصات سلاسل التوريد الزراعية"
+            },
+            {
+                "en": "Agri-Biotech and Genetics",
+                "ar": "التكنولوجيا الحيوية الزراعية وعلم الوراثة"
+            },
+            {
+                "en": "Agri-Finance and Insurance",
+                "ar": "التمويل والتأمين الزراعي"
+            },
+            {
+                "en": "Smart Irrigation Systems",
+                "ar": "أنظمة الري الذكية"
+            },
+            {
+                "en": "Agri Drones and Remote Sensing",
+                "ar": "الطائرات الزراعية المسيرة والاستشعار عن بعد"
+            },
+            {
+                "en": "Livestock Management",
+                "ar": "إدارة الثروة الحيوانية"
+            },
+            {
+                "en": "Food Traceability and Safety",
+                "ar": "تتبع الأغذية وسلامتها"
+            },
+            {
+                "en": "Other",
+                "ar": "أخرى"
+            }
+        ],
+        "technologies": [
+            "Artificial Intelligence (AI)",
+            "Machine Learning (ML)",
+            "Internet of Things (IoT)",
+            "Cloud Computing",
+            "Big Data & Analytics",
+            "Automation",
+            "Robotics",
+            "Blockchain",
+            "Mobile Applications",
+            "Web Applications",
+            "Other"
+        ]
+    },
+    {
+        "industry": {
+            "en": "Fintech",
+            "ar": "التكنولوجيا المالية"
+        },
+        "sectors": [
+            {
+                "en": "Digital Banking / Neo Banks",
+                "ar": "البنوك الرقمية / البنوك الجديدة"
+            },
+            {
+                "en": "Payments and Remittances",
+                "ar": "المدفوعات والتحويلات المالية"
+            },
+            {
+                "en": "Payment Gateways and Processors",
+                "ar": "بوابات ومعالجات الدفع"
+            },
+            {
+                "en": "Lending and Microfinance",
+                "ar": "الإقراض والتمويل الأصغر"
+            },
+            {
+                "en": "Wealth Management / Robo-Advisory",
+                "ar": "إدارة الثروات / الاستشارة الآلية"
+            },
+            {
+                "en": "InsurTech",
+                "ar": "تكنولوجيا التأمين"
+            },
+            {
+                "en": "RegTech / Compliance",
+                "ar": "التكنولوجيا التنظيمية / الامتثال"
+            },
+            {
+                "en": "Fraud Detection and Risk Scoring",
+                "ar": "كشف الاحتيال وتقييم المخاطر"
+            },
+            {
+                "en": "Digital Wallets",
+                "ar": "المحافظ الرقمية"
+            },
+            {
+                "en": "Buy Now Pay Later (BNPL)",
+                "ar": "اشتر الآن وادفع لاحقاً"
+            },
+            {
+                "en": "Crypto Exchanges",
+                "ar": "منصات تداول العملات الرقمية"
+            },
+            {
+                "en": "Crowdfunding Platforms",
+                "ar": "منصات التمويل الجماعي"
+            },
+            {
+                "en": "Other",
+                "ar": "أخرى"
+            }
+        ],
+        "technologies": [
+            "Artificial Intelligence (AI)",
+            "Machine Learning (ML)",
+            "Blockchain",
+            "Cloud Computing",
+            "Big Data & Analytics",
+            "Mobile Applications",
+            "Web Applications",
+            "Automation",
+            "Internet of Things (IoT)",
+            "Other"
+        ]
+    },
+    {
+        "industry": {
+            "en": "Healthtech",
+            "ar": "التكنولوجيا الصحية"
+        },
+        "sectors": [
+            {
+                "en": "Telemedicine and Remote Care",
+                "ar": "التطبيب عن بعد والرعاية عن بعد"
+            },
+            {
+                "en": "Electronic Health Records (EHR)",
+                "ar": "السجلات الصحية الإلكترونية"
+            },
+            {
+                "en": "Medical Devices and Wearables",
+                "ar": "الأجهزة الطبية والأجهزة القابلة للارتداء"
+            },
+            {
+                "en": "Diagnostics and Imaging",
+                "ar": "التشخيص والتصوير الطبي"
+            },
+            {
+                "en": "Health Data Analytics",
+                "ar": "تحليلات البيانات الصحية"
+            },
+            {
+                "en": "Wellness and Fitness Platforms",
+                "ar": "منصات العافية واللياقة البدنية"
+            },
+            {
+                "en": "Genomics and Precision Medicine",
+                "ar": "علم الجينوم والطب الدقيق"
+            },
+            {
+                "en": "Drug Discovery Platforms",
+                "ar": "منصات اكتشاف الأدوية"
+            },
+            {
+                "en": "Remote Patient Monitoring",
+                "ar": "مراقبة المرضى عن بعد"
+            },
+            {
+                "en": "Virtual Hospitals",
+                "ar": "المستشفيات الافتراضية"
+            },
+            {
+                "en": "Healthcare Supply Chain",
+                "ar": "سلاسل التوريد في الرعاية الصحية"
+            },
+            {
+                "en": "Other",
+                "ar": "أخرى"
+            }
+        ],
+        "technologies": [
+            "Artificial Intelligence (AI)",
+            "Machine Learning (ML)",
+            "Internet of Things (IoT)",
+            "Cloud Computing",
+            "Big Data & Analytics",
+            "Automation",
+            "Robotics",
+            "Blockchain",
+            "Mobile Applications",
+            "Web Applications",
+            "Other"
+        ]
+    },
+    {
+        "industry": {
+            "en": "Edtech",
+            "ar": "تكنولوجيا التعليم"
+        },
+        "sectors": [
+            {
+                "en": "Online Learning Platforms",
+                "ar": "منصات التعلم عبر الإنترنت"
+            },
+            {
+                "en": "K-12 Solutions",
+                "ar": "حلول التعليم من الروضة حتى الثاني عشر"
+            },
+            {
+                "en": "Higher Education Solutions",
+                "ar": "حلول التعليم العالي"
+            },
+            {
+                "en": "Corporate Training and LMS",
+                "ar": "التدريب المؤسسي وأنظمة إدارة التعلم"
+            },
+            {
+                "en": "Testing and Assessment Tools",
+                "ar": "أدوات الاختبار والتقييم"
+            },
+            {
+                "en": "Language Learning",
+                "ar": "تعلم اللغات"
+            },
+            {
+                "en": "Virtual Classrooms",
+                "ar": "الفصول الافتراضية"
+            },
+            {
+                "en": "Skill Development Platforms",
+                "ar": "منصات تنمية المهارات"
+            },
+            {
+                "en": "AR/VR Learning Environments",
+                "ar": "بيئات التعلم بالواقع المعزز والافتراضي"
+            },
+            {
+                "en": "Gamified Learning Apps",
+                "ar": "تطبيقات التعلم القائمة على الألعاب"
+            },
+            {
+                "en": "Other",
+                "ar": "أخرى"
+            }
+        ],
+        "technologies": [
+            "Artificial Intelligence (AI)",
+            "Machine Learning (ML)",
+            "Cloud Computing",
+            "Big Data & Analytics",
+            "Automation",
+            "Mobile Applications",
+            "Web Applications",
+            "Internet of Things (IoT)",
+            "AR/VR",
+            "Other"
+        ]
+    },
+    {
+        "industry": {
+            "en": "E-commerce & Retail",
+            "ar": "التجارة الإلكترونية والتجزئة"
+        },
+        "sectors": [
+            {
+                "en": "Online Marketplaces",
+                "ar": "الأسواق عبر الإنترنت"
+            },
+            {
+                "en": "Direct-to-Consumer Brands",
+                "ar": "العلامات التجارية المباشرة للمستهلك"
+            },
+            {
+                "en": "Social Commerce",
+                "ar": "التجارة الاجتماعية"
+            },
+            {
+                "en": "Retail Analytics and Personalization",
+                "ar": "تحليلات التجزئة والتخصيص"
+            },
+            {
+                "en": "Logistics and Last-Mile Delivery",
+                "ar": "الخدمات اللوجستية وتوصيل الميل الأخير"
+            },
+            {
+                "en": "Subscription Commerce",
+                "ar": "تجارة الاشتراكات"
+            },
+            {
+                "en": "Flash Sales Platforms",
+                "ar": "منصات البيع السريع"
+            },
+            {
+                "en": "B2B E-commerce",
+                "ar": "التجارة الإلكترونية بين الشركات"
+            },
+            {
+                "en": "Inventory Management Systems",
+                "ar": "أنظمة إدارة المخزون"
+            },
+            {
+                "en": "Omni-Channel Retail",
+                "ar": "التجزئة متعددة القنوات"
+            },
+            {
+                "en": "Digital Payments Integration",
+                "ar": "دمج المدفوعات الرقمية"
+            },
+            {
+                "en": "Other",
+                "ar": "أخرى"
+            }
+        ],
+        "technologies": [
+            "Artificial Intelligence (AI)",
+            "Machine Learning (ML)",
+            "Cloud Computing",
+            "Big Data & Analytics",
+            "Mobile Applications",
+            "Web Applications",
+            "Automation",
+            "Internet of Things (IoT)",
+            "Blockchain",
+            "Other"
+        ]
+    },
+    {
+        "industry": {
+            "en": "Mobility & Logistics",
+            "ar": "التنقل والخدمات اللوجستية"
+        },
+        "sectors": [
+            {
+                "en": "Ride-Hailing",
+                "ar": "خدمات طلب الركوب"
+            },
+            {
+                "en": "Fleet Management",
+                "ar": "إدارة الأساطيل"
+            },
+            {
+                "en": "Delivery and Courier Services",
+                "ar": "خدمات التوصيل والبريد السريع"
+            },
+            {
+                "en": "Smart Public Transport",
+                "ar": "النقل العام الذكي"
+            },
+            {
+                "en": "Supply Chain Platforms",
+                "ar": "منصات سلاسل التوريد"
+            },
+            {
+                "en": "Drone Delivery",
+                "ar": "التوصيل بالطائرات المسيرة"
+            },
+            {
+                "en": "Micro-Mobility (e-scooters, bikes)",
+                "ar": "التنقل المصغر (السكوتر الإلكتروني، الدراجات)"
+            },
+            {
+                "en": "Autonomous Vehicles",
+                "ar": "المركبات ذاتية القيادة"
+            },
+            {
+                "en": "Freight and Cargo Management",
+                "ar": "إدارة الشحن والبضائع"
+            },
+            {
+                "en": "Smart Parking Systems",
+                "ar": "أنظمة مواقف السيارات الذكية"
+            },
+            {
+                "en": "Mobility-as-a-Service (MaaS)",
+                "ar": "التنقل كخدمة"
+            },
+            {
+                "en": "Other",
+                "ar": "أخرى"
+            }
+        ],
+        "technologies": [
+            "Artificial Intelligence (AI)",
+            "Machine Learning (ML)",
+            "Internet of Things (IoT)",
+            "Cloud Computing",
+            "Big Data & Analytics",
+            "Automation",
+            "Robotics",
+            "Mobile Applications",
+            "Web Applications",
+            "Blockchain",
+            "Other"
+        ]
+    },
+    {
+        "industry": {
+            "en": "Recycling & Greentech",
+            "ar": "إعادة التدوير والتكنولوجيا الخضراء"
+        },
+        "sectors": [
+            {
+                "en": "Waste Management Platforms",
+                "ar": "منصات إدارة النفايات"
+            },
+            {
+                "en": "Renewable Energy Solutions",
+                "ar": "حلول الطاقة المتجددة"
+            },
+            {
+                "en": "Energy Storage Systems",
+                "ar": "أنظمة تخزين الطاقة"
+            },
+            {
+                "en": "Carbon Capture and Trading",
+                "ar": "احتجاز الكربون وتداوله"
+            },
+            {
+                "en": "Water Treatment Technologies",
+                "ar": "تقنيات معالجة المياه"
+            },
+            {
+                "en": "Smart Grid Management",
+                "ar": "إدارة الشبكات الذكية"
+            },
+            {
+                "en": "Energy Efficiency Monitoring",
+                "ar": "مراقبة كفاءة الطاقة"
+            },
+            {
+                "en": "Sustainable Packaging",
+                "ar": "التغليف المستدام"
+            },
+            {
+                "en": "Circular Economy Platforms",
+                "ar": "منصات الاقتصاد الدائري"
+            },
+            {
+                "en": "Other",
+                "ar": "أخرى"
+            }
+        ],
+        "technologies": [
+            "Artificial Intelligence (AI)",
+            "Machine Learning (ML)",
+            "Internet of Things (IoT)",
+            "Cloud Computing",
+            "Big Data & Analytics",
+            "Automation",
+            "Robotics",
+            "Blockchain",
+            "Mobile Applications",
+            "Web Applications",
+            "Other"
+        ]
+    },
+    {
+        "industry": {
+            "en": "SaaS / Enterprise Tech",
+            "ar": "البرمجيات كخدمة / تكنولوجيا المؤسسات"
+        },
+        "sectors": [
+            {
+                "en": "Cloud Infrastructure",
+                "ar": "البنية التحتية السحابية"
+            },
+            {
+                "en": "Productivity Tools",
+                "ar": "أدوات الإنتاجية"
+            },
+            {
+                "en": "CRM and ERP Systems",
+                "ar": "أنظمة إدارة علاقات العملاء وتخطيط موارد المؤسسات"
+            },
+            {
+                "en": "Cybersecurity Platforms",
+                "ar": "منصات الأمن السيبراني"
+            },
+            {
+                "en": "HR and Payroll Systems",
+                "ar": "أنظمة الموارد البشرية والرواتب"
+            },
+            {
+                "en": "Data Analytics and BI Tools",
+                "ar": "أدوات تحليل البيانات وذكاء الأعمال"
+            },
+            {
+                "en": "DevOps and CI/CD Platforms",
+                "ar": "منصات DevOps والتكامل المستمر/النشر المستمر"
+            },
+            {
+                "en": "Marketing Automation",
+                "ar": "أتمتة التسويق"
+            },
+            {
+                "en": "Customer Support Platforms",
+                "ar": "منصات دعم العملاء"
+            },
+            {
+                "en": "Project Management Tools",
+                "ar": "أدوات إدارة المشاريع"
+            },
+            {
+                "en": "Workflow Automation",
+                "ar": "أتمتة سير العمل"
+            },
+            {
+                "en": "Other",
+                "ar": "أخرى"
+            }
+        ],
+        "technologies": [
+            "Artificial Intelligence (AI)",
+            "Machine Learning (ML)",
+            "Cloud Computing",
+            "Big Data & Analytics",
+            "Automation",
+            "Web Applications",
+            "Mobile Applications",
+            "Blockchain",
+            "Other"
+        ]
+    },
+    {
+        "industry": {
+            "en": "Tourism & TravelTech",
+            "ar": "السياحة وتكنولوجيا السفر"
+        },
+        "sectors": [
+            {
+                "en": "Online Booking Platforms",
+                "ar": "منصات الحجز عبر الإنترنت"
+            },
+            {
+                "en": "Travel Management Systems",
+                "ar": "أنظمة إدارة السفر"
+            },
+            {
+                "en": "Hospitality Solutions",
+                "ar": "حلول الضيافة"
+            },
+            {
+                "en": "Experience Marketplaces",
+                "ar": "أسواق التجارب"
+            },
+            {
+                "en": "Mobility Services for Travel",
+                "ar": "خدمات التنقل للسفر"
+            },
+            {
+                "en": "Virtual Travel Experiences",
+                "ar": "تجارب السفر الافتراضية"
+            },
+            {
+                "en": "Travel Insurance Platforms",
+                "ar": "منصات تأمين السفر"
+            },
+            {
+                "en": "Dynamic Pricing Engines",
+                "ar": "محركات التسعير الديناميكي"
+            },
+            {
+                "en": "Loyalty and Rewards Platforms",
+                "ar": "منصات الولاء والمكافآت"
+            },
+            {
+                "en": "Other",
+                "ar": "أخرى"
+            }
+        ],
+        "technologies": [
+            "Artificial Intelligence (AI)",
+            "Machine Learning (ML)",
+            "Cloud Computing",
+            "Big Data & Analytics",
+            "Mobile Applications",
+            "Web Applications",
+            "Automation",
+            "Blockchain",
+            "Other"
+        ]
+    },
+    {
+        "industry": {
+            "en": "Media & Entertainment",
+            "ar": "الإعلام والترفيه"
+        },
+        "sectors": [
+            {
+                "en": "Streaming Platforms",
+                "ar": "منصات البث"
+            },
+            {
+                "en": "Gaming",
+                "ar": "الألعاب"
+            },
+            {
+                "en": "Digital Publishing",
+                "ar": "النشر الرقمي"
+            },
+            {
+                "en": "Advertising Technology (AdTech)",
+                "ar": "تكنولوجيا الإعلان"
+            },
+            {
+                "en": "Music Tech",
+                "ar": "تكنولوجيا الموسيقى"
+            },
+            {
+                "en": "Podcast Platforms",
+                "ar": "منصات البودكاست"
+            },
+            {
+                "en": "AR/VR Entertainment",
+                "ar": "ترفيه الواقع المعزز والافتراضي"
+            },
+            {
+                "en": "Content Creation Tools",
+                "ar": "أدوات إنشاء المحتوى"
+            },
+            {
+                "en": "Esports Platforms",
+                "ar": "منصات الرياضات الإلكترونية"
+            },
+            {
+                "en": "Social Media Networks",
+                "ar": "شبكات التواصل الاجتماعي"
+            },
+            {
+                "en": "Other",
+                "ar": "أخرى"
+            }
+        ],
+        "technologies": [
+            "Artificial Intelligence (AI)",
+            "Machine Learning (ML)",
+            "Cloud Computing",
+            "Big Data & Analytics",
+            "Mobile Applications",
+            "Web Applications",
+            "Automation",
+            "Blockchain",
+            "AR/VR",
+            "Other"
+        ]
+    },
+    {
+        "industry": {
+            "en": "Foodtech",
+            "ar": "تكنولوجيا الغذاء"
+        },
+        "sectors": [
+            {
+                "en": "Food Delivery Platforms",
+                "ar": "منصات توصيل الطعام"
+            },
+            {
+                "en": "Alternative Proteins",
+                "ar": "البروتينات البديلة"
+            },
+            {
+                "en": "Smart Kitchen Devices",
+                "ar": "أجهزة المطبخ الذكية"
+            },
+            {
+                "en": "Food Safety and Traceability",
+                "ar": "سلامة الغذاء وتتبعه"
+            },
+            {
+                "en": "Meal Kit Services",
+                "ar": "خدمات وجبات التحضير المنزلي"
+            },
+            {
+                "en": "Restaurant Management Systems",
+                "ar": "أنظمة إدارة المطاعم"
+            },
+            {
+                "en": "Vertical Farming",
+                "ar": "الزراعة العمودية"
+            },
+            {
+                "en": "Grocery Delivery",
+                "ar": "توصيل البقالة"
+            },
+            {
+                "en": "Other",
+                "ar": "أخرى"
+            }
+        ],
+        "technologies": [
+            "Artificial Intelligence (AI)",
+            "Machine Learning (ML)",
+            "Internet of Things (IoT)",
+            "Cloud Computing",
+            "Big Data & Analytics",
+            "Automation",
+            "Robotics",
+            "Mobile Applications",
+            "Web Applications",
+            "Blockchain",
+            "Other"
+        ]
+    },
+    {
+        "industry": {
+            "en": "AI & Deeptech",
+            "ar": "الذكاء الاصطناعي والتكنولوجيا العميقة"
+        },
+        "sectors": [
+            {
+                "en": "Machine Learning Platforms",
+                "ar": "منصات تعلم الآلة"
+            },
+            {
+                "en": "Natural Language Processing",
+                "ar": "معالجة اللغات الطبيعية"
+            },
+            {
+                "en": "Computer Vision",
+                "ar": "الرؤية الحاسوبية"
+            },
+            {
+                "en": "Robotics",
+                "ar": "الروبوتات"
+            },
+            {
+                "en": "Quantum Computing",
+                "ar": "الحوسبة الكمومية"
+            },
+            {
+                "en": "Edge AI Solutions",
+                "ar": "حلول الذكاء الاصطناعي الطرفية"
+            },
+            {
+                "en": "Neural Interface Technology",
+                "ar": "تكنولوجيا الواجهات العصبية"
+            },
+            {
+                "en": "Autonomous Systems",
+                "ar": "الأنظمة المستقلة"
+            },
+            {
+                "en": "Other",
+                "ar": "أخرى"
+            }
+        ],
+        "technologies": [
+            "Artificial Intelligence (AI)",
+            "Machine Learning (ML)",
+            "Cloud Computing",
+            "Big Data & Analytics",
+            "Automation",
+            "Robotics",
+            "Blockchain",
+            "Web Applications",
+            "Mobile Applications",
+            "Other"
+        ]
+    },
+    {
+        "industry": {
+            "en": "LegalTech",
+            "ar": "التكنولوجيا القانونية"
+        },
+        "sectors": [
+            {
+                "en": "Contract Management",
+                "ar": "إدارة العقود"
+            },
+            {
+                "en": "e-Discovery",
+                "ar": "الاكتشاف الإلكتروني"
+            },
+            {
+                "en": "Compliance Platforms",
+                "ar": "منصات الامتثال"
+            },
+            {
+                "en": "Online Dispute Resolution",
+                "ar": "تسوية المنازعات عبر الإنترنت"
+            },
+            {
+                "en": "Case Management Systems",
+                "ar": "أنظمة إدارة القضايا"
+            },
+            {
+                "en": "IP Management Tools",
+                "ar": "أدوات إدارة الملكية الفكرية"
+            },
+            {
+                "en": "Legal Research Platforms",
+                "ar": "منصات البحث القانوني"
+            },
+            {
+                "en": "Other",
+                "ar": "أخرى"
+            }
+        ],
+        "technologies": [
+            "Artificial Intelligence (AI)",
+            "Machine Learning (ML)",
+            "Cloud Computing",
+            "Big Data & Analytics",
+            "Automation",
+            "Blockchain",
+            "Web Applications",
+            "Mobile Applications",
+            "Other"
+        ]
+    },
+    {
+        "industry": {
+            "en": "Social Impact & Civic Tech",
+            "ar": "التأثير الاجتماعي والتكنولوجيا المدنية"
+        },
+        "sectors": [
+            {
+                "en": "GovTech Services",
+                "ar": "خدمات التكنولوجيا الحكومية"
+            },
+            {
+                "en": "Community Platforms",
+                "ar": "منصات المجتمع"
+            },
+            {
+                "en": "Non-Profit Management Tools",
+                "ar": "أدوات إدارة المنظمات غير الربحية"
+            },
+            {
+                "en": "Civic Engagement Apps",
+                "ar": "تطبيقات المشاركة المدنية"
+            },
+            {
+                "en": "Digital Identity Solutions",
+                "ar": "حلول الهوية الرقمية"
+            },
+            {
+                "en": "Open Data Platforms",
+                "ar": "منصات البيانات المفتوحة"
+            },
+            {
+                "en": "Public Service Portals",
+                "ar": "بوابات الخدمات العامة"
+            },
+            {
+                "en": "Other",
+                "ar": "أخرى"
+            }
+        ],
+        "technologies": [
+            "Artificial Intelligence (AI)",
+            "Machine Learning (ML)",
+            "Cloud Computing",
+            "Big Data & Analytics",
+            "Automation",
+            "Blockchain",
+            "Web Applications",
+            "Mobile Applications",
+            "Other"
+        ]
+    },
+    {
+        "industry": {
+            "en": "Manufacturing",
+            "ar": "التصنيع"
+        },
+        "sectors": [
+            {
+                "en": "Smart Factory (Industry 4.0)",
+                "ar": "المصانع الذكية (الصناعة 4.0)"
+            },
+            {
+                "en": "3D Printing and Additive Manufacturing",
+                "ar": "الطباعة ثلاثية الأبعاد والتصنيع بالإضافة"
+            },
+            {
+                "en": "Supply Chain Automation",
+                "ar": "أتمتة سلاسل التوريد"
+            },
+            {
+                "en": "Industrial IoT",
+                "ar": "إنترنت الأشياء الصناعي"
+            },
+            {
+                "en": "Predictive Maintenance",
+                "ar": "الصيانة التنبؤية"
+            },
+            {
+                "en": "Robotics Integration",
+                "ar": "تكامل الروبوتات"
+            },
+            {
+                "en": "Quality Control Systems",
+                "ar": "أنظمة مراقبة الجودة"
+            },
+            {
+                "en": "Digital Twin Platforms",
+                "ar": "منصات التوأم الرقمي"
+            },
+            {
+                "en": "Advanced Materials",
+                "ar": "المواد المتقدمة"
+            },
+            {
+                "en": "Other",
+                "ar": "أخرى"
+            }
+        ],
+        "technologies": [
+            "Artificial Intelligence (AI)",
+            "Machine Learning (ML)",
+            "Internet of Things (IoT)",
+            "Cloud Computing",
+            "Big Data & Analytics",
+            "Automation",
+            "Robotics",
+            "Blockchain",
+            "Mobile Applications",
+            "Web Applications",
+            "Other"
+        ]
+    },
+    {
+        "industry": {
+            "en": "Creative Arts",
+            "ar": "الفنون الإبداعية"
+        },
+        "sectors": [
+            {
+                "en": "Digital Art Platforms",
+                "ar": "منصات الفن الرقمي"
+            },
+            {
+                "en": "Music Production Tools",
+                "ar": "أدوات إنتاج الموسيقى"
+            },
+            {
+                "en": "Design Marketplaces",
+                "ar": "أسواق التصميم"
+            },
+            {
+                "en": "Content Creation Platforms",
+                "ar": "منصات إنشاء المحتوى"
+            },
+            {
+                "en": "Virtual Galleries",
+                "ar": "المعارض الافتراضية"
+            },
+            {
+                "en": "NFT Art Marketplaces",
+                "ar": "أسواق فنون NFT"
+            },
+            {
+                "en": "AR/VR Creative Experiences",
+                "ar": "تجارب إبداعية بالواقع المعزز والافتراضي"
+            },
+            {
+                "en": "Other",
+                "ar": "أخرى"
+            }
+        ],
+        "technologies": [
+            "Artificial Intelligence (AI)",
+            "Machine Learning (ML)",
+            "Cloud Computing",
+            "Big Data & Analytics",
+            "Automation",
+            "Blockchain",
+            "Web Applications",
+            "Mobile Applications",
+            "AR/VR",
+            "Other"
+        ]
+    }
+]

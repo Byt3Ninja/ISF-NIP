@@ -26,10 +26,7 @@ class StoreUserRequest extends FormRequest
      */
     public function rules()
     {
-
-        
-
-        return [
+        $rules = [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'phone' => 'required|unique:users,phone',
@@ -46,17 +43,16 @@ class StoreUserRequest extends FormRequest
             'title_en'     => 'nullable|string',
         ];
 
-    // Apply mentor-required rules ONLY if:
-    // - role is "Mentor"
-    // - auth user is NOT an Admin
-    if ($this->input('role') == '4' && !auth()->user()->hasRole('Admin')) {
-        $rules['bio_en']      = 'required|string';
-        $rules['Linkedin']    = 'required|url';
-        $rules['expertise']   = 'required|array';
-        $rules['expertise.*'] = 'exists:expertises,id';
-        $rules['title_en']    = 'required|string';
-    }
-    
+        // Apply mentor-required rules ONLY if role is Mentor (ID 6)
+        if ($this->input('role') == '4') {
+            $rules['bio_en']      = 'required|string';
+            $rules['Linkedin']    = 'required|url';
+            $rules['expertise']   = 'required|array|min:1';
+            $rules['expertise.*'] = 'exists:expertises,id';
+            $rules['title_en']    = 'required|string';
+        }
+        
+        return $rules;
     }
 
         protected function failedValidation(Validator $validator)

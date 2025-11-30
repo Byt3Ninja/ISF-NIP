@@ -339,7 +339,7 @@ return [
 	'Sure del cal' => 'Are you sure, delete current calendar item?',
 	'Private' => 'Private',
 	'Service request' => 'Service request',
-	'request sent' => 'Your request sent successfully, and waiting system manager approval',
+	'request sent' => 'Your request sent successfully, and waiting service provider approval',
 	'just now' => 'Just now',
 	'Waiting' => 'Waiting',
 	'SelState' => 'Choose State',

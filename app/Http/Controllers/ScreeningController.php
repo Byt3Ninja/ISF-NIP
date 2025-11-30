@@ -544,6 +544,7 @@ class ScreeningController extends Controller
 			$output->field = $item->field;
       		$output->value = $item->value;
 			$output->judger_id = $item->judger_id;
+			$output->approval = intval( $item->is_approved ) === 1 ? 'approved' : ( $item->is_approved === null || intval( $item->is_approved ) === 2 ? 'pending' : 'disapproved' );
 	  		$output->name = trim( str_replace(['   ', '  '], ' ', $item->{'judger_first_name_' . $l} . ' ' . $item->{'judger_last_name_' . $l}) );
       		return $output;
 		});
@@ -558,6 +559,7 @@ class ScreeningController extends Controller
 			$companies = $item->companies->map(function( $company ) use ( $customFields, $judger_id, $criteria ) {
 				$comment = $customFields->where('judger_id', $judger_id)->where('field', 'final_comment')->first();
 				$company->comment = !empty( $comment ) ? $comment->value : '';
+				$company->approval = !empty( $comment ) ? $comment->approval : 'pending';
 				$details = $criteria->map(function( $item ) use ( $judger_id ) {
 					$details = $item->subCriteria->filter(function( $sub ) use ( $judger_id ) {
 						$results = $sub->results->where('judger_id', $judger_id)->values()->first();
@@ -590,6 +592,7 @@ class ScreeningController extends Controller
 				$output->status = $company->status;
 				$output->value = ( round( $details->sum('value') * 100 ) / 100 );
 				$output->comment = $company->comment;
+				$output->approval = $company->approval;
 				$output->details = $details;
 				return $output;
 			})->first();
