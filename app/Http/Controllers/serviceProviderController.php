@@ -112,11 +112,6 @@ class serviceProviderController extends Controller
 		return redirect()->back()->with('success', __('auth.provider_registration_recorded'));
 	}
 
-	public function tst_view($type)
-	{
-		return view('emails.service-providers.' . $type, ['contact_name' => 'sss']);
-	}
-
 	public function requests()
 	{
 		$l = app()->getLocale();
