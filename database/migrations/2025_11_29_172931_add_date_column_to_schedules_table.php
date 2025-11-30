@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('schedules', function (Blueprint $table) {
-            $table->date('date')->nullable()->after('session_type');
+            $table->date('date')->nullable();
         });
     }
 
