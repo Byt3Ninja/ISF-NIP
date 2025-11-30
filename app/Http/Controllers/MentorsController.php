@@ -1122,4 +1122,16 @@ class MentorsController extends Controller
 	{
 			return view('mentor.availability.index');
 	}
+
+	public function removeSlot(Request $request, $id)
+	{
+		try {
+			$schedule = Schedule::where('user_id', Auth::id())->findOrFail($id);
+			$schedule->delete();
+			return response()->json(['success' => true, 'message' => __('mentor.slot_removed_success')], 200);
+		} catch (Exception $e) {
+			return response()->json(['success' => false, 'message' => __('mentor.slot_removed_error')], 500);
+		}
+	}
+
 }

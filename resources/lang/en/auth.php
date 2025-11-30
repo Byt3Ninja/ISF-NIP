@@ -84,4 +84,6 @@ return [
 	'ActionTakenBy' => 'Action Taken By',
 	'rejectionReason' => 'Rejection Reason',
 	'serviceProviderRequestHaveActionTakenAlready' => 'This request already has an action taken.',
+	'unauthorized' => 'Unauthorized',
+	'not_authorized_permission' => 'You are not authorized to perform this action.'
 ];

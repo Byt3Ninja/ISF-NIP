@@ -83,5 +83,7 @@ return [
 	'ActionTakenBy' => 'الإجراء المتخذ بواسطة',
 	'rejectionReason' => 'سبب الرفض',
 	'serviceProviderRequestHaveActionTakenAlready' => 'هذا الطلب لديه اجراء متخذ بالفعل.',
+	'unauthorized' => 'غير مصرح',
+	'not_authorized_permission' => 'أنت غير مصرح لك بأداء هذا الإجراء.'
 ];
 

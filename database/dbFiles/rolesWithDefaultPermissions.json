@@ -8127,6 +8127,33 @@
                 "default_for": [
                     "mentor"
                 ]
+            },
+            {
+                "name": "slots.create",
+                "description": "Create new mentor availability slots",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "mentor"
+                ]
+            },
+            {
+                "name": "slots.store",
+                "description": "Store new mentor availability slots",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "mentor"
+                ]
+            },
+            {
+                "name": "slots.destroy",
+                "description": "Delete mentor availability slots",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "mentor"
+                ]
             }
         ]
     }

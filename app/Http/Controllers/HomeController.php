@@ -1255,7 +1255,9 @@ class HomeController extends Controller
                 s.tfrom,
                 s.tto,
                 s.notes,
-                s.active
+                s.active,
+                s.session_type,
+                s.date
             FROM
                 schedules s
             WHERE
@@ -1263,31 +1265,31 @@ class HomeController extends Controller
         ";
         $my_schedules = collect(DB::select($my_schedules_q))->map(function ($schedule) {
             $schedule->active = $schedule->active == 1 || $schedule->active == true ? true : false;
-            $date_from = Carbon::parse($schedule->dfrom)->format('d-m-Y');
-            $date_to = Carbon::parse($schedule->dto)->format('d-m-Y');
-            $_days = '';
-            switch ($schedule->type) {
-                case 'Weekly': {
-                        $_days = 'Weekly (' . str_replace(['[', ']', '"'], ' ', json_encode($schedule->days)) . ')';
-                        break;
-                    }
-                case 'WorkingDays': {
-                        $_days = __('dashboard.All working days');
-                        break;
-                    }
-                case 'Period': {
-                        $_days = __('dashboard.from') . $date_from . __('dashboard.to') . $date_to;
-                        break;
-                    }
-                default: {
-                        $_days = $date_to;
-                    }
-            }
-            $schedule->_days = $_days;
+            // $date_from = Carbon::parse($schedule->dfrom)->format('d-m-Y');
+            // $date_to = Carbon::parse($schedule->dto)->format('d-m-Y');
             $schedule->t_from = substr($schedule->tfrom, 0, 5);
             $schedule->t_to = substr($schedule->tto, 0, 5);
             $schedule->notes ? $schedule->notes : '...';
-            return $schedule;
+
+            if ($schedule->type === 'Weekly') {
+                return [
+                    'id' => $schedule->id,
+                    'weekday' => $schedule->days,
+                    'start_time' => $schedule->t_from,
+                    'end_time' => $schedule->t_to,
+                    'session_type' => $schedule->session_type,
+                    'weekly' => true
+                ];
+            } else {
+                return [
+                    'id' => $schedule->id,
+                    'date' => $schedule->date ?? $schedule->date_to ?? null,
+                    'start_time' => $schedule->t_from,
+                    'end_time' => $schedule->t_to,
+                    'session_type' => $schedule->session_type,
+                    'weekly' => false
+                ];
+            }
         });
 
         $setting = collect(DB::select("SELECT * FROM settings where `id` = 1 limit 1"))->first();

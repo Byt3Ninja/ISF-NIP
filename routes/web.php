@@ -570,6 +570,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     //Mentors
     Route::get('/availability', 'MentorsController@availability')->name('slots.index');
     Route::post('mentors/modify', 'MentorsController@modify')->name('mentors.settings_modify');
+    Route::post('availability/remove-slot/{id}', 'MentorsController@removeSlot')->name('slots.destroy');
 
     Route::get('program/show', 'Mentor\MentorProgramController@show');
 
