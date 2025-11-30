@@ -212,7 +212,7 @@
               </div>
               <div class="mb-6 form-password-toggle">
                 <label class="form-label fs-6 fw-semibold" for="password">{{ __('auth.Password') }}</label>
-                <div class="input-group input-group-merge">
+                <div class="input-group input-group-merge shadow-none">
                   <input 
                     type="password" 
                     id="password" 

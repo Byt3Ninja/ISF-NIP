@@ -1099,7 +1099,6 @@ return [
 	'Select Language' => 'Select Language',
 	'Timezone' => 'Timezone',
 	'Select Timezone' => 'Select Timezone',
-	'Gender' => 'Gender',
 	'Currency' => 'Currency',
 	'Select Currency' => 'Select Currency',
 	'AddAnswerOption' => 'Add Answer',

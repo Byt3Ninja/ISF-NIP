@@ -1051,7 +1051,6 @@ return [
 	'Timezone' => 'المنطقة الزمنية',
 	'Select Timezone' => 'اختر المنطقة الزمنية',
 	'Select Language' => 'اختر اللغه',
-	'Gender' => 'الجنس',
 	'Idea Exploration' => 'مرحلة استكشاف الافكار',
 	'READY_PRODUCT' => 'منتج جاهز',
 	'Product + Service' => 'المنتج + الخدمة',

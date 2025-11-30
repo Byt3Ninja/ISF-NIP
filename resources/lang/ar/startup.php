@@ -102,6 +102,7 @@ return [
   'status' => 'الحالة',
   'actions' => 'الإجراءات',
   'view_details' => 'عرض التفاصيل',
+  'view_startup_profile' => 'عرض ملف الشركة',
 
   'upcoming' => 'قادمة',
   'ongoing' => 'جارية',

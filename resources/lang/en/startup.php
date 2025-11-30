@@ -101,6 +101,7 @@ return [
   'status' => 'Status',
   'actions' => 'Actions',
   'view_details' => 'View Details',
+  'view_startup_profile' => 'View Startup Profile',
 
   'upcoming' => 'Upcoming',
   'ongoing' => 'Ongoing',

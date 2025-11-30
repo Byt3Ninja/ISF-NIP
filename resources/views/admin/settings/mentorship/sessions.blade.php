@@ -114,8 +114,6 @@
                               <div class="invalid-feedback" id="end_date_error"></div>
                             </div>
 
-                            
-
                             <!-- Done Filter -->
                             <div class="col-12">
                               <label for="doneValueSelect" class="form-label">{{ __('cycles.Completion_Status') }}</label>
