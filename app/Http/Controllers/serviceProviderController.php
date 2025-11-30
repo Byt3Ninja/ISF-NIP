@@ -103,7 +103,10 @@ class serviceProviderController extends Controller
 		// send confirmation email here
 		if( !in_array(env('APP_ENV', 'local'), ['local']) )
 		{
-			Mail::to($registration->email)->queue(new serviceProviderRegistrationMail( $contact_name ));
+			if( config('mail.driver') && config('mail.host') && config('mail.port') && config('mail.username') && config('mail.password') )
+			{
+				Mail::to($registration->email)->queue(new serviceProviderRegistrationMail( $contact_name ));
+			}
 		}
 
 		return redirect()->back()->with('success', __('auth.provider_registration_recorded'));
@@ -212,7 +215,10 @@ class serviceProviderController extends Controller
 					DB::commit();
 					if( !in_array(env('APP_ENV', 'local'), ['local']) )
 					{
-						Mail::to( $email )->queue(new serviceProviderApproveMail( $contact_name, $email, $password, $login_url ));
+						if( config('mail.driver') && config('mail.host') && config('mail.port') && config('mail.username') && config('mail.password') )
+						{
+							Mail::to( $email )->queue(new serviceProviderApproveMail( $contact_name, $email, $password, $login_url ));
+						}
 					}
 					return redirect()->route('services_providers.requests')->with('success', __('admin.serviceProviderRequestApproved'));
 				}
@@ -238,7 +244,10 @@ class serviceProviderController extends Controller
 
 				if( !in_array(env('APP_ENV', 'local'), ['local']) )
 				{
-					Mail::to( $email )->queue(new serviceProviderRejectMail( $contact_name, $reason ));
+					if( config('mail.driver') && config('mail.host') && config('mail.port') && config('mail.username') && config('mail.password') )
+					{
+						Mail::to( $email )->queue(new serviceProviderRejectMail( $contact_name, $reason ));
+					}
 				}
 				return redirect()->route('services_providers.requests')->with('success', __('admin.serviceProviderRequestRejected'));
 			}
