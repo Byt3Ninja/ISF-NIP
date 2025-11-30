@@ -2542,4 +2542,6 @@ return [
 	'Service not found' => 'Service not found',
 	'Service request not found' => 'Service request not found',
 	'Service request rated, thank you for your feedback' => 'Service request rated, thank you for your feedback',
+	'ongoing_programs' => 'Ongoing Programs',
+	'completed_programs' => 'Completed Programs',
 ];

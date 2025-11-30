@@ -838,6 +838,13 @@ class ReportController extends Controller
         // Keep the passed cycle (for backward-compatible views), but do not filter by it
         $cycle = Cycle::find($cycle_id);
 
+        $ongoingCycles = Cycle::where('start', '<=', now())
+            ->where('end', '>=', now())
+            ->get();
+
+        $completedCycles = Cycle::where('end', '<', now())
+            ->get();
+
         // OVERALL (all cycles) KPIs within the organization (no cycle filter)
         $data['mentors_count'] = User::whereHas('mentorSessions', function ($q) use ($organization_id, $program_id) {
             $q->when(!is_null($organization_id), function ($q) use ($organization_id) {
@@ -1070,18 +1077,14 @@ class ReportController extends Controller
         $data['startups'] = $startups->count();
         $data['screening_sessions_count'] = $screenings;
         $data['final_screening_count'] = $final_screenings;
+        $data['ongoingCycles'] = $ongoingCycles;
+        $data['completed_programs'] = $completedCycles;
 
         // Group overall KPIs for Blade looping
         $data['kpiData'] = [
-            [ 'value' => $data['startups'] ?? 0, 'label' => 'Subscribed_Startups', 'icon' => 'building', 'color' => 'primary' ],
-            [ 'value' => $data['mentors_count'] ?? 0, 'label' => 'Enrolled_Mentors', 'icon' => 'school', 'color' => 'warning' ],
-            [ 'value' => $data['mentorRequests_count'] ?? 0, 'label' => 'Mentorship_Requests', 'icon' => 'book', 'color' => 'success' ],
-            [ 'value' => $data['mentorships_period_formatted'] ?? '00:00', 'label' => 'Mentorship_Sessions_Duration', 'icon' => 'clock', 'color' => 'danger' ],
-            [ 'value' => number_format($data['mentorship_attendance_rate'] ?? 0, 2), 'label' => 'Startups_Attendance_Rate', 'icon' => 'browser', 'color' => 'secondary', 'unit' => '%' ],
-            [ 'value' => $data['training_sessions_count'] ?? 0, 'label' => 'Training_Sessions', 'icon' => 'user-screen', 'color' => 'warning' ],
-            [ 'value' => $data['training_sessions_period'] ?? 0, 'label' => 'Training_Sessions_Duration', 'icon' => 'clock', 'color' => 'primary', 'unit' => 'h' ],
-            [ 'value' => $data['screening_sessions_count'] ?? 0, 'label' => 'Screening', 'icon' => 'scale', 'color' => 'success' ],
-            [ 'value' => $data['final_screening_count'] ?? 0, 'label' => 'Final_Screening', 'icon' => 'gavel', 'color' => 'primary' ],
+            [ 'value' => $data['cycles']->count() ?? 0, 'label' => 'total_programs', 'icon' => 'components', 'color' => 'info' ],
+            [ 'value' => $data['ongoingCycles']->count() ?? 0, 'label' => 'ongoing_programs', 'icon' => 'progress-bolt', 'color' => 'primary' ],
+            [ 'value' => $data['completed_programs']->count() ?? 0, 'label' => 'completed_programs', 'icon' => 'progress-check', 'color' => 'success' ],
         ];
 
         return $data;

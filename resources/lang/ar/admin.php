@@ -2595,4 +2595,6 @@ return [
 	'Service not found' => 'خدمة غير موجودة',
 	'Service request not found' => 'طلب خدمة غير موجود',
 	'Service request rated, thank you for your feedback' => 'تم تقييم طلب الخدمة, شكرا لتعليقك',
+	'ongoing_programs' => 'البرامج الجارية',
+	'completed_programs' => 'البرامج المكتملة',
 ];
