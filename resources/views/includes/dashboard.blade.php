@@ -909,7 +909,7 @@
 										</div>
 									</div>
 									<div class="card-datatable table-responsive">
-										<table class="table">
+										<table class="datatables-basic table slots-table">
 											<thead class="table-light">
 												<th> {{ __('mentor.days_date') }} </th>
 												<th> {{ __('dashboard.Weekly') }} </th>
@@ -969,7 +969,7 @@
 							<div class="col-md-12">
 								<div class="card">
 									<div class="card-header">
-										<h5 class="card-title mb-0">
+										<h5 class="card-title mb-0 text-capitalize">
 											{{ __("dashboard.My next mentorship sessions") }}
 										</h5>
 									</div>
@@ -2113,6 +2113,10 @@ document.addEventListener('DOMContentLoaded', function() {
 		$('.delete-slot').click(function() {
 		  const slotId = $(this).data('value');
 		  const buttonElement = $(this);
+			const rowElement = buttonElement.closest('tr');
+
+			console.log('Deleting slot ID:', slotId);
+			console.log('rowElement', rowElement);
 
 		  Swal.fire({
 				title: "{{__('mentor.delete_slot_confirm')}}",
@@ -2130,31 +2134,31 @@ document.addEventListener('DOMContentLoaded', function() {
 				if (result.isConfirmed) {
 					// Show loading state
 					buttonElement.prop('disabled', true).html('<i class="ti ti-loader ti-spin"></i>');
-
+					
 					$.ajax({
-					type: "POST",
-					url: `/dashboard/availability/remove-slot/${slotId}`,
-					headers: {
-						'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-					},
-					success: function(response) {
-						console.log('response', response);
-						buttonElement.prop('disabled', false).html('<i class="ti ti-trash ti-16px"></i>');
-						releaseSuccessAlert({
-							title: response?.title || "{{ __('admin.Deleted') }}!",
-							message:response?.message || "{{ __('admin.DeletedSuccessfully') }}.",
-						});
-					},
-					error: function(jqXHR, statusText, error) {
-						buttonElement.prop('disabled', false).html('<i class="ti ti-trash ti-16px"></i>');
-						console.log('jqXHR', jqXHR)
-						console.log('statusText', statusText)
-						console.log('error', error)
-						releaseFailureAlert({
-							title: jqXHR.responseJSON?.title || "{{ __('admin.Error') }}!",
-							message: jqXHR.responseJSON?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
-						});
-					}
+						type: "POST",
+						url: `/dashboard/availability/remove-slot/${slotId}`,
+						headers: {
+							'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+						},
+						success: function(response) {
+							// console.log('response', response);
+							buttonElement.prop('disabled', false).html('<i class="ti ti-trash ti-16px"></i>');
+							rowElement.remove(); // Remove the row from the table immediately
+							
+							releaseSuccessAlert({
+								title: response?.title || "{{ __('admin.Deleted') }}!",
+								message:response?.message || "{{ __('admin.DeletedSuccessfully') }}.",
+							});
+						},
+						error: function(jqXHR, statusText, error) {
+							buttonElement.prop('disabled', false).html('<i class="ti ti-trash ti-16px"></i>');
+
+							releaseFailureAlert({
+								title: jqXHR.responseJSON?.title || "{{ __('admin.Error') }}!",
+								message: jqXHR.responseJSON?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
+							});
+						}
 					});
 				}
 		  });

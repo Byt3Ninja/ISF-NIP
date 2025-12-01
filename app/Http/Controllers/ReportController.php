@@ -1112,9 +1112,9 @@ class ReportController extends Controller
         });
 
         $data['training_sessions_count'] = $training_sessions->count();
-        $data['training_sessions_period'] = $training_sessions->sum('duration')/60;
+        $data['training_sessions_period'] = $this->formatMinutesToHoursMinutes($training_sessions->sum('duration'));
         $data['mentorRequests_count']  = $mentorRequests->count();
-        $data['mentorships_period']= $mentorRequests->sum('period')/60;
+        $data['mentorships_period'] = $this->formatMinutesToHoursMinutes($mentorRequests->sum('period'));
         if ($mentorRequests->count()){
 
             $data['mentorship_attendance_rate']= ($mentorRequests->sum('done')/$mentorRequests->count())*100;

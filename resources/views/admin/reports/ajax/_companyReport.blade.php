@@ -73,11 +73,11 @@
 
 @php
 $cards = [
-  ['col' => 'col-lg-2 col-sm-6', 'href' => '#mentorshipSessionsSection', 'color' => 'primary', 'icon' => 'ti-telescope', 'value' => $mentorRequests_count, 'title' => __('admin.Mentorship Sessions')],
-  ['col' => 'col-lg-2 col-sm-6', 'href' => '#mentorshipSessionsSection', 'color' => 'secondary', 'icon' => 'ti-calendar-event', 'value' => $mentorships_period, 'title' => __('admin.Mentorship Sessions Duration')],
-  ['col' => 'col-lg-2 col-sm-6', 'href' => '/dashboard/mentorship/sessions?show=all', 'color' => 'danger', 'icon' => 'ti-user-screen', 'value' => (int) $mentorship_attendance_rate . '%', 'title' => __('admin.Company Attendance Rate')],
-  ['col' => 'col-lg-2 col-sm-6', 'href' => '/dashboard/training/sessions?company_id=' . $company->id, 'color' => 'warning', 'icon' => 'ti-book', 'value' => $training_sessions_count, 'title' => __('admin.Training sessions')],
-  ['col' => 'col-lg-2 col-sm-6', 'href' => '/dashboard/training/sessions', 'color' => 'success', 'icon' => 'ti-clock', 'value' => $training_sessions_period, 'title' => __('admin.Training sessions Duration')]
+  ['col' => 'col-lg-2 col-sm-6', 'color' => 'primary', 'icon' => 'ti-telescope', 'value' => $mentorRequests_count, 'title' => __('admin.Mentorship Sessions')],
+  ['col' => 'col-lg-2 col-sm-6', 'color' => 'secondary', 'icon' => 'ti-calendar-event', 'value' => $mentorships_period, 'title' => __('admin.Mentorship Sessions Duration')],
+  ['col' => 'col-lg-2 col-sm-6', 'color' => 'danger', 'icon' => 'ti-user-screen', 'value' => (int) $mentorship_attendance_rate . '%', 'title' => __('admin.Company Attendance Rate')],
+  ['col' => 'col-lg-2 col-sm-6', 'color' => 'warning', 'icon' => 'ti-book', 'value' => $training_sessions_count, 'title' => __('admin.Training sessions')],
+  ['col' => 'col-lg-2 col-sm-6', 'color' => 'success', 'icon' => 'ti-clock', 'value' => $training_sessions_period, 'title' => __('admin.Training sessions Duration')]
 ];
 @endphp
 
@@ -85,21 +85,19 @@ $cards = [
   <div class="row justify-content-center g-4">
     @foreach($cards as $card)
     <div class="{{ $card['col'] }}">
-      <a href="{{ $card['href'] }}" class="text-decoration-none">
-        <div class="card card-border-shadow-{{ $card['color'] }} h-100 cursor-pointer">
-          <div class="card-body text-center">
-            <div class="d-flex align-items-center justify-content-center mb-2">
-              <div class="avatar avatar-sm me-4">
-                <div class="avatar-initial rounded bg-label-{{ $card['color'] }}">
-                  <i class="ti {{ $card['icon'] }} ti-xs"></i>
-                </div>
+      <div class="card card-border-shadow-{{ $card['color'] }} h-100">
+        <div class="card-body text-center">
+          <div class="d-flex align-items-center justify-content-center mb-2">
+            <div class="avatar avatar-sm me-4">
+              <div class="avatar-initial rounded bg-label-{{ $card['color'] }}">
+                <i class="ti {{ $card['icon'] }} ti-xs"></i>
               </div>
-              <h5 class="mb-0">{{ $card['value'] }}</h5>
             </div>
-            <small class="text-center">{{ $card['title'] }}</small>
+            <h5 class="mb-0">{{ $card['value'] }}</h5>
           </div>
+          <small class="text-center">{{ $card['title'] }}</small>
         </div>
-      </a>
+      </div>
     </div>
     @endforeach
   </div>
@@ -117,26 +115,26 @@ $cards = [
     </div>
     <div id="mentorshipSessionsSection" class="card-body">
       <div class="table-responsive">
-        <table class="table table-hover" id="mentorshipSessionsTable">
+        <table class="table" id="mentorshipSessionsTable">
           <thead class="table-light">
             <tr>
               <th>{{ __('cycles.Mentor') }}</th>
               <th>{{ __('cycles.Rate/Comment') }}</th>
               <th>{{ __('cycles.Date/Time') }}</th>
               <th>{{ __('cycles.Approved') }}</th>
-              <th>{{ __('cycles.Attendance') }}</th>
+              <th>{{ __('cycles.attendance_status') }}</th>
             </tr>
           </thead>
           <tbody>
             @foreach ($mentorship_sessions as $session)
             <tr>
               <td>
-                <div class="d-flex align-items-center">
+                <a href="/dashboard/show/UserProfile/{{ $session->mentor->id }}" class="d-flex align-items-center">
                   <div class="avatar avatar-sm me-2">
                     <img src="{{ $session->mentor->image_url }}" alt="img" class="rounded">
                   </div>
-                  <span class="fw-medium">{{ $session->mentor->name }}</span>
-                </div>
+                  <span class="fw-medium text-dark">{{ $session->mentor->name }}</span>
+                </a>
               </td>
               <td>
                 @if($session->rate_comment)
@@ -145,9 +143,9 @@ $cards = [
                       <i class="ti ti-star-filled text-warning"></i>
                     @endfor
                   </div>
-                  <small class="text-muted">{{ $session->rate_comment }}</small>
+                  <small class="text-muted">{{ $session->rate_comment ?? '-' }}</small>
                 @else
-                  <small class="text-muted">{{ $session->comment }}</small>
+                  <small class="text-muted">{{ $session->comment ?? '-' }}</small>
                 @endif
               </td>
               <td>
@@ -158,7 +156,7 @@ $cards = [
                 <span class="badge {{ $session->approved ? 'bg-label-success' : 'bg-label-warning' }}">{{ $session->approved ? __($session->approved) : __('Waiting') }}</span>
               </td>
               <td>
-                <span class="badge {{ $session->done ? 'bg-label-success' : 'bg-label-secondary' }}">{{ $session->done ? __('Yes') : __('No') }}</span>
+                <span class="badge {{ $session->done ? 'bg-label-success' : 'bg-label-secondary' }}">{{ $session->done ? __('cycles.attended') : __('cycles.not_attended') }}</span>
               </td>
             </tr>
             @endforeach
@@ -181,13 +179,12 @@ $cards = [
     </div>
     <div class="card-body">
       <div class="table-responsive">
-        <table class="table table-hover startup-tblTraining">
+        <table class="table startup-tblTraining">
           <thead class="table-light">
             <tr>
               <th>{{ __('cycles.Type') }}</th>
               <th>{{ __('cycles.Title') }}</th>
-              <th>{{ __('cycles.Start') }}</th>
-              <th>{{ __('cycles.End') }}</th>
+              <th>{{ __('cycles.Date_Time') }}</th>
               <th>{{ __('cycles.details') }}</th>
             </tr>
           </thead>
@@ -196,8 +193,31 @@ $cards = [
             <tr>
               <td><span class="badge bg-label-info">{{ __('cycles.' . $session->type) }}</span></td>
               <td class="fw-medium">{{ $session->title }}</td>
-              <td>{{ $session->datetime }}</td>
-              <td>{{ $session->enddatetime ?? '-' }}</td>
+              <td>
+                @php
+                  $start  = \Carbon\Carbon::createFromTimestamp($session->datetime);
+                  $end    = $session->enddatetime ? \Carbon\Carbon::createFromTimestamp($session->enddatetime) : null;
+
+                  $startDate = $start->format('Y-m-d');
+                  $endDate   = $end ? $end->format('Y-m-d') : null;
+
+                  $startTime = $start->format('H:i:s');
+                  $endTime   = $end ? $end->format('H:i:s') : null;
+                @endphp
+                <small class="text-nowrap">
+                  @if ($session->type == 'online')
+                    {{ $startDate }} @if($endDate) - {{ $endDate }}@endif
+                  @else
+                    {{ $startDate }}
+                  @endif
+                </small>
+                <br>
+                <small>
+                  @if($session->type != 'online')
+                    {{ $startTime }}
+                  @endif
+                </small>
+              </td>
               <td>
                 @if ($session->type == 'sessions')
                   <small class="text-muted">{{ __('cycles.Duration') }}: {{ $session->duration }} {{ __('cycles.Minutes') }}</small>
@@ -223,7 +243,7 @@ $cards = [
 $(document).ready(function() {
   $('.startup-tblTraining, #mentorshipSessionsTable').DataTable({
     responsive: true,
-    pageLength: 10,
+    pageLength: 5,
     order: [[2, 'desc']]
     @if (app()->getLocale() == 'ar')
     ,language: {
