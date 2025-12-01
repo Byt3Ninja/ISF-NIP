@@ -208,7 +208,7 @@
                       class="form-select select2"
                       data-placeholder="{{ __('admin.Country')}}" 
                     >
-                      <option value="0"></option>
+                      <option value="0">{{ __('admin.Country')}}</option>
                       @foreach($countries as $country)
                       <option value="{{$country->id}}" {{($country->id==$user->country_id)? 'selected':''}}>
                         {{ $country->emoji . ' ' . $country->{'name_'.$l} }}</option>
@@ -225,7 +225,7 @@
                       name='state_id'
                       data-placeholder="{{ __('admin.State')}}"
                     >
-                      <option value="0"></option>
+                      <option value="0">{{ __('admin.State')}}</option>
                       @php $name = 'name_'.$l; @endphp
                       @if($user->state_id)
                       <option value="{{$user->state_id}}" selected>{{$user->state->{'name_'.$l} }}</option>
@@ -242,7 +242,7 @@
                       name='city_id'
                       data-placeholder="{{ __('admin.City')}}"
                     >
-                      <option value="0"></option>
+                      <option value="0">{{ __('admin.City')}}</option>
                       @php $name = 'name_'.$l; @endphp
                       @if($user->city_id)
                       <option value="{{$user->city_id}}" selected>{{$user->city->{'name_'.$l} }}</option>

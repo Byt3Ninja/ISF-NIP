@@ -11,6 +11,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\UploadedFile;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Mockery;
 
 class UserServiceTest extends TestCase
@@ -325,11 +327,41 @@ class UserServiceTest extends TestCase
     {
         Storage::fake('local');
         
-        $file = UploadedFile::fake()->create('users.xlsx', 100);
-        $mockData = [
-            ['John', 'Doe', 'john@example.com', '1234567890'],
-            ['Jane', 'Smith', 'jane@example.com', '0987654321'],
-        ];
+        // Create a real Excel file for testing
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        
+        // Add header row
+        $sheet->setCellValue('A1', 'First Name');
+        $sheet->setCellValue('B1', 'Last Name');
+        $sheet->setCellValue('C1', 'Email');
+        $sheet->setCellValue('D1', 'Phone');
+        
+        // Add data rows
+        $sheet->setCellValue('A2', 'John');
+        $sheet->setCellValue('B2', 'Doe');
+        $sheet->setCellValue('C2', 'john@example.com');
+        $sheet->setCellValue('D2', '1234567890');
+        
+        $sheet->setCellValue('A3', 'Jane');
+        $sheet->setCellValue('B3', 'Smith');
+        $sheet->setCellValue('C3', 'jane@example.com');
+        $sheet->setCellValue('D3', '0987654321');
+        
+        // Save to temporary file
+        $writer = new Xlsx($spreadsheet);
+        $tempFile = tempnam(sys_get_temp_dir(), 'test_users_');
+        $tempFile .= '.xlsx';
+        $writer->save($tempFile);
+        
+        // Create UploadedFile from the real Excel file
+        $file = new UploadedFile(
+            $tempFile,
+            'users.xlsx',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            null,
+            true
+        );
 
         $this->userRepositoryMock
             ->shouldReceive('importUsers')
@@ -344,6 +376,10 @@ class UserServiceTest extends TestCase
 
         $this->assertIsArray($result);
         $this->assertArrayHasKey('success', $result);
+        $this->assertTrue($result['success']);
+        
+        // Clean up
+        @unlink($tempFile);
     }
 
     /** @test */

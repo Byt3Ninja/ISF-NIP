@@ -1,149 +1,28 @@
-<style>
-.cursor-pointer {
-  cursor: pointer;
-}
-</style>
 <div class="col-12 mt-6">
   <div class="row justify-content-center mb-8">
     @foreach($kpiData as $key => $item)
       <div class="col-sm-6 col-md-4 col-lg-2 mb-4">
         @php
-          $isSubscribedCard = $item['label'] == 'Subscribed_Startups';
-          $isMentorshipCard = $item['label'] == 'Mentorship_Requests';
-          $isMentorshipDurationCard = $item['label'] == 'Mentorship_Sessions_Duration';
-          $isEnrolledMentorsCard = $item['label'] == 'Enrolled_Mentors';
-          $cardClasses = 'card card-border-shadow-' . $item['color'] . ' h-100';
-          $isScreeningCard = $item['label'] == 'Screening';
-          $isFinalScreeningCard = $item['label'] == 'Final_Screening';
-          if ($isSubscribedCard || $isMentorshipCard || $isMentorshipDurationCard || $isEnrolledMentorsCard || $isScreeningCard || $isFinalScreeningCard) {
-            $cardClasses .= ' cursor-pointer';
-          }
-          if ($isSubscribedCard) {
-            $cardClasses .= ' subscribed-startups-card';
-          }
-          if ($isMentorshipCard) {
-            $cardClasses .= ' mentorship-requests-card';
-          }
-          if ($isMentorshipDurationCard) {
-            $cardClasses .= ' mentorship-duration-card';
-          }
-          if ($isEnrolledMentorsCard) {
-            $cardClasses .= ' enrolled-mentors-card';
-          }
-          if ($isScreeningCard) {
-            $cardClasses .= ' screening-startups-card';
-          }
-          if ($isFinalScreeningCard) {
-            $cardClasses .= ' final-screening-startups-card';
-          }
-
-          $unitSuffix = '';
-          // if (isset($item['unit']) && $item['unit']) {
-          //   if ($item['unit'] !== 'hh:mm') {
-          //     $unitSuffix = ' ' . $item['unit'];
-          //   }
-          // }
+          $cardClasses = 'card card-border-shadow-' . $item['color'] . ' h-100 cursor-pointer kpi-filter-card';
+          $cardClasses .= ' kpi-' . $item['label'];
         @endphp
-        @if($isEnrolledMentorsCard)
-          <a href="/dashboard/show/Mentors?enrolledIn" class="text-decoration-none d-block">
-        @endif
-        <div class="{{ $cardClasses }}"
-          @if($isSubscribedCard)
-            data-url="{{ route('users.view_companies', ['programFilter' => 'all']) }}"
-          @elseif($isMentorshipCard)
-            data-url="{{ route('mentorships.sessions_list', ['show' => 'all']) }}"
-          @elseif($isScreeningCard)
-            @php
-              // Get the screening step for the selected program
-              $screeningStep = \App\Step::where('cycle_id', request('program_id'))
-                ->where('stype', 2) // stype 2 is for screening
-                ->first();
-              $screeningStepId = $screeningStep ? $screeningStep->id : 0;
-            @endphp
-            data-url="/dashboard/screening/results/{{ $screeningStepId }}"
-          @elseif($isFinalScreeningCard)
-            @php
-              // Get the final screening step for the selected program
-              $finalScreeningStep = \App\Step::where('cycle_id', request('program_id'))
-                ->where('stype', 5) // stype 5 is for final screening
-                ->first();
-              $stepId = $finalScreeningStep ? $finalScreeningStep->id : 0;
-            @endphp
-            data-url="/dashboard/final/results/{{ $stepId }}"
-          @endif
-        >
-        <div class="card-body py-2" style="display: grid; place-items: center;">
+        <div class="{{ $cardClasses }}" data-filter="{{ $item['label'] }}">
+          <div class="card-body py-2" style="display: grid; place-items: center;">
             <div class="d-flex align-items-center mb-2">
               <div class="avatar me-4">
                 <span class="avatar-initial rounded bg-label-{{ $item['color'] }}">
                   <i class="ti ti-{{ $item['icon'] }} ti-20px"></i>
                 </span>
               </div>
-              <h5 class="mb-0">{{ $item['value'] }}{!! $unitSuffix !!}</h5>
+              <h5 class="mb-0">{{ $item['value'] }}</h5>
             </div>
             <small class="text-center">{{ __('admin.' . $item['label']) }}</small>
           </div>
         </div>
-        @if($isEnrolledMentorsCard)
-          </a>
-        @endif
       </div>
     @endforeach
   </div>
 </div>
-
-@php
-  $hasCycles = isset($cycles) && $cycles->count();
-@endphp
-
-@if($hasCycles)
-<div class="modal fade" id="mentorshipDurationModal" tabindex="-1" aria-labelledby="mentorshipDurationModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="mentorshipDurationModalLabel">
-          <i class="ti ti-clock me-2"></i>
-          {{ __('admin.Mentorship_Sessions_Duration') }}
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="mb-3">
-          <label for="mentorshipDurationSelect" class="form-label">{{ __('cycles.Cycle') }}</label>
-          <select id="mentorshipDurationSelect" class="form-select select2">
-            @foreach($cycles as $cycleOption)
-              <option value="{{ $cycleOption->id }}">{{ $cycleOption->title }}</option>
-            @endforeach
-          </select>
-        </div>
-
-        <div class="table-responsive" id="mentorshipDurationTableWrapper">
-          <table class="table table-striped" id="mentorshipDurationTable">
-            <thead class="table-light">
-              <tr>
-                <th style="width: 60px;">#</th>
-                <th>{{ __('cycles.Company') }}</th>
-                <th>{{ __('cycles.Mentor') }}</th>
-                <th>{{ __('cycles.Date/Time') }}</th>
-                <th>{{ __('cycles.Duration') }}</th>
-              </tr>
-            </thead>
-            <tbody id="mentorshipDurationTableBody"></tbody>
-          </table>
-        </div>
-
-        <div class="text-center py-5 d-none" id="mentorshipDurationEmpty">
-          <i class="ti ti-info-circle text-secondary display-4 d-block mb-3"></i>
-          <p class="mb-0">{{ __('admin.No_Mentorship_Sessions') }}</p>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('admin.Close') }}</button>
-      </div>
-    </div>
-  </div>
-</div>
-@endif
 
 <div class="col-12 mt-6">
   <div class="card border">
@@ -171,20 +50,13 @@
         <table class="table table-hover" id="tblCycleKPIs">
           <thead class="table-light">
             <tr>
-              <th><small>{{ __('admin.Program') }}</small></th>
-              <th><small>{{ __('admin.Organization') }}</small></th>
-              <th><small>{{ __('admin.Start_Date') }}</small></th>
-              <th><small>{{ __('admin.End_Date') }}</small></th>
-              <th><small>{{ __('admin.Subscribed_Startups') }}</small></th>
-              <th><small>{{ __('admin.Enrolled_Mentors') }}</small></th>
-              <th><small>{{ __('admin.Mentorship_Requests') }}</small></th>
-              <th><small>{{ __('admin.Mentorship_Sessions_Duration') }}</small></th>
-              <th><small>{{ __('admin.Startups_Attendance_Rate') }}</small></th>
-              <th><small>{{ __('admin.Training_Sessions') }}</small></th>
-              <th><small>{{ __('admin.Training_Sessions_Duration') }} (h)</small></th>
-              <th><small>{{ __('admin.First_Screening') }}</small></th>
-              <th><small>{{ __('admin.Final_Screening') }}</small></th>
-              <th><small>{{ __('admin.Actions') }}</small></th>
+              <th>{{ __('admin.Program') }}</th>
+              <th>{{ __('admin.Organization') }}</th>
+              <th>{{ __('admin.Start_Date') }}</th>
+              <th>{{ __('admin.End_Date') }}</th>
+              <th>{{ __('admin.Subscribed_Startups') }}</th>
+              <th>{{ __('admin.Enrolled_Mentors') }}</th>
+              <th>{{ __('admin.Actions') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -192,22 +64,18 @@
               @php($kpi = $cycles_kpis[$_cycle->id] ?? null)
               @if($kpi)
                 <tr data-cycle-id="{{ $_cycle->id }}">
-                  <td><small>{{ $_cycle->title }}</small></td>
-                  <td><small>{{ $_cycle->organization->name ?? '-' }}</small></td>
-                  <td><small>{{ $_cycle->start_format ?? '' }}</small></td>
-                  <td><small>{{ $_cycle->end_format ?? '' }}</small></td>
-                  <td><small>{{ $kpi['startups'] }}</small></td>
-                  <td><small>{{ $kpi['mentors_count'] }}</small></td>
-                  <td><small>{{ $kpi['mentorRequests_count'] }}</small></td>
-                  <td><small>{{ $kpi['mentorships_period_formatted'] }}</small></td>
-                  <td><small>{{ (int) ($kpi['mentorship_attendance_rate'] ?? 0) }}%</small></td>
-                  <td><small>{{ $kpi['training_sessions_count'] }}</small></td>
-                  <td><small>{{ number_format($kpi['training_sessions_period'], 1) }}</small></td>
-                  <td><small>{{ $kpi['screening_sessions_count'] }}</small></td>
-                  <td><small>{{ $kpi['final_screening_count'] }}</small></td>
+                  <td>{{ $_cycle->title }}</td>
+                  <td>{{ $_cycle->organization->name ?? '-' }}</td>
+                  <td>{{ $_cycle->start_format ?? '' }}</td>
+                  <td>{{ $_cycle->end_format ?? '' }}</td>
+                  <td>{{ $kpi['startups'] }}</td>
+                  <td>{{ $kpi['mentors_count'] }}</td>
                   <td>
-                    <a href="/dashboard/programlist/report/{{ $_cycle->id }}" class="btn btn-sm btn-primary">
-                      <i class="ti ti-eye me-1"></i>{{ __('admin.View_Report') }}
+                    <a 
+                      href="/dashboard/programlist/report/{{ $_cycle->id }}" 
+                      class="btn btn-sm btn-primary text-nowrap"
+                    >
+                      <i class="ti ti-file-text ti-16px me-1"></i>{{ __('admin.View_Report') }}
                     </a>
                   </td>
                 </tr>
@@ -218,30 +86,10 @@
       </div>
     </div>
   </div>
+</div>
+
 <script>
-  // Handle card clicks for screening and final screening
-  function handleCardClick(event) {
-    const card = $(event.currentTarget);
-    const url = card.data('url');
-    
-    if (url) {
-      if (url.includes('screening/results') || url.includes('final/results')) {
-        // For screening and final screening, the URL already includes the step ID
-        event.preventDefault();
-        window.location.href = url;
-        return false;
-      }
-      
-      // For other card types, use default behavior
-      window.location.href = url;
-    }
-  }
-
-  // Initialize card click handlers
-  $('.screening-startups-card, .final-screening-startups-card').on('click', handleCardClick);
-
   $(document).ready(function() {
-    // Initialize DataTable for Per Program KPIs
     let cyclesKpiTable = $('#tblCycleKPIs').DataTable({
       responsive: true,
       pageLength: 10,
@@ -279,6 +127,58 @@
 
     // Build and inject filters
     addFiltersRow();
+
+    // KPI Card Click Handler
+    let currentKpiFilter = null;
+
+    $('.kpi-filter-card').on('click', function() {
+      const filterType = $(this).data('filter');
+      
+      // Remove active state from all KPI cards
+      $('.kpi-filter-card').removeClass('border-primary').css('opacity', '1');
+      
+      if (currentKpiFilter === filterType) {
+        // If clicking the same filter, reset
+        currentKpiFilter = null;
+        applyKpiFilter(null);
+      } else {
+        // Apply new filter
+        currentKpiFilter = filterType;
+        $(this).addClass('border-primary').css('opacity', '1');
+        $('.kpi-filter-card').not(this).css('opacity', '0.6');
+        applyKpiFilter(filterType);
+      }
+    });
+
+    function applyKpiFilter(filterType) {
+      // Get ongoing and completed program IDs from controller
+      const ongoingIds = @json($ongoingCycles->pluck('id')->toArray() ?? []);
+      const completedIds = @json($completed_programs->pluck('id')->toArray() ?? []);
+
+      // Remove previous KPI filter
+      $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(function(fn) {
+        return fn.toString().indexOf('KPI_FILTER') === -1;
+      });
+
+      if (filterType === 'ongoing_programs') {
+        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+          if (settings.nTable.id !== 'tblCycleKPIs') return true;
+          const row = cyclesKpiTable.row(dataIndex).node();
+          const cycleId = $(row).data('cycle-id');
+          return ongoingIds.includes(cycleId); // KPI_FILTER
+        });
+      } else if (filterType === 'completed_programs') {
+        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+          if (settings.nTable.id !== 'tblCycleKPIs') return true;
+          const row = cyclesKpiTable.row(dataIndex).node();
+          const cycleId = $(row).data('cycle-id');
+          return completedIds.includes(cycleId); // KPI_FILTER
+        });
+      }
+      // If filterType is 'total_programs' or null, show all (no custom filter)
+
+      cyclesKpiTable.draw();
+    }
 
     // Build and inject filters in a dedicated row above the table
     function addFiltersRow() {
@@ -407,9 +307,9 @@
           const startDate = $('#startDateFilter').val();
           const endDate = $('#endDateFilter').val();
 
-          // Remove previous custom filter
+          // Remove previous custom filter but keep KPI filter
           $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(function(fn) {
-            return fn.toString().indexOf('tblCycleKPIs') === -1;
+            return fn.toString().indexOf('tblCycleKPIs') === -1 || fn.toString().indexOf('KPI_FILTER') !== -1;
           });
           
           if (startDate || endDate) {
@@ -458,16 +358,15 @@
           // Clear organization filter
           $('#orgFilterSelect').val('').trigger('change');
           
-          // Remove custom date filters
+          // Remove custom date filters but keep KPI filter
           $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(function(fn) {
-            return fn.toString().indexOf('tblCycleKPIs') === -1;
+            return fn.toString().indexOf('tblCycleKPIs') === -1 || fn.toString().indexOf('KPI_FILTER') !== -1;
           });
           
           cyclesKpiTable.draw();
         });
       }
     }
-
 
     // Export helper
     window.exportCyclesKpi = function(format) {
@@ -477,118 +376,6 @@
       } catch (e) {
         console.error('Export error:', e);
       }
-    }
-
-    const mentorshipSessionsData = @json($cycles_sessions ?? []);
-    const mentorshipCycles = @json(
-      isset($cycles)
-        ? $cycles->map(fn($cycle) => ['id' => $cycle->id, 'title' => $cycle->title])->values()
-        : []
-    );
-    let selectedCycleIdForDuration = null;
-
-    $(document).on('click', '.subscribed-startups-card', function (event) {
-      event.preventDefault();
-      const targetUrl = $(this).data('url');
-      if (targetUrl) {
-        window.location.href = targetUrl;
-      }
-    });
-
-    $(document).on('click', '.mentorship-requests-card', function (event) {
-      event.preventDefault();
-      const targetUrl = $(this).data('url');
-      if (targetUrl) {
-        window.location.href = targetUrl;
-      }
-    });
-
-    $(document).on('click', '.screening-startups-card', function (event) {
-      event.preventDefault();
-      const targetUrl = $(this).data('url');
-      if (targetUrl) {
-        window.location.href = targetUrl;
-      }
-    });
-
-    $(document).on('click', '.final-screening-startups-card', function (event) {
-      event.preventDefault();
-      const targetUrl = $(this).data('url');
-      if (targetUrl) {
-        window.location.href = targetUrl;
-      }
-    });
-
-    $(document).on('click', '.mentorship-duration-card', function (event) {
-      event.preventDefault();
-      const modalElement = document.getElementById('mentorshipDurationModal');
-      if (!modalElement) {
-        return;
-      }
-
-      const $select = $('#mentorshipDurationSelect');
-      if ($select.length && !$select.hasClass('select2-hidden-accessible')) {
-        $select.select2({
-          dropdownParent: $('#mentorshipDurationModal'),
-          width: '100%'
-        });
-      }
-
-      const availableCycleIds = mentorshipCycles.map(cycle => String(cycle.id));
-      const defaultCycleId = selectedCycleIdForDuration && availableCycleIds.includes(String(selectedCycleIdForDuration))
-        ? String(selectedCycleIdForDuration)
-        : (availableCycleIds[0] ?? '');
-
-      if (defaultCycleId) {
-        $select.val(defaultCycleId).trigger('change');
-      } else {
-        renderMentorshipSessions('');
-      }
-
-      const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
-      modalInstance.show();
-    });
-
-    $('#mentorshipDurationSelect').on('change', function () {
-      const cycleId = $(this).val();
-      renderMentorshipSessions(cycleId);
-    });
-
-    $('#tblCycleKPIs tbody').on('click', 'tr', function () {
-      const cycleId = $(this).data('cycle-id');
-      if (!cycleId) {
-        return;
-      }
-      selectedCycleIdForDuration = cycleId;
-      $('#tblCycleKPIs tbody tr').removeClass('selected');
-      $(this).addClass('selected');
-    });
-
-    function renderMentorshipSessions(cycleId) {
-      const $tableWrapper = $('#mentorshipDurationTableWrapper');
-      const $tbody = $('#mentorshipDurationTableBody');
-      const $emptyState = $('#mentorshipDurationEmpty');
-
-      $tbody.empty();
-
-      if (!cycleId || !mentorshipSessionsData || !mentorshipSessionsData[cycleId] || mentorshipSessionsData[cycleId].length === 0) {
-        $tableWrapper.addClass('d-none');
-        $emptyState.removeClass('d-none');
-        return;
-      }
-
-      $tableWrapper.removeClass('d-none');
-      $emptyState.addClass('d-none');
-
-      mentorshipSessionsData[cycleId].forEach((session, index) => {
-        const $row = $('<tr/>');
-        $row.append($('<td/>').text(index + 1));
-        $row.append($('<td/>').text(session.startup || '-'));
-        $row.append($('<td/>').text(session.mentor || '-'));
-        $row.append($('<td/>').text(session.zoom_date || '-'));
-        $row.append($('<td/>').text(session.duration_formatted || '00:00'));
-        $tbody.append($row);
-      });
     }
   });
 </script>

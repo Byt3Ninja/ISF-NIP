@@ -54,8 +54,8 @@ class ProgramServiceTest extends TestCase
 
         $result = $this->programService->getProgramMentors($program->id);
 
-        $this->assertIsObject($result);
-        // Should return paginated mentors
+        $this->assertInstanceOf(\Illuminate\Contracts\Pagination\LengthAwarePaginator::class, $result);
+        $this->assertGreaterThan(0, $result->count());
     }
 
     /** @test */
@@ -69,8 +69,10 @@ class ProgramServiceTest extends TestCase
 
         $result = $this->programService->getProgramMentors(99999);
 
-        $this->assertIsObject($result);
-        // Should return not found response
+        // Service returns error response using ApiResponder trait
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('success', $result);
+        $this->assertFalse($result['success']);
     }
 
     /** @test */
@@ -95,7 +97,7 @@ class ProgramServiceTest extends TestCase
 
         $result = $this->programService->getProgramMentors($program->id, 'John');
 
-        $this->assertIsObject($result);
+        $this->assertInstanceOf(\Illuminate\Contracts\Pagination\LengthAwarePaginator::class, $result);
     }
 
     /** @test */

@@ -494,62 +494,60 @@
       <!-- End Time Sheets -->
 
       
-<!-- Start Assessments -->
-<li
-class="{{ Request::is('dashboard/question-assessment*', 'dashboard/answerOption*', 'dashboard/analysis-assessment*', 'dashboard/history-assessment*', 'dashboard/category-assessment*') ? 'sidebar-group-active open' : '' }} menu-item">
-  <a class="menu-link menu-toggle">
-  <i class="ti ti-circle-dashed-check ti-md me-3"></i>
-  <div>{{ __('admin.Assessments') }}</div>
-  </a>
-  
-<ul class="menu-sub">
-  {{-- <li class="{{ Request::is('dashboard/questions*') ? 'active' : '' }} menu-item">
-    <a href="{{ route('questions.index') }}" class="menu-link">
-      <i class="bx bx-message"></i>
-      <div>{{ __('admin.AddQuestions') }}</div>
-    </a>
-  </li>
-  <li class="{{ Request::is('dashboard/answerOption*') ? 'active' : '' }} menu-item">
-    <a href="{{ route('answerOption.index') }}" class="menu-link">
-      <i class="bx bx-message"></i>
-      <div>{{ __('admin.AddAnswerOption') }}</div>
-    </a>
-  </li> --}}
+      <!-- Start Assessments -->
+      <li
+      class="{{ Request::is('dashboard/question-assessment*', 'dashboard/answerOption*', 'dashboard/analysis-assessment*', 'dashboard/history-assessment*', 'dashboard/category-assessment*') ? 'sidebar-group-active open' : '' }} menu-item">
+        <a class="menu-link menu-toggle">
+        <i class="ti ti-circle-dashed-check ti-md me-3"></i>
+        <div>{{ __('admin.Assessments') }}</div>
+        </a>
+        
+      <ul class="menu-sub">
+        {{-- <li class="{{ Request::is('dashboard/questions*') ? 'active' : '' }} menu-item">
+          <a href="{{ route('questions.index') }}" class="menu-link">
+            <i class="bx bx-message"></i>
+            <div>{{ __('admin.AddQuestions') }}</div>
+          </a>
+        </li>
+        <li class="{{ Request::is('dashboard/answerOption*') ? 'active' : '' }} menu-item">
+          <a href="{{ route('answerOption.index') }}" class="menu-link">
+            <i class="bx bx-message"></i>
+            <div>{{ __('admin.AddAnswerOption') }}</div>
+          </a>
+        </li> --}}
 
 
-  <li class="{{ Request::is('*assessments') ? 'active' : '' }} menu-item">
-    <a href="{{ route('assessments.index') }}" class="menu-link">
-      <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-      <span class="menu-item"> {{ __('admin.Manage_Assessments') }}</span>
-    </a>
-  </li>
+        <li class="{{ Request::is('*assessments') ? 'active' : '' }} menu-item">
+          <a href="{{ route('assessments.index') }}" class="menu-link">
+            <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+            <span class="menu-item"> {{ __('admin.Manage_Assessments') }}</span>
+          </a>
+        </li>
 
-  {{-- <li class="{{ Request::is('dashboard/question-assessment*') ? 'active' : '' }} menu-item">
-    <a href="{{ route('assessments.take') }}" class="menu-link">
-      <span class="menu-item">{{ __('admin.Question_Assessment') }}</span>
-      <i class="bx bx-message"></i>
-    </a>
-  </li>
-  <li class="{{ Request::is('dashboard/analysis-assessment*') ? 'active' : '' }} menu-item">
-    <a href="{{ route('assessments.results_history_view') }}" class="menu-link">
-      <span class="menu-item">{{ __('admin.Analysis_Assessment') }}</span>
-      <i class="bx bx-message"></i>
-    </a>
-  </li>
+        {{-- <li class="{{ Request::is('dashboard/question-assessment*') ? 'active' : '' }} menu-item">
+          <a href="{{ route('assessments.take') }}" class="menu-link">
+            <span class="menu-item">{{ __('admin.Question_Assessment') }}</span>
+            <i class="bx bx-message"></i>
+          </a>
+        </li>
+        <li class="{{ Request::is('dashboard/analysis-assessment*') ? 'active' : '' }} menu-item">
+          <a href="{{ route('assessments.results_history_view') }}" class="menu-link">
+            <span class="menu-item">{{ __('admin.Analysis_Assessment') }}</span>
+            <i class="bx bx-message"></i>
+          </a>
+        </li>
 
-  <li class="{{ Request::is('dashboard/history-assessment*') ? 'active' : '' }} menu-item">
-    <a href="{{ route('assessments.results_history_view') }}" class="menu-link">
-      <span class="menu-item">{{ __('admin.History_Assessment') }}</span>
-      <i class="bx bx-message"></i>
-    </a>
-  </li> --}}
+        <li class="{{ Request::is('dashboard/history-assessment*') ? 'active' : '' }} menu-item">
+          <a href="{{ route('assessments.results_history_view') }}" class="menu-link">
+            <span class="menu-item">{{ __('admin.History_Assessment') }}</span>
+            <i class="bx bx-message"></i>
+          </a>
+        </li> --}}
 
-</ul>
-</li>
+      </ul>
+      </li>
 
-<!-- End Assessment -->
-
-
+      <!-- End Assessment -->
 
       <li class="{{ Request::is('dashboard/screening*') ? 'sidebar-group-active open' : '' }} menu-item">
         <a class="menu-link menu-toggle">
@@ -758,14 +756,25 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/answerOption*
         </ul>
       </li>
 
-      @if (!$_user->hasAnyRole('Mentor|Judger'))
+    @endif
+
+      @if( !$_user->hasAnyRole('Mentor|Judger') )
         <li
-          class="{{ Request::is('*services*', '*serviceCategories*', 'dashboard/requests/all') ? 'sidebar-group-active open' : '' }} menu-item">
+          class="{{ Request::is('*services*', '*serviceCategories*', 'dashboard/requests/all', 'dashboard/services_providers*') ? 'sidebar-group-active open' : '' }} menu-item">
           <a class="menu-link menu-toggle">
             <i class="menu-icon tf-icons ti ti-arrows-move"></i>
             <div>{{ __('admin.Services') }}</div>
           </a>
           <ul class="menu-sub">
+            @if( $_user->ableTo('services_providers.index', $permissions) )
+            <li class="{{ Request::is('dashboard/services_providers*') ? 'active' : '' }} menu-item">
+              <a class="menu-link" href="{{ route('services_providers.index') }}">
+                <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+                <span class="menu-item">{{ __('admin.ServiceProviders') }}</span>
+              </a>
+            </li>
+            @endif
+            @if( $_user->ableToAny(['service_requests.list_all', 'service_requests.list_archived'], $permissions) )
             <li
               class="{{ Request::is('dashboard/requests/all', 'dashboard/requests/old') ? 'active' : '' }} menu-item">
               <a class="menu-link" href="{{ route('service_requests.list_all') }}">
@@ -773,29 +782,35 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/answerOption*
                 <span class="menu-item">{{ __('admin.Requests') }}</span>
               </a>
             </li>
+            @endif
+            @if( $_user->ableTo('services.create', $permissions) )
             <li class="{{ Request::is('dashboard/services/create') ? 'active' : '' }} menu-item">
               <a class="menu-link" href="{{ route('services.create') }}">
                 <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
                 <span class="menu-item">{{ __('admin.Add Service') }}</span>
               </a>
             </li>
+            @endif
+            @if( $_user->ableTo('services.index', $permissions) )
             <li class="{{ Request::is('dashboard/services', 'dashboard/services/*/edit') ? 'active' : '' }} menu-item">
               <a class="menu-link" href="{{ route('services.index') }}">
                 <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
                 <span class="menu-item">{{ __('admin.All Services') }}</span>
               </a>
-            </li>                                    
+            </li>
+            @endif
+            @if( $_user->ableTo('serviceCategories.index', $permissions) )
             <li class="{{ Request::is('dashboard/serviceCategories*') ? 'active' : '' }} menu-item">
               <a class="menu-link" href="{{ route('serviceCategories.index') }}">
                 <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
                 <span class="menu-item">{{ __('admin.Services Categories') }}</span>
               </a>
             </li>
+            @endif
           </ul>
         </li>
       @endif
-    @endif
-   
+    
     @if ($_user->hasAnyRole('organizationManager|Admin'))
       <li class="{{ Request::is('*users*', 'dashboard/judger', '*roles', '*activities*', '*audit-logs*') ? 'sidebar-group-active open' : '' }} menu-item">
         <a class="menu-link menu-toggle">

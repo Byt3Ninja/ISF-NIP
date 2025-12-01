@@ -592,4 +592,7 @@ return [
     'public_link_copied_successfully' => 'تم نسخ الرابط العام بنجاح',
     'private_link_copied_successfully' => 'تم نسخ الرابط الخاص بنجاح',
     'No Old Requests' => 'لا توجد طلبات قديمة',
+    'attendance_status' => 'حالة الحضور',
+    'attended' => 'حضر',
+    'not_attended' => 'لم يحضر',
 ];

@@ -34,7 +34,7 @@
                 <li><a class="dropdown-item" href="javascript:void(0)" id="exportCsv"><i class="ti ti-file-text me-2"></i>CSV</a></li>
               </ul>
             </div>
-            @if (count($received) > 0 && $countold)
+            @if( $_user->ableTo('service_requests.list_archived') || ( count($received) > 0 && $countold > 0 ) )
               <a href="/dashboard/requests/old" class="btn btn-primary text-nowrap">
                 <i class="ti ti-eye me-1 me-md-2"></i>
                 {{ __('cycles.Show old records') }}

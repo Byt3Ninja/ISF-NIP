@@ -191,7 +191,6 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     // Service Providers
 
     Route::resource('services_providers', 'serviceProviderController');
-    Route::get('services-providers/mails/{name?}', 'serviceProviderController@tst_view');
     Route::get('services-providers/requests', 'serviceProviderController@requests')->name('services_providers.requests');
     Route::post('services-providers/requests/take-action', 'serviceProviderController@takeAction')->name('services_providers.takeAction');
 

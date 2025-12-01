@@ -599,4 +599,7 @@ return [
     'public_link_copied_successfully' => 'Public link copied successfully',
     'private_link_copied_successfully' => 'Private link copied successfully',
     'No Old Requests' => 'No old requests',
+    'attendance_status' => 'Attendance Status',
+    'attended' => 'Attended',
+    'not_attended' => 'Not Attended',
 ];
