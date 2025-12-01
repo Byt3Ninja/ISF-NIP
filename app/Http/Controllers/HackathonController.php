@@ -881,7 +881,7 @@ class HackathonController extends Controller
             'field_ids' => implode(",", $field_map_ids)
         ];
 
-        $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->whereIn('form_data.field_id', $field_map_ids)->orderBy('id', 'ASC')->get();
+        $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->whereIn('form_data.field_id', $field_map_ids)->orderBy('form_fields.id', 'ASC')->get();
         $days = request()->query('days', 14);
         $company = $user->company;
         $stepData = $company?->stepdata;
