@@ -2133,7 +2133,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		  }).then((result) => {
 				if (result.isConfirmed) {
 					// Show loading state
-					buttonElement.prop('disabled', true).html('<i class="tia ti-loader ti-spin"></i>');
+					buttonElement.prop('disabled', true).html('<i class="ti ti-loader ti-spin"></i>');
 					
 					$.ajax({
 						type: "POST",
