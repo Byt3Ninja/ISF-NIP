@@ -2544,4 +2544,5 @@ return [
 	'Service request rated, thank you for your feedback' => 'Service request rated, thank you for your feedback',
 	'ongoing_programs' => 'Ongoing Programs',
 	'completed_programs' => 'Completed Programs',
+	'view_hackathon' => 'View Hackathon',
 ];

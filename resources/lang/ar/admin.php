@@ -2597,4 +2597,5 @@ return [
 	'Service request rated, thank you for your feedback' => 'تم تقييم طلب الخدمة, شكرا لتعليقك',
 	'ongoing_programs' => 'البرامج الجارية',
 	'completed_programs' => 'البرامج المكتملة',
+	'view_hackathon' => 'عرض الهاكاثون'
 ];
