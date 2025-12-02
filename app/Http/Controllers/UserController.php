@@ -153,9 +153,10 @@ class UserController extends Controller
 	 * @param  \App\User  $User
 	 * @return \Illuminate\Http\Response
 	 */
-	public function updatePassword(UpdateUserPasswordRequest $request,User $user)
+	public function updatePassword(UpdateUserPasswordRequest $request /*,User $user*/)
 	{
 		$this->authorize('updatePassword', Auth::user());
+		$user = User::find($request->id);
 	
 		$result= $this->userService->updatePassword($user, $request->all());
 
