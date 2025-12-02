@@ -2599,4 +2599,5 @@ return [
 	'completed_programs' => 'البرامج المكتملة',
 	'view_hackathon' => 'عرض الهاكاثون',
 	'Login as User' => 'تسجيل الدخول كمستخدم',
+	'Almuni' => ' الخريجين ',
 ];

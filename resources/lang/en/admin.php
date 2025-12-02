@@ -2546,4 +2546,5 @@ return [
 	'completed_programs' => 'Completed Programs',
 	'view_hackathon' => 'View Hackathon',
 	'Login as User' => 'Login as User',
+	'Almuni' => 'Alumni',
 ];
