@@ -186,8 +186,8 @@
                 {{-- Stats --}}
                 <div class="d-flex justify-content-between align-items-center border-bottom pb-6 mb-6 mt-2">
                   <a 
-                    @if ($_user->ableTo('users.view_companies', $permissions))
-                      href="/dashboard/companies?programFilter={{ $cycle->id }}"
+                    @if ($_user->ableTo('cycles.users_manage', $permissions))
+                      href="/dashboard/cycles/{{ $cycle->id }}/registered"
                     @else
                       href="javascript:void(0);" 
                     @endif
