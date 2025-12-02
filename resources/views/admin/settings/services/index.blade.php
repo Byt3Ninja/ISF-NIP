@@ -39,7 +39,7 @@
                       <li><a class="dropdown-item" href="javascript:void(0)" id="exportCsv"><i class="ti ti-file-text me-2"></i>CSV</a></li>
                     </ul>
                   </div>
-                  @if( $_user->ableToAny(['serviceCategories.create', 'serviceCategories.store'], $permissions) )
+                  @if( $_user->ableToAny(['services.create', 'services.store'], $permissions) )
                   <div class="invoice-create-btn">
                     <a href="{{ route('services.create') }}" class="btn btn-primary glow">
                       <i class="ti ti-plus me-2"></i> {{ __('cycles.Add New') }}
@@ -145,11 +145,9 @@
                                 <i class="ti ti-dots-vertical"></i>
                               </button>
                               <ul class="dropdown-menu" aria-labelledby="actionsDropdown{{ $service->id }}">
-                                @if($_user->ableToAny(['services.show', 'services.edit', 'services.update'],
-                                $permissions))
+                                @if($_user->ableToAny(['services.show', 'services.edit', 'services.update'], $permissions))
                                 <li>
-                                  <a class="dropdown-item d-flex align-items-center"
-                                    href="{{ route('services.edit', ['service' => $service->id]) }}">
+                                  <a class="dropdown-item d-flex align-items-center" href="{{ route('services.edit', ['service' => $service->id]) }}">
                                     <i class="ti ti-pencil me-1"></i> {{ __('admin.Edit') }}
                                   </a>
                                 </li>

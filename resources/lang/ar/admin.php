@@ -69,6 +69,7 @@ return [
 	'About Settings' => 'إعدادات عنا',
 	'Contact Settings' => 'إعدادات اتصل بنا',
 	'Services Categories' => 'فئات الخدمات',
+	'Manage Services' => 'ادارة الخدمات',
 	'Service Status' => 'حالة الخدمة',
 	'Add new service category' => 'إضافة فئة ',
 	'English Name' => 'إسم الشركة باللغة الإنجليزية',
@@ -2589,9 +2590,13 @@ return [
 	'ConfirmRejectMessage' => 'هل أنت متأكد من رفض هذا الطلب؟ <br /> سيتم إرسال بريد إلكتروني إلى المستخدم مع سبب الرفض',
 	'RejectRequest' => 'رفض الطلب',
 	'ReasonIsRequired' => 'سبب الرفض مطلوب',
+	'ServiceProviders' => 'مقدمي الخدمات',
 	'Service Provider' => 'مقدم الخدمة',
-	
 	'Service not found' => 'خدمة غير موجودة',
 	'Service request not found' => 'طلب خدمة غير موجود',
 	'Service request rated, thank you for your feedback' => 'تم تقييم طلب الخدمة, شكرا لتعليقك',
+	'ongoing_programs' => 'البرامج الجارية',
+	'completed_programs' => 'البرامج المكتملة',
+	'view_hackathon' => 'عرض الهاكاثون',
+	'Login as User' => 'تسجيل الدخول كمستخدم',
 ];

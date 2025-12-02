@@ -909,7 +909,7 @@
 										</div>
 									</div>
 									<div class="card-datatable table-responsive">
-										<table class="table">
+										<table class="datatables-basic table slots-table">
 											<thead class="table-light">
 												<th> {{ __('mentor.days_date') }} </th>
 												<th> {{ __('dashboard.Weekly') }} </th>
@@ -969,7 +969,7 @@
 							<div class="col-md-12">
 								<div class="card">
 									<div class="card-header">
-										<h5 class="card-title mb-0">
+										<h5 class="card-title mb-0 text-capitalize">
 											{{ __("dashboard.My next mentorship sessions") }}
 										</h5>
 									</div>
@@ -1556,10 +1556,10 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 					<i class="ti ti-x me-2"></i>
 					{{ __('admin.Cancel') }}
 				</button>
-				<button type="button" class="btn btn-primary" id="completePrerequisitesBtn">
+				<a class="btn btn-primary" id="completePrerequisitesBtn">
 					<i class="ti ti-external-link me-2"></i>
 					{{ __('dashboard.Complete Prerequisites & Join') }}
-				</button>
+				</a>
 			</div>
 		</div>
 	</div>
@@ -1624,140 +1624,171 @@ document.addEventListener('DOMContentLoaded', function() {
 @if( array_intersect(['dashboard.widgets_tables_my_current_schedule_view'], $permissions) )
 	<script src="/vuexy/assets/js/mentor-schedule.js"></script>
 @endif
-	<script>
-		window.handleJoinClick = function(button) {
-			const cycleId = button.getAttribute('data-cycle-id');
-			const hasPreRequests = button.getAttribute('data-has-pre');
-			const joinUrl = button.getAttribute('data-join-url');
-			const preRequests = JSON.parse(button.getAttribute('data-pre-requests') || '[]');
+<script>
+	let completionCheckInterval = null;
 
-			if (hasPreRequests === 'true') {
-				// Populate modal
-				const list = document.getElementById('prerequisitesList');
-				list.innerHTML = '';
-				preRequests.forEach(pr => {
-					const li = document.createElement('li');
-					li.className = 'list-group-item d-flex align-items-center';
-					li.innerHTML = `
-						<i class="ti ti-circle-check me-2 text-warning"></i>
-						<a href="${pr.url}?action=complete-profile" target="_blank" class="text-decoration-none flex-grow-1">${pr.label}</a>
-					`;
-					list.appendChild(li);
-				});
+	// -------------------------------------------------------
+	// MAIN JOIN BUTTON HANDLER
+	// -------------------------------------------------------
+	window.handleJoinClick = function(button) {
+		const hasPreRequests = button.getAttribute('data-has-pre');
+		const preRequests = JSON.parse(button.getAttribute('data-pre-requests') || '[]');
 
-				// Set buttons
-				document.getElementById('completePrerequisitesBtn').onclick = function() {
-					if (preRequests.length > 0) {
-						const firstReq = preRequests[0];
-						if (firstReq.action === 'complete-profile') {
-							window.location.href = firstReq.url + '?action=complete-profile';
-						} else {
-							localStorage.setItem('prerequisitesOpened', 'true');
-							window.open(`${firstReq.url}?action=complete-profile`, '_blank');
-						}
-					}
-					$('#prerequisitesModal').modal('hide');
-				};
+		if (hasPreRequests === 'true') {
+			populatePrerequisiteModal(preRequests);
 
-				// Show modal
-				$('#prerequisitesModal').modal('show');
-			} else {
-				window.location.href = joinUrl;
-			}
-		}
-
-		// Check if page should refresh when user returns from completing prerequisites
-		window.addEventListener('focus', function() {
-			if (localStorage.getItem('prerequisitesOpened') === 'true') {
-				localStorage.removeItem('prerequisitesOpened');
-				// Refresh the page to update prerequisite status
-				window.location.reload();
-			}
-		});
-
-		// Real-time completion status checking
-		let completionCheckInterval;
-
-		function startCompletionStatusCheck() {
-			// Check every 5 seconds to reduce API calls
-			completionCheckInterval = setInterval(function() {
-				fetch('{{ route('cycles.completion_status_check') }}', {
-					method: 'GET',
-					headers: {
-						'X-Requested-With': 'XMLHttpRequest',
-						'Content-Type': 'application/json',
-						'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-					}
-				})
-				.then(response => response.json())
-				.then(data => {
-					updateUIWithCompletionStatus(data);
-				})
-				.catch(error => {
-					console.log('Error checking completion status:', error);
-				});
-			}, 5000); // Check every 5 seconds to reduce API calls
-		}
-
-		function updateUIWithCompletionStatus(data) {
-			const hasPreRequests = data.has_pre_requests;
-			const preRequests = data.pre_requests || [];
-				
-			// Find all join buttons
-			const joinButtons = document.querySelectorAll('button[onclick*="handleJoinClick"]');
-			if (joinButtons.length === 0) {
-				console.log('No join buttons found');
-				return;
-			}
-
-			// Update each button appearance and text
-			joinButtons.forEach(joinButton => {
-					joinButton.className = 'btn btn-primary';
-					joinButton.innerHTML = '<span class="me-2">{{ __('dashboard.Join now') }}</span><i class="ti ti-arrows-join"></i>';
-		
-					// Update button data attributes
-					joinButton.setAttribute('data-has-pre', hasPreRequests ? 'true' : 'false');
-					joinButton.setAttribute('data-pre-requests', JSON.stringify(preRequests.map(pr => ({
-							url: `${pr.url}?action=complete-profile`,
-							label: pr.label,
-					}))));
-			});
-
-			// Find all prerequisites alerts
-			const alertDivs = document.querySelectorAll('.alert.alert-info');
-			alertDivs.forEach(alertDiv => {
-				if (hasPreRequests) {
-					// Update the alert content
-					const listElement = alertDiv.querySelector('.list-unstyled');
-					if (listElement) {
-						listElement.innerHTML = '';
-						preRequests.forEach(pr => {
-							const li = document.createElement('li');
-							li.className = 'pre-request-item';
-							li.innerHTML = `
-								<a href="${pr.url}?action=complete-profile" class="btn btn-sm btn-outline-info d-flex align-items-center gap-2" role="button" aria-label="${pr.label}">
-									<i class="ti ti-external-link"></i>
-									<span>${pr.label}</span>
-								</a>
-							`;
-							listElement.appendChild(li);
-						});
-					}
-					alertDiv.style.display = 'block';
-				} else {
-					// Hide the alert if no prerequisites
-					alertDiv.style.display = 'none';
-				}
-			});
-		}
-
-		// Start checking when page loads
-		@if(isset($pollingNeeded) && $pollingNeeded)
-		document.addEventListener('DOMContentLoaded', function() {
+			// Start polling ONLY while modal is open
 			startCompletionStatusCheck();
-		});
-		@endif
-	</script>
+
+			$('#prerequisitesModal').on('hidden.bs.modal', stopCompletionStatusCheck);
+			$('#prerequisitesModal').modal('show');
+		} else {
+			window.location.href = button.getAttribute('data-join-url');
+		}
+	};
+
+	// -------------------------------------------------------
+	// POPULATE MODAL ITEMS
+	// -------------------------------------------------------
+	function populatePrerequisiteModal(preRequests) {
+		console.log('Populating prerequisites modal with:', preRequests);
+    const list = document.getElementById('prerequisitesList');
+    list.innerHTML = '';
+
+    preRequests.forEach(pr => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item d-flex align-items-center';
+        li.innerHTML = `
+            <i class="ti ti-circle-check me-2 text-warning"></i>
+            <a href="${pr.url}?action=complete-profile" 
+               target="_blank" 
+               class="text-decoration-none flex-grow-1">
+               ${pr.label}
+            </a>`;
+        list.appendChild(li);
+    });
+
+    // ----------------------------------------
+    // Attach modal action button link
+    // ----------------------------------------
+    const modalBtn = document.getElementById('completePrerequisitesBtn');
+
+    if (preRequests.length > 0) {
+			const firstUrl = `${preRequests[0].url}?action=complete-profile`;
+
+			modalBtn.setAttribute('href', firstUrl);
+			
+			// Save state so page refreshes when returning
+			modalBtn.onclick = function () {
+				localStorage.setItem('prerequisitesOpened', 'true');
+			};
+    }
+	}
+
+
+	// -------------------------------------------------------
+	// SINGLE CHECKER FUNCTION
+	// -------------------------------------------------------
+	function checkCompletionStatus() {
+		return fetch('{{ route('cycles.completion_status_check') }}', {
+			method: 'GET',
+			headers: {
+				'X-Requested-With': 'XMLHttpRequest',
+				'Content-Type': 'application/json',
+				'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+			}
+		})
+		.then(res => res.json())
+		.then(data => {
+			updateUIWithCompletionStatus(data);
+
+			// Auto-stop polling when prerequisites are completed
+			if (!data.has_pre_requests) {
+				stopCompletionStatusCheck();
+				$('#prerequisitesModal').modal('hide');
+			}
+		})
+		.catch(err => console.error("Error:", err));
+	}
+
+	// -------------------------------------------------------
+	// UPDATE UI BASED ON COMPLETION STATUS
+	// -------------------------------------------------------
+
+	function updateUIWithCompletionStatus(data) {
+    const hasPreRequests = data.has_pre_requests;
+    const preRequests = data.pre_requests || [];
+
+    // Update Join buttons
+    const joinButtons = document.querySelectorAll('button[onclick*="handleJoinClick"]');
+    joinButtons.forEach(joinButton => {
+        joinButton.className = 'btn btn-primary';
+        joinButton.innerHTML = '<span class="me-2">{{ __("dashboard.Join now") }}</span><i class="ti ti-arrows-join"></i>';
+
+        joinButton.setAttribute('data-has-pre', hasPreRequests ? 'true' : 'false');
+        joinButton.setAttribute('data-pre-requests', JSON.stringify(preRequests.map(pr => ({
+            url: `${pr.url}?action=complete-profile`,
+            label: pr.label,
+        }))));
+    });
+
+    // Update alert boxes
+    const alertDivs = document.querySelectorAll('.alert.alert-info');
+    alertDivs.forEach(alertDiv => {
+        if (hasPreRequests) {
+            const listElement = alertDiv.querySelector('.list-unstyled');
+            if (listElement) {
+                listElement.innerHTML = '';
+                preRequests.forEach(pr => {
+                    const li = document.createElement('li');
+                    li.className = 'pre-request-item';
+                    li.innerHTML = `
+                        <a href="${pr.url}?action=complete-profile"
+                           class="btn btn-sm btn-outline-info d-flex align-items-center gap-2">
+                           <i class="ti ti-external-link"></i>
+                           <span>${pr.label}</span>
+                        </a>`;
+                    listElement.appendChild(li);
+                });
+            }
+            alertDiv.style.display = 'block';
+        } else {
+            alertDiv.style.display = 'none';
+        }
+    });
+	}
+
+	// -------------------------------------------------------
+	// START POLLING — ONLY WHEN NEEDED
+	// -------------------------------------------------------
+	function startCompletionStatusCheck() {
+		if (completionCheckInterval) return; // Prevent duplicates
+
+		completionCheckInterval = setInterval(checkCompletionStatus, 5000);
+	}
+
+	// -------------------------------------------------------
+	// STOP POLLING
+	// -------------------------------------------------------
+	function stopCompletionStatusCheck() {
+		if (completionCheckInterval) {
+			clearInterval(completionCheckInterval);
+			completionCheckInterval = null;
+		}
+	}
+
+	// -------------------------------------------------------
+	// REFRESH WHEN USER RETURNS TO PAGE
+	// -------------------------------------------------------
+	window.addEventListener('focus', function() {
+		if (localStorage.getItem('prerequisitesOpened') === 'true') {
+			localStorage.removeItem('prerequisitesOpened');
+			window.location.reload();
+		}
+	});
+
+</script>
+
 	<script>
 		// Initialize DataTable with pagination configuration
 		$(document).on('click', '.show-passcode', function(e) {
@@ -2082,6 +2113,10 @@ document.addEventListener('DOMContentLoaded', function() {
 		$('.delete-slot').click(function() {
 		  const slotId = $(this).data('value');
 		  const buttonElement = $(this);
+			const rowElement = buttonElement.closest('tr');
+
+			console.log('Deleting slot ID:', slotId);
+			console.log('rowElement', rowElement);
 
 		  Swal.fire({
 				title: "{{__('mentor.delete_slot_confirm')}}",
@@ -2099,31 +2134,31 @@ document.addEventListener('DOMContentLoaded', function() {
 				if (result.isConfirmed) {
 					// Show loading state
 					buttonElement.prop('disabled', true).html('<i class="ti ti-loader ti-spin"></i>');
-
+					
 					$.ajax({
-					type: "POST",
-					url: `/dashboard/availability/remove-slot/${slotId}`,
-					headers: {
-						'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-					},
-					success: function(response) {
-						console.log('response', response);
-						buttonElement.prop('disabled', false).html('<i class="ti ti-trash ti-16px"></i>');
-						releaseSuccessAlert({
-							title: response?.title || "{{ __('admin.Deleted') }}!",
-							message:response?.message || "{{ __('admin.DeletedSuccessfully') }}.",
-						});
-					},
-					error: function(jqXHR, statusText, error) {
-						buttonElement.prop('disabled', false).html('<i class="ti ti-trash ti-16px"></i>');
-						console.log('jqXHR', jqXHR)
-						console.log('statusText', statusText)
-						console.log('error', error)
-						releaseFailureAlert({
-							title: jqXHR.responseJSON?.title || "{{ __('admin.Error') }}!",
-							message: jqXHR.responseJSON?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
-						});
-					}
+						type: "POST",
+						url: `/dashboard/availability/remove-slot/${slotId}`,
+						headers: {
+							'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+						},
+						success: function(response) {
+							// console.log('response', response);
+							buttonElement.prop('disabled', false).html('<i class="ti ti-trash ti-16px"></i>');
+							rowElement.remove(); // Remove the row from the table immediately
+							
+							releaseSuccessAlert({
+								title: response?.title || "{{ __('admin.Deleted') }}!",
+								message:response?.message || "{{ __('admin.DeletedSuccessfully') }}.",
+							});
+						},
+						error: function(jqXHR, statusText, error) {
+							buttonElement.prop('disabled', false).html('<i class="ti ti-trash ti-16px"></i>');
+
+							releaseFailureAlert({
+								title: jqXHR.responseJSON?.title || "{{ __('admin.Error') }}!",
+								message: jqXHR.responseJSON?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
+							});
+						}
 					});
 				}
 		  });

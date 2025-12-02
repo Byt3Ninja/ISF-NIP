@@ -187,7 +187,7 @@
       var type = $(e.target).data('bs-target').replace('#', ''); // e.g. "mentorship"
 
       // Hide/show program selection card based on active tab
-      if (type === 'cycles') {
+      if (type === 'cycles' || type === 'companies') {
         $('#programSelectionCard').hide();
       } else {
         $('#programSelectionCard').show();

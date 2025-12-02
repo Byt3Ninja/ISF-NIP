@@ -156,6 +156,11 @@ $pills =
       ? ['briefcase', 'target', 'users', 'file-text', 'components']
       : ['briefcase', 'target', 'users', 'file-text'];
 
+if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('registered') && $company?->id === $_user?->company_id ) )
+{
+  $pills[] = 'startup_growth';
+  $pillsIcons[] = 'chart-dots-2';
+}
 // Static Programs List
 $programs = [
     (object)[
@@ -206,6 +211,24 @@ $programsSummary = [
 
 <div class="content-wrapper position-relative">
   <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="row">
+			@if( session()->has('success') )
+			<div class="col-md-12 mb-2">
+				<div role="alert" class="alert alert-success alert-dismissible">
+					{{ session()->get('success') }}
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>
+			</div>
+			@endif
+			@if( session()->has('error') )
+			<div class="col-md-12 mb-2">
+				<div role="alert" class="alert alert-danger alert-dismissible">
+					{{ session()->get('error') }}
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>
+			</div>
+			@endif
+		</div>
     @if($_user->hasRole('Judger'))
       <div class="d-flex align-items-center gap-3 mb-6">
         <a id="save-screening-btn" class="btn btn-sm btn-icon shadow btn-white rounded-circle">
@@ -289,6 +312,13 @@ $programsSummary = [
       <section class="tab-pane fade" id="pitch_deck" role="tabpanel" aria-labelledby="pitch-deck-tab">
         @include('admin.clients.startup.partials._startup_pitch_deck')
       </section>
+
+      @if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('registered') && $company?->id === $_user?->company_id ) )
+      <!-- Startup growth Section -->
+      <section class="tab-pane fade" id="startup_growth" role="tabpanel" aria-labelledby="startup-growth-tab">
+        @include('admin.clients.startup.partials._startup_growth')
+      </section>
+      @endif
 
       <!-- Programs Section -->
       <section class="tab-pane fade" id="programs_summary" role="tabpanel" aria-labelledby="programs-summery-tab">

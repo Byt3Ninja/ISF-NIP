@@ -122,7 +122,7 @@
                       @if ($cycle->join_url)
                         <li>
                           <a 
-                            class="dropdown-item"
+                            class="dropdown-item text-capitalize"
                             href="javascript:void(0);"
                             onclick="copyToClipboard('{{ $cycle->join_url }}', 'public');"
                           >
@@ -133,7 +133,7 @@
                       @if ($cycle->private)
                         <li>
                           <a 
-                            class="dropdown-item"
+                            class="dropdown-item text-capitalize"
                             href="javascript:void(0);"
                             onclick="copyToClipboard('{{ url('dashboard/cycles/view/' . $cycle->private) }}', 'private')"
                           >
@@ -155,12 +155,6 @@
                         <li>
                           <a class="dropdown-item" href="/dashboard/hackathon/dashboard/{{ $cycle->id }}">
                             <i class="ti ti-settings me-1"></i> {{ __('admin.manage_hackathon') }}
-                          </a>
-                        </li>
-                      @else
-                        <li>
-                          <a class="dropdown-item" href="{{ route('programs.report', $cycle->id) }}">
-                            <i class="ti ti-file-text me-1"></i> {{ __('admin.View_Report') }}
                           </a>
                         </li>
                       @endif
@@ -259,15 +253,19 @@
                 </p>
 
                   {{-- Footer Actions --}}
-                <div class="mt-auto">
+                <div class="d-flex align-items-center gap-3 mt-auto">
                   <a
                     @if ($cycle->type === 'Hackathon')                   
                       href="/dashboard/hackathon/details/{{ $cycle->id }}" 
                     @else
                       href="/dashboard/programlist/{{ $cycle->id }}" 
                     @endif
-                    class="btn btn-primary w-100">
-                    {{ __('admin.View_Details') }}
+                    class="btn btn-primary flex-grow-1">
+                    <i class="ti ti-eye me-1"></i> 
+                    {{ $cycle->type === 'Hackathon' ? __('admin.view_hackathon') : __('admin.View_Details') }}
+                  </a>
+                  <a  class="btn btn-outline-primary flex-grow-1" href="{{ route('programs.report', $cycle->id) }}">
+                    <i class="ti ti-file-text me-1"></i> {{ __('admin.View_Report') }}
                   </a>
                 </div>
               </div>

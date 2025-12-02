@@ -40,6 +40,9 @@ class UserModelTest extends TestCase
     {
         $company = Company::factory()->create();
         $user = User::factory()->create(['company_id' => $company->id]);
+        
+        // Refresh to ensure relationship is loaded
+        $user->refresh();
 
         $this->assertInstanceOf(Company::class, $user->company);
         $this->assertEquals($company->id, $user->company->id);
@@ -50,6 +53,9 @@ class UserModelTest extends TestCase
     {
         $organization = Organization::factory()->create();
         $user = User::factory()->create(['organization_id' => $organization->id]);
+        
+        // Refresh to ensure relationship is loaded
+        $user->refresh();
 
         $this->assertInstanceOf(Organization::class, $user->organization);
         $this->assertEquals($organization->id, $user->organization->id);
@@ -87,6 +93,9 @@ class UserModelTest extends TestCase
             'first_name_en' => 'John',
             'last_name_en' => 'Doe',
         ]);
+        
+        // Refresh to ensure attributes are loaded
+        $user->refresh();
 
         $this->assertEquals('John Doe', $user->name);
     }
@@ -99,6 +108,9 @@ class UserModelTest extends TestCase
             'first_name_ar' => 'جون',
             'last_name_ar' => 'دو',
         ]);
+        
+        // Refresh to ensure attributes are loaded
+        $user->refresh();
 
         $this->assertEquals('جون دو', $user->name);
     }
@@ -107,6 +119,9 @@ class UserModelTest extends TestCase
     public function it_has_image_url_attribute()
     {
         $user = User::factory()->create(['img_url' => 'test.jpg']);
+        
+        // Refresh to ensure attributes are loaded
+        $user->refresh();
 
         $this->assertStringContainsString('test.jpg', $user->image_url);
     }
@@ -115,6 +130,9 @@ class UserModelTest extends TestCase
     public function it_returns_placeholder_when_no_image()
     {
         $user = User::factory()->create(['img_url' => null]);
+        
+        // Refresh to ensure attributes are loaded
+        $user->refresh();
 
         $this->assertStringContainsString('placeholder', $user->image_url);
     }
@@ -128,6 +146,9 @@ class UserModelTest extends TestCase
             'address' => 'Test Address',
             'timezone' => 'UTC',
         ]);
+        
+        // Refresh to ensure attributes are loaded
+        $user->refresh();
 
         $this->assertTrue($user->hasCompletedProfile());
     }
@@ -138,7 +159,12 @@ class UserModelTest extends TestCase
         $user = User::factory()->create([
             'phone' => null,
             'country_id' => null,
+            'address' => null,
+            'timezone' => null,
         ]);
+        
+        // Refresh to ensure attributes are loaded
+        $user->refresh();
 
         $this->assertFalse($user->hasCompletedProfile());
     }
@@ -153,6 +179,9 @@ class UserModelTest extends TestCase
             'stage' => 1,
         ]);
         $user = User::factory()->create(['company_id' => $company->id]);
+        
+        // Refresh to ensure relationship is loaded
+        $user->refresh();
 
         $this->assertTrue($user->hasCompletedStartup());
     }
@@ -162,8 +191,14 @@ class UserModelTest extends TestCase
     {
         $company = Company::factory()->create([
             'name_en' => null,
+            'address_en' => null,
+            'est_date' => null,
+            'stage' => null,
         ]);
         $user = User::factory()->create(['company_id' => $company->id]);
+        
+        // Refresh to ensure relationship is loaded
+        $user->refresh();
 
         $this->assertFalse($user->hasCompletedStartup());
     }
@@ -176,6 +211,9 @@ class UserModelTest extends TestCase
         $user->assignRole('Admin');
         $role->givePermissionTo('users.index');
         $role->givePermissionTo('users.create');
+        
+        // Refresh to ensure relationships are loaded
+        $user->refresh();
 
         $permissions = $user->myPermissions();
 

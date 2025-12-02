@@ -3,29 +3,12 @@
 @section('style')
   <link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify.min.css">
   <link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify-bootstrap.min.css">
-  
-  <style>
-    /* Spinning icon animation for loading states */
-    .spinner-icon {
-      animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  </style>
 @stop
 
 @section('content')
   <!-- BEGIN: Content-->
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
-      <div class="content-header">
-        <div class="col">
-          <h3 class="fw-bold">{{ __('cycles.Mentorship Sessions') }}</h3>
-        </div>
-      </div>
       <div class="content-body">
         <section id="alerts">
           @if (session()->has('message'))
@@ -45,28 +28,15 @@
         <section class="row">
           <div class="col-12">
             <div class="card">
-              <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-center border-bottom pb-3 mb-6">
-                <div class="mb-4 mb-md-0 d-flex flex-wrap gap-2">
-                  <button onclick="redirect('all')" class="btn btn-{{ request()->show == 'all' ? 'primary' : 'label-secondary' }}">
-                    {{ __('cycles.All requests') }}
-                  </button>
-                  <button onclick="redirect('')" class="btn btn-{{ !request()->show ? 'primary' : 'label-secondary' }}">
-                    {{ __('cycles.New requests only') }}
-                  </button>
-                  <button onclick="redirect('approved')" class="btn btn-{{ request()->show == 'approved' ? 'primary' : 'label-secondary' }}">
-                    {{ __('cycles.approved requests') }}
-                  </button>
-                  <button onclick="redirect('disapproved')" class="btn btn-{{ request()->show == 'disapproved' ? 'primary' : 'label-secondary' }}">
-                    {{ __('cycles.disapproved requests') }}
-                  </button>
-                </div>
+              <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-center border-bottom">
+                <h5 class="card-title mb-0">{{ __('cycles.Mentorship Sessions') }}</h5>
                 <div class="d-flex align-items-center gap-2">
                   <!-- Filter Modal Trigger -->
                   <button type="button" class="btn btn-label-primary" data-bs-toggle="modal" data-bs-target="#filterModal">
                     <i class="ti ti-filter me-2"></i>
                     {{ __('cycles.Filter') }}
                   </button>
-                  @if(request()->hasAny(['start_date', 'end_date', 'done', 'cycle_id']))
+                  @if(request()->hasAny(['start_date', 'end_date', 'done', 'cycle_id', 'show']))
                   <button onclick="resetFilters()" class="btn btn-outline-secondary">
                     <i class="ti ti-refresh me-2"></i>
                     {{ __('cycles.Reset') }}
@@ -84,208 +54,150 @@
                 </div>
               </div>
 
-              <div class="card-body">
-               <!-- Filter Modal -->
-                <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
-                  <div class="modal-dialog modal-dialog-centered modal-md">
-                    <div class="modal-content">
-                      <form id="filterForm" method="GET" action="{{ url()->current() }}">
-                        <input type="hidden" name="show" value="all">
-                        <div class="modal-header">
-                          <h5 class="modal-title" id="filterModalLabel">{{ __('cycles.Filter_Sessions') }}</h5>
-                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('Cancel') }}"></button>
-                        </div>
-
-                        <div class="modal-body">
-                          <div class="row g-6">
-                            <!-- Start Date -->
-                            <div class="col-12 col-md-6">
-                              <label for="start_date" class="form-label">{{ __('cycles.Start_Date') }}</label>
-                              <input type="text" id="filter_start_date" name="start_date" class="form-control datepicker-filter" 
-                                value="{{ request('start_date') }}" placeholder="{{ __('cycles.Start_Date') }}">
-                              <div class="invalid-feedback" id="start_date_error"></div>
-                            </div>
-
-                            <!-- End Date -->
-                            <div class="col-12 col-md-6">
-                              <label for="end_date" class="form-label">{{ __('cycles.End_Date') }}</label>
-                              <input type="text" id="filter_end_date" name="end_date" class="form-control datepicker-filter" 
-                                value="{{ request('end_date') }}" placeholder="{{ __('cycles.End_Date') }}">
-                              <div class="invalid-feedback" id="end_date_error"></div>
-                            </div>
-
-                            <!-- Done Filter -->
-                            <div class="col-12">
-                              <label for="doneValueSelect" class="form-label">{{ __('cycles.Completion_Status') }}</label>
-                              <select class="form-select select2" name="done" data-placeholder="{{ __('cycles.Select_Completion_Status') }}" id="doneValueSelect">
-                                <option value="all" {{ request()->done == 'all' ? 'selected' : '' }}>{{ __('cycles.All') }}</option>
-                                <option value="yes" {{ request()->done == 'yes' ? 'selected' : '' }}>{{ __('admin.Yes') }}</option>
-                                <option value="no" {{ request()->done == 'no' ? 'selected' : '' }}>{{ __('admin.No') }}</option>
-                              </select>
-                            </div>
-
-                            <!-- Cycle -->
-                            <div class="col-12">
-                              <label for="cycle_id" class="form-label">{{ __('cycles.Cycle') }}</label>
-                              <select class="form-select select2" name="cycle_id">
-                                <option value="" disabled>{{ __('cycles.Select_Program') }}</option>
-                                <option value="all" {{ !request()->cycle_id ? 'selected' : '' }}>{{ __('admin.All_Programs') }}</option>
-                                @foreach ($cycles as $cycle)
-                                  <option value="{{ $cycle->id }}" {{ request()->cycle_id == $cycle->id ? 'selected' : '' }}>
-                                    {{ $cycle->title }}
-                                  </option>
-                                @endforeach
-                              </select>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
-                          <button type="submit" class="btn btn-primary">{{ __('cycles.Apply_Filters') }}</button>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-                </div>
-                <div class="table-responsive">
-                  <table class="table" id="userstable">
-                    <thead class="table-light">
+              <div class="card-datatable table-responsive">
+                <table class="datatable-basic table" id="mentorship-sessions-table">
+                  <thead class="table-light">
+                    <tr>
+                      <th>{{ __('cycles.Company') }}</th>
+                      <th>{{ __('cycles.User/Title') }}</th>
+                      <th>{{ __('cycles.Mentor') }}</th>
+                      <th>{{ __('cycles.Cycle') }}</th>
+                      <th>{{ __('cycles.Rate/Comment') }}</th>
+                      <th class="text-nowrap">{{ __('cycles.Created At') }}</th>
+                      <th>{{ __('cycles.Date/Time') }}</th>
+                      <th>{{ __('cycles.Approved') }}</th>
+                      <th>{{ __('cycles.Done') }}</th>
+                      <th>{{ __('cycles.Actions') }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @foreach ($sessions as $session)
                       <tr>
-                        <th>{{ __('cycles.Company') }}</th>
-                        <th>{{ __('cycles.User/Title') }}</th>
-                        <th>{{ __('cycles.Mentor') }}</th>
-                        <th>{{ __('cycles.Cycle') }}</th>
-                        <th>{{ __('cycles.Rate/Comment') }}</th>
-                        <th class="text-nowrap">{{ __('cycles.Created At') }}</th>
-                        <th>{{ __('cycles.Date/Time') }}</th>
-                        <th>{{ __('cycles.Approved') }}</th>
-                        <th>{{ __('cycles.Done') }}</th>
-                        <th>{{ __('cycles.Actions') }}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      @foreach  ($sessions as $session)
-                        <tr>
-                          <td>
-                            <div class="d-flex align-items-center w-px-150">
-                              <a href="/dashboard/companyProfile/{{ $session->user->company->id ?? '' }}">
-                                <img 
-                                  onerror="this.src='/images/logo-placeholder.png'"
-                                  src="{{ $session->user->company->logo_url ?? '' }}" alt="avatar" class="rounded-circle me-2 border bg-label-light" height="40" width="40">
-                              </a>
-                              <a href="/dashboard/companyProfile/{{ $session->user->company->id ?? '' }}">
-                                {{ $session->user->company->{'name_' . $l} ?? '' }}
-                              </a>
-                            </div>
-                          </td>
-                          <td>
-                            <div class="d-flex align-items-center">
-                              <a href="/dashboard/users/{{ $session->user_id }}/edit">
-                                @if( !in_array(env('APP_ENV', 'local'), ['local']) )
-                                <img 
-                                  onerror="if(this.src!='/icons/account.svg'){this.onerror=null;this.src='/icons/account.svg';}"
-                                  src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
-                              @endif
-                                </a>
-                              <div>
-                                <h6 class="mb-0 text-nowrap">{{ $session->user->{'first_name_' . $l} }} {{ $session->user->{'last_name_' . $l} }}</h6>
-                                <small>{{ $session->user->{'title_' . $l} }}</small>
-                              </div>
-                            </div>
-                          </td>
-                          <td>
-                            <div class="d-flex align-items-center">
+                        <td>
+                          <a  href="/dashboard/companyProfile/{{ $session->user->company->id ?? '' }}" class="d-flex align-items-center" style="width: 130px;">
+                            <img 
+                              onerror="this.src='/images/logo-placeholder.png'"
+                              src="{{ $session->user->company->logo_url ?? '' }}" alt="avatar" class="rounded-circle me-2 border bg-label-light flex-shrink-0" height="36" width="36">
+                            <small class="text-dark">{{ $session->user->company->{'name_' . $l} ?? '' }}</small>
+                          </a>
+                        </td>
+                        <td>
+                          <div class="d-flex align-items-center" style="width: 130px;">
+                            <a href="/dashboard/users/{{ $session->user_id }}/edit">
                               @if( !in_array(env('APP_ENV', 'local'), ['local']) )
                               <img 
                                 onerror="if(this.src!='/icons/account.svg'){this.onerror=null;this.src='/icons/account.svg';}"
-                                src="{{ $session->mentor->image_url ?? '' }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
-                                @endif
-                              {{ $session->mentor->name ?? '' }}
+                                src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle me-2 flex-shrink-0" height="36" width="36">
+                            @endif
+                              </a>
+                            <div class="overflow-hidden">
+                              <small class="text-dark">{{ $session->user->{'first_name_' . $l} }} {{ $session->user->{'last_name_' . $l} }}</small>
+                              <small class="d-block text-muted">{{ $session->user->{'title_' . $l} }}</small>
                             </div>
-                          </td>
-                          <td>
-                            {{ optional($cycles->firstWhere('id', $session->cycle_id))->title }}
-                          </td>
-                          <td>
-                            <small>{!! $session->rate_comment ? str_repeat('<i class="ti tis-star text-warning"></i>', $session->rating) . '<br>' . $session->rate_comment : $session->comment !!}</small>
-                          </td>
-                          <td>
-                            <small>{{ $session->created_at }}</small>
-                          </td>
-                          <td>
-                            <small>{{ $session->zoom_date }} ({{ $session->period }}M)</small>
-                          </td>
-                          <td>
-                              @if( $session->approved )
-                              @if( $session->approved == 'Yes' )
-                              <span class="badge bg-label-success" >
+                          </div>
+                        </td>
+                        <td>
+                          <a href="/dashboard/show/UserProfile/{{ $session->mentor->id }}" class="d-flex align-items-center" style="min-width: 130px;">
+                            @if( !in_array(env('APP_ENV', 'local'), ['local']) )
+                            <img 
+                              onerror="if(this.src!='/icons/account.svg'){this.onerror=null;this.src='/icons/account.svg';}"
+                              src="{{ $session->mentor->image_url ?? '' }}" alt="avatar" class="rounded-circle me-2 flex-shrink-0" height="36" width="36">
+                              @endif
+                            <small class="text-dark">{{ $session->mentor->name ?? '' }}</small>
+                          </a>
+                        </td>
+                        <td style="width: 130px;">
+                          <small class="d-block">{{ optional($cycles->firstWhere('id', $session->cycle_id))->title }}</small>
+                        </td>
+                        <td style="min-width: 200px; max-width: 300px;">
+                          <div class="d-flex align-items-center gap-1 mb-1">
+                            <strong>{{ number_format($session->rating ?? 0, 1) }}</strong>
+                            <i class="ti ti-star-filled ti-16px text-warning"></i>
+                          </div>
+
+                          @if($session->comment)
+                            <p class="small text-muted d-block">{!! $session->comment !!}</p>
+                          @else
+                            <small class="text-muted block">{{ __('admin.No comment provided') }}</small>
+                          @endif
+                        </td>
+                        <td class="text-nowrap" style="width: 100px;">
+                          <small>{{ $session->created_at ? $session->created_at->format('d-m-Y') : '' }}</small>
+                          <small class="d-block">{{ $session->created_at ? $session->created_at->format('H:i:s') : '' }}</small>
+                        </td>
+                        <td class="text-nowrap" style="min-width: 150px;">
+                          <small>{{ $session->zoom_date ? $session->zoom_date->format('d-m-Y') : '' }}</small>
+                          <small class="d-block">{{ $session->zoom_date ? $session->zoom_date->format('H:i:s') : '' }} ({{ $session->period ?? '' }}M)</small>
+                        </td>
+                        <td style="min-width: 100px;">
+                            @if( $session->approved )
+                            @if( $session->approved == 'Yes' )
+                            <span class="badge bg-label-success" >
                               {{ __('admin.Yes') }}
-                              </span>
-                              @else
-                              <span class="badge bg-label-danger" >
-                              {{ __('admin.No') }}
-                              </span>
-                              @endif
-                              @else
-                              <span class="badge bg-label-warning" >
-                              {{ __('admin.Waiting') }}
-                              </span>
-                              @endif
-                            
-                          </td>
-                          <td>
-                            <span class="badge bg-label-{{ $session->done ? 'success' : 'danger' }}">
-                              {{ $session->done ? __('Yes') : __('No') }}
                             </span>
-                          </td>
-                          <td>
-                            <div class="btn-group">
-                              <button class="me-1 btn-icon rounded-circle btn btn-sm btn-label-info" onclick="edit({{ $session->id }})" title="Edit">
-                                <i class="ti ti-edit"></i>
+                            @else
+                            <span class="badge bg-label-danger" >
+                              {{ __('admin.No') }}
+                            </span>
+                            @endif
+                            @else
+                            <span class="badge bg-label-warning" >
+                              {{ __('admin.Waiting') }}
+                            </span>
+                            @endif
+                          
+                        </td>
+                        <td style="min-width: 80px;">
+                          <span class="badge bg-label-{{ $session->done ? 'success' : 'danger' }}">
+                            {{ $session->done ? __('Yes') : __('No') }}
+                          </span>
+                        </td>
+                        <td style="min-width: 280px;">
+                          <div class="d-flex flex-wrap gap-1">
+                            <button class="btn-icon rounded-circle btn btn-sm btn-label-info" onclick="edit({{ $session->id }})" title="Edit">
+                              <i class="ti ti-edit"></i>
+                            </button>
+                            @if( $session->datetime >= now() )
+                            <button class="btn-icon rounded-circle btn btn-sm btn-label-danger" onclick="deleteme({{ $session->id }})" title="Delete">
+                              <i class="ti ti-trash"></i>
+                            </button>
+                            @endif
+                            @if (!$session->approved)
+                              <button class="btn-icon rounded-circle btn btn-sm btn-label-success" onclick="approve({{ $session->id }}, 'Yes')" title="Approve">
+                                <i class="ti ti-check"></i>
                               </button>
-                              @if( $session->datetime >= now() )
-                              <button class="me-1 btn-icon rounded-circle btn btn-sm btn-label-danger" onclick="deleteme({{ $session->id }})" title="Delete">
-                                <i class="ti ti-trash"></i>
+                              <button class="btn-icon rounded-circle btn btn-sm btn-label-danger" onclick="approve({{ $session->id }}, 'No')" title="Disapprove">
+                                <i class="ti ti-x"></i>
+                              </button>
+                            @endif
+                            @if ($session->join_url)
+                              <a href="{{ $session->start_url }}" target="_blank" class="btn-icon rounded-circle btn btn-sm btn-label-secondary" title="Start Meeting">
+                                <i class="ti ti-device-computer-camera"></i>
+                              </a>
+                              <a href="{{ $session->join_url }}" target="_blank" class="btn-icon rounded-circle btn btn-sm btn-label-primary" title="Join only">
+                                <i class="ti ti-user"></i>
+                              </a>
+                              @if( !empty( $session->zoom_passcode ) )
+                              <button data-passcode="{{ $session->zoom_passcode }}" title="Show Passcode" type="button"
+                                class="btn-icon rounded-circle btn btn-sm btn-label-warning show-passcode">
+                                <i class="ti ti-key"></i>
                               </button>
                               @endif
-                              @if (!$session->approved)
-                                <button class="me-1 btn-icon rounded-circle btn btn-sm btn-label-success" onclick="approve({{ $session->id }}, 'Yes')" title="Approve">
-                                  <i class="ti ti-check"></i>
-                                </button>
-                                <button class="me-1 btn-icon rounded-circle btn btn-sm btn-label-danger" onclick="approve({{ $session->id }}, 'No')" title="Disapprove">
-                                  <i class="ti ti-x"></i>
-                                </button>
-                              @endif
-                              @if ($session->join_url)
-                                <a href="{{ $session->start_url }}" target="_blank" class="me-1 btn-icon rounded-circle btn btn-sm btn-label-secondary" title="Start Meeting">
-                                  <i class="ti ti-device-computer-camera"></i>
-                                </a>
-                                <a href="{{ $session->join_url }}" target="_blank" class="me-1 btn-icon rounded-circle btn btn-sm btn-label-primary" title="Join only">
-                                  <i class="ti ti-user"></i>
-                                </a>
-                                @if( !empty( $session->zoom_passcode ) )
-                                <button data-passcode="{{ $session->zoom_passcode }}" title="Show Passcode" type="button"
-                                  class="me-1 btn-icon rounded-circle btn btn-sm btn-label-warning show-passcode">
-                                  <i class="ti ti-key"></i>
-                                </button>
-                                @endif
-                              @endif
-                              @if ($session->fileurl)
-                                <a href="/dashboard/private/{{ $session->fileurl }}" target="_blank" class="me-1 btn-icon rounded-circle btn btn-sm btn-light" title="Download attached">
-                                  <i class="ti ti-download"></i>
-                                </a>
-                              @endif
-                              <button title="View Report" type="button" onclick="openReportsModal({{ $session->id }})" class="btn btn-icon btn-label-warning rounded-circle waves-effect">
-                                 <i class="ti ti-file-text"></i>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      @endforeach
-                    </tbody>
-                  </table>
-                </div>
+                            @endif
+                            @if ($session->fileurl)
+                              <a href="/dashboard/private/{{ $session->fileurl }}" target="_blank" class="btn-icon rounded-circle btn btn-sm btn-light" title="Download attached">
+                                <i class="ti ti-download"></i>
+                              </a>
+                            @endif
+                            <button title="View Report" type="button" onclick="openReportsModal({{ $session->id }})" class="btn btn-icon btn-label-warning rounded-circle waves-effect">
+                              <i class="ti ti-file-text"></i>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    @endforeach
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -294,6 +206,85 @@
     </div>
   </div>
   <!-- END: Content-->
+
+  <!-- Filter Modal -->
+  <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <form id="filterForm" method="GET" action="{{ url()->current() }}">
+          <div class="modal-header">
+            <h5 class="modal-title d-flex align-items-center" id="filterModalLabel">
+              <i class="ti ti-filter me-2"></i> {{ __('cycles.Filter_Sessions') }}
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('Cancel') }}"></button>
+          </div>
+
+          <div class="modal-body">
+            <div class="row g-6">
+              <!-- Request Status -->
+              <div class="col-12">
+                <label for="showSelect" class="form-label">{{ __('cycles.Request_Status') }}</label>
+                <select class="form-select" name="show" data-placeholder="{{ __('cycles.Select_Status') }}" id="showSelect">
+                  {{-- @if(!request()->show) --}}
+                  <option value="" {{ !request()->show ? 'selected' : '' }}>{{ __('cycles.New requests only') }}</option>
+                  {{-- @endif --}}
+                  <option value="all" {{ request()->show == 'all' ? 'selected' : '' }}>{{ __('cycles.All requests') }}</option>
+                  <option value="approved" {{ request()->show == 'approved' ? 'selected' : '' }}>{{ __('cycles.approved requests') }}</option>
+                  <option value="disapproved" {{ request()->show == 'disapproved' ? 'selected' : '' }}>{{ __('cycles.disapproved requests') }}</option>
+                </select>
+              </div>
+            
+              <!-- Done Filter -->
+              <div class="col-12">
+                <label for="doneValueSelect" class="form-label">{{ __('cycles.Completion_Status') }}</label>
+                <select class="form-select select2" name="done" data-placeholder="{{ __('cycles.Select_Completion_Status') }}" id="doneValueSelect">
+                  <option value="all" {{ request()->done == 'all' ? 'selected' : '' }}>{{ __('cycles.All') }}</option>
+                  <option value="yes" {{ request()->done == 'yes' ? 'selected' : '' }}>{{ __('admin.Yes') }}</option>
+                  <option value="no" {{ request()->done == 'no' ? 'selected' : '' }}>{{ __('admin.No') }}</option>
+                </select>
+              </div>
+              
+              <!-- Cycle -->
+              <div class="col-12">
+                <label for="cycle_id" class="form-label">{{ __('cycles.Cycle') }}</label>
+                <select class="form-select select2" name="cycle_id">
+                  <option value="" disabled>{{ __('cycles.Select_Program') }}</option>
+                  <option value="all" {{ !request()->cycle_id ? 'selected' : '' }}>{{ __('admin.All_Programs') }}</option>
+                  @foreach ($cycles as $cycle)
+                    <option value="{{ $cycle->id }}" {{ request()->cycle_id == $cycle->id ? 'selected' : '' }}>
+                      {{ $cycle->title }}
+                    </option>
+                  @endforeach
+                </select>
+              </div>
+
+              <!-- Start Date -->
+              <div class="col-12 col-md-6">
+                <label for="start_date" class="form-label">{{ __('cycles.Start_Date') }}</label>
+                <input type="text" id="filter_start_date" name="start_date" class="form-control datepicker-filter"
+                  value="{{ request('start_date') }}" placeholder="{{ __('cycles.Start_Date') }}">
+                <div class="invalid-feedback" id="start_date_error"></div>
+              </div>
+
+              <!-- End Date -->
+              <div class="col-12 col-md-6">
+                <label for="end_date" class="form-label">{{ __('cycles.End_Date') }}</label>
+                <input type="text" id="filter_end_date" name="end_date" class="form-control datepicker-filter"
+                  value="{{ request('end_date') }}" placeholder="{{ __('cycles.End_Date') }}">
+                <div class="invalid-feedback" id="end_date_error"></div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="modal-footer mt-6">
+            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+            <button type="submit" class="btn btn-primary">{{ __('cycles.Apply_Filters') }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
 <!-- Enhanced Modal for Session Reports and Recordings -->
 <div class="modal fade" id="reportsModal" tabindex="-1" aria-labelledby="reportsModalLabel" aria-hidden="true">
@@ -769,7 +760,7 @@
       
       const btn = $('#refreshReportsBtn');
       const originalHtml = btn.html();
-      btn.html('<i class="ti ti-loader-2 spinner-icon me-1"></i>{{ __("admin.refreshing") }}...');
+      btn.html('<i class="ti ti-loader-2 ti-spin me-1"></i>{{ __("admin.refreshing") }}...');
       btn.prop('disabled', true);
       
       fetchSessionData(currentSessionId, false).always(function() {
@@ -783,7 +774,7 @@
       
       const btn = $('#refreshRecordingsBtn');
       const originalHtml = btn.html();
-      btn.html('<i class="ti ti-loader-2 spinner-icon me-1"></i>{{ __("admin.refreshing") }}...');
+      btn.html('<i class="ti ti-loader-2 ti-spin me-1"></i>{{ __("admin.refreshing") }}...');
       btn.prop('disabled', true);
       
       fetchSessionData(currentSessionId, false).always(function() {
@@ -826,12 +817,9 @@
       $('#retryLoadBtn').on('click', () => fetchSessionData(currentSessionId));
     });
     $(document).ready(function() {
-    let mentorshipTable = $('#userstable').DataTable({
+    let mentorshipTable = $('#mentorship-sessions-table').DataTable({
       "responsive": true,
       "searching": true,
-      "lengthChange": false,
-      "paging": true,
-      "bInfo": false,
       "order": [],
       "columnDefs": [
         {
@@ -1166,6 +1154,7 @@
       url.searchParams.delete('end_date');
       url.searchParams.delete('done');
       url.searchParams.delete('cycle_id');
+      url.searchParams.delete('show');
       window.location.href = url.toString();
     }
   </script>

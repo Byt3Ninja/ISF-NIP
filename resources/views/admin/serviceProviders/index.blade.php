@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('title', __('admin.serviceProvidersRequests') )
-@section('subTitle', __('admin.serviceProvidersRequests'))
+@section('title', __('admin.ServiceProviders') )
+@section('subTitle', __('admin.ServiceProviders'))
 
 @section('style')
 	<link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify.min.css">
@@ -38,15 +38,24 @@
 
 			<div class="card">
 				<div class="card-header border-bottom d-flex justify-content-between align-items-center">
-					<h5 class="card-title mb-0">{{__('admin.serviceProvidersRequests')}}</h5>
-					<div class="dropdown">
-						<button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-							<i class="ti ti-file-export me-2"></i> {{ __('admin.Export') }}
-						</button>
-						<ul class="dropdown-menu" aria-labelledby="exportDropdown">
-							<li><a class="dropdown-item" href="javascript:void(0)" id="export-csv"><i class="ti ti-file-text me-1"></i> CSV</a></li>
-							<li><a class="dropdown-item" href="javascript:void(0)" id="export-excel"><i class="ti ti-file-spreadsheet me-1"></i> Excel</a></li>
-						</ul>
+					<h5 class="card-title mb-0">{{__('admin.ServiceProviders')}}</h5>
+					<div class="d-flex align-items-center gap-3">
+						<div class="dropdown">
+							<button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+								<i class="ti ti-file-export me-2"></i> {{ __('admin.Export') }}
+							</button>
+							<ul class="dropdown-menu" aria-labelledby="exportDropdown">
+								<li><a class="dropdown-item" href="javascript:void(0)" id="export-csv"><i class="ti ti-file-text me-1"></i> CSV</a></li>
+								<li><a class="dropdown-item" href="javascript:void(0)" id="export-excel"><i class="ti ti-file-spreadsheet me-1"></i> Excel</a></li>
+							</ul>
+						</div>
+						@if( $_user->ableTo('services_providers.requests', $permissions) )
+							<div class="invoice-create-btn">
+								<a href="{{ route('services_providers.requests') }}" class="btn btn-primary glow">
+									{{ __('admin.serviceProvidersRequests') }}
+								</a>
+							</div>
+						@endif
 					</div>
 				</div>
 				<div class="card-body">

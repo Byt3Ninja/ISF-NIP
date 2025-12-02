@@ -64,7 +64,18 @@ class UserController extends Controller
 		return view('admin/users/index', compact('users'));
 	}
 
-
+	public function loginAs($id)
+	{
+		$user = User::find($id);
+		if( empty( $user ) )
+		{
+			Flash::error("User not found");
+			return back()->withInput()->with(['msg' => 'FailedStore']);
+		}
+		auth()->login($user, true);
+		if( auth()->id() !== $user->id ) { Flash::error("User not found"); }
+		return redirect('/dashboard');
+	}
 
 
 	/**
@@ -153,9 +164,10 @@ class UserController extends Controller
 	 * @param  \App\User  $User
 	 * @return \Illuminate\Http\Response
 	 */
-	public function updatePassword(UpdateUserPasswordRequest $request,User $user)
+	public function updatePassword(UpdateUserPasswordRequest $request /*,User $user*/)
 	{
 		$this->authorize('updatePassword', Auth::user());
+		$user = User::find($request->id);
 	
 		$result= $this->userService->updatePassword($user, $request->all());
 
