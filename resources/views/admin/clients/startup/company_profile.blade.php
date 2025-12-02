@@ -148,14 +148,19 @@ $env = env('APP_ENV');
 
 $pills = 
   $env == 'dev' 
-    ? ['overview', 'milestones', 'team', 'pitch_deck', 'startup_growth', 'programs_summary']
-    : ['overview', 'milestones', 'team', 'pitch_deck', 'startup_growth'];
+    ? ['overview', 'milestones', 'team', 'pitch_deck', 'programs_summary']
+    : ['overview', 'milestones', 'team', 'pitch_deck'];
 
   $pillsIcons = 
     $env == 'dev' 
-      ? ['briefcase', 'target', 'users', 'file-text', 'chart-dots-2', 'components']
-      : ['briefcase', 'target', 'users', 'file-text', 'chart-dots-2'];
+      ? ['briefcase', 'target', 'users', 'file-text', 'components']
+      : ['briefcase', 'target', 'users', 'file-text'];
 
+if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('registered') && $company?->id === $_user?->company_id ) )
+{
+  $pills[] = 'startup_growth';
+  $pillsIcons[] = 'chart-dots-2';
+}
 // Static Programs List
 $programs = [
     (object)[
@@ -308,10 +313,12 @@ $programsSummary = [
         @include('admin.clients.startup.partials._startup_pitch_deck')
       </section>
 
+      @if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('registered') && $company?->id === $_user?->company_id ) )
       <!-- Startup growth Section -->
       <section class="tab-pane fade" id="startup_growth" role="tabpanel" aria-labelledby="startup-growth-tab">
         @include('admin.clients.startup.partials._startup_growth')
       </section>
+      @endif
 
       <!-- Programs Section -->
       <section class="tab-pane fade" id="programs_summary" role="tabpanel" aria-labelledby="programs-summery-tab">
