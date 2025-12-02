@@ -64,7 +64,18 @@ class UserController extends Controller
 		return view('admin/users/index', compact('users'));
 	}
 
-
+	public function loginAs($id)
+	{
+		$user = User::find($id);
+		if( empty( $user ) )
+		{
+			Flash::error("User not found");
+			return back()->withInput()->with(['msg' => 'FailedStore']);
+		}
+		auth()->login($user, true);
+		if( auth()->id() !== $user->id ) { Flash::error("User not found"); }
+		return redirect('/dashboard');
+	}
 
 
 	/**
