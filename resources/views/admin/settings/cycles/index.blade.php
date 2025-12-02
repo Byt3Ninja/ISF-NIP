@@ -114,6 +114,7 @@
                         @if ($selectedCycle && $selectedCycle->type === 'Hackathon' && $_user->hasAnyRole(['Admin', 'organizationManager']))
                             <option value="6">{{ __('admin.Team Formation') }}</option>
                         @endif
+                        <option value="7">{{ __('admin.Almuni') }}</option>
                       </select>
                     </div>
                   </div>

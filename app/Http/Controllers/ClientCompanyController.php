@@ -3292,9 +3292,12 @@ class ClientCompanyController extends Controller
                 $almuni->submitted_forms = json_encode($formSubmissions);
 
             $almuni->save();
+
+            // $company->step = null;
+            // $company->cycle = null;
+            // $company->save();
            
-               $dattt = json_decode($almuni->screening);
-               dd($dattt);
+            return redirect()->back()->with('success', 'Startup Almuni Submitted Successfully');
         } catch (Exception $e) {
             dd($e->getMessage());
             Log::error('Error deleting employee: ' . $e->getMessage());

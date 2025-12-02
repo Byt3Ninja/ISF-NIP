@@ -394,9 +394,9 @@ class CyclesController extends Controller
                             'updated_at' => now(),
                         ]);
                     }
-                }else{
-                    DB::table('mentorship_schedules')->where('cycle_id', $cycle->id)->delete();
-                }
+            }else{
+                DB::table('mentorship_schedules')->where('cycle_id', $cycle->id)->delete();
+            }
 
 
            
@@ -437,7 +437,6 @@ class CyclesController extends Controller
                 return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
             }
             /// add new step
-       
             $stype = $request->stype;
             
             $data = null;
@@ -469,7 +468,7 @@ class CyclesController extends Controller
                         ]);
                     }
                 }
-            } elseif ($stype == 2) {
+            }elseif ($stype == 2) {
                 if (is_null($request->fromDate) || is_null($request->toDate)) {
                     return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
                 }
@@ -484,7 +483,7 @@ class CyclesController extends Controller
                     'from' => $request->fromDate,
                     'to' => $request->toDate
                 ]);
-            } elseif ($stype == 3) {
+            }elseif ($stype == 3) {
                 if (is_null($request->fromDate) || is_null($request->toDate)) {
                     return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
                 }
@@ -499,7 +498,7 @@ class CyclesController extends Controller
                     'from' => $request->fromDate,
                     'to' => $request->toDate
                 ]);
-            } elseif ($stype == 4) {
+            }elseif ($stype == 4) {
                 if (is_null($request->fromDate) || is_null($request->toDate)) {
                     return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
                 }
@@ -515,7 +514,7 @@ class CyclesController extends Controller
                     'from' => $request->fromDate,
                     'to' => $request->toDate
                 ]);
-            } elseif ($stype == 5) {
+            }elseif ($stype == 5) {
                 if (is_null($request->fromDate) || is_null($request->toDate)) {
                     return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
                 }
@@ -582,6 +581,34 @@ class CyclesController extends Controller
                 'from' => $request->fromDate,
                 'to' => $request->toDate,
                 'count_team_number' => $request->count_team_number ??0,
+                ]);
+            }elseif ($stype == 7) {
+                
+                $validator = Validator::make($request->all(), [
+                    'title' => 'required|string|max:100',
+                    'description' => 'required|string|max:100',
+                    ]);
+                if ($validator->fails()) {
+                    return redirect()->back()
+                    ->withInput()
+                    ->with([
+                    'message2' => $validator->errors()->first(),
+                    'class' => 'danger'
+                    ]);
+                }
+              if (is_null($request->fromDate) || is_null($request->toDate)) {
+                   return redirect()->back()->with(['message2' => __('admin.AddDateFirst'), 'class' => 'danger']);
+               }
+                
+                Step::insert([
+                'cycle_id' => $request->cid,
+                'title' => $request->title,
+                'description' => $request->description,
+                'stype' => $stype,
+                'data' => null,
+                'arr' => $request->arr,
+                'from' => $request->fromDate,
+                'to' => $request->toDate,
                 ]);
             }
             return redirect()->back()->with('message', 'Saved');

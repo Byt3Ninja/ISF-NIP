@@ -204,12 +204,19 @@
                               <select id="cstep" class="select form-control"
                                 onchange="changestep({{ $company->id }},this.options[this.selectedIndex].value)">
                                 <option value="0">{{ __('cycles.Disapprove') }}</option>
-                                @foreach (\App\Step::where('cycle_id', $company->cycle)->orderBy('arr')->get() as $step)
+                                @foreach (\App\Step::where('cycle_id', $company->cycle)->orderBy('arr')->where('stype', '!=', '7')->get() as $step)
                                   <option value="{{ $step->id }}"
                                     {{ $step->id == $company->step ? 'selected' : '' }}>
                                     {{ $step->title }}</option>
                                 @endforeach
                               </select>
+                              <form action= "{{ Route('company.addCompanyAlumni', $company->id) }}" method="POST"
+                                enctype="multipart/form-data" autocomplete="off">
+                                {!! csrf_field() !!}
+                              <button type="submit" class="btn btn-sm btn-label-primary" 
+                                >{{ __('admin.Almuni') }}
+                              </button>
+                              </form>
                             </div>
                           </td>
                         </tr>
