@@ -59,14 +59,14 @@
                   <input
                     id="pitch-deck-input"
                     name="pitch_deck"
-                    class="form-control border-light light-shadow px-8 d-none"
+                    class="form-control px-8 d-none"
                     type="file"
                     accept="application/pdf"
                     onchange="handlePitchDickUpload('pitch-deck-input', 'pitch-deck-dropzone')"
                   />
                   <div
                     id="pitch-deck-dropzone"
-                    class="d-flex flex-column justify-content-center align-items-center gap-1 border border-dashed border-2 p-3 text-center w-100 rounded"
+                    class="d-flex flex-column justify-content-center align-items-center gap-1 border border-dashed p-3 text-center w-100 rounded"
                     style="cursor: pointer;"
                     onclick="document.getElementById('pitch-deck-input').click();"
                   >

@@ -5,27 +5,10 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
 
   <style>
-    #contentWrapper {
-      margin-bottom: 5rem;
-    }
-    .radius-15 {
-      border-radius: 15px;
-    }
-    
-    .light-shadow {
-      box-shadow: 0px 2px 0px 0px #F2F1F3;
-    }
-    .custom-container {
-      width: 100%;
-    }
+    .custom-container { width: 100% }
 
     @media screen and (min-width: 768px) {
-      #contentWrapper {
-       margin-bottom: 12rem;
-      }
-      .custom-container {
-        width: 78%;
-      }
+      .custom-container { width: 78%; }
     }
   </style>
 @stop
@@ -34,12 +17,13 @@
   $name = 'name_' . $l;
   $tabs = collect([
       ['company-info', 'ti-building-skyscraper', $l == 'en' ? 'Startup Info' : 'معلومات الشركة'],
-      ['classification', 'ti-apps', $l == 'en' ? 'Industry / Sectors' : ' الصناعة / القطاعات'],
-      ['company-contact-info', 'ti-phone', $l == 'en' ? 'Contact Info' : 'معلومات الاتصال'],
-      ['company-description', 'ti-file-description', $l == 'en' ? 'Description' : 'الوصف'],
-      ['company-financial-info', 'ti-currency-dollar', $l == 'en' ? 'Financial' : ' المالية'],
+      ['industry-sectors', 'ti-apps', $l == 'en' ? 'Industry / Sectors' : ' الصناعة / القطاعات'],
+      ['company-contact', 'ti-phone', $l == 'en' ? 'Contact Info' : 'معلومات الاتصال'],
+      ['company-desc', 'ti-file-description', $l == 'en' ? 'Description' : 'الوصف'],
+      ['company-financial-info', 'ti-report-money', $l == 'en' ? 'Financial Info' : 'المعلومات المالية'],
+      ['company-financial-projection', 'ti-database-dollar', $l == 'en' ? 'Financial Projection' : 'التوقعات المالية'],
       ['team-info', 'ti-briefcase', __('startup.team_info')],
-      ['employess', 'ti-users-group', __('startup.Employees')],
+      ['employees', 'ti-users-group', __('startup.Employees')],
       ['pitch-deck', 'ti-presentation', $l == 'en' ? 'Pitch Deck' : 'الوثائق'],
       ['company-milestones', 'ti-flag', $l == 'en' ? 'Milestones' : 'الإنجازات'],
       ['business_model', 'ti-presentation', $l == 'en' ? 'Business Model' : ' نموذج الاعمال '],
@@ -52,7 +36,7 @@
 
 @section('content')
   <!-- Content wrapper -->
-  <div class="content-wrapper" id="contentWrapper">
+  <div class="content-wrapper" style="margin-bottom: 5rem;">
     <!-- Content -->
     <div class="container-xxl flex-grow-1 container-p-y overflow-x-hidden" style="max-width: 100%;">
       <!-- Tabs (mobile) -->
@@ -126,22 +110,28 @@
                 @case('company-info')
                   @include('partials.forms.company.company-info-form',['heading' => $tab['label']])
                 @break
-                @case('classification')
+                @case('industry-sectors')
                   @include('partials.forms.company.classification_form', ['heading' => $tab['label']])
                 @break
-                @case('company-contact-info')
+                @case('company-contact')
                   @include('partials.forms.company.company-contact', ['heading' => $tab['label']])
                 @break
-                @case('company-description')
+                @case('company-desc')
                   @include('partials.forms.company.company-desc', ['heading' => $tab['label']])
                 @break
                 @case('company-financial-info')
                   @include('partials.forms.company.company-financial', ['heading' => $tab['label']])
                 @break
+                @case('company-financial-info')
+                  @include('partials.forms.company.company-financial', ['heading' => $tab['label']])
+                @break
+                @case('company-financial-projection')
+                  @include('partials.forms.company.company-financial-projection', ['heading' => $tab['label']])
+                @break
                 @case('team-info')
                   @include('partials.forms.company.company-team-info', ['heading' => $tab['label']])
                 @break
-                @case('employess')
+                @case('employees')
                   @include('partials.forms.company.company-employees', ['heading' => $tab['label']])
                 @break
                 @case('pitch-deck')
@@ -183,25 +173,7 @@
   </script>
   <script src="/app-assets/js/1.js"></script>
 
-  <!-- <script src="/vuexy/assets/js/forms-tagify.js"></script> -->
   <script src="/vuexy/assets/js/pages-edit-compnay.js"></script>
-  {{-- <script src="/vuexy/assets/js/founder-form.js"></script> --}}
-  {{-- <script src="/vuexy/assets/js/shareholder-form.js"></script> --}}
-  {{-- <script src="/vuexy/assets/js/investor-form.js"></script> --}}
-
-  <!-- <script>
-    document.getElementById('img_url').addEventListener('change', function(
-    event) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          document.getElementById('company-logo').src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-  </script>  -->
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -512,142 +484,6 @@
         console.error('Error fetching countries:', error);
       });
   </script>
-
-{{-- <script>
-@if($client->company)
-  const selectedCountryCode = '{{$client->company->country_code}}';
- @else
-  const selectedCountryCode = '+20';
-@endif
-  fetch('https://restcountries.com/v3.1/all')
-  .then(response => response.json())
-  .then(data => {
-      const select = document.getElementById('country_code');
-      data.forEach(country => {
-          // دمج root و suffixes لتكوين كود الهاتف الدولي الكامل
-          const countryCode = `${country.idd.root}${country.idd.suffixes ? country.idd.suffixes[0] : ''}`;
-          
-          // إنشاء عنصر <option> لكل دولة
-          const option = document.createElement('option');
-          option.value = countryCode;
-          option.text = `${countryCode} (${country.cca2})`;
-          option.style.fontSize = '12px';
-          
-          // إذا كان كود الهاتف من قاعدة البيانات مطابقاً للكود الحالي
-          if (countryCode === selectedCountryCode) {
-              option.selected = true;  // يتم تحديد الخيار
-          }if (!selectedCountryCode && country.cca2 === 'EG') {
-              option.selected = true; // تعيين "مصر" كخيار افتراضي
-          }
-
-          select.appendChild(option);  // إضافة العنصر إلى القائمة المنسدلة
-      });
-  });
-</script> --}}
-{{-- 
-<script>
-  // Initialize the phone input
-const phoneInput = document.getElementById("phone");
-const whatsappInput = document.getElementById("WhatsApp");
-const phoneError = document.getElementById('phone-error');
-const whatsappError = document.getElementById('whatsapp-error');
-
-const countryCodeFromDB = "{{ $client->company ? $client->company->country_code : '' }}".trim();
-const countryCodeWAFromDB = "{{ $client->company ? $client->company->country_code_w_a : '' }}".trim();
-
-// Initialize intl-tel-input
-const iti = intlTelInput(phoneInput, {
-  initialCountry: getCountryCode(countryCodeFromDB),
-  preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
-  utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
-  formatOnDisplay: false,
-  separateDialCode: true,
-  autoPlaceholder: "aggressive",
-  customPlaceholder: (placeholder) => "e.g. " + placeholder,
-});
-
-function getCountryCode(code) {
-  let dialCode = code.toString().trim();
-  const countryData = intlTelInputGlobals.getCountryData();
-  const country = countryData.find(country => `+${country.dialCode}` === dialCode);
-
-  if (country) {
-    console.log("Country Code Found: " + country.iso2);
-    return country.iso2;
-  }
-  return "eg";
-}
-
-const whatsappIti = intlTelInput(whatsappInput, {
-  initialCountry: getCountryCode(countryCodeWAFromDB),
-  preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
-  utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
-  separateDialCode: true,
-  formatOnDisplay: false,
-  autoPlaceholder: "aggressive",
-  customPlaceholder: (placeholder) => "e.g. " + placeholder,
-});
-
-
-// حقل مخفي للكود الدولي للواتساب
-const countryCodeWAInput = document.createElement("input");
-countryCodeWAInput.type = "hidden";
-countryCodeWAInput.name = "country_code_w_a";
-countryCodeWAInput.value = "{{ $client->company ? ( $client->company->country_code_w_a ?? '' ) : '' }}";
-whatsappInput.parentNode.appendChild(countryCodeWAInput);
-
-// تحديث الحقل المخفي عند تغيير الدولة في الواتساب
-whatsappInput.addEventListener("countrychange", () => {
-    const dialCode = whatsappIti.getSelectedCountryData().dialCode;
-    countryCodeWAInput.value =  dialCode; // تعيين الكود الدولي
-    console.log("WhatsApp Dial Code Updated: " + countryCodeWAInput.value);
-});
-
-// حقل مخفي للكود الدولي
-const countryCodeInput = document.createElement("input");
-countryCodeInput.type = "hidden";
-countryCodeInput.name = "country_code";
-countryCodeInput.value = "{{ $client->company ? ( $client->company->country_code ?? '' ) : '' }}";
-phoneInput.parentNode.appendChild(countryCodeInput);
-
-// ضبط الدولة الافتراضية
-if (countryCodeFromDB) {
-    iti.setCountry(countryCodeFromDB);
-    countryCodeInput.value =  iti.getSelectedCountryData().dialCode;
-}
-
-// تحديث الحقل المخفي عند تغيير الدولة
-phoneInput.addEventListener("countrychange", () => {
-    const dialCode = iti.getSelectedCountryData().dialCode;
-    countryCodeInput.value =  dialCode;
-});
-
-whatsappInput.addEventListener("countrychange", () => {
-    const dialCode = whatsappIti.getSelectedCountryData().dialCode;
-    console.log("WhatsApp Dial Code: " + dialCode);
-});
-
-// التحقق من صحة الرقم
-phoneInput.addEventListener("input", () => {
-    if (iti.isValidNumber()) {
-        phoneError.style.display = 'none';
-    } else {
-        phoneError.style.display = 'block';
-        phoneError.innerText = "Invalid phone number";
-    }
-});
-
-whatsappInput.addEventListener("input", () => {
-    if (whatsappIti.isValidNumber()) {
-        whatsappError.style.display = 'none';
-    } else {
-        whatsappError.style.display = 'block';
-        whatsappError.innerText = "Invalid WhatsApp number";
-    }
-});
-
-
-</script> --}}
 @stop
 
 
