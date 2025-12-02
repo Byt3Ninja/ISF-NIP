@@ -105,6 +105,7 @@
                   <td><small class="text-nowrap">{{ $user->created_at }}</small></td>
                   <td>
                     <div class="d-flex align-items-center gap-1">
+                      <a href="{{ route('users.login_as', ['id' => $user->id]) }}" title="{{ __('admin.Login as User') }}" class="btn btn-icon btn-label-dark btn-sm"> <i class="ti ti-key"></i> </a>
                       <button data-bs-toggle="modal" data-bs-target="#MessageModal"
                         class="btn btn-icon btn-label-primary btn-sm">
                         <i class="ti ti-message"></i>

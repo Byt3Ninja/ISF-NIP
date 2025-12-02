@@ -38,6 +38,7 @@ use App\ServicesRequests;
 use App\Events\WebMessage;
 use App\MentorshipRequest;
 use App\ScreeningEvaluation;
+use App\StartupCustomerGrowth;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Services\CompanyService;
@@ -185,7 +186,30 @@ class ClientCompanyController extends Controller
                 $comments = collect([]);
             }
         }
-        return view('admin/clients/startup/company_profile', compact('company', 'formTitle', 'formData', 'evaluationForm', 'Currencies', 'milestones', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile', 'technologies', 'sectors', 'industry'));
+        $current_year = date('Y');
+        $years = array_merge(range($current_year - 10, $current_year), range($current_year + 1, $current_year + 10));
+        $growth_records = StartupCustomerGrowth::records( $company->id );
+        $avgMonthlyGrowth = 0;
+        $growthSinceFirstRecord = 0;
+        $compoundAnnualGrowthRate = 0;
+        $years_count = $growth_records->groupBy('year')->count();
+        if( $growth_records->count() > 0 )
+        {
+            $count = $growth_records->count();
+            $intervals = $count - 1;
+            $last = $growth_records->last();
+            $first = $growth_records->first();
+
+            $growthSinceFirstRecord = (($last->total - $first->total) / $first->total) * 100;
+            $growthSinceFirstRecord = round($growthSinceFirstRecord) . '%';
+
+            $avgMonthlyGrowth = pow(($last->total / $first->total), (1 / $intervals)) - 1;
+            $avgMonthlyGrowth = round($avgMonthlyGrowth * 100, 1) . '%';
+
+            $compoundAnnualGrowthRate = pow(($last->total / $first->total), (1 / $years_count)) - 1;
+            $compoundAnnualGrowthRate = round($compoundAnnualGrowthRate * 100, 1) . '%';
+        }
+        return view('admin/clients/startup/company_profile', compact('company', 'formTitle', 'formData', 'evaluationForm', 'Currencies', 'milestones', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile', 'technologies', 'sectors', 'industry', 'years', 'growth_records', 'growthSinceFirstRecord', 'avgMonthlyGrowth', 'compoundAnnualGrowthRate'));
         // } catch (Exception $e) {
         //     //log what happend
         //     Log::channel('system_exceptions')->info('Exceptions:', [$e]);

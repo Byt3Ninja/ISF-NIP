@@ -2545,4 +2545,5 @@ return [
 	'ongoing_programs' => 'Ongoing Programs',
 	'completed_programs' => 'Completed Programs',
 	'view_hackathon' => 'View Hackathon',
+	'Login as User' => 'Login as User',
 ];

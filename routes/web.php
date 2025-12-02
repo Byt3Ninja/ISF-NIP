@@ -385,6 +385,10 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('/delete-document', 'ClientCompanyController@deleteDocument')->name('company.profile_documents_delete');
     Route::post('/delete-image/{id?}', 'ClientCompanyController@deleteImage')->name('company.profile_images_delete');
 
+    // startup growth
+
+    Route::post('/startupGrowth/add', 'startupCustomerGrowthController@addRecord');
+
     // Company Alumni
     Route::get('/companyProfile/{id}/alumni/{cycle_id}', [ClientCompanyController::class, 'companyAlumni'])->name('company.alumni_view');
 
@@ -417,6 +421,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     //like a service
     Route::post('/likeService', 'ClientCompanyController@likeService')->name('services.like');
     //Users  Manager routes
+    Route::get('/users/login_as/{id}', 'UserController@loginAs')->name('users.login_as');
     Route::resource('users', 'UserController');
     Route::get('/judger', 'UserController@judger')->name('users.judger');
     Route::post('/users/password', 'UserController@updatePassword')->name('user.profile_update_password');
