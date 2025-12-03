@@ -23,22 +23,6 @@
 
 @section('content')
 
-@php
-$jsonPath = public_path('slots.json');
-$weeklySlots = [];
-
-if (file_exists($jsonPath)) {
-    $jsonContent = file_get_contents($jsonPath);
-    $allSlots = json_decode($jsonContent, true);
-
-    if (is_array($allSlots)) {
-        $weeklySlots = array_filter($allSlots, function ($slot) {
-            return isset($slot['weekly']) && $slot['weekly'] === true;
-        });
-    }
-}
-@endphp
-
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
   
@@ -244,10 +228,15 @@ if (file_exists($jsonPath)) {
 
     // Fetch slots on page load
     document.addEventListener('DOMContentLoaded', function() {
-        fetch('{{ asset("slots.json") }}')
+        fetch('/dashboard/availability/slots', {
+            headers: {
+              "Accept": "application/json"
+            }
+          })
             .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok'))
-            .then(data => {
-                processSlots(data);
+            .then(result => {
+              console.log('Fetched slots:', result?.data ? result.data : []);
+                processSlots(result?.data ? result.data : []);
                 updateCalendarStyles();
                 initializeMainCalendar(); // Initialize the main calendar here
             })
@@ -423,18 +412,36 @@ if (file_exists($jsonPath)) {
         const slot = getSlotFromForm();
         if (!slot) return;
 
-        availabilityData[type][key] = [...(availabilityData[type][key] || []), slot];
-        
-        updateSlotsList();
-        updateListView();
-        clearSlotForm();
-
-        if (type === 'specific') {
-            updateCalendarStyles();
-            alert(`Slot added to ${moment(key).format('MMMM D, D, YYYY')}`);
-        } else {
-            alert(`Slot will be applied to all ${key}s`);
-        }
+         fetch('/dashboard/availability/add-slot', {
+            headers: {
+              "Accept": "application/json",
+              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+              'Content-Type': 'application/json',
+            },
+            method: 'POST',
+            body: JSON.stringify({
+              tfrom: slot.start,
+              tto: slot.end,
+              session_type: slot.sessionType,
+              type: 'Period',
+              date: type === 'specific' ? key : null,
+              days: type === 'weekly' ? [key] : null,
+            }),
+        })
+          .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok'))
+          .then(result => {
+            availabilityData[type][key] = [...(availabilityData[type][key] || []), slot];
+            
+            updateSlotsList();
+            updateListView();
+            clearSlotForm();
+            if (type === 'specific') {
+                updateCalendarStyles();
+                alert(`Slot added to ${moment(key).format('MMMM D, D, YYYY')}`);
+            } else {
+                alert(`Slot will be applied to all ${key}s`);
+            }
+          });
     }
 
     $('#add-single-slot').click(() => addSlot('specific'));
@@ -684,10 +691,14 @@ if (file_exists($jsonPath)) {
         currentSelectedDate = null;
         currentWeekday = null;
         // Re-fetch data on close to discard any unstaged changes
-        fetch('{{ asset("slots.json") }}')
+        fetch('/dashboard/availability/slots', {
+          headers: {
+            "Accept": "application/json"
+          }
+        })
             .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok'))
-            .then(data => {
-                processSlots(data);
+            .then(result => {
+                processSlots(result?.data ? result.data : []);
                 updateCalendarStyles();
             });
 

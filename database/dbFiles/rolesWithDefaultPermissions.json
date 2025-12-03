@@ -8138,7 +8138,7 @@
                 ]
             },
             {
-                "name": "slots.create",
+                "name": "slots.store",
                 "description": "Create new mentor availability slots",
                 "guard_name": "web",
                 "is_core": 0,
@@ -8147,8 +8147,8 @@
                 ]
             },
             {
-                "name": "slots.store",
-                "description": "Store new mentor availability slots",
+                "name": "slots.copy",
+                "description": "Apply new mentor availability slots to multiple days",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
