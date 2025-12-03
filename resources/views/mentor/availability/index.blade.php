@@ -415,15 +415,15 @@
          fetch('/dashboard/availability/add-slot', {
             headers: {
               "Accept": "application/json",
-              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-              'Content-Type': 'application/json',
+              "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content'),
+              "Content-Type": 'application/json',
             },
             method: 'POST',
             body: JSON.stringify({
               tfrom: slot.start,
               tto: slot.end,
               session_type: slot.sessionType,
-              type: 'Period',
+              type: type === 'weekly' ? 'Weekly' : 'Period',
               date: type === 'specific' ? key : null,
               days: type === 'weekly' ? [key] : null,
             }),
@@ -436,12 +436,23 @@
             updateListView();
             clearSlotForm();
             if (type === 'specific') {
-                updateCalendarStyles();
-                alert(`Slot added to ${moment(key).format('MMMM D, D, YYYY')}`);
+              const message = "{{ __('mentor.availability.slot_added_to_date', ['date' => ':date']) }}".replace(':date', moment(key).format('MMMM D, YYYY'));
+              
+              updateCalendarStyles();
+              releaseSuccessAlert({
+                'title': 'Slot Added',
+                'message': message,
+              });
             } else {
-                alert(`Slot will be applied to all ${key}s`);
+              const message = "{{ __('mentor.availability.slot_added_to_all', ['date' => ':date']) }}".replace(':date', key + 's');
+              updateCalendarStyles();
+              releaseSuccessAlert({
+                'title': 'Slot Added',
+                'message': message,
+              });
             }
-          });
+          })
+          .catch(error => releaseFailureAlert({ message: error }));
     }
 
     $('#add-single-slot').click(() => addSlot('specific'));

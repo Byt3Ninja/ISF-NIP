@@ -42,4 +42,5 @@ return [
     'delete_slot_confirm' => 'Are you sure you want to delete this slot?',
     'slot_removed_success' => 'Availability slot has been deleted successfully',
     'slot_removed_error' => 'An error occurred while deleting the availability slot',
+    'slot_added_to_date' => 'Slot added to :date',
 ];

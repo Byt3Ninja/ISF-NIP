@@ -40,7 +40,8 @@ return [
     'offline' => 'اوفلاين',
     'both' => 'اونلاين او اوفلاين',
     'manage_availability' => 'إدارة التواجد',
-    'delete_slot_confirm' => 'هل أنت متأكد أنك تريد حذف فترة التواجد هذا؟',
+    'delete_slot_confirm' => 'هل أنت متأكد أنك تريد حذف فترة التواجد هذه؟',
     'slot_removed_success' => 'تم حذف فترة التواجد بنجاح',
     'slot_removed_error' => 'حدث خطأ أثناء حذف فترة التواجد',
+    'slot_added_to_date' => 'تم اضافة الفترة في :date',
 ];
