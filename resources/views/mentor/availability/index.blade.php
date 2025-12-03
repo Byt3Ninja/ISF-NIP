@@ -423,7 +423,7 @@
               tfrom: slot.start,
               tto: slot.end,
               session_type: slot.sessionType,
-              type: type === 'weekly' ? 'Weekly' : 'specific',
+              type: type === 'weekly' ? 'Weekly' : 'Period',
               date: type === 'specific' ? key : null,
               days: type === 'weekly' ? [key] : null,
             }),
@@ -436,7 +436,7 @@
             updateListView();
             clearSlotForm();
             if (type === 'specific') {
-              const message = "{{ __('mentor.availability.slot_added_to_date', ['date' => ':date']) }}".replace(':date', moment(key).format('MMMM D, YYYY'));
+              const message = "{{ __('mentor.slot_added_to_date', ['date' => ':date']) }}".replace(':date', moment(key).format('MMMM D, YYYY'));
               
               updateCalendarStyles();
               releaseSuccessAlert({
@@ -444,7 +444,7 @@
                 'message': message,
               });
             } else {
-              const message = "{{ __('mentor.availability.slot_added_to_all', ['date' => ':date']) }}".replace(':date', key + 's');
+              const message = "{{ __('mentor.slot_added_to_all', ['date' => ':date']) }}".replace(':date', key + 's');
               updateCalendarStyles();
               releaseSuccessAlert({
                 'title': '{{ __('mentor.slot_added_success') }}',

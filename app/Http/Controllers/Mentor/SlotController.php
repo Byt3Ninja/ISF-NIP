@@ -67,36 +67,33 @@ class SlotController extends Controller
 			return response()->json(['success' => true, 'data' => $slots], 200);
 	}
 
-  public function store(Request $request)
+	public function store(Request $request)
 	{
-			// dd($request->all());
-			$request->validate([
-				'session_type' => 'required',
-				'tfrom' => 'required',
-				'tto' => 'required',
+			$validated = $request->validate([
+					'session_type' => 'required',
+					'tfrom' => 'required',
+					'tto' => 'required',
+					'type' => 'required|in:Weekly,Period', // optional: validate type
+					'days' => 'required_if:type,Weekly',
+					'date' => 'required_if:type,Period',
 			]);
-			$userId = auth()->id();
-			$from = $request->tfrom;
-			$to = $request->tto;
-			$addSchedule = new Schedule;
-			$addSchedule->user_id = $userId;
-			$addSchedule->type = $request->type;
-			if($request->type == 'Weekly'){
-			$addSchedule->days = json_encode($request->days);
-			}elseif($request->type == 'Period'){
-				$addSchedule->dfrom = $request->date;
-			}
-			$addSchedule->tfrom = $from;
-			$addSchedule->tto = $to;
-			$addSchedule->save();
-			
-			return response()->json(['success' => true, 'message' => __('mentor.slot_added_success')], 200);
 
+			$slotData = [
+					'user_id' => auth()->id(),
+					'type' => $validated['type'],
+					'session_type' => $validated['session_type'],
+					'tfrom' => $validated['tfrom'],
+					'tto' => $validated['tto'],
+					'days' => $validated['type'] === 'Weekly' ? $validated['days'] : null,
+					'date' => $validated['type'] !== 'Weekly' ? $validated['date'] : null,
+			];
 
+			Schedule::create($slotData);
 
-
-
-			
+			return response()->json([
+					'success' => true,
+					'message' => __('mentor.slot_added_success')
+			], 200);
 	}
 
   public function copy()
