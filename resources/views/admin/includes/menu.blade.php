@@ -879,10 +879,9 @@
         <li class="{{ Request::is('dashboard/room*', '') ? 'active' : '' }} menu-item">
           <a class="menu-link" href="{{ route('rooms.index') }}">
             <i class="menu-icon tf-icons ti ti-air-traffic-control"></i>
-            <span class="menu-item">{{ __('admin.Rooms Management') }}</span>
+            <div>{{ __('admin.Rooms Management') }}</div>
           </a>
         </li>
-       
       @endif
 
       @if ($_user->hasAnyRole('organizationManager'))
