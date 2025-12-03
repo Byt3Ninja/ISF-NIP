@@ -27,10 +27,10 @@
   <div class="container-xxl flex-grow-1 container-p-y">
   
     <div class="d-flex justify-content-between align-items-center mb-6">
-      <h4 class="card-title mb-0 text-dark f">{{ __('Weekly Availability Slots') }}</h4>
-  
+      <h4 class="card-title mb-0 text-dark f">{{ __('mentor.weekly_availability_slots') }}</h4>
+
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#availabilityModal">
-        <i class="ti ti-plus me-1"></i> {{ __('Add Availability') }}
+        <i class="ti ti-plus me-1"></i> {{ __('mentor.add_availability') }}
       </button>
     </div>
   
@@ -51,25 +51,27 @@
         <div class="modal-content">
   
           <div class="modal-header border-bottom pb-6">
-            <div class="d-flex justify-content-between align-items-center w-100">
-              <h5 class="modal-title mb-0">{{ __('Add Availability') }}</h5>
-              <nav class="nav-align-end">
-                <ul class="nav nav-tabs">
-                  <li class="nav-item">
-                    <button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#calendar-tab">
-                      <i class="ti ti-calendar ti-sm me-1"></i>
-                      {{ __('Calendar View') }}
-                    </button>
-                  </li>
-                  <li class="nav-item">
-                    <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#list-tab">
-                      <i class="ti ti-list ti-sm me-1"></i>
-                      {{ __('List View') }}
-                    </button>
-                  </li>
-                </ul>
-              </nav>
-            </div>
+          <div class="d-flex justify-content-between align-items-center w-100">
+            <h5 class="modal-title d-flex align-items-center mb-0">
+              <i class="ti ti-plus me-2"></i> {{ __('mentor.add_availability') }}
+            </h5>
+            <nav class="nav-align-end">
+              <ul class="nav nav-tabs">
+                <li class="nav-item">
+                  <button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#calendar-tab">
+                    <i class="ti ti-calendar ti-sm me-1"></i>
+                    {{ __('mentor.calendar_view') }}
+                  </button>
+                </li>
+                <li class="nav-item">
+                  <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#list-tab">
+                    <i class="ti ti-list ti-sm me-1"></i>
+                    {{ __('mentor.list_view') }}
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          </div>
             <button class="btn-close" data-bs-dismiss="modal"></button>
           </div>
   
@@ -85,29 +87,29 @@
     
                       <div class="mb-4">
                         <h6 class="mb-0" id="selected-date-display">
-                          {{ __('Select a date from the calendar') }}
+                          {{ __('mentor.select_date_from_calendar') }}
                         </h6>
-                        <small class="text-muted">Add your available time slots</small>
+                        <small class="text-muted">{{ __('mentor.select_date_to_add_your_available_time_slots') }}</small>
                       </div>
       
                       <div class="border rounded p-4 bg-light-subtle mb-4" id="slot-form-box" style="display: none;">
                         <div class="row mb-2">
                           <div class="col-md-4 mb-3">
-                            <label class="form-label">{{ __('Start Time') }}</label>
+                            <label class="form-label">{{ __('mentor.start_time') }}</label>
                             <input type="text" id="slot-start-time" class="form-control bg-white border" placeholder="09:00">
                           </div>
-      
+
                           <div class="col-md-4 mb-3">
-                            <label class="form-label">{{ __('End Time') }}</label>
+                            <label class="form-label">{{ __('mentor.end_time') }}</label>
                             <input type="text" id="slot-end-time" class="form-control bg-white border" placeholder="17:00">
                           </div>
-      
+
                           <div class="col-md-4 mb-3">
-                            <label class="form-label">{{ __('Session Type') }}</label>
+                            <label class="form-label">{{ __('mentor.session_type') }}</label>
                             <select id="slot-session-type" class="form-select bg-white border">
-                              <option value="Online">Online</option>
-                              <option value="Offline">Offline</option>
-                              <option value="Both">Both</option>
+                              <option value="Online">{{ __('mentor.online') }}</option>
+                              <option value="Offline">{{ __('mentor.offline') }}</option>
+                              <option value="Both">{{ __('mentor.both') }}</option>
                             </select>
                           </div>
                         </div>
@@ -115,20 +117,20 @@
                         <div class="d-flex gap-2">
                           <button type="button" class="btn btn-sm btn-primary text-nowrap" id="add-single-slot">
                             <i class="ti ti-plus ti-16px me-1"></i>
-                            {{ __('Add Single Slot') }}
+                            {{ __('mentor.add_single_slot') }}
                           </button>
                           <button type="button" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 text-nowrap" id="apply-to-weekday">
                             <i class="ti ti-calendar-check ti-16px"></i>
-                            <span>{{ __('Apply to All') }}</span>
+                            <span>{{ __('mentor.apply_to_all') }}</span>
                             <span id="selected-weekday"></span>
                           </button>
                         </div>
                       </div>
       
                       <div id="slots-list-container">
-                        <h6 class="mb-3">{{ __('Slots for Selected Date') }}</h6>
+                        <h6 class="mb-3">{{ __('mentor.slots_for_selected_date') }}</h6>
                         <div id="slots-list">
-                          <p class="text-muted">{{ __('No slots added yet') }}</p>
+                          <p class="text-muted">{{ __('mentor.no_slots_added') }}</p>
                         </div>
                       </div>
       
@@ -149,8 +151,8 @@
           </div>
   
           <div class="modal-footer border-top pt-6">
-            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
-            <button type="submit" class="btn btn-primary">{{ __('Save Availability') }}</button>
+            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('mentor.cancel') }}</button>
+            <button type="button" class="btn btn-primary">{{ __('mentor.save_availability') }}</button>
           </div>
         </div>
       </form>
@@ -242,12 +244,22 @@
             })
             .catch(error => {
                 console.error('Error fetching slots:', error);
-                alert('Could not load availability slots. Please try again later.');
+                alert('{{ __('mentor.could_not_load_availability_slots') }}');
             });
 
         // Initialize time pickers after DOM is ready
-        startTimePicker = flatpickr("#slot-start-time", { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true });
-        endTimePicker = flatpickr("#slot-end-time", { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true });
+        startTimePicker = flatpickr("#slot-start-time", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true,
+        });
+        endTimePicker = flatpickr("#slot-end-time", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true,
+        });
 
         // Initialize calendar after time pickers
         calendarInstance = flatpickr("#availability-calendar", {
@@ -265,7 +277,7 @@
             if (hasSlots) {
                 dayElem.classList.add('has-slots');
             }
-        }
+        },
     });
     }); // Close DOMContentLoaded
 
@@ -386,7 +398,7 @@
         const sessionType = $('#slot-session-type').val();
 
         if (!start || !end) {
-            alert('Please select start and end time');
+            alert('{{ __('mentor.please_select_start_and_end_time') }}');
             return null;
         }
 
@@ -394,7 +406,7 @@
         const endTime = moment(end, 'HH:mm');
 
         if (!startTime.isValid() || !endTime.isValid() || endTime.isSameOrBefore(startTime)) {
-            alert('End time must be after start time');
+            alert('{{ __('mentor.end_time_must_be_after_start_time') }}');
             return null;
         }
         
@@ -405,7 +417,7 @@
     function addSlot(type) {
         const key = type === 'specific' ? currentSelectedDate : currentWeekday;
         if (!key) {
-            alert('Please select a date first');
+            alert('{{ __('mentor.please_select_date_first') }}');
             return;
         }
 
@@ -466,19 +478,19 @@
     // Render calendar view's slots list
     function updateSlotsList() {
         if (!currentSelectedDate) {
-            $('#slots-list').html('<p class="text-muted">No slots added yet</p>');
+            $('#slots-list').html('<p class="text-muted">@lang('mentor.no_slots_added')</p>');
             return;
         }
 
         const renderSlotHTML = (slot, type, key, index) => {
             const isWeekly = type === 'weekly';
-            const repeatsText = isWeekly ? ' • <em>Repeats weekly</em>' : '';
+            const repeatsText = isWeekly ? ' • <em>{{ __('mentor.repeats_weekly') }}</em>' : '';
             const bgColor = isWeekly ? 'bg-light-subtle' : 'bg-white';
             return `
                 <div class="${bgColor} border rounded p-3 mb-2 d-flex justify-content-between align-items-center">
                     <div>
                         <div class="fw-bold text-dark mb-1">${slot.start} - ${slot.end}</div>
-                        <div class="small text-muted">${slot.duration} min • ${slot.sessionType}${repeatsText}</div>
+                        <div class="small text-muted">${slot.duration} {{ __('mentor.min') }} • ${slot.sessionType === 'Online' ? '{{ __('mentor.online') }}' : slot.sessionType === 'Offline' ? '{{ __('mentor.offline') }}' : '{{ __('mentor.both') }}'}${repeatsText}</div>
                     </div>
                     <button type="button" class="btn btn-label-danger btn-sm btn-icon delete-slot" data-type="${type}" data-key="${key}" data-index="${index}">
                         <i class="ti ti-trash ti-16px"></i>
@@ -493,22 +505,33 @@
                 : `<p class="text-muted">${emptyMsg}</p>`
             }`;
 
-        const specificSlotsHtml = renderGroup('Specific Date Slots:', availabilityData.specific[currentSelectedDate], 'specific', currentSelectedDate, 'No slots added for this specific date.');
-        const weeklySlotsHtml = renderGroup(`Weekly Recurring Slots (Every ${currentWeekday}):`, availabilityData.weekly[currentWeekday], 'weekly', currentWeekday, `No recurring slots for ${currentWeekday}s.`);
+        const specificSlotsHtml = renderGroup('{{ __('mentor.specific_date_slots') }}:', availabilityData.specific[currentSelectedDate], 'specific', currentSelectedDate, '{{ __('mentor.no_slots_added') }}');
+        const weeklySlotsHtml = renderGroup(`{{ __('mentor.weekly_recurring_slots') }} ({{ __('mentor.every') }} ${currentWeekday === 'Sunday' ? '{{ __('mentor.sunday') }}' : currentWeekday === 'Monday' ? '{{ __('mentor.monday') }}' : currentWeekday === 'Tuesday' ? '{{ __('mentor.tuesday') }}' : currentWeekday === 'Wednesday' ? '{{ __('mentor.wednesday') }}' : currentWeekday === 'Thursday' ? '{{ __('mentor.thursday') }}' : currentWeekday === 'Friday' ? '{{ __('mentor.friday') }}' : '{{ __('mentor.saturday') }}'}):`, availabilityData.weekly[currentWeekday], 'weekly', currentWeekday, `{{ __('mentor.no_slots_added') }}`);
         
         $('#slots-list').html(specificSlotsHtml + weeklySlotsHtml);
     }
 
     // Render list view
     function updateListView() {
-        const weekdaysOrder = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const weekdaysOrder = [
+            { key: 'Sunday', display: '{{ __('mentor.sunday') }}' },
+            { key: 'Monday', display: '{{ __('mentor.monday') }}' },
+            { key: 'Tuesday', display: '{{ __('mentor.tuesday') }}' },
+            { key: 'Wednesday', display: '{{ __('mentor.wednesday') }}' },
+            { key: 'Thursday', display: '{{ __('mentor.thursday') }}' },
+            { key: 'Friday', display: '{{ __('mentor.friday') }}' },
+            { key: 'Saturday', display: '{{ __('mentor.saturday') }}' }
+        ];
         let html = '';
 
-        weekdaysOrder.forEach(weekday => {
-            const weeklySlots = (availabilityData.weekly[weekday] || []).map(slot => ({ ...slot, type: 'weekly', key: weekday }));
+        weekdaysOrder.forEach(day => {
+            const weekdayKey = day.key;
+            const weekdayDisplay = day.display;
+
+            const weeklySlots = (availabilityData.weekly[weekdayKey] || []).map(slot => ({ ...slot, type: 'weekly', key: weekdayKey }));
             
             const specificSlotsOnWeekday = Object.entries(availabilityData.specific)
-                .filter(([date]) => moment(date).format('dddd') === weekday)
+                .filter(([date]) => moment(date).format('dddd') === weekdayKey)
                 .flatMap(([date, slots]) => slots.map(slot => ({ ...slot, type: 'specific', key: date })));
 
             const allSlotsForDay = [...weeklySlots, ...specificSlotsOnWeekday];
@@ -516,14 +539,14 @@
 
             allSlotsForDay.sort((a, b) => a.start.localeCompare(b.start));
 
-            html += `<div class="mb-4"><h6 class="mb-3">${weekday}</h6>`;
+            html += `<div class="mb-4"><h6 class="mb-3">${weekdayDisplay}</h6>`;
 
             allSlotsForDay.forEach(slot => {
                 const originalArray = availabilityData[slot.type][slot.key];
                 const originalIndex = originalArray.findIndex(s => s.start === slot.start && s.end === slot.end && s.sessionType === slot.sessionType);
 
                 const isWeekly = slot.type === 'weekly';
-                const repeatsText = isWeekly ? ` • <em>Repeats weekly</em>` : ` • <span class="text-primary">${moment(slot.key).format('MMM D')}</span>`;
+                const repeatsText = isWeekly ? ` • <em>{{ __('mentor.repeats_weekly') }}</em>` : ` • <span class="text-primary">${moment(slot.key).format('MMM D')}</span>`;
                 const bgColor = isWeekly ? 'bg-light-subtle' : 'bg-white';
 
                 html += `
@@ -532,14 +555,14 @@
                             <div class="fw-bold text-dark mb-1">
                                 <span class="slot-start">${slot.start}</span> - <span class="slot-end">${slot.end}</span>
                             </div>
-                            <div class="small text-muted">
-                                ${slot.duration} min • <span class="slot-session-type">${slot.sessionType}</span>${repeatsText}
-                            </div>
+                        <div class="small text-muted">
+                            ${slot.duration} {{ __('mentor.min') }} • <span class="slot-session-type">${slot.sessionType === 'Online' ? '{{ __('mentor.online') }}' : slot.sessionType === 'Offline' ? '{{ __('mentor.offline') }}' : '{{ __('mentor.both') }}'}</span>${repeatsText}
+                        </div>
                         </div>
                         <div class="slot-actions btn-group">
-                            <button type="button" class="btn btn-sm btn-icon btn-label-primary add-slot-action" title="Add"><i class="ti ti-plus"></i></button>
-                            <button type="button" class="btn btn-sm btn-icon btn-label-secondary copy-slot-action" title="Copy"><i class="ti ti-copy"></i></button>
-                            <button type="button" class="btn btn-label-danger btn-sm btn-icon delete-slot" title="Delete" data-type="${slot.type}" data-key="${slot.key}" data-index="${originalIndex}">
+                            <button type="button" class="btn btn-sm btn-icon btn-label-primary add-slot-action" title="{{ __('mentor.add') }}"><i class="ti ti-plus"></i></button>
+                            <button type="button" class="btn btn-sm btn-icon btn-label-secondary copy-slot-action" title="{{ __('mentor.copy') }}"><i class="ti ti-copy"></i></button>
+                            <button type="button" class="btn btn-label-danger btn-sm btn-icon delete-slot" title="{{ __('mentor.delete') }}" data-type="${slot.type}" data-key="${slot.key}" data-index="${originalIndex}">
                                 <i class="ti ti-trash ti-16px"></i>
                             </button>
                         </div>
@@ -549,7 +572,7 @@
         });
 
         if (html === '') {
-            html = '<p class="text-muted">No availability slots have been added yet.</p>';
+            html = '<p class="text-muted">{{ __('mentor.no_availability_slots_added') }}</p>';
         }
 
         $('#availability-list-view').html(html);
@@ -582,8 +605,8 @@
                     </div>
                 </div>
                 <div class="d-flex gap-2 mt-3">
-                    <button class="btn btn-sm btn-primary save-new-slot-action" data-original-type="${type}" data-original-key="${key}">Save</button>
-                    <button class="btn btn-sm btn-label-secondary cancel-new-slot-action">Cancel</button>
+                    <button class="btn btn-sm btn-primary save-new-slot-action" data-original-type="${type}" data-original-key="${key}">{{ __('mentor.save_availability') }}</button>
+                    <button class="btn btn-sm btn-label-secondary cancel-new-slot-action">{{ __('mentor.cancel') }}</button>
                 </div>
             </div>
         `;
@@ -614,7 +637,7 @@
         const startTime = moment(start, 'HH:mm');
         const endTime = moment(end, 'HH:mm');
         if (!startTime.isValid() || !endTime.isValid() || endTime.isSameOrBefore(startTime)) {
-            alert('End time must be after start time.');
+            alert('{{ __('mentor.end_time_must_be_after_start_time') }}');
             return;
         }
 
@@ -642,20 +665,22 @@
         
         const popoverContent = `
             <div>
-                ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => `
+                ${['{{ __('mentor.sunday') }}', '{{ __('mentor.monday') }}', '{{ __('mentor.tuesday') }}', '{{ __('mentor.wednesday') }}', '{{ __('mentor.thursday') }}', '{{ __('mentor.friday') }}', '{{ __('mentor.saturday') }}'].map((day, index) => {
+                    const dayValues = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                    return `
                     <div class="form-check">
-                      <input class="form-check-input" type="checkbox" value="${day}" id="day-copy-${day}">
-                      <label class="form-check-label" for="day-copy-${day}">${day}</label>
+                      <input class="form-check-input" type="checkbox" value="${dayValues[index]}" id="day-copy-${dayValues[index]}">
+                      <label class="form-check-label" for="day-copy-${dayValues[index]}">${day}</label>
                     </div>
-                `).join('')}
+                `}).join('')}
                 <div class="d-flex justify-content-end mt-3">
-                    <button class="btn btn-primary btn-sm apply-copy-action">Apply</button>
+                    <button class="btn btn-primary btn-sm apply-copy-action">{{ __('mentor.apply_to_all') }}</button>
                 </div>
             </div>`;
 
         const popover = new bootstrap.Popover(button, {
             html: true,
-            title: 'Copy Slot to Weekdays',
+            title: '{{ __('mentor.copy') }} {{ __('mentor.slots_for_selected_date') }}',
             content: popoverContent,
             sanitize: false,
             container: 'body',
@@ -692,20 +717,20 @@
     $('#availability-form').submit(function(e) {
         e.preventDefault();
         if (!Object.keys(availabilityData.specific).length && !Object.keys(availabilityData.weekly).length) {
-            alert('Please add at least one slot');
+            alert('{{ __('mentor.please_add_at_least_one_slot') }}');
             return;
         }
         $('#availability-data-input').val(JSON.stringify(availabilityData));
         console.log('Availability Data:', availabilityData);
-        alert('Availability saved! Check console for data.');
+        alert('{{ __('mentor.save_availability') }}! Check console for data.');
     });
 
     // Reset modal
     $('#availabilityModal').on('hidden.bs.modal', function () {
         $('.copy-slot-action').popover('dispose'); // Clean up popovers when modal closes
-        calendarInstance.clear();
-        currentSelectedDate = null;
-        currentWeekday = null;
+        // calendarInstance.clear();
+        // currentSelectedDate = null;
+        // currentWeekday = null;
         // Re-fetch data on close to discard any unstaged changes
         fetch('/dashboard/availability/slots', {
           headers: {
@@ -722,5 +747,16 @@
         updateSelectedDateDisplay();
     });
 
+    $('#availabilityModal').on('shown.bs.modal', function () {
+        if (!currentSelectedDate) {
+            const today = moment().format('YYYY-MM-DD');
+            calendarInstance.setDate(today, true);
+            updateSelectedDate([new Date(today)]);
+        }
+    });
+
+    $('button[data-bs-toggle="tab"][data-bs-target="#list-tab"]').on('shown.bs.tab', function (e) {
+      updateListView();
+    });
 </script>
 @stop
