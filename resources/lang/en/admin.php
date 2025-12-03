@@ -2547,4 +2547,5 @@ return [
 	'view_hackathon' => 'View Hackathon',
 	'Login as User' => 'Login as User',
 	'Almuni' => 'Alumni',
+	'serviceprovider' => 'Service Provider',
 ];
