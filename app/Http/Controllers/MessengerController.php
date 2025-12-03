@@ -421,8 +421,9 @@ class MessengerController extends Controller
     {
         try {
             $user = auth()->user();
-            $senderId = $request->has('sender') ? $request->input('sender', null) : null;
-            $senderId = $senderId ?? $user->id;
+            // $senderId = $request->has('sender') ? $request->input('sender', null) : null;
+            // $senderId = $senderId ?? $user->id;
+            $senderId = $user->id;
 
             $receiverId = $request->has('receiver') ? $request->input('receiver', null) : null;
             if( ( !$receiverId || is_null( $receiverId ) ) && $request->has('company_id') )
