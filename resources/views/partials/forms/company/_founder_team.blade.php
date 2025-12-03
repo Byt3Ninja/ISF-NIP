@@ -117,7 +117,7 @@
           <div class="p-3">
             <div class="d-flex align-items-center">
               <div 
-                class="border d-flex radius-15 flex-shrink-0" 
+                class="border d-flex rounded flex-shrink-0" 
                 style="width: 80px; height: 80px;"
               >
                 <img 

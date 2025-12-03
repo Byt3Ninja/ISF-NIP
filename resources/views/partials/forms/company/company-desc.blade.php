@@ -36,7 +36,7 @@ $action = Auth::user()->hasanyRole('Admin|organizationManager') ? route('company
               value="@if($client->company){{ $client->company->Sustainable_development }}@endif"
             /> --}}
             <select name="Sustainable_development[]"
-              class="form-select select2 border-light light-shadow px-10"
+              class="form-select select2 px-10"
               id="sustainable-mutiple-select"
               multiple="multiple">
               <option value="no_poverty"
