@@ -43,5 +43,5 @@ return [
     'slot_removed_success' => 'Availability slot has been deleted successfully',
     'slot_removed_error' => 'An error occurred while deleting the availability slot',
     'slot_added_to_date' => 'Slot added to :date',
-    'slot_added_success' => 'Availability slot has been added successfully',
+    'slot_added_success' => 'Slot Added Successfully',
 ];

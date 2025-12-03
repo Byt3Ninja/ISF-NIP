@@ -423,7 +423,7 @@
               tfrom: slot.start,
               tto: slot.end,
               session_type: slot.sessionType,
-              type: type === 'weekly' ? 'Weekly' : 'Period',
+              type: type === 'weekly' ? 'Weekly' : 'specific',
               date: type === 'specific' ? key : null,
               days: type === 'weekly' ? [key] : null,
             }),
@@ -440,19 +440,24 @@
               
               updateCalendarStyles();
               releaseSuccessAlert({
-                'title': 'Slot Added',
+                'title': '{{ __('mentor.slot_added_success') }}',
                 'message': message,
               });
             } else {
               const message = "{{ __('mentor.availability.slot_added_to_all', ['date' => ':date']) }}".replace(':date', key + 's');
               updateCalendarStyles();
               releaseSuccessAlert({
-                'title': 'Slot Added',
+                'title': '{{ __('mentor.slot_added_success') }}',
                 'message': message,
               });
             }
           })
-          .catch(error => releaseFailureAlert({ message: error }));
+          .catch(error => {
+            releaseFailureAlert({
+              title: '{{ __('admin.Error') }}',
+              message: error?.message ? error.message : "{{ __('admin.unexpected_error') }}", 
+            });
+          });
     }
 
     $('#add-single-slot').click(() => addSlot('specific'));

@@ -2548,4 +2548,5 @@ return [
 	'Login as User' => 'Login as User',
 	'Almuni' => 'Alumni',
 	'serviceprovider' => 'Service Provider',
+	'unexpected_error' => 'An unexpected error occurred, please try again later',
 ];
