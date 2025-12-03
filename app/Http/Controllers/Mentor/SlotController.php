@@ -69,8 +69,34 @@ class SlotController extends Controller
 
   public function store(Request $request)
 	{
-			dd($request->all());
-			// return view('mentor.availability.index');
+			// dd($request->all());
+			$request->validate([
+				'session_type' => 'required',
+				'tfrom' => 'required',
+				'tto' => 'required',
+			]);
+			$userId = auth()->id();
+			$from = $request->tfrom;
+			$to = $request->tto;
+			$addSchedule = new Schedule;
+			$addSchedule->user_id = $userId;
+			$addSchedule->type = $request->type;
+			if($request->type == 'Weekly'){
+			$addSchedule->days = json_encode($request->days);
+			}elseif($request->type == 'Period'){
+				$addSchedule->dfrom = $request->date;
+			}
+			$addSchedule->tfrom = $from;
+			$addSchedule->tto = $to;
+			$addSchedule->save();
+			
+			return response()->json(['success' => true, 'message' => __('mentor.slot_added_success')], 200);
+
+
+
+
+
+			
 	}
 
   public function copy()

@@ -294,6 +294,7 @@ class CyclesController extends Controller
                 'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'program_step_type' => ['required', 'in:cycle,time'],
+                'cohort' => 'required|string|max:250',
             ], [
                 'public_slug.required_if' => __('cycles.Public URL required'),
                 'public_slug.unique' => __('cycles.Public URL already exist'),
