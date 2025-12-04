@@ -578,10 +578,10 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     // Availability Slots
     Route::get('availability', 'Mentor\SlotController@index')->name('slots.index');
-    Route::get('availability/slots', 'Mentor\SlotController@getSlots')->name('slots.index');
-    Route::post('availability/add-slot/', 'Mentor\SlotController@store')->name('slots.store');
-    Route::post('availability/copy-slot/', 'Mentor\SlotController@copy')->name('slots.copy');
-    Route::post('availability/remove-slot/{id}', 'Mentor\SlotController@destroy')->name('slots.destroy');
+    Route::get('availability/slots', 'Mentor\SlotController@getSlots')->name('slots.read');
+    Route::post('availability/slots/store', 'Mentor\SlotController@store')->name('slots.store');
+    Route::post('availability/slots/{id}/copy', 'Mentor\SlotController@copy')->name('slots.copy');
+    Route::delete('availability/slots/{id}', 'Mentor\SlotController@destroy')->name('slots.destroy');
 
     Route::get('program/show', 'Mentor\MentorProgramController@show');
 

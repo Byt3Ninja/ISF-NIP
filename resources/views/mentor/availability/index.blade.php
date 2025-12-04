@@ -44,10 +44,7 @@
   <!-- ADD AVAILABILITY MODAL WITH CALENDAR -->
   <div class="modal fade" id="availabilityModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
-      <form method="POST" action="#" id="availability-form">
-        @csrf
-        <input type="hidden" name="availability_data" id="availability-data-input">
-  
+      <form onsubmit="return false;">  
         <div class="modal-content">
   
           <div class="modal-header border-bottom pb-6">
@@ -151,8 +148,7 @@
           </div>
   
           <div class="modal-footer border-top pt-6">
-            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('mentor.cancel') }}</button>
-            <button type="button" class="btn btn-primary">{{ __('mentor.save_availability') }}</button>
+            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('admin.close') }}</button>
           </div>
         </div>
       </form>
@@ -162,9 +158,15 @@
 @endsection
 
 @section('scripts')
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
 <script src="/vuexy/assets/vendor/libs/fullcalendar/fullcalendar.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/locales/ar.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ar.js"></script>
+
 <script>
+  // Translation data
+  const translations = {!! json_encode(__('mentor')) !!};
+
   // Global variables
     let calendarInstance;
     let currentSelectedDate = null;
@@ -176,6 +178,7 @@
 
     // Helper function to create a slot object
     const createSlotObject = (slot) => ({
+        id: slot.id,
         start: slot.start_time,
         end: slot.end_time,
         sessionType: slot.session_type,
@@ -192,10 +195,10 @@
     const updateSelectedDateDisplay = () => {
         if (currentSelectedDate) {
             $('#selected-date-display').text(moment(currentSelectedDate).format('dddd, MMMM D, YYYY'));
-            $('#selected-weekday').text(currentWeekday);
+            $('#selected-weekday').text(translations[currentWeekday.toLowerCase()]);
             $('#slot-form-box').show();
         } else {
-            $('#selected-date-display').text('Select a date from the calendar');
+            $('#selected-date-display').text('{{ __('mentor.select_date_from_calendar') }}');
             $('#slot-form-box').hide();
         }
     };
@@ -264,6 +267,7 @@
         // Initialize calendar after time pickers
         calendarInstance = flatpickr("#availability-calendar", {
         inline: true,
+        locale: '{{ $l }}',
         mode: "single",
         dateFormat: "Y-m-d",
         minDate: "today",
@@ -334,10 +338,17 @@
 
         mainCalendarInstance = new FullCalendar.Calendar(mainCalendarEl, {
             initialView: 'dayGridMonth',
+            locale: '{{ $l }}',
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
                 right: 'dayGridMonth,timeGridDay,listMonth'
+            },
+            buttonText: {
+              today: '{{ $l }}' == 'en' ? 'Today' : 'اليوم',
+              month: '{{ $l }}' == 'en' ? 'Month' : 'الشهر',
+              day: '{{ $l }}' == 'en' ? 'Day' : 'اليوم',
+              list: '{{ $l }}' == 'en' ? 'List' : 'قائمة',
             },
             editable: false,
             selectable: false,
@@ -351,7 +362,7 @@
 
                 if (arg.event.extendedProps.weekly) {
                     let iconEl = document.createElement('i');
-                    iconEl.className = 'ti ti-repeat ti-16px text-dark ms-2'; // Added ms-1 for margin-left
+                    iconEl.className = 'ti ti-repeat ti-16px text-dark m{{ $l == 'en' ? 's' : 'e' }}-2'; // Added ms-1 for margin-left
                     arrayOfDomNodes.push(iconEl);
                 }
 
@@ -379,15 +390,66 @@
 
     // Override delete slot handler to also update main calendar
     $(document).off('click.delete-slot-override').on('click.delete-slot-override', '.delete-slot', function() {
-        const { type, key, index } = $(this).data();
-        availabilityData[type][key].splice(index, 1);
-        if (availabilityData[type][key].length === 0) {
-            delete availabilityData[type][key];
-        }
-        updateSlotsList();
-        updateListView();
-        updateCalendarStyles();
-        updateMainCalendar();
+        const { type, key, index, id } = $(this).data();
+
+        // Show SweetAlert confirmation before deletion
+        Swal.fire({
+            title: "{{__('mentor.delete_slot_confirm')}}",
+				    text: "{{__('admin.Recover')}}",
+            icon: 'warning',
+           	showCancelButton: true,
+            confirmButtonText: "{{ __('admin.DYes') }}",
+            cancelButtonText: "{{ __('admin.No') }}",
+            reverseButtons: true,
+            customClass: {
+              confirmButton: 'btn btn-danger me-2',
+              cancelButton: 'btn btn-label-secondary',
+            },
+            buttonsStyling: false,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // User confirmed deletion, proceed with deletion
+                availabilityData[type][key].splice(index, 1);
+                if (availabilityData[type][key].length === 0) {
+                    delete availabilityData[type][key];
+                }
+
+                // API call to delete the slot from the server
+                if (id) {
+                    fetch(`/dashboard/availability/slots/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            "Accept": "application/json",
+                            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                        }
+                    })
+                    .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok'))
+                    .then(result => {
+                        if(result.success) {
+                            releaseSuccessAlert({
+                                'message': result?.message ? result.message : "{{ __('mentor.slot_removed_success') }}",
+                            });
+                        } else {
+                             releaseFailureAlert({
+                                'title': '{{ __('admin.Error') }}',
+                                'message': result?.message ? result.message : "{{ __('admin.unexpected_error') }}",
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        releaseFailureAlert({
+                            'title': '{{ __('admin.Error') }}',
+                            'message': error?.message ? error.message : "{{ __('admin.unexpected_error') }}",
+                        });
+                    });
+                }
+
+                updateSlotsList();
+                updateListView();
+                updateCalendarStyles();
+                updateMainCalendar();
+            }
+        });
     });
     
 
@@ -424,7 +486,7 @@
         const slot = getSlotFromForm();
         if (!slot) return;
 
-         fetch('/dashboard/availability/add-slot', {
+         fetch('/dashboard/availability/slots/store', {
             headers: {
               "Accept": "application/json",
               "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content'),
@@ -437,12 +499,13 @@
               session_type: slot.sessionType,
               type: type === 'weekly' ? 'Weekly' : 'Period',
               date: type === 'specific' ? key : null,
-              days: type === 'weekly' ? [key] : null,
+              days: type === 'weekly' ? key : null,
             }),
         })
           .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok'))
           .then(result => {
-            availabilityData[type][key] = [...(availabilityData[type][key] || []), slot];
+            const newSlot = createSlotObject(result.data);
+            availabilityData[type][key] = [...(availabilityData[type][key] || []), newSlot];
             
             updateSlotsList();
             updateListView();
@@ -492,7 +555,7 @@
                         <div class="fw-bold text-dark mb-1">${slot.start} - ${slot.end}</div>
                         <div class="small text-muted">${slot.duration} {{ __('mentor.min') }} • ${slot.sessionType === 'Online' ? '{{ __('mentor.online') }}' : slot.sessionType === 'Offline' ? '{{ __('mentor.offline') }}' : '{{ __('mentor.both') }}'}${repeatsText}</div>
                     </div>
-                    <button type="button" class="btn btn-label-danger btn-sm btn-icon delete-slot" data-type="${type}" data-key="${key}" data-index="${index}">
+                    <button type="button" class="btn btn-label-danger btn-sm btn-icon delete-slot" data-type="${type}" data-key="${key}" data-index="${index}" data-id="${slot.id}">
                         <i class="ti ti-trash ti-16px"></i>
                     </button>
                 </div>`;
@@ -550,7 +613,7 @@
                 const bgColor = isWeekly ? 'bg-light-subtle' : 'bg-white';
 
                 html += `
-                    <div class="${bgColor} border rounded p-3 mb-2 d-flex justify-content-between align-items-center" data-type="${slot.type}" data-key="${slot.key}" data-index="${originalIndex}">
+                    <div class="${bgColor} border rounded p-3 mb-2 d-flex justify-content-between align-items-center" data-type="${slot.type}" data-key="${slot.key}" data-index="${originalIndex}" data-id="${slot.id}">
                         <div class="slot-details">
                             <div class="fw-bold text-dark mb-1">
                                 <span class="slot-start">${slot.start}</span> - <span class="slot-end">${slot.end}</span>
@@ -562,7 +625,7 @@
                         <div class="slot-actions btn-group">
                             <button type="button" class="btn btn-sm btn-icon btn-label-primary add-slot-action" title="{{ __('mentor.add') }}"><i class="ti ti-plus"></i></button>
                             <button type="button" class="btn btn-sm btn-icon btn-label-secondary copy-slot-action" title="{{ __('mentor.copy') }}"><i class="ti ti-copy"></i></button>
-                            <button type="button" class="btn btn-label-danger btn-sm btn-icon delete-slot" title="{{ __('mentor.delete') }}" data-type="${slot.type}" data-key="${slot.key}" data-index="${originalIndex}">
+                            <button type="button" class="btn btn-label-danger btn-sm btn-icon delete-slot" title="{{ __('mentor.delete') }}" data-type="${slot.type}" data-key="${slot.key}" data-index="${originalIndex}" data-id="${slot.id}">
                                 <i class="ti ti-trash ti-16px"></i>
                             </button>
                         </div>
@@ -588,19 +651,19 @@
             <div class="editable-slot-form border rounded p-3 mb-2">
                 <div class="row g-2 mb-2">
                     <div class="col-md-3">
-                        <label class="form-label">Start</label>
+                        <label class="form-label">@lang('mentor.start_time')</label>
                         <input type="text" class="form-control form-control-sm start-time-input" value="${originalSlot.start}">
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">End</label>
+                        <label class="form-label">@lang('mentor.end_time')</label>
                         <input type="text" class="form-control form-control-sm end-time-input" value="${originalSlot.end}">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Type</label>
+                        <label class="form-label">@lang('mentor.session_type')</label>
                         <select class="form-select form-select-sm session-type-select">
-                            <option ${originalSlot.sessionType === 'Online' ? 'selected' : ''}>Online</option>
-                            <option ${originalSlot.sessionType === 'Offline' ? 'selected' : ''}>Offline</option>
-                            <option ${originalSlot.sessionType === 'Both' ? 'selected' : ''}>Both</option>
+                            <option ${originalSlot.sessionType === 'Online' ? 'selected' : ''}>@lang('mentor.online')</option>
+                            <option ${originalSlot.sessionType === 'Offline' ? 'selected' : ''}>@lang('mentor.offline')</option>
+                            <option ${originalSlot.sessionType === 'Both' ? 'selected' : ''}>@lang('mentor.both')</option>
                         </select>
                     </div>
                 </div>
@@ -644,13 +707,49 @@
         const newSlot = { start, end, sessionType, duration: endTime.diff(startTime, 'minutes') };
         
         const { originalType, originalKey } = $(this).data();
-        availabilityData[originalType][originalKey] = [...(availabilityData[originalType][originalKey] || []), newSlot];
-        
-        updateListView();
-        updateSlotsList();
-        updateCalendarStyles();
-        
-        form.remove();
+
+        fetch('/dashboard/availability/slots/store', {
+            headers: {
+              "Accept": "application/json",
+              "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content'),
+              "Content-Type": 'application/json',
+            },
+            method: 'POST',
+            body: JSON.stringify({
+              tfrom: newSlot.start,
+              tto: newSlot.end,
+              session_type: newSlot.sessionType,
+              type: originalType === 'weekly' ? 'Weekly' : 'Period',
+              date: originalType === 'specific' ? originalKey : null,
+              days: originalType === 'weekly' ? originalKey : null,
+            }),
+        })
+        .then(response => response.json())
+        .then(result => {
+          if (!result.success) {
+            throw new Error(result.message || '{{ __('admin.unexpected_error') }}');
+          }
+
+          const addedSlot = createSlotObject(result.data);
+          availabilityData[originalType][originalKey] = [...(availabilityData[originalType][originalKey] || []), addedSlot];
+          
+          updateListView();
+          updateSlotsList();
+          updateCalendarStyles();
+
+          releaseSuccessAlert({
+            'title': '{{ __('mentor.slot_added_success') }}',
+            'message': result.message,
+          });
+          
+          form.remove();
+        })
+        .catch(error => {
+          releaseFailureAlert({
+            title: '{{ __('admin.Error') }}',
+            message: error?.message ? error.message : "{{ __('admin.unexpected_error') }}",
+          });
+        });
     });
 
     // Handle Copy action in list view
@@ -694,12 +793,37 @@
             const selectedDays = Array.from($(popoverTip).find('.form-check-input:checked')).map(cb => cb.value);
 
             if (selectedDays.length > 0) {
-                selectedDays.forEach(day => {
-                    availabilityData.weekly[day] = [...(availabilityData.weekly[day] || []), slotToCopy];
+                fetch(`/dashboard/availability/slots/${slotToCopy.id}/copy`, {
+                    method: 'POST',
+                    headers: {
+                        "Accept": "application/json",
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content'),
+                        "Content-Type": 'application/json',
+                    },
+                    body: JSON.stringify({ selectedDays }),
+                })
+                .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok'))
+                .then(result => {
+                    result.data.forEach(slot => {
+                        const newSlot = createSlotObject(slot);
+                        const day = slot.weekday;
+                        availabilityData.weekly[day] = [...(availabilityData.weekly[day] || []), newSlot];
+                    });
+                    
+                    updateListView();
+                    updateSlotsList();
+                    updateCalendarStyles();
+                    
+                    releaseSuccessAlert({
+                        'message': result.message,
+                    });
+                })
+                .catch(error => {
+                    releaseFailureAlert({
+                        'title': '{{ __('admin.Error') }}',
+                        'message': error?.message ? error.message : "{{ __('admin.unexpected_error') }}",
+                    });
                 });
-                updateListView();
-                updateSlotsList();
-                updateCalendarStyles();
             }
             popover.dispose();
         });
@@ -710,19 +834,6 @@
                 $('body').off('click.popover');
             }
         });
-    });
-
-
-    // Form submission
-    $('#availability-form').submit(function(e) {
-        e.preventDefault();
-        if (!Object.keys(availabilityData.specific).length && !Object.keys(availabilityData.weekly).length) {
-            alert('{{ __('mentor.please_add_at_least_one_slot') }}');
-            return;
-        }
-        $('#availability-data-input').val(JSON.stringify(availabilityData));
-        console.log('Availability Data:', availabilityData);
-        alert('{{ __('mentor.save_availability') }}! Check console for data.');
     });
 
     // Reset modal

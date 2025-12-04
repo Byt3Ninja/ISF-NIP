@@ -73,11 +73,36 @@ class SlotController extends Controller
 					'session_type' => 'required',
 					'tfrom' => 'required',
 					'tto' => 'required',
-					'type' => 'required|in:Weekly,Period', // optional: validate type
+					'type' => 'required|in:Weekly,Period',
 					'days' => 'required_if:type,Weekly',
 					'date' => 'required_if:type,Period',
 			]);
 
+			// Build base search query
+			$query = Schedule::where('user_id', auth()->id())
+					->where('type', $validated['type'])
+					->where('tfrom', $validated['tfrom'])
+					->where('tto', $validated['tto'])
+					->where('session_type', $validated['session_type']);
+
+			// Add type-specific conditions
+			if ($validated['type'] === 'Weekly') {
+					$query->where('days', $validated['days']);
+			} else {
+					$query->where('date', $validated['date']);
+			}
+
+			// Check if duplicate exists
+			$exists = $query->exists();
+
+			if ($exists) {
+					return response()->json([
+							'success' => false,
+							'message' => __('mentor.slot_already_exists'),
+					], 422);
+			}
+
+			// Create slot
 			$slotData = [
 					'user_id' => auth()->id(),
 					'type' => $validated['type'],
@@ -88,17 +113,74 @@ class SlotController extends Controller
 					'date' => $validated['type'] !== 'Weekly' ? $validated['date'] : null,
 			];
 
-			Schedule::create($slotData);
+			$schedule = Schedule::create($slotData);
 
 			return response()->json([
 					'success' => true,
-					'message' => __('mentor.slot_added_success')
+					'message' => __('mentor.slot_added_success'),
+					'data' => [
+							'id' => $schedule->id,
+							'weekday' => $schedule->days,
+							'date' => $schedule->date,
+							'start_time' => substr($schedule->tfrom, 0, 5),
+							'end_time' => substr($schedule->tto, 0, 5),
+							'session_type' => $schedule->session_type,
+							'weekly' => $schedule->type === 'Weekly',
+					]
 			], 200);
 	}
 
-  public function copy()
+
+ 	public function copy(Request $request, $id)
 	{
-			// return view('mentor.availability.index');
+			$validated = $request->validate([
+					'selectedDays' => 'required|array',
+			]);
+
+			// 1. Find original schedule slot
+			$original = Schedule::findOrFail($id);
+
+			$createdSlots = [];
+
+			foreach ($validated['selectedDays'] as $day) {
+
+					// 2. Build new schedule data
+					$slotData = $original->replicate()->toArray();
+
+					$slotData['user_id'] = auth()->id(); // always apply current user
+					
+					// 3. Apply day/date depending on type
+					if ($original->type === 'Weekly') {
+							$slotData['days'] = $day; // single weekday (0–6)
+							unset($slotData['date']); // remove date if exists
+					} else {
+							// date‐specific slot
+							$slotData['date'] = $day; // here $day must be a date (Y-m-d)
+							unset($slotData['days']); // remove weekday if exists
+					}
+
+					// 4. Create new duplicated schedule
+					$newSchedule = Schedule::create($slotData);
+
+					$isWeekly = $newSchedule->type === 'Weekly';
+
+					// 5. Format response slot
+					$createdSlots[] = [
+							'id'           => $newSchedule->id,
+							'weekday'      => $isWeekly ? $newSchedule->days : null,
+							'date'         => $isWeekly ? null : ($newSchedule->date ?? $newSchedule->dto),
+							'start_time'   => substr($newSchedule->tfrom, 0, 5),
+							'end_time'     => substr($newSchedule->tto, 0, 5),
+							'session_type' => $newSchedule->session_type,
+							'weekly'       => $isWeekly,
+					];
+			}
+
+			return response()->json([
+					'success' => true,
+					'message' => __('mentor.slot_copied_success'),
+					'data'    => $createdSlots,
+			], 200);
 	}
 
 	public function destroy(Request $request, $id)
