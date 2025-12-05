@@ -2136,8 +2136,8 @@ document.addEventListener('DOMContentLoaded', function() {
 					buttonElement.prop('disabled', true).html('<i class="ti ti-loader ti-spin"></i>');
 					
 					$.ajax({
-						type: "POST",
-						url: `/dashboard/availability/remove-slot/${slotId}`,
+						type: "DELETE",
+						url: `/dashboard/availability/slots/${slotId}`,
 						headers: {
 							'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
 						},

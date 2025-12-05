@@ -224,35 +224,53 @@ class ClientCompanyController extends Controller
      */
     public function editOrCreate($id = null)
     {
-
+        $user = auth()->user();
         try {
-            if ($id == null) {
-                $client = User::where('HaveCompany', 1)->with('company')
-                    ->with('company.city')
-                    ->find(Auth::id());
-                if (empty($client)) {
-                    return redirect()->route('user.profile_view')->with(['msg' => 'NoHaveCompany', 'class' => 'danger']);
+            if( $id == null )
+            {
+                $client = User::where('HaveCompany', 1)->with('company')->with('company.city')->find($user->id);
+                if( empty( $client ) )
+                {
+                    if( !$user->hasRole('registered') )
+                    {
+                        return redirect()->route('user.profile_view')->with(['msg' => 'NoHaveCompany', 'class' => 'danger']);
+                    }
+                    else
+                    {
+                        $company = new company;
+                        $company->name_en = '';
+                        $company->name_ar = '';
+                        $company->address_en = '';
+                        $company->address_ar = '';
+                        $company->save();
+
+                        $user->company_id = $company->id;
+                        $user->HaveCompany = 1;
+                        $user->save();
+
+                        $client = User::where('HaveCompany', 1)->with('company')->with('company.city')->find($user->id);
+                    }
                 }
 
                 $countries = Country::all();
                 $states = State::all();
                 $Setting = Settings::where('id', 1)->first();
                 $sectors = Sector::whereNull('parent_id')->get();
-                $funding_rounds = auth()->user()->company ? auth()->user()->company->fundingRounds : [];
+                $funding_rounds = $user->company ? $user->company->fundingRounds : [];
                 $teamMembers = Team_Member::all(); // جلب جميع الأعضاء
-                if (auth()->user()->company) {
-                    $fonders = Team_Member::where('TeamMember', 'Founder')
-                        ->where('Company_id', auth()->user()->company->id)->get();
-                    $Shareholders = Team_Member::where('TeamMember', 'Shareholder')
-                        ->where('Company_id', auth()->user()->company->id)->get();
-                    $Investors = Team_Member::where('TeamMember', 'Investor')
-                        ->where('Company_id', auth()->user()->company->id)->get();
-
+                if( $user->company )
+                {
+                    $company_members = Team_Member::where('Company_id', $user->company->id)->get();
+                    $fonders = $company_members->where('TeamMember', 'Founder')->values();
+                    $Shareholders = $company_members->where('TeamMember', 'Shareholder')->values();
+                    $Investors = $company_members->where('TeamMember', 'Investor')->values();
                     // For backward compatibility, create empty collections
                     $Achieveds = collect();
                     $Planneds = collect();
                     $Archiveds = collect();
-                } else {
+                }
+                else
+                {
                     $fonders = 'NA';
                     $Shareholders = 'NA';
                     $Investors = 'NA';
@@ -282,14 +300,22 @@ class ClientCompanyController extends Controller
                     $country->emoji = $emoji;
                     return $country;
                 });
-            } else {
-
-                // if (!Auth::user()->hasAnyRole('Admin|organizationManager')) {
+            }
+            else
+            {
+                if( $user->hasRole('registered') )
+                {
+                    if( $user->company_id != $id )
+                    {
+                        return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
+                    }
+                }
+                // if (!$user->hasAnyRole('Admin|organizationManager')) {
                 //     return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
                 // }
 
-                if (Auth::user()->hasRole('organizationManager')) {
-                    $userorg = Organization::where('user_id', Auth::id())->first();
+                if ($user->hasRole('organizationManager')) {
+                    $userorg = Organization::where('user_id', $user->id)->first();
                     $cycles = Cycle::where('organization_id', $userorg->id)->with('companies')->get();
                     foreach ($cycles as $cycle) {
                         foreach ($cycle->companies as $company) {

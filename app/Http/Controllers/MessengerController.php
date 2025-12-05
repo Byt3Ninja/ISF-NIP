@@ -420,18 +420,37 @@ class MessengerController extends Controller
     public function sendmsg(Request $request)
     {
         try {
+            $user = auth()->user();
+            // $senderId = $request->has('sender') ? $request->input('sender', null) : null;
+            // $senderId = $senderId ?? $user->id;
+            $senderId = $user->id;
+
+            $receiverId = $request->has('receiver') ? $request->input('receiver', null) : null;
+            if( ( !$receiverId || is_null( $receiverId ) ) && $request->has('company_id') )
+            {
+                $company = Company::find( $request->input('company_id') );
+                if( $company?->user?->id )
+                {
+                    $receiverId = $company?->user?->id ?? null;
+                }
+            }
+            if( !$receiverId || is_null( $receiverId ) )
+            {
+                return redirect()->back()->with('error', 'Receiver not specified');
+            }
+
             $new = new Messenger();
-            $new->sender = $request->input('sender');
-            $new->receiver = $request->input('receiver');
+            $new->sender = $senderId;
+            $new->receiver = $receiverId;
             $new->messgeId = $request->input('messgeId');
             $new->subject = $request->input('subject');
             $new->message = $request->input('message');
-            $new->user_id = auth()->user()->id;
+            // $new->user_id = auth()->user()->id;
             $new->save();
-            $rname = User::findOrFail($request->input('receiver'));
-            $sname =  User::findOrFail($request->input('sender'));
+            $rname = User::findOrFail( $receiverId );
+            $sname =  User::findOrFail( $senderId );
             /// notify user vi push
-            /// event(new WebMessage('NewMsg', $rname->first_name_en.' '.$rname->last_name_en, $request->input('receiver')));
+            /// event(new WebMessage('NewMsg', $rname->first_name_en.' '.$rname->last_name_en, $receiverId));
             /// Send Mail
             $user = new User();
             $user->email = $rname->email;

@@ -14,6 +14,7 @@ use App\Http\Controllers\ClientCompanyController;
 use App\Http\Controllers\HackathonController;
 use App\Http\Controllers\Mentor\MentorProgramController;
 use App\Http\Controllers\Mentor\MentorshipTaskController;
+use App\Http\Controllers\Mentor\SlotController;
 use App\Http\Controllers\Judger\JudgerScreeningController;
 use App\Http\Controllers\AdvancedExportController;
 /* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
@@ -573,9 +574,14 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('zoom/{id}/registrants', 'MeetingController@registrants');
 
     //Mentors
-    Route::get('/availability', 'MentorsController@availability')->name('slots.index');
     Route::post('mentors/modify', 'MentorsController@modify')->name('mentors.settings_modify');
-    Route::post('availability/remove-slot/{id}', 'MentorsController@removeSlot')->name('slots.destroy');
+
+    // Availability Slots
+    Route::get('availability', 'Mentor\SlotController@index')->name('slots.index');
+    Route::get('availability/slots', 'Mentor\SlotController@getSlots')->name('slots.read');
+    Route::post('availability/slots/store', 'Mentor\SlotController@store')->name('slots.store');
+    Route::post('availability/slots/{id}/copy', 'Mentor\SlotController@copy')->name('slots.copy');
+    Route::delete('availability/slots/{id}', 'Mentor\SlotController@destroy')->name('slots.destroy');
 
     Route::get('program/show', 'Mentor\MentorProgramController@show');
 

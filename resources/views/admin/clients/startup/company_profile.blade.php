@@ -253,7 +253,7 @@ $programsSummary = [
           </h6>
         </div>
         <div class="d-flex align-items-center gap-3">
-          @if( $_user->hasAnyRole('Admin|organizationManager') || $_user->ableTo('company.profile_view_mine', $permissions) )
+          @if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->ableTo('company.profile_view_mine', $permissions) && $_user->hasRole('registered') && $_user->company_id == $company->id ) )
             <a href="/dashboard/myCompany/{{ $company->id }}" class="btn btn-white text-primary shadow-sm border">
               {{ __('startup.edit_info') }} <i class="ti ti-settings ms-2"></i>
             </a>
@@ -437,8 +437,8 @@ $programsSummary = [
       </div>
       <form method="post" action="/dashboard/send_message" enctype="multipart/form-data">
         {!! csrf_field() !!}
-        <input type="hidden" name="sender" value="{{ $_user->id }}">
-        <input type="hidden" name="receiver" value="{{ $company?->user?->id }}">
+        {{--  <input type="hidden" name="sender" value="{{ $_user->id }}">  --}}
+        <input type="hidden" name="company_id" value="{{ $company->id }}">
         <div class="modal-body">
           <div class="form-group mb-3">
             <label class="form-label fs-6 mb-1">{{ __('messages.Subject') }}:</label>
