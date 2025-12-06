@@ -44,7 +44,7 @@ class StoreUserRequest extends FormRequest
         ];
 
         // Apply mentor-required rules ONLY if role is Mentor (ID 6)
-        if ($this->input('role') == '4') {
+        if ($this->input('role') == '6') {
             $rules['bio_en']      = 'required|string';
             $rules['Linkedin']    = 'required|url';
             $rules['expertise']   = 'required|array|min:1';

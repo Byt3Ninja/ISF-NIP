@@ -165,7 +165,7 @@
                       <label for="{{$role}}Role" style="display: grid; place-items: center;" class="form-check custom-option custom-option-icon cursor-pointer">
                         <div class="d-flex align-items-center">
                           @if($role === 'Founder')
-                            <input name="role" class="form-check-input role-input" type="radio" value="{{$key == 0 ? '4' : '3'}}" id="{{$role}}Role" checked={{ $key==0 ? 'true' : '' }} required />
+                            <input name="role" class="form-check-input role-input" type="radio" value="8" id="{{$role}}Role" checked required />
                             <div class="form-check-label custom-option-content d-flex align-items-center">
                               <i class="ti ti-businessplan me-2"></i>
                               <span class="custom-option-title">{{ __('admin.'. $role) }}</span>
@@ -195,8 +195,6 @@
                           </div>
                         </div>
                       @endif
-
-                 
 
                       <div class="col-12 mb-6">
                         <label class="form-label fs-6 fw-bold d-block text-{{ $l == 'ar' ? 'end' : 'start' }}">
@@ -512,9 +510,7 @@ document.addEventListener('DOMContentLoaded', function() {
   } else {
     // Manually trigger for the default case
     const checkedRole = document.querySelector('input[name="role"]:checked');
-    if (checkedRole && checkedRole.value === '4') { // Changed selectedRole to checkedRole.value for correctness
-      updateMentorFieldsVisibility(checkedRole.value);
-    } else if (checkedRole) { // Added this else if to handle other roles if '4' is not checked
+    if (checkedRole) {
       updateMentorFieldsVisibility(checkedRole.value);
     }
   }
@@ -529,10 +525,10 @@ document.querySelectorAll('.role-input').forEach(input => {
     updateMentorFieldsVisibility(selectedRole);
     
     // Update URL with role data
-    const url = new URL(window.location.href);
-    url.searchParams.set('type', config.type);
-    url.searchParams.set('data', config.hash);
-    window.history.pushState({}, '', url);
+    // const url = new URL(window.location.href);
+    // url.searchParams.set('type', config.type);
+    // url.searchParams.set('data', config.hash);
+    // window.history.pushState({}, '', url);
   });
 });
 </script>
