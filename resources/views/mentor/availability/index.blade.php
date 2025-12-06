@@ -76,7 +76,7 @@
             <div class="tab-content">
               <div class="tab-pane fade show active" id="calendar-tab" role="tabpanel">
                 <div class="row">
-                  <div class="col-lg-5 border-end ps-5">
+                  <div class="col-lg-5 border-end ps-5 mb-6 mb-lg-0">
                     <div id="availability-calendar"></div>
                   </div>
                   <div class="col-lg-7 ps-8">
@@ -194,7 +194,14 @@
 
     const updateSelectedDateDisplay = () => {
         if (currentSelectedDate) {
-            $('#selected-date-display').text(moment(currentSelectedDate).format('dddd, MMMM D, YYYY'));
+            const currentWeekday = moment(currentSelectedDate).format('dddd').toLowerCase();
+            const arabicDay = translations[currentWeekday];
+
+            const monthName = moment(currentSelectedDate).format('MMMM').toLowerCase();
+            const arabicMonth = translations[monthName];
+            const formattedDate = `${arabicMonth} ${moment(currentSelectedDate).format('D, YYYY')}`;
+
+            $('#selected-date-display').text(`${arabicDay}, ${formattedDate}`);
             $('#selected-weekday').text(translations[currentWeekday.toLowerCase()]);
             $('#slot-form-box').show();
         } else {
@@ -553,7 +560,7 @@
                 <div class="${bgColor} border rounded p-3 mb-2 d-flex justify-content-between align-items-center">
                     <div>
                         <div class="fw-bold text-dark mb-1">${slot.start} - ${slot.end}</div>
-                        <div class="small text-muted">${slot.duration} {{ __('mentor.min') }} • ${slot.sessionType === 'Online' ? '{{ __('mentor.online') }}' : slot.sessionType === 'Offline' ? '{{ __('mentor.offline') }}' : '{{ __('mentor.both') }}'}${repeatsText}</div>
+                        <div class="small text-muted">${slot.duration} {{ __('mentor.min') }} • ${translations[slot.sessionType.toLowerCase()]}${repeatsText}</div>
                     </div>
                     <button type="button" class="btn btn-label-danger btn-sm btn-icon delete-slot" data-type="${type}" data-key="${key}" data-index="${index}" data-id="${slot.id}">
                         <i class="ti ti-trash ti-16px"></i>
@@ -619,7 +626,7 @@
                                 <span class="slot-start">${slot.start}</span> - <span class="slot-end">${slot.end}</span>
                             </div>
                         <div class="small text-muted">
-                            ${slot.duration} {{ __('mentor.min') }} • <span class="slot-session-type">${slot.sessionType === 'Online' ? '{{ __('mentor.online') }}' : slot.sessionType === 'Offline' ? '{{ __('mentor.offline') }}' : '{{ __('mentor.both') }}'}</span>${repeatsText}
+                            ${slot.duration} {{ __('mentor.min') }} • <span class="slot-session-type">${translations[slot.sessionType.toLowerCase()]}</span>${repeatsText}
                         </div>
                         </div>
                         <div class="slot-actions btn-group">

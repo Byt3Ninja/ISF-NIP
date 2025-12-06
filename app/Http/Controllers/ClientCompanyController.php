@@ -510,6 +510,7 @@ class ClientCompanyController extends Controller
      */
     public function updateOrStore(StoreUpdateClientCompanyRequest $request, $id = null)
     {
+        dd($request->all());
         try {
             $user = Auth::user();
             if (!is_null($id)) {
