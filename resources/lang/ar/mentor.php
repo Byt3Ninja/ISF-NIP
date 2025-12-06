@@ -99,4 +99,12 @@ return [
     'october' => 'أكتوبر',
     'november' => 'نوفمبر',
     'december' => 'ديسمبر',
+    'sunday' => 'الأحد',
+    'monday' => 'الاثنين',
+    'tuesday' => 'الثلاثاء',
+    'wednesday' => 'الأربعاء',
+    'thursday' => 'الخميس',
+    'friday' => 'الجمعة',
+    'saturday' => 'السبت',
+    'slot_copied_success' => 'تم نسخ الفترة بنجاح',
 ];
