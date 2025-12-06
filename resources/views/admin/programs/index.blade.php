@@ -260,11 +260,11 @@
                     @else
                       href="/dashboard/programlist/{{ $cycle->id }}" 
                     @endif
-                    class="btn btn-primary flex-grow-1">
+                    class="btn btn-primary flex-grow-1 text-nowrap">
                     <i class="ti ti-eye me-1"></i> 
                     {{ $cycle->type === 'Hackathon' ? __('admin.view_hackathon') : __('admin.View_Details') }}
                   </a>
-                  <a  class="btn btn-outline-primary flex-grow-1" href="{{ route('programs.report', $cycle->id) }}">
+                  <a  class="btn btn-outline-primary flex-grow-1 text-nowrap" href="{{ route('programs.report', $cycle->id) }}">
                     <i class="ti ti-file-text me-1"></i> {{ __('admin.View_Report') }}
                   </a>
                 </div>
