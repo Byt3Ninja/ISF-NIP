@@ -46,6 +46,30 @@ class SlotController extends Controller
 			return view('mentor.availability.index');
 	}
 
+	private function cleanWeekday($value)
+	{
+			// If null or empty → return as is
+			if (!$value) return $value;
+
+			// Case 1: JSON encoded string, ex: "\"Sunday\""
+			$decoded = json_decode($value, true);
+
+			if (json_last_error() === JSON_ERROR_NONE) {
+					// If decoded value is string → return it
+					if (is_string($decoded)) {
+							return $decoded;
+					}
+
+					// If decoded value is array → return array
+					if (is_array($decoded)) {
+							return $decoded;
+					}
+			}
+
+			// Case 2: Not JSON but still has quotes → trim quotes
+			return trim($value, '"');
+	}
+
 	public function getSlots() {
 		$schedules = Schedule::where('user_id', auth()->id())->get();
 
@@ -55,7 +79,7 @@ class SlotController extends Controller
 
           return [
               'id'           => $item->id,
-              'weekday'      => $isWeekly ? $item->days : null,
+              'weekday'      => $isWeekly ? $this->cleanWeekday($item->days) : null,
 							'date'			   => $isWeekly ? null : ($item->date ?? $item->dto),
               'start_time'   => substr($item->tfrom, 0, 5), // "14:00"
               'end_time'     => substr($item->tto, 0, 5),   // "17:00"
