@@ -326,9 +326,9 @@
                         </div>
 
                       <div class="col-12 mb-3">
-                        <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="expertise">{{ __('admin.Industry Expertise') }}</label>
+                        <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="expertise">{{ __('admin.Expertises') }}</label>
                         <div class="form-group">
-                          <select name="expertise[]" class="select2 form-select text-{{ $l == 'ar' ? 'end' : 'start' }}" multiple="multiple" id="expertise" data-placeholder="{{__('admin.Select Expertise')}}" required>
+                          <select name="expertise[]" class="select2 form-select text-{{ $l == 'ar' ? 'end' : 'start' }}" multiple="multiple" id="expertise" data-placeholder="{{__('admin.Expertises')}}" required>
                             @php
                             $expertises = App\Expertise::where('parent_id', null)->get();
                             @endphp
