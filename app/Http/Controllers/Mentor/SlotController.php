@@ -185,6 +185,7 @@ class SlotController extends Controller
 
 	public function destroy(Request $request, $id)
 	{
+		
 		try {
 			$schedule = Schedule::where('user_id', Auth::id())->findOrFail($id);
 			$schedule->delete();

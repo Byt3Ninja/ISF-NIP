@@ -99,4 +99,5 @@ return [
     'november' => 'November',
     'december' => 'December',
 
+    'slot_copied_success' => 'Slot copied successfully',
 ];
