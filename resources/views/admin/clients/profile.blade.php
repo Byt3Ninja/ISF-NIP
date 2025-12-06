@@ -398,7 +398,7 @@
                           @foreach($mentorshipTasks as $item)
                             <tr>
                               <td>{{ $item->title }}</td>
-                              <td>{{ $item->description }}</td>
+                              <td>{{ strip_tags($item->description) }}</td>
                               <td>{{ $item->start }}</td>
                               <td>{{ $item->end }}</td>
                             </tr>

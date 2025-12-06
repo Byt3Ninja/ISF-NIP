@@ -400,7 +400,7 @@
                           <tr>
                             <td>{{ $n + 1 }}</td>
                             <td>{{ $mentor->cycle->title ?? '' }}</td>
-                            <td>{{ $mentor->cycle->description ?? '' }}</td>
+                            <td>{{ strip_tags($mentor->cycle->description) }}</td>
                             <td>{{ $mentor->cycle->start ?? '' }}</td>
                             <td>{{ $mentor->cycle->end ?? '' }}</td>
                           </tr>
