@@ -1169,6 +1169,7 @@ class HomeController extends Controller
                 mr.period,
                 mr.rate_comment,
                 mr.done,
+                mr.session_type,
                 u.img_url AS `user_img_url`,
                 u.first_name_en AS `user_first_name_en`,
                 u.first_name_ar AS `user_first_name_ar`,
@@ -1221,6 +1222,7 @@ class HomeController extends Controller
             $session->period = $_session->period;
             $session->rate_comment = $_session->rate_comment;
             $session->done = $_session->done;
+            $session->session_type = $_session->session_type;
 
             $user = new stdClass;
             $user->id = $_session->user_id;

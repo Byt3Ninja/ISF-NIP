@@ -725,6 +725,7 @@
 													<th>{{__('cycles.Date/Time')}}</th>
 													<th>{{__('cycles.Approved')}}</th>
 													<th>{{__('cycles.Done')}}</th>
+													<th>{{__('cycles.Type')}}</th>
 													<th>{{__('cycles.Actions')}}</th>
 												</tr>
 											</thead>
@@ -769,6 +770,7 @@
 																class="warning">'.__('Waiting').'</span>' !!} </div>
 													</td>
 													<td> {{ $session->done ?__('Yes') : __('No') }} </td>
+													<td> {{ $session->session_type ?? '' }} </td>
 													<td> 
 														@php
 															$now = date('Y-m-d H:i');
