@@ -655,6 +655,8 @@ class HomeController extends Controller
                     mr.zoom_date,
                     mr.start_url,
                     mr.zoom_passcode,
+                    mr.mentor_id AS `mentor_id`,
+                    mr.session_type AS `session_type`,
                     u.id AS `user_id`,
                     u.img_url AS `user_image_url`,
                     u.first_name_ar AS `first_name_ar`,
@@ -698,6 +700,7 @@ class HomeController extends Controller
                 $output->zoom_date = $session->zoom_date;
                 $output->start_url = $session->start_url;
                 $output->passcode = $session->zoom_passcode;
+                $output->session_type = $session->session_type;
 
                 $image = User::image_handler($session->user_image_url);
                 $user = new stdClass;
@@ -719,7 +722,7 @@ class HomeController extends Controller
         } else {
             $upcoming_sessions = collect([]);
         }
-
+        
         if (array_intersect(['dashboard_cards.my_programs'], $permissions)) {
             $my_cycles_q = "SELECT 
                     c.id AS `id`
