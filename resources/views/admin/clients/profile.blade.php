@@ -15,9 +15,12 @@
         <div class="col-12">
           <article class="card mb-6">
             <header class="user-profile-header-banner">
-              <img src="/vuexy/assets/img/pages/profile-banner.png" 
-                   alt="Banner image" 
-                   class="rounded-top" />
+              <img 
+                src="/vuexy/assets/img/pages/profile-banner.png" 
+                alt="Banner image" 
+                class="rounded-top" 
+                style="object-fit: cover;"
+              />
             </header>
             
             <div class="user-profile-header d-flex flex-column flex-lg-row text-sm-start text-center mb-5">
@@ -395,7 +398,7 @@
                           @foreach($mentorshipTasks as $item)
                             <tr>
                               <td>{{ $item->title }}</td>
-                              <td>{{ $item->description }}</td>
+                              <td>{{ strip_tags($item->description) }}</td>
                               <td>{{ $item->start }}</td>
                               <td>{{ $item->end }}</td>
                             </tr>

@@ -38,9 +38,12 @@
         <div class="col-12">
           <article class="card mb-6">
             <header class="user-profile-header-banner">
-              <img src="/vuexy/assets/img/pages/profile-banner.png" 
-                   alt="Banner image" 
-                   class="rounded-top" />
+              <img 
+                src="/vuexy/assets/img/pages/profile-banner.png" 
+                alt="Banner image" 
+                class="rounded-top" 
+                style="object-fit: cover;"
+              />
             </header>
 
             <div class="user-profile-header d-flex flex-column flex-lg-row text-sm-start text-center mb-5">
@@ -397,7 +400,7 @@
                           <tr>
                             <td>{{ $n + 1 }}</td>
                             <td>{{ $mentor->cycle->title ?? '' }}</td>
-                            <td>{{ $mentor->cycle->description ?? '' }}</td>
+                            <td>{{ strip_tags($mentor->cycle->description) }}</td>
                             <td>{{ $mentor->cycle->start ?? '' }}</td>
                             <td>{{ $mentor->cycle->end ?? '' }}</td>
                           </tr>
