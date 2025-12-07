@@ -119,6 +119,7 @@ $cards = [
           <thead class="table-light">
             <tr>
               <th>{{ __('cycles.Mentor') }}</th>
+              <th>{{ __('cycles.Program') }}</th>
               <th>{{ __('cycles.Rate/Comment') }}</th>
               <th>{{ __('cycles.Date/Time') }}</th>
               <th>{{ __('cycles.Approved') }}</th>
@@ -135,6 +136,9 @@ $cards = [
                   </div>
                   <span class="fw-medium text-dark">{{ $session->mentor->name }}</span>
                 </a>
+              </td>
+              <td>
+                <span class="fw-medium">{{ $session->cycle->title }}</span>
               </td>
               <td>
                 @if($session->rate_comment)
