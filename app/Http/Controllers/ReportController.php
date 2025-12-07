@@ -1123,6 +1123,7 @@ class ReportController extends Controller
         }
         $data['mentorship_sessions']=$mentorRequests->get();
         $data['training_sessions']=$training_sessions->get();
+        // dd($data['mentorship_sessions']);
         return $data;
     }
 
