@@ -118,6 +118,7 @@ $cards = [
         <table class="table" id="mentorshipSessionsTable">
           <thead class="table-light">
             <tr>
+              <th>#</th>
               <th>{{ __('cycles.Mentor') }}</th>
               <th>{{ __('cycles.Program') }}</th>
               <th>{{ __('cycles.Rate/Comment') }}</th>
@@ -129,6 +130,7 @@ $cards = [
           <tbody>
             @foreach ($mentorship_sessions as $session)
             <tr>
+              <td> {{ $session->id }}</td>
               <td>
                 <a href="/dashboard/show/UserProfile/{{ $session->mentor->id }}" class="d-flex align-items-center">
                   <div class="avatar avatar-sm me-2">
