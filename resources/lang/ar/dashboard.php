@@ -183,4 +183,5 @@ return [
     'Completion of all prerequisites is required before you can join the program.' => 'إكمال جميع المتطلبات مطلوب قبل أن تتمكن من الانضمام للبرنامج.',
     'Complete Prerequisites & Join' => 'إكمال المتطلبات والانضمام',
     'Complete Prerequisites' => 'إكمال المتطلبات',
+    'Type' => 'نوع',
 ];

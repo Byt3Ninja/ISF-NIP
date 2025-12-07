@@ -183,4 +183,5 @@ return [
     'Completion of all prerequisites is required before you can join the program.' => 'Completion of all prerequisites is required before you can join the program.',
     'Complete Prerequisites & Join' => 'Complete Prerequisites & Join',
     'Complete Prerequisites' => 'Complete Prerequisites',
+    'Type' => 'Type',
 ];
