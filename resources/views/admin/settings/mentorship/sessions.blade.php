@@ -159,6 +159,8 @@
                               $badgeClass = 'success';
                             }elseif($session->session_type == 'Offline'){
                                 $badgeClass = 'warning';
+                            }else{
+                                $badgeClass = '';
                             }
                           @endphp
                           <span class="badge bg-label-{{ $badgeClass }}">
@@ -275,10 +277,10 @@
                 <label for="session_type" class="form-label">{{ __('admin.Session_Type') }}</label>
                 <select class="form-select select2" name="session_type">
                   <option value="" disabled>{{ __('admin.Select_Session_Type') }}</option>
-                  <option value="all" {{ !request()->session_type ? 'selected' : '' }}>{{ __('admin.All') }}</option>
-                  <option value="Both" {{ !request()->session_type ? 'selected' : '' }}>{{ __('admin.Both') }}</option>
-                  <option value="Online" {{ !request()->session_type ? 'selected' : '' }}>{{ __('admin.Online') }}</option>
-                  <option value="Offline" {{ !request()->session_type ? 'selected' : '' }}>{{ __('admin.Offline') }}</option>
+                  <option value="all" {{ request()->session_type == 'all' ? 'selected' : '' }}>{{ __('admin.All') }}</option>
+                  <option value="Both" {{ request()->session_type == 'Both' ? 'selected' : '' }}>{{ __('admin.Both') }}</option>
+                  <option value="Online" {{ request()->session_type == 'Online' ? 'selected' : '' }}>{{ __('admin.Online') }}</option>
+                  <option value="Offline" {{ request()->session_type == 'Offline' ? 'selected' : '' }}>{{ __('admin.Offline') }}</option>
                 
                 </select>
               </div>

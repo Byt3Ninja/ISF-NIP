@@ -30,6 +30,7 @@
                               <th>{{ __('admin.Date') }}</th>
                               <th>{{ __('admin.Notes') }}</th>
                               <th>{{ __('admin.Rate') }}</th>
+                              <th>{{ __('admin.Type') }}</th>
                               <th>{{ __('dashboard.Meeting Link') }}</th>
                               {{--                                                        <th>{{__('mentor.mentorshipTasks.all')}}</th> --}}
                             </tr>
@@ -71,6 +72,9 @@
                                       {!! str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>', $session->rating) !!}
                                     </span>
                                   @endif
+                                </td>
+                                <td>
+                                  {{ $session->session_type ?? '' }}
                                 </td>
                                 @php
 															$now = date('Y-m-d H:i');
