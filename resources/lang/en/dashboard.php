@@ -102,7 +102,7 @@ return [
     'User' => 'User',
     'Date' => 'Date',
     'Admin Notes' => 'Admin Notes',
-    'Meeting Link' => 'Meeting Link',
+    'Meeting Link' => 'Meeting Link/Map',
     'Add new' => 'Add new',
     'Choose type' => 'Choose type',
     'Add one day' => 'Add one day',

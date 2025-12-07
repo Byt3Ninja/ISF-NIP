@@ -592,6 +592,7 @@ class MentorsController extends Controller
 
 	public function sessions(Request $request)
 	{
+		
 		$organization_id = auth()->user()->organization_id;
 		if ($request->show == 'all') {
 			 $query = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
@@ -651,6 +652,9 @@ class MentorsController extends Controller
         	$query->whereNull('done');
    		 }
     	}
+		if ($request->filled('session_type') && $request->session_type != 'all') {
+			$query->where('session_type', $request->session_type);
+		}
 
 		$sessions = $query->orderBy('id', 'DESC')->get();
 
