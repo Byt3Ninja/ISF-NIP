@@ -67,6 +67,7 @@
                       <th>{{ __('cycles.Date/Time') }}</th>
                       <th>{{ __('cycles.Approved') }}</th>
                       <th>{{ __('cycles.Done') }}</th>
+                      <th>{{ __('cycles.Type') }}</th>
                       <th>{{ __('cycles.Actions') }}</th>
                     </tr>
                   </thead>
@@ -150,6 +151,18 @@
                         <td style="min-width: 80px;">
                           <span class="badge bg-label-{{ $session->done ? 'success' : 'danger' }}">
                             {{ $session->done ? __('Yes') : __('No') }}
+                          </span>
+                        </td>
+                        <td style="min-width: 100px;">
+                          @php
+                            if(in_array($session->session_type, ['Online', 'Both'])){
+                              $badgeClass = 'success';
+                            }elseif($session->session_type == 'Offline'){
+                                $badgeClass = 'warning';
+                            }
+                          @endphp
+                          <span class="badge bg-label-{{ $badgeClass }}">
+                            {{ $session->session_type }}
                           </span>
                         </td>
                         <td style="min-width: 280px;">
@@ -255,6 +268,18 @@
                       {{ $cycle->title }}
                     </option>
                   @endforeach
+                </select>
+              </div>
+
+              <div class="col-12">
+                <label for="session_type" class="form-label">{{ __('admin.Session_Type') }}</label>
+                <select class="form-select select2" name="session_type">
+                  <option value="" disabled>{{ __('admin.Select_Session_Type') }}</option>
+                  <option value="all" {{ !request()->session_type ? 'selected' : '' }}>{{ __('admin.All') }}</option>
+                  <option value="Both" {{ !request()->session_type ? 'selected' : '' }}>{{ __('admin.Both') }}</option>
+                  <option value="Online" {{ !request()->session_type ? 'selected' : '' }}>{{ __('admin.Online') }}</option>
+                  <option value="Offline" {{ !request()->session_type ? 'selected' : '' }}>{{ __('admin.Offline') }}</option>
+                
                 </select>
               </div>
 
