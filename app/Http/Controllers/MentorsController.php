@@ -658,6 +658,16 @@ class MentorsController extends Controller
 
 		$sessions = $query->orderBy('id', 'DESC')->get();
 
+		// Add rate filtering - filter after retrieval for better accuracy
+		if ($request->filled('rate') && $request->rate != 'all') {
+			$rating = $request->rate;
+			$sessions = $sessions->filter(function ($session) use ($rating) {
+				// Filter sessions by their individual rating
+				$sessionRating = $session->rating ?? 0;
+				return round($sessionRating) == $rating;
+			});
+		}
+
 		$sessions = $sessions->map(function ($session) {
 			$session->date = Carbon::parse($session->zoom_date);
 			return $session;

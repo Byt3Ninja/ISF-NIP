@@ -47,7 +47,7 @@
                     <i class="ti ti-filter me-2"></i>
                     {{ __('cycles.Filter') }}
                   </button>
-                  @if(request()->hasAny(['start_date', 'end_date', 'done', 'cycle_id', 'show']))
+                  @if(request()->hasAny(['start_date', 'end_date', 'done', 'cycle_id', 'show', 'rate', 'session_type']))
                   <button onclick="resetFilters()" class="btn btn-outline-secondary">
                     <i class="ti ti-refresh me-2"></i>
                     {{ __('cycles.Reset') }}
@@ -249,7 +249,7 @@
           </div>
 
           <div class="modal-body">
-            <div class="row g-6">
+            <div class="row g-4">
               <!-- Request Status -->
               <div class="col-12">
                 <label for="showSelect" class="form-label">{{ __('cycles.Request_Status') }}</label>
@@ -288,12 +288,25 @@
               </div>
 
               <!-- Session Type -->
-              <div class="col-12">
+              <div class="col-12 col-md-6">
                 <label for="session_type" class="form-label">{{ __('mentor.session_type') }}</label>
                 <select class="form-select select2" name="session_type">
                   <option value="all" {{ request()->session_type == 'all' ? 'selected' : '' }}>{{ __('admin.All') }}</option>
                   <option value="Online" {{ request()->session_type == 'Online' ? 'selected' : '' }}>{{ __('mentor.online') }}</option>
                   <option value="Offline" {{ request()->session_type == 'Offline' ? 'selected' : '' }}>{{ __('mentor.offline') }}</option>                
+                </select>
+              </div>
+
+              <!-- Rating -->
+              <div class="col-12 col-md-6">
+                <label for="rate" class="form-label">{{ __('cycles.Rating') }}</label>
+                <select class="form-select select2" name="rate">
+                  <option value="all" {{ request()->rate == 'all' ? 'selected' : '' }}>{{ __('admin.All') }}</option>
+                  <option value="1" {{ request()->rate == 1 ? 'selected' : '' }} > 1 </option>
+                  <option value="2" {{ request()->rate == 2 ? 'selected' : '' }} > 2 </option>
+                  <option value="3" {{ request()->rate == 3 ? 'selected' : '' }} > 3 </option>
+                  <option value="4" {{ request()->rate == 4 ? 'selected' : '' }} > 4 </option>
+                  <option value="5" {{ request()->rate == 5 ? 'selected' : '' }} > 5 </option>
                 </select>
               </div>
 
@@ -1194,6 +1207,8 @@
       url.searchParams.delete('done');
       url.searchParams.delete('cycle_id');
       url.searchParams.delete('show');
+      url.searchParams.delete('rate');
+      url.searchParams.delete('session_type');
       window.location.href = url.toString();
     }
   </script>
