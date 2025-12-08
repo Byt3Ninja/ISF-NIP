@@ -526,7 +526,7 @@
                 'message': message,
               });
             } else {
-              const message = "{{ __('mentor.slot_added_to_all', ['date' => ':date']) }}".replace(':date', key + 's');
+              const message = "{{ __('mentor.slot_added_to_all', ['day' => ':day']) }}".replace(':day', key + 's');
               updateCalendarStyles();
               releaseSuccessAlert({
                 'title': '{{ __('mentor.slot_added_success') }}',

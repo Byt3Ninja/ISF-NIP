@@ -44,6 +44,7 @@ return [
     'slot_removed_success' => 'تم حذف فترة التواجد بنجاح',
     'slot_removed_error' => 'حدث خطأ أثناء حذف فترة التواجد',
     'slot_added_to_date' => 'تم اضافة الفترة في :date',
+    'slot_added_to_all' => 'تم اضافة الفترة في كل :day',
     'slot_added_success' => 'تم اضافة الفترة بنجاح',
     'slot_copied_success' => 'تم نسخ الفترة بنجاح',
     'slot_already_exists' => 'فترة التواجد هذه موجودة بالفعل',
