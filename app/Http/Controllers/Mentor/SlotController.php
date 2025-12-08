@@ -70,23 +70,41 @@ class SlotController extends Controller
 			return trim($value, '"');
 	}
 
-	public function getSlots() {
-		$schedules = Schedule::where('user_id', auth()->id())->get();
+	public function getSlots(Request $request, $id = null) {
+			$schedules = Schedule::where('user_id', $id ?? auth()->id())->get();
 
-      $slots = $schedules->map(function ($item) {
+			// If 'active_only' filter is set, filter active schedules
+			if ($request->has('active_only') && $request->active_only == 'true') {
+					$schedules = Schedule::where('active', 1)->where('user_id', $id ?? auth()->id())->get();
+			}
 
-				$isWeekly = $item->type == 'Weekly';
+			// Map schedules to desired format
+			$slots = $schedules->map(function ($item) {
+					$isWeekly = $item->type == 'Weekly';
 
-          return [
-              'id'           => $item->id,
-              'weekday'      => $isWeekly ? $this->cleanWeekday($item->days) : null,
-							'date'			   => $isWeekly ? null : ($item->date ?? $item->dto),
-              'start_time'   => substr($item->tfrom, 0, 5), // "14:00"
-              'end_time'     => substr($item->tto, 0, 5),   // "17:00"
-              'session_type' => $item->session_type,
-              'weekly'       => $isWeekly,
-          ];
-      });
+					return [
+						'id'           => $item->id,
+						'weekday'      => $isWeekly ? $this->cleanWeekday($item->days) : null,
+						'date'         => $isWeekly ? null : ($item->date ?? $item->dto),
+						'start_time'   => substr($item->tfrom, 0, 5),
+						'end_time'     => substr($item->tto, 0, 5),
+						'session_type' => $item->session_type,
+						'weekly'       => $isWeekly,
+					];
+			});
+
+			// If fetching for specific mentor, include mentor info
+			if ($id) {
+					$user = User::find($id);
+					return response()->json([
+						'success' => true,
+						'user' => [
+							'id' => $user->id,
+							'name' => $user->name,
+						],
+						'data' => $slots,
+					], 200);
+			}
 
 			return response()->json(['success' => true, 'data' => $slots], 200);
 	}
