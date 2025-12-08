@@ -43,6 +43,7 @@ return [
     'slot_removed_success' => 'Availability slot has been deleted successfully',
     'slot_removed_error' => 'An error occurred while deleting the availability slot',
     'slot_added_to_date' => 'Slot added to :date',
+    'slot_added_to_all' => 'Slot added to all :day',
     'slot_added_success' => 'Slot Added Successfully',
     'slot_copied_success' => 'Slot Copied Successfully',
     'slot_already_exists' => 'This availability slot already exists',
