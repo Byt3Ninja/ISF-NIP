@@ -493,60 +493,14 @@
       @endif
       <!-- End Time Sheets -->
 
-      
       <!-- Start Assessments -->
       <li
-      class="{{ Request::is('dashboard/question-assessment*', 'dashboard/answerOption*', 'dashboard/analysis-assessment*', 'dashboard/history-assessment*', 'dashboard/category-assessment*') ? 'sidebar-group-active open' : '' }} menu-item">
-        <a class="menu-link menu-toggle">
-        <i class="ti ti-circle-dashed-check ti-md me-3"></i>
-        <div>{{ __('admin.Assessments') }}</div>
+        class="{{ Request::is('*assessments', 'dashboard/question-assessment*', 'dashboard/answerOption*', 'dashboard/analysis-assessment*', 'dashboard/history-assessment*', 'dashboard/category-assessment*') ? 'active' : '' }} menu-item">
+        <a href="{{ route('assessments.index') }}" class="menu-link">
+          <i class="ti ti-circle-dashed-check ti-md me-3"></i>
+          <div>{{ __('admin.Assessments') }}</div>
         </a>
-        
-      <ul class="menu-sub">
-        {{-- <li class="{{ Request::is('dashboard/questions*') ? 'active' : '' }} menu-item">
-          <a href="{{ route('questions.index') }}" class="menu-link">
-            <i class="bx bx-message"></i>
-            <div>{{ __('admin.AddQuestions') }}</div>
-          </a>
-        </li>
-        <li class="{{ Request::is('dashboard/answerOption*') ? 'active' : '' }} menu-item">
-          <a href="{{ route('answerOption.index') }}" class="menu-link">
-            <i class="bx bx-message"></i>
-            <div>{{ __('admin.AddAnswerOption') }}</div>
-          </a>
-        </li> --}}
-
-
-        <li class="{{ Request::is('*assessments') ? 'active' : '' }} menu-item">
-          <a href="{{ route('assessments.index') }}" class="menu-link">
-            <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-            <span class="menu-item"> {{ __('admin.Manage_Assessments') }}</span>
-          </a>
-        </li>
-
-        {{-- <li class="{{ Request::is('dashboard/question-assessment*') ? 'active' : '' }} menu-item">
-          <a href="{{ route('assessments.take') }}" class="menu-link">
-            <span class="menu-item">{{ __('admin.Question_Assessment') }}</span>
-            <i class="bx bx-message"></i>
-          </a>
-        </li>
-        <li class="{{ Request::is('dashboard/analysis-assessment*') ? 'active' : '' }} menu-item">
-          <a href="{{ route('assessments.results_history_view') }}" class="menu-link">
-            <span class="menu-item">{{ __('admin.Analysis_Assessment') }}</span>
-            <i class="bx bx-message"></i>
-          </a>
-        </li>
-
-        <li class="{{ Request::is('dashboard/history-assessment*') ? 'active' : '' }} menu-item">
-          <a href="{{ route('assessments.results_history_view') }}" class="menu-link">
-            <span class="menu-item">{{ __('admin.History_Assessment') }}</span>
-            <i class="bx bx-message"></i>
-          </a>
-        </li> --}}
-
-      </ul>
       </li>
-
       <!-- End Assessment -->
 
       <li class="{{ Request::is('dashboard/screening*') ? 'sidebar-group-active open' : '' }} menu-item">
