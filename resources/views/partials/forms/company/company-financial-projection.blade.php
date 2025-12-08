@@ -1,20 +1,23 @@
 <div class="card">
-  <div class="card-header">
-    <div class="d-flex flex-wrap align-items-md-center justify-content-between gap-3">
-      <div>
-        <h5 class="card-title mb-0">{{ $heading }}</h5>
-        <small class="text-muted">{{ __('startup.enter_valuation_date_and_financial_data_to_generate_metrics') }}</small>
-      </div>
-      <div class="d-flex align-items-center gap-3">
-        <label for="valuationDate" class="form-label text-nowrap">
-          {{ __('startup.valuation_date') }} <span class="text-danger">*</span>
-        </label>
-        <input type="text" class="form-control" id="valuationDate" name="valuation_date" required>
-      </div>
-    </div>
-  </div>
-  <form id="financialForm" method="post" enctype="multipart/form-data" action="{{ route('company.profile_update_mine', isset($client) && $client->company ? $client->company->id : auth()->user()->id) }}">
+	 <form id="financialForm" method="post" enctype="multipart/form-data" action="{{ route('company.profile_update_mine', isset($client) && $client->company ? $client->company->id : auth()->user()->id) }}">
     {!! csrf_field() !!}
+		<div class="card-header">
+			<div class="d-flex flex-wrap align-items-md-center justify-content-between gap-3">
+			<div>
+				<h5 class="card-title mb-0">{{ $heading }}</h5>
+				<small class="text-muted">{{ __('startup.enter_valuation_date_and_financial_data_to_generate_metrics') }}</small>
+			</div>
+			<div class="d-flex align-items-center gap-3">
+				<label for="valuationDate" class="form-label text-nowrap">
+				{{ __('startup.valuation_date') }} <span class="text-danger">*</span>
+				</label>
+				<input type="text" class="form-control" id="valuationDate" name="valuation_date" required>
+			</div>
+			</div>
+		</div>
+ 
+
+	<input name="CompanyN" type="hidden" value="15">
     
     <div class="card-datatable table-responsive">
       <table class="datatable-basic table mb-0" id="financialTable">
@@ -82,7 +85,7 @@
                   @for ($i = 0; $i < 4; $i++)
                     <td>
                       <input type="text" class="form-control @if (isset($row['fw-bold'])) fw-bold @endif"
-                        id="{{ $row['name'] }}_{{ $i }}" name="{{ $row['name'] }}_{{ $i }}"
+                        id="{{ $row['name'] }}_{{ $i }}"  name="{{ $row['name'] }}_{{ $i }}"
                         @if (isset($row['special']) && $row['special'] == 'delta' && $i == 0) value="-" @endif readonly tabindex="-1">
                     </td>
                   @endfor
@@ -95,6 +98,7 @@
                     @endif
                   </td>
                   @for ($i = 0; $i < 4; $i++)
+				  
                     <td>
                       <input type="number" class="form-control year-{{ $i }} input-trigger"
                         name="{{ $row['name'] }}_{{ $i }}" @if ($row['required']) required @endif>
