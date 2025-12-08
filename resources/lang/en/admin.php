@@ -2549,8 +2549,4 @@ return [
 	'Almuni' => 'Alumni',
 	'serviceprovider' => 'Service Provider',
 	'unexpected_error' => 'An unexpected error occurred, please try again later',
-	'Both' => 'Both',
-	'Offline' => 'Offline',
-	'Session_Type' => 'Session Type',
-	'Select_Session_Type' => 'Select Session Type',
 ];

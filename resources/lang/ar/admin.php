@@ -2602,8 +2602,4 @@ return [
 	'Almuni' => ' الخريجين ',
 	'serviceprovider' => 'مقدم الخدمة',
 	'unexpected_error' => 'حدث خطأ غير متوقع، يرجى المحاولة مرة أخرى لاحقًا',
-	'Both' => 'كلاهما',
-	'Offline' => 'غير متصل',
-	'Session_Type' => 'نوع الجلسة',
-	'Select_Session_Type' => 'اختر نوع الجلسة',
 ];

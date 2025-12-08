@@ -29,7 +29,18 @@
           <div class="col-12">
             <div class="card">
               <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-center border-bottom">
-                <h5 class="card-title mb-0">{{ __('cycles.Mentorship Sessions') }}</h5>
+                <h5 class="card-title mb-0 text-capitalize">
+                  {{ __('cycles.Mentorship Sessions') }}
+                  @if (request()->show == 'all') 
+                    ( {{ __('cycles.All requests') }} )
+                  @elseif (request()->show == 'approved')
+                    ( {{ __('cycles.approved requests') }} )
+                  @elseif (request()->show == 'disapproved')
+                    ( {{ __('cycles.disapproved requests') }} )
+                  @else
+                    ( {{ __('cycles.New requests only') }} )
+                  @endif
+                </h5>
                 <div class="d-flex align-items-center gap-2">
                   <!-- Filter Modal Trigger -->
                   <button type="button" class="btn btn-label-primary" data-bs-toggle="modal" data-bs-target="#filterModal">
@@ -67,7 +78,7 @@
                       <th>{{ __('cycles.Date/Time') }}</th>
                       <th>{{ __('cycles.Approved') }}</th>
                       <th>{{ __('cycles.Done') }}</th>
-                      <th>{{ __('cycles.Type') }}</th>
+                      <th>{{ __('mentor.session_type') }}</th>
                       <th>{{ __('cycles.Actions') }}</th>
                     </tr>
                   </thead>
@@ -155,17 +166,20 @@
                         </td>
                         <td style="min-width: 100px;">
                           @php
-                            if(in_array($session->session_type, ['Online', 'Both'])){
-                              $badgeClass = 'success';
-                            }elseif($session->session_type == 'Offline'){
-                                $badgeClass = 'warning';
-                            }else{
-                                $badgeClass = '';
+                            $badgeColor = 'secondary';
+                            $badgeIcon = 'screen-share';
+                            if ($session->session_type == 'Online') {
+                              $badgeColor = 'success';
+                              $badgeIcon = 'video';
+                            } elseif($session->session_type == 'Offline'){
+                              $badgeColor = 'warning';
+                              $badgeIcon = 'map';
                             }
                           @endphp
-                          <span class="badge bg-label-{{ $badgeClass }}">
-                            {{ $session->session_type }}
-                          </span>
+                          <small class="badge bg-label-{{ $badgeColor }}">
+                            <i class="ti ti-{{ $badgeIcon }} ti-16px me-1"></i>
+                            {{ $session->session_type ?? __('admin.All') }}
+                          </small>
                         </td>
                         <td style="min-width: 280px;">
                           <div class="d-flex flex-wrap gap-1">
@@ -273,15 +287,13 @@
                 </select>
               </div>
 
+              <!-- Session Type -->
               <div class="col-12">
-                <label for="session_type" class="form-label">{{ __('admin.Session_Type') }}</label>
+                <label for="session_type" class="form-label">{{ __('mentor.session_type') }}</label>
                 <select class="form-select select2" name="session_type">
-                  <option value="" disabled>{{ __('admin.Select_Session_Type') }}</option>
                   <option value="all" {{ request()->session_type == 'all' ? 'selected' : '' }}>{{ __('admin.All') }}</option>
-                  <option value="Both" {{ request()->session_type == 'Both' ? 'selected' : '' }}>{{ __('admin.Both') }}</option>
-                  <option value="Online" {{ request()->session_type == 'Online' ? 'selected' : '' }}>{{ __('admin.Online') }}</option>
-                  <option value="Offline" {{ request()->session_type == 'Offline' ? 'selected' : '' }}>{{ __('admin.Offline') }}</option>
-                
+                  <option value="Online" {{ request()->session_type == 'Online' ? 'selected' : '' }}>{{ __('mentor.online') }}</option>
+                  <option value="Offline" {{ request()->session_type == 'Offline' ? 'selected' : '' }}>{{ __('mentor.offline') }}</option>                
                 </select>
               </div>
 
