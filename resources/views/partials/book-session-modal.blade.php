@@ -180,7 +180,7 @@ $(document).ready(function() {
       dataType: 'json'
     })
     .done(function(result) {
-      console.log('Fetched slots:', result?.data || []);
+      // console.log('Fetched slots:', result?.data || []);
       availableSlots = result?.data || [];
 
       if (result?.user) {

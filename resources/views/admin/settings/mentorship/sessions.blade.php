@@ -171,7 +171,7 @@
                             if ($session->session_type == 'Online') {
                               $badgeColor = 'success';
                               $badgeIcon = 'video';
-                            } elseif($session->session_type == 'Offline'){
+                            } elseif ($session->session_type == 'Offline'){
                               $badgeColor = 'warning';
                               $badgeIcon = 'map';
                             }

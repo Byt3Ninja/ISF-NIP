@@ -67,12 +67,12 @@
       </a>
     </li>
 
-    <li class="{{ Request::is('*myProfile') ? 'active' : '' }} menu-item">
+    {{-- <li class="{{ Request::is('*myProfile') ? 'active' : '' }} menu-item">
       <a href="{{ route('user.profile_view') }}" class="menu-link">
         <i class="ti ti-user me-3 ti-md"></i>
         <div>{{ __('admin.Profile') }}</div>
       </a>
-    </li>
+    </li> --}}
     
     @if ($_user->ableTo('slots.index', $permissions))
       <li class="{{ Request::is('*availability') ? 'active' : '' }} menu-item">
@@ -165,31 +165,30 @@
     </li>
     @endif
 
-    <li class="{{ Request::is('*calendar*') ? 'active' : '' }} menu-item">
+    {{-- <li class="{{ Request::is('*calendar*') ? 'active' : '' }} menu-item">
       <a href="{{ route('calendar.events_list') }}" class="menu-link">
         <i class="menu-icon tf-icons ti ti-calendar"></i>
         <div>{{ __('admin.Calendar') }}</div>
       </a>
-      <ul class="menu-sub"></ul>
-    </li>
+    </li> --}}
 
     <?php
-    $cmessages = App\Messenger::where('receiver', auth()->id())->whereNull('read');
+    // $cmessages = App\Messenger::where('receiver', auth()->id())->whereNull('read');
     //        if( !is_null( $organization_id ) ) { $cmessages = $cmessages->where('organization_id', $organization_id); }
-    $unread = $cmessages->count();
+    // $unread = $cmessages->count();
     $l == 'ar' ? ($arrow = 'left') : ($arrow = 'right');
     ?>
 
-    @if( $_user->ableTo('messages.list', $permissions) )
+    {{-- @if( $_user->ableTo('messages.list', $permissions) )
       <li class="{{ Request::is('dashboard/messages') ? 'active' : '' }} menu-item">
         <a href="/dashboard/messages" class="menu-link">
           <i class="menu-icon tf-icons ti ti-messages"></i>
           <div>{{ __('admin.Messages') }}</div>
         </a>
       </li>
-    @endif
+    @endif --}}
 
-    @if (!$_user->hasAnyRole('Judger'))
+    {{-- @if (!$_user->hasAnyRole('Judger'))
       @if( $_user->ableTo('messages.view', $permissions) )
         <li class="{{ Request::is('dashboard/mymsg') ? 'active' : '' }} menu-item">
           <a href="/dashboard/mymsg" class="menu-link">
@@ -198,7 +197,7 @@
           </a>
         </li>
       @endif
-    @endif
+    @endif --}}
 
     {{-- @if( $_user->ableToAny(['messages.index'], $permissions) )
     <li class="{{ Request::is('dashboard/inbox', 'dashboard/outbox', 'dashboard/mymsg', 'dashboard/sendmessage', 'dashboard/messages') ? 'sidebar-group-active open' : '' }} menu-item">
@@ -493,60 +492,14 @@
       @endif
       <!-- End Time Sheets -->
 
-      
       <!-- Start Assessments -->
       <li
-      class="{{ Request::is('dashboard/question-assessment*', 'dashboard/answerOption*', 'dashboard/analysis-assessment*', 'dashboard/history-assessment*', 'dashboard/category-assessment*') ? 'sidebar-group-active open' : '' }} menu-item">
-        <a class="menu-link menu-toggle">
-        <i class="ti ti-circle-dashed-check ti-md me-3"></i>
-        <div>{{ __('admin.Assessments') }}</div>
+        class="{{ Request::is('*assessments', 'dashboard/question-assessment*', 'dashboard/answerOption*', 'dashboard/analysis-assessment*', 'dashboard/history-assessment*', 'dashboard/category-assessment*') ? 'active' : '' }} menu-item">
+        <a href="{{ route('assessments.index') }}" class="menu-link">
+          <i class="ti ti-circle-dashed-check ti-md me-3"></i>
+          <div>{{ __('admin.Assessments') }}</div>
         </a>
-        
-      <ul class="menu-sub">
-        {{-- <li class="{{ Request::is('dashboard/questions*') ? 'active' : '' }} menu-item">
-          <a href="{{ route('questions.index') }}" class="menu-link">
-            <i class="bx bx-message"></i>
-            <div>{{ __('admin.AddQuestions') }}</div>
-          </a>
-        </li>
-        <li class="{{ Request::is('dashboard/answerOption*') ? 'active' : '' }} menu-item">
-          <a href="{{ route('answerOption.index') }}" class="menu-link">
-            <i class="bx bx-message"></i>
-            <div>{{ __('admin.AddAnswerOption') }}</div>
-          </a>
-        </li> --}}
-
-
-        <li class="{{ Request::is('*assessments') ? 'active' : '' }} menu-item">
-          <a href="{{ route('assessments.index') }}" class="menu-link">
-            <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-            <span class="menu-item"> {{ __('admin.Manage_Assessments') }}</span>
-          </a>
-        </li>
-
-        {{-- <li class="{{ Request::is('dashboard/question-assessment*') ? 'active' : '' }} menu-item">
-          <a href="{{ route('assessments.take') }}" class="menu-link">
-            <span class="menu-item">{{ __('admin.Question_Assessment') }}</span>
-            <i class="bx bx-message"></i>
-          </a>
-        </li>
-        <li class="{{ Request::is('dashboard/analysis-assessment*') ? 'active' : '' }} menu-item">
-          <a href="{{ route('assessments.results_history_view') }}" class="menu-link">
-            <span class="menu-item">{{ __('admin.Analysis_Assessment') }}</span>
-            <i class="bx bx-message"></i>
-          </a>
-        </li>
-
-        <li class="{{ Request::is('dashboard/history-assessment*') ? 'active' : '' }} menu-item">
-          <a href="{{ route('assessments.results_history_view') }}" class="menu-link">
-            <span class="menu-item">{{ __('admin.History_Assessment') }}</span>
-            <i class="bx bx-message"></i>
-          </a>
-        </li> --}}
-
-      </ul>
       </li>
-
       <!-- End Assessment -->
 
       <li class="{{ Request::is('dashboard/screening*') ? 'sidebar-group-active open' : '' }} menu-item">

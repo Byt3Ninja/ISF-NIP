@@ -247,7 +247,7 @@
           })
             .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok'))
             .then(result => {
-              console.log('Fetched slots:', result?.data ? result.data : []);
+              // console.log('Fetched slots:', result?.data ? result.data : []);
                 processSlots(result?.data ? result.data : []);
                 updateCalendarStyles();
                 initializeMainCalendar(); // Initialize the main calendar here
