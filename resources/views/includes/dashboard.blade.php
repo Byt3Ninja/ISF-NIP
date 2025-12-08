@@ -790,9 +790,9 @@
 															{{ $session->session_type ?? __('admin.All') }}
 														</small>
 													</td>
-													@if (isset($session->session_location) && $session->session_type == 'Offline')
+													@if (isset($offlineAllowed) && $offlineAllowed)
 														<td>
-															{{ $session->session_location }}
+															{{ isset($session->session_location) && $session->session_type == 'Offline' ? $session->session_location : 'N/A' }}
 														</td>
 													@endif
 													<td> 
