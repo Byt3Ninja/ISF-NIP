@@ -725,6 +725,10 @@
 													<th>{{__('cycles.Date/Time')}}</th>
 													<th>{{__('cycles.Approved')}}</th>
 													<th>{{__('cycles.Done')}}</th>
+													<th>{{__('mentor.session_type')}}</th>
+													@if (isset($offlineAllowed) && $offlineAllowed)
+														<th>{{__('mentor.session_location')}}</th>
+													@endif
 													<th>{{__('cycles.Actions')}}</th>
 												</tr>
 											</thead>
@@ -769,6 +773,28 @@
 																class="warning">'.__('Waiting').'</span>' !!} </div>
 													</td>
 													<td> {{ $session->done ?__('Yes') : __('No') }} </td>
+													<td> 
+														@php
+															$badgeColor = 'secondary';
+															$badgeIcon = 'screen-share';
+															if ($session->session_type == 'Online') {
+																$badgeColor = 'success';
+																$badgeIcon = 'video';
+															} elseif($session->session_type == 'Offline'){
+																$badgeColor = 'warning';
+																$badgeIcon = 'map';
+															}
+														@endphp
+														<small class="badge bg-label-{{ $badgeColor }}">
+															<i class="ti ti-{{ $badgeIcon }} ti-16px me-1"></i>
+															{{ $session->session_type ?? __('admin.All') }}
+														</small>
+													</td>
+													@if (isset($offlineAllowed) && $offlineAllowed)
+														<td>
+															{{ isset($session->session_location) && $session->session_type == 'Offline' ? $session->session_location : 'N/A' }}
+														</td>
+													@endif
 													<td> 
 														@php
 															$now = date('Y-m-d H:i');

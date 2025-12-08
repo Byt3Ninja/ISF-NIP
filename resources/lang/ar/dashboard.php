@@ -43,7 +43,7 @@ return [
     'Specialization' => 'التخصص',
     'Linkedin' => 'Linkedin',
     'Request' => 'الطلب',
-    'Add mentorship session with' => 'إضافة طلب إرشاد جديد',
+    'Add mentorship session with' => 'اضافة طاب جلسة ارشاد مع',
     'Start meeting Date/ Time' => 'تاريخ ووقت البدأ',
     'Meeting duration' => 'مدة الاجتماع',
     'Minutes' => 'دقائق',

@@ -204,11 +204,16 @@
                 @endphp
 
                 @if($canRequestMentorship)
-                  <button type="button" class="btn btn-primary"
+                  <button type="button" class="btn btn-primary" onclick="fetchSlots({{ $mentor->id }})">
+                    {{ __('cycles.Request_Mentorship') }}
+                    <i class="ti ti-calendar-plus ms-2"></i>
+                  </button>
+                  
+                  {{-- <button type="button" class="btn btn-primary"
                     onclick="request({{$mentor->id}},'{{optional($startup)->name }}', {{ $getCycle->organization_id }},{{ $getCycle->id }})"
                     title="Add new request">
                     {{ __('cycles.Request_Mentorship') }} <i class="ti ti-calendar-plus ms-2"></i>
-                  </button>
+                  </button> --}}
                 @else
                   <a href="{{ route('mentors.profile_view', $mentor->id) }}" class="btn btn-primary">
                     {{ __('admin.View Profile') }}
@@ -220,6 +225,15 @@
           </div>
           <!-- Mentor Card -->
 
+            @include(
+              'partials.book-session-modal',
+              [
+                'mentor_id' => $mentor->id,
+                'user_id' => $startup->id,
+                'cycle_id' => $getCycle->id,
+                'organization_id' => $getCycle->organization_id,
+              ]
+            )
           @endforeach
           @else
           <!-- No Mentors Result -->
@@ -386,7 +400,7 @@
   </div>
 </div>
 
-@include('admin.clients.startup.partials._session_modal')
+{{-- @include('admin.clients.startup.partials._session_modal') --}}
 @stop
 
 @section('pagescripts')

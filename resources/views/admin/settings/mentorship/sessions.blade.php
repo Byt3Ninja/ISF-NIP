@@ -29,14 +29,25 @@
           <div class="col-12">
             <div class="card">
               <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-center border-bottom">
-                <h5 class="card-title mb-0">{{ __('cycles.Mentorship Sessions') }}</h5>
+                <h5 class="card-title mb-0 text-capitalize">
+                  {{ __('cycles.Mentorship Sessions') }}
+                  @if (request()->show == 'all') 
+                    ( {{ __('cycles.All requests') }} )
+                  @elseif (request()->show == 'approved')
+                    ( {{ __('cycles.approved requests') }} )
+                  @elseif (request()->show == 'disapproved')
+                    ( {{ __('cycles.disapproved requests') }} )
+                  @else
+                    ( {{ __('cycles.New requests only') }} )
+                  @endif
+                </h5>
                 <div class="d-flex align-items-center gap-2">
                   <!-- Filter Modal Trigger -->
                   <button type="button" class="btn btn-label-primary" data-bs-toggle="modal" data-bs-target="#filterModal">
                     <i class="ti ti-filter me-2"></i>
                     {{ __('cycles.Filter') }}
                   </button>
-                  @if(request()->hasAny(['start_date', 'end_date', 'done', 'cycle_id', 'show']))
+                  @if(request()->hasAny(['start_date', 'end_date', 'done', 'cycle_id', 'show', 'rate', 'session_type']))
                   <button onclick="resetFilters()" class="btn btn-outline-secondary">
                     <i class="ti ti-refresh me-2"></i>
                     {{ __('cycles.Reset') }}
@@ -67,7 +78,7 @@
                       <th>{{ __('cycles.Date/Time') }}</th>
                       <th>{{ __('cycles.Approved') }}</th>
                       <th>{{ __('cycles.Done') }}</th>
-                      <th>{{ __('cycles.Type') }}</th>
+                      <th>{{ __('mentor.session_type') }}</th>
                       <th>{{ __('cycles.Actions') }}</th>
                     </tr>
                   </thead>
@@ -155,15 +166,20 @@
                         </td>
                         <td style="min-width: 100px;">
                           @php
-                            if(in_array($session->session_type, ['Online', 'Both'])){
-                              $badgeClass = 'success';
-                            }elseif($session->session_type == 'Offline'){
-                                $badgeClass = 'warning';
+                            $badgeColor = 'secondary';
+                            $badgeIcon = 'screen-share';
+                            if ($session->session_type == 'Online') {
+                              $badgeColor = 'success';
+                              $badgeIcon = 'video';
+                            } elseif($session->session_type == 'Offline'){
+                              $badgeColor = 'warning';
+                              $badgeIcon = 'map';
                             }
                           @endphp
-                          <span class="badge bg-label-{{ $badgeClass }}">
-                            {{ $session->session_type }}
-                          </span>
+                          <small class="badge bg-label-{{ $badgeColor }}">
+                            <i class="ti ti-{{ $badgeIcon }} ti-16px me-1"></i>
+                            {{ $session->session_type ?? __('admin.All') }}
+                          </small>
                         </td>
                         <td style="min-width: 280px;">
                           <div class="d-flex flex-wrap gap-1">
@@ -233,7 +249,7 @@
           </div>
 
           <div class="modal-body">
-            <div class="row g-6">
+            <div class="row g-4">
               <!-- Request Status -->
               <div class="col-12">
                 <label for="showSelect" class="form-label">{{ __('cycles.Request_Status') }}</label>
@@ -271,15 +287,26 @@
                 </select>
               </div>
 
-              <div class="col-12">
-                <label for="session_type" class="form-label">{{ __('admin.Session_Type') }}</label>
+              <!-- Session Type -->
+              <div class="col-12 col-md-6">
+                <label for="session_type" class="form-label">{{ __('mentor.session_type') }}</label>
                 <select class="form-select select2" name="session_type">
-                  <option value="" disabled>{{ __('admin.Select_Session_Type') }}</option>
-                  <option value="all" {{ !request()->session_type ? 'selected' : '' }}>{{ __('admin.All') }}</option>
-                  <option value="Both" {{ !request()->session_type ? 'selected' : '' }}>{{ __('admin.Both') }}</option>
-                  <option value="Online" {{ !request()->session_type ? 'selected' : '' }}>{{ __('admin.Online') }}</option>
-                  <option value="Offline" {{ !request()->session_type ? 'selected' : '' }}>{{ __('admin.Offline') }}</option>
-                
+                  <option value="all" {{ request()->session_type == 'all' ? 'selected' : '' }}>{{ __('admin.All') }}</option>
+                  <option value="Online" {{ request()->session_type == 'Online' ? 'selected' : '' }}>{{ __('mentor.online') }}</option>
+                  <option value="Offline" {{ request()->session_type == 'Offline' ? 'selected' : '' }}>{{ __('mentor.offline') }}</option>                
+                </select>
+              </div>
+
+              <!-- Rating -->
+              <div class="col-12 col-md-6">
+                <label for="rate" class="form-label">{{ __('cycles.Rating') }}</label>
+                <select class="form-select select2" name="rate">
+                  <option value="all" {{ request()->rate == 'all' ? 'selected' : '' }}>{{ __('admin.All') }}</option>
+                  <option value="1" {{ request()->rate == 1 ? 'selected' : '' }} > 1 </option>
+                  <option value="2" {{ request()->rate == 2 ? 'selected' : '' }} > 2 </option>
+                  <option value="3" {{ request()->rate == 3 ? 'selected' : '' }} > 3 </option>
+                  <option value="4" {{ request()->rate == 4 ? 'selected' : '' }} > 4 </option>
+                  <option value="5" {{ request()->rate == 5 ? 'selected' : '' }} > 5 </option>
                 </select>
               </div>
 
@@ -1180,6 +1207,8 @@
       url.searchParams.delete('done');
       url.searchParams.delete('cycle_id');
       url.searchParams.delete('show');
+      url.searchParams.delete('rate');
+      url.searchParams.delete('session_type');
       window.location.href = url.toString();
     }
   </script>

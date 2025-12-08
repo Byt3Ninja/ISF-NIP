@@ -106,15 +106,19 @@
                     </a>
 
                     @if(!empty($order))
-                      <button 
+                      <button type="button" class="btn btn-primary" onclick="fetchSlots({{ $client->id }})">
+                        {{ __('cycles.Request_Mentorship') }}
+                        <i class="ti ti-calendar-plus ms-2"></i>
+                      </button>
+                      {{-- <button 
                         onclick="request({{ $order->user_id }}, '{{ optional($order->user)->{'first_name_' . $l} }} {{ optional($order->user)->{'last_name_' . $l} }}', {{ $order->cycle->organization_id }}, {{ $order->cycle_id }})" 
-                        title="Add new request" 
+                        title="{{ __('cycles.Request_Mentorship') }}" 
                         type="button" 
                         class="btn btn-primary"
                       >
                       <i class="ti ti-calendar-plus me-2"></i>
                         {{ __('cycles.Request_Mentorship') }}
-                      </button>
+                      </button> --}}
                     @endif
                   </div>
                 </div>
@@ -416,9 +420,20 @@
       </div>
     </div>
   </div>
-  
+
+  @if(!empty($order))
+    @include(
+      'partials.book-session-modal',
+      [
+        'mentor_id' => $client->id,
+        'user_id' => $order->user_id,
+        'cycle_id' => $order->cycle_id,
+        'organization_id' => $order->cycle->organization_id,
+      ]
+    )
+  @endif
   {{-- Session Request Modal --}}
- @include('admin.clients.startup.partials._session_modal')
+ {{-- @include('admin.clients.startup.partials._session_modal') --}}
 @stop
 
 @section('pagescripts')
