@@ -67,12 +67,12 @@
       </a>
     </li>
 
-    <li class="{{ Request::is('*myProfile') ? 'active' : '' }} menu-item">
+    {{-- <li class="{{ Request::is('*myProfile') ? 'active' : '' }} menu-item">
       <a href="{{ route('user.profile_view') }}" class="menu-link">
         <i class="ti ti-user me-3 ti-md"></i>
         <div>{{ __('admin.Profile') }}</div>
       </a>
-    </li>
+    </li> --}}
     
     @if ($_user->ableTo('slots.index', $permissions))
       <li class="{{ Request::is('*availability') ? 'active' : '' }} menu-item">
@@ -165,31 +165,30 @@
     </li>
     @endif
 
-    <li class="{{ Request::is('*calendar*') ? 'active' : '' }} menu-item">
+    {{-- <li class="{{ Request::is('*calendar*') ? 'active' : '' }} menu-item">
       <a href="{{ route('calendar.events_list') }}" class="menu-link">
         <i class="menu-icon tf-icons ti ti-calendar"></i>
         <div>{{ __('admin.Calendar') }}</div>
       </a>
-      <ul class="menu-sub"></ul>
-    </li>
+    </li> --}}
 
     <?php
-    $cmessages = App\Messenger::where('receiver', auth()->id())->whereNull('read');
+    // $cmessages = App\Messenger::where('receiver', auth()->id())->whereNull('read');
     //        if( !is_null( $organization_id ) ) { $cmessages = $cmessages->where('organization_id', $organization_id); }
-    $unread = $cmessages->count();
+    // $unread = $cmessages->count();
     $l == 'ar' ? ($arrow = 'left') : ($arrow = 'right');
     ?>
 
-    @if( $_user->ableTo('messages.list', $permissions) )
+    {{-- @if( $_user->ableTo('messages.list', $permissions) )
       <li class="{{ Request::is('dashboard/messages') ? 'active' : '' }} menu-item">
         <a href="/dashboard/messages" class="menu-link">
           <i class="menu-icon tf-icons ti ti-messages"></i>
           <div>{{ __('admin.Messages') }}</div>
         </a>
       </li>
-    @endif
+    @endif --}}
 
-    @if (!$_user->hasAnyRole('Judger'))
+    {{-- @if (!$_user->hasAnyRole('Judger'))
       @if( $_user->ableTo('messages.view', $permissions) )
         <li class="{{ Request::is('dashboard/mymsg') ? 'active' : '' }} menu-item">
           <a href="/dashboard/mymsg" class="menu-link">
@@ -198,7 +197,7 @@
           </a>
         </li>
       @endif
-    @endif
+    @endif --}}
 
     {{-- @if( $_user->ableToAny(['messages.index'], $permissions) )
     <li class="{{ Request::is('dashboard/inbox', 'dashboard/outbox', 'dashboard/mymsg', 'dashboard/sendmessage', 'dashboard/messages') ? 'sidebar-group-active open' : '' }} menu-item">

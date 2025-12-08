@@ -1280,27 +1280,56 @@ $flattenedMenuItems = flattenMenuItems($filteredMenuItems);
               <span class="align-middle">{{ __('admin.Profile') }}</span>
             </a>
           </li>
-          @if ($companyid)
+          @if ($companyid && $_user->hasRole('Registered'))
             <li>
-              <a class="dropdown-item" href="/dashboard/myCompany">
-                <i class="ti ti-building me-3 ti-md"></i>
-                <span class="align-middle">{{ __('admin.Company') }}</span>
+              <a class="dropdown-item" href="{{ route('company.profile_view', $companyid) }}">
+                <i class="ti ti-building-skyscraper me-3 ti-md"></i>
+                <span class="align-middle">{{ __('admin.CompanyProfile') }}</span>
               </a>
             </li>
           @endif
           <li>
             <a class="dropdown-item" href="/dashboard/myProfile">
               <i class="ti ti-settings me-3 ti-md"></i>
-              <span class="align-middle">
-                {{$l=='ar'?'الاعدادات':'Settings'}}
-              </span>
+              <span class="align-middle">{{ __('admin.settings') }}</span>
             </a>
           </li>
+          <?php
+            $cmessages = App\Messenger::where('receiver', auth()->id())->whereNull('read');
+            $unread = $cmessages->count();
+          ?>
+
+          @if( $_user->ableTo('messages.list', $permissions) )
+            <li>
+              <a class="dropdown-item" href="{{ route('messages.list') }}">
+                <i class="ti ti-message me-3 ti-md"></i>
+                <span class="align-middle">
+                  {{ __('admin.Messages') }}
+                  @if ($unread > 0)
+                    <span class="badge bg-danger rounded-pill float-end ms-2">{{ $unread }}</span>
+                  @endif
+                </span>
+              </a>
+            </li>
+          @endif
+
+          @if ($_user->ableTo('calendar.events_list', $permissions))
           <li>
-            <a class="dropdown-item" href="/dashboard/documentation">
-              <i class="ti ti-question-mark me-3 ti-md"></i><span class="align-middle">FAQ</span>
+            <a class="dropdown-item" href="{{ route('calendar.events_list') }}">
+              <i class="ti ti-calendar me-3 ti-md"></i>
+              <span class="align-middle">{{ __('admin.Calendar') }}</span>
             </a>
           </li>
+          @endif
+
+           @if( $_user->ableTo('documentation.index', $permissions) )
+            <li>
+              <a class="dropdown-item" href="{{ route('documentation.index') }}">
+                <i class="ti ti-question-mark me-3 ti-md"></i>
+                <span class="align-middle">FAQ</span>
+              </a>
+            </li>
+          @endif
           <li>
             <div class="d-grid px-2 pt-2 pb-1">
               <a class="btn btn-sm btn-danger d-flex" href="{{ route('logout') }}"
