@@ -466,7 +466,7 @@ class ClientCompanyController extends Controller
                 ->orderBy('created_at')->get();
             $financialprojection = FinancialProjection::where('company_id', $id)->get();
             
-            dd($financialprojection);
+            // dd($financialprojection);
             return view('admin/clients/company', compact(
                 'client',
                 '_countries',
