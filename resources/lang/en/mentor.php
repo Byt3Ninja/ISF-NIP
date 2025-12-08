@@ -113,4 +113,5 @@ return [
     'file_excced_10' => 'File size exceeds the 10MB limit.',
     'unsupported_slot_attachment_format' => 'Unsupported file format. Allowed formats: PDF, DOC, DOCX, PPT, XLS, PNG, JPEG.',
     'slot_notes_placeholder' => 'Share any specific topics or questions you like to discuss',
+    'session_location' => 'Session Location',
 ];

@@ -114,4 +114,5 @@ return [
     'file_excced_10' => 'الملف يتجاوز 10 ميجا',
     'unsupported_slot_attachment_format' => 'تنسيق الملف غير مدعوم. الصيغ المسموح بها: PDF، DOC، DOCX، PPT، XLS، PNG، JPEG.',
     'slot_notes_placeholder' => 'شارك اي مواضيع او استفسارات للمساعدة',
+    'session_location' => 'مكان الجلسة',
 ];
