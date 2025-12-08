@@ -287,7 +287,13 @@ function formatDate(dateStr) {
           ? '<i class="ti ti-map-pin ti-14px"></i>'
           : '<i class="ti ti-screen-share ti-14px"></i>';
 
-      const locationText = slot.session_type === 'Offline' && slot.location ? slot.location : slot.session_type;
+      const sessionTypeMap = {
+        Online: '{{ __('mentor.online') }}',
+        Offline: '{{ __('mentor.offline') }}',
+        Both: '{{ __('mentor.both') }}'
+      };
+
+      const locationText = slot.session_type === 'Offline' && slot.location ? slot.location : sessionTypeMap[slot.session_type ?? 'Both'];
 
       return `
         <div class="card shadow-none mb-2 border slot-card" data-slot-index="${index}">
@@ -299,7 +305,7 @@ function formatDate(dateStr) {
                   ${slot.start_time} - ${slot.end_time}
                 </div>
                 <div class="d-flex align-items-center gap-2 small">
-                  <i class="ti ti-hourglass-empty ti-16px"></i> ${duration} min
+                  <i class="ti ti-hourglass-empty ti-16px"></i> ${duration} @lang('mentor.min')
                   <div class="badge bg-light-subtle d-flex align-items-center gap-1 text-dark rounded px-2">${icon} ${locationText}</div>
                 </div>
               </div>
