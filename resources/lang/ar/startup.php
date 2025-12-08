@@ -1,6 +1,13 @@
 <?php
 
 return [
+  'mentorship_requests' => [
+    'label' => 'طلبات الارشاد',
+    'meeting_link' => 'رابط الجلسة',
+    'no_link' => 'لا يوجد رابط',
+    'join_now' => 'انضم الان',
+  ],
+
   'all_startups' => 'كل الشركات',
   'startup_profile_heading' => 'تفاصيل الشركة الناشئة / الفكرة',
   'registered' => 'مسجلة',

@@ -1,6 +1,13 @@
 <?php
 
 return [
+  'mentorship_requests' => [
+    'label' => 'Mentorship Requests',
+    'meeting_link' => 'Meeting Link',
+    'no_link' => 'No link',
+    'join_now' => 'Join Now',
+  ],
+
   'all_startups' => 'All Startups',
   'startup_profile_heading' => 'Startup Profile / Idea',
   'registered' => 'Registered',
