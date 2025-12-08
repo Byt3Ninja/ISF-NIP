@@ -1306,7 +1306,11 @@ $flattenedMenuItems = flattenMenuItems($filteredMenuItems);
                 <span class="align-middle">
                   {{ __('admin.Messages') }}
                   @if ($unread > 0)
-                    <span class="badge bg-danger rounded-pill float-end ms-2">{{ $unread }}</span>
+                    <div class="flex-shrink-0 float-end" style="width: 24px; height: 24px;">
+                      <small class="badge bg-danger rounded-circle w-100 h-100 d-flex align-items-center justify-content-center ms-2">
+                        {{ $unread }}
+                      </small>
+                    </div>
                   @endif
                 </span>
               </a>
