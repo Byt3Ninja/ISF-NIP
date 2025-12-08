@@ -1123,13 +1123,13 @@ class HomeController extends Controller
             {
                 if( $now > Carbon::parse($step->to)->timestamp )
                 {
-                    $status = $l == 'ar' ? 'انتهت' : 'Completed';
+                    $status = 'Completed';
                     $color = 'label-success';
                     $textColor = 'success';
                 }
                 if( $now <= Carbon::parse($step->to)->timestamp && $now >= Carbon::parse($step->from)->timestamp )
                 {
-                    $status = $l == 'ar' ? 'يحدث اﻵن' : 'On going';
+                    $status = 'Ongoing';
                     $color = 'label-primary';
                     $textColor = 'primary';
                 }
