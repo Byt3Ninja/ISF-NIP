@@ -274,7 +274,7 @@ function formatDate(dateStr) {
     }
 
     if (slots.length === 0) {
-      $container.html('<div class="text-center text-muted py-5 small">{{ __('mentor.no_available_slots_for_this_data') }}</div>');
+      $container.html('<div class="text-center text-muted py-5 small">{{ __('mentor.no_available_slots_for_this_date') }}</div>');
       return;
     }
 
