@@ -198,12 +198,11 @@
                                           (!auth()->user()->hasRole('Mentor') && !auth()->user()->hasRole('Admin')));
                   
                   if ($canRequestMentorship) {
-                    $startup = auth()->user();
-                    $getCycle = $startup->company->cycledata;
+                    $getCycle = auth()->user()->company->cycledata;
                   }
                 @endphp
 
-                @if($canRequestMentorship)
+                @if ($canRequestMentorship && auth()->user()->company->id && $mentor->id)
                   <button type="button" class="btn btn-primary" onclick="fetchSlots({{ $mentor->id }})">
                     {{ __('cycles.Request_Mentorship') }}
                     <i class="ti ti-calendar-plus ms-2"></i>
@@ -224,16 +223,17 @@
             </div>
           </div>
           <!-- Mentor Card -->
-
-            @include(
-              'partials.book-session-modal',
-              [
-                'mentor_id' => $mentor->id,
-                'user_id' => $startup->id,
-                'cycle_id' => $getCycle->id,
-                'organization_id' => $getCycle->organization_id,
-              ]
-            )
+            @if ($canRequestMentorship && auth()->user()->company->id && $mentor->id)
+              @include(
+                'partials.book-session-modal',
+                [
+                  'mentor_id' => $mentor->id,
+                  'user_id' => auth()->user()->company->id,
+                  'cycle_id' => $getCycle->id,
+                  'organization_id' => $getCycle->organization_id,
+                ]
+              )
+            @endif
           @endforeach
           @else
           <!-- No Mentors Result -->
