@@ -23,6 +23,7 @@ use App\Settings;
 use App\Training;
 use App\Milestone;
 use App\Screening;
+use Carbon\Carbon;
 use App\Technology;
 use App\Team_member;
 use App\FundingRound;
@@ -37,9 +38,10 @@ use App\TrainingSession;
 use App\ServicesRequests;
 use App\Events\WebMessage;
 use App\MentorshipRequest;
+use App\FinancialProjection;
 use App\ScreeningEvaluation;
-use App\StartupCustomerGrowth;
 use Illuminate\Http\Request;
+use App\StartupCustomerGrowth;
 use Illuminate\Validation\Rule;
 use App\Services\CompanyService;
 use App\ScreeningEvaluationResults;
@@ -462,6 +464,8 @@ class ClientCompanyController extends Controller
             // Load all milestones for this company (new unified structure)
             $milestones = Milestone::where('company_id', $id)
                 ->orderBy('created_at')->get();
+            $financialprojection = FinancialProjection::where('company_id', $id)->get();
+            
 
             return view('admin/clients/company', compact(
                 'client',
@@ -485,7 +489,8 @@ class ClientCompanyController extends Controller
                 'technologiesSelected',
                 'industries',
                 'employees',
-                'data'
+                'data',
+                'financialprojection'
             ));
         } catch (Exception $e) {
             //log what happend
@@ -510,11 +515,10 @@ class ClientCompanyController extends Controller
      */
     public function updateOrStore(StoreUpdateClientCompanyRequest $request, $id = null)
     {
-        dd($request->all());
         try {
             $user = Auth::user();
             if (!is_null($id)) {
-                if (!$user->hasanyRole('Admin|organizationManager')) {
+                if ($user->hasanyRole('Admin')) {
                     return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
                 }
                 if ($user->hasRole('organizationManager')) {
@@ -531,6 +535,7 @@ class ClientCompanyController extends Controller
                             AND o.user_id = " . $user->id);
 
                     $check = collect($check)->first();
+                   
                     if (empty($check)) {
                         return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
                     } else {
@@ -1045,6 +1050,8 @@ class ClientCompanyController extends Controller
                 $result->business_plan = $uploadedFile;
             }
             $result->save();
+
+            
             if ($data['CompanyN'] == 14) {
                 // Set up debug logging using Laravel's Log facade
                 Log::debug('Starting company update process', [
@@ -1518,6 +1525,60 @@ class ClientCompanyController extends Controller
                         ->with('class', 'danger')
                         ->withInput();
                 }
+            }
+            if ($data['CompanyN'] == 15) {
+                
+                if($data['valuation_date'] == null){
+                    return redirect()->back()->with(['msg' => 'Please enter the valuation date', 'class' => 'danger']);
+                }
+                
+                $deleteFinancial = FinancialProjection::where('company_id', $result->id)->delete();
+
+                $baseDate = Carbon::createFromFormat('Y-m-d', $data['valuation_date']);
+                $yearsCount = 4;
+                
+                
+                for ($i = 0; $i < $yearsCount; $i++) {
+                    
+                    $yearDate = $baseDate->copy()->addYears($i);
+                    
+                    $addFinancial = new FinancialProjection();
+                    $addFinancial->company_id = $result->id;
+
+                    $addFinancial->user_id = auth()->user()->id;
+                    $addFinancial->date_validate = $yearDate->format('Y-m-d');
+                    // البيانات الرقمية
+                    $addFinancial->revenues = $data["rev_$i"];
+                    $addFinancial->cogs = $data["cogs_$i"];
+                    $addFinancial->salaries = $data["sal_$i"];
+                    $addFinancial->other_op_expenses = $data["opex_$i"];
+                    $addFinancial->ebitda = $data["ebitda_$i"];
+                    $addFinancial->depreciation_amortization = $data["da_$i"];
+                    $addFinancial->ebit = $data["ebit_$i"];
+                    $addFinancial->interest = $data["int_$i"];
+                    $addFinancial->taxes = $data["tax_$i"];
+                    $addFinancial->net_profit = $data["np_$i"];
+                    
+                    // Working Capital + Inventory + Payables
+                    $addFinancial->receivables = $data["rec_$i"];
+                    $addFinancial->inventory = $data["inv_$i"];
+                    $addFinancial->payables = $data["pay_$i"];
+                    $addFinancial->working_capital = $data["wc_$i"];
+                    
+                    // لو القيمة "-" خليها null
+                    $addFinancial->change_in_wc = $data["dwc_$i"];
+                    
+                    
+                    $addFinancial->capital_expenditures = $data["capex_$i"];
+                    $addFinancial->debt_end_year = $data["debt_$i"];
+                    $addFinancial->debt_change = $data["ddebt_$i"];
+                    $addFinancial->free_cash_flow = $data["fcf_$i"];
+
+                    $addFinancial->save();
+                   
+                }
+            
+               
             }
             if (is_null($id)) {
                 User::where('id', $user->id)->update(['company_id' => $result->id]);
