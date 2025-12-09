@@ -537,12 +537,12 @@
           <div>{{ __('admin.Mentorship') }}</div>
         </a>
         <ul class="menu-sub">
-          <li class="{{ Request::is('dashboard/mentorship/assign*') ? 'active' : '' }} menu-item">
+          {{-- <li class="{{ Request::is('dashboard/mentorship/assign*') ? 'active' : '' }} menu-item">
             <a class="menu-link" href="/dashboard/mentorship/assign">
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
               <span class="menu-item">{{ __('admin.Cycles Mentors') }}</span>
             </a>
-          </li>
+          </li> --}}
           <li class="{{ Request::is('dashboard/mentorship/view*') ? 'active' : '' }} menu-item">
             <a class="menu-link" href="/dashboard/mentorship/view">
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
