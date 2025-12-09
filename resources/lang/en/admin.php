@@ -347,7 +347,6 @@ return [
 	'New messages' => 'New messages',
 	'Contact us' => 'Contact us',
 	'Mentorship requests' => 'Mentorship Sessions',
-	'Mentorship Sessions' => 'Mentorship Sessions',
 	'Mentorship Sessions Duration' => 'Mentorship Sessions Duration',
 	'No_Mentorship_Sessions_Startup' => 'No mentorship sessions available for this startup.',
 	'Services Requests' => 'Services Requests',
@@ -1588,7 +1587,6 @@ return [
 	'Search groups...' => 'Search groups...',
 	'Select' => 'Select',
 	'Selected' => 'Selected',
-	'Mentorship Sessions' => 'My Next Mentorship Sessions',
 	'User' => 'User',
 	'Date / Time' => 'Date / Time',
 	'Admin Notes' => 'Admin Notes',
@@ -2549,4 +2547,5 @@ return [
 	'Almuni' => 'Alumni',
 	'serviceprovider' => 'Service Provider',
 	'unexpected_error' => 'An unexpected error occurred, please try again later',
+	'management' => 'Management',
 ];

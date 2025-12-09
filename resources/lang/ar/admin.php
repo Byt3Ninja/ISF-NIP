@@ -344,7 +344,6 @@ return [
 	'New messages' => 'الرسائل الجديدة',
 	'Contact us' => 'رسائل اتصل بنا',
 	'Mentorship requests' => 'جلسات الإرشاد',
-	'Mentorship Sessions' => 'جلسات الإرشاد',
 	'Mentorship Sessions Duration' => 'مدة جلسات الإرشاد',
 	'No_Mentorship_Sessions_Startup' => 'لا توجد جلسات إرشاد متاحة لهذه الشركة الناشئة',
 	'Services Requests' => 'طلبات الخدمات',
@@ -1596,7 +1595,6 @@ return [
 	'Search groups...' => 'البحث في المجموعات...',
 	'Select' => 'اختر',
 	'Selected' => 'محدد',
-	'Mentorship Sessions' => 'جلسات الإرشاد القادمة',
 	'User' => 'مستخدم',
 	'Date / Time' => 'التاريخ / الوقت',
 	'Admin Notes' => 'ملاحظات المسؤول',
@@ -2602,4 +2600,5 @@ return [
 	'Almuni' => ' الخريجين ',
 	'serviceprovider' => 'مقدم الخدمة',
 	'unexpected_error' => 'حدث خطأ غير متوقع، يرجى المحاولة مرة أخرى لاحقًا',
+	'management' => 'ادارة',
 ];

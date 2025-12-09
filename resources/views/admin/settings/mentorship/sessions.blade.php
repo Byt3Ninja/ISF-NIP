@@ -253,10 +253,8 @@
               <!-- Request Status -->
               <div class="col-12">
                 <label for="showSelect" class="form-label">{{ __('cycles.Request_Status') }}</label>
-                <select class="form-select" name="show" data-placeholder="{{ __('cycles.Select_Status') }}" id="showSelect">
-                  {{-- @if(!request()->show) --}}
+                <select class="form-select text-capitalize" name="show" data-placeholder="{{ __('cycles.Select_Status') }}" id="showSelect">
                   <option value="" {{ !request()->show ? 'selected' : '' }}>{{ __('cycles.New requests only') }}</option>
-                  {{-- @endif --}}
                   <option value="all" {{ request()->show == 'all' ? 'selected' : '' }}>{{ __('cycles.All requests') }}</option>
                   <option value="approved" {{ request()->show == 'approved' ? 'selected' : '' }}>{{ __('cycles.approved requests') }}</option>
                   <option value="disapproved" {{ request()->show == 'disapproved' ? 'selected' : '' }}>{{ __('cycles.disapproved requests') }}</option>
@@ -288,7 +286,7 @@
               </div>
 
               <!-- Session Type -->
-              <div class="col-12 col-md-6">
+              <div class="col-12">
                 <label for="session_type" class="form-label">{{ __('mentor.session_type') }}</label>
                 <select class="form-select select2" name="session_type">
                   <option value="all" {{ request()->session_type == 'all' ? 'selected' : '' }}>{{ __('admin.All') }}</option>
@@ -298,7 +296,7 @@
               </div>
 
               <!-- Rating -->
-              <div class="col-12 col-md-6">
+              <div class="col-12" id="rateFilter" style="display: {{ request()->show == 'all' || request()->show == 'approved' ? 'block' : 'none' }}">
                 <label for="rate" class="form-label">{{ __('cycles.Rating') }}</label>
                 <select class="form-select select2" name="rate">
                   <option value="all" {{ request()->rate == 'all' ? 'selected' : '' }}>{{ __('admin.All') }}</option>
@@ -1211,5 +1209,15 @@
       url.searchParams.delete('session_type');
       window.location.href = url.toString();
     }
+
+    // Handle show filter change
+    $('#showSelect').on('change', function() {
+      // Show rating filter if 'show' is 'approved' or 'all'
+      if (this.value === 'approved' || this.value === 'all') {
+        $('#rateFilter').show();
+      } else {
+        $('#rateFilter').hide();
+      }
+    });
   </script>
 @stop
