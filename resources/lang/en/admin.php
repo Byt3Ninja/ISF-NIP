@@ -2547,5 +2547,7 @@ return [
 	'Almuni' => 'Alumni',
 	'serviceprovider' => 'Service Provider',
 	'unexpected_error' => 'An unexpected error occurred, please try again later',
-	'management' => 'Management',
+	'questions_management' => 'Questions Management',
+	'mentorship_management' => 'Mentorship Management',
+	'weights' => 'Weights',
 ];

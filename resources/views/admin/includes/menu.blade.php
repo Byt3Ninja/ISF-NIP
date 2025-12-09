@@ -530,15 +530,6 @@
       </li>
 
       <!-- Mentorship Nav Item -->
-      @if ($_user->ableTo('mentorships.requests_view', $permissions))
-        <li class="{{ Request::is('dashboard/mentorship/view*') ? 'active' : '' }} menu-item">
-          <a href="{{ route('mentorships.requests_view') }}" class="menu-link">
-            <i class="menu-icon tf-icons ti ti-device-desktop-cog"></i>
-            <div>{{ __('admin.Mentorship') }} {{ __('admin.management') }}</div>
-          </a>
-        </li>
-      @endif
-
       @if ($_user->ableTo('mentorships.sessions_list', $permissions))
         <li class="{{ Request::is('dashboard/mentorship/sessions*') ? 'active' : '' }} menu-item">
           <a href="{{ route('mentorships.sessions_list') }}" class="menu-link">
@@ -547,40 +538,24 @@
           </a>
         </li>
       @endif
+
+      @if ($_user->ableTo('mentorships.requests_view', $permissions))
+        <li class="{{ Request::is('dashboard/mentorship/view*') ? 'active' : '' }} menu-item">
+          <a href="{{ route('mentorships.requests_view') }}" class="menu-link">
+            <i class="menu-icon tf-icons ti ti-device-desktop-cog"></i>
+            <div>{{ __('admin.mentorship_management') }}</div>
+          </a>
+        </li>
+      @endif
       <!-- End Mentorship Nav Item -->
 
       <!-- Questions Nav Item -->
       <li
-        class="{{ Request::is('*question-categories*', '*questions-bank*', '*weights*', '*assessments*') ? 'sidebar-group-active open' : '' }} menu-item">
-        <a class="menu-link menu-toggle">
-          <i class="ti ti-question-mark me-3 ti-md"></i>
-          <div>{{ __('admin.Questions') }}</div>
+        class="{{ Request::is('*question-categories*', '*questions-bank*', '*weights*', '*assessments*') ? 'active' : '' }} menu-item">
+        <a href="/dashboard/question-categories" class="menu-link">
+          <i class="menu-icon tf-icons ti ti-settings-question"></i>
+          <div>{{ __('admin.questions_management') }}</div>
         </a>
-        <ul class="menu-sub">
-          <li class="{{ Request::is('dashboard/question-categories*') ? 'active' : '' }} menu-item">
-            <a class="menu-link" href="/dashboard/question-categories">
-              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-              <span class="menu-item"> {{ __('admin.Questions Categories') }}</span>
-            </a>
-          </li>
-          <li class="{{ Request::is('dashboard/questions-bank*') ? 'active' : '' }} menu-item">
-            <a class="menu-link" href="/dashboard/questions-bank">
-              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-              <span class="menu-item"> {{ __('admin.Questions Bank') }}</span>
-            </a>
-          </li>
-        {{-- @if (!app()->environment('production', 'beta')) --}}
-          <li class="{{ Request::is('*weights') ? 'active' : '' }} menu-item">
-            <a href="{{ route('weights.index') }}" class="menu-link">
-              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-              <span class="menu-item"> {{ __('admin.Weight') }}</span>
-            </a>
-          </li>
-          
-          
-        {{-- @endif --}}
-
-        </ul>
       </li>
       <!-- End Questions Nav Item -->
 

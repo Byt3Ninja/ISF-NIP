@@ -206,7 +206,7 @@ return [
 	'Event Link' => 'رابط الحدث',
 	'EditEvents' => 'تحرير الأحداث',
 	'eventsettings' => 'إعدادات الحدث',
-	'Categories' => 'الأقسام',
+	'Categories' => 'الفئات',
 	'Products' => 'المنتجات',
 	'Product Categories' => 'أقسام المنتج',
 	'Add new product category' => 'إضافة قسم منتجات جديد',
@@ -2600,5 +2600,7 @@ return [
 	'Almuni' => ' الخريجين ',
 	'serviceprovider' => 'مقدم الخدمة',
 	'unexpected_error' => 'حدث خطأ غير متوقع، يرجى المحاولة مرة أخرى لاحقًا',
-	'management' => 'ادارة',
+	'questions_management' => 'ادارة الاسئلة',
+	'mentorship_management' => 'ادارة جلسات الارشاد',
+	'weights' => 'الاوزان',
 ];

@@ -2,13 +2,35 @@
 
 @section('title', __('admin.Questions Categories') )
 @section('subTitle', __('admin.Questions Categories` List'))
+
 @section('content')
 <div class="content-wrapper">
 	<div class="container-xxl flex-grow-1 container-p-y">
-		<div class="content-overlay"></div>
 			<div class="content-header row">
+				<!-- Navigation Tabs -->
+				<nav class="nav-align-top mb-6">
+					@php
+						$tabs = [
+							['title' => __('admin.Categories'), 'url' => 'dashboard/question-categories', 'icon' => 'category-2'],
+							['title' => __('admin.Questions'), 'url' => 'dashboard/questions-bank', 'icon' => 'question-mark'],
+							['title' => __('admin.weights'), 'url' => 'dashboard/weights', 'icon' => 'weight'],
+						]
+					@endphp
+					<ul class="nav nav-pills">
+						@foreach($tabs as $tab)
+							<li class="nav-item">
+								<a href="/{{ $tab['url'] }}" class="nav-link {{ Request::is($tab['url'] . '*') ? 'active' : '' }}">
+									<i class="ti ti-{{ $tab['icon'] }} me-2"></i>
+									{{ $tab['title'] }}
+								</a>
+							</li>
+						@endforeach
+					</ul>
+				</nav>
+				<!--/ Navigation Tabs -->
+
 				@if( session()->has('success') )
-					<div class="col-md-12">
+					<div class="col-md-12 mb-6">
 						<div role="alert" class="alert alert-success alert-dismissible fade show mb-2">
 							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 							<div class="d-flex align-items-center"> <i class="ti ti-thumb-up me-3 ti-md"></i> <span> {{ __('admin.'. session()->get('success')) }} </span> </div>
@@ -16,7 +38,7 @@
 					</div>
 				@endif
 				@if( session()->has('error') )
-					<div class="col-md-12">
+					<div class="col-md-12 mb-6">
 						<div class="alert alert-danger alert-dismissible mb-2" role="alert">
 							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 							<div class="d-flex align-items-center"> <i class="ti ti-alert-triangle me-3 ti-md"></i> <span>{{ __('admin.'.session()->get('error')) }} </span> </div>
