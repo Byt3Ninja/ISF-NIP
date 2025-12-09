@@ -1532,7 +1532,7 @@ class ClientCompanyController extends Controller
                     return redirect()->back()->with(['msg' => 'Please enter the valuation date', 'class' => 'danger']);
                 }
                 
-                $deleteFinancial = FinancialProjection::where('company_id', $result->id)->delete();
+                
 
                 $baseDate = Carbon::createFromFormat('Y-m-d', $data['valuation_date']);
                 $yearsCount = 4;
@@ -1542,11 +1542,18 @@ class ClientCompanyController extends Controller
                     
                     $yearDate = $baseDate->copy()->addYears($i);
                     
-                    $addFinancial = new FinancialProjection();
+                    $updateFinancial = FinancialProjection::where('company_id', $result->id)->where('year', $yearDate->year)->first();
+                    if($updateFinancial){
+                        $addFinancial = $updateFinancial;
+                    }else{
+                        $addFinancial = new FinancialProjection();
+                    }
+                    
                     $addFinancial->company_id = $result->id;
 
                     $addFinancial->user_id = auth()->user()->id;
-                    $addFinancial->date_validate = $yearDate->format('Y-m-d');
+                    $addFinancial->valuation_date = $yearDate->format('Y-m-d');
+                    $addFinancial->year = $yearDate->year;
                     // البيانات الرقمية
                     $addFinancial->revenues = $data["rev_$i"];
                     $addFinancial->cogs = $data["cogs_$i"];
@@ -1622,10 +1629,11 @@ class ClientCompanyController extends Controller
             }
             return redirect()->back()->withErrors($e->validator)->withInput();
         } catch (Exception $e) {
-            // dd($e);
+            dd($e);
             // تسجيل الأخطاء الأخرى
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             if ($request->ajax()) {
+               
                 return response()->json([
                     'success' => false,
                     'message' => __('admin.please_complete_startup_info')
