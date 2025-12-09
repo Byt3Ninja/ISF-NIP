@@ -312,9 +312,9 @@
   
                   @php
                     if(auth()->user()->hasAnyRole(['organizationManager'])) {
-                      $organizations = App\organization::where('id',auth()->user()->organization_id)->get();
+                      $organizations = App\Organization::where('id',auth()->user()->organization_id)->get();
                     } else {
-                      $organizations = App\organization::all();
+                      $organizations = App\Organization::all();
                     }
                   @endphp
   
