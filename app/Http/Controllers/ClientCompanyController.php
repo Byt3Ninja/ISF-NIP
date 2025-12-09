@@ -1608,7 +1608,7 @@ class ClientCompanyController extends Controller
                     ]);
                 }
 
-                return redirect()->route('company.profile_view_mine', $redirectId)->with(['msg' => __('admin.startup_info_updated'), 'class' => 'success']);
+                return redirect()->route('company.profile_view_mine', $redirectId)->with(['msg' => __('startup_info_updated'), 'class' => 'success']);
             } else {
                 if ($data['CompanyN'] == 14 && $request->ajax()) {
                     return response()->json([
@@ -2010,6 +2010,11 @@ class ClientCompanyController extends Controller
                 'name' => 'required|string|max:300',
                 'description' => 'required|string|max:1000',
                 'completion_percentage' => 'required|integer|min:0|max:100',
+                'category' => 'required',
+                'status' => 'required',
+                'milestone_date' => 'required|date',
+                'visibility' => 'required',
+                'cohort' => 'nullable',
                 'documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,docx,xlsx|max:10240', // 10MB
             ], [
                 'name.required' => __('startup.milestone_title_required'),
@@ -2023,6 +2028,11 @@ class ClientCompanyController extends Controller
                 'documents.*.file' => __('startup.document_invalid_file'),
                 'documents.*.mimes' => __('startup.milestone_document_invalid_type'),
                 'documents.*.max' => __('startup.document_too_large'),
+                'Category.required' => __('startup.Please_select_a_category'),
+                'Status.required' => __('startup.Please_select_a_status'),
+                'milestone_date.required' => __('startup.milestone_date_required'),
+                'visibility.required' => __('startup.visibility_required'),
+
             ]);
 
             if ($validator->fails()) {
@@ -2036,6 +2046,12 @@ class ClientCompanyController extends Controller
             $milestone->name = $request->name;
             $milestone->description = $request->description;
             $milestone->completion_percentage = $request->completion_percentage;
+            $milestone->category = $request->category;
+            $milestone->status = $request->status ?? 'Not Started';
+            $milestone->completed = $request->status == 'Completed' ? 1 : 0;
+            $milestone->milestone_date = $request->milestone_date;
+            $milestone->visibility = $request->visibility;
+            $milestone->cohort = $request->cohort;
             $milestone->Company_id = $id;
             $milestone->save();
 
@@ -2093,6 +2109,11 @@ class ClientCompanyController extends Controller
                 'name' => 'required|string|max:300',
                 'description' => 'required|string|max:1000',
                 'completion_percentage' => 'required|integer|min:0|max:100',
+                'category' => 'required',
+                'status' => 'required',
+                'milestone_date' => 'required|date',
+                'visibility' => 'required',
+                'cohort' => 'nullable',
                 'documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,docx,xlsx|max:10240', // 10MB
                 'remove_documents' => 'nullable|string', // JSON string of indices to remove
             ], [
@@ -2109,6 +2130,10 @@ class ClientCompanyController extends Controller
                 'documents.*.file' => __('startup.document_invalid_file'),
                 'documents.*.mimes' => __('startup.milestone_document_invalid_type'),
                 'documents.*.max' => __('startup.document_too_large'),
+                'category.required' => __('startup.category_required'),
+                'status.required' => __('startup.status_required'),
+                'milestone_date.required' => __('startup.milestone_date_required'),
+                'visibility.required' => __('startup.visibility_required'),
             ]);
 
             if ($validator->fails()) {
@@ -2132,6 +2157,12 @@ class ClientCompanyController extends Controller
             $milestone->name = $request->name;
             $milestone->description = $request->description;
             $milestone->completion_percentage = $request->completion_percentage;
+            $milestone->category = $request->category;
+            $milestone->status = $request->status ?? 'Not Started';
+            $milestone->completed = $request->status == 'Completed' ? 1 : 0;
+            $milestone->milestone_date = $request->milestone_date;
+            $milestone->visibility = $request->visibility;
+            $milestone->cohort = $request->cohort;
             $milestone->save();
 
             // Handle file uploads if any (append to existing documents)

@@ -389,4 +389,8 @@ return [
   'debt_at_end_of_year' => 'Debt at End of Year',
   'debt_change' => 'Debt Change',
   'free_cash_flow' => 'Free Cash Flow (FCF)',
+  'Please_select_a_category' => ' Please select a category ',
+  'Please_select_a_status' => ' Please select a status ',
+  'milestone_date_required' => 'Please select the milestone date',
+  'visibility_required' => ' Please select the visibility',
 ];

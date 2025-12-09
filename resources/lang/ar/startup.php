@@ -390,4 +390,8 @@ return [
   'debt_at_end_of_year' => 'الدين في نهاية السنة',
   'debt_change' => 'تغيير الدين',
   'free_cash_flow' => 'التدفق النقدي الحر (FCF)',
+  'Please_select_a_category' => ' يرجى اختيار الفئة ',
+  'Please_select_a_status' => ' يرجى اختيار حالة ',
+  'milestone_date_required' => 'يرجى اختيار تاريخ المرحلة',
+  'visibility_required' => ' يرجى اختيار خيار الظهور ',
 ];
