@@ -659,7 +659,7 @@ class MentorsController extends Controller
 		$sessions = $query->orderBy('id', 'DESC')->get();
 
 		// Add rate filtering - filter after retrieval for better accuracy
-		if ($request->filled('rate') && $request->rate != 'all') {
+		if ($request->filled('rate') && $request->rate != 'all' && ($request->show == 'all' || $request->show == 'approved')) {
 			$rating = $request->rate;
 			$sessions = $sessions->filter(function ($session) use ($rating) {
 				// Filter sessions by their individual rating

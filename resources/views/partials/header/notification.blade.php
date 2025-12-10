@@ -19,7 +19,7 @@ if($user)
       <i class="ti ti-bell ti-md"></i>
       @if ($all > 0)
       <span 
-        class="badge badge-notifications bg-danger rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
+        class="badge badge-notifications bg-danger rounded-circle d-flex justify-content-center align-items-center flex-shrink-0 w-px-20 h-px-20">
         {{ $all }}
       </span>
       @endif

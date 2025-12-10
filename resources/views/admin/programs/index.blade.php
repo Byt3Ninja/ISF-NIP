@@ -172,6 +172,13 @@
                           </a>
                         </li>
                       @endif
+                      @if ($_user->ableTo('mentorships.requests_list', $permissions))
+                      <li>
+                        <a class="dropdown-item" href="{{ route('mentorships.requests_list', $cycle->id) }}">
+                          <i class="ti ti-settings me-1"></i>  {{ __('admin.manage_mentors') }}
+                        </a>
+                      </li>
+                      @endif
                     </ul>
                   </div>
                 </div>

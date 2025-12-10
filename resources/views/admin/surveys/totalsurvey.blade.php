@@ -17,9 +17,31 @@
 @section('content')
 <div class="content-wrapper">
 	<div class="container-xxl flex-grow-1 container-p-y">
+
+		<!-- Navigation Tabs -->
+		<nav class="nav-align-top mb-6">
+			@php
+				$tabs = [
+					['title' => __('admin.surveys'), 'url' => 'dashboard/surveys', 'icon' => 'device-imac-search'],
+					['title' => __('admin.surveys_results'), 'url' => 'dashboard/Totalsurveys', 'icon' => 'report-search'],
+				]
+			@endphp
+			<ul class="nav nav-pills">
+				@foreach($tabs as $tab)
+					<li class="nav-item">
+						<a href="/{{ $tab['url'] }}" class="nav-link {{ Request::is($tab['url'] . '*') ? 'active' : '' }}">
+							<i class="ti ti-{{ $tab['icon'] }} me-2"></i>
+							{{ $tab['title'] }}
+						</a>
+					</li>
+				@endforeach
+			</ul>
+		</nav>
+		<!--/ Navigation Tabs -->
+
 		<div class="row">
 			@if( session()->has('success') )
-			<div class="col-md-12 mb-2">
+			<div class="col-md-12 mb-6">
 				<div role="alert" class="alert alert-success alert-dismissible">
 					{{ __('admin.'. session()->get('success')) }}
 					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -27,7 +49,7 @@
 			</div>
 			@endif
 			@if( session()->has('error') )
-			<div class="col-md-12 mb-2">
+			<div class="col-md-12 mb-6">
 				<div role="alert" class="alert alert-danger alert-dismissible">
 					{{ __('admin.'.session()->get('error')) }}
 					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -38,7 +60,7 @@
 
 		<div class="card">
 			<div class="card-header border-bottom d-flex justify-content-between align-items-center">
-				<h5 class="card-title mb-0">{{__('admin.Survey_Results')}}</h5>
+				<h5 class="card-title mb-0">{{__('admin.surveys_results')}}</h5>
 				<div class="dropdown">
 					<button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
 						<i class="ti ti-file-export me-2"></i> {{ __('admin.Export') }}
@@ -49,49 +71,8 @@
 					</ul>
 				</div>
 			</div>
-			<div class="card-body">
-				<div class="row mt-6">
-					<div class="col-12 col-md-2">
-						<select id="scope-filter" class="form-select form-select-sm mb-2 mb-md-0">
-							<option value="">{{ __('admin.Scope') }}</option>
-							<option value="">{{ __('admin.All') }}</option>
-							@foreach($scopes as $scope)
-							<option value="{{ $scope }}">{{ $scope }}</option>
-							@endforeach
-						</select>
-					</div>
-					@if($isAdmin)
-					<div class="col-12 col-md-2">
-						<select id="org-filter" class="form-select form-select-sm mb-2 mb-md-0">
-							<option value="">{{ __('admin.Organization') }}</option>
-							<option value="">{{ __('admin.All') }}</option>
-							@foreach($organizations as $org)
-							<option value="{{ $org['name'] }}">{{ $org['name'] }}</option>
-							@endforeach
-						</select>
-					</div>
-					@endif
-					<div class="col-12 col-md-2">
-						<select id="session-filter" class="form-select form-select-sm mb-2 mb-md-0">
-							<option value="">{{ __('admin.surveyTriggerAfterSession') }}</option>
-							<option value="">{{ __('admin.All') }}</option>
-							<option value="1">{{ __('admin.surveyTriggerAllowed') }}</option>
-							<option value="0">{{ __('admin.surveyTriggerDenied') }}</option>
-						</select>
-					</div>
-					<div class="col-12 col-md-2">
-						<select id="cycle-filter" class="form-select form-select-sm mb-2 mb-md-0">
-							<option value="">{{ __('admin.surveyTriggerAfterCycle') }}</option>
-							<option value="">{{ __('admin.All') }}</option>
-							<option value="1">{{ __('admin.surveyTriggerAllowed') }}</option>
-							<option value="0">{{ __('admin.surveyTriggerDenied') }}</option>
-						</select>
-					</div>
-					<div class="col-12 col-md-2 d-none align-items-end">
-						<button id="clear-filters" class="btn btn-sm btn-outline-secondary">{{ __('admin.Clear') }}</button>
-					</div>
-				</div>
-				<table id="table table-hover surveys-datatable" class="table">
+			<div class="card-datatable table-responsive datatable-basic">
+				<table id="table surveys-datatable" class="table">
 					<thead>
 						<tr class="table-light">
 							<th>#</th>
@@ -136,20 +117,24 @@
 							@endrole
 							<td class="text-center">
 								@if( $survey_scope->trigger_by_session )
-								<span class="btn btn-xs btn-outline-success"> <i class="ti ti-check me-1"></i> {{
-									__('admin.surveyTriggerAllowed') }} </span>
+								<span class="badge bg-label-success"> 
+									{{ __('admin.surveyTriggerAllowed') }} 
+								</span>
 								@else
-								<span class="btn btn-xs btn-outline-danger"> <i class="ti ti-x me-1"></i> {{
-									__('admin.surveyTriggerDenied') }} </span>
+								<span class="badge bg-label-danger">  
+									{{ __('admin.surveyTriggerDenied') }} 
+								</span>
 								@endif
 							</td>
 							<td class="text-center">
 								@if( $survey_scope->trigger_by_due )
-								<span class="btn btn-xs btn-outline-success"> <i class="ti ti-check me-1"></i> {{
-									__('admin.surveyTriggerAllowed') }} </span>
+								<span class="badge bg-label-success"> 
+									{{ __('admin.surveyTriggerAllowed') }} 
+								</span>
 								@else
-								<span class="btn btn-xs btn-outline-danger"> <i class="ti ti-x me-1"></i> {{
-									__('admin.surveyTriggerDenied') }} </span>
+								<span class="badge bg-label-danger">  
+									{{ __('admin.surveyTriggerDenied') }} 
+								</span>
 								@endif
 							</td>
 							<td class="text-center">
@@ -163,8 +148,9 @@
 							<td class="text-center">
 								@if($survey)
 								<a href="{{ route('surveys.results_view', ['survey' => $survey->id]) }}?target={{ $survey_scope->scope }}"
-									class="btn btn-xs btn-outline-info"> <i class="ti ti-checklist"></i> {{
-									__('admin.surveyResults') }}
+									class="btn btn-sm btn-primary text-nowrap"> 
+									<i class="ti ti-eye me-1"></i> 
+									{{ __('admin.quizViewResults') }}
 								</a>
 								@endif
 							</td>
@@ -187,6 +173,7 @@
 				responsive: true,
         pageLength: 10,
         lengthMenu: [10, 25, 50, 100],
+				dom: '<"row"<"col-12 col-md-9 d-flex flex-wrap flex-md-nowrap align-items-center"l><"col-12 col-md-3 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6 d-flex justify-content-end"p>>',
 				'buttons': [
 					{
 						extend: 'csv',
@@ -226,54 +213,113 @@
 					},
 					'oAria': {
 						'sSortAscending': ": تفعيل لترتيب العمود تصاعدياً",
-						'sSortDescending': ": تفعيل لترتيب العمود تنازلياً"
+						'sSortDescending': ": تفعيل ترتيب العمود تنازلياً"
 					}
 				}
 				@endif
-			});
+				initComplete: function() {
+					var table = this.api();
 
-			// Filter events
-			$('#scope-filter').on('change', function() {
-				var val = this.value;
-				table.column({{ $scopeCol }}).search(val).draw();
-				toggleClearButton();
-			});
-			@if($isAdmin)
-			$('#org-filter').on('change', function() {
-				var val = this.value;
-				table.column({{ $orgCol }}).search(val).draw();
-				toggleClearButton();
-			});
-			@endif
-			$('#session-filter').on('change', function() {
-				var text = $('#session-filter option:selected').text().trim();
-				table.column({{ $sessionCol }}).search(text, true, false).draw();
-				toggleClearButton();
-			});
-			$('#cycle-filter').on('change', function() {
-				var text = $('#cycle-filter option:selected').text().trim();
-				table.column({{ $cycleCol }}).search(text, true, false).draw();
-				toggleClearButton();
-			});
+					// Create filter container after length selector
+					var filterContainer = $('<div class="d-flex flex-wrap gap-2 mt-3 mt-md-0 ms-md-8"></div>');
 
-			// Toggle clear button visibility
-			function toggleClearButton() {
-				var hasFilter = $('#scope-filter').val() @if($isAdmin) || $('#org-filter').val() @endif || $('#session-filter').val() || $('#cycle-filter').val();
-				if (hasFilter) {
-					$('#clear-filters').parent().removeClass('d-none').addClass('d-flex');
-				} else {
-					$('#clear-filters').parent().removeClass('d-flex').addClass('d-none');
+					// Scope Filter
+					var scopeSelect = $('<select id="scope-filter" class="form-select form-select-sm" style="width: auto;"><option value="">{{ __("admin.Scope") }}</option><option value="">{{ __("admin.All") }}</option></select>');
+					var scopes = [];
+					table.column({{ $scopeCol }}).nodes().each(function(cell) {
+						var text = $(cell).text().trim();
+						if (text && !scopes.includes(text)) {
+							scopes.push(text);
+						}
+					});
+					scopes.sort();
+					scopes.forEach(function(scope) {
+						var option = $('<option></option>').val(scope).text(scope);
+						scopeSelect.append(option);
+					});
+					filterContainer.append(scopeSelect);
+
+					// Organization Filter (for Admin only)
+					@if($isAdmin)
+					var orgSelect = $('<select id="org-filter" class="form-select form-select-sm" style="width: auto;"><option value="">{{ __("admin.Organization") }}</option><option value="">{{ __("admin.All") }}</option></select>');
+					var organizations = [];
+					table.column({{ $orgCol }}).nodes().each(function(cell) {
+						var text = $(cell).text().trim();
+						if (text && !organizations.includes(text)) {
+							organizations.push(text);
+						}
+					});
+					organizations.sort();
+					organizations.forEach(function(org) {
+						var option = $('<option></option>').val(org).text(org);
+						orgSelect.append(option);
+					});
+					filterContainer.append(orgSelect);
+					@endif
+
+					// Session Filter
+					var sessionSelect = $('<select id="session-filter" class="form-select form-select-sm" style="width: auto;"><option value="">{{ __("admin.surveyTriggerAfterSession") }}</option><option value="">{{ __("admin.All") }}</option><option value="{{ __("admin.surveyTriggerAllowed") }}">{{ __("admin.surveyTriggerAllowed") }}</option><option value="{{ __("admin.surveyTriggerDenied") }}">{{ __("admin.surveyTriggerDenied") }}</option></select>');
+					filterContainer.append(sessionSelect);
+
+					// Cycle Filter
+					var cycleSelect = $('<select id="cycle-filter" class="form-select form-select-sm" style="width: auto;"><option value="">{{ __("admin.surveyTriggerAfterCycle") }}</option><option value="">{{ __("admin.All") }}</option><option value="{{ __("admin.surveyTriggerAllowed") }}">{{ __("admin.surveyTriggerAllowed") }}</option><option value="{{ __("admin.surveyTriggerDenied") }}">{{ __("admin.surveyTriggerDenied") }}</option></select>');
+					filterContainer.append(cycleSelect);
+
+					// Clear button container
+					var clearButtonContainer = $('<div class="d-none align-items-end"></div>');
+					var clearButton = $('<button id="clear-filters" class="btn btn-sm btn-outline-secondary">{{ __("admin.Clear") }}</button>');
+					clearButtonContainer.append(clearButton);
+					filterContainer.append(clearButtonContainer);
+
+					$('.dataTables_length').after(filterContainer);
+
+					// Apply filters
+					scopeSelect.on('change', function() {
+						table.column({{ $scopeCol }}).search(this.value).draw();
+						toggleClearButton();
+					});
+
+					@if($isAdmin)
+					orgSelect.on('change', function() {
+						table.column({{ $orgCol }}).search(this.value).draw();
+						toggleClearButton();
+					});
+					@endif
+
+					sessionSelect.on('change', function() {
+						var text = $(this).find('option:selected').text().trim();
+						table.column({{ $sessionCol }}).search(text, true, false).draw();
+						toggleClearButton();
+					});
+
+					cycleSelect.on('change', function() {
+						var text = $(this).find('option:selected').text().trim();
+						table.column({{ $cycleCol }}).search(text, true, false).draw();
+						toggleClearButton();
+					});
+
+					// Toggle clear button visibility
+					function toggleClearButton() {
+						var hasFilter = scopeSelect.val() @if($isAdmin) || orgSelect.val() @endif || sessionSelect.val() || cycleSelect.val();
+						if (hasFilter) {
+							clearButtonContainer.removeClass('d-none').addClass('d-flex');
+						} else {
+							clearButtonContainer.removeClass('d-flex').addClass('d-none');
+						}
+					}
+
+					// Clear filters
+					clearButton.on('click', function() {
+						scopeSelect.val('');
+						@if($isAdmin)
+						orgSelect.val('');
+						@endif
+						sessionSelect.val('');
+						cycleSelect.val('');
+						table.columns().search('').draw();
+						clearButtonContainer.removeClass('d-flex').addClass('d-none');
+					});
 				}
-			}
-
-			// Clear filters
-			$('#clear-filters').on('click', function() {
-				$('#scope-filter, #session-filter, #cycle-filter').val('');
-				@if($isAdmin)
-				$('#org-filter').val('');
-				@endif
-				table.columns().search('').draw();
-				$(this).parent().removeClass('d-flex').addClass('d-none');
 			});
 
 			// Export buttons
