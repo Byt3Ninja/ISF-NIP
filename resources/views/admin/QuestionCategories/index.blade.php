@@ -70,50 +70,48 @@
 										</a>
 									</div>
                 </div>
-								<div class="card-body">
-									<!-- datatable start -->
-									<div class="table-responsive">
-										<table id="categoriesTable" class="table datatables-ajax">
-											<thead>
-											<tr class="table-light">
-												<th>#</th>
-												<th>{{__('admin.categoryTitle')}}</th>
-												<th class="text-center">{{__('admin.Organization')}}</th>
-												<th class="text-center">{{__('admin.categoryQuestions')}}</th>
-												<th class="text-center">{{__('admin.Actions')}}</th>
+								<!-- datatable start -->
+								<div class="card-datatable table-responsive datatable-basic">
+									<table id="categoriesTable" class="table datatables-ajax">
+										<thead>
+										<tr class="table-light">
+											<th>#</th>
+											<th>{{__('admin.categoryTitle')}}</th>
+											<th class="text-center">{{__('admin.Organization')}}</th>
+											<th class="text-center">{{__('admin.categoryQuestions')}}</th>
+											<th class="text-center">{{__('admin.Actions')}}</th>
+										</tr>
+										</thead>
+										<tbody>
+											@foreach( $categories as $category )
+											<tr id="row_{{ $category->id }}">
+												<td class="text-center">
+													<a href="{{ route('question-categories.edit', ['question_category' => $category->id]) }}">{{ $category->id }}</a></td>
+												<td class="text-center">
+													{{ $category->title }}</td>
+												<td class="text-center">
+													<a href="{{ route('organizations.edit', ['organization' => $category->organization->id]) }}"> {{ $category->organization->{'name_'.$l} }}</a></td>
+												<td class="text-center">
+													 {{ $category->questions->count() }} </td>
+												<td class="text-center">
+													<a 
+														href="{{ route('question-categories.edit', ['question_category' => $category->id]) }}" 
+														class="btn btn-label-primary btn-sm"
+													>
+														<i class="ti ti-edit ti-xs me-2"></i> {{ __('admin.Edit') }}</a>
+													<button 
+														id='deleteAction' 
+														data-id='{{ $category->id }}' 
+														data-url="{{ route('question-categories.destroy', ['question_category' => $category->id]) }}" 
+														class="btn btn-label-danger btn-sm"
+													> 
+														<i class="ti ti-trash ti-sm me-2"></i> {{ __('admin.Delete') }}
+													</button>
+												</td>
 											</tr>
-											</thead>
-											<tbody>
-												@foreach( $categories as $category )
-												<tr id="row_{{ $category->id }}">
-													<td class="text-center">
-														<a href="{{ route('question-categories.edit', ['question_category' => $category->id]) }}">{{ $category->id }}</a></td>
-													<td class="text-center">
-														{{ $category->title }}</td>
-													<td class="text-center">
-														<a href="{{ route('organizations.edit', ['organization' => $category->organization->id]) }}"> {{ $category->organization->{'name_'.$l} }}</a></td>
-													<td class="text-center">
-														 {{ $category->questions->count() }} </td>
-													<td class="text-center">
-														<a 
-															href="{{ route('question-categories.edit', ['question_category' => $category->id]) }}" 
-															class="btn btn-label-primary btn-sm"
-														>
-															<i class="ti ti-edit ti-xs me-2"></i> {{ __('admin.Edit') }}</a>
-														<button 
-															id='deleteAction' 
-															data-id='{{ $category->id }}' 
-															data-url="{{ route('question-categories.destroy', ['question_category' => $category->id]) }}" 
-															class="btn btn-label-danger btn-sm"
-														> 
-															<i class="ti ti-trash ti-sm me-2"></i> {{ __('admin.Delete') }}
-														</button>
-													</td>
-												</tr>
-												@endforeach
-											</tbody>
-										</table>
-									</div>
+											@endforeach
+										</tbody>
+									</table>
 								</div>
 							</div>
 						</div>

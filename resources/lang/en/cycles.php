@@ -602,4 +602,12 @@ return [
     'attendance_status' => 'Attendance Status',
     'attended' => 'Attended',
     'not_attended' => 'Not Attended',
+    'manage_mentors' => 'Manage Mentors',
+    'assign_mentors_to' => 'Assign Mentors to',
+    'manage_mentor_description1' => 'Select a program to assign mentors. This will allow you to assign mentors',
+    'manage_mentor_description2' => 'to the selected program, which will be visible to users in program.',
+    'mentors_selected' => 'Mentors Selected',
+    'no_mentors_selected' => 'No sentors selected',
+    'clear_all' => 'Clear All',
+    'no_mentors_found_matched_your_criteria' => 'No mentors found matched your criteria.',
 ];

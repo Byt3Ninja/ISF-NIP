@@ -2552,4 +2552,5 @@ return [
 	'weights' => 'Weights',
 	'quizzes_results' => 'Quizzes Results',
 	'surveys_results' => 'Surveys Results',
+	'mentors_assigned_successfully' => 'Mentors assigned successfully',
 ];

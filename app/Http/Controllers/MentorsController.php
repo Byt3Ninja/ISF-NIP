@@ -143,17 +143,23 @@ class MentorsController extends Controller
 
 	public function assign($id, Request $request)
 	{
-		if ($request->id) {
-			$users = explode(',', $request->selected_mentors);
-			CyclesMentors::where('cycle_id', $request->id)->delete();
-			if ($users) {
-				foreach ($users as $user) {
-					CyclesMentors::insert(['cycle_id' => $request->id, 'user_id' => $user]);
-				}
+			if ($request->id) {
+
+					$users = array_filter(explode(',', $request->selected_mentors));
+
+					CyclesMentors::where('cycle_id', $request->id)->delete();
+
+					foreach ($users as $user) {
+							CyclesMentors::insert([
+									'cycle_id' => $request->id,
+									'user_id' => (int) $user,
+							]);
+					}
 			}
-		}
-		return back()->with(['message' => 'Request successfully added', 'class' => 'success']);
+
+			return back()->with(['message' => 'mentors_assigned_successfully', 'class' => 'success']);
 	}
+
 
 	public function list_surveys($id, Request $request)
 	{
