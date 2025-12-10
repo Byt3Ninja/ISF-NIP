@@ -589,43 +589,20 @@
           </li>
         </ul>
       </li>
-      <li class="{{ Request::is('*quizzes*', '*surveys*', '*quizResults*') ? 'sidebar-group-active open' : '' }} menu-item">
-        <a class="menu-link menu-toggle">
-          <i class="ti ti-stack me-3 ti-md"></i>
-          <div>{{ __('admin.quizzesAndSurveys') }}</div>
+
+      <li class="{{ Request::is('*quizzes*', '*quizResults*') ? 'active' : '' }} menu-item">
+        <a class="menu-link" href="/dashboard/quizzes">
+          <i class="menu-icon tf-icons ti ti-clock-bolt"></i>
+          <div>{{ __('admin.quizzes') }}</div>
         </a>
-        <ul class="menu-sub">
-          <li class="{{ Request::is('dashboard/quizzes*') ? 'active' : '' }} menu-item">
-            <a class="menu-link" href="/dashboard/quizzes">
-              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-              <span class="menu-item"> {{ __('admin.quizzes') }}</span>
-            </a>
-          </li>
-           <li class="{{ Request::is('dashboard/quizResults*') ? 'active' : '' }} menu-item">
-            <a class="menu-link" href="{{ route('quizzes.quiz_Results_view') }}">
-              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-              <span class="menu-item"> {{ __('admin.Quiz_Results') }}</span>
-            </a>
-          </li>
-          
-          <li class="{{ Request::is('dashboard/surveys*') ? 'active' : '' }} menu-item">
-            <a class="menu-link" href="/dashboard/surveys">
-              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-              <span class="menu-item"> {{ __('admin.surveys') }}</span>
-            </a>
-          </li>
-
-          <li class="{{ Request::is('dashboard/Totalsurveys*') ? 'active' : '' }} menu-item">
-            <a class="menu-link" href="{{ route('surveys.dashboard_count_view') }}">
-              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-              <span class="menu-item"> {{ __('admin.Survey_Results') }}</span>
-            </a>
-          </li>
-
-         
-
-        </ul>
       </li>
+      <li class="{{ Request::is('*surveys*', '*Totalsurveys*') ? 'active' : '' }} menu-item">
+        <a class="menu-link" href="/dashboard/surveys">
+          <i class="menu-icon tf-icons ti ti-device-imac-search"></i>
+          <div>{{ __('admin.surveys') }}</div>
+        </a>
+      </li>
+      
       <li class="{{ Request::is('dashboard/final/*') ? 'sidebar-group-active open' : '' }} menu-item">
         <a class="menu-link menu-toggle">
           <i class="ti ti-trophy me-3 ti-md"></i>

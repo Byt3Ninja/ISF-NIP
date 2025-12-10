@@ -729,7 +729,7 @@ return [
 	'quizNotYetAvailable' => 'Not yet available',
 	'quizNextQuestion' => 'Next question',
 	'quizSubmitNoAnswer' => 'Please select answer before proceed',
-	'quizViewResults' => 'View results',
+	'quizViewResults' => 'View Results',
 	'quizOk' => 'Ok',
 	'quizCorrectAnswer' => 'Correct answer',
 	'quizWrongAnswer' => 'Wrong answer',
@@ -2550,4 +2550,6 @@ return [
 	'questions_management' => 'Questions Management',
 	'mentorship_management' => 'Mentorship Management',
 	'weights' => 'Weights',
+	'quizzes_results' => 'Quizzes Results',
+	'surveys_results' => 'Surveys Results',
 ];

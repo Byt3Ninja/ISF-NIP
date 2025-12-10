@@ -2603,4 +2603,6 @@ return [
 	'questions_management' => 'ادارة الاسئلة',
 	'mentorship_management' => 'ادارة جلسات الارشاد',
 	'weights' => 'الاوزان',
+	'quizzes_results' => 'نتائج الاختبارات',
+	'surveys_results' => 'نتائج الاستبيانات',
 ];
