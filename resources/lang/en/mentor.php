@@ -4,6 +4,7 @@ return [
     'enrolled_programs' => 'Enrolled Programs',
 
     'mentorshipTasks' => [
+        'label' => 'Mentorship Tasks',
         'index' => 'Tasks of Mentorship sessions',
         'create' => 'Add a new task',
         'all' => 'View all tasks',

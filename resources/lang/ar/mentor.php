@@ -4,6 +4,7 @@ return [
     'enrolled_programs' => 'البرامج المسجلة',
     
     'mentorshipTasks' => [
+        'label' => 'مها الارشاد',
         'index'=>'مهام جلسات الارشاد',
         'create'=>'اضافة مهمة جديدة',
         'all'=>'عرض كافة المهام',
