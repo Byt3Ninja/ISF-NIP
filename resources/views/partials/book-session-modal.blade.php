@@ -429,26 +429,15 @@ function formatDate(dateStr) {
 
   // Submit
   $('#bookingFormSubmit').on('submit', function (event) {
-    event.preventDefault();
     const $slotError = $('#slotError');
 
     if (!selectedSlot) {
+      event.preventDefault();
       $slotError.text('{{ __('mentor.select_available_slot') }}').show();
       return;
     }
 
     $slotError.hide();
-
-    const bookingData = {
-      date: selectedDate,
-      startTime: selectedSlot.start_time,
-      endTime: selectedSlot.end_time,
-      duration: calculateDuration(selectedSlot.start_time, selectedSlot.end_time),
-      sessionType: selectedSlot.session_type,
-      location: selectedSlot.location || null,
-      file: $('#fileUpload')[0].files[0] || null,
-      notes: $('#additionalNotes').val().trim()
-    };
 
     releaseSuccessAlert({
       title: '{{ __('mentor.success') }}',
@@ -457,6 +446,9 @@ function formatDate(dateStr) {
 
     $('#bookingModal').modal('hide');
     resetForm();
+
+    // submit AFTER closing modal
+    this.submit();
   });
 
   function resetForm() {
