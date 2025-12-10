@@ -595,4 +595,12 @@ return [
     'attendance_status' => 'حالة الحضور',
     'attended' => 'حضر',
     'not_attended' => 'لم يحضر',
+    'manage_mentors' => 'إدارة المرشدين',
+    'assign_mentors_to' => 'تعيين المرشدين إلى',
+    'manage_mentor_description1' => 'اختر برنامج لتعيين المرشدين. سيسمح لك بتعيين المرشدين إلى البرنامج المختار، والتي سيكون مرئية للاستخدم في البرنامج.',
+    'manage_mentor_description2' => 'إلى البرنامج المختار، والتي سيكون مرئية للاستخدم في البرنامج.',
+    'mentors_selected' => 'المرشدين المختارون',
+    'no_mentors_selected' => 'لم يتم اختيار أي مرشدين',
+    'clear_all' => 'مسح الكل',
+    'no_mentors_found_matched_your_criteria' => 'لم يتم العثور على أي مرشدين يتطابق مع معاييرك',
 ];

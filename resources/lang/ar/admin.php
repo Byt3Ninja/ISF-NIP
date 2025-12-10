@@ -2605,4 +2605,5 @@ return [
 	'weights' => 'الاوزان',
 	'quizzes_results' => 'نتائج الاختبارات',
 	'surveys_results' => 'نتائج الاستبيانات',
+	'mentors_assigned_successfully' => 'تم تعيين المرشدين بنجاح',
 ];
