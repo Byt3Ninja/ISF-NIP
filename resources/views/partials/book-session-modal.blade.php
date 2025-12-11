@@ -21,7 +21,7 @@
       </div>
       @csrf
       
-      <input type="hidden" name="mentorid" value="{{ $mentor_id }}">
+      <input type="hidden" name="mentorid" id="bookingMentorId" value="{{ $mentor_id }}">
       @if (isset($user_id))
         <input type="hidden" name="user_id" value="{{ $user_id }}">
       @endif
@@ -166,13 +166,9 @@ $(document).ready(function() {
   let flatpickrInstance = null;
   let offlineDisabled = false;
 
-  // Open booking modal on button click
-  // $('#openBookingBtn').on('click', function() {
-  //   const mentorId = $(this).data('id');
-  //   fetchSlots(mentorId);
-  // });
-
   window.fetchSlots = function(mentorId) {
+    $('#bookingMentorId').val(mentorId);
+
     $.ajax({
       url: `/dashboard/availability/slots/${mentorId || ''}`,
       method: 'GET',

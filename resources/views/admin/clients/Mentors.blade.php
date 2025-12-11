@@ -203,7 +203,7 @@
                 @endphp
 
                 @if ($canRequestMentorship && auth()->user()->company->id && $mentor->id)
-                  <button type="button" class="btn btn-primary" onclick="fetchSlots({{ $mentor->id }})">
+                  <button type="button" class="btn btn-primary" onclick="if (typeof fetchSlots === 'function') { fetchSlots({{ $mentor->id }}); }">
                     {{ __('cycles.Request_Mentorship') }}
                     <i class="ti ti-calendar-plus ms-2"></i>
                   </button>
