@@ -1599,8 +1599,10 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 <!-- / Program Prerequisites Modal -->
 
 <!-- Request Mentorship Session Modal -->
-@if (auth()->user()->company->id && $_user->hasRole('Registered'))
-	@include('partials.book-session-modal')
+@if ( $_user->hasRole('Registered'))
+	@if(auth()->user()->company->id != null)
+		@include('partials.book-session-modal')
+	@endif
 @endif
 
 @stop
