@@ -46,68 +46,106 @@ class SlotController extends Controller
 			return view('mentor.availability.index');
 	}
 
+	private $weekdayMap = [
+    'Mon' => 'Monday',
+    'Tue' => 'Tuesday',
+    'Wed' => 'Wednesday',
+    'Thu' => 'Thursday',
+    'Fri' => 'Friday',
+    'Sat' => 'Saturday',
+    'Sun' => 'Sunday',
+	];
+
 	private function cleanWeekday($value)
 	{
-			// If null or empty → return as is
-			if (!$value) return $value;
+			if (!$value) return [];
 
-			// Case 1: JSON encoded string, ex: "\"Sunday\""
 			$decoded = json_decode($value, true);
 
+			// If valid JSON
 			if (json_last_error() === JSON_ERROR_NONE) {
-					// If decoded value is string → return it
+
+					// If string: convert to array
 					if (is_string($decoded)) {
-							return $decoded;
+							return [$this->weekdayMap[$decoded] ?? $decoded];
 					}
 
-					// If decoded value is array → return array
+					// If array: convert each item
 					if (is_array($decoded)) {
-							return $decoded;
+							return array_map(function ($w) {
+									return $this->weekdayMap[$w] ?? $w;
+							}, $decoded);
 					}
 			}
 
-			// Case 2: Not JSON but still has quotes → trim quotes
-			return trim($value, '"');
+			// Not JSON → treat as raw string
+			$value = trim($value, '"');
+			return [$this->weekdayMap[$value] ?? $value];
 	}
 
-	public function getSlots(Request $request, $id = null) {
+
+	public function getSlots(Request $request, $id = null)
+	{
 			$schedules = Schedule::where('user_id', $id ?? auth()->id())->get();
 
-			// If 'active_only' filter is set, filter active schedules
+			// Active-only filter
 			if ($request->has('active_only') && $request->active_only == 'true') {
-					$schedules = Schedule::where('active', 1)->where('user_id', $id ?? auth()->id())->get();
+					$schedules = Schedule::where('active', 1)
+							->where('user_id', $id ?? auth()->id())
+							->get();
 			}
 
-			// Map schedules to desired format
-			$slots = $schedules->map(function ($item) {
+			$slots = collect(); // we will push items manually
+
+			foreach ($schedules as $item) {
 					$isWeekly = $item->type == 'Weekly';
 
-					return [
-						'id'           => $item->id,
-						'weekday'      => $isWeekly ? $this->cleanWeekday($item->days) : null,
-						'date'         => $isWeekly ? null : ($item->date ?? $item->dto),
-						'start_time'   => substr($item->tfrom, 0, 5),
-						'end_time'     => substr($item->tto, 0, 5),
-						'session_type' => $item->session_type,
-						'weekly'       => $isWeekly,
-					];
-			});
+					if ($isWeekly) {
+							// cleanWeekday() must return an array of weekdays
+							$weekdays = $this->cleanWeekday($item->days);
 
-			// If fetching for specific mentor, include mentor info
+							foreach ($weekdays as $weekday) {
+									$slots->push([
+											'id'           => $item->id,
+											'weekday'      => $weekday,
+											'date'         => null,
+											'start_time'   => substr($item->tfrom, 0, 5),
+											'end_time'     => substr($item->tto, 0, 5),
+											'session_type' => $item->session_type,
+											'weekly'       => true,
+									]);
+							}
+
+					} else {
+							// Non-weekly: single slot per row
+							$slots->push([
+									'id'           => $item->id,
+									'weekday'      => null,
+									'date'         => $item->date ?? $item->dto,
+									'start_time'   => substr($item->tfrom, 0, 5),
+									'end_time'     => substr($item->tto, 0, 5),
+									'session_type' => $item->session_type,
+									'weekly'       => false,
+							]);
+					}
+			}
+
+			// If fetching for a mentor, include mentor info
 			if ($id) {
 					$user = User::find($id);
 					return response()->json([
-						'success' => true,
-						'user' => [
-							'id' => $user->id,
-							'name' => $user->name,
-						],
-						'data' => $slots,
+							'success' => true,
+							'user' => [
+									'id' => $user->id,
+									'name' => $user->name,
+							],
+							'data' => $slots,
 					], 200);
 			}
 
 			return response()->json(['success' => true, 'data' => $slots], 200);
 	}
+
 
 	public function store(Request $request)
 	{

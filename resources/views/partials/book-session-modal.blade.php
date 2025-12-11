@@ -5,7 +5,6 @@
   }
 </style>
 
-@if (isset($mentor_id))
 <!-- Booking Modal -->
 <div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
@@ -21,16 +20,12 @@
       </div>
       @csrf
       
-      <input type="hidden" name="mentorid" value="{{ $mentor_id }}">
-      @if (isset($user_id))
-        <input type="hidden" name="user_id" value="{{ $user_id }}">
+      <input type="hidden" name="mentorid" id="bookingMentorId">
+      @if (isset(auth()->user()->company->id))
+        <input type="hidden" name="user_id" value="{{ auth()->user()->company->id }}">
       @endif
-      @if (isset($organization_id))
-        <input type="hidden" name="organization_id" value="{{ $organization_id }}">
-      @endif
-      @if (isset($cycle_id))
-        <input type="hidden" name="cycle_id" value="{{ $cycle_id }}">
-      @endif
+      <input type="hidden" name="organization_id" id="bookingOrgId">
+      <input type="hidden" name="cycle_id" id="bookingCycleId">
       <input type="hidden" name="date" id="selectedDateValue">
       <input type="hidden" name="timeFrom" id="selectedStartTime">
       <input type="hidden" name="timeTo" id="selectedEndTime">
@@ -51,14 +46,12 @@
                 <div class="text-muted small" id="slotsDate">{{ __('admin.loading') }}...</div>
               </div>
               <div class="d-flex gap-2 mb-3">
-                <button class="btn btn-xs btn-primary rounded active" data-filter="all">{{ __('admin.All') }}</button>
-                <button class="btn btn-xs rounded border border-light" data-filter="online">
-                  <i class="ti ti-video ti-14px me-1"></i>
-                  {{ __('mentor.online') }}
+                <button type="button" class="btn btn-xs btn-primary rounded active" data-filter="all">{{ __('admin.All') }}</button>
+                <button type="button" class="btn btn-xs rounded border border-light" data-filter="online">
+                  <i class="ti ti-video ti-14px me-1"></i>{{ __('mentor.online') }}
                 </button>
-                <button class="btn btn-xs rounded border border-light" data-filter="offline">
-                  <i class="ti ti-map-pin ti-14px me-1"></i>
-                  {{ __('mentor.offline') }}
+                <button type="button" class="btn btn-xs rounded border border-light" data-filter="offline">
+                  <i class="ti ti-map-pin ti-14px me-1"></i>{{ __('mentor.offline') }}
                 </button>
               </div>
               <div id="slotsList" style="width: 100%; max-height: 320px; overflow-y: auto;">
@@ -123,9 +116,7 @@
           <div class="border bg-light-subtle rounded p-4 text-center cursor-pointer"
             onclick="document.getElementById('fileUpload').click()">
             <i class="ti ti-cloud-upload mb-2"></i>
-            <div class="fw-medium">
-              {{ __('mentor.single_dropzone_description') }}
-            </div>
+            <div class="fw-medium">{{ __('mentor.single_dropzone_description') }}</div>
             <div class="small text-muted mt-1">PDF, DOC, DOCX, PPT, XLS, PNG, JPEG up to 10MB</div>
           </div>
           <input type="file" name="file_url" id="fileUpload" class="d-none" accept=".pdf,.doc,.docx,.ppt,.xls,.png,.jpeg,.jpg">
@@ -136,7 +127,7 @@
         <!-- Additional Notes -->
         <div class="mt-3">
           <label for="additionalNotes" class="form-label mb-2">
-            {{ $l == 'en' ? 'Additional Notes' : 'ملاحظات إضافية' }}
+            {{ $l == 'en' ? 'Additional Notes' : 'ملاحظات إضافية' }}
             <span class="text-muted fw-normal">({{ __('mentor.optional') }})</span>
           </label>
           <textarea class="form-control" name="notes" id="additionalNotes" rows="3" maxlength="1000"
@@ -145,10 +136,10 @@
       </div>
       <div class="modal-footer border-top py-4">
         <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
-          <i class="ti ti-x me-2"></i> {{ __('admin.Cancel') }}
+          <i class="ti ti-x me-2"></i>{{ __('admin.Cancel') }}
         </button>
-        <button type="submit" class="btn btn-primary">
-          <i class="ti ti-send me-2"></i> {{ __('admin.Submit') }}
+        <button type="submit" class="btn btn-primary" id="submit-button">
+          <i class="ti ti-send me-2"></i>{{ __('admin.Submit') }}
         </button>
       </div>
     </form>
@@ -160,143 +151,122 @@
 
 <script>
 $(document).ready(function() {
-  let availableSlots = [];
-  let selectedSlot = null;
-  let selectedDate = null;
-  let flatpickrInstance = null;
-  let offlineDisabled = false;
+  // State management
+  const state = {
+    slots: [],
+    selectedSlot: null,
+    selectedDate: null,
+    calendar: null,
+    offlineDisabled: false
+  };
 
-  // Open booking modal on button click
-  // $('#openBookingBtn').on('click', function() {
-  //   const mentorId = $(this).data('id');
-  //   fetchSlots(mentorId);
-  // });
+  const SESSION_TYPES = {
+    Online: '{{ __('mentor.online') }}',
+    Offline: '{{ __('mentor.offline') }}',
+    Both: '{{ __('mentor.both') }}'
+  };
 
-  window.fetchSlots = function(mentorId) {
-    $.ajax({
-      url: `/dashboard/availability/slots/${mentorId || ''}`,
-      method: 'GET',
-      data: { active_only: 'true' },
-      dataType: 'json'
-    })
-    .done(function(result) {
-      // console.log('Fetched slots:', result?.data || []);
-      availableSlots = result?.data || [];
+  const ICONS = {
+    Online: '<i class="ti ti-video ti-14px"></i>',
+    Offline: '<i class="ti ti-map-pin ti-14px"></i>',
+    Both: '<i class="ti ti-screen-share ti-14px"></i>'
+  };
 
-      if (result?.user) {
-        $('#mentorName').text(result.user.name || 'Mentor Name');
-      }
+  // Utility functions
+  const parseTime = (time) => {
+    const [h, m] = time.split(':').map(Number);
+    return h * 60 + m;
+  };
 
-      if (result?.data) {
-        $('#bookingModal').modal('show');
-        if (!flatpickrInstance) {
-          initializeCalendar();
-        }
-      }
-    })
-    .fail(function() {
-      alert('{{ __('mentor.could_not_load_availability_slots') }}');
+  const calcDuration = (start, end) => parseTime(end) - parseTime(start);
+
+  const formatDate = (dateStr) => {
+    return new Date(dateStr).toLocaleDateString('en-US', { 
+      weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' 
     });
-  }
+  };
 
-  function getAvailableDates() {
-  const dates = new Set();
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const endDate = new Date();
-  endDate.setMonth(endDate.getMonth() + 3);
+  const getToday = () => new Date().toISOString().split('T')[0];
 
-  availableSlots.forEach(slot => {
-    if (slot.date) {
-      const slotDate = new Date(slot.date);
-      slotDate.setHours(0, 0, 0, 0);
-      if (slotDate >= today) {
-        dates.add(slot.date);
+  const getUTCDate = (date) => {
+    return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  };
+
+  const getDayName = (dateStr) => {
+    const utcDate = getUTCDate(new Date(dateStr));
+    return utcDate.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
+  };
+
+  // Slot filtering and retrieval
+  const getAvailableDates = () => {
+    const dates = new Set();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const endDate = new Date();
+    endDate.setMonth(endDate.getMonth() + 3);
+
+    // Add specific dates
+    state.slots.forEach(slot => {
+      if (slot.date) {
+        const slotDate = new Date(slot.date);
+        slotDate.setHours(0, 0, 0, 0);
+        if (slotDate >= today) dates.add(slot.date);
+      }
+    });
+
+    // Add weekly recurring dates
+    for (let d = new Date(today); d <= endDate; d.setDate(d.getDate() + 1)) {
+      const utcDate = getUTCDate(d);
+      const dayName = utcDate.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
+      const dateStr = utcDate.toISOString().split('T')[0];
+
+      if (state.slots.some(s => s.weekly && s.weekday === dayName)) {
+        dates.add(dateStr);
       }
     }
-  });
 
-  for (let d = new Date(today); d <= endDate; d.setDate(d.getDate() + 1)) {
-    const dayName = d.toLocaleDateString('en-US', { weekday: 'long' });
-    const hasWeeklySlot = availableSlots.some(slot =>
-      slot.weekly && slot.weekday === dayName
-    );
-    if (hasWeeklySlot) {
-      dates.add(d.toISOString().split('T')[0]);
-    }
-  }
+    return Array.from(dates).sort();
+  };
 
-  return Array.from(dates);
-}
+  const getSlotsForDate = (dateStr) => {
+    const dayName = getDayName(dateStr);
+    return state.slots.flatMap(slot => {
+      if (slot.date === dateStr) return [slot];
+      if (slot.weekly && slot.weekday === dayName) return [{ ...slot, date: dateStr }];
+      return [];
+    });
+  };
 
-function getSlotsForDate(dateStr) {
-  const date = new Date(dateStr);
-  const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
-  const slots = [];
+  const filterSlots = (slots, filterType) => {
+    let filtered = state.offlineDisabled 
+      ? slots.filter(s => s.session_type === 'Online')
+      : slots;
 
-  availableSlots.forEach(slot => {
-    if (slot.date === dateStr) {
-      slots.push(slot);
-    } else if (slot.weekly && slot.weekday === dayName) {
-      slots.push({ ...slot, date: dateStr });
-    }
-  });
+    if (filterType === 'online') return filtered.filter(s => s.session_type === 'Online');
+    if (filterType === 'offline') return filtered.filter(s => s.session_type === 'Offline');
+    return filtered;
+  };
 
-  return slots;
-}
-
-function calculateDuration(startTime, endTime) {
-  const [startHour, startMin] = startTime.split(':').map(Number);
-  const [endHour, endMin] = endTime.split(':').map(Number);
-  return (endHour * 60 + endMin) - (startHour * 60 + startMin);
-}
-
-function formatDate(dateStr) {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-}
-
-  // Render available time slots for a selected date
-  function renderSlots(dateStr) {
+  // UI rendering
+  const renderSlots = (dateStr) => {
     const $container = $('#slotsList');
     const filter = $('button[data-filter].active').data('filter');
-    let slots = getSlotsForDate(dateStr);
+    const slots = filterSlots(getSlotsForDate(dateStr), filter);
 
-    // Filter slots based on offline disabled flag and user filter
-    if (offlineDisabled) {
-      slots = slots.filter(slot => slot.session_type === 'Online');
-    }
-
-    if (filter === 'online') {
-      slots = slots.filter(slot => slot.session_type === 'Online');
-    } else if (filter === 'offline') {
-      slots = slots.filter(slot => slot.session_type === 'Offline');
-    }
-
-    if (slots.length === 0) {
+    if (!slots.length) {
       $container.html('<div class="text-center text-muted py-5 small">{{ __('mentor.no_available_slots_for_this_date') }}</div>');
       return;
     }
 
-    // Generate HTML for slots
-    const slotsHtml = slots.map((slot, index) => {
-      const duration = calculateDuration(slot.start_time, slot.end_time);
-      const icon = slot.session_type === 'Online'
-        ? '<i class="ti ti-video ti-14px"></i>'
-        : slot.session_type === 'Offline'
-          ? '<i class="ti ti-map-pin ti-14px"></i>'
-          : '<i class="ti ti-screen-share ti-14px"></i>';
-
-      const sessionTypeMap = {
-        Online: '{{ __('mentor.online') }}',
-        Offline: '{{ __('mentor.offline') }}',
-        Both: '{{ __('mentor.both') }}'
-      };
-
-      const locationText = slot.session_type === 'Offline' && slot.location ? slot.location : sessionTypeMap[slot.session_type ?? 'Both'];
+    const html = slots.map((slot, i) => {
+      const duration = calcDuration(slot.start_time, slot.end_time);
+      const icon = ICONS[slot.session_type] || ICONS.Both;
+      const location = slot.session_type === 'Offline' && slot.location 
+        ? slot.location 
+        : SESSION_TYPES[slot.session_type] || SESSION_TYPES.Both;
 
       return `
-        <div class="card shadow-none mb-2 border slot-card" data-slot-index="${index}">
+        <div class="card shadow-none mb-2 border slot-card" data-slot-index="${i}">
           <div class="card-body p-3">
             <div class="d-flex align-items-center justify-content-between">
               <div class="flex-grow-1">
@@ -306,180 +276,193 @@ function formatDate(dateStr) {
                 </div>
                 <div class="d-flex align-items-center gap-2 small">
                   <i class="ti ti-hourglass-empty ti-16px"></i> ${duration} @lang('mentor.min')
-                  <div class="badge bg-light-subtle d-flex align-items-center gap-1 text-dark rounded px-2">${icon} ${locationText}</div>
+                  <div class="badge bg-light-subtle d-flex align-items-center gap-1 text-dark rounded px-2">
+                    ${icon} ${location}
+                  </div>
                 </div>
               </div>
-              <input type="radio" class="form-check-input" name="slot" value="${index}">
+              <input type="radio" class="form-check-input" name="slot" value="${i}">
             </div>
           </div>
         </div>
       `;
     }).join('');
 
-    $container.html(slotsHtml);
+    $container.html(html);
 
-    // Attach change event to radio buttons
-    $container.find('input[name="slot"]').each(function(index) {
-      $(this).on('change', function() {
-        const $cardElement = $(this).closest('.slot-card');
-        selectSlot(slots[index], $cardElement);
-      });
+    $container.find('input[name="slot"]').on('change', function() {
+      selectSlot(slots[$(this).val()], $(this).closest('.slot-card'));
     });
-  }
+  };
 
-  // Select a time slot and update UI
-  function selectSlot(slot, $cardElement) {
+  const selectSlot = (slot, $card) => {
     $('.slot-card').removeClass('selected');
-    $cardElement.addClass('selected');
+    $card.addClass('selected');
+    state.selectedSlot = slot;
 
-    selectedSlot = slot;
-
-    const duration = calculateDuration(slot.start_time, slot.end_time);
-    $('#detailDate').text(formatDate(selectedDate));
+    const duration = calcDuration(slot.start_time, slot.end_time);
+    $('#detailDate').text(formatDate(state.selectedDate));
     $('#detailTime').text(`${slot.start_time} - ${slot.end_time}`);
-    $('#detailDuration').text(`${duration} minutes`);
+    $('#detailDuration').text(`${duration} @lang('admin.min')`);
     $('#detailType').text(slot.session_type === 'Online' ? '{{ __('mentor.online_video_call') }}' : slot.session_type);
 
+    $('#selectedDateValue').val(state.selectedDate);
     $('#selectedStartTime').val(slot.start_time);
     $('#selectedEndTime').val(slot.end_time);
     $('#selectedSessionType').val(slot.session_type);
 
     $('#sessionDetails').show();
     $('#slotError').hide();
-  }
+  };
 
-  function initializeCalendar() {
-    const availableDates = getAvailableDates();
-    const today = new Date().toISOString().split('T')[0];
+  const initCalendar = () => {
+    const dates = getAvailableDates();
+    const today = getToday();
 
-    flatpickrInstance = flatpickr("#calendar", {
+    if (!dates.length) {
+      // Disable submit button
+      $('#submit-button').prop('disabled', true);
+
+      $('#slotsList').html('<div class="text-center text-muted py-5">{{ __('mentor.no_availability_slots_added') }}</div>');
+      $('#slotsDate').text('{{ __('mentor.no_availability_slots_added') }}');
+      return;
+    }
+
+    // Enable submit button
+    $('#submit-button').prop('disabled', false);
+
+    state.calendar = flatpickr("#calendar", {
       inline: true,
       locale: '{{ $l }}',
       minDate: "today",
       defaultDate: today,
       dateFormat: "Y-m-d",
-      enable: availableDates,
-      onChange: function (selectedDates, dateStr) {
-        selectedDate = dateStr;
-        selectedSlot = null;
+      enable: dates,
+      onChange: ([date], dateStr) => {
+        state.selectedDate = dateStr;
+        state.selectedSlot = null;
         renderSlots(dateStr);
-        $('#sessionDetails').hide();
+        $('#sessionDetails, #slotError').hide();
         $('#slotsDate').text(formatDate(dateStr));
-        $('#slotError').hide();
-        $('#selectedDateValue').val(dateStr || today);
       },
-      onDayCreate: function (dObj, dStr, fp, dayElem) {
+      onDayCreate: (dObj, dStr, fp, dayElem) => {
         const dateStr = dayElem.dateObj.toISOString().split('T')[0];
-        if (availableDates.includes(dateStr)) {
-          $(dayElem).addClass('available');
-        } else {
-          const todayDate = new Date();
-          todayDate.setHours(0, 0, 0, 0);
-          if (dayElem.dateObj >= todayDate) {
-            $(dayElem).addClass('unavailable');
-          }
-        }
+        const isAvailable = dates.includes(dateStr);
+        const isFuture = dayElem.dateObj >= new Date().setHours(0, 0, 0, 0);
+        
+        $(dayElem).addClass(isAvailable ? 'available' : (isFuture ? 'unavailable' : ''));
       }
     });
 
-    // Set initial date and load slots
-    selectedDate = today;
+    state.selectedDate = today;
     $('#slotsDate').text(formatDate(today));
     renderSlots(today);
-  }
+  };
 
-  // Filter buttons
-  $('button[data-filter]').on('click', function () {
-    $('button[data-filter]').removeClass('active');
-    $(this).addClass('active');
-    if (selectedDate) {
-      renderSlots(selectedDate);
+  const resetCalendar = () => {
+    if (state.calendar?.destroy) {
+      state.calendar.destroy();
+      state.calendar = null;
     }
-  });
+    initCalendar();
+  };
 
-  // File upload
-  $('#fileUpload').on('change', function () {
-    const file = this.files[0];
-    const $fileError = $('#fileError');
-    const $fileName = $('#fileName');
+  const resetForm = () => {
+    state.selectedSlot = null;
+    state.selectedDate = getToday();
+    
+    $('#fileUpload, #additionalNotes').val('');
+    $('#fileName, #fileError, #sessionDetails, #slotError').hide();
+    
+    $('button[data-filter]').removeClass('active').first().addClass('active');
+    
+    resetCalendar();
+  };
 
-    if (!file) return;
-
-    const allowedExtensions = ['pdf', 'doc', 'docx', 'ppt', 'xls', 'png', 'jpeg', 'jpg'];
-    const fileExtension = file.name.split('.').pop().toLowerCase();
+  // File upload validation
+  const validateFile = (file) => {
+    const allowed = ['pdf', 'doc', 'docx', 'ppt', 'xls', 'png', 'jpeg', 'jpg'];
+    const ext = file.name.split('.').pop().toLowerCase();
     const maxSize = 10 * 1024 * 1024;
 
-    if (!allowedExtensions.includes(fileExtension)) {
-      $fileError.text('{{ __('mentor.unsupported_slot_attachment_format') }}').show();
-      $fileName.hide();
-      $(this).val('');
-      return;
+    if (!allowed.includes(ext)) {
+      return { valid: false, error: '{{ __('mentor.unsupported_slot_attachment_format') }}' };
     }
-
     if (file.size > maxSize) {
-      $fileError.text('{{ __('mentor.file_excced_10') }}').show();
-      $fileName.hide();
-      $(this).val('');
+      return { valid: false, error: '{{ __('mentor.file_excced_10') }}' };
+    }
+    return { valid: true };
+  };
+
+  // Event handlers
+  window.fetchSlots = (mentorId, cycleId, organizationId) => {
+    if (!mentorId || !cycleId || !organizationId) {
+      alert('{{ __('mentor.mentor_not_entrolled_in_cycle') }}');
       return;
     }
 
-    $fileError.hide();
-    $fileName.html(`<i class="ti ti-paperclip me-1"></i>${file.name}`).show();
+    $('#bookingMentorId').val(mentorId);
+    $('#bookingCycleId').val(cycleId);
+    $('#bookingOrgId').val(organizationId);
+
+    $.ajax({
+      url: `/dashboard/availability/slots/${mentorId}`,
+      method: 'GET',
+      data: { active_only: 'true' },
+      dataType: 'json'
+    })
+    .done(result => {
+      state.slots = result?.data || [];
+      if (result?.user) $('#mentorName').text(result.user.name || 'Mentor Name');
+      
+      $('#bookingModal').modal('show');
+      resetCalendar();
+    })
+    .fail(() => alert('{{ __('mentor.could_not_load_availability_slots') }}'));
+  };
+
+  $('button[data-filter]').on('click', function() {
+    $('button[data-filter]').removeClass('active');
+    $(this).addClass('active');
+    if (state.selectedDate) renderSlots(state.selectedDate);
   });
 
-  // Submit
-  $('#bookingFormSubmit').on('submit', function (event) {
-    const $slotError = $('#slotError');
+  $('#fileUpload').on('change', function() {
+    const file = this.files[0];
+    if (!file) return;
 
-    if (!selectedSlot) {
-      event.preventDefault();
-      $slotError.text('{{ __('mentor.select_available_slot') }}').show();
+    const result = validateFile(file);
+    if (!result.valid) {
+      $('#fileError').text(result.error).show();
+      $('#fileName').hide();
+      $(this).val('');
+    } else {
+      $('#fileError').hide();
+      $('#fileName').html(`<i class="ti ti-paperclip me-1"></i>${file.name}`).show();
+    }
+  });
+
+  $('#bookingFormSubmit').on('submit', function(e) {
+    if (!state.selectedSlot) {
+      e.preventDefault();
+      $('#slotError').text('{{ __('mentor.select_available_slot') }}').show();
       return;
     }
 
-    $slotError.hide();
-
+    $('#slotError').hide();
     releaseSuccessAlert({
       title: '{{ __('mentor.success') }}',
-      message: '{{ __('mentor.session_request_success') }}',
+      message: '{{ __('mentor.session_request_success') }}'
     });
 
     $('#bookingModal').modal('hide');
     resetForm();
 
-    // submit AFTER closing modal
+    // Submit form
     this.submit();
   });
-
-  function resetForm() {
-    selectedSlot = null;
-    $('#fileUpload').val('');
-    $('#additionalNotes').val('');
-    $('#fileName').hide();
-    $('#fileError').hide();
-    $('#sessionDetails').hide();
-    $('#slotError').hide();
-    $('button[data-filter]').each(function(index) {
-      $(this).toggleClass('active', index === 0);
-    });
-
-    // Reset to today's date
-    const today = new Date().toISOString().split('T')[0];
-    selectedDate = today;
-
-    // Destroy and reinitialize the calendar to reset to today
-    if (flatpickrInstance && typeof flatpickrInstance.destroy === 'function') {
-      flatpickrInstance.destroy();
-      flatpickrInstance = null;
-    }
-
-    // Reinitialize the calendar with today's date
-    initializeCalendar();
-  }
 
   $('#bookingModal').on('hidden.bs.modal', resetForm);
 });
 </script>
 @endpush
-
-@endif

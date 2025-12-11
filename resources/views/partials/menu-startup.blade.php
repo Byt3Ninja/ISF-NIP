@@ -140,33 +140,6 @@
       <span class="menu-header-text">{{ $l == 'en' ? 'Engagement' : 'تفاعل' }}</span>
     </li>
 
-    {{-- Calendar --}}
-    <li class="{{ active('*calendar*') }} menu-item">
-      <a href="{{ route('calendar.events_list') }}" class="menu-link">
-        <i class="menu-icon tf-icons ti ti-calendar"></i>
-        <span>{{ __('admin.Calendar') }}</span>
-      </a>
-    </li>
-
-    {{-- Messages --}}
-    @if($_user->ableTo('messages.list', $permissions))
-      <li class="{{ active('dashboard/messages') }} menu-item">
-        <a href="/dashboard/messages" class="menu-link">
-          <i class="menu-icon tf-icons ti ti-messages"></i>
-          <span>{{ __('admin.Messages') }}</span>
-        </a>
-      </li>
-    @endif
-
-    @if($_user->ableTo('messages.view', $permissions))
-      <li class="{{ active('dashboard/mymsg') }} menu-item">
-        <a href="/dashboard/mymsg" class="menu-link">
-          <i class="menu-icon tf-icons ti ti-world"></i>
-          <span>{{ __('admin.contactus') }}</span>
-        </a>
-      </li>
-    @endif
-
     {{-- Services Directory --}}
     @if($_user->ableTo('users.directory_view', $permissions))
       <li class="{{ active('dashboard/directory') }} menu-item">

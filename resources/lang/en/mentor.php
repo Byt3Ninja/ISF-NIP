@@ -4,6 +4,7 @@ return [
     'enrolled_programs' => 'Enrolled Programs',
 
     'mentorshipTasks' => [
+        'label' => 'Mentorship Tasks',
         'index' => 'Tasks of Mentorship sessions',
         'create' => 'Add a new task',
         'all' => 'View all tasks',
@@ -115,4 +116,5 @@ return [
     'unsupported_slot_attachment_format' => 'Unsupported file format. Allowed formats: PDF, DOC, DOCX, PPT, XLS, PNG, JPEG.',
     'slot_notes_placeholder' => 'Share any specific topics or questions you like to discuss',
     'session_location' => 'Session Location',
+    'mentor_not_entrolled_in_cycle' => 'Mentor is not entrolled in a cycle',
 ];

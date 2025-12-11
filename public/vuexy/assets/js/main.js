@@ -724,7 +724,7 @@ document.getElementById("search-menu-input")?.addEventListener("input", function
 
   menuItems.forEach(item => {
     const label = item.querySelector('.menu-link span').textContent.toLowerCase();
-    console.log('label', label);
+    
     if (label.includes(searchTerm)) {
       item.style.display = "block";
     } else {
