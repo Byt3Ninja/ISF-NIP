@@ -221,7 +221,9 @@
                     </div>
                   </a>
                   <a
-                    @if ($_user->ableTo('mentors.list', $permissions))
+                    @if ($_user->ableTo('mentorships.requests_list', $permissions))
+                      href="{{ route('mentorships.requests_list', $cycle->id) }}"
+                    @elseif ($_user->ableTo('mentors.list', $permissions))
                       href="/dashboard/show/Mentors?programFilter={{ $cycle->id }}" 
                     @else
                       href="javascript:void(0);" 

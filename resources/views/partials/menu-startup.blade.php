@@ -61,12 +61,12 @@
     </li>
 
     {{-- Profile --}}
-    <li class="{{ active('*myProfile') }} menu-item">
+    {{-- <li class="{{ active('*myProfile') }} menu-item">
       <a href="{{ route('user.profile_view') }}" class="menu-link">
         <i class="menu-icon tf-icons ti ti-user"></i>
         <span>{{ __('admin.Profile') }}</span>
       </a>
-    </li>
+    </li> --}}
 
 
     {{-- ================================
