@@ -203,7 +203,11 @@
                 @endphp
 
                 @if ($canRequestMentorship && auth()->user()->company->id && $mentor->id)
-                  <button type="button" class="btn btn-primary" onclick="if (typeof fetchSlots === 'function') { fetchSlots({{ $mentor->id }}); }">
+                  <button 
+                    type="button" 
+                    class="btn btn-primary" 
+                    onclick="if (typeof fetchSlots === 'function') { fetchSlots({{ $mentor->id }}, {{ $getCycle->id }}, {{ $getCycle->organization_id }}); }"
+                  >
                     {{ __('cycles.Request_Mentorship') }}
                     <i class="ti ti-calendar-plus ms-2"></i>
                   </button>
@@ -223,16 +227,8 @@
             </div>
           </div>
           <!-- Mentor Card -->
-            @if ($canRequestMentorship && auth()->user()->company->id && $mentor->id)
-              @include(
-                'partials.book-session-modal',
-                [
-                  'mentor_id' => $mentor->id,
-                  'user_id' => auth()->user()->company->id,
-                  'cycle_id' => $getCycle->id,
-                  'organization_id' => $getCycle->organization_id,
-                ]
-              )
+            @if ($canRequestMentorship && auth()->user()->company->id)
+              @include('partials.book-session-modal')
             @endif
           @endforeach
           @else

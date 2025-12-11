@@ -892,8 +892,10 @@
 														@if( $_user->ableTo('mentors.settings_modify', $permissions) )
 														<td>
 															<button
-																onclick="request({{ $mentor->id }},'{{ $mentor->name }}', {{ $mentor->organization_id }}, {{ $mentor->cycle_id }})"
-																title="Add new request" type="button"
+																onclick="if (typeof fetchSlots === 'function') { fetchSlots({{ $mentor->id }}, {{ $mentor->cycle_id }}, {{ $mentor->organization_id }}); }"
+																{{-- onclick="request({{ $mentor->id }},'{{ $mentor->name }}', {{ $mentor->organization_id }}, {{ $mentor->cycle_id }})" --}}
+																title="{{ __('cycles.Request_Mentorship') }}"
+																type="button"
 																class="btn btn-icon rounded-circle btn-label-success">
 																<i class="fa fa-plus"></i>
 															</button>
@@ -1595,6 +1597,12 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 	</div>
 </div>
 <!-- / Program Prerequisites Modal -->
+
+<!-- Request Mentorship Session Modal -->
+@if (auth()->user()->company->id && $_user->hasRole('Registered'))
+	@include('partials.book-session-modal')
+@endif
+
 @stop
 
 @section('scripts')
@@ -1938,7 +1946,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	<script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
 	<script src="/vuexy/assets/js/charts-apex.js"></script>
 	<script src="/vuexy/assets/js/charts-chartjs.js"></script>
-	<script src="/vuexy/assets/js/mentorship-session.js"></script>
+	{{-- <script src="/vuexy/assets/js/mentorship-session.js"></script> --}}
 	<script>
 		function redirectWithDays(showValue) {
 			// الحصول على قيم التواريخ
