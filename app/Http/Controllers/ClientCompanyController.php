@@ -52,6 +52,7 @@ use Illuminate\Support\Facades\Validator;
 use \Illuminate\Validation\ValidationException;
 use Intervention\Image\ImageManagerStatic as Image;
 use App\Http\Requests\StoreUpdateClientCompanyRequest;
+use Google\Service\PolyService\Format;
 use URL, File, DB, Exception, Session, Storage, stdClass;
 
 class ClientCompanyController extends Controller
@@ -211,7 +212,85 @@ class ClientCompanyController extends Controller
             $compoundAnnualGrowthRate = pow(($last->total / $first->total), (1 / $years_count)) - 1;
             $compoundAnnualGrowthRate = round($compoundAnnualGrowthRate * 100, 1) . '%';
         }
-        return view('admin/clients/startup/company_profile', compact('company', 'formTitle', 'formData', 'evaluationForm', 'Currencies', 'milestones', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile', 'technologies', 'sectors', 'industry', 'years', 'growth_records', 'growthSinceFirstRecord', 'avgMonthlyGrowth', 'compoundAnnualGrowthRate'));
+
+        $programs = collect();
+
+        $cycle = Cycle::find($company->cycle);
+        if ($cycle) {
+            $programs->push((object)[
+                'id' => $cycle->id,
+                'name' => $cycle->title,
+                'organization' => (object)[
+                    // لو string
+                    'name' => is_object($cycle->organization) ? ($cycle->organization->name ?? null) : $cycle->organization
+                ],
+                'cohort' => (object)[ 'name' => $cycle->cohort ?? null ],
+                'start_date' => Carbon::parse($cycle->start),
+                'completion_date' => Carbon::parse($cycle->end),
+                'final_screening_score' => null,
+                'status' => 'upcoming',
+            ]);
+        }
+        $almunies = Almuni::where('company_id', $company->id)->get();
+        foreach ($almunies as $almuni) {
+            $programsRaw = json_decode($almuni->program ?? '[]');
+            if (!is_array($programsRaw)) continue;
+            foreach ($programsRaw as $p) {
+                if (is_array($p)) $p = (object)$p;
+                $orgObj = null;
+                if (isset($p->Organization)) {
+                    if (is_object($p->Organization)) {
+                        $orgObj = (object)[ 'name' => $p->Organization->name ?? null ];
+                    } else {
+                        $orgObj = (object)[ 'name' => $p->Organization ];
+                    }
+                } elseif (isset($p->{'Organization Name'})) {
+                    if (is_object($p->{'Organization Name'})) {
+                        $orgObj = (object)[ 'name' => $p->{'Organization Name'}->name ?? null ];
+                    } else {
+                        $orgObj = (object)[ 'name' => $p->{'Organization Name'} ];
+                    }
+                } else {
+                    $orgObj = (object)[ 'name' => null ];
+                }
+                $programs->push((object)[
+                    'id' => $p->ID ?? ($programs->count() + 1),
+                    'name' => $p->{'Program Name'} ?? $p->Program_Name ?? $p->title ?? null,
+                    'organization' => $orgObj,
+                    'cohort' => (object)[ 'name' => $p->Cohort ?? $p->{'Cohort Name'} ?? null ],
+                    'start_date' => !empty($p->Start_Date) ? Carbon::parse($p->Start_Date) : null,
+                    'completion_date' => !empty($p->Completion_Date) ? Carbon::parse($p->Completion_Date) : null,
+                    'final_screening_score' => $p->Final_Screening_Score ?? null,
+                    'status' => $p->Status ?? 'completed',
+                ]);
+            }
+        }
+        $programs = $programs->values()->all();
+
+        
+        return view('admin/clients/startup/company_profile', compact('company',
+         'formTitle',
+        'formData',
+        'evaluationForm', 
+        'Currencies', 
+        'milestones', 
+        'Achieved_Milestones', 
+        'Planned_Milestones', 
+        'icons', 
+        'fonders', 
+        'Shareholders', 
+        'Investors', 
+        'fileExists', 
+        'pathToFile', 
+        'technologies', 
+        'sectors', 
+        'industry', 
+        'years', 
+        'growth_records', 
+        'growthSinceFirstRecord', 
+        'avgMonthlyGrowth',
+        'compoundAnnualGrowthRate', 
+        'programs'));
         // } catch (Exception $e) {
         //     //log what happend
         //     Log::channel('system_exceptions')->info('Exceptions:', [$e]);
