@@ -446,7 +446,7 @@
 
     @if( $_user->ableToAny(['cycles.list', 'programlist.index'], $permissions) )
       <li
-        class="{{ Request::is('dashboard/cycles*', 'dashboard/programlist*') ? 'active' : '' }} menu-item">
+        class="{{ Request::is('dashboard/cycles*', 'dashboard/programlist*', 'dashboard/mentorship/assign*') ? 'active' : '' }} menu-item">
         <a href="{{ route('programlist.index') }}" class="menu-link">
           <i class="menu-icon tf-icons ti ti-components"></i>
           <div>{{ __('admin.Cycles') }}</div>
@@ -551,7 +551,7 @@
 
       <!-- Questions Nav Item -->
       <li
-        class="{{ Request::is('*question-categories*', '*questions-bank*', '*weights*', '*assessments*') ? 'active' : '' }} menu-item">
+        class="{{ Request::is('*question-categories*', '*questions-bank*', '*weights*') ? 'active' : '' }} menu-item">
         <a href="/dashboard/question-categories" class="menu-link">
           <i class="menu-icon tf-icons ti ti-settings-question"></i>
           <div>{{ __('admin.questions_management') }}</div>
