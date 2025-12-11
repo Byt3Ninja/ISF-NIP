@@ -203,6 +203,7 @@
                 @endphp
 
                 @if ($canRequestMentorship && auth()->user()->company->id && $mentor->id)
+                 @if($mentor->schedule->isNotEmpty())
                   <button 
                     type="button" 
                     class="btn btn-primary" 
@@ -211,7 +212,12 @@
                     {{ __('cycles.Request_Mentorship') }}
                     <i class="ti ti-calendar-plus ms-2"></i>
                   </button>
-                  
+                  @else
+                  <button type="button" class="btn btn-primary" disabled>
+                    {{ __('cycles.Not_Available_Request_Mentorship') }}
+                    <i class="ti ti-calendar-plus ms-2"></i>
+                  </button>
+                  @endif
                   {{-- <button type="button" class="btn btn-primary"
                     onclick="request({{$mentor->id}},'{{optional($startup)->name }}', {{ $getCycle->organization_id }},{{ $getCycle->id }})"
                     title="Add new request">
