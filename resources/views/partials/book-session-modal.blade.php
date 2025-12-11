@@ -306,6 +306,7 @@ $(document).ready(function() {
     $('#detailDuration').text(`${duration} @lang('admin.min')`);
     $('#detailType').text(slot.session_type === 'Online' ? '{{ __('mentor.online_video_call') }}' : slot.session_type);
 
+    $('#selectedDateValue').val(state.selectedDate);
     $('#selectedStartTime').val(slot.start_time);
     $('#selectedEndTime').val(slot.end_time);
     $('#selectedSessionType').val(slot.session_type);
@@ -343,7 +344,6 @@ $(document).ready(function() {
         renderSlots(dateStr);
         $('#sessionDetails, #slotError').hide();
         $('#slotsDate').text(formatDate(dateStr));
-        $('#selectedDateValue').val(dateStr || today);
       },
       onDayCreate: (dObj, dStr, fp, dayElem) => {
         const dateStr = dayElem.dateObj.toISOString().split('T')[0];
@@ -356,7 +356,6 @@ $(document).ready(function() {
 
     state.selectedDate = today;
     $('#slotsDate').text(formatDate(today));
-    $('#selectedDateValue').val(today);
     renderSlots(today);
   };
 
