@@ -1600,7 +1600,7 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 
 <!-- Request Mentorship Session Modal -->
 @if ( $_user->hasRole('Registered'))
-	@if(auth()->user()->company->id != null)
+	@if(auth()->user()->company?->id != null)
 		@include('partials.book-session-modal')
 	@endif
 @endif
