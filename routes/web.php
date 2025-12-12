@@ -61,6 +61,7 @@ Route::get('/reminderMentorShipRequest', 'IndexController@reminderMentorShipRequ
 
 
 /// Frontend routes ///
+Route::get('programs/teams/{files?}', 'HackathonController@get_team_media')->where('files', '.*');
 Route::get('lang/{locale}', 'IndexController@lang');
 Route::get('js-translations/{locale?}', 'IndexController@getJsTranslations')->name('js.translations');
 Route::get('/', 'IndexController@home');

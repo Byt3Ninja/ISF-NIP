@@ -33,9 +33,24 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use App\Notifications\StatusHackathonInvitation;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 
 class HackathonController extends Controller
 {
+
+    public function get_team_media( $path = null )
+    {
+		try {
+			$instance = Storage::disk('programTeams');
+			if( $instance->directoryExists( $path ) ) { return response()->view('errors.404')->setStatusCode( 404 ); }
+			$file = $instance->response( $path );
+			$mimeType = $instance->mimeType($path);
+			if( $mimeType == 'image/svg' ) { $mimeType = 'image/svg+xml'; }
+			$file->headers->set('Content-Type', $mimeType);
+			return $file;
+		} catch( \Throwable $th ) { return response()->view('errors.404')->setStatusCode( 404 ); }
+    }
+
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -1363,29 +1378,41 @@ class HackathonController extends Controller
 
         // Handle image upload
         $newImageUrl = null;
-        
+
         if ($request->hasFile('team_image')) {
             // Delete old image if exists
             if ($teamFormation->img_team) {
-                $oldImagePath = public_path($teamFormation->img_team);
+                /* $oldImagePath = public_path($teamFormation->img_team);
                 if (file_exists($oldImagePath)) {
                     unlink($oldImagePath);
+                } */
+                $storage_image_path = str_replace('programs/teams/', '', $teamFormation->img_team);
+                if( Storage::disk('programTeams')->exists($storage_image_path) )
+                {
+                    Storage::disk('programTeams')->delete($storage_image_path);
                 }
             }
             
             // Upload new image
             $image = $request->file('team_image');
             $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('programs/teams/'), $imageName);
+            // $image->move(public_path('programs/teams/'), $imageName);
+            $path = Storage::disk('programTeams')->putFileAs('', $image, $imageName);
             
             $teamFormation->img_team = 'programs/teams/' . $imageName;
             $newImageUrl = '/programs/teams/' . $imageName;
         } elseif ($request->remove_image) {
             // Remove existing image
             if ($teamFormation->img_team) {
-                $oldImagePath = public_path($teamFormation->img_team);
+                /* $oldImagePath = public_path($teamFormation->img_team);
                 if (file_exists($oldImagePath)) {
                     unlink($oldImagePath);
+                } */
+
+                $storage_image_path = str_replace('programs/teams/', '', $teamFormation->img_team);
+                if( Storage::disk('programTeams')->exists($storage_image_path) )
+                {
+                    Storage::disk('programTeams')->delete($storage_image_path);
                 }
                 $teamFormation->img_team = null;
             }
