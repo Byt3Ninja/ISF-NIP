@@ -604,4 +604,5 @@ return [
     'clear_all' => 'مسح الكل',
     'no_mentors_found_matched_your_criteria' => 'لم يتم العثور على أي مرشدين يتطابق مع معاييرك',
     'Not_Available_Request_Mentorship' => 'لا يتوفر طلب ارشاد',
+    'Screening Guidelines' => 'إرشادات التصفية',
 ];
