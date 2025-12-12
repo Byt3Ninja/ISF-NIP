@@ -1477,6 +1477,9 @@ class ClientCompanyController extends Controller
                     }
                 }
 
+                $validated = $request->validate(['industry_id' => ['required', 'integer', 'exists:industries,id']]);
+                $industryId = (int) $validated['industry_id'];
+
                 DB::beginTransaction();
                 try {
                     $timestamp = now();
@@ -1506,7 +1509,7 @@ class ClientCompanyController extends Controller
                         if ($existingRelation) {
                             // Update existing relation
                             $existingRelation->update([
-                                'industry_id' => $data['industry_id'],
+                                'industry_id' => $industryId,
                                 'updated_at' => $timestamp
                             ]);
                         } else {
@@ -1514,7 +1517,7 @@ class ClientCompanyController extends Controller
                             $relations[] = [
                                 'company_id' => $result->id,
                                 'user_id' => $user->id,
-                                'industry_id' => $data['industry_id'],
+                                'industry_id' => $industryId,
                                 'sector_id' => $sectorId,
                                 'created_at' => $timestamp,
                                 'updated_at' => $timestamp
@@ -1542,7 +1545,7 @@ class ClientCompanyController extends Controller
                         if ($existingRelation) {
                             // Update existing relation
                             $existingRelation->update([
-                                'industry_id' => $data['industry_id'],
+                                'industry_id' => $industryId,
                                 'updated_at' => $timestamp
                             ]);
                         } else {
@@ -1550,7 +1553,7 @@ class ClientCompanyController extends Controller
                             $relations[] = [
                                 'company_id' => $result->id,
                                 'user_id' => $user->id,
-                                'industry_id' => $data['industry_id'],
+                                'industry_id' => $industryId,
                                 'technology_id' => $techId,
                                 'created_at' => $timestamp,
                                 'updated_at' => $timestamp
