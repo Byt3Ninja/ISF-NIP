@@ -762,7 +762,7 @@ class MentorshipTaskController extends Controller
 				}
 			}
 			if ($result) {
-				return redirect(route('mentorshipTasks.index', ['mentorship_id' => $request->mentorship_request_id]))->with(['message' => 'StoredSuccessfully']);
+				return redirect(route('mentorshipTasks.index', ['mentorship_id' => (int) $mentorship->id]))->with(['message' => 'StoredSuccessfully']);
 			} else {
 				return back()->withInput()->with(['message2' => 'FailedStore']);
 			}
