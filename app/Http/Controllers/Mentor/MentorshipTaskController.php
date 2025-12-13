@@ -565,13 +565,32 @@ class MentorshipTaskController extends Controller
 		]);
 		$id = $request->mentorship_request_id;
 		$task = MentorshipTask::where('mentorship_request_id', $id)->find($request->task_id);
+
 		if (empty($task)) {
-			$output = [
-				'message' => 'Task could not be found',
-				'errors' => ['task_id' => 'Task could not be found']
-			];
-			return response()->json($output, 422);
+				$output = [
+					'message' => 'Task could not be found',
+					'errors' => ['task_id' => 'Task could not be found']
+				];
+				return response()->json($output, 422);
 		}
+
+		// Normalize comment text
+    $commentText = trim($request->comment);
+
+    // Prevent duplicate comment (same user, same task, same text)
+    $exists = MentorshipTaskComment::where('mentorship_task_id', $request->task_id)
+        ->where('user_id', $user->id)
+        ->where('comment', $commentText)
+        ->exists();
+
+    if ($exists) {
+        return response()->json([
+            'status' => false,
+            'title' => 'Duplicate',
+            'message' => __('mentor.mentorshipTasks.comment_already_exists'),
+        ], 409);
+    }
+
 		$comment = new MentorshipTaskComment;
 		$comment->mentorship_task_id = $request->task_id;
 		$comment->user_id = $user->id;
