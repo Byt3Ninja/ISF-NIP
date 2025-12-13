@@ -231,4 +231,7 @@ return [
 	'ZOOM_CLIENT_ID_Placeholder' => 'أدخل معرف عميل Zoom',
 	'ZOOM_CLIENT_SECRET_Placeholder' => 'أدخل سرية عميل Zoom',
 	'ZOOM_ACCOUNT_ID_Placeholder' => 'أدخل معرف حساب Zoom',
+	'add_new_tag' => 'أضف وسم جديد',
+	'edit_tag' => 'تعديل الوسم',
+	'tag_name' => 'اسم الوسم',
 ];
