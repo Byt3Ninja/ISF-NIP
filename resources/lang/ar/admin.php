@@ -2607,4 +2607,5 @@ return [
 	'surveys_results' => 'نتائج الاستبيانات',
 	'mentors_assigned_successfully' => 'تم تعيين المرشدين بنجاح',
 	'updated_at' => 'تم التحديث في',
+	'roleJudge' => 'محكم',
 ];

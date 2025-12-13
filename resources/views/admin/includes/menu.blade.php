@@ -532,7 +532,7 @@
       <!-- Mentorship Nav Item -->
       @if ($_user->ableTo('mentorships.sessions_list', $permissions))
         <li class="{{ Request::is('dashboard/mentorship/sessions*') ? 'active' : '' }} menu-item">
-          <a href="{{ route('mentorships.sessions_list') }}" class="menu-link">
+          <a href="{{ route('mentorships.sessions_list') }}?show=all" class="menu-link">
             <i class="menu-icon tf-icons ti ti-bulb"></i>
             <div>{{ __('admin.Mentorship Sessions') }}</div>
           </a>
