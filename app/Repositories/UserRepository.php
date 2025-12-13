@@ -122,7 +122,7 @@ class UserRepository
                         $user->img_url = $img_url;
                     }
 
-                if ($data['role'] == "6" && !auth()?->user()?->hasRole('admin')) {
+                if ($data['role'] == "mentor" && !auth()?->user()?->hasRole('admin')) {
                
                     UsersBio::create([
                         'user_id' => $user->id,
@@ -149,7 +149,7 @@ class UserRepository
                     $user->title_en = $data['title_en'];
 
                 }
-                    $role = Role::find($data['role']);
+                    $role = Role::where('name', $data['role'])->first();
                     DB::table('model_has_roles')->insert([
                         'role_id' => $role->id,
                         'model_type' => User::class,

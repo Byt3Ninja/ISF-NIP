@@ -32,7 +32,7 @@ class StoreUserRequest extends FormRequest
             'phone' => 'required|unique:users,phone',
             'email' => 'email|required|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|exists:roles,id',
+            'role' => 'required|exists:roles,name',
             'gender'=>'required|in:Male,Female',
             'img_url' => 'nullable|image|mimes:jpeg,bmp,png,jpg,gif',
             'country_code' => 'required',
@@ -44,7 +44,7 @@ class StoreUserRequest extends FormRequest
         ];
 
         // Apply mentor-required rules ONLY if role is Mentor (ID 6)
-        if ($this->input('role') == '6') {
+        if ($this->input('role') == 'Mentor') {
             $rules['bio_en']      = 'required|string';
             $rules['Linkedin']    = 'required|url';
             $rules['expertise']   = 'required|array|min:1';

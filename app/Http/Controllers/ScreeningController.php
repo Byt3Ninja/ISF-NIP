@@ -622,6 +622,7 @@ class ScreeningController extends Controller
 			'criteria.*.subCriteria.*.id' => 'nullable|sometimes|integer|exists:screening_evaluation_criteria,id',
 			'criteria.*.subCriteria.*.name' => 'required_if:action,publish|nullable|string|max:255',
 			'criteria.*.subCriteria.*.weight' => 'required_if:action,publish|numeric|between:0,1',
+			'screening_guidelines' => 'nullable|string|max:5000',
 		]);
 
 		$id = $request->stepId;
@@ -659,6 +660,12 @@ class ScreeningController extends Controller
 			$evaluation->save();
 			
 		}
+
+		// Save screening guidelines
+		if ($request->has('screening_guidelines')) {
+			$evaluation->screening_guidelines = $request->screening_guidelines;
+			$evaluation->save();
+		}
 		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
 		$current_status = strtolower( $evaluationForm->status );
 		if( $current_status == 'published' ) { return response()->json(['status' => false, 'message' => __('You can not make any changes on a published evaluation')], 200); }
@@ -674,7 +681,8 @@ class ScreeningController extends Controller
 			$allSeenCriteriaIds = [];
 			$allSeenSubCriteriaIds = [];
 			// Compare request criteria
-			foreach ($request->criteria as $reqCriterion)
+			$criteria = $request->criteria ?? [];
+			foreach ($criteria as $reqCriterion)
 			{
 				$reqId = $reqCriterion['id'];
 				if (!$reqId)

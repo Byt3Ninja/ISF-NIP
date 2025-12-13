@@ -175,9 +175,10 @@
 					</div>
 					<div class="bg-white rounded border border-light p-2 p-md-4">
 						<h4 id="task-details-name" class="fw-medium">{{ __('admin.Task_Name') }}</h4>
-						<div class="bg-label-secondary p-2 rounded mb-3">
+						<div class="bg-label-secondary p-2 rounded mb-3" style="max-width: 100%;">
 							<h6 class="fw-semibold mb-1">{{ __('admin.Description') }}</h6>
-							<p id="task-details-contents" class="text-secondary"></p>
+							<p id="task-details-contents" class="text-secondary" style="white-space: normal; word-break: break-word; overflow-wrap: break-word;">
+							</p>
 						</div>
 						<div
 							class="mb-3 w-100 d-flex flex-wrap flex-md-nowrap justify-content-between gap-2 align-items-center pb-2 border-bottom">
@@ -931,7 +932,7 @@
 												<i class="ti ti-trash text-danger ti-16px"></i>
 											</div>
 										</div>
-										<div class="text-muted mb-0 text-wrap px-2 text-${lang == 'ar' ? 'right' : 'left'}" style="overflow-wrap: break-word;">
+										<div class="comment-text text-muted mb-0 text-wrap px-2 text-${lang == 'ar' ? 'right' : 'left'}" style="overflow-wrap: break-word;">
 											${comment.comment}
 										</div>
 									</div>
@@ -1533,9 +1534,27 @@
 			e.preventDefault();
 			const commentInput = document.getElementById('commentInput');
 			const commentList = document.getElementById('commentList');
+
+			const allComments = commentList.querySelectorAll('div .comment-text');
+			
 			const commentText = commentInput.value.trim();
-			if( commentText )
-			{
+
+			let alreadyExists = false;
+			
+			if (commentText) {
+				allComments.forEach(comment => {
+					console.log('comment.textContent.trim()', comment.textContent.trim());
+					if (comment.textContent.trim() === commentText.trim()) {
+						alreadyExists = true;
+					}
+				});
+
+				if (alreadyExists) {
+					commentInput.value = '';
+					releaseWarningAlert({ message: "{{ __('mentor.mentorshipTasks.comment_already_exists') }}" });
+					return;
+				}
+
 				let task_id = $(this).attr('data-task');
 				var send_data = {
 					_token: "{{ csrf_token() }}",
@@ -1567,7 +1586,7 @@
 										<i class="ti ti-trash text-danger ti-16px"></i>
 									</div>
 								</div>
-								<div class="text-muted mb-0 text-wrap px-2 text-${lang == 'ar' ? 'right' : 'left'}" style="overflow-wrap: break-word;">
+								<div class="comment-text text-muted mb-0 text-wrap px-2 text-${lang == 'ar' ? 'right' : 'left'}" style="overflow-wrap: break-word;">
 									${commentText}
 								</div>
 							`;

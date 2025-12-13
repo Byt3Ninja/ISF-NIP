@@ -159,19 +159,20 @@
                   @csrf
                   <div class="row">
                     <!-- Switch Role -->
-            
+       
                     @foreach($accountRoles as $key => $role)
+                   
                     <div class="col-6 mb-4">
                       <label for="{{$role}}Role" style="display: grid; place-items: center;" class="form-check custom-option custom-option-icon cursor-pointer">
                         <div class="d-flex align-items-center">
                           @if($role === 'Founder')
-                            <input name="role" class="form-check-input role-input" type="radio" value="8" id="{{$role}}Role" checked required />
+                            <input name="role" class="form-check-input role-input" type="radio" value="registered" id="{{$role}}Role" checked required />
                             <div class="form-check-label custom-option-content d-flex align-items-center">
                               <i class="ti ti-businessplan me-2"></i>
                               <span class="custom-option-title">{{ __('admin.'. $role) }}</span>
                             </div>
                           @else
-                            <input name="role" class="form-check-input role-input" type="radio" value="6" id="{{$role}}Role" required />
+                            <input name="role" class="form-check-input role-input" type="radio" value="mentor" id="{{$role}}Role" required />
                             <div class="form-check-label custom-option-content d-flex align-items-center">
                               <i class="ti ti-user me-2"></i>
                               <span class="custom-option-title">{{ __('admin.'. $role) }}</span>
@@ -190,6 +191,20 @@
                             <div class="alert alert-danger">
                               <ul>
                                 <li>{{ session('error') }} </li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      @endif
+
+                      @if ($errors->any())
+                        <div class="row">
+                          <div class="col-md-12">
+                            <div class="alert alert-danger">
+                              <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                  <li>{{ $error }}</li>
+                                @endforeach
                               </ul>
                             </div>
                           </div>
@@ -459,13 +474,13 @@
 <script>
 // Role-specific configuration
 const ROLE_CONFIG = {
-  '8': {
+  'registered': {
     name: 'founder',
     hash: '2521',
     type: '3',
     showMentorFields: false
   },
-  '6': {
+  'mentor': {
     name: 'mentor',
     hash: '2520',
     type: 'mentor',
