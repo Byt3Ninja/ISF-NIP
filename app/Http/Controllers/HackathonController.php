@@ -54,38 +54,68 @@ class HackathonController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $hackathons_query = "SELECT
-        c.id as 'c_id',
-        c.title as 'c_title',
-        c.description as 'c_description',
-        c.start as 'c_start_date',
-        c.end as 'c_end_date',
-        c.type as 'c_type',
-        c.img_url as 'c_img_url',
-        c.created_at as 'c_created_at',
-        c.updated_at as 'c_updated_at',
+        // $hackathons_query = "SELECT
+        // c.id as 'c_id',
+        // c.title as 'c_title',
+        // c.description as 'c_description',
+        // c.start as 'c_start_date',
+        // c.end as 'c_end_date',
+        // c.type as 'c_type',
+        // c.img_url as 'c_img_url',
+        // c.created_at as 'c_created_at',
+        // c.updated_at as 'c_updated_at',
       
-        o.id as 'o_id',
-        o.name_ar as 'o_name_ar',
-        o.name_en as 'o_name_en',
-        o.img_url as 'o_logo',
-        o.created_at as 'o_created_at',
-        o.updated_at as 'o_updated_at'
-        FROM 
-        cycles as c
-        LEFT JOIN organizations as o ON c.organization_id = o.id
-        WHERE c.type = 'Hackathon'
-        ";
-        if($request->searchHackathon != null){
-            $hackathons_query .= " AND c.title LIKE '%".$request->searchHackathon."%'";
-        }
-        if($user->organization_id != null){
-            $hackathons_query .= " AND c.organization_id = ".$user->organization_id;
-        }
+        // o.id as 'o_id',
+        // o.name_ar as 'o_name_ar',
+        // o.name_en as 'o_name_en',
+        // o.img_url as 'o_logo',
+        // o.created_at as 'o_created_at',
+        // o.updated_at as 'o_updated_at'
+        // FROM 
+        // cycles as c
+        // LEFT JOIN organizations as o ON c.organization_id = o.id
+        // WHERE c.type = 'Hackathon'
+        // ";
+        // if($request->searchHackathon != null){
+        //     $hackathons_query .= " AND c.title LIKE '%".$request->searchHackathon."%'";
+        // }
+        // if($user->organization_id != null){
+        //     $hackathons_query .= " AND c.organization_id = ".$user->organization_id;
+        // }
         
-        $hackathons_query .= "  ORDER BY c.start ASC";
-        $hackathons_raw = collect(DB::select($hackathons_query));
+        // $hackathons_query .= "  ORDER BY c.start ASC";
+        // $hackathons_raw = collect(DB::select($hackathons_query));
 
+        $hackathons_raw = DB::table('cycles as c')
+            ->select([
+                'c.id AS c_id',
+                'c.title AS c_title',
+                'c.description AS c_description',
+                'c.start AS c_start_date',
+                'c.end AS c_end_date',
+                'c.type AS c_type',
+                'c.img_url AS c_img_url',
+                'c.created_at AS c_created_at',
+                'c.updated_at AS c_updated_at',
+            
+                'o.id AS o_id',
+                'o.name_ar AS o_name_ar',
+                'o.name_en AS o_name_en',
+                'o.img_url AS o_logo',
+                'o.created_at AS o_created_at',
+                'o.updated_at AS o_updated_at',
+            ])
+            ->leftJoin('organizations as o', 'c.organization_id', '=', 'o.id')
+            ->where('c.type', 'Hackathon')
+            ->when($request->searchHackathon, function ($query, $searchHackathon) {
+                return $query->where('c.title', 'like', '%' . $searchHackathon . '%');
+            })
+            ->when($user->organization_id, function ($query) use ($user) {
+                return $query->where('c.organization_id', $user->organization_id);
+            })
+            ->orderBy('c.start', 'asc')
+        ->get();
+ 
         $hackathon_ids = $hackathons_raw->pluck('c_id')->toArray();
 
         $step = Step::where('stype', 1)->whereIn('cycle_id', $hackathons_raw->pluck('c_id'))->get();
