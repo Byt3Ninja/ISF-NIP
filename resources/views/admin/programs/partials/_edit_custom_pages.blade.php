@@ -161,7 +161,7 @@
 @push('scripts')
 <script>
         $(document).ready(function() {
-            $('.table').DataTable({
+            $('.custom-table').DataTable({
             paging: true,
             searching: true,
             ordering: true,
