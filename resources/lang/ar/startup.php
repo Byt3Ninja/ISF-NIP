@@ -112,6 +112,7 @@ return [
   // Profile Programs
   'totalMentorshipHours' => 'إجمالي ساعات الإرشاد',
   'totalTrainingHours' => 'إجمالي ساعات التدريب',
+  'avgScreening' => 'متوسط درجة الفحص',
   'avgFinalScreening' => 'متوسط درجة الفحص النهائي',
   'avgAttendanceRate' => 'متوسط معدل الحضور',
   'program_Name' => 'اسم البرنامج',
