@@ -1,3 +1,40 @@
+@php
+  $alumni = App\Almuni::where('company_id', auth()->user()->company->id)->get();
+$programs = collect();
+foreach ($alumni as $alumnus) {
+    if (!$alumnus->program) {
+        continue;
+    }
+    $programsRaw = json_decode($alumnus->program, true);
+    if (!is_array($programsRaw)) {
+        continue;
+    }
+    foreach ($programsRaw as $program) {
+
+        $programs->push((object) [
+            'id'     => $program['ID'] ?? null,
+            'name'   => $program['Program Name'] ?? '',
+            'cohort' => $program['Cohort'] ?? '',
+        ]);
+    }
+}
+$currentProgram = App\Cycle::where(
+    'id',
+    auth()->user()->company->cycle
+)->first();
+if ($currentProgram) {
+    $programs->push((object) [
+        'id'     => $currentProgram->id,
+        'name'   => $currentProgram->title ?? $currentProgram->name ?? '',
+        'cohort' => $currentProgram->cohort ?? '',
+    ]);
+}
+$programs = $programs
+    ->filter(fn ($p) => $p->id)
+    ->unique('id')
+    ->values();
+
+@endphp
 <div class="row">
   <!-- Milestone Cards Container -->
   <div id="milestones-container" class="col-12">
@@ -35,6 +72,7 @@
                 id="milestone-title-input" 
                 class="form-control milestone-title" 
                 placeholder="{{ __('admin.Milestone_Name') }}"
+                required
               />
               <div class="invalid-feedback milestone-title-error"></div>
             </div>
@@ -45,6 +83,7 @@
                 class="form-control milestone-description" 
                 rows="3"
                 placeholder="{{ __('admin.Description') }}"
+                required
               ></textarea>
               <div class="invalid-feedback milestone-description-error"></div>
             </div>
@@ -62,6 +101,52 @@
               />
               <div class="invalid-feedback milestone-completion-error"></div>
             </div>
+
+            <div class="mb-3">
+              <label for="milestone-status-select" class="form-label mb-1">
+                {{ $l == 'ar' ? ' الحالة ' : 'Status' }}
+              </label>
+              <select id="milestone-status-select" name="Milestone_Status" required class="form-select milestone-status">
+                <option value="not_started"> {{ __('startup.not_started') }} </option>
+                <option value="in_progress">{{ __('startup.in_progress') }}</option>
+                <option value="completed">{{ __('startup.completed') }}</option>
+                <option value="on_hold">{{ __('startup.on_hold') }}</option>
+              </select>
+              <div class="invalid-feedback milestone-status-error"></div>
+            </div>
+
+            <div class="mb-3">
+              <label for="milestone-date-input" class="form-label mb-1">
+                {{ $l == 'ar' ? '  ' : 'Milestone Date' }}
+              </label>
+              <input id="milestone-date-input" required class="form-control milestone-date" type="date" name="Milestone_Date" >
+              <div class="invalid-feedback milestone-date-error"></div>
+            </div>
+
+            <div class="mb-3">
+              <label for="milestone-visibility-select" class="form-label mb-1">
+                {{ $l == 'ar' ? '  ' : 'Milestone Visibility' }}
+              </label>
+              <select id="milestone-visibility-select" required name="Milestone_Visibility" class="form-select milestone-status">
+                <option value="public"> {{ __('startup.public') }} </option>
+                <option value="private">{{ __('startup.private') }}</option>
+              </select>
+              <div class="invalid-feedback milestone-status-error"></div>
+            </div>
+
+            <div class="mb-3">
+              <label for="milestone-Cohort-select" class="form-label mb-1">
+                {{ $l == 'ar' ? '  ' : 'Cohort' }}
+              </label>
+              <select id="milestone-Cohort-select" name="Cohort" class="form-select milestone-Cohort">
+               
+                @foreach ($programs as $cycle)
+                  <option value="{{ $cycle->id }}">{{ $cycle->name ." - ". $cycle->cohort }}</option>
+                @endforeach
+              </select>
+              <div class="invalid-feedback milestone-Cohort-error"></div>
+            </div>
+
             <div class="mb-3">
               <label for="milestone-documents-input" class="form-label mb-1">
                 {{ $l == 'ar' ? 'المستندات الداعمة' : 'Supporting Documents' }}
