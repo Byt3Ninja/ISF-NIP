@@ -267,7 +267,7 @@ class ClientCompanyController extends Controller
         }
         $programs = $programs->values()->all();
 
-        
+            
         return view('admin/clients/startup/company_profile', compact('company',
          'formTitle',
         'formData',
@@ -2080,6 +2080,7 @@ class ClientCompanyController extends Controller
 
     public function AddMileStone(Request $request, $id = null)
     {
+        dd($request->all());
         try {
             if (!$id) {
                 return response()->json([

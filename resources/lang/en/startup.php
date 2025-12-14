@@ -399,4 +399,9 @@ return [
   'mark_alumni_confirmation' => 'This action is irreversible. The startup will be graduated, and a snapshot of its information and participation records will be saved permanently.',
   'mark_alumni_success' => 'The startup has been marked as alumni.',
   'mark_alumni_error' => 'An error occurred while marking the startup as alumni.',
+  'not_started' => 'Not Started',
+  'in_progress' => 'In Progress',
+  'on_hold' => 'On Hold',
+  'private' => 'Private',
+  'public' => 'Public',
 ];
