@@ -267,7 +267,7 @@ class ClientCompanyController extends Controller
         }
         $programs = $programs->values()->all();
 
-        
+            
         return view('admin/clients/startup/company_profile', compact('company',
          'formTitle',
         'formData',
@@ -2080,6 +2080,7 @@ class ClientCompanyController extends Controller
 
     public function AddMileStone(Request $request, $id = null)
     {
+        dd($request->all());
         try {
             if (!$id) {
                 return response()->json([
@@ -2809,7 +2810,6 @@ class ClientCompanyController extends Controller
 
     public function addCompanyAlumni(Request $request, $id)
     {
-        
         try {
             $user = Auth::user();
             $company = Company::findOrFail($id);
@@ -2820,7 +2820,7 @@ class ClientCompanyController extends Controller
             $almuni->company_id = $id;
             $almuni->alumni = '1';
             $almuni->established_date = date('Y-m-d H:i:s');
-           
+
             //Relations Data
             $relations_data = $company_relations->map(function ($relation) {
                                     return [
@@ -2854,7 +2854,7 @@ class ClientCompanyController extends Controller
                 ];
             $almuni->basic_startup_information = json_encode($basic_startup_information);
 
-            
+
                 $team_leaders = Team_member::where('company_id', $id)
                     ->where('TeamMember', 'hackathon')
                     ->get();
@@ -2909,7 +2909,7 @@ class ClientCompanyController extends Controller
                         'Gender' => $employee->gender,
                         'Employment Type' => $employee->employment_type,
                         'Start Date' => $employee->hiring_date
-                        
+
                     ];
                 }
 
@@ -3228,10 +3228,10 @@ class ClientCompanyController extends Controller
 
                  // Training
                  $steps = Step::where('cycle_id', $company->cycledata->id)->get();
-                 
+
                 $startup_training = TrainingSession::whereIn('step_id', $steps->pluck('id'))
                     ->get();
-                  
+
                 $trainings = [];
                 // dd($startup_training[3]->attendance);
                 // dd($startup_training[3]->course->title);
@@ -3250,13 +3250,13 @@ class ClientCompanyController extends Controller
                 }
 
                 $almuni->training = json_encode($trainings);
-                    
+
                 $steps = Step::where('cycle_id', $company->cycledata->id)->get();
                 $startup_mentorship = MentorshipRequest::where('cycle_id', $company->cycledata->id)
                 ->where('approved', 'Yes')
                 ->where('user_id', $company->user->id)
                 ->get();
-                  
+
                 $mentorships = [];
                 // dd($startup_mentorship[3]);
                 // dd($startup_training[3]->course->title);
@@ -3275,12 +3275,12 @@ class ClientCompanyController extends Controller
                 }
 
                 $almuni->mentorship = json_encode($mentorships);
-        
 
-                
+
+
                 $startup_milestones = Milestone::where('company_id', $company->id)
                     ->get();
-                  
+
                 $milestones = [];
                 // dd($startup_mentorship[3]);
                 // dd($startup_training[3]->course->title);
@@ -3341,7 +3341,7 @@ class ClientCompanyController extends Controller
                     ];
                 }
 
-                
+
                 $almuni->quizzes = json_encode($quizzes);
 
                 $startup_surveys= Surveys::where('organization_id', $company->cycledata->organization_id)->get();
@@ -3359,7 +3359,7 @@ class ClientCompanyController extends Controller
                                 ];
                             });
                         })
-                        ->filter()  
+                        ->filter()
                         ->values();
                     $surveys[] = [
                         'Survey_ID' => $survey->id ?? '',
@@ -3367,12 +3367,12 @@ class ClientCompanyController extends Controller
                         'Survey_answers' => $answers ?? '',
                     ];
                 }
-                
+
                 $almuni->surveys = json_encode($surveys);
 
                 $startup_services= ServicesRequests::where('user_id', $company->user->id)->get();
                 $services = [];
-                
+
                 foreach ($startup_services as $service) {
                     $services[] = [
                         'Service_name' => $service->service->name_en ?? '',
@@ -3381,7 +3381,7 @@ class ClientCompanyController extends Controller
                         'Price' => $service->service->price ?? '',
                     ];
                 }
-               
+
                 $almuni->services = json_encode($services);
 
                 // $startup_formSubmissions= Formdata::where('user_id', $company->user->id)->get();
@@ -3465,7 +3465,7 @@ class ClientCompanyController extends Controller
                     return $item;
                 })->values();
                         // dd($data);
-                        
+
                         foreach ($data as $item) {
 
                             // كل answers عبارة عن Collection جوا Collection
@@ -3497,7 +3497,7 @@ class ClientCompanyController extends Controller
                                 ];
                             }
                         }
-             
+
                 $almuni->submitted_forms = json_encode($formSubmissions);
 
             $almuni->save();
@@ -3505,14 +3505,28 @@ class ClientCompanyController extends Controller
             // $company->step = null;
             // $company->cycle = null;
             // $company->save();
-           
-            return redirect()->back()->with('success', 'Startup Almuni Submitted Successfully');
+
+            // Check if AJAX request
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => __('startup.mark_alumni_success')
+                ], 200);
+            }
+
+            return redirect()->back()->with('success', __('startup.mark_alumni_success'));
         } catch (Exception $e) {
-            dd($e->getMessage());
-            Log::error('Error deleting employee: ' . $e->getMessage());
-            return response()->json([
-                'errors' => ['general' => ['An error occurred while deleting the employee.']]
-            ], 500);
+            Log::error('Error adding company to alumni: ' . $e->getMessage());
+
+            // Check if AJAX request
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('startup.mark_alumni_error') . ' (' . __('admin.Error') . ': ' . $e->getMessage() . ')'
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', __('startup.mark_alumni_error'));
         }
 
     }

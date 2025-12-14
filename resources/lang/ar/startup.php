@@ -112,6 +112,7 @@ return [
   // Profile Programs
   'totalMentorshipHours' => 'إجمالي ساعات الإرشاد',
   'totalTrainingHours' => 'إجمالي ساعات التدريب',
+  'avgScreening' => 'متوسط درجة الفحص',
   'avgFinalScreening' => 'متوسط درجة الفحص النهائي',
   'avgAttendanceRate' => 'متوسط معدل الحضور',
   'program_Name' => 'اسم البرنامج',
@@ -394,4 +395,14 @@ return [
   'Please_select_a_status' => ' يرجى اختيار حالة ',
   'milestone_date_required' => 'يرجى اختيار تاريخ المرحلة',
   'visibility_required' => ' يرجى اختيار خيار الظهور ',
+  'mark_alumni' => 'تحويل إلى خريج',
+  'already_alumni' => 'خريج بالفعل',
+  'mark_alumni_confirmation' => 'هذا الإجراء لا يمكن التراجع عنه. سيتم تخرج الشركة الناشئة وسيتم حفظ لقطة من معلوماتها وسجل مشاركاتها بشكل دائم.',
+  'mark_alumni_success' => 'تم تحويل الشركة الناشئة إلى خريج بنجاح.',
+  'mark_alumni_error' => 'حدث خطأ في تحويل الشركة الناشئة إلى خريج.',
+  'not_started' => 'لم يبدء',
+  'in_progress' => 'في التقدم',
+  'on_hold' => 'معلق',
+  'private' => ' خاص ',
+  'public' => ' عام ',
 ];
