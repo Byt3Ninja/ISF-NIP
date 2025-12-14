@@ -394,4 +394,9 @@ return [
   'Please_select_a_status' => ' Please select a status ',
   'milestone_date_required' => 'Please select the milestone date',
   'visibility_required' => ' Please select the visibility',
+  'mark_alumni' => 'Mark as Alumni',
+  'already_alumni' => 'Already Alumni',
+  'mark_alumni_confirmation' => 'This action is irreversible. The startup will be graduated, and a snapshot of its information and participation records will be saved permanently.',
+  'mark_alumni_success' => 'The startup has been marked as alumni.',
+  'mark_alumni_error' => 'An error occurred while marking the startup as alumni.',
 ];

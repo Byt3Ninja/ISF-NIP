@@ -2608,4 +2608,6 @@ return [
 	'mentors_assigned_successfully' => 'تم تعيين المرشدين بنجاح',
 	'updated_at' => 'تم التحديث في',
 	'roleJudge' => 'محكم',
+	'in' => 'في',
+	'success' => 'نجاح',
 ];
