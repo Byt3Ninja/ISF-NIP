@@ -55,7 +55,7 @@
             <p class="mb-0">{{ __('cycles.manage_startup_description2') }}</p>
           </div>
           <div class="card mb-6">
-            <div class="card-body overflow-x-hidden">
+            <div class="card-body overflow-x-hidden text-nowrap">
               <div class="d-flex flex-wrap flex-lg-nowrap justify-content-between align-items-lg-center">
                 <div class="form-group d-flex flex-column flex-lg-row align-items-lg-center gap-2 mb-6 mb-lg-0 me-lg-4">
                   <label class="form-label fs-6">{{ __('cycles.Select_Cycle') }}:</label>
