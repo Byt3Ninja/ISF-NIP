@@ -196,12 +196,12 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
 // ];
 
 // Static Summary Values
-$programsSummary = [
-  'totalMentorshipHours' => '42:30',
-  'totalTrainingHours'   => '56:15',
-  'avgFinalScreening'    => 85.0,
-  'avgAttendanceRate'    => 92.5,
-];
+// $programsSummary = [
+//   'totalMentorshipHours' => '42:30',
+//   'totalTrainingHours'   => '56:15',
+//   'avgFinalScreening'    => 85.0,
+//   'avgAttendanceRate'    => 92.5,
+// ];
 @endphp
 
 @section('content')

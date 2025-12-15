@@ -605,8 +605,8 @@ class MentorsController extends Controller
 				return $q->where('organization_id', $organization_id);
 			})->when($request->start_date && $request->end_date, function ($q) use ($request) {
 				// التأكد من أن التواريخ متوافقة مع التنسيق المناسب
-			$startDate = Carbon::parse($request->start_date)->startOfDay();
-            $endDate = Carbon::parse($request->end_date)->endOfDay();
+				$startDate = Carbon::parse($request->start_date)->startOfDay();
+				$endDate = Carbon::parse($request->end_date)->endOfDay();
 
 				// البحث باستخدام التاريخ من وإلى
 				return $q->whereBetween('zoom_date', [$startDate, $endDate]);

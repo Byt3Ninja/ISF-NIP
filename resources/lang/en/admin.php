@@ -2553,4 +2553,9 @@ return [
 	'quizzes_results' => 'Quizzes Results',
 	'surveys_results' => 'Surveys Results',
 	'mentors_assigned_successfully' => 'Mentors assigned successfully',
+	'updated_at' => 'Updated At',
+	'roleJudge' => 'Judge',
+	'in' => 'in',
+	'success' => 'Success',
+	'Ongoing' => 'Ongoing',
 ];

@@ -234,38 +234,64 @@ class ClientCompanyController extends Controller
         $almunies = Almuni::where('company_id', $company->id)->get();
         foreach ($almunies as $almuni) {
             $programsRaw = json_decode($almuni->program ?? '[]');
+            // dd($programsRaw);
             if (!is_array($programsRaw)) continue;
             foreach ($programsRaw as $p) {
                 if (is_array($p)) $p = (object)$p;
                 $orgObj = null;
                 if (isset($p->Organization)) {
                     if (is_object($p->Organization)) {
-                        $orgObj = (object)[ 'name' => $p->Organization->name ?? null ];
+                        $orgObj = (object)[ 'name' => $p->Organization->name_en0 ?? null ];
                     } else {
                         $orgObj = (object)[ 'name' => $p->Organization ];
                     }
-                } elseif (isset($p->{'Organization Name'})) {
+                    
+                } elseif (isset($p->{'Organization_Name'})) {
                     if (is_object($p->{'Organization Name'})) {
-                        $orgObj = (object)[ 'name' => $p->{'Organization Name'}->name ?? null ];
+                        $orgObj = (object)[ 'name' => $p->{'Organization_Name'}->name ?? null ];
                     } else {
-                        $orgObj = (object)[ 'name' => $p->{'Organization Name'} ];
+                        $orgObj = (object)[ 'name' => $p->{'Organization_Name'} ];
                     }
                 } else {
                     $orgObj = (object)[ 'name' => null ];
                 }
                 $programs->push((object)[
                     'id' => $p->ID ?? ($programs->count() + 1),
-                    'name' => $p->{'Program Name'} ?? $p->Program_Name ?? $p->title ?? null,
+                    'name' => $p->{'Program_Name'} ?? $p->Program_Name ?? $p->title ?? null,
                     'organization' => $orgObj,
-                    'cohort' => (object)[ 'name' => $p->Cohort ?? $p->{'Cohort Name'} ?? null ],
+                    'cohort' => (object)[ 'name' => $p->Cohort ?? $p->{'Cohort_Name'} ?? null ],
                     'start_date' => !empty($p->Start_Date) ? Carbon::parse($p->Start_Date) : null,
                     'completion_date' => !empty($p->Completion_Date) ? Carbon::parse($p->Completion_Date) : null,
                     'final_screening_score' => $p->Final_Screening_Score ?? null,
                     'status' => $p->Status ?? 'completed',
                 ]);
             }
+            $mentorshipToSum = collect(json_decode($almuni->mentorship, true));
+            $trainingToSum = collect(json_decode($almuni->training, true));
+            $finalScreenAvg = collect(json_decode($almuni->final_screening, true));
         }
+        // dd($finalScreenAvg);
         $programs = $programs->values()->all();
+        $curentCycle = $company->cycledata->mentorshipRequests->where('user_id', $company->user->id)->sum('period');
+        $totalMinutes = collect($mentorshipToSum)->sum('duration')+$curentCycle;
+        $hours   = intdiv($totalMinutes, 60);
+        $minutes = $totalMinutes % 60;
+        $totalMentorshipHours = sprintf('%02d:%02d', $hours, $minutes);
+        // Training
+        $curentCycleTraining = $company->cycledata->trainingSessions->where('user_id', $company->user->id)->sum('duration');
+        $totalMinutesTraining = collect($trainingToSum)->sum('duration')+$curentCycleTraining;
+        $hoursTraining   = intdiv($totalMinutesTraining, 60);
+        $minutesTraining = $totalMinutesTraining % 60;
+        $totalMentorshipHoursTraining = sprintf('%02d:%02d', $hoursTraining, $minutesTraining);
+        
+
+
+        $programsSummary = [
+            'totalMentorshipHours' => $totalMentorshipHours,
+            'totalTrainingHours'   => $totalMentorshipHoursTraining,
+            'avgFinalScreening'    => 85.0,
+            'avgAttendanceRate'    => 92.5,
+        ];
 
         
         return view('admin/clients/startup/company_profile', compact('company',
@@ -290,7 +316,8 @@ class ClientCompanyController extends Controller
         'growthSinceFirstRecord', 
         'avgMonthlyGrowth',
         'compoundAnnualGrowthRate', 
-        'programs'));
+        'programs',
+        'programsSummary',));
         // } catch (Exception $e) {
         //     //log what happend
         //     Log::channel('system_exceptions')->info('Exceptions:', [$e]);
@@ -2077,6 +2104,7 @@ class ClientCompanyController extends Controller
 
     public function AddMileStone(Request $request, $id = null)
     {
+        
         try {
             if (!$id) {
                 return response()->json([
@@ -2883,7 +2911,7 @@ class ClientCompanyController extends Controller
                         'Country' => $company->country->name_en ?? '',
                         'Email' => $founder->Email,
                         'Phone_Number' => $founder->Phone,
-                        'LinkedIn Profile' => $founder->LinkedIn
+                        'LinkedIn_Profile' => $founder->LinkedIn
                     ];
                 }
 
@@ -2904,7 +2932,7 @@ class ClientCompanyController extends Controller
                         'Phone_Number' => $employee->Phone,
                         'Job Title' => $employee->RoleShereholder,
                         'Gender' => $employee->gender,
-                        'Employment Type' => $employee->employment_type,
+                        'Employment_Type' => $employee->employment_type,
                         'Start Date' => $employee->hiring_date
                         
                     ];
@@ -2926,7 +2954,7 @@ class ClientCompanyController extends Controller
                         'Email' => $shareholder->Email,
                         'Phone_Number' => $shareholder->Phone,
                         'Role' => $shareholder->RoleShereholder,
-                        'Ownership Percentage' => $shareholder->PresentagShereholder
+                        'Ownership_Percentage' => $shareholder->PresentagShereholder
                     ];
                 }
 
@@ -2956,29 +2984,29 @@ class ClientCompanyController extends Controller
 
 
                     $pitch_deck[] = [
-                        'pitch deck' => $company->pitch_deck ?? '',
-                        'pitch deck video' => $company->pitch_deck_video ?? '',
-                        'pitch deck description' => $company->pitch_deck_description ?? '',
-                        'pitch deck summary' => $company->pitch_deck_summary ?? '',
+                        'pitch_deck' => $company->pitch_deck ?? '',
+                        'pitch_deck_video' => $company->pitch_deck_video ?? '',
+                        'pitch_deck_description' => $company->pitch_deck_description ?? '',
+                        'pitch_deck_summary' => $company->pitch_deck_summary ?? '',
                     ];
                 $almuni->pitch_deck = json_encode($pitch_deck);
 
 
                 $legal_information[] = [
                         'Registered' => $company->Commercial_Register  ? 'Registered' : 'Not Registered',
-                        'Commercial Register' => $company->Commercial_Register ?? '',
-                        'Tax Card' => $company->Tax_Card ?? '',
-                        'Country Register id' => $company->Country_Register_id ?? '',
+                        'Commercial_Register' => $company->Commercial_Register ?? '',
+                        'Tax_Card' => $company->Tax_Card ?? '',
+                        'Country_Register_id' => $company->Country_Register_id ?? '',
                     ];
                 $almuni->legal_information = json_encode($legal_information);
 
                     $cycle[] = [
-                        'Program Name' => $company->cycledata->title ?? '',
+                        'Program_Name' => $company->cycledata->title ?? '',
                         'ID' =>  $company->cycledata->id ?? '',
                         'Organization' =>  $company->cycledata->organization ?? '',
                         'Cohort' =>  $company->cycledata->cohort ?? '',
-                        'Start Date' => $company->cycledata->start->format('Y-m-d H:i') ?? '',
-                        'Completion Date' => $company->cycledata->end->format('Y-m-d H:i') ?? '',
+                        'Start_Date' => $company->cycledata->start->format('Y-m-d H:i') ?? '',
+                        'Completion_Date' => $company->cycledata->end->format('Y-m-d H:i') ?? '',
                         'Type' => $company->cycledata->type ?? '',
                     ];
                 $almuni->program = json_encode($cycle);
@@ -3247,24 +3275,22 @@ class ClientCompanyController extends Controller
                 }
 
                 $almuni->training = json_encode($trainings);
-                    
-                $steps = Step::where('cycle_id', $company->cycledata->id)->get();
+
+                // $steps = Step::where('cycle_id', $company->cycledata->id)->get();
                 $startup_mentorship = MentorshipRequest::where('cycle_id', $company->cycledata->id)
                 ->where('approved', 'Yes')
                 ->where('user_id', $company->user->id)
                 ->get();
                   
                 $mentorships = [];
-                // dd($startup_mentorship[3]);
+                // dd($startup_mentorship[3]->period);
                 // dd($startup_training[3]->course->title);
                 foreach ($startup_mentorship as $mentorship) {
                     $mentorships[] = [
                         'mentor_name' => $mentorship->mentor->first_name_en ." ". $mentorship->mentor->last_name_en,
                         'mentor_ID' => $mentorship->mentor->id ?? '',
-                        // 'step_name' => $training->course->id ?? '',
-                        // 'step_ID' => $training->course->title ?? '',
                         'date' => $mentorship->zoom_date->format('Y-m-d H:i') ?? '',
-                        'duration' => $mentorship->duration,
+                        'duration' => $mentorship->period,
                         'attended' => $mentorship->done == '1' ? 'Attended' : 'Not Attended',
                         'rating' => $mentorship->rating,
                         'comments' => $mentorship->rate_comment,
