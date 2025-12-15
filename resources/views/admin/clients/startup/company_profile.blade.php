@@ -148,13 +148,13 @@ $env = env('APP_ENV');
 
 $pills = 
   $env == 'dev' 
-    ? ['overview', 'milestones', 'team', 'pitch_deck', 'programs_summary']
-    : ['overview', 'milestones', 'team', 'pitch_deck'];
+    ? ['overview', 'milestones', 'team', 'pitch_deck', 'programs_summary', 'financial_report']
+    : ['overview', 'milestones', 'team', 'pitch_deck', 'financial_report'];
 
   $pillsIcons = 
     $env == 'dev' 
-      ? ['briefcase', 'target', 'users', 'file-text', 'components']
-      : ['briefcase', 'target', 'users', 'file-text'];
+      ? ['briefcase', 'target', 'users', 'file-text', 'components', 'database-dollar']
+      : ['briefcase', 'target', 'users', 'file-text', 'database-dollar'];
 
 if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('registered') && $company?->id === $_user?->company_id ) )
 {
@@ -268,7 +268,7 @@ $programsSummary = [
 
     @include('admin.clients.startup.partials._startup_info')
     
-    <nav class="nav-align-top mb-6">
+    <nav class="nav-align-top mb-8">
       <ul class="nav nav-pills flex-column flex-md-row gap-2 gap-lg-0" role="tablist">
         @foreach ($pills as $key => $pill)
           <li class="nav-item">
@@ -323,6 +323,11 @@ $programsSummary = [
       <!-- Programs Section -->
       <section class="tab-pane fade" id="programs_summary" role="tabpanel" aria-labelledby="programs-summery-tab">
         @include('admin.clients.startup.partials._startup_programs')
+      </section>
+      
+      <!-- Financial Section -->
+      <section class="tab-pane fade" id="financial_report" role="tabpanel" aria-labelledby="financial-report-tab">
+        @include('admin.clients.startup.partials._startup_financial_report')
       </section>
     </div>
     {{-- <section class="mt-6 px-4">

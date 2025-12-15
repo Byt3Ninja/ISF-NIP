@@ -14,9 +14,9 @@
 				@php
 					$tabs = [
 						['title' => __('cycles.All requests'), 'show' => 'all', 'icon' => 'bulb'],
+            ['title' => __('cycles.New requests only'), 'show' => '', 'icon' => 'brand-speedtest'],
 						['title' => __('cycles.approved requests'), 'show' => 'approved', 'icon' => 'circle-check'],
             ['title' => __('cycles.disapproved requests'), 'show' => 'disapproved', 'icon' => 'playstation-x'],
-            ['title' => __('cycles.New requests only'), 'show' => '', 'icon' => 'brand-speedtest'],
 					]
 				@endphp
 				<ul class="nav nav-pills flex-column flex-sm-row gap-2 gap-lg-0">
