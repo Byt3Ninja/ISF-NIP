@@ -532,7 +532,7 @@
       <!-- Mentorship Nav Item -->
       @if ($_user->ableTo('mentorships.sessions_list', $permissions))
         <li class="{{ Request::is('dashboard/mentorship/sessions*') ? 'active' : '' }} menu-item">
-          <a href="{{ route('mentorships.sessions_list') }}" class="menu-link">
+          <a href="{{ route('mentorships.sessions_list') }}?show=all" class="menu-link">
             <i class="menu-icon tf-icons ti ti-bulb"></i>
             <div>{{ __('admin.Mentorship Sessions') }}</div>
           </a>
@@ -839,13 +839,19 @@
      
   
     @if ($_user->hasAnyRole('Admin'))
-      <li class="{{ Request::is('dashboard/settings*') ? 'active' : '' }} menu-item">
+      <li 
+        class="{{ 
+          Request::is('dashboard/settings*', '*importer*', '*currencies*', '*Tags*', '*Category*', '*subcategories*', '*Labels*', '*queue-jobs*', '*industry-settings*', '*expertise-settings*', '*stages*')
+          ? 'sidebar-group-active open' 
+          : '' 
+        }} menu-item"
+      >
         <a class="menu-link menu-toggle">
           <i class="menu-icon tf-icons ti ti-settings"></i>
           <div>{{ __('admin.settings') }}</div>
         </a>
         <ul class="menu-sub">
-          <li class="{{ Request::is('*Tags') ? 'active' : '' }} menu-item">
+          <li class="{{ Request::is('dashboard/settings*') ? 'active' : '' }} menu-item">
             <a href="/dashboard/settings" class="menu-link">
               <i class="menu-livicon" data-icon="globe"></i>
               <div>{{ __('admin.settings') }}</div>

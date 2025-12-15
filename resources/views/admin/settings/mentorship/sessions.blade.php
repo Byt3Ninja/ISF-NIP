@@ -9,6 +9,29 @@
   <!-- BEGIN: Content-->
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
+      <!-- Navigation Tabs -->
+			<nav class="nav-align-top mb-6">
+				@php
+					$tabs = [
+						['title' => __('cycles.All requests'), 'show' => 'all', 'icon' => 'bulb'],
+            ['title' => __('cycles.New requests only'), 'show' => '', 'icon' => 'brand-speedtest'],
+						['title' => __('cycles.approved requests'), 'show' => 'approved', 'icon' => 'circle-check'],
+            ['title' => __('cycles.disapproved requests'), 'show' => 'disapproved', 'icon' => 'playstation-x'],
+					]
+				@endphp
+				<ul class="nav nav-pills flex-column flex-sm-row gap-2 gap-lg-0">
+					@foreach($tabs as $tab)
+						<li class="nav-item">
+							<a href="/dashboard/mentorship/sessions?show={{ $tab['show'] }}" class="nav-link {{ Request::get('show') == $tab['show'] ? 'active' : '' }}">
+								<i class="ti ti-{{ $tab['icon'] }} me-2"></i>
+								{{ $tab['title'] }}
+							</a>
+						</li>
+					@endforeach
+				</ul>
+			</nav>
+			<!--/ Navigation Tabs -->
+
       <div class="content-body">
         <section id="alerts">
           @if (session()->has('message'))
@@ -28,8 +51,8 @@
         <section class="row">
           <div class="col-12">
             <div class="card">
-              <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-center border-bottom">
-                <h5 class="card-title mb-0 text-capitalize">
+              <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center border-bottom">
+                <h5 class="card-title mb-6 mb-md-0 text-capitalize">
                   {{ __('cycles.Mentorship Sessions') }}
                   @if (request()->show == 'all') 
                     ( {{ __('cycles.All requests') }} )

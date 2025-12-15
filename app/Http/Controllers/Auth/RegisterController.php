@@ -78,7 +78,6 @@ class RegisterController extends Controller
     protected function create(array $data)
     {
 
-
        $user= $this->userService->store($data);
     
          return $user['data'];

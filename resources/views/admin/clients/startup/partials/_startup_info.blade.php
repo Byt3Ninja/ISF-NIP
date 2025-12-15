@@ -1,4 +1,4 @@
-<section class="mb-6">
+<section class="mb-8">
   <!-- Company Info Card -->
   <div class="card">
     <div class="card-body">

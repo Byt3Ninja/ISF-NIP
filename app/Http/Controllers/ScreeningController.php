@@ -338,63 +338,53 @@ class ScreeningController extends Controller
 
 	public function changestep(Request $request)
 	{
-		
-		$approved = $by = null;
-		$data = [];
-		$company = Company::where('id', $request->company)->first();
-		if ($request->step == "0") {
-			$by = Auth::id();
-			$data['new_step'] = 'Disapproved';
-		} else {
-			$cstep = Step::findOrFail($request->step);
-			
-			
+		$companies = is_array($request->company) ? $request->company : [$request->company];
+		$successCount = 0;
+		$totalCount = count($companies);
+
+		foreach ($companies as $companyId) {
+			$approved = $by = null;
+			$data = [];
+			$company = Company::where('id', $companyId)->first();
+
+			if (!$company) {
+				continue; // Skip if company not found
+			}
+
+			if ($request->step == "0") {
+				$by = Auth::id();
+				$data['new_step'] = 'Disapproved';
+			} else {
+				$cstep = Step::findOrFail($request->step);
 				$approved = 1;
 				$by = Auth::id();
 				$data['new_step'] = $cstep?->title;
-			
-		}
-		$data['last_step'] = null;
-		if( !empty( $company->step ) )
-		{
-			$lastStep = Step::find($company->step);
-			$data['last_step'] = $lastStep ? $lastStep->title : null;
-		}
-		
-		if( $request->step == "0" ) { $update = $company->update(['cycle' => null, 'step' => null, 'approved' => null, 'approved_by' => $by]); }
-		if( $request->step != "0" ) {$update = $company->update(['step' => $request->step, 'approved' => $approved, 'approved_by' => $by]); }
+			}
 
-		
-			/// notify Company Owner via Mail
-			SendChangeCycleNotificationJob::dispatch($request->company, $request->step, $data['last_step'], $data['new_step']);
-			
-			// $company_owner = $company->user;
-			// $data['owner_name_en'] = $company_owner->first_name_en . " " . $company_owner->last_name_en;
-			// $data['owner_name_ar'] = $company_owner->first_name_ar . " " . $company_owner->last_name_ar;
-			// $data['company_name_ar'] = $company_owner->company->name_ar;
-			// $data['company_name_en'] = $company_owner->company->name_en;
-			// $data['organization_name_ar'] = $cstep->cycle->organization->name_ar ?? null;
-			// $data['organization_name_en'] = $cstep->cycle->organization->name_en ?? null;
-			// $data['emailCompany'] = $company_owner->email;
-			// 	if( $request->step != "0" ){$data['status'] = 'in';}else{ $data['status'] = 'out'; }
-			// // Broadcast Event //
-			// broadcast(new ChangeStep($data));
-		
-			// $recipients = User::role("Registered")->where('email', $company_owner->email)->get();
-			// // Notify all recipients
-			// if( !in_array(env('APP_ENV', 'local'), ['local']) ){
-			// 	try {
-			// 		foreach( $recipients as $recipient ) {
-			// 			$recipient->notify(new ChangeCycle($data));
-			// 		}
-			// 	} catch (\Throwable $th) {
-			// 		// throw $th;
-			// 	}
-			// }
-		
+			$data['last_step'] = null;
+			if (!empty($company->step)) {
+				$lastStep = Step::find($company->step);
+				$data['last_step'] = $lastStep ? $lastStep->title : null;
+			}
+
+			if ($request->step == "0") {
+				$update = $company->update(['cycle' => null, 'step' => null, 'approved' => null, 'approved_by' => $by]);
+			} else {
+				$update = $company->update(['step' => $request->step, 'approved' => $approved, 'approved_by' => $by]);
+			}
+
+			if ($update) {
+				$successCount++;
+				/// notify Company Owner via Mail
+				SendChangeCycleNotificationJob::dispatch($companyId, $request->step, $data['last_step'], $data['new_step']);
+			}
+		}
+
 		/// End of mail send
-		if ($update) {
+		if ($successCount === $totalCount) {
 			return response()->json(['state' => 'success'], 200);
+		} elseif ($successCount > 0) {
+			return response()->json(['state' => 'partial', 'message' => "Updated {$successCount} out of {$totalCount} companies"], 200);
 		} else {
 			return response()->json(['state' => 'failed'], 500);
 		}
@@ -622,6 +612,7 @@ class ScreeningController extends Controller
 			'criteria.*.subCriteria.*.id' => 'nullable|sometimes|integer|exists:screening_evaluation_criteria,id',
 			'criteria.*.subCriteria.*.name' => 'required_if:action,publish|nullable|string|max:255',
 			'criteria.*.subCriteria.*.weight' => 'required_if:action,publish|numeric|between:0,1',
+			'screening_guidelines' => 'nullable|string|max:5000',
 		]);
 
 		$id = $request->stepId;
@@ -659,6 +650,12 @@ class ScreeningController extends Controller
 			$evaluation->save();
 			
 		}
+
+		// Save screening guidelines
+		if ($request->has('screening_guidelines')) {
+			$evaluation->screening_guidelines = $request->screening_guidelines;
+			$evaluation->save();
+		}
 		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
 		$current_status = strtolower( $evaluationForm->status );
 		if( $current_status == 'published' ) { return response()->json(['status' => false, 'message' => __('You can not make any changes on a published evaluation')], 200); }
@@ -674,7 +671,8 @@ class ScreeningController extends Controller
 			$allSeenCriteriaIds = [];
 			$allSeenSubCriteriaIds = [];
 			// Compare request criteria
-			foreach ($request->criteria as $reqCriterion)
+			$criteria = $request->criteria ?? [];
+			foreach ($criteria as $reqCriterion)
 			{
 				$reqId = $reqCriterion['id'];
 				if (!$reqId)

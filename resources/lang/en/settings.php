@@ -228,4 +228,7 @@ return [
 	'ZOOM_CLIENT_ID_Placeholder' => 'Enter Zoom Client ID',
 	'ZOOM_CLIENT_SECRET_Placeholder' => 'Enter Zoom Client Secret',
 	'ZOOM_ACCOUNT_ID_Placeholder' => 'Enter Zoom Account ID',
+	'add_new_tag' => 'Add New Tag',
+	'edit_tag' => 'Edit Tag',
+	'tag_name' => 'Tag Name',
 ];
