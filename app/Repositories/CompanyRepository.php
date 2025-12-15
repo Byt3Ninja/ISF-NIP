@@ -1,6 +1,7 @@
 <?php
 namespace App\Repositories;
 
+use App\Almuni;
 use App\Cycle;
 use App\Company;
 use App\Milestone;
@@ -53,6 +54,22 @@ class CompanyRepository
             } else {
                 $query->whereHas('sectoR', function ($q) use ($filters, $locale) {
                     $q->where("name_{$locale}", 'like', "%{$filters['sector']}%");
+                });
+            }
+        }
+        
+        if (!empty($filters['is_alumni'])) {
+            if($filters['is_alumni'] == 1){
+                $query->whereIn('id', function ($q) {
+                    $q->select('company_id')
+                    ->from('alumni')
+                    ->whereNotNull('company_id');
+                });
+            }elseif($filters['is_alumni'] == 2){
+                $query->whereNotIn('id', function ($q) {
+                    $q->select('company_id')
+                    ->from('alumni')
+                    ->whereNotNull('company_id');
                 });
             }
         }
