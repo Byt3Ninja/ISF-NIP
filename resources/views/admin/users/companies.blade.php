@@ -435,7 +435,7 @@
               <option value="1" {{ request('alumni') == "1" ? 'selected' : '' }}>
                 {{ __('startup.alumni_only') }}
               </option>
-              <option value="0" {{ request('alumni') == "0" ? 'selected' : '' }}>
+              <option value="2" {{ request('alumni') == "2" ? 'selected' : '' }}>
                 {{ __('startup.non_alumni') }}
               </option>
             </select>

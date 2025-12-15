@@ -2542,7 +2542,7 @@ class ClientCompanyController extends Controller
                 $filters['sectors'] = $sectors;
             }
         }
-
+        // dd($request->all());
         // Handle Alumni filter
         if ($request->filled('alumni')) {
             $alumni = $request->get('alumni');
