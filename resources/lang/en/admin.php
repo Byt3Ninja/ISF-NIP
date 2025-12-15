@@ -2567,4 +2567,5 @@ return [
 	'roleJudge' => 'Judge',
 	'in' => 'in',
 	'success' => 'Success',
+	'Ongoing' => 'Ongoing',
 ];

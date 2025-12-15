@@ -2620,4 +2620,5 @@ return [
 	'roleJudge' => 'محكم',
 	'in' => 'في',
 	'success' => 'نجاح',
+	'Ongoing' => 'مستمرة',
 ];
