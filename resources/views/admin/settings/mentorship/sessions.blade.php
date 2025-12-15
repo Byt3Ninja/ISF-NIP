@@ -150,8 +150,8 @@
                             <i class="ti ti-star-filled ti-16px text-warning"></i>
                           </div>
 
-                          @if($session->comment)
-                            <p class="small text-muted d-block">{!! $session->comment !!}</p>
+                          @if($session->rate_comment)
+                            <p class="small text-muted d-block">{!! $session->rate_comment !!}</p>
                           @else
                             <small class="text-muted block">{{ __('admin.No comment provided') }}</small>
                           @endif
