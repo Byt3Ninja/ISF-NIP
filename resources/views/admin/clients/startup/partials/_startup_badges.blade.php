@@ -29,29 +29,29 @@ $achievements = [
 ];
 
 $achievemenLabels = [
-  'team_builder' => __('startup.added_members_count'),
-  'growth_achiever' => __('startup.completed_milestones_count'),
-  'mentor_connect' => __('startup.make_mentorships_count'),
+  'team_builder' => __('startup.badges.added_members_count'),
+  'growth_achiever' => __('startup.badges.completed_milestones_count'),
+  'mentor_connect' => __('startup.badges.make_mentorships_count'),
 ];
 
 $unlockHints = [
-  __('startup.not_graduated_yet'),
-  __('startu.participate_in_hackathon_to_unlock'),
-  __('startup.complete_profile_to_unlock'),
-  __('startup.create_join_team'),
-  __('startup.reach_growth_milestones'),
-  __('startup.no_mentorhip_sessions'),
+  __('startup.badges.not_graduated_yet'),
+  __('startup.badges.participate_in_hackathon_to_unlock'),
+  __('startup.badges.complete_profile_to_unlock'),
+  __('startup.badges.create_join_team'),
+  __('startup.badges.reach_growth_milestones'),
+  __('startup.badges.no_mentorhip_sessions'),
 ];
 
 $badgeLabels = ['alumni', 'winner', 'completed', 'active', 'achiever', 'connected'];
 $badgeIcons = ['fa-medal', 'fa-trophy', 'fa-user-check', 'fa-users', 'fa-arrow-up-right-dots', 'fa-handshake'];
-$badgeColors = ['primary', 'success', 'info', 'warning', 'danger', 'success'];
+$badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
 @endphp
 
 <div class="card mb-6">
   <div class="card-header">
-    <h5 class="card-title mb-1">{{ __('startup.badges_recognition') }}</h5>
-    <small class="text-muted">{{ __('startup.achievements_and_progress') }}</small>
+    <h5 class="card-title mb-1">{{ __('startup.badges.badges_recognition') }}</h5>
+    <small class="text-muted">{{ __('startup.badges.achievements_and_progress') }}</small>
   </div>
   <div class="card-body">
     <!-- Achievement Badges -->
@@ -75,14 +75,14 @@ $badgeColors = ['primary', 'success', 'info', 'warning', 'danger', 'success'];
                 </div>
     
                 <div class="badge bg-label-{{ $item['locked'] ? 'secondary' : $badgeColors[$loop->index] }} {{ $item['locked'] ? 'text-dark' : '' }} rounded-pill text-uppercase mb-2">
-                  {{ $badgeLabels[$loop->index] }}
+                  {{ $item['locked'] ? __('startup.badges.locked') : $badgeLabels[$loop->index] }}
                 </div>
     
                 <h6 class="mb-1 text-dark fw-semibold">
                   @if (isset($item['title']) && !$item['locked'])
                     {{ $item['title'] }}
                   @else
-                    {{ __('startup.' . $key) }}
+                    {{ __('startup.badges.' . $key) }}
                   @endif
                 </h6>
                 
@@ -91,12 +91,11 @@ $badgeColors = ['primary', 'success', 'info', 'warning', 'danger', 'success'];
                 @else
                   <small class="text-muted">
                     @if (isset($item['date']))
-                      {{ $item['date'] }}
+                      {{ \Carbon\Carbon::parse($item['date'])->format('F Y') }}
                     @elseif (isset($item['count']))
-                      {{ str_replace(':count', $item['count'], $achievemenLabels[$key]) }}
-                      {{ $item['count'] }}
+                      {{ __($achievemenLabels[$key], ['count' => $item['count']]) }}
                     @elseif ($key === 'profile_complete')
-                      {{ __('startup.100_profile_complete') }}
+                      {{ __('startup.badges.100_profile_complete') }}
                     @endif
                   </small>
                 @endif
