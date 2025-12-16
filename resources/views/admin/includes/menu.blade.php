@@ -274,7 +274,7 @@
 
     @if ($_user->hasAnyRole('Admin|Registered|Mentor|organizationManager'))
     @if( $_user->ableTo('users.view_companies', $permissions) )
-     <li class="{{ Request::is('dashboard/companies') ? 'active' : '' }} menu-item">
+     <li class="{{ Request::is('dashboard/companies', 'dashboard/companyProfile*') ? 'active' : '' }} menu-item">
         <a class="menu-link" href="{{ route('users.view_companies') }}">
           <i class="menu-icon tf-icons ti ti-building-skyscraper"></i>
           <div>{{ __('admin.Companies') }}</div>
