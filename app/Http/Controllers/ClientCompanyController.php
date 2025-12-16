@@ -272,13 +272,13 @@ class ClientCompanyController extends Controller
         }
         // dd($finalScreenAvg);
         $programs = $programs->values()->all();
-        $curentCycle = $company->cycledata->mentorshipRequests->where('user_id', $company->user->id)->sum('period');
+        $curentCycle = $company->cycledata?->mentorshipRequests?->where('user_id', $company->user->id)->sum('period');
         $totalMinutes = collect($mentorshipToSum)->sum('duration')+$curentCycle;
         $hours   = intdiv($totalMinutes, 60);
         $minutes = $totalMinutes % 60;
         $totalMentorshipHours = sprintf('%02d:%02d', $hours, $minutes);
         // Training
-        $curentCycleTraining = $company->cycledata->trainingSessions->where('user_id', $company->user->id)->sum('duration');
+        $curentCycleTraining = $company->cycledata?->trainingSessions?->where('user_id', $company->user->id)->sum('duration');
         $totalMinutesTraining = collect($trainingToSum)->sum('duration')+$curentCycleTraining;
         $hoursTraining   = intdiv($totalMinutesTraining, 60);
         $minutesTraining = $totalMinutesTraining % 60;
