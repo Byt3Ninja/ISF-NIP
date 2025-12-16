@@ -302,10 +302,63 @@ class ClientCompanyController extends Controller
             'avgFinalScreening'    => 85.0,
             'avgAttendanceRate'    => 92.5,
         ];
+        // Financial Projection
+        $valuationDate = date('Y-m-d');
+        $valuationYear = (int) date('Y', strtotime($valuationDate));
 
-            
+        $financials = FinancialProjection::where('company_id', $company->id)
+            ->whereBetween('year', [
+                $valuationYear - 1,
+                $valuationYear + 2
+            ])
+            ->orderBy('year')
+            ->get()
+            ->keyBy('year');
+        $periods = [];
+        $map = function ($fp) {
+            return [
+                'revenue'        => (float) ($fp->revenues ?? 0),
+                'cogs'           => (float) ($fp->cogs ?? 0),
+                'grossProfit'    => (float) ($fp->revenues ?? 0) - (float) ($fp->cogs ?? 0),
+                'salaries'       => (float) ($fp->salaries ?? 0),
+                'opex'           => (float) ($fp->other_op_expenses ?? 0),
+                'ebitda'         => (float) ($fp->ebitda ?? 0),
+                'da'             => (float) ($fp->depreciation_amortization ?? 0),
+                'ebit'           => (float) ($fp->ebit ?? 0),
+                'interest'       => (float) ($fp->interest ?? 0),
+                'taxes'          => (float) ($fp->taxes ?? 0),
+                'netProfit'      => (float) ($fp->net_profit ?? 0),
+                'fcf'            => (float) ($fp->free_cash_flow ?? 0),
+                'capex'          => (float) ($fp->capital_expenditures ?? 0),
+                'workingCapital' => (float) ($fp->working_capital ?? 0),
+                'totalDebt'      => (float) ($fp->debt_end_year ?? 0),
+            ];
+        };
+
+        foreach ($financials as $year => $fp) {
+
+            if ($year < $valuationYear) {
+                $key   = 'past';
+                $label = __('startup.financial.past_year');
+            } else {
+                $index = ($year - $valuationYear) + 1;
+                $key   = 'year' . $index;
+                $label = __('startup.financial.year_' . $index);
+            }
+
+            $periods[$key] = [
+                'label' => $label,
+                'sub'   => ($year - 1) . ' - ' . $year,
+                'data'  => $map($fp),
+            ];
+        }
+
+        // Padges
+        
+
+            // dd($periods);
         return view('admin/clients/startup/company_profile', compact('company',
-         'formTitle',
+        'formTitle',
         'formData',
         'evaluationForm', 
         'Currencies', 
@@ -327,7 +380,9 @@ class ClientCompanyController extends Controller
         'avgMonthlyGrowth',
         'compoundAnnualGrowthRate', 
         'programs',
-        'programsSummary',));
+        'programsSummary',
+        'periods',
+        'valuationDate',));
         // } catch (Exception $e) {
         //     //log what happend
         //     Log::channel('system_exceptions')->info('Exceptions:', [$e]);
