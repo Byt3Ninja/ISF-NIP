@@ -266,9 +266,9 @@ class ClientCompanyController extends Controller
                     'status' => $p->Status ?? 'completed',
                 ]);
             }
-            $mentorshipToSum = collect(json_decode($almuni->mentorship, true));
-            $trainingToSum = collect(json_decode($almuni->training, true));
-            $finalScreenAvg = collect(json_decode($almuni->final_screening, true));
+            $mentorshipToSum = collect(json_decode($almuni?->mentorship, true));
+            $trainingToSum = collect(json_decode($almuni?->training, true));
+            $finalScreenAvg = collect(json_decode($almuni?->final_screening, true));
         }
         // dd($finalScreenAvg);
         $programs = $programs->values()->all();
