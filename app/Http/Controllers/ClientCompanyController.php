@@ -232,6 +232,9 @@ class ClientCompanyController extends Controller
             ]);
         }
         $almunies = Almuni::where('company_id', $company->id)->get();
+        $mentorshipToSum = collect();
+        $trainingToSum = collect();
+        $finalScreenAvg = collect();
         foreach ($almunies as $almuni) {
             $programsRaw = json_decode($almuni->program ?? '[]');
             // dd($programsRaw);
@@ -266,26 +269,21 @@ class ClientCompanyController extends Controller
                     'status' => $p->Status ?? 'completed',
                 ]);
             }
-            if($almuni->mentorship != null){
-                $mentorshipToSum = collect(json_decode($almuni?->mentorship, true));
-            }else{
-                $mentorshipToSum = collect();
+            
+            if (!empty($almuni->mentorship)) {
+                $mentorshipToSum = collect(json_decode($almuni->mentorship, true));
             }
-            if($almuni->training != null){   
-                $trainingToSum = collect(json_decode($almuni?->training, true));
-            }else{
-                $trainingToSum = collect();
+            if(!empty($almuni->training)){   
+                $trainingToSum = collect(json_decode($almuni->training, true));
             }
-            if($almuni->final_screening != null){   
-                $finalScreenAvg = collect(json_decode($almuni?->final_screening, true));
-            }else{
-                $finalScreenAvg = collect();
+            if(!empty($almuni->training)){   
+                $finalScreenAvg = collect(json_decode($almuni->final_screening, true));
             }
         }
         // dd($finalScreenAvg);
         $programs = $programs->values()->all();
         $curentCycle = $company->cycledata?->mentorshipRequests?->where('user_id', $company->user->id)->sum('period');
-        $totalMinutes = collect($mentorshipToSum)?->sum('duration') ?? 0 +$curentCycle;
+        $totalMinutes = $mentorshipToSum->sum('duration') + $curentCycle;
         $hours   = intdiv($totalMinutes, 60);
         $minutes = $totalMinutes % 60;
         $totalMentorshipHours = sprintf('%02d:%02d', $hours, $minutes);
