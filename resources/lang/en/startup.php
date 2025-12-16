@@ -150,6 +150,8 @@ return [
   'linkedin' => 'LinkedIn',
   'twitter' => 'Twitter',
   'facebook' => 'Facebook',
+  'instagram' => 'Instagram',
+  'youtube' => 'YouTube',
 
   // Outcome Summary Cards
   'screening_score' => 'Screening Score',
@@ -472,5 +474,8 @@ return [
     'reach_growth_milestones' => 'Reach growth milestones',
     'no_mentorhip_sessions' => 'No mentorhip sessions',
     'locked' => 'Locked',
-  ]
+  ],
+
+  'funding_stage' => 'Funding Stage',
+  'development_stage' => 'Development Stage',
 ];

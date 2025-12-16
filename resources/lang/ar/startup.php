@@ -131,7 +131,7 @@ return [
   'completed' => 'مكتملة',
 
   // رأس تقرير الخريجين
-  'alumni_report_title' => 'تقرير خريجي الشركة الناشئة',
+  'alumni_report_title' => 'تقرير خريج الشركة الناشئة',
   'alumni_report_subtitle' => 'رؤى الخريجين بحسب البرنامج لشركة واحدة',
   'export_pdf' => 'تصدير PDF',
   'export_csv' => 'تصدير CSV',
@@ -151,6 +151,8 @@ return [
   'linkedin' => 'لينكدإن',
   'twitter' => 'تويتر',
   'facebook' => 'فيسبوك',
+  'instagram' => 'انستقرام',
+  'youtube' => 'يوتيوب',
 
   // بطاقات الملخص
   'screening_score' => 'درجة الفحص',
@@ -474,5 +476,8 @@ return [
     'reach_growth_milestones' => 'حقق مراحل النمو',
     'no_mentorhip_sessions' => 'لا توجد جلسات إرشاد',
     'locked' => 'مقفل',
-  ]
+  ],
+
+  'funding_stage' => 'مرحلة التمويل',
+  'development_stage' => 'مرحلة التنمية',
 ];
