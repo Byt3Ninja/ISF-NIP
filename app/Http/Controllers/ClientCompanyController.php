@@ -354,9 +354,58 @@ class ClientCompanyController extends Controller
         }
 
         // Padges
-        
+        $profile = $company;
+        $profile_page = collect([
+            $profile->name_en,
+            $profile->name_ar,
+            $profile->country_id,
+            $profile->state_id,
+            $profile->city_id,
+            $profile->business_categories,
+            $profile->address_en,
+            $profile->address_ar,
+            $profile->years_of_operations,
+            $profile->product_or_service,
+            $profile->about_problem,
+            $profile->about_market_opportunity,
+            $profile->about_competitors,
+            $profile->about_monetize,
+            $profile->about_challenges,
+            $profile->business_model,
+            $profile->business_model_description,
+        ])->every(fn ($value) => !is_null($value));
+      
+        // dd($company->user->mentorship->whereNotNull('rating')->where('done', 1));
+        $achievements = [
+            'alumni' => [
+                'locked'  => $almunies->count() > 0 ? false : true,
+                'title'   => $almunies->sortByDesc('created_at')->first()->cycle->title,
+                'date' => $almunies->sortByDesc('created_at')->first()->created_at->format('d-m-Y'), // Alumni date
+            ],
+            'hackathon' => [
+                'locked'  => true,
+                'title'   => 'Global Hack Week',
+                'date' => '20-11-2022', // Winning date
+            ],
+            'profile_complete' => [
+                'locked'  => $profile_page,
+                'subtitle'=> '100% Completed',
+            ],
+            'team_builder' => [
+                'locked'  => $profile->employees != null ? false : true,
+                'count' => $profile->employees?->count() ?? 0, // Count of team members
+            ],
+            'growth_achiever' => [
+                'locked'  => $profile->milestones->count() > 0 ? false : true,
+                'count' => $profile->milestones?->count() ?? 0, // Count of milestones
+            ],
+            'mentor_connect' => [
+                'locked'  => $company->user?->mentorship?->whereNotNull('rating')->where('done', 1)->count() > 0 ? false : true,
+                'count' => $company->user?->mentorship?->whereNotNull('rating')->where('done', 1)->count() ?? 0, // Count of mentorship sessions
+            ],
+        ];
 
-            // dd($periods);
+            // dd($achievements);
         return view('admin/clients/startup/company_profile', compact('company',
         'formTitle',
         'formData',
@@ -382,7 +431,8 @@ class ClientCompanyController extends Controller
         'programs',
         'programsSummary',
         'periods',
-        'valuationDate',));
+        'valuationDate',
+        'achievements'));
         // } catch (Exception $e) {
         //     //log what happend
         //     Log::channel('system_exceptions')->info('Exceptions:', [$e]);
