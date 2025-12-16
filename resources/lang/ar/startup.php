@@ -131,7 +131,7 @@ return [
   'completed' => 'مكتملة',
 
   // رأس تقرير الخريجين
-  'alumni_report_title' => 'تقرير خريجي الشركة الناشئة',
+  'alumni_report_title' => 'تقرير خريج الشركة الناشئة',
   'alumni_report_subtitle' => 'رؤى الخريجين بحسب البرنامج لشركة واحدة',
   'export_pdf' => 'تصدير PDF',
   'export_csv' => 'تصدير CSV',
@@ -151,6 +151,8 @@ return [
   'linkedin' => 'لينكدإن',
   'twitter' => 'تويتر',
   'facebook' => 'فيسبوك',
+  'instagram' => 'انستقرام',
+  'youtube' => 'يوتيوب',
 
   // بطاقات الملخص
   'screening_score' => 'درجة الفحص',
@@ -445,5 +447,37 @@ return [
     'growth_profit' => 'النمو الربح',
     'cost_goods_sold' => 'تكلفة البضائع المباعة',
     'revenue' => 'الربح',
-  ]
+  ],
+
+  'badges' => [
+    'badges_recognition' => 'الوسمات والتعرف',
+    'achievements_and_progress' => 'الإنجازات والتقدم',
+    'hackathon' => 'هاكاثون',
+    'profile_complete' => 'الملف الكامل',
+    'team_builder' => 'بنا الفريق',
+    'growth_achiever' => 'مُنَخِص النمُو',
+    'mentor_connect' => 'اتصال بالمرشد',
+    'winner' => 'الرابح',
+    'completed' => 'مكتمل',
+    'connected' => 'متصل',
+    'achiever' => 'منجز',
+    'active' => 'فعال',
+    '100_profile_complete' => 'اكتمل الملف الشخصي بنسبة 100٪',
+    'added_members_count' => 'تمت إضافة :count عضو إلى الفريق',
+    'completed_milestones_count' => 'تم إكمال :count مرحلة',
+    'make_mentorship_count' => ':count جلسة إرشاد',
+    'added_members_count' => 'تمت إضافة :count عضو إلى الفريق',
+    'completed_milestones_count' => 'تم إكمال :count مرحلة',
+    'make_mentorships_count' => ':count جلسة إرشاد',
+    'not_graduated_yet' => 'لم يتخرج بعد',
+    'participate_in_hackathon_to_unlock' => 'شارك في هاكاثون لفتح الميزة',
+    'complete_profile_to_unlock' => 'أكمل ملفك الشخصي لفتح الميزة',
+    'create_join_team' => 'أنشئ فريقًا أو انضم إلى فريق',
+    'reach_growth_milestones' => 'حقق مراحل النمو',
+    'no_mentorhip_sessions' => 'لا توجد جلسات إرشاد',
+    'locked' => 'مقفل',
+  ],
+
+  'funding_stage' => 'مرحلة التمويل',
+  'development_stage' => 'مرحلة التنمية',
 ];

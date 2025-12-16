@@ -185,4 +185,5 @@
   </div>
 </div>
 
+@include('admin.clients.startup.partials._startup_badges')
 {{-- @include('admin.clients.startup.partials._working_team') --}}

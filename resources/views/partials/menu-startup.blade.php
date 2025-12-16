@@ -56,7 +56,7 @@
     <li class="{{ menuItem('dashboard') }} menu-item">
       <a href="/dashboard" class="menu-link">
         <i class="menu-icon tf-icons ti ti-smart-home"></i>
-        <span>{{ __('admin.Dashboard') }}</span>
+        <div>{{ __('admin.Dashboard') }}</div>
       </a>
     </li>
 
@@ -64,7 +64,7 @@
     {{-- <li class="{{ active('*myProfile') }} menu-item">
       <a href="{{ route('user.profile_view') }}" class="menu-link">
         <i class="menu-icon tf-icons ti ti-user"></i>
-        <span>{{ __('admin.Profile') }}</span>
+        <div>{{ __('admin.Profile') }}</div>
       </a>
     </li> --}}
 
@@ -104,7 +104,7 @@
           <a href="{{ $isMineOnly ? route('company.profile_view_mine') : route('company.profile_view', $companyId) }}"
             class="menu-link">
             <i class="menu-icon tf-icons ti ti-building-skyscraper"></i>
-            <span>{{ __('admin.My company') }}</span>
+            <div>{{ __('admin.My company') }}</div>
           </a>
         </li>
       @endif
@@ -114,7 +114,7 @@
         <li class="{{ active('dashboard/analysis-assessment') }} menu-item">
           <a href="/dashboard/analysis-assessment" class="menu-link">
             <i class="menu-icon tf-icons ti ti-chart-pie"></i>
-            <span>{{ $l == 'en' ? 'Analysis & Assessment' : 'تحليل وتقييم' }}</span>
+            <div>{{ $l == 'en' ? 'Analysis & Assessment' : 'تحليل وتقييم' }}</div>
           </a>
         </li>
       @endif
@@ -124,7 +124,7 @@
         <li class="{{ active('dashboard/swot-analysis*') }} menu-item">
           <a href="{{ route('swot.view') }}" class="menu-link">
             <i class="menu-icon tf-icons ti ti-analyze"></i>
-            <span>{{ __('admin.swot_analysis') }}</span>
+            <div>{{ __('admin.swot_analysis') }}</div>
           </a>
         </li>
       @endif
@@ -145,7 +145,7 @@
       <li class="{{ active('dashboard/directory') }} menu-item">
         <a href="/dashboard/directory" class="menu-link">
           <i class="menu-icon tf-icons ti ti-search"></i>
-          <span>{{ __('admin.Services') }}</span>
+          <div>{{ __('admin.Services') }}</div>
         </a>
       </li>
     @endif
@@ -155,7 +155,7 @@
       <li class="{{ active('dashboard/show/Mentors') }} menu-item">
         <a href="/dashboard/show/Mentors" class="menu-link">
           <i class="menu-icon tf-icons ti ti-users"></i>
-          <span>{{ __('admin.Mentors') }}</span>
+          <div>{{ __('admin.Mentors') }}</div>
         </a>
       </li>
     @endif
@@ -164,7 +164,7 @@
     <li class="{{ active('dashboard/hackathon') }} menu-item">
       <a href="/dashboard/hackathon" class="menu-link">
         <i class="menu-icon tf-icons ti ti-activity"></i>
-        <span>{{ __('admin.Hackathon') }}</span>
+        <div>{{ __('admin.Hackathon') }}</div>
       </a>
     </li>
 
@@ -182,7 +182,7 @@
       <li class="{{ active('dashboard/requests/mine') }} menu-item">
         <a href="/dashboard/requests/mine" class="menu-link">
           <i class="menu-icon tf-icons ti ti-briefcase"></i>
-          <span>{{ $l == 'en' ? 'Services Requests' : 'طلبات الخدمات' }}</span>
+          <div>{{ $l == 'en' ? 'Services Requests' : 'طلبات الخدمات' }}</div>
         </a>
       </li>
     @endif
@@ -192,7 +192,7 @@
       <li class="{{ active('dashboard/mentorship/mine') }} menu-item">
         <a href="/dashboard/mentorship/mine" class="menu-link">
           <i class="menu-icon tf-icons ti ti-user-check"></i>
-          <span>{{ $l == 'en' ? 'Mentorship Requests' : 'طلبات الإرشاد' }}</span>
+          <div>{{ $l == 'en' ? 'Mentorship Requests' : 'طلبات الإرشاد' }}</div>
         </a>
       </li>
     @endif
@@ -210,7 +210,7 @@
       <li class="{{ active('dashboard/training/my*') }} menu-item">
         <a href="/dashboard/training/my" class="menu-link">
           <i class="menu-icon tf-icons ti ti-certificate-2"></i>
-          <span>{{ __('admin.My courses') }}</span>
+          <div>{{ __('admin.My courses') }}</div>
         </a>
       </li>
     @endif
@@ -220,7 +220,7 @@
       <li class="{{ active('dashboard/quizzes/my*') }} menu-item">
         <a href="/dashboard/quizzes/my" class="menu-link">
           <i class="menu-icon tf-icons ti ti-help-octagon"></i>
-          <span>{{ __('admin.My Quizzes') }}</span>
+          <div>{{ __('admin.My Quizzes') }}</div>
         </a>
       </li>
     @endif
@@ -230,7 +230,7 @@
       <li class="{{ active('dashboard/mentor/mentorshipSessions*') }} menu-item">
         <a href="{{ route('mentorships.sessions_list_detailed') }}" class="menu-link">
           <i class="menu-icon tf-icons ti ti-layout-kanban"></i>
-          <span>{{ $l == 'en' ? 'Mentorship Tasks' : 'مهام الإرشاد' }}</span>
+          <div>{{ $l == 'en' ? 'Mentorship Tasks' : 'مهام الإرشاد' }}</div>
         </a>
       </li>
     @endif
@@ -249,7 +249,7 @@
       <li class="{{ active('dashboard/myFiles') }} menu-item">
         <a href="/dashboard/myFiles" class="menu-link">
           <i class="menu-icon tf-icons ti ti-file"></i>
-          <span>{{ __('admin.filemanager') }}</span>
+          <div>{{ __('admin.filemanager') }}</div>
         </a>
       </li>
     @endif
@@ -259,7 +259,7 @@
       <li class="{{ active('dashboard/documentation*') }} menu-item">
         <a href="/dashboard/documentation" class="menu-link">
           <i class="menu-icon tf-icons ti ti-file-description"></i>
-          <span>{{ __('admin.Documentations') }}</span>
+          <div>{{ __('admin.Documentations') }}</div>
         </a>
       </li>
     @endif
