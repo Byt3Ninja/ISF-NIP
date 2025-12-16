@@ -1,32 +1,32 @@
 @php
-$achievements = [
-  'alumni' => [
-    'locked'  => false,
-    'title'   => 'Y Combinator',
-    'date' => '20-11-2022', // Alumni date
-  ],
-  'hackathon' => [
-    'locked'  => true,
-    'title'   => 'Global Hack Week',
-    'date' => '20-11-2022', // Winning date
-  ],
-  'profile_complete' => [
-    'locked'  => false,
-    'subtitle'=> '100% Completed',
-  ],
-  'team_builder' => [
-    'locked'  => true,
-    'count' => 3, // Count of team members
-  ],
-  'growth_achiever' => [
-    'locked'  => true,
-    'count' => 4, // Count of milestones
-  ],
-  'mentor_connect' => [
-    'locked'  => false,
-    'count' => 5, // Count of mentorship sessions
-  ],
-];
+// $achievements = [
+//   'alumni' => [
+//     'locked'  => false,
+//     'title'   => 'Y Combinator',
+//     'date' => '20-11-2022', // Alumni date
+//   ],
+//   'hackathon' => [
+//     'locked'  => true,
+//     'title'   => 'Global Hack Week',
+//     'date' => '20-11-2022', // Winning date
+//   ],
+//   'profile_complete' => [
+//     'locked'  => false,
+//     'subtitle'=> '100% Completed',
+//   ],
+//   'team_builder' => [
+//     'locked'  => true,
+//     'count' => 3, // Count of team members
+//   ],
+//   'growth_achiever' => [
+//     'locked'  => true,
+//     'count' => 4, // Count of milestones
+//   ],
+//   'mentor_connect' => [
+//     'locked'  => false,
+//     'count' => 5, // Count of mentorship sessions
+//   ],
+// ];
 
 $achievemenLabels = [
   'team_builder' => __('startup.badges.added_members_count'),
