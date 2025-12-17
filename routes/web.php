@@ -497,6 +497,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     //Faqs
     Route::resource('faqs', 'FaqsController');
 
+    // Tasks
+    Route::resource('tasks', 'TasksController');
+
     // Forms
     Route::get('forms', 'FormController@index')->name('forms.index');
 

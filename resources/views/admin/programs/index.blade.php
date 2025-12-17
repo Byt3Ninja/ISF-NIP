@@ -188,7 +188,7 @@
                 <a href="/dashboard/programlist/{{ $cycle->id }}">
                   <h5 class="mb-1 fw-semibold">{{ $cycle->title }}</h5>
                 </a>
-                <p class="text-muted line-clamp-3">{{ $cycle->description }}</p>
+                <p class="text-muted small line-clamp-3">{{ $cycle->description }}</p>
 
                 {{-- Stats --}}
                 <div class="d-flex justify-content-between align-items-center border-bottom pb-6 mb-6 mt-2">
