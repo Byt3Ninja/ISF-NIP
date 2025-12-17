@@ -501,6 +501,14 @@
         </a>
       </li>
       <!-- End Assessment -->
+     
+      <li
+        class="{{ Request::is('dashboard/tasks') ? 'active' : '' }} menu-item">
+        <a href="{{ route('tasks.index') }}" class="menu-link">
+          <i class="menu-icon tf-icons ti ti-brand-stackoverflow"></i>
+          <div>{{ __('admin.tasks') }}</div>
+        </a>
+      </li>
 
       <li class="{{ Request::is('dashboard/screening*') ? 'sidebar-group-active open' : '' }} menu-item">
         <a class="menu-link menu-toggle">
