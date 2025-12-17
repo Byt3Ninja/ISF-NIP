@@ -379,7 +379,7 @@ class ClientCompanyController extends Controller
         $achievements = [
             'alumni' => [
                 'locked'  => $almunies->count() > 0 ? false : true,
-                'title'   => $almunies->sortByDesc('created_at')->first()->cycle->title,
+                'title'   => $almunies->sortByDesc('created_at')->first()?->cycle?->title,
                 'date' => $almunies->sortByDesc('created_at')->first()->created_at->format('d-m-Y'), // Alumni date
             ],
             'hackathon' => [
