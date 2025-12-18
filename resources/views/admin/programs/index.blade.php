@@ -44,8 +44,15 @@
               <!-- Search Bar -->
               <div class="input-group input-group-merge search-form" style="width: 300px;">
                 <span class="input-group-text"><i class="ti ti-search text-muted"></i></span>
-                <input type="text" id="search-programs" class="form-control"
-                  placeholder="{{ __('admin.Search') }} {{ __('admin.Cycles') }}" />
+                <input
+                  type="text" 
+                  id="search-programs" 
+                  class="form-control"
+                  placeholder="{{ __('admin.Search') }} {{ __('admin.Cycles') }}" 
+                  aria-label="Search programs"
+                  aria-describedby="search-programs"
+                  value="{{ request('search') }}"
+                />
               </div>
               
               <!-- Reset Button (shown when filters are active) -->
@@ -433,12 +440,28 @@
     // Initialize Date Picker
     flatpickr(".datepicker", { dateFormat: "Y-m-d" });
 
-    $('#search-programs').on('keyup', function() {
-      var value = $(this).val().toLowerCase();
-      console.log('value', value)
-      $('.row .card').filter(function() {
-        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-      });
+    // Debounce helper
+    const debounce = (fn, delay = 500) => {
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+      };
+    };
+
+    // Create debounced handler ONCE
+    const handleSearch = debounce((value) => {
+      const url = new URL(window.location);
+        value
+        ? url.searchParams.set('search', value)
+        : url.searchParams.delete('search');
+
+        window.location.href = url.href;
+      }, 500);
+
+    // Bind event
+    $('#search-programs').on('keyup', function () {
+      handleSearch(this.value.toLowerCase());
     });
   </script>
 @stop
