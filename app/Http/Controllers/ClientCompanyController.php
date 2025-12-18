@@ -70,59 +70,39 @@ class ClientCompanyController extends Controller
     }
     public function show($id)
     {
+        // dd($this->companyService->getCompanyRelation($id));
         // try {
         $user = auth()->user();
         $user_id = $user->id;
-        $company = Company::with('state')->with(['city', 'user', 'stage'])->find($id);
-        if (empty($company)) {
-            return abort(404);
-        }
-
+        $company = $this->companyService->getCompanyRelation($id);
         if (!empty($company->Sustainable_development)) {
             $sustainableDevelopment = json_decode($company->Sustainable_development, true);
-
             $icons = SustainableIcon::whereIn('title', $sustainableDevelopment)->get();
         } else {
             $icons = '';
         }
-        // استرجاع الأيقونات المناسبة
-        // $icons = SustainableIcon::where('title', $sustainableDevelopment)->get();
-        $team_Member_get = Team_Member::where('Company_id', $id);
-        $fonders = $team_Member_get->where('TeamMember', 'Founder')->get();
-        $Shareholders = $team_Member_get->where('TeamMember', 'Shareholder')->get();
-        $Investors = $team_Member_get->where('TeamMember', 'Investor')->get();
-
+        $team = $this->companyService->getTeamMember($id);
+        $fonders = $team->where('TeamMember', 'founders');
+        $Shareholders = $team->where('TeamMember', 'shareholders');
+        $Investors = $team->where('TeamMember', 'investors');
 
         // Load all milestones for this company (new unified structure)
-        $milestones = Milestone::where('Company_id', $id)->orderBy('created_at')->get();
+        // dd($this->companyService->findMilestone($id));
+        $milestones = $this->companyService->getAllMilestones($id);
 
         // For backward compatibility, create empty collections for old template variables
         $Achieved_Milestones = collect();
         $Planned_Milestones = collect();
         $Currencies = Currency::where('enabled', 1)->get(); // جلب جميع الأعضاء
 
-        $company_relation_get = CompanyRelation::where('company_id', $id);
+        $company_relation_get = $this->companyService->findCompanyRelation($id);
         // Startup Technologies
-        $technologies = $company_relation_get->whereNotNull('technology_id')
-            ->with('technology')
-            ->get()
-            ->pluck('technology')
-            ->filter();
-
+        // dd($company_relation_get);
+        $technologies = $company_relation_get['technologies'];
         // Startup Sectors
-        $sectors = $company_relation_get->whereNotNull('sector_id')
-            ->with('sector')
-            ->get()
-            ->pluck('sector')
-            ->filter();
-
+        $sectors = $company_relation_get['sectors'];
         // Startup Industry
-        $industry = $company_relation_get->whereNotNull('industry_id')
-            ->with('industry')
-            ->get()
-            ->pluck('industry')
-            ->filter()
-            ->first(); // Usually one industry per company
+        $industry = $company_relation_get['industry'];
 
         // مسار الملف
         $pathToFile = storage_path($company->pitch_deck);
@@ -215,7 +195,6 @@ class ClientCompanyController extends Controller
                 'id' => $cycle->id,
                 'name' => $cycle->title,
                 'organization' => (object)[
-                    // لو string
                     'name' => is_object($cycle->organization) ? ($cycle->organization->name ?? null) : $cycle->organization
                 ],
                 'cohort' => (object)[ 'name' => $cycle->cohort ?? null ],

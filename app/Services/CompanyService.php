@@ -285,8 +285,9 @@ public function deleteInvestor(int $companyId, int $id): bool
     return $this->companyRepository->deleteInvestor($companyId, $id);
 }
 
-public function findMilestone(int $companyId, int $id): ?object
+public function findMilestone(int $companyId, int $id = 0): ?object
 {
+    
     return $this->companyRepository->findMilestone($companyId, $id);
 }
 
@@ -294,5 +295,51 @@ public function deleteMilestone(int $id): bool
 {
     return $this->companyRepository->deleteMilestone($id);
 }
+public function getCompanyRelation($id)
+{
+    $company = $this->companyRepository->findWithRelations($id);
+    if (!$company) {
+        return [ 'type' => 'not_found' ];
+    }
+    return  $company;
+}
+public function getTeamMember($companyId, $team = null)
+{
+    $teamMembers = $this->companyRepository->team_MemberGet($companyId, $team);
+    if (!$teamMembers) {
+        return [ 'type' => 'not_found' ];
+    }
+    return $teamMembers;
+    
+}
+public function getAllMilestones($companyId)
+{
+    $milestones = $this->companyRepository->findAllMilestones($companyId);
+    if (!$milestones) {
+        return [ 'type' => 'not_found' ];
+    }
+    return $milestones;
+}
+public function findCompanyRelation($companyId)
+{
+    $companyRelationRet = [];
+    $companyRelationRet['companyRelation'] = $this->companyRepository->findCompanyRelation($companyId);
+    if (!$companyRelationRet['companyRelation']) {
+        return [ 'type' => 'not_found' ];
+    }
+        $companyRelationRet['technologies'] = $companyRelationRet['companyRelation']->whereNotNull('technology_id')
+            ->pluck('technology')
+            ->filter();
+        $companyRelationRet['sectors'] = $companyRelationRet['companyRelation']->whereNotNull('sector_id')
+            ->pluck('sector')
+            ->filter();
+        $companyRelationRet['industry'] = $companyRelationRet['companyRelation']->whereNotNull('industry_id')
+            ->pluck('industry')
+            ->filter()
+            ->first();
+
+    return $companyRelationRet;
+}
+
 }
 
