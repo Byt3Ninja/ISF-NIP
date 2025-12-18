@@ -1493,7 +1493,7 @@
 													<span class="badge bg-label-secondary me-2">
 														{{ $milestone['category'] }}
 													</span>
-													<span class="badge bg-label-{{ $milestone['status'] === 'completed' ? 'bg-success' : ( $milestone['status'] === 'in_progress' ? 'primary' : 'warning') }}">
+													<span class="badge bg-label-{{ $milestone['status'] === 'completed' ? 'success' : ( $milestone['status'] === 'in_progress' ? 'primary' : 'warning') }}">
 														@if ($milestone['status'] === 'completed')
 															{{ __('startup.completed') }}
 														@elseif ($milestone['status'] === 'in_progress')
