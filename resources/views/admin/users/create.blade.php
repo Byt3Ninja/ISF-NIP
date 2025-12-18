@@ -244,7 +244,7 @@
             message: translations.validate_first_name_string_length
           },
           regexp: {
-            regexp: /^[a-zA-Z]+$/,
+            regexp: /^[\p{L}\s]+$/u,
             message: translations.validate_first_name_regexp
           }
         }
@@ -260,7 +260,7 @@
             message: translations.validate_last_name_string_length
           },
           regexp: {
-            regexp: /^[a-zA-Z]+$/,
+            regexp: /^[\p{L}\s]+$/u,
             message: translations.validate_last_name_regexp
           }
         }

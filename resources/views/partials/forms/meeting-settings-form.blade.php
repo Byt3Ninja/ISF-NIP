@@ -204,7 +204,7 @@
           />
         </div>
       </div>
-      <div id="offline_sessions_fields" @if ($Title->allow_offline_sessions != 1) style="display: none;" @endif>
+      {{-- <div id="offline_sessions_fields" @if ($Title->allow_offline_sessions != 1) style="display: none;" @endif>
         <div class="form-group mb-4">
           <label class="form-label" for="default_offline_session_location">
             {{ __('settings.Default_Offline_Session_Location') }}
@@ -250,7 +250,7 @@
           </div>
           <small class="text-muted">{{ __('settings.Map_Location_Description') }}</small>
         </div>
-      </div>
+      </div> --}}
     </div>
   </div>
   
@@ -457,19 +457,21 @@ $(document).ready(function () {
   const $clearBtn = $("#clearLocation");
 
   function updateMapLocationState() {
-    const v = $mapInput.val().trim();
-    if (v) {
-      $clearBtn.show();
-      $("#selectedAddress").val(v);
-      selectedLocation = { lat: null, lng: null, address: v };
-    } else {
-      $clearBtn.hide();
-      $("#selectedAddress").val("");
-      selectedLocation = null;
+    if ($mapInput) {
+      const v = $mapInput.val() ? $mapInput.val().trim() : '';
+      if (v) {
+        $clearBtn.show();
+        $("#selectedAddress").val(v);
+        selectedLocation = { lat: null, lng: null, address: v };
+      } else {
+        $clearBtn.hide();
+        $("#selectedAddress").val("");
+        selectedLocation = null;
+      }
     }
   }
 
-  $mapInput.on("input", updateMapLocationState);
+  $mapInput?.on("input", updateMapLocationState);
   updateMapLocationState();
 
   /* ---------------------------

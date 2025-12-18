@@ -62,6 +62,7 @@ return [
   'saving' => 'Saving...',
 
   'milestones' => 'Milestones',
+  'track_your_milestones' => 'Track your milestones',
   'milestone_title_required' => 'Please enter a milestone title',
   'milestone_title_max_length' => 'Milestone title must not exceed 300 characters',
 
