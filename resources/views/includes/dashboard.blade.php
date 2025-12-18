@@ -1397,7 +1397,7 @@
 				$milestones = [
 					[
 						'title' => 'MVP Launch',
-						'description' => 'Launch the first version of the platform',
+						'description' => 'Launch the first version',
 						'category' => 'Technical',
 						'status' => 'Completed',
 						'date' => '2024-03-01',
@@ -1477,8 +1477,9 @@
 														{{ $milestone['status'] }}
 													</span>
 												</div>
-				
-												<small class="text-muted mb-0">{{ $milestone['description'] }}</small>
+												<div class="w-75">
+													<small class="text-muted line-clamp-2">{{ $milestone['description'] }}</small>
+												</div>
 											</div>
 										</div>
 									@endforeach
