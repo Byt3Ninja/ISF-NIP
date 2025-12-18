@@ -374,7 +374,7 @@ class ClientCompanyController extends Controller
             'alumni' => [
                 'locked'  => $almunies->count() > 0 ? false : true,
                 'title'   => $almunies->sortByDesc('created_at')->first()?->cycle?->title,
-                'date' => $almunies->sortByDesc('created_at')->first()->created_at->format('d-m-Y'), // Alumni date
+                'date' => $almunies->sortByDesc('created_at')->first()?->created_at->format('d-m-Y'), // Alumni date
             ],
             'hackathon' => [
                 'locked'  => true,
