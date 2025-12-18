@@ -2232,7 +2232,7 @@ class ClientCompanyController extends Controller
                 'completion_percentage' => 'required|integer|min:0|max:100',
                 'category' => 'required',
                 'status' => 'required',
-                'milestone_date' => 'required|date',
+                'date' => 'required|date',
                 'visibility' => 'required',
                 'cohort' => 'nullable',
                 'documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,docx,xlsx|max:10240', // 10MB
@@ -2248,9 +2248,9 @@ class ClientCompanyController extends Controller
                 'documents.*.file' => __('startup.document_invalid_file'),
                 'documents.*.mimes' => __('startup.milestone_document_invalid_type'),
                 'documents.*.max' => __('startup.document_too_large'),
-                'Category.required' => __('startup.Please_select_a_category'),
-                'Status.required' => __('startup.Please_select_a_status'),
-                'milestone_date.required' => __('startup.milestone_date_required'),
+                'category.required' => __('startup.Please_select_a_category'),
+                'status.required' => __('startup.Please_select_a_status'),
+                'date.required' => __('startup.milestone_date_required'),
                 'visibility.required' => __('startup.visibility_required'),
 
             ]);
@@ -2331,7 +2331,7 @@ class ClientCompanyController extends Controller
                 'completion_percentage' => 'required|integer|min:0|max:100',
                 'category' => 'required',
                 'status' => 'required',
-                'milestone_date' => 'required|date',
+                'date' => 'required|date',
                 'visibility' => 'required',
                 'cohort' => 'nullable',
                 'documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,docx,xlsx|max:10240', // 10MB

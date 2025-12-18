@@ -146,6 +146,7 @@ return [
   'sector' => 'القطاع',
   'team_size' => 'حجم الفريق',
   'program_cohort' => 'دفعة البرنامج',
+  'select_program_cohort' => 'حدد دفعة البرنامج',
   'program_start' => 'بداية البرنامج',
   'program_end' => 'نهاية البرنامج',
   'website' => 'الموقع الإلكتروني',
@@ -273,9 +274,9 @@ return [
   'due_date' => 'تاريخ الاستحقاق',
   'completion' => 'الإنجاز',
   'deliverables' => 'المخرجات',
-  'technical_architecture_pdf' => 'ملف بنية تقنية PDF',
-  'mvp_demo_video' => 'فيديو عرض النموذج الأولي',
-
+  'milestone_date' => 'تاريخ المرحلة',
+  'select_visibility' => 'حدد الرؤية',
+  
   // المهام
   'program_tasks' => 'مهام البرنامج',
   'tasks_assigned_note' => 'مهام مسندة إلى الشركة',
@@ -396,6 +397,8 @@ return [
   'free_cash_flow' => 'التدفق النقدي الحر (FCF)',
   'Please_select_a_category' => ' يرجى اختيار الفئة ',
   'Please_select_a_status' => ' يرجى اختيار حالة ',
+  'category_required' => 'يرجى اختيار الفئة',
+  'status_required' => 'يرجى اختيار الحالة',
   'milestone_date_required' => 'يرجى اختيار تاريخ المرحلة',
   'visibility_required' => ' يرجى اختيار خيار الظهور ',
   'mark_alumni' => 'تحويل إلى خريج',
@@ -407,6 +410,7 @@ return [
   'not_started' => 'لم يبدء',
   'in_progress' => 'قيد التنفيذ',
   'on_hold' => 'معلق',
+  'pending' => 'قيد الانتظار',
   'private' => ' خاص ',
   'public' => ' عام ',
 

@@ -560,7 +560,7 @@ const tagifyInstance = new Tagify(tagifyInput, {
   // Modal Close & Init
   $('#addTaskModal').on('hidden.bs.modal', resetForm);
   form.addEventListener('submit', e => e.preventDefault());
-  document.querySelector('#task-due-date')?.flatpickr({ enableTime: false, dateFormat: 'Y-m-d' });
+  document.querySelector('#task-due-date')?.flatpickr({ enableTime: false, dateFormat: 'Y-m-d', minDate: 'today' });
 
   // Clear validation errors for select2 fields on change
   $('#task-program, #task-priority, #task-status').on('select2:select select2:unselect change', function () {

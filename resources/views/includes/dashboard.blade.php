@@ -1399,21 +1399,32 @@
 						'title' => 'MVP Launch',
 						'description' => 'Launch the first version',
 						'category' => 'Technical',
-						'status' => 'Completed',
+						'status' => 'completed',
+						'visibility' => 'public',
 						'date' => '2024-03-01',
 					],
 					[
 						'title' => 'First Paying Customer',
 						'description' => 'Get your first paying customer',
 						'category' => 'Marketing',
-						'status' => 'Completed',
+						'status' => 'completed',
+						'visibility' => 'private',
 						'date' => '2024-04-15',
 					],
 					[
 						'title' => 'Seed Round Funding',
 						'description' => 'Closing $2M seed round',
 						'category' => 'Finance',
-						'status' => 'In_Progress',
+						'status' => 'in_progress',
+						'visibility' => 'private',
+						'date' => '2024-05-01',
+					]
+					[
+						'title' => 'Seeding State',
+						'description' => 'Closing $4k seed round',
+						'category' => 'Software Development',
+						'status' => 'pending',
+						'visibility' => 'private',
 						'date' => '2024-05-01',
 					]
 				];
@@ -1450,14 +1461,14 @@
 									<!-- Vertical line -->
 									<div class="bg-light ms-2" style="position:absolute; top:0; bottom:0; start:10px; width:2px;"></div>
 									@foreach ($milestones as $milestone)
-										<div class="d-flex mb-4 position-relative ps-8">
+										<div class="d-{{ $milestone['visibility'] === 'private' ? 'none' : 'flex' }} mb-4 position-relative ps-8">
 											<div class="position-absolute top-0 start-0 me-3">
 												<div class="rounded-circle w-px-20 h-px-20 d-flex justify-content-center align-items-center
-													{{ $milestone['status'] === 'Completed'
+													{{ $milestone['status'] === 'completed'
 														? 'badge bg-success'
 														: 'bg-white border border-2 border-primary' }}"
 												>
-													@if ($milestone['status'] === 'Completed')
+													@if ($milestone['status'] === 'completed')
 														<i class="ti ti-circle-check ti-xs"></i>
 													@endif
 												</div>
@@ -1473,7 +1484,7 @@
 													<span class="badge bg-label-secondary me-2">
 														{{ $milestone['category'] }}
 													</span>
-													<span class="badge bg-label-{{ $milestone['status'] === 'Completed' ? 'success' : 'primary' }}">
+													<span class="badge bg-label-{{ $milestone['status'] === 'completed' ? 'success' : 'primary' }}">
 														{{ $milestone['status'] === 'Completed' ? __('startup.completed') : __('startup.in_progress')}}
 													</span>
 												</div>
