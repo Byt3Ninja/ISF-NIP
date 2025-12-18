@@ -87,14 +87,10 @@ class ClientCompanyController extends Controller
         }
         // استرجاع الأيقونات المناسبة
         // $icons = SustainableIcon::where('title', $sustainableDevelopment)->get();
-
-        $fonders = Team_Member::where('TeamMember', 'Founder')
-            ->where('Company_id', $id)
-            ->get();
-        $Shareholders = Team_Member::where('TeamMember', 'Shareholder')
-            ->where('Company_id', $id)->get();
-        $Investors = Team_Member::where('TeamMember', 'Investor')
-            ->where('Company_id', $id)->get();
+        $team_Member_get = Team_Member::where('Company_id', $id);
+        $fonders = $team_Member_get->where('TeamMember', 'Founder')->get();
+        $Shareholders = $team_Member_get->where('TeamMember', 'Shareholder')->get();
+        $Investors = $team_Member_get->where('TeamMember', 'Investor')->get();
 
 
         // Load all milestones for this company (new unified structure)
@@ -105,25 +101,23 @@ class ClientCompanyController extends Controller
         $Planned_Milestones = collect();
         $Currencies = Currency::where('enabled', 1)->get(); // جلب جميع الأعضاء
 
+        $company_relation_get = CompanyRelation::where('company_id', $id);
         // Startup Technologies
-        $technologies = CompanyRelation::where('company_id', $id)
-            ->whereNotNull('technology_id')
+        $technologies = $company_relation_get->whereNotNull('technology_id')
             ->with('technology')
             ->get()
             ->pluck('technology')
             ->filter();
 
         // Startup Sectors
-        $sectors = CompanyRelation::where('company_id', $id)
-            ->whereNotNull('sector_id')
+        $sectors = $company_relation_get->whereNotNull('sector_id')
             ->with('sector')
             ->get()
             ->pluck('sector')
             ->filter();
 
         // Startup Industry
-        $industry = CompanyRelation::where('company_id', $id)
-            ->whereNotNull('industry_id')
+        $industry = $company_relation_get->whereNotNull('industry_id')
             ->with('industry')
             ->get()
             ->pluck('industry')
@@ -740,9 +734,10 @@ class ClientCompanyController extends Controller
             $user = Auth::user();
             if (!is_null($id)) {
                 if ($user->hasanyRole('Admin')) {
-                    return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
+                    $id = $request->id;
+                    // return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
                 }
-                if ($user->hasRole('organizationManager')) {
+                if ($user->hasanyRole('organizationManager')) {
                     $check = DB::select("SELECT
                             *
                         FROM
