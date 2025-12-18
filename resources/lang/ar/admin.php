@@ -2664,4 +2664,5 @@ return [
 	'file_exceeds_limit' => 'يتجاوز حجم الملف الحد الأقصى 10 ميجابايت',
 	'triggered' => 'تم التفعيل',
 	'last_updated' => 'اخر تحديث',
+	'select_category' => 'حدد الفئة',
 ];

@@ -145,6 +145,7 @@ return [
   'sector' => 'Sector',
   'team_size' => 'Team Size',
   'program_cohort' => 'Program Cohort',
+  'select_program_cohort' => 'Select program cohort',
   'program_start' => 'Program Start',
   'program_end' => 'Program End',
   'website' => 'Website',
@@ -272,8 +273,8 @@ return [
   'due_date' => 'Due date',
   'completion' => 'Completion',
   'deliverables' => 'Deliverables',
-  'technical_architecture_pdf' => 'Technical architecture PDF',
-  'mvp_demo_video' => 'MVP demo video',
+  'milestone_date' => 'Milestone date',
+  'select_visibility' => 'Select visibility',
 
   // Tasks
   'program_tasks' => 'Program tasks',
@@ -395,6 +396,8 @@ return [
   'free_cash_flow' => 'Free Cash Flow (FCF)',
   'Please_select_a_category' => ' Please select a category ',
   'Please_select_a_status' => ' Please select a status ',
+  'category_required' => 'Please select a category',
+  'status_required' => 'Please select a status',
   'milestone_date_required' => 'Please select the milestone date',
   'visibility_required' => ' Please select the visibility',
   'mark_alumni' => 'Mark as Alumni',
@@ -406,6 +409,7 @@ return [
   'not_started' => 'Not Started',
   'in_progress' => 'In Progress',
   'on_hold' => 'On Hold',
+  'pending' => 'Pending',
   'private' => 'Private',
   'public' => 'Public',
   

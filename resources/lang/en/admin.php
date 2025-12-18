@@ -2612,4 +2612,5 @@ return [
 	'file_exceeds_limit' => 'File exceeds 10MB limit',
 	'triggered' => 'Triggered',
 	'last_updated' => 'Last Updated',
+	'select_category' => 'Select Category',
 ];
