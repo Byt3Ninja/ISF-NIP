@@ -1,54 +1,68 @@
 @php
-
-
-  // 2. Chart Series Data (For Line/Bar Charts)
-  $chartLabels = array_map(fn($p) => $p['label'], array_values($periods));
+  // Chart Series Data (For Line/Bar Charts)
+  $chartLabels = $periods ? array_map(fn($p) => $p['label'], array_values($periods)) : [];
 
   // Helper to extract a specific key across all periods
   $extractSeries = function ($key) use ($periods) {
-      return array_map(function ($p) use ($key) {
-          // Logic to calculate margins on the fly if needed, or grab raw data
-          if ($key === 'revenue') {
-              return $p['data']['revenue'] / 1000000;
-          } // In Millions
-          if ($key === 'grossMargin') {
-              return round(
-                  ($p['data']['grossProfit'] / $p['data']['revenue']) * 100,
-                  1,
-              );
-          }
-          if ($key === 'ebitdaMargin') {
-              return round(
-                  ($p['data']['ebitda'] / $p['data']['revenue']) * 100,
-                  1,
-              );
-          }
-          if ($key === 'netMargin') {
-              return round(
-                  ($p['data']['netProfit'] / $p['data']['revenue']) * 100,
-                  1,
-              );
-          }
-          if ($key === 'debtEbitda') {
-              return round($p['data']['totalDebt'] / $p['data']['ebitda'], 2);
-          }
-          return $p['data'][$key];
-      }, array_values($periods));
+    if (empty($periods)) {
+      return [];
+    }
+    if ($key === 'wcChange') {
+      $wcValues = array_map(fn($p) => $p['data']['workingCapital'], array_values($periods));
+      $changes = [];
+      $prev = null;
+      foreach ($wcValues as $wc) {
+        if ($prev === null) {
+          $changes[] = 0;
+        } else {
+          $changes[] = $wc - $prev;
+        }
+        $prev = $wc;
+      }
+      return $changes;
+    }
+    return array_map(function ($p) use ($key) {
+        // Logic to calculate margins on the fly if needed, or grab raw data
+        if ($key === 'revenue') {
+          return $p['data']['revenue'] / 1000000;
+        } // In Millions
+        if ($key === 'grossMargin') {
+          return round(
+            ($p['data']['grossProfit'] / $p['data']['revenue']) * 100,
+            1,
+          );
+        }
+        if ($key === 'ebitdaMargin') {
+          return round(
+            ($p['data']['ebitda'] / $p['data']['revenue']) * 100,
+            1,
+          );
+        }
+        if ($key === 'netMargin') {
+          return round(
+            ($p['data']['netProfit'] / $p['data']['revenue']) * 100,
+            1,
+          );
+        }
+        if ($key === 'debtEbitda') {
+          return round($p['data']['totalDebt'] / $p['data']['ebitda'], 2);
+        }
+        return $p['data'][$key];
+    }, array_values($periods));
   };
 
   $chartSeries = [
-      'revenue' => $extractSeries('revenue'),
-      'grossMargin' => $extractSeries('grossMargin'),
-      'ebitdaMargin' => $extractSeries('ebitdaMargin'),
-      'netMargin' => $extractSeries('netMargin'),
-      'fcf' => $extractSeries('fcf'),
-      'capex' => $extractSeries('capex'),
-      'netProfit' => $extractSeries('netProfit'),
-      'wcTotal' => $extractSeries('workingCapital'),
-      'debtTotal' => $extractSeries('totalDebt'),
-      'debtEbitda' => $extractSeries('debtEbitda'),
-      // Mocking WC Change for this example
-      'wcChange' => [10000, 80000, 150000, 220000],
+    'revenue' => $extractSeries('revenue'),
+    'grossMargin' => $extractSeries('grossMargin'),
+    'ebitdaMargin' => $extractSeries('ebitdaMargin'),
+    'netMargin' => $extractSeries('netMargin'),
+    'fcf' => $extractSeries('fcf'),
+    'capex' => $extractSeries('capex'),
+    'netProfit' => $extractSeries('netProfit'),
+    'wcTotal' => $extractSeries('workingCapital'),
+    'debtTotal' => $extractSeries('totalDebt'),
+    'debtEbitda' => $extractSeries('debtEbitda'),
+    'wcChange' => $extractSeries('wcChange'),
   ];
 @endphp
 
@@ -63,27 +77,29 @@
           <div>
             <h5 class="card-title mb-1"> 
               {{ __('startup.financial.executive_summary') }}
-              ({{ reset($periods)['label'] }})
+              ({{ $periods ? reset($periods)['label'] : '' }})
             </h5>
             <p class="text-muted small mb-0">
               {{ __('startup.financial.valuation_date') }}: {{ $valuationDate }}
             </p>
           </div>
 
-          <nav class="nav-align-end">
-            <ul class="nav nav-tabs d-flex flex-column flex-md-row gap-2 gap-lg-0">
-              @foreach ($periods as $key => $info)
-                <li class="nav-item">
-                  <button
-                    class="d-flex flex-column nav-link {{ $loop->first ? 'active' : '' }}"
-                    onclick="switchPeriod('{{ $key }}', {{ $loop->index }}, this)">
-                    <div id="period-label">{{ $info['label'] }}</div>
-                    <div class="small">{{ $info['sub'] }}</div>
-                  </button>
-                </li>
-              @endforeach
-            </ul>
-          </nav>
+          @if ($periods && count($periods) > 1)
+            <nav class="nav-align-end">
+              <ul class="nav nav-tabs d-flex flex-column flex-md-row gap-2 gap-lg-0">
+                @foreach ($periods as $key => $info)
+                  <li class="nav-item">
+                    <button
+                      class="d-flex flex-column nav-link {{ $loop->first ? 'active' : '' }}"
+                      onclick="switchPeriod('{{ $key }}', {{ $loop->index }}, this)">
+                      <div id="period-label">{{ $info['label'] }}</div>
+                      <div class="small">{{ $info['sub'] }}</div>
+                    </button>
+                  </li>
+                @endforeach
+              </ul>
+            </nav>
+          @endif
         </div>
       </div>
     </div>
@@ -257,25 +273,27 @@
     </div>
 
     <!-- Detailed Metrics Table -->
-    <h5 class="fw-semibold text-dark mb-3">{{ __('startup.financial.detailed_metrics') }}</h5>
-    <div class="card border-0 shadow-sm mb-5">
-      <div class="card-datatable">
-        <div class="table-responsive">
-          <table class="table align-middle mb-0">
-            <thead class="table-light">
-              <tr>
-                <th class="ps-4">{{ __('startup.financial.metric') }}</th>
-                <th class="text-end">{{ __('startup.financial.value') }}</th>
-                <th class="text-end pe-4">{{ __('startup.financial.percent_of_revenue') }}</th>
-              </tr>
-            </thead>
-            <tbody id="metrics-table-body">
-              <!-- Populated by JS -->
-            </tbody>
-          </table>
+    @if ($periods)
+      <h5 class="fw-semibold text-dark mb-3">{{ __('startup.financial.detailed_metrics') }}</h5>
+      <div class="card border-0 shadow-sm mb-5">
+        <div class="card-datatable">
+          <div class="table-responsive">
+            <table class="table align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-4">{{ __('startup.financial.metric') }}</th>
+                  <th class="text-end">{{ __('startup.financial.value') }}</th>
+                  <th class="text-end pe-4">{{ __('startup.financial.percent_of_revenue') }}</th>
+                </tr>
+              </thead>
+              <tbody id="metrics-table-body">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </div>
+    @endif
   </div>
 </div>
 
@@ -328,7 +346,7 @@
       type: 'doughnut',
       data: {
         labels: ['Margin', 'COGS'],
-        datasets: [{ data: [70,30], backgroundColor: ['#28c76f','#dfdfe3'], borderWidth: 0, cutout: '80%' }]
+        datasets: [{ data: [], backgroundColor: ['#28c76f','#dfdfe3'], borderWidth: 1, cutout: '80%' }]
       },
       options: {
         maintainAspectRatio: false,
@@ -416,70 +434,74 @@
   function switchPeriod(key, idx, btn) {
     // Update tab
     document.querySelectorAll('.nav-tabs .nav-link').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+
+    if (btn) btn.classList.add('active');
 
     const d = dashboardData[key];
-    const gm = fmt.percent(d.grossProfit, d.revenue);
 
-    // Update KPIs
-    update('kpi-revenue', fmt.currency(d.revenue));
-    update('kpi-fcf', fmt.currency(d.fcf));
-    update('kpi-ebitda-margin', fmt.percent(d.ebitda, d.revenue));
-    update('kpi-debt-ebitda', (d.totalDebt / d.ebitda).toFixed(2));
-    update('d-gross-val', gm);
-    update('kpi2-gro', gm);
-    update('kpi2-ebi', fmt.percent(d.ebitda, d.revenue));
-    update('kpi2-ope', fmt.percent(d.ebit, d.revenue));
-    update('kpi2-net', fmt.percent(d.netProfit, d.revenue));
-    update('kpi-total-debt', fmt.currency(d.totalDebt));
-    update('kpi-interest-cov', (d.ebitda / d.interest).toFixed(2));
-    update('kpi-fcf-margin', fmt.percent(d.fcf, d.revenue));
+    if (d) {
+      const gm = fmt.percent(d.grossProfit, d.revenue);
 
-    // Update charts
-    charts.revenue.data.datasets[0].pointRadius = [0,1,2,3].map(i => i === idx ? 6 : 3);
-    charts.revenue.update();
-
-    charts.grossMargin.data.datasets[0].data = [gm, 100 - gm];
-    charts.grossMargin.update();
-
-    charts.marginTrend.data.datasets.forEach(ds => ds.pointRadius = [0,1,2,3].map(i => i === idx ? 6 : 3));
-    charts.marginTrend.update();
-
-    charts.cashFlow.data.datasets[0].backgroundColor = dim(idx, '#28c76f');
-    charts.cashFlow.data.datasets[1].backgroundColor = dim(idx, '#ff9f43');
-    charts.cashFlow.data.datasets[2].backgroundColor = dim(idx, '#00bad1');
-    charts.cashFlow.update();
-
-    charts.wc.data.datasets[1].backgroundColor = dim(idx, '#00bad1');
-    charts.wc.update();
-
-    charts.debt.data.datasets[1].backgroundColor = dim(idx, '#ff4c51');
-    charts.debt.update();
-
-    // Update table
-    const rows = [
-      { n: '{{ __('startup.financial.revenue') }}', v: d.revenue, b: 1 },
-      { n: '{{ __('startup.financial.cost_goods_sold') }}', v: d.cogs },
-      { n: '{{ __('startup.financial.growth_profit') }}', v: d.grossProfit, b: 1 },
-      { n: '{{ __('startup.salaries') }}', v: d.salaries },
-      { n: '{{ __('startup.financial.operating_expenses') }}', v: d.opex },
-      { n: '{{ __('startup.ebitda') }}', v: d.ebitda, b: 1 },
-      { n: '{{ __('startup.depreciation_and_amortization') }}', v: d.da },
-      { n: '{{ __('startup.ebit') }}', v: d.ebit },
-      { n: '{{ __('startup.financial.interest_taxes') }}', v: d.interest + d.taxes },
-      { n: '{{ __('startup.financial.net') }}', v: d.netProfit, b: 1, bg: 1 },
-      { n: '{{ __('startup.financial.free_cash_flow') }}', v: d.fcf },
-      { n: '{{ __('startup.financial.working_capital') }}', v: d.workingCapital },
-      { n: '{{ __(('startup.financial.total_debt')) }}', v: d.totalDebt, b: 1 }
-    ];
-
-    document.getElementById('metrics-table-body').innerHTML = rows.map(r => `
-      <tr${r.bg ? ' class="table-primary"' : ''}>
-        <td class="ps-4${r.b ? ' fw-bold' : ''}">${r.n}</td>
-        <td class="text-end${r.b ? ' fw-bold' : ''}">${fmt.currency(r.v)}</td>
-        <td class="text-end pe-4 text-muted">${r.n === 'Revenue' ? '-' : fmt.percent(r.v, d.revenue) + '%'}</td>
-      </tr>
-    `).join('');
+      // Update KPIs
+      update('kpi-revenue', fmt.currency(d.revenue));
+      update('kpi-fcf', fmt.currency(d.fcf));
+      update('kpi-ebitda-margin', fmt.percent(d.ebitda, d.revenue));
+      update('kpi-debt-ebitda', (d.totalDebt / d.ebitda).toFixed(2));
+      update('d-gross-val', gm);
+      update('kpi2-gro', gm);
+      update('kpi2-ebi', fmt.percent(d.ebitda, d.revenue));
+      update('kpi2-ope', fmt.percent(d.ebit, d.revenue));
+      update('kpi2-net', fmt.percent(d.netProfit, d.revenue));
+      update('kpi-total-debt', fmt.currency(d.totalDebt));
+      update('kpi-interest-cov', (d.ebitda / d.interest).toFixed(2));
+      update('kpi-fcf-margin', fmt.percent(d.fcf, d.revenue));
+  
+      // Update charts
+      charts.revenue.data.datasets[0].pointRadius = [0,1,2,3].map(i => i === idx ? 6 : 3);
+      charts.revenue.update();
+  
+      charts.grossMargin.data.datasets[0].data = [gm, 100 - gm];
+      charts.grossMargin.update();
+  
+      charts.marginTrend.data.datasets.forEach(ds => ds.pointRadius = [0,1,2,3].map(i => i === idx ? 6 : 3));
+      charts.marginTrend.update();
+  
+      charts.cashFlow.data.datasets[0].backgroundColor = dim(idx, '#28c76f');
+      charts.cashFlow.data.datasets[1].backgroundColor = dim(idx, '#ff9f43');
+      charts.cashFlow.data.datasets[2].backgroundColor = dim(idx, '#00bad1');
+      charts.cashFlow.update();
+  
+      charts.wc.data.datasets[1].backgroundColor = dim(idx, '#00bad1');
+      charts.wc.update();
+  
+      charts.debt.data.datasets[1].backgroundColor = dim(idx, '#ff4c51');
+      charts.debt.update();
+  
+      // Update table
+      const rows = [
+        { n: '{{ __('startup.financial.revenue') }}', v: d.revenue, b: 1 },
+        { n: '{{ __('startup.financial.cost_goods_sold') }}', v: d.cogs },
+        { n: '{{ __('startup.financial.growth_profit') }}', v: d.grossProfit, b: 1 },
+        { n: '{{ __('startup.salaries') }}', v: d.salaries },
+        { n: '{{ __('startup.financial.operating_expenses') }}', v: d.opex },
+        { n: '{{ __('startup.ebitda') }}', v: d.ebitda, b: 1 },
+        { n: '{{ __('startup.depreciation_and_amortization') }}', v: d.da },
+        { n: '{{ __('startup.ebit') }}', v: d.ebit },
+        { n: '{{ __('startup.financial.interest_taxes') }}', v: d.interest + d.taxes },
+        { n: '{{ __('startup.financial.net') }}', v: d.netProfit, b: 1, bg: 1 },
+        { n: '{{ __('startup.financial.free_cash_flow') }}', v: d.fcf },
+        { n: '{{ __('startup.financial.working_capital') }}', v: d.workingCapital },
+        { n: '{{ __(('startup.financial.total_debt')) }}', v: d.totalDebt, b: 1 }
+      ];
+  
+      document.getElementById('metrics-table-body').innerHTML = rows.map(r => `
+        <tr${r.bg ? ' class="table-primary"' : ''}>
+          <td class="ps-4${r.b ? ' fw-bold' : ''}">${r.n}</td>
+          <td class="text-end${r.b ? ' fw-bold' : ''}">${fmt.currency(r.v)}</td>
+          <td class="text-end pe-4 text-muted">${r.n === 'Revenue' ? '-' : fmt.percent(r.v, d.revenue) + '%'}</td>
+        </tr>
+      `).join('');
+    }
   }
 
   // Initialize
