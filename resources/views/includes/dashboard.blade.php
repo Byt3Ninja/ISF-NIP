@@ -935,7 +935,7 @@
 								<th> {{ __('dashboard.Company') }} </th>
 								<th> {{ __('dashboard.User') }} </th>
 								<th> {{ __('dashboard.Date') }} </th>
-								<th> {{ __('dashboard.Type') }} </th>
+								<th> {{ __('dashboard.Session_Type') }} </th>
 								<th> {{ __('dashboard.Admin Notes') }} </th>
 								<th> {{ __('dashboard.Meeting Link') }} </th>
 							</thead>
