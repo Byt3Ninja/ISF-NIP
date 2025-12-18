@@ -405,7 +405,7 @@ return [
   'mark_alumni_error' => 'حدث خطأ في تحويل الشركة الناشئة إلى خريج.',
 
   'not_started' => 'لم يبدء',
-  'in_progress' => 'في التقدم',
+  'in_progress' => 'قيد التنفيذ',
   'on_hold' => 'معلق',
   'private' => ' خاص ',
   'public' => ' عام ',

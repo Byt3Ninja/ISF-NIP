@@ -1473,8 +1473,8 @@
 													<span class="badge bg-label-secondary me-2">
 														{{ $milestone['category'] }}
 													</span>
-													<span class="badge bg-label-success">
-														{{ $milestone['status'] }}
+													<span class="badge bg-label-{{ $milestone['status'] === 'Completed' ? 'success' : 'primary' }}">
+														{{ $milestone['status'] === 'Completed' ? __('startup.completed') : __('startup.in_progress')}}
 													</span>
 												</div>
 												<div class="w-75">
