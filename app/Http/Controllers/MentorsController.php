@@ -437,7 +437,7 @@ class MentorsController extends Controller
 			}
 
 		}else{
-
+			// dd($request->all());
 				$this->meetingService = OnlineMeetingFactory::create();
 				$datefrom = $request->date . ' ' . $request->timeFrom;
 				$dateto = $request->date . ' ' . $request->timeTo;
@@ -448,7 +448,7 @@ class MentorsController extends Controller
 				}
 				$dayName = Carbon::parse($request->date)->format('l');
 
-				$schedules_q = "SELECT * FROM schedules WHERE user_id = ? AND `days` LIKE ?  AND tfrom <= ? AND tto >= ?";
+				$schedules_q = "SELECT * FROM schedules WHERE user_id = ? AND `days` LIKE ? AND tfrom <= ? AND tto >= ?";
 				$schedules = DB::select($schedules_q, [
 					$request->mentorid,
 					'%' . $dayName . '%',
@@ -456,7 +456,7 @@ class MentorsController extends Controller
 					$request->timeTo
 				]);
 				if ($schedules == null) {
-					return back()->with(['msg' => 'mentor_not_available_in_this_time']);
+					return back()->with(['class' => 'danger','msg' => 'mentor_not_available_in_this_time']);
 				}
 				if ($request->mentorid) {
 					
