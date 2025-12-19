@@ -86,7 +86,7 @@ class SlotController extends Controller
 
 	public function getSlots(Request $request, $id = null)
 	{
-			$schedules = Schedule::where('user_id', $id ?? auth()->id())->get();
+			$schedules = Schedule::where('user_id', $id ?? auth()->id())->where('date', '>=', date('Y-m-d'))->get();
 
 			// Active-only filter
 			if ($request->has('active_only') && $request->active_only == 'true') {
