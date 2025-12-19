@@ -49,6 +49,11 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/page-auth.css" />
 
   <style>
+    div[data-validator] {
+      width: 100% !important;
+      text-align: {{ $l == 'ar' ? 'end' : 'start' }} !important;
+    }
+
     .iti__country-list {
       position: absolute;
       left: 1rem;
