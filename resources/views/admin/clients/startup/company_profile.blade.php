@@ -146,62 +146,15 @@
 @php
 $env = env('APP_ENV');
 
-$pills = 
-  $env == 'dev' 
-    ? ['overview', 'milestones', 'team', 'pitch_deck', 'programs_summary', 'financial_report']
-    : ['overview', 'milestones', 'team', 'pitch_deck', 'financial_report'];
+$pills = ['overview', 'milestones', 'team', 'pitch_deck', 'programs_summary', 'financial_report'];
 
-  $pillsIcons = 
-    $env == 'dev' 
-      ? ['briefcase', 'target', 'users', 'file-text', 'components', 'database-dollar']
-      : ['briefcase', 'target', 'users', 'file-text', 'database-dollar'];
+$pillsIcons = ['briefcase', 'target', 'users', 'file-text', 'components', 'database-dollar'];
 
 if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('registered') && $company?->id === $_user?->company_id ) )
 {
   $pills[] = 'startup_growth';
   $pillsIcons[] = 'chart-dots-2';
 }
-// Static Programs List
-// $programs = [
-//     (object)[
-//         'id' => 1,
-//         'name' => 'Full Stack Development Bootcamp',
-//         'organization' => (object)['name' => 'Tech Academy'],
-//         'cohort' => (object)['name' => 'Cohort A'],
-//         'start_date' => \Carbon\Carbon::parse('2026-01-10'),
-//         'completion_date' => \Carbon\Carbon::parse('2024-06-20'),
-//         'final_screening_score' => 85,
-//         'status' => 'upcoming',
-//     ],
-//     (object)[
-//         'id' => 2,
-//         'name' => 'Digital Marketing Training',
-//         'organization' => (object)['name' => 'Marketing Institute'],
-//         'cohort' => (object)['name' => 'Batch 5'],
-//         'start_date' => \Carbon\Carbon::parse('2024-02-01'),
-//         'completion_date' => \Carbon\Carbon::parse('2024-05-01'),
-//         'final_screening_score' => 78,
-//         'status' => 'completed',
-//     ],
-//     (object)[
-//         'id' => 3,
-//         'name' => 'Project Management Mentorship',
-//         'organization' => (object)['name' => 'PMI Center'],
-//         'cohort' => (object)['name' => 'Spring 2024'],
-//         'start_date' => \Carbon\Carbon::parse('2024-03-15'),
-//         'completion_date' => null,
-//         'final_screening_score' => 92,
-//         'status' => 'ongoing',
-//     ],
-// ];
-
-// Static Summary Values
-// $programsSummary = [
-//   'totalMentorshipHours' => '42:30',
-//   'totalTrainingHours'   => '56:15',
-//   'avgFinalScreening'    => 85.0,
-//   'avgAttendanceRate'    => 92.5,
-// ];
 @endphp
 
 @section('content')

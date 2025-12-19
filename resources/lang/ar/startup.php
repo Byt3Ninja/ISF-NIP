@@ -472,7 +472,6 @@ return [
     'completed_milestones_count' => 'تم إكمال :count مرحلة',
     'make_mentorship_count' => ':count جلسة إرشاد',
     'added_members_count' => 'تمت إضافة :count عضو إلى الفريق',
-    'completed_milestones_count' => 'تم إكمال :count مرحلة',
     'make_mentorships_count' => ':count جلسة إرشاد',
     'not_graduated_yet' => 'لم يتخرج بعد',
     'participate_in_hackathon_to_unlock' => 'شارك في هاكاثون لفتح الميزة',
