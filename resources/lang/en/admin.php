@@ -2613,4 +2613,5 @@ return [
 	'triggered' => 'Triggered',
 	'last_updated' => 'Last Updated',
 	'select_category' => 'Select Category',
+	'serviceProvider' => 'Service Provider',
 ];
