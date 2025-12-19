@@ -2665,4 +2665,5 @@ return [
 	'triggered' => 'تم التفعيل',
 	'last_updated' => 'اخر تحديث',
 	'select_category' => 'حدد الفئة',
+	'serviceProvider' => 'مقدم خدمة',
 ];
