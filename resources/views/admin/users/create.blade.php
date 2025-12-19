@@ -10,6 +10,30 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
 @endsection
 
+@section('style')
+<style>
+  .iti__country-list {
+    position: absolute;
+    left: 1rem;
+    /* right: 0; */
+    z-index: 9999;
+    list-style: none;
+    text-align: left;
+    padding: 0;
+    margin: 0 0 0 -1px;
+    box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
+    background-color: white;
+    border: 1px solid #CCC;
+    white-space: nowrap;
+    max-height: 200px;
+    width: 350px;
+    overflow-y: scroll;
+    overflow-x: auto -webkit-overflow-scrolling: touch;
+    background-color: #fff;
+  }
+</style>
+@endsection
+
 @section('content')
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
