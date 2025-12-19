@@ -8,6 +8,7 @@ use Exception;
 use App\Company;
 use App\Surveys;
 use App\Schedule;
+use App\Settings;
 use Carbon\Carbon;
 use App\SurveyScopes;
 use App\CyclesMentors;
@@ -19,16 +20,16 @@ use App\Events\RequestMentorship;
 use App\Services\WhatsAppService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\MentorResource;
 use App\Jobs\SendMentorshipRequestJob;
 use App\Factories\OnlineMeetingFactory;
 use App\Events\MentorshipSessionUpdated;
-use App\Http\Resources\MentorResource;
 use App\Jobs\SendMentorshipNotification;
 use App\Notifications\MentorshipSession;
 use App\Notifications\MentorshipRequestNotification;
-use App\Http\Controllers\Controller;
 
 class SlotController extends Controller
 {
@@ -43,7 +44,9 @@ class SlotController extends Controller
 
 	public function index()
 	{
-			return view('mentor.availability.index');
+			$settings = Settings::where('id', 1)->first();
+			$offline_allowed = $settings->allow_offline_sessions = 1 ? true : false;
+			return view('mentor.availability.index', compact('offline_allowed'));
 	}
 
 	private $weekdayMap = [
