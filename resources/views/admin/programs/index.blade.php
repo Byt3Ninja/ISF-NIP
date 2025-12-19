@@ -441,7 +441,7 @@
     flatpickr(".datepicker", { dateFormat: "Y-m-d" });
 
     // Debounce helper
-    const debounce = (fn, delay = 1500) => {
+    const debounce = (fn, delay = 1000) => {
       let timer;
       return (...args) => {
         clearTimeout(timer);
@@ -457,7 +457,7 @@
         : url.searchParams.delete('search');
 
         window.location.href = url.href;
-      }, 1500);
+      }, 1000);
 
     // Bind event
     $('#search-programs').on('keyup', function () {
