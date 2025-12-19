@@ -181,7 +181,7 @@ class SlotController extends Controller
 							'message' => __('mentor.slot_already_exists'),
 					], 422);
 			}
-
+			$dayName = Carbon::parse($validated['date'])->format('l');
 			// Create slot
 			$slotData = [
 					'user_id' => auth()->id(),
@@ -189,7 +189,7 @@ class SlotController extends Controller
 					'session_type' => $validated['session_type'],
 					'tfrom' => $validated['tfrom'],
 					'tto' => $validated['tto'],
-					'days' => $validated['type'] === 'Weekly' ? $validated['days'] : null,
+					'days' => $validated['type'] === 'Weekly' ? $validated['days'] : $dayName,
 					'date' => $validated['type'] !== 'Weekly' ? $validated['date'] : null,
 			];
 
