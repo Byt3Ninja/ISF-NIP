@@ -8,6 +8,7 @@ use Exception;
 use App\Company;
 use App\Surveys;
 use App\Schedule;
+use App\Settings;
 use Carbon\Carbon;
 use App\SurveyScopes;
 use App\CyclesMentors;
@@ -21,10 +22,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\MentorResource;
 use App\Jobs\SendMentorshipRequestJob;
 use App\Factories\OnlineMeetingFactory;
 use App\Events\MentorshipSessionUpdated;
-use App\Http\Resources\MentorResource;
 use App\Jobs\SendMentorshipNotification;
 use App\Notifications\MentorshipSession;
 use App\Notifications\MentorshipRequestNotification;
@@ -135,10 +136,11 @@ class MentorsController extends Controller
 				return true; // في حالة عدم تحديد أي فلتر
 			});
 		}
-
-
-
-		return view('admin.settings.mentorship.assign', compact('mentors', 'id', 'cList', 'cycles'));
+			
+			$settings = Settings::where('id', 1)->first();
+			$offline_allowed = $settings->allow_offline_sessions = 1 ? true : false;
+		dd($offline_allowed);
+		return view('admin.settings.mentorship.assign', compact('mentors', 'id', 'cList', 'cycles', 'offline_allowed'));
 	}
 
 	public function assign($id, Request $request)
