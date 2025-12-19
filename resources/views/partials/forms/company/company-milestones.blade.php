@@ -1,5 +1,5 @@
 @php
-  $alumni = App\Almuni::where('company_id', auth()->user()->company->id)->get();
+  $alumni = App\Almuni::where('company_id', auth()->user()?->company?->id)->get();
 $programs = collect();
 foreach ($alumni as $alumnus) {
     if (!$alumnus->program) {
@@ -20,7 +20,7 @@ foreach ($alumni as $alumnus) {
 }
 $currentProgram = App\Cycle::where(
     'id',
-    auth()->user()->company->cycle
+    auth()->user()?->company?->cycle
 )->first();
 if ($currentProgram) {
     $programs->push((object) [
