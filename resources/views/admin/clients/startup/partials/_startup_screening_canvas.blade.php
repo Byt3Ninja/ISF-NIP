@@ -1,6 +1,7 @@
 @php
   // Show the canvas if the query parameter 'screening' is set to 'true'
   $showCanvas = request()->query('screening') === 'true';
+  $hasGuidelines = !empty($evaluationForm->screening_guidelines) || !empty($evaluationForm->screening_guidelines_file);
 @endphp
 
 <style>
@@ -154,6 +155,15 @@
       <div class="row">
         <div class="col-12">
           <ul class="nav nav-pills mb-3 pb-3 border-bottom" id="pills-tab" role="tablist">
+            @if($hasGuidelines)
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="pills-guidelines-tab" data-bs-toggle="pill"
+                data-bs-target="#pills-guidelines" type="button" role="tab" aria-controls="pills-guidelines"
+                aria-selected="true">
+                {{ __('admin.Guidelines') }}
+              </button>
+            </li>
+            @endif
             <li class="nav-item" role="presentation">
               <button class="nav-link" id="pills-form-data-tab" data-bs-toggle="pill"
                 data-bs-target="#pills-form-data" type="button" role="tab" aria-controls="pills-form-data"
@@ -162,9 +172,9 @@
               </button>
             </li>
             <li class="nav-item" role="presentation">
-              <button class="nav-link active" id="pills-screening-criteria-tab" data-bs-toggle="pill"
+              <button class="nav-link {{ !$hasGuidelines ? 'active' : '' }}" id="pills-screening-criteria-tab" data-bs-toggle="pill"
                 data-bs-target="#pills-screening-criteria" type="button" role="tab" aria-controls="pills-screening-criteria"
-                aria-selected="true">
+                aria-selected="{{ !$hasGuidelines ? 'true' : 'false' }}">
                 {{ __('admin.Screening Criteria')}}
               </button>
             </li>
@@ -184,7 +194,29 @@
             </li>
           </ul>
           <div class="tab-content shadow-none p-2" id="pills-tabContent">
-            <div class="tab-pane fade" id="pills-form-data" role="tabpanel" aria-labelledby="pills-form-data-tab">
+            @if($hasGuidelines)
+            <div class="tab-pane fade show active" id="pills-guidelines" role="tabpanel" aria-labelledby="pills-guidelines-tab">
+              <div class="row mb-6">
+                <div class="col-12">
+                  <h5 class="mb-4">{{ __('admin.Screening Guidelines') }}</h5>
+                  <div class="mb-4">
+                    {!! $evaluationForm->screening_guidelines !!}
+                  </div>
+                  @if(!empty($evaluationForm->screening_guidelines_file))
+                  <div class="mb-4">
+                    <iframe src="{{ url($evaluationForm->screening_guidelines_file) }}" style="width: 100%; height: 500px; border: none;"></iframe>
+                  </div>
+                  @endif
+                  <div class="d-flex justify-content-end">
+                    <button type="button" class="btn btn-primary" onclick="document.getElementById('pills-form-data-tab').click()">
+                      {{ __('admin.Continue') }} <i class="ti ti-arrow-right ms-2"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            @endif
+            <div class="tab-pane fade {{ !$hasGuidelines ? 'show active' : '' }}" id="pills-form-data" role="tabpanel" aria-labelledby="pills-form-data-tab">
               <div class="row mb-6">
                   <div class="col-12">
                     <h5 class="mb-0">
@@ -227,10 +259,14 @@
                         </div>
                       @endif
                     </div>
+                  <div class="d-flex justify-content-end">
+                    <button type="button" class="btn btn-primary" onclick="document.getElementById('pills-screening-criteria-tab').click()">
+                      {{ __('admin.Continue') }} <i class="ti ti-arrow-right ms-2"></i>
+                    </button>
                   </div>
               </div>
             </div>
-            <div class="tab-pane fade show active" id="pills-screening-criteria" role="tabpanel"
+            <div class="tab-pane fade" id="pills-screening-criteria" role="tabpanel"
               aria-labelledby="pills-screening-criteria-tab">
               <!-- Content for Screening Criteria -->
               <div class="steps">
