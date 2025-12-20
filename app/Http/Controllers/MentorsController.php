@@ -139,7 +139,7 @@ class MentorsController extends Controller
 			
 			$settings = Settings::where('id', 1)->first();
 			$offline_allowed = $settings->allow_offline_sessions = 1 ? true : false;
-		dd($offline_allowed);
+			
 		return view('admin.settings.mentorship.assign', compact('mentors', 'id', 'cList', 'cycles', 'offline_allowed'));
 	}
 
