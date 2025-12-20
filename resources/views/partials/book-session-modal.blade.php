@@ -157,7 +157,8 @@ $(document).ready(function() {
     selectedSlot: null,
     selectedDate: null,
     calendar: null,
-    offlineDisabled: false
+    offlineDisabled: false,
+    blocked_intervals: []
   };
 
   const SESSION_TYPES = {
@@ -237,10 +238,31 @@ $(document).ready(function() {
     });
   };
 
+  const isSlotBlocked = (slot, dateStr) => {
+    if (!state.blocked_intervals || !state.blocked_intervals.length) return false;
+    
+    const dateParts = dateStr.split('-');
+    const year = parseInt(dateParts[0]);
+    const month = parseInt(dateParts[1]) - 1;
+    const day = parseInt(dateParts[2]);
+    
+    const startParts = slot.start_time.split(':');
+    const endParts = slot.end_time.split(':');
+    
+    const start = new Date(year, month, day, parseInt(startParts[0]), parseInt(startParts[1]), 0).getTime() / 1000;
+    const end = new Date(year, month, day, parseInt(endParts[0]), parseInt(endParts[1]), 0).getTime() / 1000;
+    
+    return state.blocked_intervals.some(interval => {
+       return start < interval.end && end > interval.start;
+    });
+  };
+
   const filterSlots = (slots, filterType) => {
+    let availableSlots = slots.filter(s => !isSlotBlocked(s, s.date));
+
     let filtered = state.offlineDisabled 
-      ? slots.filter(s => s.session_type === 'Online')
-      : slots;
+      ? availableSlots.filter(s => s.session_type === 'Online')
+      : availableSlots;
 
     if (filterType === 'online') return filtered.filter(s => s.session_type === 'Online');
     if (filterType === 'offline') return filtered.filter(s => s.session_type === 'Offline');
@@ -413,6 +435,7 @@ $(document).ready(function() {
     })
     .done(result => {
       state.slots = result?.data || [];
+      state.blocked_intervals = result?.blocked_intervals || [];
       if (result?.user) $('#mentorName').text(result.user.name || 'Mentor Name');
       
       $('#bookingModal').modal('show');

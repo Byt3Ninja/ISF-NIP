@@ -612,4 +612,5 @@ return [
     'startups_selected' => 'الشركات المختارة',
     'no_startups_selected' => 'لم يتم اختيار أي شركه',
     'startups_will_be_affected' => 'شركات سوف يتم تغيير المرحلة فيها',
+    'MaxConcurrentSessionsReached' => 'تم الوصول إلى الحد الأقصى للجلسات التدريبية عبر الإنترنت في هذا الوقت. يرجى اختيار وقت آخر',
 ];

@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\Auditable;
+use Carbon\Carbon;
 
 class Settings extends Model
 {
