@@ -96,6 +96,13 @@ trait ZoomMeetingTrait
 
     public function create($data)
     {
+        if (Settings::hasReachedMaxConcurrentSessions($data['start_time'] ?? null, $data['duration'] ?? null)) {
+            return [
+                'success' => false,
+                'data'    => ['message' => __('settings.max_concurrent_sessions_reached')],
+            ];
+        }
+
         $path = 'users/me/meetings';
         $url = $this->retrieveZoomUrl();
 

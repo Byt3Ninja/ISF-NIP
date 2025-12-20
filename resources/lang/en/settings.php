@@ -228,4 +228,10 @@ return [
 	'ZOOM_CLIENT_ID_Placeholder' => 'Enter Zoom Client ID',
 	'ZOOM_CLIENT_SECRET_Placeholder' => 'Enter Zoom Client Secret',
 	'ZOOM_ACCOUNT_ID_Placeholder' => 'Enter Zoom Account ID',
+	'max_concurrent_sessions' => 'Maximum Concurrent Online Sessions',
+	'max_concurrent_sessions_placeholder' => 'Enter max concurrent sessions (e.g. 10)',
+	'max_concurrent_sessions_description' => 'Limit the number of simultaneous online sessions across the platform. Leave blank for no limit.',
+	'validation_max_concurrent_sessions_integer' => 'Maximum concurrent sessions must be an integer',
+	'validation_max_concurrent_sessions_between' => 'Maximum concurrent sessions must be between 1 and 99',
+	'max_concurrent_sessions_reached' => 'The maximum limit for concurrent online sessions has been reached. Please try again later.',
 ];

@@ -277,7 +277,7 @@ return [
     'Code'=>' Code ',
     'CoursCategories'=>' Categories ',
     'Tags'=>' Tags ',
-    'CoursLevel'=>' Cours Level ',
+    'CoursLevel'=>' Course Level ',
     'Quizs'=>' Quiz ',
     'Instractor'=>' Instractor ',
     'CoursStart'=>' Cours Start ',

@@ -192,6 +192,13 @@ class TeamsService implements OnlineMeetingServiceInterface
      */
     public function createMeeting($data)
     {
+        if (Settings::hasReachedMaxConcurrentSessions($data['start_time'] ?? null, $data['duration'] ?? null)) {
+            return [
+                'success' => false,
+                'data'    => __('settings.max_concurrent_sessions_reached'),
+            ];
+        }
+
         $user = Auth::user();
 
         try{
