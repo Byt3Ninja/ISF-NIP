@@ -553,6 +553,7 @@ class SettingsController extends Controller
 			$updateSittings->allow_offline_sessions = $allow_offline_sessions;
 			$updateSittings->default_offline_session_location = $default_offline_session_location;
 			$updateSittings->map_location = $map_location;
+			$updateSittings->max_concurrent_sessions = $request->max_concurrent_sessions;
 			$updateSittings->save();
 		}
 		if( strtolower($Meeting) == 'zoom' )
@@ -563,6 +564,7 @@ class SettingsController extends Controller
 			$updateSittings->allow_offline_sessions = $allow_offline_sessions;
 			$updateSittings->default_offline_session_location = $default_offline_session_location;
 			$updateSittings->map_location = $map_location;
+			$updateSittings->max_concurrent_sessions = $request->max_concurrent_sessions;
 			$updateSittings->save();
 		}
 

@@ -23,7 +23,7 @@
     ['teamMembers', 'ti-users', __('settings.teamMembers')],
     ['WhatsApp', 'ti-brand-whatsapp', __('admin.WhatsApp')],
     ['smtp', 'ti-mail', 'SMTP'],
-    ['notifications', 'ti-bell', __('admin.Notifications')],
+    ['notifications', 'ti-bell', __('admin.notifications')],
     // ['Schedule', 'ti-calendar-bolt', __('admin.Schedule')],
   ])->map(function ($tab) {
     return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];

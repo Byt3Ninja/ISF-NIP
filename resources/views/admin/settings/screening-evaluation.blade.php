@@ -17,8 +17,19 @@
     <!-- Screamer Warning -->
 
     
-    <div>
-      <div class="d-flex align-items-center gap-4 mb-4">
+    <div id="model-validation-summary" style="display: none;" class="mb-3"></div>
+    <div id="model-editor" class="mt-4"></div>
+    
+    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+      <div>
+        @if( $_user->ableTo('screening.evaluation_add_criteria') && $status == 'draft' )
+        <button id="add-category-btn" class="btn btn-label-primary">
+          <i class="fas fa-plus me-2"></i> {{ __('cycles.AddNewCriteria') }}
+        </button>
+        @endif
+      </div>
+
+      <div class="d-flex align-items-center gap-2">
         @if( $_user->ableTo('screening.evaluation_save_draft', $permissions) && $status == 'draft' )
         <button id="draft-model-btn" class="btn btn-light">
           <i class="fas fa-save me-2"></i> {{ __('cycles.SaveDraft') }}
@@ -36,7 +47,6 @@
           @endif
         @endif
       </div>
-      <div id="model-validation-summary" style="display: none;"></div>
     </div>
 
     <div id="model-editor" class="mt-4"></div>
