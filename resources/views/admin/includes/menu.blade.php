@@ -294,7 +294,7 @@
       >
         <a href="{{ route('mentorships.sessions_list_detailed') }}" class="menu-link">
           <i class="menu-icon tf-icons ti ti-layout-kanban"></i>
-          <div>{{ __('mentor.mentorshipTasks.label') }}</div>
+          <div>{{ __('admin.tasks') }}</div>
         </a>
       </li>
       @endif
