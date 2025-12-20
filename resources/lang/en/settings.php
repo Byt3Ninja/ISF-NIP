@@ -237,4 +237,5 @@ return [
 	'add_new_tag' => 'Add New Tag',
 	'edit_tag' => 'Edit Tag',
 	'tag_name' => 'Tag Name',
+	'Notification Channels' => 'Notification Channels',
 ];

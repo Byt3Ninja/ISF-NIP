@@ -712,6 +712,9 @@ class TrainingController extends Controller
 			$duration = $start->diffInMinutes($end);
 
 			if ($type == 'sessions') {
+				if (\App\Settings::hasReachedMaxConcurrentSessions($datetimeStamp, $duration)) {
+					return back()->with(['message' => __('cycles.MaxConcurrentSessionsReached'), 'class' => 'danger']);
+				}
 				$_session = $this->addorcreatSession($type, $datetime, $duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email);
 
 				if( $_session['success'] == false )

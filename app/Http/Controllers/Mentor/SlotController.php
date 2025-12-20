@@ -3,33 +3,16 @@
 namespace App\Http\Controllers\Mentor;
 
 use App\User;
-use App\Cycle;
 use Exception;
-use App\Company;
-use App\Surveys;
 use App\Schedule;
 use App\Settings;
 use Carbon\Carbon;
-use App\SurveyScopes;
-use App\CyclesMentors;
-use App\Events\WebMessage;
-use App\MentorshipRequest;
 use Illuminate\Http\Request;
-use App\Jobs\ExportMentorsData;
-use App\Events\RequestMentorship;
 use App\Services\WhatsAppService;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Resources\MentorResource;
-use App\Jobs\SendMentorshipRequestJob;
 use App\Factories\OnlineMeetingFactory;
-use App\Events\MentorshipSessionUpdated;
-use App\Jobs\SendMentorshipNotification;
-use App\Notifications\MentorshipSession;
-use App\Notifications\MentorshipRequestNotification;
 
 class SlotController extends Controller
 {
@@ -45,7 +28,8 @@ class SlotController extends Controller
 	public function index()
 	{
 			$settings = Settings::where('id', 1)->first();
-			$offline_allowed = $settings->allow_offline_sessions = 1 ? true : false;
+			$offline_allowed = $settings->allow_offline_sessions = 1 ? true : false;			
+			
 			return view('mentor.availability.index', compact('offline_allowed'));
 	}
 
@@ -87,66 +71,151 @@ class SlotController extends Controller
 	}
 
 
+	private function getBlockedIntervals($maxLimit)
+	{
+		if (!$maxLimit) return [];
+
+		$events = [];
+		$now = now();
+
+		// 1. Training Sessions
+		$sessions = \DB::table('training_sessions')
+			->whereNotNull('zoom_id')
+			->where('enddatetime', '>', (string)$now->timestamp)
+			->get(['datetime', 'enddatetime']);
+
+		foreach ($sessions as $s) {
+			$events[] = ['time' => (int)$s->datetime, 'type' => 1];
+			$events[] = ['time' => (int)$s->enddatetime, 'type' => -1];
+		}
+
+		// 2. Final Screenings
+		$screenings = \DB::table('finalscreenings')
+			->whereNotNull('zoom_id')
+			->whereRaw('DATE_ADD(datetime, INTERVAL duration MINUTE) > ?', [$now->toDateTimeString()])
+			->get(['datetime', 'duration']);
+
+		foreach ($screenings as $s) {
+			$start = Carbon::parse($s->datetime);
+			$end = (clone $start)->addMinutes($s->duration);
+			$events[] = ['time' => $start->timestamp, 'type' => 1];
+			$events[] = ['time' => $end->timestamp, 'type' => -1];
+		}
+
+		// 3. Mentorship Requests
+		$mentorships = \DB::table('mentorship_requests')
+			->whereNotNull('zoom_id')
+			->whereRaw('DATE_ADD(zoom_date, INTERVAL period MINUTE) > ?', [$now->toDateTimeString()])
+			->get(['zoom_date', 'period']);
+
+		foreach ($mentorships as $m) {
+			$start = Carbon::parse($m->zoom_date);
+			$end = (clone $start)->addMinutes($m->period);
+			$events[] = ['time' => $start->timestamp, 'type' => 1];
+			$events[] = ['time' => $end->timestamp, 'type' => -1];
+		}
+
+		// Sort events
+		usort($events, function ($a, $b) {
+			if ($a['time'] == $b['time']) {
+				return $a['type'] - $b['type']; // -1 (end) comes before 1 (start)
+			}
+			return ($a['time'] < $b['time']) ? -1 : 1;
+		});
+
+		$blocked = [];
+		$current = 0;
+		$startBlocked = null;
+
+		foreach ($events as $event) {
+			$prev = $current;
+			$current += $event['type'];
+
+			if ($prev < $maxLimit && $current >= $maxLimit) {
+				$startBlocked = $event['time'];
+			} else if ($prev >= $maxLimit && $current < $maxLimit) {
+				if ($startBlocked !== null) {
+					$blocked[] = [
+						'start' => $startBlocked,
+						'end' => $event['time']
+					];
+					$startBlocked = null;
+				}
+			}
+		}
+
+		return $blocked;
+	}
+
 	public function getSlots(Request $request, $id = null)
 	{
-			$schedules = Schedule::where('user_id', $id ?? auth()->id())->where('date', '>=', date('Y-m-d'))->get();
+		$settings = Settings::where('id', 1)->first();
+		$offline_allowed = $settings ? ($settings->allow_offline_sessions = 1 ? true : false) : false;
 
-			// Active-only filter
-			if ($request->has('active_only') && $request->active_only == 'true') {
-					$schedules = Schedule::where('active', 1)
-							->where('user_id', $id ?? auth()->id())
-							->get();
+		$schedules = Schedule::where('user_id', $id ?? auth()->id())->where('date', '>=', date('Y-m-d'))->get();
+
+		// Active-only filter
+		if ($request->has('active_only') && $request->active_only == 'true') {
+			$schedules = Schedule::where('active', 1)
+				->where('user_id', $id ?? auth()->id())
+				->get();
+		}
+
+		$slots = collect(); // we will push items manually
+
+		foreach ($schedules as $item) {
+			$isWeekly = $item->type == 'Weekly';
+
+			if ($isWeekly) {
+				// cleanWeekday() must return an array of weekdays
+				$weekdays = $this->cleanWeekday($item->days);
+
+				foreach ($weekdays as $weekday) {
+					$slots->push([
+						'id'           => $item->id,
+						'weekday'      => $weekday,
+						'date'         => null,
+						'start_time'   => substr($item->tfrom, 0, 5),
+						'end_time'     => substr($item->tto, 0, 5),
+						'session_type' => $item->session_type,
+						'weekly'       => true,
+					]);
+				}
+			} else {
+				// Non-weekly: single slot per row
+				$slots->push([
+					'id'           => $item->id,
+					'weekday'      => null,
+					'date'         => $item->date ?? $item->dto,
+					'start_time'   => substr($item->tfrom, 0, 5),
+					'end_time'     => substr($item->tto, 0, 5),
+					'session_type' => $item->session_type,
+					'weekly'       => false,
+				]);
 			}
+		}
 
-			$slots = collect(); // we will push items manually
+		// Calculate blocked intervals
+		$settings = Settings::where('id', 1)->first();
+		$maxLimit = $settings ? (int)$settings->max_concurrent_sessions : 0;
+		$blockedIntervals = $this->getBlockedIntervals($maxLimit);
 
-			foreach ($schedules as $item) {
-					$isWeekly = $item->type == 'Weekly';
+		// If fetching for a mentor, include mentor info
+		if ($id) {
+			$user = User::find($id);
+			return response()->json([
+				'success' => true,
+				'user' => [
+					'id' => $user->id,
+					'name' => $user->name,
+				],
+				'data' => $slots,
+				'blocked_intervals' => $blockedIntervals,
+				'offline_allowed' => $offline_allowed,
+			], 200);
+		}
 
-					if ($isWeekly) {
-							// cleanWeekday() must return an array of weekdays
-							$weekdays = $this->cleanWeekday($item->days);
-
-							foreach ($weekdays as $weekday) {
-									$slots->push([
-											'id'           => $item->id,
-											'weekday'      => $weekday,
-											'date'         => null,
-											'start_time'   => substr($item->tfrom, 0, 5),
-											'end_time'     => substr($item->tto, 0, 5),
-											'session_type' => $item->session_type,
-											'weekly'       => true,
-									]);
-							}
-
-					} else {
-							// Non-weekly: single slot per row
-							$slots->push([
-									'id'           => $item->id,
-									'weekday'      => null,
-									'date'         => $item->date ?? $item->dto,
-									'start_time'   => substr($item->tfrom, 0, 5),
-									'end_time'     => substr($item->tto, 0, 5),
-									'session_type' => $item->session_type,
-									'weekly'       => false,
-							]);
-					}
-			}
-
-			// If fetching for a mentor, include mentor info
-			if ($id) {
-					$user = User::find($id);
-					return response()->json([
-							'success' => true,
-							'user' => [
-									'id' => $user->id,
-									'name' => $user->name,
-							],
-							'data' => $slots,
-					], 200);
-			}
-
-			return response()->json(['success' => true, 'data' => $slots], 200);
+		return response()->json(['success' => true, 'data' => $slots, 'blocked_intervals' => $blockedIntervals, 'offline_allowed' => $offline_allowed], 200);
 	}
 
 

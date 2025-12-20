@@ -619,4 +619,5 @@ return [
     'startups_selected' => 'Startups Selected',
     'no_startups_selected' => 'No Startups selected',
     'startups_will_be_affected' => 'Startups will be affected',
+    'MaxConcurrentSessionsReached' => 'The maximum number of online training sessions allowed at this time has been reached. Please select a different time slot.',
 ];
