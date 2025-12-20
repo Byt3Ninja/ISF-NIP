@@ -21,10 +21,14 @@ return [
   'Month' => 'Month',
   'Total customers' => 'Total customers',
   'New customers' => 'New customers',
+   'New customers this period' => 'New customers this period',
   'MoM growth' => 'MoM growth',
-  'Growth since first record' => 'Growth since first record',
-  'Average monthly growth' => 'Average monthly growth',
-  'Compound annual growth rate' => 'Compound annual growth rate',
+  'mixed' => 'Mixed',
+  'enterprise' => 'Enterprise',
+  'customer_type' => 'Customer Type',
+  'growth_since_first_record' => 'Growth since first record',
+  'average_monthly_growth' => 'Average monthly growth',
+  'compound_annual_growth_rate' => 'Compound annual growth rate',
   'Segment' => 'Segment',
   'Add Customer Record' => 'Add Customer Record',
   'customer_growth_record_added' => 'Customer growth record added',
@@ -482,4 +486,5 @@ return [
 
   'funding_stage' => 'Funding Stage',
   'development_stage' => 'Development Stage',
+  'notes' => 'Notes',
 ];

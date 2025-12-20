@@ -21,10 +21,14 @@ return [
   'Month' => 'الشهر',
   'Total customers' => 'مجموع العملاء',
   'New customers' => 'عملاء جدد',
+  'New customers this period' => 'عملاء جدد هذه الفترة',
   'MoM growth' => 'نمو شهري',
-  'Growth since first record' => 'نمو منذ السجل الأول',
-  'Average monthly growth' => 'نمو شهري متوسط',
-  'Compound annual growth rate' => 'نمو سنوي مضاعف',
+  'mixed' => 'متعدد',
+  'enterprise' => 'شركة',
+  'customer_type' => 'نوع العميل',
+  'growth_since_first_record' => 'نمو منذ السجل الأول',
+  'average_monthly_growth' => 'نمو شهري متوسط',
+  'compound_annual_growth_rate' => 'نمو سنوي مضاعف',
   'Segment' => 'القطاع',
   'Add Customer Record' => 'إضافة سجل عميل',
   'customer_growth_record_added' => 'تم إضافة سجل نمو العملاء',
@@ -484,4 +488,5 @@ return [
 
   'funding_stage' => 'مرحلة التمويل',
   'development_stage' => 'مرحلة التنمية',
+  'notes' => 'ملاحظات',
 ];

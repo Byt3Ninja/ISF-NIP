@@ -180,8 +180,12 @@ class ClientCompanyController extends Controller
             $growthSinceFirstRecord = (($last->total - $first->total) / $first->total) * 100;
             $growthSinceFirstRecord = round($growthSinceFirstRecord) . '%';
 
-            $avgMonthlyGrowth = pow(($last->total / $first->total), (1 / $intervals)) - 1;
-            $avgMonthlyGrowth = round($avgMonthlyGrowth * 100, 1) . '%';
+            if ($intervals == 0) {
+                $avgMonthlyGrowth = 0;
+            } else {
+                $avgMonthlyGrowth = pow(($last->total / $first->total), (1 / $intervals)) - 1;
+                $avgMonthlyGrowth = round($avgMonthlyGrowth * 100, 1) . '%';
+            }
 
             $compoundAnnualGrowthRate = pow(($last->total / $first->total), (1 / $years_count)) - 1;
             $compoundAnnualGrowthRate = round($compoundAnnualGrowthRate * 100, 1) . '%';
