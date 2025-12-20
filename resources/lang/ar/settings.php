@@ -237,4 +237,7 @@ return [
 	'validation_max_concurrent_sessions_integer' => 'يجب أن يكون الحد الأقصى للجلسات المتزامنة رقماً صحيحاً',
 	'validation_max_concurrent_sessions_between' => 'يجب أن يكون الحد الأقصى للجلسات المتزامنة بين 1 و 99',
 	'max_concurrent_sessions_reached' => 'تم الوصول إلى الحد الأقصى للجلسات المتزامنة عبر الإنترنت. يرجى المحاولة مرة أخرى لاحقاً.',
+	'add_new_tag' => 'أضف وسم جديد',
+	'edit_tag' => 'تعديل الوسم',
+	'tag_name' => 'اسم الوسم'
 ];

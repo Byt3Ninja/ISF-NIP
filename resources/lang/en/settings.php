@@ -234,4 +234,7 @@ return [
 	'validation_max_concurrent_sessions_integer' => 'Maximum concurrent sessions must be an integer',
 	'validation_max_concurrent_sessions_between' => 'Maximum concurrent sessions must be between 1 and 99',
 	'max_concurrent_sessions_reached' => 'The maximum limit for concurrent online sessions has been reached. Please try again later.',
+	'add_new_tag' => 'Add New Tag',
+	'edit_tag' => 'Edit Tag',
+	'tag_name' => 'Tag Name',
 ];

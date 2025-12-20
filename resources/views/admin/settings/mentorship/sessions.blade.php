@@ -9,6 +9,29 @@
   <!-- BEGIN: Content-->
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
+      <!-- Navigation Tabs -->
+			<nav class="nav-align-top mb-6">
+				@php
+					$tabs = [
+						['title' => __('cycles.All requests'), 'show' => 'all', 'icon' => 'bulb'],
+            ['title' => __('cycles.New requests only'), 'show' => '', 'icon' => 'brand-speedtest'],
+						['title' => __('cycles.approved requests'), 'show' => 'approved', 'icon' => 'circle-check'],
+            ['title' => __('cycles.disapproved requests'), 'show' => 'disapproved', 'icon' => 'playstation-x'],
+					]
+				@endphp
+				<ul class="nav nav-pills flex-column flex-sm-row gap-2 gap-lg-0">
+					@foreach($tabs as $tab)
+						<li class="nav-item">
+							<a href="/dashboard/mentorship/sessions?show={{ $tab['show'] }}" class="nav-link {{ Request::get('show') == $tab['show'] ? 'active' : '' }}">
+								<i class="ti ti-{{ $tab['icon'] }} me-2"></i>
+								{{ $tab['title'] }}
+							</a>
+						</li>
+					@endforeach
+				</ul>
+			</nav>
+			<!--/ Navigation Tabs -->
+
       <div class="content-body">
         <section id="alerts">
           @if (session()->has('message'))
@@ -28,8 +51,8 @@
         <section class="row">
           <div class="col-12">
             <div class="card">
-              <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-center border-bottom">
-                <h5 class="card-title mb-0 text-capitalize">
+              <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center border-bottom">
+                <h5 class="card-title mb-6 mb-md-0 text-capitalize">
                   {{ __('cycles.Mentorship Sessions') }}
                   @if (request()->show == 'all') 
                     ( {{ __('cycles.All requests') }} )
@@ -74,18 +97,18 @@
                       <th>{{ __('cycles.Mentor') }}</th>
                       <th>{{ __('cycles.Cycle') }}</th>
                       <th>{{ __('cycles.Rate/Comment') }}</th>
-                      <th class="text-nowrap">{{ __('cycles.Created At') }}</th>
-                      <th>{{ __('cycles.Date/Time') }}</th>
+                      <th>{{ __('mentor.session_type') }}</th>
                       <th>{{ __('cycles.Approved') }}</th>
                       <th>{{ __('cycles.Done') }}</th>
-                      <th>{{ __('mentor.session_type') }}</th>
+                      <th>{{ __('cycles.Date/Time') }}</th>
+                      <th class="text-nowrap">{{ __('cycles.Created At') }}</th>
                       <th>{{ __('cycles.Actions') }}</th>
                     </tr>
                   </thead>
                   <tbody>
                     @foreach ($sessions as $session)
                       <tr>
-                        <td>
+                        <td style="width: 130px;">
                           <a  href="/dashboard/companyProfile/{{ $session->user->company->id ?? '' }}" class="d-flex align-items-center" style="width: 130px;">
                             <img 
                               onerror="this.src='/images/logo-placeholder.png'"
@@ -93,8 +116,8 @@
                             <small class="text-dark">{{ $session->user->company->{'name_' . $l} ?? '' }}</small>
                           </a>
                         </td>
-                        <td>
-                          <div class="d-flex align-items-center" style="width: 130px;">
+                        <td style="width: 130px;">
+                          <div class="d-flex align-items-center">
                             <a href="/dashboard/users/{{ $session->user_id }}/edit">
                               @if( !in_array(env('APP_ENV', 'local'), ['local']) )
                               <img 
@@ -108,7 +131,7 @@
                             </div>
                           </div>
                         </td>
-                        <td>
+                        <td style="width: 130px;">
                           <a href="/dashboard/show/UserProfile/{{ $session->mentor->id }}" class="d-flex align-items-center" style="min-width: 130px;">
                             @if( !in_array(env('APP_ENV', 'local'), ['local']) )
                             <img 
@@ -118,53 +141,22 @@
                             <small class="text-dark">{{ $session->mentor->name ?? '' }}</small>
                           </a>
                         </td>
-                        <td style="width: 130px;">
-                          <small class="d-block">{{ optional($cycles->firstWhere('id', $session->cycle_id))->title }}</small>
+                        <td style="width: 120px;">
+                          <small>{{ optional($cycles->firstWhere('id', $session->cycle_id))->title }}</small>
                         </td>
-                        <td style="min-width: 200px; max-width: 300px;">
+                        <td style="min-width: 150px; max-width: 150px;">
                           <div class="d-flex align-items-center gap-1 mb-1">
                             <strong>{{ number_format($session->rating ?? 0, 1) }}</strong>
                             <i class="ti ti-star-filled ti-16px text-warning"></i>
                           </div>
 
-                          @if($session->comment)
-                            <p class="small text-muted d-block">{!! $session->comment !!}</p>
+                          @if($session->rate_comment)
+                            <p class="small text-muted d-block">{!! $session->rate_comment !!}</p>
                           @else
                             <small class="text-muted block">{{ __('admin.No comment provided') }}</small>
                           @endif
                         </td>
-                        <td class="text-nowrap" style="width: 100px;">
-                          <small>{{ $session->created_at ? $session->created_at->format('d-m-Y') : '' }}</small>
-                          <small class="d-block">{{ $session->created_at ? $session->created_at->format('H:i:s') : '' }}</small>
-                        </td>
-                        <td class="text-nowrap" style="min-width: 150px;">
-                          <small>{{ $session->zoom_date ? $session->zoom_date->format('d-m-Y') : '' }}</small>
-                          <small class="d-block">{{ $session->zoom_date ? $session->zoom_date->format('H:i:s') : '' }} ({{ $session->period ?? '' }}M)</small>
-                        </td>
-                        <td style="min-width: 100px;">
-                            @if( $session->approved )
-                            @if( $session->approved == 'Yes' )
-                            <span class="badge bg-label-success" >
-                              {{ __('admin.Yes') }}
-                            </span>
-                            @else
-                            <span class="badge bg-label-danger" >
-                              {{ __('admin.No') }}
-                            </span>
-                            @endif
-                            @else
-                            <span class="badge bg-label-warning" >
-                              {{ __('admin.Waiting') }}
-                            </span>
-                            @endif
-                          
-                        </td>
-                        <td style="min-width: 80px;">
-                          <span class="badge bg-label-{{ $session->done ? 'success' : 'danger' }}">
-                            {{ $session->done ? __('Yes') : __('No') }}
-                          </span>
-                        </td>
-                        <td style="min-width: 100px;">
+                        <td style="width: 80px;">
                           @php
                             $badgeColor = 'secondary';
                             $badgeIcon = 'screen-share';
@@ -180,6 +172,36 @@
                             <i class="ti ti-{{ $badgeIcon }} ti-16px me-1"></i>
                             {{ $session->session_type ?? __('admin.All') }}
                           </small>
+                        </td>
+                        <td style="width: 80px;">
+                          @if( $session->approved )
+                          @if( $session->approved == 'Yes' )
+                          <span class="badge bg-label-success" >
+                            {{ __('admin.Yes') }}
+                          </span>
+                          @else
+                          <span class="badge bg-label-danger" >
+                            {{ __('admin.No') }}
+                          </span>
+                          @endif
+                          @else
+                          <span class="badge bg-label-warning" >
+                            {{ __('admin.Waiting') }}
+                          </span>
+                          @endif
+                        </td>
+                        <td style="min-width: 80px;">
+                          <span class="badge bg-label-{{ $session->done ? 'success' : 'danger' }}">
+                            {{ $session->done ? __('Yes') : __('No') }}
+                          </span>
+                        </td>
+                        <td class="text-nowrap" style="min-width: 150px;">
+                          <small>{{ $session->zoom_date ? $session->zoom_date->format('d-m-Y') : '' }}</small>
+                          <small class="d-block">{{ $session->zoom_date ? $session->zoom_date->format('H:i:s') : '' }} ({{ $session->period ?? '' }}M)</small>
+                        </td>
+                        <td class="text-nowrap" style="width: 100px;">
+                          <small>{{ $session->created_at ? $session->created_at->format('d-m-Y') : '' }}</small>
+                          <small class="d-block">{{ $session->created_at ? $session->created_at->format('H:i:s') : '' }}</small>
                         </td>
                         <td style="min-width: 280px;">
                           <div class="d-flex flex-wrap gap-1">

@@ -24,8 +24,8 @@ return [
         'comments'=>'التعليقات',
         'no comments'=>'لا توجد تعليقات حتي الان',
         'completedTasks'=>'عدد المهام المنتهية',
-        'nonCompletedTasks'=>'عدد المهام الغير منتهية'
-
+        'nonCompletedTasks'=>'عدد المهام الغير منتهية',
+        'comment_already_exists' => 'تم بالفعل ارسال هذا التعليق من قبل',
     ],
     'mentorshipRequests'=>[
         'all'=>'عرض جلسات الارشارد',

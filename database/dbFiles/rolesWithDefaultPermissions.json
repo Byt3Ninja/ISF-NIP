@@ -8175,5 +8175,21 @@
                 ]
             }
         ]
+    },
+    {
+        "name": "Tasks Management",
+        "description": "Tasks management",
+        "permissions": [
+            {
+                "name": "tasks.index",
+                "description": "View tasks list",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }
+        ]
     }
 ]

@@ -184,4 +184,5 @@ return [
     'Complete Prerequisites & Join' => 'إكمال المتطلبات والانضمام',
     'Complete Prerequisites' => 'إكمال المتطلبات',
     'Type' => 'نوع',
+    'Session_Type' => 'نوع الجلسه'
 ];

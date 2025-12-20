@@ -75,22 +75,26 @@ class CycleCustomPagesController extends Controller
 	{
 		if( $id == $request->cycleId )
 		{
-			$request->validate([
-				'cycleId' => 'required|exists:cycles,id',
+			$validated = $request->validate([
+				'cycleId' => 'required|integer|exists:cycles,id',
 				'sorting' => 'required|array',
+				'sorting.*' => 'integer|exists:cycle_custom_pages,id',
 			]);
-			$cycle = Cycle::find($request->cycleId);
+			$cycleId = (int) $validated['cycleId'];
+			$sorting = $validated['sorting'];
+			$cycle = Cycle::find($cycleId);
 			$custom_pages = $cycle->custom_pages;
-			foreach( $request->sorting as $key => $value )
+			$custom_pages = $custom_pages->whereIn('id', $sorting)->values();
+
+			$sorting = collect($sorting)->map(function($value) { return intval($value); })->values();
+			foreach( $custom_pages as $page )
 			{
-				$page = $custom_pages->where('id', $value)->first();
-				if( !empty( $page ) )
-				{
-					$page->row_no = $key + 1;
-					$page->save();
-				}
+				$get_key = $sorting->search( intval( $page->id ) );
+				if( $get_key === false ) { continue; }
+				$page->row_no = $get_key + 1;
+				$page->save();
 			}
-			$custom_pages = Cycle::find($request->cycleId)->custom_pages;
+			$custom_pages = Cycle::find($cycleId)->custom_pages;
 			$custom_pages = $custom_pages->sortBy('row_no')->values();
 			return response()->json(['status' => true, 'message' => 'Custom page reordered successfully', 'pages' => $custom_pages]);
 		} else { return response()->json(['status' => false, 'message' => 'You can not re-order custom page for this program']); }
