@@ -88,6 +88,12 @@ class ScreeningEvaluation extends Model
 				return $category;
 			})->filter(function( $category ) { return !is_null( $category->id ); })->values();
 			$evaluation->categories = $categories;
+			
+			// Fetch screening guidelines from the associated cycle
+			$step = Step::with('cycle')->find($_e->step_id);
+			$evaluation->screening_guidelines = $step && $step->cycle ? $step->cycle->program_guideline : null;
+			$evaluation->screening_guidelines_file = $step && $step->cycle ? $step->cycle->program_guideline_file : null;
+
 			return $evaluation;
 		})->values();
 		if( !is_array( $id ) ) { $evaluationForm = $evaluationForm->first(); }
