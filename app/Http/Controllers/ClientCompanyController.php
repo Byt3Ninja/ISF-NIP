@@ -276,18 +276,27 @@ class ClientCompanyController extends Controller
             'avgAttendanceRate'    => 92.5,
         ];
         // Financial Projection
-        $valuationDate = date('Y-m-d');
-        $valuationYear = (int) date('Y', strtotime($valuationDate));
+        $availableValuationDates = FinancialProjection::where('company_id', $company->id)
+            ->select('date_validate')
+            ->distinct()
+            ->orderBy('date_validate', 'desc')
+            ->pluck('date_validate')
+            ->toArray();
 
+        $valuationDate = request('valuation_date');
+        if (!$valuationDate || !in_array($valuationDate, $availableValuationDates)) {
+            $valuationDate = !empty($availableValuationDates) ? $availableValuationDates[0] : date('Y-m-d');
+        }
+
+        $periods = [];
+        $valuationYear = (int) date('Y', strtotime($valuationDate));
+        
         $financials = FinancialProjection::where('company_id', $company->id)
-            ->whereBetween('year', [
-                $valuationYear - 1,
-                $valuationYear + 2
-            ])
+            ->where('date_validate', $valuationDate)
             ->orderBy('year')
             ->get()
             ->keyBy('year');
-        $periods = [];
+
         $map = function ($fp) {
             return [
                 'revenue'        => (float) ($fp->revenues ?? 0),
@@ -305,24 +314,29 @@ class ClientCompanyController extends Controller
                 'capex'          => (float) ($fp->capital_expenditures ?? 0),
                 'workingCapital' => (float) ($fp->working_capital ?? 0),
                 'totalDebt'      => (float) ($fp->debt_end_year ?? 0),
+                'receivables'    => (float) ($fp->receivables ?? 0),
+                'inventory'      => (float) ($fp->inventory ?? 0),
+                'payables'       => (float) ($fp->payables ?? 0),
             ];
         };
 
-        foreach ($financials as $year => $fp) {
+        // We expect 4 years: Past (Year - 1), Year 1 (Year), Year 2 (Year + 1), Year 3 (Year + 2)
+        // But we should just iterate over what we have and label them relative to valuation year
+        
+        // Define the expected years based on valuation year
+        $expectedYears = [
+            $valuationYear - 1 => ['key' => 'past', 'label' => __('startup.financial.past_year')],
+            $valuationYear => ['key' => 'year1', 'label' => __('startup.financial.year_1')],
+            $valuationYear + 1 => ['key' => 'year2', 'label' => __('startup.financial.year_2')],
+            $valuationYear + 2 => ['key' => 'year3', 'label' => __('startup.financial.year_3')],
+        ];
 
-            if ($year < $valuationYear) {
-                $key   = 'past';
-                $label = __('startup.financial.past_year');
-            } else {
-                $index = ($year - $valuationYear) + 1;
-                $key   = 'year' . $index;
-                $label = __('startup.financial.year_' . $index);
-            }
-
-            $periods[$key] = [
-                'label' => $label,
-                'sub'   => ($year - 1) . ' - ' . $year,
-                'data'  => $map($fp),
+        foreach ($expectedYears as $year => $meta) {
+            $data = isset($financials[$year]) ? $map($financials[$year]) : $map(new FinancialProjection());
+            $periods[$meta['key']] = [
+                'label' => $meta['label'],
+                'sub'   => $year, // Just the year number
+                'data'  => $data,
             ];
         }
 
@@ -405,6 +419,7 @@ class ClientCompanyController extends Controller
         'programsSummary',
         'periods',
         'valuationDate',
+        'availableValuationDates',
         'achievements'));
         // } catch (Exception $e) {
         //     //log what happend
