@@ -18,6 +18,18 @@
     .fc-today-button {
       text-transform: capitalize !important;
     }
+    .slot-popup {
+      position: absolute;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 8px 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      z-index: 9999;
+      pointer-events: none;
+      font-size: 12px;
+      white-space: nowrap;
+    }
   </style>
 @stop
 
@@ -362,7 +374,7 @@
             events: events,
             eventContent: function(arg) {
                 let arrayOfDomNodes = [];
-                
+
                 let titleEl = document.createElement('span');
                 titleEl.innerHTML = arg.event.title;
                 arrayOfDomNodes.push(titleEl);
@@ -374,6 +386,39 @@
                 }
 
                 return { domNodes: arrayOfDomNodes };
+            },
+            eventMouseEnter: function(arg) {
+                const event = arg.event;
+                const startTime = moment(event.start);
+                const endTime = event.end ? moment(event.end) : moment(event.start).add(1, 'hour'); // fallback if no end time
+                const duration = endTime.diff(startTime, 'minutes');
+                const repeatsStatus = event.extendedProps.weekly ? '{{ __("mentor.repeats_weekly") }}' : '{{ $l == "en" ? "Does not repeat" : "لا يتكرر" }}';
+
+                // Create or get popup element
+                let popup = document.querySelector('.slot-popup');
+                if (!popup) {
+                    popup = document.createElement('div');
+                    popup.className = 'slot-popup';
+                    document.body.appendChild(popup);
+                }
+
+                // Set popup content
+                popup.innerHTML = `
+                    <div><strong>{{ $l == "en" ? "Duration" : "المدة" }}:</strong> ${duration} {{ __("mentor.min") }}</div>
+                    <div><strong>{{ $l == "en" ? "Repeats Weekly" : "تتكرر اسبوعيا" }}:</strong> ${repeatsStatus}</div>
+                `;
+
+                // Position popup below the event
+                const rect = arg.el.getBoundingClientRect();
+                popup.style.left = (rect.left + rect.width / 2) + 'px';
+                popup.style.top = (rect.bottom + 5) + 'px';
+                popup.style.display = 'block';
+            },
+            eventMouseLeave: function(arg) {
+                const popup = document.querySelector('.slot-popup');
+                if (popup) {
+                    popup.style.display = 'none';
+                }
             }
         });
 
