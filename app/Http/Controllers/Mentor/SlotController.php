@@ -3,33 +3,16 @@
 namespace App\Http\Controllers\Mentor;
 
 use App\User;
-use App\Cycle;
 use Exception;
-use App\Company;
-use App\Surveys;
 use App\Schedule;
 use App\Settings;
 use Carbon\Carbon;
-use App\SurveyScopes;
-use App\CyclesMentors;
-use App\Events\WebMessage;
-use App\MentorshipRequest;
 use Illuminate\Http\Request;
-use App\Jobs\ExportMentorsData;
-use App\Events\RequestMentorship;
 use App\Services\WhatsAppService;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Resources\MentorResource;
-use App\Jobs\SendMentorshipRequestJob;
 use App\Factories\OnlineMeetingFactory;
-use App\Events\MentorshipSessionUpdated;
-use App\Jobs\SendMentorshipNotification;
-use App\Notifications\MentorshipSession;
-use App\Notifications\MentorshipRequestNotification;
 
 class SlotController extends Controller
 {
@@ -45,7 +28,8 @@ class SlotController extends Controller
 	public function index()
 	{
 			$settings = Settings::where('id', 1)->first();
-			$offline_allowed = $settings->allow_offline_sessions = 1 ? true : false;
+			$offline_allowed = $settings->allow_offline_sessions = 1 ? true : false;			
+			
 			return view('mentor.availability.index', compact('offline_allowed'));
 	}
 
@@ -165,6 +149,9 @@ class SlotController extends Controller
 
 	public function getSlots(Request $request, $id = null)
 	{
+		$settings = Settings::where('id', 1)->first();
+		$offline_allowed = $settings ? ($settings->allow_offline_sessions = 1 ? true : false) : false;
+
 		$schedules = Schedule::where('user_id', $id ?? auth()->id())->where('date', '>=', date('Y-m-d'))->get();
 
 		// Active-only filter
@@ -224,10 +211,11 @@ class SlotController extends Controller
 				],
 				'data' => $slots,
 				'blocked_intervals' => $blockedIntervals,
+				'offline_allowed' => $offline_allowed,
 			], 200);
 		}
 
-		return response()->json(['success' => true, 'data' => $slots, 'blocked_intervals' => $blockedIntervals], 200);
+		return response()->json(['success' => true, 'data' => $slots, 'blocked_intervals' => $blockedIntervals, 'offline_allowed' => $offline_allowed], 200);
 	}
 
 

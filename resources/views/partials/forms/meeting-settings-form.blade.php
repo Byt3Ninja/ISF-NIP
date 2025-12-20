@@ -218,7 +218,7 @@
             id="allow_offline_sessions"
             type="checkbox"
             name="allow_offline_sessions"
-            value="1"
+            value="{{ $Title->allow_offline_sessions ? $Title->allow_offline_sessions : '1' }}"
             {{ $Title->allow_offline_sessions == 1 ? 'checked' : '' }}
           />
         </div>
