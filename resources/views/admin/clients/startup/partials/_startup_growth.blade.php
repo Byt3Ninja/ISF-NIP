@@ -31,7 +31,7 @@
       <i class="ti ti-plus me-2"></i> {{ __('admin.Add New') }}
     </button>
   </div>
-  <table class="datatables-basic table">
+  <table class="datatables-basic table" id="growthTable">
     <thead class="table-light">
       <tr>
         <th>{{ __('startup.Year') }}</th>
@@ -43,7 +43,7 @@
       </tr>
     </thead>
     <tbody>
-      @forelse( $growth_records as $record )
+      @foreach( $growth_records as $record )
         <tr>
           <td>{{ $record->year }}</td>
           <td>{{ __('startup.mini_month_' . $record->month) }}</td>
@@ -52,11 +52,7 @@
           <td>{{ $record->MoM }}</td>
           <td>{{ strtoupper( $record->segment ) }}</td>
         </tr>
-      @empty
-        <tr>
-          <td colspan="6" class="text-center">{{ __('admin.No_records_found') }}</td>
-        </tr>
-      @endforelse
+      @endforeach
     </tbody>
   </table>
 </div>
@@ -120,3 +116,25 @@
 		</div>
 	</div>
 </div>
+
+@push('scripts')
+<script>
+  $(document).ready(function(){
+    $('#growthTable').DataTable({
+      pageLength: 10,
+      responsive: true,
+      ordering: true,
+      searching: true,
+      @if (app()->getLocale() == 'ar')
+      ,language: {
+        search: 'ابحث:',
+        lengthMenu: 'أظهر _MENU_ مدخلات',
+        info: 'إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل',
+        paginate: { previous: 'السابق', next: 'التالي' },
+        emptyTable: 'لا توجد بيانات'
+      }
+      @endif
+    });
+  });
+</script>
+@endpush
