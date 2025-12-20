@@ -1342,17 +1342,18 @@ class CyclesController extends Controller
         }
     }
 
-    private function storeUploadedFile(Request $request, string $inputName, string $subfolder = '')
-    {
-        if ($request->hasFile($inputName)) {
-            $file = $request->file($inputName);
-            $filename  = $file->getClientOriginalName();
-            $path = $subfolder ? "$subfolder/$filename" : $filename;
+    // private function storeUploadedFile(Request $request, string $inputName, string $subfolder = '')
+    // {
+    //     if( !$request->hasFile( $inputName ) ) { return null; }
+    //     $file = $request->file( $inputName );
+    //     abort_unless($file->isValid(), 400);
 
-            Storage::disk('public_uploads')->put($path, file_get_contents($file->getRealPath()));
+    //     $raw_name = str_replace('.' . $file->getClientOriginalExtension(), '', $file->getClientOriginalName()) . '-' . $file->getClientOriginalExtension();
+    //     $filename = time() . '_' . $raw_name . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
 
-            return $path;
-        }
-        return null;
-    }
+    //     $path = $subfolder ? "$subfolder/$filename" : $filename;
+    //     Storage::disk('public_uploads')->put($path, file_get_contents($file->getRealPath()));
+
+    //     return $path;
+    // }
 }

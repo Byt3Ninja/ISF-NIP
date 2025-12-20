@@ -8,6 +8,7 @@ use Exception;
 use App\Company;
 use App\Surveys;
 use App\Schedule;
+use App\Settings;
 use Carbon\Carbon;
 use App\SurveyScopes;
 use App\CyclesMentors;
@@ -21,10 +22,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\MentorResource;
 use App\Jobs\SendMentorshipRequestJob;
 use App\Factories\OnlineMeetingFactory;
 use App\Events\MentorshipSessionUpdated;
-use App\Http\Resources\MentorResource;
 use App\Jobs\SendMentorshipNotification;
 use App\Notifications\MentorshipSession;
 use App\Notifications\MentorshipRequestNotification;
@@ -135,10 +136,11 @@ class MentorsController extends Controller
 				return true; // في حالة عدم تحديد أي فلتر
 			});
 		}
-
-
-
-		return view('admin.settings.mentorship.assign', compact('mentors', 'id', 'cList', 'cycles'));
+			
+			$settings = Settings::where('id', 1)->first();
+			$offline_allowed = $settings->allow_offline_sessions = 1 ? true : false;
+		dd($offline_allowed);
+		return view('admin.settings.mentorship.assign', compact('mentors', 'id', 'cList', 'cycles', 'offline_allowed'));
 	}
 
 	public function assign($id, Request $request)
@@ -437,7 +439,7 @@ class MentorsController extends Controller
 			}
 
 		}else{
-
+			// dd($request->all());
 				$this->meetingService = OnlineMeetingFactory::create();
 				$datefrom = $request->date . ' ' . $request->timeFrom;
 				$dateto = $request->date . ' ' . $request->timeTo;
@@ -448,7 +450,7 @@ class MentorsController extends Controller
 				}
 				$dayName = Carbon::parse($request->date)->format('l');
 
-				$schedules_q = "SELECT * FROM schedules WHERE user_id = ? AND `days` LIKE ?  AND tfrom <= ? AND tto >= ?";
+				$schedules_q = "SELECT * FROM schedules WHERE user_id = ? AND `days` LIKE ? AND tfrom <= ? AND tto >= ?";
 				$schedules = DB::select($schedules_q, [
 					$request->mentorid,
 					'%' . $dayName . '%',
@@ -456,7 +458,7 @@ class MentorsController extends Controller
 					$request->timeTo
 				]);
 				if ($schedules == null) {
-					return back()->with(['msg' => 'mentor_not_available_in_this_time']);
+					return back()->with(['class' => 'danger','msg' => 'mentor_not_available_in_this_time']);
 				}
 				if ($request->mentorid) {
 					
@@ -605,8 +607,8 @@ class MentorsController extends Controller
 				return $q->where('organization_id', $organization_id);
 			})->when($request->start_date && $request->end_date, function ($q) use ($request) {
 				// التأكد من أن التواريخ متوافقة مع التنسيق المناسب
-			$startDate = Carbon::parse($request->start_date)->startOfDay();
-            $endDate = Carbon::parse($request->end_date)->endOfDay();
+				$startDate = Carbon::parse($request->start_date)->startOfDay();
+				$endDate = Carbon::parse($request->end_date)->endOfDay();
 
 				// البحث باستخدام التاريخ من وإلى
 				return $q->whereBetween('zoom_date', [$startDate, $endDate]);
@@ -684,7 +686,7 @@ class MentorsController extends Controller
 		} else {
 				$cycles = \App\Cycle::all();
 		}
-
+		// dd($sessions[300]);
 		return view('admin.settings.mentorship.sessions', compact('sessions', 'cycles'));
 	}
 

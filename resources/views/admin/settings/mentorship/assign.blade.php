@@ -38,9 +38,9 @@
             <p class="mb-0">{{ __('cycles.manage_mentor_description2') }}</p>
           </div>
           <div class="card mb-6">
-            <div class="card-body">
-              <div class="d-flex flex-wrap justify-content-between align-items-md-center">
-                <div class="form-group d-flex align-items-center gap-2">
+            <div class="card-body overflow-x-hidden text-nowrap">
+              <div class="d-flex flex-wrap flex-lg-nowrap justify-content-between align-items-md-center">
+                <div class="form-group d-flex flex-column flex-lg-row align-items-lg-center gap-2 mb-6 mb-lg-0 me-lg-4">
                   <label class="form-label fs-6">{{ __('cycles.Select_Cycle') }}:</label>
                   <select id="cstep" class="select2 form-select" style="width: 350px;"
                     onchange="window.open('/dashboard/mentorship/assign/'+this.options[this.selectedIndex].value,'_self');">
@@ -54,7 +54,7 @@
                     @endif
                   </select>
                 </div>
-                <div class="d-flex align-items-center gap-3">
+                <div class="d-flex flex-wrap flex-lg-nowrap align-items-center gap-3">
                   <a class="btn btn-label-primary" href="/dashboard/cycles/{{ $id }}">
                     <i class="ti ti-components me-2"></i> {{ __('cycles.Manage Cycle') }}
                   </a>
@@ -73,8 +73,8 @@
         <!-- Main Content -->
         <section>
           <div class="card">
-            <div class="card-header d-flex flex-wrap justify-content-between align-items-md-center border-bottom">
-              <h5 class="card-title m-0">
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-lg-center border-bottom">
+              <h5 class="card-title mb-6 mb-lg-0">
                 {{ __('cycles.assign_mentors_to') }}
                 <span class="fw-bold ms-1">
                   {{ $cycles->where('id', request('id'))->pluck('title')->implode(', ') }}
@@ -129,7 +129,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h6 class="mb-0 fw-bold"><i class="ti ti-tags me-1"></i> {{ __('cycles.mentors_selected') }}: <span id="selected-count">0</span></h6>
-                        <button type="button" class="btn btn-sm btn-label-danger" id="clearAllBtn" style="display:none;">{{ __('cycles.clear_all') }}</button>
+                        <button type="button" class="btn btn-sm btn-label-danger d-none" id="clearAllBtn">{{ __('cycles.clear_all') }}</button>
                     </div>
                     <div id="selected-mentors-container" class="d-flex flex-wrap gap-2" style="width: 90%;">
                         <span class="text-muted fst-italic" id="no-selection-msg">{{ __('cycles.no_mentors_selected') }}.</span>
@@ -468,9 +468,9 @@
             selectedContainer.innerHTML = '';
             if (selectedMentors.length === 0) {
                 selectedContainer.appendChild(noSelectionMsg);
-                clearAllBtn.style.display = 'none';
+                clearAllBtn.classList.add('d-none');
             } else {
-                clearAllBtn.style.display = 'block';
+                clearAllBtn.classList.remove('d-none');
                 selectedMentors.forEach(id => {
                     const tag = document.createElement('span');
                     tag.className = 'badge bg-label-primary selected-tag small d-flex align-items-center';

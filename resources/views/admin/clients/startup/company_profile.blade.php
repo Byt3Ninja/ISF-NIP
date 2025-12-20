@@ -146,62 +146,15 @@
 @php
 $env = env('APP_ENV');
 
-$pills = 
-  $env == 'dev' 
-    ? ['overview', 'milestones', 'team', 'pitch_deck', 'programs_summary']
-    : ['overview', 'milestones', 'team', 'pitch_deck'];
+$pills = ['overview', 'milestones', 'team', 'pitch_deck', 'programs_summary', 'financial_report'];
 
-  $pillsIcons = 
-    $env == 'dev' 
-      ? ['briefcase', 'target', 'users', 'file-text', 'components']
-      : ['briefcase', 'target', 'users', 'file-text'];
+$pillsIcons = ['briefcase', 'target', 'users', 'file-text', 'components', 'database-dollar'];
 
 if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('registered') && $company?->id === $_user?->company_id ) )
 {
   $pills[] = 'startup_growth';
   $pillsIcons[] = 'chart-dots-2';
 }
-// Static Programs List
-// $programs = [
-//     (object)[
-//         'id' => 1,
-//         'name' => 'Full Stack Development Bootcamp',
-//         'organization' => (object)['name' => 'Tech Academy'],
-//         'cohort' => (object)['name' => 'Cohort A'],
-//         'start_date' => \Carbon\Carbon::parse('2026-01-10'),
-//         'completion_date' => \Carbon\Carbon::parse('2024-06-20'),
-//         'final_screening_score' => 85,
-//         'status' => 'upcoming',
-//     ],
-//     (object)[
-//         'id' => 2,
-//         'name' => 'Digital Marketing Training',
-//         'organization' => (object)['name' => 'Marketing Institute'],
-//         'cohort' => (object)['name' => 'Batch 5'],
-//         'start_date' => \Carbon\Carbon::parse('2024-02-01'),
-//         'completion_date' => \Carbon\Carbon::parse('2024-05-01'),
-//         'final_screening_score' => 78,
-//         'status' => 'completed',
-//     ],
-//     (object)[
-//         'id' => 3,
-//         'name' => 'Project Management Mentorship',
-//         'organization' => (object)['name' => 'PMI Center'],
-//         'cohort' => (object)['name' => 'Spring 2024'],
-//         'start_date' => \Carbon\Carbon::parse('2024-03-15'),
-//         'completion_date' => null,
-//         'final_screening_score' => 92,
-//         'status' => 'ongoing',
-//     ],
-// ];
-
-// Static Summary Values
-$programsSummary = [
-  'totalMentorshipHours' => '42:30',
-  'totalTrainingHours'   => '56:15',
-  'avgFinalScreening'    => 85.0,
-  'avgAttendanceRate'    => 92.5,
-];
 @endphp
 
 @section('content')
@@ -268,7 +221,7 @@ $programsSummary = [
 
     @include('admin.clients.startup.partials._startup_info')
     
-    <nav class="nav-align-top mb-6">
+    <nav class="nav-align-top mb-8">
       <ul class="nav nav-pills flex-column flex-md-row gap-2 gap-lg-0" role="tablist">
         @foreach ($pills as $key => $pill)
           <li class="nav-item">
@@ -323,6 +276,11 @@ $programsSummary = [
       <!-- Programs Section -->
       <section class="tab-pane fade" id="programs_summary" role="tabpanel" aria-labelledby="programs-summery-tab">
         @include('admin.clients.startup.partials._startup_programs')
+      </section>
+      
+      <!-- Financial Section -->
+      <section class="tab-pane fade" id="financial_report" role="tabpanel" aria-labelledby="financial-report-tab">
+        @include('admin.clients.startup.partials._startup_financial_report')
       </section>
     </div>
     {{-- <section class="mt-6 px-4">

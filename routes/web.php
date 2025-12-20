@@ -61,6 +61,7 @@ Route::get('/reminderMentorShipRequest', 'IndexController@reminderMentorShipRequ
 
 
 /// Frontend routes ///
+Route::get('programs/teams/{files?}', 'HackathonController@get_team_media')->where('files', '.*');
 Route::get('lang/{locale}', 'IndexController@lang');
 Route::get('js-translations/{locale?}', 'IndexController@getJsTranslations')->name('js.translations');
 Route::get('/', 'IndexController@home');
@@ -495,6 +496,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::resource('roles', 'RolesController');
     //Faqs
     Route::resource('faqs', 'FaqsController');
+
+    // Tasks
+    Route::resource('tasks', 'TasksController');
 
     // Forms
     Route::get('forms', 'FormController@index')->name('forms.index');

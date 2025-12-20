@@ -36,7 +36,7 @@
             'screening' => ['label' => __('admin.Screening'), 'icon' => 'ti ti-scale'],
             'finalScreening' => ['label' => __('admin.Final Screening'), 'icon' => 'ti ti-gavel'],
             'cycles' => ['label' => __('admin.Cycles'), 'icon' => 'ti ti-components'],
-            'companies' => ['label' => __('admin.Companies_hub'), 'icon' => 'ti ti-building'],
+            'companies' => ['label' => __('admin.Companies_hub'), 'icon' => 'ti ti-building-skyscraper'],
             'mentorSurveys' => ['label' => __('admin.Surveys_Mentor'), 'icon' => 'ti ti-clipboard-check'],
             'startupSurveys' => ['label' => __('cycles.Startup_Surveys'), 'icon' => 'ti ti-clipboard-list'],
           ];

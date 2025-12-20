@@ -1,4 +1,4 @@
-<section class="mb-6">
+<section class="mb-8">
   <!-- Company Info Card -->
   <div class="card">
     <div class="card-body">
@@ -284,7 +284,9 @@
                            class="text-secondary text-decoration-none hover-primary"
                            data-bs-toggle="tooltip" data-bs-placement="top" title="Open in Google Maps">
                           <i class="ti ti-external-link ti-xs me-1"></i>
-                          {{ optional($company->state)->{'name_' . $l} }}, {{ optional($company->city)->{'name_' . $l} }}, {{ optional($company->country)->{'name_' . $l} }}
+                          {{ optional($company->state)->{'name_' . $l} ? optional($company->state)->{'name_' . $l} . ', ' : '' }}
+                          {{ optional($company->city)->{'name_' . $l} ? optional($company->city)->{'name_' . $l} . ', ' : '' }} 
+                          {{ optional($company->country)->{'name_' . $l} }}
                         </a>
                       @else
                         <span class="text-secondary">

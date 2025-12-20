@@ -8,6 +8,30 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
 @endsection
 
+@section('style')
+<style>
+  .iti__country-list {
+    position: absolute;
+    left: 1rem;
+    /* right: 0; */
+    z-index: 9999;
+    list-style: none;
+    text-align: left;
+    padding: 0;
+    margin: 0 0 0 -1px;
+    box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
+    background-color: white;
+    border: 1px solid #CCC;
+    white-space: nowrap;
+    max-height: 200px;
+    width: 350px;
+    overflow-y: scroll;
+    overflow-x: auto -webkit-overflow-scrolling: touch;
+    background-color: #fff;
+  }
+</style>
+@endsection
+
 @php
   $navPills = [
     'info' => [
@@ -145,7 +169,7 @@
                     <select class="form-select select2" id="role" name="role">
                       <option disabled value="" selected>{{ __('admin.Select_Role') }}</option>
                       @foreach($roles as $role)
-                        <option value="{{ $role['id'] }}" {{ ($role['name'] == $currentRole)? "selected":"" }} >{{ __('admin.' . $role['name']) }}</option>
+                        <option value="{{ $role['name'] }}" {{ ($role['name'] == $currentRole)? "selected":"" }} >{{ __('admin.' . $role['name']) }}</option>
                       @endforeach
                     </select>
                   </div>
@@ -403,7 +427,7 @@
               message: translations.validate_first_name_string_length
             },
             regexp: {
-              regexp: /^[a-zA-Z]+$/,
+              regexp: /^[\p{L}\s]+$/u,
               message: translations.validate_first_name_regexp
             }
           }
@@ -419,7 +443,7 @@
               message: translations.validate_last_name_string_length
             },
             regexp: {
-              regexp: /^[a-zA-Z]+$/,
+              regexp: /^[\p{L}\s]+$/u,
               message: translations.validate_last_name_regexp
             }
           }

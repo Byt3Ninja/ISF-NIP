@@ -25,6 +25,7 @@ return [
         'no comments' => 'No Comments Yet',
         'completedTasks' => 'Completed Tasks',
         'nonCompletedTasks' => 'Non Completed Tasks',
+        'comment_already_exists' => 'This comment already exists',
     ],
     'mentorshipRequests' => [
         'all' => 'Mentorship Sessions',
