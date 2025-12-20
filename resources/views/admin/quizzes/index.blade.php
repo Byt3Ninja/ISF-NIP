@@ -23,7 +23,7 @@ if ($user->hasRole('organizationManager')){
 				@php
 					$tabs = [
 						['title' => __('admin.quizzes'), 'url' => 'dashboard/quizzes', 'icon' => 'clock-bolt'],
-						['title' => __('admin.Quiz_Results'), 'url' => 'dashboard/quizResults', 'icon' => 'checklist'],
+						['title' => __('admin.quizzes_results'), 'url' => 'dashboard/quizResults', 'icon' => 'checklist'],
 					]
 				@endphp
 				<ul class="nav nav-pills">

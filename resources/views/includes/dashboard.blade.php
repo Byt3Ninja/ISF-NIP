@@ -46,7 +46,7 @@
 		<div class="content-body">
 			@if( session()->has('success') )
 			<div class="row">
-				<div class="col-md-12">
+				<div class="col-md-12 mb-6">
 					<div role="alert" class="alert alert-success alert-dismissible fade show mb-2">
 						{{ __('dashboard.'. session()->get('success')) }}
 						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -56,7 +56,7 @@
 			@endif
 			@if( session()->has('error') )
 			<div class="row">
-				<div class="col-md-12">
+				<div class="col-md-12 mb-6">
 					<div role="alert" class="alert alert-danger alert-dismissible fade show mb-2">
 						{{ __('dashboard.'.session()->get('error')) }}
 						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -66,7 +66,7 @@
 			@endif
 			@if( session()->has('msg') )
 			<div class="row">
-				<div class="col-md-12">
+				<div class="col-md-12 mb-6">
 					<div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2"
 						role="alert">
 						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
