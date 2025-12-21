@@ -1,35 +1,27 @@
 <section>
-
-
   <!-- Evaluation Model CRUD Tab -->
-  <div id="evaluation-model" class="card card-body tab-content active">
-    <h4>{{ __('cycles.ManageEvaluationModel') }}</h4>
+  <div id="evaluation-model" class="">
+    <h5 class="card-title mb-1">{{ __('cycles.ManageEvaluationModel') }}</h5>
     <p class="text-muted">{{ __('cycles.EvaluationModelDescription') }}</p>
-
-    <!-- Screening Guidelines Section -->
-    <div class="mb-4">
-      <h5>{{ __('cycles.Screening Guidelines') }}</h5>
-      <div class="form-group">
-        <textarea class="form-control" id="screening_guidelines" name="screening_guidelines" rows="5">{{ $evaluationForm->screening_guidelines ?? '' }}</textarea>
-      </div>
-    </div>
     
     <!-- Screamer Warning -->
-
-    
-    <div id="model-validation-summary" style="display: none;" class="mb-3"></div>
-    <div id="model-editor" class="mt-4"></div>
-    
-    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
-      <div>
-        @if( $_user->ableTo('screening.evaluation_add_criteria') && $status == 'draft' )
-        <button id="add-category-btn" class="btn btn-label-primary">
-          <i class="fas fa-plus me-2"></i> {{ __('cycles.AddNewCriteria') }}
-        </button>
-        @endif
+    @if( $_user->ableTo('screening.evaluation_publish', $permissions) )
+      <div class="alert alert-info alert-dismissible fade show border border-info" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <strong>{{ __('cycles.Important Notice') }}:</strong><br>
+        <span dir="{{ $l == 'ar' ? 'rtl' : 'ltr' }}">
+          @if($l == 'ar')
+            يرجى الملاحظة أنه عند نشر معايير الشركات المقدمة للانضمام إلى البرنامج، لن تتمكن من تعديلها لاحقًا. تأكد من مراجعة المعايير بعناية قبل النشر.
+          @else
+            Please note that once you publish the criteria for companies applying to join the program, you will not be able to modify them later. Please review the criteria carefully before publishing.
+          @endif
+        </span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
-
-      <div class="d-flex align-items-center gap-2">
+    @endif
+    
+    <div>
+      <div class="d-flex align-items-center gap-4 mb-4">
         @if( $_user->ableTo('screening.evaluation_save_draft', $permissions) && $status == 'draft' )
         <button id="draft-model-btn" class="btn btn-light">
           <i class="fas fa-save me-2"></i> {{ __('cycles.SaveDraft') }}
@@ -47,8 +39,8 @@
           @endif
         @endif
       </div>
+      <div id="model-validation-summary" style="display: none;"></div>
     </div>
-
     <div id="model-editor" class="mt-4"></div>
     @if( $_user->ableTo('screening.evaluation_add_criteria') && $status == 'draft' )
     <button id="add-category-btn" class="btn btn-label-primary">
@@ -59,27 +51,8 @@
 </section>
 
 @push('scripts')
-  <!-- Summernote CSS/JS -->
-  <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
-  
   <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', () => {
-      // Initialize Summernote
-      $('#screening_guidelines').summernote({
-        placeholder: '{{ __('cycles.Enter_Program_Guideline') }}',
-        tabsize: 2,
-        height: 200,
-        toolbar: [
-          ['style', ['style']],
-          ['font', ['bold', 'underline', 'clear']],
-          ['color', ['color']],
-          ['para', ['ul', 'ol', 'paragraph']],
-          ['table', ['table']],
-          ['insert', ['link', 'picture', 'video']],
-          ['view', ['fullscreen', 'codeview', 'help']]
-        ]
-      });
       // --- Tab Navigation ---
       // const navLinks = document.querySelectorAll('.nav-link');
       // const tabContents = document.querySelectorAll('.main-content .tab-content');
@@ -429,7 +402,6 @@
                 "action": "publish",
                 "criteria": evaluationModelData.categories,
                 "stepId": {{ $cstep->id }},
-                "screening_guidelines": $('#screening_guidelines').summernote('code')
               },
               success: function(response) {
                 console.log(response);
@@ -470,7 +442,6 @@
               "action": "draft",
               "criteria": evaluationModelData.categories,
               "stepId": {{ $cstep->id }},
-              "screening_guidelines": $('#screening_guidelines').summernote('code')
             },
             success: function(response) {
               console.log(response);
