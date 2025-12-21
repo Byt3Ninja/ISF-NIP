@@ -166,7 +166,12 @@
         <div class="col-xl-12 col-md-12 col-sm-12">
           <div class="card">
             <div class="card-header border-bottom border-light mb-0">
-              <h5 class="card-title primary">{{ __('cycles.' . $types[$cstep?->data] ?? '') }}</h5>
+              <h5 class="card-title primary">
+                @php
+                    $typeKey = $cstep->data;
+                @endphp
+                    {{ $typeKey && isset($types[$typeKey]) ? __('cycles.' . $types[$typeKey]) : '' }}
+              </h5>
               <p>{{ __('cycles.Select judges from the menu') }}:</p>
             </div>
             <div class="card-body">
