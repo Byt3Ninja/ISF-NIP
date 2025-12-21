@@ -145,7 +145,10 @@
                 <dl class="row">
                   <dt class="col-sm-3 text-right">{{ __('cycles.Screening type') }}</dt>
                   <dd class="col-sm-9">
-                    {{ __('cycles.' . $types[$cstep?->data] ?? '') }}
+                    @php
+                        $typeKey = $cstep->data;
+                    @endphp
+                    {{ $typeKey && isset($types[$typeKey]) ? __('cycles.' . $types[$typeKey]) : '' }}
                   </dd>
                 </dl>
                 <dl class="row">
