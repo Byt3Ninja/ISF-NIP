@@ -145,7 +145,7 @@
                 <dl class="row">
                   <dt class="col-sm-3 text-right">{{ __('cycles.Screening type') }}</dt>
                   <dd class="col-sm-9">
-                    {{ __('cycles.' . $types[$cstep->data]) }}
+                    {{ __('cycles.' . $types[$cstep?->data]) }}
                   </dd>
                 </dl>
                 <dl class="row">
@@ -163,7 +163,7 @@
         <div class="col-xl-12 col-md-12 col-sm-12">
           <div class="card">
             <div class="card-header border-bottom border-light mb-0">
-              <h5 class="card-title primary">{{ __('cycles.' . $types[$cstep->data]) }}</h5>
+              <h5 class="card-title primary">{{ __('cycles.' . $types[$cstep?->data]) }}</h5>
               <p>{{ __('cycles.Select judges from the menu') }}:</p>
             </div>
             <div class="card-body">
