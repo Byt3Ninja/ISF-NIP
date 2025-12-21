@@ -600,7 +600,6 @@ class MentorsController extends Controller
 
 	public function sessions(Request $request)
 	{
-		$updateRequests = MentorshipRequest::where('session_type', 'Both')->update(['session_type' => 'Online']);
 		$organization_id = auth()->user()->organization_id;
 		if ($request->show == 'all') {
 			 $query = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
