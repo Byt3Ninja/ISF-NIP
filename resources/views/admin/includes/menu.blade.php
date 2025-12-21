@@ -512,7 +512,7 @@
 
       <li
         class="{{ Request::is('dashboard/screening', 'dashboard/final', 'dashboard/screening/*', 'dashboard/final/*') ? 'active' : '' }} menu-item">
-        <a href="{{ route('assessments.index') }}" class="menu-link">
+        <a href="/dashboard/screening" class="menu-link">
           <i class="menu-icon tf-icons ti ti-hourglass"></i>
           <div>{{ __('admin.screening_management') }}</div>
         </a>
