@@ -184,5 +184,6 @@ return [
     'Complete Prerequisites & Join' => 'Complete Prerequisites & Join',
     'Complete Prerequisites' => 'Complete Prerequisites',
     'Type' => 'Type',
-    'Session_Type' => 'Session Type'
+    'Session_Type' => 'Session Type',
+    'Meeting_Link/Map' => 'Meeting Link/Map',
 ];

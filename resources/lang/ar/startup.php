@@ -6,6 +6,7 @@ return [
     'meeting_link' => 'رابط الجلسة',
     'no_link' => 'لا يوجد رابط',
     'join_now' => 'انضم الان',
+    'Meeting_Link/Map' => 'رابط الجلسة/خريطة',
   ],
 
   'all_startups' => 'كل الشركات',
