@@ -38,7 +38,157 @@ class ScreeningController extends Controller
 	{
 		$this->whatsAppService = $whatsAppService;
 	}
-	public function index($id = 0)
+	
+	public function index(Request $request)
+	{
+			$organizationId = auth()->user()->organization_id;
+
+			/** -------------------------
+			 * Base steps query with filters
+			 * ------------------------- */
+			$stepsQuery = Step::with(['cycle.organization'])
+					->when($organizationId, function ($q) use ($organizationId) {
+							$q->whereHas('cycle', fn ($c) =>
+									$c->where('organization_id', $organizationId)
+							);
+					})
+					->where('stype', 2);
+
+			// Apply filters
+			if ($request->filled('search')) {
+					$search = $request->search;
+					$stepsQuery->where(function ($q) use ($search) {
+							$q->where('title', 'like', "%{$search}%")
+									->orWhereHas('cycle', function ($c) use ($search) {
+											$c->where('title', 'like', "%{$search}%");
+									})
+					->orWhereHas('cycle.organization', function ($o) use ($search) {
+							$o->where('name_en', 'like', "%{$search}%")
+									->orWhere('name_ar', 'like', "%{$search}%");
+					});
+					});
+			}
+
+			if ($request->filled('screening_type')) {
+					$screeningType = $request->screening_type;
+					$stepsQuery->where('data', $screeningType);
+			}
+
+			if ($request->filled('status')) {
+					$today = now()->toDateString();
+					switch ($request->status) {
+							case 'upcoming':
+									$stepsQuery->where('from', '>', $today);
+									break;
+							case 'in_progress':
+									$stepsQuery->where('from', '<=', $today)->where('to', '>=', $today);
+									break;
+							case 'completed':
+									$stepsQuery->where('to', '<', $today);
+									break;
+					}
+			}
+
+			$steps = $stepsQuery->orderBy('from')->get();
+
+			/** -------------------------
+			 * Preload all related data
+			 * ------------------------- */
+			$stepIds   = $steps->pluck('id');
+			$cycleIds  = $steps->pluck('cycle_id')->unique();
+
+			$judges = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+					->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+					->where('roles.default_for', 'judger')
+					->select('users.id', 'users.first_name_en', 'users.last_name_en')
+					->get()
+					->keyBy('id');
+
+			$screenings = Screening::whereIn('step_id', $stepIds)
+					->get()
+					->groupBy('step_id');
+
+			$companies = Company::whereIn('step', $stepIds)
+					->get()
+					->groupBy('step');
+
+			$forms = Step::whereIn('cycle_id', $cycleIds)
+					->where('stype', 1)
+					->get()
+					->keyBy(fn ($f) => "{$f->cycle_id}-{$f->arr}");
+
+			/** -------------------------
+			 * Build screeningSteps
+			 * ------------------------- */
+			$screeningSteps = $steps->map(function ($step) use (
+					$judges,
+					$screenings,
+					$companies,
+					$forms
+			) {
+					$judgersList = collect(json_decode($step->list, true) ?? [])
+							->map(fn ($j) => is_array($j) ? array_map('intval', $j) : [(int) $j]);
+
+					/** Collect judges for step */
+					$judgeIds = $judgersList->flatten()->unique();
+
+					$judgesForStep = $judgeIds
+							->map(fn ($id) => $judges->get($id))
+							->filter()
+							->map(fn ($j) => (object) [
+									'id'   => $j->id,
+									'name' => "{$j->first_name_en} {$j->last_name_en}",
+							])
+							->values();
+
+					/** Companies */
+					$companiesForStep = ($companies[$step->id] ?? collect())
+							->map(fn ($c) => (object) [
+									'id'   => $c->id,
+									'name' => $c->name_en,
+							])
+							->values();
+
+					/** Form */
+					$formKey = "{$step->cycle_id}-" . ($step->arr - 1);
+					$form    = $forms->get($formKey);
+
+					/** Screening type */
+					$screeningType = match ($step->data) {
+							'onetoall'     => 'one-to-all',
+							'grouptoall'   => 'group-to-all',
+							'grouptogroup' => 'group-to-group',
+							default        => 'one-to-all',
+					};
+
+					return (object) [
+							'id'            => $step->id,
+							'title'         => $step->title,
+							'description'   => $step->description ?? '',
+							'program'       => $step->cycle
+									? (object) ['id' => $step->cycle->id, 'title' => $step->cycle->title]
+									: null,
+							'organization'  => $step->cycle?->organization
+									? (object) [
+											'id'   => $step->cycle->organization->id,
+											'name' => $step->cycle->organization->name,
+									]
+									: null,
+							'start_date'    => optional($step->from)->format('Y-m-d'),
+							'end_date'      => optional($step->to)->format('Y-m-d'),
+							'screening_type'=> $screeningType,
+							'judges'        => $judgesForStep,
+							'companies'     => $companiesForStep,
+							'form'          => $form
+									? (object) ['id' => $form->id, 'title' => $form->title]
+									: null,
+					];
+			});
+
+			return view('admin.settings.screening.index', compact('screeningSteps'));
+	}
+
+	public function show($id = 0)
 	{
 		$organization_id = auth()->user()->organization_id;
 		$steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
@@ -46,12 +196,6 @@ class ScreeningController extends Controller
 				$query->where('organization_id', $organization_id);
 			});
 		})->where('stype', 2)->orderBy('from')->get();
-		// $judges = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->get();
-		$judges = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
-			->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
-			->where('roles.default_for', 'judger')
-			->select('users.*')
-			->get();
 
 		if ($id == 0) {
 			$id = $steps->pluck('id')->first();
@@ -66,7 +210,12 @@ class ScreeningController extends Controller
 					$query->where('organization_id', $organization_id);
 				});
 			})->where('stype', 2)->where('id', $id)->first();
+
+			if( empty( $cstep ) ) {
+				return abort(404);
+			}
 		}
+
 		if ($cstep) {
 			$form = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
 				return $q->whereHas('cycle', function ($query) use ($organization_id) {
@@ -112,7 +261,13 @@ class ScreeningController extends Controller
 		$companies = [];
 		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
 		if( $cstep ) { $companies = Company::whereIn('step', [$form?->id ?? 0, $cstep?->id ?? 0])->get(); } else { $cstep = []; }
-		return view('admin.settings.screening.index', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'steps', 'id', 'svgs', 'evaluationForm'));
+		$judges = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+				->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+				->where('roles.default_for', 'judger')
+				->select('users.id', 'users.first_name_en', 'users.last_name_en')
+				->get()
+				->keyBy('id');
+		return view('admin.settings.screening.show', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'steps', 'id', 'svgs', 'evaluationForm'));
 	}
 
 	public function update(Request $request)

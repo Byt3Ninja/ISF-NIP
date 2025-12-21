@@ -510,31 +510,12 @@
         </a>
       </li>
 
-      <li class="{{ Request::is('dashboard/screening*') ? 'sidebar-group-active open' : '' }} menu-item">
-        <a class="menu-link menu-toggle">
-          <i class="ti ti-hourglass me-3 ti-md"></i>
-          <div>{{ __('admin.Screening') }}</div>
+      <li
+        class="{{ Request::is('dashboard/screening', 'dashboard/final', 'dashboard/screening/*', 'dashboard/final/*') ? 'active' : '' }} menu-item">
+        <a href="/dashboard/screening" class="menu-link">
+          <i class="menu-icon tf-icons ti ti-hourglass"></i>
+          <div>{{ __('admin.screening_management') }}</div>
         </a>
-        <ul class="menu-sub">
-          <li class="{{ Request::is('dashboard/screening', 'dashboard/*/screening') ? 'active' : '' }} menu-item">
-            <a class="menu-link" href="/dashboard/screening">
-              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-              <div>{{ __('admin.Manage') }}</div>
-            </a>
-          </li>
-          <li class="{{ Request::is('dashboard/screening/results') ? 'active' : '' }} menu-item">
-            <a class="menu-link" href="/dashboard/screening/results">
-              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-              <div> {{ __('admin.Results') }}</div>
-            </a>
-          </li>
-           {{-- <li class="{{ Request::is('dashboard/screening/resultsReport') ? 'active' : '' }} menu-item">
-            <a class="menu-link" href="/dashboard/screening/resultsReport">
-              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-              <div> {{ __('admin.resultsReport') }}</div>
-            </a>
-          </li> --}}
-        </ul>
       </li>
 
       <!-- Mentorship Nav Item -->

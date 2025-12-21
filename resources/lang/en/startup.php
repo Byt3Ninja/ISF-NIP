@@ -6,6 +6,7 @@ return [
     'meeting_link' => 'Meeting Link',
     'no_link' => 'No link',
     'join_now' => 'Join Now',
+    'Meeting_Link/Map' => 'Meeting Link/Map',
   ],
 
   'all_startups' => 'All Startups',
