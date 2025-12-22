@@ -179,6 +179,65 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsTo(Organization::class)->withTrashed();
     }
 
+    /**
+     * Many-to-many relationship for Sub-Admin users with multiple organizations.
+     */
+    public function organizations()
+    {
+        return $this->belongsToMany(Organization::class, 'user_organizations')->withTimestamps();
+    }
+
+    /**
+     * Get all accessible organization IDs for this user.
+     * - Admin: returns all organization IDs
+     * - Sub-Admin: returns assigned organization IDs from pivot table
+     * - organizationManager: returns single organization_id
+     * - Others: returns organization_id if set
+     *
+     * @return array
+     */
+    public function getOrganizationsIdsAttribute(): array
+    {
+        if ($this->hasRole('admin')) {
+            return Organization::pluck('id')->toArray();
+        }
+
+        if ($this->hasRole('subadmin')) {
+            return $this->organizations()->pluck('organizations.id')->toArray();
+        }
+
+        if ($this->organization_id) {
+            return [$this->organization_id];
+        }
+
+        return [];
+    }
+
+    /**
+     * Check if user can access a specific organization.
+     *
+     * @param int $organizationId
+     * @return bool
+     */
+    public function canAccessOrganization(int $organizationId): bool
+    {
+        if ($this->hasRole('admin')) {
+            return true;
+        }
+
+        return in_array($organizationId, $this->organizations_ids);
+    }
+
+    /**
+     * Check if user is a Sub-Admin.
+     *
+     * @return bool
+     */
+    public function isSubAdmin(): bool
+    {
+        return $this->hasRole('subadmin');
+    }
+
     // ============> Judger Relations <======================
     public function screeningRequests(){
         return $this->hasMany(Screening::class,'user_id');

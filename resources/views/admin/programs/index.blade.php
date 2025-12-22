@@ -327,10 +327,14 @@
                   @endif
   
                   @php
-                    if(auth()->user()->hasAnyRole(['organizationManager'])) {
-                      $organizations = App\Organization::where('id',auth()->user()->organization_id)->get();
-                    } else {
+                    $user = auth()->user();
+                    if($user->hasRole('Admin')) {
                       $organizations = App\Organization::all();
+                    } elseif($user->hasRole('organizationManager') || $user->isSubAdmin()) {
+                      $orgIds = $user->organizations_ids;
+                      $organizations = App\Organization::whereIn('id', $orgIds)->get();
+                    } else {
+                      $organizations = collect();
                     }
                   @endphp
   

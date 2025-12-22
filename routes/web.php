@@ -430,6 +430,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/judger', 'UserController@judger')->name('users.judger');
     Route::post('/users/password', 'UserController@updatePassword')->name('user.profile_update_password');
     Route::post('/users/update_my_password', 'UserController@updateMyPassword')->name('user.profile_update_my_password');
+    Route::patch('/users/{user}/organizations', 'UserController@updateOrganizations')->name('users.update_organizations');
     Route::get('/companies', 'ClientCompanyController@companies')->name('users.view_companies');
     // Export startups (CSV / Excel) - preserves current filters passed as query params
     Route::get('/companies/export', 'CompanyExportController@export')->name('users.companies_export');

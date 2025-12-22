@@ -54,16 +54,17 @@ class MentorsController extends Controller
 	}
 	public function index(Request $request, $id = 0)
 	{
-		$organization_id = auth()->user()->organization_id;
+		$user = auth()->user();
+		$orgIds = $user->organizations_ids;
 		if ($id == 0) {
-			$id = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
-				return $q->where('organization_id', $organization_id);
+			$id = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->whereIn('organization_id', $orgIds);
 			})->orderBy('start', 'DESC')->pluck('id')->first();
 		}
 		$companies = Company::where('cycle', $id)->where('step', '>', 0)->get();
 		$mentors = CyclesMentors::where('cycle_id', $id)->get();
-		$cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
-			return $q->where('organization_id', $organization_id);
+		$cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+			return $q->whereIn('organization_id', $orgIds);
 		})->get();
 
 		if ($request->step_id != 0) {
@@ -82,10 +83,11 @@ class MentorsController extends Controller
 	public function list(Request $request, $id = 0)
 	{
 		$l = app()->getLocale();
-		$organization_id = auth()->user()->organization_id;
+		$user = auth()->user();
+		$orgIds = $user->organizations_ids;
 		if ($id == 0) {
-			$id = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
-				return $q->where('organization_id', $organization_id);
+			$id = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->whereIn('organization_id', $orgIds);
 			})->orderBy('start', 'DESC')->pluck('id')->first();
 		}
 		// $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
@@ -95,8 +97,8 @@ class MentorsController extends Controller
 			->select('users.*')
 			->get();
 		$cList = CyclesMentors::where('cycle_id', $id)->pluck('user_id')->toArray();
-		$cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
-			return $q->where('organization_id', $organization_id);
+		$cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+			return $q->whereIn('organization_id', $orgIds);
 		})->get();
 
 		$selectedSpecialization = $request->specialization; // الحصول على قيمة التصفية من query string
@@ -165,9 +167,10 @@ class MentorsController extends Controller
 
 	public function list_surveys($id, Request $request)
 	{
-		$organization_id = auth()->user()->organization_id;
-		$cycle = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
-			return $q->where('organization_id', $organization_id);
+		$user = auth()->user();
+		$orgIds = $user->organizations_ids;
+		$cycle = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+			return $q->whereIn('organization_id', $orgIds);
 		})->with(['steps' => function ($q) {
 			$q->orderBy('arr');
 		}])->find($id);
@@ -196,9 +199,12 @@ class MentorsController extends Controller
 
 	public function total_surveys()
 	{
+		$user = auth()->user();
+		$orgIds = $user->organizations_ids;
 		if (Auth::user()->hasAnyRole('organizationManager')) {
-			$organization_id = auth()->user()->organization_id;
-			$surveys = SurveyScopes::where('organization_id', $organization_id)->with(['survey', 'responses'])->get();
+			$surveys = SurveyScopes::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->whereIn('organization_id', $orgIds);
+			})->with(['survey', 'responses'])->get();
 			$surveys = $surveys->map(function ($survey) {
 				$responses = $survey->responses;
 				$eligibleUsers = $responses->count();
@@ -211,7 +217,6 @@ class MentorsController extends Controller
 				return $survey;
 			});
 		} else {
-			$organization_id = auth()->user()->organization_id;
 			$surveys = SurveyScopes::with(['survey', 'responses'])->get();
 			$surveys = $surveys->map(function ($survey) {
 				$responses = $survey->responses;
@@ -234,9 +239,10 @@ class MentorsController extends Controller
 
 	public function create_survey($id, Request $request)
 	{
-		$organization_id = auth()->user()->organization_id;
-		$cycle = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
-			return $q->where('organization_id', $organization_id);
+		$user = auth()->user();
+		$orgIds = $user->organizations_ids;
+		$cycle = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+			return $q->whereIn('organization_id', $orgIds);
 		})->find($id);
 
 		if (!empty($cycle)) {
@@ -271,9 +277,10 @@ class MentorsController extends Controller
 
 	public function edit_survey($id, $survey, Request $request)
 	{
-		$organization_id = auth()->user()->organization_id;
-		$cycle = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
-			return $q->where('organization_id', $organization_id);
+		$user = auth()->user();
+		$orgIds = $user->organizations_ids;
+		$cycle = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+			return $q->whereIn('organization_id', $orgIds);
 		})->find($id);
 
 		if (!empty($cycle)) {
@@ -292,9 +299,10 @@ class MentorsController extends Controller
 
 	public function update_survey($id, $survey, Request $request)
 	{
-		$organization_id = auth()->user()->organization_id;
-		$cycle = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
-			return $q->where('organization_id', $organization_id);
+		$user = auth()->user();
+		$orgIds = $user->organizations_ids;
+		$cycle = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+			return $q->whereIn('organization_id', $orgIds);
 		})->find($id);
 
 		if (!empty($cycle)) {
@@ -316,9 +324,10 @@ class MentorsController extends Controller
 
 	public function destroy_survey($id, $survey, Request $request)
 	{
-		$organization_id = auth()->user()->organization_id;
-		$cycle = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
-			return $q->where('organization_id', $organization_id);
+		$user = auth()->user();
+		$orgIds = $user->organizations_ids;
+		$cycle = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+			return $q->whereIn('organization_id', $orgIds);
 		})->find($id);
 
 		if (!empty($cycle)) {
@@ -600,10 +609,11 @@ class MentorsController extends Controller
 
 	public function sessions(Request $request)
 	{
-		$organization_id = auth()->user()->organization_id;
+		$user = auth()->user();
+		$orgIds = $user->organizations_ids;
 		if ($request->show == 'all') {
-			 $query = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
-				return $q->where('organization_id', $organization_id);
+			 $query = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->whereIn('organization_id', $orgIds);
 			})->when($request->start_date && $request->end_date, function ($q) use ($request) {
 				// التأكد من أن التواريخ متوافقة مع التنسيق المناسب
 				$startDate = Carbon::parse($request->start_date)->startOfDay();
@@ -616,8 +626,8 @@ class MentorsController extends Controller
 				return $q->where('cycle_id', $request->cycle_id);
 			});
 		} elseif ($request->show == 'approved') {
-			 $query = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
-				return $q->where('organization_id', $organization_id);
+			 $query = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->whereIn('organization_id', $orgIds);
 			})->whereNotNull('start_url')->when($request->start_date && $request->end_date, function ($q) use ($request) {
 				$startDate = Carbon::parse($request->start_date)->startOfDay();
 				$endDate = Carbon::parse($request->end_date)->endOfDay();
@@ -627,8 +637,8 @@ class MentorsController extends Controller
 				return $q->where('cycle_id', $request->cycle_id);
 			});
 		} elseif ($request->show == 'disapproved') {
-			 $query = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
-				return $q->where('organization_id', $organization_id);
+			 $query = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->whereIn('organization_id', $orgIds);
 			})->where('approved', 'No')->when($request->start_date && $request->end_date, function ($q) use ($request) {
 				$startDate = Carbon::parse($request->start_date)->startOfDay();
 				$endDate = Carbon::parse($request->end_date)->endOfDay();
@@ -638,8 +648,8 @@ class MentorsController extends Controller
 				return $q->where('cycle_id', $request->cycle_id);
 			});
 		} else {
-			 $query = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
-				return $q->where('organization_id', $organization_id);
+			 $query = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->whereIn('organization_id', $orgIds);
 			})->whereNull('approved')->when($request->start_date && $request->end_date, function ($q) use ($request) {
 				$startDate = Carbon::parse($request->start_date)->startOfDay();
 				$endDate = Carbon::parse($request->end_date)->endOfDay();
@@ -680,8 +690,8 @@ class MentorsController extends Controller
 			return $session;
 		});
 
-		if(!is_null($organization_id)) {
-			$cycles = \App\Cycle::where('organization_id', $organization_id)->get();
+		if(!empty($orgIds) && !$user->hasRole('admin')) {
+			$cycles = \App\Cycle::whereIn('organization_id', $orgIds)->get();
 		} else {
 				$cycles = \App\Cycle::all();
 		}

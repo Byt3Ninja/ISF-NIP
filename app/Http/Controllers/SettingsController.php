@@ -881,8 +881,12 @@ class SettingsController extends Controller
 
 	public function ReminderLogs(Request $request) {
 		// $delete = ReminderLog::truncate();
+		$user = auth()->user();
+		$orgIds = $user->organizations_ids;
 							if(auth()->user()->hasRole('organizationManager')) {
-                                $cycles = Cycle::where('organization_id', auth()->user()->organization_id)->get(); 
+                                $cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+                                    return $q->whereIn('organization_id', $orgIds);
+                                })->get();
                                 $ReminderLogs = ReminderLog::whereIn('cycle_id', $cycles->pluck('id'));
                             }elseif(auth()->user()->hasRole('Admin')) {
                                 $ReminderLogs = ReminderLog::all();
@@ -1037,14 +1041,19 @@ class SettingsController extends Controller
 		}
 
 		// Check if user already exists in another organization
+		$user = auth()->user();
+		$orgIds = $user->organizations_ids;
 		$existingUser = User::where('email', $request->email)->first();
-		if ($existingUser && $existingUser->organization_id !== auth()->user()->organization_id) {
+		if ($existingUser && !empty($orgIds) && !in_array($existingUser->organization_id, $orgIds)) {
 			return back()->with('message2', __('admin.user_belongs'));
 		}
-	
+
 		// Check for existing invitation and allow resending
+		$primaryOrgId = !empty($orgIds) ? $orgIds[0] : null;
 		$invitation = Invitation::where('email', $request->email)
-		->where('organization_id', auth()->user()->organization_id)
+		->when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+			return $q->whereIn('organization_id', $orgIds);
+		})
 		->first();
 
 		if ($invitation) {
@@ -1060,7 +1069,7 @@ class SettingsController extends Controller
 				$invitation->last_name = $request->last_name;
 				$invitation->email = $request->email;
 				$invitation->role = $request->role;
-				$invitation->organization_id = auth()->user()->organization_id;
+				$invitation->organization_id = $primaryOrgId ?? auth()->user()->organization_id;
 				$invitation->expires_at = now()->addDays(2);
 				$invitation->save();
 
