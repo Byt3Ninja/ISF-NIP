@@ -513,28 +513,6 @@
           <div>{{ __('admin.surveys') }}</div>
         </a>
       </li>
-      
-      <li class="{{ Request::is('dashboard/final/*') ? 'sidebar-group-active open' : '' }} menu-item">
-        <a class="menu-link menu-toggle">
-          <i class="ti ti-trophy me-3 ti-md"></i>
-          <div>{{ __('admin.Final Screening') }}</div>
-        </a>
-        <ul class="menu-sub">
-          <li class="{{ Request::is('dashboard/final', 'dashboard/*/final') ? 'active' : '' }} menu-item">
-            <a class="menu-link" href="/dashboard/final">
-              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-              <span class="menu-item">{{ __('admin.Manage') }}</span>
-            </a>
-          </li>
-          <li class="{{ Request::is('dashboard/final/results*') ? 'active' : '' }} menu-item">
-            <a class="menu-link" href="/dashboard/final/results">
-              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-              <span class="menu-item">{{ __('admin.Results') }}</span>
-            </a>
-          </li>
-        </ul>
-      </li>
-
     @endif
 
       @if( !$_user->hasAnyRole('Mentor|Judger') )
