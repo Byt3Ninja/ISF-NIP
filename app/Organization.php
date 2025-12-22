@@ -69,6 +69,15 @@ class Organization extends Model
 		return $this->hasOne(OrganizationSettings::class, 'organization_id');
 	}
 
+	/**
+	 * Users assigned to this organization (Sub-Admins).
+	 * This is the inverse of the many-to-many relationship from User model.
+	 */
+	public function assignedUsers()
+	{
+		return $this->belongsToMany(User::class, 'user_organizations')->withTimestamps();
+	}
+
 	public function getLocalizedNameAttribute(): string
 {
     return app()->getLocale() === 'ar' ? $this->name_ar : $this->name_en;

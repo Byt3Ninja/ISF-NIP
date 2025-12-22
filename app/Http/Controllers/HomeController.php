@@ -214,8 +214,9 @@ class HomeController extends Controller
             if($user->hasRole('Registered')){
                 $services_requests_q .= " AND sr.user_id = " . $user->id;
             }
-            if ($has_org) {
-                $services_requests_q .= " AND s.organization_id = " . $user->organization_id;
+            $orgIds = $user->organizations_ids;
+            if ($has_org && !empty($orgIds) && !$user->hasRole('admin')) {
+                $services_requests_q .= " AND s.organization_id IN (" . implode(',', array_map('intval', $orgIds)) . ")";
             }
             $services_requests = collect(DB::select($services_requests_q));
         } else {
@@ -230,8 +231,9 @@ class HomeController extends Controller
                 WHERE
                     o.deleted_at IS NULL
             ";
-            if ($has_org) {
-                $organizations_q .= " AND o.id = " . $user->organization_id;
+            $orgIds = $user->organizations_ids;
+            if ($has_org && !empty($orgIds) && !$user->hasRole('admin')) {
+                $organizations_q .= " AND o.id IN (" . implode(',', array_map('intval', $orgIds)) . ")";
             }
             $organizations = collect(DB::select($organizations_q));
         } else {
@@ -254,8 +256,9 @@ class HomeController extends Controller
                 WHERE
                     c.deleted_at IS NULL
             ";
-            if ($has_org) {
-                $cycles_q .= " AND c.organization_id = " . $user->organization_id;
+            $orgIds = $user->organizations_ids;
+            if ($has_org && !empty($orgIds) && !$user->hasRole('admin')) {
+                $cycles_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $orgIds)) . ")";
             }
             $cycles = collect(DB::select($cycles_q));
             $cycles = $cycles->groupBy('id')->map(function ($groupedCycle) use ($l) {

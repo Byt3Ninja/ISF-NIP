@@ -279,17 +279,28 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          @if (is_null(auth()->user()->organization_id))
+          @php
+            $authUser = auth()->user();
+            $userOrgIds = $authUser->organizations_ids;
+            $showOrgDropdown = $authUser->hasRole('admin') || ($authUser->isSubAdmin() && count($userOrgIds) > 1);
+          @endphp
+          @if ($showOrgDropdown)
           <div class="form-group mb-4">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('builder.Choose Organization') }}: </label>
             <select class="select form-control" id="organization_id" name="organization_id" required>
-              @foreach (\App\Organization::all() as $org)
-              <option value="{{ $org->id }}">{{ $org->name_ar }}</option>
-              @endforeach
+              @if($authUser->hasRole('admin'))
+                @foreach (\App\Organization::all() as $org)
+                <option value="{{ $org->id }}">{{ $org->name }}</option>
+                @endforeach
+              @else
+                @foreach ($authUser->organizations as $org)
+                <option value="{{ $org->id }}">{{ $org->name }}</option>
+                @endforeach
+              @endif
             </select>
           </div>
           @else
-          <input type="hidden" name="organization_id" value="{{ auth()->user()->organization_id }}"
+          <input type="hidden" name="organization_id" value="{{ $userOrgIds[0] ?? '' }}"
             id="organization_id">
           @endif
           <div class="col-12 mb-4">
