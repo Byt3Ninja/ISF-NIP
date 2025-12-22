@@ -47,7 +47,16 @@ $pills = [
       <div class="card mb-6">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center">
-            <h5 class="card-title fw-semibold mb-0">{{ $cstep->title }}</h5>
+            <div class="d-flex align-items-center gap-2">
+              <!-- Back To List -->
+              <a 
+                class="btn btn-icon btn-sm btn-text-secondary waves-effect waves-light rounded-pill" 
+                href="/dashboard/screening"
+              >
+                <i class="ti ti-chevron-left ti-lg"></i>
+              </a>
+              <h5 class="card-title fw-semibold mb-0">{{ $cstep->title }}</h5>
+            </div>
             <div class="d-flex align-items-center gap-3">
               <a class="btn btn-outline-primary" href="/dashboard/final/results/{{ $id }}">
                 <i class="ti ti-file-text me-2"></i> {{ __('admin.view_results') }}
@@ -158,44 +167,41 @@ $pills = [
               </div>
               <div class="p-3 bg-light-subtle rounded-2 border">
                 <div class="d-flex flex-wrap gap-2">
-                  @if ($cstep->data == 'grouptogroup')
-                    @php
-                      $allJudges = [];
-                      foreach ($judgers_list as $panel) {
-                        $allJudges = array_merge($allJudges, $panel['judgers']);
-                      }
-                      $allJudges = array_unique($allJudges);
-                    @endphp
-                    @forelse ($allJudges as $judgeId)
-                      @php $judge = $judges->find($judgeId); @endphp
-                      @if ($judge)
-                        <span class="badge text-dark bg-card border px-3 py-2 rounded-pill">
-                          <i class="ti ti-user me-1"></i>
-                          {{ $judge->{'first_name_' . $l} }} {{ $judge->{'last_name_' . $l} }}
-                        </span>
-                      @endif
-                    @empty
-                      <span class="badge text-dark bg-card border px-3 py-2 rounded-pill">
-                        <i class="ti ti-mood-puzzled me-1"></i>
-                        {{ __('admin.no_judges_assigned') }}
-                      </span>
-                    @endforelse
-                  @else
-                    @forelse ($judgersList as $judgeId)
-                      @php $judge = $judges->find($judgeId); @endphp
-                      @if ($judge)
-                        <span class="badge text-dark bg-card border px-3 py-2 rounded-pill">
-                          <i class="ti ti-user me-1"></i>
-                          {{ $judge->{'first_name_' . $l} }} {{ $judge->{'last_name_' . $l} }}
-                        </span>
-                      @endif
-                    @empty
-                      <span class="badge text-dark bg-card border px-3 py-2 rounded-pill">
-                        <i class="ti ti-mood-puzzled me-1"></i>
-                        {{ __('admin.no_judges_assigned') }}
-                      </span>
-                    @endforelse
-                  @endif
+                  @php
+                    $allJudges = collect($judgers_list ?? [])
+                        ->pluck('judgers')
+                        ->flatten()
+                        ->merge($judgersList ?? [])
+                        ->unique()
+                        ->filter();
+                  @endphp
+
+                  @forelse ($allJudges as $judgeId)
+                    @php $judge = $judges->find($judgeId); @endphp
+                    
+                    @if ($judge)
+                      <a 
+                        href="/dashboard/users/{{ $judge->id }}/edit" 
+                        class="badge text-dark bg-card border px-3 py-2 rounded-pill d-flex align-items-center"
+                      >
+                        <div class="avatar avatar-xs me-2">
+                          @if ($judge->img_url)
+                            <img src="{{ $judge->img_url }}" alt="img" class="rounded-circle object-fit-cover">
+                          @else
+                            <div class="avatar-initial rounded-circle bg-label-secondary">
+                              <i class="ti ti-user ti-xs"></i>
+                            </div>
+                          @endif
+                        </div>
+                        {{ $judge->{'first_name_' . $l} }} {{ $judge->{'last_name_' . $l} }}
+                      </a>
+                    @endif
+                  @empty
+                    <span class="badge text-dark bg-card border px-3 py-2 rounded-pill">
+                      <i class="ti ti-mood-puzzled me-1"></i>
+                      {{ __('admin.no_judges_assigned') }}
+                    </span>
+                  @endforelse
                 </div>
               </div>
             </div>
@@ -209,53 +215,49 @@ $pills = [
               </div>
               <div class="p-3 bg-light-subtle rounded-2 border">
                 <div class="d-flex flex-wrap gap-2">
-                  @if ($cstep->data == 'onetoall')
+                  @php
+                    $allCompanies = collect($judgers_list ?? [])
+                        ->pluck('companies')
+                        ->flatten()
+                        ->merge(
+                            \App\Company::whereIn('step', array_filter([$form->id ?? null, $cstep->id ?? null]))
+                                ->pluck('id')
+                        )
+                        ->unique()
+                        ->filter();
+
+                    $companiesById = $companies->keyBy('id');
+                  @endphp
+
+                  @forelse ($allCompanies as $companyId)
+                    @php $company = $companiesById[$companyId] ?? null; @endphp
+
+                    @if ($company)
+                      <a 
+                        href="/dashboard/companyProfile/{{ $company->id }}" 
+                        class="badge text-dark bg-card border px-3 py-2 rounded-pill d-flex align-items-center"
+                      >
+                        <div class="avatar avatar-xs me-2">
+                          @if ($company->logo)
+                            <img src="{{ $company->logo }}" alt="logo" class="rounded-circle object-fit-cover">
+                          @else
+                            <div class="avatar-initial rounded-circle bg-label-secondary">
+                              <i class="ti ti-building-skyscraper ti-xs"></i>
+                            </div>
+                          @endif
+                        </div>
+                        {{ $company->{'name_' . $l} }}
+                      </a>
+                    @endif
+                  @empty
                     <span class="badge text-dark bg-card border px-3 py-2 rounded-pill">
                       <i class="ti ti-mood-puzzled me-1"></i>
-                      {{ __('admin.all_startups') }}
+                      {{ __('admin.no_startups_assigned') }}
                     </span>
-                  @elseif ($cstep->data == 'grouptogroup')
-                    @php
-                      $allCompanies = [];
-                      foreach ($judgers_list as $panel) {
-                        $allCompanies = array_merge($allCompanies, $panel['companies']);
-                      }
-                      $allCompanies = array_unique($allCompanies);
-                    @endphp
-                    @forelse ($allCompanies as $companyId)
-                      @php $company = $companies->find($companyId); @endphp
-                      @if ($company)
-                        <span class="badge text-dark bg-card border px-3 py-2 rounded-pill">
-                          <i class="ti ti-building-skyscraper me-1"></i>
-                          {{ $company->{'name_' . $l} }}
-                        </span>
-                      @endif
-                    @empty
-                      <span class="badge text-dark bg-card border px-3 py-2 rounded-pill">
-                        <i class="ti ti-mood-puzzled me-1"></i>
-                        {{ __('admin.no_startups_assigned') }}
-                      </span>
-                    @endforelse
-                  @else
-                    @php
-                      $assignedCompanies = \App\Company::whereIn('step', [$form->id ?? '', $cstep->id])->get();
-                    @endphp
-                    @forelse ($assignedCompanies as $company)
-                      <span class="badge text-dark bg-card border px-3 py-2 rounded-pill">
-                        <i class="ti ti-building-skyscraper me-1"></i>
-                        {{ $company->{'name_' . $l} }}
-                      </span>
-                    @empty
-                      <span class="badge text-dark bg-card border px-3 py-2 rounded-pill">
-                        <i class="ti ti-mood-puzzled me-1"></i>
-                        {{ __('admin.no_startups_assigned') }}
-                      </span>
-                    @endforelse
-                  @endif
+                  @endforelse
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </div>

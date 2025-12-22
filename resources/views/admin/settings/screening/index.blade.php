@@ -15,7 +15,7 @@
         @foreach($tabs as $tab)
           <li class="nav-item">
             <a href="/{{ $tab['url'] }}" class="nav-link {{ Request::is($tab['url'] . '*') ? 'active' : '' }}">
-              <i class="ti ti-{{ $tab['icon'] }} me-2"></i>
+              <i class="ti ti-{{ $tab['icon'] }} me-2 d-none d-md-inline"></i>
               {{ $tab['title'] }}
             </a>
           </li>
@@ -42,9 +42,9 @@
           </div>
           <div class="d-flex align-items-center gap-3">
             <!-- Quick Stats -->
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center ms-1">
               <div class="badge bg-label-primary rounded-pill d-flex align-items-center px-3 py-2">
-                <i class="ti ti-list me-1"></i>
+                <i class="ti ti-list me-1 d-none d-sm-block"></i>
                 <span class="fw-semibold">
                   {{ count($screeningSteps) }} {{ __('admin.screening.step') }}                  
                 </span>
@@ -58,22 +58,12 @@
       <div class="card bg-light-subtle shadow-none rounded-0 border-bottom">
         <div class="card-body py-4">
           <form id="filter-form" method="GET" action="/dashboard/screening">
-            <div class="row g-3">
-              <div class="col-md-4">
-                <label class="form-label">{{ __('admin.screening.search_steps') }}</label>
+            <div class="row g-3 align-items-center">
+              <div class="col-md-6 col-lg-3">
                 <input type="text" class="form-control bg-card" name="search" value="{{ request('search') }}" placeholder="{{ __('admin.screening.search_steps_placeholder') }}">
               </div>
-              <div class="col-md-3">
-                <label class="form-label">{{ __('admin.screening.screening_type') }}</label>
-                <select class="form-select bg-card" name="screening_type">
-                  <option value="">{{ __('admin.screening.all_types') }}</option>
-                  <option value="onetoall" {{ request('screening_type') == 'onetoall' ? 'selected' : '' }}>{{ __('admin.screening.onetoall') }}</option>
-                  <option value="grouptoall" {{ request('screening_type') == 'grouptoall' ? 'selected' : '' }}>{{ __('admin.screening.grouptoall') }}</option>
-                  <option value="grouptogroup" {{ request('screening_type') == 'grouptogroup' ? 'selected' : '' }}>{{ __('admin.screening.grouptogroup') }}</option>
-                </select>
-              </div>
-              <div class="col-md-2">
-                <label class="form-label">{{ __('admin.status') }}</label>
+
+              <div class="col-md-6 col-lg-2">
                 <select class="form-select bg-card" name="status">
                   <option value="">{{ __('admin.All_statuses') }}</option>
                   <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>{{ __('admin.In_Progress') }}</option>
@@ -81,14 +71,42 @@
                   <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>{{ __('admin.completed') }}</option>
                 </select>
               </div>
-              <div class="col-md-3">
-                <div class="d-flex justify-content-md-end align-items-end h-100 gap-2">
-                  <button type="submit" class="btn btn-primary" disabled>
-                    <i class="ti ti-filter me-2"></i> {{ __('admin.Filter') }}
+
+              <div class="col-md-6 col-lg-2">
+                <select class="form-select bg-card" name="program">
+                  <option value="">{{ __('admin.All_Programs') }}</option>
+                  @foreach($screeningSteps->pluck('program')->unique('id') as $program)
+                    <option value="{{ $program->id }}" {{ request('program') == $program->id ? 'selected' : '' }}>{{ Str::limit($program->title, 25) }}</option>
+                  @endforeach
+                </select>
+              </div>
+
+              <div class="col-md-6 col-lg-2">
+                <select class="form-select bg-card" name="judge">
+                  <option value="">{{ __('cycles.All Judges') }}</option>
+                  @foreach($screeningSteps->pluck('judges')->flatten()->unique('id') as $judge)
+                    <option value="{{ $judge->id }}" {{ request('judge') == $judge->id ? 'selected' : '' }}>{{ $judge->name }}</option>
+                  @endforeach
+                </select>
+              </div>
+
+              <div class="col-md-6 col-lg-2">
+                <select class="form-select bg-card" name="startup">
+                  <option value="">{{ __('admin.all_startups') }}</option>
+                  @foreach($screeningSteps->pluck('companies')->flatten()->unique('id') as $company)
+                    <option value="{{ $company->id }}" {{ request('startup') == $company->id ? 'selected' : '' }}>{{ Str::limit($company->name, 25) }}</option>
+                  @endforeach
+                </select>
+              </div>
+
+              <div class="col-md-6 col-lg-1">
+                <div class="d-flex justify-content-lg-end gap-2">
+                  <button type="submit" class="btn btn-primary btn-icon" disabled>
+                    <i class="ti ti-filter"></i>
                   </button>
-                  @if(request('search') || request('screening_type') || request('status'))
-                    <a href="/dashboard/screening" class="btn btn-outline-secondary">
-                      <i class="ti ti-refresh me-2"></i> {{ __('admin.Reset') }}
+                  @if(request('search') || request('status') || request('program') || request('judge') || request('startup'))
+                    <a href="/dashboard/screening" class="btn bg-card border btn-icon">
+                      <i class="ti ti-refresh"></i>
                     </a>
                   @endif
                 </div>
@@ -177,13 +195,6 @@
                     </div>
                   </div>
       
-                  <!-- Screening Type -->
-                  <div class="mb-3">
-                    <span data-bs-toggle="tooltip" data-bs-title="{{ __('admin.screening.' . str_replace('-', '', $step->screening_type) . '_description') }}" class="badge bg-label-info text-capitalize" title="{{ __('admin.screening.' . str_replace('-', '', $step->screening_type) . '_description') }}">
-                      {{ __('admin.screening.' . str_replace('-', '', $step->screening_type)) }}
-                    </span>
-                  </div>
-      
                   <!-- Assignments Summary -->
                   <div class="row g-2 mb-3">
                     <div class="col-6">
@@ -216,7 +227,7 @@
                 </div>
       
                 <!-- Card Footer -->
-                <div class="card-footer text-center">
+                <div class="card-footer text-center text-nowrap">
                   <div class="d-flex gap-2">
                     <a href="/dashboard/screening/{{ $step->id }}" class="btn btn-primary flex-fill">
                       <i class="ti ti-eye-cog me-2"></i> {{ __('admin.screening.manage_step') }}
@@ -249,14 +260,7 @@
       <form id="stepForm" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="_token" value="">
         <div class="modal-body">
-          <div class="form-group mb-3">
-            <label class="form-label">{{ __('admin.screening.screening_type') }}</label>
-            <select class="form-select" name="ScreeningSelect" id="screening-type" required>
-              <option value="onetoall">{{ __('admin.screening.onetoall') }}</option>
-              <option value="grouptoall">{{ __('admin.screening.grouptoall') }}</option>
-              <option value="grouptogroup">{{ __('admin.screening.grouptogroup') }}</option>
-            </select>
-          </div>
+
           <input type="hidden" name="sid" id="step-id-value">
           <input type="hidden" name="type" value="8">
           <div class="form-group mb-3">
@@ -320,16 +324,6 @@
       $('#step-from-date').val(stepData.start_date);
       $('#step-to-date').val(stepData.end_date);
       $('#step-description').val(stepData.description);
-
-      if (stepData.screening_type) {
-        if (stepData.screening_type == 'one-to-all') {
-          $('#screening-type').val('onetoall');
-        } else if (stepData.screening_type == 'group-to-all') {
-          $('#screening-type').val('grouptoall');
-        } else {
-          $('#screening-type').val('grouptogroup');
-        }
-      }
     }
   });
 

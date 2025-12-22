@@ -89,6 +89,27 @@ class ScreeningController extends Controller
 					}
 			}
 
+			if ($request->filled('program')) {
+					$stepsQuery->whereHas('cycle', function ($c) use ($request) {
+							$c->where('id', $request->program);
+					});
+			}
+
+			if ($request->filled('judge')) {
+					$stepsQuery->where(function ($q) use ($request) {
+							// Check if judge is in the JSON list field
+							$q->whereRaw("JSON_CONTAINS(list, ?)", [json_encode($request->judge)])
+									->orWhereRaw("JSON_CONTAINS(list, ?)", [json_encode([$request->judge])])
+									->orWhereRaw("JSON_CONTAINS(list, ?)", [$request->judge]);
+					});
+			}
+
+			if ($request->filled('startup')) {
+					$stepsQuery->whereHas('companies', function ($c) use ($request) {
+							$c->where('id', $request->startup);
+					});
+			}
+
 			$steps = $stepsQuery->orderBy('from')->get();
 
 			/** -------------------------
