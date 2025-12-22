@@ -2708,6 +2708,7 @@ return [
 		'panel' => 'لجنة',
 		'add_panel' => 'أضف لجنة',
 		'add_judging_panels' => 'أضف لجان التقييم',
-		'add_panels_description' => 'أضف المحكمن والشركات إلى كل لجنة'
+		'add_panels_description' => 'أضف المحكمن والشركات إلى كل لجنة',
+		'schedule_session' => 'جدولة الجلسة',
 	],
 ];

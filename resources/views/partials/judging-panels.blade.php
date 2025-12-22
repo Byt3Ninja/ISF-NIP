@@ -34,10 +34,10 @@
       ];
 
       $judgingPanels = [
-        ['judges' => ['John Doe', 'Jane Smith'], 'companies' => ['Google']],
-        ['judges' => ['Michael Johnson'], 'companies' => ['Microsoft', 'Apple']],
+        ['judges' => ['John Doe', 'Jane Smith'], 'companies' => ['Google'], 'session' => ['date' => '2025-12-25', 'start_time' => '10:00', 'end_time' => '11:00', 'meeting_link' => 'https://meet.google.com/abc']],
+        ['judges' => ['Michael Johnson'], 'companies' => ['Microsoft', 'Apple'], 'session' => ['date' => '2025-12-26', 'start_time' => '14:00', 'end_time' => '15:30', 'meeting_link' => 'https://zoom.us/j/123']],
         ['judges' => ['Emily Davis', 'David Wilson'], 'companies' => ['Amazon', 'Facebook']],
-        ['judges' => ['Sarah Brown'], 'companies' => ['Tesla']],
+        ['judges' => ['Sarah Brown'], 'companies' => ['Tesla'], 'session' => ['date' => '2025-12-27', 'start_time' => '09:00', 'end_time' => '10:00', 'meeting_link' => 'https://teams.microsoft.com/l/meetup-join/xyz']],
         ['judges' => ['Robert Miller', 'Lisa Garcia'], 'companies' => ['Netflix', 'Uber']]
       ];
     @endphp
@@ -58,7 +58,7 @@
             @if($index > 0)
               <button
                 type="button"
-                class="btn btn-sm btn-outline-danger ms-2 me-2 remove-panel"
+                class="btn btn-icon btn-sm btn-outline-danger ms-2 me-4 remove-panel"
               >
                 <i class="ti ti-trash"></i>
               </button>
@@ -91,6 +91,49 @@
                   />
                 </div>
               </div>
+
+              <hr class="my-4">
+
+              <!-- Session Schedule Section -->
+              <div class="row mb-3">
+                <div class="col-12">
+                  <div class="d-flex align-items-center mb-3">
+                    <div class="form-check form-switch me-3">
+                      <input
+                        class="form-check-input session-toggle"
+                        type="checkbox"
+                        id="session-toggle-{{ $index + 1 }}"
+                        {{ isset($panel['session']) || str_contains($_SERVER['REQUEST_URI'], 'final') ? 'checked' : '' }}
+                      />
+                      <label class="form-check-label fw-semibold" for="session-toggle-{{ $index + 1 }}">
+                        {{ __('admin.screening.schedule_session') }}
+                      </label>
+                    </div>
+                  </div>
+                  <div class="session-inputs border rounded p-4" id="session-inputs-{{ $index + 1 }}" style="display: {{ isset($panel['session']) ? 'block' : 'none' }};">
+                    <div class="row mb-3">
+                      <div class="col-md-6">
+                        <label class="form-label fw-semibold">{{ __('admin.Session_date') }}</label>
+                        <input type="text" class="form-control session-date" name="panels[{{ $index }}][session_date]" value="{{ $panel['session']['date'] ?? '' }}">
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label fw-semibold">{{ __('admin.Meeting Link') }}</label>
+                        <input type="url" class="form-control session-meeting-link" name="panels[{{ $index }}][meeting_link]" placeholder="https://" value="{{ $panel['session']['meeting_link'] ?? '' }}">
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">{{ __('admin.Start Time') }}</label>
+                        <input type="text" class="form-control session-start-time" name="panels[{{ $index }}][start_time]" value="{{ $panel['session']['start_time'] ?? '' }}">
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">{{ __('admin.End Time') }}</label>
+                        <input type="text" class="form-control session-end-time" name="panels[{{ $index }}][end_time]" value="{{ $panel['session']['end_time'] ?? '' }}">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -98,7 +141,6 @@
     </div>
   </div>
 </div>
-
 
 @push('scripts')
 <script>
@@ -135,8 +177,34 @@
     });
   }
 
+  function initFlatpickr(container) {
+    $(container).find('.session-date').each(function() {
+      if (!$(this).data('flatpickr')) {
+        flatpickr(this, { dateFormat: 'Y-m-d' });
+      }
+    });
+
+    $(container).find('.session-start-time, .session-end-time').each(function() {
+      if (!$(this).data('flatpickr')) {
+        flatpickr(this, { enableTime: true, noCalendar: true, dateFormat: 'H:i' });
+      }
+    });
+  }
+
   // Initialize first panel
   initTagify(document);
+  initFlatpickr(document);
+
+  // Handle session toggle
+  $(document).on('change', '.session-toggle', function() {
+    const panelId = $(this).attr('id').split('-').pop();
+    const inputsDiv = $(`#session-inputs-${panelId}`);
+    if ($(this).is(':checked')) {
+      inputsDiv.show();
+    } else {
+      inputsDiv.hide();
+    }
+  });
 
   $('#addPanelBtn').on('click', function() {
     panelIndex++;
@@ -151,10 +219,24 @@
     // Update the cloned panel
     clonedPanel.find('.accordion-button').removeClass('show').addClass('collapsed').attr('data-bs-target', `#${panelId}`).html(`<i class="ti ti-user-check me-2"></i> Panel #${panelIndex}`);
     clonedPanel.find('.accordion-collapse').removeClass('show').attr('id', panelId);
+
+    // Update session toggle and inputs IDs
+    clonedPanel.find('.session-toggle').attr('id', `session-toggle-${panelIndex}`);
+    clonedPanel.find('.session-inputs').attr('id', `session-inputs-${panelIndex}`);
+
+    // Update input names for session fields
+    clonedPanel.find('[name*="panels["]').each(function() {
+      const name = $(this).attr('name');
+      const newName = name.replace(/panels\[\d+\]/, `panels[${panelIndex - 1}]`);
+      $(this).attr('name', newName);
+    });
+
     clonedPanel.find('.accordion-body input').val(''); // Clear inputs
+    clonedPanel.find('.session-toggle').prop('checked', false); // Uncheck toggle
+    clonedPanel.find('.session-inputs').hide(); // Hide session inputs
 
     // Add remove button to cloned panels
-    const removeBtn = $('<button type="button" class="btn btn-sm btn-outline-danger ms-2 me-2 remove-panel"><i class="ti ti-trash"></i></button>');
+    const removeBtn = $('<button type="button" class="btn btn-sm btn-outline-danger ms-2 me-4 remove-panel"><i class="ti ti-trash"></i></button>');
     clonedPanel.find('.accordion-header').append(removeBtn);
 
     // Destroy existing Tagify instances in clone to reinitialize
@@ -166,6 +248,7 @@
 
     accordion.append(clonedPanel);
     initTagify(clonedPanel[0]);
+    initFlatpickr(clonedPanel[0]);
   });
 
   $(document).on('click', '.remove-panel', async function() {
