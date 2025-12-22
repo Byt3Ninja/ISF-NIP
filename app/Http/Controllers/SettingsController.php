@@ -40,6 +40,29 @@ class SettingsController extends Controller
         $this->middleware('auth')->except(['showSetPasswordForm', 'acceptInvitation']);
     }
 
+		public function index()
+		{
+				$pages = [
+						['title' => 'general', 'route' => 'settings.system_general_view'],
+						['title' => 'roles_permissions', 'route' => 'roles.index'],
+						['title' => 'importer_tool', 'route' => 'importer.index'],
+						['title' => 'currencies', 'route' => 'currencies.index'],
+						['title' => 'tags', 'route' => 'Tags.index'],
+						['title' => 'categories', 'route' => 'Category.index'],
+						['title' => 'subcategories', 'route' => 'subcategories.index'],
+						['title' => 'stages', 'route' => 'stages.index'],
+						['title' => 'labels', 'route' => 'Labels.index'],
+						['title' => 'queue_jobs', 'route' => 'queue.jobs'],
+						['title' => 'industry', 'route' => 'settings.industry_view'],
+						['title' => 'expertise', 'route' => 'settings.expertise_view'],
+						['title' => 'notification_templates', 'route' => 'notification-templates.index'],
+						['title' => 'notification_triggers', 'route' => 'notification-triggers.index'],
+						['title' => 'license_key', 'route' => 'license.activate_view_form']
+				];
+
+				return view('admin.settings.index', compact('pages'));
+		}
+
 	public function get_settings( Request $request )
 	{
 		$Title = Settings::findOrFail('1');

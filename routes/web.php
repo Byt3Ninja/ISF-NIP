@@ -237,7 +237,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('updateevent/{id}', 'EventsController@updateevent')->name('events.update');
     Route::get('deleteevent/{id}', 'EventsController@deleteevent')->name('events.delete');
     // Settings Routes
-    Route::any('settings', 'SettingsController@get_settings')->name('settings.system_general_view');
+    Route::any('settings', 'SettingsController@index')->name('settings.index');
+    Route::any('settings/general', 'SettingsController@get_settings')->name('settings.system_general_view');
     Route::get('industry-settings', 'SettingsController@industrySettings')->name('settings.industry_view');
     Route::get('expertise-settings', 'ExpertiseController@index')->name('settings.expertise_view');
     Route::get('notification-settings', 'SettingsController@notificationSettings')->name('settings.notification_view');
