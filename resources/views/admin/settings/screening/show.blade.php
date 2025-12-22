@@ -2,6 +2,7 @@
 
 @section('vendorstyle')
 <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
 @stop
 
 @php
@@ -63,11 +64,11 @@ $pills = [
                 </button>
                 <div class="dropdown-menu dropdown-menu-end">
                   <button class="dropdown-item edit-step-btn" data-step='@json($cstep)'>
-                    <i class="ti ti-pencil me-1"></i> Edit Step
+                    <i class="ti ti-pencil me-1"></i> {{ __('admin.edit_step') }}
                   </button>
                   <div class="dropdown-divider"></div>
                   <button class="dropdown-item text-danger" onclick="handleDeleteStep({{ $cstep->id }})">
-                    <i class="ti ti-trash me-1"></i> Delete
+                    <i class="ti ti-trash me-1"></i> {{ __('admin.delete') }}
                   </button>
                 </div>
               </div>
@@ -121,9 +122,9 @@ $pills = [
                     </div>
                   </div>
                   <div class="flex-grow-1">
-                    <div class="text-secondary small mb-1">{{ __('admin.start_date') }} -> {{ __('admin.end_date') }}</div>
+                    <div class="text-secondary small mb-1">{{ __('admin.start_date') }} - {{ __('admin.end_date') }}</div>
                     <div class="text-info fw-semibold">
-                      {{ $cstep->from?->format('d-m-Y') ?? '-' }} -> {{ $cstep->to?->format('d-m-Y') ?? '-' }}
+                      {{ $cstep->from?->format('d-m-Y') ?? '-' }} - {{ $cstep->to?->format('d-m-Y') ?? '-' }}
                     </div>
                   </div>
                 </div>
@@ -208,7 +209,12 @@ $pills = [
               </div>
               <div class="p-3 bg-light-subtle rounded-2 border">
                 <div class="d-flex flex-wrap gap-2">
-                  @if ($cstep->data == 'grouptogroup')
+                  @if ($cstep->data == 'onetoall')
+                    <span class="badge text-dark bg-card border px-3 py-2 rounded-pill">
+                      <i class="ti ti-mood-puzzled me-1"></i>
+                      {{ __('admin.all_startups') }}
+                    </span>
+                  @elseif ($cstep->data == 'grouptogroup')
                     @php
                       $allCompanies = [];
                       foreach ($judgers_list as $panel) {
@@ -282,7 +288,9 @@ $pills = [
       <div class="tab-content bg-card shadow">
         <!-- Judging Panels Tab -->
         <div class="tab-pane fade show active" id="judging_panels" role="tabpanel" aria-labelledby="judging_panels-tab">
-          <div class="d-flex flex-column">
+          @include('partials.judging-panels')
+          <!-- Old Logic (should be removed) Once new logic done -->
+          {{-- <div class="d-flex flex-column">
             @if (isset($cstep->data) && array_key_exists($cstep->data, $types))
               <h5 class="card-title primary">{{ __('cycles.' . $types[$cstep->data]) }}</h5>
             @endif
@@ -339,7 +347,6 @@ $pills = [
                     {{ $cstep->data == 'onetoall' ? '' : 'multiple="multiple"' }}
                     data-placeholder="{{ __('cycles.Select') }}..."  
                   >
-                    {{-- {!! $cstep->data == 'onetoall' ? '<option disabled value="">' . __('cycles.Please select one name') . '</option>' : '' !!} --}}
                     <option value="">{{ __('cycles.Select') }}...</option>
                     @foreach ($judges as $judge)
                     <option value="{{ $judge->id }}" {{ in_array( intval( $judge->id ) , $judgersList->toArray()) ? 'selected' : '' }}>
@@ -359,22 +366,34 @@ $pills = [
                 </div>
               </div>
             </form>
-          </div>
+          </div> --}}
+          <!-- Old Logic (should be removed) Once new logic done -->
         </div>
         <!--/ Judging Panels Tab -->
-
+        
         <!-- Screening Guidelines Tab -->
         <div class="tab-pane fade" id="screening_guidelines" role="tabpanel" aria-labelledby="screening_guidelines-tab">
           <div class="d-flex flex-column">
             <h5 class="mb-1">{{ __('admin.screening_guidelines') }}</h5>
             <p class="mb-6 text-muted">{{ __('admin.screening_guidelines_description') }}</p>
-            <textarea 
-              class="form-control" 
-              id="screening-guidelines-editor" 
-              name="screening_guidelines" 
-              rows="5">
-              {{ $evaluationForm->screening_guidelines ?? '' }}
-            </textarea>
+            <div id="model-validation-summary" style="display: none;"></div>
+            <form id="screening-guidelines-form" action="{{ route('screening.evaluation_save_draft') }}" method="POST" enctype="multipart/form-data">
+              {!! csrf_field() !!}
+              <input type="hidden" name="action" value="draft">
+              <input type="hidden" name="stepId" value="{{ $cstep->id }}">
+              <textarea
+                class="form-control"
+                id="screening-guidelines-editor"
+                name="screening_guidelines"
+                rows="5">
+                {!! $evaluationForm->screening_guidelines ?? '' !!}
+              </textarea>
+              <div class="row mt-4">
+                <div class="col-12 d-flex justify-content-end">
+                  <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('admin.Save') }}</button>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
         <!--/ Screening Guidelines Tab -->
@@ -399,18 +418,18 @@ $pills = [
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title mb-0" id="myModalLabel33">Modify Step</h5>
+        <h5 class="modal-title mb-0" id="myModalLabel33">{{ __('admin.screening.modify_step') }}</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <form id="stepForm" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="_token" value="">
         <div class="modal-body">
           <div class="form-group mb-3">
-            <label class="form-label">Screening Type</label>
+            <label class="form-label">{{ __('admin.screening.screening_type') }}</label>
             <select class="form-select" name="ScreeningSelect" id="screening-type" required>
-              <option value="onetoall">One-to-All</option>
-              <option value="grouptoall">Group-to-All</option>
-              <option value="grouptogroup">Group-to-Group</option>
+              <option value="onetoall">{{ __('admin.screening.onetoall') }}</option>
+              <option value="grouptoall">{{ __('admin.screening.grouptoall') }}</option>
+              <option value="grouptogroup">{{ __('admin.screening.grouptogroup') }}</option>
             </select>
           </div>
           <input type="hidden" name="sid" id="step-id-value">
@@ -421,12 +440,12 @@ $pills = [
               class="form-control" required>
           </div>
           <div class="form-group mb-3">
-            <label class="form-label">{{ __('cycles.Start From') }}</label>
+            <label class="form-label">{{ __('admin.start_date') }}</label>
             <input id="step-from-date" name="fromDate" type="text" class="form-control date"
               required>
           </div>
           <div class="form-group mb-3">
-            <label class="form-label">{{ __('admin.End at') }}</label>
+            <label class="form-label">{{ __('admin.end_date') }}</label>
             <input id="step-to-date" name="toDate" type="text" class="form-control date"
               required>
           </div>
@@ -437,7 +456,7 @@ $pills = [
           </div>
         </div>
         <div class="modal-footer">
-          <button type="submit" value="submit" class="btn btn-primary me-3">
+          <button type="submit" value="submit" class="btn btn-primary">
             <span class="d-none d-sm-block">{{ __('cycles.Submit') }}</span>
           </button>
           <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
@@ -483,11 +502,15 @@ $pills = [
 
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
+<script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script>
 @stop
 
 @section('pagescripts')
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      // Get initial content before initializing Summernote
+      const initialContent = $('#screening-guidelines-editor').val() || '';
+
       // Initialize Summernote editor
       $('#screening-guidelines-editor').summernote({
         placeholder: '{{ __('admin.screening_guidelines_placeholder') }}',
@@ -503,6 +526,13 @@ $pills = [
           ['view', ['fullscreen', 'codeview', 'help']]
         ],
       });
+
+      // Set the initial content after Summernote is initialized
+      if (initialContent.trim() !== '') {
+        setTimeout(() => {
+          $('#screening-guidelines-editor').summernote('code', initialContent);
+        }, 100);
+      }
 
       // Initialize date pickers
       $('.date').flatpickr({
@@ -686,6 +716,76 @@ $pills = [
           return false;
         }
       });
+
+      // Handle screening guidelines form submission with AJAX
+      $('#screening-guidelines-form').on('submit', function(e) {
+        e.preventDefault();
+
+        // Sync Summernote content to textarea
+        $('#screening-guidelines-editor').val($('#screening-guidelines-editor').summernote('code'));
+
+        const formData = new FormData(this);
+
+        $.ajax({
+          url: $(this).attr('action'),
+          type: 'POST',
+          data: formData,
+          processData: false,
+          contentType: false,
+          headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+          },
+          success: function(response) {
+            if (response.status) {
+              showAlert($('#model-validation-summary')[0], 'Screening guidelines saved successfully', 'success', 3000);
+            } else {
+              showAlert($('#model-validation-summary')[0], response.message, 'danger');
+            }
+          },
+          error: function(xhr) {
+            const errorMessage = xhr.responseJSON?.message || 'An error occurred while saving screening guidelines';
+            showAlert($('#model-validation-summary')[0], errorMessage, 'danger');
+          }
+        });
+      });
+
+      // Helper function to show dismissible alerts
+      function showAlert(element, message, type = 'info', timeout = null) {
+        const alertTypes = {
+          'success': 'alert-success',
+          'danger': 'alert-danger',
+          'warning': 'alert-warning',
+          'info': 'alert-info'
+        };
+
+        const alertClass = alertTypes[type] || 'alert-info';
+
+        element.innerHTML = `
+          ${message}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        element.className = `alert ${alertClass} alert-dismissible`;
+        element.style.display = 'block';
+
+        // Initialize Bootstrap alert dismiss functionality
+        const dismissButton = element.querySelector('.btn-close');
+        if (dismissButton) {
+          dismissButton.addEventListener('click', function() {
+            element.style.display = 'none';
+            element.classList.remove('alert-success', 'alert-danger', 'alert-warning', 'alert-info');
+          });
+        }
+
+        // Auto-dismiss after timeout if specified
+        if (timeout) {
+          setTimeout(() => {
+            if (element.classList.contains(alertClass)) {
+              element.style.display = 'none';
+              element.classList.remove('alert-success', 'alert-danger', 'alert-warning', 'alert-info');
+            }
+          }, timeout);
+        }
+      }
     });
 
     setTimeout(() => {

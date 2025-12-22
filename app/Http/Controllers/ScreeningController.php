@@ -196,6 +196,12 @@ class ScreeningController extends Controller
 				$query->where('organization_id', $organization_id);
 			});
 		})->where('stype', 2)->orderBy('from')->get();
+		// $judges = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->get();
+		$judges = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+			->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+			->where('roles.default_for', 'judger')
+			->select('users.*')
+			->get();
 
 		if ($id == 0) {
 			$id = $steps->pluck('id')->first();
@@ -210,12 +216,7 @@ class ScreeningController extends Controller
 					$query->where('organization_id', $organization_id);
 				});
 			})->where('stype', 2)->where('id', $id)->first();
-
-			if( empty( $cstep ) ) {
-				return abort(404);
-			}
 		}
-
 		if ($cstep) {
 			$form = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
 				return $q->whereHas('cycle', function ($query) use ($organization_id) {
@@ -261,12 +262,6 @@ class ScreeningController extends Controller
 		$companies = [];
 		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
 		if( $cstep ) { $companies = Company::whereIn('step', [$form?->id ?? 0, $cstep?->id ?? 0])->get(); } else { $cstep = []; }
-		$judges = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
-				->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
-				->where('roles.default_for', 'judger')
-				->select('users.id', 'users.first_name_en', 'users.last_name_en')
-				->get()
-				->keyBy('id');
 		return view('admin.settings.screening.show', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'steps', 'id', 'svgs', 'evaluationForm'));
 	}
 
@@ -806,13 +801,23 @@ class ScreeningController extends Controller
 			
 		}
 
-		// Save screening guidelines
+		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
+		$current_status = strtolower( $evaluationForm->status );
+
+		// Allow saving screening_guidelines even when evaluation is published
 		if ($request->has('screening_guidelines')) {
 			$evaluation->screening_guidelines = $request->screening_guidelines;
 			$evaluation->save();
+			// If only screening_guidelines is being saved, return success
+			if (!$request->has('criteria') || empty($request->criteria)) {
+				return response()->json([
+					'status' => true,
+					'title' => 'saved',
+					'message' => 'Screening guidelines saved successfully'
+				]);
+			}
 		}
-		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
-		$current_status = strtolower( $evaluationForm->status );
+
 		if( $current_status == 'published' ) { return response()->json(['status' => false, 'message' => __('You can not make any changes on a published evaluation')], 200); }
 		else
 		{

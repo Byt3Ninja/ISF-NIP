@@ -32,44 +32,234 @@ class FinalscreeningController extends Controller
 
     public function index(Request $request, $id = 0)
     {
-        $organization_id=auth()->user()->organization_id;
-        $steps = Step::when(!is_null($organization_id),function ($q) use($organization_id){
-            return $q->whereHas('cycle',function ($query) use ($organization_id){
-                $query->where('organization_id',$organization_id);
+        $organizationId = auth()->user()->organization_id;
+
+        /** -------------------------
+         * Base steps query with filters
+         * ------------------------- */
+        $stepsQuery = Step::with(['cycle.organization'])
+                ->when($organizationId, function ($q) use ($organizationId) {
+                        $q->whereHas('cycle', fn ($c) =>
+                                $c->where('organization_id', $organizationId)
+                        );
+                })
+                ->where('stype', 5);
+
+        // Apply filters
+        if ($request->filled('search')) {
+                $search = $request->search;
+                $stepsQuery->where(function ($q) use ($search) {
+                        $q->where('title', 'like', "%{$search}%")
+                                ->orWhereHas('cycle', function ($c) use ($search) {
+                                        $c->where('title', 'like', "%{$search}%");
+                                })
+                ->orWhereHas('cycle.organization', function ($o) use ($search) {
+                        $o->where('name_en', 'like', "%{$search}%")
+                                ->orWhere('name_ar', 'like', "%{$search}%");
+                });
+                });
+        }
+
+        if ($request->filled('screening_type')) {
+                $screeningType = $request->screening_type;
+                $stepsQuery->where('data', $screeningType);
+        }
+
+        if ($request->filled('status')) {
+                $today = now()->toDateString();
+                switch ($request->status) {
+                        case 'upcoming':
+                                $stepsQuery->where('from', '>', $today);
+                                break;
+                        case 'in_progress':
+                                $stepsQuery->where('from', '<=', $today)->where('to', '>=', $today);
+                                break;
+                        case 'completed':
+                                $stepsQuery->where('to', '<', $today);
+                                break;
+                }
+        }
+
+        $steps = $stepsQuery->orderBy('from')->get();
+
+        /** -------------------------
+         * Preload all related data
+         * ------------------------- */
+        $stepIds   = $steps->pluck('id');
+        $cycleIds  = $steps->pluck('cycle_id')->unique();
+
+        $judges = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+                ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+                ->where('roles.default_for', 'judger')
+                ->select('users.id', 'users.first_name_en', 'users.last_name_en')
+                ->get()
+                ->keyBy('id');
+
+        $finalscreenings = Finalscreening::whereIn('step_id', $stepIds)
+                ->get()
+                ->groupBy('step_id');
+
+        $companies = Company::whereIn('step', $stepIds)
+                ->get()
+                ->groupBy('step');
+
+        $forms = Step::whereIn('cycle_id', $cycleIds)
+                ->where('stype', 1)
+                ->get()
+                ->keyBy(fn ($f) => "{$f->cycle_id}-{$f->arr}");
+
+        /** -------------------------
+         * Build finalScreeningSteps
+         * ------------------------- */
+        $finalScreeningSteps = $steps->map(function ($step) use (
+                $judges,
+                $finalscreenings,
+                $companies,
+                $forms
+        ) {
+                $judgersList = collect(json_decode($step->list, true) ?? [])
+                        ->map(fn ($j) => is_array($j) ? array_map('intval', $j) : [(int) $j]);
+
+                /** Collect judges for step */
+                $judgeIds = $judgersList->flatten()->unique();
+
+                $judgesForStep = $judgeIds
+                        ->map(fn ($id) => $judges->get($id))
+                        ->filter()
+                        ->map(fn ($j) => (object) [
+                                'id'   => $j->id,
+                                'name' => "{$j->first_name_en} {$j->last_name_en}",
+                        ])
+                        ->values();
+
+                /** Companies */
+                $companiesForStep = ($companies[$step->id] ?? collect())
+                        ->map(fn ($c) => (object) [
+                                'id'   => $c->id,
+                                'name' => $c->name_en,
+                        ])
+                        ->values();
+
+                /** Form */
+                $formKey = "{$step->cycle_id}-" . ($step->arr - 1);
+                $form    = $forms->get($formKey);
+
+                /** Screening type */
+                $screeningType = match ($step->data) {
+                        'onetoall'     => 'one-to-all',
+                        'grouptoall'   => 'group-to-all',
+                        'grouptogroup' => 'group-to-group',
+                        default        => 'one-to-all',
+                };
+
+                return (object) [
+                        'id'            => $step->id,
+                        'title'         => $step->title,
+                        'description'   => $step->description ?? '',
+                        'program'       => $step->cycle
+                                ? (object) ['id' => $step->cycle->id, 'title' => $step->cycle->title]
+                                : null,
+                        'organization'  => $step->cycle?->organization
+                                ? (object) [
+                                        'id'   => $step->cycle->organization->id,
+                                        'name' => $step->cycle->organization->name,
+                                ]
+                                : null,
+                        'start_date'    => optional($step->from)->format('Y-m-d'),
+                        'end_date'      => optional($step->to)->format('Y-m-d'),
+                        'screening_type'=> $screeningType,
+                        'judges'        => $judgesForStep,
+                        'companies'     => $companiesForStep,
+                        'form'          => $form
+                                ? (object) ['id' => $form->id, 'title' => $form->title]
+                                : null,
+                ];
+        });
+
+        return view('admin.settings.final.index', compact('finalScreeningSteps'));
+    }
+
+    public function show($id = 0)
+    {
+        $organization_id = auth()->user()->organization_id;
+        $steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
+            return $q->whereHas('cycle', function ($query) use ($organization_id) {
+                $query->where('organization_id', $organization_id);
             });
         })->where('stype', 5)->orderBy('from')->get();
+
         // $judges = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->get();
 		$judges = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
 			->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
 			->where('roles.default_for', 'judger')
 			->select('users.*')
 			->get();
+
         if ($id == 0) {
             $id = $steps->pluck('id')->first();
-            $cstep = Step::where('stype', 5)->where('id', $id)->first();
+            $cstep = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
+                return $q->whereHas('cycle', function ($query) use ($organization_id) {
+                    $query->where('organization_id', $organization_id);
+                });
+            })->where('stype', 5)->where('id', $id)->first();
         } else {
-            $cstep = Step::where('stype', 5)->where('id', $id)->first();
-        }
-        $companies = Company::where('step',$id);
-        if($request->judge_id != 0){
-            $list = Finalscreening::whereJsonContains('judges', (string) $request->judge_id)->get();
-            $companies = $companies->whereIn('id',$list->pluck('company_id'));
-        }
-        if($request->startup_id != 0){
-            $companies = $companies->where('id',$request->startup_id);
+            $cstep = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
+                return $q->whereHas('cycle', function ($query) use ($organization_id) {
+                    $query->where('organization_id', $organization_id);
+                });
+            })->where('stype', 5)->where('id', $id)->first();
+
+            if( empty( $cstep ) ) {
+                return abort(404);
+            }
         }
 
-        $companies = $companies->get();
+        if ($cstep) {
+            $form = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
+                return $q->whereHas('cycle', function ($query) use ($organization_id) {
+                    $query->where('organization_id', $organization_id);
+                });
+            })->where('cycle_id', $cstep->cycle_id)->where('stype', 1)->where('arr', $cstep->arr - 1)->first();
+        } else {
+            $form = collect([]);
+        }
+        $judgers_count = 0;
+        $cList = collect(json_decode($cstep?->list, true) ?? []);
+        if( in_array( $cstep?->data, ['onetoall', 'grouptoall']) ) { $judgers_count = $cList->count(); }
+        else
+        {
+            $judgers_count = $cList->flatten()->unique()->count();
+        }
+        $svgs = ['notebook', 'search', 'idea', 'comments', 'trophy'];
+
+        $judgers_list = collect( json_decode($cstep?->list) )->map(function($user) {
+            if( is_array( $user ) ) { $user = array_map('intval', $user); } else { $user = intval( $user ); }
+            return $user;
+        });
+
+        $finalscreenings = collect([]);
+        if( $cstep ) { $finalscreenings = Finalscreening::where('step_id', $cstep->id)->get(); }
+
+        foreach( $judgers_list as $panel_id => $judgers_ids )
+        {
+            $users_list = $finalscreenings->where('panel', $panel_id)->map(function($finalscreening) {
+                if( is_array( $finalscreening->companies ) ) { return $finalscreening->companies; }
+                else { return collect(json_decode($finalscreening->companies, true) ?? []); }
+            })->flatten()->unique()->values()->all();
+
+            $judgers_list[$panel_id] = ['judgers' => $judgers_ids, 'companies' => $users_list ];
+        }
         $check = ScreeningEvaluation::where('step_id', $id)->first();
-		if( empty( $check ) )
-		{
-			$evaluation = new ScreeningEvaluation();
-			$evaluation->step_id = $id;
-			$evaluation->save();
-		}
-		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
-
-        return view('admin.settings.final.index', compact('cstep', 'judges', 'steps', 'id', 'companies', 'evaluationForm'));
+        if( empty( $check ) )
+        {
+            $evaluation = new ScreeningEvaluation();
+            $evaluation->step_id = $id;
+            $evaluation->save();
+        }
+        $companies = [];
+        $evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
+        if( $cstep ) { $companies = Company::whereIn('step', [$form?->id ?? 0, $cstep?->id ?? 0])->get(); } else { $cstep = []; }
+        return view('admin.settings.final.show', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'steps', 'id', 'svgs', 'evaluationForm'));
     }
 
     public function update(Request $request)

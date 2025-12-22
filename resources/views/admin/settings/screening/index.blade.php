@@ -37,15 +37,17 @@
       <div class="card-header border-bottom">
         <div class="d-flex justify-content-between align-items-center">
           <div>
-            <h5 class="card-title mb-1">Screening Steps</h5>
-            <p class="text-muted mb-0">Manage and monitor the evaluation process for all programs</p>
+            <h5 class="card-title mb-1">{{ __('admin.screening.heading') }}</h5>
+            <p class="text-muted mb-0">{{ __('admin.screening.subheading') }}</p>
           </div>
           <div class="d-flex align-items-center gap-3">
             <!-- Quick Stats -->
             <div class="d-flex align-items-center">
               <div class="badge bg-label-primary rounded-pill d-flex align-items-center px-3 py-2">
                 <i class="ti ti-list me-1"></i>
-                <span class="fw-semibold">{{ count($screeningSteps) }} Steps</span>
+                <span class="fw-semibold">
+                  {{ count($screeningSteps) }} {{ __('admin.screening.step') }}                  
+                </span>
               </div>
             </div>
           </div>
@@ -58,35 +60,35 @@
           <form id="filter-form" method="GET" action="/dashboard/screening">
             <div class="row g-3">
               <div class="col-md-4">
-                <label class="form-label">Search Steps</label>
-                <input type="text" class="form-control bg-card" name="search" value="{{ request('search') }}" placeholder="Search by title, program, or organization...">
+                <label class="form-label">{{ __('admin.screening.search_steps') }}</label>
+                <input type="text" class="form-control bg-card" name="search" value="{{ request('search') }}" placeholder="{{ __('admin.screening.search_steps_placeholder') }}">
               </div>
               <div class="col-md-3">
-                <label class="form-label">Screening Type</label>
+                <label class="form-label">{{ __('admin.screening.screening_type') }}</label>
                 <select class="form-select bg-card" name="screening_type">
-                  <option value="">All Types</option>
-                  <option value="onetoall" {{ request('screening_type') == 'onetoall' ? 'selected' : '' }}>One-to-All</option>
-                  <option value="grouptoall" {{ request('screening_type') == 'grouptoall' ? 'selected' : '' }}>Group-to-All</option>
-                  <option value="grouptogroup" {{ request('screening_type') == 'grouptogroup' ? 'selected' : '' }}>Group-to-Group</option>
+                  <option value="">{{ __('admin.screening.all_types') }}</option>
+                  <option value="onetoall" {{ request('screening_type') == 'onetoall' ? 'selected' : '' }}>{{ __('admin.screening.onetoall') }}</option>
+                  <option value="grouptoall" {{ request('screening_type') == 'grouptoall' ? 'selected' : '' }}>{{ __('admin.screening.grouptoall') }}</option>
+                  <option value="grouptogroup" {{ request('screening_type') == 'grouptogroup' ? 'selected' : '' }}>{{ __('admin.screening.grouptogroup') }}</option>
                 </select>
               </div>
               <div class="col-md-2">
-                <label class="form-label">Status</label>
+                <label class="form-label">{{ __('admin.status') }}</label>
                 <select class="form-select bg-card" name="status">
-                  <option value="">All Status</option>
-                  <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                  <option value="upcoming" {{ request('status') == 'upcoming' ? 'selected' : '' }}>Upcoming</option>
-                  <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                  <option value="">{{ __('admin.All_statuses') }}</option>
+                  <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>{{ __('admin.In_Progress') }}</option>
+                  <option value="upcoming" {{ request('status') == 'upcoming' ? 'selected' : '' }}>{{ __('admin.Upcoming') }}</option>
+                  <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>{{ __('admin.completed') }}</option>
                 </select>
               </div>
               <div class="col-md-3">
                 <div class="d-flex justify-content-md-end align-items-end h-100 gap-2">
                   <button type="submit" class="btn btn-primary" disabled>
-                    <i class="ti ti-filter me-2"></i> Filter
+                    <i class="ti ti-filter me-2"></i> {{ __('admin.Filter') }}
                   </button>
                   @if(request('search') || request('screening_type') || request('status'))
                     <a href="/dashboard/screening" class="btn btn-outline-secondary">
-                      <i class="ti ti-refresh me-2"></i> Reset
+                      <i class="ti ti-refresh me-2"></i> {{ __('admin.Reset') }}
                     </a>
                   @endif
                 </div>
@@ -115,11 +117,11 @@
                           <i class="ti ti-plus me-1"></i> {{ __('builder.Add_New_Form') }}
                         </a>
                         <button class="dropdown-item edit-step-btn" data-step='@json($step)'>
-                          <i class="ti ti-pencil me-1"></i> Edit Step
+                          <i class="ti ti-pencil me-1"></i> {{ __('admin.edit_step') }}
                         </button>
                         <div class="dropdown-divider"></div>
                         <button class="dropdown-item text-danger" onclick="handleDeleteStep({{ $step->id }})">
-                          <i class="ti ti-trash me-1"></i> Delete
+                          <i class="ti ti-trash me-1"></i> {{ __('admin.delete') }}
                         </button>
                       </div>
                     </div>
@@ -130,7 +132,9 @@
                       $status = ($step->end_date < $today) ? 'completed' : (($step->start_date > $today) ? 'upcoming' : 'in progress');
                       $statusColor = ($status == 'completed') ? 'success' : (($status == 'upcoming') ? 'warning' : 'primary');
                     @endphp
-                    <span class="badge bg-label-{{ $statusColor }} text-capitalize">{{ $status }}</span>
+                    <span class="badge bg-label-{{ $statusColor }} text-capitalize">
+                      {{ $status == 'in_progress' ? __('admin.In_Progress') : ($status == 'upcoming' ? __('admin.Upcoming') : __('admin.completed')) }}
+                    </span>
                   </div>
                 </div>
       
@@ -175,8 +179,8 @@
       
                   <!-- Screening Type -->
                   <div class="mb-3">
-                    <span class="badge bg-label-info text-capitalize">
-                      {{ str_replace('-', ' ', $step->screening_type) }}
+                    <span data-bs-toggle="tooltip" data-bs-title="{{ __('admin.screening.' . str_replace('-', '', $step->screening_type) . '_description') }}" class="badge bg-label-info text-capitalize" title="{{ __('admin.screening.' . str_replace('-', '', $step->screening_type) . '_description') }}">
+                      {{ __('admin.screening.' . str_replace('-', '', $step->screening_type)) }}
                     </span>
                   </div>
       
@@ -185,17 +189,19 @@
                     <div class="col-6">
                       <div class="d-flex align-items-center">
                         <i class="ti ti-user-check me-1 text-muted"></i>
-                        <small class="text-muted">
-                          {{ count($step->judges) }} Judge{{ count($step->judges) != 1 ? 's' : '' }}
-                        </small>
+                        <div class="text-muted small">
+                          <strong class="text-dark">{{ count($step->judges) }}</strong>
+                          {{ count($step->judges) != 1 ? __('admin.Judgers') : __('admin.Judger') }}
+                        </div>
                       </div>
                     </div>
                     <div class="col-6">
                       <div class="d-flex align-items-center">
                         <i class="ti ti-building-skyscraper me-1 text-muted"></i>
-                        <small class="text-muted">
-                          {{ count($step->companies) }} startup{{ count($step->companies) != 1 ? 's' : '' }}
-                        </small>
+                        <div class="text-muted small">
+                          <strong class="text-dark">{{ count($step->companies) }}</strong>
+                          {{ count($step->companies) != 1 ? __('admin.Startups') : __('admin.Startup') }}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -213,10 +219,10 @@
                 <div class="card-footer text-center">
                   <div class="d-flex gap-2">
                     <a href="/dashboard/screening/{{ $step->id }}" class="btn btn-primary flex-fill">
-                      <i class="ti ti-eye-cog me-2"></i> Manage Step
+                      <i class="ti ti-eye-cog me-2"></i> {{ __('admin.screening.manage_step') }}
                     </a>
                     <a href="/dashboard/screening/results/{{ $step->id }}" class="btn btn-outline-primary flex-fill">
-                      <i class="ti ti-file-text me-2"></i> View Results
+                      <i class="ti ti-file-text me-2"></i> {{ __('admin.view_results') }}
                     </a>
                   </div>
                 </div>
@@ -237,18 +243,18 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title mb-0" id="myModalLabel33">Modify Step</h5>
+        <h5 class="modal-title mb-0" id="myModalLabel33">{{ __('admin.screening.modify_step') }}</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <form id="stepForm" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="_token" value="">
         <div class="modal-body">
           <div class="form-group mb-3">
-            <label class="form-label">Screening Type</label>
+            <label class="form-label">{{ __('admin.screening.screening_type') }}</label>
             <select class="form-select" name="ScreeningSelect" id="screening-type" required>
-              <option value="onetoall">One-to-All</option>
-              <option value="grouptoall">Group-to-All</option>
-              <option value="grouptogroup">Group-to-Group</option>
+              <option value="onetoall">{{ __('admin.screening.onetoall') }}</option>
+              <option value="grouptoall">{{ __('admin.screening.grouptoall') }}</option>
+              <option value="grouptogroup">{{ __('admin.screening.grouptogroup') }}</option>
             </select>
           </div>
           <input type="hidden" name="sid" id="step-id-value">
@@ -259,12 +265,12 @@
               class="form-control" required>
           </div>
           <div class="form-group mb-3">
-            <label class="form-label">{{ __('cycles.Start From') }}</label>
+            <label class="form-label">{{ __('admin.start_date') }}</label>
             <input id="step-from-date" name="fromDate" type="text" class="form-control date"
               required>
           </div>
           <div class="form-group mb-3">
-            <label class="form-label">{{ __('admin.End at') }}</label>
+            <label class="form-label">{{ __('admin.end_date') }}</label>
             <input id="step-to-date" name="toDate" type="text" class="form-control date"
               required>
           </div>
@@ -275,7 +281,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="submit" value="submit" class="btn btn-primary me-3">
+          <button type="submit" value="submit" class="btn btn-primary">
             <span class="d-none d-sm-block">{{ __('cycles.Submit') }}</span>
           </button>
           <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
