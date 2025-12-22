@@ -22,7 +22,7 @@
         @endphp
         <img
           src="{{ $imageUrl }}"
-          alt="avatar"
+          alt="logo"
           class="object-fit-contain me-2 rounded-circle border p-1 bg-white"
           style="width: 50px; height: 50px;"
         />
@@ -165,90 +165,12 @@
     </li>
     @endif
 
-    {{-- <li class="{{ Request::is('*calendar*') ? 'active' : '' }} menu-item">
-      <a href="{{ route('calendar.events_list') }}" class="menu-link">
-        <i class="menu-icon tf-icons ti ti-calendar"></i>
-        <div>{{ __('admin.Calendar') }}</div>
-      </a>
-    </li> --}}
-
     <?php
     // $cmessages = App\Messenger::where('receiver', auth()->id())->whereNull('read');
     //        if( !is_null( $organization_id ) ) { $cmessages = $cmessages->where('organization_id', $organization_id); }
     // $unread = $cmessages->count();
     $l == 'ar' ? ($arrow = 'left') : ($arrow = 'right');
     ?>
-
-    {{-- @if( $_user->ableTo('messages.list', $permissions) )
-      <li class="{{ Request::is('dashboard/messages') ? 'active' : '' }} menu-item">
-        <a href="/dashboard/messages" class="menu-link">
-          <i class="menu-icon tf-icons ti ti-messages"></i>
-          <div>{{ __('admin.Messages') }}</div>
-        </a>
-      </li>
-    @endif --}}
-
-    {{-- @if (!$_user->hasAnyRole('Judger'))
-      @if( $_user->ableTo('messages.view', $permissions) )
-        <li class="{{ Request::is('dashboard/mymsg') ? 'active' : '' }} menu-item">
-          <a href="/dashboard/mymsg" class="menu-link">
-            <i class="menu-icon tf-icons ti ti-world"></i>
-            <div>{{ __('admin.contactus') }}</div>
-          </a>
-        </li>
-      @endif
-    @endif --}}
-
-    {{-- @if( $_user->ableToAny(['messages.index'], $permissions) )
-    <li class="{{ Request::is('dashboard/inbox', 'dashboard/outbox', 'dashboard/mymsg', 'dashboard/sendmessage', 'dashboard/messages') ? 'sidebar-group-active open' : '' }} menu-item">
-      <a class="menu-link menu-toggle">
-        <i class="menu-icon tf-icons ti ti-messages"></i>
-        <div>{{ __('admin.My messages') }}</div>
-      </a>
-      <ul class="menu-sub">
-        @if( $_user->ableTo('messages.index', $permissions) )
-          <li class="{{ Request::is('dashboard/messages') ? 'active' : '' }} menu-item">
-            <a href="/dashboard/messages" class="menu-link">
-              <span class="menu-item">{{ __('admin.Messages') }}</span>
-            </a>
-          </li>
-        @endif
-        @if( $_user->ableTo('sendmessage', $permissions) )
-          <li class="{{ Request::is('dashboard/sendmessage') ? 'active' : '' }} menu-item"><a
-              href="/dashboard/sendmessage" class="menu-link">
-              <i class="bx bx-message"></i>
-              <span class="menu-item">{{ __('admin.New Message') }}</span>
-            </a>
-          </li>
-        @endif
-        @if( $_user->ableTo('messages.folders_inbox', $permissions) )
-          <li class="{{ Request::is('dashboard/inbox') ? 'active' : '' }} menu-item"><a href="/dashboard/inbox"
-              class="menu-link"><i class="bx bxs-inbox"></i>
-              <span class="menu-item">{{ __('admin.myinbox') }}</span>
-              @if ($unread > 0)
-                <span
-                  class="badge badge-pill badge-round badge-dark-info float-right mr-50 ml-auto">{{ $unread }}</span>
-              @endif
-            </a>
-          </li>
-        @endif
-        @if( $_user->ableTo('messages.folders_outbox', $permissions) )
-          <li class="{{ Request::is('dashboard/outbox') ? 'active' : '' }} menu-item">
-            <a href="/dashboard/outbox" class="menu-link"><i class="bx bx-mail-send"></i>
-              <span class="menu-item">{{ __('admin.myoutbox') }}</span>
-            </a>
-          </li>
-        @endif
-        @if( $_user->ableTo('messages.view', $permissions) )
-          <li class="{{ Request::is('dashboard/mymsg') ? 'active' : '' }} menu-item">
-            <a href="/dashboard/mymsg" class="menu-link"><i class="bx bx-support"></i>
-              <span class="menu-item">{{ __('admin.contactus') }}</span>
-            </a>
-          </li>
-        @endif
-      </ul>
-    </li>
-    @endif --}}
     
     @if (!$_user->hasAnyRole('Mentor|Judger'))
       @if( $_user->ableTo('users.directory_view', $permissions) )
@@ -701,17 +623,7 @@
               </a>
             </li>
           @endif
-          
         
-          @if( $_user->ableTo('roles.index', $permissions) )
-            <li class="{{ Request::is('*roles') ? 'active' : '' }} menu-item">
-              <a href="{{ route('roles.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons ti ti-user-cog"></i>
-                <div>{{ __('admin.Roles_and_permissions') }}</div>
-              </a>
-            </li>
-          @endif
-          
           @if( $_user->ableTo('audit-logs.index', $permissions) )
             <li class="{{ Request::is('*audit-logs*') ? 'active' : '' }} menu-item">
               <a class="menu-link" href="/dashboard/audit-logs">
@@ -742,30 +654,79 @@
       @endif
 
       @if ($_user->hasAnyRole('organizationManager'))
-      @if ($_user->ableTo('settings.organization_manage',$permissions))
-      <li class="{{ Request::is('dashboard/organizations/settings*') && !Request::is('dashboard/organizations/settings/reminder-logs') ? 'active' : '' }} menu-item">
-        <a class="menu-link" href="{{ route('settings.organization_manage') }}">
-          <i class="menu-icon tf-icons ti ti-settings"></i>
-          <div>{{ __('admin.settings') }}</div>
-        </a>
-      </li>
-      <li class="{{ Request::is('dashboard/organizations/settings/reminder-logs') ? 'active' : '' }} menu-item">
-        <a class="menu-link" href="{{ route('organization.ReminderLogs') }}">
-          <i class="menu-icon tf-icons ti ti-alarm"></i>
-          <div>{{ __('admin.ReminderLogs') }}</div>
-        </a>
-      </li>
-      @if ($_user->ableTo('importer.index'))
-            <li class="{{ Request::is('dashboard/importer*') ? 'active' : '' }} menu-item">
-                <a href="{{ route('importer.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-file-import"></i>
-                    <div>{{ __('admin.Importer Tool') }}</div>
+        <li class="{{ Request::is('dashboard/organizations/settings*', 'dashboard/importer*', 'dashboard/admin/notification-templates*', 'dashboard/admin/notification-triggers*') ? 'sidebar-group-active open' : '' }} menu-item">
+          <a class="menu-link menu-toggle">
+            <i class="menu-icon tf-icons ti ti-settings"></i>
+            <div>{{ __('admin.settings') }}</div>
+          </a>
+
+          <ul class="menu-sub">
+            @if ($_user->ableTo('settings.organization_manage', $permissions)) 
+              <li class="{{ Request::is('dashboard/organizations/settings*') && !Request::is('dashboard/organizations/settings/reminder-logs') ? 'active' : '' }} menu-item">
+                <a class="menu-link" href="{{ route('settings.organization_manage') }}">
+                  <i class="menu-icon tf-icons ti ti-settings"></i>
+                  <div>{{ __('admin.settings') }}</div>
                 </a>
-            </li>
+              </li>
+            @endif
+
+            @if ($_user->ableTo('organization.ReminderLogs', $permissions))
+              <li class="{{ Request::is('dashboard/organizations/settings/reminder-logs') ? 'active' : '' }} menu-item">
+                <a class="menu-link" href="{{ route('organization.ReminderLogs') }}">
+                  <i class="menu-icon tf-icons ti ti-alarm"></i>
+                  <div>{{ __('admin.ReminderLogs') }}</div>
+                </a>
+              </li>
+            @endif
+
+            @if ($_user->ableTo('importer.index', $permissions))
+              <li class="{{ Request::is('dashboard/importer*') ? 'active' : '' }} menu-item">
+                <a href="{{ route('importer.index') }}" class="menu-link">
+                  <i class="menu-icon tf-icons ti ti-file-import"></i>
+                  <div>{{ __('admin.Importer Tool') }}</div>
+                </a>
+              </li>
+            @endif
+
+            @if ($_user->ableTo('roles.index', $permissions))
+              <li class="{{ Request::is('*roles') ? 'active' : '' }} menu-item">
+                <a href="{{ route('roles.index') }}" class="menu-link">
+                  <i class="menu-icon tf-icons ti ti-user-cog"></i>
+                  <div>{{ __('admin.Roles_and_permissions') }}</div>
+                </a>
+              </li>
+            @endif
+
+            @if( $_user->ableTo('license.activate_view_form', $permissions) )
+              <li class="{{ Request::is('dashboard/license/activate*') ? 'active' : '' }} menu-item">
+                <a class="menu-link" href="{{ route('license.activate_view_form') }}">
+                  <i class="menu-icon tf-icons ti ti-key"></i>
+                  <div>{{ __('admin.License Key') }}</div>
+                </a>
+              </li>
+            @endif
+           
+            @if ($_user->ableTo('notification-templates.index', $permissions))
+              <li class="{{ Request::is('dashboard/admin/notification-templates*') ? 'active' : '' }} menu-item">
+                <a class="menu-link" href="{{ route('notification-templates.index') }}">
+                  <i class="menu-icon tf-icons ti ti-mail"></i>
+                  <div>{{ __('settings.notification_templates') }}</div>
+                </a>
+              </li>
+            @endif
+
+            @if ($_user->ableTo('notification-triggers.index', $permissions))
+              <li class="{{ Request::is('dashboard/admin/notification-triggers*') ? 'active' : '' }} menu-item">
+                <a class="menu-link" href="{{ route('notification-triggers.index') }}">
+                  <i class="menu-icon tf-icons ti ti-mail-check"></i>
+                  <div>{{ __('settings.notification_triggers') }}</div>
+                </a>
+              </li>
+            @endif
+          </ul>
+        </li>
       @endif
-      @endif
-      @endif
-      @endif
+    @endif
 
     @if( $_user->ableTo('documentation.index', $permissions) )
     <li class="{{ Request::is('dashboard/documentation*') ? 'active' : '' }} menu-item">
@@ -776,143 +737,37 @@
     </li>
   @endif
 
-    @if( $_user->ableTo('reports.list', $permissions) )
-      <li class="{{ Request::is('dashboard/reports*') ? 'active' : '' }} menu-item">
-        <a class="menu-link" href="{{ route('reports.list') }}">
-          <i class="menu-icon tf-icons ti ti-id"></i>
-          <div>{{ __('admin.Reports') }}</div>
-        </a>
-      </li>
-    @endif
-
-    @if( $_user->ableTo('license.activate_view_form', $permissions) )
-    <li class="{{ Request::is('dashboard/license/activate*') ? 'active' : '' }} menu-item">
-      <a class="menu-link" href="{{ route('license.activate_view_form') }}">
-        <i class="menu-icon tf-icons ti ti-key"></i>
-        <div>{{ __('admin.License Key') }}</div>
+  @if( $_user->ableTo('reports.list', $permissions) )
+    <li class="{{ Request::is('dashboard/reports*') ? 'active' : '' }} menu-item">
+      <a class="menu-link" href="{{ route('reports.list') }}">
+        <i class="menu-icon tf-icons ti ti-id"></i>
+        <div>{{ __('admin.Reports') }}</div>
       </a>
     </li>
-   @endif
-
-   @if ($_user->hasAnyRole('Admin|organizationManager'))
-    <li class="{{ Request::is('dashboard/admin/notification-templates*', 'dashboard/admin/notification-triggers*') ? 'sidebar-group-active open' : '' }} menu-item">
-      <a class="menu-link menu-toggle">
-        <i class="menu-icon tf-icons ti ti-mail"></i>
-        <div>{{ __('settings.Notification_Templates') }}</div>
+  @endif
+    
+  @if($_user->ableTo('settings.index', $permissions))
+    <li class="menu-item pb-4 {{ Route::is(
+        'settings.*',
+        'roles.*',
+        'importer.*',
+        'currencies.*',
+        'Tags.*',
+        'Category.*',
+        'subcategories.*',
+        'stages.*',
+        'Labels.*',
+        'queue.*',
+        'notification-templates.*',
+        'notification-triggers.*',
+        'license.*'
+    ) ? 'active' : '' }}">
+      <a class="menu-link" href="{{ route('settings.index') }}">
+        <i class="menu-icon tf-icons ti ti-settings"></i>
+        <div>{{ __('admin.settings') }}</div>
       </a>
-      <ul class="menu-sub">
-        <li class="{{ Request::is('dashboard/admin/notification-templates/create') ? 'active' : '' }} menu-item">
-          <a class="menu-link" href="{{ route('notification-templates.create') }}">
-            <i class="bx bx-{{ $arrow ?? 'right' }}-arrow-alt"></i>
-            <span class="menu-item">{{ __('settings.Create_Template') }}</span>
-          </a>
-        </li>
-        <li class="{{ Request::is('dashboard/admin/notification-templates', 'dashboard/admin/notification-templates/*/edit') ? 'active' : '' }} menu-item">
-          <a class="menu-link" href="{{ route('notification-templates.index') }}">
-            <i class="bx bx-{{ $arrow ?? 'right' }}-arrow-alt"></i>
-            <span class="menu-item">{{ __('settings.Manage_Templates') }}</span>
-          </a>
-        </li>
-
-        <li class="{{ Request::is('dashboard/admin/notification-triggers', 'dashboard/admin/notification-triggers/*/edit', 'dashboard/admin/notification-triggers/*') ? 'active' : '' }} menu-item">
-          <a class="menu-link" href="{{ route('notification-triggers.index') }}">
-            <i class="bx bx-{{ $arrow ?? 'right' }}-arrow-alt"></i>
-            <span class="menu-item">{{ __('settings.Manage_Triggers') }}</span>
-          </a>
-        </li>
-
-      </ul>
     </li>
-   @endif
-
-     
-  
-    @if ($_user->hasAnyRole('Admin'))
-      <li 
-        class="{{ 
-          Request::is('dashboard/settings*', '*importer*', '*currencies*', '*Tags*', '*Category*', '*subcategories*', '*Labels*', '*queue-jobs*', '*industry-settings*', '*expertise-settings*', '*stages*')
-          ? 'sidebar-group-active open' 
-          : '' 
-        }} menu-item"
-      >
-        <a class="menu-link menu-toggle">
-          <i class="menu-icon tf-icons ti ti-settings"></i>
-          <div>{{ __('admin.settings') }}</div>
-        </a>
-        <ul class="menu-sub">
-          <li class="{{ Request::is('dashboard/settings*') ? 'active' : '' }} menu-item">
-            <a href="/dashboard/settings" class="menu-link">
-              <i class="menu-livicon" data-icon="globe"></i>
-              <div>{{ __('admin.settings') }}</div>
-            </a>
-          </li>
-          <li class="{{ Request::is('dashboard/importer*') ? 'active' : '' }} menu-item">
-             <a href="{{ route('importer.index') }}" class="menu-link">
-               <i class="menu-icon tf-icons ti ti-upload"></i>
-                 <div>{{ __('admin.Importer Tool') }}</div>
-             </a>
-          </li>
-          <li class="{{ Request::is('*currencies') ? 'active' : '' }} menu-item">
-            <a href="{{ route('currencies.index') }}" class="menu-link">
-              <i class="menu-icon fas fa-money-bill-wave"></i>
-                <div>{{ __('admin.Currencies') }}</div>
-            </a>
-        </li>
-          @if (!app()->environment('production', 'beta'))
-            <li class="{{ Request::is('*Tags') ? 'active' : '' }} menu-item">
-              <a href="{{ route('Tags.index') }}" class="menu-link">
-                <i class="menu-livicon" data-icon="globe"></i>
-                <div>{{ __('admin.Tags') }}</div>
-              </a>
-            </li>
-            <li class="{{ Request::is('dashboard/Category*') ? 'active' : '' }} menu-item">
-              <a href="{{ route('Category.index') }}" class="menu-link">
-                <i class="menu-livicon" data-icon="globe"></i>
-                <div>{{ __('admin.Categories') }}</div>
-              </a>
-            </li>
-            <li class="{{ Request::is('dashboard/subcategories*') ? 'active' : '' }} menu-item">
-              <a href="{{ route('subcategories.index') }}" class="menu-link">
-                <i class="menu-livicon" data-icon="globe"></i>
-                <div>{{ __('admin.SubCategories') }}</div>
-              </a>
-            </li>
-            <li class="{{ Request::is('*stages') ? 'active' : '' }} menu-item">
-              <a href="{{ route('stages.index') }}" class="menu-link">
-                <i class="menu-livicon" data-icon="globe"></i>
-                <div>{{ __('admin.Stages') }}</div>
-              </a>
-            </li>
-            <li class="{{ Request::is('*Labels') ? 'active' : '' }} menu-item">
-              <a href="{{ route('Labels.index') }}" class="menu-link">
-                <i class="menu-livicon" data-icon="globe"></i>
-                <div>{{ __('admin.Labels') }}</div>
-              </a>
-            </li>
-          @endif
-          <li class="{{ Request::is('*queue-jobs') ? 'active' : '' }} menu-item">
-            <a href="{{ route('queue.jobs') }}" class="menu-link">
-              <i class="menu-livicon" data-icon="globe"></i>
-              <div>{{ __('admin.QueueJobs') }}</div>
-            </a>
-          </li>
-          <li class="{{ Request::is('dashboard/industry-settings') ? 'active' : '' }} menu-item">
-            <a class="menu-link" href="/dashboard/industry-settings">
-              <i class="menu-livicon" data-icon="globe"></i>
-              <div>{{ __('admin.Industry_Settings') }}</div>
-            </a>
-          </li>
-          <li class="{{ Request::is('dashboard/expertise-settings') ? 'active' : '' }} menu-item">
-            <a class="menu-link" href="/dashboard/expertise-settings">
-              <i class="menu-livicon" data-icon="globe"></i>
-              <div>{{ __('admin.Expertise_Settings') }}</div>
-            </a>
-          </li>
-        </ul>
-      </li>
-
-      @endif
-      
+  @endif
     
     @if ($setting->HomePage == true)
       @if ($_user->hasRole('Admin'))

@@ -4,6 +4,15 @@
         "description": null,
         "permissions": [
             {
+                "name": "settings.index",
+                "description": "View Main Settings Page",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
                 "name": "settings.system_general_view",
                 "description": "View General Settings",
                 "guard_name": "web",
