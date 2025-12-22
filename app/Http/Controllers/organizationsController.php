@@ -34,11 +34,14 @@ class organizationsController extends Controller
 	public function index(Request $request)
 	{
 		$user = auth()->user();
+		$orgIds = $user->organizations_ids;
 		$organizations = Organization::with(['user', 'cycles']);
-		if( !empty($user->organization_id) && !is_null($user->organization_id) && trim($user->organization_id) )
-		{
-			$organizations = $organizations->where('id', $user->organization_id);
+
+		// Filter by user's accessible organizations (unless admin)
+		if (!empty($orgIds) && !$user->hasRole('admin')) {
+			$organizations = $organizations->whereIn('id', $orgIds);
 		}
+
 		if($request->status !== null && $request->status !== 'all') {
 		$organizations = $organizations->where('status', $request->status)->get();
 		}else{

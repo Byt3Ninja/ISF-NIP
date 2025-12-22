@@ -146,10 +146,11 @@ class CyclesController extends Controller
     }
     public function index($id = 0)
     {
-        $organization_id = auth()->user()->organization_id;
+        $user = auth()->user();
+        $orgIds = $user->organizations_ids;
 
-        $cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
-            return $q->where('organization_id', $organization_id);
+        $cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+            return $q->whereIn('organization_id', $orgIds);
         })->with(['organization'])->orderBy('start', 'DESC')->get();
 
         $steps = null;
@@ -196,18 +197,19 @@ class CyclesController extends Controller
 
     public function users(Request $request, $id)
     {
-        $organization_id = auth()->user()->organization_id;
+        $user = auth()->user();
+        $orgIds = $user->organizations_ids;
 
         if ($id == 0) {
-            $cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
-                return $q->where('organization_id', $organization_id);
+            $cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+                return $q->whereIn('organization_id', $orgIds);
             })->orderBy('id', 'DESC')->get();
             if (!empty($cycles->toArray())) {
                 $id = $cycles->pluck('id')[0];
             }
         } else {
-            $cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
-                return $q->where('organization_id', $organization_id);
+            $cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+                return $q->whereIn('organization_id', $orgIds);
             })->get();
         }
         $companies = Company::where('cycle', $id);

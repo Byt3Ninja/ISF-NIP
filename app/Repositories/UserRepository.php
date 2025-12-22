@@ -433,6 +433,7 @@ class UserRepository
     }
     /**
      * Summary of getCompaniesForOrgManager
+     * Supports both single organization (organizationManager) and multiple organizations (Sub-Admin)
      * @param \App\User $user
      * @param array $filters
      * @return array{companies: mixed, errorMessage: string}
@@ -446,7 +447,14 @@ class UserRepository
         $stage = $filters['stage'] ?? null;
         $companies = collect();
 
-        $cycle_ids = Cycle::where('organization_id', $user->organization_id)->pluck('id');
+        // Get organization IDs - supports both single and multiple organizations
+        $orgIds = $user->organizations_ids;
+
+        if (empty($orgIds)) {
+            return ['companies' => $companies, 'errorMessage' => ''];
+        }
+
+        $cycle_ids = Cycle::whereIn('organization_id', $orgIds)->pluck('id');
         $companies = Company::whereIn('cycle', $cycle_ids)
             ->when($search, function ($query) use ($search, $name) {
                 $query->where($name, 'like', '%' . $search . '%');

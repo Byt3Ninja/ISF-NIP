@@ -128,10 +128,51 @@ class UserController extends Controller
 	 */
 	public function edit(User $user)
 	{
-		$roles =$this->userService->roleList()['data'];
-		$countries=$this->userService->countries();
+		$authUser = auth()->user();
+		$roles = $this->userService->roleList()['data'];
+		$countries = $this->userService->countries();
 
-		return view('admin/users/edit', compact('user', 'roles', 'countries'));
+		// Only admins can assign all organizations, Sub-Admin sees their assigned orgs
+		if ($authUser->hasRole('Admin')) {
+			$organizations = \App\Organization::all();
+		} elseif ($authUser->hasRole('organizationManager') || $authUser->isSubAdmin()) {
+			$orgIds = $authUser->organizations_ids;
+			$organizations = \App\Organization::whereIn('id', $orgIds)->get();
+		} else {
+			$organizations = collect();
+		}
+
+		return view('admin/users/edit', compact('user', 'roles', 'countries', 'organizations'));
+	}
+
+	/**
+	 * Update the organizations assigned to a Sub-Admin user.
+	 *
+	 * @param  \Illuminate\Http\Request  $request
+	 * @param  \App\User  $user
+	 * @return \Illuminate\Http\RedirectResponse
+	 */
+	public function updateOrganizations(Request $request, User $user)
+	{
+		$this->authorize('update', Auth::user());
+
+		// Validate that user is Sub-Admin
+		if (!$user->isSubAdmin()) {
+			return back()->with(['msg' => 'UserNotSubAdmin']);
+		}
+
+		// Validate organization IDs
+		$validated = $request->validate([
+			'organization_ids' => 'nullable|array',
+			'organization_ids.*' => 'exists:organizations,id',
+		]);
+
+		// Sync organizations
+		$organizationIds = $validated['organization_ids'] ?? [];
+		$user->organizations()->sync($organizationIds);
+
+		return redirect()->route('users.edit', $user->id)
+			->with(['msg' => 'OrganizationsUpdatedSuccessfully']);
 	}
 
 	/**

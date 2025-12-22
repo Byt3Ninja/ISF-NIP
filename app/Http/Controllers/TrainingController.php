@@ -555,11 +555,12 @@ class TrainingController extends Controller
 	public function results($id = 0)
 	{
 		try {
-			$organization_id = auth()->user()->organization_id;
-			$sessions = TrainingSession::when(!is_null($organization_id), function ($q) use ($organization_id) {
-				return $q->whereHas('step', function ($query) use ($organization_id) {
-					$query->whereHas('cycle', function ($qer) use ($organization_id) {
-						$qer->where('organization_id', $organization_id);
+			$user = auth()->user();
+			$orgIds = $user->organizations_ids;
+			$sessions = TrainingSession::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->whereHas('step', function ($query) use ($orgIds) {
+					$query->whereHas('cycle', function ($qer) use ($orgIds) {
+						$qer->whereIn('organization_id', $orgIds);
 					});
 				});
 			})->where('type', 'online')->orderBy('datetime')->get();
@@ -591,11 +592,12 @@ class TrainingController extends Controller
 	public function sessions(Request $request, $id = 0)
 	{
 		try {
-			$organization_id = auth()->user()->organization_id;
+			$user = auth()->user();
+			$orgIds = $user->organizations_ids;
 
-			$steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
-				return $q->whereHas('cycle', function ($query) use ($organization_id) {
-					$query->where('organization_id', $organization_id);
+			$steps = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->whereHas('cycle', function ($query) use ($orgIds) {
+					$query->whereIn('organization_id', $orgIds);
 				});
 			})->where('stype', 4)->get();
 
@@ -1428,13 +1430,14 @@ class TrainingController extends Controller
 
 	public function sessionsReport(Request $request)
 	{
-		
-		try {
-			$organization_id = auth()->user()->organization_id;
 
-			$steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
-				return $q->whereHas('cycle', function ($query) use ($organization_id) {
-					$query->where('organization_id', $organization_id);
+		try {
+			$user = auth()->user();
+			$orgIds = $user->organizations_ids;
+
+			$steps = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->whereHas('cycle', function ($query) use ($orgIds) {
+					$query->whereIn('organization_id', $orgIds);
 				});
 			})->where('stype', 4)->get();
 			$sessions = TrainingSession::with('reports')->orderBy('datetime', 'ASC');

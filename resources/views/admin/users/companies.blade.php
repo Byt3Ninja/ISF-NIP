@@ -352,13 +352,21 @@
         </div>
         
         <div class="modal-body">
-          <!-- Organization Filter (Admin only) -->
-          @role('Admin')
+          <!-- Organization Filter (Admin and Sub-Admin) -->
+          @if(auth()->user()->hasRole('Admin') || auth()->user()->isSubAdmin())
           <div class="form-group mb-4">
             <label for="organizationFilter" class="form-label">{{ __('admin.Organizations') }}</label>
             <select name="orgnization" id="organizationFilter" class="form-select select2">
               <option value="">{{ __('admin.All_Organizations') }}</option>
-              @php $orgs = App\Organization::all(); @endphp
+              @php
+                $authUser = auth()->user();
+                if ($authUser->hasRole('Admin')) {
+                  $orgs = App\Organization::all();
+                } else {
+                  $orgIds = $authUser->organizations_ids;
+                  $orgs = App\Organization::whereIn('id', $orgIds)->get();
+                }
+              @endphp
               @foreach ($orgs as $org)
                 <option value="{{ $org->id }}" {{ request('orgnization') == $org->id ? 'selected' : '' }}>
                   {{ $org->{'name_' . $l} }}
@@ -366,7 +374,7 @@
               @endforeach
             </select>
           </div>
-          @endrole
+          @endif
 
           <!-- Program Filter -->
           <div class="form-group mb-4">

@@ -32,15 +32,16 @@ class FinalscreeningController extends Controller
 
     public function index(Request $request, $id = 0)
     {
-        $organizationId = auth()->user()->organization_id;
+        $user = auth()->user();
+        $orgIds = $user->organizations_ids;
 
         /** -------------------------
          * Base steps query with filters
          * ------------------------- */
         $stepsQuery = Step::with(['cycle.organization'])
-                ->when($organizationId, function ($q) use ($organizationId) {
+                ->when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
                         $q->whereHas('cycle', fn ($c) =>
-                                $c->where('organization_id', $organizationId)
+                                $c->whereIn('organization_id', $orgIds)
                         );
                 })
                 ->where('stype', 5);
@@ -197,10 +198,11 @@ class FinalscreeningController extends Controller
 
     public function show($id = 0)
     {
-        $organization_id = auth()->user()->organization_id;
-        $steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
-            return $q->whereHas('cycle', function ($query) use ($organization_id) {
-                $query->where('organization_id', $organization_id);
+        $user = auth()->user();
+        $orgIds = $user->organizations_ids;
+        $steps = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+            return $q->whereHas('cycle', function ($query) use ($orgIds) {
+                $query->whereIn('organization_id', $orgIds);
             });
         })->where('stype', 5)->orderBy('from')->get();
 
@@ -213,15 +215,15 @@ class FinalscreeningController extends Controller
 
         if ($id == 0) {
             $id = $steps->pluck('id')->first();
-            $cstep = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
-                return $q->whereHas('cycle', function ($query) use ($organization_id) {
-                    $query->where('organization_id', $organization_id);
+            $cstep = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+                return $q->whereHas('cycle', function ($query) use ($orgIds) {
+                    $query->whereIn('organization_id', $orgIds);
                 });
             })->where('stype', 5)->where('id', $id)->first();
         } else {
-            $cstep = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
-                return $q->whereHas('cycle', function ($query) use ($organization_id) {
-                    $query->where('organization_id', $organization_id);
+            $cstep = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+                return $q->whereHas('cycle', function ($query) use ($orgIds) {
+                    $query->whereIn('organization_id', $orgIds);
                 });
             })->where('stype', 5)->where('id', $id)->first();
 
@@ -231,9 +233,9 @@ class FinalscreeningController extends Controller
         }
 
         if ($cstep) {
-            $form = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
-                return $q->whereHas('cycle', function ($query) use ($organization_id) {
-                    $query->where('organization_id', $organization_id);
+            $form = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+                return $q->whereHas('cycle', function ($query) use ($orgIds) {
+                    $query->whereIn('organization_id', $orgIds);
                 });
             })->where('cycle_id', $cstep->cycle_id)->where('stype', 1)->where('arr', $cstep->arr - 1)->first();
         } else {
@@ -499,10 +501,11 @@ class FinalscreeningController extends Controller
     }
     public function results(Request $request, $id = 0)
     {
-        $organization_id=auth()->user()->organization_id;
-        $steps = Step::when(!is_null($organization_id),function ($q) use($organization_id){
-            return $q->whereHas('cycle',function ($query) use ($organization_id){
-                $query->where('organization_id',$organization_id);
+        $user = auth()->user();
+        $orgIds = $user->organizations_ids;
+        $steps = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+            return $q->whereHas('cycle', function ($query) use ($orgIds) {
+                $query->whereIn('organization_id', $orgIds);
             });
         })->where('stype', 5)->orderBy('from')->get();
 

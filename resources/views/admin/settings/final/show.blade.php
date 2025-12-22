@@ -51,7 +51,7 @@ $pills = [
               <!-- Back To List -->
               <a 
                 class="btn btn-icon btn-sm btn-text-secondary waves-effect waves-light rounded-pill" 
-                href="/dashboard/screening"
+                href="/dashboard/final"
               >
                 <i class="ti ti-chevron-left ti-lg"></i>
               </a>
