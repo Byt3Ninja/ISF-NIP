@@ -5,6 +5,28 @@
 @section('content')
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-align-top mb-6">
+      @php
+        $tabs = [
+          ['title' => __('notification_templates.notification_templates'), 'url' => 'dashboard/admin/notification-templates', 'icon' => 'mail'],
+          ['title' => __('notification_triggers.notification_triggers'), 'url' => 'dashboard/admin/notification-triggers', 'icon' => 'mail-check'],
+        ]
+      @endphp
+      <ul class="nav nav-pills">
+        @foreach($tabs as $tab)
+          <li class="nav-item">
+            <a href="/{{ $tab['url'] }}" class="nav-link {{ Request::is($tab['url'] . '*') ? 'active' : '' }}">
+              <i class="ti ti-{{ $tab['icon'] }} me-2"></i>
+              {{ $tab['title'] }}
+            </a>
+          </li>
+        @endforeach
+      </ul>
+    </nav>
+    <!--/ Navigation Tabs -->
+
     <div class="card">
       <div class="card-header border-bottom">
         <div class="d-flex flex-wrap justify-content-between align-items-center">
@@ -28,99 +50,96 @@
         </div>
       </div>
       
-      <div class="card-body">
-        <!-- Datatable filter configuration fields -->
-        <div class="row" id="datatable-filters">
-          <div class="col-12 col-md-4 mb-2 mb-md-0">
-            <select class="form-select form-select-sm dt-filter" id="filter-channel" data-column="2">
-              <option value="" selected>{{ __('notification_templates.all_channels') }}</option>
-              <option value="Email">Email</option>
-              <option value="Whatsapp">WhatsApp</option>
-              <option value="Pusher">Push</option>
-            </select>
-          </div>
-          <div class="col-12 col-md-4 mb-2 mb-md-0">
-            <select class="form-select form-select-sm dt-filter" id="filter-status" data-column="3">
-              <option value="" selected>{{ __('notification_templates.all_status') }}</option>
-              <option value="Active">{{ __('notification_templates.active') }}</option>
-              <option value="Inactive">{{ __('notification_templates.inactive') }}</option>
-            </select>
-          </div>
+      <!-- Datatable filter configuration fields -->
+      <div class="row" id="datatable-filters">
+        <div class="col-12 col-md-4 mb-2 mb-md-0">
+          <select class="form-select form-select-sm dt-filter" id="filter-channel" data-column="2">
+            <option value="" selected>{{ __('notification_templates.all_channels') }}</option>
+            <option value="Email">Email</option>
+            <option value="Whatsapp">WhatsApp</option>
+            <option value="Pusher">Push</option>
+          </select>
         </div>
-        <!-- /Datatable filter configuration fields -->
+        <div class="col-12 col-md-4 mb-2 mb-md-0">
+          <select class="form-select form-select-sm dt-filter" id="filter-status" data-column="3">
+            <option value="" selected>{{ __('notification_templates.all_status') }}</option>
+            <option value="Active">{{ __('notification_templates.active') }}</option>
+            <option value="Inactive">{{ __('notification_templates.inactive') }}</option>
+          </select>
+        </div>
+      </div>
 
-        <!-- Templates Table -->
-        <div class="table-responsive mt-2">
-          <table id="templates-list-datatable" class="table datatables-ajax">
-            <thead>
-              <tr class="table-light">
-                <th>{{ __('notification_templates.name') }}</th>
-                <th>{{ __('notification_templates.title') }}</th>
-                <th>{{ __('notification_templates.channel') }}</th>
-                <th>{{ __('notification_templates.status') }}</th>
-                <th>{{ __('notification_templates.version') }}</th>
-                <th>{{ __('notification_templates.created_by') }}</th>
-                <th>{{ __('notification_templates.created_at') }}</th>
-                <th>{{ __('notification_templates.actions') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              @foreach($templates as $template)
-              <tr id="row_{{ $template->id }}">
-                <td>
-                  <strong>{{ $template->name }}</strong>
-                  @if($template->parent_template_id)
-                    <small class="text-muted d-block">
-                      <i class="ti ti-git-branch"></i> {{ __('notification_templates.cloned') }}
-                    </small>
-                  @endif
-                </td>
-                <td>{{ $template->title }}</td>
-                <td data-search="{{ ucfirst($template->channel) }}">
-                  <span class="badge bg-label-{{ $template->channel == 'email' ? 'danger' : ($template->channel == 'whatsapp' ? 'success' : 'info') }}">
-                    <i class="ti ti-{{ $template->channel == 'email' ? 'mail' : ($template->channel == 'whatsapp' ? 'brand-whatsapp' : 'bell') }} ti-16px me-1"></i>
-                    {{ ucfirst($template->channel) }}
-                  </span>
-                </td>
-                <td data-search="{{ $template->is_active ? 'Active' : 'Inactive' }}">
-                  <span class="badge bg-label-{{ $template->is_active ? 'success' : 'secondary' }}">
-                    <i class="ti ti-circle-dot ti-16px me-1"></i>
-                    {{ $template->is_active ? __('notification_templates.active') : __('notification_templates.inactive') }}
-                  </span>
-                </td>
-                <td>v{{ $template->version }}</td>
-                <td>{{ $template->creator->first_name_en ?? __('notification_templates.unknown') }}</td>
-                <td><small class="text-nowrap">{{ $template->created_at->format('M d, Y') }}</small></td>
-                <td>
-                  <div class="dropdown">
-                    <button type="button" class="btn btn-sm btn-icon dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                      <i class="ti ti-dots-vertical"></i>
+      <!-- Templates Table -->
+      <div class="card-datatable table-responsive">
+        <table id="templates-list-datatable" class="table datatables-ajax">
+          <thead>
+            <tr class="table-light">
+              <th>{{ __('notification_templates.name') }}</th>
+              <th>{{ __('notification_templates.title') }}</th>
+              <th>{{ __('notification_templates.channel') }}</th>
+              <th>{{ __('notification_templates.status') }}</th>
+              <th>{{ __('notification_templates.version') }}</th>
+              <th>{{ __('notification_templates.created_by') }}</th>
+              <th>{{ __('notification_templates.created_at') }}</th>
+              <th>{{ __('notification_templates.actions') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach($templates as $template)
+            <tr id="row_{{ $template->id }}">
+              <td>
+                <strong>{{ $template->name }}</strong>
+                @if($template->parent_template_id)
+                  <small class="text-muted d-block">
+                    <i class="ti ti-git-branch"></i> {{ __('notification_templates.cloned') }}
+                  </small>
+                @endif
+              </td>
+              <td>{{ $template->title }}</td>
+              <td data-search="{{ ucfirst($template->channel) }}">
+                <span class="badge bg-label-{{ $template->channel == 'email' ? 'danger' : ($template->channel == 'whatsapp' ? 'success' : 'info') }}">
+                  <i class="ti ti-{{ $template->channel == 'email' ? 'mail' : ($template->channel == 'whatsapp' ? 'brand-whatsapp' : 'bell') }} ti-16px me-1"></i>
+                  {{ ucfirst($template->channel) }}
+                </span>
+              </td>
+              <td data-search="{{ $template->is_active ? 'Active' : 'Inactive' }}">
+                <span class="badge bg-label-{{ $template->is_active ? 'success' : 'secondary' }}">
+                  <i class="ti ti-circle-dot ti-16px me-1"></i>
+                  {{ $template->is_active ? __('notification_templates.active') : __('notification_templates.inactive') }}
+                </span>
+              </td>
+              <td>v{{ $template->version }}</td>
+              <td>{{ $template->creator->first_name_en ?? __('notification_templates.unknown') }}</td>
+              <td><small class="text-nowrap">{{ $template->created_at->format('M d, Y') }}</small></td>
+              <td>
+                <div class="dropdown">
+                  <button type="button" class="btn btn-sm btn-icon dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                    <i class="ti ti-dots-vertical"></i>
+                  </button>
+                  <div class="dropdown-menu dropdown-menu-end">
+                    <a class="dropdown-item" href="{{ route('notification-templates.show', $template) }}">
+                      <i class="ti ti-eye me-1"></i> {{ __('notification_templates.view') }}
+                    </a>
+                    <a class="dropdown-item" href="{{ route('notification-templates.edit', $template) }}">
+                      <i class="ti ti-edit me-1"></i> {{ __('notification_templates.edit') }}
+                    </a>
+                    <button type="button" class="dropdown-item" onclick="previewTemplate({{ $template->id }})">
+                      <i class="ti ti-search me-1"></i> {{ __('notification_templates.preview') }}
                     </button>
-                    <div class="dropdown-menu dropdown-menu-end">
-                      <a class="dropdown-item" href="{{ route('notification-templates.show', $template) }}">
-                        <i class="ti ti-eye me-1"></i> {{ __('notification_templates.view') }}
-                      </a>
-                      <a class="dropdown-item" href="{{ route('notification-templates.edit', $template) }}">
-                        <i class="ti ti-edit me-1"></i> {{ __('notification_templates.edit') }}
-                      </a>
-                      <button type="button" class="dropdown-item" onclick="previewTemplate({{ $template->id }})">
-                        <i class="ti ti-search me-1"></i> {{ __('notification_templates.preview') }}
-                      </button>
-                      <button type="button" class="dropdown-item" onclick="cloneTemplate({{ $template->id }})">
-                        <i class="ti ti-copy me-1"></i> {{ __('notification_templates.clone') }}
-                      </button>
-                      <div class="dropdown-divider"></div>
-                      <button type="button" class="dropdown-item text-danger" id="deleteAction" data-id="{{ $template->id }}" data-url="{{ route('notification-templates.destroy', $template) }}">
-                        <i class="ti ti-trash me-1"></i> {{ __('notification_templates.delete') }}
-                      </button>
-                    </div>
+                    <button type="button" class="dropdown-item" onclick="cloneTemplate({{ $template->id }})">
+                      <i class="ti ti-copy me-1"></i> {{ __('notification_templates.clone') }}
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <button type="button" class="dropdown-item text-danger" id="deleteAction" data-id="{{ $template->id }}" data-url="{{ route('notification-templates.destroy', $template) }}">
+                      <i class="ti ti-trash me-1"></i> {{ __('notification_templates.delete') }}
+                    </button>
                   </div>
-                </td>
-              </tr>
-              @endforeach
-            </tbody>
-          </table>
-        </div>
+                </div>
+              </td>
+            </tr>
+            @endforeach
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

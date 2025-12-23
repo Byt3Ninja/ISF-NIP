@@ -717,18 +717,70 @@ document.getElementById('menuSearch')?.addEventListener('input', function() {
   });
 });
 
-// Handle search startup menu logic
-document.getElementById("search-menu-input")?.addEventListener("input", function() {
+// Handle search menu logic
+document.getElementById("search-menu-input")?.addEventListener("input", function () {
   const searchTerm = this.value.toLowerCase();
-  const menuItems = document.querySelectorAll('.startup-menu-inner .menu-item');
 
-  menuItems.forEach(item => {
-    const label = item.querySelector('.menu-link span').textContent.toLowerCase();
-    
-    if (label.includes(searchTerm)) {
-      item.style.display = "block";
+  const menu = document.querySelector('.menu-inner, .startup-menu-inner');
+  const items = menu.querySelectorAll('.menu-item');
+  const headers = menu.querySelectorAll('.menu-header');
+
+  let anyVisible = false;
+
+  // 1️⃣ Handle menu items (both grouped & flat)
+  items.forEach(item => {
+    const hasSub = item.querySelector('.menu-sub');
+    let match = false;
+
+    if (hasSub) {
+      // GROUPED MENU
+      const children = item.querySelectorAll('.menu-sub .menu-item');
+
+      children.forEach(child => {
+        const label = child.querySelector('.menu-link div')?.textContent.toLowerCase() || '';
+
+        if (label.includes(searchTerm)) {
+          child.style.display = 'block';
+          match = true;
+        } else {
+          child.style.display = 'none';
+        }
+      });
+
+      if (match || searchTerm === '') {
+        item.style.display = 'block';
+        item.classList.add('open');
+        anyVisible = true;
+      } else {
+        item.style.display = 'none';
+        item.classList.remove('open');
+      }
     } else {
-      item.style.display = "none";
+      // FLAT MENU
+      const label = item.querySelector('.menu-link div')?.textContent.toLowerCase() || '';
+
+      if (label.includes(searchTerm) || searchTerm === '') {
+        item.style.display = 'block';
+        anyVisible = true;
+      } else {
+        item.style.display = 'none';
+      }
     }
-  })
+  });
+
+  // 2️⃣ Handle section headers
+  headers.forEach(header => {
+    let next = header.nextElementSibling;
+    let hasVisibleItem = false;
+
+    while (next && !next.classList.contains('menu-header')) {
+      if (next.classList.contains('menu-item') && next.style.display !== 'none') {
+        hasVisibleItem = true;
+        break;
+      }
+      next = next.nextElementSibling;
+    }
+
+    header.style.display = hasVisibleItem ? 'block' : 'none';
+  });
 });
