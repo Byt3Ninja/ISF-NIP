@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Auth;
+use Illuminate\Support\Facades\Auth;
 use App\User;
 use App\Cycle;
 use App\Event;
@@ -43,7 +43,7 @@ class SettingsController extends Controller
 		public function index()
 		{
 				$pages = [
-						['title' => 'general', 'route' => 'settings.system_general_view'],
+						['title' => 'general', 'route' => Auth::user()->hasRole('Admin') ? 'settings.system_general_view' : 'settings.organization_manage'],
 						['title' => 'roles_permissions', 'route' => 'roles.index'],
 						['title' => 'importer_tool', 'route' => 'importer.index'],
 						['title' => 'currencies', 'route' => 'currencies.index'],

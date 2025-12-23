@@ -19,10 +19,12 @@
     <div class="layout-wrapper layout-content-navbar">
       <div class="layout-container">
         <!-- Sidebar Menu -->
-        @if ($_user->hasRole('Registered'))
+        @if ($_user->hasAnyRole('Admin|organizationManager'))
+          @include('partials.organized-menu')
+        @elseif ($_user->hasRole('Registered'))
           @include('partials.menu-startup')
         @else
-          @include('admin.includes.menu')
+          @include('partials.menu')
         @endif
 
         <div class="layout-page">
