@@ -505,4 +505,6 @@ return [
   'funding_stage' => 'مرحلة التمويل',
   'development_stage' => 'مرحلة التنمية',
   'notes' => 'ملاحظات',
+  'no_deliverables' => 'لا توجد مستندات',
+  'failed' => 'فشل',
 ];
