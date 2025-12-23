@@ -503,4 +503,6 @@ return [
   'funding_stage' => 'Funding Stage',
   'development_stage' => 'Development Stage',
   'notes' => 'Notes',
+  'no_deliverables' => 'No Deliverables',
+  'failed' => 'Failed',
 ];

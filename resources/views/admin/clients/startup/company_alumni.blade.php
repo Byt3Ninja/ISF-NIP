@@ -1,37 +1,37 @@
 @extends('layouts.admin')
 
 @php
-$startup = [
-  'name' => 'PayLinkx',
-  'logo' => 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTc9APxkj0xClmrU3PpMZglHQkx446nQPG6lA&s',
-  'is_alumni' => true,
-  'description' => __('startup.overview_description'),
-  'organization' => 'Growthlabs',
-  'location' => 'Egypt · Cairo',
-  'established_at' => '2019-05-01',
-  'business_type' => 'B2B',
-  'development_stage' => 'Growth',
-  'funding_stage' => 'Seed',
-  'industry' => 'Financial Services',
-  'sector' => 'Payments',
-  'team_size' => '25+',
-  'technologies' => 'AI, APIs, Cloud',
-  'program' => [
-    'name' => 'Fintech Accelerator 2025',
-    'cohort' => 'Cohort 3',
-    'start' => '10 Jan 2025',
-    'end' => '15 Jun 2025',
-  ],
-  'sdgs' => ['no poverty', 'zero hunger', 'good health and well being', 'quality education'],
-  'links' => [
-    'website' => '#',
-    'linkedin' => '#',
-    'twitter' => '#',
-    'facebook' => '#',
-    'instagram' => '#',
-    'youtube' => '#',
-  ],
-];
+// $startup = [
+//   'name' => 'PayLinkx',
+//   'logo' => 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTc9APxkj0xClmrU3PpMZglHQkx446nQPG6lA&s',
+//   'is_alumni' => true,
+//   'description' => __('startup.overview_description'),
+//   'organization' => 'Growthlabs',
+//   'location' => 'Egypt · Cairo',
+//   'established_at' => '2019-05-01',
+//   'business_type' => 'B2B',
+//   'development_stage' => 'Growth',
+//   'funding_stage' => 'Seed',
+//   'industry' => 'Financial Services',
+//   'sector' => 'Payments',
+//   'team_size' => '25+',
+//   'technologies' => 'AI, APIs, Cloud',
+//   'program' => [
+//     'name' => 'Fintech Accelerator 2025',
+//     'cohort' => 'Cohort 3',
+//     'start' => '10 Jan 2025',
+//     'end' => '15 Jun 2025',
+//   ],
+//   'sdgs' => ['no poverty', 'zero hunger', 'good health and well being', 'quality education'],
+//   'links' => [
+//     'website' => '#',
+//     'linkedin' => '#',
+//     'twitter' => '#',
+//     'facebook' => '#',
+//     'instagram' => '#',
+//     'youtube' => '#',
+//   ],
+// ];
 
 $startupStatValues = [
   'screening_score'        => ['current' => 4.3, 'total' => 5],
@@ -48,36 +48,36 @@ $startupStatValues = [
 ];
 
 // Team configuration and data
-$teamData = [
-  'leader' => [
-    'id' => 'LD-001',
-    'name' => 'Omar Hassan',
-    'country' => 'Egypt',
-    'email' => 'omar@example.com',
-    'phone' => '+20 100 000 0000',
-  ],
-  'founders' => [
-    ['name' => 'Omar Hassan', 'email' => 'omar@example.com', 'linkedin' => '#'],
-    ['name' => 'Sara Ali', 'email' => 'sara@example.com', 'linkedin' => '#'],
-  ],
-  'employees' => [
-    ['name' => 'Ahmed Mohamed', 'job' => 'Backend engineer', 'gender' => 'Male', 'employment' => 'Full time', 'start_date' => '2022-03-01'],
-    ['name' => 'Mona Adel', 'job' => 'Product manager', 'gender' => 'Female', 'employment' => 'Full time', 'start_date' => '2021-10-15'],
-  ],
-];
+// $teamData = [
+//   'leader' => [
+//     'id' => 'LD-001',
+//     'name' => 'Omar Hassan',
+//     'country' => 'Egypt',
+//     'email' => 'omar@example.com',
+//     'phone' => '+20 100 000 0000',
+//   ],
+//   'founders' => [
+//     ['name' => 'Omar Hassan', 'email' => 'omar@example.com', 'linkedin' => '#'],
+//     ['name' => 'Sara Ali', 'email' => 'sara@example.com', 'linkedin' => '#'],
+//   ],
+//   'employees' => [
+//     ['name' => 'Ahmed Mohamed', 'job' => 'Backend engineer', 'gender' => 'Male', 'employment' => 'Full time', 'start_date' => '2022-03-01'],
+//     ['name' => 'Mona Adel', 'job' => 'Product manager', 'gender' => 'Female', 'employment' => 'Full time', 'start_date' => '2021-10-15'],
+//   ],
+// ];
 
 // Ownership and investors data
-$ownershipData = [
-  'shareholders' => [
-    ['name' => 'Omar Hassan', 'role' => 'founder_role', 'ownership' => '40%', 'text_class' => 'primary'],
-    ['name' => 'Sara Ali', 'role' => 'cofounder_role', 'ownership' => '30%', 'text_class' => 'info'],
-    ['name' => 'ABC Ventures', 'role' => 'investor_role', 'ownership' => '20%', 'text_class' => 'success'],
-  ],
-  'investors' => [
-    ['name' => 'ABC Ventures', 'type' => 'vc'],
-    ['name' => 'XYZ Angels Syndicate', 'type' => 'angel_group'],
-  ],
-];
+// $ownershipData = [
+//   'shareholders' => [
+//     ['name' => 'Omar Hassan', 'role' => 'founder_role', 'ownership' => '40%', 'text_class' => 'primary'],
+//     ['name' => 'Sara Ali', 'role' => 'cofounder_role', 'ownership' => '30%', 'text_class' => 'info'],
+//     ['name' => 'ABC Ventures', 'role' => 'investor_role', 'ownership' => '20%', 'text_class' => 'success'],
+//   ],
+//   'investors' => [
+//     ['name' => 'ABC Ventures', 'type' => 'vc'],
+//     ['name' => 'XYZ Angels Syndicate', 'type' => 'angel_group'],
+//   ],
+// ];
 
 // Screening data
 $screeningData = [
@@ -110,147 +110,147 @@ $screeningData = [
 ];
 
 // Mentorship data
-$mentorshipData = [
-  [
-    'mentor' => 'Mentor A',
-    'id' => 'M-001',
-    'step_name' => 'Growth mentoring',
-    'step_id' => 'STP-M-03',
-    'date' => '2025-03-10',
-    'duration' => '1.5h',
-    'founder_attended' => 'Omar Hassan',
-    'rating' => '5',
-    'comments' => 'Helpful session on pricing strategy and B2B sales pipeline.',
-  ],
-  // Add more mentorship sessions here
-];
+// $mentorshipData = [
+//   [
+//     'mentor' => 'Mentor A',
+//     'id' => 'M-001',
+//     'step_name' => 'Growth mentoring',
+//     'step_id' => 'STP-M-03',
+//     'date' => '2025-03-10',
+//     'duration' => '1.5h',
+//     'founder_attended' => 'Omar Hassan',
+//     'rating' => '5',
+//     'comments' => 'Helpful session on pricing strategy and B2B sales pipeline.',
+//   ],
+//   // Add more mentorship sessions here
+// ];
 
-$milestones = [
-  [
-    'title' => 'MVP launch',
-    'description' => 'Launch first production version with payment gateway integration.',
-    'due_date' => '2025-04-15',
-    'completion' => 80, // %
-    'deliverables' => [
-        ['name' => 'Technical architecture PDF', 'type' => 'pdf', 'link' => '#'],
-        ['name' => 'MVP demo video', 'type' => 'video', 'link' => '#'],
-    ],
-  ],
-  // Add more milestones here
-];
+//$milestones = [
+  //[
+    //'title' => 'MVP launch',
+   // 'description' => 'Launch first production version with payment gateway integration.',
+   // 'due_date' => '2025-04-15',
+   // 'completion' => 80, // %
+   // 'deliverables' => [
+     //   ['name' => 'Technical architecture PDF', 'type' => 'pdf', 'link' => '#'],
+       // ['name' => 'MVP demo video', 'type' => 'video', 'link' => '#'],
+    //],
+  //],
+//  // Add more milestones here
+//];
 
 $deliverableIcons = [
   'pdf' => 'ti-file-pdf',
   'video' => 'ti-video',
 ];
 
-$tasks = [
-  [
-    'title' => 'Customer interviews',
-    'task_id' => 'TSK-001',
-    'session_id' => 'TR-101',
-    'session_title' => 'Lean startup fundamentals',
-    'description' => 'Conduct ten customer interviews and summarize findings.',
-    'due_date' => '2025-02-10',
-    'completion_date' => '2025-02-08',
-    'mentor' => 'Mentor A',
-    'created_by' => 'Program manager',
-    'status' => 'Completed',
-  ],
-  // Add more tasks here
-];
+// $tasks = [
+//   [
+//     'title' => 'Customer interviews',
+//     'task_id' => 'TSK-001',
+//     'session_id' => 'TR-101',
+//     'session_title' => 'Lean startup fundamentals',
+//     'description' => 'Conduct ten customer interviews and summarize findings.',
+//     'due_date' => '2025-02-10',
+//     'completion_date' => '2025-02-08',
+//     'mentor' => 'Mentor A',
+//     'created_by' => 'Program manager',
+//     'status' => 'Completed',
+//   ],
+//   // Add more tasks here
+// ];
 
-$quizzes = [
-  [
-    'quiz_id' => 'QZ-001',
-    'title' => 'Lean startup quiz',
-    'date_completed' => '2025-02-05',
-    'founder' => 'Omar Hassan',
-    'score' => '90%',
-    'score_badge' => 'warning',
-    'status' => __('startup.passed'),
-  ],
-  // Add more quizzes here
-];
+// $quizzes = [
+//   [
+//     'quiz_id' => 'QZ-001',
+//     'title' => 'Lean startup quiz',
+//     'date_completed' => '2025-02-05',
+//     'founder' => 'Omar Hassan',
+//     'score' => '90%',
+//     'score_badge' => 'warning',
+//     'status' => __('startup.passed'),
+//   ],
+//   // Add more quizzes here
+// ];
 
-$surveys = [
-  [
-    'survey_id' => 'SV-001',
-    'title' => 'Mid program satisfaction',
-    'program_step' => 'Mid review step',
-    'date_completed' => '2025-03-01',
-    'answers_link' => '#',
-    'badge_class' => 'primary',
-  ],
-  // Add more surveys here
-];
+//$surveys = [
+  //[
+   // 'survey_id' => 'SV-001',
+    //'title' => 'Mid program satisfaction',
+    //'program_step' => 'Mid review step',
+    //'date_completed' => '2025-03-01',
+    //'answers_link' => '#', // هنا مش رابط هنا هيكون فى كل سؤال واجابته لوحدها 
+    //'badge_class' => 'primary',
+  //],
+  //// Add more surveys here
+//];
 
-$services = [
-  [
-    'name' => 'Cloud credits',
-    'service_id' => 'SRV-001',
-    'description' => 'Cloud infrastructure credits for twelve months to support product development.',
-    'badge_class' => 'primary',
-  ],
-  [
-    'name' => 'Legal advisory session',
-    'service_id' => 'SRV-002',
-    'description' => 'One-on-one session with legal partner for company setup and shareholder agreement review.',
-    'badge_class' => 'primary',
-  ],
-  // Add more services here
-];
+//$services = [
+//  [
+//    'name' => 'Cloud credits',
+ //   'service_id' => 'SRV-001',
+ //   'description' => 'Cloud infrastructure credits for twelve months to support product development.',
+ //   'badge_class' => 'primary',
+ // ],
+ // [
+ //   'name' => 'Legal advisory session',
+  //  'service_id' => 'SRV-002',
+ //   'description' => 'One-on-one session with legal partner for company setup and shareholder agreement review.',
+  //  'badge_class' => 'primary',
+ // ],
+ // // Add more services here
+//];
 
-$forms = [
-  [
-    'title' => 'Startup profiling form',
-    'form_id' => 'FM-001',
-    'step_name' => 'Application step form',
-    'step_id' => 'STP-FM-01',
-    'submission_date' => '2025-01-05 14:22',
-    'badge_class' => 'primary',
-    'modal_id' => 1,
-    'fields' => [
-      [
-        'name' => 'Startup description',
-        'type' => 'text',
-        'value' => 'AI powered payment orchestration platform for SMEs.',
-        'attachment' => null,
-      ],
-      [
-        'name' => 'Pitch deck file',
-        'type' => 'file',
-        'value' => 'Uploaded',
-        'attachment' => '#',
-      ],
-      [
-        'name' => 'Industry',
-        'type' => 'selection',
-        'value' => 'Financial services',
-        'attachment' => null,
-      ],
-      [
-        'name' => 'Team size',
-        'type' => 'number',
-        'value' => '25',
-        'attachment' => null,
-      ],
-      [
-        'name' => 'Business model',
-        'type' => 'selection',
-        'value' => 'B2B SaaS',
-        'attachment' => null,
-      ],
-      [
-        'name' => 'Competitive landscape',
-        'type' => 'text',
-        'value' => 'Competitive landscape is moderate with a few dominant players.',
-        'attachment' => null,
-      ],
-    ],
-  ],
-  // Add more forms here
-];
+// $forms = [
+//   [
+//     'title' => 'Startup profiling form',
+//     'form_id' => 'FM-001',
+//     'step_name' => 'Application step form',
+//     'step_id' => 'STP-FM-01',
+//     'submission_date' => '2025-01-05 14:22',
+//     'badge_class' => 'primary',
+//     'modal_id' => 1,
+//     'fields' => [
+//       [
+//         'name' => 'Startup description',
+//         'type' => 'text',
+//         'value' => 'AI powered payment orchestration platform for SMEs.',
+//         'attachment' => null,
+//       ],
+//       [
+//         'name' => 'Pitch deck file',
+//         'type' => 'file',
+//         'value' => 'Uploaded',
+//         'attachment' => '#',
+//       ],
+//       [
+//         'name' => 'Industry',
+//         'type' => 'selection',
+//         'value' => 'Financial services',
+//         'attachment' => null,
+//       ],
+//       [
+//         'name' => 'Team size',
+//         'type' => 'number',
+//         'value' => '25',
+//         'attachment' => null,
+//       ],
+//       [
+//         'name' => 'Business model',
+//         'type' => 'selection',
+//         'value' => 'B2B SaaS',
+//         'attachment' => null,
+//       ],
+//       [
+//         'name' => 'Competitive landscape',
+//         'type' => 'text',
+//         'value' => 'Competitive landscape is moderate with a few dominant players.',
+//         'attachment' => null,
+//       ],
+//     ],
+//   ],
+//   // Add more forms here
+// ];
 
 $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
 @endphp
@@ -916,7 +916,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                         @foreach ($ownershipData['investors'] as $investor)
                         <tr class="border-top">
                           <td class="fw-medium">{{ $investor['name'] }}</td>
-                          <td class="text-end"><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary'}}">{{ __('startup.' .
+                          <td class="text-end"><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary'}}">{{ __('admin.' .
                               $investor['type']) }}</span></td>
                         </tr>
                         @endforeach
@@ -1331,6 +1331,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                     </td>
                     <td>
                       <ul class="list-unstyled mb-0 small">
+                        @if(!empty($m['deliverables']))
                         @foreach ($m['deliverables'] as $d)
                         <li>
                           <a href="{{ $d['link'] }}" class="fw-medium text-primary">
@@ -1338,6 +1339,9 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                           </a>
                         </li>
                         @endforeach
+                        @else
+                        <li class="text-muted">{{ __('startup.no_deliverables') }}</li>
+                        @endif
                       </ul>
                     </td>
                   </tr>
