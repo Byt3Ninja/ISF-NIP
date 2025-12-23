@@ -39,7 +39,7 @@ class CompanyRelation extends Model
 
     public function technology()
     {
-        return $this->belongsTo(Technology::class);
+        return $this->belongsTo(Technology::class, 'technology_id');
     }
 
     public function user()

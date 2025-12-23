@@ -402,4 +402,8 @@ class Company extends Model
         }
         return $form;
     }
+    public function companyRelations()
+    {
+        return $this->hasMany(CompanyRelation::class, 'company_id', 'id');
+    }
 }
