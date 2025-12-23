@@ -25,7 +25,7 @@
             <label class="form-label" for="img_url">{{__('admin.Image')}}</label>
             <input type="file" class="form-control" name="img_url" id="img_url" accept="image/*" onchange="previewImage(event)">
             <div class="mt-3">
-                <img id="preview-image" src="{{ asset($organization->img_url) }}" alt="Preview Image" width="100" style="display: {{ $organization->img_url ? 'block' : 'none' }};">
+                <img id="preview-image" src="{{ $organization->imageUrl }}" alt="Preview Image" width="100" style="display: {{ $organization->img_url ? 'block' : 'none' }};">
             </div>            
         </div>
     </div>

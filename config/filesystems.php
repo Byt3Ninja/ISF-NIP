@@ -153,6 +153,13 @@ return [
             'url' => env('APP_URL') . '/documents',
             'visibility' => 'public',
         ],
+
+        'organizations' => [
+            'driver' => 'local',
+            'root' => storage_path('app/organizations'),
+            'url' => env('APP_URL') . '/dashboard/organizations/logo',
+            'visibility' => 'private',
+        ],
     ],
 
 ];

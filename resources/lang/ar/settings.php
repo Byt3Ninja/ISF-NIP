@@ -294,6 +294,7 @@ return [
 		'quizzes' => 'الاختبارات',
 		'surveys' => 'الاستطلاعات',
 		'people_and_organizations' => 'الأشخاص والمنظمات',
+		'organization_types' => 'أنواع المؤسسات',
 		'organizations' => 'المنظمات',
 		'users' => 'المستخدمين',
 		'startups' => 'الشركات الناشئة',

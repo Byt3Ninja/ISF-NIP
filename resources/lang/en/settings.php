@@ -291,6 +291,7 @@ return [
 		'quizzes' => 'Quizzes',
 		'surveys' => 'Surveys',
 		'people_and_organizations' => 'People & Organizations',
+		'organization_types' => 'Organization Types',
 		'organizations' => 'Organizations',
 		'users' => 'Users',
 		'startups' => 'Startups',

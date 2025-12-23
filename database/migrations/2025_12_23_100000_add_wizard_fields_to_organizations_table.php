@@ -1,0 +1,36 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('organizations', function (Blueprint $table) {
+            $table->foreignId('organization_type_id')
+                ->nullable()
+                ->after('id')
+                ->constrained('organization_types')
+                ->onDelete('set null');
+
+            $table->boolean('is_draft')->default(false)->after('status');
+            $table->tinyInteger('wizard_step')->default(1)->after('is_draft');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('organizations', function (Blueprint $table) {
+            $table->dropForeign(['organization_type_id']);
+            $table->dropColumn(['organization_type_id', 'is_draft', 'wizard_step']);
+        });
+    }
+};

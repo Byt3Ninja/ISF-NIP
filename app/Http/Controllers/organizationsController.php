@@ -90,16 +90,14 @@ class organizationsController extends Controller
 		$organization->user_id = $user->id;
 		$organization->color = $request->color;
 
-		//store the image
-
+		// Store the image using Storage disk
 		if ($request->hasFile('img_url')) {
-            $image = $request->file('img_url');
-            $imageName = time() . '.' . $image->getClientOriginalExtension();
-             $image->move(public_path('organizations/'), $imageName);
-			 $organization->img_url = 'organizations/' . $imageName;
-        }else {
-			$img_url = '/images/background/logo.png';
-			$organization->img_url =$img_url;
+			$image = $request->file('img_url');
+			$imageName = time() . '.' . $image->getClientOriginalExtension();
+			Storage::disk('organizations')->put($imageName, file_get_contents($image));
+			$organization->img_url = $imageName;
+		} else {
+			$organization->img_url = null;
 		}
 		//update
 		$organization->save();
@@ -164,33 +162,18 @@ class organizationsController extends Controller
 		$organization->color = $request->color;
 
 
-		//store the image
+		// Store the image using Storage disk
 		if ($request->hasFile('img_url')) {
-            $image = $request->file('img_url');
-            $imageName = time() . '.' . $image->getClientOriginalExtension();
+			// Delete old image if exists
+			if ($organization->img_url && Storage::disk('organizations')->exists($organization->img_url)) {
+				Storage::disk('organizations')->delete($organization->img_url);
+			}
 
-             $image->move(public_path('organizations/'), $imageName);
-             $organization->img_url = 'organizations/' . $imageName;
-        }
-
-		// if ($request->file('img_url') != false) {
-		// 	$img_file = $request->file('img_url'); // الملف المرفوع
-		// 	// الحصول على اسم الصورة الأصلي أو اسم جديد حسب الحاجة
-		// 	$counter = 1;
-		// 	$imageName = str_replace('.' . $img_file->getClientOriginalExtension(), '', $img_file->getClientOriginalName()) . '-' . $counter++ . '.' . $img_file->getClientOriginalExtension();
-		// 	$imageName = strtolower(str_replace(' ', '-', $imageName));
-		// 	// تخزين الصورة في المجلد المحدد في إعدادات التخزين 'UsersLFMPublic'
-		// 	Storage::disk('UsersLFMPublic')->put($imageName, file_get_contents($img_file));
-
-		// 	// الحصول على رابط الصورة المخزنة
-		// 	$imagePath = Storage::disk('UsersLFMPublic')->url($imageName);
-		// } else {
-		// 	$imagePath = $organization->img_url;
-		// }
-
-
-		//update
-		// $organization->img_url = 'organizations/' . $imageName;
+			$image = $request->file('img_url');
+			$imageName = time() . '.' . $image->getClientOriginalExtension();
+			Storage::disk('organizations')->put($imageName, file_get_contents($image));
+			$organization->img_url = $imageName;
+		}
 
 		$organization->save();
 		$user = $organization->user;
