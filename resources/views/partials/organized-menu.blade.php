@@ -45,7 +45,7 @@ $navigationItems = [
       ['title' => 'services', 'route' => 'services.index'],
       ['title' => 'file_manager', 'route' => 'my_files.list'],
       ['title' => 'rooms', 'route' => 'rooms.index'],
-      ['title' => 'timesheets', 'route' => 'timesheet.index'],
+      ['title' => 'timesheets', 'route' => 'TimeSheet.index'],
     ],
   ],
 
@@ -138,6 +138,26 @@ if (strpos(request()->getRequestUri(), 'programlist') !== false || strpos(reques
   $activeItem = 'programlist.index';
 }
 
+// Special case: Make settings active if route matches specified patterns
+if (Route::is(
+    'settings.*',
+    'roles.*',
+    'importer.*',
+    'currencies.*',
+    'Tags.*',
+    'Category.*',
+    'subcategories.*',
+    'stages.*',
+    'Labels.*',
+    'queue.*',
+    'notification-templates.*',
+    'notification-triggers.*',
+    'license.*'
+)) {
+  $activeGroup = 'admin';
+  $activeItem = 'settings.index';
+}
+
 // If no active item found, default to first group (dashboard) being open
 if (!$activeGroup) {
   $activeGroup = 'dashboard';
@@ -195,6 +215,7 @@ if (!$activeGroup) {
               <li 
                 class="menu-item 
                 {{ $_user->hasRole('Admin') && $child['title'] === 'reminder_logs' ? 'd-none' : '' }} 
+                {{ env('APP_ENV') === 'production' && ($child['title'] === 'timesheets' || $child['title'] === 'projects') ? 'd-none' : '' }} 
                 {{ $child['route'] === $activeItem ? 'active' : '' }}"
               >
                 <a 
