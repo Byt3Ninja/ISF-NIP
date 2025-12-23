@@ -126,7 +126,7 @@
       ordering: true,
       searching: true,
       @if (app()->getLocale() == 'ar')
-      ,language: {
+      language: {
         search: 'ابحث:',
         lengthMenu: 'أظهر _MENU_ مدخلات',
         info: 'إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل',
