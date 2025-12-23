@@ -12,6 +12,28 @@
         </div>
       @endif
 
+      <!-- Navigation Tabs -->
+      <nav class="nav-align-top mb-6">
+        @php
+          $tabs = [
+            ['title' => __('admin.training_sessions'), 'url' => 'dashboard/training/sessions', 'icon' => 'book'],
+            ['title' => __('admin.training_courses'), 'url' => 'dashboard/training/all', 'icon' => 'certificate'],
+            ['title' => __('admin.training_results'), 'url' => 'dashboard/training/results', 'icon' => 'report-analytics'],
+          ]
+        @endphp
+        <ul class="nav nav-pills">
+          @foreach($tabs as $tab)
+            <li class="nav-item">
+              <a href="/{{ $tab['url'] }}" class="nav-link {{ Request::is($tab['url'] . '*') ? 'active' : '' }}">
+                <i class="ti ti-{{ $tab['icon'] }} me-2"></i>
+                {{ $tab['title'] }}
+              </a>
+            </li>
+          @endforeach
+        </ul>
+      </nav>
+      <!--/ Navigation Tabs -->
+
       {{-- Main Card --}}
       <div class="card">
         {{-- Card Header --}}
@@ -40,147 +62,145 @@
         </div>
 
         {{-- Data Table --}}
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-hover" id="coursesTable">
-              <thead class="table-light">
-                <tr>
-                  <th class="text-nowrap">#</th>
-                  <th class="text-nowrap">{{ __('cycles.Title') }}</th>
-                  <th class="text-nowrap">{{ __('cycles.Created at') }}</th>
-                  <th class="text-nowrap">{{ __('cycles.Added By') }}</th>
-                  <th class="text-nowrap">{{ __('admin.quizStatus') }}</th>
-                  <th class="text-nowrap">{{ __('cycles.Tags') }}</th>
-                  <th class="text-nowrap">{{ $l == 'ar' ? 'الفئات' : 'Categories' }}</th>
-                  <th class="text-nowrap">{{ __('admin.CountProgram') }}</th>
-                  <th class="text-nowrap" class="text-center">{{ __('cycles.Actions') }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                @forelse ($courses as $key => $course)
-                  <tr id="course-row-{{ $course->id }}">
-                    <td class="fw-medium">{{ $key + 1 }}</td>
-                    <td>
-                      <a href="{{ route('trainings.course_view', $course->id) }}" class="text-primary fw-medium">
-                        {{ Str::limit($course->title, 50) }}
-                      </a>
-                    </td>
-                    <td>{{ $course->created_at->format('Y-m-d') }}</td>
-                    <td>
-                      @if($course->user)
-                        {{ $course->user->{"first_name_{$l}"} }} {{ $course->user->{"last_name_{$l}"} }}
-                      @else
-                        <span class="text-muted">{{ __('admin.Unknown') }}</span>
-                      @endif
-                    </td>
-                    <td data-status="{{ $course->Status == '0' ? 'draft' : 'published' }}">
-                      @if($course->Status == '0')
-                        <span class="badge bg-label-warning">{{ __('admin.Draft') }}</span>
-                      @else
-                        <span class="badge bg-label-success">{{ __('admin.Published') }}</span>
-                      @endif
-                    </td>
-                    <td>
-                      @php
-                        $tagsList = [];
-                        if($course->tags) {
-                          foreach($course->tags as $tag) {
-                            $tagName = $tag->name ?? '';
-                            if($tagName && (str_starts_with($tagName, '[') || str_starts_with($tagName, '{'))) {
-                              $decoded = json_decode($tagName, true);
-                              if(is_array($decoded)) {
-                                foreach($decoded as $item) {
-                                  if(is_array($item) && isset($item['value'])) {
-                                    $tagsList[] = $item['value'];
-                                  }
+        <div class="card-datatable table-responsive">
+          <table class="table table-hover" id="coursesTable">
+            <thead class="table-light">
+              <tr>
+                <th class="text-nowrap">#</th>
+                <th class="text-nowrap">{{ __('cycles.Title') }}</th>
+                <th class="text-nowrap">{{ __('cycles.Created at') }}</th>
+                <th class="text-nowrap">{{ __('cycles.Added By') }}</th>
+                <th class="text-nowrap">{{ __('admin.quizStatus') }}</th>
+                <th class="text-nowrap">{{ __('cycles.Tags') }}</th>
+                <th class="text-nowrap">{{ $l == 'ar' ? 'الفئات' : 'Categories' }}</th>
+                <th class="text-nowrap">{{ __('admin.CountProgram') }}</th>
+                <th class="text-nowrap" class="text-center">{{ __('cycles.Actions') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @forelse ($courses as $key => $course)
+                <tr id="course-row-{{ $course->id }}">
+                  <td class="fw-medium">{{ $key + 1 }}</td>
+                  <td>
+                    <a href="{{ route('trainings.course_view', $course->id) }}" class="text-primary fw-medium">
+                      {{ Str::limit($course->title, 50) }}
+                    </a>
+                  </td>
+                  <td>{{ $course->created_at->format('Y-m-d') }}</td>
+                  <td>
+                    @if($course->user)
+                      {{ $course->user->{"first_name_{$l}"} }} {{ $course->user->{"last_name_{$l}"} }}
+                    @else
+                      <span class="text-muted">{{ __('admin.Unknown') }}</span>
+                    @endif
+                  </td>
+                  <td data-status="{{ $course->Status == '0' ? 'draft' : 'published' }}">
+                    @if($course->Status == '0')
+                      <span class="badge bg-label-warning">{{ __('admin.Draft') }}</span>
+                    @else
+                      <span class="badge bg-label-success">{{ __('admin.Published') }}</span>
+                    @endif
+                  </td>
+                  <td>
+                    @php
+                      $tagsList = [];
+                      if($course->tags) {
+                        foreach($course->tags as $tag) {
+                          $tagName = $tag->name ?? '';
+                          if($tagName && (str_starts_with($tagName, '[') || str_starts_with($tagName, '{'))) {
+                            $decoded = json_decode($tagName, true);
+                            if(is_array($decoded)) {
+                              foreach($decoded as $item) {
+                                if(is_array($item) && isset($item['value'])) {
+                                  $tagsList[] = $item['value'];
                                 }
                               }
-                            } else {
-                              $tagsList[] = $tagName;
                             }
+                          } else {
+                            $tagsList[] = $tagName;
                           }
                         }
-                        $tagsList = array_filter(array_map('trim', $tagsList));
-                        $tagsText = implode(', ', $tagsList);
-                      @endphp
-                      <span data-export="{{ $tagsText }}">
-                        @if(count($tagsList) > 0)
-                          @foreach($tagsList as $tagName)
-                            <span class="badge bg-label-info me-1 mb-1">{{ $tagName }}</span>
-                          @endforeach
-                        @else
-                          <span class="text-muted">-</span>
+                      }
+                      $tagsList = array_filter(array_map('trim', $tagsList));
+                      $tagsText = implode(', ', $tagsList);
+                    @endphp
+                    <span data-export="{{ $tagsText }}">
+                      @if(count($tagsList) > 0)
+                        @foreach($tagsList as $tagName)
+                          <span class="badge bg-label-info me-1 mb-1">{{ $tagName }}</span>
+                        @endforeach
+                      @else
+                        <span class="text-muted">-</span>
+                      @endif
+                    </span>
+                  </td>
+                  <td>
+                    @php
+                      $categories = $course->categories;
+                      $categoriesCount = $categories->count();
+                      $displayLimit = 2;
+                      $categoriesText = $categories->pluck('title')->implode(', ');
+                    @endphp
+                    <div data-categories="{{ $categoriesText }}">
+                      @if($categoriesCount > 0)
+                        @foreach($categories->take($displayLimit) as $category)
+                          <span class="badge bg-label-secondary me-1 mb-1">{{ $category->title }}</span>
+                        @endforeach
+                        @if($categoriesCount > $displayLimit)
+                          <button type="button" 
+                            class="badge bg-label-primary border-0 mb-1" 
+                            style="cursor: pointer;"
+                            onclick="showAllCategories({{ $course->id }}, {{ json_encode($categories->pluck('title')) }})">
+                            +{{ $categoriesCount - $displayLimit }}
+                          </button>
                         @endif
-                      </span>
-                    </td>
+                      @else
+                        <span class="text-muted">-</span>
+                      @endif
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge bg-label-primary">{{ $course->contents_count ?? $course->contents->count() }}</span>
+                  </td>
+                  @if ($_user->hasAnyRole('organizationManager|Mentor|Admin'))
                     <td>
-                      @php
-                        $categories = $course->categories;
-                        $categoriesCount = $categories->count();
-                        $displayLimit = 2;
-                        $categoriesText = $categories->pluck('title')->implode(', ');
-                      @endphp
-                      <div data-categories="{{ $categoriesText }}">
-                        @if($categoriesCount > 0)
-                          @foreach($categories->take($displayLimit) as $category)
-                            <span class="badge bg-label-secondary me-1 mb-1">{{ $category->title }}</span>
-                          @endforeach
-                          @if($categoriesCount > $displayLimit)
-                            <button type="button" 
-                              class="badge bg-label-primary border-0 mb-1" 
-                              style="cursor: pointer;"
-                              onclick="showAllCategories({{ $course->id }}, {{ json_encode($categories->pluck('title')) }})">
-                              +{{ $categoriesCount - $displayLimit }}
-                            </button>
-                          @endif
-                        @else
-                          <span class="text-muted">-</span>
+                      <div class="d-flex align-items-center gap-2 justify-content-center">
+                        <a title="Edit" href="/dashboard/training/EditTR/{{ $course->id }}"
+                          class="btn btn-icon btn-label-info rounded-circle">
+                          <i class="ti ti-edit"></i>
+                        </a>
+
+                        @if (isset($course))
+                          <button title="Delete" class="btn btn-label-danger btn-icon rounded-circle"
+                            onclick="deleteCourse({{ $course->id ?? 0 }})">
+                            <i class="ti ti-trash"></i>
+                          </button>
                         @endif
+
+                        <a title="Show" href="/dashboard/training/viewCourse/{{ $course->id }}"
+                          class="btn btn-icon btn-label-primary rounded-circle">
+                          <i class="ti ti-eye"></i>
+                        </a>
                       </div>
                     </td>
+                  @else
                     <td>
-                      <span class="badge bg-label-primary">{{ $course->contents_count ?? $course->contents->count() }}</span>
+                      <a title="Show" href="/dashboard/training/viewCourse/{{ $course->id }}"
+                        class="btn btn-label-primary">{{ __('admin.Enroll') }}
+                      </a>
                     </td>
-                    @if ($_user->hasAnyRole('organizationManager|Mentor|Admin'))
-                      <td>
-                        <div class="d-flex align-items-center gap-2 justify-content-center">
-                          <a title="Edit" href="/dashboard/training/EditTR/{{ $course->id }}"
-                            class="btn btn-icon btn-label-info rounded-circle">
-                            <i class="ti ti-edit"></i>
-                          </a>
-  
-                          @if (isset($course))
-                            <button title="Delete" class="btn btn-label-danger btn-icon rounded-circle"
-                              onclick="deleteCourse({{ $course->id ?? 0 }})">
-                              <i class="ti ti-trash"></i>
-                            </button>
-                          @endif
-  
-                          <a title="Show" href="/dashboard/training/viewCourse/{{ $course->id }}"
-                            class="btn btn-icon btn-label-primary rounded-circle">
-                            <i class="ti ti-eye"></i>
-                          </a>
-                        </div>
-                      </td>
-                    @else
-                      <td>
-                        <a title="Show" href="/dashboard/training/viewCourse/{{ $course->id }}"
-                          class="btn btn-label-primary">{{ __('admin.Enroll') }}
-                        </a>
-                      </td>
-                    @endif
-                  </tr>
-                @empty
-                  <tr>
-                    <td colspan="9" class="text-center py-5">
-                      <i class="ti ti-file-off ti-lg text-muted d-block mb-2"></i>
-                      <p class="text-muted mb-0">{{ $l == 'en' ? 'No courses found.' : 'لا توجد دورات.' }}</p>
-                    </td>
-                  </tr>
-                @endforelse
-              </tbody>
-            </table>
-          </div>
+                  @endif
+                </tr>
+              @empty
+                <tr>
+                  <td colspan="9" class="text-center py-5">
+                    <i class="ti ti-file-off ti-lg text-muted d-block mb-2"></i>
+                    <p class="text-muted mb-0">{{ $l == 'en' ? 'No courses found.' : 'لا توجد دورات.' }}</p>
+                  </td>
+                </tr>
+              @endforelse
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

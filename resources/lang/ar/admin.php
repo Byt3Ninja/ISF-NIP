@@ -2716,4 +2716,7 @@ return [
 		'add_panels_description' => 'أضف المحكمن والشركات إلى كل لجنة',
 		'schedule_session' => 'جدولة الجلسة',
 	],
+	'training_sessions' => 'جلسات التدريب',
+	'training_courses' => 'دورات التدريب',
+	'training_results' => 'نتائج التدريب',
 ];

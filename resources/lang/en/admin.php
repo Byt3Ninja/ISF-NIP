@@ -2664,4 +2664,7 @@ return [
 		'add_panels_description' => 'Add judges and companies to each panel',
 		'schedule_session' => 'Schedule Session',
 	],
+	'training_sessions' => 'Training Sessions',
+	'training_courses' => 'Training Courses',
+	'training_results' => 'Training Results',
 ];
