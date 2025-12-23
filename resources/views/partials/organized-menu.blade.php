@@ -30,6 +30,7 @@ $navigationItems = [
   'people' => [
     'title' => 'people_and_organizations',
     'children' => [
+      ['title' => 'organization_types', 'route' => 'organization-types.index'],
       ['title' => 'organizations', 'route' => 'organizations.index'],
       ['title' => 'users', 'route' => 'users.index'],
       ['title' => 'startups', 'route' => 'users.view_companies'],
@@ -118,6 +119,12 @@ if (strpos(request()->getRequestUri(), '/companies') !== false) {
 if (strpos(request()->getRequestUri(), '/judger') !== false) {
   $activeGroup = 'people';
   $activeItem = 'users.judger';
+}
+
+// Special case: Make organization_types active if URL contains '/organization-types'
+if (strpos(request()->getRequestUri(), '/organization-types') !== false) {
+  $activeGroup = 'people';
+  $activeItem = 'organization-types.index';
 }
 
 // Special case: Make questions active if URL contains '/questions-bank'

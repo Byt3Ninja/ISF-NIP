@@ -12,13 +12,7 @@
     <a href="/dashboard" class="app-brand-link">
       @if (!is_null($_user->organization))
         @php
-          $imageUrl = $_user->organization->img_url ? asset($_user->organization->img_url) : null;
-
-          // استخراج المسار من الرابط
-          $imagePath = parse_url($imageUrl, PHP_URL_PATH);
-
-          // إزالة أي أجزاء غير ضرورية في البداية مثل `/dashboard/uploads/files/`
-          $fileN = ltrim(str_replace('/dashboard/uploads/files/', '', $imagePath), '/');
+          $imageUrl = $_user->organization->imageUrl;
         @endphp
         <img
           src="{{ $imageUrl }}"
@@ -320,13 +314,19 @@
     @endif
 
     @if ($_user->hasAnyRole('Admin'))
+      <li class="{{ Request::is('*organization-types*') ? 'active' : '' }} menu-item">
+        <a href="{{ route('organization-types.index') }}" class="menu-link">
+          <i class="menu-icon tf-icons ti ti-category"></i>
+          <div>{{ __('admin.Organization Types') }}</div>
+        </a>
+      </li>
+
       <li class="{{ Request::is('*organizations') ? 'active' : '' }} menu-item">
         <a href="{{ route('organizations.index') }}" class="menu-link">
           <i class="menu-icon tf-icons ti ti-building"></i>
           <div>{{ __('admin.Manage Organizations') }}</div>
         </a>
       </li>
-    
     @endif
 
     @if( $_user->ableTo('projects.index', $permissions) )

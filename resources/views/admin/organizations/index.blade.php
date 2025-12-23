@@ -5,6 +5,26 @@
 
 @section('vendorstyle')
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
+<style>
+  .draft-ribbon {
+    position: absolute;
+    top: 12px;
+    left: -35px;
+    background: #0d6efd;
+    color: white;
+    padding: 5px 40px;
+    font-size: 11px;
+    font-weight: 600;
+    transform: rotate(-45deg);
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .org-card {
+    position: relative;
+    overflow: hidden;
+  }
+</style>
 @stop
 
 @section('content')
@@ -77,8 +97,11 @@
                 </div>
               </div>
               <div class="col-12 col-lg-4 mt-3 mt-lg-0">
-                <div class="w-100 h-100 d-flex justify-content-lg-end justify-content-center align-items-center">
+                <div class="w-100 h-100 d-flex justify-content-lg-end justify-content-center align-items-center gap-2">
                   @if ($_user->ableTo('organizations.create', $permissions))
+                    <a href="{{ route('organization.wizard.create') }}" class="btn btn-outline-primary">
+                      <i class="ti ti-wand me-2"></i> {{ __('admin.Create with Wizard') }}
+                    </a>
                     <a href="{{ route('organizations.create') }}" class="btn btn-primary">
                       <i class="ti ti-plus me-2"></i> {{ __('admin.Add_New') }}
                     </a>
@@ -124,6 +147,9 @@
           @foreach ($organizations as $organization)
             <div class="col-12 col-md-6 col-lg-4 mb-6">
               <div class="card org-card">
+                @if($organization->is_draft)
+                  <div class="draft-ribbon">{{ __('admin.Draft') }}</div>
+                @endif
                 <div class="card-body">
                   <div class="d-flex justify-content-between align-items-center">
                     <h5 class="card-title text-primary fw-semibold mb-0">
@@ -147,11 +173,11 @@
                   <!-- Organization Image -->
                   <div class="card mt-3 d-flex justify-content-center align-items-center position-relative"
                     style="height: 150px; width: 100%;">
-                    <img 
-                      src="/{{ $organization->image_url ?? '/images/background/logo.png' }}"
-                      onerror="this.src='/images/background/logo.png'" alt="Organization Image" 
+                    <img
+                      src="{{ $organization->imageUrl }}"
+                      onerror="this.src='/images/logo-placeholder.png'" alt="Organization Image"
                       class="rounded img-fluid"
-                      style="height: 120px; min-width: 200px; object-fit: cover;" 
+                      style="height: 120px; min-width: 200px; object-fit: cover;"
                     />
                     <!-- Status Badge -->
                     <div
