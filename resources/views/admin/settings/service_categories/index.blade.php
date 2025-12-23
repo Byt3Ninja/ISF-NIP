@@ -69,71 +69,69 @@
                 </div>
               </div>
               <div class="card-content">
-                <div class="card-body">
-                  <div class="table-responsive">
-                    <table class="table zero-configuration" id="services-categories-table"
-                      style="font-size: 0.92rem;">
-                      <thead class="table-light">
-                        <tr>
-                          <th>#</th>
-                          <th class="text-center">{{__('admin.Organization')}}</th>
-                          <th class="text-center">{{ $l == 'en' ? 'Service Name (EN)' : 'اسم الخدمة بالانجليزية' }}</th>
-                          <th class="text-center">{{ $l == 'en' ? 'Service Name (AR)' : 'اسم الخدمة بالعربية' }}</th>
-                          <th class="text-center">{{ __('admin.Created At') }}</th>
-                          @if( $_user->ableToAny(['serviceCategories.show', 'serviceCategories.edit',
-                          'serviceCategories.update', 'serviceCategories.destroy'], $permissions) )<th
-                            class="text-center">{{ __('admin.Actions') }}</th>@endif
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @foreach ($serviceCategories as $category)
-                        <tr>
-                          <td style="font-size: 0.92rem;">{{ $index++ }}</td>
-                          <td class="text-center" style="font-size: 0.92rem;">
-                            <a href="{{ URL::to('dashboard/organizations/' . $category->organization_id . '/edit') }}">
-                              {{ $category->organization ? $category->organization->{'name_'.$l} : '-' }}
-                            </a>
-                          </td>
-                          <td class="text-center" style="font-size: 0.92rem;">{{ $category->name_en }}</td>
-                          <td class="text-center" style="font-size: 0.92rem;">{{ $category->name_ar }}</td>
-                          <td class="text-center" style="font-size: 0.92rem;">{{ $category->created_at }}</td>
-                          @if( $_user->ableToAny(['serviceCategories.show', 'serviceCategories.edit',
-                          'serviceCategories.update', 'serviceCategories.destroy'], $permissions) )
-                          <td class="text-center" style="font-size: 0.92rem;">
-                            <div class="dropdown">
-                              <button class="btn btn-label-secondary p-1 px-2" type="button"
-                                id="actionsDropdown{{ $category->id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="ti ti-dots-vertical"></i>
-                              </button>
-                              <ul class="dropdown-menu" aria-labelledby="actionsDropdown{{ $category->id }}">
-                                @if( $_user->ableToAny(['serviceCategories.edit', 'serviceCategories.update'],
-                                $permissions) )
-                                <li>
-                                  <a class="dropdown-item d-flex align-items-center"
-                                    href="{{ route('serviceCategories.edit', ['serviceCategory' => $category->id]) }}">
-                                    <i class="ti ti-pencil me-1"></i> {{ __('admin.Edit') }}
-                                  </a>
-                                </li>
-                                @endif
-                                @if( $_user->ableTo('serviceCategories.destroy', $permissions) )
-                                <li>
-                                  <button
-                                    class="dropdown-item text-danger d-flex align-items-center delete-service-action"
-                                    data-id="{{ $category->id }}"
-                                    data-url="{{ route('serviceCategories.destroy', ['serviceCategory' => $category->id]) }}">
-                                    <i class="ti ti-trash me-1"></i> {{ __('Delete') }}
-                                  </button>
-                                </li>
-                                @endif
-                              </ul>
-                            </div>
-                          </td>
-                          @endif
-                        </tr>
-                        @endforeach
-                      </tbody>
-                    </table>
-                  </div>
+                <div class="card-datatable table-responsive">
+                  <table class="table zero-configuration" id="services-categories-table"
+                    style="font-size: 0.92rem;">
+                    <thead class="table-light">
+                      <tr>
+                        <th>#</th>
+                        <th class="text-center">{{__('admin.Organization')}}</th>
+                        <th class="text-center">{{ $l == 'en' ? 'Service Name (EN)' : 'اسم الخدمة بالانجليزية' }}</th>
+                        <th class="text-center">{{ $l == 'en' ? 'Service Name (AR)' : 'اسم الخدمة بالعربية' }}</th>
+                        <th class="text-center">{{ __('admin.Created At') }}</th>
+                        @if( $_user->ableToAny(['serviceCategories.show', 'serviceCategories.edit',
+                        'serviceCategories.update', 'serviceCategories.destroy'], $permissions) )<th
+                          class="text-center">{{ __('admin.Actions') }}</th>@endif
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @foreach ($serviceCategories as $category)
+                      <tr>
+                        <td style="font-size: 0.92rem;">{{ $index++ }}</td>
+                        <td class="text-center" style="font-size: 0.92rem;">
+                          <a href="{{ URL::to('dashboard/organizations/' . $category->organization_id . '/edit') }}">
+                            {{ $category->organization ? $category->organization->{'name_'.$l} : '-' }}
+                          </a>
+                        </td>
+                        <td class="text-center" style="font-size: 0.92rem;">{{ $category->name_en }}</td>
+                        <td class="text-center" style="font-size: 0.92rem;">{{ $category->name_ar }}</td>
+                        <td class="text-center" style="font-size: 0.92rem;">{{ $category->created_at }}</td>
+                        @if( $_user->ableToAny(['serviceCategories.show', 'serviceCategories.edit',
+                        'serviceCategories.update', 'serviceCategories.destroy'], $permissions) )
+                        <td class="text-center" style="font-size: 0.92rem;">
+                          <div class="dropdown">
+                            <button class="btn btn-label-secondary p-1 px-2" type="button"
+                              id="actionsDropdown{{ $category->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                              <i class="ti ti-dots-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="actionsDropdown{{ $category->id }}">
+                              @if( $_user->ableToAny(['serviceCategories.edit', 'serviceCategories.update'],
+                              $permissions) )
+                              <li>
+                                <a class="dropdown-item d-flex align-items-center"
+                                  href="{{ route('serviceCategories.edit', ['serviceCategory' => $category->id]) }}">
+                                  <i class="ti ti-pencil me-1"></i> {{ __('admin.Edit') }}
+                                </a>
+                              </li>
+                              @endif
+                              @if( $_user->ableTo('serviceCategories.destroy', $permissions) )
+                              <li>
+                                <button
+                                  class="dropdown-item text-danger d-flex align-items-center delete-service-action"
+                                  data-id="{{ $category->id }}"
+                                  data-url="{{ route('serviceCategories.destroy', ['serviceCategory' => $category->id]) }}">
+                                  <i class="ti ti-trash me-1"></i> {{ __('Delete') }}
+                                </button>
+                              </li>
+                              @endif
+                            </ul>
+                          </div>
+                        </td>
+                        @endif
+                      </tr>
+                      @endforeach
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>

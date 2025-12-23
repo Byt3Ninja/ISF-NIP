@@ -66,88 +66,86 @@
           </div>
         </div>
 
-        <div class="card-body">          
-          <div class="table-responsive">
-            <table class="table services-requests-table">
-              <thead class="table-light">
+        <div class="card-datatable table-responsive">
+          <table class="table services-requests-table">
+            <thead class="table-light">
+              <tr>
+                <th>#</th>
+                <th>{{ __('cycles.SenderName') }}</th>
+                <th>{{ __('cycles.Service') }}</th>
+                <th>{{ __('admin.Status') }}</th>
+                <th>{{ __('cycles.Comments') }}</th>
+                <th>{{ __('cycles.Date/Time') }}</th>
+                <th>{{ __('cycles.Actions') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @foreach ($received as $n => $rec)
+                @php
+                  $user = $rec->user?->{'first_name_' . $l} . ' ' . $rec->user?->{'last_name_' . $l};
+                @endphp
                 <tr>
-                  <th>#</th>
-                  <th>{{ __('cycles.SenderName') }}</th>
-                  <th>{{ __('cycles.Service') }}</th>
-                  <th>{{ __('admin.Status') }}</th>
-                  <th>{{ __('cycles.Comments') }}</th>
-                  <th>{{ __('cycles.Date/Time') }}</th>
-                  <th>{{ __('cycles.Actions') }}</th>
+                  <td>{{ $n + 1 }}</td>
+                  <td>
+                    @if (!empty($rec->user->company))
+                      <div class="d-flex align-items-center gap-2">
+                        <a href="/dashboard/companyProfile/{{ $rec->user->company->id }}">
+                          <img 
+                            src="/191014/{{ $rec->user->img_url ?? '/images/logo-placeholder.png' }}" 
+                            alt="avatar"
+                            class="rounded-circle border shadow-sm" 
+                            height="40" 
+                            width="40"
+                            onerror="this.onerror=null;this.src='/images/logo-placeholder.png';"  
+                          />
+                        </a>
+                        <a href="/dashboard/companyProfile/{{ $rec->user->company->id }}">
+                          <div class="media-body">
+                            <h6 class="media-heading mb-0">{{ $user }}</h6>
+                            <span class="font-small-2">{{ $rec->user->{'title_' . $l} }}
+                              @if ($rec->user->company)
+                                - {{ $rec->user->company->{'name_' . $l} }}
+                              @endif
+                            </span>
+                          </div>
+                        </a>
+                      </div>
+                    @else
+                      No Company
+                    @endif
+                  </td>
+                  <td>{{ $rec->service->{'name_' . $l} }}</td>
+                  <td>
+                    @if($rec->status == 'Pending')
+                      <span class="badge bg-label-warning">{{ __('admin.Pending') }}</span>
+                    @else
+                      <span class="badge bg-label-success">{{ __('admin.Done') }}</span>
+                    @endif
+                  </td>
+                  <td>{{ $rec->comment ?? '-' }}</td>
+                  <td>{{ $rec->date_time }}</td>
+                  <td>
+                    <button
+                      onclick="reply(
+                        {{ $rec->id }}, 
+                        '{{ addslashes($user) }}', 
+                        '{{ addslashes($rec->service->{'name_' . $l} ?? '-') }}',
+                        '{{ addslashes($rec->service->vendor_name ?? '-') }}',
+                        '{{ addslashes($rec->service->vendor_email ?? '-') }}',
+                        '{{ addslashes($rec->service->vendor_phone ?? '-') }}'
+                    );"
+                      type="button" class="btn btn-icon rounded-circle btn-label-info mr-1">
+                      <i class="ti ti-edit text-info"></i>
+                    </button>
+                    <button
+                      onclick="OpenModal({{ $rec->user_id }},'{{ $user }}','{{ $rec->service->{'name_' . $l} }}');"
+                      type="button" class="btn btn-icon rounded-circle btn-label-primary mr-1">
+                      <i class="ti ti-brand-telegram"></i></button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                @foreach ($received as $n => $rec)
-                  @php
-                    $user = $rec->user?->{'first_name_' . $l} . ' ' . $rec->user?->{'last_name_' . $l};
-                  @endphp
-                  <tr>
-                    <td>{{ $n + 1 }}</td>
-                    <td>
-                      @if (!empty($rec->user->company))
-                        <div class="d-flex align-items-center gap-2">
-                          <a href="/dashboard/companyProfile/{{ $rec->user->company->id }}">
-                            <img 
-                              src="/191014/{{ $rec->user->img_url ?? '/images/logo-placeholder.png' }}" 
-                              alt="avatar"
-                              class="rounded-circle border shadow-sm" 
-                              height="40" 
-                              width="40"
-                              onerror="this.onerror=null;this.src='/images/logo-placeholder.png';"  
-                            />
-                          </a>
-                          <a href="/dashboard/companyProfile/{{ $rec->user->company->id }}">
-                            <div class="media-body">
-                              <h6 class="media-heading mb-0">{{ $user }}</h6>
-                              <span class="font-small-2">{{ $rec->user->{'title_' . $l} }}
-                                @if ($rec->user->company)
-                                  - {{ $rec->user->company->{'name_' . $l} }}
-                                @endif
-                              </span>
-                            </div>
-                          </a>
-                        </div>
-                      @else
-                        No Company
-                      @endif
-                    </td>
-                    <td>{{ $rec->service->{'name_' . $l} }}</td>
-                    <td>
-                      @if($rec->status == 'Pending')
-                        <span class="badge bg-label-warning">{{ __('admin.Pending') }}</span>
-                      @else
-                        <span class="badge bg-label-success">{{ __('admin.Done') }}</span>
-                      @endif
-                    </td>
-                    <td>{{ $rec->comment ?? '-' }}</td>
-                    <td>{{ $rec->date_time }}</td>
-                    <td>
-                      <button
-                        onclick="reply(
-                          {{ $rec->id }}, 
-                          '{{ addslashes($user) }}', 
-                          '{{ addslashes($rec->service->{'name_' . $l} ?? '-') }}',
-                          '{{ addslashes($rec->service->vendor_name ?? '-') }}',
-                          '{{ addslashes($rec->service->vendor_email ?? '-') }}',
-                          '{{ addslashes($rec->service->vendor_phone ?? '-') }}'
-                      );"
-                        type="button" class="btn btn-icon rounded-circle btn-label-info mr-1">
-                        <i class="ti ti-edit text-info"></i>
-                      </button>
-                      <button
-                        onclick="OpenModal({{ $rec->user_id }},'{{ $user }}','{{ $rec->service->{'name_' . $l} }}');"
-                        type="button" class="btn btn-icon rounded-circle btn-label-primary mr-1">
-                        <i class="ti ti-brand-telegram"></i></button>
-                    </td>
-                  </tr>
-                @endforeach
-              </tbody>
-            </table>
-          </div>
+              @endforeach
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
