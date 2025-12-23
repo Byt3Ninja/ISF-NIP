@@ -5,6 +5,28 @@
 @section('content')
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-align-top mb-6">
+      @php
+        $tabs = [
+          ['title' => __('notification_templates.notification_templates'), 'url' => 'dashboard/admin/notification-templates', 'icon' => 'mail'],
+          ['title' => __('notification_triggers.notification_triggers'), 'url' => 'dashboard/admin/notification-triggers', 'icon' => 'mail-check'],
+        ]
+      @endphp
+      <ul class="nav nav-pills">
+        @foreach($tabs as $tab)
+          <li class="nav-item">
+            <a href="/{{ $tab['url'] }}" class="nav-link {{ Request::is($tab['url'] . '*') ? 'active' : '' }}">
+              <i class="ti ti-{{ $tab['icon'] }} me-2"></i>
+              {{ $tab['title'] }}
+            </a>
+          </li>
+        @endforeach
+      </ul>
+    </nav>
+    <!--/ Navigation Tabs -->
+
     <div class="card">
       <div class="card-header border-bottom">
         <div class="d-flex flex-wrap justify-content-between align-items-center">
