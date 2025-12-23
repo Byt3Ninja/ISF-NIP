@@ -12,14 +12,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Create Sub-Admin role
-        $roleId = DB::table('roles')->insertGetId([
-            'name' => 'Sub-Admin',
-            'default_for' => 'subadmin',
-            'guard_name' => 'web',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        // Create Sub-Admin role if not exists
+        $subAdminRole = DB::table('roles')->where('default_for', 'subadmin')->first();
+        if( $subAdminRole )
+        {
+            $roleId = $subAdminRole->id;
+            DB::table('roles')->where('id', $subAdminRole->id)->update(['name' => 'Sub-Admin']);
+        }
+        else
+        {
+            $roleId = DB::table('roles')->insertGetId([
+                'name' => 'Sub-Admin',
+                'default_for' => 'subadmin',
+                'guard_name' => 'web',
+            ]);
+        }
 
         // Copy permissions from organizationManager role
         $orgManagerRole = DB::table('roles')
