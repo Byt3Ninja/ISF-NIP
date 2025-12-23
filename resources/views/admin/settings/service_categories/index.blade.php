@@ -19,6 +19,28 @@
     </div>
     @endif
 
+    <!-- Navigation Tabs -->
+    <nav class="nav-align-top mb-6">
+      @php
+        $tabs = [
+          ['title' => __('admin.All Services'), 'url' => 'dashboard/services', 'icon' => 'arrows-move'],
+          ['title' => __('admin.Services Requests'), 'url' => 'dashboard/requests/all', 'icon' => 'ti ti-briefcase'],
+          ['title' => __('admin.Services Categories'), 'url' => 'dashboard/serviceCategories', 'icon' => 'layout-grid'],
+        ]
+      @endphp
+      <ul class="nav nav-pills">
+        @foreach($tabs as $tab)
+          <li class="nav-item">
+            <a href="/{{ $tab['url'] }}" class="nav-link {{ Request::is($tab['url'] . '*') ? 'active' : '' }}">
+              <i class="ti ti-{{ $tab['icon'] }} me-2"></i>
+              {{ $tab['title'] }}
+            </a>
+          </li>
+        @endforeach
+      </ul>
+    </nav>
+    <!--/ Navigation Tabs -->
+
     <div class="content-body">
       <section id="basic-datatable">
         <?php $index = 1; ?>

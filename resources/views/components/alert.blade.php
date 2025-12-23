@@ -1,4 +1,4 @@
-<div class="alert alert-{{ $type }} alert-dismissible" role="alert">
+<div class="alert alert-{{ $type }} alert-dismissible mb-6" role="alert">
   {{ $message }} {{ Session::forget('msg') }}
   <button 
     type="button" 

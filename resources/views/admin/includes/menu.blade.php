@@ -489,58 +489,66 @@
       </li>
     @endif
 
-      @if( !$_user->hasAnyRole('Mentor|Judger') )
-        <li
-          class="{{ Request::is('*services*', '*serviceCategories*', 'dashboard/requests/all', 'dashboard/services_providers*') ? 'sidebar-group-active open' : '' }} menu-item">
-          <a class="menu-link menu-toggle">
-            <i class="menu-icon tf-icons ti ti-arrows-move"></i>
-            <div>{{ __('admin.Services') }}</div>
-          </a>
-          <ul class="menu-sub">
-            @if( $_user->ableTo('services_providers.index', $permissions) )
-            <li class="{{ Request::is('dashboard/services_providers*') ? 'active' : '' }} menu-item">
-              <a class="menu-link" href="{{ route('services_providers.index') }}">
-                <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-                <span class="menu-item">{{ __('admin.ServiceProviders') }}</span>
-              </a>
-            </li>
-            @endif
-            @if( $_user->ableToAny(['service_requests.list_all', 'service_requests.list_archived'], $permissions) )
-            <li
-              class="{{ Request::is('dashboard/requests/all', 'dashboard/requests/old') ? 'active' : '' }} menu-item">
-              <a class="menu-link" href="{{ route('service_requests.list_all') }}">
-                <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-                <span class="menu-item">{{ __('admin.Requests') }}</span>
-              </a>
-            </li>
-            @endif
-            @if( $_user->ableTo('services.create', $permissions) )
-            <li class="{{ Request::is('dashboard/services/create') ? 'active' : '' }} menu-item">
-              <a class="menu-link" href="{{ route('services.create') }}">
-                <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-                <span class="menu-item">{{ __('admin.Add Service') }}</span>
-              </a>
-            </li>
-            @endif
-            @if( $_user->ableTo('services.index', $permissions) )
-            <li class="{{ Request::is('dashboard/services', 'dashboard/services/*/edit') ? 'active' : '' }} menu-item">
-              <a class="menu-link" href="{{ route('services.index') }}">
-                <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-                <span class="menu-item">{{ __('admin.All Services') }}</span>
-              </a>
-            </li>
-            @endif
-            @if( $_user->ableTo('serviceCategories.index', $permissions) )
-            <li class="{{ Request::is('dashboard/serviceCategories*') ? 'active' : '' }} menu-item">
-              <a class="menu-link" href="{{ route('serviceCategories.index') }}">
-                <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-                <span class="menu-item">{{ __('admin.Services Categories') }}</span>
-              </a>
-            </li>
-            @endif
-          </ul>
-        </li>
-      @endif
+    @if( !$_user->hasAnyRole('Mentor|Judger') )
+      <li
+        class="{{ Request::is('*services*', '*serviceCategories*', 'dashboard/requests/all') ? 'active' : '' }} menu-item">
+        <a href="/dashboard/services" class="menu-link">
+          <i class="menu-icon tf-icons ti ti-arrows-move"></i>
+          <div>{{ __('admin.Services') }}</div>
+        </a>
+      </li>
+      
+      {{-- <li
+        class="{{ Request::is('*services*', '*serviceCategories*', 'dashboard/requests/all', 'dashboard/services_providers*') ? 'sidebar-group-active open' : '' }} menu-item">
+        <a class="menu-link menu-toggle">
+          <i class="menu-icon tf-icons ti ti-arrows-move"></i>
+          <div>{{ __('admin.Services') }}</div>
+        </a>
+        <ul class="menu-sub">
+          @if( $_user->ableTo('services_providers.index', $permissions) )
+          <li class="{{ Request::is('dashboard/services_providers*') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="{{ route('services_providers.index') }}">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item">{{ __('admin.ServiceProviders') }}</span>
+            </a>
+          </li>
+          @endif
+          @if( $_user->ableToAny(['service_requests.list_all', 'service_requests.list_archived'], $permissions) )
+          <li
+            class="{{ Request::is('dashboard/requests/all', 'dashboard/requests/old') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="{{ route('service_requests.list_all') }}">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item">{{ __('admin.Requests') }}</span>
+            </a>
+          </li>
+          @endif
+          @if( $_user->ableTo('services.create', $permissions) )
+          <li class="{{ Request::is('dashboard/services/create') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="{{ route('services.create') }}">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item">{{ __('admin.Add Service') }}</span>
+            </a>
+          </li>
+          @endif
+          @if( $_user->ableTo('services.index', $permissions) )
+          <li class="{{ Request::is('dashboard/services', 'dashboard/services/*/edit') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="{{ route('services.index') }}">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item">{{ __('admin.All Services') }}</span>
+            </a>
+          </li>
+          @endif
+          @if( $_user->ableTo('serviceCategories.index', $permissions) )
+          <li class="{{ Request::is('dashboard/serviceCategories*') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="{{ route('serviceCategories.index') }}">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item">{{ __('admin.Services Categories') }}</span>
+            </a>
+          </li>
+          @endif
+        </ul>
+      </li> --}}
+    @endif
     
     @if ($_user->hasAnyRole('organizationManager|Admin'))
       <li class="{{ Request::is('*users*', 'dashboard/judger', '*roles', '*activities*', '*audit-logs*') ? 'sidebar-group-active open' : '' }} menu-item">

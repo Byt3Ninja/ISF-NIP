@@ -12,7 +12,7 @@
     </div>
     @endif
     @if (session()->has('message2'))
-    <div class="alert alert-danger alert-dismissible mb-2" role="alert">
+    <div class="alert alert-danger alert-dismissible mb-6" role="alert">
       {{ __('admin.' . session()->get('message2')) }}
       <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
