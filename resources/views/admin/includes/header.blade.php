@@ -237,6 +237,16 @@
         'subItems' => []
     ],
 
+    // Organization Types (Admin)
+    [
+        'label' => $l == 'en' ? 'Organization Types' : 'أنواع المؤسسات',
+        'icon' => 'ti ti-category',
+        'route' => 'organization-types.index',
+        'permission' => null,
+        'isVisible' => '$_user->hasRole("Admin")',
+        'subItems' => []
+    ],
+
     // Organizations (Admin)
     [
         'label' => $l == 'en' ? 'Manage Organizations' : 'إدارة المنظمات',

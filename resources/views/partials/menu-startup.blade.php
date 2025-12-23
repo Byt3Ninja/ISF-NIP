@@ -8,7 +8,7 @@
   // Sidebar avatar
   $imageSrc =
     $_user->organization?->img_url
-      ? asset($_user->organization->img_url)
+      ? $_user->organization->imageUrl
       : ($setting->Logo
         ? "/images/logo/$setting->Logo"
         : "/images/background/logo.png");

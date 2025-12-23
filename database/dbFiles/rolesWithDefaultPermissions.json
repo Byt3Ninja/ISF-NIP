@@ -1880,6 +1880,135 @@
         ]
     },
     {
+        "name": "Organization Wizard",
+        "description": null,
+        "permissions": [
+            {
+                "name": "organization.wizard.create",
+                "description": "Create Organization Wizard",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "organization.wizard.store.step1",
+                "description": "Save Organization Step 1",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "organization.wizard.edit",
+                "description": "Edit Organization Wizard",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "organization.wizard.update.step1",
+                "description": "Update Organization Step 1",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "organization.wizard.draft",
+                "description": "Save Organization as Draft",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "organization.wizard.draft.update",
+                "description": "Update Organization Draft",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Organization Types",
+        "description": null,
+        "permissions": [
+            {
+                "name": "organization-types.index",
+                "description": "List Organization Types",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "organization-types.create",
+                "description": "Create Organization Types Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "organization-types.store",
+                "description": "Save New Organization Types",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "organization-types.show",
+                "description": "View Organization Types Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "organization-types.edit",
+                "description": "Edit Organization Types Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "organization-types.update",
+                "description": "Save Organization Types Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "organization-types.destroy",
+                "description": "Delete Organization Types",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
         "name": "Assessments",
         "description": null,
         "permissions": [
