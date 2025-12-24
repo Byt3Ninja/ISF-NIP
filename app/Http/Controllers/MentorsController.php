@@ -344,6 +344,7 @@ class MentorsController extends Controller
 
 	public function addWait(Request $request)
 	{
+		
 		$request->validate([
 			'notes' => 'nullable|string|max:255',
 		]);
@@ -430,6 +431,7 @@ class MentorsController extends Controller
 					'organization_id' => $request->organization_id,
 					'cycle_id' => $request->cycle_id,
 					'fileurl' => $fileName,
+					'session_type' => $request->session_type
 				]);
 
 				$successCount++;
@@ -514,7 +516,7 @@ class MentorsController extends Controller
 							'organization_id' => $request->organization_id,
 							'cycle_id' => $request->cycle_id,
 							'fileurl' => $fileName,
-							'session_type' => $schedules[0]->session_type
+							'session_type' => $request->session_type
 						]);
 
 						$mentor = User::find($request->mentorid);
@@ -532,7 +534,7 @@ class MentorsController extends Controller
 							'organization_id' => $request->organization_id,
 							'cycle_id' => $request->cycle_id,
 							'approved' => $approved,
-							'session_type' => $schedules[0]->session_type
+							'session_type' => $request->session_type
 						]);
 					}
 					if (!in_array(env('APP_ENV', 'local'), ['local'])) {
