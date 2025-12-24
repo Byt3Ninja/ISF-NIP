@@ -10,127 +10,94 @@
         <span class="d-none d-md-inline ms-2">{{ __('admin.screening.add_panel') }}</span>
       </button>
     </div>
+
+    <form method="POST" action="#" novalidate>
+    @csrf
+
     @php
-      $judges = [
-        ['value' => 'John Doe'],
-        ['value' => 'Jane Smith'],
-        ['value' => 'Michael Johnson'],
-        ['value' => 'Emily Davis'],
-        ['value' => 'David Wilson'],
-        ['value' => 'Sarah Brown'],
-        ['value' => 'Robert Miller'],
-        ['value' => 'Lisa Garcia']
-      ];
-
-      $companies = [
-        ['value' => 'Google'],
-        ['value' => 'Microsoft'],
-        ['value' => 'Apple'],
-        ['value' => 'Amazon'],
-        ['value' => 'Facebook'],
-        ['value' => 'Tesla'],
-        ['value' => 'Netflix'],
-        ['value' => 'Uber']
-      ];
-
+      $judges = ['John Doe','Jane Smith','Michael Johnson','Emily Davis','David Wilson','Sarah Brown','Robert Miller','Lisa Garcia'];
+      $companies = ['Google','Microsoft','Apple','Amazon','Facebook','Tesla','Netflix','Uber'];
       $judgingPanels = [
         ['judges' => ['John Doe', 'Jane Smith'], 'companies' => ['Google'], 'session' => ['date' => '2025-12-25', 'start_time' => '10:00', 'end_time' => '11:00', 'meeting_link' => 'https://meet.google.com/abc']],
         ['judges' => ['Michael Johnson'], 'companies' => ['Microsoft', 'Apple'], 'session' => ['date' => '2025-12-26', 'start_time' => '14:00', 'end_time' => '15:30', 'meeting_link' => 'https://zoom.us/j/123']],
         ['judges' => ['Emily Davis', 'David Wilson'], 'companies' => ['Amazon', 'Facebook']],
-        ['judges' => ['Sarah Brown'], 'companies' => ['Tesla'], 'session' => ['date' => '2025-12-27', 'start_time' => '09:00', 'end_time' => '10:00', 'meeting_link' => 'https://teams.microsoft.com/l/meetup-join/xyz']],
-        ['judges' => ['Robert Miller', 'Lisa Garcia'], 'companies' => ['Netflix', 'Uber']]
       ];
     @endphp
+
     <div class="accordion" id="panels-container">
       @foreach($judgingPanels as $index => $panel)
         <div class="accordion-item border">
           <h2 class="accordion-header d-flex align-items-center py-3">
-            <button
-              class="accordion-button flex-grow-1 {{ $index === 0 ? '' : 'collapsed' }}"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#panel-{{ $index + 1 }}"
-              aria-expanded="{{ $index === 0 ? 'true' : 'false' }}"
-            >
+            <button class="accordion-button flex-grow-1 {{ $index === 0 ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#panel-{{ $index + 1 }}">
               <i class="ti ti-user-check me-2"></i>
               {{ __('admin.screening.panel') }} #{{ $index + 1 }}
             </button>
             @if($index > 0)
-              <button
-                type="button"
-                class="btn btn-icon btn-sm btn-outline-danger ms-2 me-4 remove-panel"
-              >
+              <button type="button" class="btn btn-icon btn-sm btn-outline-danger ms-2 me-4 remove-panel">
                 <i class="ti ti-trash"></i>
               </button>
             @endif
           </h2>
 
-          <div
-            id="panel-{{ $index + 1 }}"
-            class="accordion-collapse collapse {{ $index === 0 ? 'show' : '' }}"
-            data-bs-parent="#panels-container"
-          >
+          <div id="panel-{{ $index + 1 }}" class="accordion-collapse collapse {{ $index === 0 ? 'show' : '' }}">
             <div class="accordion-body mt-3">
               <div class="row">
+                <!-- Judges -->
                 <div class="col-md-6 mb-3">
-                  <label class="form-label fw-semibold">{{ __('admin.Judgers') }}</label>
-                  <input
-                    type="text"
-                    class="form-control tagify-judges"
-                    placeholder="Select judges (type to search)"
-                    value="{{ implode(',', $panel['judges']) }}"
-                  />
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label class="form-label fw-semibold mb-0">{{ __('admin.Judgers') }}</label>
+                    <a href="javascript:void(0);" class="select-all-toggle small fw-medium">{{ __('admin.select_all') }}</a>
+                  </div>
+                  <select class="form-select select2" multiple data-placeholder="{{ __('cycles.Select Judges') }}">
+                    @foreach($judges as $judge)
+                      <option value="{{ $judge }}" @selected(in_array($judge, $panel['judges']))>{{ $judge }}</option>
+                    @endforeach
+                  </select>
                 </div>
+
+                <!-- Companies -->
                 <div class="col-md-6 mb-3">
-                  <label class="form-label fw-semibold">{{ __('admin.Startups') }}</label>
-                  <input
-                    type="text"
-                    class="form-control tagify-companies"
-                    placeholder="Select companies assigned to this panel"
-                    value="{{ implode(',', $panel['companies']) }}"
-                  />
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label class="form-label fw-semibold mb-0">{{ __('admin.Startups') }}</label>
+                    <a href="javascript:void(0);" class="select-all-toggle small fw-medium">{{ __('admin.select_all') }}</a>
+                  </div>
+                  <select class="form-select select2" multiple data-placeholder="{{ __('admin.select_startups') }}">
+                    @foreach($companies as $company)
+                      <option value="{{ $company }}" @selected(in_array($company, $panel['companies']))>{{ $company }}</option>
+                    @endforeach
+                  </select>
                 </div>
               </div>
 
               <hr class="my-4">
 
-              <!-- Session Schedule Section -->
-              <div class="row mb-3">
-                <div class="col-12">
-                  <div class="d-flex align-items-center mb-3">
-                    <div class="form-check form-switch me-3">
-                      <input
-                        class="form-check-input session-toggle"
-                        type="checkbox"
-                        id="session-toggle-{{ $index + 1 }}"
-                        {{ isset($panel['session']) || str_contains($_SERVER['REQUEST_URI'], 'final') ? 'checked' : '' }}
-                      />
-                      <label class="form-check-label fw-semibold" for="session-toggle-{{ $index + 1 }}">
-                        {{ __('admin.screening.schedule_session') }}
-                      </label>
-                    </div>
+              <!-- Session -->
+              <div class="form-check form-switch mb-3">
+                <input class="form-check-input session-toggle" type="checkbox" id="session-toggle-{{ $index + 1 }}" {{ isset($panel['session']) ? 'checked' : '' }}>
+                <label class="form-check-label fw-semibold">{{ __('admin.screening.schedule_session') }}</label>
+              </div>
+
+              <div class="session-inputs border rounded p-4" style="display: {{ isset($panel['session']) ? 'block' : 'none' }}">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">{{ __('admin.Session_date') }}</label>
+                    <input type="text" class="form-control session-date" name="panels[{{ $index }}][session_date]" value="{{ $panel['session']['date'] ?? '' }}" placeholder="YYYY-MM-DD">
+                    <div class="invalid-feedback error-session_date"></div>
                   </div>
-                  <div class="session-inputs border rounded p-4" id="session-inputs-{{ $index + 1 }}" style="display: {{ isset($panel['session']) ? 'block' : 'none' }};">
-                    <div class="row mb-3">
-                      <div class="col-md-6">
-                        <label class="form-label fw-semibold">{{ __('admin.Session_date') }}</label>
-                        <input type="text" class="form-control session-date" name="panels[{{ $index }}][session_date]" value="{{ $panel['session']['date'] ?? '' }}">
-                      </div>
-                      <div class="col-md-6">
-                        <label class="form-label fw-semibold">{{ __('admin.Meeting Link') }}</label>
-                        <input type="url" class="form-control session-meeting-link" name="panels[{{ $index }}][meeting_link]" placeholder="https://" value="{{ $panel['session']['meeting_link'] ?? '' }}">
-                      </div>
-                    </div>
-                    <div class="row">
-                      <div class="col-md-6 mb-3">
-                        <label class="form-label fw-semibold">{{ __('admin.Start Time') }}</label>
-                        <input type="text" class="form-control session-start-time" name="panels[{{ $index }}][start_time]" value="{{ $panel['session']['start_time'] ?? '' }}">
-                      </div>
-                      <div class="col-md-6 mb-3">
-                        <label class="form-label fw-semibold">{{ __('admin.End Time') }}</label>
-                        <input type="text" class="form-control session-end-time" name="panels[{{ $index }}][end_time]" value="{{ $panel['session']['end_time'] ?? '' }}">
-                      </div>
-                    </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">{{ __('admin.Meeting Link') }}</label>
+                    <input type="url" class="form-control" name="panels[{{ $index }}][meeting_link]" value="{{ $panel['session']['meeting_link'] ?? '' }}" placeholder="https://meet.google.com/...">
+                    <div class="invalid-feedback error-meeting_link"></div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">{{ __('admin.Start Time') }}</label>
+                    <input type="text" class="form-control session-time" name="panels[{{ $index }}][start_time]" value="{{ $panel['session']['start_time'] ?? '' }}" placeholder="HH:MM">
+                    <div class="invalid-feedback error-start_time"></div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">{{ __('admin.End Time') }}</label>
+                    <input type="text" class="form-control session-time" name="panels[{{ $index }}][end_time]" value="{{ $panel['session']['end_time'] ?? '' }}" placeholder="HH:MM">
+                    <div class="invalid-feedback error-end_time"></div>
                   </div>
                 </div>
               </div>
@@ -139,160 +106,164 @@
         </div>
       @endforeach
     </div>
+
+    <div class="d-flex justify-content-end mt-4">
+      <button type="submit" class="btn btn-primary">{{ __('admin.submit') }}</button>
+    </div>
+    </form>
   </div>
 </div>
 
 @push('scripts')
 <script>
-  let panelIndex = 5;
+const isValidUrl = (str) => {
+  try { return new URL(str).protocol.startsWith('http'); }
+  catch { return false; }
+};
 
-  const allJudges = @json($judges);
-  const allCompanies = @json($companies);
+const initPlugins = (el) => {
+  $(el).find('.session-date').flatpickr({ dateFormat: 'Y-m-d', minDate: 'today' });
+  $(el).find('.session-time').flatpickr({ enableTime: true, noCalendar: true, dateFormat: 'H:i' });
+  $(el).find('.select2').each(function() {
+    $(this).select2({ placeholder: $(this).data('placeholder'), allowClear: true, width: '100%', dropdownParent: $(this).parent() });
+  });
+};
 
-  function initTagify(container) {
-    $(container).find('.tagify-judges').each(function() {
-      if (!this.tagify) {
-        new Tagify(this, {
-          whitelist: allJudges,
-          enforceWhitelist: true,
-          dropdown: {
-            enabled: 0,
-            closeOnSelect: false
-          }
-        });
-      }
+const updateSelectAllText = ($select) => {
+  const $link = $select.closest('.col-md-6').find('.select-all-toggle');
+  const total = $select.find('option').length;
+  const selected = ($select.val() || []).length;
+  $link.text(selected === total && total > 0 ? '{{ __("admin.deselect_all") }}' : '{{ __("admin.select_all") }}');
+};
+
+const renumberPanels = () => {
+  $('.accordion-item').each((i, el) => {
+    const idx = i + 1;
+    const $panel = $(el);
+    
+    $panel.find('.accordion-button').attr('data-bs-target', `#panel-${idx}`).html(`<i class="ti ti-user-check me-2"></i> @lang('admin.screening.panel') #${idx}`);
+    $panel.find('.accordion-collapse').attr('id', `panel-${idx}`);
+    $panel.find('.session-toggle').attr('id', `session-toggle-${idx}`);
+    $panel.find('input[name^="panels["]').each(function() {
+      $(this).attr('name', $(this).attr('name').replace(/panels\[\d+\]/, `panels[${i}]`));
     });
+  });
+};
 
-    $(container).find('.tagify-companies').each(function() {
-      if (!this.tagify) {
-        new Tagify(this, {
-          whitelist: allCompanies,
-          enforceWhitelist: true,
-          dropdown: {
-            enabled: 0,
-            closeOnSelect: false
-          }
-        });
-      }
-    });
+initPlugins(document);
+
+$(document).on('click', '.select-all-toggle', function() {
+  const $select = $(this).closest('.col-md-6').find('select');
+  const allOpts = $select.find('option').map((_, el) => $(el).val()).get();
+  const curr = $select.val() || [];
+  $select.val(curr.length === allOpts.length ? null : allOpts).trigger('change');
+});
+
+$(document).on('change', '.select2', function() { updateSelectAllText($(this)); });
+
+$('#addPanelBtn').on('click', () => {
+  const $clone = $('.accordion-item').first().clone();
+  const idx = $('.accordion-item').length + 1;
+  
+  $clone.find('.select2-container').remove();
+  $clone.find('.select2').removeClass('select2-hidden-accessible');
+  $clone.find('*').removeAttr('data-select2-id');
+  $clone.find('select, input[type="text"], input[type="url"]').val('');
+  $clone.find('.select-all-toggle').text('{{ __("admin.select_all") }}');
+  
+  $clone.find('.accordion-button').addClass('collapsed').attr('data-bs-target', `#panel-${idx}`).html(`<i class="ti ti-user-check me-2"></i> @lang('admin.screening.panel') #${idx}`);
+  $clone.find('.accordion-collapse').removeClass('show').attr('id', `panel-${idx}`);
+  $clone.find('.session-toggle').prop('checked', false).attr('id', `session-toggle-${idx}`);
+  $clone.find('.session-inputs').hide();
+  
+  if (!$clone.find('.remove-panel').length) {
+    $clone.find('.accordion-header').append('<button type="button" class="btn btn-icon btn-sm btn-outline-danger ms-2 me-4 remove-panel"><i class="ti ti-trash"></i></button>');
   }
+  
+  $('#panels-container').append($clone);
+  renumberPanels();
+  initPlugins($clone);
+});
 
-  function initFlatpickr(container) {
-    $(container).find('.session-date').each(function() {
-      if (!$(this).data('flatpickr')) {
-        flatpickr(this, { dateFormat: 'Y-m-d' });
+$(document).on('click', '.remove-panel', async function() {
+  const result = await Swal.fire({
+    icon: 'warning', title: '@lang("admin.SureDelete")', showCancelButton: true,
+    confirmButtonText: '@lang("admin.DYes")', cancelButtonText: '@lang("Cancel")',
+    customClass: { confirmButton: 'btn btn-danger me-2', cancelButton: 'btn btn-label-secondary' },
+    buttonsStyling: false
+  });
+  if (result.isConfirmed) { $(this).closest('.accordion-item').remove(); renumberPanels(); }
+});
+
+$(document).on('change', '.session-toggle', function() {
+  $(this).closest('.accordion-body').find('.session-inputs').toggle(this.checked);
+});
+
+$(document).on('submit', 'form', function(e) {
+  e.preventDefault();
+  let valid = true;
+  
+  $('.session-inputs input').removeClass('is-invalid');
+  $('.invalid-feedback').text('');
+  
+  $('.accordion-item').each(function() {
+    const $p = $(this);
+    if (!$p.find('.session-toggle').is(':checked')) return;
+    
+    const fields = {
+      session_date: { msg: '{{ __('admin.date_required') }}' },
+      meeting_link: { msg: '{{ __('admin.meeting_link_required') }}', url: true },
+      start_time: { msg: '{{ __('admin.start_time_required') }}' },
+      end_time: { msg: '{{ __('admin.end_time_required') }}' }
+    };
+    
+    $.each(fields, (name, cfg) => {
+      const $inp = $p.find(`input[name*="${name}"]`);
+      const val = $inp.val().trim();
+      
+      if (!val) {
+        $inp.addClass('is-invalid');
+        $p.find(`.error-${name}`).text(cfg.msg);
+        valid = false;
+      } else if (cfg.url && !isValidUrl(val)) {
+        $inp.addClass('is-invalid');
+        $p.find(`.error-${name}`).text('{{ __('admin.meeting_link_url_required') }}');
+        valid = false;
       }
     });
-
-    $(container).find('.session-start-time, .session-end-time').each(function() {
-      if (!$(this).data('flatpickr')) {
-        flatpickr(this, { enableTime: true, noCalendar: true, dateFormat: 'H:i' });
-      }
-    });
+    
+    const start = $p.find('input[name*="start_time"]').val();
+    const end = $p.find('input[name*="end_time"]').val();
+    if (start && end && start >= end) {
+      $p.find('input[name*="end_time"]').addClass('is-invalid');
+      $p.find('.error-end_time').text('{{ __('admin.end_time_must_be_after_start_time') }}');
+      valid = false;
+    }
+  });
+  
+  if (!valid) {
+    const $err = $('.is-invalid').first();
+    const $collapse = $err.closest('.accordion-collapse');
+    if (!$collapse.hasClass('show')) $collapse.collapse('show');
+    $('html, body').animate({ scrollTop: $err.offset().top - 100 }, 300);
+  } else {
+    fetch(window.location.href, {
+      method: 'POST', body: new FormData(this),
+      headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+    })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) releaseSuccessAlert({ title: '{{ __('admin.success') }}', message: d.message });
+      else releaseFailureAlert({ title: '{{ __('admin.error') }}', message: d.message || '{{ __('admin.unexpected_error') }}' });
+    })
+    .catch(e => releaseFailureAlert({ title: '{{ __('admin.error') }}', message: e?.message || '{{ __('admin.unexpected_error') }}' }));
   }
+});
 
-  // Initialize first panel
-  initTagify(document);
-  initFlatpickr(document);
-
-  // Handle session toggle
-  $(document).on('change', '.session-toggle', function() {
-    const panelId = $(this).attr('id').split('-').pop();
-    const inputsDiv = $(`#session-inputs-${panelId}`);
-    if ($(this).is(':checked')) {
-      inputsDiv.show();
-    } else {
-      inputsDiv.hide();
-    }
-  });
-
-  $('#addPanelBtn').on('click', function() {
-    panelIndex++;
-
-    const accordion = $('#panels-container');
-    const panelId = `panel-${panelIndex}`;
-
-    // Clone the first panel
-    const originalPanel = $('.accordion-item').first();
-    const clonedPanel = originalPanel.clone(true);
-
-    // Update the cloned panel
-    clonedPanel.find('.accordion-button').removeClass('show').addClass('collapsed').attr('data-bs-target', `#${panelId}`).html(`<i class="ti ti-user-check me-2"></i> Panel #${panelIndex}`);
-    clonedPanel.find('.accordion-collapse').removeClass('show').attr('id', panelId);
-
-    // Update session toggle and inputs IDs
-    clonedPanel.find('.session-toggle').attr('id', `session-toggle-${panelIndex}`);
-    clonedPanel.find('.session-inputs').attr('id', `session-inputs-${panelIndex}`);
-
-    // Update input names for session fields
-    clonedPanel.find('[name*="panels["]').each(function() {
-      const name = $(this).attr('name');
-      const newName = name.replace(/panels\[\d+\]/, `panels[${panelIndex - 1}]`);
-      $(this).attr('name', newName);
-    });
-
-    clonedPanel.find('.accordion-body input').val(''); // Clear inputs
-    clonedPanel.find('.session-toggle').prop('checked', false); // Uncheck toggle
-    clonedPanel.find('.session-inputs').hide(); // Hide session inputs
-
-    // Add remove button to cloned panels
-    const removeBtn = $('<button type="button" class="btn btn-sm btn-outline-danger ms-2 me-4 remove-panel"><i class="ti ti-trash"></i></button>');
-    clonedPanel.find('.accordion-header').append(removeBtn);
-
-    // Destroy existing Tagify instances in clone to reinitialize
-    clonedPanel.find('input').each(function() {
-      if (this.tagify) {
-        this.tagify.destroy();
-      }
-    });
-
-    accordion.append(clonedPanel);
-    initTagify(clonedPanel[0]);
-    initFlatpickr(clonedPanel[0]);
-  });
-
-  $(document).on('click', '.remove-panel', async function() {
-    const item = $(this).closest('.accordion-item');
-    const inputs = item.find('input');
-    let hasData = false;
-    inputs.each(function() {
-      if ($(this).val().trim() !== '') {
-        hasData = true;
-        return false; // break
-      }
-    });
-
-    if (hasData) {
-      const result = await Swal.fire({
-        title: '@lang("admin.SureDelete")',
-        text: '@lang("admin.Recover")',
-        icon: 'warning',
-        showCancelButton: true,
-        customClass: {
-          confirmButton: 'btn btn-danger me-2',
-          cancelButton: 'btn btn-label-secondary',
-        },
-        buttonsStyling: false,
-        cancelButtonText: '@lang("admin.Cancel")',
-        confirmButtonText: '@lang("admin.DYes")',
-      });
-      if (!result.isConfirmed) {
-        return;
-      }
-    }
-
-    inputs.each(function() {
-      if (this.tagify) {
-        this.tagify.destroy();
-      }
-    });
-
-    item.remove();
-
-    // Reset index if only first panel left
-    if ($('.accordion-item').length === 1) {
-      panelIndex = 1;
-    }
-  });
+$(document).on('input', '.session-inputs input', function() {
+  $(this).removeClass('is-invalid');
+  const field = $(this).attr('name').match(/\[([^\]]+)\]$/)[1];
+  $(this).closest('.accordion-item').find(`.error-${field}`).text('');
+});
 </script>
 @endpush

@@ -46,8 +46,8 @@ $pills = [
        <!-- Screening Step Details Card -->
       <div class="card mb-6">
         <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center gap-2">
+          <div class="d-flex flex-wrap justify-content-between align-items-lg-center">
+            <div class="d-flex align-items-center gap-2 mb-4 mb-lg-0">
               <!-- Back To List -->
               <a 
                 class="btn btn-icon btn-sm btn-text-secondary waves-effect waves-light rounded-pill" 
