@@ -286,6 +286,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
         Route::post('/create', 'OrganizationWizardController@storeStep1')->name('store.step1');
         Route::get('/{id}/edit', 'OrganizationWizardController@edit')->name('edit');
         Route::put('/{id}/step1', 'OrganizationWizardController@updateStep1')->name('update.step1');
+        Route::put('/{id}/step2', 'OrganizationWizardController@updateStep2')->name('update.step2');
         Route::post('/draft', 'OrganizationWizardController@saveDraft')->name('draft');
         Route::put('/{id}/draft', 'OrganizationWizardController@saveDraft')->name('draft.update');
         Route::post('/{id}/publish', 'OrganizationWizardController@publish')->name('publish');
