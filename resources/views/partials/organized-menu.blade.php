@@ -97,8 +97,8 @@ if ($currentRoute) {
   }
 }
 
-// Special case: Make screening active if URL contains 'final'
-if (strpos(request()->getRequestUri(), 'final') !== false) {
+// Special case: Make screening active if URL contains 'final' or 'screening'
+if (strpos(request()->getRequestUri(), 'final') !== false || strpos(request()->getRequestUri(), 'screening') !== false) {
   $activeGroup = 'programs';
   $activeItem = 'screening.index';
 }
