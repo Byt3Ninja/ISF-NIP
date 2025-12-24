@@ -2810,7 +2810,7 @@ return [
 
 	'mandatory' => 'اجباري',
 	'optional' => 'اختياري',
-	'start_survey' => 'ابدء بالاستبيان',
+	'start_survey' => 'ابدء الاستبيان',
 	'complete_survey' => 'اكمل الاستبيان',
 	'view_survey' => 'عرض الاستبيان',
 	'all_surveys' => 'جميع الاستبيانات',
