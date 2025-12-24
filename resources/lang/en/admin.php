@@ -2614,4 +2614,9 @@ return [
 	'last_updated' => 'Last Updated',
 	'select_category' => 'Select Category',
 	'serviceProvider' => 'Service Provider',
+	'created_by' => 'Created By',
+	'role_admin' => 'Admin',
+	'role_organization_manager' => 'Organization Manager',
+	'role_mentor' => 'Mentor',
 ];
+

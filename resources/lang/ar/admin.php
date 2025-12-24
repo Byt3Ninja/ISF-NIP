@@ -2667,3 +2667,7 @@ return [
 	'select_category' => 'حدد الفئة',
 	'serviceProvider' => 'مقدم خدمة',
 ];
+    'created_by' => 'أنشئت بواسطة',
+    'role_admin' => 'مسؤول',
+    'role_organization_manager' => 'مدير المنظمة',
+    'role_mentor' => 'مرشد',

@@ -8191,5 +8191,37 @@
                 ]
             }
         ]
+    },
+    {
+        "name": "Tasks Management",
+        "description": "Create new task",
+        "permissions": [
+            {
+                "name": "tasks.store",
+                "description": "Create new task",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Tasks Management",
+        "description": "Edit task",
+        "permissions": [
+            {
+                "name": "tasks.update",
+                "description": "Edit task",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }
+        ]
     }
 ]
