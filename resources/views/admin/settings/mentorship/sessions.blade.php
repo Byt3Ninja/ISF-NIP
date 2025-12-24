@@ -166,11 +166,15 @@
                             } elseif ($session->session_type == 'Offline'){
                               $badgeColor = 'warning';
                               $badgeIcon = 'map';
+                            }else{
+                              $badgeColor = 'success';
+                              $badgeIcon = 'screen-share';
                             }
                           @endphp
+                          
                           <small class="badge bg-label-{{ $badgeColor }}">
                             <i class="ti ti-{{ $badgeIcon }} ti-16px me-1"></i>
-                            {{ $session->session_type ?? __('admin.All') }}
+                            {{ $session->session_type ?? __('admin.Online') }}
                           </small>
                         </td>
                         <td style="width: 80px;">
