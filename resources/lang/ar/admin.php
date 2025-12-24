@@ -2671,6 +2671,10 @@ return [
 	'last_updated' => 'اخر تحديث',
 	'select_category' => 'حدد الفئة',
 	'serviceProvider' => 'مقدم خدمة',
+    'created_by' => 'أنشئت بواسطة',
+    'role_admin' => 'مسؤول',
+    'role_organization_manager' => 'مدير المنظمة',
+    'role_mentor' => 'مرشد',
 	'initial_screening' => 'التقييم الابتدائي',
 	'assigned_startups' => 'الشركات المعينة',
 	'no_startups_assigned' => 'لا شركات معينة',
@@ -2794,7 +2798,3 @@ return [
 	'Organization Types' => 'أنواع المؤسسات',
 	'Create with Wizard' => 'إنشاء بالمعالج',
 ];
-    'created_by' => 'أنشئت بواسطة',
-    'role_admin' => 'مسؤول',
-    'role_organization_manager' => 'مدير المنظمة',
-    'role_mentor' => 'مرشد',
