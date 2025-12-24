@@ -255,10 +255,11 @@ class SlotController extends Controller
 			}
 			$dayName = Carbon::parse($validated['date'])->format('l');
 			// Create slot
+			
 			$slotData = [
 					'user_id' => auth()->id(),
 					'type' => $validated['type'],
-					'session_type' => $validated['session_type'],
+					'session_type' => $validated['session_type'] == 'Both' ? 'Online' : 'Offline',
 					'tfrom' => $validated['tfrom'],
 					'tto' => $validated['tto'],
 					'days' => $validated['type'] === 'Weekly' ? $validated['days'] : $dayName,
@@ -266,6 +267,19 @@ class SlotController extends Controller
 			];
 
 			$schedule = Schedule::create($slotData);
+			if($validated['session_type'] == 'Both'){
+				$slotData = [
+					'user_id' => auth()->id(),
+					'type' => $validated['type'],
+					'session_type' => 'Offline',
+					'tfrom' => $validated['tfrom'],
+					'tto' => $validated['tto'],
+					'days' => $validated['type'] === 'Weekly' ? $validated['days'] : $dayName,
+					'date' => $validated['type'] !== 'Weekly' ? $validated['date'] : null,
+			];
+
+			$schedule = Schedule::create($slotData);
+			}
 
 			return response()->json([
 					'success' => true,
