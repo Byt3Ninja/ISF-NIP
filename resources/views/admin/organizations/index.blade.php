@@ -98,7 +98,7 @@
               </div>
               <div class="col-12 col-lg-4 mt-3 mt-lg-0">
                 <div class="w-100 h-100 d-flex justify-content-lg-end justify-content-center align-items-center gap-2">
-                  @if ($_user->ableTo('organizations.create', $permissions))
+                  @if ($_user->ableToAny(['organization.wizard.create', 'organization.wizard.store.step1'], $permissions))
                     <a href="{{ route('organization.wizard.create') }}" class="btn btn-outline-primary">
                       <i class="ti ti-wand me-2"></i> {{ __('admin.Create with Wizard') }}
                     </a>
@@ -232,6 +232,14 @@
                             <a class="dropdown-item"
                               href="{{ route('organizations.edit', ['organization' => $organization->id]) }}">
                               <i class="ti ti-edit text-info me-2"></i>{{ __('admin.Edit') }}
+                            </a>
+                          </li>
+                        @endif
+                        @if ($_user->ableToAny(['organization.wizard.edit'], $permissions))
+                          <li>
+                            <a class="dropdown-item"
+                              href="{{ route('organization.wizard.edit', ['id' => $organization->id]) }}">
+                              <i class="ti ti-wand text-primary me-2"></i>{{ __('admin.Edit with Wizard') }}
                             </a>
                           </li>
                         @endif

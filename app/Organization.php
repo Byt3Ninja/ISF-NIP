@@ -28,7 +28,23 @@ class Organization extends Model
 		'img_url',
 		'organization_type_id',
 		'is_draft',
-		'wizard_step'
+		'wizard_step',
+		// Step 2: Contact Information
+		'contact_email',
+		'country_code',
+		'contact_phone',
+		'country_id',
+		'state_id',
+		'city_id',
+		'address',
+		'google_map_url',
+		// Step 2: Social Media
+		'linkedin_company_url',
+		'twitter_handle',
+		'facebook_page_url',
+		'instagram_profile_url',
+		'youtube_channel_url',
+		'tiktok_url',
 	];
 
 	protected $casts = [
@@ -128,6 +144,30 @@ class Organization extends Model
 	public function organizationType()
 	{
 		return $this->belongsTo(OrganizationTypes::class, 'organization_type_id');
+	}
+
+	/**
+	 * Get the country for this organization.
+	 */
+	public function country()
+	{
+		return $this->belongsTo(Country::class);
+	}
+
+	/**
+	 * Get the state for this organization.
+	 */
+	public function state()
+	{
+		return $this->belongsTo(State::class);
+	}
+
+	/**
+	 * Get the city for this organization.
+	 */
+	public function city()
+	{
+		return $this->belongsTo(City::class);
 	}
 
 	/**

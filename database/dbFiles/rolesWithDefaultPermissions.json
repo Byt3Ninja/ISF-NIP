@@ -1902,15 +1902,6 @@
                 ]
             },
             {
-                "name": "organization.wizard.edit",
-                "description": "Edit Organization Wizard",
-                "guard_name": "web",
-                "is_core": 0,
-                "default_for": [
-                    "admin"
-                ]
-            },
-            {
                 "name": "organization.wizard.update.step1",
                 "description": "Update Organization Step 1",
                 "guard_name": "web",
@@ -1920,8 +1911,26 @@
                 ]
             },
             {
+                "name": "organization.wizard.update.step2",
+                "description": "Update Organization Step 2",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
                 "name": "organization.wizard.draft",
                 "description": "Save Organization as Draft",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "organization.wizard.edit",
+                "description": "Edit Organization Wizard",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
