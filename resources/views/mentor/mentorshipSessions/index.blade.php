@@ -49,7 +49,7 @@
           <div class="col-xl-12 col-md-12 col-sm-12">
             <div class="card">
               <div class="card-header border-bottom">
-                <h5 class="card-title mb-0">{{ __('mentor.mentorshipTasks.label') }}</h5>
+                <h5 class="card-title mb-0">{{ __('admin.tasks') }}</h5>
               </div>
               <div class="card-datatable table-responsive datatable-basic">
                 <table class="table mb-0 mt-3" id="userstable">

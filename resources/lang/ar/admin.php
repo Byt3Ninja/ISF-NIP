@@ -2807,4 +2807,11 @@ return [
 	'end_time_must_be_after_start_time' => 'يجب أن يكون الوقت النهاية بعد الوقت البدء',
 	'meeting_link_required' => 'يرجى إدخال رابط الاجتماع',
 	'meeting_link_url_required' => 'يرجى إدخال رابط اجتماع صحيح',
+
+	'mandatory' => 'اجباري',
+	'optional' => 'اختياري',
+	'start_survey' => 'ابدء الاستبيان',
+	'complete_survey' => 'اكمل الاستبيان',
+	'view_survey' => 'عرض الاستبيان',
+	'all_surveys' => 'جميع الاستبيانات',
 ];

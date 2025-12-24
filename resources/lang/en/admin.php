@@ -2755,5 +2755,12 @@ return [
 	'end_time_must_be_after_start_time' => 'The end time must be after the start time.',
 	'meeting_link_required' => 'Please enter the meeting link.',
 	'meeting_link_url_required' => 'Please enter a valid meeting link',
+
+	'mandatory' => 'Mandatory',
+	'optional' => 'Optional',
+	'start_survey' => 'Start Survey',
+	'complete_survey' => 'Complete Survey',
+	'view_survey' => 'View Survey',
+	'all_surveys' => 'All Surveys',
 ];
 

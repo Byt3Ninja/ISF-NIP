@@ -36,7 +36,7 @@ return [
     'start_time' => 'وقت البدء',
     'end_time' => 'وقت الانتهاء',
     'session_type' => 'نوع الجلسة',
-    'my_availability_slots' => 'جداول التواجد الخاصة بي',
+    'my_availability_slots' => 'فترات التواجد الخاصة',
     'online' => 'اونلاين',
     'offline' => 'اوفلاين',
     'both' => 'اونلاين او اوفلاين',

@@ -112,7 +112,7 @@
                           <a  href="/dashboard/companyProfile/{{ $session->user->company->id ?? '' }}" class="d-flex align-items-center" style="width: 130px;">
                             <img 
                               onerror="this.src='/images/logo-placeholder.png'"
-                              src="{{ $session->user->company->logo_url ?? '' }}" alt="avatar" class="rounded-circle me-2 border bg-label-light flex-shrink-0" height="36" width="36">
+                              src="{{ $session->user->company->logo_url ?? '' }}" alt="logo" class="rounded-circle me-2 border bg-label-light flex-shrink-0" height="36" width="36">
                             <small class="text-dark">{{ $session->user->company->{'name_' . $l} ?? '' }}</small>
                           </a>
                         </td>

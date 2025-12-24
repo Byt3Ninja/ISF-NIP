@@ -36,7 +36,7 @@ return [
     'start_time' => 'Start Time',
     'end_time' => 'End Time',
     'session_type' => 'Session Type',
-    'my_availability_slots' => 'My Availability Slots',
+    'my_availability_slots' => 'Availability Slots',
     'online' => 'Online',
     'offline' => 'Offline',
     'both' => 'Both',
