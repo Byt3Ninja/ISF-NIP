@@ -2619,12 +2619,10 @@ return [
 	'last_updated' => 'Last Updated',
 	'select_category' => 'Select Category',
 	'serviceProvider' => 'Service Provider',
-<<<<<<< HEAD
 	'created_by' => 'Created By',
 	'role_admin' => 'Admin',
 	'role_organization_manager' => 'Organization Manager',
 	'role_mentor' => 'Mentor',
-=======
 	'initial_screening' => 'Initial Screening',
 	'assigned_startups' => 'Assigned Startups',
 	'no_startups_assigned' => 'No startups assigned',
@@ -2747,6 +2745,5 @@ return [
 	// Organization Types & Wizard
 	'Organization Types' => 'Organization Types',
 	'Create with Wizard' => 'Create with Wizard',
->>>>>>> f67a475fc874c1f1427b78a0fc32efaf81dc8826
 ];
 
