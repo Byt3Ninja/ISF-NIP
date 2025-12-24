@@ -147,19 +147,19 @@ if (strpos(request()->getRequestUri(), 'programlist') !== false || strpos(reques
 
 // Special case: Make settings active if route matches specified patterns
 if (Route::is(
-    'settings.*',
-    'roles.*',
-    'importer.*',
-    'currencies.*',
-    'Tags.*',
-    'Category.*',
-    'subcategories.*',
-    'stages.*',
-    'Labels.*',
-    'queue.*',
-    'notification-templates.*',
-    'notification-triggers.*',
-    'license.*'
+  'settings.*',
+  'roles.*',
+  'importer.*',
+  'currencies.*',
+  'Tags.*',
+  'Category.*',
+  'subcategories.*',
+  'stages.*',
+  'Labels.*',
+  'queue.*',
+  'notification-templates.*',
+  'notification-triggers.*',
+  'license.*'
 )) {
   $activeGroup = 'admin';
   $activeItem = 'settings.index';

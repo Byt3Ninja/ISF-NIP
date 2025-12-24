@@ -2794,3 +2794,7 @@ return [
 	'Organization Types' => 'أنواع المؤسسات',
 	'Create with Wizard' => 'إنشاء بالمعالج',
 ];
+    'created_by' => 'أنشئت بواسطة',
+    'role_admin' => 'مسؤول',
+    'role_organization_manager' => 'مدير المنظمة',
+    'role_mentor' => 'مرشد',
