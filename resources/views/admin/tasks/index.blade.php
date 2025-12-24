@@ -2,7 +2,6 @@
 
 @section('vendorstyle')
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
 @stop
 
 @section('content')
@@ -27,7 +26,6 @@
 <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
-<script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script>
 @stop
 
 @section('pagescripts')
@@ -55,7 +53,7 @@ $(function () {
   const statusObj = {
     Pending: { title: '{{ __('admin.boardTitlePending') }}', class: 'bg-label-warning' },
     'In Progress': { title: '{{ __('admin.boardTitleProgress') }}', class: 'bg-label-info' },
-    'In Review': { title: '{{ __('admin.boardTitleReview') }}', class: 'bg-label-primary' },
+    'Review': { title: '{{ __('admin.boardTitleReview') }}', class: 'bg-label-primary' },
     Completed: { title: '{{ __('admin.boardTitleCompleted') }}', class: 'bg-label-success' }
   };
 
@@ -278,11 +276,40 @@ $(function () {
         </div>`;
     }).join('');
 
-    const tagsHtml = data.tags?.length ? `<div class="col-12 mb-3"><strong>{{ __('admin.tags') }}</strong><div class="d-flex flex-wrap gap-2 mt-2">${data.tags.map(tag => `<span class="badge bg-label-info">${tag}</span>`).join('')}</div></div>` : '';
+    // Normalize tags for display
+    const normalizedTagsForDisplay = data.tags?.map(tag => {
+      if (typeof tag === 'object' && tag !== null) {
+        return tag.value || tag.name || String(tag);
+      }
+      return String(tag);
+    }) || [];
+    
+    const tagsHtml = normalizedTagsForDisplay.length ? `<div class="col-12 mb-3"><strong>{{ __('admin.tags') }}</strong><div class="d-flex flex-wrap gap-2 mt-2">${normalizedTagsForDisplay.map(tag => `<span class="badge bg-label-info">${tag}</span>`).join('')}</div></div>` : '';
+
+    // Role display mapping
+    const roleDisplayNames = {
+      'Admin': '{{ __('admin.role_admin') }}',
+      'organizationmanager': '{{ __('admin.role_organization_manager') }}',
+      'Mentor': '{{ __('admin.role_mentor') }}',
+    };
+
+    // Creator information
+    const creatorHtml = data.creator ? `
+      <div class="col-12 mb-3 pb-3 border-bottom">
+        <div class="d-flex align-items-center gap-2">
+          <strong>{{ __('admin.created_by') }}:</strong> 
+          <a href="${data.creator.profile_url}" class="text-primary text-decoration-none">
+            ${data.creator.name}
+          </a>
+          <span class="badge bg-label-secondary">${roleDisplayNames[data.creator.role] || data.creator.role}</span>
+        </div>
+      </div>
+    ` : '';
 
     $('#task-details-content').html(`
       <div class="row">
         <div class="col-12 mb-4"><h4>${data.title}</h4><p class="text-muted">${data.description}</p></div>
+        ${creatorHtml}
         <div class="col-lg-6 mb-3"><strong>{{ __('admin.Program') }}:</strong> ${data.program.title}</div>
         <div class="col-lg-6 mb-3"><strong>{{ __('admin.Priority') }}:</strong> <span class="badge ${priorityObj[data.priority].class} ms-2">${priorityObj[data.priority].title}</span></div>
         <div class="col-lg-6 mb-3"><strong>{{ __('admin.overall_status') }}:</strong> <span class="badge ${statusObj[data.overallStatus].class} ms-2">${statusObj[data.overallStatus].title}</span></div>
@@ -345,10 +372,18 @@ $(function () {
       assigneeSelect.val(assigneeValues).trigger('change');
     }
 
-    // Set tags in Tagify
-    tagifyInstance.removeAllTags();
+    // Set tags in Select2 - ensure tags are simple strings
     if (data.tags && Array.isArray(data.tags)) {
-      tagifyInstance.addTags(data.tags);
+      // Normalize tags to ensure they're simple strings
+      const normalizedTags = data.tags.map(tag => {
+        // If tag is an object with a 'value' property, extract it
+        if (typeof tag === 'object' && tag !== null) {
+          return tag.value || tag.name || String(tag);
+        }
+        // Otherwise, ensure it's a string
+        return String(tag);
+      });
+      $('#task-tags').val(normalizedTags).trigger('change');
     }
 
     $('#addTaskModalLabel').text('{{ __('admin.edit_task') }}');
@@ -399,21 +434,26 @@ $(function () {
   });
 });
 
-// Initialize Tagify for tags input
-const tagifyInput = document.getElementById('task-tags');
-const tagifyWhitelist = tagifyInput.dataset.whitelist ? JSON.parse('[' + tagifyInput.dataset.whitelist + ']') : [];
-
-const tagifyInstance = new Tagify(tagifyInput, {
-  whitelist: tagifyWhitelist,
-  maxTags: 50,
-  dropdown: {
-    maxItems: 20,
-    classname: 'tags-look',
-    enabled: 0,
-    closeOnSelect: false
-  },
-  enforceWhitelist: false,
-  placeholder: tagifyInput.placeholder
+// Initialize Select2 for tags with tag creation enabled
+$(document).ready(function() {
+  $('#task-tags').select2({
+    tags: true,
+    tokenSeparators: [','],
+    placeholder: '{{ __('admin.Select_Tags') }}',
+    createTag: function (params) {
+      const term = $.trim(params.term);
+      
+      if (term === '') {
+        return null;
+      }
+      
+      return {
+        id: term,
+        text: term,
+        newTag: true // Mark as new tag
+      };
+    }
+  });
 });
 
 // Validation & Form Logic
@@ -448,13 +488,16 @@ const tagifyInstance = new Tagify(tagifyInput, {
     $('#task-due-date').val('');
 
     // Reset tags
-    tagifyInstance.removeAllTags();
+    $('#task-tags').val('').trigger('change');
 
     // Reset select2 elements (need to trigger change for proper display)
     $('#task-program').val('').trigger('change');
     $('#task-priority').val('').trigger('change');
     $('#task-status').val('').trigger('change');
     $('#task-assignees').val('').trigger('change');
+
+    // Hide assignees section
+    $('#assignees-section').hide();
 
     // Reset validation again after select2 triggers (to clear any validation errors)
     setTimeout(() => fv.resetForm(true), 10);
@@ -473,84 +516,99 @@ const tagifyInstance = new Tagify(tagifyInput, {
     fv.validate().then(status => {
       if (status !== 'Valid') return;
       
+      const editRow = $(form).data('edit-row');
+      const taskId = editRow ? window.dt_task.row(editRow).data().id : null;
+      const url = editRow ? `/dashboard/tasks/${taskId}` : '/dashboard/tasks';
+      
+      // Use FormData to support file uploads
       const formData = new FormData(form);
+      
+      // Add tags from Select2
+      const tags = $('#task-tags').val() || [];
+      formData.delete('taskTags[]'); // Remove original select2 input
+      tags.forEach(tag => formData.append('tags[]', tag));
+      
+      // Add program_id (renaming from taskProgram to match backend)
+      if (formData.has('taskProgram')) {
+        formData.append('program_id', formData.get('taskProgram'));
+      }
 
-      // Get assignee IDs directly from the select element
+      // Add assignees (they are already in formData as taskAssignees[], but backend expects assignees[])
       const assigneeIds = $('#task-assignees').val() || [];
-      const selectedAssignees = assigneeIds.map(val => ({
-        company: $(`#task-assignees option[value="${val}"]`).text(),
-        status: 'Pending',
-        lastUpdated: new Date().toISOString().split('T')[0]
-      }));
-      
-      // Get tags from Tagify
-      const tags = tagifyInstance.value.map(tag => tag.value || tag);
-      
-      const taskPayload = {
-        title: formData.get('taskTitle'),
-        description: formData.get('taskDescription'),
-        program_id: formData.get('taskProgram') ? Number(formData.get('taskProgram')) : null,
-        assignees: assigneeIds.map(val => +val),
-        priority: formData.get('taskPriority'),
-        status: formData.get('taskStatus'),
-        due_date: formData.get('taskDueDate'),
-        tags: tags
-      };
+      formData.delete('taskAssignees[]'); // Remove original to avoid confusion
+      assigneeIds.forEach(id => formData.append('assignees[]', id));
+
+      // Map other fields to match backend expectations
+      formData.append('title', formData.get('taskTitle'));
+      formData.append('description', formData.get('taskDescription'));
+      formData.append('priority', formData.get('taskPriority'));
+      formData.append('status', formData.get('taskStatus'));
+      formData.append('due_date', formData.get('taskDueDate'));
+
+      // For PUT requests with files, Laravel requires POST with _method=PUT
+      if (editRow) {
+        formData.append('_method', 'PUT');
+      }
 
       if (!window.dt_task) return Swal.fire('{{ __('admin.error') }}', '{{ __('admin.table_not_initialized') }}', 'error');
 
-      const editRow = $(form).data('edit-row');
-      const taskId = editRow ? window.dt_task.row(editRow).data().id : null;
-      const method = editRow ? 'PUT' : 'POST';
-      const url = editRow ? `/dashboard/tasks/${taskId}` : '/dashboard/tasks';
-
       $.ajax({
         url: url,
-        method: method,
-        dataType: 'json',
-        contentType: 'application/json',
-        data: JSON.stringify(taskPayload),
+        method: 'POST', // Always use POST for FormData with potential files
+        data: formData,
+        processData: false,
+        contentType: false,
         headers: {
           'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         },
         success: function(response) {
-          if (editRow) {
-            // Update the existing row with the new data
-            const taskObj = {
-              id: response.data.id || taskId,
-              title: response.data.title,
-              description: response.data.description,
-              program: { id: response.data.program_id, title: $('#task-program option:selected').text() },
-              assignees: selectedAssignees.length ? selectedAssignees : [{ company: 'Current User', status: 'Pending', lastUpdated: new Date().toISOString().split('T')[0] }],
-              priority: response.data.priority,
-              overallStatus: response.data.status,
-              dueDate: response.data.due_date,
-              tags: response.data.tags || []
+          // Prepare task object for table update
+          const selectedAssignees = assigneeIds.map(val => {
+            const startup = startups.find(s => s.id === +val);
+            return {
+              id: +val,
+              name: startup ? (startup.name || startup.name_en) : $(`#task-assignees option[value="${val}"]`).text(),
+              status: 'Pending',
+              lastUpdated: new Date().toISOString().split('T')[0]
             };
+          });
+
+          // Normalize tags to ensure they're simple strings
+          const normalizedTags = (response.data.tags || []).map(tag => {
+            if (typeof tag === 'object' && tag !== null) {
+              return tag.value || tag.name || String(tag);
+            }
+            return String(tag);
+          });
+
+          const taskObj = {
+            id: response.data.id || taskId,
+            title: response.data.title,
+            description: response.data.description,
+            program: { id: response.data.program_id, title: $('#task-program option:selected').text() },
+            assignees: selectedAssignees,
+            priority: response.data.priority,
+            overallStatus: response.data.status,
+            dueDate: response.data.due_date || 'N/A',
+            tags: normalizedTags
+          };
+
+          if (editRow) {
             window.dt_task.row(editRow).data(taskObj).draw();
             showToast({type: 'success', message: '{{ __('admin.Task_updated_successfully') }}'});
           } else {
-            // Add new task to the table
-            const taskObj = {
-              id: response.data.id,
-              title: response.data.title,
-              description: response.data.description,
-              program: { id: response.data.program_id, title: $('#task-program option:selected').text() },
-              assignees: selectedAssignees.length ? selectedAssignees : [{ company: 'Current User', status: 'Pending', lastUpdated: new Date().toISOString().split('T')[0] }],
-              priority: response.data.priority,
-              overallStatus: response.data.status,
-              dueDate: response.data.due_date,
-              tags: response.data.tags || []
-            };
             window.dt_task.row.add(taskObj).draw('page');
-            showToast({type: 'success', message: '{{ __('admin.Task_added_successfully') }}'});
+            showToast({type: 'success', message: '{{ __('admin.Task_added_successfully.') }}'});
           }
           $('#addTaskModal').modal('hide');
           resetForm();
         },
         error: function(xhr) {
           console.error('Failed to save task:', xhr);
-          const errorMsg = xhr.responseJSON?.message;
+          let errorMsg = xhr.responseJSON?.message;
+          if (xhr.responseJSON?.errors) {
+            errorMsg = Object.values(xhr.responseJSON.errors).flat().join('<br>');
+          }
           showToast({type: 'error', message: errorMsg ? errorMsg : '{{ __('admin.unexpected_error') }}'});
         }
       });
@@ -560,7 +618,6 @@ const tagifyInstance = new Tagify(tagifyInput, {
   // Modal Close & Init
   $('#addTaskModal').on('hidden.bs.modal', resetForm);
   form.addEventListener('submit', e => e.preventDefault());
-  document.querySelector('#task-due-date')?.flatpickr({ enableTime: false, dateFormat: 'Y-m-d', minDate: 'today' });
 
   // Clear validation errors for select2 fields on change
   $('#task-program, #task-priority, #task-status').on('select2:select select2:unselect change', function () {
@@ -571,7 +628,17 @@ const tagifyInstance = new Tagify(tagifyInput, {
   $('#task-program').on('select2:select change', function () {
     const programId = $(this).val();
     const assigneeSelect = $('#task-assignees');
+    const assigneesSection = $('#assignees-section');
     const currentValues = assigneeSelect.val() || [];
+
+    // Show or hide assignees section based on program selection
+    if (programId) {
+      assigneesSection.show();
+    } else {
+      assigneesSection.hide();
+      assigneeSelect.empty().trigger('change');
+      return;
+    }
 
     // Check if we're in edit mode (modal has edit-row data)
     const isEditMode = $('#addNewTaskForm').data('edit-row') !== undefined;
@@ -581,7 +648,7 @@ const tagifyInstance = new Tagify(tagifyInput, {
       // In edit mode, show all startups to allow changing assignees
       assignees = startups || [];
     } else {
-      // In add mode, filter by program
+      // In add mode, filter by program and auto-select ALL
       assignees = startups ? startups.filter(startup => startup.cycle === +programId) : [];
     }
 
@@ -591,9 +658,15 @@ const tagifyInstance = new Tagify(tagifyInput, {
       assigneeSelect.append(`<option value="${assignee.id}">${assignee.name ?? assignee.name_en}</option>`);
     });
 
-    // Keep previously selected values if they're still available
-    const validValues = currentValues.filter(val => assignees.some(a => a.id === val));
-    assigneeSelect.val(validValues).trigger('change');
+    // Auto-select all assignees in add mode if no previous selection exists
+    if (!isEditMode && currentValues.length === 0) {
+      const allIds = assignees.map(a => a.id);
+      assigneeSelect.val(allIds).trigger('change');
+    } else {
+      // Keep previously selected values if they're still available
+      const validValues = currentValues.filter(val => assignees.some(a => a.id === val));
+      assigneeSelect.val(validValues).trigger('change');
+    }
 
     // Revalidate assignees field
     fv.revalidateField('taskAssignees[]');
@@ -609,7 +682,7 @@ $('#task-upload').on('change', function () {
   const files = Array.from(this.files);
   if (!files.length) return;
 
-  const allowedExt = ['pdf', 'doc', 'docx', 'ppt', 'xls', 'png', 'jpeg', 'jpg'];
+  const allowedExt = ['pdf', 'docx', 'xlsx', 'png', 'jpg', 'jpeg'];
   const maxSize = 10 * 1024 * 1024; // 10MB
   const errors = [];
   const validFiles = [];
