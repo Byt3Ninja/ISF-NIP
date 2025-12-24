@@ -2745,5 +2745,15 @@ return [
 	// Organization Types & Wizard
 	'Organization Types' => 'Organization Types',
 	'Create with Wizard' => 'Create with Wizard',
+
+	'select_startups' => 'Select Startups',
+	'select_all' => 'Select All',
+	'deselect_all' => 'Deselect All',
+	'date_required' => 'Please enter a date.',
+	'start_time_required' => 'Please enter the start time.',
+	'end_time_required' => 'Please enter the end time.',
+	'end_time_must_be_after_start_time' => 'The end time must be after the start time.',
+	'meeting_link_required' => 'Please enter the meeting link.',
+	'meeting_link_url_required' => 'Please enter a valid meeting link',
 ];
 
