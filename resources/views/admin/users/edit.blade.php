@@ -47,6 +47,18 @@
       'icon' => 'ti ti-lock',
     ],
   ];
+
+  // Add organizations tab for Sub-Admin role
+  $userRole = $user->roles->first();
+  $isSubAdmin = $userRole && strtolower($userRole->default_for ?? '') === 'subadmin';
+  if ($isSubAdmin) {
+    $navPills['organizations'] = [
+      'title' => $l == 'en' ? 'Assigned Organizations' : 'المنظمات المعينة',
+      'active' => false,
+      'id' => 'nav-pills-organizations',
+      'icon' => 'ti ti-building',
+    ];
+  }
 @endphp
 
 @section('content')
@@ -346,6 +358,53 @@
             </form>
           </div>
           <!-- /Security -->
+
+          <!-- Assigned Organizations (Sub-Admin only) -->
+          @if($isSubAdmin)
+          <div class="tab-pane fade" id="nav-pills-organizations" role="tabpanel">
+            <form
+              method="post"
+              action="{{ route('users.update_organizations', ['user' => $user->id]) }}"
+              id="organizations-form"
+            >
+              @csrf
+              @method('patch')
+              <div class="row">
+                <div class="col-12">
+                  <div class="form-group mb-4">
+                    <label class="form-label" for="organization_ids">
+                      {{ $l == 'en' ? 'Assigned Organizations' : 'المنظمات المعينة' }}
+                    </label>
+                    <p class="text-muted small mb-3">
+                      {{ $l == 'en' ? 'Select one or more organizations that this Sub-Admin can manage.' : 'اختر منظمة واحدة أو أكثر يمكن لهذا المسؤول الفرعي إدارتها.' }}
+                    </p>
+                    <select
+                      class="form-select select2"
+                      id="organization_ids"
+                      name="organization_ids[]"
+                      multiple="multiple"
+                      data-placeholder="{{ $l == 'en' ? 'Select Organizations' : 'اختر المنظمات' }}"
+                    >
+                      @foreach($organizations as $org)
+                        <option
+                          value="{{ $org->id }}"
+                          {{ in_array($org->id, $user->organizations->pluck('id')->toArray()) ? 'selected' : '' }}
+                        >
+                          {{ $org->name }}
+                        </option>
+                      @endforeach
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 d-flex justify-content-end align-items-center gap-4 mt-8">
+                <a href="{{ route('users.index') }}" class="btn btn-label-secondary">{{ __('admin.Cancel') }}</a>
+                <button type="submit" class="btn btn-primary">{{ __('admin.Update') }}</button>
+              </div>
+            </form>
+          </div>
+          @endif
+          <!-- /Assigned Organizations -->
 
         </div>
       </div>

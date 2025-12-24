@@ -45,13 +45,10 @@
                 <h6 class="fw-semibold mb-1">{{ __('mentor.available_time_slots') }}</h6>
                 <div class="text-muted small" id="slotsDate">{{ __('admin.loading') }}...</div>
               </div>
-              <div class="d-flex gap-2 mb-3">
+              <div class="d-flex gap-2 mb-3" id="filter-buttons">
                 <button type="button" class="btn btn-xs btn-primary rounded active" data-filter="all">{{ __('admin.All') }}</button>
                 <button type="button" class="btn btn-xs rounded border border-light" data-filter="online">
                   <i class="ti ti-video ti-14px me-1"></i>{{ __('mentor.online') }}
-                </button>
-                <button type="button" class="btn btn-xs rounded border border-light" data-filter="offline">
-                  <i class="ti ti-map-pin ti-14px me-1"></i>{{ __('mentor.offline') }}
                 </button>
               </div>
               <div id="slotsList" style="width: 100%; max-height: 320px; overflow-y: auto;">
@@ -436,17 +433,23 @@ $(document).ready(function() {
     .done(result => {
       state.slots = result?.data || [];
       state.blocked_intervals = result?.blocked_intervals || [];
+      state.offlineDisabled = !result?.offline_allowed;
       if (result?.user) $('#mentorName').text(result.user.name || 'Mentor Name');
-      
+
       $('#bookingModal').modal('show');
       resetCalendar();
+
+      // Add offline filter button if offline is allowed and not already present
+      if (!state.offlineDisabled && !$('#filter-buttons button[data-filter="offline"]').length) {
+        $('#filter-buttons').append('<button type="button" class="btn btn-xs rounded border border-light" data-filter="offline"><i class="ti ti-map-pin ti-14px me-1"></i>{{ __("mentor.offline") }}</button>');
+      }
     })
     .fail(() => alert('{{ __('mentor.could_not_load_availability_slots') }}'));
   };
 
-  $('button[data-filter]').on('click', function() {
-    $('button[data-filter]').removeClass('active');
-    $(this).addClass('active');
+  $(document).on('click', 'button[data-filter]', function() {
+    $('button[data-filter]').removeClass('active btn-primary').addClass('border border-light');
+    $(this).addClass('active btn-primary').removeClass('border border-light');
     if (state.selectedDate) renderSlots(state.selectedDate);
   });
 

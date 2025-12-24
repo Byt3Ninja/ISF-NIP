@@ -44,14 +44,26 @@
                                 @endif
                                 <form method="post" action="{{route('serviceCategories.store')}}">
                                     {!! csrf_field() !!}
-                                    <div class="mb-3 {{ $isOrgMan ? 'd-none' : '' }}">
+                                    @php
+                                        $authUser = auth()->user();
+                                        $isSingleOrg = $isOrgMan || ($authUser->isSubAdmin() && count($authUser->organizations_ids) == 1);
+                                        $showOrgDropdown = $authUser->hasRole('Admin') || ($authUser->isSubAdmin() && count($authUser->organizations_ids) > 1);
+                                    @endphp
+                                    <div class="mb-3 {{ $isSingleOrg ? 'd-none' : '' }}">
                                         <label for="organization_id" class="form-label">{{ __('cycles.Select_Organization')}}</label>
                                         <select required class="form-select" id="organization_id" name="organization_id" data-placeholder="{{ __('cycles.Select_Organization') }}">
-                                            @if( !$isOrgMan ) <option selected disabled value="">{{ __('cycles.Select_Organization') }}</option>  @endif
-                                            @foreach( \App\Organization::all() as $org )
-                                                @php if( $isOrgMan && $org->id != $org_id ) { continue; } @endphp
-                                                <option {{ $isOrgMan && $org->id == $org_id ? 'selected' : '' }} value="{{ $org->id }}">{{ $org->{'name_' . app()->getLocale()} }}</option>
-                                            @endforeach
+                                            @if( $showOrgDropdown ) <option selected disabled value="">{{ __('cycles.Select_Organization') }}</option> @endif
+                                            @if($authUser->hasRole('Admin'))
+                                                @foreach( \App\Organization::all() as $org )
+                                                    <option value="{{ $org->id }}">{{ $org->{'name_' . app()->getLocale()} }}</option>
+                                                @endforeach
+                                            @elseif($authUser->isSubAdmin())
+                                                @foreach( $authUser->organizations as $org )
+                                                    <option value="{{ $org->id }}">{{ $org->{'name_' . app()->getLocale()} }}</option>
+                                                @endforeach
+                                            @else
+                                                <option selected value="{{ $org_id }}">{{ \App\Organization::find($org_id)?->{'name_' . app()->getLocale()} }}</option>
+                                            @endif
                                         </select>
                                     </div>
                                     <div class="mb-3">

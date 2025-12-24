@@ -30,7 +30,7 @@
                             <th>{{ __('admin.Comment') }}</th>
                             <th>{{ __('admin.Rate') }}</th>
                             <th>{{ __('mentor.session_type') }}</th>
-                            <th>{{ __('startup.mentorship_requests.meeting_link') }}</th>
+                            <th>{{ __('startup.mentorship_requests.Meeting_Link/Map') }}</th>
                             {{-- <th>{{__('mentor.mentorshipTasks.all')}}</th> --}}
                           </tr>
                         </thead>
@@ -106,6 +106,11 @@
                                   @elseif ($now > $end_time)
                                     <small class="text-danger">{{ __('admin.Meeting_Expired') }}</small>
                                   @else
+                                    @if (isset($session->session_type) && $session->session_type == 'Offline')
+                                      <td>
+                                        {{ isset($session->session_location) && $session->session_type == 'Offline' ? $session->session_location : 'N/A' }}
+                                      </td>
+                                    @endif
                                     <a href="{{ $session?->join_url }}" target="_blank">
                                       <button type="button" class="btn btn-sm btn-primary">
                                         <i class="ti ti-brand-zoom"></i> {{ __('startup.mentorship_requests.join_now') }}

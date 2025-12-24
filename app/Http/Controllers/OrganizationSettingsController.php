@@ -14,7 +14,9 @@ class OrganizationSettingsController extends Controller
 
     protected function orgSettings()
     {
-        $orgId = auth()->user()->organization_id;
+        $user = auth()->user();
+        $orgIds = $user->organizations_ids;
+        $orgId = !empty($orgIds) ? $orgIds[0] : null;
         return OrganizationSettings::firstOrCreate(['organization_id' => $orgId]);
     }
 

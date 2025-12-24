@@ -8,7 +8,7 @@
   // Sidebar avatar
   $imageSrc =
     $_user->organization?->img_url
-      ? asset($_user->organization->img_url)
+      ? $_user->organization->imageUrl
       : ($setting->Logo
         ? "/images/logo/$setting->Logo"
         : "/images/background/logo.png");
@@ -230,7 +230,7 @@
       <li class="{{ active('dashboard/mentor/mentorshipSessions*') }} menu-item">
         <a href="{{ route('mentorships.sessions_list_detailed') }}" class="menu-link">
           <i class="menu-icon tf-icons ti ti-layout-kanban"></i>
-          <div>{{ $l == 'en' ? 'Mentorship Tasks' : 'مهام الإرشاد' }}</div>
+          <div>{{ __('admin.tasks') }}</div>
         </a>
       </li>
     @endif

@@ -50,6 +50,11 @@
     "guard_name": "web"
   },
   {
+    "name": "Sub-Admin",
+    "default_for": "subadmin",
+    "guard_name": "web"
+  },
+  {
     "name": "Trainer",
     "default_for": "trainer",
     "guard_name": "web"

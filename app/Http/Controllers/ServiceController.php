@@ -47,9 +47,17 @@ class ServiceController extends Controller
 	 */
 	public function create()
 	{
+		$user = auth()->user();
 		$serviceCategories = ServiceCategory::all();
 		$Setting = Settings::where('id', 1)->first();
-		$organizations = Organization::all();
+		if ($user->hasRole('Admin')) {
+			$organizations = Organization::all();
+		} elseif ($user->hasRole('organizationManager') || $user->isSubAdmin()) {
+			$orgIds = $user->organizations_ids;
+			$organizations = Organization::whereIn('id', $orgIds)->get();
+		} else {
+			$organizations = collect();
+		}
 		$providers = serviceProviders::all();
 		return view('admin/settings/services/create', compact('serviceCategories','Setting','organizations', 'providers'));
 	}
@@ -126,8 +134,16 @@ class ServiceController extends Controller
 	 */
 	public function edit(Service $service)
 	{
+		$user = auth()->user();
 		$serviceCategories = ServiceCategory::all();
-		$organizations = Organization::all();
+		if ($user->hasRole('Admin')) {
+			$organizations = Organization::all();
+		} elseif ($user->hasRole('organizationManager') || $user->isSubAdmin()) {
+			$orgIds = $user->organizations_ids;
+			$organizations = Organization::whereIn('id', $orgIds)->get();
+		} else {
+			$organizations = collect();
+		}
 		$providers = serviceProviders::all();
 		return view('admin/settings/services/edit', compact('service', 'serviceCategories', 'organizations', 'providers'));
 	}

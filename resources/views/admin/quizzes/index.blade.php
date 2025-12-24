@@ -5,12 +5,16 @@
 
 @php
 $user = Auth::user();
-if ($user->hasRole('organizationManager')){
-	$organizations = App\Organization::where('id', $user->organization_id)->get();
-	$cycles = App\Cycle::where('organization_id', $user->organization_id)->get();
-} else {
+if ($user->hasRole('Admin')) {
 	$organizations = App\Organization::all();
 	$cycles = App\Cycle::all();
+} elseif ($user->hasRole('organizationManager') || $user->isSubAdmin()) {
+	$orgIds = $user->organizations_ids;
+	$organizations = App\Organization::whereIn('id', $orgIds)->get();
+	$cycles = App\Cycle::whereIn('organization_id', $orgIds)->get();
+} else {
+	$organizations = collect();
+	$cycles = collect();
 }
 @endphp
 
@@ -23,7 +27,7 @@ if ($user->hasRole('organizationManager')){
 				@php
 					$tabs = [
 						['title' => __('admin.quizzes'), 'url' => 'dashboard/quizzes', 'icon' => 'clock-bolt'],
-						['title' => __('admin.Quiz_Results'), 'url' => 'dashboard/quizResults', 'icon' => 'checklist'],
+						['title' => __('admin.quizzes_results'), 'url' => 'dashboard/quizResults', 'icon' => 'checklist'],
 					]
 				@endphp
 				<ul class="nav nav-pills">

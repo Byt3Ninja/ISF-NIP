@@ -70,7 +70,7 @@
                     <i class="ti ti-filter me-2"></i>
                     {{ __('cycles.Filter') }}
                   </button>
-                  @if(request()->hasAny(['start_date', 'end_date', 'done', 'cycle_id', 'show', 'rate', 'session_type']))
+                  @if(request()->hasAny(['start_date', 'end_date', 'done', 'cycle_id', 'rate', 'session_type']))
                   <button onclick="resetFilters()" class="btn btn-outline-secondary">
                     <i class="ti ti-refresh me-2"></i>
                     {{ __('cycles.Reset') }}
@@ -1226,7 +1226,6 @@
       url.searchParams.delete('end_date');
       url.searchParams.delete('done');
       url.searchParams.delete('cycle_id');
-      url.searchParams.delete('show');
       url.searchParams.delete('rate');
       url.searchParams.delete('session_type');
       window.location.href = url.toString();

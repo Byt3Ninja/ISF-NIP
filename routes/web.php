@@ -104,8 +104,7 @@ Route::get('/2otp', function () {
 Route::get('/db-migrate', 'IndexController@dbMigrate');
 Route::get('/seed-permissions', 'IndexController@seedPermissions');
 Auth::routes(['verify' => true]);
-Route::get('organizations/set-password/{invitationId}', 'SettingsController@showSetPasswordForm')
-    ->name('invitations.set_password_view_form');
+Route::get('organizations/set-password/{invitationId}', 'SettingsController@showSetPasswordForm')->name('invitations.set_password_view_form');
 Route::post('organizations/settings/accept/{invitationId}', 'SettingsController@acceptInvitation')->name('invitations.accept');
 
 Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa']], function () {
@@ -237,7 +236,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('updateevent/{id}', 'EventsController@updateevent')->name('events.update');
     Route::get('deleteevent/{id}', 'EventsController@deleteevent')->name('events.delete');
     // Settings Routes
-    Route::any('settings', 'SettingsController@get_settings')->name('settings.system_general_view');
+    Route::any('settings', 'SettingsController@index')->name('settings.index');
+    Route::any('settings/general', 'SettingsController@get_settings')->name('settings.system_general_view');
     Route::get('industry-settings', 'SettingsController@industrySettings')->name('settings.industry_view');
     Route::get('expertise-settings', 'ExpertiseController@index')->name('settings.expertise_view');
     Route::get('notification-settings', 'SettingsController@notificationSettings')->name('settings.notification_view');
@@ -266,9 +266,6 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('whatsapp/session/{sessionId}/send', 'IndexController@sendMessage')->where('sessionId', '[0-9]+')->name('whatsapp.session.send');
     Route::post('whatsapp/getWASession', 'WhatsAppSessionController@getWASessionID')->name('whatsapp.session.getsessionid');
 
-
-
-
     Route::get('organizations/settings', 'SettingsController@showSettings')->name('settings.organization_manage');
     Route::put('organizations/settings/updateMeeting', 'SettingsController@meetingSetting')->name('settings.organization_meeting_manage');
     Route::put('organizations/settings/socialLogin', 'SettingsController@socialSetting')->name('settings.organization_social_manage');
@@ -280,6 +277,22 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::delete('organizations/settings/cancel-invitation/{invitationId}', 'SettingsController@cancelInvitation')->name('organization.users_invitations_cancel');
     Route::get('organizations/settings/reminder-logs', 'SettingsController@ReminderLogs')->name('organization.ReminderLogs');
     Route::post('organizations/reminder-logs/destroy', 'ReminderLogController@destroy')->name('organization.destroyReminderLogs');
+
+    Route::resource('organization-types', 'OrganizationTypesController');
+
+    // Organization Wizard Routes (multi-step creation/editing)
+    Route::prefix('organization')->name('organization.wizard.')->group(function () {
+        Route::get('/create', 'OrganizationWizardController@create')->name('create');
+        Route::post('/create', 'OrganizationWizardController@storeStep1')->name('store.step1');
+        Route::get('/{id}/edit', 'OrganizationWizardController@edit')->name('edit');
+        Route::put('/{id}/step1', 'OrganizationWizardController@updateStep1')->name('update.step1');
+        Route::post('/draft', 'OrganizationWizardController@saveDraft')->name('draft');
+        Route::put('/{id}/draft', 'OrganizationWizardController@saveDraft')->name('draft.update');
+        Route::post('/{id}/publish', 'OrganizationWizardController@publish')->name('publish');
+    });
+
+    // Organization Logo from Storage
+    Route::get('organizations/logo/{filename}', 'OrganizationWizardController@getLogo')->name('organizations.logo');
 
     //services categories Manager routes
     Route::resource('serviceCategories', 'ServiceCategoryController');
@@ -429,6 +442,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/judger', 'UserController@judger')->name('users.judger');
     Route::post('/users/password', 'UserController@updatePassword')->name('user.profile_update_password');
     Route::post('/users/update_my_password', 'UserController@updateMyPassword')->name('user.profile_update_my_password');
+    Route::patch('/users/{user}/organizations', 'UserController@updateOrganizations')->name('users.update_organizations');
     Route::get('/companies', 'ClientCompanyController@companies')->name('users.view_companies');
     // Export startups (CSV / Excel) - preserves current filters passed as query params
     Route::get('/companies/export', 'CompanyExportController@export')->name('users.companies_export');
@@ -553,7 +567,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('mentorshipschedule/destroy', 'MentorshipScheduleController@destroy')->name('mentorship.schedule_destroy');
 
     //Screening
-    Route::get('screening', 'ScreeningController@index');
+    Route::get('screening', 'ScreeningController@index')->name('screening.index');
+    Route::get('screening/{id?}', 'ScreeningController@show');
     Route::get('/dashboard/screening/get/{formId}/{stepId}/{panel}', 'ScreeningController@get')->name('screening.get');
     Route::post('screening/update', 'ScreeningController@update');
     Route::post('screening/save', 'ScreeningController@save');
@@ -582,7 +597,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     // Availability Slots
     Route::get('availability', 'Mentor\SlotController@index')->name('slots.index');
-    Route::get('availability/slots/{id?}', 'Mentor\SlotController@getSlots')->name('slots.read');
+    Route::get('availability/slots/{user_id?}', 'Mentor\SlotController@getSlots')->name('slots.read');
     Route::post('availability/slots/store', 'Mentor\SlotController@store')->name('slots.store');
     Route::post('availability/slots/{id}/copy', 'Mentor\SlotController@copy')->name('slots.copy');
     Route::delete('availability/slots/{id}', 'Mentor\SlotController@destroy')->name('slots.destroy');
@@ -696,7 +711,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/upcomingBusyReview', 'BookingController@upcomingBusyReview')->name('bookings.review_upcoming_busy');
     Route::get('/oldReview', 'BookingController@oldReview')->name('bookings.review_past');
     //Final Screening
-    Route::get('final', 'FinalscreeningController@index')->name('screening.index');
+    Route::get('final', 'FinalscreeningController@index');
+    Route::get('final/{id}', 'FinalscreeningController@show');
     Route::get('{id?}/final', 'FinalscreeningController@index')->name('screening.show');
     Route::post('final/update', 'FinalscreeningController@update')->name('screening.update');
     Route::post('final/save', 'FinalscreeningController@save')->name('screening.store');

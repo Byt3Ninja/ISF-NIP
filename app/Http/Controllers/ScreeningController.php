@@ -38,12 +38,185 @@ class ScreeningController extends Controller
 	{
 		$this->whatsAppService = $whatsAppService;
 	}
-	public function index($id = 0)
+	
+	public function index(Request $request)
 	{
-		$organization_id = auth()->user()->organization_id;
-		$steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
-			return $q->whereHas('cycle', function ($query) use ($organization_id) {
-				$query->where('organization_id', $organization_id);
+			$user = auth()->user();
+			$orgIds = $user->organizations_ids;
+
+			/** -------------------------
+			 * Base steps query with filters
+			 * ------------------------- */
+			$stepsQuery = Step::with(['cycle.organization'])
+					->when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+							$q->whereHas('cycle', fn ($c) =>
+									$c->whereIn('organization_id', $orgIds)
+							);
+					})
+					->where('stype', 2);
+
+			// Apply filters
+			if ($request->filled('search')) {
+					$search = $request->search;
+					$stepsQuery->where(function ($q) use ($search) {
+							$q->where('title', 'like', "%{$search}%")
+									->orWhereHas('cycle', function ($c) use ($search) {
+											$c->where('title', 'like', "%{$search}%");
+									})
+					->orWhereHas('cycle.organization', function ($o) use ($search) {
+							$o->where('name_en', 'like', "%{$search}%")
+									->orWhere('name_ar', 'like', "%{$search}%");
+					});
+					});
+			}
+
+			if ($request->filled('screening_type')) {
+					$screeningType = $request->screening_type;
+					$stepsQuery->where('data', $screeningType);
+			}
+
+			if ($request->filled('status')) {
+					$today = now()->toDateString();
+					switch ($request->status) {
+							case 'upcoming':
+									$stepsQuery->where('from', '>', $today);
+									break;
+							case 'in_progress':
+									$stepsQuery->where('from', '<=', $today)->where('to', '>=', $today);
+									break;
+							case 'completed':
+									$stepsQuery->where('to', '<', $today);
+									break;
+					}
+			}
+
+			if ($request->filled('program')) {
+					$stepsQuery->whereHas('cycle', function ($c) use ($request) {
+							$c->where('id', $request->program);
+					});
+			}
+
+			if ($request->filled('judge')) {
+					$stepsQuery->where(function ($q) use ($request) {
+							// Check if judge is in the JSON list field
+							$q->whereRaw("JSON_CONTAINS(list, ?)", [json_encode($request->judge)])
+									->orWhereRaw("JSON_CONTAINS(list, ?)", [json_encode([$request->judge])])
+									->orWhereRaw("JSON_CONTAINS(list, ?)", [$request->judge]);
+					});
+			}
+
+			if ($request->filled('startup')) {
+					$stepsQuery->whereHas('companies', function ($c) use ($request) {
+							$c->where('id', $request->startup);
+					});
+			}
+
+			$steps = $stepsQuery->orderBy('from')->get();
+
+			/** -------------------------
+			 * Preload all related data
+			 * ------------------------- */
+			$stepIds   = $steps->pluck('id');
+			$cycleIds  = $steps->pluck('cycle_id')->unique();
+
+			$judges = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+					->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+					->where('roles.default_for', 'judger')
+					->select('users.id', 'users.first_name_en', 'users.last_name_en')
+					->get()
+					->keyBy('id');
+
+			$screenings = Screening::whereIn('step_id', $stepIds)
+					->get()
+					->groupBy('step_id');
+
+			$companies = Company::whereIn('step', $stepIds)
+					->get()
+					->groupBy('step');
+
+			$forms = Step::whereIn('cycle_id', $cycleIds)
+					->where('stype', 1)
+					->get()
+					->keyBy(fn ($f) => "{$f->cycle_id}-{$f->arr}");
+
+			/** -------------------------
+			 * Build screeningSteps
+			 * ------------------------- */
+			$screeningSteps = $steps->map(function ($step) use (
+					$judges,
+					$screenings,
+					$companies,
+					$forms
+			) {
+					$judgersList = collect(json_decode($step->list, true) ?? [])
+							->map(fn ($j) => is_array($j) ? array_map('intval', $j) : [(int) $j]);
+
+					/** Collect judges for step */
+					$judgeIds = $judgersList->flatten()->unique();
+
+					$judgesForStep = $judgeIds
+							->map(fn ($id) => $judges->get($id))
+							->filter()
+							->map(fn ($j) => (object) [
+									'id'   => $j->id,
+									'name' => "{$j->first_name_en} {$j->last_name_en}",
+							])
+							->values();
+
+					/** Companies */
+					$companiesForStep = ($companies[$step->id] ?? collect())
+							->map(fn ($c) => (object) [
+									'id'   => $c->id,
+									'name' => $c->name_en,
+							])
+							->values();
+
+					/** Form */
+					$formKey = "{$step->cycle_id}-" . ($step->arr - 1);
+					$form    = $forms->get($formKey);
+
+					/** Screening type */
+					$screeningType = match ($step->data) {
+							'onetoall'     => 'one-to-all',
+							'grouptoall'   => 'group-to-all',
+							'grouptogroup' => 'group-to-group',
+							default        => 'one-to-all',
+					};
+
+					return (object) [
+							'id'            => $step->id,
+							'title'         => $step->title,
+							'description'   => $step->description ?? '',
+							'program'       => $step->cycle
+									? (object) ['id' => $step->cycle->id, 'title' => $step->cycle->title]
+									: null,
+							'organization'  => $step->cycle?->organization
+									? (object) [
+											'id'   => $step->cycle->organization->id,
+											'name' => $step->cycle->organization->name,
+									]
+									: null,
+							'start_date'    => optional($step->from)->format('Y-m-d'),
+							'end_date'      => optional($step->to)->format('Y-m-d'),
+							'screening_type'=> $screeningType,
+							'judges'        => $judgesForStep,
+							'companies'     => $companiesForStep,
+							'form'          => $form
+									? (object) ['id' => $form->id, 'title' => $form->title]
+									: null,
+					];
+			});
+
+			return view('admin.settings.screening.index', compact('screeningSteps'));
+	}
+
+	public function show($id = 0)
+	{
+		$user = auth()->user();
+		$orgIds = $user->organizations_ids;
+		$steps = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+			return $q->whereHas('cycle', function ($query) use ($orgIds) {
+				$query->whereIn('organization_id', $orgIds);
 			});
 		})->where('stype', 2)->orderBy('from')->get();
 		// $judges = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->get();
@@ -55,22 +228,22 @@ class ScreeningController extends Controller
 
 		if ($id == 0) {
 			$id = $steps->pluck('id')->first();
-			$cstep = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
-				return $q->whereHas('cycle', function ($query) use ($organization_id) {
-					$query->where('organization_id', $organization_id);
+			$cstep = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->whereHas('cycle', function ($query) use ($orgIds) {
+					$query->whereIn('organization_id', $orgIds);
 				});
 			})->where('stype', 2)->where('id', $id)->first();
 		} else {
-			$cstep = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
-				return $q->whereHas('cycle', function ($query) use ($organization_id) {
-					$query->where('organization_id', $organization_id);
+			$cstep = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->whereHas('cycle', function ($query) use ($orgIds) {
+					$query->whereIn('organization_id', $orgIds);
 				});
 			})->where('stype', 2)->where('id', $id)->first();
 		}
 		if ($cstep) {
-			$form = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
-				return $q->whereHas('cycle', function ($query) use ($organization_id) {
-					$query->where('organization_id', $organization_id);
+			$form = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->whereHas('cycle', function ($query) use ($orgIds) {
+					$query->whereIn('organization_id', $orgIds);
 				});
 			})->where('cycle_id', $cstep->cycle_id)->where('stype', 1)->where('arr', $cstep->arr - 1)->first();
 		} else {
@@ -112,7 +285,7 @@ class ScreeningController extends Controller
 		$companies = [];
 		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
 		if( $cstep ) { $companies = Company::whereIn('step', [$form?->id ?? 0, $cstep?->id ?? 0])->get(); } else { $cstep = []; }
-		return view('admin.settings.screening.index', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'steps', 'id', 'svgs', 'evaluationForm'));
+		return view('admin.settings.screening.show', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'steps', 'id', 'svgs', 'evaluationForm'));
 	}
 
 	public function update(Request $request)
@@ -296,25 +469,26 @@ class ScreeningController extends Controller
 	public function results($id = 0)
 	{
 		$l = app()->getLocale();
-		$organization_id = auth()->user()->organization_id;
+		$user = auth()->user();
+		$orgIds = $user->organizations_ids;
 
-		$steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
-			return $q->whereHas('cycle', function ($query) use ($organization_id) {
-				$query->where('organization_id', $organization_id);
+		$steps = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+			return $q->whereHas('cycle', function ($query) use ($orgIds) {
+				$query->whereIn('organization_id', $orgIds);
 			});
 		})->where('stype', 2)->orderBy('from')->get();
-		
+
 		if ($id == 0) {
 			$id = $steps->pluck('id')->first();
-			$cstep = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
-				return $q->whereHas('cycle', function ($query) use ($organization_id) {
-					$query->where('organization_id', $organization_id);
+			$cstep = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->whereHas('cycle', function ($query) use ($orgIds) {
+					$query->whereIn('organization_id', $orgIds);
 				});
 			})->where('stype', 2)->where('id', $id)->first();
 		} else {
-			$cstep = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
-				return $q->whereHas('cycle', function ($query) use ($organization_id) {
-					$query->where('organization_id', $organization_id);
+			$cstep = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->whereHas('cycle', function ($query) use ($orgIds) {
+					$query->whereIn('organization_id', $orgIds);
 				});
 			})->where('stype', 2)->where('id', $id)->first();
 		}
@@ -651,13 +825,23 @@ class ScreeningController extends Controller
 			
 		}
 
-		// Save screening guidelines
+		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
+		$current_status = strtolower( $evaluationForm->status );
+
+		// Allow saving screening_guidelines even when evaluation is published
 		if ($request->has('screening_guidelines')) {
 			$evaluation->screening_guidelines = $request->screening_guidelines;
 			$evaluation->save();
+			// If only screening_guidelines is being saved, return success
+			if (!$request->has('criteria') || empty($request->criteria)) {
+				return response()->json([
+					'status' => true,
+					'title' => 'saved',
+					'message' => 'Screening guidelines saved successfully'
+				]);
+			}
 		}
-		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
-		$current_status = strtolower( $evaluationForm->status );
+
 		if( $current_status == 'published' ) { return response()->json(['status' => false, 'message' => __('You can not make any changes on a published evaluation')], 200); }
 		else
 		{
@@ -866,18 +1050,19 @@ class ScreeningController extends Controller
 	public function resultsReport()
 	{
 		$l = app()->getLocale();
-		$organization_id = auth()->user()->organization_id;
+		$user = auth()->user();
+		$orgIds = $user->organizations_ids;
 
-		$steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
-			return $q->whereHas('cycle', function ($query) use ($organization_id) {
-				$query->where('organization_id', $organization_id);
+		$steps = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+			return $q->whereHas('cycle', function ($query) use ($orgIds) {
+				$query->whereIn('organization_id', $orgIds);
 			});
 		})->where('stype', 2)->orderBy('from')->get();
-		
+
 			$id = $steps->pluck('id')->first();
-			$cstep = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
-				return $q->whereHas('cycle', function ($query) use ($organization_id) {
-					$query->where('organization_id', $organization_id);
+			$cstep = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->whereHas('cycle', function ($query) use ($orgIds) {
+					$query->whereIn('organization_id', $orgIds);
 				});
 			})->where('stype', 2)->where('id', $id)->first();
 		

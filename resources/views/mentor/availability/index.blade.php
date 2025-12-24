@@ -18,6 +18,17 @@
     .fc-today-button {
       text-transform: capitalize !important;
     }
+    .slot-popup.popover {
+      position: absolute;
+      z-index: 9999;
+      pointer-events: none;
+      font-size: 12px;
+      white-space: nowrap;
+      max-width: none;
+    }
+    .slot-popup.popover .popover-arrow {
+      display: none;
+    }
   </style>
 @stop
 
@@ -105,8 +116,6 @@
                             <label class="form-label">{{ __('mentor.session_type') }}</label>
                             <select id="slot-session-type" class="form-select bg-white border">
                               <option value="Online">{{ __('mentor.online') }}</option>
-                              <option value="Offline">{{ __('mentor.offline') }}</option>
-                              <option value="Both">{{ __('mentor.both') }}</option>
                             </select>
                           </div>
                         </div>
@@ -164,6 +173,9 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ar.js"></script>
 
 <script>
+  // Constants
+  const isOfflineAllowed = {!! json_encode($offline_allowed) !!};
+
   // Translation data
   const translations = {!! json_encode(__('mentor')) !!};
 
@@ -238,6 +250,21 @@
     let startTimePicker;
     let endTimePicker;
 
+    // Function to get session type options HTML
+    function getSessionTypeOptionsHTML(selected = 'Online') {
+        let options = `<option value="Online" ${selected === 'Online' ? 'selected' : ''}>${translations.online || 'Online'}</option>`;
+        if (isOfflineAllowed) {
+            options += `<option value="Offline" ${selected === 'Offline' ? 'selected' : ''}>${translations.offline || 'Offline'}</option>`;
+            options += `<option value="Both" ${selected === 'Both' ? 'selected' : ''}>${translations.both || 'Both'}</option>`;
+        }
+        return options;
+    }
+
+    // Initialize session type select
+    function initSessionTypeSelect() {
+        $('#slot-session-type').html(getSessionTypeOptionsHTML());
+    }
+
     // Fetch slots on page load
     document.addEventListener('DOMContentLoaded', function() {
         fetch('/dashboard/availability/slots', {
@@ -270,6 +297,9 @@
             dateFormat: "H:i",
             time_24hr: true,
         });
+
+        // Initialize session type select
+        initSessionTypeSelect();
 
         // Initialize calendar after time pickers
         calendarInstance = flatpickr("#availability-calendar", {
@@ -362,7 +392,7 @@
             events: events,
             eventContent: function(arg) {
                 let arrayOfDomNodes = [];
-                
+
                 let titleEl = document.createElement('span');
                 titleEl.innerHTML = arg.event.title;
                 arrayOfDomNodes.push(titleEl);
@@ -374,6 +404,43 @@
                 }
 
                 return { domNodes: arrayOfDomNodes };
+            },
+            eventMouseEnter: function(arg) {
+                const event = arg.event;
+                const startTime = moment(event.start);
+                const endTime = event.end ? moment(event.end) : moment(event.start).add(1, 'hour'); // fallback if no end time
+                const duration = endTime.diff(startTime, 'minutes');
+                const repeatsStatus = event.extendedProps.weekly ? '{{ __("mentor.repeats_weekly") }}' : '{{ $l == "en" ? "Does not repeat" : "لا يتكرر" }}';
+
+                // Create or get popup element
+                let popup = document.querySelector('.slot-popup');
+                if (!popup) {
+                    popup = document.createElement('div');
+                    popup.className = 'popover slot-popup';
+                    const body = document.createElement('div');
+                    body.className = 'popover-body';
+                    popup.appendChild(body);
+                    document.body.appendChild(popup);
+                }
+
+                // Set popup content
+                const body = popup.querySelector('.popover-body');
+                body.innerHTML = `
+                    <div><strong>{{ $l == "en" ? "Duration" : "المدة" }}:</strong> ${duration} {{ __("mentor.min") }}</div>
+                    <div><strong>{{ $l == "en" ? "Repeats" : "يتكرر" }}:</strong> ${repeatsStatus}</div>
+                `;
+
+                // Position popup below the event
+                const rect = arg.el.getBoundingClientRect();
+                popup.style.left = (rect.left + rect.width / 2) + 'px';
+                popup.style.top = (rect.bottom + 5) + 'px';
+                popup.style.display = 'block';
+            },
+            eventMouseLeave: function(arg) {
+                const popup = document.querySelector('.slot-popup');
+                if (popup) {
+                    popup.style.display = 'none';
+                }
             }
         });
 
@@ -668,9 +735,7 @@
                     <div class="col-md-4">
                         <label class="form-label">@lang('mentor.session_type')</label>
                         <select class="form-select form-select-sm session-type-select">
-                            <option ${originalSlot.sessionType === 'Online' ? 'selected' : ''}>@lang('mentor.online')</option>
-                            <option ${originalSlot.sessionType === 'Offline' ? 'selected' : ''}>@lang('mentor.offline')</option>
-                            <option ${originalSlot.sessionType === 'Both' ? 'selected' : ''}>@lang('mentor.both')</option>
+                            ${getSessionTypeOptionsHTML(originalSlot.sessionType)}
                         </select>
                     </div>
                 </div>
