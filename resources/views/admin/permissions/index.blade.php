@@ -73,10 +73,11 @@
                 <div class="d-flex flex-wrap gap-1">
                   @foreach( $permission->roles as $role )
                     <a 
-                      target="_blank" 
+                      target="_blank"
                       href="{{ route('roles.edit', ['role' => $role->id]) }}"
-                      class="btn btn-xs btn-label-primary">
+                      class="btn btn-xs btn-label-primary d-flex align-items-center px-1">
                       <small>{{ $role->name ?? '' }}</small>
+                      <i class="fas fa-times text-danger mx-2 strip-role-permission" data-role="{{ $role->id }}" data-permission="{{ $permission->id }}" role="button"></i>
                     </a>
                   @endforeach
                 </div>
@@ -101,87 +102,155 @@
 </div>
 @stop
 
+@php
+  $stripFromRoles_url = URL::to('dashboard/permissions/strip-from-roles');
+@endphp
+
 @section('scripts')
-<script>
-  $(document).ready(function() {
-    const isRtl = {{ $l == 'ar' ? 'true' : 'false' }};
+  <script>
+    $(document).ready(function() {
+      const isRtl = {{ $l == 'ar' ? 'true' : 'false' }};
 
-    // Initialize DataTable
-    var table = $('.permissions-table').DataTable({
-      responsive: true,
-      pageLength: 10,
-      lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "{{ __('admin.All') }}"]],
-      language: isRtl ? { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/ar.json' } : {},
-      dom: '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-2"l><"col-sm-12 col-md-7 filters"><"col-sm-12 col-md-3"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
-      buttons: [
-        {
-          extend: 'excel',
-          title: '{{ $l == "en" ? "Permissions List" : "قائمة الأذونات" }}',
-          exportOptions: {
-            columns: [0, 1, 2],
-          }
-        },
-        {
-          extend: 'csv',
-          title: '{{ $l == "en" ? "Permissions List" : "قائمة الأذونات" }}',
-          exportOptions: {
-            columns: [0, 1, 2],
-          }
-        },
-      ],
-    });
-
-    // Handle export buttons
-    $('#exportCsv').on('click', function() {
-      table.button('.buttons-csv').trigger();
-    });
-
-    $('#exportExcel').on('click', function() {
-      table.button('.buttons-excel').trigger();
-    });
-
-    // Handle delete action
-    $(document).on("click", "#deleteAction", function (e) {
-      e.preventDefault();
-      var url = $(this).data('url');
-      var id = $(this).data('id');
-      var token = '{{ csrf_token() }}';
-      
-      Swal.fire({
-        title: "{{__('admin.SureDelete')}}",
-        text: "{{__('admin.Recover')}}",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "{{ __('admin.DYes') }}",
-        cancelButtonText: "{{ __('admin.No') }}",
-        reverseButtons: true,
-        customClass: {
-            confirmButton: 'btn btn-danger me-2',
-            cancelButton: 'btn btn-label-secondary',
-        },
-        buttonsStyling: false,
-      })
-      .then((result) => {
-        if (result.value) {
-          $.post(url, {'_method': 'DELETE' , '_token': token},
-            function(response) {
-              // Remove the row from DataTable
-              table.row('#row_' + id).remove().draw();
-
-              releaseSuccessAlert({
-                title: "{{ __('admin.Deleted') }}!",
-                message: "{{ __('admin.DeletedSuccessfully') }}.",
-              });
+      // Initialize DataTable
+      var table = $('.permissions-table').DataTable({
+        responsive: true,
+        pageLength: 10,
+        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "{{ __('admin.All') }}"]],
+        language: isRtl ? { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/ar.json' } : {},
+        dom: '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-2"l><"col-sm-12 col-md-7 filters"><"col-sm-12 col-md-3"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+        buttons: [
+          {
+            extend: 'excel',
+            title: '{{ $l == "en" ? "Permissions List" : "قائمة الأذونات" }}',
+            exportOptions: {
+              columns: [0, 1, 2],
             }
-          ).fail(function(error) { 
-            releaseFailureAlert({
-							title: "{{ __('admin.Error') }}!",
-							message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
-						});
-          });
-        }
+          },
+          {
+            extend: 'csv',
+            title: '{{ $l == "en" ? "Permissions List" : "قائمة الأذونات" }}',
+            exportOptions: {
+              columns: [0, 1, 2],
+            }
+          },
+        ],
+      });
+
+      // Handle export buttons
+      $('#exportCsv').on('click', function() {
+        table.button('.buttons-csv').trigger();
+      });
+
+      $('#exportExcel').on('click', function() {
+        table.button('.buttons-excel').trigger();
+      });
+
+      // Handle delete action
+      $(document).on("click", "#deleteAction", function (e) {
+        e.preventDefault();
+        var url = $(this).data('url');
+        var id = $(this).data('id');
+        var token = '{{ csrf_token() }}';
+        
+        Swal.fire({
+          title: "{{__('admin.SureDelete')}}",
+          text: "{{__('admin.Recover')}}",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "{{ __('admin.DYes') }}",
+          cancelButtonText: "{{ __('admin.No') }}",
+          reverseButtons: true,
+          customClass: {
+              confirmButton: 'btn btn-danger me-2',
+              cancelButton: 'btn btn-label-secondary',
+          },
+          buttonsStyling: false,
+        })
+        .then((result) => {
+          if (result.value) {
+            $.post(url, {'_method': 'DELETE' , '_token': token},
+              function(response) {
+                // Remove the row from DataTable
+                table.row('#row_' + id).remove().draw();
+
+                releaseSuccessAlert({
+                  title: "{{ __('admin.Deleted') }}!",
+                  message: "{{ __('admin.DeletedSuccessfully') }}.",
+                });
+              }
+            ).fail(function(error) { 
+              releaseFailureAlert({
+                title: "{{ __('admin.Error') }}!",
+                message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
+              });
+            });
+          }
+        });
+      });
+
+      $(document).on("click", ".strip-role-permission", function (e) {
+        e.preventDefault();
+        var el = $(this);
+        const token = '{{ csrf_token() }}';
+        const url = "{{ $stripFromRoles_url }}";
+        const permissionId = $(this).data('permission');
+        const roleId = $(this).data('role');
+
+        Swal.fire({
+          title: "{{__('admin.SureDelete')}}",
+          text: "{{__('admin.Recover')}}",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "{{ __('admin.DYes') }}",
+          cancelButtonText: "{{ __('admin.No') }}",
+          reverseButtons: true,
+          customClass: {
+              confirmButton: 'btn btn-danger me-2',
+              cancelButton: 'btn btn-label-secondary',
+          },
+          buttonsStyling: false,
+        })
+        .then((result) => {
+          if (result.value) {
+            $.post(url, {'_token': token, 'permission': permissionId, 'role': roleId},
+              function(response) {
+                if( response.status )
+                {
+                  var load_roles = '';
+                  $.each(response.data, function(index, item) {
+                    load_roles += `
+                      <a 
+                        target="_blank"
+                        href="${item.url}"
+                        class="btn btn-xs btn-label-primary d-flex align-items-center px-1">
+                        <small>${item.name}</small>
+                        <i class="fas fa-times text-danger mx-2 strip-role-permission" data-role="${item.role_id}" data-permission="${item.permission_id}" role="button"></i>
+                      </a>
+                    `;
+                  })
+                  el.parent().parent().html( load_roles );
+                  releaseSuccessAlert({
+                    title: "{{ __('admin.Deleted') }}!",
+                    message: "{{ __('admin.DeletedSuccessfully') }}.",
+                  });
+                }
+                else
+                {
+                  releaseFailureAlert({
+                    title: "{{ __('admin.Error') }}!",
+                    message: response?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
+                  });
+                }
+              }
+            ).fail(function(error) { 
+              releaseFailureAlert({
+                title: "{{ __('admin.Error') }}!",
+                message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
+              });
+            });
+          }
+        });
       });
     });
-  });
-</script>
+  </script>
 @stop

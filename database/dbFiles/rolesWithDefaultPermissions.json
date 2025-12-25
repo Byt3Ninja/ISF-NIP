@@ -865,8 +865,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "mentor",
-                    "judger"
+                    "mentor"
                 ]
             },
             {
@@ -1820,7 +1819,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "subadmin"
                 ]
             },
             {
@@ -1847,7 +1847,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "subadmin"
                 ]
             },
             {
@@ -1856,7 +1857,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "subadmin"
                 ]
             },
             {
@@ -1865,7 +1867,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "subadmin"
                 ]
             },
             {
@@ -2473,7 +2476,6 @@
                 "default_for": [
                     "admin",
                     "mentor",
-                    "judger",
                     "organizationmanager",
                     "subadmin"
                 ]
@@ -5380,7 +5382,6 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "judger",
                     "organizationmanager",
                     "subadmin"
                 ]
@@ -5439,7 +5440,6 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "judger",
                     "organizationmanager",
                     "subadmin"
                 ]
@@ -5615,7 +5615,7 @@
             },
             {
                 "name": "screening.results_report",
-                "description": " All Screening Results Report ",
+                "description": " All Screening Results Report",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
