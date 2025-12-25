@@ -138,7 +138,7 @@
         'icon' => 'ti ti-layout-kanban ti-md me-2 me-lg-4 ti-lg',
         'route' => 'mentorships.sessions_list_detailed',
         'permission' => 'mentorships.sessions_list_detailed',
-        'isVisible' => '$_user->hasRole("Mentor")',
+        'isVisible' => '$_user->hasAnyRole("Mentor|Registered")',
         'subItems' => []
     ],
  
@@ -178,13 +178,23 @@
                 'isVisible' => true
             ],
             [
-                'label' => $l == 'en' ? 'Mentorship' : 'الإرشاد',
+                'label' => $l == 'en' ? 'Mentorship Requests' : 'طلبات الارشاد',
                 'icon' => 'ti ti-users-group',
                 'route' => '/dashboard/mentorship/mine',
                 'permission' => 'mentorships.list_mine',
                 'isVisible' => true
             ]
         ]
+    ],
+
+    // Services Directory
+    [
+        'label' => $l == 'en' ? 'Directory' : 'دليل الخدمات',
+        'icon' => 'ti ti-search',
+        'route' => 'users.directory_view',
+        'permission' => 'users.directory_view',
+        'isVisible' => '$_user->hasAnyRole("Registered|Mentor")',
+        'subItems' => []
     ],
 
     // My Courses

@@ -19,8 +19,12 @@ if ($canRequestMentorship) {
   $getCycle = auth()->user()->company->cycledata;
 }
 
-// Determine active tab
 $currentRoute = \Route::currentRouteName();
+
+$tabs = [
+  ['title' => __('admin.allMentors'), 'route' => 'mentors.list', 'icon' => 'users'],
+  ['title' => __('admin.invitations'), 'route' => 'invitations.index', 'icon' => 'inbox'],
+];
 @endphp
 
 @section('content')
@@ -42,24 +46,17 @@ $currentRoute = \Route::currentRouteName();
 
       {{-- Tabs Navigation --}}
       <ul class="nav nav-pills mb-6">
-        <li class="nav-item">
-          <a 
-            class="nav-link {{ $currentRoute === 'mentors.list' ? 'active' : '' }}" 
-            href="{{ route('mentors.list') }}"
-          >
-            <i class="ti ti-users me-2"></i>
-            {{ __('admin.allMentors') }}
-          </a>
-        </li>
-        <li class="nav-item">
-          <a 
-            class="nav-link {{ $currentRoute === 'invitations.index' ? 'active' : '' }}" 
-            href="{{ route('invitations.index') }}"
-          >
-            <i class="ti ti-inbox me-2"></i>
-            {{ __('admin.invitations') }}
-          </a>
-        </li>
+        @foreach($tabs as $tab)
+          <li class="nav-item">
+            <a 
+              class="nav-link {{ $currentRoute === $tab['route'] ? 'active' : '' }}" 
+              href="{{ route($tab['route']) }}"
+            >
+              <i class="ti ti-{{ $tab['icon'] }} me-2"></i>
+              {{ $tab['title'] }}
+            </a>
+          </li>
+        @endforeach
       </ul>
 
       @include('mentors.partials.header')
