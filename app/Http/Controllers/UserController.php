@@ -172,7 +172,7 @@ class UserController extends Controller
 		$user->organizations()->sync($organizationIds);
 
 		return redirect()->route('users.edit', $user->id)
-			->with(['msg' => 'OrganizationsUpdatedSuccessfully']);
+			->with(['success' => 'OrganizationsUpdatedSuccessfully']);
 	}
 
 	/**

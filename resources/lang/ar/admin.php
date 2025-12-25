@@ -398,6 +398,8 @@ return [
 	'Manager' => 'مدير',
 	'Judger' => 'محكم',
 	'judger' => 'محكم',
+	'Judge' => 'محكم',
+	'judge' => 'محكم',
 	'Pages Editor' => 'مشرف صفحة',
 	'End' => 'ينتهي',
 	'Event Updated Successfully' => 'تم التحديث بنجاح',

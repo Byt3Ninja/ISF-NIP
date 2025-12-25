@@ -91,6 +91,12 @@
             message="{{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }}"
           />
         @endif
+        @if (session()->has('success'))
+          <x-alert
+            type="success"
+            message="{{ __('admin.' . session()->get('success')) }} {{ Session::forget('success') }}"
+          />
+        @endif
 
         @if (count($errors) > 0)
           <ul class="alert alert-danger alert-dismissible ps-8">
