@@ -854,6 +854,7 @@
 			@endif
 
 			@if( array_intersect(['dashboard.widgets_tables_my_current_schedule_view'], $permissions) )
+			@if ($_user->ableTo('slots.index', $permissions))
 			<div class="col-12">
 				<div class="card mb-6">
 					<div class="card-header">
@@ -915,6 +916,7 @@
 					</div>
 				</div>
 			</div>
+			@endif
 			@endif
 
 			@if( array_intersect(['dashboard.widgets_tables.my_next_mentorship_sessions_view'], $permissions) )

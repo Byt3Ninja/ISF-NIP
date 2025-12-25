@@ -8815,7 +8815,7 @@
     },
     {
         "name": "Invitations",
-        "description": "Invitations management for mentors",
+        "description": "Manage invitations sent to mentors",
         "permissions": [
             {
                 "name": "invitations.index",
