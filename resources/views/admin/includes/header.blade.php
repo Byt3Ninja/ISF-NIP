@@ -102,16 +102,6 @@
         'subItems' => []
     ],
 
-    // Contact Us
-    [
-        'label' => $l == 'en' ? 'Contact Us' : 'اتصل بنا',
-        'icon' => 'ti ti-world',
-        'route' => '/dashboard/mymsg',
-        'permission' => 'messages.view',
-        'isVisible' => true,
-        'subItems' => []
-    ],
-
     // Companies
     [
         'label' => $l == 'en' ? 'Startup Hub' : 'الشركات',
@@ -126,7 +116,7 @@
     [
         'label' => $l == 'en' ? 'Mentors' : 'المرشدون',
         'icon' => 'ti ti-users ti-md me-2 me-lg-4 ti-lg',
-        'route' => '/dashboard/show/Mentors',
+        'route' => '/dashboard/mentors',
         'permission' => 'mentors.list',
         'isVisible' => '$_user->hasAnyRole("Registered|Mentor|organizationManager")',
         'subItems' => []
@@ -229,7 +219,7 @@
 
     // Screening (for Judgers)
     [
-        'label' => $l == 'en' ? 'Judger Screening' : 'فرز الحكام',
+        'label' => $l == 'en' ? 'Screening' : 'الفحص و التقييم',
         'icon' => 'ti ti-gavel',
         'route' => '/dashboard/judger/screening',
         'permission' => 'screening.access',

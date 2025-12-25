@@ -194,7 +194,7 @@
         ],
         [
             'color' => 'secondary',
-            'href' => '/dashboard/show/Mentors',
+            'href' => '/dashboard/mentors',
             'icon' => 'ti ti-school',
             'text' => __('dashboard.Mentors'),
             'count' => $m_count,

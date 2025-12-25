@@ -2848,5 +2848,8 @@ return [
 	'Please enter the Google Maps URL' => 'يرجى إدخال رابط خرائط جوجل',
 	'Please enter a valid Google Maps URL' => 'يرجى إدخال رابط خرائط جوجل صالح',
 	'Please enter a valid URL' => 'يرجى إدخال رابط صالح',
+	'select_expertises' => 'اختر الخبرات',
+	'select_rating' => 'اختر التقييم',
+	'invitations' => 'الدعوات',
 	'please_select_score' => 'يرجى اختيار درجة التقييم',
 ];

@@ -1618,7 +1618,7 @@ class HomeController extends Controller
             ];
             $data['countCards'][] = [
                 'color' => 'secondary',
-                'href' => '/dashboard/show/Mentors',
+                'href' => '/dashboard/mentors',
                 'icon' => 'ti ti-school',
                 'text' => 'Mentors',
                 'permissions' => ['mentors.list', 'dashboard.widgets_cards_my_mentors_view'],
@@ -1665,7 +1665,7 @@ class HomeController extends Controller
             ];
             $data['countCards'][] = [
                 'color' => 'secondary',
-                'href' => '/dashboard/show/Mentors',
+                'href' => '/dashboard/mentors',
                 'icon' => 'ti ti-school',
                 'text' => 'Mentors',
                 'permissions' => ['mentors.list', 'dashboard.widgets_cards_my_mentors_view'],
@@ -1720,7 +1720,7 @@ class HomeController extends Controller
             ];
             $data['countCards'][] = [
                 'color' => 'danger',
-                'href' => '/dashboard/show/Mentors',
+                'href' => '/dashboard/mentors',
                 'icon' => 'ti-school',
                 'text' => 'Mentors',
                 'permissions' => ['users.index', 'dashboard.widgets_cards_mentors_view'],
