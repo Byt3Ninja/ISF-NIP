@@ -124,7 +124,17 @@
 
     // Mentorship Tasks (for Mentors)
     [
-        'label' => $l == 'en' ? 'Mentorship Tasks' : 'مهام الإرشاد',
+        'label' => __('mentor.availability'),
+        'icon' => 'ti ti-calendar-cog ti-md me-2 me-lg-4 ti-lg',
+        'route' => 'slots.index',
+        'permission' => 'slots.index',
+        'isVisible' => '$_user->hasRole("Mentor")',
+        'subItems' => []
+    ],
+
+    // Mentorship Tasks (for Mentors)
+    [
+        'label' => $l == 'en' ? 'Tasks' : 'المهام',
         'icon' => 'ti ti-layout-kanban ti-md me-2 me-lg-4 ti-lg',
         'route' => 'mentorships.sessions_list_detailed',
         'permission' => 'mentorships.sessions_list_detailed',
