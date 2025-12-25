@@ -578,8 +578,18 @@
         })
           .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok'))
           .then(result => {
-            const newSlot = createSlotObject(result.data);
-            availabilityData[type][key] = [...(availabilityData[type][key] || []), newSlot];
+            if( Array.isArray(result.data) )
+            {
+              $.each(result.data, function(index, slot) {
+                var newSlot = createSlotObject(slot);
+                availabilityData[type][key] = [...(availabilityData[type][key] || []), newSlot];
+              });
+            }
+            else
+            {
+              const newSlot = createSlotObject(result.data);
+              availabilityData[type][key] = [...(availabilityData[type][key] || []), newSlot];
+            }
             
             updateSlotsList();
             updateListView();
@@ -802,8 +812,18 @@
             throw new Error(result.message || '{{ __('admin.unexpected_error') }}');
           }
 
-          const addedSlot = createSlotObject(result.data);
-          availabilityData[originalType][originalKey] = [...(availabilityData[originalType][originalKey] || []), addedSlot];
+          if( Array.isArray(result.data) )
+          {
+            $.each(result.data, function(index, slot) {
+              var newSlot = createSlotObject(slot);
+              availabilityData[type][key] = [...(availabilityData[type][key] || []), newSlot];
+            });
+          }
+          else
+          {
+            const addedSlot = createSlotObject(result.data);
+            availabilityData[originalType][originalKey] = [...(availabilityData[originalType][originalKey] || []), addedSlot];
+          }
           
           updateListView();
           updateSlotsList();
