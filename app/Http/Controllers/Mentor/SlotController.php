@@ -286,7 +286,7 @@ class SlotController extends Controller
 						'session_type' => $schedule->session_type,
 						'weekly' => $schedule->type === 'Weekly',
 					];
-				})->values()
+				})
 			], 200);
 	}
 

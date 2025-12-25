@@ -470,6 +470,9 @@ class MentorsController extends Controller
 
 				$schedules_q = "SELECT * FROM schedules WHERE user_id = ? AND `days` LIKE ? AND tfrom <= ? AND tto >= ?";
 				$schedules = DB::select($schedules_q, [
+					$request->mentorid,
+					'%' . $dayName . '%',
+					$request->timeFrom,
 					$request->timeTo
 				]);
 				if ($schedules == null) {
