@@ -2493,7 +2493,7 @@ return [
 	'No bio has been added yet' => 'No bio has been added yet',
 	'no_available_yet' => 'Not Available Yet',
 	'In Progress' => 'In Progress',
-	'Select Program' => 'Select Program',
+	'Select Program' => 'Select program',
 	'LINKEDIN_LOGIN' => 'LinkedIn Login',
 	'disabled' => 'Disabled',
 	'enabled' => 'Enabled',
@@ -2796,6 +2796,9 @@ return [
 	'Please enter the Google Maps URL' => 'Please enter the Google Maps URL.',
 	'Please enter a valid Google Maps URL' => 'Please enter a valid Google Maps URL.',
 	'Please enter a valid URL' => 'Please enter a valid URL.',
+	'select_expertises' => 'Select expertises',
+	'select_rating' => 'Select rating',
+	'invitations' => 'Invitations',
 	'please_select_score' => 'Please select a score.',
 ];
 

@@ -179,8 +179,8 @@
   
     @if ($_user->hasAnyRole('Mentor|Registered|Admin|organizationManager'))
       @if( $_user->ableTo('mentors.list', $permissions) )
-      <li class="{{ Request::is('dashboard/show/Mentors') ? 'active' : '' }} menu-item"><a
-          href="/dashboard/show/Mentors" class="menu-link">
+      <li class="{{ Request::is('dashboard/mentors') ? 'active' : '' }} menu-item"><a
+          href="/dashboard/mentors" class="menu-link">
           <i class="menu-icon tf-icons ti ti-users"></i>
           <div>{{ __('admin.Mentors') }}</div>
         </a>
