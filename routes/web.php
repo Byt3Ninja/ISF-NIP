@@ -509,6 +509,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     //Audit Logs
     Route::resource('audit-logs', 'AuditLogsController', ['except' => ['create', 'store', 'edit', 'update']]);
     //Permissions
+    Route::post('permissions/strip-from-roles', 'PermissionsController@stripFromRoles');
     Route::resource('permissions', 'PermissionsController');
     // permissions groups
     Route::resource('permission-groups', 'PermissionGroupsController');

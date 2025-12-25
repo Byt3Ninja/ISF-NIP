@@ -2,6 +2,8 @@
 
 namespace App;
 
+use Illuminate\Support\Str;
+use App\Http\Middleware\Permissions;
 use App\Traits\Auditable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\DB;
@@ -308,6 +310,7 @@ class User extends Authenticatable implements MustVerifyEmail
 	public function ableTo( $permission, $permissions = [] )
 	{
         if( env('PERMISSION_BYPASS', false) === true ) { return true; }
+        if( $this->checkForBypass( $permission ) === true ) { return true; }
         if( empty( $permissions ) || count( $permissions ) == 0 ) { $permissions = $this->roles->flatMap(function($role) { return $role->_permissions->pluck('name'); })->unique()->values()->toArray(); }
         return in_array( $permission, $permissions );
 	}
@@ -328,11 +331,37 @@ class User extends Authenticatable implements MustVerifyEmail
     public function ableToAny( $permission, $permissions = [] )
     {
         if( env('PERMISSION_BYPASS', false) === true ) { return true; }
+        if( $this->checkForBypassToAny( $permission ) === true ) { return true; }
         if( empty( $permissions ) || count( $permissions ) == 0 ) { $permissions = $this->roles->flatMap(function($role) { return $role->_permissions->pluck('name'); })->unique()->values()->toArray(); }
         $permissions = array_map(function($n){ return trim( strtolower($n) ); }, $permissions); 
         foreach( $permission as $p )
         {
             if( in_array( trim( strtolower($p) ), $permissions ) ) { return true; }
+        }
+        return false;
+    }
+
+    public function checkForBypass( $permission )
+    {
+        $middleware = new Permissions;
+        $exceptNames = $middleware->exceptNames;
+        if( in_array( $permission, $exceptNames) ) { return true; }
+        else
+        {
+            if( is_array( $permission ) ) { return false; }
+            foreach( $exceptNames as $except) { if( Str::is($except, $permission) ) { return true; } }
+        }
+        return false;
+    }
+
+    public function checkForBypassToAny( $permission )
+    {
+        $middleware = new Permissions;
+        $exceptNames = $middleware->exceptNames;
+
+        foreach( $permission as $p )
+        {
+            foreach( $exceptNames as $except) { if( Str::is($except, $p) ) { return true; } }
         }
         return false;
     }

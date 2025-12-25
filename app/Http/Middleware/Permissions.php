@@ -11,7 +11,7 @@ use Spatie\Permission\PermissionRegistrar;
 
 class Permissions
 {
-    private $exceptNames = [
+    public $exceptNames = [
         'core.dashboard_view',
         'organizations.logo',
         'provider-registration',
@@ -38,7 +38,7 @@ class Permissions
         'trainings.time_tracking',
     ];
 
-    private $exceptControllers = [
+    public $exceptControllers = [
         'LoginController',
 		'IndexController',
         'ForgotPasswordController',
