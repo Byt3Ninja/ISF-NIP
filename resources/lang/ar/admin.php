@@ -720,6 +720,7 @@ return [
 	'Trainer' => 'مدرب',
 	'organizationManager' => 'مدير مؤسسه',
 	'Sub-Admin' => 'مسؤول فرعي',
+	'sub-admin' => 'مسؤول فرعي',
 	'Assigned Organizations' => 'المؤسسات المعينة',
 	'AssignedOrganizationsDescription' => 'اختر مؤسسة واحدة أو أكثر يمكن لهذا المسؤول الفرعي إدارتها.',
 	'OrganizationsUpdatedSuccessfully' => 'تم تحديث المؤسسات بنجاح',

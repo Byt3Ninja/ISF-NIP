@@ -748,6 +748,7 @@ return [
 	'Trainer' => 'Trainer',
 	'organizationManager' => 'Organization Manager',
 	'Sub-Admin' => 'Sub-Admin',
+	'sub-admin' => 'Sub-Admin',
 	'Assigned Organizations' => 'Assigned Organizations',
 	'AssignedOrganizationsDescription' => 'Select one or more organizations that this Sub-Admin can manage.',
 	'OrganizationsUpdatedSuccessfully' => 'Organizations updated successfully',
