@@ -18,7 +18,17 @@ use App\Http\Controllers\Mentor\SlotController;
 use App\Http\Controllers\Judger\JudgerScreeningController;
 use App\Http\Controllers\AdvancedExportController;
 /* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
-
+Route::get('def-permission', function() {
+    $jsonRole = File::get(base_path('database/dbFiles/rolesWithDefaultPermissions.json'));
+    $dataRole = json_decode($jsonRole, true);
+    $dataRole = collect( $dataRole )->flatMap(function($role) {
+        return $role['permissions'];
+    });
+    $judges = $dataRole->filter(function($permission) {
+        return in_array('judger', $permission['default_for']);
+    })->values();
+    dd( $judges->pluck('name')->toArray() );
+});
 Route::get('test', function () {
     $user = User::find(1);
     $user->notify(new WelcomeUserNotification($user, '12345'));
@@ -283,10 +293,13 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     // Organization Wizard Routes (multi-step creation/editing)
     Route::prefix('organization')->name('organization.wizard.')->group(function () {
         Route::get('/create', 'OrganizationWizardController@create')->name('create');
-        Route::post('/create', 'OrganizationWizardController@storeStep1')->name('store.step1');
+        Route::post('/create', 'OrganizationWizardController@store')->name('store');
         Route::get('/{id}/edit', 'OrganizationWizardController@edit')->name('edit');
         Route::put('/{id}/step1', 'OrganizationWizardController@updateStep1')->name('update.step1');
         Route::put('/{id}/step2', 'OrganizationWizardController@updateStep2')->name('update.step2');
+        Route::put('/{id}/step3', 'OrganizationWizardController@updateStep3')->name('update.step3');
+        Route::get('/{id}/managers', 'OrganizationWizardController@getManagers')->name('managers.list');
+        Route::post('/{id}/managers', 'OrganizationWizardController@createManager')->name('managers.create');
         Route::post('/draft', 'OrganizationWizardController@saveDraft')->name('draft');
         Route::put('/{id}/draft', 'OrganizationWizardController@saveDraft')->name('draft.update');
         Route::post('/{id}/publish', 'OrganizationWizardController@publish')->name('publish');

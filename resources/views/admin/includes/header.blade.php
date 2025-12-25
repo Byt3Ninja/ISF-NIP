@@ -1219,7 +1219,7 @@ $menuItems = $menuItems->flatMap(function($item) {
       <div class="modal-body px-0 py-3 py-md-4 px-md-8">
         <input type="text" id="menuSearch" class="form-control form-control-lg" placeholder="{{ __('admin.Search') }}...">
         <div class="w-100 d-none d-md-block" style="max-height: 450px; overflow-y: auto;">
-          <div id="menuGrid" class="nav nav-pills row g-2 g-md-3 mt-3">
+          <div id="menuGrid" class="nav nav-pills row g-2 g-md-3 mt-3 w-100">
             @foreach($menuItems as $item)
               <div class="col-12 col-sm-6 nav-item" data-label="{{ strtolower($item['label']) }}">
                 @php
@@ -1255,7 +1255,7 @@ $menuItems = $menuItems->flatMap(function($item) {
           </div>
         </div>
         <div class="w-100 d-block d-md-none">
-          <div id="menuGrid" class="nav nav-pills row g-2 g-md-3 mt-3">
+          <div id="menuGrid" class="nav nav-pills row g-2 g-md-3 mt-3 w-100">
             @foreach($menuItems as $item)
               <div class="col-12 col-sm-6 nav-item" data-label="{{ strtolower($item['label']) }}">
                 @php

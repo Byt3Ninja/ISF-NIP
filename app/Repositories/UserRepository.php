@@ -311,10 +311,11 @@ class UserRepository
         $users = User::role($role->name)->get();
 
         return [
-                'id'         => $role->id,
-                'name'       => $role->name,
-                'totalUsers' => $users->count(),
-                'avatars'    => $users->map(function ($user) {
+                'id'          => $role->id,
+                'name'        => $role->name,
+                'default_for' => $role->default_for,
+                'totalUsers'  => $users->count(),
+                'avatars'     => $users->map(function ($user) {
                     return $user->img_url 
                         ? Storage::disk('public_uploads')->url($user->img_url) 
                         : null;
