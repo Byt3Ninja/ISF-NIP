@@ -2796,5 +2796,6 @@ return [
 	'Please enter the Google Maps URL' => 'Please enter the Google Maps URL.',
 	'Please enter a valid Google Maps URL' => 'Please enter a valid Google Maps URL.',
 	'Please enter a valid URL' => 'Please enter a valid URL.',
+	'please_select_score' => 'Please select a score.',
 ];
 

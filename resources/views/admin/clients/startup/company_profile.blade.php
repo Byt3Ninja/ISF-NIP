@@ -604,6 +604,26 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
         const originalSaveBtnHtml = saveBtn.innerHTML;
         const originalPublishBtnHtml = publishBtn.innerHTML;
         
+        if (type === 'publish') {
+          let missingScores = false;
+          const scoreSelects = document.querySelectorAll('.score-select');
+          scoreSelects.forEach(select => {
+            if (!select.value || select.value === '') {
+              missingScores = true;
+              select.classList.add('is-invalid');
+            } else {
+              select.classList.remove('is-invalid');
+            }
+          });
+
+          if (missingScores) {
+            alert('{{ __("admin.please_select_score") }}');
+            // Navigate to the criteria tab if not already there
+            document.getElementById('pills-screening-criteria-tab').click();
+            return;
+          }
+        }
+
         if (type === 'draft') {
           const saveIcon = saveBtn.querySelector('i');
           if (saveIcon) {
