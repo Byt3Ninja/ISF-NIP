@@ -255,44 +255,38 @@ class SlotController extends Controller
 			}
 			$dayName = Carbon::parse($validated['date'])->format('l');
 			// Create slot
-			
-			$slotData = [
-					'user_id' => auth()->id(),
-					'type' => $validated['type'],
-					'session_type' => $validated['session_type'] == 'Both' ? 'Online' : 'Offline',
-					'tfrom' => $validated['tfrom'],
-					'tto' => $validated['tto'],
-					'days' => $validated['type'] === 'Weekly' ? $validated['days'] : $dayName,
-					'date' => $validated['type'] !== 'Weekly' ? $validated['date'] : null,
-			];
-
-			$schedule = Schedule::create($slotData);
-			if($validated['session_type'] == 'Both'){
+			$schedules = [];
+			$sessionTypes = $validated['session_type'] === 'Both'
+							? ['Online', 'Offline']
+							: [$validated['session_type']];
+			foreach ($sessionTypes as $sessionType) {
 				$slotData = [
 					'user_id' => auth()->id(),
 					'type' => $validated['type'],
-					'session_type' => 'Offline',
+					'session_type' => $sessionType,
 					'tfrom' => $validated['tfrom'],
 					'tto' => $validated['tto'],
 					'days' => $validated['type'] === 'Weekly' ? $validated['days'] : $dayName,
 					'date' => $validated['type'] !== 'Weekly' ? $validated['date'] : null,
-			];
+				];
 
-			$schedule = Schedule::create($slotData);
+				$schedules[] = Schedule::create($slotData);
 			}
 
 			return response()->json([
-					'success' => true,
-					'message' => __('mentor.slot_added_success'),
-					'data' => [
-							'id' => $schedule->id,
-							'weekday' => $schedule->days,
-							'date' => $schedule->date,
-							'start_time' => substr($schedule->tfrom, 0, 5),
-							'end_time' => substr($schedule->tto, 0, 5),
-							'session_type' => $schedule->session_type,
-							'weekly' => $schedule->type === 'Weekly',
-					]
+				'success' => true,
+				'message' => __('mentor.slot_added_success'),
+				'data' => collect($schedules)->map(function ($schedule) {
+					return [
+						'id' => $schedule->id,
+						'weekday' => $schedule->days,
+						'date' => $schedule->date,
+						'start_time' => substr($schedule->tfrom, 0, 5),
+						'end_time' => substr($schedule->tto, 0, 5),
+						'session_type' => $schedule->session_type,
+						'weekly' => $schedule->type === 'Weekly',
+					];
+				})->values()
 			], 200);
 	}
 
