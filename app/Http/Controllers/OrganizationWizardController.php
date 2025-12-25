@@ -8,10 +8,13 @@ use App\StaticCategory;
 use App\Country;
 use App\State;
 use App\City;
+use App\User;
 use App\Http\Requests\OrganizationStep1Request;
 use App\Http\Requests\OrganizationStep2Request;
+use App\Http\Requests\CreateOrganizationManagerRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 class OrganizationWizardController extends Controller
@@ -41,7 +44,7 @@ class OrganizationWizardController extends Controller
      */
     public function edit($id)
     {
-        $organization = Organization::with(['organizationType', 'industries', 'country', 'state', 'city'])->findOrFail($id);
+        $organization = Organization::with(['organizationType', 'industries', 'country', 'state', 'city', 'assignedUsers'])->findOrFail($id);
         $organizationTypes = OrganizationTypes::all();
         $industries = StaticCategory::all();
         $countries = Country::all();
@@ -54,21 +57,33 @@ class OrganizationWizardController extends Controller
             ? City::where('state_id', $organization->state_id)->get()
             : collect();
 
+        // Get assigned managers for step 3
+        $assignedManagers = $organization->assignedUsers()->get()->map(function ($user) {
+            return [
+                'id' => $user->id,
+                'name' => $user->full_name ?? ($user->first_name_en . ' ' . $user->last_name_en),
+                'email' => $user->email,
+            ];
+        });
+
         return view('admin.organizations.wizard.create', compact(
             'organization',
             'organizationTypes',
             'industries',
             'countries',
             'states',
-            'cities'
+            'cities',
+            'assignedManagers'
         ));
     }
 
     /**
      * Store step 1 data for a new organization.
      */
-    public function storeStep1(OrganizationStep1Request $request)
+    public function store(OrganizationStep1Request $request)
     {
+        $_user = auth()->user();
+        if( !$_user->ableTo('organization.wizard.create') ) { return abort(403); }
         DB::beginTransaction();
 
         try {
@@ -116,6 +131,8 @@ class OrganizationWizardController extends Controller
      */
     public function updateStep1(OrganizationStep1Request $request, $id)
     {
+        $_user = auth()->user();
+        if( !$_user->ableTo('organization.wizard.edit') ) { return abort(403); }
         $organization = Organization::findOrFail($id);
 
         // Check if organization is published and prevent reverting to draft
@@ -179,6 +196,8 @@ class OrganizationWizardController extends Controller
      */
     public function updateStep2(OrganizationStep2Request $request, $id)
     {
+        $_user = auth()->user();
+        if( !$_user->ableTo('organization.wizard.edit') ) { return abort(403); }
         $organization = Organization::findOrFail($id);
 
         DB::beginTransaction();
@@ -225,10 +244,267 @@ class OrganizationWizardController extends Controller
     }
 
     /**
+     * Get managers for AJAX DataTable.
+     */
+    public function getManagers(Request $request, $id)
+    {
+        $_user = auth()->user();
+        if( !$_user->ableTo('organization.wizard.edit') ) { return abort(403); }
+        $organization = Organization::findOrFail($id);
+        $locale = app()->getLocale();
+
+        // Get users with organizationmanager or Sub-Admin roles
+        $query = User::whereHas('roles', function ($q) {
+            $q->whereIn('default_for', ['organizationmanager', 'subadmin']);
+        });
+
+        // Search filter
+        if ($request->filled('search_term')) {
+            $searchTerm = $request->search_term;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('email', 'like', "%{$searchTerm}%")
+                  ->orWhere('first_name_en', 'like', "%{$searchTerm}%")
+                  ->orWhere('last_name_en', 'like', "%{$searchTerm}%")
+                  ->orWhere('first_name_ar', 'like', "%{$searchTerm}%")
+                  ->orWhere('last_name_ar', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        // Get assigned manager IDs for this organization
+        $assignedManagerIds = $organization->assignedUsers()->pluck('users.id')->toArray();
+
+        // Pagination
+        $start = $request->input('start', 0);
+        $length = $request->input('length', 5);
+        $totalRecords = $query->count();
+
+        $managers = $query->skip($start)->take($length)->get();
+
+
+        $data = $managers->map(function ($user) use ($locale, $assignedManagerIds) {
+            $name = $locale === 'ar'
+                ? (($user->first_name_ar ?? $user->first_name_en) . ' ' . ($user->last_name_ar ?? $user->last_name_en))
+                : ($user->first_name_en . ' ' . $user->last_name_en);
+
+            $roleName = $user->roles->first()->default_for ?? '';
+            $roleName = trim( strtolower( $roleName ) ) ;
+            $roleDisplay = $roleName === 'organizationmanager'
+                ? __('admin.Organization Manager')
+                : ($roleName === 'subadmin' ? __('admin.Sub-Admin') : $roleName);
+
+            // Calculate organizations count based on role
+            // Organization Manager: count unique orgs (organization_id + pivot table)
+            // Sub-Admin: count only from pivot table
+            if ($roleName === 'organizationmanager') {
+                // Get unique organization IDs from both organization_id and pivot
+                $orgIds = $user->organizations()->pluck('organizations.id')->toArray();
+                if ($user->organization_id) {
+                    $orgIds[] = $user->organization_id;
+                }
+                $organizationsCount = count(array_unique($orgIds));
+            } else {
+                // Sub-Admin: only count from pivot table
+                $organizationsCount = $user->organizations()->count();
+            }
+
+            return [
+                'id' => $user->id,
+                'name' => $name,
+                'email' => $user->email,
+                'role' => $roleDisplay,
+                'organizations_count' => $organizationsCount,
+                'is_selected' => in_array($user->id, $assignedManagerIds),
+                'avatar' => $user->image_url,
+            ];
+        });
+
+
+        return response()->json([
+            'draw' => intval($request->input('draw', 1)),
+            'recordsTotal' => $totalRecords,
+            'recordsFiltered' => $totalRecords,
+            'data' => $data,
+        ]);
+    }
+
+    /**
+     * Update step 3 data (Organization Managers).
+     */
+    public function updateStep3(Request $request, $id)
+    {
+        $_user = auth()->user();
+        if( !$_user->ableTo('organization.wizard.edit') ) { return abort(403); }
+        $organization = Organization::findOrFail($id);
+
+        // Validate at least one manager
+        $request->validate([
+            'manager_ids' => 'required|array|min:1',
+            'manager_ids.*' => 'exists:users,id',
+        ], [
+            'manager_ids.required' => __('admin.Please select or create at least one organization manager'),
+            'manager_ids.min' => __('admin.Please select or create at least one organization manager'),
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $managerIds = $request->manager_ids;
+            $this->syncManagersToOrganization($organization, $managerIds);
+
+            // Update wizard step if moving forward
+            if ($organization->wizard_step < 4) {
+                $organization->wizard_step = 4;
+            }
+
+            $organization->save();
+
+            DB::commit();
+
+            // Redirect to step 4 after saving step 3
+            return redirect()
+                ->route('organization.wizard.edit', ['id' => $organization->id, 'step' => 4])
+                ->with('success', __('admin.Managers saved successfully'));
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()
+                ->withInput()
+                ->with('error', __('admin.Error saving managers') . ': ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Create a new manager via AJAX.
+     */
+    public function createManager(CreateOrganizationManagerRequest $request, $id)
+    {
+        $_user = auth()->user();
+        if( !$_user->ableTo('organization.wizard.edit') ) { return abort(403); }
+        $organization = Organization::findOrFail($id);
+        $locale = app()->getLocale();
+
+        DB::beginTransaction();
+
+        try {
+            // Create the user
+            $user = new User();
+            $user->first_name_en = $request->first_name_en;
+            $user->last_name_en = $request->last_name_en;
+            $user->first_name_ar = $request->first_name_ar;
+            $user->last_name_ar = $request->last_name_ar;
+            $user->gender = $request->gender;
+            $user->email = $request->email;
+            $user->country_code = $request->country_code;
+            $user->phone = $request->phone;
+            $user->password = Hash::make($request->password);
+            $user->organization_id = $organization->id;
+            $user->email_verified_at = now();
+            $user->save();
+
+            // Assign Organization Manager role
+            $user->allotRole('organizationmanager');
+
+            // Add to user_organizations pivot table
+            $organization->assignedUsers()->attach($user->id);
+
+            DB::commit();
+
+            $name = $locale === 'ar'
+                ? (($user->first_name_ar ?? $user->first_name_en) . ' ' . ($user->last_name_ar ?? $user->last_name_en))
+                : ($user->first_name_en . ' ' . $user->last_name_en);
+
+            return response()->json([
+                'success' => true,
+                'message' => __('admin.Manager created successfully'),
+                'manager' => [
+                    'id' => $user->id,
+                    'name' => $name,
+                    'email' => $user->email,
+                ],
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => __('admin.Error creating manager') . ': ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Sync managers to organization and handle role switching.
+     */
+    protected function syncManagersToOrganization($organization, $managerIds)
+    {
+        // Get current assignments
+        $currentManagerIds = $organization->assignedUsers()->pluck('users.id')->toArray();
+
+        // Sync the pivot table
+        $organization->assignedUsers()->sync($managerIds);
+
+        // Handle role switching for each manager
+        foreach ($managerIds as $userId) {
+            $user = User::find($userId);
+            if (!$user) continue;
+
+            $orgCount = $user->organizations()->count();
+
+            // If user now has more than 1 organization and has organizationmanager role, switch to Sub-Admin
+            if ($orgCount > 1 && $user->hasRole('organizationmanager')) {
+                $this->switchToSubAdmin($user);
+            }
+        }
+
+        // Handle removed managers - check if they need role change
+        $removedIds = array_diff($currentManagerIds, $managerIds);
+        foreach ($removedIds as $userId) {
+            $user = User::find($userId);
+            if (!$user) continue;
+
+            $orgCount = $user->organizations()->count();
+
+            // If user now has only 1 org and has Sub-Admin role, switch back to organizationmanager
+            if ($orgCount == 1 && $user->hasRole('subadmin')) {
+                $this->switchToOrgManager($user);
+            }
+        }
+    }
+
+    /**
+     * Switch user role from Organization Manager to Sub-Admin.
+     */
+    protected function switchToSubAdmin($user)
+    {
+        $user->deAllotRole('organizationmanager');
+        $user->allotRole('subadmin');
+        // Clear the organization_id field as sub-admins use pivot table
+        $user->organization_id = null;
+        $user->save();
+    }
+
+    /**
+     * Switch user role from Sub-Admin to Organization Manager.
+     */
+    protected function switchToOrgManager($user)
+    {
+        $user->deAllotRole('subadmin');
+        $user->allotRole('organizationmanager');
+        // Set organization_id to their remaining organization
+        $remainingOrg = $user->organizations()->first();
+        if ($remainingOrg) {
+            $user->organization_id = $remainingOrg->id;
+        }
+        $user->save();
+    }
+
+    /**
      * Save organization as draft (no validation required for mandatory fields).
      */
     public function saveDraft(Request $request, $id = null)
     {
+        $_user = auth()->user();
+        if( !$_user->ableTo('organization.wizard.edit') ) { return abort(403); }
         // Minimal validation for draft - only validate if values are provided
         $rules = [
             // Step 1 fields
@@ -256,6 +532,9 @@ class OrganizationWizardController extends Controller
             'instagram_profile_url' => 'nullable|url|max:255',
             'youtube_channel_url' => 'nullable|url|max:255',
             'tiktok_url' => 'nullable|url|max:255',
+            // Step 3 fields (Managers)
+            'manager_ids' => 'nullable|array',
+            'manager_ids.*' => 'exists:users,id',
         ];
 
         $messages = [];
@@ -387,6 +666,11 @@ class OrganizationWizardController extends Controller
                 $organization->industries()->sync($request->industries ?? []);
             }
 
+            // Sync managers if provided (Step 3)
+            if ($request->has('manager_ids') && is_array($request->manager_ids)) {
+                $this->syncManagersToOrganization($organization, $request->manager_ids);
+            }
+
             DB::commit();
 
             // Stay on the current step after saving draft
@@ -407,6 +691,8 @@ class OrganizationWizardController extends Controller
      */
     public function publish($id)
     {
+        $_user = auth()->user();
+        if( !$_user->ableTo('organization.wizard.edit') ) { return abort(403); }
         $organization = Organization::findOrFail($id);
 
         // Check if already published
