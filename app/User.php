@@ -271,6 +271,16 @@ class User extends Authenticatable implements MustVerifyEmail
             );
         }
     }
+    public function deAllotRole( $role )
+    {
+        $user_id = $this->id;
+        $_role = Role::where('default_for', 'LIKE', '%' . $role . '%')->first();
+        if( !empty( $_role ) )
+        {
+            $id = $_role->id;
+            RoleUsers::where(['model_id' => $user_id, 'role_id' => $id, 'model_type' => 'App\User'])->delete();
+        }
+    }
     public function allotRole( $role )
     {
         $user_id = $this->id;
