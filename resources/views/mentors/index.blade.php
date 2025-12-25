@@ -18,6 +18,9 @@ $canRequestMentorship =
 if ($canRequestMentorship) {
   $getCycle = auth()->user()->company->cycledata;
 }
+
+// Determine active tab
+$currentRoute = \Route::currentRouteName();
 @endphp
 
 @section('content')
@@ -38,21 +41,23 @@ if ($canRequestMentorship) {
       @endif
 
       {{-- Tabs Navigation --}}
-      <ul class="nav nav-tabs mb-3">
+      <ul class="nav nav-pills mb-6">
         <li class="nav-item">
           <a 
             class="nav-link {{ $currentRoute === 'mentors.list' ? 'active' : '' }}" 
             href="{{ route('mentors.list') }}"
           >
+            <i class="ti ti-users me-2"></i>
             {{ __('admin.allMentors') }}
           </a>
         </li>
         <li class="nav-item">
           <a 
-            class="nav-link {{ $currentRoute === 'mentors.invitations' ? 'active' : '' }}" 
-            href="{{ route('mentors.invitations') }}"
+            class="nav-link {{ $currentRoute === 'invitations.index' ? 'active' : '' }}" 
+            href="{{ route('invitations.index') }}"
           >
-            {{ __('admin.Invitations') }}
+            <i class="ti ti-inbox me-2"></i>
+            {{ __('admin.invitations') }}
           </a>
         </li>
       </ul>

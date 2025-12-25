@@ -1,8 +1,36 @@
 @extends('layouts.admin')
 
+@php
+// Determine active tab
+$currentRoute = \Route::currentRouteName();
+@endphp
+
 @section('content')
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
+
+    {{-- Tabs Navigation --}}
+    <ul class="nav nav-pills mb-6">
+      <li class="nav-item">
+        <a 
+          class="nav-link {{ $currentRoute === 'mentors.list' ? 'active' : '' }}" 
+          href="{{ route('mentors.list') }}"
+        >
+          <i class="ti ti-users me-2"></i>
+          {{ __('admin.allMentors') }}
+        </a>
+      </li>
+      <li class="nav-item">
+        <a 
+          class="nav-link {{ $currentRoute === 'invitations.index' ? 'active' : '' }}" 
+          href="{{ route('invitations.index') }}"
+        >
+          <i class="ti ti-inbox me-2"></i>
+          {{ __('admin.invitations') }}
+        </a>
+      </li>
+    </ul>
+    
     <div class="row">
       <div class="col-12">
         <div class="card">

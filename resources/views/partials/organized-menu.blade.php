@@ -139,6 +139,12 @@ if (strpos(request()->getRequestUri(), '/weights') !== false) {
   $activeItem = 'question-categories.index';
 }
 
+// Special case: Make mentors active if URL contains '/invitations'
+if (strpos(request()->getRequestUri(), '/invitations') !== false) {
+  $activeGroup = 'people';
+  $activeItem = 'mentors.list';
+}
+
 // Special case: Make programs active if URL contains 'programlist' or 'hackathon' or 'cycles' or '/mentorship/assign/'
 if (strpos(request()->getRequestUri(), 'programlist') !== false || strpos(request()->getRequestUri(), 'hackathon') !== false || strpos(request()->getRequestUri(), 'cycles') !== false || strpos(request()->getRequestUri(), '/mentorship/assign/') !== false) {
   $activeGroup = 'programs';

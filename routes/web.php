@@ -331,7 +331,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/mentors', 'ClientProfileController@showMintors')->name('mentors.list');
 
     // Invitations
-    Route::resource('invitations', 'InvitationController');
+    Route::group(['prefix' => 'mentors'], function () {
+        Route::resource('invitations', 'InvitationController');
+    });
     
     // lowercase alias for backward-compatibility / ease of testing
     Route::get('/confirm-email/{token}', 'ClientProfileController@confirmEmailUpdate')->name('user.profile_email_confirm');
