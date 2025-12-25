@@ -46,6 +46,7 @@ class Settings extends Model
 
         // Count overlapping training sessions (stored as varchar timestamps)
         $count += \DB::table('training_sessions')
+            ->whereNull('deleted_at')
             ->whereNotNull('zoom_id')
             ->where(function($query) use ($checkTime, $endTime) {
                 $query->where('datetime', '<', (string) $endTime->timestamp)
@@ -55,6 +56,7 @@ class Settings extends Model
 
         // Count overlapping final screenings (stored as datetime)
         $count += \DB::table('finalscreenings')
+            ->whereNull('deleted_at')
             ->whereNotNull('zoom_id')
             ->where(function($query) use ($checkTime, $endTime) {
                 $query->where('datetime', '<', $endTime->toDateTimeString())
@@ -64,6 +66,7 @@ class Settings extends Model
 
         // Count overlapping mentorship requests (stored as datetime)
         $count += \DB::table('mentorship_requests')
+            ->whereNull('deleted_at')
             ->whereNotNull('zoom_id')
             ->where(function($query) use ($checkTime, $endTime) {
                 $query->where('zoom_date', '<', $endTime->toDateTimeString())

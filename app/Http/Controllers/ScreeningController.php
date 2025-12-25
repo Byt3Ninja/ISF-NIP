@@ -621,7 +621,7 @@ class ScreeningController extends Controller
 					$output->judger->id = $oneResult->user_id;
 					$output->judger->name = $oneResult->user->name;
 					$output->given_score = intval( $oneResult->score );
-					$output->max = 5;
+					$output->max = 10;
 					$score = ( $oneResult->score / $output->max );
 					$output->score = $score * 100;
 					$output->comment = $oneResult->comment;
