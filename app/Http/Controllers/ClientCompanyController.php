@@ -678,7 +678,9 @@ class ClientCompanyController extends Controller
             $milestones = Milestone::where('company_id', $id)
                 ->orderBy('created_at')->get();
                 
-                $year = "2025"; // add here year from Validation Date
+                $year = !empty($data['valuation_date'])
+                        ? Carbon::parse($data['valuation_date'])->year
+                        : (int) date('Y'); // add here year from Validation Date
             $financialprojection = FinancialProjection::where('company_id', $id)
                                                         ->whereBetween('year', [$year - 1, $year + 2])
                                                         ->orderBy('year')
