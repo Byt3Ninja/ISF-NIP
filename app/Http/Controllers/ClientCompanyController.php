@@ -677,7 +677,12 @@ class ClientCompanyController extends Controller
             // Load all milestones for this company (new unified structure)
             $milestones = Milestone::where('company_id', $id)
                 ->orderBy('created_at')->get();
-            $financialprojection = FinancialProjection::where('company_id', $id)->get();
+                
+                $year = "2025"; // add here year from Validation Date
+            $financialprojection = FinancialProjection::where('company_id', $id)
+                                                        ->whereBetween('year', [$year - 1, $year + 2])
+                                                        ->orderBy('year')
+                                                        ->get();
             
             // dd($financialprojection);
             return view('admin/clients/company', compact(
@@ -1749,28 +1754,28 @@ class ClientCompanyController extends Controller
                     return redirect()->back()->with(['msg' => 'Please enter the valuation date', 'class' => 'danger']);
                 }
                 
-                
-
                 $baseDate = Carbon::createFromFormat('Y-m-d', $data['valuation_date']);
-                $yearsCount = 4;
-                
-                
-                for ($i = 0; $i < $yearsCount; $i++) {
-                    
-                    $yearDate = $baseDate->copy()->addYears($i);
-                    
-                    $updateFinancial = FinancialProjection::where('company_id', $result->id)->where('year', $yearDate->year)->first();
-                    if($updateFinancial){
-                        $addFinancial = $updateFinancial;
-                    }else{
-                        $addFinancial = new FinancialProjection();
-                    }
-                    
-                    $addFinancial->company_id = $result->id;
 
-                    $addFinancial->user_id = auth()->user()->id;
+                // من سنة قبل لحد سنتين بعد
+                $startOffset = -1;
+                $yearsCount  = 4; // -1, 0, +1, +2
+
+                for ($i = 0; $i < $yearsCount; $i++) {
+
+                    $yearOffset = $startOffset + $i;
+                    $yearDate   = $baseDate->copy()->addYears($yearOffset);
+
+                    $updateFinancial = FinancialProjection::where('company_id', $result->id)
+                        ->where('year', $yearDate->year)
+                        ->first();
+
+                    $addFinancial = $updateFinancial ?? new FinancialProjection();
+
+                    $addFinancial->company_id = $result->id;
+                    $addFinancial->user_id = auth()->id();
                     $addFinancial->valuation_date = $yearDate->format('Y-m-d');
                     $addFinancial->year = $yearDate->year;
+
                     // البيانات الرقمية
                     $addFinancial->revenues = $data["rev_$i"];
                     $addFinancial->cogs = $data["cogs_$i"];
@@ -1782,24 +1787,20 @@ class ClientCompanyController extends Controller
                     $addFinancial->interest = $data["int_$i"];
                     $addFinancial->taxes = $data["tax_$i"];
                     $addFinancial->net_profit = $data["np_$i"];
-                    
-                    // Working Capital + Inventory + Payables
+
+                    // Working Capital
                     $addFinancial->receivables = $data["rec_$i"];
                     $addFinancial->inventory = $data["inv_$i"];
                     $addFinancial->payables = $data["pay_$i"];
                     $addFinancial->working_capital = $data["wc_$i"];
-                    
-                    // لو القيمة "-" خليها null
                     $addFinancial->change_in_wc = $data["dwc_$i"];
-                    
-                    
+
                     $addFinancial->capital_expenditures = $data["capex_$i"];
                     $addFinancial->debt_end_year = $data["debt_$i"];
                     $addFinancial->debt_change = $data["ddebt_$i"];
                     $addFinancial->free_cash_flow = $data["fcf_$i"];
 
                     $addFinancial->save();
-                   
                 }
             
                
