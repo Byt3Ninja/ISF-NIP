@@ -400,6 +400,8 @@ return [
 	'Manager' => 'Manager',
 	'Judger' => 'Judge',
 	'judger' => 'Judge',
+	'Judge' => 'Judge',
+	'judge' => 'Judge',
 	'Pages Editor' => 'Pages Editor',
 	'End' => 'End',
 	'Event Updated Successfully' => 'Event Updated Successfully',
