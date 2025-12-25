@@ -371,7 +371,14 @@ class MentorsController extends Controller
 					$errors[] = "Mentor already scheduled on $date from $time_from to $time_to";
 					continue;
 				}
+				
 				$period = $request->period ?: Carbon::parse($datefrom)->diffInMinutes(Carbon::parse($dateto));
+
+				if (\App\Settings::hasReachedMaxConcurrentSessions(Carbon::parse($datefrom)->timestamp, $period)) {
+					$errors[] = __('api.max_concurrent_sessions_reached');
+					continue;
+				}
+
 				$dayName = Carbon::parse($date)->format('l');
 
 				$schedules_q = "SELECT * FROM schedules WHERE user_id = ? AND `days` LIKE ? AND tfrom <= ? AND tto >= ?";
@@ -463,14 +470,16 @@ class MentorsController extends Controller
 
 				$schedules_q = "SELECT * FROM schedules WHERE user_id = ? AND `days` LIKE ? AND tfrom <= ? AND tto >= ?";
 				$schedules = DB::select($schedules_q, [
-					$request->mentorid,
-					'%' . $dayName . '%',
-					$request->timeFrom,
 					$request->timeTo
 				]);
 				if ($schedules == null) {
 					return back()->with(['class' => 'danger','msg' => 'mentor_not_available_in_this_time']);
 				}
+				
+				if (\App\Settings::hasReachedMaxConcurrentSessions(Carbon::parse($datefrom)->timestamp, $period)) {
+					return back()->with(['class' => 'danger', 'msg' => __('api.max_concurrent_sessions_reached')]);
+				}
+
 				if ($request->mentorid) {
 					
 					if (Carbon::parse($request->date)->toDateString() < now()->toDateString()) {
@@ -565,6 +574,11 @@ class MentorsController extends Controller
 			}
 			foreach ($dates as $key) {
 				$date = ltrim($key);
+				
+				if (\App\Settings::hasReachedMaxConcurrentSessions(Carbon::parse($date)->timestamp, $request->period)) {
+					return back()->with(['message2' => __('api.max_concurrent_sessions_reached'), 'notAdd' => 2]);
+				}
+
 				$topic = "Online mentorship meeting (M" . $request->mentorid . '- U' . $request->userid . ')';
 				$data = ['topic' => $topic, "start_time" => $date, 'duration' => $request->period, 'host_video' => 1, 'participant_video' => 1];
 
@@ -717,6 +731,11 @@ class MentorsController extends Controller
 		$request->date = \Carbon\Carbon::createFromFormat('Y-m-d h:i a', $request->date)->format('Y-m-d H:i:s');
 
 		if ($request) {
+			
+			if (\App\Settings::hasReachedMaxConcurrentSessions(Carbon::parse($request->date)->timestamp, $request->period)) {
+				return back()->with(['message2' => __('api.max_concurrent_sessions_reached')]);
+			}
+
 			$approved = $start = $join = null;
 			if ($request->approved) {
 				$approved = 'Yes';
