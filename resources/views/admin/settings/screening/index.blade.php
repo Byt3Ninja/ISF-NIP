@@ -123,11 +123,23 @@
             <div class="col-xl-4 col-lg-6 col-md-6">
               <div class="card shadow-sm border h-100" data-step-id="{{ $step->id }}">
                 <!-- Card Header with Status Indicator -->
-                <div class="card-header d-flex align-items-center justify-content-between pb-2">
-                  <div class="d-flex align-items-center gap-2">
-                    <div class="badge bg-label-primary rounded-pill">#{{ $step->id }}</div>
+                <div class="card-header d-flex align-items-center justify-content-between pb-2 pe-2">
+                  <h6 class="card-title mb-0 pe-2">
+                    <a href="/dashboard/screening/{{ $step->id }}" class="text-heading text-decoration-none">
+                      {{ $step->title }}
+                    </a>
+                  </h6>
+                  <div class="d-flex align-items-center gap-1">
+                    @php
+                      $today = date('Y-m-d');
+                      $status = ($step->end_date < $today) ? 'completed' : (($step->start_date > $today) ? 'upcoming' : 'in progress');
+                      $statusColor = ($status == 'completed') ? 'success' : (($status == 'upcoming') ? 'warning' : 'primary');
+                    @endphp
+                    <span class="badge bg-label-{{ $statusColor }} text-capitalize">
+                      {{ $status == 'in_progress' ? __('admin.In_Progress') : ($status == 'upcoming' ? __('admin.Upcoming') : __('admin.completed')) }}
+                    </span>
                     <div class="dropdown">
-                      <button class="btn btn-text-secondary rounded-pill btn-icon dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                      <button class="btn btn-text-secondary rounded-pill btn-icon btn-sm dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
                         <i class="ti ti-dots-vertical"></i>
                       </button>
                       <div class="dropdown-menu dropdown-menu-end">
@@ -144,27 +156,10 @@
                       </div>
                     </div>
                   </div>
-                  <div class="d-flex align-items-center gap-2">
-                    @php
-                      $today = date('Y-m-d');
-                      $status = ($step->end_date < $today) ? 'completed' : (($step->start_date > $today) ? 'upcoming' : 'in progress');
-                      $statusColor = ($status == 'completed') ? 'success' : (($status == 'upcoming') ? 'warning' : 'primary');
-                    @endphp
-                    <span class="badge bg-label-{{ $statusColor }} text-capitalize">
-                      {{ $status == 'in_progress' ? __('admin.In_Progress') : ($status == 'upcoming' ? __('admin.Upcoming') : __('admin.completed')) }}
-                    </span>
-                  </div>
                 </div>
       
                 <!-- Card Body -->
                 <div class="card-body">
-                  <!-- Title -->
-                  <h6 class="card-title mb-2">
-                    <a href="/dashboard/screening/{{ $step->id }}" class="text-heading text-decoration-none">
-                      {{ $step->title }}
-                    </a>
-                  </h6>
-      
                   <!-- Description -->
                   <p class="card-text text-muted small mb-3">
                     {{ Str::limit($step->description, 120) }}
