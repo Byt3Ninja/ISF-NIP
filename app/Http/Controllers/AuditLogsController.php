@@ -24,6 +24,7 @@ class AuditLogsController extends Controller
     public function show(AuditLog $auditLog)
     {
         $properties = json_decode($auditLog->properties, true);
+        unset( $properties['created_at'] );
         unset( $properties['updated_at'] );
         $auditLog->properties = $properties;
         return view('admin.auditLogs.show', compact('auditLog'));
