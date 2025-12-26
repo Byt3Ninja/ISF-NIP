@@ -1,6 +1,6 @@
 <section>
   <!-- Evaluation Model CRUD Tab -->
-  <div id="evaluation-model" class="">
+  <div id="evaluation-model" class="card card-body tab-content active">
     <h5 class="card-title mb-1">{{ __('cycles.ManageEvaluationModel') }}</h5>
     <p class="text-muted">{{ __('cycles.EvaluationModelDescription') }}</p>
     
