@@ -2901,4 +2901,10 @@ return [
 	'Processing...' => 'جاري المعالجة...',
 	'Creating manager...' => 'جاري إنشاء المدير...',
 	'Saving managers...' => 'جاري حفظ المديرين...',
+	'email_max_length' => 'البريد الإلكتروني يجب أن لا يتجاوز 255 حرفاً',
+	'invitation_subject_required' => 'يرجَى إدخال موضوع الدعوة',
+	'invitation_subject_max_length' => 'موضوع الدعوة يجب أن لا يتجاوز 255 حرفاً',
+	'invitation_message_required' => 'يرجى إدخال رسالة الدعوة',
+	'invitation_scope_required' => 'يرجى اختيار نطاق الدعوة',
+	'organizations_select_required' => 'يرجى اختيار مؤسسة واحده على الأقل',
 ];

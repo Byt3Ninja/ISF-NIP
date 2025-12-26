@@ -2845,5 +2845,11 @@ return [
 	'Managers saved successfully' => 'Managers saved successfully',
 	'Error creating manager' => 'Error creating manager',
 	'Error saving managers' => 'Error saving managers',
+	'email_max_length' => 'Email must not exceed 255 characters.',
+	'invitation_subject_required' => 'Please enter invitation subject.',
+	'invitation_subject_max_length' => 'Subject must not exceed 255 characters.',
+	'invitation_message_required' => 'Please enter invitation message.',
+	'invitation_scope_required' => 'Please select invitation scope.',
+	'organizations_select_required' => 'Please select at least one organization.',
 ];
 
