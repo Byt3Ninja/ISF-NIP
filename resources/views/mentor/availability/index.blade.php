@@ -719,12 +719,158 @@
         });
 
         if (html === '') {
-            html = '<p class="text-muted">{{ __('mentor.no_availability_slots_added') }}</p>';
+            html = `
+                <div class="text-center py-5" id="empty-list-view">
+                    <p class="text-muted mb-3">{{ __('mentor.no_availability_slots_added') }}</p>
+                    <button type="button" class="btn btn-primary" id="show-add-slot-form-btn">
+                        <i class="ti ti-plus me-1"></i> {{ __('mentor.add_availability') }}
+                    </button>
+                </div>
+                <div id="list-view-add-slot-form" style="display: none;">
+                    <div class="border rounded p-4 bg-light-subtle mb-4">
+                        <h6 class="mb-3">{{ __('mentor.add_new_slot') }}</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <label class="form-label">{{ __('mentor.day') }}</label>
+                                <select id="list-view-day-select" class="form-select">
+                                    <option value="Sunday">{{ __('mentor.sunday') }}</option>
+                                    <option value="Monday">{{ __('mentor.monday') }}</option>
+                                    <option value="Tuesday">{{ __('mentor.tuesday') }}</option>
+                                    <option value="Wednesday">{{ __('mentor.wednesday') }}</option>
+                                    <option value="Thursday">{{ __('mentor.thursday') }}</option>
+                                    <option value="Friday">{{ __('mentor.friday') }}</option>
+                                    <option value="Saturday">{{ __('mentor.saturday') }}</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 col-lg-3 mb-3">
+                                <label class="form-label">{{ __('mentor.start_time') }}</label>
+                                <input type="text" id="list-view-start-time" class="form-control" placeholder="09:00">
+                            </div>
+                            <div class="col-md-6 col-lg-3 mb-3">
+                                <label class="form-label">{{ __('mentor.end_time') }}</label>
+                                <input type="text" id="list-view-end-time" class="form-control" placeholder="17:00">
+                            </div>
+                            <div class="col-md-6 col-lg-2 mb-3">
+                                <label class="form-label">{{ __('mentor.session_type') }}</label>
+                                <select id="list-view-session-type" class="form-select">
+                                    ${getSessionTypeOptionsHTML()}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-primary" id="save-list-view-slot">
+                                {{ __('admin.Save') }}
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="cancel-list-view-slot">
+                                {{ __('mentor.cancel') }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
         $('#availability-list-view').html(html);
     }
-    
+
+    // Show add slot form in list view
+    $(document).on('click', '#show-add-slot-form-btn', function() {
+      $('#empty-list-view').hide();
+      $('#list-view-add-slot-form').show();
+      
+      // Initialize flatpickr for the new time inputs
+      flatpickr("#list-view-start-time", {
+          enableTime: true,
+          noCalendar: true,
+          dateFormat: "H:i",
+          time_24hr: true,
+      });
+      flatpickr("#list-view-end-time", {
+          enableTime: true,
+          noCalendar: true,
+          dateFormat: "H:i",
+          time_24hr: true,
+      });
+    });
+
+    // Cancel add slot form in list view
+    $(document).on('click', '#cancel-list-view-slot', function() {
+        $('#list-view-add-slot-form').hide();
+        $('#empty-list-view').show();
+        // Clear form
+        $('#list-view-start-time').val('');
+        $('#list-view-end-time').val('');
+        $('#list-view-session-type').val('Online');
+    });
+
+    // Save slot from list view
+    $(document).on('click', '#save-list-view-slot', function() {
+        const day = $('#list-view-day-select').val();
+        const start = $('#list-view-start-time').val();
+        const end = $('#list-view-end-time').val();
+        const sessionType = $('#list-view-session-type').val();
+
+        if (!start || !end) {
+            alert('{{ __('mentor.please_select_start_and_end_time') }}');
+            return;
+        }
+
+        const startTime = moment(start, 'HH:mm');
+        const endTime = moment(end, 'HH:mm');
+
+        if (!startTime.isValid() || !endTime.isValid() || endTime.isSameOrBefore(startTime)) {
+            alert('{{ __('mentor.end_time_must_be_after_start_time') }}');
+            return;
+        }
+
+        const duration = endTime.diff(startTime, 'minutes');
+
+        fetch('/dashboard/availability/slots/store', {
+            headers: {
+                "Accept": "application/json",
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content'),
+                "Content-Type": 'application/json',
+            },
+            method: 'POST',
+            body: JSON.stringify({
+                tfrom: start,
+                tto: end,
+                session_type: sessionType,
+                type: 'Weekly',
+                date: null,
+                days: day,
+            }),
+        })
+        .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok'))
+        .then(result => {
+            if (Array.isArray(result.data)) {
+                $.each(result.data, function(index, slot) {
+                    const newSlot = createSlotObject(slot);
+                    availabilityData.weekly[day] = [...(availabilityData.weekly[day] || []), newSlot];
+                });
+            } else {
+                const newSlot = createSlotObject(result.data);
+                availabilityData.weekly[day] = [...(availabilityData.weekly[day] || []), newSlot];
+            }
+
+            updateListView();
+            updateSlotsList();
+            updateCalendarStyles();
+            updateMainCalendar();
+
+            releaseSuccessAlert({
+                'title': '{{ __('mentor.slot_added_success') }}',
+                'message': result.message,
+            });
+        })
+        .catch(error => {
+            releaseFailureAlert({
+                title: '{{ __('admin.Error') }}',
+                message: error?.message ? error.message : "{{ __('admin.unexpected_error') }}",
+            });
+        });
+    });
+            
     // Handle Add (clone) action in list view
     $(document).on('click', '.add-slot-action', function() {
         const slotElement = $(this).closest('.d-flex');
