@@ -226,7 +226,7 @@ $tabs = [
             </div>
             <div class="col-12 mb-4">
               <label for="emailBody" class="form-label">Email Body <span class="text-danger">*</span></label>
-              <div id="emailBodyEditor" style="height: 200px; overflow-y: scroll;"></div>
+              <div id="emailBodyEditor" style="height: 150px; overflow-y: scroll;"></div>
               <textarea class="d-none" id="emailBody" name="email_body" maxlength="10000" required></textarea>
               <div class="invalid-feedback" id="emailBodyError"></div>
             </div>
@@ -241,7 +241,7 @@ $tabs = [
 
           <hr />
 
-          <div class="row mt-auto">
+          <div class="row mt-auto pb-6">
             <div class="col-12">
               <div class="d-flex align-items-center gap-3">
                 <button type="button" class="btn btn-label-secondary" data-bs-dismiss="offcanvas">Cancel</button>
@@ -561,7 +561,8 @@ const fv = FormValidation.formValidation(document.getElementById('invitationForm
   plugins: {
     trigger: new FormValidation.plugins.Trigger(),
     bootstrap5: new FormValidation.plugins.Bootstrap5({
-      rowSelector: '.mb-3'
+      eleValidClass: '',
+      rowSelector: '.mb-4'
     }),
     submitButton: new FormValidation.plugins.SubmitButton(),
     defaultSubmit: new FormValidation.plugins.DefaultSubmit(),

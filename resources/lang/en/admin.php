@@ -2668,7 +2668,7 @@ return [
 		'panel' => 'panel',
 		'add_panel' => 'Add Panel',
 		'add_judging_panels' => 'Add Judging Panels',
-		'add_panels_description' => 'Add judges and companies to each panel',
+		'add_panels_description' => 'Add judges and startups to each panel',
 		'schedule_session' => 'Schedule Session',
 	],
 	'training_sessions' => 'Training Sessions',
