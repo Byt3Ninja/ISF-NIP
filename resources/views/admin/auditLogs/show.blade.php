@@ -10,7 +10,6 @@
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
       <div class="content-overlay"></div>
-    
         <div class="content-body">
             <div class="row">
                 <!-- invoice view page -->
@@ -36,93 +35,64 @@
                         <div class="invoice-product-details table-responsive">
                             <table class="table table-borderless mb-0">
                                 <tbody>
-                                <tr>
-                                    <th>
-                                        {{ __('audit.description') }}
-                                    </th>
-                                    <td>
-                                        {{ $auditLog->description }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>
-                                        {{ __('audit.subject_id') }}
-                                    </th>
-                                    <td>
-                                        {{ $auditLog->subject_id }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>
-                                        {{ __('audit.subject_type') }}
-                                    </th>
-                                    <td>
-                                        {{ $auditLog->subject_type }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>
-                                        {{ __('audit.user_id') }}
-                                    </th>
-                                    <td>
-                                        {{ $auditLog->user_id }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>
-                                        {{ __('audit.properties') }}
-                                    </th>
-                                    <td id="encode">
-                                        @php
-                                         $properties = json_decode($auditLog->properties, true);
-                                        @endphp
-
-                                        @if(is_array($properties))
-                                        <ul class="list-unstyled mb-0">
-                                            @foreach($properties as $key => $value)
-                                         <li>
-                                          <strong>{{ ucfirst($key) }}:</strong>
-                                          @if(is_array($value) || is_object($value))
-                                             <pre class="mb-0">{{ json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
-                                           @else
-                                             {{ $value }}
-                                          @endif
-                                         </li>
-                                          @endforeach
-                                        </ul>
-                                        @else
-                                           <span>{{ $auditLog->properties }}</span>
-                                       @endif
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>
-                                        {{ __('audit.host') }}
-                                    </th>
-                                    <td>
-                                        {{ $auditLog->host }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th></th>
-                                    <td>
-                                    <div class="card-footer p-0">
-                        <span class=" float-sm-right d-flex flex-sm-row flex-column justify-content-end">
-                       <a href="/dashboard/audit-logs"> <button class="btn btn-primary">{{__('audit.Back')}}</button></a>
-                                </span>
-                                    </div>
-                                    </td>
-                                </tr>
+                                    <tr>
+                                        <th> {{ __('audit.description') }} </th>
+                                        <td> {{ $auditLog->description }} </td>
+                                    </tr>
+                                    <tr>
+                                        <th> {{ __('audit.subject_id') }} </th>
+                                        <td> {{ $auditLog->subject_id }} </td>
+                                    </tr>
+                                    <tr>
+                                        <th> {{ __('audit.subject_type') }} </th>
+                                        <td> {{ $auditLog->subject_type }} </td>
+                                    </tr>
+                                    <tr>
+                                        <th> {{ __('audit.user_id') }} </th>
+                                        <td> {{ $auditLog->user_id }} </td>
+                                    </tr>
+                                    <tr>
+                                        <th> {{ __('audit.properties') }} </th>
+                                        <td id="encode">
+                                            @if(is_string( $auditLog->properties ))
+                                                <span>{{ $auditLog->properties }}</span>
+                                            @else
+                                                <ul class="list-unstyled mb-0">
+                                                    @foreach($auditLog->properties as $key => $value)
+                                                        <li>
+                                                            <strong>{{ ucfirst($key) }}:</strong>
+                                                            @if(is_array($value) || is_object($value))
+                                                                <pre class="mb-0">{{ json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                                            @else
+                                                                {{ $value }}
+                                                            @endif
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th> {{ __('audit.host') }} </th>
+                                        <td> {{ $auditLog->host }} </td>
+                                    </tr>
+                                    <tr>
+                                        <th></th>
+                                        <td>
+                                            <div class="card-footer p-0">
+                                                <span class=" float-sm-right d-flex flex-sm-row flex-column justify-content-end">
+                                                    <a href="/dashboard/audit-logs"> <button class="btn btn-primary">{{__('audit.Back')}}</button></a>
+                                                </span>
+                                            </div>
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
-
-
-
                         </div>
                     </div>
                 </div>
             </div>
-    </div>
+        </div>
     </div>
 </div>
 @stop
