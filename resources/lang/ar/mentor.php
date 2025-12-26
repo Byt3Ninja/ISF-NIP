@@ -118,4 +118,6 @@ return [
     'slot_notes_placeholder' => 'شارك اي مواضيع او استفسارات للمساعدة',
     'session_location' => 'مكان الجلسة',
     'mentor_not_entrolled_in_cycle' => 'المرشد ليس مسجل في برنامج',
+    'add_new_slot' => 'اضافة فترة جديدة',
+    'day' => 'اليوم',
 ];
