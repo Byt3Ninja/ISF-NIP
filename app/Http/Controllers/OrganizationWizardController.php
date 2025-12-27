@@ -8,17 +8,24 @@ use App\StaticCategory;
 use App\Country;
 use App\State;
 use App\City;
-use App\User;
 use App\Http\Requests\OrganizationStep1Request;
 use App\Http\Requests\OrganizationStep2Request;
+use App\Http\Requests\OrganizationStep4Request;
 use App\Http\Requests\CreateOrganizationManagerRequest;
+use App\Services\OrganizationWizardService;
+use App\Services\OrganizationManagerService;
+use App\Services\OrganizationLandingPageService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 class OrganizationWizardController extends Controller
 {
+    public function __construct(
+        protected OrganizationWizardService $wizardService,
+        protected OrganizationManagerService $managerService,
+        protected OrganizationLandingPageService $landingPageService
+    ) {}
+
     /**
      * Show the wizard form for creating a new organization.
      */
@@ -44,7 +51,7 @@ class OrganizationWizardController extends Controller
      */
     public function edit($id)
     {
-        $organization = Organization::with(['organizationType', 'industries', 'country', 'state', 'city', 'assignedUsers'])->findOrFail($id);
+        $organization = Organization::with(['organizationType', 'industries', 'country', 'state', 'city', 'assignedUsers', 'landingPage'])->findOrFail($id);
         $organizationTypes = OrganizationTypes::all();
         $industries = StaticCategory::all();
         $countries = Country::all();
@@ -66,6 +73,9 @@ class OrganizationWizardController extends Controller
             ];
         });
 
+        // Get landing page data for step 4
+        $landingPage = $organization->landingPage;
+
         return view('admin.organizations.wizard.create', compact(
             'organization',
             'organizationTypes',
@@ -73,7 +83,8 @@ class OrganizationWizardController extends Controller
             'countries',
             'states',
             'cities',
-            'assignedManagers'
+            'assignedManagers',
+            'landingPage'
         ));
     }
 
@@ -83,47 +94,28 @@ class OrganizationWizardController extends Controller
     public function store(OrganizationStep1Request $request)
     {
         $_user = auth()->user();
-        if( !$_user->ableTo('organization.wizard.create') ) { return abort(403); }
-        DB::beginTransaction();
-
-        try {
-            $organization = new Organization();
-            $organization->name_en = $request->name_en;
-            $organization->name_ar = $request->name_ar;
-            $organization->organization_type_id = $request->organization_type_id;
-            $organization->status = $request->status;
-            $organization->bio = $request->bio;
-            $organization->is_draft = true;
-            $organization->wizard_step = 2;
-
-            // Handle image upload using Storage disk
-            if ($request->hasFile('img_url')) {
-                $image = $request->file('img_url');
-                $imageName = time() . '.' . $image->getClientOriginalExtension();
-                Storage::disk('organizations')->put($imageName, file_get_contents($image));
-                $organization->img_url = $imageName;
-            }
-
-            $organization->save();
-
-            // Sync industries (many-to-many)
-            if ($request->has('industries') && is_array($request->industries)) {
-                $organization->industries()->sync($request->industries);
-            }
-
-            DB::commit();
-
-            // Redirect to step 2 after saving step 1
-            return redirect()
-                ->route('organization.wizard.edit', ['id' => $organization->id, 'step' => 2])
-                ->with('success', __('admin.Organization basics saved successfully'));
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()
-                ->withInput()
-                ->with('error', __('admin.Error saving organization') . ': ' . $e->getMessage());
+        if (!$_user->ableTo('organization.wizard.create')) {
+            return abort(401);
         }
+
+        $data = $request->validated();
+
+        // Add file if uploaded
+        if ($request->hasFile('img_url')) {
+            $data['img_url'] = $request->file('img_url');
+        }
+
+        $result = $this->wizardService->create($data);
+
+        if ($result['success']) {
+            return redirect()
+                ->route('organization.wizard.edit', ['id' => $result['data']->id, 'step' => 2])
+                ->with('success', $result['message']);
+        }
+
+        return back()
+            ->withInput()
+            ->with('error', $result['message']);
     }
 
     /**
@@ -132,63 +124,36 @@ class OrganizationWizardController extends Controller
     public function updateStep1(OrganizationStep1Request $request, $id)
     {
         $_user = auth()->user();
-        if( !$_user->ableTo('organization.wizard.edit') ) { return abort(403); }
-        $organization = Organization::findOrFail($id);
-
-        // Check if organization is published and prevent reverting to draft
-        if (!$organization->is_draft && $request->has('revert_to_draft')) {
-            return back()
-                ->withInput()
-                ->with('error', __('admin.Published organizations cannot be reverted to draft'));
+        if (!$_user->ableTo('organization.wizard.edit')) {
+            return abort(401);
         }
 
-        DB::beginTransaction();
+        $data = $request->validated();
 
-        try {
-            $organization->name_en = $request->name_en;
-            $organization->name_ar = $request->name_ar;
-            $organization->organization_type_id = $request->organization_type_id;
-            $organization->status = $request->status;
-            $organization->bio = $request->bio;
+        // Add file if uploaded
+        if ($request->hasFile('img_url')) {
+            $data['img_url'] = $request->file('img_url');
+        }
 
-            // Update wizard step if moving forward
-            if ($organization->wizard_step < 2) {
-                $organization->wizard_step = 2;
-            }
+        // Add revert_to_draft flag if present
+        if ($request->has('revert_to_draft')) {
+            $data['revert_to_draft'] = true;
+        }
 
-            // Handle image upload using Storage disk
-            if ($request->hasFile('img_url')) {
-                // Delete old image if exists
-                if ($organization->img_url && Storage::disk('organizations')->exists($organization->img_url)) {
-                    Storage::disk('organizations')->delete($organization->img_url);
-                }
+        $result = $this->wizardService->updateStep1($id, $data);
 
-                $image = $request->file('img_url');
-                $imageName = time() . '.' . $image->getClientOriginalExtension();
-                Storage::disk('organizations')->put($imageName, file_get_contents($image));
-                $organization->img_url = $imageName;
-            }
+        if ($result['success']) {
+            $redirectTo = $request->input('redirect_to', 'next');
+            $step = $redirectTo === 'same' ? 1 : 2;
 
-            $organization->save();
-
-            // Sync industries (many-to-many)
-            if ($request->has('industries')) {
-                $organization->industries()->sync($request->industries ?? []);
-            }
-
-            DB::commit();
-
-            // Redirect to step 2 after saving step 1
             return redirect()
-                ->route('organization.wizard.edit', ['id' => $organization->id, 'step' => 2])
-                ->with('success', __('admin.Organization basics updated successfully'));
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()
-                ->withInput()
-                ->with('error', __('admin.Error updating organization') . ': ' . $e->getMessage());
+                ->route('organization.wizard.edit', ['id' => $result['data']->id, 'step' => $step])
+                ->with('success', $result['message']);
         }
+
+        return back()
+            ->withInput()
+            ->with('error', $result['message']);
     }
 
     /**
@@ -197,50 +162,24 @@ class OrganizationWizardController extends Controller
     public function updateStep2(OrganizationStep2Request $request, $id)
     {
         $_user = auth()->user();
-        if( !$_user->ableTo('organization.wizard.edit') ) { return abort(403); }
-        $organization = Organization::findOrFail($id);
-
-        DB::beginTransaction();
-
-        try {
-            // Contact Information
-            $organization->contact_email = $request->contact_email;
-            $organization->country_code = $request->country_code;
-            $organization->contact_phone = $request->contact_phone;
-            $organization->country_id = $request->country_id;
-            $organization->state_id = $request->state_id;
-            $organization->city_id = $request->city_id;
-            $organization->address = $request->address;
-            $organization->google_map_url = $request->google_map_url;
-
-            // Social Media
-            $organization->linkedin_company_url = $request->linkedin_company_url;
-            $organization->twitter_handle = $request->twitter_handle;
-            $organization->facebook_page_url = $request->facebook_page_url;
-            $organization->instagram_profile_url = $request->instagram_profile_url;
-            $organization->youtube_channel_url = $request->youtube_channel_url;
-            $organization->tiktok_url = $request->tiktok_url;
-
-            // Update wizard step if moving forward
-            if ($organization->wizard_step < 3) {
-                $organization->wizard_step = 3;
-            }
-
-            $organization->save();
-
-            DB::commit();
-
-            // Redirect to step 3 after saving step 2
-            return redirect()
-                ->route('organization.wizard.edit', ['id' => $organization->id, 'step' => 3])
-                ->with('success', __('admin.Contact information saved successfully'));
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()
-                ->withInput()
-                ->with('error', __('admin.Error saving contact information') . ': ' . $e->getMessage());
+        if (!$_user->ableTo('organization.wizard.edit')) {
+            return abort(401);
         }
+
+        $result = $this->wizardService->updateStep2($id, $request->validated());
+
+        if ($result['success']) {
+            $redirectTo = $request->input('redirect_to', 'next');
+            $step = $redirectTo === 'same' ? 2 : 3;
+
+            return redirect()
+                ->route('organization.wizard.edit', ['id' => $result['data']->id, 'step' => $step])
+                ->with('success', $result['message']);
+        }
+
+        return back()
+            ->withInput()
+            ->with('error', $result['message']);
     }
 
     /**
@@ -249,81 +188,33 @@ class OrganizationWizardController extends Controller
     public function getManagers(Request $request, $id)
     {
         $_user = auth()->user();
-        if( !$_user->ableTo('organization.wizard.edit') ) { return abort(403); }
-        $organization = Organization::findOrFail($id);
-        $locale = app()->getLocale();
-
-        // Get users with organizationmanager or Sub-Admin roles
-        $query = User::whereHas('roles', function ($q) {
-            $q->whereIn('default_for', ['organizationmanager', 'subadmin']);
-        });
-
-        // Search filter
-        if ($request->filled('search_term')) {
-            $searchTerm = $request->search_term;
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where('email', 'like', "%{$searchTerm}%")
-                  ->orWhere('first_name_en', 'like', "%{$searchTerm}%")
-                  ->orWhere('last_name_en', 'like', "%{$searchTerm}%")
-                  ->orWhere('first_name_ar', 'like', "%{$searchTerm}%")
-                  ->orWhere('last_name_ar', 'like', "%{$searchTerm}%");
-            });
+        if (!$_user->ableTo('organization.wizard.edit')) {
+            return abort(401);
         }
 
-        // Get assigned manager IDs for this organization
-        $assignedManagerIds = $organization->assignedUsers()->pluck('users.id')->toArray();
+        $filters = [
+            'search_term' => $request->input('search_term'),
+            'start' => $request->input('start', 0),
+            'length' => $request->input('length', 5),
+        ];
 
-        // Pagination
-        $start = $request->input('start', 0);
-        $length = $request->input('length', 5);
-        $totalRecords = $query->count();
+        $result = $this->managerService->getAvailableManagers($id, $filters);
 
-        $managers = $query->skip($start)->take($length)->get();
-
-
-        $data = $managers->map(function ($user) use ($locale, $assignedManagerIds) {
-            $name = $locale === 'ar'
-                ? (($user->first_name_ar ?? $user->first_name_en) . ' ' . ($user->last_name_ar ?? $user->last_name_en))
-                : ($user->first_name_en . ' ' . $user->last_name_en);
-
-            $roleName = $user->roles->first()->default_for ?? '';
-            $roleName = trim( strtolower( $roleName ) ) ;
-            $roleDisplay = $roleName === 'organizationmanager'
-                ? __('admin.Organization Manager')
-                : ($roleName === 'subadmin' ? __('admin.Sub-Admin') : $roleName);
-
-            // Calculate organizations count based on role
-            // Organization Manager: count unique orgs (organization_id + pivot table)
-            // Sub-Admin: count only from pivot table
-            if ($roleName === 'organizationmanager') {
-                // Get unique organization IDs from both organization_id and pivot
-                $orgIds = $user->organizations()->pluck('organizations.id')->toArray();
-                if ($user->organization_id) {
-                    $orgIds[] = $user->organization_id;
-                }
-                $organizationsCount = count(array_unique($orgIds));
-            } else {
-                // Sub-Admin: only count from pivot table
-                $organizationsCount = $user->organizations()->count();
-            }
-
-            return [
-                'id' => $user->id,
-                'name' => $name,
-                'email' => $user->email,
-                'role' => $roleDisplay,
-                'organizations_count' => $organizationsCount,
-                'is_selected' => in_array($user->id, $assignedManagerIds),
-                'avatar' => $user->image_url,
-            ];
-        });
-
+        if (!$result['success']) {
+            return response()->json([
+                'draw' => intval($request->input('draw', 1)),
+                'recordsTotal' => 0,
+                'recordsFiltered' => 0,
+                'data' => [],
+                'error' => $result['message'],
+            ]);
+        }
 
         return response()->json([
             'draw' => intval($request->input('draw', 1)),
-            'recordsTotal' => $totalRecords,
-            'recordsFiltered' => $totalRecords,
-            'data' => $data,
+            'recordsTotal' => $result['data']['total'],
+            'recordsFiltered' => $result['data']['filtered'],
+            'data' => $result['data']['records'],
         ]);
     }
 
@@ -333,8 +224,9 @@ class OrganizationWizardController extends Controller
     public function updateStep3(Request $request, $id)
     {
         $_user = auth()->user();
-        if( !$_user->ableTo('organization.wizard.edit') ) { return abort(403); }
-        $organization = Organization::findOrFail($id);
+        if (!$_user->ableTo('organization.wizard.edit')) {
+            return abort(401);
+        }
 
         // Validate at least one manager
         $request->validate([
@@ -345,32 +237,20 @@ class OrganizationWizardController extends Controller
             'manager_ids.min' => __('admin.Please select or create at least one organization manager'),
         ]);
 
-        DB::beginTransaction();
+        $result = $this->managerService->assignManagers($id, $request->manager_ids);
 
-        try {
-            $managerIds = $request->manager_ids;
-            $this->syncManagersToOrganization($organization, $managerIds);
+        if ($result['success']) {
+            $redirectTo = $request->input('redirect_to', 'next');
+            $step = $redirectTo === 'same' ? 3 : 4;
 
-            // Update wizard step if moving forward
-            if ($organization->wizard_step < 4) {
-                $organization->wizard_step = 4;
-            }
-
-            $organization->save();
-
-            DB::commit();
-
-            // Redirect to step 4 after saving step 3
             return redirect()
-                ->route('organization.wizard.edit', ['id' => $organization->id, 'step' => 4])
-                ->with('success', __('admin.Managers saved successfully'));
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()
-                ->withInput()
-                ->with('error', __('admin.Error saving managers') . ': ' . $e->getMessage());
+                ->route('organization.wizard.edit', ['id' => $result['data']->id, 'step' => $step])
+                ->with('success', $result['message']);
         }
+
+        return back()
+            ->withInput()
+            ->with('error', $result['message']);
     }
 
     /**
@@ -379,123 +259,24 @@ class OrganizationWizardController extends Controller
     public function createManager(CreateOrganizationManagerRequest $request, $id)
     {
         $_user = auth()->user();
-        if( !$_user->ableTo('organization.wizard.edit') ) { return abort(403); }
-        $organization = Organization::findOrFail($id);
-        $locale = app()->getLocale();
+        if (!$_user->ableTo('organization.wizard.edit')) {
+            return abort(401);
+        }
 
-        DB::beginTransaction();
+        $result = $this->managerService->createManager($id, $request->validated());
 
-        try {
-            // Create the user
-            $user = new User();
-            $user->first_name_en = $request->first_name_en;
-            $user->last_name_en = $request->last_name_en;
-            $user->first_name_ar = $request->first_name_ar;
-            $user->last_name_ar = $request->last_name_ar;
-            $user->gender = $request->gender;
-            $user->email = $request->email;
-            $user->country_code = $request->country_code;
-            $user->phone = $request->phone;
-            $user->password = Hash::make($request->password);
-            $user->organization_id = $organization->id;
-            $user->email_verified_at = now();
-            $user->save();
-
-            // Assign Organization Manager role
-            $user->allotRole('organizationmanager');
-
-            // Add to user_organizations pivot table
-            $organization->assignedUsers()->attach($user->id);
-
-            DB::commit();
-
-            $name = $locale === 'ar'
-                ? (($user->first_name_ar ?? $user->first_name_en) . ' ' . ($user->last_name_ar ?? $user->last_name_en))
-                : ($user->first_name_en . ' ' . $user->last_name_en);
-
+        if ($result['success']) {
             return response()->json([
                 'success' => true,
-                'message' => __('admin.Manager created successfully'),
-                'manager' => [
-                    'id' => $user->id,
-                    'name' => $name,
-                    'email' => $user->email,
-                ],
+                'message' => $result['message'],
+                'manager' => $result['data'],
             ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => __('admin.Error creating manager') . ': ' . $e->getMessage(),
-            ], 500);
-        }
-    }
-
-    /**
-     * Sync managers to organization and handle role switching.
-     */
-    protected function syncManagersToOrganization($organization, $managerIds)
-    {
-        // Get current assignments
-        $currentManagerIds = $organization->assignedUsers()->pluck('users.id')->toArray();
-
-        // Sync the pivot table
-        $organization->assignedUsers()->sync($managerIds);
-
-        // Handle role switching for each manager
-        foreach ($managerIds as $userId) {
-            $user = User::find($userId);
-            if (!$user) continue;
-
-            $orgCount = $user->organizations()->count();
-
-            // If user now has more than 1 organization and has organizationmanager role, switch to Sub-Admin
-            if ($orgCount > 1 && $user->hasRole('organizationmanager')) {
-                $this->switchToSubAdmin($user);
-            }
         }
 
-        // Handle removed managers - check if they need role change
-        $removedIds = array_diff($currentManagerIds, $managerIds);
-        foreach ($removedIds as $userId) {
-            $user = User::find($userId);
-            if (!$user) continue;
-
-            $orgCount = $user->organizations()->count();
-
-            // If user now has only 1 org and has Sub-Admin role, switch back to organizationmanager
-            if ($orgCount == 1 && $user->hasRole('subadmin')) {
-                $this->switchToOrgManager($user);
-            }
-        }
-    }
-
-    /**
-     * Switch user role from Organization Manager to Sub-Admin.
-     */
-    protected function switchToSubAdmin($user)
-    {
-        $user->deAllotRole('organizationmanager');
-        $user->allotRole('subadmin');
-        // Clear the organization_id field as sub-admins use pivot table
-        $user->organization_id = null;
-        $user->save();
-    }
-
-    /**
-     * Switch user role from Sub-Admin to Organization Manager.
-     */
-    protected function switchToOrgManager($user)
-    {
-        $user->deAllotRole('subadmin');
-        $user->allotRole('organizationmanager');
-        // Set organization_id to their remaining organization
-        $remainingOrg = $user->organizations()->first();
-        if ($remainingOrg) {
-            $user->organization_id = $remainingOrg->id;
-        }
-        $user->save();
+        return response()->json([
+            'success' => false,
+            'message' => $result['message'],
+        ], 500);
     }
 
     /**
@@ -504,8 +285,11 @@ class OrganizationWizardController extends Controller
     public function saveDraft(Request $request, $id = null)
     {
         $_user = auth()->user();
-        if( !$_user->ableTo('organization.wizard.edit') ) { return abort(403); }
-        // Minimal validation for draft - only validate if values are provided
+        if (!$_user->ableTo('organization.wizard.edit')) {
+            return abort(401);
+        }
+
+        // Minimal validation for draft
         $rules = [
             // Step 1 fields
             'name_en' => 'nullable|string|max:255',
@@ -537,153 +321,50 @@ class OrganizationWizardController extends Controller
             'manager_ids.*' => 'exists:users,id',
         ];
 
-        $messages = [];
         $locale = app()->getLocale();
-
-        if ($locale === 'ar') {
-            $messages = [
+        $messages = $locale === 'ar'
+            ? [
                 'img_url.image' => 'نوع الملف غير صالح، يرجى رفع ملفات من نوع PNG أو JPG فقط',
                 'img_url.mimes' => 'نوع الملف غير صالح، يرجى رفع ملفات من نوع PNG أو JPG فقط',
                 'img_url.max' => 'الملف اكبر من الحد المسموح. الحد الأقصى المسموح به هو 5 ميجابايت',
-            ];
-        } else {
-            $messages = [
+            ]
+            : [
                 'img_url.image' => 'Invalid file format. Please upload PNG or JPG files only.',
                 'img_url.mimes' => 'Invalid file format. Please upload PNG or JPG files only.',
                 'img_url.max' => 'File too large. Maximum size allowed is 5MB.',
             ];
-        }
 
         $request->validate($rules, $messages);
 
-        DB::beginTransaction();
+        $data = $request->all();
 
-        try {
-            if ($id) {
-                $organization = Organization::findOrFail($id);
+        // Add file if uploaded
+        if ($request->hasFile('img_url')) {
+            $data['img_url'] = $request->file('img_url');
+        }
 
-                // Prevent saving as draft if already published
-                if (!$organization->is_draft) {
-                    return back()
-                        ->withInput()
-                        ->with('error', __('admin.Published organizations cannot be saved as draft'));
-                }
-            } else {
-                $organization = new Organization();
-                $organization->is_draft = true;
-                $organization->wizard_step = 1;
-            }
+        $currentStep = (int) $request->input('current_step', 1);
+        $result = $this->wizardService->saveDraft($id, $data, $currentStep);
 
-            // Only update fields that are provided (Step 1)
-            if ($request->filled('name_en')) {
-                $organization->name_en = $request->name_en;
-            }
-            if ($request->filled('name_ar')) {
-                $organization->name_ar = $request->name_ar;
-            }
-            if ($request->filled('organization_type_id')) {
-                $organization->organization_type_id = $request->organization_type_id;
-            }
-            if ($request->has('status')) {
-                $organization->status = $request->status;
-            }
-            if ($request->filled('bio')) {
-                $organization->bio = $request->bio;
-            }
-
-            // Step 2: Contact Information
-            if ($request->filled('contact_email')) {
-                $organization->contact_email = $request->contact_email;
-            }
-            if ($request->filled('country_code')) {
-                $organization->country_code = $request->country_code;
-            }
-            if ($request->filled('contact_phone')) {
-                $organization->contact_phone = $request->contact_phone;
-            }
-            if ($request->filled('country_id')) {
-                $organization->country_id = $request->country_id;
-            }
-            if ($request->filled('state_id')) {
-                $organization->state_id = $request->state_id;
-            }
-            if ($request->filled('city_id')) {
-                $organization->city_id = $request->city_id;
-            }
-            if ($request->filled('address')) {
-                $organization->address = $request->address;
-            }
-            if ($request->filled('google_map_url')) {
-                $organization->google_map_url = $request->google_map_url;
-            }
-
-            // Step 2: Social Media
-            if ($request->has('linkedin_company_url')) {
-                $organization->linkedin_company_url = $request->linkedin_company_url;
-            }
-            if ($request->has('twitter_handle')) {
-                $organization->twitter_handle = $request->twitter_handle;
-            }
-            if ($request->has('facebook_page_url')) {
-                $organization->facebook_page_url = $request->facebook_page_url;
-            }
-            if ($request->has('instagram_profile_url')) {
-                $organization->instagram_profile_url = $request->instagram_profile_url;
-            }
-            if ($request->has('youtube_channel_url')) {
-                $organization->youtube_channel_url = $request->youtube_channel_url;
-            }
-            if ($request->has('tiktok_url')) {
-                $organization->tiktok_url = $request->tiktok_url;
-            }
-
-            // Handle image upload using Storage disk
-            if ($request->hasFile('img_url')) {
-                // Delete old image if exists
-                if ($organization->img_url && Storage::disk('organizations')->exists($organization->img_url)) {
-                    Storage::disk('organizations')->delete($organization->img_url);
-                }
-
-                $image = $request->file('img_url');
-                $imageName = time() . '.' . $image->getClientOriginalExtension();
-                Storage::disk('organizations')->put($imageName, file_get_contents($image));
-                $organization->img_url = $imageName;
-            }
-
-            // Determine current step from request (default to 1)
-            $currentStep = (int) $request->input('current_step', 1);
-
-            // Update wizard_step based on current step if it's higher
-            // This enables the next step tab
-            if ($currentStep >= $organization->wizard_step) {
-                $organization->wizard_step = $currentStep + 1;
-            }
-
-            $organization->save();
-
-            // Sync industries if provided
-            if ($request->has('industries')) {
-                $organization->industries()->sync($request->industries ?? []);
-            }
-
-            // Sync managers if provided (Step 3)
-            if ($request->has('manager_ids') && is_array($request->manager_ids)) {
-                $this->syncManagersToOrganization($organization, $request->manager_ids);
-            }
-
-            DB::commit();
-
-            // Stay on the current step after saving draft
-            return redirect()
-                ->route('organization.wizard.edit', ['id' => $organization->id, 'step' => $currentStep])
-                ->with('success', __('admin.Organization saved as draft successfully'));
-
-        } catch (\Exception $e) {
-            DB::rollBack();
+        if (!$result['success']) {
             return back()
                 ->withInput()
-                ->with('error', __('admin.Error saving draft') . ': ' . $e->getMessage());
+                ->with('error', $result['message']);
         }
+
+        // Sync managers if provided (Step 3)
+        if ($request->has('manager_ids') && is_array($request->manager_ids) && !empty($request->manager_ids)) {
+            $managerResult = $this->managerService->assignManagers($result['data']->id, $request->manager_ids);
+            if (!$managerResult['success']) {
+                return back()
+                    ->withInput()
+                    ->with('error', $managerResult['message']);
+            }
+        }
+
+        return redirect()
+            ->route('organization.wizard.edit', ['id' => $result['data']->id, 'step' => $currentStep])
+            ->with('success', $result['message']);
     }
 
     /**
@@ -692,25 +373,19 @@ class OrganizationWizardController extends Controller
     public function publish($id)
     {
         $_user = auth()->user();
-        if( !$_user->ableTo('organization.wizard.edit') ) { return abort(403); }
-        $organization = Organization::findOrFail($id);
-
-        // Check if already published
-        if (!$organization->is_draft) {
-            return back()->with('error', __('admin.Organization is already published'));
+        if (!$_user->ableTo('organization.wizard.edit')) {
+            return abort(401);
         }
 
-        // Check if has at least one manager
-        if ($organization->assignedUsers()->count() === 0) {
-            return back()->with('error', __('admin.Organization must have at least one manager to publish'));
+        $result = $this->wizardService->publish($id);
+
+        if ($result['success']) {
+            return redirect()
+                ->route('organization.wizard.edit', $result['data']->id)
+                ->with('success', $result['message']);
         }
 
-        $organization->is_draft = false;
-        $organization->save();
-
-        return redirect()
-            ->route('organization.wizard.edit', $organization->id)
-            ->with('success', __('admin.Organization published successfully'));
+        return back()->with('error', $result['message']);
     }
 
     /**
@@ -725,5 +400,135 @@ class OrganizationWizardController extends Controller
         }
 
         return $disk->response($filename);
+    }
+
+    /**
+     * Update step 4 data (Landing Page Setup).
+     */
+    public function updateStep4(OrganizationStep4Request $request, $id)
+    {
+        $_user = auth()->user();
+        if (!$_user->ableTo('organization.wizard.edit')) {
+            return abort(401);
+        }
+
+        $data = $request->validated();
+
+        // Collect files for processing
+        $files = [
+            'articles' => [],
+            'partners_list' => [],
+        ];
+
+        // Gather article images
+        $articles = $request->input('articles', []);
+        foreach ($articles as $index => $article) {
+            if ($request->hasFile("articles.{$index}.image")) {
+                $files['articles'][$index]['image'] = $request->file("articles.{$index}.image");
+            }
+        }
+
+        // Gather partner logos
+        $partners = $request->input('partners_list', []);
+        foreach ($partners as $index => $partner) {
+            if ($request->hasFile("partners_list.{$index}.logo")) {
+                $files['partners_list'][$index]['logo'] = $request->file("partners_list.{$index}.logo");
+            }
+        }
+
+        $result = $this->landingPageService->update($id, $data, $files);
+
+        if ($result['success']) {
+            $redirectTo = $request->input('redirect_to', 'next');
+            $step = $redirectTo === 'same' ? 4 : 5;
+
+            return redirect()
+                ->route('organization.wizard.edit', ['id' => $id, 'step' => $step])
+                ->with('success', $result['message']);
+        }
+
+        return back()
+            ->withInput()
+            ->with('error', $result['message']);
+    }
+
+    /**
+     * Serve landing page assets from storage.
+     */
+    public function getLandingAsset($organizationId, $type, $filename)
+    {
+        $disk = Storage::disk('organization_landing');
+        $path = "{$organizationId}/{$type}/{$filename}";
+
+        if (!$disk->exists($path)) {
+            abort(404);
+        }
+
+        return $disk->response($path);
+    }
+
+    /**
+     * Preview landing page.
+     */
+    public function previewLandingPage($id)
+    {
+        $_user = auth()->user();
+        if (!$_user->ableTo('organization.wizard.edit')) {
+            return abort(401);
+        }
+
+        $result = $this->landingPageService->getPreviewUrl($id);
+
+        if ($result['success']) {
+            return redirect()->to($result['data']);
+        }
+
+        return back()->with('error', $result['message']);
+    }
+
+    /**
+     * Generate slug via AJAX.
+     */
+    public function generateSlug(Request $request, $id = null)
+    {
+        $_user = auth()->user();
+        if (!$_user->ableTo('organization.wizard.edit')) {
+            return abort(401);
+        }
+
+        $name = $request->input('name', null);
+        $result = $this->wizardService->generateSlug($id, $name);
+
+        if ($result['success']) {
+            return response()->json([
+                'status' => true,
+                'message' => $result['message'],
+                'slug' => $result['data'],
+            ]);
+        }
+
+        return response()->json([
+            'status' => false,
+            'message' => $result['message'],
+        ], 400);
+    }
+
+    /**
+     * Check slug availability via AJAX.
+     */
+    public function checkSlugAvailability(Request $request, $id = null)
+    {
+        $_user = auth()->user();
+        if (!$_user->ableTo('organization.wizard.edit')) {
+            return abort(401);
+        }
+
+        $slug = $request->input('slug');
+        $result = $this->wizardService->checkSlugAvailability($slug, $id);
+
+        return response()->json([
+            'available' => $result['data'],
+            'message' => $result['message'],
+        ]);
     }
 }

@@ -160,6 +160,13 @@ return [
             'url' => env('APP_URL') . '/dashboard/organizations/logo',
             'visibility' => 'private',
         ],
+
+        'organization_landing' => [
+            'driver' => 'local',
+            'root' => storage_path('app/organization_landing'),
+            'url' => env('APP_URL') . '/organization-wizard',
+            'visibility' => 'public',
+        ],
     ],
 
 ];

@@ -8,6 +8,7 @@ use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Organization extends Model
 {
@@ -29,6 +30,7 @@ class Organization extends Model
 		'organization_type_id',
 		'is_draft',
 		'wizard_step',
+		'slug',
 		// Step 2: Contact Information
 		'contact_email',
 		'country_code',
@@ -194,5 +196,50 @@ class Organization extends Model
 	public function scopeDrafts($query)
 	{
 		return $query->where('is_draft', true);
+	}
+
+	/**
+	 * Get the landing page for this organization.
+	 */
+	public function landingPage()
+	{
+		return $this->hasOne(OrganizationLandingPage::class);
+	}
+
+	/**
+	 * Generate a unique slug from organization name.
+	 *
+	 * @param string $name
+	 * @param int|null $excludeId Organization ID to exclude from uniqueness check
+	 * @return string
+	 */
+	public static function generateSlug($name, $excludeId = null)
+	{
+		$slug = Str::slug($name);
+		$originalSlug = $slug;
+		$counter = 1;
+
+		while (static::where('slug', $slug)
+			->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
+			->exists()) {
+			$slug = $originalSlug . '-' . $counter;
+			$counter++;
+		}
+
+		return $slug;
+	}
+
+	/**
+	 * Get the public landing page URL.
+	 *
+	 * @return string|null
+	 */
+	public function getLandingPageUrlAttribute()
+	{
+		if (!$this->slug) {
+			return null;
+		}
+
+		return url('/o/' . $this->slug);
 	}
 }
