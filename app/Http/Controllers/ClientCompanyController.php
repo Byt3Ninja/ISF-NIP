@@ -3970,6 +3970,10 @@ class ClientCompanyController extends Controller
 
     public function companyPerks()
     {
+        if (!auth()->user()->hasRole('Registered')) {
+            abort(404);
+        }
+
         return view('admin.clients.startup.company_perks');
     }
 
