@@ -45,19 +45,21 @@ $tabs = [
       @endif
 
       {{-- Tabs Navigation --}}
-      <ul class="nav nav-pills mb-6">
-        @foreach($tabs as $tab)
-          <li class="nav-item">
-            <a 
-              class="nav-link {{ $currentRoute === $tab['route'] ? 'active' : '' }}" 
-              href="{{ route($tab['route']) }}"
-            >
-              <i class="ti ti-{{ $tab['icon'] }} me-2"></i>
-              {{ $tab['title'] }}
-            </a>
-          </li>
-        @endforeach
-      </ul>
+      @if ($_user->hasAnyRole('Admin|organizationManager'))
+        <ul class="nav nav-pills mb-6">
+          @foreach($tabs as $tab)
+            <li class="nav-item">
+              <a 
+                class="nav-link {{ $currentRoute === $tab['route'] ? 'active' : '' }}" 
+                href="{{ route($tab['route']) }}"
+              >
+                <i class="ti ti-{{ $tab['icon'] }} me-2"></i>
+                {{ $tab['title'] }}
+              </a>
+            </li>
+          @endforeach
+        </ul>
+      @endif
 
       @include('mentors.partials.header')
 

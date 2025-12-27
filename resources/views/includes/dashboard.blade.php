@@ -22,11 +22,6 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
 <link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify.min.css">
 <link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify-bootstrap.min.css">
-<style>
-	input[type=search] {
-		width: 150px !important;
-	}
-</style>
 @stop
 @section('content')
 @if (!$_user->first_name_ar)
@@ -854,7 +849,7 @@
 			@endif
 
 			@if( array_intersect(['dashboard.widgets_tables_my_current_schedule_view'], $permissions) )
-			@if ($_user->ableTo('slots.index', $permissions))
+			@if( $_user->ableTo('slots.index', $permissions) )
 			<div class="col-12">
 				<div class="card mb-6">
 					<div class="card-header">
@@ -920,430 +915,88 @@
 			@endif
 
 			@if( array_intersect(['dashboard.widgets_tables.my_next_mentorship_sessions_view'], $permissions) )
-			@php
-			$mentorship_sessions = collect([
-					(object)[
-							'id' => 1,
-							'zoom_date' => '2025-12-24 17:00:00',
-							'period' => 60,
-							'status' => 'Pending',
-							'session_type' => 'Online',
-							'location' => null,
-							'start_url' => 'https://zoom.us/start/1',
-							'passcode' => '123456',
-							'admin_comment' => 'Initial session',
-							'user' => (object)[
-									'id' => 11,
-									'name' => 'Ahmed Ali',
-									'image_url' => '/icons/avatar.svg',
-									'company' => (object)[
-											'id' => 101,
-											'name' => 'Tech Solutions',
-											'logo_url' => '/images/logo-placeholder.png',
-									],
-							],
-							'survey' => (object)[
-									'id' => 201,
-									'status' => 'Pending',
-									'is_required' => true,
-							],
-					],
-					(object)[
-							'id' => 2,
-							'zoom_date' => '2025-01-11 10:00:00',
-							'period' => 45,
-							'status' => 'Completed',
-							'session_type' => 'Offline',
-							'location' => 'Cairo Hub',
-							'start_url' => 'https://zoom.us/start/2',
-							'passcode' => null,
-							'admin_comment' => 'Went well',
-							'user' => (object)[
-									'id' => 12,
-									'name' => 'Sara Mohamed',
-									'image_url' => '/icons/avatar.svg',
-									'company' => (object)[
-											'id' => 102,
-											'name' => 'InnovateX',
-											'logo_url' => '/images/logo-placeholder.png',
-									],
-							],
-							'survey' => (object)[
-									'id' => 202,
-									'status' => 'Completed',
-									'is_required' => false,
-							],
-					],
-					(object)[
-							'id' => 3,
-							'zoom_date' => '2025-01-12 16:30:00',
-							'period' => 30,
-							'status' => 'In_Progress',
-							'session_type' => 'Online',
-							'location' => null,
-							'start_url' => 'https://zoom.us/start/3',
-							'passcode' => '789123',
-							'admin_comment' => null,
-							'user' => (object)[
-									'id' => 13,
-									'name' => 'Omar Hassan',
-									'image_url' => '/icons/avatar.svg',
-									'company' => (object)[
-											'id' => 103,
-											'name' => 'NextGen Labs',
-											'logo_url' => '/images/logo-placeholder.png',
-									],
-							],
-							'survey' => (object)[
-									'id' => 203,
-									'status' => 'In_Progress',
-									'is_required' => true,
-							],
-					],
-					(object)[
-							'id' => 4,
-							'zoom_date' => '2025-01-13 09:00:00',
-							'period' => 90,
-							'status' => 'Pending',
-							'session_type' => 'Offline',
-							'location' => 'Alexandria Office',
-							'start_url' => 'https://zoom.us/start/4',
-							'passcode' => null,
-							'admin_comment' => 'Waiting confirmation',
-							'user' => (object)[
-									'id' => 14,
-									'name' => 'Mona Adel',
-									'image_url' => '/icons/avatar.svg',
-									'company' => (object)[
-											'id' => 104,
-											'name' => 'Bright Minds',
-											'logo_url' => '/images/logo-placeholder.png',
-									],
-							],
-							'survey' => (object)[
-									'id' => 204,
-									'status' => 'Pending',
-									'is_required' => false,
-							],
-					],
-					(object)[
-							'id' => 5,
-							'zoom_date' => '2025-01-14 11:00:00',
-							'period' => 60,
-							'status' => 'Completed',
-							'session_type' => 'Online',
-							'location' => null,
-							'start_url' => 'https://zoom.us/start/5',
-							'passcode' => '555888',
-							'admin_comment' => 'Excellent feedback',
-							'user' => (object)[
-									'id' => 15,
-									'name' => 'Youssef Samir',
-									'image_url' => '/icons/avatar.svg',
-									'company' => (object)[
-											'id' => 105,
-											'name' => 'CodeCraft',
-											'logo_url' => '/images/logo-placeholder.png',
-									],
-							],
-							'survey' => (object)[
-									'id' => 205,
-									'status' => 'Completed',
-									'is_required' => true,
-							],
-					],
-					(object)[
-							'id' => 6,
-							'zoom_date' => '2025-01-15 15:00:00',
-							'period' => 45,
-							'status' => 'Pending',
-							'session_type' => 'Online',
-							'location' => null,
-							'start_url' => 'https://zoom.us/start/6',
-							'passcode' => null,
-							'admin_comment' => null,
-							'user' => (object)[
-									'id' => 16,
-									'name' => 'Nada Fathy',
-									'image_url' => '/icons/avatar.svg',
-									'company' => (object)[
-											'id' => 106,
-											'name' => 'FutureSoft',
-											'logo_url' => '/images/logo-placeholder.png',
-									],
-							],
-							'survey' => (object)[
-									'id' => 206,
-									'status' => 'Pending',
-									'is_required' => true,
-							],
-					],
-					(object)[
-							'id' => 7,
-							'zoom_date' => '2025-01-16 13:00:00',
-							'period' => 30,
-							'status' => 'In_Progress',
-							'session_type' => 'Offline',
-							'location' => 'Smart Village',
-							'start_url' => 'https://zoom.us/start/7',
-							'passcode' => '111222',
-							'admin_comment' => 'Ongoing',
-							'user' => (object)[
-									'id' => 17,
-									'name' => 'Khaled Nabil',
-									'image_url' => '/icons/avatar.svg',
-									'company' => (object)[
-											'id' => 107,
-											'name' => 'AI Works',
-											'logo_url' => '/images/logo-placeholder.png',
-									],
-							],
-							'survey' => (object)[
-									'id' => 207,
-									'status' => 'In_Progress',
-									'is_required' => false,
-							],
-					],
-					(object)[
-							'id' => 8,
-							'zoom_date' => '2025-01-17 10:30:00',
-							'period' => 60,
-							'status' => 'Completed',
-							'session_type' => 'Online',
-							'location' => null,
-							'start_url' => 'https://zoom.us/start/8',
-							'passcode' => null,
-							'admin_comment' => 'Completed successfully',
-							'user' => (object)[
-									'id' => 18,
-									'name' => 'Salma Tarek',
-									'image_url' => '/icons/avatar.svg',
-									'company' => (object)[
-											'id' => 108,
-											'name' => 'DesignPro',
-											'logo_url' => '/images/logo-placeholder.png',
-									],
-							],
-							'survey' => (object)[
-									'id' => 208,
-									'status' => 'Completed',
-									'is_required' => true,
-							],
-					],
-					(object)[
-							'id' => 9,
-							'zoom_date' => '2025-01-18 12:00:00',
-							'period' => 45,
-							'status' => 'Pending',
-							'session_type' => 'Offline',
-							'location' => 'Downtown Office',
-							'start_url' => 'https://zoom.us/start/9',
-							'passcode' => null,
-							'admin_comment' => 'Rescheduled',
-							'user' => (object)[
-									'id' => 19,
-									'name' => 'Hassan Magdy',
-									'image_url' => '/icons/avatar.svg',
-									'company' => (object)[
-											'id' => 109,
-											'name' => 'MarketGuru',
-											'logo_url' => '/images/logo-placeholder.png',
-									],
-							],
-							'survey' => (object)[
-									'id' => 209,
-									'status' => 'Pending',
-									'is_required' => false,
-							],
-					],
-					(object)[
-							'id' => 10,
-							'zoom_date' => '2025-01-19 17:00:00',
-							'period' => 90,
-							'status' => 'Completed',
-							'session_type' => 'Online',
-							'location' => null,
-							'start_url' => 'https://zoom.us/start/10',
-							'passcode' => '999000',
-							'admin_comment' => 'Final mentorship',
-							'user' => (object)[
-									'id' => 20,
-									'name' => 'Laila Mostafa',
-									'image_url' => '/icons/avatar.svg',
-									'company' => (object)[
-											'id' => 110,
-											'name' => 'Startup Hub',
-											'logo_url' => '/images/logo-placeholder.png',
-									],
-							],
-							'survey' => (object)[
-									'id' => 210,
-									'status' => 'Completed',
-									'is_required' => true,
-							],
-					],
-			]);
-			@endphp
-
 			<div class="col-12">
 				<div class="card mb-6">
 					<div class="card-header">
 						<h5 class="card-title mb-0 text-capitalize">
-							{{ __("admin.Mentorship Sessions") }}
+							{{ __("dashboard.My next mentorship sessions") }}
 						</h5>
 					</div>
 					<div class="card-datatable table-responsive">
-						<table class="table mentorship-sessions-table">
+						<table class="table">
 							<thead class="table-light">
 								<th> {{ '#' }} </th>
-								<th> {{ __('admin.Company') }} </th>
-								<th> {{ __('admin.registered') }} </th>
-								<th> {{ __('admin.Date & Time') }} </th>
-								<th> {{ __('admin.Status') }} </th>
+								<th> {{ __('dashboard.Company') }} </th>
+								<th> {{ __('dashboard.User') }} </th>
+								<th> {{ __('dashboard.Date') }} </th>
 								<th> {{ __('dashboard.Session_Type') }} </th>
-								<th> {{ __('admin.Survey') }} </th>
-								<th> {{ __('admin.Notes') }} </th>
-								<th> {{ __('dashboard.Actions') }} </th>
+								<th> {{ __('dashboard.Admin Notes') }} </th>
+								<th> {{ __('dashboard.Meeting Link') }} </th>
 							</thead>
 							<tbody>
-								@foreach( $mentorship_sessions as $key => $session )
+								@foreach( $upcoming_sessions as $key => $session )
 								<tr>
 									<td> {{ $loop->iteration }} </td>
-									<td style="width: 100px;">
-										<a 
-											class="d-flex align-items-center" style="width: 100px;"
-											@if ($_user->ableTo('company.profile_view', $permissions) && isset($session->user->company->id))
-												href="/dashboard/companyProfile/{{ $session->user->company->id }}" 
-											@else
-												href="javascript:void(0)"
-											@endif
-										>
-											<img 
-												class="rounded-circle me-2 border bg-label-light flex-shrink-0"
-												src="{{ $session->user->company->logo_url }}"
-												onerror="this.onerror=null;this.src='/images/logo-placeholder.png';"
-												height="36"
-												width="36"
-												alt="logo" 
-											/>
-											<small class="text-dark">{{ $session->user->company->name }}</small>
-										</a>
-									</td>
-									<td style="width: 100px;">
-										<a 
-											class="d-flex align-items-center" style="width: 100px;"
-											@if ($_user->ableTo('users.edit', $permissions) && isset($session->user->id ))
-												href="/dashboard/users/{{ $session->user->id }}/edit"
-											@else
-												href="javascript:void(0)"
-											@endif
-										>
-											<img 
-												class="rounded-circle me-2 border bg-label-light flex-shrink-0"
-												src="{{ $session->user->image_url }}"
-												onerror="this.onerror=null;this.src='/icons/avatar.svg';"
-												height="36"
-												width="36"
-												alt="avatar" 
-											/>
-											<small class="text-dark">{{ $session->user->name }}</small>
-										</a>
-									</td>
-									<td> 
-										<div class="text-muted">
-											<span class="small text-nowrap">{{ FormatDate($session->zoom_date, 'Y-m-d H:i A') }}</span>
-											<br />
-											<span class="small text-nowrap">({{ $session->period }} {{ __('admin.Min') }}) </span>
-										</div>
-									</td>
-									<td> 
-										@if ($session->status == 'Pending')
-											<div class="badge bg-label-warning">{{ __('admin.Pending') }}</div>
-										@elseif ($session->status == 'Completed')
-											<div class="badge bg-label-success">{{ __('admin.Completed') }}</div>
-										@else
-											<div class="badge bg-label-primary">{{ __('admin.In_Progress') }}</div>
-										@endif
+									<td>
+										@if( $_user->ableTo('company.profile_view', $permissions) )<a class="text-dark"
+											href="/dashboard/companyProfile/{{ $session->user->company->id }}">@endif
+											<img src="{{ $session->user->company->logo_url }}" alt="avatar" class="rounded-circle"
+												height="40" width="40">
+											<span class="fw-medium"> {{ $session->user->company->name }}</span>
+											@if( $_user->ableTo('company.profile_view', $permissions) )</a>@endif
 									</td>
 									<td>
-										<div class="d-flex justify-content-start align-items-start" style="width: 150px;">
-											<div class="d-flex flex-column " style="width: 100%; min-width: 0;">
-												@if ($session->session_type == 'Offline')
-													<span class="badge bg-label-secondary" style="width: fit-content;">{{ __('mentor.offline') }}</span>
-													<div class="d-flex align-items-center gap-1 mt-2">
-														<i class="ti ti-map-pin ti-14px"></i>
-														<small class="text-muted">{{ $session->location ?? '' }}</small>
-													</div>
-												@else
-													<span class="badge bg-label-info" style="width: fit-content;">{{ __('mentor.online') }}</span>
-												@endif
+										@if( $_user->ableTo('users.edit', $permissions) )<a
+											class="text-dark d-flex align-items-center gap-2"
+											href="/dashboard/users/{{ $session->user->id }}/edit">@endif
+											<img src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle"
+												height="35" width="35" style="border: 2px solid #ddd;">
+											<div class="media-body">
+												<h6 class="media-heading mb-0" style="font-size: 14px;">{{ $session->user->name }}
+												</h6>
+												<span class="font-small-2" style="font-size:11px;">{{ $session->user->title }}</span>
 											</div>
-										</div>
+											@if( $_user->ableTo('users.edit', $permissions) )
+										</a>@endif
 									</td>
+									<td> {{ FormatDate($session->zoom_date, 'Y-m-d H:i A') }} ({{ $session->period }}M) </td>
 									<td>
-										<div>
-											@if ($session->survey->status == 'Pending')
-												<span class="badge bg-label-warning">{{ __('admin.Pending') }}</span>
-											@elseif ($session->survey->status == 'Completed')
-												<span class="badge bg-label-success">{{ __('admin.Completed') }}</span>
-											@else
-												<span class="badge bg-label-primary">{{ __('admin.In_Progress') }}</span>
-											@endif
-
-											@if ($session->survey->is_required)
-												<span class="badge bg-label-danger mt-2">{{ __('admin.mandatory') }}</span>
-											@else 
-												<span class="badge bg-label-secondary mt-2">{{ __('admin.optional') }}</span>
-											@endif
-										</div>
+										{{ $session->session_type ?? '' }}
 									</td>
-									<td>
-										<small class="text-muted line-clamp-2">
-											{{ $session->admin_comment ?? '...' }}
-										</small>
-									</td>
+									<td> {{ $session->admin_comment ?? '...' }} </td>
 									<td>
 										@php
 											$now = date('Y-m-d H:i');
 											$start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
 											$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+' . $session->period .' minutes'));
-											@endphp
-
-										<div class="d-flex align-items-center flex-wrap text-nowrap gap-2">
-											@if ($session->survey->status == 'Pending')
-												<a href="/dashboard/surveys/{{ $session->survey->id }}" class="btn btn-sm btn-info">
-													{{ __('admin.start_survey') }}
-												</a>
-											@elseif ($session->survey->status == 'In_Progress')
-												<a href="/dashboard/surveys/{{ $session->survey->id }}" class="btn btn-sm btn-info">
-													{{ __('admin.complete_survey') }}
-												</a>
-											@elseif ($session->survey->status == 'Completed')
-												<a href="/dashboard/surveys/{{ $session->survey->id }}" class="btn btn-sm btn-info">
-													{{ __('admin.view_survey') }}
-												</a>
-											@endif
-
-											@if( $now >= $start_time )
-												@if( $now <= $end_time )
-													<a href="{{ $session->start_url }}" target="_blank">
-														<button type="button" data-value="{{ $session->id }}" type="button" class="btn btn-sm btn-primary rounded">
-															{{ __('admin.Join Meeting') }}
-														</button>
-													</a>
-													@if( !empty( $session->passcode ) )
-														| <button title="Show Passcode" type="button" data-passcode="{{ $session->passcode }}" type="button" class="btn btn-sm btn-label-success show-passcode rounded">
-															<i class="ti ti-key"></i>
-														</button>
-													@endif
-												@endif
-											@endif
-
-										</div>
+										@endphp
 										
+										@if( $now >= $start_time )
+											@if( $now <= $end_time )
+											<a href="{{ $session->start_url }}" target="_blank">
+												<button title="Start Meeting" type="button" data-value="{{ $session->id }}" type="button" class="btn btn-label-primary rounded">
+													<i class="ti ti-link"></i> {{ __('admin.Join Meeting') }}
+												</button>
+											</a>
+											@if( !empty( $session->passcode ) )
+												 | <button title="Show Passcode" type="button" data-passcode="{{ $session->passcode }}" type="button" class="btn btn-label-warning show-passcode rounded">
+													<i class="ti ti-key"></i>
+												</button>
+											@endif
+											@else
+												<span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
+											@endif
+										@else
+											<i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }}
+										@endif
 									</td>
 								</tr>
 								@endforeach
+								@if( $upcoming_sessions->count() == 0 )
+								<tr>
+									<td class="text-center" colspan="6">{{ __('cycles.No data available in table') }}</td>
+								</tr>
+								@endif
 							</tbody>
 						</table>
 					</div>
@@ -2591,152 +2244,20 @@ document.addEventListener('DOMContentLoaded', function() {
 	</script>
 
 	<script>
-	$(document).ready(function () {
-		// Initialize slots DataTable
-		$('.slots-table')?.DataTable({
-			responsive: true,
-			processing: true,
-			searching: false,
-			lengthChange: false,
-			pageLength: 7,
-			language: {
-				url: '{{ $l }}' == "ar"
-					? "https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json"
-					: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json",
-			},
+		$(document).ready(function () {
+			// Initialize slots DataTable
+			$('.slots-table')?.DataTable({
+				responsive: true,
+				processing: true,
+				searching: false,
+				lengthChange: false,
+				pageLength: 7,
+				language: {
+					url: '{{ $l }}' == "ar"
+						? "https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json"
+						: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json",
+				},
+			});
 		});
-
-		// Initialize mentorship sessions DataTable
-		$('.mentorship-sessions-table')?.DataTable({
-			processing: true,
-			pageLength: 10,
-			dom: '<"row"' +
-				'<"col-12 col-lg-10 d-flex flex-wrap align-items-center ps-0 ps-lg-3"l>' +
-				'<"col-12 col-lg-2 dt-action-buttons text-xl-end text-lg-start text-md-end text-start d-flex align-items-center justify-content-end flex-md-row flex-column mb-6 mb-md-0 pe-0 pe-lg-2"f>' +
-				'>' +
-				't' +
-				'<"row px-6"' +
-					'<"col-sm-12 col-lg-6"i>' +
-					'<"col-sm-12 col-lg-6 d-flex justify-content-end"p>' +
-				'>',
-			language: {
-				url: '{{ $l }}' === "ar"
-					? "https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json"
-					: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json",	
-				sLengthMenu: '_MENU_',
-				search: '',
-				searchPlaceholder: '{{ __('admin.Search') }}...',
-			},
-
-			initComplete: function () {
-				const api = this.api();
-
-				const filterContainer = $(
-					'<div class="d-flex flex-wrap flex-md-nowrap gap-3 ms-3"></div>'
-				);
-
-				$('.dataTables_length').after(filterContainer);
-
-				const addDropdownFilter = (colIndex, id, placeholder, width = 150) => {
-					api.columns(colIndex).every(function () {
-						const column = this;
-
-						const select = $(`
-							<select id="${id}"
-								class="form-select text-capitalize"
-								style="min-width:${width}px">
-								<option value="">${placeholder}</option>
-							</select>
-						`)
-							.appendTo(filterContainer)
-							.on('change', function () {
-								let val = $(this).val();
-
-								if (!val) {
-									column.search('', true, false).draw();
-									return;
-								}
-
-								// ✅ Normalize input
-								val = val.trim().toLowerCase();
-
-								// ✅ Escape regex safely
-								val = $.fn.dataTable.util.escapeRegex(val);
-
-								// ✅ Match exact word ignoring extra spaces
-								column
-									.search(`^\\s*${val}\\s*$`, true, false)
-									.draw();
-							});
-
-						// Populate unique values (clean text only)
-						column
-							.data()
-							.unique()
-							.sort()
-							.each(function (d) {
-								const text = $('<div>')
-									.html(d)
-									.text()
-									.replace(/\s+/g, ' ')
-									.trim();
-
-								if (text) {
-									select.append(
-										`<option value="${text.toLowerCase()}">${text}</option>`
-									);
-								}
-							});
-					});
-				};
-
-				// Startup (Company)
-				addDropdownFilter(
-					1,
-					'startupFilter',
-					'{{ __("cycles.All Startups") }}',
-					200
-				);
-
-				// Session Status
-				addDropdownFilter(
-					4,
-					'sessionStatusFilter',
-					'{{ __("cycles.All Status") }}'
-				);
-
-				// Survey Mandatory / Optional
-				api.columns(6).every(function () {
-					const column = this;
-
-					const select = $(`
-						<select id="surveyMandatoryFilter"
-							class="form-select text-capitalize"
-							style="min-width:170px">
-							<option value="">
-								{{ __("admin.all_surveys") }}
-							</option>
-							<option value="mandatory">
-								{{ __("admin.mandatory") }}
-							</option>
-							<option value="optional">
-								{{ __("admin.optional") }}
-							</option>
-						</select>
-					`)
-					.appendTo(filterContainer)
-					.on('change', function () {
-						const val = $(this).val();
-						column.search(val ? val : '', true, false).draw();
-					});
-				});
-
-				setTimeout(() => {
-					$('.dataTables_filter .form-control').removeClass('form-control-sm');
-					$('.dataTables_length .form-select').removeClass('form-select-sm');
-				}, 300);
-			}
-    });
-	});
 	</script>
 @stop

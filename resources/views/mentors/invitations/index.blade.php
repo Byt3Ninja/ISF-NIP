@@ -39,9 +39,9 @@ $tabs = [
         <div class="card">
           <div class="card-header border-bottom">
             <div class="d-flex justify-content-between align-items-center">
-              <h5 class="card-title mb-0">Invitations</h5>
+              <h5 class="card-title mb-0">{{ __('admin.invitations') }}</h5>
               <button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#newInvitationOffcanvas">
-                <i class="ti ti-plus me-1"></i> New Invitation
+                <i class="ti ti-plus me-1"></i> {{ __('admin.new_invitation') }}
               </button>
             </div>
           </div>
@@ -49,21 +49,23 @@ $tabs = [
             <table id="invitationsTable" class="table">
               <thead class="table-light">
                 <tr>
-                  <th>Invitee Name</th>
-                  <th>Title</th>
-                  <th>Scope</th>
-                  <th>Status</th>
-                  <th>Created At</th>
-                  <th>Actions</th>
+                  <th>{{ __('admin.invitee_name') }}</th>
+                  <th>{{ __('admin.subject') }}</th>
+                  <th>{{ __('admin.Scope') }}</th>
+                  <th>{{ __('admin.status') }}</th>
+                  <th>{{ __('admin.Created At') }}</th>
+                  <th>{{ __('admin.actions') }}</th>
                 </tr>
               </thead>
               <tbody>
                 @foreach($invitations as $item)
                 <tr data-scope="{{ $item['scope'] }}" data-status="{{ $item['status'] }}">
                   <td>{{ $item['invitee_name'] }}</td>
-                  <td>{{ $item['title'] }}</td>
+                  <td>{{ $item['subject'] }}</td>
                   <td>
-                    <span class="badge bg-label-{{ $item['scope'] == 'Public' ? 'primary' : 'info' }}">{{ $item['scope'] }}</span>
+                    <span class="badge bg-label-{{ $item['scope'] == 'Public' ? 'primary' : 'info' }}">
+                      {{ __('admin.' . strtolower($item['scope'])) }}
+                    </span>
                   </td>
                   <td>
                     <span class="badge
@@ -71,14 +73,14 @@ $tabs = [
                       @elseif($item['status'] == 'Pending') bg-label-warning
                       @else bg-label-danger
                       @endif">
-                      <i class="ti ti-{{ $item['status'] == 'Accepted' ? 'circle-check' : ($item['status'] == 'Pending' ? 'clock' : 'circle-x') }} ti-sm me-1"></i>
-                      {{ $item['status'] }}
+                      <i class="ti ti-{{ $item['status'] == 'Accepted' ? 'circle-check' : ($item['status'] == 'Pending' ? 'clock' : 'circle-x') }} ti-xs me-1"></i>
+                      {{ __('admin.' . strtolower($item['status'])) }}
                     </span>
                   </td>
-                  <td>{{ $item['date_timestamp'] }}</td>
+                  <td>{{ $item['created_at'] }}</td>
                   <td>
-                    <button class="btn btn-sm btn-primary view-details" data-bs-toggle="offcanvas" data-bs-target="#invitationOffcanvas" data-invitee-name="{{ $item['invitee_name'] }}" data-invitee-email="{{ $item['invitee_email'] }}" data-title="{{ $item['title'] }}" data-scope="{{ $item['scope'] }}" data-status="{{ $item['status'] }}" data-message="{{ $item['message_content'] }}" data-date="{{ $item['date_timestamp'] }}" data-attachments="{{ implode(',', $item['attachments']) }}" data-response-message="{{ $item['response_message'] }}">
-                      <i class="ti ti-eye me-1"></i> View Details
+                    <button class="btn btn-sm btn-outline-primary text-nowrap view-details" data-bs-toggle="offcanvas" data-bs-target="#invitationOffcanvas" data-invitee-name="{{ $item['invitee_name'] }}" data-invitee-email="{{ $item['invitee_email'] }}" data-subject="{{ $item['subject'] }}" data-scope="{{ $item['scope'] }}" data-status="{{ $item['status'] }}" data-message="{{ $item['message_content'] }}" data-date="{{ $item['created_at'] }}" data-attachments="{{ implode(',', $item['attachments']) }}" data-response-message="{{ $item['response_message'] }}">
+                      <i class="ti ti-eye me-1"></i> {{ __('admin.view_details') }}
                     </button>
                   </td>
                 </tr>
@@ -96,13 +98,15 @@ $tabs = [
       <div class="offcanvas-header border-bottom">
         <div class="d-flex justify-content-between w-100">
           <div class="d-flex flex-column">
-            <h5 class="offcanvas-title fw-bold mb-1" id="invitationTitle">Invitation Subject</h5>
+            <h5 class="offcanvas-title fw-bold mb-1" id="invitationTitle">
+              @lang('admin.invitation_subject')
+            </h5>
             <small class="text-muted mb-2">
               <i class="ti ti-calendar me-1"></i>
-              Sent on: <span id="dateTimestamp"></span>
+              @lang('admin.sent_on'): <span id="dateTimestamp"></span>
             </small>
             <div class="d-flex align-items-center gap-2">
-              <div id="invitationScope"></div>
+              <div id="invitationScopeDisplay"></div>
               <div id="invitationStatus"></div>
             </div>
           </div>
@@ -118,11 +122,17 @@ $tabs = [
           <div class="mail-message mb-4">
             <div class="d-flex align-items-center mb-2">
               <div class="avatar avatar-sm me-2">
-                <span class="avatar-initial rounded-circle bg-secondary">AD</span>
+                @if (auth()->user()->image_url)
+                  <img src="{{ auth()->user()->image_url }}" alt="{{ auth()->user()->name }}" class="rounded-circle" onerror="this.src='/images/user-placeholder.jpeg'">
+                @else
+                  <span class="avatar-initial rounded-circle bg-secondary">
+                    {{ strtoupper(substr(auth()->user()->first_name_en ?? 'U', 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name_en ?? 'U', 0, 1)) }}
+                  </span>
+                @endif
               </div>
               <div>
-                <h6 class="mb-0 small fw-bold">Admin (You)</h6>
-                <small class="text-muted">Original Message</small>
+                <h6 class="mb-0 small fw-bold">{{ auth()->user()->name }} (@lang('admin.you'))</h6>
+                <small class="text-muted">@lang('admin.original_message')</small>
               </div>
             </div>
             <div class="p-3 bg-white border rounded shadow-sm">
@@ -135,18 +145,20 @@ $tabs = [
           <!-- Divider -->
           <div class="text-center my-8 position-relative">
             <hr>
-            <span class="position-absolute top-50 start-50 translate-middle badge bg-label-secondary small">Replies</span>
+            <span class="position-absolute top-50 start-50 translate-middle badge bg-label-secondary small">@lang('admin.replies')</span>
           </div>
     
           <!-- 2. Invitee Replies (Incoming) -->
           <div class="mail-message mb-4">
             <div class="d-flex align-items-center mb-2 flex-row-reverse">
               <div class="avatar avatar ms-2">
-                <span class="avatar-initial rounded-circle bg-primary" id="inviteeInitials">JS</span>
+                <span class="avatar-initial rounded-circle bg-label-primary" id="inviteeInitials">
+                  <i class="ti ti-user"></i>
+                </span>
               </div>
               <div class="text-end">
-                <h6 class="mb-0 small fw-bold" id="inviteeNameDisplay">John Smith</h6>
-                <small class="text-muted m-0" id="inviteeEmailDisplay">john@example.com</small>
+                <h6 class="mb-0 small fw-bold" id="inviteeNameDisplay"></h6>
+                <small class="text-muted m-0" id="inviteeEmailDisplay"></small>
               </div>
             </div>
             <div class="p-3 border rounded shadow-sm bg-light-subtle">
@@ -156,7 +168,7 @@ $tabs = [
     
               <!-- Attachments specifically for this reply -->
               <div id="attachmentsSection" class="border-top pt-2 mt-2">
-                <p class="small fw-bold mb-2"><i class="ti ti-paperclip me-1"></i>Attachments</p>
+                <p class="small fw-bold mb-2"><i class="ti ti-paperclip me-1"></i>@lang('admin.attachments')</p>
                 <div class="d-flex flex-column gap-2 ps-6" id="attachmentsList">
                   <!-- JS injected: <a class="btn btn-xs btn-white border">filename.pdf</a> -->
                 </div>
@@ -169,10 +181,10 @@ $tabs = [
         <div class="offcanvas-footer border-top pt-4">
           <label class="form-label fw-bold small text-primary mb-2">
             <i class="ti ti-arrow-back-up me-1"></i> 
-            Send Follow-up Message
+            @lang('admin.send_follow_up_message')
           </label>
           <div class="input-group">
-            <textarea class="form-control" id="followUpMessage" rows="3" placeholder="Write your message..."></textarea>
+            <textarea class="form-control" id="followUpMessage" rows="3" placeholder="@lang('admin.write_your_message')..."></textarea>
           </div>
           <div class="d-flex justify-content-between align-items-center mt-3">
             <div class="attachment-upload">
@@ -181,7 +193,7 @@ $tabs = [
               </button>
             </div>
             <button type="button" class="btn btn-primary px-4" id="btnSendFollowUp">
-              Send <i class="ti ti-send ms-1"></i>
+              @lang('admin.Send_Message') <i class="ti ti-send ms-2"></i>
             </button>
           </div>
         </div>
@@ -191,62 +203,62 @@ $tabs = [
     <!-- New Invitation Offcanvas -->
     <div class="offcanvas offcanvas-end w-px-600" tabindex="-1" id="newInvitationOffcanvas" aria-labelledby="newInvitationOffcanvasLabel">
       <div class="offcanvas-header border-bottom">
-        <h5 class="offcanvas-title" id="newInvitationOffcanvasLabel">New Invitation</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        <div class="d-flex justify-content-between w-100">
+          <h5 class="offcanvas-title" id="newInvitationOffcanvasLabel">@lang('admin.new_invitation')</h5>
+          <button type="button" class="btn-close m-0 p-0" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
       </div>
       <div class="offcanvas-body">
         <form id="invitationForm" enctype="multipart/form-data" class="d-flex flex-column h-100">
           <meta name="csrf-token" content="{{ csrf_token() }}">
           <div class="row">
             <div class="col-12 mb-4">
-              <label for="mentorEmail" class="form-label">Mentor Email <span class="text-danger">*</span></label>
-              <input type="email" class="form-control" id="mentorEmail" name="mentor_email" maxlength="255" required>
+              <label for="mentorEmail" class="form-label"> 
+                @lang('admin.invitee_email')
+                <span class="text-danger">*</span></label>
+              <input type="email" class="form-control" id="mentorEmail" name="invitee_email" placeholder="@lang('admin.enter_invitee_email')" required>
               <div class="invalid-feedback" id="mentorEmailError"></div>
             </div>
             <div class="col-12 mb-4">
-              <label for="invitationScope" class="form-label">Invitation Scope <span class="text-danger">*</span></label>
+              <label for="invitationScope" class="form-label">@lang('admin.invitation_scope') <span class="text-danger">*</span></label>
               <select class="form-select" id="invitationScope" name="invitation_scope" required>
-                <option value="">Select Scope</option>
-                <option value="Public">Public</option>
-                <option value="Select Organizations">Select Organizations</option>
+                <option value="">@lang('admin.select_scope')</option>
+                <option value="Public">@lang('admin.public')</option>
+                <option value="Organization">@lang('admin.organization')</option>
               </select>
               <div class="invalid-feedback" id="invitationScopeError"></div>
             </div>
             <div class="col-12 mb-4" id="organizationsContainer" style="display: none;">
-              <label for="organizations" class="form-label">Organizations <span class="text-danger">*</span></label>
-              <select class="form-select" id="organizations" name="organizations[]" multiple required>
-                <!-- Organizations will be populated via JS -->
+              <label for="organizations" class="form-label">@lang('admin.Organizations') <span class="text-danger">*</span></label>
+              <select class="form-select select2" id="organizations" name="organizations[]" data-placeholder="@lang('admin.Select Organizations')" multiple required>
+                @foreach($organizations as $organization)
+                  <option value="{{ $organization['id'] }}">{{ $organization['name'] }}</option>
+                @endforeach
               </select>
               <div class="invalid-feedback" id="organizationsError"></div>
             </div>
             <div class="col-12 mb-4">
-              <label for="emailSubject" class="form-label">Email Subject <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" id="emailSubject" name="email_subject" maxlength="255" required>
-              <div class="invalid-feedback" id="emailSubjectError"></div>
+              <label for="invitationSubject" class="form-label">@lang('admin.invitation_subject') <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="invitationSubject" name="invitation_subject" placeholder="@lang('admin.enter_invitation_subject')" required>
+              <div class="invalid-feedback" id="invitationSubjectError"></div>
             </div>
             <div class="col-12 mb-4">
-              <label for="emailBody" class="form-label">Email Body <span class="text-danger">*</span></label>
-              <div id="emailBodyEditor" style="height: 150px; overflow-y: scroll;"></div>
-              <textarea class="d-none" id="emailBody" name="email_body" maxlength="10000" required></textarea>
-              <div class="invalid-feedback" id="emailBodyError"></div>
+              <label for="invitationMessage" class="form-label">@lang('admin.invitation_message') <span class="text-danger">*</span></label>
+              <div id="invitationMessageEditor" style="height: 150px; overflow-y: scroll;"></div>
+              <textarea class="d-none" id="invitationMessage" name="invitation_message" maxlength="10000" required></textarea>
+              <div class="invalid-feedback" id="invitationMessageError"></div>
             </div>
-            <div class="col-12">
-              <label for="attachments" class="form-label">Attachments (Optional)</label>
-              <input type="file" class="form-control" id="attachments" name="attachments[]" multiple accept=".pdf,.doc,.docx,.xlsx,.pptx,.png,.jpg,.jpeg">
-              <div class="form-text">Supported types: PDF, DOC, DOCX, XLSX, PPTX, PNG, JPG. Max 5 files, 10MB each.</div>
-              <div class="invalid-feedback" id="attachmentsError"></div>
-              <div id="attachmentsList" class="mt-2"></div>
-            </div>
-          </div>
+          </div>        
 
-          <hr />
-
-          <div class="row mt-auto pb-6">
+          <div class="row mt-auto py-6 border-top">
             <div class="col-12">
               <div class="d-flex align-items-center gap-3">
-                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="offcanvas">Cancel</button>
-                <button type="button" class="btn btn-primary" id="sendInvitationBtn">
-                  <i class="ti ti-send me-1"></i> Send Invitation
+                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="offcanvas">
+                  <i class="ti ti-x me-2"></i>
+                  @lang('admin.cancel')
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  <i class="ti ti-send me-2"></i> @lang('admin.send_invitation')
                 </button>
               </div>
             </div>
@@ -270,385 +282,261 @@ $tabs = [
 
 @section('pagescripts')
 <script>
-// Initialize Quill Editor
-const quill = new Quill('#emailBodyEditor', {
-  theme: 'snow',
-  placeholder: 'Compose your email message...',
-  modules: {
-    toolbar: [
-      [{ 'header': [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      [{ 'color': [] }, { 'background': [] }],
-      ['link'],
-      ['clean']
-    ]
-  }
-});
+$(function () {
+  /* =======================
+   * Quill Editor
+   * ======================= */
+  const quill = new Quill('#invitationMessageEditor', {
+    theme: 'snow',
+    placeholder: '@lang('admin.compose_your_invitation_message')',
+    modules: {
+      toolbar: [
+        [{ header: [1, 2, 3, false] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        [{ color: [] }, { background: [] }],
+        ['image', 'link'],
+        ['clean']
+      ]
+    }
+  });
 
-// Update hidden textarea when Quill content changes
-quill.on('text-change', function() {
-  const html = quill.root.innerHTML;
-  const text = quill.getText().trim();
-  $('#emailBody').val(html);
-  // Trigger validation if needed
-  if (fv) {
-    fv.revalidateField('email_body');
-  }
-});
+  quill.on('text-change', () => {
+    $('#invitationMessage').val(quill.root.innerHTML);
+    fv && fv.revalidateField('invitation_message');
+  });
 
-// Initialize invitations DataTable
-$('#invitationsTable').DataTable({
-  processing: true,
-  pageLength: 10,
-  dom: '<"row"' +
-    '<"col-12 col-lg-9 d-flex flex-wrap align-items-center ps-0 ps-lg-3"l>' +
-    '<"col-12 col-lg-3 dt-action-buttons text-xl-end text-lg-start text-md-end text-start d-flex align-items-center justify-content-end flex-md-row flex-column mb-6 mb-md-0 pe-0 pe-lg-6"f>' +
-    '>' +
-    't' +
-    '<"row px-6"' +
-    '<"col-sm-12 col-lg-6"i>' +
-    '<"col-sm-12 col-lg-6 d-flex justify-content-end"p>' +
-    '>',
-  language: {
-    url: '{{ app()->getLocale() }}' === "ar"
-      ? "https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json"
-      : "https://cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json",
-    sLengthMenu: '_MENU_',
-    search: '',
-    searchPlaceholder: '{{ __('admin.Search') }}...',
-  },
+  /* =======================
+   * DataTable
+   * ======================= */
+  const table = $('#invitationsTable').DataTable({
+    responsive: true,
+    processing: true,
+    pageLength: 10,
+    dom:
+      '<"row"' +
+      '<"col-12 col-lg-9 d-flex flex-wrap align-items-center ps-0 ps-lg-6"l>' +
+      '<"col-12 col-lg-3 dt-action-buttons d-flex justify-content-lg-end pe-0 pe-lg-6"f>' +
+      '>' +
+      't' +
+      '<"row px-6"' +
+      '<"col-lg-6"i>' +
+      '<"col-lg-6 d-flex justify-content-end"p>' +
+      '>',
+    language: {
+      url:
+        '{{ app()->getLocale() }}' === 'ar'
+          ? 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json'
+          : 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json',
+      sLengthMenu: '_MENU_',
+      search: '',
+      searchPlaceholder: '{{ __('admin.Search') }}...'
+    },
+    initComplete() {
+      const api = this.api();
+      const container = $('<div class="d-flex gap-3 ms-3"></div>').insertAfter('.dataTables_length');
 
-  initComplete: function () {
-    const api = this.api();
-
-    const filterContainer = $(
-      '<div class="d-flex flex-wrap flex-md-nowrap gap-3 ms-3"></div>'
-    );
-
-    $('.dataTables_length').after(filterContainer);
-
-    const addDropdownFilter = (colIndex, id, placeholder, width = 150) => {
-      api.columns(colIndex).every(function () {
-        const column = this;
-
+      const addFilter = (col, id, label, width = 150) => {
         const select = $(`
-          <select id="${id}"
-            class="form-select text-capitalize"
-            style="min-width:${width}px">
-            <option value="">${placeholder}</option>
+          <select id="${id}" class="form-select" style="min-width:${width}px">
+            <option value="">${label}</option>
           </select>
         `)
-          .appendTo(filterContainer)
+          .appendTo(container)
           .on('change', function () {
-            let val = $(this).val();
-
-            if (!val) {
-              column.search('', true, false).draw();
-              return;
-            }
-
-            val = val.trim().toLowerCase();
-            val = $.fn.dataTable.util.escapeRegex(val);
-
-            column.search(`^\\s*${val}\\s*$`, true, false).draw();
+            const val = $(this).val();
+            api
+              .column(col)
+              .search(val ? `^\\s*${$.fn.dataTable.util.escapeRegex(val)}\\s*$` : '', true, false)
+              .draw();
           });
 
-        // Populate unique values (clean text only)
-        column
+        api
+          .column(col)
           .data()
           .unique()
           .sort()
-          .each(function (d) {
-            const text = $('<div>')
-              .html(d)
-              .text()
-              .replace(/\s+/g, ' ')
-              .trim();
-
-            if (text) {
-              select.append(
-                `<option value="${text.toLowerCase()}">${text}</option>`
-              );
-            }
+          .each(d => {
+            const text = $('<div>').html(d).text().replace(/\s+/g, ' ').trim();
+            text && select.append(`<option value="${text.toLowerCase()}">${text}</option>`);
           });
-      });
+      };
+
+      addFilter(2, 'scopeFilter', '@lang('admin.all_scopes')');
+      addFilter(3, 'statusFilter', '@lang('admin.All_statuses')');
+
+      setTimeout(() => {
+        $('.form-control-sm, .form-select-sm').removeClass('form-control-sm form-select-sm');
+      }, 300);
+    }
+  });
+
+  /* =======================
+   * View Details
+   * ======================= */
+  $(document).on('click', '.view-details', function () {
+    const d = $(this).data();
+
+    $('#inviteeNameDisplay').text(d.inviteeName);
+    $('#inviteeEmailDisplay').text(d.inviteeEmail);
+    $('#invitationTitle').text(d.subject);
+    $('#originalMessageContent').text(d.message);
+    $('#replyMessageContent').text(d.responseMessage);
+    $('#dateTimestamp').text(d.date);
+
+    const scopeLabels = {
+      Public: '@lang("admin.public")',
+      Organization: '@lang("admin.organization")'
     };
 
-    // Scope filter (column 2)
-    addDropdownFilter(2, 'scopeFilter', 'All Scopes', 150);
+    const statusLabels = {
+      Accepted: '@lang("admin.accepted")',
+      Pending: '@lang("admin.pending")',
+      Declined: '@lang("admin.declined")'
+    };
 
-    // Status filter (column 3)
-    addDropdownFilter(3, 'statusFilter', 'All Status', 150);
+    $('#invitationScopeDisplay').html(
+      `<span class="badge bg-label-${d.scope === 'Public' ? 'primary' : 'info'}">
+        ${scopeLabels[d.scope] || d.scope}
+      </span>`
+    );
 
-    setTimeout(() => {
-      $('.dataTables_filter .form-control').removeClass('form-control-sm');
-      $('.dataTables_length .form-select').removeClass('form-select-sm');
-    }, 300);
-  }
-});
+    $('#invitationStatus').html(
+      `<span class="badge bg-label-${
+        d.status === 'Accepted' ? 'success' :
+        d.status === 'Pending' ? 'warning' : 'danger'
+      }">
+        ${statusLabels[d.status] || d.status}
+      </span>`
+    );
 
-// Handle View Details button click
-$(document).on('click', '.view-details', function() {
-  const data = $(this).data();
+    const attachments = (d.attachments || '').split(',').filter(a => a.trim());
+    $('#attachmentsSection').toggle(attachments.length > 0);
+    $('#attachmentsList').html(
+      attachments.map(a => `<a class="btn btn-xs btn-white border">${a}</a>`).join('')
+    );
 
-  $('#inviteeNameDisplay').text(data.inviteeName);
-  $('#inviteeEmailDisplay').text(data.inviteeEmail);
-  $('#invitationTitle').text(data.title);
-  $('#originalMessageContent').text(data.message);
-  $('#replyMessageContent').text(data.responseMessage);
-  $('#dateTimestamp').text(data.date);
-  $('#invitationScope').append(
-    `<span class="badge bg-label-${data.scope === 'Public' ? 'primary' : 'info'}">${data.scope}</span>`
-  )
-  $('#invitationStatus').append(
-    `<span class="badge bg-label-${data.status === 'Accepted' ? 'success' : (data.status === 'Pending' ? 'warning' : 'danger')}">${data.status}</span>`
-  );
-
-  const attachments = data.attachments ? data.attachments.split(',') : [];
-  const filteredAttachments = attachments.filter(att => att.trim() !== '');
-  if (filteredAttachments.length > 0) {
-    $('#attachmentsList').html(filteredAttachments.map(att => `<a class="btn btn-xs btn-white border">${att}</a>`).join(''));
-    $('#attachmentsSection').show();
-  } else {
-    $('#attachmentsSection').hide();
-  }
-
-  $('#invitationOffcanvas').offcanvas('show');
-});
-
-// Invitation Form Logic
-let organizations = []; // Will be populated from API
-
-// Load organizations
-$.ajax({
-  url: '/api/organizations', // Assume this endpoint exists
-  method: 'GET',
-  success: function(data) {
-    organizations = data;
-    populateOrganizations();
-  },
-  error: function() {
-    // Fallback: hardcoded organizations for demo
-    organizations = [
-      {id: 1, name_en: 'Organization 1', name_ar: 'المنظمة 1'},
-      {id: 2, name_en: 'Organization 2', name_ar: 'المنظمة 2'},
-      {id: 3, name_en: 'Organization 3', name_ar: 'المنظمة 3'}
-    ];
-    populateOrganizations();
-  }
-});
-
-function populateOrganizations() {
-  const locale = '{{ app()->getLocale() }}';
-  const nameField = locale === 'ar' ? 'name_ar' : 'name_en';
-  const $select = $('#organizations');
-  $select.empty();
-  organizations.forEach(org => {
-    $select.append(`<option value="${org.id}">${org[nameField]}</option>`);
+    $('#invitationOffcanvas').offcanvas('show');
   });
-}
 
-// Toggle organizations selector based on scope
-$('#invitationScope').on('change', function() {
-  const scope = $(this).val();
-  if (scope === 'Select Organizations') {
-    $('#organizationsContainer').show();
-    $('#organizations').prop('required', true);
-  } else {
-    $('#organizationsContainer').hide();
-    $('#organizations').prop('required', false);
-  }
-});
+  /* =======================
+   * Scope / Organizations
+   * ======================= */
+  const toggleOrganizations = show => {
+    $('#organizationsContainer').toggle(show);
+    $('#organizations').val(null).trigger('change');
+    fv.revalidateField('organizations[]');
+  };
 
-// Initialize Select2 for multi-select
-$('#organizations').select2({
-  placeholder: 'Select organizations',
-  allowClear: true
-});
+  $('#invitationScope').on('change', function () {
+    toggleOrganizations($(this).val() === 'Organization');
+  });
 
-// File upload handling
-$('#attachments').on('change', function() {
-  const files = this.files;
-  const $list = $('#attachmentsList');
-  $list.empty();
+  $('#organizations').on('change select2:select select2:unselect', () => {
+    fv.revalidateField('organizations[]');
+  });
 
-  if (files.length > 5) {
-    $(this).val('');
-    showError('attachments', '{{ app()->getLocale() === "ar" ? "يمكنك تحميل 5 ملفات كحد أقصى" : "You can upload a maximum of 5 files" }}');
-    return;
-  }
-
-  const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'image/png', 'image/jpeg', 'image/jpg'];
-  const maxSize = 10 * 1024 * 1024; // 10MB
-
-  for (let file of files) {
-    if (!allowedTypes.includes(file.type)) {
-      $(this).val('');
-      showError('attachments', '{{ app()->getLocale() === "ar" ? "نوع الملف غير مدعوم. يرجى تحميل ملف من نوع PDF أو DOC أو DOCX أو XLSX أو PPTX أو PNG أو JPG." : "Unsupported file type. Please upload a PDF, DOCX, XLSX, PPTX, PNG, or JPG file." }}');
-      return;
-    }
-    if (file.size > maxSize) {
-      $(this).val('');
-      showError('attachments', '{{ app()->getLocale() === "ar" ? "حجم الملف يتجاوز الحد المسموح به (10 ميجابايت لكل ملف)" : "File size exceeds the allowed limit (10 MB per file)." }}');
-      return;
-    }
-    $list.append(`<div class="badge bg-label-secondary me-1">${file.name}</div>`);
-  }
-});
-
-// Initialize FormValidation
-const fv = FormValidation.formValidation(document.getElementById('invitationForm'), {
-  fields: {
-    mentor_email: {
-      validators: {
-        notEmpty: {
-          message: '{{ app()->getLocale() === "ar" ? "يرجى إدخال البريد الإلكتروني للمرشد" : "Please enter the mentor email address." }}'
-        },
-        emailAddress: {
-          message: '{{ app()->getLocale() === "ar" ? "يرجى إدخال بريد إلكتروني صالح" : "Please enter a valid email address." }}'
-        },
-        stringLength: {
-          max: 255,
-          message: '{{ app()->getLocale() === "ar" ? "البريد الإلكتروني يجب ألا يتجاوز 255 حرفاً" : "Email must not exceed 255 characters." }}'
+  /* =======================
+   * Form Validation
+   * ======================= */
+  const fv = FormValidation.formValidation(document.getElementById('invitationForm'), {
+    fields: {
+      invitee_email: {
+        validators: {
+          notEmpty: { message: '{{ __('admin.Please enter the email address') }}' },
+          emailAddress: { message: '{{ __('admin.Please enter a valid email address') }}' },
+          stringLength: { max: 255, message: '{{ __('admin.email_max_length') }}' }
         }
-      }
-    },
-    invitation_scope: {
-      validators: {
-        notEmpty: {
-          message: '{{ app()->getLocale() === "ar" ? "يرجى اختيار نطاق الدعوة" : "Please select the invitation scope." }}'
-        }
-      }
-    },
-    'organizations[]': {
-      validators: {
-        callback: {
-          callback: function(value, validator, $field) {
-            const scope = $('#invitationScope').val();
-            if (scope === 'Select Organizations') {
-              return value && value.length > 0;
+      },
+      invitation_scope: {
+        validators: { notEmpty: { message: '{{ __('admin.invitation_scope_required') }}' } }
+      },
+      'organizations[]': {
+        validators: {
+          callback: {
+            message: '{{ __('admin.organizations_select_required') }}',
+            callback: function () {
+              const scope = $('#invitationScope').val();
+              const value = $('#organizations').val();
+  
+              if (scope === 'Organization') {
+                return value && value.length > 0;
+              }
+              return true;
             }
-            return true;
-          },
-          message: '{{ app()->getLocale() === "ar" ? "يرجى اختيار مؤسسة واحدة على الأقل" : "Please select at least one organization." }}'
+          }
         }
+      },
+      invitation_subject: {
+        validators: {
+          notEmpty: { message: '{{ __('admin.invitation_subject_required') }}' },
+          stringLength: { max: 255, message: '{{ __('admin.invitation_subject_max_length') }}' }
+        }
+      },
+      invitation_message: {
+        validators: { notEmpty: { message: '{{ __('admin.invitation_message_required') }}' } }
       }
     },
-    email_subject: {
-      validators: {
-        notEmpty: {
-          message: '{{ app()->getLocale() === "ar" ? "يرجى إدخال عنوان البريد الإلكتروني" : "Please enter the email subject." }}'
-        },
-        stringLength: {
-          max: 255,
-          message: '{{ app()->getLocale() === "ar" ? "عنوان البريد الإلكتروني يجب ألا يتجاوز 255 حرفاً" : "Email subject must not exceed 255 characters." }}'
-        }
-      }
-    },
-    email_body: {
-      validators: {
-        notEmpty: {
-          message: '{{ app()->getLocale() === "ar" ? "يرجى إدخال محتوى البريد الإلكتروني" : "Please enter the email content." }}'
-        },
-        stringLength: {
-          max: 10000,
-          message: '{{ app()->getLocale() === "ar" ? "محتوى البريد الإلكتروني يجب ألا يتجاوز 10000 حرف" : "Email content must not exceed 10000 characters." }}'
-        }
-      }
-    }
-  },
-  plugins: {
-    trigger: new FormValidation.plugins.Trigger(),
-    bootstrap5: new FormValidation.plugins.Bootstrap5({
-      eleValidClass: '',
-      rowSelector: '.mb-4'
-    }),
-    submitButton: new FormValidation.plugins.SubmitButton(),
-    defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
-    autoFocus: new FormValidation.plugins.AutoFocus()
-  }
-});
-
-// Form submission
-$('#sendInvitationBtn').on('click', function() {
-  fv.validate().then(function(status) {
-    if (status !== 'Valid') {
-      return;
-    }
-
-  const formData = new FormData($('#invitationForm')[0]);
-  const selectedOrgs = $('#organizations').val();
-  if (selectedOrgs && selectedOrgs.length > 0) {
-    selectedOrgs.forEach(org => formData.append('organizations[]', org));
-  }
-
-  // Show loading
-  $(this).prop('disabled', true).html('<i class="ti ti-loader me-1"></i> Sending...');
-
-  $.ajax({
-    url: '/invitations', // Assume POST endpoint
-    method: 'POST',
-    data: formData,
-    processData: false,
-    contentType: false,
-    headers: {
-      'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-    },
-    success: function(response) {
-      // Show success message
-      showToast('{{ app()->getLocale() === "ar" ? "تم إرسال الدعوة بنجاح" : "Invitation sent successfully." }}', 'success');
-      $('#newInvitationOffcanvas').offcanvas('hide');
-      // Refresh page to update table
-      location.reload();
-    },
-    error: function(xhr) {
-      const error = xhr.responseJSON?.message || '{{ app()->getLocale() === "ar" ? "فشل إرسال الدعوة. يرجى المحاولة مرة أخرى" : "Failed to send the invitation. Please try again." }}';
-      showToast(error, 'error');
-    },
-    complete: function() {
-      $('#sendInvitationBtn').prop('disabled', false).html('<i class="ti ti-send me-1"></i> Send Invitation');
+    plugins: {
+      trigger: new FormValidation.plugins.Trigger(),
+      bootstrap5: new FormValidation.plugins.Bootstrap5({
+        eleValidClass: '',
+        eleInvalidClass: 'is-invalid',
+        rowSelector: '.mb-4'
+      }),
+      submitButton: new FormValidation.plugins.SubmitButton(),
+      autoFocus: new FormValidation.plugins.AutoFocus()
     }
   });
+
+  /* =======================
+   * Submit Form
+   * ======================= */
+  fv.on('core.form.valid', () => {
+    const $btn = $('#invitationForm button[type="submit"]')
+      .prop('disabled', true)
+      .html('<i class="ti ti-loader me-1"></i> Sending...');
+
+    $.ajax({
+      url: '/invitations',
+      method: 'POST',
+      data: new FormData($('#invitationForm')[0]),
+      processData: false,
+      contentType: false,
+      headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+      success() {
+        releaseSuccessAlert({
+          title: '{{ __('admin.success') }}',
+          message:
+            '{{ app()->getLocale() === "ar" ? "تم إرسال الدعوة بنجاح" : "Invitation sent successfully." }}'
+        });
+        $('#newInvitationOffcanvas').offcanvas('hide');
+        location.reload();
+      },
+      error(xhr) {
+        releaseFailureAlert({
+          title: '{{ __('admin.error') }}',
+          message: xhr.responseJSON?.message || '{{ __('admin.unexpected_error') }}'
+        });
+      },
+      complete() {
+        $btn.prop('disabled', false).html('<i class="ti ti-send me-1"></i> Send Invitation');
+      }
+    });
   });
+
+  /* =======================
+   * Reset
+   * ======================= */
+  $('#newInvitationOffcanvas').on('hidden.bs.offcanvas', resetForm);
+
+  function resetForm() {
+    $('#invitationForm')[0].reset();
+    fv.resetForm();
+    $('#organizationsContainer').hide();
+    $('#attachmentsList').empty();
+    quill.setContents([]);
+  }
 });
-
-// Reset form when offcanvas is hidden
-$('#newInvitationOffcanvas').on('hidden.bs.offcanvas', function() {
-  resetForm();
-});
-
-function resetForm() {
-  $('#invitationForm')[0].reset();
-  fv.resetForm();
-  $('#invitationForm .form-control').removeClass('is-valid is-invalid');
-  $('#invitationForm .invalid-feedback').hide();
-  $('#organizationsContainer').hide();
-  $('#organizations').prop('required', false);
-  $('#attachmentsList').empty();
-  // Clear Quill editor
-  quill.setContents([]);
-}
-
-function showError(fieldId, message) {
-  const $errorElement = $(`#${fieldId}Error`);
-  $errorElement.text(message).show();
-  $(`#${fieldId}`).addClass('is-invalid');
-}
-
-function showToast(message, type) {
-  // Simple toast implementation - you might want to use a proper toast library
-  const toastClass = type === 'success' ? 'bg-success' : 'bg-danger';
-  const toast = $(`<div class="toast align-items-center text-white ${toastClass} border-0 position-fixed top-0 end-0 m-3" role="alert">
-    <div class="d-flex">
-      <div class="toast-body">${message}</div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-    </div>
-  </div>`);
-  $('body').append(toast);
-  const bsToast = new bootstrap.Toast(toast);
-  bsToast.show();
-  setTimeout(() => toast.remove(), 5000);
-}
 </script>
 @endsection

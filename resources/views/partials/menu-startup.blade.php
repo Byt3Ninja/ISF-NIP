@@ -32,7 +32,7 @@
   <div class="app-brand demo bg-light" style="height: 70px;">
     <a href="/dashboard" class="app-brand-link">
       <img src="{{ $imageSrc }}" class="object-fit-contain me-2 rounded-circle border p-1 bg-white"
-           style="width: 50px; height: 50px;" alt="avatar" />
+           style="width: 50px; height: 50px;" alt="logo" />
     </a>
 
     <a href="javascript:void(0);" class="layout-menu-toggle menu-link ms-auto">
@@ -167,7 +167,13 @@
         <div>{{ __('admin.Hackathon') }}</div>
       </a>
     </li>
-
+    
+    <li class="{{ active('dashboard/perks') }} menu-item">
+      <a href="/dashboard/perks" class="menu-link">
+        <i class="menu-icon tf-icons ti ti-gift"></i>
+        <div>{{ $l == 'en' ? 'Perks & Discounts' : 'المزايا والخصومات' }}</div>
+      </a>
+    </li>
 
 
     {{-- ====================

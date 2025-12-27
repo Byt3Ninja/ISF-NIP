@@ -92,7 +92,13 @@
         <div class="col-xl-12 col-md-12 col-sm-12">
           <div class="card mb-4">
             <div class="card-header border-bottom border-light mb-6">
-              <h4 class="card-title">{{ __('cycles.Mentors') }}</h4>
+              <div class="d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0">{{ __('cycles.Mentors') }}</h4>
+                <a class="btn btn-primary" href="/dashboard/mentorship/assign/{{ $id }}">
+                  <i class="ti ti-user me-2 ti-16px"></i>
+                  {{ __('cycles.Manage Cycle mentors') }}
+                </a>
+              </div>
             </div>
             <div class="card-body">
               @if (count($mentors) == 0)

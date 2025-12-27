@@ -1,5 +1,5 @@
 <div class="card card-body shadow-none h-100 d-flex justify-content-center align-items-center">
-  <div class="d-flex flex-column">
+  <div class="d-flex flex-column align-items-center">
     <img src="/icons/not-found.svg" width="250" height="250" alt="No Result">
     <h6 class="text-center text-secondary">
       {{ $message ?? __('admin.No Result') }}

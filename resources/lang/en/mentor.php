@@ -118,4 +118,6 @@ return [
     'slot_notes_placeholder' => 'Share any specific topics or questions you like to discuss',
     'session_location' => 'Session Location',
     'mentor_not_entrolled_in_cycle' => 'Mentor is not entrolled in a cycle',
+    'add_new_slot' => 'Add New Slot',
+    'day' => 'Day',
 ];
