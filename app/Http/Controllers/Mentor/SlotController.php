@@ -152,7 +152,7 @@ class SlotController extends Controller
 		$settings = Settings::where('id', 1)->first();
 		$offline_allowed = $settings ? ($settings->allow_offline_sessions = 1 ? true : false) : false;
 
-		$schedules = Schedule::where('user_id', $id ?? auth()->id())->where('date', '>=', date('Y-m-d'))->get();
+		$schedules = Schedule::where('user_id', $id ?? auth()->id())->where('type', 'Period')->where('date', '>=', date('Y-m-d'))->get();
 
 		// Active-only filter
 		if ($request->has('active_only') && $request->active_only == 'true') {
