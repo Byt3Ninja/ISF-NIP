@@ -1022,7 +1022,7 @@ $menuItems = $menuItems->flatMap(function($item) {
         @php $impersonator = \App\User::find( session()->get('impersonator_id') ); @endphp
         @if( !empty( $impersonator ) )
           @if( $impersonator->ableTo('users.login_as') )
-            <li class="nav-item me-1 me-md-2" title={{ __('admin.Stop Impersonate') }}>
+            <li class="nav-item me-1 me-md-2" title="{{ __('admin.Stop Impersonate') }}">
               <form id="stop-impersonation-form" action="{{ URL::to('dashboard/users/impersonate-stop') }}" method="POST">
                 @csrf
               </form>
