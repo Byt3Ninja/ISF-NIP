@@ -12,7 +12,7 @@
       <div class="modal-header border-bottom py-4">
         <div>
           <h5 class="modal-title fw-semibold">
-            {{ __('dashboard.Add mentorship session with') }} { <span id="mentorName"></span> }
+            {{ __('dashboard.Add mentorship session with') }} <span id="mentorName"></span>
           </h5>
           <div class="text-muted small mt-1">{{ __('mentor.select_date_and_slot') }}</div>
         </div>
