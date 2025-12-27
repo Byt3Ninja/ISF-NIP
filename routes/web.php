@@ -305,6 +305,10 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
         Route::get('/{id}/preview', 'OrganizationWizardController@previewLandingPage')->name('preview');
         Route::post('/generate-slug/{id?}', 'OrganizationWizardController@generateSlug')->name('generate.slug');
         Route::post('/check-slug/{id?}', 'OrganizationWizardController@checkSlugAvailability')->name('check.slug');
+        // Step 5: Custom Sections
+        Route::put('/{id}/step5', 'OrganizationWizardController@updateStep5')->name('update.step5');
+        Route::post('/{id}/step5/reorder', 'OrganizationWizardController@reorderStep5Sections')->name('step5.reorder');
+        Route::delete('/{id}/step5/{sectionId}', 'OrganizationWizardController@deleteStep5Section')->name('step5.delete');
         Route::post('/draft', 'OrganizationWizardController@saveDraft')->name('draft');
         Route::put('/{id}/draft', 'OrganizationWizardController@saveDraft')->name('draft.update');
         Route::post('/{id}/publish', 'OrganizationWizardController@publish')->name('publish');
@@ -461,7 +465,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     //like a service
     Route::post('/likeService', 'ClientCompanyController@likeService')->name('services.like');
     //Users  Manager routes
-    Route::get('/users/login_as/{id}', 'UserController@loginAs')->name('users.login_as');
+    Route::get('/users/impersonate-start/{id}', 'UserController@startImpersonate')->name('users.login_as');
+    Route::post('/users/impersonate-stop', 'UserController@stopImpersonate');
     Route::resource('users', 'UserController');
     Route::get('/judger', 'UserController@judger')->name('users.judger');
     Route::post('/users/password', 'UserController@updatePassword')->name('user.profile_update_password');

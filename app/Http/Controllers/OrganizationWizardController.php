@@ -11,10 +11,12 @@ use App\City;
 use App\Http\Requests\OrganizationStep1Request;
 use App\Http\Requests\OrganizationStep2Request;
 use App\Http\Requests\OrganizationStep4Request;
+use App\Http\Requests\OrganizationStep5Request;
 use App\Http\Requests\CreateOrganizationManagerRequest;
 use App\Services\OrganizationWizardService;
 use App\Services\OrganizationManagerService;
 use App\Services\OrganizationLandingPageService;
+use App\Services\OrganizationCustomSectionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -23,7 +25,8 @@ class OrganizationWizardController extends Controller
     public function __construct(
         protected OrganizationWizardService $wizardService,
         protected OrganizationManagerService $managerService,
-        protected OrganizationLandingPageService $landingPageService
+        protected OrganizationLandingPageService $landingPageService,
+        protected OrganizationCustomSectionService $customSectionService
     ) {}
 
     /**
@@ -51,7 +54,7 @@ class OrganizationWizardController extends Controller
      */
     public function edit($id)
     {
-        $organization = Organization::with(['organizationType', 'industries', 'country', 'state', 'city', 'assignedUsers', 'landingPage'])->findOrFail($id);
+        $organization = Organization::with(['organizationType', 'industries', 'country', 'state', 'city', 'assignedUsers', 'landingPage', 'customSections'])->findOrFail($id);
         $organizationTypes = OrganizationTypes::all();
         $industries = StaticCategory::all();
         $countries = Country::all();
@@ -76,6 +79,9 @@ class OrganizationWizardController extends Controller
         // Get landing page data for step 4
         $landingPage = $organization->landingPage;
 
+        // Get custom sections for step 5
+        $customSections = $organization->customSections;
+
         return view('admin.organizations.wizard.create', compact(
             'organization',
             'organizationTypes',
@@ -84,7 +90,8 @@ class OrganizationWizardController extends Controller
             'states',
             'cities',
             'assignedManagers',
-            'landingPage'
+            'landingPage',
+            'customSections'
         ));
     }
 
@@ -528,6 +535,80 @@ class OrganizationWizardController extends Controller
 
         return response()->json([
             'available' => $result['data'],
+            'message' => $result['message'],
+        ]);
+    }
+
+    /**
+     * Update step 5 data (Custom Sections).
+     */
+    public function updateStep5(OrganizationStep5Request $request, $id)
+    {
+        $_user = auth()->user();
+        if (!$_user->ableTo('organization.wizard.edit')) {
+            return abort(401);
+        }
+
+        $sections = $request->input('custom_sections', []);
+
+        $result = $this->customSectionService->update($id, $sections);
+
+        // Return JSON for AJAX requests
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => $result['success'],
+                'message' => $result['message'],
+            ], $result['success'] ? 200 : 422);
+        }
+
+        if ($result['success']) {
+            return redirect()
+                ->route('organization.wizard.edit', ['id' => $id, 'step' => 5])
+                ->with('success', $result['message']);
+        }
+
+        return back()
+            ->withInput()
+            ->with('error', $result['message']);
+    }
+
+    /**
+     * Reorder custom sections via AJAX.
+     */
+    public function reorderStep5Sections(Request $request, $id)
+    {
+        $_user = auth()->user();
+        if (!$_user->ableTo('organization.wizard.edit')) {
+            return abort(401);
+        }
+
+        $request->validate([
+            'ordered_ids' => 'required|array',
+            'ordered_ids.*' => 'integer',
+        ]);
+
+        $result = $this->customSectionService->reorder($id, $request->ordered_ids);
+
+        return response()->json([
+            'success' => $result['success'],
+            'message' => $result['message'],
+        ]);
+    }
+
+    /**
+     * Delete a custom section via AJAX.
+     */
+    public function deleteStep5Section(Request $request, $id, $sectionId)
+    {
+        $_user = auth()->user();
+        if (!$_user->ableTo('organization.wizard.edit')) {
+            return abort(401);
+        }
+
+        $result = $this->customSectionService->delete($id, $sectionId);
+
+        return response()->json([
+            'success' => $result['success'],
             'message' => $result['message'],
         ]);
     }
