@@ -156,7 +156,7 @@
       </div>
 
       {{-- Tab Content --}}
-      <div class="tab-content" id="teamTabsContent">
+      <div class="tab-content px-0" id="teamTabsContent">
         
         {{-- Overview Tab --}}
         <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">

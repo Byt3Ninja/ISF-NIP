@@ -1,3 +1,9 @@
+<style>
+	.flatpickr-monthSelect-month.selected {
+		background-color: var(--bs-primary) !important;
+	}
+</style>
+
 <div class="card">
 	{{-- MERGE financialProjection VALUES INTO $sections --}}
 	@php
@@ -111,21 +117,27 @@
     {!! csrf_field() !!}
 		<div class="card-header">
 			<div class="d-flex flex-wrap align-items-md-center justify-content-between gap-3">
-			<div>
-				<h5 class="card-title mb-0">{{ $heading }}</h5>
-				<small class="text-muted">{{ __('startup.enter_valuation_date_and_financial_data_to_generate_metrics') }}</small>
-			</div>
-			<div class="d-flex align-items-center gap-3">
-				<label for="valuationDate" class="form-label text-nowrap">
-				{{ __('startup.valuation_date') }} <span class="text-danger">*</span>
-				</label>
-				<input type="text" class="form-control" id="valuationDate" name="valuation_date" required>
-			</div>
+				<div>
+					<h5 class="card-title mb-0">{{ $heading }}</h5>
+					<small class="text-muted">{{ __('startup.enter_valuation_date_and_financial_data_to_generate_metrics') }}</small>
+				</div>
+				<div class="d-flex flex-wrap align-items-md-center gap-3">
+					<div class="d-flex align-items-center gap-2 mb-3 mb-md-0">
+						<label for="valuationDate" class="form-label text-nowrap">
+						{{ __('startup.valuation_date') }} <span class="text-danger">*</span>
+						</label>
+						<input type="hidden" id="valuationDateHidden" name="valuation_date">
+						<input type="text" class="form-control" id="valuationDate" required>
+					</div>
+					<div class="d-flex align-items-center">
+						{{-- <button type="reset" class="btn btn-label-secondary me-3">{{ __('admin.Reset') }}</button> --}}
+						<button type="submit" class="btn btn-primary">{{ __('admin.Save') }}</button>
+					</div>
+				</div>
 			</div>
 		</div>
- 
 
-	<input name="CompanyN" type="hidden" value="15">
+		<input name="CompanyN" type="hidden" value="15">
     
     <div class="card-datatable table-responsive">
       <table class="datatable-basic table mb-0" id="financialTable">
@@ -189,16 +201,14 @@
         </tbody>
       </table>
     </div>
-		<div class="card-footer text-end">
-			<button type="reset" class="btn btn-label-secondary me-3">{{ __('admin.Reset') }}</button>
-			<button type="submit" class="btn btn-primary">{{ __('admin.Save') }}</button>
-		</div>
   </form>
 </div>
 
 @push('scripts')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
 <script>
-  // Financial Projection Form Logic
+// Financial Projection Form Logic
 document.addEventListener('DOMContentLoaded', function () {
 	const dateInput = document.getElementById('valuationDate');
 	const formInputs = document.querySelectorAll('.input-trigger');
@@ -206,11 +216,23 @@ document.addEventListener('DOMContentLoaded', function () {
 	// Initialize Flatpickr for Valuation Date
 	flatpickr('#valuationDate', {
 		defaultDate: new Date(),
-		dateFormat: 'Y-m-d',
-		onChange: function(selectedDates, dateStr, instance) {
-			updateHeaders();
+		plugins: [
+			new monthSelectPlugin({
+				shorthand: true,      // Jan, Feb, Mar
+				dateFormat: "Y-m",    // value format
+				altFormat: "F Y",     // display format
+			})
+		],
+		onChange: function (selectedDates) {
+			if (selectedDates.length) {
+				const valDate = moment(selectedDates[0]);
+				const valDateStr = valDate.format("YYYY-MM");
+				updateHeaders();
+				document.getElementById('valuationDateHidden').value = valDateStr;
+			}
 		}
 	});
+
 	updateHeaders();
 
 	// 2. Input Change Listener (for all financial inputs)
