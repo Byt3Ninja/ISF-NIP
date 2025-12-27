@@ -44,22 +44,6 @@ $(function () {
     $iframeContainer.addClass('d-none');
     $errorMessage.removeClass('d-none');
   });
-
-  // Fallback check after 5 seconds
-  setTimeout(function () {
-    try {
-      const iframeEl = $iframe[0];
-
-      if (!iframeEl.contentWindow || !iframeEl.contentDocument) {
-        $iframeContainer.addClass('d-none');
-        $errorMessage.removeClass('d-none');
-      }
-    } catch (e) {
-      // Cross-origin access issue → assume failure
-      $iframeContainer.addClass('d-none');
-      $errorMessage.removeClass('d-none');
-    }
-  }, 5000);
 });
 </script>
 @endsection
