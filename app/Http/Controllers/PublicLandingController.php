@@ -4,10 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Organization;
 use App\OrganizationLandingPage;
+use App\Services\OrganizationCustomSectionService;
 use Illuminate\Http\Request;
 
 class PublicLandingController extends Controller
 {
+    protected $customSectionService;
+
+    public function __construct(OrganizationCustomSectionService $customSectionService)
+    {
+        $this->customSectionService = $customSectionService;
+    }
     /**
      * Display the public landing page for an organization.
      *
@@ -83,11 +90,16 @@ class PublicLandingController extends Controller
         // Get theme (default to gradient)
         $theme = $landingPage->landing_theme ?? 'gradient';
 
+        // Get custom sections filtered by visibility for current user
+        $currentUser = auth()->user();
+        $customSections = $this->customSectionService->getVisibleSections($organization->id, $currentUser);
+
         return view('public.organization-landing', [
             'organization' => $organization,
             'landingPage' => $landingPage,
             'articlesWithUrls' => $articlesWithUrls,
             'partnersWithUrls' => $partnersWithUrls,
+            'customSections' => $customSections,
             'locale' => $locale,
             'l' => $locale,
             'isRtl' => $isRtl,

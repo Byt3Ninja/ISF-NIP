@@ -207,6 +207,52 @@ class Organization extends Model
 	}
 
 	/**
+	 * Get the custom sections for this organization.
+	 */
+	public function customSections()
+	{
+		return $this->hasMany(OrganizationCustomSection::class)->orderBy('sort_order');
+	}
+
+	/**
+	 * Check if a user is a participant of this organization.
+	 *
+	 * A user is considered a participant if ANY of these conditions are true:
+	 * 1. User is assigned via user_organizations pivot table
+	 * 2. User's organization_id field matches this organization
+	 * 3. User is in a cycle belonging to this organization (User → Company → Step → Cycle → Organization)
+	 *
+	 * @param User|null $user
+	 * @return bool
+	 */
+	public function isUserParticipant(?User $user): bool
+	{
+		if (!$user) {
+			return false;
+		}
+
+		// Check 1: User assigned via pivot
+		if ($this->assignedUsers()->where('users.id', $user->id)->exists()) {
+			return true;
+		}
+
+		// Check 2: User's organization_id matches
+		if ($user->organization_id === $this->id) {
+			return true;
+		}
+
+		// Check 3: User is in a cycle belonging to this organization
+		// User → Company → Step → Cycle → Organization
+		if ($user->company && $user->company->step && $user->company->step->cycle) {
+			if ($user->company->step->cycle->organization_id === $this->id) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Generate a unique slug from organization name.
 	 *
 	 * @param string $name
