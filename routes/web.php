@@ -300,13 +300,15 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
         Route::put('/{id}/step3', 'OrganizationWizardController@updateStep3')->name('update.step3');
         Route::get('/{id}/managers', 'OrganizationWizardController@getManagers')->name('managers.list');
         Route::post('/{id}/managers', 'OrganizationWizardController@createManager')->name('managers.create');
+        // Step 4: Landing Page
+        Route::put('/{id}/step4', 'OrganizationWizardController@updateStep4')->name('update.step4');
+        Route::get('/{id}/preview', 'OrganizationWizardController@previewLandingPage')->name('preview');
+        Route::post('/generate-slug/{id?}', 'OrganizationWizardController@generateSlug')->name('generate.slug');
+        Route::post('/check-slug/{id?}', 'OrganizationWizardController@checkSlugAvailability')->name('check.slug');
         Route::post('/draft', 'OrganizationWizardController@saveDraft')->name('draft');
         Route::put('/{id}/draft', 'OrganizationWizardController@saveDraft')->name('draft.update');
         Route::post('/{id}/publish', 'OrganizationWizardController@publish')->name('publish');
     });
-
-    // Organization Logo from Storage
-    Route::get('organizations/logo/{filename}', 'OrganizationWizardController@getLogo')->name('organizations.logo');
 
     //services categories Manager routes
     Route::resource('serviceCategories', 'ServiceCategoryController');
@@ -904,6 +906,11 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     });
 });
 
+// Organization Logo from Storage
+Route::get('organizations/logo/{filename?}', 'OrganizationWizardController@getLogo')->name('organizations.logo');
+// Organization Landing Page Assets from Storage
+Route::get('organization/{organizationId}/landing-assets/{type}/{filename?}', 'OrganizationWizardController@getLandingAsset')->name('organization.landing.asset');
+
 ///// Reports routes
 //Route::group(['prefix' => 'reports',  'middleware' => ['auth', 'verified']], function(){
 //Route::post('users','ExcelController@ExUsers');
@@ -925,6 +932,9 @@ Route::get('/auth/microsoft/callback', 'MicrosoftController@callback')->name('in
 // --------------------> Linked In <-------------------
 Route::get('/auth/linkedin/{data?}', 'SocialController@redirectToLinkedIn')->name('integrations.auth_linkedin_login');
 Route::get('/auth/linkedin-openid/callback', 'SocialController@handleLinkedInCallback')->name('integrations.auth_linkedin_callback');
+
+// Public Organization Landing Page
+Route::get('/o/{slug}', 'PublicLandingController@show')->name('organization.landing.public');
 
 Route::get('/{org_slug}/join/{step_slug}', 'ExternalCyclesController@publicJoin')->name('public.join');
 Route::get('/{org_slug}/program/{program_slug}', 'ExternalCyclesController@publicProgramJoin')->name('public.program_join');
