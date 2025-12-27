@@ -149,11 +149,16 @@ class SlotController extends Controller
 
 	public function getSlots(Request $request, $id = null)
 	{
+		
 		$settings = Settings::where('id', 1)->first();
 		$offline_allowed = $settings ? ($settings->allow_offline_sessions = 1 ? true : false) : false;
 
-		$schedules = Schedule::where('user_id', $id ?? auth()->id())->where('type', 'Period')->where('date', '>=', date('Y-m-d'))->get();
-
+		$schedules = Schedule::where('user_id', $id ?? auth()->id())
+					->where(function ($query) {
+						$query->whereNull('date')
+							->orWhere('date', '>=', date('Y-m-d'));
+					})
+					->get();
 		// Active-only filter
 		if ($request->has('active_only') && $request->active_only == 'true') {
 			$schedules = Schedule::where('active', 1)
@@ -229,7 +234,7 @@ class SlotController extends Controller
 					'days' => 'required_if:type,Weekly',
 					'date' => 'required_if:type,Period',
 			]);
-
+			
 			// Build base search query
 			$query = Schedule::where('user_id', auth()->id())
 					->where('type', $validated['type'])
@@ -272,7 +277,7 @@ class SlotController extends Controller
 
 				$schedules[] = Schedule::create($slotData);
 			}
-
+			
 			return response()->json([
 				'success' => true,
 				'message' => __('mentor.slot_added_success'),
