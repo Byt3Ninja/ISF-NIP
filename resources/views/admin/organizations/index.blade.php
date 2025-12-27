@@ -94,6 +94,17 @@
                       </div>
                     </div>
                   </div>
+                  <div class="col-12 col-sm-3 mb-3 mb-sm-0">
+                    <div class="badge bg-label-secondary d-flex align-items-center py-2" style="height: auto;">
+                      <div class="badge card">
+                        <i class="ti ti-circle-dot fs-2 text-primary"></i>
+                      </div>
+                      <div class="ms-2 py-1">
+                        <h6 class="mb-0 fw-bold text-primary">{{ __('admin.Draft') }}</h6>
+                        <h5 class="mb-0 text-start">{{ $organizations->where('is_draft', true)->count() }}</h5>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div class="col-12 col-lg-4 mt-3 mt-lg-0">
@@ -114,31 +125,45 @@
 
         <div class="card mb-6">
           <div class="card-body">
-            <div class="row">
-              <div class="col-12 col-md-3 mb-3 mb-md-0">
-                <form id="status-form" method="GET" action="{{ route('organizations.index') }}">
-                  <select id="status-select" class="form-select" name="status">
-                    <option value="" selected>{{ __('admin.Status') }}</option>
-                    <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>
+            <form id="status-form" method="GET" action="{{ route('organizations.index') }}">
+              <div class="row">
+                <div class="col-12 col-md-2 mb-3 mb-md-0">
+                    <select id="status-select" class="form-select" name="status">
+                      <option value="" selected>{{ __('admin.Status') }}</option>
+                      <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>
+                        {{ __('admin.All') }}
+                      </option>
+                      <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>
+                        {{ __('admin.Active') }}
+                      </option>
+                      <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>
+                        {{ __('admin.Inactive') }}
+                      </option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-2 mb-3 mb-md-0">
+                  <select id="visibility-select" class="form-select" name="visibility">
+                    <option value="" selected>{{ __('admin.Visibility') }}</option>
+                    <option value="all" {{ request('visibility') == 'all' ? 'selected' : '' }}>
                       {{ __('admin.All') }}
                     </option>
-                    <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>
-                      {{ __('admin.Active') }}
+                    <option value="published" {{ request('visibility') == 'published' ? 'selected' : '' }}>
+                      {{ __('admin.Published') }}
                     </option>
-                    <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>
-                      {{ __('admin.Inactive') }}
+                    <option value="draft" {{ request('visibility') == 'draft' ? 'selected' : '' }}>
+                      {{ __('admin.Draft') }}
                     </option>
                   </select>
-                </form>
-              </div>
-              <div class="col-12 col-md-6"></div>
-              <div class="col-12 col-md-3">
-                <div class="position-relative w-100 h-100 d-flex justify-content-end align-items-center">
-                  <input type="text" id="search-org" class="form-control" placeholder="{{ __('admin.Search') }}" />
-                  <i class="ti ti-search position-absolute top-50 mx-2 translate-middle-y"></i>
+                </div>
+                <div class="col-12 col-md-5"></div>
+                <div class="col-12 col-md-3">
+                  <div class="position-relative w-100 h-100 d-flex justify-content-end align-items-center">
+                    <input type="text" id="search-org" class="form-control" placeholder="{{ __('admin.Search') }}" />
+                    <i class="ti ti-search position-absolute top-50 mx-2 translate-middle-y"></i>
+                  </div>
                 </div>
               </div>
-            </div>
+            </form>
           </div>
         </div>
 
@@ -271,6 +296,9 @@
   <script>
     // Filter Organizations
     $(document).on("change", "#status-select", function(e) {
+      $("#status-form").submit();
+    });
+    $(document).on("change", "#visibility-select", function(e) {
       $("#status-form").submit();
     });
 

@@ -453,6 +453,57 @@
             opacity: 1;
         }
 
+        /* Custom Sections */
+        .section-custom {
+            padding: 80px 0;
+        }
+
+        .custom-section-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .custom-section-body {
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+
+        .custom-section-body h1,
+        .custom-section-body h2,
+        .custom-section-body h3,
+        .custom-section-body h4,
+        .custom-section-body h5,
+        .custom-section-body h6 {
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .custom-section-body p {
+            margin-bottom: 1rem;
+        }
+
+        .custom-section-body ul,
+        .custom-section-body ol {
+            margin-bottom: 1rem;
+            padding-{{ $isRtl ? 'right' : 'left' }}: 2rem;
+        }
+
+        .custom-section-body img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .custom-section-body a {
+            color: {{ $currentTheme['primaryColor'] }};
+            text-decoration: underline;
+        }
+
+        .custom-section-body a:hover {
+            text-decoration: none;
+        }
+
         /* Footer */
         .landing-footer {
             background: #1a1a2e;
@@ -907,6 +958,22 @@
             </div>
         </div>
     </section>
+    @endif
+
+    <!-- Custom Sections -->
+    @if(!empty($customSections))
+        @foreach($customSections as $customSection)
+            <section class="landing-section section-custom" style="{{ $customSection->getBackgroundStyle() }}">
+                <div class="container">
+                    <div class="custom-section-content">
+                        <h2 class="section-title text-center mb-4">{{ $customSection->title }}</h2>
+                        <div class="custom-section-body">
+                            {!! $customSection->content !!}
+                        </div>
+                    </div>
+                </div>
+            </section>
+        @endforeach
     @endif
 
     <!-- Footer -->

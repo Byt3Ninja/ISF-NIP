@@ -43,10 +43,19 @@ class organizationsController extends Controller
 		}
 
 		if($request->status !== null && $request->status !== 'all') {
-		$organizations = $organizations->where('status', $request->status)->get();
-		}else{
-			$organizations = $organizations->get();
+			$organizations = $organizations->where('status', $request->status);
 		}
+
+		if($request->visibility !== null && $request->visibility !== 'all') {
+			if( $request->visibility == 'draft' ) {
+				$organizations = $organizations->where('is_draft', true);
+			}
+			else if( $request->visibility == 'published' ) {
+				$organizations = $organizations->where('is_draft', false);
+			}
+		}
+
+		$organizations = $organizations->get();
 		foreach ($organizations as $organization) {
 			$organization->total_startups = Company::whereHas('cycle', function ($query) use ($organization) {
 				$query->where('organization_id', $organization->id);
