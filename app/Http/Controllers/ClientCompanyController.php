@@ -3968,4 +3968,9 @@ class ClientCompanyController extends Controller
 
     }
 
+    public function companyPerks()
+    {
+        return view('admin.clients.startup.company_perks');
+    }
+
 }

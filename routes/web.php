@@ -426,6 +426,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     // Company Alumni
     Route::get('/companyProfile/{id}/alumni/{cycle_id}', [ClientCompanyController::class, 'companyAlumni'])->name('company.alumni_view');
 
+    // Company Perks
+    Route::get('perks', [ClientCompanyController::class, 'companyPerks']);
+
     // Company Profile Employees
     Route::get('/employees/{id}', 'ClientCompanyController@getEmployees')->name('company.getEmployees');
     Route::delete('/employees/delete/{id}', 'ClientCompanyController@deleteEmployee')->name('company.employees_delete');
