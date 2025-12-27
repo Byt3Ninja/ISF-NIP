@@ -48,7 +48,7 @@
                 <option value="">{{ __('admin.Select Status') }}</option>
                 <option value="Pending">{{ __('admin.boardTitlePending') }}</option>
                 <option value="In Progress">{{ __('admin.boardTitleProgress') }}</option>
-                <option value="Review">{{ __('admin.boardTitleReview') }}</option>
+                <option value="In Review">{{ __('admin.boardTitleReview') }}</option>
                 <option value="Completed">{{ __('admin.boardTitleCompleted') }}</option>
               </select>
             </div>
@@ -67,12 +67,11 @@
             <div class="col-sm-4 col-12 mb-4">
               <label class="form-label" for="task-due-date">{{ __('admin.Due_Date') }}</label>
               <input
-                type="date"
-                class="form-control"
+                type="text"
+                class="form-control flatpickr-validation"
                 id="task-due-date"
                 name="taskDueDate" 
                 placeholder="{{ __('admin.Due_Date') }}"
-                min="{{ date('Y-m-d') }}"
               />
             </div>
             <div class="col-12 mb-4">
@@ -86,9 +85,8 @@
                   <option value="{{ $program->id }}">{{ $program->title }}</option>
                 @endforeach
               </select>
-              <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'سيتم تعيين المهمة لجميع الشركات الناشئة المرتبطة بهذا البرنامج' : 'This task will be assigned to all startups linked to this program' }}</small>
             </div>
-            <div class="col-12 mb-4" id="assignees-section" style="display: none;">
+            <div class="col-12 mb-4">
               <label class="form-label" for="task-assignees">
                 {{ __('admin.assignees') }}
                 <span class="text-danger">*</span>
@@ -100,23 +98,21 @@
                 multiple
                 data-placeholder="{{ __('admin.select_assignees') }}"
               >
+                @foreach ($startups as $startup)
+                  <option value="{{ $startup['id'] }}">{{ $startup['name'] }}</option>
+                @endforeach
               </select>
-              <small class="text-muted">{{ app()->getLocale() == 'ar' ? 'يمكنك اختيار جميع الشركات أو شركات محددة' : 'You can select all companies or specific companies' }}</small>
             </div>
             <div class="col-12 mb-4">
               <label class="form-label" for="task-tags">{{ __('admin.Tags') }}</label>
-              <select
-                class="select2 form-select"
+              <input
+                type="text"
+                class="form-control"
                 id="task-tags"
-                name="taskTags[]"
-                multiple
-                data-placeholder="{{ __('admin.Select_Tags') }}"
-              >
-                @foreach ($tags as $tag)
-             
-                  <option value="{{ $tag->name }}">{{ $tag->name }}</option>
-                @endforeach
-              </select>
+                name="taskTags"
+                placeholder="{{ __('admin.Select_Tags') }}"
+                data-whitelist='[{{ $tags->pluck('name')->map(function($tag) { return '"' . $tag . '"'; })->join(', ') }}]'
+              />
             </div>
             <div class="col-12 mb-4">
               <label class="form-label mb-2">{{ __('admin.attachments')}}</label>
@@ -124,9 +120,9 @@
                 onclick="document.getElementById('task-upload').click()">
                 <i class="ti ti-cloud-upload mb-2"></i>
                 <div class="fw-medium">{{ __('mentor.single_dropzone_description') }}</div>
-                <div class="small text-muted mt-1">PDF, DOCX, XLSX, PNG, JPG, JPEG up to 10MB</div>
+                <div class="small text-muted mt-1">PDF, DOC, DOCX, PPT, XLS, PNG, JPEG up to 10MB</div>
               </div>
-              <input type="file" name="attachments[]" id="task-upload" class="d-none" accept=".pdf,.docx,.xlsx,.png,.jpg,.jpeg" multiple>
+              <input type="file" name="attachments" id="task-upload" class="d-none" accept=".pdf,.doc,.docx,.ppt,.xls,.png,.jpeg,.jpg" multiple>
               <div id="fileError" class="invalid-feedback mt-2" style="display: none;"></div>
               <div id="fileName" class="small mt-2" style="display: none;"></div>
             </div>
