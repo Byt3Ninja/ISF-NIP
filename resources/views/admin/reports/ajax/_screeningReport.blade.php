@@ -139,6 +139,7 @@
 					<div class="col-lg-2 col-md-4 col-sm-6">
 						<select id="screening-status-filter" class="form-select">
 							<option value="">{{ __('cycles.All Status') }}</option>
+							<option value="not-assigned">{{ __('admin.Not Assigned') }}</option>
 							<option value="published">{{ __('cycles.Published') }}</option>
 							<option value="draft">{{ __('admin.In Progress') }}</option>
 							<option value="not-evaluated">{{ __('cycles.Not Evaluated') }}</option>
@@ -1090,6 +1091,10 @@
 		switch(filterType) {
 			case 'total':
 				// Show all - filters are already cleared
+				break;
+			case 'not-assigned':
+				screeningCurrentFilters.status = 'not-assigned';
+				$('#screening-status-filter').val('not-assigned');
 				break;
 			case 'not-evaluated':
 				screeningCurrentFilters.status = 'not-evaluated';

@@ -591,6 +591,9 @@ class ReportController extends Controller
         $pending_screenings = $_allCompanies->filter(function($company) use ($allResults) {
             return $allResults->where('company_id', $company->id)->isEmpty();
         })->values();
+        $not_assigned_screenings = $_allCompanies->filter(function($company) {
+            return $company->judges->count() === 0;
+        })->values();
         $non_pending_companies = $_allCompanies->filter(function($company) use ($allResults) {
             return !$allResults->where('company_id', $company->id)->isEmpty();
         })->values();
@@ -602,13 +605,14 @@ class ReportController extends Controller
         $kpiData = [
             [ 'value' => $allJudges?->count() ?? 0, 'label' => 'Judgers', 'icon' => 'user', 'color' => 'info'],
             [ 'value' => $_allCompanies?->count() ?? 0, 'label' => 'Total', 'icon' => 'gavel', 'color' => 'primary'],
+            [ 'value' => $not_assigned_screenings->count(), 'label' => 'Not Assigned', 'icon' => 'clock', 'color' => 'warning' ],
             [ 'value' => $pending_screenings->count() + $not_evaluated_screenings, 'label' => 'Not Evaluated', 'icon' => 'trending-up-2', 'color' => 'danger'],
             [ 'value' => $draft_screenings, 'label' => 'In Progress', 'icon' => 'pencil-check', 'color' => 'secondary'],
             [ 'value' => $published_screenings, 'label' => 'Published', 'icon' => 'progress-check', 'color' => 'success'],
         ];
 
         // Process companies with their evaluation data
-        $startups = $_allCompanies->map(function ($company) use ($allJudges, $allResults, $allCompanies, $steps) {
+        $startups = $_allCompanies->map(function ($company) use ($allJudges, $allResults, $allCompanies, $steps, $not_assigned_screenings) {
             $scoped = $allCompanies->where('id', $company->id)->first();
             $c = clone $scoped;
             
@@ -623,11 +627,13 @@ class ReportController extends Controller
             $c->average_score = round($averageScore, 1);
             $c->evaluation_results = $companyResults;
 
+            $has_no_judgers = $not_assigned_screenings->where('id', $c->id)->count() > 0 ? true : false;
+
             $c->company_step_id = $company->step_id;
             $c->company_cycle_id = $company->cycle_id;
             $c->score = $company->score;
             $_judges = $company->judges;
-            $c->status = $company->status;
+            $c->status = $has_no_judgers ? 'Not Assigned' : $company->status;
             $c->stepInfo = $steps->where('id', $company->step_id)->first();
             $judges = clone $_judges;
             $companyId = $c->id;
@@ -757,6 +763,9 @@ class ReportController extends Controller
         $pending_screenings = $_allCompanies->filter(function($company) use ($allResults) {
             return $allResults->where('company_id', $company->id)->isEmpty();
         })->values();
+        $not_assigned_screenings = $_allCompanies->filter(function($company) {
+            return $company->judges->count() === 0;
+        })->values();
         $non_pending_companies = $_allCompanies->filter(function($company) use ($allResults) {
             return !$allResults->where('company_id', $company->id)->isEmpty();
         })->values();
@@ -770,13 +779,14 @@ class ReportController extends Controller
         $kpiData = [
             [ 'value' => $judgers_count, 'label' => 'Judgers', 'icon' => 'user', 'color' => 'info'],
             [ 'value' => $screening_count, 'label' => 'Total', 'icon' => 'gavel', 'color' => 'primary'],
+            [ 'value' => $not_assigned_screenings->count(), 'label' => 'Not Assigned', 'icon' => 'clock', 'color' => 'warning' ],
             [ 'value' => $pending_screenings->count() + $not_evaluated_screenings, 'label' => 'Not Evaluated', 'icon' => 'trending-up-2', 'color' => 'danger'],
             [ 'value' => $draft_screenings, 'label' => 'In Progress', 'icon' => 'pencil-check', 'color' => 'secondary'],
             [ 'value' => $published_screenings, 'label' => 'Published', 'icon' => 'progress-check', 'color' => 'success'],
         ];
 
         // Process companies with their evaluation data
-        $startups = $_allCompanies->map(function ($company) use ($allJudges, $allResults, $allCompanies, $steps) {
+        $startups = $_allCompanies->map(function ($company) use ($allJudges, $allResults, $allCompanies, $steps, $not_assigned_screenings) {
             $scoped = $allCompanies->where('id', $company->id)->first();
             $c = clone $scoped;
             
@@ -791,11 +801,13 @@ class ReportController extends Controller
             $c->average_score = round($averageScore, 1);
             $c->evaluation_results = $companyResults;
 
+            $has_no_judgers = $not_assigned_screenings->where('id', $c->id)->count() > 0 ? true : false;
+
             $c->company_step_id = $company->step_id;
             $c->company_cycle_id = $company->cycle_id;
             $c->score = $company->score;
             $_judges = $company->judges;
-            $c->status = $company->status;
+            $c->status = $has_no_judgers ? 'Not Assigned' : $company->status;
             $c->stepInfo = $steps->where('id', $c->company_step_id)->first();
             $judges = clone $_judges;
             $companyId = $c->id;
@@ -829,7 +841,9 @@ class ReportController extends Controller
             return $judge;
         });
 
-        $judgers = User::role('Judger')->count();
+        $judgers = User::whereHas('roles', function ($query) {
+			$query->where('default_for', 'judger');
+		})->count();
         $data['judgers'] = $judgers;
         $data['cycles'] = $cycles;
         $data['steps'] = $steps;
