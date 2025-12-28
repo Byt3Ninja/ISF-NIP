@@ -1104,9 +1104,13 @@ class HomeController extends Controller
                 s.from,
                 s.to,
                 s.description,
-                s.data
+                s.data,
+                c.id AS cycle_id,
+                c.step_type
             FROM
                 steps s
+            LEFT JOIN
+                cycles c ON c.id = s.cycle_id
             WHERE
                 s.cycle_id = $cycle_id
                 AND s.cycle_id != 0
@@ -1115,42 +1119,71 @@ class HomeController extends Controller
                 s.arr asc
         ";
         $now = time();
-        $steps = collect(DB::select($steps_q))->map(function ($step) use ($l, $company, $stepData, $cycle_id, $now) {
+        $stepType = $company?->cycledata?->step_type;
+        $steps = collect(DB::select($steps_q));
+        $cycleSteps = $steps->pluck('id')->toArray();
+
+        // array_search($company->step, $cycleSteps)
+        $steps = $steps->map(function ($step) use ($l, $company, $stepData, $stepType, $cycle_id, $now) {
+            $starting = Carbon::parse($step->from)->format('Y-m-d 00:00:00');
+            $ending = Carbon::parse($step->to)->format('Y-m-d 23:59:59');
+
             $step->from = Carbon::parse($step->from)->format('d-m-Y');
             $step->to = Carbon::parse($step->to)->format('d-m-Y');
-
-            $status = $l == 'ar' ? 'لم تبدأ' : 'Not started';
             $status_flag = 'not_started';
+            $status = $l == 'ar' ? 'لم تبدأ' : 'Not started';
             $status_flag_tile = $l == 'ar' ? 'لم تبدأ' : 'Not started';
             $color = 'label-light';
             $textColor = 'light';
             if (!empty($step) && !empty($stepData))
             {
-                if( $now > Carbon::parse($step->to)->timestamp )
+                if( $stepType == 'time' )
                 {
-                    $status_flag = 'completed';
-                    $status_flag_tile = $l == 'ar' ? 'انتهت' : 'Completed';
-                    $status = 'Completed';
-                    $color = 'label-success';
-                    $textColor = 'success';
+                    if( $now > Carbon::parse($ending)->timestamp )
+                    {
+                        $status_flag = 'completed';
+                        $status_flag_tile = $l == 'ar' ? 'انتهت' : 'Completed';
+                        $status = 'Completed';
+                        $color = 'label-success';
+                        $textColor = 'success';
+                    }
+                    if( $now <= Carbon::parse($ending)->timestamp && $now >= Carbon::parse($starting)->timestamp )
+                    {
+                        $status_flag = 'ongoing';
+                        $status_flag_tile = $l == 'ar' ? 'جاري' : 'Ongoing';
+                        $status = 'Ongoing';
+                        $color = 'label-primary';
+                        $textColor = 'primary';
+                    }
+                    /* if ($stepData->arr > $step->arr) {
+                        $status = $l == 'ar' ? 'انتهت' : 'Completed';
+                        $color = 'label-success';
+                        $textColor = 'success';
+                    } elseif ($stepData->arr == $step->arr) {
+                        $status = $l == 'ar' ? 'بدأت' : 'Started';
+                        $color = 'label-primary';
+                        $textColor = 'primary';
+                    } */
                 }
-                if( $now <= Carbon::parse($step->to)->timestamp && $now >= Carbon::parse($step->from)->timestamp )
+                if( $stepType == 'cycle' )
                 {
-                    $status_flag = 'ongoing';
-                    $status_flag_tile = $l == 'ar' ? 'جاري' : 'Ongoing';
-                    $status = 'Ongoing';
-                    $color = 'label-primary';
-                    $textColor = 'primary';
+                    if( $stepData->arr > $step->arr )
+                    {
+                        $status_flag = 'completed';
+                        $status_flag_tile = $l == 'ar' ? 'انتهت' : 'Completed';
+                        $status = 'Completed';
+                        $color = 'label-success';
+                        $textColor = 'success';
+                    }
+                    elseif( $stepData->arr == $step->arr )
+                    {
+                        $status_flag = 'ongoing';
+                        $status_flag_tile = $l == 'ar' ? 'جاري' : 'Ongoing';
+                        $status = 'Ongoing';
+                        $color = 'label-primary';
+                        $textColor = 'primary';
+                    }
                 }
-                /* if ($stepData->arr > $step->arr) {
-                    $status = $l == 'ar' ? 'انتهت' : 'Completed';
-                    $color = 'label-success';
-                    $textColor = 'success';
-                } elseif ($stepData->arr == $step->arr) {
-                    $status = $l == 'ar' ? 'بدأت' : 'Started';
-                    $color = 'label-primary';
-                    $textColor = 'primary';
-                } */
             }
             $trType = $fLink = null;
             if ($company->approved) {
@@ -2460,7 +2493,7 @@ class HomeController extends Controller
         $startupComplete = method_exists($user, 'hasCompletedStartup') ? $user->hasCompletedStartup() : ($user->company && !empty($user->company->name_en) && !empty($user->company->address_en) && !empty($user->company->sector) && !empty($user->company->stage));
         $data['pollingNeeded'] = !$profileComplete || !$startupComplete;
         $settings = Settings::where('id', 1)->first();
-			$data['offline_allowed'] = $settings->allow_offline_sessions = 1 ? true : false;
+		$data['offline_allowed'] = $settings->allow_offline_sessions = 1 ? true : false;
         return view('includes.dashboard', $data);
     }
     protected function adminDashboard()
