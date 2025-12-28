@@ -296,7 +296,7 @@ $(function () {
    * Quill Editor
    * ======================= */
   
-   // Toolbar
+  // Toolbar
   const toolbarOptions = [
     [{ header: [1, 2, 3, false] }],
     ['bold', 'italic', 'underline', 'strike'],
@@ -335,6 +335,14 @@ $(function () {
       const files = Array.from(input.files);
       let range = quill.getSelection(true);
       
+      const totalSize = files.reduce((total, file) => total + file.size, 0);
+      const maxSize = 10 * 1024 * 1024; // 10 MB
+
+      if (totalSize > maxSize) {
+        alert('{{ __('admin.file_exceeds_limit') }}');
+        return;
+      }
+
       files.forEach((file, i) => {
         const reader = new FileReader();
         reader.onload = () => {
@@ -362,6 +370,15 @@ $(function () {
     input.click();
 
     input.onchange = () => {
+      const files = Array.from(input.files);
+      const totalSize = files.reduce((total, file) => total + file.size, 0);
+      const maxSize = 10 * 1024 * 1024; // 10 MB
+
+      if (totalSize > maxSize) {
+        alert('{{ __('admin.file_exceeds_limit') }}');
+        return;
+      }
+
       Array.from(input.files).forEach(file => {
         const url = URL.createObjectURL(file);
         const range = quill.getSelection(true);
