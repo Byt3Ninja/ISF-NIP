@@ -403,12 +403,18 @@
         
         if (validateCurrentTab(currentTabId)) {
           // Save current progress (you can implement auto-save here if needed)
-          navigateToTab(currentTab + 1, false);
+          if( currentTab == 1 )
+          {
+            submitProgram();
+          }
+          else
+          {
+            navigateToTab(currentTab + 1, false);
+          }
         }
       });
 
-      // Publish button click handler
-      $(document).on('click', '.publish-btn', function() {
+      function submitProgram() {
         const currentTab = parseInt($(this).data('current-tab'));
         
         // Validate all tabs before publishing
@@ -449,6 +455,10 @@
         
         // Submit the form
         $('#hidden-submit-btn').click();
+      }
+      // Publish button click handler
+      $(document).on('click', '.publish-btn', function() {
+        submitProgram();
       });
 
       // Tab click handler - prevent direct navigation to disabled tabs
