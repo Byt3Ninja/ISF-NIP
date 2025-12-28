@@ -3065,5 +3065,7 @@ return [
 	'public_scope_hint' => 'Mentors not related to any organization',
 	'organization_scope_hint' => 'Mentors related to organizations only',
     'error_date_range' => 'Program date range must be defined correctly.',
+	'setup' => 'Setup',
+	'setup_organization_wizard_description' => 'Setup you organization details step by step',
 ];
 

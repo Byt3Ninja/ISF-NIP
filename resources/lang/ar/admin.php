@@ -3119,5 +3119,7 @@ return [
 
 	'public_scope_hint' => 'المرشدون غير مرتبطين بأي موسسة',
 	'organization_scope_hint' => 'المرشدون المرتبطين بالمؤسسات فقط',
+	'setup' => 'إعداد',
+	'setup_organization_wizard_description' => 'قم بإعداد تفاصيل مؤسستك خطوة بخطوة.',
     'error_date_range' => 'يجب تحديد نطاق التاريخ بشكل صحيح.',
 ];

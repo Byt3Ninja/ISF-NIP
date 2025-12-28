@@ -163,13 +163,3 @@
     </small>
   </div>
 </div>
-
-@if($org && $org->is_draft)
-  <div class="alert alert-warning d-flex align-items-center mt-3" role="alert">
-    <i class="ti ti-alert-triangle me-2"></i>
-    <div>
-      {{ __('admin.This organization is currently in draft mode') }}.
-      {{ __('admin.Complete all required steps to publish it') }}.
-    </div>
-  </div>
-@endif

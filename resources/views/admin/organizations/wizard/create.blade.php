@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('style')
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bs-stepper/bs-stepper.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/toastr/toastr.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css" />
   <style>
@@ -59,388 +59,247 @@
   // Active step is the requested step if it's <= maxStep, otherwise default to 1
   $activeStep = ($requestedStep <= $maxStep) ? (int)$requestedStep : 1;
 
-  $labels = [
-    'organization_basics' => $l == 'ar' ? 'المعلومات الأساسية' : 'Organization Basics',
-    'contact_information' => $l == 'ar' ? 'معلومات الاتصال' : 'Contact Information',
-    'organization_manager' => $l == 'ar' ? 'مدير المؤسسة' : 'Organization Manager',
-    'landing_page' => $l == 'ar' ? 'الصفحة الرئيسية' : 'Landing Page',
-    'custom_pages' => $l == 'ar' ? 'صفحات مخصصة' : 'Custom Pages',
+  $icons = [
+    'organization_basics' => 'form-wizard-account',
+    'contact_information' => 'form-wizard-personal',
+    'organization_manager' => 'form-wizard-address',
+    'landing_page' => 'form-wizard-social-link',
+    'custom_pages' => 'form-wizard-submit',
   ];
 
   $tabs = [
-    ['id' => 'organization_basics', 'label' => $labels['organization_basics'], 'step' => 1],
-    ['id' => 'contact_information', 'label' => $labels['contact_information'], 'step' => 2],
-    ['id' => 'organization_manager', 'label' => $labels['organization_manager'], 'step' => 3],
-    ['id' => 'landing_page', 'label' => $labels['landing_page'], 'step' => 4],
-    ['id' => 'custom_pages', 'label' => $labels['custom_pages'], 'step' => 5],
+    ['id' => 'organization_basics', 'title' => __('admin.Organization Basics'), 'step' => 1],
+    ['id' => 'contact_information', 'title' => __('admin.Contact Information'), 'step' => 2],
+    ['id' => 'organization_manager', 'title' => __('admin.Organization Manager'), 'step' => 3],
+    ['id' => 'landing_page', 'title' => __('admin.Landing Page'), 'step' => 4],
+    ['id' => 'custom_pages', 'title' => __('admin.Custom Pages'), 'step' => 5],
   ];
 @endphp
 
 @section('content')
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
+
+    <!-- Modern Icons Wizard -->
     <div class="row">
-      <h4 class="fw-bold mb-4">
-        @if($isEdit)
-          {{ __('admin.Edit Organization') }}
-        @else
-          {{ __('admin.Create Organization') }}
-        @endif
-      </h4>
-
-      @if (session()->has('success'))
-        <x-alert type="success" message="{{ session()->get('success') }}" />
-      @endif
-      @if (session()->has('error'))
-        <x-alert type="danger" message="{{ session()->get('error') }}" />
-      @endif
-      @if ($errors->any())
-        @foreach ($errors->all() as $error)
-          <x-alert type="danger" message="{{ $error }}" />
-        @endforeach
-      @endif
-    </div>
-
-    <div class="card p-4 p-md-8">
-      <form
-        action="{{ $isEdit ? route('organization.wizard.update.step1', $organization->id) : route('organization.wizard.store') }}"
-        method="POST"
-        enctype="multipart/form-data"
-        id="organizationWizardForm"
-      >
-        @csrf
-        @if($isEdit)
-          @method('PUT')
-        @endif
-        <input type="hidden" name="current_step" id="current_step" value="{{ $activeStep }}">
-        <input type="hidden" name="redirect_to" id="redirect_to_step1" value="next">
-
-        <!-- Tabs (mobile) -->
-        <div style="max-width: 100%; overflow-x: auto;" class="mb-4 d-md-none pb-3">
-          <ul class="nav nav-pills flex-nowrap" role="tablist">
-            @foreach ($tabs as $key => $tab)
-              <li class="nav-item" role="presentation">
-                <button
-                  class="nav-link {{ $tab['step'] == $activeStep ? 'active' : '' }} {{ $tab['step'] > $maxStep ? 'tab-disabled' : '' }}"
-                  id="pills-{{ $tab['id'] }}-tab-mobile"
-                  data-bs-toggle="pill"
-                  data-bs-target="#pills-{{ $tab['id'] }}"
-                  type="button"
-                  role="tab"
-                  aria-controls="pills-{{ $tab['id'] }}"
-                  aria-selected="{{ $tab['step'] == $activeStep ? 'true' : 'false' }}"
-                  data-tab-index="{{ $key }}"
-                  data-step="{{ $tab['step'] }}"
-                  {{ $tab['step'] > $maxStep ? 'disabled' : '' }}
-                >
-                  <span class="fw-semibold">{{ $tab['label'] }}</span>
-                </button>
-              </li>
-            @endforeach
-          </ul>
+      <div class="col-12">
+        <div class="mb-4">
+          <h4 class="mb-1">
+            {{ $isEdit ? __('admin.Edit Organization') : __('admin.Create Organization') }}
+          </h4>
+          <p class="mb-0">{{ __('admin.setup_organization_wizard_description') }}</p>
         </div>
 
-        <!-- Tabs (desktop) -->
-        <ul class="nav nav-pills d-none d-md-flex" id="pills-tab" role="tablist">
-          @foreach ($tabs as $key => $tab)
-            <li class="nav-item me-2" role="presentation">
-              <button
-                class="nav-link {{ $tab['step'] == $activeStep ? 'active' : '' }} {{ $tab['step'] > $maxStep ? 'tab-disabled' : '' }}"
-                id="pills-{{ $tab['id'] }}-tab"
-                data-bs-toggle="pill"
-                data-bs-target="#pills-{{ $tab['id'] }}"
-                type="button"
-                role="tab"
-                aria-controls="pills-{{ $tab['id'] }}"
-                aria-selected="{{ $tab['step'] == $activeStep ? 'true' : 'false' }}"
-                data-tab-index="{{ $key }}"
-                data-step="{{ $tab['step'] }}"
-                {{ $tab['step'] > $maxStep ? 'disabled' : '' }}
-              >
-                <span class="fw-semibold">{{ $tab['label'] }}</span>
-              </button>
-            </li>
+        <!-- Alerts -->
+        @if (session()->has('success'))
+          <x-alert type="success" message="{{ session()->get('success') }}" />
+        @endif
+        @if (session()->has('error'))
+          <x-alert type="danger" message="{{ session()->get('error') }}" />
+        @endif
+        @if ($errors->any())
+          @foreach ($errors->all() as $error)
+            <x-alert type="danger" message="{{ $error }}" />
           @endforeach
-        </ul>
-        <hr />
+        @endif
+        <!--/ Alerts -->
 
-        <div class="tab-content shadow-none p-4" id="pills-tabContent">
-          <!-- Step 1: Organization Basics -->
-          <div class="tab-pane fade {{ $activeStep == 1 ? 'show active' : '' }}" id="pills-organization_basics" role="tabpanel" aria-labelledby="pills-organization_basics-tab" data-tab-index="0">
-            @include('admin.organizations.wizard.partials._step1_basics', ['organization' => $organization ?? null])
-
-            <!-- Navigation Buttons -->
-            <div class="d-flex align-items-center justify-content-between gap-3 mt-4 pt-4 border-top">
-              <div class="d-flex gap-2">
-                @if($isDraft)
-                  <button type="button" class="btn btn-label-secondary save-draft-step1-btn">
-                    <i class="ti ti-file me-2"></i>
-                    {{ __('admin.Save as Draft') }}
-                  </button>
-                @endif
-                <button type="button" class="btn btn-label-secondary save-changes-step1-btn">
-                  <i class="ti ti-device-floppy me-2"></i>
-                  {{ __('admin.Save Changes') }}
+        <div class="bs-stepper wizard-icons wizard-icons-example">
+          <div class="bs-stepper-header">
+            @foreach ($tabs as $tab)
+              <div 
+                class="step" data-target="#{{ $tab['id'] }}">
+                <button 
+                  type="button" 
+                  class="step-trigger"
+                  {{-- {{ $tab['step'] > $maxStep ? 'disabled' : '' }} --}}
+                >
+                  <span class="bs-stepper-icon">
+                    <svg viewBox="0 0 58 58">
+                      <use xlink:href="/vuexy/assets/svg/icons/{{ $icons[$tab['id']] }}.svg"></use>
+                    </svg>
+                  </span>
+                  <span class="bs-stepper-label">{{ $tab['title'] }}</span>
                 </button>
               </div>
-
-              <div class="d-flex gap-2">
-                @if($canPublish)
-                  <button type="button" class="btn btn-success publish-btn" id="publishBtn">
-                    <i class="ti ti-world me-2"></i>
-                    {{ __('admin.Publish') }}
-                  </button>
-                @endif
-                <button type="button" class="btn btn-primary save-continue-step1-btn">
-                  {{ __('admin.Save & Continue') }}
-                  <i class="ti ti-arrow-{{ $l == 'en' ? 'right' : 'left' }} ms-2"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Step 2: Contact Information -->
-          <div class="tab-pane fade {{ $activeStep == 2 ? 'show active' : '' }}" id="pills-contact_information" role="tabpanel" aria-labelledby="pills-contact_information-tab" data-tab-index="1">
-            @include('admin.organizations.wizard.partials._step2_contact', ['organization' => $organization ?? null])
-
-            <!-- Navigation Buttons for Step 2 -->
-            <div class="d-flex align-items-center justify-content-between gap-3 mt-4 pt-4 border-top">
-              <div class="d-flex gap-2">
-                <button type="button" class="btn btn-label-secondary prev-step-btn" data-target-step="0">
-                  <i class="ti ti-arrow-{{ $l == 'en' ? 'left' : 'right' }} me-2"></i>
-                  {{ __('admin.Previous Step') }}
-                </button>
-                @if($isDraft)
-                  <button type="button" class="btn btn-label-secondary save-draft-step2-btn">
-                    <i class="ti ti-file me-2"></i>
-                    {{ __('admin.Save as Draft') }}
-                  </button>
-                @endif
-                <button type="button" class="btn btn-label-secondary save-changes-step2-btn">
-                  <i class="ti ti-device-floppy me-2"></i>
-                  {{ __('admin.Save Changes') }}
-                </button>
-              </div>
-
-              <div class="d-flex gap-2">
-                @if($canPublish)
-                  <button type="button" class="btn btn-success publish-btn">
-                    <i class="ti ti-world me-2"></i>
-                    {{ __('admin.Publish') }}
-                  </button>
-                @endif
-                <button type="button" class="btn btn-primary save-continue-step2-btn">
-                  {{ __('admin.Save & Continue') }}
-                  <i class="ti ti-arrow-{{ $l == 'en' ? 'right' : 'left' }} ms-2"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Step 3: Organization Manager -->
-          <div class="tab-pane fade {{ $activeStep == 3 ? 'show active' : '' }}" id="pills-organization_manager" role="tabpanel" aria-labelledby="pills-organization_manager-tab" data-tab-index="2">
-            @include('admin.organizations.wizard.partials._step3_managers', ['organization' => $organization ?? null, 'assignedManagers' => $assignedManagers ?? collect()])
-
-            <!-- Navigation Buttons for Step 3 -->
-            <div class="d-flex align-items-center justify-content-between gap-3 mt-4 pt-4 border-top">
-              <div class="d-flex gap-2">
-                <button type="button" class="btn btn-label-secondary prev-step-btn" data-target-step="1">
-                  <i class="ti ti-arrow-{{ $l == 'en' ? 'left' : 'right' }} me-2"></i>
-                  {{ __('admin.Previous Step') }}
-                </button>
-                @if($isDraft)
-                  <button type="button" class="btn btn-label-secondary save-draft-step3-btn">
-                    <i class="ti ti-file me-2"></i>
-                    {{ __('admin.Save as Draft') }}
-                  </button>
-                @endif
-                <button type="button" class="btn btn-label-secondary save-changes-step3-btn">
-                  <i class="ti ti-device-floppy me-2"></i>
-                  {{ __('admin.Save Changes') }}
-                </button>
-              </div>
-
-              <div class="d-flex gap-2">
-                @if($isDraft)
-                  <button type="button" class="btn btn-success publish-btn" id="publishBtnStep3" style="{{ $hasManagers ? '' : 'display: none;' }}">
-                    <i class="ti ti-world me-2"></i>
-                    {{ __('admin.Publish') }}
-                  </button>
-                @endif
-                <button type="button" class="btn btn-primary save-continue-step3-btn">
-                  {{ __('admin.Save & Continue') }}
-                  <i class="ti ti-arrow-{{ $l == 'en' ? 'right' : 'left' }} ms-2"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Step 4: Landing Page -->
-          <div class="tab-pane fade {{ $activeStep == 4 ? 'show active' : '' }}" id="pills-landing_page" role="tabpanel" aria-labelledby="pills-landing_page-tab" data-tab-index="3">
-            @if($isEdit)
-              @include('admin.organizations.wizard.partials._step4_landing', ['organization' => $organization ?? null])
-
-              <!-- Navigation Buttons for Step 4 -->
-              <div class="d-flex align-items-center justify-content-between gap-3 mt-4 pt-4 border-top">
-                <div class="d-flex gap-2">
-                  <button type="button" class="btn btn-label-secondary prev-step-btn" data-target-step="2">
-                    <i class="ti ti-arrow-{{ $l == 'en' ? 'left' : 'right' }} me-2"></i>
-                    {{ __('admin.Previous Step') }}
-                  </button>
-                  @if($isDraft)
-                    <button type="button" class="btn btn-label-secondary save-draft-step4-btn">
-                      <i class="ti ti-file me-2"></i>
-                      {{ __('admin.Save as Draft') }}
-                    </button>
-                  @endif
-                  <button type="button" class="btn btn-label-secondary save-changes-step4-btn">
-                    <i class="ti ti-device-floppy me-2"></i>
-                    {{ __('admin.Save Changes') }}
-                  </button>
+              @if (!$loop->last)
+                <div class="line">
+                  <div style="width: 50px; height: 2px;" class="bg-dark"></div>
                 </div>
+              @endif
+            @endforeach
+          </div>
+          <div class="bs-stepper-content">
+            <form
+              action="{{ $isEdit ? route('organization.wizard.update.step1', $organization->id) : route('organization.wizard.store') }}"
+              method="POST"
+              enctype="multipart/form-data"
+              id="organizationWizardForm"
+            >
+              @csrf
+              @if($isEdit)
+                @method('PUT')
+              @endif
+              
+              <input type="hidden" name="current_step" id="current_step" value="{{ $activeStep }}">
+              <input type="hidden" name="redirect_to" id="redirect_to_step1" value="next">
 
-                <div class="d-flex gap-2">
-                  @if($isDraft)
-                    <button type="button" class="btn btn-success publish-btn" id="publishBtnStep4" style="{{ $hasManagers ? '' : 'display: none;' }}">
-                      <i class="ti ti-world me-2"></i>
-                      {{ __('admin.Publish') }}
-                    </button>
-                  @endif
-                  <button type="button" class="btn btn-primary save-continue-step4-btn">
-                    {{ __('admin.Save & Continue') }}
-                    <i class="ti ti-arrow-{{ $l == 'en' ? 'right' : 'left' }} ms-2"></i>
-                  </button>
+              @foreach ($tabs as $key => $tab)
+                <div id="{{ $tab['id'] }}" class="content">
+                  <div class="content-header mb-4">
+                    <h5 class="mb-0">{{ $tab['title'] }}</h5>
+                    <small>{{ __('admin.setup') }} {{ $tab['title'] }}</small>
+                  </div>
+
+                  @switch($tab['step'])
+                    @case(1)
+                    @include('admin.organizations.wizard.partials._step1_basics', ['organization' => $organization ?? null])
+                      @break
+                    @case(2)
+                    @include('admin.organizations.wizard.partials._step2_contact', ['organization' => $organization ?? null])
+                      @break
+                    @case(3)
+                    @include('admin.organizations.wizard.partials._step3_managers', ['organization' => $organization ?? null, 'assignedManagers' => $assignedManagers ?? collect()])
+                      @break
+                    @case(4)
+                    @include('admin.organizations.wizard.partials._step4_landing', ['organization' => $organization ?? null])
+                      @break
+                    @case(5)
+                    @include('admin.organizations.wizard.partials._step5_custom_sections', ['organization' => $organization ?? null])
+                      @break
+                    @default 
+                      @include('admin.organizations.wizard.partials._step1_basics', ['organization' => $organization ?? null])
+                  @endswitch
                 </div>
-              </div>
-            @else
-              <div class="text-center py-5">
-                <i class="ti ti-layout display-1 text-muted"></i>
-                <h5 class="mt-3 text-muted">{{ __('admin.Please complete the previous steps first') }}</h5>
+                @endforeach
+                <div class="row mt-6 border-top pt-6">
+                  <div class="col-12 d-flex justify-content-between">
+                    <button class="btn btn-label-secondary btn-prev">
+                      <i class="ti ti-arrow-left ti-xs me-sm-2"></i>
+                      <span class="align-middle d-sm-inline-block d-none">{{ __('admin.Previous') }}</span>
+                    </button>
+                    <div class="d-flex align-items-center gap-3">
+                      @if($isDraft)
+                        <button type="button" class="btn btn-label-secondary btn-draft">
+                          <i class="ti ti-file me-2"></i>
+                          {{ __('admin.Save as Draft') }}
+                        </button>
+                      @endif
+                      @if($canPublish && $loop->last)
+                        <button type="button" class="btn btn-success publish-btn" id="publishBtn">
+                          <i class="ti ti-world me-2"></i>
+                          {{ __('admin.Publish') }}
+                        </button>
+                      @else
+                        <button class="btn btn-primary btn-next">
+                          <span class="align-middle d-sm-inline-block d-none me-sm-2">{{ __('admin.Save & Continue') }}</span>
+                          <i class="ti ti-arrow-right ti-xs"></i>
+                        </button>
+                      @endif
+                    </div>
+                  </div>
+                </div>
+            </form>
+
+            @if(isset($organization) && $organization->is_draft)
+              <div class="alert alert-warning d-flex align-items-center mt-3" role="alert">
+                <i class="ti ti-alert-triangle me-2"></i>
+                <div>
+                  {{ __('admin.This organization is currently in draft mode') }}.
+                  {{ __('admin.Complete all required steps to publish it') }}.
+                </div>
               </div>
             @endif
-          </div>
 
-          <!-- Step 5: Custom Sections -->
-          <div class="tab-pane fade {{ $activeStep == 5 ? 'show active' : '' }}" id="pills-custom_pages" role="tabpanel" aria-labelledby="pills-custom_pages-tab" data-tab-index="4">
-            @if($isEdit && $maxStep >= 5)
-              @include('admin.organizations.wizard.partials._step5_custom_sections')
+            @if($isEdit)
+              <!-- Step 2 Form (separate form for step 2 submission) -->
+              <form
+                action="{{ route('organization.wizard.update.step2', $organization->id) }}"
+                method="POST"
+                id="step2Form"
+                style="display: none;"
+              >
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="redirect_to" id="redirect_to_step2" value="next">
+              </form>
 
-              <!-- Step 5 Navigation Buttons -->
-              <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
-                <button type="button" class="btn btn-outline-secondary step-nav-btn" data-step="4">
-                  <i class="ti ti-arrow-{{ $l == 'ar' ? 'right' : 'left' }} me-1"></i>{{ __('admin.Previous Step') }}
-                </button>
-                <div class="d-flex gap-2">
-                  @if($isDraft)
-                    <button type="button" class="btn btn-label-secondary" id="saveAsDraftStep5">
-                      <i class="ti ti-device-floppy me-1"></i>{{ __('admin.Save as Draft') }}
-                    </button>
-                  @endif
-                  <button type="button" class="btn btn-primary" id="saveStep5">
-                    <i class="ti ti-check me-1"></i>{{ __('admin.Save') }}
-                  </button>
-                  @if($canPublish)
-                    <button type="button" class="btn btn-success" id="publishStep5">
-                      <i class="ti ti-world me-1"></i>{{ __('admin.Publish') }}
-                    </button>
-                  @endif
-                </div>
-              </div>
-            @else
-              <div class="text-center py-5">
-                <i class="ti ti-lock display-1 text-muted"></i>
-                <h5 class="mt-3 text-muted">{{ __('admin.Please complete the previous steps first') }}</h5>
-              </div>
+              <!-- Step 3 Form (separate form for step 3 submission) -->
+              <form
+                action="{{ route('organization.wizard.update.step3', $organization->id) }}"
+                method="POST"
+                id="step3Form"
+                style="display: none;"
+              >
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="redirect_to" id="redirect_to_step3" value="next">
+              </form>
+
+              <!-- Step 4 Form (separate form for step 4 submission) -->
+              <form
+                action="{{ route('organization.wizard.update.step4', $organization->id) }}"
+                method="POST"
+                enctype="multipart/form-data"
+                id="step4Form"
+                style="display: none;"
+              >
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="redirect_to" id="redirect_to_step4" value="next">
+              </form>
+
+              <!-- Step 5 Form (separate form for step 5 submission) -->
+              <form
+                action="{{ route('organization.wizard.update.step5', $organization->id) }}"
+                method="POST"
+                id="step5Form"
+                style="display: none;"
+              >
+                @csrf
+                @method('PUT')
+              </form>
+            @endif
+
+            @if($isDraft)
+              <!-- Draft Form (for both new and existing organizations) -->
+              <form
+                action="{{ $isEdit ? route('organization.wizard.draft.update', $organization->id) : route('organization.wizard.draft') }}"
+                method="POST"
+                enctype="multipart/form-data"
+                id="draftForm"
+                style="display: none;"
+              >
+                @csrf
+                @if($isEdit)
+                  @method('PUT')
+                @endif
+                <input type="hidden" name="current_step" id="draft_current_step" value="{{ $activeStep }}">
+              </form>
+            @endif
+
+            @if($isEdit && $isDraft)
+              <!-- Publish Form -->
+              <form
+                action="{{ route('organization.wizard.publish', $organization->id) }}"
+                method="POST"
+                id="publishForm"
+                style="display: none;"
+              >
+                @csrf
+              </form>
             @endif
           </div>
         </div>
-      </form>
-
-      @if($isEdit)
-        <!-- Step 2 Form (separate form for step 2 submission) -->
-        <form
-          action="{{ route('organization.wizard.update.step2', $organization->id) }}"
-          method="POST"
-          id="step2Form"
-          style="display: none;"
-        >
-          @csrf
-          @method('PUT')
-          <input type="hidden" name="redirect_to" id="redirect_to_step2" value="next">
-        </form>
-
-        <!-- Step 3 Form (separate form for step 3 submission) -->
-        <form
-          action="{{ route('organization.wizard.update.step3', $organization->id) }}"
-          method="POST"
-          id="step3Form"
-          style="display: none;"
-        >
-          @csrf
-          @method('PUT')
-          <input type="hidden" name="redirect_to" id="redirect_to_step3" value="next">
-        </form>
-
-        <!-- Step 4 Form (separate form for step 4 submission) -->
-        <form
-          action="{{ route('organization.wizard.update.step4', $organization->id) }}"
-          method="POST"
-          enctype="multipart/form-data"
-          id="step4Form"
-          style="display: none;"
-        >
-          @csrf
-          @method('PUT')
-          <input type="hidden" name="redirect_to" id="redirect_to_step4" value="next">
-        </form>
-
-        <!-- Step 5 Form (separate form for step 5 submission) -->
-        <form
-          action="{{ route('organization.wizard.update.step5', $organization->id) }}"
-          method="POST"
-          id="step5Form"
-          style="display: none;"
-        >
-          @csrf
-          @method('PUT')
-        </form>
-      @endif
-
-      @if($isDraft)
-        <!-- Draft Form (for both new and existing organizations) -->
-        <form
-          action="{{ $isEdit ? route('organization.wizard.draft.update', $organization->id) : route('organization.wizard.draft') }}"
-          method="POST"
-          enctype="multipart/form-data"
-          id="draftForm"
-          style="display: none;"
-        >
-          @csrf
-          @if($isEdit)
-            @method('PUT')
-          @endif
-          <input type="hidden" name="current_step" id="draft_current_step" value="{{ $activeStep }}">
-        </form>
-      @endif
-
-      @if($isEdit && $isDraft)
-        <!-- Publish Form -->
-        <form
-          action="{{ route('organization.wizard.publish', $organization->id) }}"
-          method="POST"
-          id="publishForm"
-          style="display: none;"
-        >
-          @csrf
-        </form>
-      @endif
+      </div>
     </div>
+    <!-- /Modern Icons Wizard -->
   </div>
 </div>
 @stop
 
 @section('scripts')
-  <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bs-stepper/bs-stepper.js"></script>
   <script src="/vuexy/assets/vendor/libs/toastr/toastr.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
@@ -2368,6 +2227,7 @@
 
         // Add Section Button
         $('#addSectionBtn, #addFirstSectionBtn').on('click', function() {
+          console.log('clicked')
           if (sectionIndex >= maxSections) {
             toastr.warning('{{ __("admin.Maximum 10 sections allowed") }}');
             return;
@@ -2756,4 +2616,8 @@
 
     });
   </script>
+@stop
+
+@section('pagescripts')
+<script src="/vuexy/assets/js/form-wizard-icons.js"></script>
 @stop
