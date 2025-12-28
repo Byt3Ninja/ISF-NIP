@@ -130,7 +130,7 @@ $(function () {
           render: () => `
             <div class="d-flex align-items-center">
               <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill task-view"><i class="ti ti-eye ti-md"></i></a>
-              <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill task-edit"><i class="ti ti-pencil ti-md"></i></a>
+              <!-- <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill task-edit"><i class="ti ti-pencil ti-md"></i></a> -->
               <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill delete-record"><i class="ti ti-trash ti-md"></i></a>
             </div>`
         }
@@ -273,7 +273,7 @@ $(function () {
           </div>
           <div class="d-flex align-items-center gap-3 text-end">
             <div><span>Status:</span> <span class="badge ${statusObj[a.status].class}">${statusObj[a.status].title}</span></div>
-            <button class="btn btn-sm btn-outline-primary trigger-company" data-company="${a.name}" data-current-status="${a.status}"><i class="ti ti-send me-1"></i>{{ __('admin.trigger_update') }}</button>
+            <!-- <button class="btn btn-sm btn-outline-primary trigger-company" data-company="${a.name}" data-current-status="${a.status}"><i class="ti ti-send me-1"></i>{{ __('admin.trigger_update') }}</button> -->
           </div>
         </div>`;
     }).join('');
