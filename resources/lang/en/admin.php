@@ -3062,6 +3062,6 @@ return [
 	'Section content must not exceed 10,000 characters' => 'Section content must not exceed 10,000 characters.',
 
 	'public_scope_hint' => 'Mentors not related to any organization',
-	'organization_scope_hint' => 'Mentors related to organizations',
+	'organization_scope_hint' => 'Mentors related to organizations only',
 ];
 
