@@ -304,7 +304,9 @@ class UserController extends Controller
 	}
 	public function judger()
 	{
-		$judgers = User::role('Judger')->get();
+		$judgers = User::whereHas('roles', function ($query) {
+			$query->where('default_for', 'judger');
+		})->get();
 
 		return view('admin/users/judgers', compact('judgers'));
 	}
