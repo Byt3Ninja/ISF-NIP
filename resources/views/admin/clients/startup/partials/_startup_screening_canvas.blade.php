@@ -169,6 +169,7 @@
                         </div>
                       @endif
                     </div>
+                  </div>
                   <div class="d-flex justify-content-end">
                     <button type="button" class="btn btn-primary" onclick="document.getElementById('pills-screening-criteria-tab').click()">
                       {{ __('admin.Continue') }} <i class="ti ti-arrow-right ms-2"></i>
