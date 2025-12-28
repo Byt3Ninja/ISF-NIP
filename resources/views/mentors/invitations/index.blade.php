@@ -590,7 +590,7 @@ $(function () {
       .html('<i class="ti ti-loader me-1"></i> Sending...');
 
     $.ajax({
-      url: '/invitations',
+      url: '/dashboard/mentors/invitations',
       method: 'POST',
       data: new FormData($('#invitationForm')[0]),
       processData: false,

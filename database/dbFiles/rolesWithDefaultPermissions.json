@@ -8784,5 +8784,53 @@
                 ]
             }
         ]
+    },
+    {
+        "name": "Invitations",
+        "description": "Create new invitation",
+        "permissions": [
+            {
+                "name": "invitations.store",
+                "description": "Create new invitation",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Invitations",
+        "description": "Edit invitation",
+        "permissions": [
+            {
+                "name": "invitations.update",
+                "description": "Edit invitation",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Invitations",
+        "description": "Delete invitation",
+        "permissions": [
+            {
+                "name": "invitations.destroy",
+                "description": "Delete invitation",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }
+        ]
     }
 ]
