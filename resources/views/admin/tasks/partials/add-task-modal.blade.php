@@ -86,11 +86,13 @@
                 @endforeach
               </select>
             </div>
-            <div class="col-12 mb-4">
-              <label class="form-label" for="task-assignees">
-                {{ __('admin.assignees') }}
-                <span class="text-danger">*</span>
-              </label>
+            <div class="col-12 mb-4" id="assignees-container" style="display: none;">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="form-label" for="task-assignees">
+                  {{ __('admin.assignees') }} <span class="text-danger">*</span>
+                </label>
+                <a href="javascript:void(0);" class="select-all-toggle small fw-medium">{{ __('admin.select_all') }}</a>
+              </div>
               <select
                 class="select2 form-select"
                 id="task-assignees"
