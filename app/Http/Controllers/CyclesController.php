@@ -286,7 +286,7 @@ class CyclesController extends Controller
                 'public_slug' => [
                     Rule::requiredIf($request->is_public == 1),
                     'nullable',
-                    'regex:/^[a-zA-Z0-9]+$/',
+                    'regex:/^[a-zA-Z0-9_-]+$/',
                     Rule::unique('cycles', 'public_slug')->ignore($request->id),
                 ],
                 'start' => 'required|date',
@@ -734,7 +734,7 @@ class CyclesController extends Controller
                 'title' => 'required|string|max:250',
                 'description' => 'required|string|max:100',
                 'is_public' => 'required|boolean',
-                'public_slug' => 'nullable|required_if:is_public,1|unique:cycles,public_slug,' . $request->id . ',id|regex:/^[a-zA-Z0-9]+$/',
+                'public_slug' => 'nullable|required_if:is_public,1|unique:cycles,public_slug,' . $request->id . ',id|regex:/^[a-zA-Z0-9_-]+$/',
                 'start' => 'required|date|before:end',
                 'end' => 'required|date|after:start',
                 'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:2048',
