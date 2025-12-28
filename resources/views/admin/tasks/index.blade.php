@@ -130,7 +130,7 @@ $(function () {
           render: () => `
             <div class="d-flex align-items-center">
               <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill task-view"><i class="ti ti-eye ti-md"></i></a>
-              <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill task-edit"><i class="ti ti-pencil ti-md"></i></a>
+              <!-- <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill task-edit"><i class="ti ti-pencil ti-md"></i></a> -->
               <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill delete-record"><i class="ti ti-trash ti-md"></i></a>
             </div>`
         }
@@ -219,7 +219,7 @@ $(function () {
             },
             success: function(response) {
               window.dt_task.row($row).remove().draw();
-              showToast({type: 'success', message: '{{ __('admin.Task_deleted_successfully') }}'});
+              showToast({type: 'success', message: '{{ __('admin.Task_deleted_successfully.') }}'});
             },
             error: function(xhr) {
               const errorMsg = xhr.responseJSON?.message;
@@ -258,8 +258,9 @@ $(function () {
       let avatarHtml;
 
       if (logoUrl) {
-        avatarHtml = `<div class="avatar avatar-sm me-2">
-          <img src="${logoUrl}" alt="logo" class="rounded-circle" onerror="this.parentElement.innerHTML='<span class="avatar-initial rounded-circle bg-label-primary">${a.name.split(' ').map(n => n[0]).join('').toUpperCase()}</span>'" />
+        avatarHtml = 
+        `<div class="avatar avatar-sm me-2">
+          <img src="${logoUrl}" alt="logo" class="rounded-circle border" />
         </div>`;
       } else {
         avatarHtml = `<span class="avatar avatar-sm me-2"><span class="avatar-initial rounded-circle bg-label-primary">${a.name.split(' ').map(n => n[0]).join('').toUpperCase()}</span></span>`;
@@ -273,7 +274,7 @@ $(function () {
           </div>
           <div class="d-flex align-items-center gap-3 text-end">
             <div><span>Status:</span> <span class="badge ${statusObj[a.status].class}">${statusObj[a.status].title}</span></div>
-            <button class="btn btn-sm btn-outline-primary trigger-company" data-company="${a.name}" data-current-status="${a.status}"><i class="ti ti-send me-1"></i>{{ __('admin.trigger_update') }}</button>
+            <!-- <button class="btn btn-sm btn-outline-primary trigger-company" data-company="${a.name}" data-current-status="${a.status}"><i class="ti ti-send me-1"></i>{{ __('admin.trigger_update') }}</button> -->
           </div>
         </div>`;
     }).join('');
@@ -528,7 +529,7 @@ const tagifyInstance = new Tagify(tagifyInput, {
               tags: response.data.tags || []
             };
             window.dt_task.row(editRow).data(taskObj).draw();
-            showToast({type: 'success', message: '{{ __('admin.Task_updated_successfully') }}'});
+            showToast({type: 'success', message: '{{ __('admin.Task_updated_successfully.') }}'});
           } else {
             // Add new task to the table
             const taskObj = {
@@ -543,7 +544,7 @@ const tagifyInstance = new Tagify(tagifyInput, {
               tags: response.data.tags || []
             };
             window.dt_task.row.add(taskObj).draw('page');
-            showToast({type: 'success', message: '{{ __('admin.Task_added_successfully') }}'});
+            showToast({type: 'success', message: '{{ __('admin.Task_added_successfully.') }}'});
           }
           $('#addTaskModal').modal('hide');
           resetForm();
@@ -572,6 +573,8 @@ const tagifyInstance = new Tagify(tagifyInput, {
     const programId = $(this).val();
     const assigneeSelect = $('#task-assignees');
     const currentValues = assigneeSelect.val() || [];
+
+    $('#assignees-container').show();
 
     // Check if we're in edit mode (modal has edit-row data)
     const isEditMode = $('#addNewTaskForm').data('edit-row') !== undefined;
@@ -645,6 +648,22 @@ $('#task-upload').on('change', function () {
     ).join(''))
     .show();
   });
+
+  const updateSelectAllText = ($select) => {
+    const $link = $select.closest('.col-12').find('.select-all-toggle');
+    const total = $select.find('option').length;
+    const selected = ($select.val() || []).length;
+    $link.text(selected === total && total > 0 ? '{{ __("admin.deselect_all") }}' : '{{ __("admin.select_all") }}');
+  };
+
+  $(document).on('click', '.select-all-toggle', function() {
+    const $select = $(this).closest('.col-12').find('select');
+    const allOpts = $select.find('option').map((_, el) => $(el).val()).get();
+    const curr = $select.val() || [];
+    $select.val(curr.length === allOpts.length ? null : allOpts).trigger('change');
+  });
+
+  $(document).on('change', '.select2', function() { updateSelectAllText($(this)); });
 })();
 </script>
 @stop

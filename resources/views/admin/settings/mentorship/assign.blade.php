@@ -83,6 +83,11 @@
               
               <!-- PHP Logic for Filters -->
               @php
+                $scopeOptions = [
+                  ['key' => 'public', 'label' => __('admin.Public'), 'hint' => __('admin.public_scope_hint')],
+                  ['key' => 'organization', 'label' => __('admin.Organization'), 'hint' => __('admin.organization_scope_hint')],
+                ];
+
                 $specializations = [];
                 // Reusing your existing logic efficiently
                 $TMentors = App\User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
@@ -96,8 +101,18 @@
                 $specializations = array_unique($specializations);
               @endphp
               <!-- Filters Section -->
-              <div class="row g-3">
-                <div class="col-md-4">
+              <div class="row g-3 justify-content-lg-end">
+                <div class="col-md-2">
+                  <select id="scopeFilter" class="form-select">
+                    <option value="">{{ __('admin.Scope') }} ({{ __('admin.All') }})</option>
+                    @foreach ($scopeOptions as $option)
+                      <option value="{{ $option['key'] }}" {{ request('scope') == $option['key'] ? 'selected' : '' }}>
+                        {{ $option['label'] }}  ( {{ $option['hint'] }} )
+                      </option>
+                    @endforeach
+                  </select>
+                </div>
+                <div class="col-md-3">
                   <select id="specializationFilter" class="form-select">
                     <option value="">{{ __('cycles.Specialization') }} ({{ __('admin.All') }})</option>
                     @foreach ($specializations as $spec)
@@ -105,7 +120,7 @@
                     @endforeach
                   </select>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-2">
                   <select id="ratingFilter" class="form-select">
                     <option value="0">{{ __('admin.Rating') }} ({{ __('admin.All') }})</option>
                     @for($i=1; $i<=5; $i++)
@@ -113,7 +128,7 @@
                     @endfor
                   </select>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <input type="text" id="clientSearchInput" class="form-control" placeholder="{{ (__('admin.Search')) }}...">
                 </div>
               </div>

@@ -3115,4 +3115,7 @@ return [
 	'Please select the visibility option' => 'يرجى اختيار خيار الظهور',
 	'Section title must not exceed 255 characters' => 'يجب ألا يتجاوز عنوان القسم 255 حرفاً',
 	'Section content must not exceed 10,000 characters' => 'يجب ألا يتجاوز محتوى القسم 10,000 حرف',
+
+	'public_scope_hint' => 'المرشدون غير مرتبطين بأي موسسة',
+	'organization_scope_hint' => 'المرشدون المرتبطين بالمؤسسات فقط',
 ];
