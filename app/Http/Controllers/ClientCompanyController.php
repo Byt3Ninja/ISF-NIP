@@ -204,7 +204,7 @@ class ClientCompanyController extends Controller
             $growthSinceFirstRecord = $total > 0 ? ( (($last->total - $total) / $total) * 100 ) : 0;
             $growthSinceFirstRecord = round($growthSinceFirstRecord) . '%';
 
-            $avgMonthlyGrowth = $total > 0 ? ( pow(($last->total / $total), (1 / $intervals)) - 1 ) : 0;
+            $avgMonthlyGrowth = ( $total > 0 && $intervals > 0 ) ? ( pow(($last->total / $total), (1 / $intervals)) - 1 ) : 0;
             $avgMonthlyGrowth = round($avgMonthlyGrowth * 100, 1) . '%';
 
             $compoundAnnualGrowthRate = ( $total > 0 && $years_count > 0 ) ? ( pow(($last->total / $total), (1 / $years_count)) - 1 ) : 0;
