@@ -367,7 +367,7 @@
 												</td>
 												<td>
 													@if( $step->stype == 1 || $step->stype == 5 )
-													@if( $step->status == 'On going' )
+													@if( $step->status_flag == 'ongoing' )
 														<a href="/dashboard/cycles/my/{{ $step->id }}" class="btn btn-sm btn-primary"
 															title="{{ __('admin.Submit') }}"> 
 															{{ __('admin.Submit') }} 
