@@ -376,8 +376,7 @@
 													{{ $step->title }}
 													@endif
 												</td>
-												<td><span class="badge bg-{{ $step->color }} text-{{ $step->textColor }}">{{ __('admin.'.$step->status)
-														}}</span></td>
+												<td><span class="badge bg-{{ $step->color }} text-{{ $step->textColor }}">{{ $step->status_flag_tile }}</span></td>
 												<td>{{ $step->from }}</td>
 												<td>{{ $step->to }}</td>
 												<td style="height: 50px;">
