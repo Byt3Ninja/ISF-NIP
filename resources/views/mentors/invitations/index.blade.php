@@ -13,6 +13,15 @@ $tabs = [
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
+
+<style>
+.ql-file::after {
+  content: "\f0c6";
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  color: black;
+}
+</style>
 @endsection
 
 @section('content')
@@ -286,20 +295,86 @@ $(function () {
   /* =======================
    * Quill Editor
    * ======================= */
+  
+   // Toolbar
+  const toolbarOptions = [
+    [{ header: [1, 2, 3, false] }],
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ list: 'ordered' }, { list: 'bullet' }],
+    [{ color: [] }, { background: [] }],
+    ['image', 'link', 'file'],
+    ['clean']
+  ];
+
+  // Init Quill
   const quill = new Quill('#invitationMessageEditor', {
     theme: 'snow',
-    placeholder: '@lang('admin.compose_your_invitation_message')',
+    placeholder: '{{ __('admin.compose_your_invitation_message') }}...',
     modules: {
-      toolbar: [
-        [{ header: [1, 2, 3, false] }],
-        ['bold', 'italic', 'underline', 'strike'],
-        [{ list: 'ordered' }, { list: 'bullet' }],
-        [{ color: [] }, { background: [] }],
-        ['image', 'link'],
-        ['clean']
-      ]
+      toolbar: {
+        container: toolbarOptions,
+        handlers: {
+          image: imageHandler,
+          file: fileHandler
+        }
+      }
     }
   });
+
+  // ==========================
+  // IMAGE HANDLER (MULTIPLE)
+  // ==========================
+  function imageHandler() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.multiple = true;
+    input.click();
+
+    input.onchange = () => {
+      const files = Array.from(input.files);
+      let range = quill.getSelection(true);
+      
+      files.forEach((file, i) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const url = reader.result;
+          const index = range.index + i;
+          quill.insertEmbed(index, 'image', url);
+          quill.insertText(index + 1, '\n');
+        };
+        reader.readAsDataURL(file);
+      });
+
+      // Move cursor to end
+      quill.setSelection(range.index + files.length + 1);
+    };
+  }
+
+  // ==========================
+  // FILE HANDLER (PDF, DOCX, XLSX, PPTX)
+  // ==========================
+  function fileHandler() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.multiple = true;
+    input.accept = '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx';
+    input.click();
+
+    input.onchange = () => {
+      Array.from(input.files).forEach(file => {
+        const url = URL.createObjectURL(file);
+        const range = quill.getSelection(true);
+
+        quill.insertText(
+          range.index,
+          `📎 ${file.name}`,
+          { link: url }
+        );
+        quill.insertText(range.index + file.name.length + 2, '\n');
+      });
+    };
+  }
 
   quill.on('text-change', () => {
     $('#invitationMessage').val(quill.root.innerHTML);
