@@ -11,7 +11,7 @@
             title="{{ __('cycles.Go to judges page') }}"
           @else
             title="{{ __('cycles.Filter by') . ' ' . __('admin.' . $item['label']) }}"
-            data-filter-type="{{ $key == 1 ? 'total' : ($key == 2 ? 'not-evaluated' : ($key == 3 ? 'draft' : 'published')) }}"
+            data-filter-type="{{ $key == 1 ? 'total' : ($key == 2 ? 'not-assigned' : ($key == 3 ? 'not-evaluated' : ( $key == 4 ? 'draft' : 'published' ))) }}"
             onclick="filterByScreeningKPI(this)"
           @endif
         >
@@ -1087,6 +1087,7 @@
 		// Clear all current filters first
 		clearAllScreeningFilters();
 		
+		console.log(filterType);
 		// Apply the specific filter based on KPI card clicked
 		switch(filterType) {
 			case 'total':
