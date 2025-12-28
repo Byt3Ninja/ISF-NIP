@@ -421,7 +421,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     //like a service
     Route::post('/likeService', 'ClientCompanyController@likeService')->name('services.like');
     //Users  Manager routes
-    Route::get('/users/login_as/{id}', 'UserController@loginAs')->name('users.login_as');
+    Route::get('/users/impersonate-start/{id}', 'UserController@startImpersonate')->name('users.login_as');
+    Route::post('/users/impersonate-stop', 'UserController@stopImpersonate');
     Route::resource('users', 'UserController');
     Route::get('/judger', 'UserController@judger')->name('users.judger');
     Route::post('/users/password', 'UserController@updatePassword')->name('user.profile_update_password');

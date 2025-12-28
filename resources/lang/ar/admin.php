@@ -2599,4 +2599,6 @@ return [
 	'completed_programs' => 'البرامج المكتملة',
 	'view_hackathon' => 'عرض الهاكاثون',
 	'Login as User' => 'تسجيل الدخول كمستخدم',
+	'Stop Impersonate' => 'توقف عن انتحال الشخصية',
+	'ConfirmStopImpersonationMessage' => 'هل انت متاكد من توقف عن انتحال الشخصية والعودة إلى حسابك ؟',
 ];

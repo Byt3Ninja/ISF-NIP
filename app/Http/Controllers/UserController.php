@@ -64,7 +64,7 @@ class UserController extends Controller
 		return view('admin/users/index', compact('users'));
 	}
 
-	public function loginAs($id)
+	public function startImpersonate($id)
 	{
 		$user = User::find($id);
 		if( empty( $user ) )
@@ -72,11 +72,27 @@ class UserController extends Controller
 			Flash::error("User not found");
 			return back()->withInput()->with(['msg' => 'FailedStore']);
 		}
+		session([
+			'impersonator_id' => auth()->id(),
+		]);
 		auth()->login($user, true);
 		if( auth()->id() !== $user->id ) { Flash::error("User not found"); }
 		return redirect('/dashboard');
 	}
 
+	public function stopImpersonate()
+	{
+		if (! session()->has('impersonator_id')) {
+			abort(403);
+		}
+		$originalUser = User::find(session('impersonator_id'));
+		if( !$originalUser->ableTo('users.login_as') ) {
+			abort(401);
+		}
+		session()->forget('impersonator_id');
+		auth()->login($originalUser, true);
+		return redirect('/dashboard/users')->with('success', 'Impersonation ended');
+	}
 
 	/**
 	 * Show the form for creating a new resource.

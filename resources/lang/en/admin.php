@@ -2546,4 +2546,6 @@ return [
 	'completed_programs' => 'Completed Programs',
 	'view_hackathon' => 'View Hackathon',
 	'Login as User' => 'Login as User',
+	'Stop Impersonate' => 'Stop Impersonate',
+	'ConfirmStopImpersonationMessage' => 'Are you sure you want to stop impersonation and go back to your account ?',
 ];

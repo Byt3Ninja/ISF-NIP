@@ -1147,6 +1147,7 @@ function flattenMenuItems($menuItems) {
 $filteredMenuItems = filterMenuItems($menuItems, Auth::user(), $permissions ?? [], $updateSittings ?? null, $companyid);
 $flattenedMenuItems = flattenMenuItems($filteredMenuItems);
 @endphp
+<link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify.min.css">
 
 <!-- Navbar -->
 <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
@@ -1170,6 +1171,21 @@ $flattenedMenuItems = flattenMenuItems($filteredMenuItems);
     <!-- /Search -->
 
     <ul class="navbar-nav flex-row align-items-center ms-auto">
+      @if( session()->has('impersonator_id') )
+        @php $impersonator = \App\User::find( session()->get('impersonator_id') ); @endphp
+        @if( !empty( $impersonator ) )
+          @if( $impersonator->ableTo('users.login_as') )
+            <li class="nav-item me-1 me-md-2" title="{{ __('admin.Stop Impersonate') }}">
+              <form id="stop-impersonation-form" action="{{ URL::to('dashboard/users/impersonate-stop') }}" method="POST">
+                @csrf
+              </form>
+              <button id="stop-impersonation" type="button" class="btn btn-icon btn-label-danger btn-sm waves-effect">
+                <i class="fa-solid fa-user-secret fs-5"></i>
+              </button>
+            </li>
+          @endif
+        @endif
+      @endif
       <!-- Language -->
       <li class="nav-item dropdown-language dropdown me-1 me-md-2">
         <a class="nav-link btn btn-text-secondary btn-icon rounded-pill dropdown-toggle hide-arrow p-1 p-md-2"
@@ -1416,7 +1432,12 @@ $flattenedMenuItems = flattenMenuItems($filteredMenuItems);
 </div>
 
 <!-- Mobile Header JavaScript -->
+<script src="/app-assets/plugins/alertify/alertify.min.js"></script>
 <script>
+alertify.defaults.transition = 'zoom';
+alertify.defaults.theme.ok = 'btn btn-sm btn-danger';
+alertify.defaults.theme.cancel = 'btn btn-sm btn-info';
+alertify.defaults.theme.input = 'form-control';
 document.addEventListener('DOMContentLoaded', function() {
   // Search functionality
   const searchInput = document.getElementById('menuSearch');
@@ -1487,5 +1508,16 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
   }
+  $(document).on('click', '#stop-impersonation', function(e) {
+    e.preventDefault();
+    alertify.confirm(
+			"{{ __('admin.Confirm Action') }}",
+			"{!! __('admin.ConfirmStopImpersonationMessage') !!}",
+			function() {
+				$("#stop-impersonation-form").submit();
+			},
+			function(){}
+		).set('labels', {ok: "<i class='fa fa-check'></i> {{ __('admin.Yes') }}", cancel: "{{ __('admin.cancel') }}"});
+  });
 });
 </script>
