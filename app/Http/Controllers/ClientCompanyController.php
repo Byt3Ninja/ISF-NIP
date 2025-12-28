@@ -199,14 +199,15 @@ class ClientCompanyController extends Controller
             $intervals = $count - 1;
             $last = $growth_records->last();
             $first = $growth_records->first();
+            $total = $first->total;
 
-            $growthSinceFirstRecord = (($last->total - $first->total) / $first->total) * 100;
+            $growthSinceFirstRecord = $total > 0 ? ( (($last->total - $total) / $total) * 100 ) : 0;
             $growthSinceFirstRecord = round($growthSinceFirstRecord) . '%';
 
-            $avgMonthlyGrowth = pow(($last->total / $first->total), (1 / $intervals)) - 1;
+            $avgMonthlyGrowth = $total > 0 ? ( pow(($last->total / $total), (1 / $intervals)) - 1 ) : 0;
             $avgMonthlyGrowth = round($avgMonthlyGrowth * 100, 1) . '%';
 
-            $compoundAnnualGrowthRate = pow(($last->total / $first->total), (1 / $years_count)) - 1;
+            $compoundAnnualGrowthRate = ( $total > 0 && $years_count > 0 ) ? ( pow(($last->total / $total), (1 / $years_count)) - 1 ) : 0;
             $compoundAnnualGrowthRate = round($compoundAnnualGrowthRate * 100, 1) . '%';
         }
         return view('admin/clients/startup/company_profile', compact('company', 'formTitle', 'formData', 'evaluationForm', 'Currencies', 'milestones', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile', 'technologies', 'sectors', 'industry', 'years', 'growth_records', 'growthSinceFirstRecord', 'avgMonthlyGrowth', 'compoundAnnualGrowthRate'));
