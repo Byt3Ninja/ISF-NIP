@@ -757,7 +757,8 @@ class CyclesController extends Controller
                     return redirect()->back()->with('message2', 'Cycle_title_already_exist');
                 }
 
-            DB::transaction(function () use ($request, $slugs) {
+            $cycle = null;
+            DB::transaction(function () use ($request, $slugs, &$cycle) {
                 $private = null;
                 if ($request->private) {
                     $private = sha1(now());
@@ -815,7 +816,6 @@ class CyclesController extends Controller
                     $cycle->financial_guideline_file =  $request->file('financial_policy_pdf')->storeAs('programs', $originalName, 'public_uploads');
                 }
 
-
                 $cycle->legal_guideline = $request->legal_policy;
                 if ($request->hasFile('legal_policy_pdf')) {
                     $originalName = $request->file('legal_policy_pdf')->getClientOriginalName();
@@ -856,20 +856,20 @@ class CyclesController extends Controller
                     $requiredFields = ['host', 'mail', 'mailpassword', 'port', 'encryption'];
                     $missing = [];
 
-                 $setting = Settings::first();
+                    $setting = Settings::first();
 
-             foreach ($requiredFields as $field) {
-                if (!$setting || is_null($setting->$field) || $setting->$field === '') {
-                    $missing[] = $field;
-                  }
-                }
+                    foreach ($requiredFields as $field) {
+                        if (!$setting || is_null($setting->$field) || $setting->$field === '') {
+                            $missing[] = $field;
+                        }
+                    }
 
-            if (!empty($missing)) {
-                 return redirect()->back()->with([
-                    'message2' => __('missing_mail_settings', ['fields' => implode(', ', $missing)]),
-                    'class' => 'danger'
-                ]);
-             }                   
+                    if (!empty($missing)) {
+                        return redirect()->back()->with([
+                            'message2' => __('missing_mail_settings', ['fields' => implode(', ', $missing)]),
+                            'class' => 'danger'
+                        ]);
+                    }  
 
                     $admin = User::role('Admin')->orderBy('id')->first();
 
@@ -888,7 +888,7 @@ class CyclesController extends Controller
                     }
                 }
             });
-            return redirect()->route('programlist.index')->with('message', 'Saved');
+            return redirect()->route('programs.edit', ['id' => $cycle->id])->with('message', 'Saved');
         }
         else
         {
