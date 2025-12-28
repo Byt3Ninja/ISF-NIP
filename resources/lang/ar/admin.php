@@ -2542,6 +2542,7 @@ return [
 	'No bio has been added yet' => 'لم تتم إضافة نبذة بعد',
 	'no_available_yet' => 'غير متوفر بعد',
 	'In Progress' => 'قيد التنفيذ',
+	'Not Assigned' => 'لم يتم التعيين',
 	'Select Program' => 'اختر البرنامج',
 	'Select program to filter reports' => 'اختر البرنامج لتصفية التقارير',
 	'LINKEDIN_LOGIN' => 'تسجيل الدخول عبر لينكدإن',

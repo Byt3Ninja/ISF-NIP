@@ -2496,6 +2496,7 @@ return [
 	'No bio has been added yet' => 'No bio has been added yet',
 	'no_available_yet' => 'Not Available Yet',
 	'In Progress' => 'In Progress',
+	'Not Assigned' => 'Not Assigned',
 	'Select Program' => 'Select program',
 	'LINKEDIN_LOGIN' => 'LinkedIn Login',
 	'disabled' => 'Disabled',
