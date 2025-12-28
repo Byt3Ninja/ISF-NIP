@@ -27,6 +27,26 @@
             </select>
           </div>
 
+          @php 
+            $scopeOptions = [
+              ['key' => 'public', 'label' => __('admin.Public'), 'hint' => __('admin.public_scope_hint')],
+              ['key' => 'organization', 'label' => __('admin.Organization'), 'hint' => __('admin.organization_scope_hint')],
+            ];
+          @endphp
+
+          <!-- Scope Filter -->
+          <div class="form-group mb-4">
+            <label for="scopeFilter" class="form-label">{{ __('admin.Scope') }}</label>
+            <select name="scopeFilter" id="scopeFilter" class="form-select select2" data-placeholder="{{ __('admin.select_scope') }}">
+              <option value="all">{{ __('admin.allMentors') }}</option>
+              @foreach ($scopeOptions as $option)
+                <option value="{{ $option['key'] }}" {{ request('scopeFilter') == $option['key'] ? 'selected' : '' }}>
+                  {{ $option['label'] }}  ( {{ $option['hint'] }} )
+                </option>
+              @endforeach
+            </select>
+          </div>
+
           <!-- Rate Filter -->
           <div class="form-group mb-4">
             <label for="rateSearch" class="form-label">{{ __('admin.rating') }}</label>
