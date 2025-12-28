@@ -188,7 +188,7 @@
                     <!-- Switch Role -->
        
                     @foreach($accountRoles as $key => $role)
-                   
+                
                     <div class="col-6 mb-4">
                       <label for="{{$role}}Role" style="display: grid; place-items: center;" class="form-check custom-option custom-option-icon cursor-pointer">
                         <div class="d-flex align-items-center">
