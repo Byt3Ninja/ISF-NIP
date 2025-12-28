@@ -1121,6 +1121,7 @@ class HomeController extends Controller
 
             $status = $l == 'ar' ? 'لم تبدأ' : 'Not started';
             $status_flag = 'not_started';
+            $status_flag_tile = $l == 'ar' ? 'لم تبدأ' : 'Not started';
             $color = 'label-light';
             $textColor = 'light';
             if (!empty($step) && !empty($stepData))
@@ -1128,6 +1129,7 @@ class HomeController extends Controller
                 if( $now > Carbon::parse($step->to)->timestamp )
                 {
                     $status_flag = 'completed';
+                    $status_flag_tile = $l == 'ar' ? 'انتهت' : 'Completed';
                     $status = 'Completed';
                     $color = 'label-success';
                     $textColor = 'success';
@@ -1135,6 +1137,7 @@ class HomeController extends Controller
                 if( $now <= Carbon::parse($step->to)->timestamp && $now >= Carbon::parse($step->from)->timestamp )
                 {
                     $status_flag = 'ongoing';
+                    $status_flag_tile = $l == 'ar' ? 'جاري' : 'Ongoing';
                     $status = 'Ongoing';
                     $color = 'label-primary';
                     $textColor = 'primary';
@@ -1158,6 +1161,7 @@ class HomeController extends Controller
 
             $step->status = $status;
             $step->status_flag = $status_flag;
+            $step->status_flag_tile = $status_flag_tile;
             $step->color = $color;
             $step->textColor = $textColor;
             $step->trType = $trType;
