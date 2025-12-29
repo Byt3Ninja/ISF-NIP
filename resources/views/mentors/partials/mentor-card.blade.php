@@ -102,12 +102,16 @@
     <div class="row px-4 mt-auto">
       @if ($canRequestMentorship && auth()->user()->company->id && $mentor->id)
         @php
-        $schedules = App\Schedule::where('user_id', $mentor->id)
-					->where(function ($query) {
-						$query->whereNull('date')
-							->orWhere('date', '>=', date('Y-m-d'));
-					})
-					->get();
+        $schedules = App\Schedule::where('user_id', $id ?? auth()->id())
+						->where(function ($query) {$query
+								->whereNull('date')
+								->orWhere('date', '>', date('Y-m-d'))
+								->orWhere(function ($q) {
+									$q->where('date', date('Y-m-d'))
+									->where('tto', '>', date('H:i:s'));
+								});
+						})
+						->get();
         @endphp
         @if($schedules->isNotEmpty())
           <button 
