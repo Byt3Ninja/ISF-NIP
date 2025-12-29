@@ -344,6 +344,9 @@ class MentorsController extends Controller
 
 	public function addWait(Request $request)
 	{
+		$settings = Settings::where('id', 1)->first();
+
+		
 		
 		$request->validate([
 			'notes' => 'nullable|string|max:255',
@@ -392,6 +395,11 @@ class MentorsController extends Controller
 				if ($schedules == null) {
 					$errors[] = "Mentor not available on $date from $time_from to $time_to";
 					continue;
+				}
+				if($request->session_type == 'Offline'){
+					if($settings->allow_offline_sessions == 0){
+						$errors[] = 'Offline sessions are not allowed';
+					}
 				}
 
 				if (Carbon::parse($date)->toDateString() < now()->toDateString()) {
@@ -477,6 +485,13 @@ class MentorsController extends Controller
 				]);
 				if ($schedules == null) {
 					return back()->with(['class' => 'danger','msg' => 'mentor_not_available_in_this_time']);
+				}
+				if($request->session_type == 'Offline'){
+					
+					if($settings->allow_offline_sessions == 0){
+						
+						return back()->with(['class' => 'danger','msg' => 'Offline sessions are not allowed']);
+					}
 				}
 				
 				if (\App\Settings::hasReachedMaxConcurrentSessions(Carbon::parse($datefrom)->timestamp, $period)) {
