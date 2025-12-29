@@ -93,12 +93,12 @@
 
 <body class="body"
       style="background-color: #f8f8f9; margin: 0; padding: 0; -webkit-text-size-adjust: none; text-size-adjust: none;">
-    <h2>Hello {{ ucfirst($name) }}</h2>
+    <h2>Hello {{ $name }}</h2>
 
-    <p>{!! nl2br(e($messageBody)) !!}</p>
+    <p>{{ $messageBody }}</p>
 
     <p>
-        <strong>Invitation Scope:</strong> {{ ucfirst($scope) }}
+        <strong>Invitation Scope:</strong> {{ $scope }}
     </p>
 
     @if($scope === 'organization' && !empty($organizations))
