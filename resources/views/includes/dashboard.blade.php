@@ -740,7 +740,7 @@
 														$start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
 														$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+'. $session->period .' minutes'));
 														@endphp
-														{{ dd($session->organization) }}
+														
 													@if ($session->approved == 'Yes')
 														@if($now >= $start_time )
 															@if($now <= $end_time)
@@ -753,7 +753,7 @@
 																</span>
 																@else
 																<span class="warning">
-																	<a class="btn btn-sm btn-label-success" href="{{ $session->organization->google_map_url }}" target="_blank">
+																	<a class="btn btn-sm btn-label-success" href="{{ $session->organization->google_map_url ?? '#' }}" target="_blank">
 																		<i class="ti ti-map me-2"></i>
 																		{{ __('admin.Location') }}
 																	</a>
