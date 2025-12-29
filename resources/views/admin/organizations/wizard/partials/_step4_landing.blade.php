@@ -797,3 +797,514 @@
     border-radius: 0.5rem;
   }
 </style>
+
+@push('scripts')
+<script>
+$(document).on('change', '#landingEnabledToggle', function() {
+  const statusText = $('#landingStatusText');
+  if ($(this).is(':checked')) {
+    statusText.html('<span class="text-success"><i class="ti ti-check me-1"></i>{{ __("admin.Landing page is published") }}</span>');
+  } else {
+    statusText.html('<span class="text-warning"><i class="ti ti-eye-off me-1"></i>{{ __("admin.Landing page is unpublished") }}</span>');
+  }
+});
+
+// Section toggles
+$(document).on('change', '.section-toggle', function() {
+  const section = $(this).data('section');
+  const content = $('#' + section + 'Content');
+  if ($(this).is(':checked')) {
+    content.slideDown(200);
+  } else {
+    content.slideUp(200);
+  }
+});
+
+// Background type toggle (solid/gradient)
+$(document).on('change', '.bg-type-select', function() {
+  const section = $(this).data('section');
+  const type = $(this).val();
+
+  if (type === 'gradient') {
+    $('#' + section + '_solid').addClass('d-none');
+    $('#' + section + '_gradient').removeClass('d-none');
+  } else {
+    $('#' + section + '_solid').removeClass('d-none');
+    $('#' + section + '_gradient').addClass('d-none');
+  }
+
+  updateBgPreview(section);
+});
+
+// Color picker change - update text input and preview
+$(document).on('input', '.bg-color-picker', function() {
+  const section = $(this).data('section');
+  const type = $(this).data('type');
+  const color = $(this).val();
+
+  // Update corresponding text input
+  $(this).closest('.input-group').find('.bg-color-text').val(color);
+
+  updateBgPreview(section);
+});
+
+// Text input change - update color picker and preview
+$(document).on('input', '.bg-color-text', function() {
+  const section = $(this).data('section');
+  const type = $(this).data('type');
+  let color = $(this).val();
+
+  // Validate hex color format
+  if (/^#[0-9A-Fa-f]{6}$/.test(color)) {
+    // Update corresponding color picker
+    $(this).closest('.input-group').find('.bg-color-picker').val(color);
+    updateBgPreview(section);
+  }
+});
+
+function updateBgPreview(section) {
+  const bgType = $('select[name="' + section + '_bg_type"]').val();
+  const preview = $('#' + section + '_preview');
+
+  if (bgType === 'gradient') {
+    const startColor = $('input[name="' + section + '_bg_gradient_start"]').val() || '#667eea';
+    const endColor = $('input[name="' + section + '_bg_gradient_end"]').val() || '#764ba2';
+    preview.css('background', 'linear-gradient(135deg, ' + startColor + ' 0%, ' + endColor + ' 100%)');
+  } else {
+    const solidColor = $('input[name="' + section + '_bg_color"]').val() || '#ffffff';
+    preview.css('background', solidColor);
+  }
+}
+
+// Theme selection handler
+$(document).on('click', '.theme-option', function() {
+  const $this = $(this);
+  const $radio = $this.find('input[type="radio"]');
+
+  // Update selection
+  $radio.prop('checked', true);
+
+  // Update visual states
+  $('.theme-option').removeClass('border-primary border-2').addClass('border');
+  $('.theme-option .card-footer').removeClass('bg-primary bg-opacity-10');
+  $('.theme-option .card-footer').html('<span class="text-muted">{{ __("admin.Click to select") }}</span>');
+
+  $this.removeClass('border').addClass('border-primary border-2');
+  $this.find('.card-footer').addClass('bg-primary bg-opacity-10');
+  $this.find('.card-footer').html('<i class="ti ti-check text-primary me-1"></i><span class="text-primary fw-semibold">{{ __("admin.Selected") }}</span>');
+});
+
+// Check slug availability
+$(document).on('click', '#checkSlugBtn', function() {
+  const btn = $(this);
+  const slugInput = $('#slug');
+  const slug = slugInput.val().trim();
+  const feedbackDiv = $('#slugAvailabilityFeedback');
+  const orgId = '{{ $organization->id ?? "" }}';
+
+  if (!slug) {
+    feedbackDiv.html('<small class="text-danger"><i class="ti ti-alert-circle me-1"></i>{{ __("admin.Please enter a URL slug") }}</small>');
+    feedbackDiv.show();
+    return;
+  }
+
+  // Validate format
+  const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+  if (!slugRegex.test(slug)) {
+    feedbackDiv.html('<small class="text-danger"><i class="ti ti-alert-circle me-1"></i>{{ __("admin.URL must contain only lowercase letters, numbers, and hyphens") }}</small>');
+    feedbackDiv.show();
+    return;
+  }
+
+  btn.prop('disabled', true);
+  btn.html('<span class="spinner-border spinner-border-sm me-1"></span>{{ __("admin.Checking") }}...');
+  feedbackDiv.hide();
+
+  $.ajax({
+    url: "{{ $isEdit ? route('organization.wizard.check.slug', $organization->id ?? 0) : route('organization.wizard.check.slug') }}",
+    type: 'POST',
+    headers: {
+      'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    },
+    data: {
+      slug: slug
+    },
+    success: function(response) {
+      if (response.available) {
+        feedbackDiv.html('<small class="text-success"><i class="ti ti-check me-1"></i>' + response.message + '</small>');
+      } else {
+        feedbackDiv.html('<small class="text-danger"><i class="ti ti-alert-circle me-1"></i>' + response.message + '</small>');
+      }
+      feedbackDiv.show();
+    },
+    error: function(xhr) {
+      feedbackDiv.html('<small class="text-danger"><i class="ti ti-alert-circle me-1"></i>{{ __("admin.Error checking availability") }}</small>');
+      feedbackDiv.show();
+    },
+    complete: function() {
+      btn.prop('disabled', false);
+      btn.html('<i class="ti ti-check me-1"></i>{{ __("admin.Check Availability") }}');
+    }
+  });
+});
+
+// Generate slug from organization name
+$(document).on('click', '#generateSlugBtn', function() {
+  const btn = $(this);
+  const orgId = '{{ $organization->id ?? "" }}';
+
+  if (!orgId) {
+    toastr.error("{{ __('admin.Please complete the previous steps first') }}");
+    return;
+  }
+
+  btn.prop('disabled', true);
+  btn.html('<span class="spinner-border spinner-border-sm me-1"></span>{{ __("admin.Processing") }}...');
+
+  $.ajax({
+    url: "{{ $isEdit ? route('organization.wizard.generate.slug', $organization->id ?? 0) : '#' }}",
+    type: 'POST',
+    headers: {
+      'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    },
+    success: function(response) {
+      if (response.status) {
+        $('#slug').val(response.slug);
+        toastr.success("{{ __('admin.Slug generated successfully') }}");
+      } else {
+        toastr.error(response.message || "{{ __('admin.Error generating slug') }}");
+      }
+    },
+    error: function(xhr) {
+      toastr.error("{{ __('admin.Error generating slug') }}");
+    },
+    complete: function() {
+      btn.prop('disabled', false);
+      btn.html('<i class="ti ti-refresh me-1"></i>{{ __("admin.Generate from name") }}');
+    }
+  });
+});
+
+// Add repeater item
+$(document).on('click', '.add-item-btn', function() {
+  const type = $(this).data('type');
+  const max = $(this).data('max');
+  const container = getContainerByType(type);
+  const currentCount = container.find('.repeater-item').length;
+
+  if (currentCount >= max) {
+    toastr.warning(getMaxMessage(type));
+    return;
+  }
+
+  // Hide empty state
+  container.find('.empty-state').hide();
+
+  const newIndex = currentCount;
+  const template = getTemplate(type, newIndex);
+
+  if (type === 'partner') {
+    container.append(template);
+  } else {
+    container.append(template);
+  }
+
+  // Update step numbers if applicable
+  updateStepNumbers(container);
+});
+
+// Remove repeater item
+$(document).on('click', '.remove-item-btn', function() {
+  const item = $(this).closest('.repeater-item');
+  const container = item.parent();
+
+  item.fadeOut(200, function() {
+    $(this).remove();
+    updateStepNumbers(container);
+
+    // Show empty state if no items
+    if (container.find('.repeater-item').length === 0) {
+      container.find('.empty-state').show();
+    }
+
+    // Reindex remaining items
+    reindexItems(container);
+  });
+});
+
+function getContainerByType(type) {
+  switch(type) {
+    case 'step': return $('#processStepsContainer');
+    case 'metric': return $('#metricsContainer');
+    case 'article': return $('#articlesContainer');
+    case 'partner': return $('#partnersContainer');
+  }
+}
+
+function getMaxMessage(type) {
+  switch(type) {
+    case 'step': return "{{ __('admin.Maximum 4 steps allowed') }}";
+    case 'metric': return "{{ __('admin.Maximum 8 metrics allowed') }}";
+    case 'article': return "{{ __('admin.Maximum 8 articles allowed') }}";
+    case 'partner': return "{{ __('admin.Maximum 20 partners allowed') }}";
+  }
+}
+
+function getTemplate(type, index) {
+  switch(type) {
+    case 'step':
+      return `
+        <div class="repeater-item card mb-2 border" data-index="${index}">
+          <div class="card-body py-3">
+            <div class="row align-items-center">
+              <div class="col-md-1 text-center">
+                <span class="badge bg-primary rounded-circle step-number" style="width: 32px; height: 32px; line-height: 24px;">${index + 1}</span>
+              </div>
+              <div class="col-md-3">
+                <input type="text" class="form-control form-control-sm" name="process_steps[${index}][title]" placeholder="{{ __('admin.Step Title') }}" maxlength="255">
+              </div>
+              <div class="col-md-4">
+                <input type="text" class="form-control form-control-sm" name="process_steps[${index}][description]" placeholder="{{ __('admin.Step Description') }}" maxlength="1000">
+              </div>
+              <div class="col-md-3">
+                <select class="form-select form-select-sm icon-select" name="process_steps[${index}][icon]">
+                  <option value="">{{ __('admin.Select icon') }}</option>
+                  <option value="ti-file-text">File Text</option>
+                  <option value="ti-clipboard-check">Clipboard Check</option>
+                  <option value="ti-users">Users</option>
+                  <option value="ti-rocket">Rocket</option>
+                  <option value="ti-chart-bar">Chart Bar</option>
+                  <option value="ti-trophy">Trophy</option>
+                  <option value="ti-bulb">Bulb</option>
+                  <option value="ti-target">Target</option>
+                  <option value="ti-check">Check</option>
+                  <option value="ti-star">Star</option>
+                  <option value="ti-heart">Heart</option>
+                  <option value="ti-mail">Mail</option>
+                  <option value="ti-send">Send</option>
+                  <option value="ti-calendar">Calendar</option>
+                  <option value="ti-clock">Clock</option>
+                  <option value="ti-settings">Settings</option>
+                  <option value="ti-search">Search</option>
+                  <option value="ti-home">Home</option>
+                  <option value="ti-briefcase">Briefcase</option>
+                  <option value="ti-world">World</option>
+                  <option value="ti-message">Message</option>
+                  <option value="ti-phone">Phone</option>
+                  <option value="ti-lock">Lock</option>
+                  <option value="ti-shield-check">Shield Check</option>
+                  <option value="ti-gift">Gift</option>
+                  <option value="ti-thumb-up">Thumb Up</option>
+                  <option value="ti-lightbulb">Lightbulb</option>
+                  <option value="ti-bolt">Bolt</option>
+                  <option value="ti-flag">Flag</option>
+                  <option value="ti-award">Award</option>
+                </select>
+              </div>
+              <div class="col-md-1 text-end">
+                <button type="button" class="btn btn-sm btn-icon btn-label-danger remove-item-btn">
+                  <i class="ti ti-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+
+    case 'metric':
+      return `
+        <div class="repeater-item card mb-2 border" data-index="${index}">
+          <div class="card-body py-3">
+            <div class="row align-items-center">
+              <div class="col-md-3">
+                <input type="text" class="form-control form-control-sm" name="metrics[${index}][number]" placeholder="{{ __('admin.Metric Number') }}" maxlength="20">
+              </div>
+              <div class="col-md-5">
+                <input type="text" class="form-control form-control-sm" name="metrics[${index}][label]" placeholder="{{ __('admin.Metric Label') }}" maxlength="255">
+              </div>
+              <div class="col-md-3">
+                <select class="form-select form-select-sm icon-select" name="metrics[${index}][icon]">
+                  <option value="">{{ __('admin.Select icon') }}</option>
+                  <option value="ti-users">Users</option>
+                  <option value="ti-building">Building</option>
+                  <option value="ti-currency-dollar">Currency Dollar</option>
+                  <option value="ti-rocket">Rocket</option>
+                  <option value="ti-chart-line">Chart Line</option>
+                  <option value="ti-briefcase">Briefcase</option>
+                  <option value="ti-world">World</option>
+                  <option value="ti-star">Star</option>
+                  <option value="ti-trophy">Trophy</option>
+                  <option value="ti-chart-bar">Chart Bar</option>
+                  <option value="ti-chart-pie">Chart Pie</option>
+                  <option value="ti-trending-up">Trending Up</option>
+                  <option value="ti-target">Target</option>
+                  <option value="ti-award">Award</option>
+                  <option value="ti-flag">Flag</option>
+                  <option value="ti-calendar">Calendar</option>
+                  <option value="ti-clock">Clock</option>
+                  <option value="ti-heart">Heart</option>
+                  <option value="ti-thumb-up">Thumb Up</option>
+                  <option value="ti-check">Check</option>
+                  <option value="ti-bolt">Bolt</option>
+                  <option value="ti-gift">Gift</option>
+                  <option value="ti-home">Home</option>
+                  <option value="ti-map-pin">Map Pin</option>
+                  <option value="ti-globe">Globe</option>
+                  <option value="ti-sparkles">Sparkles</option>
+                  <option value="ti-flame">Flame</option>
+                  <option value="ti-diamond">Diamond</option>
+                  <option value="ti-crown">Crown</option>
+                  <option value="ti-medal">Medal</option>
+                </select>
+              </div>
+              <div class="col-md-1 text-end">
+                <button type="button" class="btn btn-sm btn-icon btn-label-danger remove-item-btn">
+                  <i class="ti ti-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+
+    case 'article':
+      return `
+        <div class="repeater-item card mb-3 border" data-index="${index}">
+          <div class="card-body py-3">
+            <div class="row">
+              <div class="col-md-3 mb-2">
+                <input type="text" class="form-control form-control-sm" name="articles[${index}][publication_name]" placeholder="{{ __('admin.Publication Name') }}" maxlength="255">
+              </div>
+              <div class="col-md-2 mb-2">
+                <input type="date" class="form-control form-control-sm" name="articles[${index}][date]">
+              </div>
+              <div class="col-md-3 mb-2">
+                <input type="text" class="form-control form-control-sm" name="articles[${index}][title]" placeholder="{{ __('admin.Article Title') }}" maxlength="255">
+              </div>
+              <div class="col-md-3 mb-2">
+                <input type="url" class="form-control form-control-sm" name="articles[${index}][link]" placeholder="{{ __('admin.Article Link') }}" maxlength="500">
+              </div>
+              <div class="col-md-1 text-end mb-2">
+                <button type="button" class="btn btn-sm btn-icon btn-label-danger remove-item-btn">
+                  <i class="ti ti-trash"></i>
+                </button>
+              </div>
+              <div class="col-md-8 mb-2">
+                <textarea class="form-control form-control-sm" name="articles[${index}][summary]" rows="2" placeholder="{{ __('admin.Article Summary') }}" maxlength="1000"></textarea>
+              </div>
+              <div class="col-md-4 mb-2">
+                <label class="form-label small">{{ __('admin.Article Image') }}</label>
+                <input type="file" class="form-control form-control-sm" name="articles[${index}][image]" accept="image/png,image/jpeg,image/jpg">
+                <small class="text-muted">PNG, JPG ({{ __('admin.Max size') }}: 5MB)</small>
+              </div>
+            </div>
+          </div>
+        </div>`;
+
+    case 'partner':
+      return `
+        <div class="repeater-item col-md-4 col-lg-3 mb-3" data-index="${index}">
+          <div class="card border h-100">
+            <div class="card-body py-3 text-center">
+              <button type="button" class="btn btn-sm btn-icon btn-label-danger position-absolute top-0 end-0 m-2 remove-item-btn">
+                <i class="ti ti-x"></i>
+              </button>
+              <div class="mb-2 bg-light rounded d-flex align-items-center justify-content-center" style="height: 60px;">
+                <i class="ti ti-building text-muted fs-3"></i>
+              </div>
+              <input type="text" class="form-control form-control-sm mb-2" name="partners_list[${index}][name]" placeholder="{{ __('admin.Partner Name') }}" maxlength="255">
+              <input type="file" class="form-control form-control-sm" name="partners_list[${index}][logo]" accept="image/png,image/jpeg,image/jpg,image/svg+xml">
+              <small class="text-muted d-block mt-1">PNG, JPG, SVG (2MB)</small>
+            </div>
+          </div>
+        </div>`;
+  }
+}
+
+function updateStepNumbers(container) {
+  container.find('.step-number').each(function(index) {
+    $(this).text(index + 1);
+  });
+}
+
+function reindexItems(container) {
+  container.find('.repeater-item').each(function(index) {
+    $(this).attr('data-index', index);
+    $(this).find('input, select, textarea').each(function() {
+      const name = $(this).attr('name');
+      if (name) {
+        const newName = name.replace(/\[\d+\]/, '[' + index + ']');
+        $(this).attr('name', newName);
+      }
+    });
+  });
+}
+
+// Helper function to submit Step 4 form
+function submitStep4Form(redirectTo) {
+  const step4Form = $('#step4Form');
+
+  // Clear previous inputs except token, method, and redirect_to
+  step4Form.find('input:not([name="_token"]):not([name="_method"]):not([name="redirect_to"]), select, textarea').remove();
+
+  // Set redirect_to value
+  $('#redirect_to_step4').val(redirectTo);
+
+  // Copy all inputs from Step 4 tab, preserving select values
+  $('#pills-landing_page').find('input, select, textarea').each(function() {
+    const $this = $(this);
+    const clone = $this.clone();
+
+    // For select elements, manually set the selected value
+    if ($this.is('select')) {
+      clone.val($this.val());
+    }
+
+    step4Form.append(clone);
+  });
+
+  step4Form.submit();
+}
+
+// Save Changes for Step 4 - validates and stays on same page
+$(document).on('click', '.save-changes-step4-btn', function(e) {
+  e.preventDefault();
+  submitStep4Form('same');
+});
+
+// Save & Continue for Step 4 - validates and goes to next step
+$(document).on('click', '.save-continue-step4-btn', function(e) {
+  e.preventDefault();
+  submitStep4Form('next');
+});
+
+// Save as Draft for Step 4 - NO validation, stays on same page
+$(document).on('click', '.save-draft-step4-btn', function(e) {
+  e.preventDefault();
+
+  // Copy step 4 form data to draft form
+  $('#draft_current_step').val(4);
+  copyStep4DataToDraft();
+  $('#draftForm').submit();
+});
+
+// Helper function to copy Step 4 data to draft form
+function copyStep4DataToDraft() {
+  const draftForm = $('#draftForm');
+
+  // Remove previous dynamic inputs from draft form (keep token, method, current_step)
+  draftForm.find('input:not([name="_token"]):not([name="_method"]):not([name="current_step"]), select, textarea').remove();
+
+  // Copy all inputs from Step 4 tab
+  $('#pills-landing_page').find('input, select, textarea').each(function() {
+    const $this = $(this);
+    const clone = $this.clone();
+
+    // For select elements, manually set the selected value
+    if ($this.is('select')) {
+      clone.val($this.val());
+    }
+
+    draftForm.append(clone);
+  });
+}
+</script>
+@endpush

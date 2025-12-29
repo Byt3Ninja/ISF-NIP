@@ -301,3 +301,627 @@
     opacity: 0.7;
   }
 </style>
+
+@push('scripts')
+<script>
+@if($isEdit)
+
+// Selected managers state
+let selectedManagers = @json($assignedManagers ?? []);
+
+// Initialize selected managers on load
+function initializeSelectedManagers() {
+  updateSelectedManagersUI();
+  updateManagerIdsInputs();
+  updatePublishButtonVisibility();
+}
+
+// Update the selected managers UI (tags bar)
+function updateSelectedManagersUI() {
+  const container = $('#selectedManagersContainer');
+  const noManagersMsg = container.find('.no-managers-message');
+  const clearAllBtn = $('.clear-all-managers-btn');
+
+  // Remove existing tags (keep the no-managers message)
+  container.find('.manager-tag').remove();
+
+  if (selectedManagers.length === 0) {
+    noManagersMsg.show();
+    clearAllBtn.hide();
+  } else {
+    noManagersMsg.hide();
+    clearAllBtn.show();
+
+    selectedManagers.forEach(function(manager) {
+      const tag = $('<span class="manager-tag">' +
+        manager.name +
+        ' <i class="ti ti-x remove-manager" data-id="' + manager.id + '"></i>' +
+        '</span>');
+      container.append(tag);
+    });
+  }
+}
+
+// Update hidden inputs for manager IDs
+function updateManagerIdsInputs() {
+  const container = $('#managerIdsContainer');
+  container.empty();
+
+  selectedManagers.forEach(function(manager) {
+    container.append('<input type="hidden" name="manager_ids[]" value="' + manager.id + '">');
+  });
+}
+
+// Update publish button visibility
+function updatePublishButtonVisibility() {
+  const publishBtn = $('#publishBtnStep3');
+  if (selectedManagers.length > 0) {
+    publishBtn.show();
+  } else {
+    publishBtn.hide();
+  }
+}
+
+// Add manager to selection
+function addManager(manager) {
+  // Check if already selected
+  if (selectedManagers.find(m => m.id === manager.id)) {
+    return false;
+  }
+  selectedManagers.push(manager);
+  updateSelectedManagersUI();
+  updateManagerIdsInputs();
+  updatePublishButtonVisibility();
+  return true;
+}
+
+// Remove manager from selection
+function removeManager(managerId) {
+  selectedManagers = selectedManagers.filter(m => m.id !== managerId);
+  updateSelectedManagersUI();
+  updateManagerIdsInputs();
+  updatePublishButtonVisibility();
+  // Update card checkbox if visible
+  $('.manager-card').each(function() {
+    if ($(this).data('id') == managerId) {
+      $(this).find('.manager-checkbox').prop('checked', false);
+      $(this).removeClass('selected');
+    }
+  });
+}
+
+// Clear all managers
+$('.clear-all-managers-btn').on('click', function() {
+  selectedManagers = [];
+  updateSelectedManagersUI();
+  updateManagerIdsInputs();
+  updatePublishButtonVisibility();
+  // Uncheck all checkboxes in cards
+  $('.manager-card .manager-checkbox').prop('checked', false);
+  $('.manager-card').removeClass('selected');
+});
+
+// Remove manager tag click
+$(document).on('click', '.remove-manager', function() {
+  const managerId = $(this).data('id');
+  removeManager(managerId);
+});
+
+// Managers list state
+let searchTimeout = null;
+let currentPage = 0;
+let pageLength = 5;
+let managersInitialized = false;
+
+// Load managers list
+function loadManagersList(page = 0) {
+  const $list = $('#managersList');
+  const $loading = $('#managersLoading');
+  const $empty = $('#managersEmpty');
+  const $pagination = $('#managersPagination');
+
+  $list.hide();
+  $empty.hide();
+  $pagination.hide();
+  $loading.show();
+
+  $.ajax({
+    url: '{{ route("organization.wizard.managers.list", $organization->id ?? 0) }}',
+    type: 'GET',
+    data: {
+      search_term: $('#managerSearchInput').val(),
+      start: page * pageLength,
+      length: pageLength,
+      draw: 1
+    },
+    success: function(response) {
+      $loading.hide();
+
+      if (response.data && response.data.length > 0) {
+        renderManagerCards(response.data);
+        $list.show();
+
+        // Update pagination
+        const totalPages = Math.ceil(response.recordsTotal / pageLength);
+        if (totalPages > 1) {
+          renderPagination(page, totalPages, response.recordsTotal);
+          $pagination.show();
+        }
+      } else {
+        $empty.show();
+      }
+    },
+    error: function() {
+      $loading.hide();
+      $empty.show();
+    }
+  });
+}
+
+// Render manager cards
+function renderManagerCards(managers) {
+  const $list = $('#managersList');
+  $list.empty();
+
+  managers.forEach(function(manager) {
+    const isSelected = selectedManagers.find(m => m.id === manager.id);
+    const initials = getInitials(manager.name);
+    const avatarUrl = manager.avatar || null;
+
+    const card = `
+      <div class="manager-card ${isSelected ? 'selected' : ''}" data-id="${manager.id}" data-name="${escapeHtml(manager.name)}" data-email="${escapeHtml(manager.email)}">
+        <input type="checkbox" class="manager-checkbox" ${isSelected ? 'checked' : ''}>
+        <div class="manager-avatar">
+          ${avatarUrl
+            ? `<img src="${avatarUrl}" onerror="this.src='/images/placeholder.jpg'" alt="${escapeHtml(manager.name)}">`
+            : `<i class="ti ti-user"></i>`
+          }
+        </div>
+        <div class="manager-info">
+          <div class="manager-name">${escapeHtml(manager.name)}</div>
+          <div class="manager-email">${escapeHtml(manager.email)}</div>
+          <div class="manager-meta">
+            <span class="manager-meta-item">
+              <i class="ti ti-briefcase"></i>
+              ${escapeHtml(manager.role)}
+            </span>
+            <span class="manager-meta-item">
+              <i class="ti ti-building"></i>
+              ${manager.organizations_count} {{ __('admin.Organizations') }}
+            </span>
+          </div>
+        </div>
+      </div>
+    `;
+    $list.append(card);
+  });
+}
+
+// Render pagination
+function renderPagination(currentPage, totalPages, totalRecords) {
+  const $info = $('#managersInfo');
+  const $list = $('#managersPaginationList');
+
+  const start = currentPage * pageLength + 1;
+  const end = Math.min((currentPage + 1) * pageLength, totalRecords);
+  $info.text(lang === 'ar'
+    ? `عرض ${start} - ${end} من ${totalRecords}`
+    : `Showing ${start} - ${end} of ${totalRecords}`
+  );
+
+  $list.empty();
+
+  // Previous button
+  $list.append(`
+    <li class="page-item ${currentPage === 0 ? 'disabled' : ''}">
+      <a class="page-link" href="#" data-page="${currentPage - 1}">&laquo;</a>
+    </li>
+  `);
+
+  // Page numbers
+  for (let i = 0; i < totalPages; i++) {
+    if (totalPages <= 5 || i === 0 || i === totalPages - 1 || Math.abs(i - currentPage) <= 1) {
+      $list.append(`
+        <li class="page-item ${i === currentPage ? 'active' : ''}">
+          <a class="page-link" href="#" data-page="${i}">${i + 1}</a>
+        </li>
+      `);
+    } else if (Math.abs(i - currentPage) === 2) {
+      $list.append(`<li class="page-item disabled"><span class="page-link">...</span></li>`);
+    }
+  }
+
+  // Next button
+  $list.append(`
+    <li class="page-item ${currentPage >= totalPages - 1 ? 'disabled' : ''}">
+      <a class="page-link" href="#" data-page="${currentPage + 1}">&raquo;</a>
+    </li>
+  `);
+}
+
+// Get initials from name
+function getInitials(name) {
+  return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+}
+
+// Escape HTML
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Pagination click handler
+$(document).on('click', '#managersPaginationList .page-link', function(e) {
+  e.preventDefault();
+  const page = $(this).data('page');
+  if (page !== undefined && !$(this).parent().hasClass('disabled')) {
+    currentPage = page;
+    loadManagersList(page);
+  }
+});
+
+// Initialize managers list when step 3 tab is shown
+$('[data-bs-target="#pills-organization_manager"]').on('shown.bs.tab', function() {
+  if (!managersInitialized) {
+    loadManagersList(0);
+    managersInitialized = true;
+  }
+});
+
+// If we're already on step 3, initialize immediately
+if ({{ $activeStep }} === 3) {
+  setTimeout(function() {
+    loadManagersList(0);
+    managersInitialized = true;
+  }, 100);
+}
+
+// Search input handler with debounce
+$('#managerSearchInput').on('input', function() {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(function() {
+    currentPage = 0;
+    loadManagersList(0);
+  }, 300);
+});
+
+// Card click handler
+$(document).on('click', '.manager-card', function(e) {
+  if ($(e.target).is('input[type="checkbox"]')) return;
+
+  const $card = $(this);
+  const $checkbox = $card.find('.manager-checkbox');
+  $checkbox.prop('checked', !$checkbox.prop('checked'));
+
+  const managerId = $card.data('id');
+  const managerName = $card.data('name');
+  const managerEmail = $card.data('email');
+
+  if ($checkbox.is(':checked')) {
+    addManager({ id: managerId, name: managerName, email: managerEmail });
+    $card.addClass('selected');
+  } else {
+    removeManager(managerId);
+    $card.removeClass('selected');
+  }
+});
+
+// Checkbox change handler
+$(document).on('change', '.manager-card .manager-checkbox', function(e) {
+  e.stopPropagation();
+  const $card = $(this).closest('.manager-card');
+  const managerId = $card.data('id');
+  const managerName = $card.data('name');
+  const managerEmail = $card.data('email');
+
+  if ($(this).is(':checked')) {
+    addManager({ id: managerId, name: managerName, email: managerEmail });
+    $card.addClass('selected');
+  } else {
+    removeManager(managerId);
+    $card.removeClass('selected');
+  }
+});
+
+// Initialize phone input for manager creation
+let managerPhoneIti = null;
+const managerPhoneInput = document.getElementById('manager_phone');
+const managerPhoneError = document.getElementById('manager-phone-error');
+const managerCountryCodeInput = document.getElementById('manager_country_code');
+
+if (managerPhoneInput) {
+  managerPhoneIti = intlTelInput(managerPhoneInput, {
+    initialCountry: 'eg',
+    preferredCountries: ['eg', 'ae', 'sa', 'ma', 'dz', 'tn'],
+    utilsScript: 'https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js',
+    formatOnDisplay: false,
+    separateDialCode: true,
+    autoPlaceholder: 'aggressive',
+  });
+
+  managerPhoneInput.addEventListener('countrychange', function() {
+    const countryData = managerPhoneIti.getSelectedCountryData();
+    managerCountryCodeInput.value = countryData.dialCode;
+  });
+
+  setTimeout(function() {
+    if (managerPhoneIti) {
+      const countryData = managerPhoneIti.getSelectedCountryData();
+      if (countryData.dialCode) {
+        managerCountryCodeInput.value = countryData.dialCode;
+      }
+    }
+  }, 100);
+
+  managerPhoneInput.addEventListener('input', function() {
+    if (managerPhoneInput.value.trim() && !managerPhoneIti.isValidNumber()) {
+      managerPhoneError.style.display = 'block';
+      managerPhoneError.innerText = lang === 'en' ? 'Invalid phone number' : 'رقم الهاتف غير صحيح';
+    } else {
+      managerPhoneError.style.display = 'none';
+    }
+  });
+}
+
+// Toggle password visibility
+$(document).on('click', '.toggle-password-btn', function() {
+  const input = $(this).siblings('input');
+  const icon = $(this).find('i');
+
+  if (input.attr('type') === 'password') {
+    input.attr('type', 'text');
+    icon.removeClass('ti-eye').addClass('ti-eye-off');
+  } else {
+    input.attr('type', 'password');
+    icon.removeClass('ti-eye-off').addClass('ti-eye');
+  }
+});
+
+// Validate create manager form
+function validateCreateManagerForm() {
+  let isValid = true;
+  const form = $('#createManagerForm');
+
+  // Clear previous errors
+  form.find('.form-control, .form-select').removeClass('is-invalid');
+  form.find('.invalid-feedback').text('');
+
+  // First Name (EN)
+  const firstNameEn = $('#manager_first_name_en');
+  if (!firstNameEn.val().trim()) {
+    firstNameEn.addClass('is-invalid');
+    firstNameEn.siblings('.invalid-feedback').text('{{ __("admin.Please enter the first name") }}');
+    isValid = false;
+  }
+
+  // Last Name (EN)
+  const lastNameEn = $('#manager_last_name_en');
+  if (!lastNameEn.val().trim()) {
+    lastNameEn.addClass('is-invalid');
+    lastNameEn.siblings('.invalid-feedback').text('{{ __("admin.Please enter the last name") }}');
+    isValid = false;
+  }
+
+  // Gender
+  const gender = $('#manager_gender');
+  if (!gender.val()) {
+    gender.addClass('is-invalid');
+    gender.siblings('.invalid-feedback').text('{{ __("admin.Please select the gender") }}');
+    isValid = false;
+  }
+
+  // Email
+  const email = $('#manager_email');
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email.val().trim()) {
+    email.addClass('is-invalid');
+    email.closest('.input-group').find('.invalid-feedback').text('{{ __("admin.Please enter the email address") }}');
+    isValid = false;
+  } else if (!emailRegex.test(email.val().trim())) {
+    email.addClass('is-invalid');
+    email.closest('.input-group').find('.invalid-feedback').text('{{ __("admin.Please enter a valid email address") }}');
+    isValid = false;
+  }
+
+  // Phone
+  const phone = $('#manager_phone');
+  if (!phone.val().trim()) {
+    phone.addClass('is-invalid');
+    phone.siblings('.invalid-feedback').text('{{ __("admin.Please enter the phone number") }}');
+    isValid = false;
+  } else if (managerPhoneIti && !managerPhoneIti.isValidNumber()) {
+    phone.addClass('is-invalid');
+    phone.siblings('.invalid-feedback').text(lang === 'en' ? 'Invalid phone number' : 'رقم الهاتف غير صحيح');
+    isValid = false;
+  }
+
+  // Password
+  const password = $('#manager_password');
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).{8,}$/;
+  if (!password.val()) {
+    password.addClass('is-invalid');
+    password.closest('.input-group').find('.invalid-feedback').text('{{ __("admin.Please enter the password") }}');
+    isValid = false;
+  } else if (!passwordRegex.test(password.val())) {
+    password.addClass('is-invalid');
+    password.closest('.input-group').find('.invalid-feedback').text('{{ __("admin.Password must include uppercase, lowercase, number and special character") }}');
+    isValid = false;
+  }
+
+  // Confirm Password
+  const confirmPassword = $('#manager_password_confirmation');
+  if (!confirmPassword.val()) {
+    confirmPassword.addClass('is-invalid');
+    confirmPassword.closest('.input-group').find('.invalid-feedback').text('{{ __("admin.Please confirm the password") }}');
+    isValid = false;
+  } else if (confirmPassword.val() !== password.val()) {
+    confirmPassword.addClass('is-invalid');
+    confirmPassword.closest('.input-group').find('.invalid-feedback').text('{{ __("admin.Passwords do not match") }}');
+    isValid = false;
+  }
+
+  return isValid;
+}
+
+// Create manager button handler
+$('#createManagerBtn').on('click', function() {
+  if (!validateCreateManagerForm()) {
+    return;
+  }
+
+  const btn = $(this);
+  btn.prop('disabled', true).html('<i class="ti ti-loader ti-spin me-2"></i>{{ __("admin.Creating...") }}');
+
+  $.ajax({
+    url: '{{ route("organization.wizard.managers.create", $organization->id ?? 0) }}',
+    type: 'POST',
+    data: {
+      _token: '{{ csrf_token() }}',
+      first_name_en: $('#manager_first_name_en').val(),
+      last_name_en: $('#manager_last_name_en').val(),
+      first_name_ar: $('#manager_first_name_ar').val(),
+      last_name_ar: $('#manager_last_name_ar').val(),
+      gender: $('#manager_gender').val(),
+      email: $('#manager_email').val(),
+      country_code: $('#manager_country_code').val(),
+      phone: $('#manager_phone').val(),
+      password: $('#manager_password').val(),
+      password_confirmation: $('#manager_password_confirmation').val()
+    },
+    success: function(response) {
+      if (response.success) {
+        // Add the new manager to selection
+        addManager(response.manager);
+
+        // Clear form
+        $('#createManagerForm input').val('');
+        $('#createManagerForm select').val('');
+
+        // Reset phone input
+        if (managerPhoneIti) {
+          managerPhoneIti.setCountry('eg');
+        }
+
+        // Show success message
+        if (typeof toastr !== 'undefined') {
+          toastr.success(response.message);
+        }
+
+        // Reload managers list to show new manager
+        loadManagersList(0);
+
+        // Switch to existing managers tab
+        $('#existing-manager-tab').tab('show');
+      }
+    },
+    error: function(xhr) {
+      let errorMessage = '{{ __("admin.Error creating manager") }}';
+      if (xhr.responseJSON) {
+        if (xhr.responseJSON.message) {
+          errorMessage = xhr.responseJSON.message;
+        }
+        if (xhr.responseJSON.errors) {
+          // Show validation errors
+          Object.keys(xhr.responseJSON.errors).forEach(function(key) {
+            const fieldName = 'manager_' + key;
+            const field = $('#' + fieldName);
+            if (field.length) {
+              field.addClass('is-invalid');
+              const feedback = field.siblings('.invalid-feedback').length ?
+                field.siblings('.invalid-feedback') :
+                field.closest('.input-group').find('.invalid-feedback');
+              feedback.text(xhr.responseJSON.errors[key][0]);
+            }
+          });
+        }
+      }
+      if (typeof toastr !== 'undefined') {
+        toastr.error(errorMessage);
+      }
+    },
+    complete: function() {
+      btn.prop('disabled', false).html('<i class="ti ti-user-plus me-2"></i>{{ __("admin.Create Manager") }}');
+    }
+  });
+});
+
+// Helper function to submit Step 3 form
+function submitStep3Form(redirectTo) {
+  // Submit step 3 form
+  const step3Form = $('#step3Form');
+
+  // Clear previous inputs (except token, method, redirect_to)
+  step3Form.find('input:not([name="_token"]):not([name="_method"]):not([name="redirect_to"])').remove();
+
+  // Set redirect_to value
+  $('#redirect_to_step3').val(redirectTo);
+
+  // Add manager IDs
+  selectedManagers.forEach(function(manager) {
+    step3Form.append('<input type="hidden" name="manager_ids[]" value="' + manager.id + '">');
+  });
+
+  step3Form.submit();
+}
+
+// Save Changes for Step 3 - validates and stays on same page
+$(document).on('click', '.save-changes-step3-btn', function(e) {
+  e.preventDefault();
+
+  // Validate at least one manager selected
+  if (selectedManagers.length === 0) {
+    if (typeof toastr !== 'undefined') {
+      toastr.error('{{ __("admin.Please select or create at least one organization manager") }}');
+    }
+    return;
+  }
+
+  submitStep3Form('same');
+});
+
+// Save & Continue for Step 3 - validates and goes to next step
+$(document).on('click', '.save-continue-step3-btn', function(e) {
+  e.preventDefault();
+
+  // Validate at least one manager selected
+  if (selectedManagers.length === 0) {
+    if (typeof toastr !== 'undefined') {
+      toastr.error('{{ __("admin.Please select or create at least one organization manager") }}');
+    }
+    return;
+  }
+
+  submitStep3Form('next');
+});
+
+// Save as Draft for Step 3 - NO validation, stays on same page
+$(document).on('click', '.save-draft-step3-btn', function(e) {
+  e.preventDefault();
+
+  // Copy step 3 form data to draft form
+  $('#draft_current_step').val(3);
+  copyStep3DataToDraft();
+  $('#draftForm').submit();
+});
+
+// Helper function to copy Step 3 data to draft form
+function copyStep3DataToDraft() {
+  const draftForm = $('#draftForm');
+
+  // Remove previous dynamic inputs from draft form (keep token, method, current_step)
+  draftForm.find('input:not([name="_token"]):not([name="_method"]):not([name="current_step"])').remove();
+
+  // Copy manager IDs
+  selectedManagers.forEach(function(manager) {
+    draftForm.append('<input type="hidden" name="manager_ids[]" value="' + manager.id + '">');
+  });
+}
+
+// Initialize on load
+initializeSelectedManagers();
+
+@endif
+</script>
+@endpush
+

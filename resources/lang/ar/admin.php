@@ -2757,6 +2757,7 @@ return [
 	'Select Industries' => 'اختر الصناعات',
 	'Select the industries this organization focuses on' => 'اختر الصناعات التي تركز عليها هذه المؤسسة',
 	'Organization Logo' => 'شعار المؤسسة',
+	'upload_logo' => 'رفع الشعار',
 	'No logo uploaded' => 'لم يتم رفع شعار',
 	'Accepted formats' => 'الصيغ المقبولة',
 	'Max size' => 'الحجم الأقصى',
