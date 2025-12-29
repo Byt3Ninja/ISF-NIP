@@ -864,8 +864,7 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin",
-                    "mentor"
+                    "admin"
                 ]
             },
             {
@@ -5676,7 +5675,6 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "mentor",
                     "registered",
                     "organizationmanager",
                     "subadmin"
@@ -5802,7 +5800,6 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "mentor",
                     "organizationmanager",
                     "subadmin"
                 ]
@@ -5814,7 +5811,6 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "mentor",
                     "organizationmanager",
                     "subadmin"
                 ]
