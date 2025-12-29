@@ -33,6 +33,16 @@
         'subItems' => []
     ],
 
+    // Settings
+    [
+        'label' => __('admin.settings'),
+        'icon' => 'ti ti-settings me-3 ti-md',
+        'route' => 'user.profile_Edit',
+        'permission' => 'user.profile_Edit',
+        'isVisible' => true,
+        'subItems' => []
+    ],
+
     // My Company (for users without company)
     [
         'label' => $l == 'en' ? 'Create Company' : 'إنشاء شركة',
