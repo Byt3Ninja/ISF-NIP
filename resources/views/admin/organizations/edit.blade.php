@@ -74,12 +74,12 @@
 												<div class="col-12 mb-6">
 													<label for="file1" class="d-flex justify-content-center align-items-center position-relative rounded"
 														style="height: 140px; cursor: pointer; width: 200px; margin: 0 auto;">
-														<img 
-															src="/{{ $organization->image_url ?? '/images/logo-placeholder.png' }}"
+														<img
+															src="{{ $organization->imageUrl }}"
 															onerror="this.src='/images/logo-placeholder.png'"
-															alt="Organization Logo" 
+															alt="Organization Logo"
 															class="rounded img-fluid border shadow-sm"
-															style="height: 140px; width: 200px; object-fit: cover;" 
+															style="height: 140px; width: 200px; object-fit: cover;"
 														/>
 														<input type="file" class="form-control d-none" id="file1" name="img_url">
 														<i class="ti ti-camera-plus position-absolute fs-3 text-dark end-0 bottom-0 m-4 z-1"></i>

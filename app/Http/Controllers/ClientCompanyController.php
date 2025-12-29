@@ -23,6 +23,7 @@ use App\Settings;
 use App\Training;
 use App\Milestone;
 use App\Screening;
+use Carbon\Carbon;
 use App\Technology;
 use App\Team_member;
 use App\FundingRound;
@@ -37,9 +38,10 @@ use App\TrainingSession;
 use App\ServicesRequests;
 use App\Events\WebMessage;
 use App\MentorshipRequest;
+use App\FinancialProjection;
 use App\ScreeningEvaluation;
-use App\StartupCustomerGrowth;
 use Illuminate\Http\Request;
+use App\StartupCustomerGrowth;
 use Illuminate\Validation\Rule;
 use App\Services\CompanyService;
 use App\ScreeningEvaluationResults;
@@ -50,6 +52,7 @@ use Illuminate\Support\Facades\Validator;
 use \Illuminate\Validation\ValidationException;
 use Intervention\Image\ImageManagerStatic as Image;
 use App\Http\Requests\StoreUpdateClientCompanyRequest;
+use Google\Service\PolyService\Format;
 use URL, File, DB, Exception, Session, Storage, stdClass;
 
 class ClientCompanyController extends Controller
@@ -67,65 +70,39 @@ class ClientCompanyController extends Controller
     }
     public function show($id)
     {
+        // dd($this->companyService->getCompanyRelation($id));
         // try {
         $user = auth()->user();
         $user_id = $user->id;
-        $company = Company::with('state')->with(['city', 'user', 'stage'])->find($id);
-        if (empty($company)) {
-            return abort(404);
-        }
-
+        $company = $this->companyService->getCompanyRelation($id);
         if (!empty($company->Sustainable_development)) {
             $sustainableDevelopment = json_decode($company->Sustainable_development, true);
-
             $icons = SustainableIcon::whereIn('title', $sustainableDevelopment)->get();
         } else {
             $icons = '';
         }
-        // استرجاع الأيقونات المناسبة
-        // $icons = SustainableIcon::where('title', $sustainableDevelopment)->get();
-
-        $fonders = Team_Member::where('TeamMember', 'Founder')
-            ->where('Company_id', $id)
-            ->get();
-        $Shareholders = Team_Member::where('TeamMember', 'Shareholder')
-            ->where('Company_id', $id)->get();
-        $Investors = Team_Member::where('TeamMember', 'Investor')
-            ->where('Company_id', $id)->get();
-
+        $team = $this->companyService->getTeamMember($id);
+        $fonders = $team->where('TeamMember', 'founders');
+        $Shareholders = $team->where('TeamMember', 'shareholders');
+        $Investors = $team->where('TeamMember', 'investors');
 
         // Load all milestones for this company (new unified structure)
-        $milestones = Milestone::where('Company_id', $id)->orderBy('created_at')->get();
+        // dd($this->companyService->findMilestone($id));
+        $milestones = $this->companyService->getAllMilestones($id);
 
         // For backward compatibility, create empty collections for old template variables
         $Achieved_Milestones = collect();
         $Planned_Milestones = collect();
         $Currencies = Currency::where('enabled', 1)->get(); // جلب جميع الأعضاء
 
+        $company_relation_get = $this->companyService->findCompanyRelation($id);
         // Startup Technologies
-        $technologies = CompanyRelation::where('company_id', $id)
-            ->whereNotNull('technology_id')
-            ->with('technology')
-            ->get()
-            ->pluck('technology')
-            ->filter();
-
+        // dd($company_relation_get);
+        $technologies = $company_relation_get['technologies'];
         // Startup Sectors
-        $sectors = CompanyRelation::where('company_id', $id)
-            ->whereNotNull('sector_id')
-            ->with('sector')
-            ->get()
-            ->pluck('sector')
-            ->filter();
-
+        $sectors = $company_relation_get['sectors'];
         // Startup Industry
-        $industry = CompanyRelation::where('company_id', $id)
-            ->whereNotNull('industry_id')
-            ->with('industry')
-            ->get()
-            ->pluck('industry')
-            ->filter()
-            ->first(); // Usually one industry per company
+        $industry = $company_relation_get['industry'];
 
         // مسار الملف
         $pathToFile = storage_path($company->pitch_deck);
@@ -210,7 +187,241 @@ class ClientCompanyController extends Controller
             $compoundAnnualGrowthRate = ( $total > 0 && $years_count > 0 ) ? ( pow(($last->total / $total), (1 / $years_count)) - 1 ) : 0;
             $compoundAnnualGrowthRate = round($compoundAnnualGrowthRate * 100, 1) . '%';
         }
-        return view('admin/clients/startup/company_profile', compact('company', 'formTitle', 'formData', 'evaluationForm', 'Currencies', 'milestones', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile', 'technologies', 'sectors', 'industry', 'years', 'growth_records', 'growthSinceFirstRecord', 'avgMonthlyGrowth', 'compoundAnnualGrowthRate'));
+
+        $programs = collect();
+
+        $cycle = Cycle::find($company->cycle);
+        if ($cycle) {
+            $programs->push((object)[
+                'id' => $cycle->id,
+                'name' => $cycle->title,
+                'organization' => (object)[
+                    'name' => is_object($cycle->organization) ? ($cycle->organization->name ?? null) : $cycle->organization
+                ],
+                'cohort' => (object)[ 'name' => $cycle->cohort ?? null ],
+                'start_date' => Carbon::parse($cycle->start),
+                'completion_date' => Carbon::parse($cycle->end),
+                'final_screening_score' => null,
+                'status' => 'upcoming',
+            ]);
+        }
+        $almunies = Almuni::where('company_id', $company->id)->get();
+        $mentorshipToSum = collect();
+        $trainingToSum = collect();
+        $finalScreenAvg = collect();
+        foreach ($almunies as $almuni) {
+            $programsRaw = json_decode($almuni->program ?? '[]');
+            // dd($programsRaw);
+            if (!is_array($programsRaw)) continue;
+            foreach ($programsRaw as $p) {
+                if (is_array($p)) $p = (object)$p;
+                $orgObj = null;
+                if (isset($p->Organization)) {
+                    if (is_object($p->Organization)) {
+                        $orgObj = (object)[ 'name' => $p->Organization->name_en0 ?? null ];
+                    } else {
+                        $orgObj = (object)[ 'name' => $p->Organization ];
+                    }
+                    
+                } elseif (isset($p->{'Organization_Name'})) {
+                    if (is_object($p->{'Organization Name'})) {
+                        $orgObj = (object)[ 'name' => $p->{'Organization_Name'}->name ?? null ];
+                    } else {
+                        $orgObj = (object)[ 'name' => $p->{'Organization_Name'} ];
+                    }
+                } else {
+                    $orgObj = (object)[ 'name' => null ];
+                }
+                $programs->push((object)[
+                    'id' => $p->ID ?? ($programs->count() + 1),
+                    'name' => $p->{'Program_Name'} ?? $p->Program_Name ?? $p->title ?? null,
+                    'organization' => $orgObj,
+                    'cohort' => (object)[ 'name' => $p->Cohort ?? $p->{'Cohort_Name'} ?? null ],
+                    'start_date' => !empty($p->Start_Date) ? Carbon::parse($p->Start_Date) : null,
+                    'completion_date' => !empty($p->Completion_Date) ? Carbon::parse($p->Completion_Date) : null,
+                    'final_screening_score' => $p->Final_Screening_Score ?? null,
+                    'status' => $p->Status ?? 'completed',
+                ]);
+            }
+            
+            if (!empty($almuni->mentorship)) {
+                $mentorshipToSum = collect(json_decode($almuni->mentorship, true));
+            }
+            if(!empty($almuni->training)){   
+                $trainingToSum = collect(json_decode($almuni->training, true));
+            }
+            if(!empty($almuni->training)){   
+                $finalScreenAvg = collect(json_decode($almuni->final_screening, true));
+            }
+        }
+        // dd($finalScreenAvg);
+        $programs = $programs->values()->all();
+        $curentCycle = $company->cycledata?->mentorshipRequests?->where('user_id', $company->user->id)->sum('period');
+        $totalMinutes = $mentorshipToSum->sum('duration') + $curentCycle;
+        $hours   = intdiv($totalMinutes, 60);
+        $minutes = $totalMinutes % 60;
+        $totalMentorshipHours = sprintf('%02d:%02d', $hours, $minutes);
+        // Training
+        $curentCycleTraining = $company->cycledata?->trainingSessions?->where('user_id', $company->user->id)->sum('duration') ?? 0;
+        $totalMinutesTraining = collect($trainingToSum)->sum('duration') ?? 0 +$curentCycleTraining;
+        $hoursTraining   = intdiv($totalMinutesTraining, 60);
+        $minutesTraining = $totalMinutesTraining % 60;
+        $totalMentorshipHoursTraining = sprintf('%02d:%02d', $hoursTraining, $minutesTraining);
+        
+
+
+        $programsSummary = [
+            'totalMentorshipHours' => $totalMentorshipHours,
+            'totalTrainingHours'   => $totalMentorshipHoursTraining,
+            'avgFinalScreening'    => 85.0,
+            'avgAttendanceRate'    => 92.5,
+        ];
+        // Financial Projection
+        $availableValuationDates = FinancialProjection::where('company_id', $company->id)
+            ->select('date_validate')
+            ->distinct()
+            ->orderBy('date_validate', 'desc')
+            ->pluck('date_validate')
+            ->toArray();
+
+        $valuationDate = request('valuation_date');
+        if (!$valuationDate || !in_array($valuationDate, $availableValuationDates)) {
+            $valuationDate = !empty($availableValuationDates) ? $availableValuationDates[0] : date('Y-m-d');
+        }
+
+        $periods = [];
+        $valuationYear = (int) date('Y', strtotime($valuationDate));
+        
+        $financials = FinancialProjection::where('company_id', $company->id)
+            ->where('date_validate', $valuationDate)
+            ->orderBy('year')
+            ->get()
+            ->keyBy('year');
+
+        $map = function ($fp) {
+            return [
+                'revenue'        => (float) ($fp->revenues ?? 0),
+                'cogs'           => (float) ($fp->cogs ?? 0),
+                'grossProfit'    => (float) ($fp->revenues ?? 0) - (float) ($fp->cogs ?? 0),
+                'salaries'       => (float) ($fp->salaries ?? 0),
+                'opex'           => (float) ($fp->other_op_expenses ?? 0),
+                'ebitda'         => (float) ($fp->ebitda ?? 0),
+                'da'             => (float) ($fp->depreciation_amortization ?? 0),
+                'ebit'           => (float) ($fp->ebit ?? 0),
+                'interest'       => (float) ($fp->interest ?? 0),
+                'taxes'          => (float) ($fp->taxes ?? 0),
+                'netProfit'      => (float) ($fp->net_profit ?? 0),
+                'fcf'            => (float) ($fp->free_cash_flow ?? 0),
+                'capex'          => (float) ($fp->capital_expenditures ?? 0),
+                'workingCapital' => (float) ($fp->working_capital ?? 0),
+                'totalDebt'      => (float) ($fp->debt_end_year ?? 0),
+                'receivables'    => (float) ($fp->receivables ?? 0),
+                'inventory'      => (float) ($fp->inventory ?? 0),
+                'payables'       => (float) ($fp->payables ?? 0),
+            ];
+        };
+
+        // We expect 4 years: Past (Year - 1), Year 1 (Year), Year 2 (Year + 1), Year 3 (Year + 2)
+        // But we should just iterate over what we have and label them relative to valuation year
+        
+        // Define the expected years based on valuation year
+        $expectedYears = [
+            $valuationYear - 1 => ['key' => 'past', 'label' => __('startup.financial.past_year')],
+            $valuationYear => ['key' => 'year1', 'label' => __('startup.financial.year_1')],
+            $valuationYear + 1 => ['key' => 'year2', 'label' => __('startup.financial.year_2')],
+            $valuationYear + 2 => ['key' => 'year3', 'label' => __('startup.financial.year_3')],
+        ];
+
+        foreach ($expectedYears as $year => $meta) {
+            $data = isset($financials[$year]) ? $map($financials[$year]) : $map(new FinancialProjection());
+            $periods[$meta['key']] = [
+                'label' => $meta['label'],
+                'sub'   => $year, // Just the year number
+                'data'  => $data,
+            ];
+        }
+
+        // Padges
+        $profile = $company;
+        $profile_page = collect([
+            $profile->name_en,
+            $profile->name_ar,
+            $profile->country_id,
+            $profile->state_id,
+            $profile->city_id,
+            $profile->business_categories,
+            $profile->address_en,
+            $profile->address_ar,
+            $profile->years_of_operations,
+            $profile->product_or_service,
+            $profile->about_problem,
+            $profile->about_market_opportunity,
+            $profile->about_competitors,
+            $profile->about_monetize,
+            $profile->about_challenges,
+            $profile->business_model,
+            $profile->business_model_description,
+        ])->every(fn ($value) => !is_null($value));
+      
+        // dd($company->user->mentorship->whereNotNull('rating')->where('done', 1));
+        $achievements = [
+            'alumni' => [
+                'locked'  => $almunies->count() > 0 ? false : true,
+                'title'   => $almunies->sortByDesc('created_at')->first()?->cycle?->title,
+                'date' => $almunies->sortByDesc('created_at')->first()?->created_at->format('d-m-Y') ?? null, // Alumni date
+            ],
+            'hackathon' => [
+                'locked'  => true,
+                'title'   => 'Global Hack Week',
+                'date' => '20-11-2022', // Winning date
+            ],
+            'profile_complete' => [
+                'locked'  => $profile_page,
+                'subtitle'=> '100% Completed',
+            ],
+            'team_builder' => [
+                'locked'  => $profile->employees != null ? false : true,
+                'count' => $profile->employees?->count() ?? 0, // Count of team members
+            ],
+            'growth_achiever' => [
+                'locked'  => $profile->milestones->count() > 0 ? false : true,
+                'count' => $profile->milestones?->count() ?? 0, // Count of milestones
+            ],
+            'mentor_connect' => [
+                'locked'  => $company->user?->mentorship?->whereNotNull('rating')->where('done', 1)->count() > 0 ? false : true,
+                'count' => $company->user?->mentorship?->whereNotNull('rating')->where('done', 1)->count() ?? 0, // Count of mentorship sessions
+            ],
+        ];
+
+            // dd($achievements);
+        return view('admin/clients/startup/company_profile', compact('company',
+        'formTitle',
+        'formData',
+        'evaluationForm', 
+        'Currencies', 
+        'milestones', 
+        'Achieved_Milestones', 
+        'Planned_Milestones', 
+        'icons', 
+        'fonders', 
+        'Shareholders', 
+        'Investors', 
+        'fileExists', 
+        'pathToFile', 
+        'technologies', 
+        'sectors', 
+        'industry', 
+        'years', 
+        'growth_records', 
+        'growthSinceFirstRecord', 
+        'avgMonthlyGrowth',
+        'compoundAnnualGrowthRate', 
+        'programs',
+        'programsSummary',
+        'periods',
+        'valuationDate',
+        'availableValuationDates',
+        'achievements'));
         // } catch (Exception $e) {
         //     //log what happend
         //     Log::channel('system_exceptions')->info('Exceptions:', [$e]);
@@ -225,35 +436,53 @@ class ClientCompanyController extends Controller
      */
     public function editOrCreate($id = null)
     {
-
+        $user = auth()->user();
         try {
-            if ($id == null) {
-                $client = User::where('HaveCompany', 1)->with('company')
-                    ->with('company.city')
-                    ->find(Auth::id());
-                if (empty($client)) {
-                    return redirect()->route('user.profile_view')->with(['msg' => 'NoHaveCompany', 'class' => 'danger']);
+            if( $id == null )
+            {
+                $client = User::where('HaveCompany', 1)->with('company')->with('company.city')->find($user->id);
+                if( empty( $client ) )
+                {
+                    if( !$user->hasRole('registered') )
+                    {
+                        return redirect()->route('user.profile_view')->with(['msg' => 'NoHaveCompany', 'class' => 'danger']);
+                    }
+                    else
+                    {
+                        $company = new company;
+                        $company->name_en = '';
+                        $company->name_ar = '';
+                        $company->address_en = '';
+                        $company->address_ar = '';
+                        $company->save();
+
+                        $user->company_id = $company->id;
+                        $user->HaveCompany = 1;
+                        $user->save();
+
+                        $client = User::where('HaveCompany', 1)->with('company')->with('company.city')->find($user->id);
+                    }
                 }
 
                 $countries = Country::all();
                 $states = State::all();
                 $Setting = Settings::where('id', 1)->first();
                 $sectors = Sector::whereNull('parent_id')->get();
-                $funding_rounds = auth()->user()->company ? auth()->user()->company->fundingRounds : [];
+                $funding_rounds = $user->company ? $user->company->fundingRounds : [];
                 $teamMembers = Team_Member::all(); // جلب جميع الأعضاء
-                if (auth()->user()->company) {
-                    $fonders = Team_Member::where('TeamMember', 'Founder')
-                        ->where('Company_id', auth()->user()->company->id)->get();
-                    $Shareholders = Team_Member::where('TeamMember', 'Shareholder')
-                        ->where('Company_id', auth()->user()->company->id)->get();
-                    $Investors = Team_Member::where('TeamMember', 'Investor')
-                        ->where('Company_id', auth()->user()->company->id)->get();
-
+                if( $user->company )
+                {
+                    $company_members = Team_Member::where('Company_id', $user->company->id)->get();
+                    $fonders = $company_members->where('TeamMember', 'Founder')->values();
+                    $Shareholders = $company_members->where('TeamMember', 'Shareholder')->values();
+                    $Investors = $company_members->where('TeamMember', 'Investor')->values();
                     // For backward compatibility, create empty collections
                     $Achieveds = collect();
                     $Planneds = collect();
                     $Archiveds = collect();
-                } else {
+                }
+                else
+                {
                     $fonders = 'NA';
                     $Shareholders = 'NA';
                     $Investors = 'NA';
@@ -283,14 +512,22 @@ class ClientCompanyController extends Controller
                     $country->emoji = $emoji;
                     return $country;
                 });
-            } else {
-
-                // if (!Auth::user()->hasAnyRole('Admin|organizationManager')) {
+            }
+            else
+            {
+                if( $user->hasRole('registered') )
+                {
+                    if( $user->company_id != $id )
+                    {
+                        return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
+                    }
+                }
+                // if (!$user->hasAnyRole('Admin|organizationManager')) {
                 //     return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
                 // }
 
-                if (Auth::user()->hasRole('organizationManager')) {
-                    $userorg = Organization::where('user_id', Auth::id())->first();
+                if ($user->hasRole('organizationManager')) {
+                    $userorg = Organization::where('user_id', $user->id)->first();
                     $cycles = Cycle::where('organization_id', $userorg->id)->with('companies')->get();
                     foreach ($cycles as $cycle) {
                         foreach ($cycle->companies as $company) {
@@ -437,7 +674,16 @@ class ClientCompanyController extends Controller
             // Load all milestones for this company (new unified structure)
             $milestones = Milestone::where('company_id', $id)
                 ->orderBy('created_at')->get();
-
+                
+                $year = !empty($data['valuation_date'])
+                        ? Carbon::parse($data['valuation_date'])->year
+                        : (int) date('Y'); // add here year from Validation Date
+            $financialprojection = FinancialProjection::where('company_id', $id)
+                                                        ->whereBetween('year', [$year - 1, $year + 2])
+                                                        ->orderBy('year')
+                                                        ->get();
+            
+            // dd($financialprojection);
             return view('admin/clients/company', compact(
                 'client',
                 '_countries',
@@ -460,7 +706,8 @@ class ClientCompanyController extends Controller
                 'technologiesSelected',
                 'industries',
                 'employees',
-                'data'
+                'data',
+                'financialprojection'
             ));
         } catch (Exception $e) {
             //log what happend
@@ -488,10 +735,11 @@ class ClientCompanyController extends Controller
         try {
             $user = Auth::user();
             if (!is_null($id)) {
-                if (!$user->hasanyRole('Admin|organizationManager')) {
-                    return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
+                if ($user->hasanyRole('Admin')) {
+                    $id = $request->id;
+                    // return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
                 }
-                if ($user->hasRole('organizationManager')) {
+                if ($user->hasanyRole('organizationManager')) {
                     $check = DB::select("SELECT
                             *
                         FROM
@@ -505,6 +753,7 @@ class ClientCompanyController extends Controller
                             AND o.user_id = " . $user->id);
 
                     $check = collect($check)->first();
+                   
                     if (empty($check)) {
                         return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
                     } else {
@@ -1019,6 +1268,8 @@ class ClientCompanyController extends Controller
                 $result->business_plan = $uploadedFile;
             }
             $result->save();
+
+            
             if ($data['CompanyN'] == 14) {
                 // Set up debug logging using Laravel's Log facade
                 Log::debug('Starting company update process', [
@@ -1365,6 +1616,9 @@ class ClientCompanyController extends Controller
                     }
                 }
 
+                $validated = $request->validate(['industry_id' => ['required', 'integer', 'exists:industries,id']]);
+                $industryId = (int) $validated['industry_id'];
+
                 DB::beginTransaction();
                 try {
                     $timestamp = now();
@@ -1394,7 +1648,7 @@ class ClientCompanyController extends Controller
                         if ($existingRelation) {
                             // Update existing relation
                             $existingRelation->update([
-                                'industry_id' => $data['industry_id'],
+                                'industry_id' => $industryId,
                                 'updated_at' => $timestamp
                             ]);
                         } else {
@@ -1402,7 +1656,7 @@ class ClientCompanyController extends Controller
                             $relations[] = [
                                 'company_id' => $result->id,
                                 'user_id' => $user->id,
-                                'industry_id' => $data['industry_id'],
+                                'industry_id' => $industryId,
                                 'sector_id' => $sectorId,
                                 'created_at' => $timestamp,
                                 'updated_at' => $timestamp
@@ -1430,7 +1684,7 @@ class ClientCompanyController extends Controller
                         if ($existingRelation) {
                             // Update existing relation
                             $existingRelation->update([
-                                'industry_id' => $data['industry_id'],
+                                'industry_id' => $industryId,
                                 'updated_at' => $timestamp
                             ]);
                         } else {
@@ -1438,7 +1692,7 @@ class ClientCompanyController extends Controller
                             $relations[] = [
                                 'company_id' => $result->id,
                                 'user_id' => $user->id,
-                                'industry_id' => $data['industry_id'],
+                                'industry_id' => $industryId,
                                 'technology_id' => $techId,
                                 'created_at' => $timestamp,
                                 'updated_at' => $timestamp
@@ -1493,6 +1747,63 @@ class ClientCompanyController extends Controller
                         ->withInput();
                 }
             }
+            if ($data['CompanyN'] == 15) {
+                
+                if($data['valuation_date'] == null){
+                    return redirect()->back()->with(['msg' => 'Please enter the valuation date', 'class' => 'danger']);
+                }
+                
+                $baseDate = Carbon::createFromFormat('Y-m-d', $data['valuation_date']);
+
+                // من سنة قبل لحد سنتين بعد
+                $startOffset = -1;
+                $yearsCount  = 4; // -1, 0, +1, +2
+
+                for ($i = 0; $i < $yearsCount; $i++) {
+
+                    $yearOffset = $startOffset + $i;
+                    $yearDate   = $baseDate->copy()->addYears($yearOffset);
+
+                    $updateFinancial = FinancialProjection::where('company_id', $result->id)
+                        ->where('year', $yearDate->year)
+                        ->first();
+
+                    $addFinancial = $updateFinancial ?? new FinancialProjection();
+
+                    $addFinancial->company_id = $result->id;
+                    $addFinancial->user_id = auth()->id();
+                    $addFinancial->valuation_date = $yearDate->format('Y-m-d');
+                    $addFinancial->year = $yearDate->year;
+
+                    // البيانات الرقمية
+                    $addFinancial->revenues = $data["rev_$i"];
+                    $addFinancial->cogs = $data["cogs_$i"];
+                    $addFinancial->salaries = $data["sal_$i"];
+                    $addFinancial->other_op_expenses = $data["opex_$i"];
+                    $addFinancial->ebitda = $data["ebitda_$i"];
+                    $addFinancial->depreciation_amortization = $data["da_$i"];
+                    $addFinancial->ebit = $data["ebit_$i"];
+                    $addFinancial->interest = $data["int_$i"];
+                    $addFinancial->taxes = $data["tax_$i"];
+                    $addFinancial->net_profit = $data["np_$i"];
+
+                    // Working Capital
+                    $addFinancial->receivables = $data["rec_$i"];
+                    $addFinancial->inventory = $data["inv_$i"];
+                    $addFinancial->payables = $data["pay_$i"];
+                    $addFinancial->working_capital = $data["wc_$i"];
+                    $addFinancial->change_in_wc = $data["dwc_$i"];
+
+                    $addFinancial->capital_expenditures = $data["capex_$i"];
+                    $addFinancial->debt_end_year = $data["debt_$i"];
+                    $addFinancial->debt_change = $data["ddebt_$i"];
+                    $addFinancial->free_cash_flow = $data["fcf_$i"];
+
+                    $addFinancial->save();
+                }
+            
+               
+            }
             if (is_null($id)) {
                 User::where('id', $user->id)->update(['company_id' => $result->id]);
                 $msgtype = 'NewComp';
@@ -1514,7 +1825,7 @@ class ClientCompanyController extends Controller
                     ]);
                 }
 
-                return redirect()->route('company.profile_view_mine', $redirectId)->with(['msg' => __('admin.startup_info_updated'), 'class' => 'success']);
+                return redirect()->route('company.profile_view_mine', $redirectId)->with(['msg' => __('startup_info_updated'), 'class' => 'success']);
             } else {
                 if ($data['CompanyN'] == 14 && $request->ajax()) {
                     return response()->json([
@@ -1535,10 +1846,11 @@ class ClientCompanyController extends Controller
             }
             return redirect()->back()->withErrors($e->validator)->withInput();
         } catch (Exception $e) {
-            // dd($e);
+            dd($e);
             // تسجيل الأخطاء الأخرى
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             if ($request->ajax()) {
+               
                 return response()->json([
                     'success' => false,
                     'message' => __('admin.please_complete_startup_info')
@@ -1903,6 +2215,7 @@ class ClientCompanyController extends Controller
 
     public function AddMileStone(Request $request, $id = null)
     {
+        
         try {
             if (!$id) {
                 return response()->json([
@@ -1915,6 +2228,11 @@ class ClientCompanyController extends Controller
                 'name' => 'required|string|max:300',
                 'description' => 'required|string|max:1000',
                 'completion_percentage' => 'required|integer|min:0|max:100',
+                'category' => 'required',
+                'status' => 'required',
+                'date' => 'required|date',
+                'visibility' => 'required',
+                'cohort' => 'nullable',
                 'documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,docx,xlsx|max:10240', // 10MB
             ], [
                 'name.required' => __('startup.milestone_title_required'),
@@ -1928,6 +2246,11 @@ class ClientCompanyController extends Controller
                 'documents.*.file' => __('startup.document_invalid_file'),
                 'documents.*.mimes' => __('startup.milestone_document_invalid_type'),
                 'documents.*.max' => __('startup.document_too_large'),
+                'category.required' => __('startup.Please_select_a_category'),
+                'status.required' => __('startup.Please_select_a_status'),
+                'date.required' => __('startup.milestone_date_required'),
+                'visibility.required' => __('startup.visibility_required'),
+
             ]);
 
             if ($validator->fails()) {
@@ -1941,6 +2264,12 @@ class ClientCompanyController extends Controller
             $milestone->name = $request->name;
             $milestone->description = $request->description;
             $milestone->completion_percentage = $request->completion_percentage;
+            $milestone->category = $request->category;
+            $milestone->status = $request->status ?? 'Not Started';
+            $milestone->completed = $request->status == 'Completed' ? 1 : 0;
+            $milestone->milestone_date = $request->milestone_date;
+            $milestone->visibility = $request->visibility;
+            $milestone->cohort = $request->cohort;
             $milestone->Company_id = $id;
             $milestone->save();
 
@@ -1998,6 +2327,11 @@ class ClientCompanyController extends Controller
                 'name' => 'required|string|max:300',
                 'description' => 'required|string|max:1000',
                 'completion_percentage' => 'required|integer|min:0|max:100',
+                'category' => 'required',
+                'status' => 'required',
+                'date' => 'required|date',
+                'visibility' => 'required',
+                'cohort' => 'nullable',
                 'documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,docx,xlsx|max:10240', // 10MB
                 'remove_documents' => 'nullable|string', // JSON string of indices to remove
             ], [
@@ -2014,6 +2348,10 @@ class ClientCompanyController extends Controller
                 'documents.*.file' => __('startup.document_invalid_file'),
                 'documents.*.mimes' => __('startup.milestone_document_invalid_type'),
                 'documents.*.max' => __('startup.document_too_large'),
+                'category.required' => __('startup.category_required'),
+                'status.required' => __('startup.status_required'),
+                'milestone_date.required' => __('startup.milestone_date_required'),
+                'visibility.required' => __('startup.visibility_required'),
             ]);
 
             if ($validator->fails()) {
@@ -2037,6 +2375,12 @@ class ClientCompanyController extends Controller
             $milestone->name = $request->name;
             $milestone->description = $request->description;
             $milestone->completion_percentage = $request->completion_percentage;
+            $milestone->category = $request->category;
+            $milestone->status = $request->status ?? 'Not Started';
+            $milestone->completed = $request->status == 'Completed' ? 1 : 0;
+            $milestone->milestone_date = $request->milestone_date;
+            $milestone->visibility = $request->visibility;
+            $milestone->cohort = $request->cohort;
             $milestone->save();
 
             // Handle file uploads if any (append to existing documents)
@@ -2306,7 +2650,7 @@ class ClientCompanyController extends Controller
                 $filters['sectors'] = $sectors;
             }
         }
-
+        // dd($request->all());
         // Handle Alumni filter
         if ($request->filled('alumni')) {
             $alumni = $request->get('alumni');
@@ -2323,9 +2667,279 @@ class ClientCompanyController extends Controller
         return view('admin/users/companies', compact('companies', 'l'));
     }
 
-    public function companyAlumni(Request $request)
+    public function companyAlumni(Request $request, $id, $cycle_id)
     {
-        return view('admin.clients.startup.company_alumni');
+       
+        $almuni = Almuni::where('cycle_id', $cycle_id)->where('company_id', $id)->first();
+        if(empty($almuni)){
+            return redirect()->back()->with('error', 'Alumni not found');
+        }
+        $basicInfo   = $this->decodeAlumniJson($almuni?->basic_startup_information);
+        $programInfo = $this->decodeAlumniJson($almuni?->program);
+        $leaderInfo  = $this->decodeAlumniJson($almuni?->startup_leader_information);
+        $founders    = $this->decodeAlumniJson($almuni?->founders);
+        $employees   = $this->decodeAlumniJson($almuni?->employees);
+        $shareholders= $this->decodeAlumniJson($almuni?->shareholders);
+        $investors   = $this->decodeAlumniJson($almuni?->investors);
+        $screening   = $this->decodeAlumniJson($almuni?->screening);
+        $finalScreen = $this->decodeAlumniJson($almuni?->final_screening);
+        $training    = $this->decodeAlumniJson($almuni?->training);
+        $mentorships  = $this->decodeAlumniJson($almuni?->mentorship);
+        $milestones  = $this->decodeAlumniJson($almuni?->milestones);
+        $tasks       = $this->decodeAlumniJson($almuni?->tasks);
+        $quizzes     = $this->decodeAlumniJson($almuni?->quizzes);
+        $surveys     = $this->decodeAlumniJson($almuni?->surveys);
+        $services    = $this->decodeAlumniJson($almuni?->services);
+        $forms       = $this->decodeAlumniJson($almuni?->submitted_forms);
+        $technologies = $this->decodeAlumniJson($basicInfo['Technologies']);
+        $sectors     = $this->decodeAlumniJson($basicInfo['Sectors']);
+        $industries  = $this->decodeAlumniJson($basicInfo['Industries']);
+
+        // dd($screening);
+        $startup = [
+            'name'           => $basicInfo['Startup_Name'] ?? null,
+            'logo'           => $basicInfo['Logo'] ?? null,
+            'is_alumni'      => (bool) $almuni->alumni,
+            'description'    => __('startup.overview_description'),
+            'organization'   => $almuni->cycle->organization->name_ar ?? null,
+            'location'       => ($basicInfo['Country'] ?? '') . ' · ' . ($basicInfo['Location'] ?? ''),
+            'established_at' => $almuni->established_date,
+            'business_type'  => $basicInfo['Business_Type'] ?? null,
+            'development_stage' => __('admin.' . $basicInfo['development_stage']) ?? null,
+            'funding_stage'  => $basicInfo['funding_stage'] ?? null,
+            'industry'       => __('admin.categories.' . $industries['name']) ?? null,
+            'sector'         => $sectors['name'] ?? null,
+            'team_size'      => $basicInfo['team_size'] ?? null,
+            'technologies'   => $technologies['name'] ?? null,
+
+            'program' => [
+                'name'   => $programInfo[0]['Program_Name'] ?? null,
+                'cohort' => $programInfo[0]['Cohort'] ?? 'N/A',
+                'start'  => $programInfo[0]['Start_Date'] ?? null,
+                'end'    => $programInfo[0]['Completion_Date'] ?? null,
+            ],
+
+            'sdgs' => json_decode($almuni->sustainability_goals, true),
+
+            'links' => [
+                'website'   => $basicInfo['Website'] ?? '#',
+                'linkedin'  => $basicInfo['LinkedIn'] ?? '#',
+                'twitter'   => $basicInfo['Twitter'] ?? '#',
+                'facebook'  => $basicInfo['Facebook'] ?? '#',
+                'instagram' => $basicInfo['Instagram'] ?? '#',
+                'youtube'   => $basicInfo['Youtube'] ?? '#',
+            ],
+        ];
+        $leader = collect($leaderInfo)->first();
+
+        $leaderData = [
+            'id'      => 'LD-' . ($leader['ID'] ?? ''),
+            'name'    => $leader['Full_Name'] ?? null,
+            'country' => $leader['Country'], // لو مش موجودة في الداتا
+            'email'   => $leader['Email'] ?? null,
+            'phone'   => $leader['Phone_Number'] ?? null,
+        ];
+
+        $foundersData = collect($founders)->map(function ($founder) {
+            return [
+                'name'     => $founder['Full_Name'] ?? null,
+                'email'    => $founder['Email'] ?? null,
+                'linkedin' => '#', // مش موجودة عندك
+            ];
+        })->values()->toArray();
+
+        $employeesData = collect($employees)->map(function ($employee) {
+            return [
+                'name'       => $employee['Full_Name'] ?? null,
+                'job'        => $employee['Job_Title'] ?? null,
+                'gender'     => $employee['Gender'] ?? null,
+                'employment' => $employee['Employment_Type'] ?? null,
+                'start_date' => $employee['Start Date'] ?? null,
+            ];
+        })->values()->toArray();
+
+        $teamData = [
+            'leader'    => $leaderData,
+            'founders'  => $foundersData,
+            'employees' => $employeesData,
+        ];
+
+        $shareholdersData = collect($shareholders)->map(function ($shareholder) {
+            return [
+                'name'     => $shareholder['Full_Name'] ?? null,
+                'Email'    => $shareholder['Email'] ?? null,
+                'role'    => $shareholder['Role'] ?? null,
+                'ownership' => $shareholder['Ownership_Percentage'] ?? null,
+                'text_class' => isset($shareholder['Ownership_Percentage'])
+            ? (
+                (float) $shareholder['Ownership_Percentage'] <= 20
+                    ? 'success'
+                    : (
+                        (float) $shareholder['Ownership_Percentage'] <= 40
+                            ? 'info'
+                            : 'primary'
+                    )
+            )
+            : null,
+                ];
+        })->values()->toArray();
+
+        $investorsData = collect($investors)->map(function ($investor) {
+            return [
+                'name'     => $investor['Full_Name'] ?? null,
+                'type'     => $investor['Type'] ?? null,
+            ];
+        })->values()->toArray();
+
+        $ownershipData = [
+            'shareholders' => $shareholdersData,
+            'investors'    => $investorsData,
+        ];
+
+        $mentorshipData = collect($mentorships)->map(function ($mentorship) {
+            $minutes = (int) $mentorship['duration'];
+            $formattedDuration = $minutes < 60
+                ? $minutes . ' m'
+                : floor($minutes / 60) . ' h';
+            return [
+                'mentor' => $mentorship['mentor_name'] ?? null,
+                'id' => 'M-' . $mentorship['mentor_ID'] ?? null,
+                'step_name' => 'Growth mentoring',
+                'step_id' => 'STP-M-03',
+                'date' => $mentorship['date'] ?? null,
+                'duration' => $formattedDuration,
+                'founder_attended' => $mentorship['founder_name'] ?? null,
+                'rating' => $mentorship['rating'] ?? null,
+                'comments' => $mentorship['comments'] ?? null,
+            ];
+        })->values()->toArray();
+
+        $milestones = collect($milestones)->map(function ($milestone) {
+            $download = $milestone['download'] ?? null;
+
+            $deliverables = null;
+
+            if (!empty($download)) {
+                $pathInfo = pathinfo($download);
+
+                $deliverables = [
+                    'name' => $pathInfo['filename'],           // Technical-architecture
+                    'type' => $pathInfo['extension'] ?? null,  // pdf / mp4
+                    'link' => $download,                        // نفس اللينك
+                ];
+            }
+            return [
+                'title' => $milestone['Milestone_title'] ?? null,
+                'description' => $milestone['Description'] ?? null,
+                'due_date' => $milestone['Due_date'] ?? null,
+                'completion' => $milestone['Completion_percentage'], // %
+                'deliverables' => $deliverables ?? null,
+            ];
+        })->values()->toArray();
+
+        $tasks = collect($tasks)->map(function ($task) {
+            
+            return [
+                'title' => $task['Task_title'] ?? null,
+                'task_id' => 'TSK-'. $task['Task_ID'] ?? null,
+                'session_id' => 'TR-' . $task['Session_ID'] ?? null,
+                'session_title' => 'Will be Deleted',
+                'description' => $task['Description'] ?? null,
+                'due_date' => $task['Due_date'] ?? null,
+                'completion_date' => $task['Completion_date'] ?? null,
+                'mentor' => $task['Assigned_mentor'] ?? null,
+                'created_by' => $task['Who_created_task'] ?? null,
+                'status' => $task['Status'] ?? null,
+            ];
+        })->values()->toArray();
+
+        $quizzes = collect($quizzes)->map(function ($quizze) {
+            
+            return [
+                'quiz_id' => 'QZ-'. $quizze['Quiz_ID'] ?? null,
+                'title' => $quizze['Quiz_title'] ?? null,
+                'date_completed' => $quizze['Date_completed'] ?? null,
+                'founder' => $quizze['founder_completed_quiz'] ?? null,
+                'score' => $quizze['Score'] ?? null,
+                'score_badge' => $quizze['Status'] == 1 ? 'success' : 'warning',
+                'status' => $quizze['Status'] == 1 ? __('startup.passed') : __('startup.failed'),
+            ];
+        })->values()->toArray();
+
+        $surveys = collect($surveys)->map(function ($survey) {
+            
+            return [
+                'survey_id' => 'SV-'. $survey['Survey_ID'] ?? null,
+                'title' => $survey['Survey_title'] ?? null,
+                'program_step' => $survey['program_step'] ?? null,
+                'date_completed' => $survey['Date_completed'] ?? null,
+                'answers_link' => '#', // هنا مش رابط هنا هيكون فى كل سؤال واجابته لوحدها 
+                'badge_class' => $survey['Survey_answers'] != null ? 'primary' : 'warning',
+            ];
+        })->values()->toArray();
+
+        $services = collect($services)->map(function ($service) {
+            
+            return [
+                'name' => $service['Service_name'] ?? null,
+                'service_id' => 'SRV-'. $service['Service_ID'] ?? null,
+                'description' => $service['Description'] ?? null,
+                'badge_class' => $service['Price'] != 0 ? 'success' : 'primary',
+            ];
+        })->values()->toArray();
+
+       $forms = collect($forms)
+                ->groupBy('ID')
+                ->map(function ($group) {
+
+                    $first = $group->first();
+
+                    return [
+                        'title' => $first['Form_Title'] ?? null,
+                        'form_id' => 'FM-' . str_pad($first['ID'], 3, '0', STR_PAD_LEFT),
+                        'step_name' => $first['step_title'] ?? null,
+                        'step_id' => 'STP-FM-' . $first['Step_ID'],
+                        'submission_date' => $first['Submission_Date'],
+                        'badge_class' => $first['Submission_Date'] ? 'success' : 'primary',
+                        'modal_id' => 1,
+
+                        'fields' => $group->map(function ($form) {
+                            return [
+                                'name' => $form['Field_Name'] ?? null,
+                                'type' => $form['Field_Type'] ?? null,
+                                'value' => $form['Submitted_Value'] ?? null,
+                                'attachment' => $form['Attachment_Link'] ?? null,
+                            ];
+                        })->values()->toArray(),
+                    ];
+                })
+                ->values()
+                ->toArray();
+
+
+        //  dd($forms);
+        return view('admin.clients.startup.company_alumni', compact('startup', 
+        'teamData', 
+        'ownershipData', 
+        'mentorshipData', 
+        'milestones', 
+        'tasks', 
+        'quizzes', 
+        'surveys', 
+        'services', 
+        'forms'));
+    }
+
+    function decodeAlumniJson($value)
+    {
+        if (empty($value)) {
+            return [];
+        }
+
+   
+        $clean = trim($value, '"');
+
+        return json_decode($clean, true) ?? [];
     }
 
     public function addEmployee(Request $request, $id)
@@ -2601,7 +3215,6 @@ class ClientCompanyController extends Controller
 
     public function addCompanyAlumni(Request $request, $id)
     {
-        
         try {
             $user = Auth::user();
             $company = Company::findOrFail($id);
@@ -2612,15 +3225,41 @@ class ClientCompanyController extends Controller
             $almuni->company_id = $id;
             $almuni->alumni = '1';
             $almuni->established_date = date('Y-m-d H:i:s');
-           
+            $team_leaders = $this->companyService->getTeamMember($id);
+            
+            $industry_ids = $company_relations->where('industry_id', '!=', null);
+            $industry= [];
+            foreach($industry_ids as $indusry_id) {
+                $industry['id'] = $indusry_id->industry_id;
+                $industry['name'] = $indusry_id->industry->name_en;
+            }
+            $jIndustry = json_encode($industry);
+         
+            $sector_ids = $company_relations->where('sector_id', '!=', null);
+            $sectors = [];
+            foreach($sector_ids as $sector_id) {
+                $sectors['id'] = $sector_id->sector_id;
+                $sectors['name'] = $sector_id->sector->name_en;
+            }
+            $jSectors = json_encode($sectors);
+            $technology_ids = $company_relations->where('technology_id', '!=', null);
+            $technologies = [];
+            foreach($technology_ids as $technology_id) {
+                $technologies['id'] = $technology_id->technology_id;
+                $technologies['name'] = $technology_id->technology->name;
+            }
+            $jTechnologies = json_encode($technologies);
+            
             //Relations Data
+           
             $relations_data = $company_relations->map(function ($relation) {
                                     return [
-                                        'Industry'    => $relation->industry?->name_en,
-                                        'Sector'      => $relation->sector?->name_en,
-                                        'Technology'  => $relation->technology?->name_en,
+                                        'industry'    => $relation->industry?->name_en,
+                                        'sector'      => $relation->sector?->name_en,
+                                        'technologies'  => $relation->technology?->name_en,
                                     ];
                                 })->values();
+                               
             $basic_startup_information = [
                     'ID' => $company->id,
                     'Startup_Name' => $company->name_en,
@@ -2634,6 +3273,13 @@ class ClientCompanyController extends Controller
                     'Business_Type' => $company->business_type,
                     'Relations'     => $relations_data,
                     'Website_Link' => $company->website,
+                    'development_stage' => $company->development_stage,
+                    'funding_stage' => $company->funding_stage,
+                    'team_size' => $team_leaders->count(),
+                    'Sectors' => $jSectors,
+                    'Industries' => $jIndustry,
+                    'Technologies' => $jTechnologies,
+
                     'Social Media Links' => [
                         'Facebook' => $company->facebook,
                         'Twitter' => $company->twitter,
@@ -2646,101 +3292,87 @@ class ClientCompanyController extends Controller
                 ];
             $almuni->basic_startup_information = json_encode($basic_startup_information);
 
-            
-                $team_leaders = Team_member::where('company_id', $id)
-                    ->where('TeamMember', 'hackathon')
-                    ->get();
-
                 $startup_leader_information = [];
 
-                foreach ($team_leaders as $leader) {
+                $hackathons = $team_leaders->where('TeamMember', 'hackathon')->values();
+                foreach ($hackathons as $leader) {
+                    
                     $startup_leader_information[] = [
                         'ID' => $leader->id,
                         'Full_Name' => $leader->Name,
                         'Country' => $company->country->name_en ?? '',
                         'Email' => $leader->Email,
-                        'Phone_Number' => $leader->Phone,
+                        'Phone_Number' => $company->user->phone,
                     ];
                 }
-
+                
                 $almuni->startup_leader_information = json_encode($startup_leader_information);
 
-                $startup_founders = Team_member::where('company_id', $id)
-                    ->where('TeamMember', 'Founder')
-                    ->get();
+                $getfounders = $team_leaders->where('TeamMember', 'Founder')->values();
 
                 $founders = [];
-
-                foreach ($startup_founders as $founder) {
+                
+                foreach ($getfounders as $founder) {
                     $founders[] = [
                         'ID' => $founder->id,
                         'Full_Name' => $founder->Name,
-                        'Country' => $company->country->name_en ?? '',
+                        // 'Country' => $company->country->name_en ?? '',
                         'Email' => $founder->Email,
-                        'Phone_Number' => $founder->Phone,
-                        'LinkedIn Profile' => $founder->LinkedIn
+                        // 'Phone_Number' => $founder->Phone,
+                        // 'LinkedIn_Profile' => $founder->LinkedIn
                     ];
                 }
 
                 $almuni->founders = json_encode($founders);
-
-                $startup_employees = Team_member::where('company_id', $id)
-                    ->where('TeamMember', 'Employee')
-                    ->get();
-
+                
+                $getemployees = $team_leaders->where('TeamMember', 'Employee')->values();
                 $employees = [];
-
-                foreach ($startup_employees as $employee) {
+              
+                foreach ($getemployees as $employee) {
                     $employees[] = [
                         'ID' => $employee->id,
                         'Full_Name' => $employee->Name,
-                        'Country' => $company->country->name_en ?? '',
+                        // 'Country' => $company->country->name_en ?? '',
                         'Email' => $employee->Email,
-                        'Phone_Number' => $employee->Phone,
-                        'Job Title' => $employee->RoleShereholder,
+                        // 'Phone_Number' => $employee->Phone,
+                        'Job_Title' => $employee->RoleShereholder,
                         'Gender' => $employee->gender,
-                        'Employment Type' => $employee->employment_type,
+                        'Employment_Type' => $employee->employment_type,
                         'Start Date' => $employee->hiring_date
-                        
+
                     ];
                 }
 
                 $almuni->employees = json_encode($employees);
 
-                $startup_shareholders = Team_member::where('company_id', $id)
-                    ->where('TeamMember', 'Shareholder')
-                    ->get();
-
+                $getShareholders = $team_leaders->where('TeamMember', 'Shareholder')->values();
                 $shareholders = [];
 
-                foreach ($startup_shareholders as $shareholder) {
+                foreach ($getShareholders as $shareholder) {
                     $shareholders[] = [
                         'ID' => $shareholder->id,
                         'Full_Name' => $shareholder->Name,
-                        'Country' => $company->country->name_en ?? '',
+                        // 'Country' => $company->country->name_en ?? '',
                         'Email' => $shareholder->Email,
-                        'Phone_Number' => $shareholder->Phone,
+                        // 'Phone_Number' => $shareholder->Phone,
                         'Role' => $shareholder->RoleShereholder,
-                        'Ownership Percentage' => $shareholder->PresentagShereholder
+                        'Ownership_Percentage' => $shareholder->PresentagShereholder
                     ];
                 }
 
                 $almuni->shareholders = json_encode($shareholders);
 
 
-                $startup_investors = Team_member::where('company_id', $id)
-                    ->where('TeamMember', 'Investor')
-                    ->get();
-
+                $getInvestors = $team_leaders->where('TeamMember', 'Investor')->values();
                 $investors = [];
 
-                foreach ($startup_investors as $investor) {
+                foreach ($getInvestors as $investor) {
                     $investors[] = [
                         'ID' => $investor->id,
                         'Full_Name' => $investor->Name,
-                        'Country' => $company->country->name_en ?? '',
+                       // 'Country' => $company->country->name_en ?? '',
                         'Email' => $investor->Email,
-                        'Phone_Number' => $investor->Phone,
+                      //  'Phone_Number' => $investor->Phone,
                         'Type' => $investor->investorType
                     ];
                 }
@@ -2751,29 +3383,29 @@ class ClientCompanyController extends Controller
 
 
                     $pitch_deck[] = [
-                        'pitch deck' => $company->pitch_deck ?? '',
-                        'pitch deck video' => $company->pitch_deck_video ?? '',
-                        'pitch deck description' => $company->pitch_deck_description ?? '',
-                        'pitch deck summary' => $company->pitch_deck_summary ?? '',
+                        'pitch_deck' => $company->pitch_deck ?? '',
+                        'pitch_deck_video' => $company->pitch_deck_video ?? '',
+                        'pitch_deck_description' => $company->pitch_deck_description ?? '',
+                        'pitch_deck_summary' => $company->pitch_deck_summary ?? '',
                     ];
                 $almuni->pitch_deck = json_encode($pitch_deck);
 
 
                 $legal_information[] = [
                         'Registered' => $company->Commercial_Register  ? 'Registered' : 'Not Registered',
-                        'Commercial Register' => $company->Commercial_Register ?? '',
-                        'Tax Card' => $company->Tax_Card ?? '',
-                        'Country Register id' => $company->Country_Register_id ?? '',
+                        'Commercial_Register' => $company->Commercial_Register ?? '',
+                        'Tax_Card' => $company->Tax_Card ?? '',
+                        'Country_Register_id' => $company->Country_Register_id ?? '',
                     ];
                 $almuni->legal_information = json_encode($legal_information);
 
                     $cycle[] = [
-                        'Program Name' => $company->cycledata->title ?? '',
+                        'Program_Name' => $company->cycledata->title ?? '',
                         'ID' =>  $company->cycledata->id ?? '',
                         'Organization' =>  $company->cycledata->organization ?? '',
                         'Cohort' =>  $company->cycledata->cohort ?? '',
-                        'Start Date' => $company->cycledata->start->format('Y-m-d H:i') ?? '',
-                        'Completion Date' => $company->cycledata->end->format('Y-m-d H:i') ?? '',
+                        'Start_Date' => $company->cycledata?->start?->format('Y-m-d H:i') ?? '',
+                        'Completion_Date' => $company->cycledata?->end?->format('Y-m-d H:i') ?? '',
                         'Type' => $company->cycledata->type ?? '',
                     ];
                 $almuni->program = json_encode($cycle);
@@ -2786,6 +3418,11 @@ class ClientCompanyController extends Controller
                 ->where('stype', 2)
                 ->orderBy('arr')
                 ->get();
+            // $metadata = collect([]);
+            // foreach($_steps as $step) {
+            //     $metadata->push(ScreeningEvaluationResults::metadata($step->id));
+            // }
+            
             $companies = Company::where('cycle', $cycle_id)->get();
             $stepsData = collect();
             $l = app()->getLocale();
@@ -2868,9 +3505,12 @@ class ClientCompanyController extends Controller
                         });
                     $companies[$cidx]->average_score = $avg ?? 0;
                 }
+                
                 $stepsData->push([
                     'step_id' => $step->id,
                     'step_title' => $step->title,
+                    'overall_average_score' => $companies->avg('average_score'),
+                    'date' => $step?->created_at?->format('Y-m-d'),
                     'companies' => $companies->map(function($c) { 
                         return [
                             'company_id' => $c->id,
@@ -3020,10 +3660,10 @@ class ClientCompanyController extends Controller
 
                  // Training
                  $steps = Step::where('cycle_id', $company->cycledata->id)->get();
-                 
+
                 $startup_training = TrainingSession::whereIn('step_id', $steps->pluck('id'))
                     ->get();
-                  
+
                 $trainings = [];
                 // dd($startup_training[3]->attendance);
                 // dd($startup_training[3]->course->title);
@@ -3033,7 +3673,7 @@ class ClientCompanyController extends Controller
                         'title' => $training->title,
                         'Trainer_course_ID' => $training->course->id ?? '',
                         'trainer_course_name' => $training->course->title ?? '',
-                        'date' => $training->datetime->format('Y-m-d H:i') ?? '',
+                        'date' => $training->datetime?->format('Y-m-d H:i') ?? '',
                         'duration' => $training->duration,
                         'step' => $training->step->title,
                         'step_ID' => $training->step->id,
@@ -3042,45 +3682,44 @@ class ClientCompanyController extends Controller
                 }
 
                 $almuni->training = json_encode($trainings);
-                    
-                $steps = Step::where('cycle_id', $company->cycledata->id)->get();
+
+                // $steps = Step::where('cycle_id', $company->cycledata->id)->get();
                 $startup_mentorship = MentorshipRequest::where('cycle_id', $company->cycledata->id)
                 ->where('approved', 'Yes')
                 ->where('user_id', $company->user->id)
                 ->get();
-                  
+
                 $mentorships = [];
-                // dd($startup_mentorship[3]);
+                // dd($startup_mentorship[3]->period);
                 // dd($startup_training[3]->course->title);
                 foreach ($startup_mentorship as $mentorship) {
                     $mentorships[] = [
                         'mentor_name' => $mentorship->mentor->first_name_en ." ". $mentorship->mentor->last_name_en,
                         'mentor_ID' => $mentorship->mentor->id ?? '',
-                        // 'step_name' => $training->course->id ?? '',
-                        // 'step_ID' => $training->course->title ?? '',
-                        'date' => $mentorship->zoom_date->format('Y-m-d H:i') ?? '',
-                        'duration' => $mentorship->duration,
+                        'date' => $mentorship->zoom_date?->format('Y-m-d H:i') ?? '',
+                        'duration' => $mentorship->period,
                         'attended' => $mentorship->done == '1' ? 'Attended' : 'Not Attended',
+                        'founder_name' => $mentorship->user->first_name_en ." ". $mentorship->user->last_name_en,
                         'rating' => $mentorship->rating,
                         'comments' => $mentorship->rate_comment,
                     ];
                 }
 
                 $almuni->mentorship = json_encode($mentorships);
-        
 
-                
+
+
                 $startup_milestones = Milestone::where('company_id', $company->id)
                     ->get();
-                  
+
                 $milestones = [];
                 // dd($startup_mentorship[3]);
                 // dd($startup_training[3]->course->title);
                 foreach ($startup_milestones as $milestone) {
                     $milestones[] = [
-                        'Milestone_title.' => $milestone->name,
+                        'Milestone_title' => $milestone->name,
                         'Description' => $milestone->description?? '',
-                        'Due_date' => $milestone->created_at->format('Y-m-d H:i') ?? '',
+                        'Due_date' => $milestone->created_at?->format('Y-m-d H:i') ?? '',
                         'Completion_percentage' => $milestone->completion_percentage,
                         // 'Linked_deliverables' => $milestone->done == '1' ? 'Attended' : 'Not Attended',
                         'download' => $milestone->documents,
@@ -3123,17 +3762,17 @@ class ClientCompanyController extends Controller
                         'Quiz_ID' => $quizze->id ?? '',
                         'Quiz_title' => $quizze->title ?? '',
                         'Date_completed' => $result?->ended_at
-                            ? $result->ended_at->format('Y-m-d H:i')
+                            ? $result?->ended_at?->format('Y-m-d H:i')
                             : '',
                         'founder_completed_quiz' => $user
                             ? ($user->first_name_en . " " . $user->last_name_en)
                             : '',
                         'Score' => $result?->score ?? '',
-                        'Status' => $quizze->status ?? '',
+                        'Status' => $result?->status ?? '',
                     ];
                 }
 
-                
+
                 $almuni->quizzes = json_encode($quizzes);
 
                 $startup_surveys= Surveys::where('organization_id', $company->cycledata->organization_id)->get();
@@ -3151,20 +3790,23 @@ class ClientCompanyController extends Controller
                                 ];
                             });
                         })
-                        ->filter()  
+                        ->filter()
                         ->values();
+                        // dd($survey->responses[0]->updated_at->format('Y-m-d H:i'));
                     $surveys[] = [
                         'Survey_ID' => $survey->id ?? '',
                         'Survey_title' => $survey->title ?? '',
+                        'program_step' =>  $survey->responses->first()?->cycle ? $survey->responses->first()?->cycle->title : '',
+                        'Date_completed' => $survey->responses->first()?->updated_at ? $survey->responses->first()?->updated_at?->format('Y-m-d H:i') : '',
                         'Survey_answers' => $answers ?? '',
                     ];
                 }
-                
+
                 $almuni->surveys = json_encode($surveys);
 
                 $startup_services= ServicesRequests::where('user_id', $company->user->id)->get();
                 $services = [];
-                
+
                 foreach ($startup_services as $service) {
                     $services[] = [
                         'Service_name' => $service->service->name_en ?? '',
@@ -3173,7 +3815,7 @@ class ClientCompanyController extends Controller
                         'Price' => $service->service->price ?? '',
                     ];
                 }
-               
+
                 $almuni->services = json_encode($services);
 
                 // $startup_formSubmissions= Formdata::where('user_id', $company->user->id)->get();
@@ -3257,7 +3899,7 @@ class ClientCompanyController extends Controller
                     return $item;
                 })->values();
                         // dd($data);
-                        
+
                         foreach ($data as $item) {
 
                             // كل answers عبارة عن Collection جوا Collection
@@ -3289,21 +3931,47 @@ class ClientCompanyController extends Controller
                                 ];
                             }
                         }
-             
+
                 $almuni->submitted_forms = json_encode($formSubmissions);
 
             $almuni->save();
-           
-               $dattt = json_decode($almuni->screening);
-               dd($dattt);
+
+            // $company->step = null;
+            // $company->cycle = null;
+            // $company->save();
+
+            // Check if AJAX request
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => __('startup.mark_alumni_success')
+                ], 200);
+            }
+
+            return redirect()->back()->with('success', __('startup.mark_alumni_success'));
         } catch (Exception $e) {
-            dd($e->getMessage());
-            Log::error('Error deleting employee: ' . $e->getMessage());
-            return response()->json([
-                'errors' => ['general' => ['An error occurred while deleting the employee.']]
-            ], 500);
+            Log::error('Error adding company to alumni: ' . $e->getMessage());
+
+            // Check if AJAX request
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('startup.mark_alumni_error') . ' (' . __('admin.Error') . ': ' . $e->getMessage() . ')'
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', __('startup.mark_alumni_error'));
         }
 
+    }
+
+    public function companyPerks()
+    {
+        if (!auth()->user()->hasRole('Registered')) {
+            abort(404);
+        }
+
+        return view('admin.clients.startup.company_perks');
     }
 
 }

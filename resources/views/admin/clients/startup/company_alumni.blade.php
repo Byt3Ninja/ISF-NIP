@@ -1,5 +1,260 @@
 @extends('layouts.admin')
 
+@php
+// $startup = [
+//   'name' => 'PayLinkx',
+//   'logo' => 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTc9APxkj0xClmrU3PpMZglHQkx446nQPG6lA&s',
+//   'is_alumni' => true,
+//   'description' => __('startup.overview_description'),
+//   'organization' => 'Growthlabs',
+//   'location' => 'Egypt · Cairo',
+//   'established_at' => '2019-05-01',
+//   'business_type' => 'B2B',
+//   'development_stage' => 'Growth',
+//   'funding_stage' => 'Seed',
+//   'industry' => 'Financial Services',
+//   'sector' => 'Payments',
+//   'team_size' => '25+',
+//   'technologies' => 'AI, APIs, Cloud',
+//   'program' => [
+//     'name' => 'Fintech Accelerator 2025',
+//     'cohort' => 'Cohort 3',
+//     'start' => '10 Jan 2025',
+//     'end' => '15 Jun 2025',
+//   ],
+//   'sdgs' => ['no poverty', 'zero hunger', 'good health and well being', 'quality education'],
+//   'links' => [
+//     'website' => '#',
+//     'linkedin' => '#',
+//     'twitter' => '#',
+//     'facebook' => '#',
+//     'instagram' => '#',
+//     'youtube' => '#',
+//   ],
+// ];
+
+$startupStatValues = [
+  'screening_score'        => ['current' => 4.3, 'total' => 5],
+  'final_screening_score'  => ['current' => 4.6, 'total' => 5],
+  'training_hours'         => ['hours' => 32, 'minutes' => 15],
+  'mentorship_hours'       => ['hours' => 24, 'minutes' => 30],
+  'attendance_rate'        => 94,
+  'milestones_completed'   => ['current' => 7, 'total' => 8],
+  'quizzes_completed'      => ['current' => 12, 'total' => 12],
+  'avg_quiz_score'         => 87,
+  'in_kind_services'       => 8,
+  'surveys_completed'      => ['current' => 5, 'total' => 5],
+  'tasks_completed'        => ['current' => 24, 'total' => 26],
+];
+
+// Team configuration and data
+// $teamData = [
+//   'leader' => [
+//     'id' => 'LD-001',
+//     'name' => 'Omar Hassan',
+//     'country' => 'Egypt',
+//     'email' => 'omar@example.com',
+//     'phone' => '+20 100 000 0000',
+//   ],
+//   'founders' => [
+//     ['name' => 'Omar Hassan', 'email' => 'omar@example.com', 'linkedin' => '#'],
+//     ['name' => 'Sara Ali', 'email' => 'sara@example.com', 'linkedin' => '#'],
+//   ],
+//   'employees' => [
+//     ['name' => 'Ahmed Mohamed', 'job' => 'Backend engineer', 'gender' => 'Male', 'employment' => 'Full time', 'start_date' => '2022-03-01'],
+//     ['name' => 'Mona Adel', 'job' => 'Product manager', 'gender' => 'Female', 'employment' => 'Full time', 'start_date' => '2021-10-15'],
+//   ],
+// ];
+
+// Ownership and investors data
+// $ownershipData = [
+//   'shareholders' => [
+//     ['name' => 'Omar Hassan', 'role' => 'founder_role', 'ownership' => '40%', 'text_class' => 'primary'],
+//     ['name' => 'Sara Ali', 'role' => 'cofounder_role', 'ownership' => '30%', 'text_class' => 'info'],
+//     ['name' => 'ABC Ventures', 'role' => 'investor_role', 'ownership' => '20%', 'text_class' => 'success'],
+//   ],
+//   'investors' => [
+//     ['name' => 'ABC Ventures', 'type' => 'vc'],
+//     ['name' => 'XYZ Angels Syndicate', 'type' => 'angel_group'],
+//   ],
+// ];
+
+// Screening data
+$screeningData = [
+  'initial' => [
+    'step_id' => 'STP-001',
+    'overall_score' => 4.3,
+    'date' => 'Jan 2025',
+    'criteria' => [
+      ['name' => 'Problem & solution', 'weight' => '30%', 'score' => 4.5],
+      ['name' => 'Market size', 'weight' => '25%', 'score' => 4.2],
+      ['name' => 'Team', 'weight' => '20%', 'score' => 4.6],
+    ],
+    'judges' => [
+      ['name' => 'Judge One', 'id' => 'J-001', 'score' => 4.2, 'comments' => 'Clear problem and strong traction in Egyptian market.'],
+      ['name' => 'Judge Two', 'id' => 'J-002', 'score' => 4.4, 'comments' => 'Team has relevant experience and solid execution plan.'],
+    ],
+  ],
+  'final' => [
+    'step_id' => 'STP-010',
+    'overall_score' => 4.6,
+    'date' => 'Mar 2025',
+    'criteria' => [
+      ['name' => 'Revenue & traction', 'weight' => '30%', 'score' => 4.7],
+      ['name' => 'Scalability', 'weight' => '25%', 'score' => 4.5],
+    ],
+    'judges' => [
+      ['name' => 'Judge Three', 'id' => 'J-010', 'score' => 4.6, 'comments' => 'Ready for next stage of funding, strong growth indicators.'],
+    ],
+  ],
+];
+
+// Mentorship data
+// $mentorshipData = [
+//   [
+//     'mentor' => 'Mentor A',
+//     'id' => 'M-001',
+//     'step_name' => 'Growth mentoring',
+//     'step_id' => 'STP-M-03',
+//     'date' => '2025-03-10',
+//     'duration' => '1.5h',
+//     'founder_attended' => 'Omar Hassan',
+//     'rating' => '5',
+//     'comments' => 'Helpful session on pricing strategy and B2B sales pipeline.',
+//   ],
+//   // Add more mentorship sessions here
+// ];
+
+//$milestones = [
+  //[
+    //'title' => 'MVP launch',
+   // 'description' => 'Launch first production version with payment gateway integration.',
+   // 'due_date' => '2025-04-15',
+   // 'completion' => 80, // %
+   // 'deliverables' => [
+     //   ['name' => 'Technical architecture PDF', 'type' => 'pdf', 'link' => '#'],
+       // ['name' => 'MVP demo video', 'type' => 'video', 'link' => '#'],
+    //],
+  //],
+//  // Add more milestones here
+//];
+
+$deliverableIcons = [
+  'pdf' => 'ti-file-pdf',
+  'video' => 'ti-video',
+];
+
+// $tasks = [
+//   [
+//     'title' => 'Customer interviews',
+//     'task_id' => 'TSK-001',
+//     'session_id' => 'TR-101',
+//     'session_title' => 'Lean startup fundamentals',
+//     'description' => 'Conduct ten customer interviews and summarize findings.',
+//     'due_date' => '2025-02-10',
+//     'completion_date' => '2025-02-08',
+//     'mentor' => 'Mentor A',
+//     'created_by' => 'Program manager',
+//     'status' => 'Completed',
+//   ],
+//   // Add more tasks here
+// ];
+
+// $quizzes = [
+//   [
+//     'quiz_id' => 'QZ-001',
+//     'title' => 'Lean startup quiz',
+//     'date_completed' => '2025-02-05',
+//     'founder' => 'Omar Hassan',
+//     'score' => '90%',
+//     'score_badge' => 'warning',
+//     'status' => __('startup.passed'),
+//   ],
+//   // Add more quizzes here
+// ];
+
+//$surveys = [
+  //[
+   // 'survey_id' => 'SV-001',
+    //'title' => 'Mid program satisfaction',
+    //'program_step' => 'Mid review step',
+    //'date_completed' => '2025-03-01',
+    //'answers_link' => '#', // هنا مش رابط هنا هيكون فى كل سؤال واجابته لوحدها 
+    //'badge_class' => 'primary',
+  //],
+  //// Add more surveys here
+//];
+
+//$services = [
+//  [
+//    'name' => 'Cloud credits',
+ //   'service_id' => 'SRV-001',
+ //   'description' => 'Cloud infrastructure credits for twelve months to support product development.',
+ //   'badge_class' => 'primary',
+ // ],
+ // [
+ //   'name' => 'Legal advisory session',
+  //  'service_id' => 'SRV-002',
+ //   'description' => 'One-on-one session with legal partner for company setup and shareholder agreement review.',
+  //  'badge_class' => 'primary',
+ // ],
+ // // Add more services here
+//];
+
+// $forms = [
+//   [
+//     'title' => 'Startup profiling form',
+//     'form_id' => 'FM-001',
+//     'step_name' => 'Application step form',
+//     'step_id' => 'STP-FM-01',
+//     'submission_date' => '2025-01-05 14:22',
+//     'badge_class' => 'primary',
+//     'modal_id' => 1,
+//     'fields' => [
+//       [
+//         'name' => 'Startup description',
+//         'type' => 'text',
+//         'value' => 'AI powered payment orchestration platform for SMEs.',
+//         'attachment' => null,
+//       ],
+//       [
+//         'name' => 'Pitch deck file',
+//         'type' => 'file',
+//         'value' => 'Uploaded',
+//         'attachment' => '#',
+//       ],
+//       [
+//         'name' => 'Industry',
+//         'type' => 'selection',
+//         'value' => 'Financial services',
+//         'attachment' => null,
+//       ],
+//       [
+//         'name' => 'Team size',
+//         'type' => 'number',
+//         'value' => '25',
+//         'attachment' => null,
+//       ],
+//       [
+//         'name' => 'Business model',
+//         'type' => 'selection',
+//         'value' => 'B2B SaaS',
+//         'attachment' => null,
+//       ],
+//       [
+//         'name' => 'Competitive landscape',
+//         'type' => 'text',
+//         'value' => 'Competitive landscape is moderate with a few dominant players.',
+//         'attachment' => null,
+//       ],
+//     ],
+//   ],
+//   // Add more forms here
+// ];
+
+$badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
+@endphp
+
 @section('content')
 <div class="content-wrapper">
   <div class="container-xxl grow container-p-y" id="contentToExport">
@@ -8,7 +263,7 @@
         <h4 class="mb-1">
           {{ __('startup.alumni_report_title') }}
         </h4>
-        <p class="text-muted mb-0 small">
+        <p class="mb-0 small">
           {{ __('startup.alumni_report_subtitle') }}
         </p>
       </div>
@@ -26,407 +281,348 @@
       </div>
     </div>
 
+    @php
+      $startupInfo = [
+        ['icon' => 'calendar-event', 'color' => 'info', 'label' => __('startup.est_date'), 'value' => $startup['established_at']],
+        ['icon' => 'briefcase', 'color' => 'warning', 'label' => __('startup.business_type'), 'value' => $startup['business_type']],
+        ['icon' => 'device-gamepad-3', 'color' => 'success', 'label' => __('startup.industry'), 'value' => $startup['industry']],
+        ['icon' => 'packages', 'color' => 'danger', 'label' => __('startup.sector'), 'value' => $startup['sector']],
+        ['icon' => 'users', 'color' => 'primary', 'label' => __('startup.team_size'), 'value' => $startup['team_size']],
+      ];
+
+      $programInfo = [
+        ['icon' => 'components', 'color' => 'secondary', 'label' => __('startup.program_Name'), 'value' => $startup['program']['name']],
+        ['icon' => 'color-swatch', 'color' => 'danger', 'label' => __('startup.program_cohort'), 'value' => $startup['program']['cohort']],
+        ['icon' => 'calendar-stats', 'color' => 'muted', 'label' => __('startup.program_start'), 'value' => $startup['program']['start']],
+        ['icon' => 'calendar-check', 'color' => 'success', 'label' => __('startup.program_end'), 'value' => $startup['program']['end']],
+      ];
+
+      $socials = [
+        ['key' => 'website', 'icon' => 'world'],
+        ['key' => 'linkedin', 'icon' => 'brand-linkedin'],
+        ['key' => 'twitter', 'icon' => 'brand-x'],
+        ['key' => 'facebook', 'icon' => 'brand-facebook'],
+        ['key' => 'instagram', 'icon' => 'brand-instagram'],
+        ['key' => 'youtube', 'icon' => 'brand-youtube'],
+      ];
+    @endphp
+
     <!-- Startup Profile Card -->
     <div class="row mb-6">
       <div class="col-12">
         <div class="card h-100 shadow-sm border-0">
           <div class="card-body">
+
+            {{-- Header --}}
             <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 pb-5 border-bottom">
               <div class="grow">
-                <h5 class="mb-2 fw-bold text-dark d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center gap-3 mb-4">
                   <div class="avatar avatar-lg">
-                    <div class="avatar-initial rounded-circle bg-label-primary">
-                      <i class="ti ti-building-skyscraper ti-xl"></i>
-                    </div>
+                    @if ($startup['logo'])
+                      <img src="{{ $startup['logo'] }}" alt="Logo" class="rounded-circle">
+                    @else
+                      <div class="avatar-initial rounded-circle bg-label-primary">
+                        <i class="ti ti-building-skyscraper ti-xl"></i>
+                      </div>
+                    @endif
                   </div>
-                  <span>PayLinkx</span>
-                </h5>
-                <p class="text-muted small mb-0">{{ __('startup.overview_description') }}</p>
+                  <div>
+                    <h5 class="mb-0 fw-bold text-dark">{{ $startup['name'] }}</h5>
+                    <span class="text-secondary small">{{ $startup['industry'] }}</span>
+                  </div>
+                </div>
+                <p class="text-muted small mb-0">{{ $startup['description'] }}</p>
               </div>
+
+              {{-- Badges --}}
               <div class="d-flex flex-wrap gap-2">
                 <span class="badge bg-label-primary rounded-pill">
-                  <i class="ti ti-building me-1"></i>Growthlabs
-                </span>
-                <span class="badge bg-label-secondary rounded-pill">
-                  <i class="ti ti-cloud me-1"></i>{{ __('startup.badge_saas') }}
+                  <i class="ti ti-building me-1"></i>{{ $startup['organization'] }}
                 </span>
                 <span class="badge bg-label-info rounded-pill">
-                  <i class="ti ti-map-pin me-1"></i>Egypt · Cairo
+                  <i class="ti ti-map-pin me-1"></i>{{ $startup['location'] }}
                 </span>
               </div>
             </div>
+
+            {{-- Startup Info --}}
             <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-4 py-5 border-bottom">
-              <div class="text-center">
-                <small
-                  class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
-                  <i class="ti ti-calendar-event text-info"></i>{{ __('startup.est_date') }}
-                </small>
-                <h6 class="fw-bold text-dark mb-0">2019-05-01</h6>
-              </div>
-              <div class="text-center">
-                <small
-                  class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
-                  <i class="ti ti-briefcase text-warning"></i>{{ __('startup.business_type') }}
-                </small>
-                <h6 class="fw-bold text-dark mb-0">B2B</h6>
-              </div>
-              <div class="text-center">
-                <small
-                  class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
-                  <i class="ti ti-device-gamepad-3 text-success"></i>{{ __('startup.industry') }}
-                </small>
-                <h6 class="fw-bold text-dark mb-0">Financial Services</h6>
-              </div>
-              <div class="text-center">
-                <small
-                  class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
-                  <i class="ti ti-packages text-danger"></i>{{ __('startup.sector') }}
-                </small>
-                <h6 class="fw-bold text-dark mb-0">Payments</h6>
-              </div>
-              <div class="text-center">
-                <small
-                  class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
-                  <i class="ti ti-users text-primary"></i>{{ __('startup.team_size') }}
-                </small>
-                <h6 class="fw-bold text-dark mb-0">25+</h6>
-              </div>
+              @foreach ($startupInfo as $item)
+                <div class="text-center">
+                  <small class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
+                    <i class="ti ti-{{ $item['icon'] }} text-{{ $item['color'] }}"></i>
+                    {{ $item['label'] }}
+                  </small>
+                  <h6 class="fw-bold text-dark mb-0">{{ $item['value'] }}</h6>
+                </div>
+              @endforeach
             </div>
+
+            {{-- Program Info --}}
             <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-4 py-5">
-              <div class="text-center">
-                <small
-                  class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
-                  <i class="ti ti-components text-secondary"></i>{{ __('startup.program_Name') }}
-                </small>
-                <h6 class="fw-bold text-dark mb-0">Fintech Accelerator 2025</h6>
-              </div>
-              <div class="text-center">
-                <small
-                  class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
-                  <i class="ti ti-color-swatch text-danger"></i>{{ __('startup.program_cohort') }}
-                </small>
-                <h6 class="fw-bold text-dark mb-0">Cohort 3</h6>
-              </div>
-              <div class="text-center">
-                <small
-                  class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
-                  <i class="ti ti-calendar-stats text-muted"></i>{{ __('startup.program_start') }}
-                </small>
-                <h6 class="fw-bold text-dark mb-0">10 Jan 2025</h6>
-              </div>
-              <div class="text-center">
-                <small
-                  class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
-                  <i class="ti ti-calendar-check text-success"></i>{{ __('startup.program_end') }}
-                </small>
-                <h6 class="fw-bold text-dark mb-0">15 Jun 2025</h6>
-              </div>
+              @foreach ($programInfo as $item)
+                <div class="text-center">
+                  <small class="text-muted text-uppercase fw-semibold d-block mb-2 d-flex align-items-center justify-content-center gap-1">
+                    <i class="ti ti-{{ $item['icon'] }} text-{{ $item['color'] }}"></i>
+                    {{ $item['label'] }}
+                  </small>
+                  <h6 class="fw-bold text-dark mb-0">{{ $item['value'] }}</h6>
+                </div>
+              @endforeach
             </div>
+
+            {{-- Social Links --}}
             <div class="pt-5 d-flex flex-wrap gap-4 border-top">
-              <a href="#"
-                class="d-inline-flex align-items-center fw-medium text-decoration-none link-primary hover-animate">
-                <i class="ti ti-world me-2"></i>{{ __('startup.website') }} <i class="ti ti-external-link ms-1 small"></i>
-              </a>
-              <a href="#"
-                class="d-inline-flex align-items-center fw-medium text-decoration-none link-primary hover-animate">
-                <i class="ti ti-brand-linkedin me-2"></i>{{ __('startup.linkedin') }} <i class="ti ti-external-link ms-1 small"></i>
-              </a>
-              <a href="#"
-                class="d-inline-flex align-items-center fw-medium text-decoration-none link-primary hover-animate">
-                <i class="ti ti-brand-twitter me-2"></i>{{ __('startup.twitter') }} <i class="ti ti-external-link ms-1 small"></i>
-              </a>
+              @foreach ($socials as $social)
+                @if ($social['key'])
+                  <a href="{{ $startup['links'][$social['key']] }}"
+                    class="d-inline-flex align-items-center fw-medium text-decoration-none link-primary hover-animate">
+                    <i class="ti ti-{{ $social['icon'] }} me-2"></i>
+                    {{ __('startup.' . $social['key']) }}
+                    <i class="ti ti-external-link ms-1 small"></i>
+                  </a>
+                @endif
+              @endforeach
             </div>
           </div>
         </div>
       </div>
     </div>
+    <!--/ Startup Profile Card -->
 
+    @php
+      $startupStatsConfig = [
+        'screening_score' => [
+            'format' => 'fraction',
+            'label'  => __('startup.screening_score'),
+            'icon'   => 'search',
+            'color'  => 'primary',
+        ],
+        'final_screening_score' => [
+            'format' => 'fraction',
+            'label'  => __('startup.final_screening_score'),
+            'icon'   => 'award',
+            'color'  => 'success',
+        ],
+        'training_hours' => [
+            'format' => 'time',
+            'label'  => __('startup.training_hours'),
+            'icon'   => 'book',
+            'color'  => 'warning',
+        ],
+        'mentorship_hours' => [
+            'format' => 'time',
+            'label'  => __('startup.mentorship_hours'),
+            'icon'   => 'school',
+            'color'  => 'info',
+        ],
+        'attendance_rate' => [
+            'format' => 'percentage',
+            'label'  => __('startup.attendance_rate'),
+            'icon'   => 'user-check',
+            'color'  => 'success',
+        ],
+        'milestones_completed' => [
+            'format' => 'fraction',
+            'label'  => __('startup.milestones_completed'),
+            'icon'   => 'flag-check',
+            'color'  => 'primary',
+        ],
+        'quizzes_completed' => [
+            'format' => 'fraction',
+            'label'  => __('startup.quizzes_completed'),
+            'icon'   => 'help',
+            'color'  => 'warning',
+        ],
+        'avg_quiz_score' => [
+            'format' => 'percentage',
+            'label'  => __('startup.avg_quiz_score'),
+            'icon'   => 'chart-bar',
+            'color'  => 'success',
+        ],
+        'in_kind_services' => [
+            'format' => 'number',
+            'label'  => __('startup.in_kind_services'),
+            'icon'   => 'gift',
+            'color'  => 'info',
+        ],
+        'surveys_completed' => [
+            'format' => 'fraction',
+            'label'  => __('startup.surveys_completed'),
+            'icon'   => 'mood-smile',
+            'color'  => 'primary',
+        ],
+        'tasks_completed' => [
+            'format' => 'fraction',
+            'label'  => __('startup.tasks_completed'),
+            'icon'   => 'checklist',
+            'color'  => 'primary',
+        ],
+      ];
+    @endphp
     <!-- Outcome Summary Section -->
     <div class="row mb-6">
       <div class="col-12">
         <div class="row gy-6">
-          <!-- Screening Score -->
-          <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-            <div class="card card-border-shadow-primary h-100 cursor-pointer">
-              <div class="card-body text-center">
-                <div class="d-flex align-items-center justify-content-center mb-2">
-                  <div class="avatar avatar-md me-4">
-                    <div class="avatar-initial rounded bg-label-primary">
-                      <i class="ti ti-search ti-md"></i>
-                    </div>
-                  </div>
-                  <h5 class="mb-0">4.3 / 5</h5>
-                </div>
-                <small class="text-center">{{ __('startup.screening_score') }}</small>
-              </div>
-            </div>
-          </div>
 
-          <!-- Final Screening Score -->
-          <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-            <div class="card card-border-shadow-success h-100 cursor-pointer">
-              <div class="card-body text-center">
-                <div class="d-flex align-items-center justify-content-center mb-2">
-                  <div class="avatar avatar-md me-4">
-                    <div class="avatar-initial rounded bg-label-success">
-                      <i class="ti ti-award ti-md"></i>
-                    </div>
-                  </div>
-                  <h5 class="mb-0">4.6 / 5</h5>
-                </div>
-                <small class="text-center">{{ __('startup.final_screening_score') }}</small>
-              </div>
-            </div>
-          </div>
+          @foreach ($startupStatsConfig as $key => $config)
+            @php $value = $startupStatValues[$key] ?? null; @endphp
 
-          <!-- Training Hours -->
-          <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-            <div class="card card-border-shadow-warning h-100 cursor-pointer">
-              <div class="card-body text-center">
-                <div class="d-flex align-items-center justify-content-center mb-2">
-                  <div class="avatar avatar-md me-4">
-                    <div class="avatar-initial rounded bg-label-warning">
-                      <i class="ti ti-book ti-md"></i>
-                    </div>
-                  </div>
-                  <h5 class="mb-0">32h 15m</h5>
-                </div>
-                <small class="text-center">{{ __('startup.training_hours') }}</small>
-              </div>
-            </div>
-          </div>
+            <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+              <div class="card card-border-shadow-{{ $config['color'] }} h-100 cursor-pointer">
+                <div class="card-body text-center">
 
-          <!-- Mentorship Hours -->
-          <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-            <div class="card card-border-shadow-info h-100 cursor-pointer">
-              <div class="card-body text-center">
-                <div class="d-flex align-items-center justify-content-center mb-2">
-                  <div class="avatar avatar-md me-4">
-                    <div class="avatar-initial rounded bg-label-info">
-                      <i class="ti ti-school ti-md"></i>
+                  <div class="d-flex align-items-center justify-content-center mb-2">
+                    <div class="avatar avatar-md me-4">
+                      <div class="avatar-initial rounded bg-label-{{ $config['color'] }}">
+                        <i class="ti ti-{{ $config['icon'] }} ti-md"></i>
+                      </div>
                     </div>
-                  </div>
-                  <h5 class="mb-0">24h 30m</h5>
-                </div>
-                <small class="text-center">{{ __('startup.mentorship_hours') }}</small>
-              </div>
-            </div>
-          </div>
 
-          <!-- Attendance Rate -->
-          <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-            <div class="card card-border-shadow-success h-100 cursor-pointer">
-              <div class="card-body text-center">
-                <div class="d-flex align-items-center justify-content-center mb-2">
-                  <div class="avatar avatar-md me-4">
-                    <div class="avatar-initial rounded bg-label-success">
-                      <i class="ti ti-user-check ti-md"></i>
-                    </div>
-                  </div>
-                  <h5 class="mb-0">94%</h5>
-                </div>
-                <small class="text-center">{{ __('startup.attendance_rate') }}</small>
-              </div>
-            </div>
-          </div>
+                    <h5 class="mb-0">
+                      @switch($config['format'])
 
-          <!-- Milestones Completed -->
-          <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-            <div class="card card-border-shadow-primary h-100 cursor-pointer">
-              <div class="card-body text-center">
-                <div class="d-flex align-items-center justify-content-center mb-2">
-                  <div class="avatar avatar-md me-4">
-                    <div class="avatar-initial rounded bg-label-primary">
-                      <i class="ti ti-flag-check ti-md"></i>
-                    </div>
-                  </div>
-                  <h5 class="mb-0">7 / 8</h5>
-                </div>
-                <small class="text-center">{{ __('startup.milestones_completed') }}</small>
-              </div>
-            </div>
-          </div>
+                        @case('fraction')
+                          {{ $value['current'] ?? 0 }} / {{ $value['total'] ?? 0 }}
+                          @break
 
-          <!-- Quizzes Completed -->
-          <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-            <div class="card card-border-shadow-warning h-100 cursor-pointer">
-              <div class="card-body text-center">
-                <div class="d-flex align-items-center justify-content-center mb-2">
-                  <div class="avatar avatar-md me-4">
-                    <div class="avatar-initial rounded bg-label-warning">
-                      <i class="ti ti-help ti-md"></i>
-                    </div>
-                  </div>
-                  <h5 class="mb-0">12 / 12</h5>
-                </div>
-                <small class="text-center">{{ __('startup.quizzes_completed') }}</small>
-              </div>
-            </div>
-          </div>
+                        @case('time')
+                          {{ $value['hours'] ?? 0 }}h {{ $value['minutes'] ?? 0 }}m
+                          @break
 
-          <!-- Average Quiz Score -->
-          <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-            <div class="card card-border-shadow-success h-100 cursor-pointer">
-              <div class="card-body text-center">
-                <div class="d-flex align-items-center justify-content-center mb-2">
-                  <div class="avatar avatar-md me-4">
-                    <div class="avatar-initial rounded bg-label-success">
-                      <i class="ti ti-chart-bar ti-md"></i>
-                    </div>
-                  </div>
-                  <h5 class="mb-0">87%</h5>
-                </div>
-                <small class="text-center">{{ __('startup.avg_quiz_score') }}</small>
-              </div>
-            </div>
-          </div>
+                        @case('percentage')
+                          {{ $value ?? 0 }}%
+                          @break
 
-          <!-- In-Kind Services -->
-          <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-            <div class="card card-border-shadow-info h-100 cursor-pointer">
-              <div class="card-body text-center">
-                <div class="d-flex align-items-center justify-content-center mb-2">
-                  <div class="avatar avatar-md me-4">
-                    <div class="avatar-initial rounded bg-label-info">
-                      <i class="ti ti-gift ti-md"></i>
-                    </div>
-                  </div>
-                  <h5 class="mb-0">8</h5>
-                </div>
-                <small class="text-center">{{ __('startup.in_kind_services') }}</small>
-              </div>
-            </div>
-          </div>
+                        @default
+                          {{ $value ?? 0 }}
 
-          <!-- Surveys Completed -->
-          <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-            <div class="card card-border-shadow-primary h-100 cursor-pointer">
-              <div class="card-body text-center">
-                <div class="d-flex align-items-center justify-content-center mb-2">
-                  <div class="avatar avatar-md me-4">
-                    <div class="avatar-initial rounded bg-label-primary">
-                      <i class="ti ti-mood-smile ti-md"></i>
-                    </div>
+                      @endswitch
+                    </h5>
                   </div>
-                  <h5 class="mb-0">5 / 5</h5>
+
+                  <small class="text-center">{{ $config['label'] }}</small>
+
                 </div>
-                <small class="text-center">{{ __('startup.surveys_completed') }}</small>
               </div>
             </div>
-          </div>
-          <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-            <div class="card card-border-shadow-primary h-100 cursor-pointer">
-              <div class="card-body text-center">
-                <div class="d-flex align-items-center justify-content-center mb-2">
-                  <div class="avatar avatar-md me-4">
-                    <div class="avatar-initial rounded bg-label-primary">
-                      <i class="ti ti-checklist ti-md"></i>
-                    </div>
-                  </div>
-                  <h5 class="mb-0">24 / 26</h5>
-                </div>
-                <small class="text-center">{{ __('startup.tasks_completed') }}</small>
-              </div>
-            </div>
-          </div>
+
+          @endforeach
+
         </div>
       </div>
     </div>
     <!-- / Outcome Summary Section -->
 
+    @php
+      $startupTabs = [
+        [
+          'id' => 'basic',
+          'icon' => 'info-square',
+          'label' => __('startup.startup_info_tab'),
+          'active' => true,
+        ],
+        [
+          'id' => 'team',
+          'icon' => 'users',
+          'label' => __('startup.team_tab'),
+        ],
+        [
+          'id' => 'ownership',
+          'icon' => 'briefcase',
+          'label' => __('startup.ownership_investors_tab'),
+        ],
+        [
+          'id' => 'screening',
+          'icon' => 'search',
+          'label' => __('startup.screening_tab'),
+        ],
+        [
+          'id' => 'training',
+          'icon' => 'school',
+          'label' => __('startup.training_tab'),
+        ],
+        [
+          'id' => 'mentorship',
+          'icon' => 'school',
+          'label' => __('startup.mentorship_tab'),
+        ],
+        [
+          'id' => 'milestones',
+          'icon' => 'flag-check',
+          'label' => __('startup.milestones_tab'),
+        ],
+        [
+          'id' => 'tasks',
+          'icon' => 'checklist',
+          'label' => __('startup.tasks_tab'),
+        ],
+        [
+          'id' => 'quizzes',
+          'icon' => 'help',
+          'label' => __('startup.quizzes_tab'),
+        ],
+        [
+          'id' => 'surveys',
+          'icon' => 'mood-smile',
+          'label' => __('startup.surveys_tab'),
+        ],
+        [
+          'id' => 'services',
+          'icon' => 'gift',
+          'label' => __('startup.services_tab'),
+        ],
+        [
+          'id' => 'forms',
+          'icon' => 'file-text',
+          'label' => __('startup.forms_tab'),
+        ],
+      ];
+    @endphp
+    <!-- Navigation Pills -->
     <div id="navigation-pills" class="card mb-4 shadow-sm">
       <div class="card-body px-4 pt-4 pb-0">
         <div class="nav-align-top">
-          <ul class="nav nav-pills flex-nowrap gap-2 pb-4" style="max-width: 100%; overflow-x: auto;" role="tablist">
-            <li class="nav-item" role="presentation">
-              <a type="button" class="nav-link active" id="tab-basic-trigger" href="#tab-basic" role="tab"
-                aria-controls="tab-basic" aria-selected="true">
-                <i class="ti ti-info-square me-1"></i>{{ __('startup.startup_info_tab') }}
-              </a>
-            </li>
-            <li class="nav-item" role="presentation">
-              <a type="button" class="nav-link" id="tab-team-trigger" href="#tab-team" role="tab"
-                aria-controls="tab-team" aria-selected="false">
-                <i class="ti ti-users me-1"></i>{{ __('startup.team_tab') }}
-              </a>
-            </li>
-            <li class="nav-item" role="presentation">
-              <a type="button" class="nav-link" id="tab-ownership-trigger" href="#tab-ownership" role="tab"
-                aria-controls="tab-ownership" aria-selected="false">
-                <i class="ti ti-briefcase me-1"></i>{{ __('startup.ownership_investors_tab') }}
-              </a>
-            </li>
-            <li class="nav-item" role="presentation">
-              <a type="button" class="nav-link" id="tab-screening-trigger" href="#tab-screening" role="tab"
-                aria-controls="tab-screening" aria-selected="false">
-                <i class="ti ti-search me-1"></i>{{ __('startup.screening_tab') }}
-              </a>
-            </li>
-            <li class="nav-item" role="presentation">
-              <a type="button" class="nav-link" id="tab-training-trigger" href="#tab-training" role="tab"
-                aria-controls="tab-book" aria-selected="false">
-                <i class="ti ti-school me-1"></i>{{ __('startup.training_tab') }}
-              </a>
-            </li>
-            <li class="nav-item" role="presentation">
-              <a type="button" class="nav-link" id="tab-mentorship-trigger" href="#tab-mentorship" role="tab"
-                aria-controls="tab-mentorship" aria-selected="false">
-                <i class="ti ti-school me-1"></i>{{ __('startup.mentorship_tab') }}
-              </a>
-            </li>
-            <li class="nav-item" role="presentation">
-              <a type="button" class="nav-link" id="tab-milestones-trigger" href="#tab-milestones" role="tab"
-                aria-controls="tab-milestones" aria-selected="false">
-                <i class="ti ti-flag-check me-1"></i>{{ __('startup.milestones_tab') }}
-              </a>
-            </li>
-            <li class="nav-item" role="presentation">
-              <a type="button" class="nav-link" id="tab-tasks-trigger" href="#tab-tasks" role="tab"
-                aria-controls="tab-tasks" aria-selected="false">
-                <i class="ti ti-checklist me-1"></i>{{ __('startup.tasks_tab') }}
-              </a>
-            </li>
-            <li class="nav-item" role="presentation">
-              <a type="button" class="nav-link" id="tab-quizzes-trigger" href="#tab-quizzes" role="tab"
-                aria-controls="tab-quizzes" aria-selected="false">
-                <i class="ti ti-help me-1"></i>{{ __('startup.quizzes_tab') }}
-              </a>
-            </li>
-            <li class="nav-item" role="presentation">
-              <a type="button" class="nav-link" id="tab-surveys-trigger" href="#tab-surveys" role="tab"
-                aria-controls="tab-surveys" aria-selected="false">
-                <i class="ti ti-mood-smile me-1"></i>{{ __('startup.surveys_tab') }}
-              </a>
-            </li>
-            <li class="nav-item" role="presentation">
-              <a type="button" class="nav-link" id="tab-services-trigger" href="#tab-services" role="tab"
-                aria-controls="tab-services" aria-selected="false">
-                <i class="ti ti-gift me-1"></i>{{ __('startup.services_tab') }}
-              </a>
-            </li>
-            <li class="nav-item" role="presentation">
-              <a type="button" class="nav-link" id="tab-forms-trigger" href="#tab-forms" role="tab"
-                aria-controls="tab-forms" aria-selected="false">
-                <i class="ti ti-file-text me-1"></i>{{ __('startup.forms_tab') }}
-              </a>
-            </li>
+          <ul class="nav nav-pills flex-nowrap gap-2 pb-4"
+              style="max-width: 100%; overflow-x: auto;"
+              role="tablist">
+
+            @foreach ($startupTabs as $tab)
+              <li class="nav-item" role="presentation">
+                <a
+                  type="button"
+                  class="nav-link {{ !empty($tab['active']) ? 'active' : '' }}"
+                  id="tab-{{ $tab['id'] }}-trigger"
+                  href="#tab-{{ $tab['id'] }}"
+                  role="tab"
+                  aria-controls="tab-{{ $tab['id'] }}"
+                  aria-selected="{{ !empty($tab['active']) ? 'true' : 'false' }}"
+                >
+                  <i class="ti ti-{{ $tab['icon'] }} me-1"></i>
+                  {{ $tab['label'] }}
+                </a>
+              </li>
+            @endforeach
+
           </ul>
         </div>
       </div>
     </div>
+    <!--/ Navigation Pills -->
 
     <div class="tab-content p-0 shadow-none" id="alumniTabContent" style="max-width: 100%; overflow-x: hidden;">
+      <!-- Basic Info Tab -->
       <div class="tab-pane fade show active" id="tab-basic" role="tabpanel" aria-labelledby="tab-basic-trigger">
         <div id="basic-info" class="card mb-6 shadow-sm">
           <div class="card-header d-flex justify-content-between align-it">
             <div>
-              <h5 class="card-title mb-0 d-flex align-items-center gap-2">
+              <h5 class="card-title mb-0 d-flex align-items-center gap-2 text-capitalize">
                 <i class="ti ti-file-info text-primary"></i>{{ __('startup.basic_info_title') }}
               </h5>
               <small class="text-muted">{{ __('startup.static_data_note') }}</small>
             </div>
             <span class="badge bg-label-success rounded-pill" style="height: fit-content;">
-              <i class="ti ti-check me-1"></i>Alumni
+              <i class="ti ti-check me-1"></i>{{ $startup['is_alumni'] ? __('startup.alumni') : __('startup.non_alumni') }}
             </span>
           </div>
           <div class="card-body">
@@ -434,9 +630,9 @@
               <div class="col-12 col-md-4">
                 <div class="p-3 rounded bg-light-subtle border">
                   <small class="text-muted text-uppercase fw-semibold d-block mb-1">
-                    <i class="ti ti-briefcase me-1"></i>{{ __('startup.startup_name') }}
+                    <i class="ti ti-building-skyscraper me-1"></i>{{ __('startup.startup_name') }}
                   </small>
-                  <p class="mb-0 fw-bold text-dark">PayLinkx</p>
+                  <p class="mb-0 fw-bold text-dark">{{ $startup['name'] }}</p>
                 </div>
               </div>
               <div class="col-12 col-md-4">
@@ -444,23 +640,15 @@
                   <small class="text-muted text-uppercase fw-semibold d-block mb-1">
                     <i class="ti ti-calendar me-1"></i>{{ __('startup.established_date') }}
                   </small>
-                  <p class="mb-0 fw-bold text-dark">2019-05-01</p>
+                  <p class="mb-0 fw-bold text-dark">{{ $startup['established_at'] }}</p>
                 </div>
               </div>
               <div class="col-12 col-md-4">
                 <div class="p-3 rounded bg-light-subtle border">
                   <small class="text-muted text-uppercase fw-semibold d-block mb-1">
-                    <i class="ti ti-map-pin me-1"></i>{{ __('startup.location') }}
+                    <i class="ti ti-briefcase me-1"></i>{{ __('startup.business_type') }}
                   </small>
-                  <p class="mb-0 fw-bold text-dark">Cairo, Egypt</p>
-                </div>
-              </div>
-              <div class="col-12 col-md-4">
-                <div class="p-3 rounded bg-light-subtle border">
-                  <small class="text-muted text-uppercase fw-semibold d-block mb-1">
-                    <i class="ti ti-building me-1"></i>{{ __('startup.business_type') }}
-                  </small>
-                  <p class="mb-0 fw-bold text-dark">B2B</p>
+                  <p class="mb-0 fw-bold text-dark">{{ $startup['business_type'] }}</p>
                 </div>
               </div>
               <div class="col-12 col-md-4">
@@ -468,55 +656,37 @@
                   <small class="text-muted text-uppercase fw-semibold d-block mb-1">
                     <i class="ti ti-bulb me-1"></i>{{ __('startup.technology') }}
                   </small>
-                  <p class="mb-0 fw-bold text-dark">AI, APIs, Cloud</p>
+                  <p class="mb-0 fw-bold text-dark">{{ $startup['technologies'] ?? '--' }}</p>
                 </div>
               </div>
               <div class="col-12 col-md-4">
                 <div class="p-3 rounded bg-light-subtle border">
                   <small class="text-muted text-uppercase fw-semibold d-block mb-1">
-                    <i class="ti ti-world me-1"></i>{{ __('startup.website') }}
+                    <i class="ti ti-world me-1"></i>{{ __('startup.development_stage') }}
                   </small>
-                  <p class="mb-0">
-                    <a href="#" class="fw-bold text-decoration-none link-primary">paylinkx.com</a>
-                  </p>
+                  <p class="mb-0 fw-bold text-dark">{{ $startup['development_stage'] ?? '--' }}</p>
                 </div>
               </div>
-              <div class="col-12 col-md-8">
+              <div class="col-12 col-md-4">
                 <div class="p-3 rounded bg-light-subtle border">
-                  <small class="text-muted text-uppercase fw-semibold d-block mb-2">
-                    <i class="ti ti-share me-1"></i>{{ __('startup.social_media') }}
+                  <small class="text-muted text-uppercase fw-semibold d-block mb-1">
+                    <i class="ti ti-world me-1"></i>{{ __('startup.funding_stage') }}
                   </small>
-                  <div class="d-flex flex-wrap gap-3 mb-0">
-                    <a href="#" class="badge bg-label-primary text-decoration-none">
-                      <i class="ti ti-brand-linkedin me-1"></i>{{ __('startup.linkedin') }}
-                    </a>
-                    <a href="#" class="badge bg-label-secondary text-decoration-none">
-                      <i class="ti ti-brand-facebook me-1"></i>Facebook
-                    </a>
-                    <a href="#" class="badge bg-label-info text-decoration-none">
-                      <i class="ti ti-brand-twitter me-1"></i>{{ __('startup.twitter') }}
-                    </a>
-                  </div>
+                  <p class="mb-0 fw-bold text-dark">{{ $startup['funding_stage'] ?? '--' }}</p>
                 </div>
               </div>
             </div>
             <hr class="my-4" />
-            <div class="row g-4">
-              <div class="col-12 col-md-6">
-                <h6 class="mb-3 fw-bold d-flex align-items-center gap-2">
-                  <i class="ti ti-target text-success"></i>{{ __('startup.sustainability_goals') }}
-                </h6>
-                <ul class="list-group list-group-flush rounded border">
-                  <li class="list-group-item d-flex justify-content-between align-items-center py-3">
-                    <span class="fw-medium">SDG 8 — Decent work &amp; economic growth</span>
-                    <span class="badge bg-label-primary">{{ __('startup.primary') }}</span>
-                  </li>
-                  <li class="list-group-item d-flex justify-content-between align-items-center py-3">
-                    <span class="fw-medium">SDG 9 — Industry innovation &amp; infrastructure</span>
-                    <span class="badge bg-label-secondary">{{ __('startup.secondary') }}</span>
-                  </li>
-                </ul>
+            <h6 class="mb-3 fw-bold d-flex align-items-center gap-2">
+              <i class="ti ti-target text-success"></i>{{ __('startup.sustainability_goals') }}
+            </h6>
+            <div class="row">
+              <div class="d-flex align-items-center gap-4">
+                @foreach($startup['sdgs'] as $sdg)
+                <span class="badge p-3 bg-light-subtle text-dark border">{{ $sdg }}</span>
+                @endforeach
               </div>
+              <hr class="my-4" />
               <div class="col-12 col-md-6">
                 <h6 class="mb-3 fw-bold d-flex align-items-center gap-2">
                   <i class="ti ti-shield-check text-warning"></i>{{ __('startup.legal_information') }}
@@ -532,27 +702,22 @@
                   </dl>
                 </div>
               </div>
-            </div>
-            <hr class="my-4" />
-            <div>
-              <h6 class="mb-3 fw-bold d-flex align-items-center gap-2">
-                <i class="ti ti-presentation text-info"></i>{{ __('startup.pitch_deck_and_video') }}
-              </h6>
-              <div class="row g-3">
-                <div class="col-12 col-md-6">
-                  <a href="#" class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-between">
+              <div class="col-12 col-md-6">
+                <h6 class="mb-3 fw-bold d-flex align-items-center gap-2">
+                  <i class="ti ti-presentation text-info"></i>{{ __('startup.pitch_deck_and_video') }}
+                </h6>
+                <div class="d-flex flex-column justify-content-between">
+                  <a href="#" class="btn btn-lg btn-outline-primary w-100 mb-2 d-flex align-items-center justify-content-between">
                     <span class="d-flex align-items-center gap-2">
                       <i class="ti ti-slideshow"></i>{{ __('startup.pitch_deck_file') }}
                     </span>
                     <i class="ti ti-download"></i>
                   </a>
-                </div>
-                <div class="col-12 col-md-6">
-                  <a href="#" class="btn btn-outline-info w-100 d-flex align-items-center justify-content-between">
+                  <a href="#" class="btn btn-lg btn-outline-info w-100 d-flex align-items-center justify-content-between">
                     <span class="d-flex align-items-center gap-2">
                       <i class="ti ti-video"></i>{{ __('startup.pitch_video') }}
                     </span>
-                    <i class="ti ti-play-circle"></i>
+                    <i class="ti ti-player-play"></i>
                   </a>
                 </div>
               </div>
@@ -560,22 +725,27 @@
           </div>
         </div>
       </div>
+      <!--/ Basic Info Tab -->
 
+      <!-- Team Tab -->
       <div class="tab-pane fade show active" id="tab-team" role="tabpanel" aria-labelledby="tab-team-trigger">
         <div id="team" class="card mb-6 shadow-sm">
           <div class="card-header d-flex justify-content-between align-items-center">
             <div>
-              <h5 class="card-title mb-0 d-flex align-items-center gap-2">
+              <h5 class="card-title mb-0 d-flex align-items-center gap-2 text-capitalize">
                 <i class="ti ti-users-group text-primary"></i>{{ __('startup.team_tab') }}
               </h5>
               <small class="text-muted">{{ __('startup.team_section_subtitle') }}</small>
             </div>
             <span class="badge bg-label-info">
-              <i class="ti ti-users me-1"></i>{{ __('startup.team_size_badge', ['count' => 8]) }}
+              <i class="ti ti-users me-1"></i>{{ __('startup.team_size_badge', ['count' => count($teamData['employees']) +
+              count($teamData['founders']) + 1]) }}
             </span>
           </div>
+      
           <div class="card-body">
             <div class="row g-6">
+              {{-- Leader --}}
               <div class="col-12 col-lg-4">
                 <div class="card card-body border h-100 shadow-sm"
                   style="background: linear-gradient(135deg, rgba(88, 86, 214, 0.08) 0%, transparent 100%);">
@@ -583,20 +753,21 @@
                     <i class="ti ti-crown text-warning"></i>{{ __('startup.startup_leader') }}
                   </h6>
                   <dl class="row mb-0 gy-3">
-                    <dt class="col-5 text-secondary fw-normal small">ID</dt>
-                    <dd class="col-7 text-end fw-bold text-dark">LD-001</dd>
-                    <dt class="col-5 text-secondary fw-normal small">Full name</dt>
-                    <dd class="col-7 text-end fw-bold text-dark">Omar Hassan</dd>
-                    <dt class="col-5 text-secondary fw-normal small">Country</dt>
-                    <dd class="col-7 text-end fw-bold text-dark">Egypt</dd>
-                    <dt class="col-5 text-secondary fw-normal small">Email</dt>
-                    <dd class="col-7 text-end"><a href="mailto:omar@example.com"
-                        class="fw-medium text-primary">omar@example.com</a></dd>
-                    <dt class="col-5 text-secondary fw-normal small">Phone</dt>
-                    <dd class="col-7 text-end fw-bold text-dark">+20 100 000 0000</dd>
+                    @foreach ($teamData['leader'] as $key => $value)
+                    <dt class="col-5 text-secondary fw-normal small">{{ ucfirst($key) }}</dt>
+                    <dd class="col-7 text-end fw-bold text-dark">
+                      @if($key === 'email')
+                      <a href="mailto:{{ $value }}" class="fw-medium text-primary">{{ $value }}</a>
+                      @else
+                      {{ $value }}
+                      @endif
+                    </dd>
+                    @endforeach
                   </dl>
                 </div>
               </div>
+      
+              {{-- Founders --}}
               <div class="col-12 col-lg-8">
                 <div class="card card-body border h-100 shadow-sm">
                   <h6 class="mb-3 fw-bold d-flex align-items-center gap-2">
@@ -612,30 +783,32 @@
                         </tr>
                       </thead>
                       <tbody>
+                        @foreach ($teamData['founders'] as $founder)
                         <tr class="border-top">
-                          <td class="fw-medium">Omar Hassan</td>
-                          <td>omar@example.com</td>
-                          <td class="text-end"><a href="#" class="fw-medium text-primary">{{ __('startup.linkedin_view_profile') }}</a></td>
+                          <td class="fw-medium">{{ $founder['name'] }}</td>
+                          <td>{{ $founder['email'] }}</td>
+                          <td class="text-end">
+                            <a href="{{ $founder['linkedin'] }}" class="fw-medium text-primary">
+                              {{ __('startup.linkedin_view_profile') }}
+                            </a>
+                          </td>
                         </tr>
-                        <tr>
-                          <td class="fw-medium">Sara Ali</td>
-                          <td>sara@example.com</td>
-                          <td class="text-end"><a href="#" class="fw-medium text-primary">{{ __('startup.linkedin_view_profile') }}</a></td>
-                        </tr>
+                        @endforeach
                       </tbody>
                     </table>
                   </div>
                 </div>
               </div>
             </div>
-
+      
+            {{-- Employees --}}
             <div class="card card-body border shadow-sm mt-6">
               <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="card-title mb-0 fw-bold d-flex align-items-center gap-2">
+                <h5 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 text-capitalize">
                   <i class="ti ti-briefcase text-success"></i>{{ __('startup.Employees') }}
                 </h5>
                 <span class="badge bg-label-secondary">
-                  <i class="ti ti-users me-1"></i>{{ __('startup.count_label', ['value' => 8]) }}
+                  <i class="ti ti-users me-1"></i>{{ __('startup.count_label', ['value' => count($teamData['employees'])]) }}
                 </span>
               </div>
               <div class="table-responsive">
@@ -643,48 +816,57 @@
                   <thead class="table-light">
                     <tr>
                       <th class="text-center text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.full_name') }}</th>
-                      <th class="text-center text-nowrap"><i class="ti ti-briefcase me-1"></i>{{ __('startup.job_title') }}</th>
-                      <th class="text-center text-nowrap"><i class="ti ti-gender-male me-1"></i>{{ __('startup.gender') }}</th>
-                      <th class="text-center text-nowrap"><i class="ti ti-clock me-1"></i>{{ __('startup.employment_type') }}</th>
-                      <th class="text-center text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.start_date_label') }}</th>
+                      <th class="text-center text-nowrap"><i class="ti ti-briefcase me-1"></i>{{ __('startup.job_title') }}
+                      </th>
+                      <th class="text-center text-nowrap"><i class="ti ti-gender-male me-1"></i>{{ __('startup.gender') }}
+                      </th>
+                      <th class="text-center text-nowrap"><i class="ti ti-clock me-1"></i>{{ __('startup.employment_type') }}
+                      </th>
+                      <th class="text-center text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.start_date_label')
+                        }}</th>
                     </tr>
                   </thead>
                   <tbody>
+                    @foreach ($teamData['employees'] as $employee)
                     <tr class="border-top">
-                      <td class="fw-medium">Ahmed Mohamed</td>
-                      <td>Backend engineer</td>
-                      <td><span class="badge bg-label-info">Male</span></td>
-                      <td><span class="badge bg-label-success">Full time</span></td>
-                      <td>2022-03-01</td>
+                      <td class="fw-medium">{{ $employee['name'] }}</td>
+                      <td>{{ $employee['job'] }}</td>
+                      <td>
+                        <span class="badge bg-label-{{ strtolower($employee['gender']) === 'male' ? 'info' : 'warning' }}">
+                          {{ $employee['gender'] }}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="badge bg-label-success">{{ $employee['employment'] }}</span>
+                      </td>
+                      <td>{{ $employee['start_date'] }}</td>
                     </tr>
-                    <tr>
-                      <td class="fw-medium">Mona Adel</td>
-                      <td>Product manager</td>
-                      <td><span class="badge bg-label-warning">Female</span></td>
-                      <td><span class="badge bg-label-success">Full time</span></td>
-                      <td>2021-10-15</td>
-                    </tr>
+                    @endforeach
                   </tbody>
                 </table>
               </div>
             </div>
           </div>
         </div>
-
       </div>
+      <!--/ Team Tab -->
 
+      <!-- Ownership Tab -->
       <div class="tab-pane fade show active" id="tab-ownership" role="tabpanel" aria-labelledby="tab-ownership-trigger">
         <div id="ownership" class="card mb-6 shadow-sm">
           <div class="card-header">
             <div>
-              <h5 class="card-title mb-0 d-flex align-items-center gap-2">
+              <h5 class="card-title mb-0 d-flex align-items-center gap-2 text-capitalize">
                 <i class="ti ti-chart-pie text-success"></i>{{ __('startup.ownership_and_investors') }}
               </h5>
               <small class="text-muted">{{ __('startup.shareholders_funding_note') }}</small>
             </div>
           </div>
+      
           <div class="card-body">
             <div class="row g-6">
+      
+              {{-- Shareholders --}}
               <div class="col-12 col-xl-6">
                 <div class="card card-body border shadow-sm h-100">
                   <h6 class="mb-3 fw-bold d-flex align-items-center gap-2">
@@ -695,31 +877,28 @@
                       <thead class="table-light">
                         <tr>
                           <th class="text-center text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.name') }}</th>
-                          <th class="text-center text-nowrap"><i class="ti ti-briefcase me-1"></i>{{ __('startup.role') }}</th>
+                          <th class="text-center text-nowrap"><i class="ti ti-briefcase me-1"></i>{{ __('startup.role') }}
+                          </th>
                           <th class="text-end"><i class="ti ti-percent me-1"></i>{{ __('startup.ownership') }}</th>
                         </tr>
                       </thead>
                       <tbody>
+                        @foreach ($ownershipData['shareholders'] as $key => $shareholder)
                         <tr class="border-top">
-                          <td class="fw-medium">Omar Hassan</td>
-                          <td><span class="badge bg-label-primary">{{ __('startup.founder_role') }}</span></td>
-                          <td class="text-end fw-bold text-primary">40%</td>
+                          <td class="fw-medium">{{ $shareholder['name'] }}</td>
+                          <td><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary' }}">{{ __('startup.' .
+                              $shareholder['role']) }}</span></td>
+                          <td class="text-end fw-bold text-{{ $shareholder['text_class'] }}">{{ $shareholder['ownership'] }}
+                          </td>
                         </tr>
-                        <tr>
-                          <td class="fw-medium">Sara Ali</td>
-                          <td><span class="badge bg-label-info">{{ __('startup.cofounder_role') }}</span></td>
-                          <td class="text-end fw-bold text-info">30%</td>
-                        </tr>
-                        <tr>
-                          <td class="fw-medium">ABC Ventures</td>
-                          <td><span class="badge bg-label-success">{{ __('startup.investor_role') }}</span></td>
-                          <td class="text-end fw-bold text-success">20%</td>
-                        </tr>
+                        @endforeach
                       </tbody>
                     </table>
                   </div>
                 </div>
               </div>
+      
+              {{-- Investors --}}
               <div class="col-12 col-xl-6">
                 <div class="card card-body border shadow-sm h-100">
                   <h6 class="mb-3 fw-bold d-flex align-items-center gap-2">
@@ -734,29 +913,29 @@
                         </tr>
                       </thead>
                       <tbody>
+                        @foreach ($ownershipData['investors'] as $investor)
                         <tr class="border-top">
-                          <td class="fw-medium">ABC Ventures</td>
-                          <td class="text-end"><span class="badge bg-label-warning">{{ __('startup.vc') }}</span></td>
+                          <td class="fw-medium">{{ $investor['name'] }}</td>
+                          <td class="text-end"><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary'}}">{{ __('admin.' .
+                              $investor['type']) }}</span></td>
                         </tr>
-                        <tr>
-                          <td class="fw-medium">XYZ Angels Syndicate</td>
-                          <td class="text-end"><span class="badge bg-label-secondary">{{ __('startup.angel_group') }}</span></td>
-                        </tr>
+                        @endforeach
                       </tbody>
                     </table>
                   </div>
                 </div>
               </div>
+      
             </div>
           </div>
         </div>
-
       </div>
+      <!--/ Ownership Tab -->
 
       <div class="tab-pane fade show active" id="tab-screening" role="tabpanel" aria-labelledby="tab-screening-trigger">
         <div id="program-screening" class="card mb-6 shadow-sm">
           <div class="card-header">
-            <h5 class="card-title mb-0 d-flex align-items-center gap-2">
+            <h5 class="card-title mb-0 d-flex align-items-center gap-2 text-capitalize">
               <i class="ti ti-search text-primary"></i>{{ __('startup.screening_tab') }}
             </h5>
             <small class="text-muted">{{ __('startup.screening_note') }}</small>
@@ -767,7 +946,7 @@
                 <div class="border-bottom pb-6 mb-6">
                   <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
                     <div>
-                      <h5 class="card-title mb-0 fw-bold d-flex align-items-center gap-2">
+                      <h5 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 text-capitalize">
                         <i class="ti ti-circle-check text-info"></i>{{ __('startup.initial_screening') }}
                       </h5>
                       <small class="text-muted">{{ __('startup.committee_evaluation') }}</small>
@@ -856,7 +1035,7 @@
                 <div>
                   <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
                     <div>
-                      <h5 class="card-title mb-0 fw-bold d-flex align-items-center gap-2">
+                      <h5 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 text-capitalize">
                         <i class="ti ti-award text-success"></i>{{ __('startup.final_screening') }}
                       </h5>
                       <small class="text-muted">{{ __('startup.investment_committee_evaluation') }}</small>
@@ -938,55 +1117,132 @@
 
       </div>
 
-      <div class="tab-pane fade show active" id="tab-training" role="tabpanel" aria-labelledby="tab-training-trigger">
-        <div id="program-training" class="card mb-6 shadow-sm">
+      <!-- Screening Tab -->
+      <div class="tab-pane fade show active" id="tab-screening" role="tabpanel" aria-labelledby="tab-screening-trigger">
+        <div id="program-screening" class="card mb-6 shadow-sm">
           <div class="card-header">
-            <h5 class="card-title mb-0 d-flex align-items-center gap-2">
-              <i class="ti ti-school text-info"></i>Training
+            <h5 class="card-title mb-0 d-flex align-items-center gap-2 text-capitalize">
+              <i class="ti ti-search text-primary"></i>{{ __('startup.screening_tab') }}
             </h5>
-            <small class="text-muted">{{ __('startup.sessions_attended_note') }}</small>
+            <small class="text-muted">{{ __('startup.screening_note') }}</small>
           </div>
+      
           <div class="card-body">
-            <div class="table-responsive">
-              <table class="table table-sm mb-0 align-middle">
-                <thead class="table-light">
-                  <tr>
-                    <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.session_id') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.title') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.course_id') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-book me-1"></i>{{ __('startup.course_name') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.date') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-steps me-1"></i>{{ __('startup.step') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-clock me-1"></i>{{ __('startup.duration_hours') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-flag me-1"></i>{{ __('startup.program_step') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-users me-1"></i>{{ __('startup.attendance') }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr class="border-top">
-                    <td><span class="badge bg-label-primary">TR-101</span></td>
-                    <td class="fw-medium">Lean startup fundamentals</td>
-                    <td>CR-001</td>
-                    <td class="fw-medium">Lean methodology</td>
-                    <td>2025-02-01</td>
-                    <td><span class="badge bg-label-info">Bootcamp</span></td>
-                    <td class="text-center fw-bold">3</td>
-                    <td>Training week 1</td>
-                    <td><span class="badge bg-label-success">{{ __('startup.founder_role') }} + 2</span></td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="row g-4">
+              @foreach (['initial', 'final'] as $phase)
+              @php
+              $phaseData = $screeningData[$phase];
+              $phaseIcon = $phase === 'initial' ? 'ti-circle-check text-info' : 'ti-award text-success';
+              $phaseTitle = $phase === 'initial' ? __('startup.initial_screening') : __('startup.final_screening');
+              $phaseSubtitle = $phase === 'initial' ? __('startup.committee_evaluation') :
+              __('startup.investment_committee_evaluation');
+              $badgeClass = $phase === 'initial' ? 'info' : 'success';
+              $scoreClass = $phase === 'initial' ? 'primary' : 'success';
+              $criteriaBadgeClass = $phase === 'initial' ? 'primary' : 'success';
+              @endphp
+      
+              <div class="col-12">
+                <div class="border-bottom pb-6 mb-6">
+                  <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+                    <div>
+                      <h5 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 text-capitalize">
+                        <i class="ti {{ $phaseIcon }}"></i>{{ $phaseTitle }}
+                      </h5>
+                      <small class="text-muted">{{ $phaseSubtitle }}</small>
+                    </div>
+                    <span class="badge bg-label-{{ $badgeClass }}">
+                      <i class="ti ti-tag me-1"></i>{{ __('startup.step_with_id', ['id' => $phaseData['step_id']]) }}
+                    </span>
+                  </div>
+      
+                  {{-- Score and Date --}}
+                  <div class="row g-3 mb-4">
+                    <div class="col">
+                      <div class="p-3 rounded bg-light-subtle border h-100">
+                        <small class="text-muted d-block fw-semibold mb-1">
+                          <i class="ti ti-star me-1"></i>{{ __('startup.overall_score') }}
+                        </small>
+                        <h4 class="mb-0 text-{{ $scoreClass }} fw-bold">{{ $phaseData['overall_score'] }} <small
+                            class="text-muted fw-normal">/ 5</small></h4>
+                      </div>
+                    </div>
+                    <div class="col">
+                      <div class="p-3 rounded bg-light-subtle border h-100">
+                        <small class="text-muted d-block fw-semibold mb-1"><i class="ti ti-calendar me-1"></i>{{
+                          __('startup.date') }}</small>
+                        <p class="mb-0 fw-bold text-dark">{{ $phaseData['date'] }}</p>
+                      </div>
+                    </div>
+                  </div>
+      
+                  {{-- Criteria --}}
+                  <h6 class="mt-4 mb-3 fw-bold d-flex align-items-center gap-2">
+                    <i class="ti ti-checklist text-success"></i>{{ __('startup.criteria') }}
+                  </h6>
+                  <div class="table-responsive">
+                    <table class="table table-sm mb-0 align-middle">
+                      <thead class="table-light">
+                        <tr>
+                          <th class="text-center text-nowrap"><i class="ti ti-ruler-measure me-1"></i>{{
+                            __('startup.criterion') }}</th>
+                          <th class="text-center text-nowrap"><i class="ti ti-weight me-1"></i>{{ __('startup.weight') }}</th>
+                          <th class="text-end"><i class="ti ti-star me-1"></i>{{ __('startup.score') }}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @foreach ($phaseData['criteria'] as $c)
+                        <tr class="border-top">
+                          <td class="fw-medium">{{ $c['name'] }}</td>
+                          <td class="text-center"><span class="badge bg-label-{{ $criteriaBadgeClass }}">{{ $c['weight']
+                              }}</span></td>
+                          <td class="text-end"><span class="badge bg-label-success">{{ $c['score'] }}</span></td>
+                        </tr>
+                        @endforeach
+                      </tbody>
+                    </table>
+                  </div>
+      
+                  {{-- Judges --}}
+                  <h6 class="mt-4 mb-3 fw-bold d-flex align-items-center gap-2">
+                    <i class="ti ti-user-check text-warning"></i>{{ __('startup.judges_evaluations') }}
+                  </h6>
+                  <div class="table-responsive">
+                    <table class="table table-sm mb-0 align-middle">
+                      <thead class="table-light">
+                        <tr>
+                          <th class="text-center text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.judge') }}</th>
+                          <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.id') }}</th>
+                          <th class="text-center text-nowrap"><i class="ti ti-star me-1"></i>{{ __('startup.score') }}</th>
+                          <th class="text-center text-nowrap"><i class="ti ti-message me-1"></i>{{ __('startup.comments') }}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @foreach ($phaseData['judges'] as $j)
+                        <tr class="border-top">
+                          <td class="fw-medium">{{ $j['name'] }}</td>
+                          <td>{{ $j['id'] }}</td>
+                          <td class="text-center"><span class="badge bg-label-{{ $badgeClass }}">{{ $j['score'] }}</span></td>
+                          <td class="small">{{ $j['comments'] }}</td>
+                        </tr>
+                        @endforeach
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              @endforeach
             </div>
           </div>
         </div>
-
       </div>
+      <!--/ Screening Tab -->
 
-      <div class="tab-pane fade show active" id="tab-mentorship" role="tabpanel"
-        aria-labelledby="tab-mentorship-trigger">
+      <!-- Mentorship Tab -->
+      <div class="tab-pane fade show active" id="tab-mentorship" role="tabpanel" aria-labelledby="tab-mentorship-trigger">
         <div id="program-mentorship" class="card mb-6 shadow-sm">
           <div class="card-header">
-            <h5 class="card-title mb-0 d-flex align-items-center gap-2">
+            <h5 class="card-title mb-0 d-flex align-items-center gap-2 text-capitalize">
               <i class="ti ti-message-circle text-success"></i>{{ __('startup.mentorship_tab') }}
             </h5>
             <small class="text-muted">{{ __('startup.mentor_interactions_note') }}</small>
@@ -1001,89 +1257,108 @@
                     <th class="text-center text-nowrap"><i class="ti ti-flag me-1"></i>{{ __('startup.step_name') }}</th>
                     <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.step_id') }}</th>
                     <th class="text-center text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.date') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-clock me-1"></i>{{ __('startup.duration_hours') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-user-check me-1"></i>{{ __('startup.founder_attended') }}</th>
+                    <th class="text-center text-nowrap"><i class="ti ti-clock me-1"></i>{{ __('startup.duration_hours') }}
+                    </th>
+                    <th class="text-center text-nowrap"><i class="ti ti-user-check me-1"></i>{{ __('startup.founder_attended')
+                      }}</th>
                     <th class="text-center text-nowrap"><i class="ti ti-star me-1"></i>{{ __('startup.rating') }}</th>
                     <th class="text-center text-nowrap"><i class="ti ti-message me-1"></i>{{ __('startup.comments') }}</th>
                   </tr>
                 </thead>
                 <tbody>
+                  @foreach ($mentorshipData as $key => $session)
                   <tr class="border-top">
-                    <td class="fw-medium">Mentor A</td>
-                    <td><span class="badge bg-label-primary">M-001</span></td>
-                    <td>Growth mentoring</td>
-                    <td>STP-M-03</td>
-                    <td>2025-03-10</td>
-                    <td class="text-center"><span class="badge bg-label-info">1.5h</span></td>
-                    <td class="fw-medium">Omar Hassan</td>
-                    <td class="text-center"><span class="badge bg-label-warning">5★</span></td>
-                    <td class="small">Helpful session on pricing strategy and B2B sales pipeline.</td>
+                    <td class="fw-medium">{{ $session['mentor'] }}</td>
+                    <td><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary' }}">{{ $session['id'] }}</span></td>
+                    <td>{{ $session['step_name'] }}</td>
+                    <td>{{ $session['step_id'] }}</td>
+                    <td>{{ $session['date'] }}</td>
+                    <td class="text-center"><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary' }}">{{
+                        $session['duration'] }}</span></td>
+                    <td class="fw-medium">{{ $session['founder_attended'] }}</td>
+                    <td class="text-center"><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary' }}">{{
+                        $session['rating'] }}</span></td>
+                    <td class="small">{{ $session['comments'] }}</td>
                   </tr>
+                  @endforeach
                 </tbody>
               </table>
             </div>
           </div>
         </div>
-
       </div>
+      <!--/ Mentorship Tab -->
 
-      <div class="tab-pane fade show active" id="tab-milestones" role="tabpanel"
-        aria-labelledby="tab-milestones-trigger">
+      <!-- Milestones Tab -->
+      <div class="tab-pane fade show active" id="tab-milestones" role="tabpanel" aria-labelledby="tab-milestones-trigger">
         <div id="program-milestones" class="card mb-6 shadow-sm">
           <div class="card-header">
-            <h5 class="card-title mb-0 d-flex align-items-center gap-2">
+            <h5 class="card-title mb-0 d-flex align-items-center gap-2 text-capitalize">
               <i class="ti ti-flag-check text-warning"></i>{{ __('startup.milestones_and_deliverables') }}
             </h5>
-            <small class="text-muted">Planned progress versus completion</small>
+            <small class="text-muted">{{ __('startup.planned_progress_note') }}</small>
           </div>
           <div class="card-body">
             <div class="table-responsive">
               <table class="table table-sm mb-0 align-middle">
                 <thead class="table-light">
                   <tr>
-                    <th class="text-center text-nowrap"><i class="ti ti-flag me-1"></i>{{ __('startup.milestone_title_label') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.description') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-calendar-due me-1"></i>{{ __('startup.due_date') }}</th>
+                    <th class="text-center text-nowrap"><i class="ti ti-flag me-1"></i>{{ __('startup.milestone_title_label')
+                      }}</th>
+                    <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.description') }}
+                    </th>
+                    <th class="text-center text-nowrap"><i class="ti ti-calendar-due me-1"></i>{{ __('startup.due_date') }}
+                    </th>
                     <th class="text-center text-nowrap"><i class="ti ti-progress me-1"></i>{{ __('startup.completion') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-paperclip me-1"></i>{{ __('startup.deliverables') }}</th>
+                    <th class="text-center text-nowrap"><i class="ti ti-paperclip me-1"></i>{{ __('startup.deliverables') }}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
+                  @foreach ($milestones as $m)
                   <tr class="border-top">
-                    <td class="fw-medium">MVP launch</td>
-                    <td class="small">Launch first production version with payment gateway integration.</td>
-                    <td><span class="badge bg-label-info">2025-04-15</span></td>
+                    <td class="fw-medium">{{ $m['title'] }}</td>
+                    <td class="small">{{ $m['description'] }}</td>
+                    <td><span class="badge bg-label-info">{{ $m['due_date'] }}</span></td>
                     <td class="w-25">
                       <div class="d-flex align-items-center gap-2">
-                        <span class="fw-semibold">80%</span>
+                        <span class="fw-semibold">{{ $m['completion'] }}%</span>
                         <div class="progress grow" style="height: 6px">
-                          <div class="progress-bar bg-success" role="progressbar" style="width: 80%"></div>
+                          <div class="progress-bar bg-success" role="progressbar" style="width: {{ $m['completion'] }}%">
+                          </div>
                         </div>
                       </div>
                     </td>
                     <td>
                       <ul class="list-unstyled mb-0 small">
-                        <li><a href="#" class="fw-medium text-primary">
-                            <i class="ti ti-file-pdf me-1"></i>Technical architecture PDF
-                          </a></li>
-                        <li><a href="#" class="fw-medium text-primary">
-                            <i class="ti ti-video me-1"></i>MVP demo video
-                          </a></li>
+                        @if(!empty($m['deliverables']))
+                        @foreach ($m['deliverables'] as $d)
+                        <li>
+                          <a href="{{ $d['link'] }}" class="fw-medium text-primary">
+                            <i class="ti {{ $deliverableIcons[$d['type']] }} me-1"></i>{{ $d['name'] }}
+                          </a>
+                        </li>
+                        @endforeach
+                        @else
+                        <li class="text-muted">{{ __('startup.no_deliverables') }}</li>
+                        @endif
                       </ul>
                     </td>
                   </tr>
+                  @endforeach
                 </tbody>
               </table>
             </div>
           </div>
         </div>
-
       </div>
+      <!--/ Milestones Tab -->
 
+      <!-- Tasks Tab -->
       <div class="tab-pane fade show active" id="tab-tasks" role="tabpanel" aria-labelledby="tab-tasks-trigger">
         <div id="program-tasks" class="card mb-6 shadow-sm">
           <div class="card-header">
-            <h5 class="card-title mb-0 d-flex align-items-center gap-2">
+            <h5 class="card-title mb-0 d-flex align-items-center gap-2 text-capitalize">
               <i class="ti ti-checklist text-primary"></i>{{ __('startup.program_tasks') }}
             </h5>
             <small class="text-muted">{{ __('startup.tasks_assigned_note') }}</small>
@@ -1093,45 +1368,56 @@
               <table class="table table-sm mb-0 align-middle">
                 <thead class="table-light">
                   <tr>
-                    <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.task_title') }}</th>
+                    <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.task_title') }}
+                    </th>
                     <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.task_id') }}</th>
                     <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.session_id') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.session_title') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.description') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-calendar-due me-1"></i>{{ __('startup.due_date_label') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-calendar-check me-1"></i>{{ __('startup.completion_date_label') }}</th>
+                    <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.session_title') }}
+                    </th>
+                    <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.description') }}
+                    </th>
+                    <th class="text-center text-nowrap"><i class="ti ti-calendar-due me-1"></i>{{ __('startup.due_date_label')
+                      }}</th>
+                    <th class="text-center text-nowrap"><i class="ti ti-calendar-check me-1"></i>{{
+                      __('startup.completion_date_label') }}</th>
                     <th class="text-center text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.mentor') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-user-circle me-1"></i>{{ __('startup.created_by') }}</th>
+                    <th class="text-center text-nowrap"><i class="ti ti-user-circle me-1"></i>{{ __('startup.created_by') }}
+                    </th>
                     <th class="text-center text-nowrap"><i class="ti ti-badge me-1"></i>{{ __('startup.status') }}</th>
                   </tr>
                 </thead>
                 <tbody>
+                  @foreach ($tasks as $key => $task)
                   <tr class="border-top">
-                    <td class="fw-medium">Customer interviews</td>
-                    <td><span class="badge bg-label-primary">TSK-001</span></td>
-                    <td>TR-101</td>
-                    <td>Lean startup fundamentals</td>
-                    <td class="small">Conduct ten customer interviews and summarize findings.</td>
-                    <td>2025-02-10</td>
-                    <td>2025-02-08</td>
-                    <td>Mentor A</td>
-                    <td>Program manager</td>
-                    <td class="text-center"><span class="badge bg-label-success">
-                        <i class="ti ti-check me-1"></i>Completed
-                      </span></td>
+                    <td class="fw-medium">{{ $task['title'] }}</td>
+                    <td><span class="badge bg-label-{{isset($badgeColors[$key]) ? $badgeColors[$key] : 'secondary' }}">{{ $task['task_id'] }}</span></td>
+                    <td>{{ $task['session_id'] }}</td>
+                    <td>{{ $task['session_title'] }}</td>
+                    <td class="small">{{ $task['description'] }}</td>
+                    <td>{{ $task['due_date'] }}</td>
+                    <td>{{ $task['completion_date'] }}</td>
+                    <td>{{ $task['mentor'] }}</td>
+                    <td>{{ $task['created_by'] }}</td>
+                    <td class="text-center">
+                      <span class="badge bg-label-{{ isset($badgeColors[$key]) ? $badgeColors[$key] : 'secondary' }}">
+                        {{ $task['status'] }}
+                      </span>
+                    </td>
                   </tr>
+                  @endforeach
                 </tbody>
               </table>
             </div>
           </div>
         </div>
-
       </div>
+      <!--/ Tasks Tab -->
 
+      <!-- Quizzes Tab -->
       <div class="tab-pane fade show active" id="tab-quizzes" role="tabpanel" aria-labelledby="tab-quizzes-trigger">
         <div id="program-quizzes" class="card mb-6 shadow-sm">
           <div class="card-header">
-            <h5 class="card-title mb-0 d-flex align-items-center gap-2">
+            <h5 class="card-title mb-0 d-flex align-items-center gap-2 text-capitalize">
               <i class="ti ti-help text-info"></i>{{ __('startup.quizzes_tab') }}
             </h5>
             <small class="text-muted">{{ __('startup.knowledge_checks_note') }}</small>
@@ -1142,36 +1428,43 @@
                 <thead class="table-light">
                   <tr>
                     <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.quiz_id') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.quiz_title') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.date_completed') }}</th>
+                    <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.quiz_title') }}
+                    </th>
+                    <th class="text-center text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.date_completed') }}
+                    </th>
                     <th class="text-center text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.founder') }}</th>
                     <th class="text-center text-nowrap"><i class="ti ti-percent me-1"></i>{{ __('startup.score') }}</th>
                     <th class="text-center text-nowrap"><i class="ti ti-badge me-1"></i>{{ __('startup.status') }}</th>
                   </tr>
                 </thead>
                 <tbody>
+                  @foreach ($quizzes as $key => $q)
                   <tr class="border-top">
-                    <td><span class="badge bg-label-primary">QZ-001</span></td>
-                    <td class="fw-medium">Lean startup quiz</td>
-                    <td>2025-02-05</td>
-                    <td>Omar Hassan</td>
-                    <td class="text-center"><span class="badge bg-label-warning">90%</span></td>
-                    <td class="text-center"><span class="badge bg-label-success">
-                        <i class="ti ti-check me-1"></i>{{ __('startup.passed') }}
-                      </span></td>
+                    <td><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary' }}">{{ $q['quiz_id'] }}</span></td>
+                    <td class="fw-medium">{{ $q['title'] }}</td>
+                    <td>{{ $q['date_completed'] }}</td>
+                    <td>{{ $q['founder'] }}</td>
+                    <td class="text-center"><span class="badge bg-label-{{ $q['score_badge'] }}">{{ $q['score'] }}</span></td>
+                    <td class="text-center">
+                      <span class="badge bg-label-{{ isset($badgeColors[$key]) ? $badgeColors[$key] : 'secondary' }}">
+                        {{ $q['status'] }}
+                      </span>
+                    </td>
                   </tr>
+                  @endforeach
                 </tbody>
               </table>
             </div>
           </div>
         </div>
-
       </div>
+      <!--/ Quizzes Tab -->
 
+      <!-- Surveys Tab -->
       <div class="tab-pane fade show active" id="tab-surveys" role="tabpanel" aria-labelledby="tab-surveys-trigger">
         <div id="program-surveys" class="card mb-6 shadow-sm">
           <div class="card-header">
-            <h5 class="card-title mb-0 d-flex align-items-center gap-2">
+            <h5 class="card-title mb-0 d-flex align-items-center gap-2 text-capitalize">
               <i class="ti ti-mood-smile text-warning"></i>{{ __('startup.surveys_tab') }}
             </h5>
             <small class="text-muted">{{ __('startup.feedback_note') }}</small>
@@ -1182,34 +1475,41 @@
                 <thead class="table-light">
                   <tr>
                     <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.survey_id') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.survey_title') }}</th>
+                    <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.survey_title') }}
+                    </th>
                     <th class="text-center text-nowrap"><i class="ti ti-flag me-1"></i>{{ __('startup.program_step') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.date_completed') }}</th>
+                    <th class="text-center text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.date_completed') }}
+                    </th>
                     <th class="text-center text-nowrap"><i class="ti ti-file me-1"></i>{{ __('startup.answers') }}</th>
                   </tr>
                 </thead>
                 <tbody>
+                  @foreach ($surveys as $key => $s)
                   <tr class="border-top">
-                    <td><span class="badge bg-label-primary">SV-001</span></td>
-                    <td class="fw-medium">Mid program satisfaction</td>
-                    <td>Mid review step</td>
-                    <td>2025-03-01</td>
-                    <td class="text-center"><a href="#" class="btn btn-sm btn-link px-0 text-primary">
-                        <i class="ti ti-eye me-1"></i>View
-                      </a></td>
+                    <td><span class="badge bg-label-{{ isset($badgeColors[$key]) ? $badgeColors[$key] : 'secondary' }}">{{ $s['survey_id'] }}</span></td>
+                    <td class="fw-medium">{{ $s['title'] }}</td>
+                    <td>{{ $s['program_step'] }}</td>
+                    <td>{{ $s['date_completed'] }}</td>
+                    <td class="text-center">
+                      <a href="/dashboard/surveys/{{ $s['survey_id'] }}" class="btn btn-sm btn-primary">
+                        <i class="ti ti-eye me-1"></i>{{ __('admin.View') }}
+                      </a>
+                    </td>
                   </tr>
+                  @endforeach
                 </tbody>
               </table>
             </div>
           </div>
         </div>
-
       </div>
+      <!--/ Surveys Tab -->
 
+      <!-- Services Tab -->
       <div class="tab-pane fade show active" id="tab-services" role="tabpanel" aria-labelledby="tab-services-trigger">
         <div id="program-services" class="card mb-6 shadow-sm">
           <div class="card-header">
-            <h5 class="card-title mb-0 d-flex align-items-center gap-2">
+            <h5 class="card-title mb-0 d-flex align-items-center gap-2 text-capitalize">
               <i class="ti ti-gift text-success"></i>{{ __('startup.services_provided') }}
             </h5>
             <small class="text-muted">{{ __('startup.perks_note') }}</small>
@@ -1221,35 +1521,32 @@
                   <tr>
                     <th class="text-center text-nowrap"><i class="ti ti-gift me-1"></i>{{ __('startup.service_name') }}</th>
                     <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.service_id') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.description') }}</th>
+                    <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.description') }}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
+                  @foreach ($services as $key => $s)
                   <tr class="border-top">
-                    <td class="fw-medium">Cloud credits</td>
-                    <td><span class="badge bg-label-primary">SRV-001</span></td>
-                    <td class="small">Cloud infrastructure credits for twelve months to support product development.
-                    </td>
+                    <td class="fw-medium">{{ $s['name'] }}</td>
+                    <td><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary' }}">{{ $s['service_id'] }}</span></td>
+                    <td class="small">{{ $s['description'] }}</td>
                   </tr>
-                  <tr>
-                    <td class="fw-medium">Legal advisory session</td>
-                    <td><span class="badge bg-label-primary">SRV-002</span></td>
-                    <td class="small">One-on-one session with legal partner for company setup and shareholder agreement
-                      review.</td>
-                  </tr>
+                  @endforeach
                 </tbody>
               </table>
             </div>
           </div>
         </div>
-
       </div>
+      <!--/ Services Tab -->
 
+      <!-- Forms Tab -->
       <div class="tab-pane fade show active" id="tab-forms" role="tabpanel" aria-labelledby="tab-forms-trigger">
         <div id="program-forms" class="card mb-6 shadow-sm">
           <div class="card-header d-flex align-items-center justify-content-between">
             <div>
-              <h5 class="card-title mb-0 d-flex align-items-center gap-2">
+              <h5 class="card-title mb-0 d-flex align-items-center gap-2 text-capitalize">
                 <i class="ti ti-file-text text-success"></i>{{ __('startup.submitted_forms') }}
               </h5>
               <small class="text-muted">{{ __('startup.custom_forms_note') }}</small>
@@ -1260,34 +1557,40 @@
               <table class="table table-sm mb-0 align-middle">
                 <thead class="table-light">
                   <tr>
-                    <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.form_title') }}</th>
+                    <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.form_title') }}
+                    </th>
                     <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.form_id') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-flag me-1"></i>{{ __('startup.custom_form_step') }}</th>
+                    <th class="text-center text-nowrap"><i class="ti ti-flag me-1"></i>{{ __('startup.custom_form_step') }}
+                    </th>
                     <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.step_id') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.submission_date') }}</th>
+                    <th class="text-center text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.submission_date') }}
+                    </th>
                     <th class="text-center text-nowrap"><i class="ti ti-file me-1"></i>{{ __('startup.details') }}</th>
                   </tr>
                 </thead>
                 <tbody>
+                  @foreach ($forms as $key => $f)
                   <tr class="border-top">
-                    <td class="fw-medium">Startup profiling form</td>
-                    <td><span class="badge bg-label-primary">FM-001</span></td>
-                    <td>Application step form</td>
-                    <td>STP-FM-01</td>
-                    <td>2025-01-05 14:22</td>
+                    <td class="fw-medium">{{ $f['title'] }}</td>
+                    <td><span class="badge bg-label-{{ isset($badgeColors[$key]) ? $badgeColors[$key] : 'secondary' }}">{{ $f['form_id'] }}</span></td>
+                    <td>{{ $f['step_name'] }}</td>
+                    <td>{{ $f['step_id'] }}</td>
+                    <td>{{ $f['submission_date'] }}</td>
                     <td class="text-center">
                       <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
-                        data-bs-target="#formDetailsModal-1">
+                        data-bs-target="#formDetailsModal-{{ $f['modal_id'] }}">
                         <i class="ti ti-eye me-1"></i>{{ __('startup.view_inputs') }}
                       </button>
                     </td>
                   </tr>
+                  @endforeach
                 </tbody>
               </table>
             </div>
           </div>
         </div>
       </div>
+      <!--/ Forms Tab -->
     </div>
 
     <div class="alert alert-info d-flex align-items-center">
@@ -1297,13 +1600,14 @@
   </div>
 </div>
 
+@foreach ($forms as $f)
 <!-- Form Details Modal -->
-<div class="modal fade" id="formDetailsModal-1" tabindex="-1" aria-labelledby="formDetailsModalLabel" aria-hidden="true">
+<div class="modal fade" id="formDetailsModal-{{ $f['modal_id'] }}" tabindex="-1" aria-labelledby="formDetailsModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="formDetailsModalLabel">
-          {{ __('startup.form_inputs_for', ['form' => 'Startup profiling form']) }}
+          {{ __('startup.form_inputs_for', ['form' => $f['title']]) }}
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
@@ -1319,40 +1623,32 @@
               </tr>
             </thead>
             <tbody>
+              @foreach ($f['fields'] as $field)
               <tr>
-                <td class="fw-medium">Company description</td>
-                <td><span class="badge bg-label-info">{{ __('startup.text') }}</span></td>
-                <td class="small">AI powered payment orchestration platform for SMEs.</td>
-                <td class="text-center">&mdash;</td>
-              </tr>
-              <tr>
-                <td class="fw-medium">Pitch deck file</td>
-                <td><span class="badge bg-label-warning">{{ __('startup.file') }}</span></td>
-                <td class="small"><span class="badge bg-label-success">{{ __('startup.uploaded') }}</span></td>
+                <td class="fw-medium">{{ $field['name'] }}</td>
+                <td>
+                  <span class="badge bg-label-{{ $field['type'] === 'text' ? 'info' : ($field['type'] === 'file' ? 'warning' : 'secondary') }}">
+                    {{ __('startup.' . $field['type']) }}
+                  </span>
+                </td>
+                <td class="small">
+                  @if ($field['type'] === 'file')
+                    <span class="badge bg-label-success">{{ __('startup.uploaded') }}</span>
+                  @else
+                    {{ $field['value'] }}
+                  @endif
+                </td>
                 <td class="text-center">
-                  <a href="#" class="btn btn-sm btn-link text-primary p-0" title="Download">
-                    <i class="ti ti-download"></i>
-                  </a>
+                  @if ($field['attachment'])
+                    <a href="{{ $field['attachment'] }}" class="btn btn-sm btn-link text-primary p-0" title="Download">
+                      <i class="ti ti-download"></i>
+                    </a>
+                  @else
+                    &mdash;
+                  @endif
                 </td>
               </tr>
-              <tr>
-                <td class="fw-medium">Industry</td>
-                <td><span class="badge bg-label-info">{{ __('startup.selection') }}</span></td>
-                <td class="small">Financial services</td>
-                <td class="text-center">&mdash;</td>
-              </tr>
-              <tr>
-                <td class="fw-medium">Team size</td>
-                <td><span class="badge bg-label-secondary">{{ __('startup.number') }}</span></td>
-                <td class="small">25</td>
-                <td class="text-center">&mdash;</td>
-              </tr>
-              <tr>
-                <td class="fw-medium">Business model</td>
-                <td><span class="badge bg-label-info">{{ __('startup.selection') }}</span></td>
-                <td class="small">B2B SaaS</td>
-                <td class="text-center">&mdash;</td>
-              </tr>
+              @endforeach
             </tbody>
           </table>
         </div>
@@ -1365,6 +1661,7 @@
     </div>
   </div>
 </div>
+@endforeach
 @stop
 
 @section('scripts')
@@ -1378,7 +1675,6 @@
     // Initialize DataTable
     DataTableInit(".table");
   });
-
 
   // Export PDF
   const exportPdfButton = document.getElementById("export-pdf-button");

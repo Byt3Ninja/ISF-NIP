@@ -38,17 +38,22 @@
         <div class="col-12">
           <article class="card mb-6">
             <header class="user-profile-header-banner">
-              <img src="/vuexy/assets/img/pages/profile-banner.png" 
-                   alt="Banner image" 
-                   class="rounded-top" />
+              <img 
+                src="/vuexy/assets/img/pages/profile-banner.png" 
+                alt="Banner image" 
+                class="rounded-top" 
+              />
             </header>
 
             <div class="user-profile-header d-flex flex-column flex-lg-row text-sm-start text-center mb-5">
               <figure class="flex-shrink-0 mt-n2 mx-sm-0 mx-auto">
-                <img src="{{ $client->image_url }}" 
-                     alt="{{ $client->first_name_en }} {{ $client->last_name_en }}"
-                     class="d-block ms-0 ms-sm-6 rounded user-profile-img" 
-                     style="height: 130px" />
+                <img 
+                  src="{{ $client->image_url ?: '/images/user-placeholder.jpeg' }}"
+                  alt="{{ $client->first_name_en }} {{ $client->last_name_en }}"
+                  class="d-block ms-0 ms-sm-6 rounded user-profile-img object-fit-cover" 
+                  style="height: 130px" 
+                  onerror="this.onerror=null; this.src='/images/user-placeholder.jpeg';" 
+                />
               </figure>
 
               <div class="flex-grow-1 mt-3 mt-lg-5">
@@ -103,15 +108,19 @@
                     </a>
 
                     @if(!empty($order))
-                      <button 
+                      <button type="button" class="btn btn-primary" onclick="fetchSlots({{ $client->id }})">
+                        {{ __('cycles.Request_Mentorship') }}
+                        <i class="ti ti-calendar-plus ms-2"></i>
+                      </button>
+                      {{-- <button 
                         onclick="request({{ $order->user_id }}, '{{ optional($order->user)->{'first_name_' . $l} }} {{ optional($order->user)->{'last_name_' . $l} }}', {{ $order->cycle->organization_id }}, {{ $order->cycle_id }})" 
-                        title="Add new request" 
+                        title="{{ __('cycles.Request_Mentorship') }}" 
                         type="button" 
                         class="btn btn-primary"
                       >
                       <i class="ti ti-calendar-plus me-2"></i>
                         {{ __('cycles.Request_Mentorship') }}
-                      </button>
+                      </button> --}}
                     @endif
                   </div>
                 </div>
@@ -397,7 +406,7 @@
                           <tr>
                             <td>{{ $n + 1 }}</td>
                             <td>{{ $mentor->cycle->title ?? '' }}</td>
-                            <td>{{ $mentor->cycle->description ?? '' }}</td>
+                            <td>{{ strip_tags($mentor->cycle->description) }}</td>
                             <td>{{ $mentor->cycle->start ?? '' }}</td>
                             <td>{{ $mentor->cycle->end ?? '' }}</td>
                           </tr>
@@ -413,9 +422,20 @@
       </div>
     </div>
   </div>
-  
+
+  @if(!empty($order))
+    @include(
+      'partials.book-session-modal',
+      [
+        'mentor_id' => $client->id,
+        'user_id' => $order->user_id,
+        'cycle_id' => $order->cycle_id,
+        'organization_id' => $order->cycle->organization_id,
+      ]
+    )
+  @endif
   {{-- Session Request Modal --}}
- @include('admin.clients.startup.partials._session_modal')
+ {{-- @include('admin.clients.startup.partials._session_modal') --}}
 @stop
 
 @section('pagescripts')

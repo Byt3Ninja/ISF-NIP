@@ -2,6 +2,8 @@
 
 namespace App;
 
+use Illuminate\Support\Str;
+use App\Http\Middleware\Permissions;
 use App\Traits\Auditable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\DB;
@@ -158,6 +160,9 @@ class User extends Authenticatable implements MustVerifyEmail
     public function bio() {
         return $this->hasOne(UsersBio::class, 'user_id');
     }
+    public function schedule() {
+        return $this->hasMany(Schedule::class, 'user_id');
+    }
     public function mentorSessions() {
         return $this->hasMany(MentorshipRequest::class,'mentor_id');
     }
@@ -174,6 +179,65 @@ class User extends Authenticatable implements MustVerifyEmail
     // ===============>  Organization Manager Relations < =========================
     public function organization(){
         return $this->belongsTo(Organization::class)->withTrashed();
+    }
+
+    /**
+     * Many-to-many relationship for Sub-Admin users with multiple organizations.
+     */
+    public function organizations()
+    {
+        return $this->belongsToMany(Organization::class, 'user_organizations')->withTimestamps();
+    }
+
+    /**
+     * Get all accessible organization IDs for this user.
+     * - Admin: returns all organization IDs
+     * - Sub-Admin: returns assigned organization IDs from pivot table
+     * - organizationManager: returns single organization_id
+     * - Others: returns organization_id if set
+     *
+     * @return array
+     */
+    public function getOrganizationsIdsAttribute(): array
+    {
+        if ($this->hasRole('admin')) {
+            return Organization::pluck('id')->toArray();
+        }
+
+        if ($this->hasRole('subadmin')) {
+            return $this->organizations()->pluck('organizations.id')->toArray();
+        }
+
+        if ($this->organization_id) {
+            return [$this->organization_id];
+        }
+
+        return [];
+    }
+
+    /**
+     * Check if user can access a specific organization.
+     *
+     * @param int $organizationId
+     * @return bool
+     */
+    public function canAccessOrganization(int $organizationId): bool
+    {
+        if ($this->hasRole('admin')) {
+            return true;
+        }
+
+        return in_array($organizationId, $this->organizations_ids);
+    }
+
+    /**
+     * Check if user is a Sub-Admin.
+     *
+     * @return bool
+     */
+    public function isSubAdmin(): bool
+    {
+        return $this->hasRole('subadmin');
     }
 
     // ============> Judger Relations <======================
@@ -205,6 +269,16 @@ class User extends Authenticatable implements MustVerifyEmail
             RoleUsers::updateOrCreate(
                 ['model_id' => $this->id, 'role_id' => $id, 'model_type' => 'App\User'],
             );
+        }
+    }
+    public function deAllotRole( $role )
+    {
+        $user_id = $this->id;
+        $_role = Role::where('default_for', 'LIKE', '%' . $role . '%')->first();
+        if( !empty( $_role ) )
+        {
+            $id = $_role->id;
+            RoleUsers::where(['model_id' => $user_id, 'role_id' => $id, 'model_type' => 'App\User'])->delete();
         }
     }
     public function allotRole( $role )
@@ -246,6 +320,7 @@ class User extends Authenticatable implements MustVerifyEmail
 	public function ableTo( $permission, $permissions = [] )
 	{
         if( env('PERMISSION_BYPASS', false) === true ) { return true; }
+        if( $this->checkForBypass( $permission ) === true ) { return true; }
         if( empty( $permissions ) || count( $permissions ) == 0 ) { $permissions = $this->roles->flatMap(function($role) { return $role->_permissions->pluck('name'); })->unique()->values()->toArray(); }
         return in_array( $permission, $permissions );
 	}
@@ -266,11 +341,37 @@ class User extends Authenticatable implements MustVerifyEmail
     public function ableToAny( $permission, $permissions = [] )
     {
         if( env('PERMISSION_BYPASS', false) === true ) { return true; }
+        if( $this->checkForBypassToAny( $permission ) === true ) { return true; }
         if( empty( $permissions ) || count( $permissions ) == 0 ) { $permissions = $this->roles->flatMap(function($role) { return $role->_permissions->pluck('name'); })->unique()->values()->toArray(); }
         $permissions = array_map(function($n){ return trim( strtolower($n) ); }, $permissions); 
         foreach( $permission as $p )
         {
             if( in_array( trim( strtolower($p) ), $permissions ) ) { return true; }
+        }
+        return false;
+    }
+
+    public function checkForBypass( $permission )
+    {
+        $middleware = new Permissions;
+        $exceptNames = $middleware->exceptNames;
+        if( in_array( $permission, $exceptNames) ) { return true; }
+        else
+        {
+            if( is_array( $permission ) ) { return false; }
+            foreach( $exceptNames as $except) { if( Str::is($except, $permission) ) { return true; } }
+        }
+        return false;
+    }
+
+    public function checkForBypassToAny( $permission )
+    {
+        $middleware = new Permissions;
+        $exceptNames = $middleware->exceptNames;
+
+        foreach( $permission as $p )
+        {
+            foreach( $exceptNames as $except) { if( Str::is($except, $p) ) { return true; } }
         }
         return false;
     }

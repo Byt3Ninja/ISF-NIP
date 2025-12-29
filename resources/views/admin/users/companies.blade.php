@@ -51,10 +51,18 @@
               </div>
               <div class="d-flex flex-column flex-md-row gap-3 align-items-md-center mt-4 mt-md-0">
                 <!-- Search Bar -->
-                <div class="input-group input-group-merge search-form" style="width: 300px;">
+                <div 
+                  class="input-group input-group-merge search-form" style="width: 300px;">
                   <span class="input-group-text"><i class="ti ti-search text-muted"></i></span>
-                  <input type="text" id="searchInput" class="form-control"
-                    placeholder="{{ __('admin.Search') }} {{ $l == 'en' ? 'Startups' : 'الشركات' }}" />
+                  <input 
+                    type="text" 
+                    id="searchInput" 
+                    class="form-control"
+                    placeholder="{{ __('admin.Search') }} {{ $l == 'en' ? 'Startups' : 'الشركات' }}" 
+                    aria-label="Search companies"
+                    aria-describedby="search-companies"
+                    value="{{ request('search') }}"
+                  />
                 </div>
                 
                 <!-- Reset Button (shown when filters are active) -->
@@ -99,7 +107,7 @@
               @if(request()->has('programFilter') && request('programFilter') != '')
                 @include('includes.no-result', ['message' => __('admin.No_Subscribed_Startups')])
               @else
-                @include('includes.no-result', ['message' => __('admin.No Companies Found')])
+                @include('includes.no-result', ['message' => __('admin.No companies found')])
               @endif
             </div>
           @else
@@ -344,13 +352,21 @@
         </div>
         
         <div class="modal-body">
-          <!-- Organization Filter (Admin only) -->
-          @role('Admin')
+          <!-- Organization Filter (Admin and Sub-Admin) -->
+          @if(auth()->user()->hasRole('Admin') || auth()->user()->isSubAdmin())
           <div class="form-group mb-4">
             <label for="organizationFilter" class="form-label">{{ __('admin.Organizations') }}</label>
             <select name="orgnization" id="organizationFilter" class="form-select select2">
               <option value="">{{ __('admin.All_Organizations') }}</option>
-              @php $orgs = App\Organization::all(); @endphp
+              @php
+                $authUser = auth()->user();
+                if ($authUser->hasRole('Admin')) {
+                  $orgs = App\Organization::all();
+                } else {
+                  $orgIds = $authUser->organizations_ids;
+                  $orgs = App\Organization::whereIn('id', $orgIds)->get();
+                }
+              @endphp
               @foreach ($orgs as $org)
                 <option value="{{ $org->id }}" {{ request('orgnization') == $org->id ? 'selected' : '' }}>
                   {{ $org->{'name_' . $l} }}
@@ -358,7 +374,7 @@
               @endforeach
             </select>
           </div>
-          @endrole
+          @endif
 
           <!-- Program Filter -->
           <div class="form-group mb-4">
@@ -435,7 +451,7 @@
               <option value="1" {{ request('alumni') == "1" ? 'selected' : '' }}>
                 {{ __('startup.alumni_only') }}
               </option>
-              <option value="0" {{ request('alumni') == "0" ? 'selected' : '' }}>
+              <option value="2" {{ request('alumni') == "2" ? 'selected' : '' }}>
                 {{ __('startup.non_alumni') }}
               </option>
             </select>
@@ -460,52 +476,7 @@
 
 @section('pagescripts')
 <script>
-  $(document).ready(function() {
-    // JavaScript Search Functionality
-    $('#searchInput').on('input', function() {
-      const searchTerm = $(this).val().toLowerCase();
-      const companyCards = $('#companiesContainer .col-md-4');
-      let visibleCount = 0;
-      
-      companyCards.each(function() {
-        const card = $(this);
-        const companyName = card.find('h5.text-dark').text().toLowerCase();
-        const companyFounders = card.find('small.text-nowrap').map(function() {
-          return $(this).text().toLowerCase();
-        }).get().join(' ');
-        const companySector = card.find('h6.fw-semibold').text().toLowerCase();
-        const companyStage = card.find('.badge.bg-label-secondary span').text().toLowerCase();
-        const companyProgram = card.find('.text-success').text().toLowerCase();
-        const companyOrganization = card.find('.text-info').text().toLowerCase();
-        
-        const searchableText = companyName + ' ' + companyFounders + ' ' + companySector + ' ' + companyStage + ' ' + companyProgram + ' ' + companyOrganization;
-        
-        if (searchableText.includes(searchTerm)) {
-          card.show();
-          visibleCount++;
-        } else {
-          card.hide();
-        }
-      });
-      
-      // Show/hide no results message
-      if (visibleCount === 0 && searchTerm !== '') {
-        if ($('#noSearchResults').length === 0) {
-          // Clone the template and show it
-          const noResultsTemplate = $('#noSearchResultsTemplate').clone();
-          noResultsTemplate.attr('id', 'noSearchResults');
-          noResultsTemplate.removeClass('d-none');
-          $('#companiesContainer').append(noResultsTemplate);
-        }
-        $('#noCompaniesResult').hide();
-      } else {
-        $('#noSearchResults').remove();
-        if (visibleCount > 0) {
-          $('#noCompaniesResult').hide();
-        }
-      }
-    });
-    
+  $(document).ready(function() { 
     // Initialize Select2 for different field types
     // Initialize sectors filter (multiple select)
     $('#sectors').select2({
@@ -602,6 +573,31 @@
       
       return false;
     }
+
+
+    // Debounce helper
+    const debounce = (fn, delay = 1000) => {
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+      };
+    };
+
+    // Create debounced handler ONCE
+    const handleSearch = debounce((value) => {
+      const url = new URL(window.location);
+        value
+        ? url.searchParams.set('search', value)
+        : url.searchParams.delete('search');
+
+        window.location.href = url.href;
+      }, 1000);
+
+    // Bind event
+    $('#searchInput').on('keyup', function () {
+      handleSearch(this.value.toLowerCase());
+    });
   });
 </script>
 @stop

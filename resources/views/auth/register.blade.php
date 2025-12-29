@@ -48,6 +48,33 @@
   <!-- Page CSS -->
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/page-auth.css" />
 
+  <style>
+    div[data-validator] {
+      width: 100% !important;
+      text-align: {{ $l == 'ar' ? 'end' : 'start' }} !important;
+    }
+
+    .iti__country-list {
+      position: absolute;
+      left: 1rem;
+      /* right: 0; */
+      z-index: 9999;
+      list-style: none;
+      text-align: left;
+      padding: 0;
+      margin: 0 0 0 -1px;
+      box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
+      background-color: white;
+      border: 1px solid #CCC;
+      white-space: nowrap;
+      max-height: 200px;
+      width: 350px;
+      overflow-y: scroll;
+      overflow-x: auto -webkit-overflow-scrolling: touch;
+      background-color: #fff;
+    }
+  </style>
+
   <!-- Helpers -->
   <script src="/vuexy/assets/vendor/js/helpers.js"></script>
   <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
@@ -159,19 +186,20 @@
                   @csrf
                   <div class="row">
                     <!-- Switch Role -->
-            
+       
                     @foreach($accountRoles as $key => $role)
+                
                     <div class="col-6 mb-4">
                       <label for="{{$role}}Role" style="display: grid; place-items: center;" class="form-check custom-option custom-option-icon cursor-pointer">
                         <div class="d-flex align-items-center">
                           @if($role === 'Founder')
-                            <input name="role" class="form-check-input role-input" type="radio" value="{{$key == 0 ? '4' : '3'}}" id="{{$role}}Role" checked={{ $key==0 ? 'true' : '' }} required />
+                            <input name="role" class="form-check-input role-input" type="radio" value="registered" id="{{$role}}Role" @if(request('id') != 'MentorRole') checked @endif required />
                             <div class="form-check-label custom-option-content d-flex align-items-center">
                               <i class="ti ti-businessplan me-2"></i>
                               <span class="custom-option-title">{{ __('admin.'. $role) }}</span>
                             </div>
                           @else
-                            <input name="role" class="form-check-input role-input" type="radio" value="6" id="{{$role}}Role" required />
+                            <input name="role" class="form-check-input role-input" type="radio" value="mentor" id="{{$role}}Role" @if(request('id') == 'MentorRole') checked @endif required />
                             <div class="form-check-label custom-option-content d-flex align-items-center">
                               <i class="ti ti-user me-2"></i>
                               <span class="custom-option-title">{{ __('admin.'. $role) }}</span>
@@ -196,7 +224,19 @@
                         </div>
                       @endif
 
-                 
+                      @if ($errors->any())
+                        <div class="row">
+                          <div class="col-md-12">
+                            <div class="alert alert-danger">
+                              <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                  <li>{{ $error }}</li>
+                                @endforeach
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      @endif
 
                       <div class="col-12 mb-6">
                         <label class="form-label fs-6 fw-bold d-block text-{{ $l == 'ar' ? 'end' : 'start' }}">
@@ -326,9 +366,9 @@
                         </div>
 
                       <div class="col-12 mb-3">
-                        <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="expertise">{{ __('admin.Industry Expertise') }}</label>
+                        <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="expertise">{{ __('admin.Expertises') }}</label>
                         <div class="form-group">
-                          <select name="expertise[]" class="select2 form-select text-{{ $l == 'ar' ? 'end' : 'start' }}" multiple="multiple" id="expertise" data-placeholder="{{__('admin.Select Expertise')}}" required>
+                          <select name="expertise[]" class="select2 form-select text-{{ $l == 'ar' ? 'end' : 'start' }}" multiple="multiple" id="expertise" data-placeholder="{{__('admin.Expertises')}}" required>
                             @php
                             $expertises = App\Expertise::where('parent_id', null)->get();
                             @endphp
@@ -461,13 +501,13 @@
 <script>
 // Role-specific configuration
 const ROLE_CONFIG = {
-  '8': {
+  'registered': {
     name: 'founder',
     hash: '2521',
     type: '3',
     showMentorFields: false
   },
-  '6': {
+  'mentor': {
     name: 'mentor',
     hash: '2520',
     type: 'mentor',
@@ -512,9 +552,7 @@ document.addEventListener('DOMContentLoaded', function() {
   } else {
     // Manually trigger for the default case
     const checkedRole = document.querySelector('input[name="role"]:checked');
-    if (checkedRole && checkedRole.value === '4') { // Changed selectedRole to checkedRole.value for correctness
-      updateMentorFieldsVisibility(checkedRole.value);
-    } else if (checkedRole) { // Added this else if to handle other roles if '4' is not checked
+    if (checkedRole) {
       updateMentorFieldsVisibility(checkedRole.value);
     }
   }
@@ -529,10 +567,10 @@ document.querySelectorAll('.role-input').forEach(input => {
     updateMentorFieldsVisibility(selectedRole);
     
     // Update URL with role data
-    const url = new URL(window.location.href);
-    url.searchParams.set('type', config.type);
-    url.searchParams.set('data', config.hash);
-    window.history.pushState({}, '', url);
+    // const url = new URL(window.location.href);
+    // url.searchParams.set('type', config.type);
+    // url.searchParams.set('data', config.hash);
+    // window.history.pushState({}, '', url);
   });
 });
 </script>

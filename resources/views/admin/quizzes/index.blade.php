@@ -5,12 +5,16 @@
 
 @php
 $user = Auth::user();
-if ($user->hasRole('organizationManager')){
-	$organizations = App\Organization::where('id', $user->organization_id)->get();
-	$cycles = App\Cycle::where('organization_id', $user->organization_id)->get();
-} else {
+if ($user->hasRole('Admin')) {
 	$organizations = App\Organization::all();
 	$cycles = App\Cycle::all();
+} elseif ($user->hasRole('organizationManager') || $user->isSubAdmin()) {
+	$orgIds = $user->organizations_ids;
+	$organizations = App\Organization::whereIn('id', $orgIds)->get();
+	$cycles = App\Cycle::whereIn('organization_id', $orgIds)->get();
+} else {
+	$organizations = collect();
+	$cycles = collect();
 }
 @endphp
 
@@ -18,6 +22,27 @@ if ($user->hasRole('organizationManager')){
 	<!-- BEGIN: Content-->
 	<div class="content-wrapper">
 		<div class="container-xxl flex-grow-1 container-p-y">
+			<!-- Navigation Tabs -->
+			<nav class="nav-align-top mb-6">
+				@php
+					$tabs = [
+						['title' => __('admin.quizzes'), 'url' => 'dashboard/quizzes', 'icon' => 'clock-bolt'],
+						['title' => __('admin.quizzes_results'), 'url' => 'dashboard/quizResults', 'icon' => 'checklist'],
+					]
+				@endphp
+				<ul class="nav nav-pills">
+					@foreach($tabs as $tab)
+						<li class="nav-item">
+							<a href="/{{ $tab['url'] }}" class="nav-link {{ Request::is($tab['url'] . '*') ? 'active' : '' }}">
+								<i class="ti ti-{{ $tab['icon'] }} me-2"></i>
+								{{ $tab['title'] }}
+							</a>
+						</li>
+					@endforeach
+				</ul>
+			</nav>
+			<!--/ Navigation Tabs -->
+
 			@if( session()->has('success') )
 				<div class="w-100">
 					<div role="alert" class="alert alert-success alert-dismissible fade show mb-2">
@@ -57,8 +82,8 @@ if ($user->hasRole('organizationManager')){
 					</div>
 				</div>
 
-				<div class="card-body">
-					<table class="table table-responsive quizzes-table">
+				<div class="card-datatable datatable-basic table-responsive">
+					<table class="table quizzes-table">
 						<thead class="table-light">
 						<tr>
 							<th>#</th>

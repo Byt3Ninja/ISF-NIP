@@ -7,7 +7,7 @@
         'icon' => 'users',
         'color' => 'primary', 
         'filter' => '', 
-        'href' => '/dashboard/show/mentors' 
+        'href' => '/dashboard/mentors' 
       ],
       [ 
         'value' => $cycle_mentors_count ?? 0, 
@@ -15,7 +15,7 @@
         'icon' => 'user-check',
         'color' => 'secondary', 
         'filter' => '', 
-        'href' => '/dashboard/show/mentors?enrolledInProgramFilter=1' 
+        'href' => '/dashboard/mentors?enrolledInProgramFilter=1' 
       ],
       [ 
         'value' => $total_sessions_count ?? 0, 

@@ -1,7 +1,7 @@
 <section>
   <!-- Evaluation Model CRUD Tab -->
-  <div id="evaluation-model" class="card card-body tab-content active mt-6">
-    <h4>{{ __('cycles.ManageEvaluationModel') }}</h4>
+  <div id="evaluation-model" class="card card-body tab-content active">
+    <h5 class="card-title mb-1">{{ __('cycles.ManageEvaluationModel') }}</h5>
     <p class="text-muted">{{ __('cycles.EvaluationModelDescription') }}</p>
     
     <!-- Screamer Warning -->

@@ -11,7 +11,7 @@
             title="{{ __('cycles.Go to judges page') }}"
           @else
             title="{{ __('cycles.Filter by') . ' ' . __('admin.' . $item['label']) }}"
-            data-filter-type="{{ $key == 1 ? 'total' : ($key == 2 ? 'not-evaluated' : ($key == 3 ? 'draft' : 'published')) }}"
+            data-filter-type="{{ $key == 1 ? 'total' : ($key == 2 ? 'not-assigned' : ($key == 3 ? 'not-evaluated' : ( $key == 4 ? 'draft' : 'published' ))) }}"
             onclick="filterByFinalScreeningKPI(this)"
           @endif
         >
@@ -124,6 +124,7 @@
 					<div class="col-lg-2 col-md-4 col-sm-6">
 						<select id="final-screening-status-filter" class="form-select">
 							<option value="">{{ __('cycles.All Status') }}</option>
+							<option value="not-assigned">{{ __('admin.Not Assigned') }}</option>
 							<option value="published">{{ __('cycles.Published') }}</option>
 							<option value="draft">{{ __('admin.In Progress') }}</option>
 							<option value="not-evaluated">{{ __('cycles.Not Evaluated') }}</option>
@@ -1056,6 +1057,10 @@
 		switch(filterType) {
 			case 'total':
 				// Show all - filters are already cleared
+				break;
+			case 'not-assigned':
+				screeningCurrentFilters.status = 'not-assigned';
+				$('#screening-status-filter').val('not-assigned');
 				break;
 			case 'not-evaluated':
 				finalScreeningCurrentFilters.status = 'not-evaluated';

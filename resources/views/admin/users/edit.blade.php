@@ -8,6 +8,30 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
 @endsection
 
+@section('style')
+<style>
+  .iti__country-list {
+    position: absolute;
+    left: 1rem;
+    /* right: 0; */
+    z-index: 9999;
+    list-style: none;
+    text-align: left;
+    padding: 0;
+    margin: 0 0 0 -1px;
+    box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
+    background-color: white;
+    border: 1px solid #CCC;
+    white-space: nowrap;
+    max-height: 200px;
+    width: 350px;
+    overflow-y: scroll;
+    overflow-x: auto -webkit-overflow-scrolling: touch;
+    background-color: #fff;
+  }
+</style>
+@endsection
+
 @php
   $navPills = [
     'info' => [
@@ -23,6 +47,18 @@
       'icon' => 'ti ti-lock',
     ],
   ];
+
+  // Add organizations tab for Sub-Admin role
+  $userRole = $user->roles->first();
+  $isSubAdmin = $userRole && strtolower($userRole->default_for ?? '') === 'subadmin';
+  if ($isSubAdmin) {
+    $navPills['organizations'] = [
+      'title' => $l == 'en' ? 'Assigned Organizations' : 'المنظمات المعينة',
+      'active' => false,
+      'id' => 'nav-pills-organizations',
+      'icon' => 'ti ti-building',
+    ];
+  }
 @endphp
 
 @section('content')
@@ -55,6 +91,12 @@
             message="{{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }}"
           />
         @endif
+        @if (session()->has('success'))
+          <x-alert
+            type="success"
+            message="{{ __('admin.' . session()->get('success')) }} {{ Session::forget('success') }}"
+          />
+        @endif
 
         @if (count($errors) > 0)
           <ul class="alert alert-danger alert-dismissible ps-8">
@@ -66,44 +108,42 @@
 
         <div class="tab-content p-0">
           <!-- Info -->
-          <div class="tab-pane fade show active" id="navs-pills-info" role="tabpanel">
-            
-            <div class="d-flex justify-content-between align-items-center mb-6">
-              <div for="upload" class="d-flex align-items-center gap-4 mb-6">
-                <label
-                  for="upload"
-                  id="upload-label"
-                  class="w-px-100 h-px-100 position-relative border-2 border-light border-dashed rounded-circle bg-label-light cursor-pointer"
-                  style="background-image: url('/191014/{{ $user->img_url }}'); background-size: cover; background-position: center; background-repeat: no-repeat;"
-                >
-                  <input hidden type="file" name="img_url" class="account-file-input" id="upload"
-                    accept="image/*" />
-                  <div class="position-absolute top-50 start-50 translate-middle z-1">
-                    <i class="ti ti-camera-plus ti-28px text-light">
-                    </i>
-                  </div>
-                </label>
-                <span class="fs-6 fw-semibold">
-                  {{ $l == 'en' ? 'Update User Logo' : 'تحديث صورة المستخدم' }}
-                </span>
-              </div>
-
-              @if ($user->company_id && $_user->ableTo('company.profile_view', $permissions))
-                <a 
-                  class="btn btn-light" 
-                  href="/dashboard/companyProfile/{{$user->company->id}}" 
-                  target="_blank"
-                >
-                  <i class="ti ti-building-skyscraper me-2"></i>
-                  {{ __('startup.view_startup_profile') }}
-                </a>
-              @endif
-            </div>
-              
-            <form method="post" action="{{route('users.update', ['user' => $user->id])}}"
-              enctype="multipart/form-data" id="info-form">
+          <div class="tab-pane fade show active" id="navs-pills-info" role="tabpanel">  
+            <form method="post" action="{{route('users.update', ['user' => $user->id])}}" enctype="multipart/form-data" id="info-form">
               {!! csrf_field() !!}
               @method('patch')
+
+              <div class="d-flex justify-content-between align-items-center mb-6">
+                <div for="upload" class="d-flex align-items-center gap-4 mb-6">
+                  <label
+                    for="upload"
+                    id="upload-label"
+                    class="w-px-100 h-px-100 position-relative border-2 border-light border-dashed rounded-circle bg-label-light cursor-pointer"
+                    style="background-image: url('/191014/{{ $user->img_url }}'); background-size: cover; background-position: center; background-repeat: no-repeat;"
+                  >
+                    <input hidden type="file" name="img_url" class="account-file-input" id="upload"
+                      accept="image/*" />
+                    <div class="position-absolute top-50 start-50 translate-middle z-1">
+                      <i class="ti ti-camera-plus ti-28px text-light">
+                      </i>
+                    </div>
+                  </label>
+                  <span class="fs-6 fw-semibold">
+                    {{ $l == 'en' ? 'Update User Logo' : 'تحديث صورة المستخدم' }}
+                  </span>
+                </div>
+
+                @if ($user->company_id && $_user->ableTo('company.profile_view', $permissions))
+                  <a 
+                    class="btn btn-light" 
+                    href="/dashboard/companyProfile/{{$user->company->id}}" 
+                    target="_blank"
+                  >
+                    <i class="ti ti-building-skyscraper me-2"></i>
+                    {{ __('startup.view_startup_profile') }}
+                  </a>
+                @endif
+              </div>
               <div class="row">
                 <div class="col-md-6 col-12">
                   <div class="form-group mb-4">
@@ -137,15 +177,15 @@
                 <div class="col-md-6 col-12">
                   <div class="form-group mb-4">
                     <label class="form-label" for="role">{{ __('admin.Role') }}</label>
-                    @if(isset($user->roles->first()->name))
-                    @php $currentRole = $user->roles->first()->name; @endphp
+                    @if(isset($user->roles->first()->default_for))
+                    @php $currentRole = $user->roles->first()->default_for; @endphp
                     @else
                     @php $currentRole = ''; @endphp
                     @endif
                     <select class="form-select select2" id="role" name="role">
                       <option disabled value="" selected>{{ __('admin.Select_Role') }}</option>
                       @foreach($roles as $role)
-                        <option value="{{ $role['id'] }}" {{ ($role['name'] == $currentRole)? "selected":"" }} >{{ __('admin.' . $role['name']) }}</option>
+                        <option value="{{ $role['id'] }}" {{ ($role['default_for'] == $currentRole)? "selected":"" }} >{{ __('admin.' . $role['name']) }}</option>
                       @endforeach
                     </select>
                   </div>
@@ -323,6 +363,53 @@
           </div>
           <!-- /Security -->
 
+          <!-- Assigned Organizations (Sub-Admin only) -->
+          @if($isSubAdmin)
+          <div class="tab-pane fade" id="nav-pills-organizations" role="tabpanel">
+            <form
+              method="post"
+              action="{{ route('users.update_organizations', ['user' => $user->id]) }}"
+              id="organizations-form"
+            >
+              @csrf
+              @method('patch')
+              <div class="row">
+                <div class="col-12">
+                  <div class="form-group mb-4">
+                    <label class="form-label" for="organization_ids">
+                      {{ $l == 'en' ? 'Assigned Organizations' : 'المنظمات المعينة' }}
+                    </label>
+                    <p class="text-muted small mb-3">
+                      {{ $l == 'en' ? 'Select one or more organizations that this Sub-Admin can manage.' : 'اختر منظمة واحدة أو أكثر يمكن لهذا المسؤول الفرعي إدارتها.' }}
+                    </p>
+                    <select
+                      class="form-select select2"
+                      id="organization_ids"
+                      name="organization_ids[]"
+                      multiple="multiple"
+                      data-placeholder="{{ $l == 'en' ? 'Select Organizations' : 'اختر المنظمات' }}"
+                    >
+                      @foreach($organizations as $org)
+                        <option
+                          value="{{ $org->id }}"
+                          {{ in_array($org->id, $user->organizations->pluck('id')->toArray()) ? 'selected' : '' }}
+                        >
+                          {{ $org->name }}
+                        </option>
+                      @endforeach
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 d-flex justify-content-end align-items-center gap-4 mt-8">
+                <a href="{{ route('users.index') }}" class="btn btn-label-secondary">{{ __('admin.Cancel') }}</a>
+                <button type="submit" class="btn btn-primary">{{ __('admin.Update') }}</button>
+              </div>
+            </form>
+          </div>
+          @endif
+          <!-- /Assigned Organizations -->
+
         </div>
       </div>
     </div>
@@ -403,7 +490,7 @@
               message: translations.validate_first_name_string_length
             },
             regexp: {
-              regexp: /^[a-zA-Z]+$/,
+              regexp: /^[\p{L}\s]+$/u,
               message: translations.validate_first_name_regexp
             }
           }
@@ -419,7 +506,7 @@
               message: translations.validate_last_name_string_length
             },
             regexp: {
-              regexp: /^[a-zA-Z]+$/,
+              regexp: /^[\p{L}\s]+$/u,
               message: translations.validate_last_name_regexp
             }
           }

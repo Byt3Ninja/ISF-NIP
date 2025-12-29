@@ -54,14 +54,21 @@
               <div class="d-flex flex-column flex-md-row gap-3 align-items-md-center mt-4 mt-md-0">
                 <!-- Search Bar -->
                 <div class="input-group input-group-merge search-form" style="width: 300px;">
-                  <span class="input-group-text"><i class="ti ti-search text-muted"></i></span>
-                  <input type="text" id="searchInput" class="form-control"
-                    placeholder="{{ __('admin.Search') }} {{ __('dashboard.Mentors') }}" />
+                  <span class="input-group-text">
+                    <i class="ti ti-search text-muted"></i>
+                  </span>
+                  <input 
+                    type="text" 
+                    id="searchInput" 
+                    class="form-control"
+                    value="{{ request('search') }}"
+                    placeholder="{{ __('admin.Search') }} {{ __('dashboard.Mentors') }}" 
+                  />
                 </div>
                 
                 <!-- Reset Button (shown when filters are active) -->
                 @php
-                  $hasActiveFilters = request()->hasAny(['programFilter', 'rateSearch', 'expertises', 'linkedin', 'enrolledInProgramFilter']) || 
+                  $hasActiveFilters = request()->hasAny(['programFilter', 'rateSearch', 'expertises', 'linkedin', 'enrolledInProgramFilter', 'search']) || 
                                     (request()->has('expertises') && !empty(request('expertises')));
                 @endphp
                 @if($hasActiveFilters)
@@ -198,28 +205,38 @@
                                           (!auth()->user()->hasRole('Mentor') && !auth()->user()->hasRole('Admin')));
                   
                   if ($canRequestMentorship) {
-                    $startup = auth()->user();
-                    $getCycle = $startup->company->cycledata;
+                    $getCycle = auth()->user()->company->cycledata;
                   }
                 @endphp
 
-                @if($canRequestMentorship)
-                  <button type="button" class="btn btn-primary"
-                    onclick="request({{$mentor->id}},'{{optional($startup)->name }}', {{ $getCycle->organization_id }},{{ $getCycle->id }})"
-                    title="Add new request">
-                    {{ __('cycles.Request_Mentorship') }} <i class="ti ti-calendar-plus ms-2"></i>
-                  </button>
+                @if ($canRequestMentorship && auth()->user()->company->id && $mentor->id)
+                 @if($mentor->schedule->isNotEmpty())
+                    <button 
+                      type="button" 
+                      class="btn btn-primary" 
+                      onclick="if (typeof fetchSlots === 'function') { fetchSlots({{ $mentor->id }}, {{ $getCycle->id }}, {{ $getCycle->organization_id }}); }"
+                    >
+                      {{ __('cycles.Request_Mentorship') }}
+                      <i class="ti ti-calendar-plus ms-2"></i>
+                    </button>
+                  @else
+                    <button type="button" class="btn btn-primary" disabled>
+                      {{ __('cycles.Not_Available_Request_Mentorship') }}
+                      <i class="ti ti-calendar-plus ms-2"></i>
+                    </button>
+                  @endif
                 @else
                   <a href="{{ route('mentors.profile_view', $mentor->id) }}" class="btn btn-primary">
                     {{ __('admin.View Profile') }}
-                    <i class="ti ti-viewfinder ms-2"></i>
                   </a>
                 @endif
               </div>
             </div>
           </div>
           <!-- Mentor Card -->
-
+            @if ($canRequestMentorship && auth()->user()->company->id)
+              @include('partials.book-session-modal')
+            @endif
           @endforeach
           @else
           <!-- No Mentors Result -->
@@ -265,7 +282,7 @@
           <!-- Program Filter -->
           <div class="form-group mb-4">
             <label for="programFilter" class="form-label">{{ __('cycles.Cycle') }}</label>
-            <select name="programFilter" id="programFilter" class="form-select select2">
+            <select name="programFilter" id="programFilter" class="form-select select2" data-placeholder="{{ __('admin.Select Program') }}">
               <option value="">{{ __('admin.All_Programs') }}</option>
               @if(isset($cycles) && count($cycles) > 0)
                 @foreach ($cycles as $cycle)
@@ -279,21 +296,21 @@
 
           <!-- Rate Filter -->
           <div class="form-group mb-4">
-            <label for="rateSearch" class="form-label">{{ __('cycles.Rating') }}</label>
-            <select name="rateSearch" id="rateSearch" class="form-select select2">
+            <label for="rateSearch" class="form-label">{{ __('admin.rating') }}</label>
+            <select name="rateSearch" id="rateSearch" class="form-select select2" data-placeholder="{{ __('admin.select_rating') }}">
               <option value="">{{ __('cycles.Any_Rating') }}</option>
-              <option value="1" {{ request('rateSearch') == '1' ? 'selected' : '' }}>1+ ⭐</option>
-              <option value="2" {{ request('rateSearch') == '2' ? 'selected' : '' }}>2+ ⭐⭐</option>
-              <option value="3" {{ request('rateSearch') == '3' ? 'selected' : '' }}>3+ ⭐⭐⭐</option>
-              <option value="4" {{ request('rateSearch') == '4' ? 'selected' : '' }}>4+ ⭐⭐⭐⭐</option>
-              <option value="5" {{ request('rateSearch') == '5' ? 'selected' : '' }}>5 ⭐⭐⭐⭐⭐</option>
+              @foreach ([1, 2, 3, 4, 5] as $index => $rating)
+                <option value="{{ $rating }}" {{ request('rateSearch') == $rating ? 'selected' : '' }}>
+                  {{ $index !== 4 ? '+' : '' }} {{ $rating }}
+                </option>
+              @endforeach
             </select>
           </div>
 
           <!-- Expertise Filter -->
           <div class="form-group mb-4">
             <label for="expertises" class="form-label">{{ __('admin.Expertises') }}</label>
-            <select name="expertises[]" id="expertises" class="form-select select2" multiple="multiple">
+            <select name="expertises[]" id="expertises" class="form-select select2" multiple="multiple" data-placeholder="{{ __('admin.select_expertises') }}">
               @php
               $expertises = App\Expertise::where('parent_id', null)->get();
               $selectedExpertises = request('expertises', []);
@@ -318,7 +335,7 @@
             <div class="d-flex gap-3">
               <div class="form-check">
                 <input class="form-check-input" type="radio" name="linkedin" value="" 
-                       id="linkedinAll" {{ !request()->has('linkedin') || request('linkedin') === '' ? 'checked' : '' }}>
+                       id="linkedinAll" {{ !request()->has('linkedin') || request('linkedin') === '' || is_null(request('linkedin')) ? 'checked' : '' }}>
                 <label class="form-check-label" for="linkedinAll">
                   {{ __('admin.All') }}
                 </label>
@@ -348,7 +365,7 @@
             <div class="d-flex gap-3">
               <div class="form-check">
                 <input class="form-check-input" type="radio" name="enrolledInProgramFilter" value=""
-                       id="enrolledAll" {{ !request()->has('enrolledInProgramFilter') || request('enrolledInProgramFilter') === '' ? 'checked' : '' }}>
+                       id="enrolledAll" {{ !request()->has('enrolledInProgramFilter') || request('enrolledInProgramFilter') === '' || is_null(request('enrolledInProgramFilter')) ? 'checked' : '' }}>
                 <label class="form-check-label" for="enrolledAll">
                   {{ __('admin.All') }}
                 </label>
@@ -372,7 +389,7 @@
         </div>
         
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" id="cancelFilterBtn">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
             <i class="ti ti-x me-2"></i>
             {{ __('admin.Cancel') }}
           </button>
@@ -385,165 +402,34 @@
     </div>
   </div>
 </div>
-
-@include('admin.clients.startup.partials._session_modal')
 @stop
 
 @section('pagescripts')
-<!-- Page JS -->
-<script src="/vuexy/assets/js/mentorship-session.js"></script>
-
 <script>
-  $(document).ready(function() {
-    // JavaScript Search Functionality
-    $('#searchInput').on('input', function() {
-      const searchTerm = $(this).val().toLowerCase();
-      const mentorCards = $('#mentorsContainer .col-md-4');
-      let visibleCount = 0;
-      
-      mentorCards.each(function() {
-        const card = $(this);
-        const mentorName = card.find('span.text-black.fw-bold.fs-6').text().toLowerCase();
-        const mentorTitle = card.find('small.text-secondary').text().toLowerCase();
-        const mentorBio = card.find('.line-clamp-4').text().toLowerCase();
-        const mentorExpertises = card.find('.btn-outline-warning').map(function() {
-          return $(this).text().toLowerCase();
-        }).get().join(' ');
-        
-        const searchableText = mentorName + ' ' + mentorTitle + ' ' + mentorBio + ' ' + mentorExpertises;
-        
-        if (searchableText.includes(searchTerm)) {
-          card.show();
-          visibleCount++;
-        } else {
-          card.hide();
-        }
-      });
-      
-      // Show/hide no results message
-      if (visibleCount === 0 && searchTerm !== '') {
-        if ($('#noSearchResults').length === 0) {
-          // Clone the template and show it
-          const noResultsTemplate = $('#noSearchResultsTemplate').clone();
-          noResultsTemplate.attr('id', 'noSearchResults');
-          noResultsTemplate.removeClass('d-none');
-          $('#mentorsContainer').append(noResultsTemplate);
-        }
-        $('#noMentorsResult').hide();
-      } else {
-        $('#noSearchResults').remove();
-        if (visibleCount > 0) {
-          $('#noMentorsResult').hide();
-        }
-      }
-    });
-    
-    // Initialize Select2 for different field types
-    // Initialize expertise filter (multiple select)
-    $('#expertises').select2({
-      placeholder: "{{ __('admin.Select Expertise') }}",
-      allowClear: true,
-      dropdownParent: $('#filterModal'),
-      closeOnSelect: false,
-      width: '100%',
-      templateResult: function(option) {
-        // Handle optgroup headers and regular options
-        if (!option.id) {
-          return option.text;
-        }
-        return $('<span>' + option.text + '</span>');
-      },
-      templateSelection: function(option) {
-        return option.text || option.element.textContent;
-      }
-    });
-    
-    // Initialize program filter (single select with "All" option)
-    $('#programFilter').select2({
-      dropdownParent: $('#filterModal'),
-      allowClear: false,
-      minimumResultsForSearch: 5, // Show search box only if more than 5 options
-      templateResult: function(option) {
-        if (!option.id) {
-          return option.text;
-        }
-        return option.text;
-      }
-    });
+$(function () {
+  // Debounce helper
+  const debounce = (fn, delay = 1000) => {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn(...args), delay);
+    };
+  };
 
-    // If programFilter is present in URL, pre-select it in the program select control
-    (function preselectProgramFilter(){
-      try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const programId = urlParams.get('programFilter');
-        if (programId && programId !== '') {
-          const $pf = $('#programFilter');
-          // Ensure option exists (it should from server-side rendering)
-          if ($pf.find('option[value="' + programId + '"]').length) {
-            $pf.val(programId).trigger('change');
-          } else {
-            // Option might not be loaded yet; append a temporary option then select
-            const programText = '{{ __('cycles.Select_Program') }} ' + programId;
-            $pf.append($('<option>', { value: programId, text: programText }));
-            $pf.val(programId).trigger('change');
-          }
-        }
-      } catch (e) {
-        console.error('preselectProgramFilter error', e);
-      }
-    })();
-    
-    // Initialize rating filter (single select with "All" option)
-    $('#rateSearch').select2({
-      dropdownParent: $('#filterModal'),
-      allowClear: false,
-      minimumResultsForSearch: Infinity, // Disable search box for rating
-      templateResult: function(option) {
-        if (!option.id) {
-          return option.text;
-        }
-        return option.text;
-      }
-    });
-    
-    // Handle cancel button logic
-    $('#cancelFilterBtn').on('click', function() {
-      // Check if any filters are active
-      const hasActiveFilters = checkForActiveFilters();
-      
-      if (hasActiveFilters) {
-        // Reset page if filters are active
-        window.location.href = "{{ route('mentors.list') }}";
-      } else {
-        // Just close modal if no filters are active
-        $('#filterModal').modal('hide');
-      }
-    });
-    
-    // Function to check if any filters are currently active
-    function checkForActiveFilters() {
-      const urlParams = new URLSearchParams(window.location.search);
-      
-      // List of filter parameters to check (removed 'search' since it's now JS-based)
-      const filterParams = [
-        'programFilter', 'rateSearch', 'expertises', 
-        'linkedin', 'enrolledInProgramFilter'
-      ];
-      
-      // Check if any filter parameter exists and has a value
-      for (let param of filterParams) {
-        if (urlParams.has(param) && urlParams.get(param) !== '') {
-          return true;
-        }
-      }
-      
-      // Special check for expertises array
-      if (urlParams.has('expertises[]')) {
-        return true;
-      }
-      
-      return false;
-    }
+  // Create debounced handler ONCE
+  const handleSearch = debounce((value) => {
+    const url = new URL(window.location);
+      value
+      ? url.searchParams.set('search', value)
+      : url.searchParams.delete('search');
+
+      window.location.href = url.href;
+    }, 1000);
+
+  // Bind event
+  $('#searchInput').on('keyup', function () {
+    handleSearch(this.value.toLowerCase());
   });
+});
 </script>
 @stop

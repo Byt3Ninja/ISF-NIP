@@ -44,17 +44,19 @@ class ProgramController extends Controller
         $user = auth()->user();
         $search = $request->input('search');
 
-        if (auth()->user()->hasRole('Admin')) {
+        if ($user->hasRole('Admin')) {
             $cycles = Cycle::when($search, function ($query, $search) {
                 return $query->where('title', 'like', '%' . $search . '%');
             });
-        } else if (auth()->user()->hasRole('organizationManager')) {
-            $cycles = Cycle::where('organization_id', $user->organization_id)
-                ->when($search, function ($query, $search) {
-                    return $query->where('title', 'like', '%' . $search . '%');
-                });
+        } else if ($user->hasRole('organizationManager') || $user->isSubAdmin()) {
+            $orgIds = $user->organizations_ids;
+            $cycles = Cycle::when(!empty($orgIds), function ($q) use ($orgIds) {
+                return $q->whereIn('organization_id', $orgIds);
+            })->when($search, function ($query, $search) {
+                return $query->where('title', 'like', '%' . $search . '%');
+            });
         } else {
-            $Organization = Organization::where('user_id', auth()->user()->id)->first();
+            $Organization = Organization::where('user_id', $user->id)->first();
 
             if (!empty($Organization)) {
                 $cycles = Cycle::where('organization_id', $Organization->id)
@@ -121,8 +123,11 @@ class ProgramController extends Controller
             $cycles = Cycle::when($search, function ($query, $search) {
                 return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
             });
-        } else if (Auth()->user()->hasRole('organizationManager')) {
-            $cycles = Cycle::where('organization_id', $user->organization_id)->when($search, function ($query, $search) {
+        } else if (Auth()->user()->hasRole('organizationManager') || $user->isSubAdmin()) {
+            $orgIds = $user->organizations_ids;
+            $cycles = Cycle::when(!empty($orgIds), function ($q) use ($orgIds) {
+                return $q->whereIn('organization_id', $orgIds);
+            })->when($search, function ($query, $search) {
                 return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
             });
         } else {
@@ -171,9 +176,12 @@ class ProgramController extends Controller
     public function show(string $id)
     {
         $user = Auth()->user();
+        $orgIds = $user->organizations_ids;
         $cycle = Cycle::where('id', $id);
-        if ($user->hasRole('organizationManager')) {
-            $cycle = $cycle->where('organization_id', $user->organization_id);
+        if ($user->hasRole('organizationManager') || $user->isSubAdmin()) {
+            $cycle = $cycle->when(!empty($orgIds), function ($q) use ($orgIds) {
+                return $q->whereIn('organization_id', $orgIds);
+            });
         }
         $cycle = $cycle->first();
         if (empty($cycle)) return redirect()->route('programlist.index')->with(['message2' => 'program_not_found', 'class' => 'danger']);
@@ -208,7 +216,6 @@ class ProgramController extends Controller
      */
     public function edit(Request $request)
     {
-        
         $user = auth()->user();
         $search = $request->input('search'); // التحقق من وجود البحث في الطلب
 
@@ -217,8 +224,11 @@ class ProgramController extends Controller
             $cycles = Cycle::when($search, function ($query, $search) {
                 return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
             });
-        } else if (Auth()->user()->hasRole('organizationManager')) {
-            $cycles = Cycle::where('organization_id', $user->organization_id)->when($search, function ($query, $search) {
+        } else if (Auth()->user()->hasRole('organizationManager') || $user->isSubAdmin()) {
+            $orgIds = $user->organizations_ids;
+            $cycles = Cycle::when(!empty($orgIds), function ($q) use ($orgIds) {
+                return $q->whereIn('organization_id', $orgIds);
+            })->when($search, function ($query, $search) {
                 return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
             });
         } else {

@@ -44,8 +44,15 @@
               <!-- Search Bar -->
               <div class="input-group input-group-merge search-form" style="width: 300px;">
                 <span class="input-group-text"><i class="ti ti-search text-muted"></i></span>
-                <input type="text" id="search-programs" class="form-control"
-                  placeholder="{{ __('admin.Search') }} {{ __('admin.Cycles') }}" />
+                <input
+                  type="text" 
+                  id="search-programs" 
+                  class="form-control"
+                  placeholder="{{ __('admin.Search') }} {{ __('admin.Cycles') }}" 
+                  aria-label="Search programs"
+                  aria-describedby="search-programs"
+                  value="{{ request('search') }}"
+                />
               </div>
               
               <!-- Reset Button (shown when filters are active) -->
@@ -172,6 +179,13 @@
                           </a>
                         </li>
                       @endif
+                      @if ($_user->ableTo('mentorships.requests_list', $permissions))
+                      <li>
+                        <a class="dropdown-item" href="{{ route('mentorships.requests_list', $cycle->id) }}">
+                          <i class="ti ti-settings me-1"></i>  {{ __('admin.manage_mentors') }}
+                        </a>
+                      </li>
+                      @endif
                     </ul>
                   </div>
                 </div>
@@ -181,13 +195,13 @@
                 <a href="/dashboard/programlist/{{ $cycle->id }}">
                   <h5 class="mb-1 fw-semibold">{{ $cycle->title }}</h5>
                 </a>
-                <p class="text-muted line-clamp-3">{{ $cycle->description }}</p>
+                <p class="text-muted small line-clamp-3">{{ $cycle->description }}</p>
 
                 {{-- Stats --}}
                 <div class="d-flex justify-content-between align-items-center border-bottom pb-6 mb-6 mt-2">
                   <a 
-                    @if ($_user->ableTo('users.view_companies', $permissions))
-                      href="/dashboard/companies?programFilter={{ $cycle->id }}"
+                    @if ($_user->ableTo('cycles.users_manage', $permissions))
+                      href="/dashboard/cycles/{{ $cycle->id }}/registered"
                     @else
                       href="javascript:void(0);" 
                     @endif
@@ -214,8 +228,10 @@
                     </div>
                   </a>
                   <a
-                    @if ($_user->ableTo('mentors.list', $permissions))
-                      href="/dashboard/show/Mentors?programFilter={{ $cycle->id }}" 
+                    @if ($_user->ableTo('mentorships.requests_list', $permissions))
+                      href="{{ route('mentorships.requests_list', $cycle->id) }}"
+                    @elseif ($_user->ableTo('mentors.list', $permissions))
+                      href="/dashboard/mentors?programFilter={{ $cycle->id }}" 
                     @else
                       href="javascript:void(0);" 
                     @endif
@@ -260,11 +276,11 @@
                     @else
                       href="/dashboard/programlist/{{ $cycle->id }}" 
                     @endif
-                    class="btn btn-primary flex-grow-1">
+                    class="btn btn-primary flex-grow-1 text-nowrap">
                     <i class="ti ti-eye me-1"></i> 
                     {{ $cycle->type === 'Hackathon' ? __('admin.view_hackathon') : __('admin.View_Details') }}
                   </a>
-                  <a  class="btn btn-outline-primary flex-grow-1" href="{{ route('programs.report', $cycle->id) }}">
+                  <a  class="btn btn-outline-primary flex-grow-1 text-nowrap" href="{{ route('programs.report', $cycle->id) }}">
                     <i class="ti ti-file-text me-1"></i> {{ __('admin.View_Report') }}
                   </a>
                 </div>
@@ -311,10 +327,14 @@
                   @endif
   
                   @php
-                    if(auth()->user()->hasAnyRole(['organizationManager'])) {
-                      $organizations = App\organization::where('id',auth()->user()->organization_id)->get();
+                    $user = auth()->user();
+                    if($user->hasRole('Admin')) {
+                      $organizations = App\Organization::all();
+                    } elseif($user->hasRole('organizationManager') || $user->isSubAdmin()) {
+                      $orgIds = $user->organizations_ids;
+                      $organizations = App\Organization::whereIn('id', $orgIds)->get();
                     } else {
-                      $organizations = App\organization::all();
+                      $organizations = collect();
                     }
                   @endphp
   
@@ -424,12 +444,28 @@
     // Initialize Date Picker
     flatpickr(".datepicker", { dateFormat: "Y-m-d" });
 
-    $('#search-programs').on('keyup', function() {
-      var value = $(this).val().toLowerCase();
-      console.log('value', value)
-      $('.row .card').filter(function() {
-        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-      });
+    // Debounce helper
+    const debounce = (fn, delay = 1000) => {
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+      };
+    };
+
+    // Create debounced handler ONCE
+    const handleSearch = debounce((value) => {
+      const url = new URL(window.location);
+        value
+        ? url.searchParams.set('search', value)
+        : url.searchParams.delete('search');
+
+        window.location.href = url.href;
+      }, 1000);
+
+    // Bind event
+    $('#search-programs').on('keyup', function () {
+      handleSearch(this.value.toLowerCase());
     });
   </script>
 @stop

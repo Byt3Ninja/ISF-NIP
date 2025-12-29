@@ -19,10 +19,12 @@
     <div class="layout-wrapper layout-content-navbar">
       <div class="layout-container">
         <!-- Sidebar Menu -->
-        @if ($_user->hasRole('Registered'))
+        @if ($_user->hasAnyRole('Admin|organizationManager|subadmin'))
+          @include('partials.organized-menu')
+        @elseif ($_user->hasRole('Registered'))
           @include('partials.menu-startup')
         @else
-          @include('admin.includes.menu')
+          @include('partials.menu')
         @endif
 
         <div class="layout-page">
@@ -444,7 +446,7 @@
         
         // Simple toast notification - you can enhance this with your preferred toast library
         const toast = `
-          <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'info'} border-0" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
+          <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} border-0" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
             <div class="d-flex">
               <div class="toast-body">${message}</div>
               <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>

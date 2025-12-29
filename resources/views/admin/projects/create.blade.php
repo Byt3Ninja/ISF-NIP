@@ -67,5 +67,5 @@
 <!-- END: Content-->
 
 {{-- @section('pagescripts')
-<script src="https://cdn.ckeditor.com/4.13.1/standard/ckeditor.js"></script>
+<script src="https://cdn.ckeditor.com/4.22.1/full/ckeditor.js"></script>
 @stop --}}

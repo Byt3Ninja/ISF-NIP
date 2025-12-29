@@ -332,9 +332,10 @@ class surveysController extends Controller
 	public function list_surveys($id, Request $request)
 	{
 		try {
-			$organization_id = auth()->user()->organization_id;
-			$cycle = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
-				return $q->where('organization_id', $organization_id);
+			$user = auth()->user();
+			$orgIds = $user->organizations_ids;
+			$cycle = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->whereIn('organization_id', $orgIds);
 			})->find($id);
 
 			if (!empty($cycle)) {
@@ -362,9 +363,10 @@ class surveysController extends Controller
 	public function create_survey($id, Request $request)
 	{
 		try {
-			$organization_id = auth()->user()->organization_id;
-			$cycle = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
-				return $q->where('organization_id', $organization_id);
+			$user = auth()->user();
+			$orgIds = $user->organizations_ids;
+			$cycle = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->whereIn('organization_id', $orgIds);
 			})->find($id);
 
 			if (!empty($cycle)) {
@@ -406,9 +408,10 @@ class surveysController extends Controller
 	public function edit_survey($id, $survey, Request $request)
 	{
 		try {
-			$organization_id = auth()->user()->organization_id;
-			$cycle = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
-				return $q->where('organization_id', $organization_id);
+			$user = auth()->user();
+			$orgIds = $user->organizations_ids;
+			$cycle = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->whereIn('organization_id', $orgIds);
 			})->find($id);
 
 			if (!empty($cycle)) {
@@ -431,9 +434,10 @@ class surveysController extends Controller
 	public function update_survey($id, $survey, Request $request)
 	{
 		try {
-			$organization_id = auth()->user()->organization_id;
-			$cycle = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
-				return $q->where('organization_id', $organization_id);
+			$user = auth()->user();
+			$orgIds = $user->organizations_ids;
+			$cycle = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->whereIn('organization_id', $orgIds);
 			})->find($id);
 
 			if (!empty($cycle)) {
@@ -459,9 +463,10 @@ class surveysController extends Controller
 	public function destroy_survey($id, $survey, Request $request)
 	{
 		try {
-			$organization_id = auth()->user()->organization_id;
-			$cycle = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
-				return $q->where('organization_id', $organization_id);
+			$user = auth()->user();
+			$orgIds = $user->organizations_ids;
+			$cycle = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->whereIn('organization_id', $orgIds);
 			})->find($id);
 
 			if (!empty($cycle)) {

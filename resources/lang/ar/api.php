@@ -132,4 +132,5 @@ return [
  'step_deleted' => 'تم حذف المرحلة بنجاح',
  'steps_reordered_successfully' => 'تم ترتيب المراحل بنجاح',
  'step_order_changed_successfully' => 'تم تغيير ترتيب المرحلة بنجاح',
+ 'max_concurrent_sessions_reached' => 'تم الوصول إلى الحد الأقصى للجلسات عبر الإنترنت في هذا الوقت. يرجى اختيار وقت آخر',
 ];

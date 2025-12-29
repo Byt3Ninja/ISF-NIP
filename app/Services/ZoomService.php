@@ -230,6 +230,13 @@ class ZoomService implements OnlineMeetingServiceInterface
 
     public function createMeeting($data): array
     {
+        if (Settings::hasReachedMaxConcurrentSessions($data['start_time'] ?? null, $data['duration'] ?? null)) {
+            return [
+                'success' => false,
+                'data'    => __('settings.max_concurrent_sessions_reached'),
+            ];
+        }
+
         $user = Auth::user();
         if (!$this->ensureCredentialsInitialized($user)) { // تمرير المستخدم الحالي
             return [

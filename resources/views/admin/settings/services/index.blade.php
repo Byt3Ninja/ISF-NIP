@@ -19,7 +19,29 @@
       </div>
     </div>
     @endif
-    
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-align-top mb-6">
+      @php
+        $tabs = [
+          ['title' => __('admin.All Services'), 'url' => 'dashboard/services', 'icon' => 'arrows-move'],
+          ['title' => __('admin.Services Requests'), 'url' => 'dashboard/requests/all', 'icon' => 'ti ti-briefcase'],
+          ['title' => __('admin.Services Categories'), 'url' => 'dashboard/serviceCategories', 'icon' => 'layout-grid'],
+        ]
+      @endphp
+      <ul class="nav nav-pills">
+        @foreach($tabs as $tab)
+          <li class="nav-item">
+            <a href="/{{ $tab['url'] }}" class="nav-link {{ Request::is($tab['url'] . '*') ? 'active' : '' }}">
+              <i class="ti ti-{{ $tab['icon'] }} me-2"></i>
+              {{ $tab['title'] }}
+            </a>
+          </li>
+        @endforeach
+      </ul>
+    </nav>
+    <!--/ Navigation Tabs -->
+  
     <div class="content-body">
       <section id="basic-datatable">
         <?php $index = 1; ?>
@@ -49,128 +71,126 @@
                 </div>
               </div>
               <div class="card-content">
-                <div class="card-body">
-                  <div class="table-responsive">
-                    <table class="table zero-configuration" id="services-table" style="font-size: 0.92rem;">
-                      <thead class="table-light">
-                        <tr>
-                          <th>#</th>
-                          <th class="text-center">{{__('admin.Organization')}}</th>
-                          <th class="text-center">{{ __('admin.Service_Name') }}</th>
-                          <th class="text-center">{{ __('cycles.Price') }}</th>
-                          <th class="text-center">{{ __('admin.Vendor Info') }}</th>
-                          <th class="text-center">{{ __('admin.Image') }}</th>
-                          <th class="text-center">{{ __('cycles.Created At') }}</th>
-                          @if( $_user->ableToAny(['services.show', 'services.edit', 'services.update',
-                          'services.destroy'], $permissions) )<th class="text-center">{{ __('admin.Actions') }}</th>
+                <div class="card-datatable table-responsive">
+                  <table class="table zero-configuration" id="services-table" style="font-size: 0.92rem;">
+                    <thead class="table-light">
+                      <tr>
+                        <th>#</th>
+                        <th class="text-center">{{__('admin.Organization')}}</th>
+                        <th class="text-center">{{ __('admin.Service_Name') }}</th>
+                        <th class="text-center">{{ __('cycles.Price') }}</th>
+                        <th class="text-center">{{ __('admin.Vendor Info') }}</th>
+                        <th class="text-center">{{ __('admin.Image') }}</th>
+                        <th class="text-center">{{ __('cycles.Created At') }}</th>
+                        @if( $_user->ableToAny(['services.show', 'services.edit', 'services.update',
+                        'services.destroy'], $permissions) )<th class="text-center">{{ __('admin.Actions') }}</th>
+                        @endif
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @foreach ($services as $service)
+                      <tr>
+                        <td>{{ $index++ }}</td>
+                        <td class="text-center" style="min-width: 200px; max-width: 300px; font-size: 0.92rem;">
+                          @if($service->organizations && $service->organizations->count())
+                          <div class="d-flex flex-wrap justify-content-center gap-1 w-100">
+                            @php $orgs = $service->organizations; $orgCount = $orgs->count(); @endphp
+                            @foreach($orgs->take(3) as $organization)
+                            <span class="badge bg-label-primary rounded-pill"
+                              title="{{ $organization->{'name_'.$l} }}">
+                              <a href="{{ URL::to('dashboard/organizations/' . $organization->id . '/edit') }}"
+                                class="text-decoration-none">
+                                {{ Str::limit($organization->{'name_'.$l}, 15) }}
+                              </a>
+                            </span>
+                            @endforeach
+                            @if($orgCount > 3)
+                            <span class="badge bg-label-secondary rounded-pill orgs-modal-trigger"
+                              data-orgs='@json($orgs->map(function($o) use($l) { return ["id"=>$o->id, "name"=>$o->{"name_".$l}]; }))'
+                              style="cursor:pointer;">
+                              +{{ $orgCount - 3 }}
+                            </span>
+                            @endif
+                          </div>
+                          @else
+                          <span class="text-muted">{{ __('admin.No Organizations') }}</span>
                           @endif
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @foreach ($services as $service)
-                        <tr>
-                          <td>{{ $index++ }}</td>
-                          <td class="text-center" style="min-width: 200px; max-width: 300px; font-size: 0.92rem;">
-                            @if($service->organizations && $service->organizations->count())
-                            <div class="d-flex flex-wrap justify-content-center gap-1 w-100">
-                              @php $orgs = $service->organizations; $orgCount = $orgs->count(); @endphp
-                              @foreach($orgs->take(3) as $organization)
-                              <span class="badge bg-label-primary rounded-pill"
-                                title="{{ $organization->{'name_'.$l} }}">
-                                <a href="{{ URL::to('dashboard/organizations/' . $organization->id . '/edit') }}"
-                                  class="text-decoration-none">
-                                  {{ Str::limit($organization->{'name_'.$l}, 15) }}
-                                </a>
-                              </span>
-                              @endforeach
-                              @if($orgCount > 3)
-                              <span class="badge bg-label-secondary rounded-pill orgs-modal-trigger"
-                                data-orgs='@json($orgs->map(function($o) use($l) { return ["id"=>$o->id, "name"=>$o->{"name_".$l}]; }))'
-                                style="cursor:pointer;">
-                                +{{ $orgCount - 3 }}
-                              </span>
-                              @endif
+                        </td>
+                        <td class="text-center" style="font-size: 0.92rem;">{{ $service->name_en }}</td>
+                        <td class="text-center" style="font-size: 0.92rem;">{{ $service->price > 0 ? $service->price . $Setting->Currency : 'Free' }}</td>
+                        <td class="text-center" style="font-size: 0.92rem;">
+                          @if($service->vendor_name || $service->vendor_email || $service->vendor_phone)
+                          <div class="vendor-info d-flex flex-column align-items-start">
+                            @if($service->vendor_name)
+                            <div class="d-flex align-items-center mb-1 vendor-name">
+                              <i class="ti ti-user me-1"></i>
+                              <span class="fw-medium text-xs">{{ $service->vendor_name }}</span>
                             </div>
-                            @else
-                            <span class="text-muted">{{ __('admin.No Organizations') }}</span>
                             @endif
-                          </td>
-                          <td class="text-center" style="font-size: 0.92rem;">{{ $service->name_en }}</td>
-                          <td class="text-center" style="font-size: 0.92rem;">{{ $service->price > 0 ? $service->price . $Setting->Currency : 'Free' }}</td>
-                          <td class="text-center" style="font-size: 0.92rem;">
-                            @if($service->vendor_name || $service->vendor_email || $service->vendor_phone)
-                            <div class="vendor-info d-flex flex-column align-items-start">
-                              @if($service->vendor_name)
-                              <div class="d-flex align-items-center mb-1 vendor-name">
-                                <i class="ti ti-user me-1"></i>
-                                <span class="fw-medium text-xs">{{ $service->vendor_name }}</span>
-                              </div>
-                              @endif
-                              @if($service->vendor_email)
-                              <div class="vendor-email d-flex align-items-center mb-1">
-                                <i class="ti ti-mail me-1"></i>
-                                <a href="mailto:{{ $service->vendor_email }}" class="text-decoration-none text-xs">
-                                  {{ $service->vendor_email }}
-                                </a>
-                              </div>
-                              @endif
-                              @if($service->vendor_phone)
-                              <div class="vendor-phone d-flex align-items-center">
-                                <i class="ti ti-phone me-1"></i>
-                                <a href="tel:{{ $service->vendor_phone }}" class="text-decoration-none text-xs">
-                                  {{ $service->vendor_phone }}
-                                </a>
-                              </div>
-                              @endif
+                            @if($service->vendor_email)
+                            <div class="vendor-email d-flex align-items-center mb-1">
+                              <i class="ti ti-mail me-1"></i>
+                              <a href="mailto:{{ $service->vendor_email }}" class="text-decoration-none text-xs">
+                                {{ $service->vendor_email }}
+                              </a>
                             </div>
-                            @else
-                            <span class="text-muted">-</span>
                             @endif
-                          </td>
-                          <td class="text-center">
-                            @if ($service->img_url)
-                            <img class="rounded" src="{{ Storage::disk('public_uploads')->url($service->img_url) }}" alt="img"
-                              style="width: 50px; height: 50px;">
-                            @else
-                            -
-                            @endif
-                          </td>
-                          <td class="text-center" style="font-size: 0.92rem;">{{ $service->created_at }}</td>
-                          @if($_user->ableToAny(['services.show', 'services.edit', 'services.update',
-                          'services.destroy'], $permissions))
-                          <td class="text-center" style="font-size: 0.92rem;">
-                            <div class="dropdown">
-                              <button class="btn btn-label-secondary p-1 px-2" type="button"
-                                id="actionsDropdown{{ $service->id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="ti ti-dots-vertical"></i>
-                              </button>
-                              <ul class="dropdown-menu" aria-labelledby="actionsDropdown{{ $service->id }}">
-                                @if($_user->ableToAny(['services.show', 'services.edit', 'services.update'], $permissions))
-                                <li>
-                                  <a class="dropdown-item d-flex align-items-center" href="{{ route('services.edit', ['service' => $service->id]) }}">
-                                    <i class="ti ti-pencil me-1"></i> {{ __('admin.Edit') }}
-                                  </a>
-                                </li>
-                                @endif
-                                @if($_user->ableTo('services.destroy', $permissions))
-                                <li>
-                                  <button
-                                    class="dropdown-item text-danger d-flex align-items-center delete-service-action"
-                                    data-id="{{ $service->id }}"
-                                    data-url="{{ route('services.destroy', ['service' => $service->id]) }}">
-                                    <i class="ti ti-trash me-1"></i> {{ __('Delete') }}
-                                  </button>
-                                </li>
-                                @endif
-                              </ul>
+                            @if($service->vendor_phone)
+                            <div class="vendor-phone d-flex align-items-center">
+                              <i class="ti ti-phone me-1"></i>
+                              <a href="tel:{{ $service->vendor_phone }}" class="text-decoration-none text-xs">
+                                {{ $service->vendor_phone }}
+                              </a>
                             </div>
-                          </td>
+                            @endif
+                          </div>
+                          @else
+                          <span class="text-muted">-</span>
                           @endif
-                        </tr>
-                        @endforeach
-                      </tbody>
-                    </table>
-                  </div>
+                        </td>
+                        <td class="text-center">
+                          @if ($service->img_url)
+                          <img class="rounded" src="{{ Storage::disk('public_uploads')->url($service->img_url) }}" alt="img"
+                            style="width: 50px; height: 50px;">
+                          @else
+                          -
+                          @endif
+                        </td>
+                        <td class="text-center" style="font-size: 0.92rem;">{{ $service->created_at }}</td>
+                        @if($_user->ableToAny(['services.show', 'services.edit', 'services.update',
+                        'services.destroy'], $permissions))
+                        <td class="text-center" style="font-size: 0.92rem;">
+                          <div class="dropdown">
+                            <button class="btn btn-label-secondary p-1 px-2" type="button"
+                              id="actionsDropdown{{ $service->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                              <i class="ti ti-dots-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="actionsDropdown{{ $service->id }}">
+                              @if($_user->ableToAny(['services.show', 'services.edit', 'services.update'], $permissions))
+                              <li>
+                                <a class="dropdown-item d-flex align-items-center" href="{{ route('services.edit', ['service' => $service->id]) }}">
+                                  <i class="ti ti-pencil me-1"></i> {{ __('admin.Edit') }}
+                                </a>
+                              </li>
+                              @endif
+                              @if($_user->ableTo('services.destroy', $permissions))
+                              <li>
+                                <button
+                                  class="dropdown-item text-danger d-flex align-items-center delete-service-action"
+                                  data-id="{{ $service->id }}"
+                                  data-url="{{ route('services.destroy', ['service' => $service->id]) }}">
+                                  <i class="ti ti-trash me-1"></i> {{ __('Delete') }}
+                                </button>
+                              </li>
+                              @endif
+                            </ul>
+                          </div>
+                        </td>
+                        @endif
+                      </tr>
+                      @endforeach
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>

@@ -360,6 +360,7 @@ class Company extends Model
         return $this->hasMany(Team_member::class, 'Company_id');
     }
 
+
     public function employees()
     {
         return $this->hasMany(Employee::class, 'company_id');
@@ -400,5 +401,9 @@ class Company extends Model
             $form->formData = $formData;
         }
         return $form;
+    }
+    public function companyRelations()
+    {
+        return $this->hasMany(CompanyRelation::class, 'company_id', 'id');
     }
 }

@@ -81,6 +81,7 @@ $tabs = $_permissions->groupBy('group')->map(function ($groupPermissions, $group
                 <option value="registered" {{ $role->default_for == 'registered' ? 'selected' : '' }}>{{ __('admin.roleRegistered') }}</option>
                 <option value="pages" {{ $role->default_for == 'pages' ? 'selected' : '' }}>{{ __('admin.rolePagesEditor') }}</option>
                 <option value="organizationmanager" {{ $role->default_for == 'organizationmanager' ? 'selected' : '' }}>{{ __('admin.roleOrganizationManager') }}</option>
+                <option value="subadmin" {{ $role->default_for == 'subadmin' ? 'selected' : '' }}>{{ __('admin.Sub-Admin') }}</option>
                 <option value="serviceProvider" {{ $role->default_for == 'serviceProvider' ? 'selected' : '' }}>{{ __('admin.roleServiceProvider') }}</option>
                 <option value="other" {{ $role->default_for == 'other' ? 'selected' : '' }}>{{ __('admin.roleOther') }}</option>
               </select>

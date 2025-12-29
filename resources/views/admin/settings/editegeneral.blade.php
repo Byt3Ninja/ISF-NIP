@@ -23,7 +23,7 @@ $tabs = collect([
   ['SMTP', 'ti-mail', __('settings.SMTP Configuration')],
   ['app-identity', 'ti-id-badge', __('settings.Application Identity')],
   ['Notification', 'ti-bell', __('settings.Push Notification Settings')],
-  ['NotificationChannels', 'ti-bell-ringing', 'Notification Channels'],
+  ['NotificationChannels', 'ti-bell-ringing', __('settings.Notification Channels')],
   ['MeetingTab', 'ti-device-computer-camera', __('settings.Meeting Setting')],
   ['SocialMediaLinks', 'ti-share', __('settings.SocialMediaLinks')],
   ['SocialMediaLogin', 'ti-brand-facebook', __('settings.SocialMediaLogin')],

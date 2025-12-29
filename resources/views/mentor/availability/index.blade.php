@@ -18,35 +18,30 @@
     .fc-today-button {
       text-transform: capitalize !important;
     }
+    .slot-popup.popover {
+      position: absolute;
+      z-index: 9999;
+      pointer-events: none;
+      font-size: 12px;
+      white-space: nowrap;
+      max-width: none;
+    }
+    .slot-popup.popover .popover-arrow {
+      display: none;
+    }
   </style>
 @stop
 
 @section('content')
 
-@php
-$jsonPath = public_path('slots.json');
-$weeklySlots = [];
-
-if (file_exists($jsonPath)) {
-    $jsonContent = file_get_contents($jsonPath);
-    $allSlots = json_decode($jsonContent, true);
-
-    if (is_array($allSlots)) {
-        $weeklySlots = array_filter($allSlots, function ($slot) {
-            return isset($slot['weekly']) && $slot['weekly'] === true;
-        });
-    }
-}
-@endphp
-
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
   
     <div class="d-flex justify-content-between align-items-center mb-6">
-      <h4 class="card-title mb-0 text-dark f">{{ __('Weekly Availability Slots') }}</h4>
-  
+      <h4 class="card-title mb-0 text-dark f">{{ __('mentor.weekly_availability_slots') }}</h4>
+
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#availabilityModal">
-        <i class="ti ti-plus me-1"></i> {{ __('Add Availability') }}
+        <i class="ti ti-plus me-1"></i> {{ __('mentor.add_availability') }}
       </button>
     </div>
   
@@ -60,32 +55,31 @@ if (file_exists($jsonPath)) {
   <!-- ADD AVAILABILITY MODAL WITH CALENDAR -->
   <div class="modal fade" id="availabilityModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
-      <form method="POST" action="#" id="availability-form">
-        @csrf
-        <input type="hidden" name="availability_data" id="availability-data-input">
-  
+      <form onsubmit="return false;">  
         <div class="modal-content">
   
           <div class="modal-header border-bottom pb-6">
-            <div class="d-flex justify-content-between align-items-center w-100">
-              <h5 class="modal-title mb-0">{{ __('Add Availability') }}</h5>
-              <nav class="nav-align-end">
-                <ul class="nav nav-tabs">
-                  <li class="nav-item">
-                    <button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#calendar-tab">
-                      <i class="ti ti-calendar ti-sm me-1"></i>
-                      {{ __('Calendar View') }}
-                    </button>
-                  </li>
-                  <li class="nav-item">
-                    <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#list-tab">
-                      <i class="ti ti-list ti-sm me-1"></i>
-                      {{ __('List View') }}
-                    </button>
-                  </li>
-                </ul>
-              </nav>
-            </div>
+          <div class="d-flex justify-content-between align-items-center w-100">
+            <h5 class="modal-title d-flex align-items-center mb-0">
+              <i class="ti ti-plus me-2"></i> {{ __('mentor.add_availability') }}
+            </h5>
+            <nav class="nav-align-end">
+              <ul class="nav nav-tabs">
+                <li class="nav-item">
+                  <button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#calendar-tab">
+                    <i class="ti ti-calendar ti-sm me-1"></i>
+                    {{ __('mentor.calendar_view') }}
+                  </button>
+                </li>
+                <li class="nav-item">
+                  <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#list-tab">
+                    <i class="ti ti-list ti-sm me-1"></i>
+                    {{ __('mentor.list_view') }}
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          </div>
             <button class="btn-close" data-bs-dismiss="modal"></button>
           </div>
   
@@ -93,7 +87,7 @@ if (file_exists($jsonPath)) {
             <div class="tab-content">
               <div class="tab-pane fade show active" id="calendar-tab" role="tabpanel">
                 <div class="row">
-                  <div class="col-lg-5 border-end ps-5">
+                  <div class="col-lg-5 border-end ps-5 mb-6 mb-lg-0">
                     <div id="availability-calendar"></div>
                   </div>
                   <div class="col-lg-7 ps-8">
@@ -101,29 +95,27 @@ if (file_exists($jsonPath)) {
     
                       <div class="mb-4">
                         <h6 class="mb-0" id="selected-date-display">
-                          {{ __('Select a date from the calendar') }}
+                          {{ __('mentor.select_date_from_calendar') }}
                         </h6>
-                        <small class="text-muted">Add your available time slots</small>
+                        <small class="text-muted">{{ __('mentor.select_date_to_add_your_available_time_slots') }}</small>
                       </div>
       
                       <div class="border rounded p-4 bg-light-subtle mb-4" id="slot-form-box" style="display: none;">
                         <div class="row mb-2">
                           <div class="col-md-4 mb-3">
-                            <label class="form-label">{{ __('Start Time') }}</label>
+                            <label class="form-label">{{ __('mentor.start_time') }}</label>
                             <input type="text" id="slot-start-time" class="form-control bg-white border" placeholder="09:00">
                           </div>
-      
+
                           <div class="col-md-4 mb-3">
-                            <label class="form-label">{{ __('End Time') }}</label>
+                            <label class="form-label">{{ __('mentor.end_time') }}</label>
                             <input type="text" id="slot-end-time" class="form-control bg-white border" placeholder="17:00">
                           </div>
-      
+
                           <div class="col-md-4 mb-3">
-                            <label class="form-label">{{ __('Session Type') }}</label>
+                            <label class="form-label">{{ __('mentor.session_type') }}</label>
                             <select id="slot-session-type" class="form-select bg-white border">
-                              <option value="Online">Online</option>
-                              <option value="Offline">Offline</option>
-                              <option value="Both">Both</option>
+                              <option value="Online">{{ __('mentor.online') }}</option>
                             </select>
                           </div>
                         </div>
@@ -131,20 +123,20 @@ if (file_exists($jsonPath)) {
                         <div class="d-flex gap-2">
                           <button type="button" class="btn btn-sm btn-primary text-nowrap" id="add-single-slot">
                             <i class="ti ti-plus ti-16px me-1"></i>
-                            {{ __('Add Single Slot') }}
+                            {{ __('mentor.add_single_slot') }}
                           </button>
                           <button type="button" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 text-nowrap" id="apply-to-weekday">
                             <i class="ti ti-calendar-check ti-16px"></i>
-                            <span>{{ __('Apply to All') }}</span>
+                            <span>{{ __('mentor.apply_to_all') }}</span>
                             <span id="selected-weekday"></span>
                           </button>
                         </div>
                       </div>
       
                       <div id="slots-list-container">
-                        <h6 class="mb-3">{{ __('Slots for Selected Date') }}</h6>
+                        <h6 class="mb-3">{{ __('mentor.slots_for_selected_date') }}</h6>
                         <div id="slots-list">
-                          <p class="text-muted">{{ __('No slots added yet') }}</p>
+                          <p class="text-muted">{{ __('mentor.no_slots_added') }}</p>
                         </div>
                       </div>
       
@@ -165,8 +157,7 @@ if (file_exists($jsonPath)) {
           </div>
   
           <div class="modal-footer border-top pt-6">
-            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
-            <button type="submit" class="btn btn-primary">{{ __('Save Availability') }}</button>
+            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('admin.close') }}</button>
           </div>
         </div>
       </form>
@@ -176,9 +167,18 @@ if (file_exists($jsonPath)) {
 @endsection
 
 @section('scripts')
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
 <script src="/vuexy/assets/vendor/libs/fullcalendar/fullcalendar.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/locales/ar.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ar.js"></script>
+
 <script>
+  // Constants
+  const isOfflineAllowed = {!! json_encode($offline_allowed) !!};
+
+  // Translation data
+  const translations = {!! json_encode(__('mentor')) !!};
+
   // Global variables
     let calendarInstance;
     let currentSelectedDate = null;
@@ -190,6 +190,7 @@ if (file_exists($jsonPath)) {
 
     // Helper function to create a slot object
     const createSlotObject = (slot) => ({
+        id: slot.id,
         start: slot.start_time,
         end: slot.end_time,
         sessionType: slot.session_type,
@@ -205,11 +206,18 @@ if (file_exists($jsonPath)) {
 
     const updateSelectedDateDisplay = () => {
         if (currentSelectedDate) {
-            $('#selected-date-display').text(moment(currentSelectedDate).format('dddd, MMMM D, YYYY'));
-            $('#selected-weekday').text(currentWeekday);
+            const currentWeekday = moment(currentSelectedDate).format('dddd').toLowerCase();
+            const arabicDay = translations[currentWeekday];
+
+            const monthName = moment(currentSelectedDate).format('MMMM').toLowerCase();
+            const arabicMonth = translations[monthName];
+            const formattedDate = `${arabicMonth} ${moment(currentSelectedDate).format('D, YYYY')}`;
+
+            $('#selected-date-display').text(`${arabicDay}, ${formattedDate}`);
+            $('#selected-weekday').text(translations[currentWeekday.toLowerCase()]);
             $('#slot-form-box').show();
         } else {
-            $('#selected-date-display').text('Select a date from the calendar');
+            $('#selected-date-display').text('{{ __('mentor.select_date_from_calendar') }}');
             $('#slot-form-box').hide();
         }
     };
@@ -242,27 +250,61 @@ if (file_exists($jsonPath)) {
     let startTimePicker;
     let endTimePicker;
 
+    // Function to get session type options HTML
+    function getSessionTypeOptionsHTML(selected = 'Online') {
+        let options = `<option value="Online" ${selected === 'Online' ? 'selected' : ''}>${translations.online || 'Online'}</option>`;
+        if (isOfflineAllowed) {
+            options += `<option value="Offline" ${selected === 'Offline' ? 'selected' : ''}>${translations.offline || 'Offline'}</option>`;
+            options += `<option value="Both" ${selected === 'Both' ? 'selected' : ''}>${translations.both || 'Both'}</option>`;
+        }
+        return options;
+    }
+
+    // Initialize session type select
+    function initSessionTypeSelect() {
+        $('#slot-session-type').html(getSessionTypeOptionsHTML());
+    }
+
     // Fetch slots on page load
     document.addEventListener('DOMContentLoaded', function() {
-        fetch('{{ asset("slots.json") }}')
+        fetch('/dashboard/availability/slots', {
+            headers: {
+              "Accept": "application/json"
+            }
+          })
             .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok'))
-            .then(data => {
-                processSlots(data);
+            .then(result => {
+              // console.log('Fetched slots:', result?.data ? result.data : []);
+                processSlots(result?.data ? result.data : []);
                 updateCalendarStyles();
                 initializeMainCalendar(); // Initialize the main calendar here
             })
             .catch(error => {
                 console.error('Error fetching slots:', error);
-                alert('Could not load availability slots. Please try again later.');
+                alert('{{ __('mentor.could_not_load_availability_slots') }}');
             });
 
         // Initialize time pickers after DOM is ready
-        startTimePicker = flatpickr("#slot-start-time", { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true });
-        endTimePicker = flatpickr("#slot-end-time", { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true });
+        startTimePicker = flatpickr("#slot-start-time", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true,
+        });
+        endTimePicker = flatpickr("#slot-end-time", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true,
+        });
+
+        // Initialize session type select
+        initSessionTypeSelect();
 
         // Initialize calendar after time pickers
         calendarInstance = flatpickr("#availability-calendar", {
         inline: true,
+        locale: '{{ $l }}',
         mode: "single",
         dateFormat: "Y-m-d",
         minDate: "today",
@@ -276,7 +318,7 @@ if (file_exists($jsonPath)) {
             if (hasSlots) {
                 dayElem.classList.add('has-slots');
             }
-        }
+        },
     });
     }); // Close DOMContentLoaded
 
@@ -333,28 +375,72 @@ if (file_exists($jsonPath)) {
 
         mainCalendarInstance = new FullCalendar.Calendar(mainCalendarEl, {
             initialView: 'dayGridMonth',
+            locale: '{{ $l }}',
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
                 right: 'dayGridMonth,timeGridDay,listMonth'
+            },
+            buttonText: {
+              today: '{{ $l }}' == 'en' ? 'Today' : 'اليوم',
+              month: '{{ $l }}' == 'en' ? 'Month' : 'الشهر',
+              day: '{{ $l }}' == 'en' ? 'Day' : 'اليوم',
+              list: '{{ $l }}' == 'en' ? 'List' : 'قائمة',
             },
             editable: false,
             selectable: false,
             events: events,
             eventContent: function(arg) {
                 let arrayOfDomNodes = [];
-                
+
                 let titleEl = document.createElement('span');
                 titleEl.innerHTML = arg.event.title;
                 arrayOfDomNodes.push(titleEl);
 
                 if (arg.event.extendedProps.weekly) {
                     let iconEl = document.createElement('i');
-                    iconEl.className = 'ti ti-repeat ti-16px text-dark ms-2'; // Added ms-1 for margin-left
+                    iconEl.className = 'ti ti-repeat ti-16px text-dark m{{ $l == 'en' ? 's' : 'e' }}-2'; // Added ms-1 for margin-left
                     arrayOfDomNodes.push(iconEl);
                 }
 
                 return { domNodes: arrayOfDomNodes };
+            },
+            eventMouseEnter: function(arg) {
+                const event = arg.event;
+                const startTime = moment(event.start);
+                const endTime = event.end ? moment(event.end) : moment(event.start).add(1, 'hour'); // fallback if no end time
+                const duration = endTime.diff(startTime, 'minutes');
+                const repeatsStatus = event.extendedProps.weekly ? '{{ __("mentor.repeats_weekly") }}' : '{{ $l == "en" ? "Does not repeat" : "لا يتكرر" }}';
+
+                // Create or get popup element
+                let popup = document.querySelector('.slot-popup');
+                if (!popup) {
+                    popup = document.createElement('div');
+                    popup.className = 'popover slot-popup';
+                    const body = document.createElement('div');
+                    body.className = 'popover-body';
+                    popup.appendChild(body);
+                    document.body.appendChild(popup);
+                }
+
+                // Set popup content
+                const body = popup.querySelector('.popover-body');
+                body.innerHTML = `
+                    <div><strong>{{ $l == "en" ? "Duration" : "المدة" }}:</strong> ${duration} {{ __("mentor.min") }}</div>
+                    <div><strong>{{ $l == "en" ? "Repeats" : "يتكرر" }}:</strong> ${repeatsStatus}</div>
+                `;
+
+                // Position popup below the event
+                const rect = arg.el.getBoundingClientRect();
+                popup.style.left = (rect.left + rect.width / 2) + 'px';
+                popup.style.top = (rect.bottom + 5) + 'px';
+                popup.style.display = 'block';
+            },
+            eventMouseLeave: function(arg) {
+                const popup = document.querySelector('.slot-popup');
+                if (popup) {
+                    popup.style.display = 'none';
+                }
             }
         });
 
@@ -378,15 +464,66 @@ if (file_exists($jsonPath)) {
 
     // Override delete slot handler to also update main calendar
     $(document).off('click.delete-slot-override').on('click.delete-slot-override', '.delete-slot', function() {
-        const { type, key, index } = $(this).data();
-        availabilityData[type][key].splice(index, 1);
-        if (availabilityData[type][key].length === 0) {
-            delete availabilityData[type][key];
-        }
-        updateSlotsList();
-        updateListView();
-        updateCalendarStyles();
-        updateMainCalendar();
+        const { type, key, index, id } = $(this).data();
+
+        // Show SweetAlert confirmation before deletion
+        Swal.fire({
+            title: "{{__('mentor.delete_slot_confirm')}}",
+				    text: "{{__('admin.Recover')}}",
+            icon: 'warning',
+           	showCancelButton: true,
+            confirmButtonText: "{{ __('admin.DYes') }}",
+            cancelButtonText: "{{ __('admin.No') }}",
+            reverseButtons: true,
+            customClass: {
+              confirmButton: 'btn btn-danger me-2',
+              cancelButton: 'btn btn-label-secondary',
+            },
+            buttonsStyling: false,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // User confirmed deletion, proceed with deletion
+                availabilityData[type][key].splice(index, 1);
+                if (availabilityData[type][key].length === 0) {
+                    delete availabilityData[type][key];
+                }
+
+                // API call to delete the slot from the server
+                if (id) {
+                    fetch(`/dashboard/availability/slots/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            "Accept": "application/json",
+                            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                        }
+                    })
+                    .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok'))
+                    .then(result => {
+                        if(result.success) {
+                            releaseSuccessAlert({
+                                'message': result?.message ? result.message : "{{ __('mentor.slot_removed_success') }}",
+                            });
+                        } else {
+                             releaseFailureAlert({
+                                'title': '{{ __('admin.Error') }}',
+                                'message': result?.message ? result.message : "{{ __('admin.unexpected_error') }}",
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        releaseFailureAlert({
+                            'title': '{{ __('admin.Error') }}',
+                            'message': error?.message ? error.message : "{{ __('admin.unexpected_error') }}",
+                        });
+                    });
+                }
+
+                updateSlotsList();
+                updateListView();
+                updateCalendarStyles();
+                updateMainCalendar();
+            }
+        });
     });
     
 
@@ -397,7 +534,7 @@ if (file_exists($jsonPath)) {
         const sessionType = $('#slot-session-type').val();
 
         if (!start || !end) {
-            alert('Please select start and end time');
+            alert('{{ __('mentor.please_select_start_and_end_time') }}');
             return null;
         }
 
@@ -405,7 +542,7 @@ if (file_exists($jsonPath)) {
         const endTime = moment(end, 'HH:mm');
 
         if (!startTime.isValid() || !endTime.isValid() || endTime.isSameOrBefore(startTime)) {
-            alert('End time must be after start time');
+            alert('{{ __('mentor.end_time_must_be_after_start_time') }}');
             return null;
         }
         
@@ -416,25 +553,71 @@ if (file_exists($jsonPath)) {
     function addSlot(type) {
         const key = type === 'specific' ? currentSelectedDate : currentWeekday;
         if (!key) {
-            alert('Please select a date first');
+            alert('{{ __('mentor.please_select_date_first') }}');
             return;
         }
 
         const slot = getSlotFromForm();
         if (!slot) return;
 
-        availabilityData[type][key] = [...(availabilityData[type][key] || []), slot];
-        
-        updateSlotsList();
-        updateListView();
-        clearSlotForm();
-
-        if (type === 'specific') {
-            updateCalendarStyles();
-            alert(`Slot added to ${moment(key).format('MMMM D, D, YYYY')}`);
-        } else {
-            alert(`Slot will be applied to all ${key}s`);
-        }
+         fetch('/dashboard/availability/slots/store', {
+            headers: {
+              "Accept": "application/json",
+              "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content'),
+              "Content-Type": 'application/json',
+            },
+            method: 'POST',
+            body: JSON.stringify({
+              tfrom: slot.start,
+              tto: slot.end,
+              session_type: slot.sessionType,
+              type: type === 'weekly' ? 'Weekly' : 'Period',
+              date: type === 'specific' ? key : null,
+              days: type === 'weekly' ? key : null,
+            }),
+        })
+          .then(response => response.ok ? response.json() : Promise.reject(response))
+          .then(result => {
+            if( Array.isArray(result.data) )
+            {
+              $.each(result.data, function(index, slot) {
+                var newSlot = createSlotObject(slot);
+                availabilityData[type][key] = [...(availabilityData[type][key] || []), newSlot];
+              });
+            }
+            else
+            {
+              const newSlot = createSlotObject(result.data);
+              availabilityData[type][key] = [...(availabilityData[type][key] || []), newSlot];
+            }
+            
+            updateSlotsList();
+            updateListView();
+            clearSlotForm();
+            if (type === 'specific') {
+              const message = "{{ __('mentor.slot_added_to_date', ['date' => ':date']) }}".replace(':date', moment(key).format('MMMM D, YYYY'));
+              
+              updateCalendarStyles();
+              releaseSuccessAlert({
+                'title': '{{ __('mentor.slot_added_success') }}',
+                'message': message,
+              });
+            } else {
+              const message = "{{ __('mentor.slot_added_to_all', ['day' => ':day']) }}".replace(':day', key + 's');
+              updateCalendarStyles();
+              releaseSuccessAlert({
+                'title': '{{ __('mentor.slot_added_success') }}',
+                'message': message,
+              });
+            }
+          })
+          .catch(async error => {
+            const data = await error.json();
+            releaseFailureAlert({
+              title: '{{ __('admin.Error') }}',
+              message: error?.message ? error.message : data.message, 
+            });
+          });
     }
 
     $('#add-single-slot').click(() => addSlot('specific'));
@@ -443,21 +626,21 @@ if (file_exists($jsonPath)) {
     // Render calendar view's slots list
     function updateSlotsList() {
         if (!currentSelectedDate) {
-            $('#slots-list').html('<p class="text-muted">No slots added yet</p>');
+            $('#slots-list').html('<p class="text-muted">@lang('mentor.no_slots_added')</p>');
             return;
         }
 
         const renderSlotHTML = (slot, type, key, index) => {
             const isWeekly = type === 'weekly';
-            const repeatsText = isWeekly ? ' • <em>Repeats weekly</em>' : '';
+            const repeatsText = isWeekly ? ' • <em>{{ __('mentor.repeats_weekly') }}</em>' : '';
             const bgColor = isWeekly ? 'bg-light-subtle' : 'bg-white';
             return `
                 <div class="${bgColor} border rounded p-3 mb-2 d-flex justify-content-between align-items-center">
                     <div>
                         <div class="fw-bold text-dark mb-1">${slot.start} - ${slot.end}</div>
-                        <div class="small text-muted">${slot.duration} min • ${slot.sessionType}${repeatsText}</div>
+                        <div class="small text-muted">${slot.duration} {{ __('mentor.min') }} • ${translations[slot.sessionType.toLowerCase()]}${repeatsText}</div>
                     </div>
-                    <button type="button" class="btn btn-label-danger btn-sm btn-icon delete-slot" data-type="${type}" data-key="${key}" data-index="${index}">
+                    <button type="button" class="btn btn-label-danger btn-sm btn-icon delete-slot" data-type="${type}" data-key="${key}" data-index="${index}" data-id="${slot.id}">
                         <i class="ti ti-trash ti-16px"></i>
                     </button>
                 </div>`;
@@ -470,22 +653,33 @@ if (file_exists($jsonPath)) {
                 : `<p class="text-muted">${emptyMsg}</p>`
             }`;
 
-        const specificSlotsHtml = renderGroup('Specific Date Slots:', availabilityData.specific[currentSelectedDate], 'specific', currentSelectedDate, 'No slots added for this specific date.');
-        const weeklySlotsHtml = renderGroup(`Weekly Recurring Slots (Every ${currentWeekday}):`, availabilityData.weekly[currentWeekday], 'weekly', currentWeekday, `No recurring slots for ${currentWeekday}s.`);
+        const specificSlotsHtml = renderGroup('{{ __('mentor.specific_date_slots') }}:', availabilityData.specific[currentSelectedDate], 'specific', currentSelectedDate, '{{ __('mentor.no_slots_added') }}');
+        const weeklySlotsHtml = renderGroup(`{{ __('mentor.weekly_recurring_slots') }} ({{ __('mentor.every') }} ${currentWeekday === 'Sunday' ? '{{ __('mentor.sunday') }}' : currentWeekday === 'Monday' ? '{{ __('mentor.monday') }}' : currentWeekday === 'Tuesday' ? '{{ __('mentor.tuesday') }}' : currentWeekday === 'Wednesday' ? '{{ __('mentor.wednesday') }}' : currentWeekday === 'Thursday' ? '{{ __('mentor.thursday') }}' : currentWeekday === 'Friday' ? '{{ __('mentor.friday') }}' : '{{ __('mentor.saturday') }}'}):`, availabilityData.weekly[currentWeekday], 'weekly', currentWeekday, `{{ __('mentor.no_slots_added') }}`);
         
         $('#slots-list').html(specificSlotsHtml + weeklySlotsHtml);
     }
 
     // Render list view
     function updateListView() {
-        const weekdaysOrder = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const weekdaysOrder = [
+            { key: 'Sunday', display: '{{ __('mentor.sunday') }}' },
+            { key: 'Monday', display: '{{ __('mentor.monday') }}' },
+            { key: 'Tuesday', display: '{{ __('mentor.tuesday') }}' },
+            { key: 'Wednesday', display: '{{ __('mentor.wednesday') }}' },
+            { key: 'Thursday', display: '{{ __('mentor.thursday') }}' },
+            { key: 'Friday', display: '{{ __('mentor.friday') }}' },
+            { key: 'Saturday', display: '{{ __('mentor.saturday') }}' }
+        ];
         let html = '';
 
-        weekdaysOrder.forEach(weekday => {
-            const weeklySlots = (availabilityData.weekly[weekday] || []).map(slot => ({ ...slot, type: 'weekly', key: weekday }));
+        weekdaysOrder.forEach(day => {
+            const weekdayKey = day.key;
+            const weekdayDisplay = day.display;
+
+            const weeklySlots = (availabilityData.weekly[weekdayKey] || []).map(slot => ({ ...slot, type: 'weekly', key: weekdayKey }));
             
             const specificSlotsOnWeekday = Object.entries(availabilityData.specific)
-                .filter(([date]) => moment(date).format('dddd') === weekday)
+                .filter(([date]) => moment(date).format('dddd') === weekdayKey)
                 .flatMap(([date, slots]) => slots.map(slot => ({ ...slot, type: 'specific', key: date })));
 
             const allSlotsForDay = [...weeklySlots, ...specificSlotsOnWeekday];
@@ -493,30 +687,30 @@ if (file_exists($jsonPath)) {
 
             allSlotsForDay.sort((a, b) => a.start.localeCompare(b.start));
 
-            html += `<div class="mb-4"><h6 class="mb-3">${weekday}</h6>`;
+            html += `<div class="mb-4"><h6 class="mb-3">${weekdayDisplay}</h6>`;
 
             allSlotsForDay.forEach(slot => {
                 const originalArray = availabilityData[slot.type][slot.key];
                 const originalIndex = originalArray.findIndex(s => s.start === slot.start && s.end === slot.end && s.sessionType === slot.sessionType);
 
                 const isWeekly = slot.type === 'weekly';
-                const repeatsText = isWeekly ? ` • <em>Repeats weekly</em>` : ` • <span class="text-primary">${moment(slot.key).format('MMM D')}</span>`;
+                const repeatsText = isWeekly ? ` • <em>{{ __('mentor.repeats_weekly') }}</em>` : ` • <span class="text-primary">${moment(slot.key).format('MMM D')}</span>`;
                 const bgColor = isWeekly ? 'bg-light-subtle' : 'bg-white';
 
                 html += `
-                    <div class="${bgColor} border rounded p-3 mb-2 d-flex justify-content-between align-items-center" data-type="${slot.type}" data-key="${slot.key}" data-index="${originalIndex}">
+                    <div class="${bgColor} border rounded p-3 mb-2 d-flex justify-content-between align-items-center" data-type="${slot.type}" data-key="${slot.key}" data-index="${originalIndex}" data-id="${slot.id}">
                         <div class="slot-details">
                             <div class="fw-bold text-dark mb-1">
                                 <span class="slot-start">${slot.start}</span> - <span class="slot-end">${slot.end}</span>
                             </div>
-                            <div class="small text-muted">
-                                ${slot.duration} min • <span class="slot-session-type">${slot.sessionType}</span>${repeatsText}
-                            </div>
+                        <div class="small text-muted">
+                            ${slot.duration} {{ __('mentor.min') }} • <span class="slot-session-type">${translations[slot.sessionType.toLowerCase()]}</span>${repeatsText}
+                        </div>
                         </div>
                         <div class="slot-actions btn-group">
-                            <button type="button" class="btn btn-sm btn-icon btn-label-primary add-slot-action" title="Add"><i class="ti ti-plus"></i></button>
-                            <button type="button" class="btn btn-sm btn-icon btn-label-secondary copy-slot-action" title="Copy"><i class="ti ti-copy"></i></button>
-                            <button type="button" class="btn btn-label-danger btn-sm btn-icon delete-slot" title="Delete" data-type="${slot.type}" data-key="${slot.key}" data-index="${originalIndex}">
+                            <button type="button" class="btn btn-sm btn-icon btn-label-primary add-slot-action" title="{{ __('mentor.add') }}"><i class="ti ti-plus"></i></button>
+                            <button type="button" class="btn btn-sm btn-icon btn-label-secondary copy-slot-action" title="{{ __('mentor.copy') }}"><i class="ti ti-copy"></i></button>
+                            <button type="button" class="btn btn-label-danger btn-sm btn-icon delete-slot" title="{{ __('mentor.delete') }}" data-type="${slot.type}" data-key="${slot.key}" data-index="${originalIndex}" data-id="${slot.id}">
                                 <i class="ti ti-trash ti-16px"></i>
                             </button>
                         </div>
@@ -526,12 +720,158 @@ if (file_exists($jsonPath)) {
         });
 
         if (html === '') {
-            html = '<p class="text-muted">No availability slots have been added yet.</p>';
+            html = `
+                <div class="text-center py-5" id="empty-list-view">
+                    <p class="text-muted mb-3">{{ __('mentor.no_availability_slots_added') }}</p>
+                    <button type="button" class="btn btn-primary" id="show-add-slot-form-btn">
+                        <i class="ti ti-plus me-1"></i> {{ __('mentor.add_availability') }}
+                    </button>
+                </div>
+                <div id="list-view-add-slot-form" style="display: none;">
+                    <div class="border rounded p-4 bg-light-subtle mb-4">
+                        <h6 class="mb-3">{{ __('mentor.add_new_slot') }}</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <label class="form-label">{{ __('mentor.day') }}</label>
+                                <select id="list-view-day-select" class="form-select">
+                                    <option value="Sunday">{{ __('mentor.sunday') }}</option>
+                                    <option value="Monday">{{ __('mentor.monday') }}</option>
+                                    <option value="Tuesday">{{ __('mentor.tuesday') }}</option>
+                                    <option value="Wednesday">{{ __('mentor.wednesday') }}</option>
+                                    <option value="Thursday">{{ __('mentor.thursday') }}</option>
+                                    <option value="Friday">{{ __('mentor.friday') }}</option>
+                                    <option value="Saturday">{{ __('mentor.saturday') }}</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 col-lg-3 mb-3">
+                                <label class="form-label">{{ __('mentor.start_time') }}</label>
+                                <input type="text" id="list-view-start-time" class="form-control" placeholder="09:00">
+                            </div>
+                            <div class="col-md-6 col-lg-3 mb-3">
+                                <label class="form-label">{{ __('mentor.end_time') }}</label>
+                                <input type="text" id="list-view-end-time" class="form-control" placeholder="17:00">
+                            </div>
+                            <div class="col-md-6 col-lg-2 mb-3">
+                                <label class="form-label">{{ __('mentor.session_type') }}</label>
+                                <select id="list-view-session-type" class="form-select">
+                                    ${getSessionTypeOptionsHTML()}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-primary" id="save-list-view-slot">
+                                {{ __('admin.Save') }}
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="cancel-list-view-slot">
+                                {{ __('mentor.cancel') }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
         $('#availability-list-view').html(html);
     }
-    
+
+    // Show add slot form in list view
+    $(document).on('click', '#show-add-slot-form-btn', function() {
+      $('#empty-list-view').hide();
+      $('#list-view-add-slot-form').show();
+      
+      // Initialize flatpickr for the new time inputs
+      flatpickr("#list-view-start-time", {
+          enableTime: true,
+          noCalendar: true,
+          dateFormat: "H:i",
+          time_24hr: true,
+      });
+      flatpickr("#list-view-end-time", {
+          enableTime: true,
+          noCalendar: true,
+          dateFormat: "H:i",
+          time_24hr: true,
+      });
+    });
+
+    // Cancel add slot form in list view
+    $(document).on('click', '#cancel-list-view-slot', function() {
+        $('#list-view-add-slot-form').hide();
+        $('#empty-list-view').show();
+        // Clear form
+        $('#list-view-start-time').val('');
+        $('#list-view-end-time').val('');
+        $('#list-view-session-type').val('Online');
+    });
+
+    // Save slot from list view
+    $(document).on('click', '#save-list-view-slot', function() {
+        const day = $('#list-view-day-select').val();
+        const start = $('#list-view-start-time').val();
+        const end = $('#list-view-end-time').val();
+        const sessionType = $('#list-view-session-type').val();
+
+        if (!start || !end) {
+            alert('{{ __('mentor.please_select_start_and_end_time') }}');
+            return;
+        }
+
+        const startTime = moment(start, 'HH:mm');
+        const endTime = moment(end, 'HH:mm');
+
+        if (!startTime.isValid() || !endTime.isValid() || endTime.isSameOrBefore(startTime)) {
+            alert('{{ __('mentor.end_time_must_be_after_start_time') }}');
+            return;
+        }
+
+        const duration = endTime.diff(startTime, 'minutes');
+
+        fetch('/dashboard/availability/slots/store', {
+            headers: {
+                "Accept": "application/json",
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content'),
+                "Content-Type": 'application/json',
+            },
+            method: 'POST',
+            body: JSON.stringify({
+                tfrom: start,
+                tto: end,
+                session_type: sessionType,
+                type: 'Weekly',
+                date: null,
+                days: day,
+            }),
+        })
+        .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok'))
+        .then(result => {
+            if (Array.isArray(result.data)) {
+                $.each(result.data, function(index, slot) {
+                    const newSlot = createSlotObject(slot);
+                    availabilityData.weekly[day] = [...(availabilityData.weekly[day] || []), newSlot];
+                });
+            } else {
+                const newSlot = createSlotObject(result.data);
+                availabilityData.weekly[day] = [...(availabilityData.weekly[day] || []), newSlot];
+            }
+
+            updateListView();
+            updateSlotsList();
+            updateCalendarStyles();
+            updateMainCalendar();
+
+            releaseSuccessAlert({
+                'title': '{{ __('mentor.slot_added_success') }}',
+                'message': result.message,
+            });
+        })
+        .catch(error => {
+            releaseFailureAlert({
+                title: '{{ __('admin.Error') }}',
+                message: error?.message ? error.message : "{{ __('admin.unexpected_error') }}",
+            });
+        });
+    });
+            
     // Handle Add (clone) action in list view
     $(document).on('click', '.add-slot-action', function() {
         const slotElement = $(this).closest('.d-flex');
@@ -542,25 +882,23 @@ if (file_exists($jsonPath)) {
             <div class="editable-slot-form border rounded p-3 mb-2">
                 <div class="row g-2 mb-2">
                     <div class="col-md-3">
-                        <label class="form-label">Start</label>
+                        <label class="form-label">@lang('mentor.start_time')</label>
                         <input type="text" class="form-control form-control-sm start-time-input" value="${originalSlot.start}">
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">End</label>
+                        <label class="form-label">@lang('mentor.end_time')</label>
                         <input type="text" class="form-control form-control-sm end-time-input" value="${originalSlot.end}">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Type</label>
+                        <label class="form-label">@lang('mentor.session_type')</label>
                         <select class="form-select form-select-sm session-type-select">
-                            <option ${originalSlot.sessionType === 'Online' ? 'selected' : ''}>Online</option>
-                            <option ${originalSlot.sessionType === 'Offline' ? 'selected' : ''}>Offline</option>
-                            <option ${originalSlot.sessionType === 'Both' ? 'selected' : ''}>Both</option>
+                            ${getSessionTypeOptionsHTML(originalSlot.sessionType)}
                         </select>
                     </div>
                 </div>
                 <div class="d-flex gap-2 mt-3">
-                    <button class="btn btn-sm btn-primary save-new-slot-action" data-original-type="${type}" data-original-key="${key}">Save</button>
-                    <button class="btn btn-sm btn-label-secondary cancel-new-slot-action">Cancel</button>
+                    <button class="btn btn-sm btn-primary save-new-slot-action" data-original-type="${type}" data-original-key="${key}">{{ __('mentor.save_availability') }}</button>
+                    <button class="btn btn-sm btn-label-secondary cancel-new-slot-action">{{ __('mentor.cancel') }}</button>
                 </div>
             </div>
         `;
@@ -591,20 +929,66 @@ if (file_exists($jsonPath)) {
         const startTime = moment(start, 'HH:mm');
         const endTime = moment(end, 'HH:mm');
         if (!startTime.isValid() || !endTime.isValid() || endTime.isSameOrBefore(startTime)) {
-            alert('End time must be after start time.');
+            alert('{{ __('mentor.end_time_must_be_after_start_time') }}');
             return;
         }
 
         const newSlot = { start, end, sessionType, duration: endTime.diff(startTime, 'minutes') };
         
         const { originalType, originalKey } = $(this).data();
-        availabilityData[originalType][originalKey] = [...(availabilityData[originalType][originalKey] || []), newSlot];
-        
-        updateListView();
-        updateSlotsList();
-        updateCalendarStyles();
-        
-        form.remove();
+
+        fetch('/dashboard/availability/slots/store', {
+            headers: {
+              "Accept": "application/json",
+              "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content'),
+              "Content-Type": 'application/json',
+            },
+            method: 'POST',
+            body: JSON.stringify({
+              tfrom: newSlot.start,
+              tto: newSlot.end,
+              session_type: newSlot.sessionType,
+              type: originalType === 'weekly' ? 'Weekly' : 'Period',
+              date: originalType === 'specific' ? originalKey : null,
+              days: originalType === 'weekly' ? originalKey : null,
+            }),
+        })
+        .then(response => response.json())
+        .then(result => {
+          if (!result.success) {
+            throw new Error(result.message || '{{ __('admin.unexpected_error') }}');
+          }
+
+          if( Array.isArray(result.data) )
+          {
+            $.each(result.data, function(index, slot) {
+              var newSlot = createSlotObject(slot);
+              availabilityData[type][key] = [...(availabilityData[type][key] || []), newSlot];
+            });
+          }
+          else
+          {
+            const addedSlot = createSlotObject(result.data);
+            availabilityData[originalType][originalKey] = [...(availabilityData[originalType][originalKey] || []), addedSlot];
+          }
+          
+          updateListView();
+          updateSlotsList();
+          updateCalendarStyles();
+
+          releaseSuccessAlert({
+            'title': '{{ __('mentor.slot_added_success') }}',
+            'message': result.message,
+          });
+          
+          form.remove();
+        })
+        .catch(error => {
+          releaseFailureAlert({
+            title: '{{ __('admin.Error') }}',
+            message: error?.message ? error.message : "{{ __('admin.unexpected_error') }}",
+          });
+        });
     });
 
     // Handle Copy action in list view
@@ -619,20 +1003,22 @@ if (file_exists($jsonPath)) {
         
         const popoverContent = `
             <div>
-                ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => `
+                ${['{{ __('mentor.sunday') }}', '{{ __('mentor.monday') }}', '{{ __('mentor.tuesday') }}', '{{ __('mentor.wednesday') }}', '{{ __('mentor.thursday') }}', '{{ __('mentor.friday') }}', '{{ __('mentor.saturday') }}'].map((day, index) => {
+                    const dayValues = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                    return `
                     <div class="form-check">
-                      <input class="form-check-input" type="checkbox" value="${day}" id="day-copy-${day}">
-                      <label class="form-check-label" for="day-copy-${day}">${day}</label>
+                      <input class="form-check-input" type="checkbox" value="${dayValues[index]}" id="day-copy-${dayValues[index]}">
+                      <label class="form-check-label" for="day-copy-${dayValues[index]}">${day}</label>
                     </div>
-                `).join('')}
+                `}).join('')}
                 <div class="d-flex justify-content-end mt-3">
-                    <button class="btn btn-primary btn-sm apply-copy-action">Apply</button>
+                    <button class="btn btn-primary btn-sm apply-copy-action">{{ __('mentor.apply_to_all') }}</button>
                 </div>
             </div>`;
 
         const popover = new bootstrap.Popover(button, {
             html: true,
-            title: 'Copy Slot to Weekdays',
+            title: '{{ __('mentor.copy') }} {{ __('mentor.slots_for_selected_date') }}',
             content: popoverContent,
             sanitize: false,
             container: 'body',
@@ -646,12 +1032,37 @@ if (file_exists($jsonPath)) {
             const selectedDays = Array.from($(popoverTip).find('.form-check-input:checked')).map(cb => cb.value);
 
             if (selectedDays.length > 0) {
-                selectedDays.forEach(day => {
-                    availabilityData.weekly[day] = [...(availabilityData.weekly[day] || []), slotToCopy];
+                fetch(`/dashboard/availability/slots/${slotToCopy.id}/copy`, {
+                    method: 'POST',
+                    headers: {
+                        "Accept": "application/json",
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content'),
+                        "Content-Type": 'application/json',
+                    },
+                    body: JSON.stringify({ selectedDays }),
+                })
+                .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok'))
+                .then(result => {
+                    result.data.forEach(slot => {
+                        const newSlot = createSlotObject(slot);
+                        const day = slot.weekday;
+                        availabilityData.weekly[day] = [...(availabilityData.weekly[day] || []), newSlot];
+                    });
+                    
+                    updateListView();
+                    updateSlotsList();
+                    updateCalendarStyles();
+                    
+                    releaseSuccessAlert({
+                        'message': result.message,
+                    });
+                })
+                .catch(error => {
+                    releaseFailureAlert({
+                        'title': '{{ __('admin.Error') }}',
+                        'message': error?.message ? error.message : "{{ __('admin.unexpected_error') }}",
+                    });
                 });
-                updateListView();
-                updateSlotsList();
-                updateCalendarStyles();
             }
             popover.dispose();
         });
@@ -664,30 +1075,21 @@ if (file_exists($jsonPath)) {
         });
     });
 
-
-    // Form submission
-    $('#availability-form').submit(function(e) {
-        e.preventDefault();
-        if (!Object.keys(availabilityData.specific).length && !Object.keys(availabilityData.weekly).length) {
-            alert('Please add at least one slot');
-            return;
-        }
-        $('#availability-data-input').val(JSON.stringify(availabilityData));
-        console.log('Availability Data:', availabilityData);
-        alert('Availability saved! Check console for data.');
-    });
-
     // Reset modal
     $('#availabilityModal').on('hidden.bs.modal', function () {
         $('.copy-slot-action').popover('dispose'); // Clean up popovers when modal closes
-        calendarInstance.clear();
-        currentSelectedDate = null;
-        currentWeekday = null;
+        // calendarInstance.clear();
+        // currentSelectedDate = null;
+        // currentWeekday = null;
         // Re-fetch data on close to discard any unstaged changes
-        fetch('{{ asset("slots.json") }}')
+        fetch('/dashboard/availability/slots', {
+          headers: {
+            "Accept": "application/json"
+          }
+        })
             .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok'))
-            .then(data => {
-                processSlots(data);
+            .then(result => {
+                processSlots(result?.data ? result.data : []);
                 updateCalendarStyles();
             });
 
@@ -695,5 +1097,16 @@ if (file_exists($jsonPath)) {
         updateSelectedDateDisplay();
     });
 
+    $('#availabilityModal').on('shown.bs.modal', function () {
+        if (!currentSelectedDate) {
+            const today = moment().format('YYYY-MM-DD');
+            calendarInstance.setDate(today, true);
+            updateSelectedDate([new Date(today)]);
+        }
+    });
+
+    $('button[data-bs-toggle="tab"][data-bs-target="#list-tab"]').on('shown.bs.tab', function (e) {
+      updateListView();
+    });
 </script>
 @stop

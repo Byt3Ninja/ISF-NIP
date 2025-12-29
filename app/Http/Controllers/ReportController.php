@@ -28,13 +28,14 @@ class ReportController extends Controller
 {
     public function index()
     {
-        $organization_id = auth()->user()->organization_id;
-        $cycles = Cycle::when(!is_null($organization_id),function ($q)use($organization_id){
-            $q->where('organization_id',$organization_id);
+        $user = auth()->user();
+        $orgIds = $user->organizations_ids;
+        $cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'),function ($q)use($orgIds){
+            $q->whereIn('organization_id',$orgIds);
         })->get();
-        $companies = Company::whereHas('cycledata',function ($q)use ($organization_id){
-            $q->when(!is_null($organization_id),function ($query)use($organization_id){
-                $query->where('organization_id',$organization_id);
+        $companies = Company::whereHas('cycledata',function ($q)use ($orgIds, $user){
+            $q->when(!empty($orgIds) && !$user->hasRole('admin'),function ($query)use($orgIds){
+                $query->whereIn('organization_id',$orgIds);
             });
         })->get();
 
@@ -44,42 +45,43 @@ class ReportController extends Controller
         return view('admin.reports.index',compact('companies','cycles','available_surveys'));
     }
     public function View($type,Request $request){
-        $organization_id = auth()->user()->organization_id;
+        $user = auth()->user();
+        $orgIds = $user->organizations_ids;
         $program_id = $request->get('program_id', null); // Can be null for "All Programs"
 
         switch ($type){
             case 'mentorship':
-                $data = $this->mentorshipReport($organization_id, $program_id,$request);
+                $data = $this->mentorshipReport($orgIds, $user, $program_id,$request);
                 $view = '_mentorshipReport';
                 break;
             case 'training':
-                $data = $this->trainingReport($organization_id, $program_id);
+                $data = $this->trainingReport($orgIds, $user, $program_id);
                 $view = '_trainingSessionsReport';
                 break;
             case 'finalScreening':
-                $data = $this->finalScreeningReport($organization_id, $program_id);
+                $data = $this->finalScreeningReport($orgIds, $user, $program_id);
                 $view = '_finalScreeningReport';
                 break;
             case 'screening':
-                $data = $this->screeningReport($organization_id, $program_id);
+                $data = $this->screeningReport($orgIds, $user, $program_id);
                 $view = '_screeningReport';
                 break;
             case 'cycles':
-                $data = $this->cyclesReport($organization_id, $request->id, $program_id);
+                $data = $this->cyclesReport($orgIds, $user, $request->id, $program_id);
                 $view = '_cyclesReport';
                 break;
             case 'companies':
-                $data = $this->companiesReport($organization_id, $request->id, $program_id);
+                $data = $this->companiesReport($orgIds, $user, $request->id, $program_id);
                 $view = '_companyReport';
                 break;
-                
+
             case 'mentorSurveys':
-                $data = $this->mentorSurveyReport($organization_id,$request->get('status', 'all'));
+                $data = $this->mentorSurveyReport($orgIds, $user, $request->get('status', 'all'));
                 $view = '_mentorSurvey';
                 break;
 
             case 'startupSurveys':
-                $data = $this->startupSurveysReport($organization_id);
+                $data = $this->startupSurveysReport($orgIds, $user);
                 $view = '_startupSurveyReport';
                 break;
 
@@ -109,10 +111,12 @@ class ReportController extends Controller
 
     }
 
-    protected function startupSurveysReport($organization_id){
+    protected function startupSurveysReport($orgIds, $user){
         $mentorRequestsQuery = MentorshipRequest::query()
-        ->whereHas('user', function($q) use ($organization_id) {
-            $q->where('organization_id', $organization_id);
+        ->whereHas('user', function($q) use ($orgIds, $user) {
+            $q->when(!empty($orgIds) && !$user->hasRole('admin'), function ($query) use ($orgIds) {
+                $query->whereIn('organization_id', $orgIds);
+            });
         });
         $data['mentorRequests'] =  $mentorRequestsQuery->get();
         $data['mentorRequests'] = $data['mentorRequests']->filter(function ($request) {
@@ -132,10 +136,12 @@ class ReportController extends Controller
         return $data;
     }
  // =============> ajax report MentorSurvey <=============
-    protected function mentorSurveyReport($organization_id, $program_id = null){
+    protected function mentorSurveyReport($orgIds, $user, $program_id = null){
         $mentorRequestsQuery = MentorshipRequest::query()
-        ->whereHas('mentor', function($q) use ($organization_id) {
-            $q->where('organization_id', $organization_id);
+        ->whereHas('mentor', function($q) use ($orgIds, $user) {
+            $q->when(!empty($orgIds) && !$user->hasRole('admin'), function ($query) use ($orgIds) {
+                $query->whereIn('organization_id', $orgIds);
+            });
         });
         $status = request('status', 'all'); 
         $data['mentorRequests'] =  $mentorRequestsQuery->get();
@@ -177,9 +183,9 @@ class ReportController extends Controller
     }
 
 
-    protected function mentorshipReport($organization_id, $program_id = null,Request $request) {
-        $mentorRequests =  MentorshipRequest::when(!is_null($organization_id),function ($q)use ($organization_id){
-            $q->where('organization_id',$organization_id);
+    protected function mentorshipReport($orgIds, $user, $program_id = null,Request $request) {
+        $mentorRequests =  MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'),function ($q)use ($orgIds){
+            $q->whereIn('organization_id',$orgIds);
         })->when(!is_null($program_id), function ($q) use ($program_id) {
             $q->where('cycle_id', $program_id);
         });
@@ -199,18 +205,18 @@ class ReportController extends Controller
         
         // Get all sessions with relationships
         $data['sessions'] = MentorshipRequest::with(['user.company', 'mentor', 'cycle'])
-            ->when(!is_null($organization_id),function ($q)use ($organization_id){
-                $q->where('organization_id',$organization_id);
+            ->when(!empty($orgIds) && !$user->hasRole('admin'),function ($q)use ($orgIds){
+                $q->whereIn('organization_id',$orgIds);
             })
             ->when(!is_null($program_id), function ($q) use ($program_id) {
                 $q->where('cycle_id', $program_id);
             })
             ->orderBy('zoom_date', 'desc')
             ->get();
-        
+
         // Get cycles for reference
-        $data['cycles'] = Cycle::when(!is_null($organization_id),function ($q)use ($organization_id){
-            $q->where('organization_id',$organization_id);
+        $data['cycles'] = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'),function ($q)use ($orgIds){
+            $q->whereIn('organization_id',$orgIds);
         })->get();
         
         // ==============> counts <=================
@@ -223,38 +229,38 @@ class ReportController extends Controller
 			->count();
         $data['total_sessions_count']= $mentorRequests->count();
         $data['mentorships_period'] =$this->formatMinutesToHoursMinutes($mentorRequests->sum('period'));
-        $data['approved_sessions_count'] = MentorshipRequest::when(!is_null($organization_id),function ($q)use ($organization_id){
-            $q->where('organization_id',$organization_id);
+        $data['approved_sessions_count'] = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'),function ($q)use ($orgIds){
+            $q->whereIn('organization_id',$orgIds);
         })->where('approved','Yes')->count();
-        $data['pending_sessions_count'] = MentorshipRequest::when(!is_null($organization_id),function ($q)use ($organization_id){
-            $q->where('organization_id',$organization_id);
+        $data['pending_sessions_count'] = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'),function ($q)use ($orgIds){
+            $q->whereIn('organization_id',$orgIds);
         })->where('approved','Yes')->where(function($q){
             $q->whereNull('done')->orWhere('done','!=',1);
         })->count();
-        $data['done_sessions_count'] = MentorshipRequest::when(!is_null($organization_id),function ($q)use ($organization_id){
-            $q->where('organization_id',$organization_id);
+        $data['done_sessions_count'] = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'),function ($q)use ($orgIds){
+            $q->whereIn('organization_id',$orgIds);
         })->where('approved','Yes')->whereDate('zoom_date','<',now()->format('Y-m-d'))->count();
-        $data['disapproved_sessions_count'] = MentorshipRequest::when(!is_null($organization_id),function ($q)use ($organization_id){
-            $q->where('organization_id',$organization_id);
+        $data['disapproved_sessions_count'] = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'),function ($q)use ($orgIds){
+            $q->whereIn('organization_id',$orgIds);
         })->where('approved','No')->count();
-        $data['new_sessions_count'] = MentorshipRequest::when(!is_null($organization_id),function ($q)use ($organization_id){
-            $q->where('organization_id',$organization_id);
+        $data['new_sessions_count'] = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'),function ($q)use ($orgIds){
+            $q->whereIn('organization_id',$orgIds);
         })->whereNull('approved')->count();
         $data['cycle_mentors_count'] = count($data['cycle_mentors']);
         return $data;
     }
 
-    protected function trainingReport($organization_id, $program_id = null){
+    protected function trainingReport($orgIds, $user, $program_id = null){
         $cycles = TrainingSession::with('step.cycle')->get()->pluck('step.cycle')->unique('id');
-        $data['cycles'] = $cycles->when(!is_null($organization_id), function ($q) use ($organization_id) {
-            return $q->where('organization_id', $organization_id);
+        $data['cycles'] = $cycles->when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+            return $q->whereIn('organization_id', $orgIds);
         })->when(!is_null($program_id), function ($q) use ($program_id) {
             return $q->where('id', $program_id);
         });
 
-        $steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
-            return $q->whereHas('cycle', function ($query) use ($organization_id) {
-                $query->where('organization_id', $organization_id);
+        $steps = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+            return $q->whereHas('cycle', function ($query) use ($orgIds) {
+                $query->whereIn('organization_id', $orgIds);
             });
         })->when(!is_null($program_id), function ($q) use ($program_id) {
             return $q->whereHas('cycle', function ($query) use ($program_id) {
@@ -262,11 +268,11 @@ class ReportController extends Controller
             });
         })->where('stype', 4)->get();
         $data['steps'] = $steps;
-        
-        $sessions = TrainingSession::with('reports')->whereHas('step',function ($q)use ($organization_id, $program_id){
-            $q->where('stype',4)->when(!is_null($organization_id),function ($query) use ($organization_id){
-                $query->whereHas('cycle',function ($query) use ($organization_id){
-                    $query->where('organization_id',$organization_id);
+
+        $sessions = TrainingSession::with('reports')->whereHas('step',function ($q)use ($orgIds, $user, $program_id){
+            $q->where('stype',4)->when(!empty($orgIds) && !$user->hasRole('admin'),function ($query) use ($orgIds){
+                $query->whereHas('cycle',function ($query) use ($orgIds){
+                    $query->whereIn('organization_id',$orgIds);
                 });
             })->when(!is_null($program_id), function ($query) use ($program_id) {
                 $query->whereHas('cycle', function ($query) use ($program_id) {
@@ -281,10 +287,10 @@ class ReportController extends Controller
         $hours = floor($totalMinutes / 60);
         $minutes = $totalMinutes % 60;
         $data['sessions_period'] = sprintf("%d:%02d", $hours, $minutes);
-        $data['zoom_sessions_count'] = TrainingSession::whereHas('step',function ($q)use ($organization_id, $program_id){
-            $q->where('stype',4)->when(!is_null($organization_id),function ($query) use ($organization_id){
-                $query->whereHas('cycle',function ($query) use ($organization_id){
-                    $query->where('organization_id',$organization_id);
+        $data['zoom_sessions_count'] = TrainingSession::whereHas('step',function ($q)use ($orgIds, $user, $program_id){
+            $q->where('stype',4)->when(!empty($orgIds) && !$user->hasRole('admin'),function ($query) use ($orgIds){
+                $query->whereHas('cycle',function ($query) use ($orgIds){
+                    $query->whereIn('organization_id',$orgIds);
                 });
             })->when(!is_null($program_id), function ($query) use ($program_id) {
                 $query->whereHas('cycle', function ($query) use ($program_id) {
@@ -293,10 +299,10 @@ class ReportController extends Controller
             });
         })->where('type','sessions')->count();
 
-        $data['offline_sessions_count'] = TrainingSession::whereHas('step',function ($q)use ($organization_id, $program_id){
-            $q->where('stype',4)->when(!is_null($organization_id),function ($query) use ($organization_id){
-                $query->whereHas('cycle',function ($query) use ($organization_id){
-                    $query->where('organization_id',$organization_id);
+        $data['offline_sessions_count'] = TrainingSession::whereHas('step',function ($q)use ($orgIds, $user, $program_id){
+            $q->where('stype',4)->when(!empty($orgIds) && !$user->hasRole('admin'),function ($query) use ($orgIds){
+                $query->whereHas('cycle',function ($query) use ($orgIds){
+                    $query->whereIn('organization_id',$orgIds);
                 });
             })->when(!is_null($program_id), function ($query) use ($program_id) {
                 $query->whereHas('cycle', function ($query) use ($program_id) {
@@ -305,10 +311,10 @@ class ReportController extends Controller
             });
         })->where('type','offline')->count();
 
-        $data['online_sessions_count'] = TrainingSession::whereHas('step',function ($q)use ($organization_id, $program_id){
-            $q->where('stype',4)->when(!is_null($organization_id),function ($query) use ($organization_id){
-                $query->whereHas('cycle',function ($query) use ($organization_id){
-                    $query->where('organization_id',$organization_id);
+        $data['online_sessions_count'] = TrainingSession::whereHas('step',function ($q)use ($orgIds, $user, $program_id){
+            $q->where('stype',4)->when(!empty($orgIds) && !$user->hasRole('admin'),function ($query) use ($orgIds){
+                $query->whereHas('cycle',function ($query) use ($orgIds){
+                    $query->whereIn('organization_id',$orgIds);
                 });
             })->when(!is_null($program_id), function ($query) use ($program_id) {
                 $query->whereHas('cycle', function ($query) use ($program_id) {
@@ -318,10 +324,10 @@ class ReportController extends Controller
         })->where('type','sessions')->count();
 
 
-         $data['online_training_count'] = TrainingSession::whereHas('step',function ($q)use ($organization_id, $program_id){
-            $q->where('stype',4)->when(!is_null($organization_id),function ($query) use ($organization_id){
-                $query->whereHas('cycle',function ($query) use ($organization_id){
-                    $query->where('organization_id',$organization_id);
+         $data['online_training_count'] = TrainingSession::whereHas('step',function ($q)use ($orgIds, $user, $program_id){
+            $q->where('stype',4)->when(!empty($orgIds) && !$user->hasRole('admin'),function ($query) use ($orgIds){
+                $query->whereHas('cycle',function ($query) use ($orgIds){
+                    $query->whereIn('organization_id',$orgIds);
                 });
             })->when(!is_null($program_id), function ($query) use ($program_id) {
                 $query->whereHas('cycle', function ($query) use ($program_id) {
@@ -333,7 +339,7 @@ class ReportController extends Controller
         return $data;
     }
 
-    protected function finalScreeningReport($organization_id, $program_id = null){
+    protected function finalScreeningReport($orgIds, $user, $program_id = null){
         // $data['judgers_count'] = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->count();
 		$data['judgers_count'] = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
 			->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
@@ -341,15 +347,15 @@ class ReportController extends Controller
 			->select('users.*')
 			->count();
 
-        $cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
-            return $q->where('organization_id', $organization_id);
+        $cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+            return $q->whereIn('organization_id', $orgIds);
         })->when(!is_null($program_id), function ($q) use ($program_id) {
             return $q->where('id', $program_id);
         })->get();
 
-        $steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
-            return $q->whereHas('cycle', function ($query) use ($organization_id) {
-            $query->where('organization_id', $organization_id);
+        $steps = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+            return $q->whereHas('cycle', function ($query) use ($orgIds) {
+            $query->whereIn('organization_id', $orgIds);
         });
         })->when(!is_null($program_id), function ($q) use ($program_id) {
             return $q->whereHas('cycle', function ($query) use ($program_id) {
@@ -585,6 +591,9 @@ class ReportController extends Controller
         $pending_screenings = $_allCompanies->filter(function($company) use ($allResults) {
             return $allResults->where('company_id', $company->id)->isEmpty();
         })->values();
+        $not_assigned_screenings = $_allCompanies->filter(function($company) {
+            return $company->judges->count() === 0;
+        })->values();
         $non_pending_companies = $_allCompanies->filter(function($company) use ($allResults) {
             return !$allResults->where('company_id', $company->id)->isEmpty();
         })->values();
@@ -596,13 +605,14 @@ class ReportController extends Controller
         $kpiData = [
             [ 'value' => $allJudges?->count() ?? 0, 'label' => 'Judgers', 'icon' => 'user', 'color' => 'info'],
             [ 'value' => $_allCompanies?->count() ?? 0, 'label' => 'Total', 'icon' => 'gavel', 'color' => 'primary'],
+            [ 'value' => $not_assigned_screenings->count(), 'label' => 'Not Assigned', 'icon' => 'clock', 'color' => 'warning' ],
             [ 'value' => $pending_screenings->count() + $not_evaluated_screenings, 'label' => 'Not Evaluated', 'icon' => 'trending-up-2', 'color' => 'danger'],
             [ 'value' => $draft_screenings, 'label' => 'In Progress', 'icon' => 'pencil-check', 'color' => 'secondary'],
             [ 'value' => $published_screenings, 'label' => 'Published', 'icon' => 'progress-check', 'color' => 'success'],
         ];
 
         // Process companies with their evaluation data
-        $startups = $_allCompanies->map(function ($company) use ($allJudges, $allResults, $allCompanies, $steps) {
+        $startups = $_allCompanies->map(function ($company) use ($allJudges, $allResults, $allCompanies, $steps, $not_assigned_screenings) {
             $scoped = $allCompanies->where('id', $company->id)->first();
             $c = clone $scoped;
             
@@ -617,11 +627,13 @@ class ReportController extends Controller
             $c->average_score = round($averageScore, 1);
             $c->evaluation_results = $companyResults;
 
+            $has_no_judgers = $not_assigned_screenings->where('id', $c->id)->count() > 0 ? true : false;
+
             $c->company_step_id = $company->step_id;
             $c->company_cycle_id = $company->cycle_id;
             $c->score = $company->score;
             $_judges = $company->judges;
-            $c->status = $company->status;
+            $c->status = $has_no_judgers ? 'Not Assigned' : $company->status;
             $c->stepInfo = $steps->where('id', $company->step_id)->first();
             $judges = clone $_judges;
             $companyId = $c->id;
@@ -664,20 +676,20 @@ class ReportController extends Controller
         return $data;
     }
 
-    protected function screeningReport($organization_id, $program_id = null)
+    protected function screeningReport($orgIds, $user, $program_id = null)
     {
         // First get steps based on program filter
         $stepsQuery = Step::where('stype', 2)
             ->whereNull('deleted_at')
-            ->when(!is_null($organization_id), function($q) use ($organization_id) {
-                return $q->whereHas('cycle', function($query) use ($organization_id) {
-                    $query->where('organization_id', $organization_id);
+            ->when(!empty($orgIds) && !$user->hasRole('admin'), function($q) use ($orgIds) {
+                return $q->whereHas('cycle', function($query) use ($orgIds) {
+                    $query->whereIn('organization_id', $orgIds);
                 });
             })
             ->when(!is_null($program_id), function($q) use ($program_id) {
                 return $q->where('cycle_id', $program_id);
             });
-            
+
         $steps = $stepsQuery->get();
         $metadata = collect([]);
         
@@ -690,9 +702,9 @@ class ReportController extends Controller
         
         // Use the already filtered steps query and order them
         $steps = $stepsQuery->orderBy('from')->get();
-        
-        $cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
-            return $q->where('organization_id', $organization_id);
+
+        $cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+            return $q->whereIn('organization_id', $orgIds);
         })->when(!is_null($program_id), function ($q) use ($program_id) {
             return $q->where('id', $program_id);
         })->get();
@@ -751,6 +763,9 @@ class ReportController extends Controller
         $pending_screenings = $_allCompanies->filter(function($company) use ($allResults) {
             return $allResults->where('company_id', $company->id)->isEmpty();
         })->values();
+        $not_assigned_screenings = $_allCompanies->filter(function($company) {
+            return $company->judges->count() === 0;
+        })->values();
         $non_pending_companies = $_allCompanies->filter(function($company) use ($allResults) {
             return !$allResults->where('company_id', $company->id)->isEmpty();
         })->values();
@@ -764,13 +779,14 @@ class ReportController extends Controller
         $kpiData = [
             [ 'value' => $judgers_count, 'label' => 'Judgers', 'icon' => 'user', 'color' => 'info'],
             [ 'value' => $screening_count, 'label' => 'Total', 'icon' => 'gavel', 'color' => 'primary'],
+            [ 'value' => $not_assigned_screenings->count(), 'label' => 'Not Assigned', 'icon' => 'clock', 'color' => 'warning' ],
             [ 'value' => $pending_screenings->count() + $not_evaluated_screenings, 'label' => 'Not Evaluated', 'icon' => 'trending-up-2', 'color' => 'danger'],
             [ 'value' => $draft_screenings, 'label' => 'In Progress', 'icon' => 'pencil-check', 'color' => 'secondary'],
             [ 'value' => $published_screenings, 'label' => 'Published', 'icon' => 'progress-check', 'color' => 'success'],
         ];
 
         // Process companies with their evaluation data
-        $startups = $_allCompanies->map(function ($company) use ($allJudges, $allResults, $allCompanies, $steps) {
+        $startups = $_allCompanies->map(function ($company) use ($allJudges, $allResults, $allCompanies, $steps, $not_assigned_screenings) {
             $scoped = $allCompanies->where('id', $company->id)->first();
             $c = clone $scoped;
             
@@ -785,11 +801,13 @@ class ReportController extends Controller
             $c->average_score = round($averageScore, 1);
             $c->evaluation_results = $companyResults;
 
+            $has_no_judgers = $not_assigned_screenings->where('id', $c->id)->count() > 0 ? true : false;
+
             $c->company_step_id = $company->step_id;
             $c->company_cycle_id = $company->cycle_id;
             $c->score = $company->score;
             $_judges = $company->judges;
-            $c->status = $company->status;
+            $c->status = $has_no_judgers ? 'Not Assigned' : $company->status;
             $c->stepInfo = $steps->where('id', $c->company_step_id)->first();
             $judges = clone $_judges;
             $companyId = $c->id;
@@ -823,7 +841,9 @@ class ReportController extends Controller
             return $judge;
         });
 
-        $judgers = User::role('Judger')->count();
+        $judgers = User::whereHas('roles', function ($query) {
+			$query->where('default_for', 'judger');
+		})->count();
         $data['judgers'] = $judgers;
         $data['cycles'] = $cycles;
         $data['steps'] = $steps;
@@ -834,7 +854,7 @@ class ReportController extends Controller
         return $data;
     }
 
-    protected function cyclesReport($organization_id,$cycle_id, $program_id = null){
+    protected function cyclesReport($orgIds, $user,$cycle_id, $program_id = null){
         // Keep the passed cycle (for backward-compatible views), but do not filter by it
         $cycle = Cycle::find($cycle_id);
 
@@ -846,63 +866,63 @@ class ReportController extends Controller
             ->get();
 
         // OVERALL (all cycles) KPIs within the organization (no cycle filter)
-        $data['mentors_count'] = User::whereHas('mentorSessions', function ($q) use ($organization_id, $program_id) {
-            $q->when(!is_null($organization_id), function ($q) use ($organization_id) {
-                $q->where('organization_id', $organization_id);
+        $data['mentors_count'] = User::whereHas('mentorSessions', function ($q) use ($orgIds, $user, $program_id) {
+            $q->when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+                $q->whereIn('organization_id', $orgIds);
             })->when(!is_null($program_id), function ($q) use ($program_id) {
                 $q->where('cycle_id', $program_id);
             });
         })->count();
 
-        $mentorRequests = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
-            $q->where('organization_id', $organization_id);
+        $mentorRequests = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+            $q->whereIn('organization_id', $orgIds);
         })->when(!is_null($program_id), function ($q) use ($program_id) {
             $q->where('cycle_id', $program_id);
         });
 
         $totalMentorshipMinutes = (clone $mentorRequests)->sum('period');
 
-        $training_sessions = TrainingSession::whereHas('step', function ($q) use ($organization_id, $program_id) {
-            $q->where('stype', 4)->whereHas('cycle', function ($query) use ($organization_id, $program_id) {
-                $query->when(!is_null($organization_id), function ($query) use ($organization_id) {
-                    $query->where('organization_id', $organization_id);
+        $training_sessions = TrainingSession::whereHas('step', function ($q) use ($orgIds, $user, $program_id) {
+            $q->where('stype', 4)->whereHas('cycle', function ($query) use ($orgIds, $user, $program_id) {
+                $query->when(!empty($orgIds) && !$user->hasRole('admin'), function ($query) use ($orgIds) {
+                    $query->whereIn('organization_id', $orgIds);
                 })->when(!is_null($program_id), function ($query) use ($program_id) {
                     $query->where('id', $program_id);
                 });
             });
         });
 
-        $startups = Company::whereHas('cycledata', function ($q) use ($organization_id, $program_id) {
-            $q->when(!is_null($organization_id), function ($q) use ($organization_id) {
-                $q->where('organization_id', $organization_id);
+        $startups = Company::whereHas('cycledata', function ($q) use ($orgIds, $user, $program_id) {
+            $q->when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+                $q->whereIn('organization_id', $orgIds);
             })->when(!is_null($program_id), function ($q) use ($program_id) {
                 $q->where('id', $program_id);
             });
         });
 
-        $screenings = Company::whereHas('stepdata', function ($q) use ($organization_id, $program_id) {
-            return $q->whereHas('cycle', function ($query) use ($organization_id, $program_id) {
-                $query->when(!is_null($organization_id), function ($q) use ($organization_id) {
-                    $q->where('organization_id', $organization_id);
+        $screenings = Company::whereHas('stepdata', function ($q) use ($orgIds, $user, $program_id) {
+            return $q->whereHas('cycle', function ($query) use ($orgIds, $user, $program_id) {
+                $query->when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+                    $q->whereIn('organization_id', $orgIds);
                 })->when(!is_null($program_id), function ($q) use ($program_id) {
                     $q->where('id', $program_id);
                 });
             })->where('stype', 2);
         })->count();
 
-        $final_screenings = Company::whereHas('stepdata', function ($q) use ($organization_id, $program_id) {
-            return $q->whereHas('cycle', function ($query) use ($organization_id, $program_id) {
-                $query->when(!is_null($organization_id), function ($q) use ($organization_id) {
-                    $q->where('organization_id', $organization_id);
+        $final_screenings = Company::whereHas('stepdata', function ($q) use ($orgIds, $user, $program_id) {
+            return $q->whereHas('cycle', function ($query) use ($orgIds, $user, $program_id) {
+                $query->when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+                    $q->whereIn('organization_id', $orgIds);
                 })->when(!is_null($program_id), function ($q) use ($program_id) {
                     $q->where('id', $program_id);
                 });
             })->where('stype', 5);
         })->count();
 
-        $steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
-            return $q->whereHas('cycle', function ($query) use ($organization_id) {
-                $query->where('organization_id', $organization_id);
+        $steps = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+            return $q->whereHas('cycle', function ($query) use ($orgIds) {
+                $query->whereIn('organization_id', $orgIds);
             });
         })->when(!is_null($program_id), function ($q) use ($program_id) {
             return $q->whereHas('cycle', function ($query) use ($program_id) {
@@ -911,8 +931,8 @@ class ReportController extends Controller
         })->where('stype', 4)->get();
 
         // All cycles within the organization
-        $cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
-            $q->where('organization_id', $organization_id);
+        $cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+            $q->whereIn('organization_id', $orgIds);
         })->get();
 
         // Per-cycle KPI data
@@ -921,13 +941,13 @@ class ReportController extends Controller
         $cycles_screenings = [];
         $cycles_final_screenings = [];
         foreach ($cycles as $c) {
-            $per_cycle_mentor_requests = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
-                $q->where('organization_id', $organization_id);
+            $per_cycle_mentor_requests = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+                $q->whereIn('organization_id', $orgIds);
             })->where('cycle_id', $c->id);
 
             $per_cycle_sessions = MentorshipRequest::with(['mentor', 'user.company'])
-                ->when(!is_null($organization_id), function ($q) use ($organization_id) {
-                    $q->where('organization_id', $organization_id);
+                ->when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+                    $q->whereIn('organization_id', $orgIds);
                 })
                 ->where('cycle_id', $c->id)
                 ->orderBy('zoom_date', 'desc')
@@ -951,11 +971,11 @@ class ReportController extends Controller
             $cycleMentorshipMinutes = (clone $per_cycle_mentor_requests)->sum('period');
 
             $per_cycle_screening_companies = Company::with(['user'])
-                ->whereHas('stepdata', function ($q) use ($organization_id, $c) {
-                    return $q->whereHas('cycle', function ($query) use ($organization_id, $c) {
+                ->whereHas('stepdata', function ($q) use ($orgIds, $user, $c) {
+                    return $q->whereHas('cycle', function ($query) use ($orgIds, $user, $c) {
                         $query->where('cycles.id', $c->id)
-                            ->when(!is_null($organization_id), function ($q) use ($organization_id) {
-                                $q->where('organization_id', $organization_id);
+                            ->when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+                                $q->whereIn('organization_id', $orgIds);
                             });
                     })->where('stype', 2);
                 })
@@ -978,11 +998,11 @@ class ReportController extends Controller
             $cycles_screenings[$c->id] = $per_cycle_screening_companies;
 
             $per_cycle_final_screening_companies = Company::with(['user'])
-                ->whereHas('stepdata', function ($q) use ($organization_id, $c) {
-                    return $q->whereHas('cycle', function ($query) use ($organization_id, $c) {
+                ->whereHas('stepdata', function ($q) use ($orgIds, $user, $c) {
+                    return $q->whereHas('cycle', function ($query) use ($orgIds, $user, $c) {
                         $query->where('cycles.id', $c->id)
-                            ->when(!is_null($organization_id), function ($q) use ($organization_id) {
-                                $q->where('organization_id', $organization_id);
+                            ->when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+                                $q->whereIn('organization_id', $orgIds);
                             });
                     })->where('stype', 5);
                 })
@@ -1004,40 +1024,40 @@ class ReportController extends Controller
 
             $cycles_final_screenings[$c->id] = $per_cycle_final_screening_companies;
 
-            $per_cycle_training_sessions = TrainingSession::whereHas('step', function ($q) use ($organization_id, $c) {
-                $q->where('stype', 4)->whereHas('cycle', function ($query) use ($organization_id, $c) {
+            $per_cycle_training_sessions = TrainingSession::whereHas('step', function ($q) use ($orgIds, $user, $c) {
+                $q->where('stype', 4)->whereHas('cycle', function ($query) use ($orgIds, $user, $c) {
                     $query->where('cycles.id', $c->id)
-                        ->when(!is_null($organization_id), function ($query) use ($organization_id) {
-                            $query->where('organization_id', $organization_id);
+                        ->when(!empty($orgIds) && !$user->hasRole('admin'), function ($query) use ($orgIds) {
+                            $query->whereIn('organization_id', $orgIds);
                         });
                 });
             });
 
-            $per_cycle_startups = Company::whereHas('cycledata', function ($q) use ($organization_id, $c) {
-                $q->where('cycles.id', $c->id)->when(!is_null($organization_id), function ($q) use ($organization_id) {
-                    $q->where('organization_id', $organization_id);
+            $per_cycle_startups = Company::whereHas('cycledata', function ($q) use ($orgIds, $user, $c) {
+                $q->where('cycles.id', $c->id)->when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+                    $q->whereIn('organization_id', $orgIds);
                 });
             });
 
-            $per_cycle_screenings = Company::whereHas('stepdata', function ($q) use ($organization_id, $c) {
-                return $q->whereHas('cycle', function ($query) use ($organization_id, $c) {
-                    $query->where('cycles.id', $c->id)->when(!is_null($organization_id), function ($q) use ($organization_id) {
-                        $q->where('organization_id', $organization_id);
+            $per_cycle_screenings = Company::whereHas('stepdata', function ($q) use ($orgIds, $user, $c) {
+                return $q->whereHas('cycle', function ($query) use ($orgIds, $user, $c) {
+                    $query->where('cycles.id', $c->id)->when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+                        $q->whereIn('organization_id', $orgIds);
                     });
                 })->where('stype', 2);
             })->count();
 
-            $per_cycle_final_screenings = Company::whereHas('stepdata', function ($q) use ($organization_id, $c) {
-                return $q->whereHas('cycle', function ($query) use ($organization_id, $c) {
-                    $query->where('cycles.id', $c->id)->when(!is_null($organization_id), function ($q) use ($organization_id) {
-                        $q->where('organization_id', $organization_id);
+            $per_cycle_final_screenings = Company::whereHas('stepdata', function ($q) use ($orgIds, $user, $c) {
+                return $q->whereHas('cycle', function ($query) use ($orgIds, $user, $c) {
+                    $query->where('cycles.id', $c->id)->when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+                        $q->whereIn('organization_id', $orgIds);
                     });
                 })->where('stype', 5);
             })->count();
 
-            $per_cycle_mentors_count = User::whereHas('mentorSessions', function ($q) use ($organization_id, $c) {
-                $q->where('cycle_id', $c->id)->when(!is_null($organization_id), function ($q) use ($organization_id) {
-                    $q->where('organization_id', $organization_id);
+            $per_cycle_mentors_count = User::whereHas('mentorSessions', function ($q) use ($orgIds, $user, $c) {
+                $q->where('cycle_id', $c->id)->when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+                    $q->whereIn('organization_id', $orgIds);
                 });
             })->count();
 
@@ -1102,7 +1122,7 @@ class ReportController extends Controller
         return sprintf('%02d:%02d', $hours, $minutes);
     }
 
-    protected function companiesReport($organization_id,$company_id, $program_id = null){
+    protected function companiesReport($orgIds, $user,$company_id, $program_id = null){
         $data['company']= Company::find($company_id);
         $mentorRequests =  MentorshipRequest::where('user_id',$data['company']?->user?->id);
         $training_sessions = TrainingSession::whereHas('step',function ($q)use ($organization_id,$company_id){
@@ -1123,18 +1143,60 @@ class ReportController extends Controller
         }
         $data['mentorship_sessions']=$mentorRequests->get();
         $data['training_sessions']=$training_sessions->get();
+
+        // Adjusted Static Programs List
+        $programs = [
+            (object)[
+                'program_name' => 'Full Stack Development Bootcamp',
+                'organization' => 'Tech Academy',
+                'mentorship_sessions_count' => 12,
+                'attendance_rate' => 92, // percentage
+                'training_sessions_count' => 40,
+                'average_screening_score' => 80, // int or float
+                'average_final_screening_score' => 85, // int or float
+                'status' => 'ongoing',
+                'current_step' => 'Training Phase',
+            ],
+            (object)[
+                'program_name' => 'Digital Marketing Training',
+                'organization' => 'Marketing Institute',
+                'mentorship_sessions_count' => 8,
+                'attendance_rate' => 88,
+                'training_sessions_count' => 25,
+                'average_screening_score' => 75,
+                'average_final_screening_score' => 78,
+                'status' => 'completed',
+                'current_step' => 'Final Evaluation',
+            ],
+            (object)[
+                'program_name' => 'Project Management Mentorship',
+                'organization' => 'PMI Center',
+                'mentorship_sessions_count' => 10,
+                'attendance_rate' => 95,
+                'training_sessions_count' => 18,
+                'average_screening_score' => 90,
+                'average_final_screening_score' => 92,
+                'status' => 'ongoing',
+                'current_step' => 'initial screening',
+            ],
+        ];
+
+        $data['programs'] = $programs;
+
+        // dd($data['mentorship_sessions']);
         return $data;
     }
 
     public function exportFinalScreening(Request $request)
     {
-        $organization_id = auth()->user()->organization_id;
+        $user = auth()->user();
+        $orgIds = $user->organizations_ids;
         $program_id = $request->input('program_id', null);
         $format = $request->input('format', 'excel');
         $filters = $request->input('filters', []);
-        
+
         // Get the same data as the report view but process it for export
-        $reportData = $this->finalScreeningReport($organization_id, $program_id);
+        $reportData = $this->finalScreeningReport($orgIds, $user, $program_id);
         $startups = $reportData['startups'];
         $judges = $reportData['judges'];
         
@@ -1338,13 +1400,14 @@ class ReportController extends Controller
 
     public function exportScreening(Request $request)
     {
-        $organization_id = auth()->user()->organization_id;
+        $user = auth()->user();
+        $orgIds = $user->organizations_ids;
         $program_id = $request->input('program_id', null);
         $format = $request->input('format', 'excel');
         $filters = $request->input('filters', []);
-        
+
         // Get the same data as the report view but process it for export
-        $reportData = $this->screeningReport($organization_id, $program_id);
+        $reportData = $this->screeningReport($orgIds, $user, $program_id);
         $startups = $reportData['startups'];
         $judges = $reportData['judges'];
         

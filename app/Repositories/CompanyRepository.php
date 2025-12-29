@@ -2,9 +2,11 @@
 namespace App\Repositories;
 
 use App\Cycle;
+use App\Almuni;
 use App\Company;
 use App\Milestone;
 use App\Team_member;
+use App\CompanyRelation;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -56,6 +58,22 @@ class CompanyRepository
                 });
             }
         }
+        
+        if (!empty($filters['is_alumni'])) {
+            if($filters['is_alumni'] == 1){
+                $query->whereIn('id', function ($q) {
+                    $q->select('company_id')
+                    ->from('alumni')
+                    ->whereNotNull('company_id');
+                });
+            }elseif($filters['is_alumni'] == 2){
+                $query->whereNotIn('id', function ($q) {
+                    $q->select('company_id')
+                    ->from('alumni')
+                    ->whereNotNull('company_id');
+                });
+            }
+        }
 
         // Handle multiple sectors filter
         if (!empty($filters['sectors']) && is_array($filters['sectors'])) {
@@ -99,7 +117,7 @@ class CompanyRepository
 
      public function findWithRelations($id)
     {
-        return Company::with(['country', 'state', 'city', 'teamMembers', 'sectoR'])->find($id);
+        return Company::with(['country', 'state', 'city', 'teamMembers', 'sectoR', 'user', 'stage'])->find($id);
     }
 
     public function update(Company $company, array $data): bool
@@ -228,4 +246,32 @@ public function deleteMilestone(int $id): bool
 {
     return DB::table('milestones')->where('id', $id)->delete();
 }
+public function team_MemberGet($companyId, $team = null)
+{
+     $teamMembers = DB::table('team_members')
+        ->where('Company_id', $companyId);
+        if($team != null){
+            $teamMembers = $teamMembers->where('TeamMember', $team);
+        }
+        $teamMembers = $teamMembers->get();
+
+        return $teamMembers;
+}
+
+public function findAllMilestones($companyId)
+{
+     $milestone = DB::table('milestones')
+        ->where('Company_id', $companyId)
+        ->orderBy('created_at')
+        ->get();
+        return $milestone;
+
+}
+public function findCompanyRelation($companyId)
+{
+    $companyRelation = CompanyRelation::where('company_id', $companyId)->with('technology', 'sector', 'industry')->get();
+
+    return $companyRelation;
+}
+
 }

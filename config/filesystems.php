@@ -61,6 +61,12 @@ return [
             'url' => env('APP_URL') . '/pitch_decks',
             'visibility' => 'public',
         ],
+        'programTeams' => [
+            'driver' => 'local',
+            'root'   => storage_path('app/public/programs/teams'),
+            'url' => env('APP_URL') . '/programs/teams',
+            'visibility' => 'public',
+        ],
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
@@ -145,6 +151,20 @@ return [
             'driver' => 'local',
             'root'   => public_path('documents'),
             'url' => env('APP_URL') . '/documents',
+            'visibility' => 'public',
+        ],
+
+        'organizations' => [
+            'driver' => 'local',
+            'root' => storage_path('app/organizations'),
+            'url' => env('APP_URL') . '/dashboard/organizations/logo',
+            'visibility' => 'private',
+        ],
+
+        'organization_landing' => [
+            'driver' => 'local',
+            'root' => storage_path('app/organization_landing'),
+            'url' => env('APP_URL') . '/organization-wizard',
             'visibility' => 'public',
         ],
     ],

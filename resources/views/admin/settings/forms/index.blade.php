@@ -18,12 +18,16 @@
   $colors = ['primary', 'success', 'warning', 'info'];
   $icons = ['file', 'send', 'calendar', 'check'];
 
-  $isOrgManager = auth()->user()->hasAnyRole(['organizationManager']);
+  $user = auth()->user();
+  $isOrgManager = $user->hasAnyRole(['organizationManager']);
 
-  if($isOrgManager) {
-    $organizations = App\Organization::where('id', auth()->user()->organization_id)->get();
-  } else {
+  if($user->hasRole('Admin')) {
     $organizations = App\Organization::all();
+  } elseif($isOrgManager || $user->isSubAdmin()) {
+    $orgIds = $user->organizations_ids;
+    $organizations = App\Organization::whereIn('id', $orgIds)->get();
+  } else {
+    $organizations = collect();
   }
 @endphp
 

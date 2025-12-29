@@ -8,7 +8,7 @@
   // Sidebar avatar
   $imageSrc =
     $_user->organization?->img_url
-      ? asset($_user->organization->img_url)
+      ? $_user->organization->imageUrl
       : ($setting->Logo
         ? "/images/logo/$setting->Logo"
         : "/images/background/logo.png");
@@ -32,7 +32,7 @@
   <div class="app-brand demo bg-light" style="height: 70px;">
     <a href="/dashboard" class="app-brand-link">
       <img src="{{ $imageSrc }}" class="object-fit-contain me-2 rounded-circle border p-1 bg-white"
-           style="width: 50px; height: 50px;" alt="avatar" />
+           style="width: 50px; height: 50px;" alt="logo" />
     </a>
 
     <a href="javascript:void(0);" class="layout-menu-toggle menu-link ms-auto">
@@ -56,17 +56,17 @@
     <li class="{{ menuItem('dashboard') }} menu-item">
       <a href="/dashboard" class="menu-link">
         <i class="menu-icon tf-icons ti ti-smart-home"></i>
-        <span>{{ __('admin.Dashboard') }}</span>
+        <div>{{ __('admin.Dashboard') }}</div>
       </a>
     </li>
 
     {{-- Profile --}}
-    <li class="{{ active('*myProfile') }} menu-item">
+    {{-- <li class="{{ active('*myProfile') }} menu-item">
       <a href="{{ route('user.profile_view') }}" class="menu-link">
         <i class="menu-icon tf-icons ti ti-user"></i>
-        <span>{{ __('admin.Profile') }}</span>
+        <div>{{ __('admin.Profile') }}</div>
       </a>
-    </li>
+    </li> --}}
 
 
     {{-- ================================
@@ -104,7 +104,7 @@
           <a href="{{ $isMineOnly ? route('company.profile_view_mine') : route('company.profile_view', $companyId) }}"
             class="menu-link">
             <i class="menu-icon tf-icons ti ti-building-skyscraper"></i>
-            <span>{{ __('admin.My company') }}</span>
+            <div>{{ __('admin.My company') }}</div>
           </a>
         </li>
       @endif
@@ -114,7 +114,7 @@
         <li class="{{ active('dashboard/analysis-assessment') }} menu-item">
           <a href="/dashboard/analysis-assessment" class="menu-link">
             <i class="menu-icon tf-icons ti ti-chart-pie"></i>
-            <span>{{ $l == 'en' ? 'Analysis & Assessment' : 'تحليل وتقييم' }}</span>
+            <div>{{ $l == 'en' ? 'Analysis & Assessment' : 'تحليل وتقييم' }}</div>
           </a>
         </li>
       @endif
@@ -124,7 +124,7 @@
         <li class="{{ active('dashboard/swot-analysis*') }} menu-item">
           <a href="{{ route('swot.view') }}" class="menu-link">
             <i class="menu-icon tf-icons ti ti-analyze"></i>
-            <span>{{ __('admin.swot_analysis') }}</span>
+            <div>{{ __('admin.swot_analysis') }}</div>
           </a>
         </li>
       @endif
@@ -140,49 +140,22 @@
       <span class="menu-header-text">{{ $l == 'en' ? 'Engagement' : 'تفاعل' }}</span>
     </li>
 
-    {{-- Calendar --}}
-    <li class="{{ active('*calendar*') }} menu-item">
-      <a href="{{ route('calendar.events_list') }}" class="menu-link">
-        <i class="menu-icon tf-icons ti ti-calendar"></i>
-        <span>{{ __('admin.Calendar') }}</span>
-      </a>
-    </li>
-
-    {{-- Messages --}}
-    @if($_user->ableTo('messages.list', $permissions))
-      <li class="{{ active('dashboard/messages') }} menu-item">
-        <a href="/dashboard/messages" class="menu-link">
-          <i class="menu-icon tf-icons ti ti-messages"></i>
-          <span>{{ __('admin.Messages') }}</span>
-        </a>
-      </li>
-    @endif
-
-    @if($_user->ableTo('messages.view', $permissions))
-      <li class="{{ active('dashboard/mymsg') }} menu-item">
-        <a href="/dashboard/mymsg" class="menu-link">
-          <i class="menu-icon tf-icons ti ti-world"></i>
-          <span>{{ __('admin.contactus') }}</span>
-        </a>
-      </li>
-    @endif
-
     {{-- Services Directory --}}
     @if($_user->ableTo('users.directory_view', $permissions))
       <li class="{{ active('dashboard/directory') }} menu-item">
         <a href="/dashboard/directory" class="menu-link">
           <i class="menu-icon tf-icons ti ti-search"></i>
-          <span>{{ __('admin.Services') }}</span>
+          <div>{{ __('admin.Services') }}</div>
         </a>
       </li>
     @endif
 
     {{-- Mentors --}}
     @if($_user->ableTo('mentors.list', $permissions))
-      <li class="{{ active('dashboard/show/Mentors') }} menu-item">
-        <a href="/dashboard/show/Mentors" class="menu-link">
+      <li class="{{ active('dashboard/mentors') }} menu-item">
+        <a href="/dashboard/mentors" class="menu-link">
           <i class="menu-icon tf-icons ti ti-users"></i>
-          <span>{{ __('admin.Mentors') }}</span>
+          <div>{{ __('admin.Mentors') }}</div>
         </a>
       </li>
     @endif
@@ -191,10 +164,16 @@
     <li class="{{ active('dashboard/hackathon') }} menu-item">
       <a href="/dashboard/hackathon" class="menu-link">
         <i class="menu-icon tf-icons ti ti-activity"></i>
-        <span>{{ __('admin.Hackathon') }}</span>
+        <div>{{ __('admin.Hackathon') }}</div>
       </a>
     </li>
-
+    
+    <li class="{{ active('dashboard/perks') }} menu-item">
+      <a href="/dashboard/perks" class="menu-link">
+        <i class="menu-icon tf-icons ti ti-gift"></i>
+        <div>{{ $l == 'en' ? 'Perks & Discounts' : 'المزايا والخصومات' }}</div>
+      </a>
+    </li>
 
 
     {{-- ====================
@@ -209,7 +188,7 @@
       <li class="{{ active('dashboard/requests/mine') }} menu-item">
         <a href="/dashboard/requests/mine" class="menu-link">
           <i class="menu-icon tf-icons ti ti-briefcase"></i>
-          <span>{{ $l == 'en' ? 'Services Requests' : 'طلبات الخدمات' }}</span>
+          <div>{{ $l == 'en' ? 'Services Requests' : 'طلبات الخدمات' }}</div>
         </a>
       </li>
     @endif
@@ -219,7 +198,7 @@
       <li class="{{ active('dashboard/mentorship/mine') }} menu-item">
         <a href="/dashboard/mentorship/mine" class="menu-link">
           <i class="menu-icon tf-icons ti ti-user-check"></i>
-          <span>{{ $l == 'en' ? 'Mentorship Requests' : 'طلبات الإرشاد' }}</span>
+          <div>{{ $l == 'en' ? 'Mentorship Requests' : 'طلبات الإرشاد' }}</div>
         </a>
       </li>
     @endif
@@ -237,7 +216,7 @@
       <li class="{{ active('dashboard/training/my*') }} menu-item">
         <a href="/dashboard/training/my" class="menu-link">
           <i class="menu-icon tf-icons ti ti-certificate-2"></i>
-          <span>{{ __('admin.My courses') }}</span>
+          <div>{{ __('admin.My courses') }}</div>
         </a>
       </li>
     @endif
@@ -247,7 +226,7 @@
       <li class="{{ active('dashboard/quizzes/my*') }} menu-item">
         <a href="/dashboard/quizzes/my" class="menu-link">
           <i class="menu-icon tf-icons ti ti-help-octagon"></i>
-          <span>{{ __('admin.My Quizzes') }}</span>
+          <div>{{ __('admin.My Quizzes') }}</div>
         </a>
       </li>
     @endif
@@ -257,7 +236,7 @@
       <li class="{{ active('dashboard/mentor/mentorshipSessions*') }} menu-item">
         <a href="{{ route('mentorships.sessions_list_detailed') }}" class="menu-link">
           <i class="menu-icon tf-icons ti ti-layout-kanban"></i>
-          <span>{{ $l == 'en' ? 'Mentorship Tasks' : 'مهام الإرشاد' }}</span>
+          <div>{{ __('admin.tasks') }}</div>
         </a>
       </li>
     @endif
@@ -276,7 +255,7 @@
       <li class="{{ active('dashboard/myFiles') }} menu-item">
         <a href="/dashboard/myFiles" class="menu-link">
           <i class="menu-icon tf-icons ti ti-file"></i>
-          <span>{{ __('admin.filemanager') }}</span>
+          <div>{{ __('admin.filemanager') }}</div>
         </a>
       </li>
     @endif
@@ -286,7 +265,7 @@
       <li class="{{ active('dashboard/documentation*') }} menu-item">
         <a href="/dashboard/documentation" class="menu-link">
           <i class="menu-icon tf-icons ti ti-file-description"></i>
-          <span>{{ __('admin.Documentations') }}</span>
+          <div>{{ __('admin.Documentations') }}</div>
         </a>
       </li>
     @endif

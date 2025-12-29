@@ -1,608 +1,370 @@
 @extends('layouts.admin')
-@php
-  $status = strtolower($evaluationForm?->status);
-  if( optional($cstep)->data == 'grouptogroup' )
-  {
-    //
-  }
-  else
-  {
-    $judgersList = collect( json_decode(optional($cstep)->list) ?? [] );
-    $judgersList = $judgersList->map(function($judger) { return intval($judger); });
-  }
-@endphp
-@section('style')
-<style>
-  /* Custom fade animation for tab content */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  .tab-content {
-    display: none;
-    animation: fadeIn 0.3s ease;
-  }
-  .tab-content.active {
-    display: block;
-  }
-</style>
-@stop
 
 @section('content')
-@php
-  $types = ['onetoall'=>'Assign One to all users','grouptoall'=>'Assign Group to all users','grouptogroup'=>'Assign Group to group of users'];
-@endphp
-<!-- BEGIN: Content-->
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="content-body">
-      @if ($cstep)
-      <section id="multiple-column-form">
-        @if (session()->has('message'))
-        <div class="alert alert-success alert-dismissible" role="alert">
-          {{ __('admin.' . session()->get('message')) }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        @endif
-        @if (session()->has('message2'))
-        <div class="alert alert-danger alert-dismissible" role="alert">
-          {{ __('admin.' . session()->get('message2')) }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        @endif
-        <div class="row match-height">
-          <div class="col-xl-12 col-md-12 col-sm-12">
-            <div class="card mb-4">
-              <div class="card-header border-bottom">
-                <h5 class="card-title mb-0">{{ __('cycles.Portal screening list') }}</h5>
+   <!-- Navigation Tabs -->
+    <nav class="nav-align-top mb-6">
+      @php
+        $tabs = [
+          ['title' => __('admin.initial_screening'), 'url' => 'dashboard/screening', 'icon' => 'scale'],
+          ['title' => __('admin.Final Screening'), 'url' => 'dashboard/final', 'icon' => 'gavel'],
+        ];
+      @endphp
+      <ul class="nav nav-pills">
+        @foreach($tabs as $tab)
+          <li class="nav-item">
+            <a href="/{{ $tab['url'] }}" class="nav-link {{ Request::is($tab['url'] . '*') ? 'active' : '' }}">
+              <i class="ti ti-{{ $tab['icon'] }} me-2 d-none d-md-inline"></i>
+              {{ $tab['title'] }}
+            </a>
+          </li>
+        @endforeach
+      </ul>
+    </nav>
+    <!--/ Navigation Tabs -->
+  
+    <!-- Alerts -->
+    @if (session()->has('message'))
+      <x-alert type="success" message="{{ __('admin.' . session()->get('message')) }} {{ Session::forget('message') }}" />
+    @endif
+    @if (session()->has('message2'))
+      <x-alert type="danger" message="{{ __('admin.' . session()->get('message2')) }} {{ Session::forget('message2') }}" />
+    @endif
+    <!--/ Alerts -->
+
+    <div class="card">
+      <div class="card-header border-bottom">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="card-title mb-1">{{ __('admin.screening.heading') }}</h5>
+            <p class="text-muted mb-0">{{ __('admin.screening.subheading') }}</p>
+          </div>
+          <div class="d-flex align-items-center gap-3">
+            <!-- Quick Stats -->
+            <div class="d-flex align-items-center ms-1">
+              <div class="badge bg-label-primary rounded-pill d-flex align-items-center px-3 py-2">
+                <i class="ti ti-list me-1 d-none d-sm-block"></i>
+                <span class="fw-semibold">
+                  {{ count($screeningSteps) }} {{ __('admin.screening.step') }}                  
+                </span>
               </div>
-              <div class="card-body mt-6">
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
-                  <div class="form-group mb-4 mb-md-0 w-50 d-none d-md-block">
-                    <label class="form-label">{{ __('cycles.Select step from list to manage') }}</label>
-                    <select id="cstep" class="select2 form-select"
-                      onchange="window.open('/dashboard/'+this.options[this.selectedIndex].value+'/screening','_self');">
-                      @foreach ($steps as $step)
-                      <option value="{{ $step->id }}" {{ $step->id == $id ? 'selected' : '' }}>{{ $step->title }}
-                        ({{ __('cycles.Cycle') }} "{{ $step->cycle->title }}" -
-                        {{ __('cycles.Start') }} {{ $step->from->format('d-m-Y') ?? '-' }}) -
-                        {{ optional(optional($step->cycle)->organization)->name }}</option>
-                      @endforeach
-                    </select>
-                  </div>
-                  <div class="form-group mb-4 mb-md-0 w-50 d-md-none">
-                    <label class="form-label">{{ __('cycles.Select step from list to manage') }}</label>
-                    <select id="cstep" class="select2 form-select"
-                      onchange="window.open('/dashboard/'+this.options[this.selectedIndex].value+'/screening','_self');">
-                      @foreach ($steps as $step)
-                      <option value="{{ $step->id }}" {{ $step->id == $id ? 'selected' : '' }}>{{ $step->title }}
-                        ({{ __('cycles.Cycle') }} "{{ $step->cycle->title }}" -
-                        {{ __('cycles.Start') }} {{ $step->from->format('d-m-Y') ?? '-' }}) -
-                        {{ optional(optional($step->cycle)->organization)->name }}</option>
-                      @endforeach
-                    </select>
-                  </div>
-                  <div class="d-flex justify-content-start justify-content-md-end flex-wrap flex-md-nowrap gap-2">
-                    <button 
-                      class="btn btn-label-secondary"
-                      style="height: fit-content;"
-                      onclick="window.location.href='/dashboard/screening/results/{{ $id }}'">
-                      <i class="ti ti-chart-bar me-2"></i> {{ __('cycles.Results') }}
-                    </button>
-                    <a 
-                      class="btn btn-label-primary" 
-                      style="height: fit-content;"
-                      href="/dashboard/cycles/{{ $cstep->cycle_id }}"
-                    >
-                      <i class="ti ti-components me-2"></i> {{ __('cycles.Cycle') }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters Section -->
+      <div class="card bg-light-subtle shadow-none rounded-0 border-bottom">
+        <div class="card-body py-4">
+          <form id="filter-form" method="GET" action="/dashboard/screening">
+            <div class="row g-3 align-items-center">
+              <div class="col-md-6 col-lg-3">
+                <input type="text" class="form-control bg-card" name="search" value="{{ request('search') }}" placeholder="{{ __('admin.screening.search_steps_placeholder') }}">
+              </div>
+
+              <div class="col-md-6 col-lg-2">
+                <select class="form-select bg-card" name="status">
+                  <option value="">{{ __('admin.All_statuses') }}</option>
+                  <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>{{ __('admin.In_Progress') }}</option>
+                  <option value="upcoming" {{ request('status') == 'upcoming' ? 'selected' : '' }}>{{ __('admin.Upcoming') }}</option>
+                  <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>{{ __('admin.completed') }}</option>
+                </select>
+              </div>
+
+              <div class="col-md-6 col-lg-2">
+                <select class="form-select bg-card" name="program">
+                  <option value="">{{ __('admin.All_Programs') }}</option>
+                  @foreach($screeningSteps->pluck('program')->unique('id') as $program)
+                    <option value="{{ $program->id }}" {{ request('program') == $program->id ? 'selected' : '' }}>{{ Str::limit($program->title, 25) }}</option>
+                  @endforeach
+                </select>
+              </div>
+
+              <div class="col-md-6 col-lg-2">
+                <select class="form-select bg-card" name="judge">
+                  <option value="">{{ __('cycles.All Judges') }}</option>
+                  @foreach($screeningSteps->pluck('judges')->flatten()->unique('id') as $judge)
+                    <option value="{{ $judge->id }}" {{ request('judge') == $judge->id ? 'selected' : '' }}>{{ $judge->name }}</option>
+                  @endforeach
+                </select>
+              </div>
+
+              <div class="col-md-6 col-lg-2">
+                <select class="form-select bg-card" name="startup">
+                  <option value="">{{ __('admin.all_startups') }}</option>
+                  @foreach($screeningSteps->pluck('companies')->flatten()->unique('id') as $company)
+                    <option value="{{ $company->id }}" {{ request('startup') == $company->id ? 'selected' : '' }}>{{ Str::limit($company->name, 25) }}</option>
+                  @endforeach
+                </select>
+              </div>
+
+              <div class="col-md-6 col-lg-1">
+                <div class="d-flex justify-content-lg-end gap-2">
+                  <button type="submit" class="btn btn-primary btn-icon" disabled>
+                    <i class="ti ti-filter"></i>
+                  </button>
+                  @if(request('search') || request('status') || request('program') || request('judge') || request('startup'))
+                    <a href="/dashboard/screening" class="btn bg-card border btn-icon">
+                      <i class="ti ti-refresh"></i>
                     </a>
-                    <button class="btn btn-label-info" style="height: fit-content;" onclick="DoChange(1)">
-                      <i class="ti ti-pencil me-2"></i> {{ __('cycles.Edit') }}
-                    </button>
-                    <button class="btn btn-label-danger" style="height: fit-content;" onclick="DoChange(2)">
-                      <i class="ti ti-trash me-2"></i> {{ __('cycles.Delete') }}
-                    </button>
+                  @endif
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <!-- Steps Grid -->
+        <div class="row g-4">
+          @forelse($screeningSteps as $step)
+            <div class="col-xl-4 col-lg-6 col-md-6">
+              <div class="card shadow-sm border h-100" data-step-id="{{ $step->id }}">
+                <!-- Card Header with Status Indicator -->
+                <div class="card-header d-flex align-items-center justify-content-between pb-2 pe-2">
+                  <h6 class="card-title mb-0 pe-2">
+                    <a href="/dashboard/screening/{{ $step->id }}" class="text-heading text-decoration-none">
+                      {{ $step->title }}
+                    </a>
+                  </h6>
+                  <div class="d-flex align-items-center gap-1">
+                    @php
+                      $today = date('Y-m-d');
+                      $status = ($step->end_date < $today) ? 'completed' : (($step->start_date > $today) ? 'upcoming' : 'in progress');
+                      $statusColor = ($status == 'completed') ? 'success' : (($status == 'upcoming') ? 'warning' : 'primary');
+                    @endphp
+                    <span class="badge bg-label-{{ $statusColor }} text-capitalize">
+                      {{ $status == 'in_progress' ? __('admin.In_Progress') : ($status == 'upcoming' ? __('admin.Upcoming') : __('admin.completed')) }}
+                    </span>
+                    <div class="dropdown">
+                      <button class="btn btn-text-secondary rounded-pill btn-icon btn-sm dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                        <i class="ti ti-dots-vertical"></i>
+                      </button>
+                      <div class="dropdown-menu dropdown-menu-end">
+                        <a class="dropdown-item" href="/dashboard/show-builder{{ $step->organization->id ? '?' . 'org_id=' . $step->organization->id : '' }}">
+                          <i class="ti ti-plus me-1"></i> {{ __('builder.Add_New_Form') }}
+                        </a>
+                        <button class="dropdown-item edit-step-btn" data-step='@json($step)'>
+                          <i class="ti ti-pencil me-1"></i> {{ __('admin.edit_step') }}
+                        </button>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item text-danger" onclick="handleDeleteStep({{ $step->id }})">
+                          <i class="ti ti-trash me-1"></i> {{ __('admin.delete') }}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+      
+                <!-- Card Body -->
+                <div class="card-body">
+                  <!-- Description -->
+                  <p class="card-text text-muted small mb-3">
+                    {{ Str::limit($step->description, 120) }}
+                  </p>
+      
+                  <!-- Program & Organization -->
+                  <div class="d-flex flex-wrap gap-2 mb-3">
+                    <a href="{{ route('cycles.list', $step->program->id) }}"
+                      class="badge bg-label-primary rounded-pill text-decoration-none px-2 py-1">
+                      <i class="ti ti-rocket ti-xs me-1"></i>{{ Str::limit($step->program->title, 30) }}
+                    </a>
+                    <a href="{{ route('organizations.edit', $step->organization->id) }}"
+                      class="badge bg-label-secondary rounded-pill text-decoration-none px-2 py-1">
+                      <i class="ti ti-building ti-xs me-1"></i>{{ Str::limit($step->organization->name, 20) }}
+                    </a>
+                  </div>
+      
+                  <!-- Date Range -->
+                  <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="d-flex align-items-center">
+                      <i class="ti ti-calendar me-1 text-muted"></i>
+                      <small class="text-muted">{{ $step->start_date }}</small>
+                    </div>
+                    <div class="text-muted">—</div>
+                    <div class="d-flex align-items-center">
+                      <i class="ti ti-calendar-check me-1 text-muted"></i>
+                      <small class="text-muted">{{ $step->end_date }}</small>
+                    </div>
+                  </div>
+      
+                  <!-- Assignments Summary -->
+                  <div class="row g-2 mb-3">
+                    <div class="col-6">
+                      <div class="d-flex align-items-center">
+                        <i class="ti ti-user-check me-1 text-muted"></i>
+                        <div class="text-muted small">
+                          <strong class="text-dark">{{ count($step->judges) }}</strong>
+                          {{ count($step->judges) != 1 ? __('admin.Judgers') : __('admin.Judger') }}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="d-flex align-items-center">
+                        <i class="ti ti-building-skyscraper me-1 text-muted"></i>
+                        <div class="text-muted small">
+                          <strong class="text-dark">{{ count($step->companies) }}</strong>
+                          {{ count($step->companies) != 1 ? __('admin.Startups') : __('admin.Startup') }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+      
+                  <!-- Assessment Form -->
+                  @if (isset($step->form->id))
+                    <a href="{{ route('forms.render_view', $step->form->id) }}" class="d-flex align-items-center mb-0">
+                      <i class="ti ti-file me-1 text-muted"></i>
+                      <small class="text-muted">{{ Str::limit($step->form->title, 25) }}</small>
+                    </a>
+                  @endif
+                </div>
+      
+                <!-- Card Footer -->
+                <div class="card-footer text-center text-nowrap">
+                  <div class="d-flex gap-2">
+                    <a href="/dashboard/screening/{{ $step->id }}" class="btn btn-primary flex-fill">
+                      <i class="ti ti-eye-cog me-2"></i> {{ __('admin.screening.manage_step') }}
+                    </a>
+                    <a href="/dashboard/screening/results/{{ $step->id }}" class="btn btn-outline-primary flex-fill">
+                      <i class="ti ti-file-text me-2"></i> {{ __('admin.view_results') }}
+                    </a>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-      <section class="row">
-        <div class="col-xl-12 col-md-12 col-sm-12">
-          <div class="card mb-4">
-            <div class="card-header">
-              <h5 class="card-title success mb-1">{{ $cstep->title }}</h5>
-              <p class="text-muted mb-1">{{ $cstep->description }}</p>
-              <div class="d-flex align-items-center text-muted">
-                <i class="ti ti-calendar-event me-2"></i>
-                <small>
-                  {{ __('cycles.from') }}
-                  {{ $cstep->from->format('d-m-Y') ?? '-' }} {{ __('cycles.to') }} {{ $cstep->to->format('d-m-Y') ?? '-' }}
-                </small>
-              </div>
-            </div>
-            <hr style="margin:-10px 0 5px 0;">
-            <div class="card-body">
-              <div class="card-text">
-                <dl class="row">
-                  <dt class="col-sm-3 text-right">{{ __('cycles.Cycle') }}</dt>
-                  <dd class="col-sm-9">{{ $cstep->cycle->title }} {{ __('cycles.from') }}
-                    {{ $cstep->cycle->start->format('d-m-Y') ?? '-' }} {{ __('cycles.to') }}
-                    {{ $cstep->cycle->end->format('d-m-Y') ?? '-' }}</dd>
-                </dl>
-                <dl class="row">
-                  <dt class="col-sm-3 text-right">{{ __('cycles.Form title') }}</dt>
-                  <dd class="col-sm-9">{!! $form->title ?? '<span class="danger">' . __('cycles.NoForm') . '</span>' !!}</dd>
-                </dl>
-                <dl class="row">
-                  <dt class="col-sm-3 text-right">{{ __('cycles.Screening type') }}</dt>
-                  <dd class="col-sm-9">
-                    {{ __('cycles.' . $types[$cstep->data]) }}
-                  </dd>
-                </dl>
-                <dl class="row">
-                  <dt class="col-sm-3 text-right">{{ __('cycles.Total registered') }}</dt>
-                  <dd class="col-sm-9">{{ \App\Company::whereIn('step', [$form->id ?? '', $cstep->id])->count() }}</dd>
-                </dl>
-                <dl class="row">
-                  <dt class="col-sm-3 text-right">{{ __('cycles.Registered Judges') }}</dt>
-                  <dd class="col-sm-9">{{ $judgers_count }} </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-xl-12 col-md-12 col-sm-12">
-          <div class="card">
-            <div class="card-header border-bottom border-light mb-0">
-              <h5 class="card-title primary">{{ __('cycles.' . $types[$cstep->data]) }}</h5>
-              <p>{{ __('cycles.Select judges from the menu') }}:</p>
-            </div>
-            <div class="card-body">
-              <div class="">
-                <form action="/dashboard/screening/update" method="POST" enctype="multipart/form-data">
-                  {!! csrf_field() !!}
-                  <input type="hidden" value="" name="judges" id="judges">
-                  <input type="hidden" value="{{ $cstep->id }}" name="step">
-                  <input type="hidden" name="fid" value="{{ $form->id ?? '' }}">
-                  @if ($cstep->data == 'grouptogroup')
-                    <div class="text-end py-3"> <button id="addPanelBtn" type="button" class="btn btn-label-primary"> <i class="fas fa-fw fa-sm fa-plus me-2"></i> {{ __('admin.Add_New') }} </button> </div>
-                    <div class="table-responsive">
-                      <table class="table table-bordered table-hover">
-                        <thead>
-                          <tr>
-                            <th style="width: 20% !important;" scope="col">{{ __('admin.Panel') }}</th>
-                            <th style="width: 40% !important;" scope="col">{{ __('admin.Judges') }}</th>
-                            <th style="width: 40% !important;" scope="col">{{ __('admin.Users') }}</th>
-                          </tr>
-                        </thead>
-                        <tbody id="panels-list-body">
-                          @foreach( $judgers_list as $key => $list )
-                            <tr data-panel="{{ $key }}">
-                              <td>
-                                <i title="Remove panel" class="remove-panel-btn cursor-pointer fas fa-fw fa-sm fa-minus-circle text-danger"></i> 
-                                {{ __('admin.Panel_list') }} {{ $key }}
-                              </td>
-                              <td>
-                                <select name="judges[{{ $key }}][]" class="select2 form-control panel judgers-selectors" multiple="multiple">
-                                  @foreach( $judges as $judge )
-                                    <option {{ in_array( $judge->id, $list['judgers'] ) ? 'selected' : '' }} value="{{ $judge->id }}">{{ $judge->{'first_name_' . $l} }} {{ $judge->{'last_name_' . $l} }} ({{ $judge->email }})</option>
-                                  @endforeach
-                                </select>
-                              </td>
-                              <td>
-                                <select name="users[{{ $key }}][]" class="select2 form-control panel users-selectors" multiple="multiple">
-                                  @foreach( $companies as $company )
-                                    <option {{ in_array( $company->id, $list['companies'] ) ? 'selected' : '' }} value="{{ $company->id }}">{{ $company->{'name_' . $l} }}</option>
-                                  @endforeach
-                                </select>
-                              </td>
-                            </tr>
-                          @endforeach
-                        </tbody>
-                      </table>
-                    </div>
-                    {{-- <div class="form-group">
-                      @foreach (json_decode($cstep->list) ?? [] as $key => $clist)
-                        <div class="form-row">
-                          <p style="margin:5px;">{{ __('cycles.panel list') . ' ' . $key }}</p>
-                          <div class="row col-md-12">
-                            <div class="col-md-11">
-                              <select name="judges[{{ $key }}][]" class="select2 form-control panel{{ $key }}"
-                                multiple="multiple">
-                                @foreach ($judges as $judge)
-                                <option value="{{ $judge->id }}" {{ in_array($judge->id, is_array($clist) ? $clist : [], true) ? 'selected' : '' }}>
-                                  {{ $judge->name }} ({{ $judge->email }})
-                                </option>
-                                @endforeach
-                              </select>
-                            </div>
-                            @php
-                            $panel = \App\Screening::where('step_id', $cstep->id)
-                                ->where('panel', $key)
-                                ->first();
-                            if ($panel && $panel->users) {
-                                $panel = json_encode($panel->users);
-                            } else {
-                                $panel = '';
-                            }
-                            @endphp
-                            <input type="hidden" value="{{ $panel }}" name="panel{{ $key }}">
-                            <div class="col-md-1">
-                              <button type="button" class="btn btn-warning" onclick="openusers({{ $key }})">
-                                <i class="ti ti-edit text-info"></i>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      @endforeach
-                      @php($key = ($key ?? 0) + 1)
-                      <div class="form-row">
-                        <p style="margin: 5px">{{ __('cycles.panel list') . ' ' . $key }}</p>
-                        <div class="row col-md-12">
-                          <div class="col-md-11">
-                            <select name="judges[{{ $key }}][]" class="select2 form-control panel{{ $key }}"
-                              multiple="multiple">
-                              @foreach ($judges as $judge)
-                              <option value="{{ $judge->id }}">{{ $judge->{'first_name_' . $l} }} {{ $judge->{'last_name_' . $l} }} ({{ $judge->email }})</option>
-                              @endforeach
-                            </select>
-                          </div>
-                          <div class="col-md-1 float-right">
-                            <button class="btn btn-primary" type="submit"><i class="ti ti-plus"></i></button>
-                          </div>
-                        </div>
-                      </div>
-                    </div> --}}
-                  @else
-                    <div class="form-group mt-6">
-                      <label class="form-label">{{ __('cycles.Judges list') }}</label>
-                      <select 
-                        id="judges-select" 
-                        name="judges[]" 
-                        class="select2 form-select" 
-                        {{ $cstep->data == 'onetoall' ? '' : 'multiple="multiple"' }}
-                        data-placeholder="{{ __('cycles.Select') }}..."  
-                      >
-                        {{-- {!! $cstep->data == 'onetoall' ? '<option disabled value="">' . __('cycles.Please select one name') . '</option>' : '' !!} --}}
-                        <option value="">{{ __('cycles.Select') }}...</option>
-                        @foreach ($judges as $judge)
-                        <option value="{{ $judge->id }}" {{ in_array( intval( $judge->id ) , $judgersList->toArray()) ? 'selected' : '' }}>
-                          {{ $judge->{'first_name_' . $l} }} {{ $judge->{'last_name_' . $l} }} ({{ $judge->email }})
-                        </option>
-                        @endforeach
-                      </select>
-                    </div>
-                  @endif
-                  <div class="form-check my-4">
-                    <input class="form-check-input" type="checkbox" id="customSwitch1"  name="notify" />
-                    <label class="form-check-label" for="customSwitch1">{{ __('cycles.Notify them') }}</label>
-                  </div>
-                  <div class="row">
-                    <div class="col-12 d-flex justify-content-end">
-                      <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('admin.Update') }}</button>
-                    </div>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      @if( $_user->ableTo('screening.evaluation_show', $permissions) )
-        @include('admin.settings.screening-evaluation')
-      @endif
-      @else
-      <div class="card card-body shadow-none h-100 d-flex justify-content-center align-items-center">
-        <div class="d-flex flex-column">
-          <img src="/icons/not-found.svg" width="250" height="250" alt="No Result">
-          <h5 class="mb-0 text-center text-dark fw-bold">
-            {{ __('admin.No Result') }}            
-          </h5>
-          <p class="text-center text-muted">
-            {{ $l == 'en' ? 'You should add a screening from programs' : 'يجب عليك إضافة مرحلة تصفية من البرامج' }}
-          </p>
-          <div class="text-center">
-            <a class="btn btn-lg btn-primary" href="/dashboard/cycles">
-              <i class="ti ti-plus me-2"></i>
-              {{ $l == 'en' ? 'Add Screening' : 'إضافة مرحلة تصفية' }}
-            </a>
-          </div>
+          @empty
+            @include('includes.no-result')
+          @endforelse
         </div>
       </div>
-      @endif
     </div>
   </div>
 </div>
-<!-- END: Content-->
 
-@if ($cstep)
-<!-- Screening form Modal -->
-<div class="modal fade text-left" id="stepForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33"
+<!-- Step Form Modal -->
+<div class="modal fade" id="step-form-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33"
   aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+  <div class="modal-dialog">
     <div class="modal-content">
-      <form class="form" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data">
-        {!! csrf_field() !!}
+      <div class="modal-header">
+        <h5 class="modal-title mb-0" id="myModalLabel33">{{ __('admin.screening.modify_step') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="stepForm" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="_token" value="">
         <div class="modal-body">
-          <div id="menu2">
-            <div class="form-group mb-3">
-              <label class="form-label">{{ __('cycles.Choose screening type') }}: </label>
-              <select class="select2 form-control" name="ScreeningSelect" id="ScreeningSelect" required>
-                <option value="" disabled {{ !$cstep->data ? 'selected' : '' }}>{{ __('cycles.Choose screening type') }}</option>
-                @foreach ($types as $k => $type)
-                <option value="{{ $k }}" {{ $cstep->data == $k ? 'selected' : '' }}>
-                  {{ __('cycles.' . $type) }}</option>
-                @endforeach
-              </select>
-            </div>
-          </div>
-          <input type="hidden" name="sid" value="{{ $cstep->id }}">
+
+          <input type="hidden" name="sid" id="step-id-value">
           <input type="hidden" name="type" value="8">
           <div class="form-group mb-3">
-            <label class="form-label">{{ __('cycles.Title') }}: </label>
-            <input value="{{ $cstep->title }}" name='title' type="text" placeholder="{{ __('cycles.Title') }}"
+            <label class="form-label">{{ __('cycles.Title') }}</label>
+            <input name="title" id="step-title" type="text" placeholder="{{ __('cycles.Title') }}"
               class="form-control" required>
           </div>
           <div class="form-group mb-3">
-            <label class="form-label">{{ __('cycles.Start From') }}: </label>
-            <input value="{{ $cstep->from->format('Y-m-d') }}" name='fromDate' type="text" class="form-control date"
+            <label class="form-label">{{ __('admin.start_date') }}</label>
+            <input id="step-from-date" name="fromDate" type="text" class="form-control date"
               required>
           </div>
           <div class="form-group mb-3">
-            <label class="form-label">{{ __('admin.End at') }}: </label>
-            <input value="{{ $cstep->to->format('Y-m-d') }}" name='toDate' type="text" class="form-control date"
+            <label class="form-label">{{ __('admin.end_date') }}</label>
+            <input id="step-to-date" name="toDate" type="text" class="form-control date"
               required>
           </div>
           <div class="form-group mb-3">
-            <label class="form-label">{{ __('cycles.Description') }}: </label>
-            <textarea name='description' placeholder="{{ __('cycles.Description') }}"
-              class="form-control" style="min-height: 80px; resize: vertical;">{{ $cstep->description }}</textarea>
+            <label class="form-label">{{ __('cycles.Description') }}</label>
+            <textarea id="step-description" name="description" placeholder="{{ __('cycles.Description') }}"
+              class="form-control" style="min-height: 80px; resize: vertical;"></textarea>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
-            <span class="d-none d-sm-block">{{ __('cycles.Close') }}</span>
-          </button>
-          <button type="submit" value="submit" class="btn btn-primary ml-1">
+          <button type="submit" value="submit" class="btn btn-primary">
             <span class="d-none d-sm-block">{{ __('cycles.Submit') }}</span>
           </button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-@if ($cstep->data == 'grouptogroup')
-<!-- Users form -->
-<div class="modal fade text-left" id="usersForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33"
-  aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-    <div class="modal-content">
-      <form class="form" action="{{ URL::to('dashboard/screening/add') }}" method="POST" enctype="multipart/form-data">
-        {!! csrf_field() !!}
-        <div class="modal-body">
-          <div class="form-group mb-0">
-            <select class="select2 form-control" name="panelusers[]" id="panelusers" multiple></select>
-          </div>
-          <input type="hidden" name="sid" value="{{ $cstep->id }}">
-          <input type="hidden" name="pid" value="0" id="pid">
-        </div>
-        <div class="modal-footer">
           <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
             <span class="d-none d-sm-block">{{ __('cycles.Close') }}</span>
           </button>
-          <button type="submit" value="submit" class="btn btn-primary ml-1">
-            <span class="d-none d-sm-block">{{ __('cycles.Save') }}</span>
-          </button>
         </div>
       </form>
     </div>
   </div>
 </div>
-@endif
-@endif
-@stop
-
-@section('scripts')
-@stop
+<!--/ Step Form Modal -->
+@endsection
 
 @section('pagescripts')
-  <script type="text/javascript">
-    $('.date').flatpickr({
-      enableTime: false,
-      dateFormat: 'Y-m-d'
+<script>
+  // Initialize date pickers
+  $('.date').flatpickr({
+    enableTime: false,
+    dateFormat: 'Y-m-d'
+  });
+
+  // Toggle submit button disable state on form change
+  $('#filter-form select, #filter-form input').on('change input', function () {
+    $('#filter-form button[type="submit"]').prop('disabled', $(this).val() ? false : true);
+  });
+
+
+  $('.edit-step-btn').on('click', function () {
+    const stepData = $(this).data('step');
+
+    if (stepData) {
+      $('#stepForm input[name="_token"]').val($('meta[name="csrf-token"]').attr('content'));
+      $('#step-form-modal').modal('show');
+      $('#step-id-value').val(stepData.id);
+      $('#step-title').val(stepData.title);
+      $('#step-from-date').val(stepData.start_date);
+      $('#step-to-date').val(stepData.end_date);
+      $('#step-description').val(stepData.description);
+    }
+  });
+
+  function handleDeleteStep(stepId) {
+    $.ajaxSetup({
+      headers: {
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+      }
     });
 
-    function DoChange(set) {
-      switch (set) {
-        case 1:
-          $('#stepForm').modal('show');
-          break;
-
-        case 2:
-          $.ajaxSetup({
-            headers: {
-              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-          });
-
-          Swal.fire({
-            title: "{{ __('cycles.Are you sure, Delete current step and all its contents?') }}",
-            text: "{{ __('admin.Recover') }}",
-            icon: "warning",
-            showCancelButton: true,
-            reverseButtons: true,
-            customClass: {
-              confirmButton: 'btn btn-danger me-2',
-              cancelButton: 'btn btn-label-secondary',
-            },
-            confirmButtonText: "{{ __('admin.DYes') }}",
-            cancelButtonText: "{{ __('admin.No') }}",
-          }).then((result) => {
-            if (result.isConfirmed) {
-              $.ajax({
-                type: "POST",
-                url: "/dashboard/cycles/modify",
-                data: {
-                  "stepid": {{ $cstep->id ?? 0 }},
-                  "type": 6,
-                },
-                success: function(response) {
-                  Swal.fire({
-                  icon: 'success',
-                  title: '{{__('Deleted!')}}',
-                  html: '{{  $l == 'en' ? 'The screening step has been deleted successfully.' : 'تم حذف مرحلة التصفية بنجاح.' }}',
-                  showCancelButton: false,
-                  showConfirmButton: true,
-                  confirmButtonText: "{{ __('admin.OK') }}",
-                  customClass: {
-                    confirmButton: 'btn btn-primary',
-                  },
-                  buttonsStyling: false,
-                }).then(() => {
-                    location.href = '/dashboard/screening';
-                  });
-                },
-                error: function(error) {
-                  releaseFailureAlert({
-                    title: "{{ __('admin.Error') }}!",
-                    message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
-                  });
-                }
-              });
-            }
-          });
-          break;
-      }
-    }
-
-    function openusers(panel) {
-      $('#pid').val(panel);
-      $('#cpanel').text(panel);
-      let theurl = "/dashboard/screening/get/{{ optional($form)->id ?? 0 }}/{{ optional($cstep)->id ?? 0 }}/" + panel;
-      $.ajax({
-        type: "GET",
-        url: theurl,
-        success: function(response) {
-          console.log(response);
-          $('#panelusers').html(response);
-          $('#usersForm').modal('show');
-        },
-        error: function(error) {
-          console.log(error);
-          alert("Error Occurred, Try again!");
-        }
-      });
-    }
-
-    $(document).ready(function() {
-      // Initialize select2 for all selects
-      $('.select2').each(function() {
-        const $select = $(this);
-        const isScreeningType = $select.attr('id') === 'ScreeningSelect';
-        let placeHolder = '';
-        if( $select.attr('id') === 'ScreeningSelect' ) { placeHolder = "{{ __('cycles.Choose screening type') }}"; }
-        else if( $select.hasClass('judgers-selectors') ) { placeHolder = "{{ __('cycles.Select judges') }}"; }
-        else if( $select.hasClass('users-selectors') ) { placeHolder = "{{ __('cycles.Select Company') }}"; }
-
-        $select.select2({
-          placeholder: placeHolder,
-          // allowClear: isScreeningType,
-          dropdownParent: isScreeningType ? $('#stepForm') : null,
-          width: '100%'
+    Swal.fire({
+      title: "{{ __('cycles.Are you sure, Delete current step and all its contents?') }}",
+      text: "{{ __('admin.Recover') }}",
+      icon: "warning",
+      showCancelButton: true,
+      customClass: {
+        confirmButton: 'btn btn-danger me-2',
+        cancelButton: 'btn btn-label-secondary',
+      },
+      confirmButtonText: "{{ __('admin.DYes') }}",
+      cancelButtonText: "{{ __('admin.No') }}",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        $.ajax({
+          type: "POST",
+          url: "/dashboard/cycles/modify",
+          data: {
+            "stepid": stepId,
+            "type": 6,
+          },
+          success: function(response) {
+            $('[data-step-id="' + stepId + '"]').closest('.col-xl-4').remove();
+            releaseSuccessAlert({
+              title: '{{__('Deleted!')}}',
+              message: '{{  $l == 'en' ? 'The screening step has been deleted successfully.' : 'تم حذف مرحلة التصفية بنجاح.' }}',
+            });
+          },
+          error: function(error) {
+            releaseFailureAlert({
+              title: "{{ __('admin.Error') }}!",
+              message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
+            });
+          }
         });
-      });
-
-      // Reinitialize ScreeningSelect when modal is shown to ensure interactivity
-      $('#stepForm').on('shown.bs.modal', function() {
-        $('#ScreeningSelect').select2('destroy').select2({
-          placeholder: '{{ __('cycles.Choose screening type') }}',
-          // allowClear: true,
-          dropdownParent: $('#stepForm'),
-          width: '100%'
-        });
-        console.log('ScreeningSelect reinitialized in modal');
-        // Ensure dropdown is not disabled
-        $('#ScreeningSelect').prop('disabled', false);
-      });
-
-      // Function to update hidden judges input
-      function updateJudgesInput() {
-        let allJudges = [];
-
-        @if (optional($cstep)->data == 'grouptogroup')
-          // Collect judges from all panel selects
-          $('select[class*="panel"]').each(function() {
-            const selectedValues = $(this).val() || [];
-            console.log('Panel select:', $(this).attr('class'), 'Values:', selectedValues);
-            allJudges = allJudges.concat(selectedValues);
-          });
-        @else
-          // Collect judges from judges-select for onetoall or grouptoall
-          const selectedValues = $('#judges-select').val() || [];
-          console.log('Judges select:', selectedValues);
-          allJudges = selectedValues;
-        @endif
-
-        // Update hidden input with unique judge IDs as JSON string
-        allJudges = [...new Set(allJudges)].map(id => parseInt(id));
-        console.log('All judges:', allJudges);
-        $('#judges').val(JSON.stringify(allJudges));
       }
-
-      // Initialize on page load
-      updateJudgesInput();
-
-      // Update on change for all judge selects
-      @if (optional($cstep)->data == 'grouptogroup')
-        $(document).on('change', 'select[class*="panel"]', updateJudgesInput);
-      @else
-        $('#judges-select').on('change', updateJudgesInput);
-      @endif
-
-      $('form[action="/dashboard/screening/update"]').on('submit', function(e) {
-        const judgesVal = $('#judges').val();
-        const judges = judgesVal ? JSON.parse(judgesVal) : [];
-        console.log('Submitting judges:', judges);
-        if (!judges || judges.length === 0) {
-          e.preventDefault();
-          alert('{{ __('Please_Choose_Judges') }}');
-          return false;
-        }
-      });
-
-      $('#stepForm form').on('submit', function(e) {
-        const screeningType = $('#ScreeningSelect').val();
-        console.log('Submitting screening type:', screeningType);
-        if (!screeningType) {
-          e.preventDefault();
-          alert('{{ __('Please select a screening type') }}');
-          return false;
-        }
-      });
-
-      // Debug screening type changes
-      $('#ScreeningSelect').on('change', function() {
-        console.log('Screening type changed to:', $(this).val());
-      });
     });
-
-    setTimeout(() => {
-      const alerts = document.querySelectorAll('.alert-dismissible');
-      alerts.forEach(alert => {
-        alert.style.transition = 'opacity 0.5s ease';
-        alert.style.opacity = '0';
-        setTimeout(() => alert.remove(), 500);
-      });
-    }, 20000);
-  </script>
+  }
+</script>
 @stop

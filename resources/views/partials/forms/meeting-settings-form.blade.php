@@ -40,6 +40,25 @@
         </select>
       </div>
 
+      <!-- Maximum Concurrent Online Sessions -->
+      <div class="form-group mb-4">
+        <label class="form-label" for="max_concurrent_sessions">
+          {{ __('settings.max_concurrent_sessions') }}
+        </label>
+        <input
+          id="max_concurrent_sessions"
+          type="number"
+          class="form-control"
+          name="max_concurrent_sessions"
+          value="{{ $Title->max_concurrent_sessions }}"
+          placeholder="{{ __('settings.max_concurrent_sessions_placeholder') }}"
+          min="1"
+          max="99"
+          maxlength="2"
+        />
+        <small class="text-muted">{{ __('settings.max_concurrent_sessions_description') }}</small>
+      </div>
+
       <!-- Teams Credentials -->
       <div
         id="teams_credentials"
@@ -199,12 +218,12 @@
             id="allow_offline_sessions"
             type="checkbox"
             name="allow_offline_sessions"
-            value="1"
+            value="{{ $Title->allow_offline_sessions ? $Title->allow_offline_sessions : '1' }}"
             {{ $Title->allow_offline_sessions == 1 ? 'checked' : '' }}
           />
         </div>
       </div>
-      <div id="offline_sessions_fields" @if ($Title->allow_offline_sessions != 1) style="display: none;" @endif>
+      {{-- <div id="offline_sessions_fields" @if ($Title->allow_offline_sessions != 1) style="display: none;" @endif>
         <div class="form-group mb-4">
           <label class="form-label" for="default_offline_session_location">
             {{ __('settings.Default_Offline_Session_Location') }}
@@ -250,7 +269,7 @@
           </div>
           <small class="text-muted">{{ __('settings.Map_Location_Description') }}</small>
         </div>
-      </div>
+      </div> --}}
     </div>
   </div>
   
@@ -457,19 +476,21 @@ $(document).ready(function () {
   const $clearBtn = $("#clearLocation");
 
   function updateMapLocationState() {
-    const v = $mapInput.val().trim();
-    if (v) {
-      $clearBtn.show();
-      $("#selectedAddress").val(v);
-      selectedLocation = { lat: null, lng: null, address: v };
-    } else {
-      $clearBtn.hide();
-      $("#selectedAddress").val("");
-      selectedLocation = null;
+    if ($mapInput) {
+      const v = $mapInput.val() ? $mapInput.val().trim() : '';
+      if (v) {
+        $clearBtn.show();
+        $("#selectedAddress").val(v);
+        selectedLocation = { lat: null, lng: null, address: v };
+      } else {
+        $clearBtn.hide();
+        $("#selectedAddress").val("");
+        selectedLocation = null;
+      }
     }
   }
 
-  $mapInput.on("input", updateMapLocationState);
+  $mapInput?.on("input", updateMapLocationState);
   updateMapLocationState();
 
   /* ---------------------------
@@ -484,6 +505,18 @@ $(document).ready(function () {
         validators: {
           notEmpty: {
             message: settingsTranslations.validation_select_meeting_platform
+          }
+        }
+      },
+      max_concurrent_sessions: {
+        validators: {
+          integer: {
+            message: settingsTranslations.validation_max_concurrent_sessions_integer
+          },
+          between: {
+            min: 1,
+            max: 99,
+            message: settingsTranslations.validation_max_concurrent_sessions_between
           }
         }
       },

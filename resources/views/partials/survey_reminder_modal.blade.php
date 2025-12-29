@@ -3,23 +3,13 @@
 @php
   $survey_data = []; // Initialize as empty array
 
-  // Check if user is authenticated and has the 'Registered' role
-  if (Auth::check() && Auth::user()->hasAnyRole('Registered')) {
-    $user_id = Auth::id();
-
-    
-       // تحقق من وجود المستخدم في أحد جدولَي الحضور
-     
-
-      // هنا فقط لو المستخدم فعلاً حضر 👇
-
-      // الاستبيانات المكتملة
+  if (Auth::check() && Auth::user()->hasAnyRole('Registered|Mentor')) {
+    $user_id = Auth::id();     
       $completed_survey_ids = \App\SurveyResponses::where('user_id', $user_id)
         ->whereNotNull('responses')
         ->pluck('survey_id')
         ->toArray();
-
-      // الاستبيانات الغير مكتملة المطلوبة
+        
       $incomplete_responses = \App\SurveyResponses::where('user_id', $user_id)
         ->whereNull('responses')
         ->whereHas('survey', function($query) {
@@ -27,15 +17,15 @@
         })
         ->with('survey')
         ->get();
-        
-      $existsInTraining = \DB::table('attendance_training_offline')->whereIn('training_session_id', $incomplete_responses->pluck('triggered_at'))->where('user_id', $user_id)->exists();
+       
+        if(Auth::check() && Auth::user()->hasAnyRole('Registered')){
+          $existsInTraining = \DB::table('attendance_training_offline')->whereIn('training_session_id', $incomplete_responses->pluck('triggered_at'))->where('user_id', $user_id)->exists();
 
-      // لو مش موجود في أي جدول => اخرج
-      if (!( $existsInTraining)) {
-        // المستخدم ما حضرش، مش هنعرض أي استبيان
-        $survey_data = [];
-        return; // أو ممكن return response()->json(['surveys' => []]);
-      }
+          if (!( $existsInTraining)) {
+            $survey_data = [];
+            return;
+          }
+        }
 
       // تجهيز البيانات
       $survey_data = [];
@@ -55,7 +45,7 @@
 @endphp
 
 {{-- Only show the modal if there are pending surveys and user is not on the survey taking page --}}
-@if(auth()->user()->hasRole('Registered') && Route::currentRouteName() !== 'surveys.take')
+@if(auth()->user()->hasAnyRole('Registered|Mentor') && Route::currentRouteName() !== 'surveys.take')
   <!-- Survey Reminder Modal -->
   <div class="modal fade" id="surveyReminderModal" tabindex="-1" aria-labelledby="surveyReminderModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-simple">
@@ -110,7 +100,7 @@
 @endif
 
 @push('scripts')
- @if(auth()->user()->hasRole('Registered') && count($survey_data) > 0)
+ @if(auth()->user()->hasAnyRole('Registered|Mentor') && count($survey_data) > 0)
   <script>
     // Survey reminder modal - show every 10 minutes
     function showSurveyReminder() {

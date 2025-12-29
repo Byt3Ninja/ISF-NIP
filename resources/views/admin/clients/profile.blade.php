@@ -15,18 +15,22 @@
         <div class="col-12">
           <article class="card mb-6">
             <header class="user-profile-header-banner">
-              <img src="/vuexy/assets/img/pages/profile-banner.png" 
-                   alt="Banner image" 
-                   class="rounded-top" />
+              <img 
+                src="/vuexy/assets/img/pages/profile-banner.png" 
+                alt="Banner image" 
+                class="rounded-top" 
+              />
             </header>
             
             <div class="user-profile-header d-flex flex-column flex-lg-row text-sm-start text-center mb-5">
               <figure class="flex-shrink-0 mx-sm-0 mx-auto">
-                <img src="{{ $client->image_url ?: '/images/user-placeholder.jpeg' }}"
-                     alt="{{ $client->first_name_en }} {{ $client->last_name_en }}" 
-                     class="d-block ms-0 ms-sm-6 rounded user-profile-img" 
-                     style="height: 130px"
-                     onerror="this.src='/images/user-placeholder.jpeg';" />
+                <img 
+                  src="{{ $client->image_url ?: '/images/user-placeholder.jpeg' }}"
+                  alt="{{ $client->first_name_en }} {{ $client->last_name_en }}" 
+                  class="d-block ms-0 ms-sm-6 rounded user-profile-img object-fit-cover" 
+                  style="height: 130px"
+                  onerror="this.onerror=null; this.src='/images/user-placeholder.jpeg';" 
+                />
               </figure>
               
               <div class="flex-grow-1 mt-3 mt-lg-5">
@@ -395,7 +399,7 @@
                           @foreach($mentorshipTasks as $item)
                             <tr>
                               <td>{{ $item->title }}</td>
-                              <td>{{ $item->description }}</td>
+                              <td>{{ strip_tags($item->description) }}</td>
                               <td>{{ $item->start }}</td>
                               <td>{{ $item->end }}</td>
                             </tr>

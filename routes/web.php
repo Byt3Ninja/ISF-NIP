@@ -14,10 +14,21 @@ use App\Http\Controllers\ClientCompanyController;
 use App\Http\Controllers\HackathonController;
 use App\Http\Controllers\Mentor\MentorProgramController;
 use App\Http\Controllers\Mentor\MentorshipTaskController;
+use App\Http\Controllers\Mentor\SlotController;
 use App\Http\Controllers\Judger\JudgerScreeningController;
 use App\Http\Controllers\AdvancedExportController;
 /* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
-
+Route::get('def-permission', function() {
+    $jsonRole = File::get(base_path('database/dbFiles/rolesWithDefaultPermissions.json'));
+    $dataRole = json_decode($jsonRole, true);
+    $dataRole = collect( $dataRole )->flatMap(function($role) {
+        return $role['permissions'];
+    });
+    $judges = $dataRole->filter(function($permission) {
+        return in_array('judger', $permission['default_for']);
+    })->values();
+    dd( $judges->pluck('name')->toArray() );
+});
 Route::get('test', function () {
     $user = User::find(1);
     $user->notify(new WelcomeUserNotification($user, '12345'));
@@ -60,6 +71,7 @@ Route::get('/reminderMentorShipRequest', 'IndexController@reminderMentorShipRequ
 
 
 /// Frontend routes ///
+Route::get('programs/teams/{files?}', 'HackathonController@get_team_media')->where('files', '.*');
 Route::get('lang/{locale}', 'IndexController@lang');
 Route::get('js-translations/{locale?}', 'IndexController@getJsTranslations')->name('js.translations');
 Route::get('/', 'IndexController@home');
@@ -102,8 +114,7 @@ Route::get('/2otp', function () {
 Route::get('/db-migrate', 'IndexController@dbMigrate');
 Route::get('/seed-permissions', 'IndexController@seedPermissions');
 Auth::routes(['verify' => true]);
-Route::get('organizations/set-password/{invitationId}', 'SettingsController@showSetPasswordForm')
-    ->name('invitations.set_password_view_form');
+Route::get('organizations/set-password/{invitationId}', 'SettingsController@showSetPasswordForm')->name('invitations.set_password_view_form');
 Route::post('organizations/settings/accept/{invitationId}', 'SettingsController@acceptInvitation')->name('invitations.accept');
 
 Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa']], function () {
@@ -235,7 +246,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('updateevent/{id}', 'EventsController@updateevent')->name('events.update');
     Route::get('deleteevent/{id}', 'EventsController@deleteevent')->name('events.delete');
     // Settings Routes
-    Route::any('settings', 'SettingsController@get_settings')->name('settings.system_general_view');
+    Route::any('settings', 'SettingsController@index')->name('settings.index');
+    Route::any('settings/general', 'SettingsController@get_settings')->name('settings.system_general_view');
     Route::get('industry-settings', 'SettingsController@industrySettings')->name('settings.industry_view');
     Route::get('expertise-settings', 'ExpertiseController@index')->name('settings.expertise_view');
     Route::get('notification-settings', 'SettingsController@notificationSettings')->name('settings.notification_view');
@@ -264,9 +276,6 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('whatsapp/session/{sessionId}/send', 'IndexController@sendMessage')->where('sessionId', '[0-9]+')->name('whatsapp.session.send');
     Route::post('whatsapp/getWASession', 'WhatsAppSessionController@getWASessionID')->name('whatsapp.session.getsessionid');
 
-
-
-
     Route::get('organizations/settings', 'SettingsController@showSettings')->name('settings.organization_manage');
     Route::put('organizations/settings/updateMeeting', 'SettingsController@meetingSetting')->name('settings.organization_meeting_manage');
     Route::put('organizations/settings/socialLogin', 'SettingsController@socialSetting')->name('settings.organization_social_manage');
@@ -278,6 +287,32 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::delete('organizations/settings/cancel-invitation/{invitationId}', 'SettingsController@cancelInvitation')->name('organization.users_invitations_cancel');
     Route::get('organizations/settings/reminder-logs', 'SettingsController@ReminderLogs')->name('organization.ReminderLogs');
     Route::post('organizations/reminder-logs/destroy', 'ReminderLogController@destroy')->name('organization.destroyReminderLogs');
+
+    Route::resource('organization-types', 'OrganizationTypesController');
+
+    // Organization Wizard Routes (multi-step creation/editing)
+    Route::prefix('organization')->name('organization.wizard.')->group(function () {
+        Route::get('/create', 'OrganizationWizardController@create')->name('create');
+        Route::post('/create', 'OrganizationWizardController@store')->name('store');
+        Route::get('/{id}/edit', 'OrganizationWizardController@edit')->name('edit');
+        Route::put('/{id}/step1', 'OrganizationWizardController@updateStep1')->name('update.step1');
+        Route::put('/{id}/step2', 'OrganizationWizardController@updateStep2')->name('update.step2');
+        Route::put('/{id}/step3', 'OrganizationWizardController@updateStep3')->name('update.step3');
+        Route::get('/{id}/managers', 'OrganizationWizardController@getManagers')->name('managers.list');
+        Route::post('/{id}/managers', 'OrganizationWizardController@createManager')->name('managers.create');
+        // Step 4: Landing Page
+        Route::put('/{id}/step4', 'OrganizationWizardController@updateStep4')->name('update.step4');
+        Route::get('/{id}/preview', 'OrganizationWizardController@previewLandingPage')->name('preview');
+        Route::post('/generate-slug/{id?}', 'OrganizationWizardController@generateSlug')->name('generate.slug');
+        Route::post('/check-slug/{id?}', 'OrganizationWizardController@checkSlugAvailability')->name('check.slug');
+        // Step 5: Custom Sections
+        Route::put('/{id}/step5', 'OrganizationWizardController@updateStep5')->name('update.step5');
+        Route::post('/{id}/step5/reorder', 'OrganizationWizardController@reorderStep5Sections')->name('step5.reorder');
+        Route::delete('/{id}/step5/{sectionId}', 'OrganizationWizardController@deleteStep5Section')->name('step5.delete');
+        Route::post('/draft', 'OrganizationWizardController@saveDraft')->name('draft');
+        Route::put('/{id}/draft', 'OrganizationWizardController@saveDraft')->name('draft.update');
+        Route::post('/{id}/publish', 'OrganizationWizardController@publish')->name('publish');
+    });
 
     //services categories Manager routes
     Route::resource('serviceCategories', 'ServiceCategoryController');
@@ -312,9 +347,14 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('/myProfile/password', 'ClientProfileController@updatePassword')->name('user.account_update_password');
     Route::post('/myProfile/notification-settings', 'ClientProfileController@updateNotificationSettings')->name('user.notification_settings_update');
     Route::get('/show/UserProfile/{id}', 'ClientProfileController@showMintorprofile')->name('mentors.profile_view');
-    Route::get('/show/Mentors', 'ClientProfileController@showMintors')->name('mentors.list');
+    Route::get('/mentors', 'ClientProfileController@showMintors')->name('mentors.list');
+
+    // Invitations
+    Route::group(['prefix' => 'mentors'], function () {
+        Route::resource('invitations', 'InvitationController');
+    });
+    
     // lowercase alias for backward-compatibility / ease of testing
-    Route::get('/show/mentors', 'ClientProfileController@showMintors')->name('mentors.list.lowercase');
     Route::get('/confirm-email/{token}', 'ClientProfileController@confirmEmailUpdate')->name('user.profile_email_confirm');
 
     Route::group(['prefix' => '2fa'], function () {
@@ -392,6 +432,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     // Company Alumni
     Route::get('/companyProfile/{id}/alumni/{cycle_id}', [ClientCompanyController::class, 'companyAlumni'])->name('company.alumni_view');
 
+    // Company Perks
+    Route::get('perks', [ClientCompanyController::class, 'companyPerks']);
+
     // Company Profile Employees
     Route::get('/employees/{id}', 'ClientCompanyController@getEmployees')->name('company.getEmployees');
     Route::delete('/employees/delete/{id}', 'ClientCompanyController@deleteEmployee')->name('company.employees_delete');
@@ -399,7 +442,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('/employees/add/{id}', 'ClientCompanyController@addEmployee')->name('company.employees_add');
 
     // Almuni 
-    Route::get('/AddCompanyalumni/{id}', 'ClientCompanyController@addCompanyAlumni')->name('company.addCompanyAlumni');
+    Route::post('/AddCompanyalumni/{id}', 'ClientCompanyController@addCompanyAlumni')->name('company.addCompanyAlumni');
+    
 
 
     //Industry
@@ -427,6 +471,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/judger', 'UserController@judger')->name('users.judger');
     Route::post('/users/password', 'UserController@updatePassword')->name('user.profile_update_password');
     Route::post('/users/update_my_password', 'UserController@updateMyPassword')->name('user.profile_update_my_password');
+    Route::patch('/users/{user}/organizations', 'UserController@updateOrganizations')->name('users.update_organizations');
     Route::get('/companies', 'ClientCompanyController@companies')->name('users.view_companies');
     // Export startups (CSV / Excel) - preserves current filters passed as query params
     Route::get('/companies/export', 'CompanyExportController@export')->name('users.companies_export');
@@ -487,6 +532,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     //Audit Logs
     Route::resource('audit-logs', 'AuditLogsController', ['except' => ['create', 'store', 'edit', 'update']]);
     //Permissions
+    Route::post('permissions/strip-from-roles', 'PermissionsController@stripFromRoles');
     Route::resource('permissions', 'PermissionsController');
     // permissions groups
     Route::resource('permission-groups', 'PermissionGroupsController');
@@ -494,6 +540,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::resource('roles', 'RolesController');
     //Faqs
     Route::resource('faqs', 'FaqsController');
+
+    // Tasks
+    Route::resource('tasks', 'TasksController');
 
     // Forms
     Route::get('forms', 'FormController@index')->name('forms.index');
@@ -548,7 +597,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('mentorshipschedule/destroy', 'MentorshipScheduleController@destroy')->name('mentorship.schedule_destroy');
 
     //Screening
-    Route::get('screening', 'ScreeningController@index');
+    Route::get('screening', 'ScreeningController@index')->name('screening.index');
+    Route::get('screening/{id?}', 'ScreeningController@show');
     Route::get('/dashboard/screening/get/{formId}/{stepId}/{panel}', 'ScreeningController@get')->name('screening.get');
     Route::post('screening/update', 'ScreeningController@update');
     Route::post('screening/save', 'ScreeningController@save');
@@ -573,9 +623,14 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('zoom/{id}/registrants', 'MeetingController@registrants');
 
     //Mentors
-    Route::get('/availability', 'MentorsController@availability')->name('slots.index');
     Route::post('mentors/modify', 'MentorsController@modify')->name('mentors.settings_modify');
-    Route::post('availability/remove-slot/{id}', 'MentorsController@removeSlot')->name('slots.destroy');
+
+    // Availability Slots
+    Route::get('availability', 'Mentor\SlotController@index')->name('slots.index');
+    Route::get('availability/slots/{user_id?}', 'Mentor\SlotController@getSlots')->name('slots.read');
+    Route::post('availability/slots/store', 'Mentor\SlotController@store')->name('slots.store');
+    Route::post('availability/slots/{id}/copy', 'Mentor\SlotController@copy')->name('slots.copy');
+    Route::delete('availability/slots/{id}', 'Mentor\SlotController@destroy')->name('slots.destroy');
 
     Route::get('program/show', 'Mentor\MentorProgramController@show');
 
@@ -686,7 +741,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/upcomingBusyReview', 'BookingController@upcomingBusyReview')->name('bookings.review_upcoming_busy');
     Route::get('/oldReview', 'BookingController@oldReview')->name('bookings.review_past');
     //Final Screening
-    Route::get('final', 'FinalscreeningController@index')->name('screening.index');
+    Route::get('final', 'FinalscreeningController@index');
+    Route::get('final/{id}', 'FinalscreeningController@show');
     Route::get('{id?}/final', 'FinalscreeningController@index')->name('screening.show');
     Route::post('final/update', 'FinalscreeningController@update')->name('screening.update');
     Route::post('final/save', 'FinalscreeningController@save')->name('screening.store');
@@ -855,6 +911,11 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     });
 });
 
+// Organization Logo from Storage
+Route::get('organizations/logo/{filename?}', 'OrganizationWizardController@getLogo')->name('organizations.logo');
+// Organization Landing Page Assets from Storage
+Route::get('organization/{organizationId}/landing-assets/{type}/{filename?}', 'OrganizationWizardController@getLandingAsset')->name('organization.landing.asset');
+
 ///// Reports routes
 //Route::group(['prefix' => 'reports',  'middleware' => ['auth', 'verified']], function(){
 //Route::post('users','ExcelController@ExUsers');
@@ -876,6 +937,9 @@ Route::get('/auth/microsoft/callback', 'MicrosoftController@callback')->name('in
 // --------------------> Linked In <-------------------
 Route::get('/auth/linkedin/{data?}', 'SocialController@redirectToLinkedIn')->name('integrations.auth_linkedin_login');
 Route::get('/auth/linkedin-openid/callback', 'SocialController@handleLinkedInCallback')->name('integrations.auth_linkedin_callback');
+
+// Public Organization Landing Page
+Route::get('/o/{slug}', 'PublicLandingController@show')->name('organization.landing.public');
 
 Route::get('/{org_slug}/join/{step_slug}', 'ExternalCyclesController@publicJoin')->name('public.join');
 Route::get('/{org_slug}/program/{program_slug}', 'ExternalCyclesController@publicProgramJoin')->name('public.program_join');

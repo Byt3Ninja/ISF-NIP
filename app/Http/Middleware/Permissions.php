@@ -11,7 +11,27 @@ use Spatie\Permission\PermissionRegistrar;
 
 class Permissions
 {
-    private $exceptNames = [
+    public $exceptNames = [
+        'core.dashboard_view',
+        'organizations.logo',
+        'organization.landing.asset',
+        'organization.landing.public',
+        'organization.wizard.store',
+        'organization.wizard.update.step1',
+        'organization.wizard.update.step2',
+        'organization.wizard.update.step3',
+        'organization.wizard.update.step4',
+        'organization.wizard.update.step5',
+        'organization.wizard.step5.reorder',
+        'organization.wizard.step5.delete',
+        'organization.wizard.preview',
+        'organization.wizard.check.slug',
+        'organization.wizard.generate.slug',
+        'organization.wizard.managers.list',
+        'organization.wizard.managers.create',
+        'organization.wizard.draft',
+        'organization.wizard.draft.update',
+        'organization.wizard.publish',
         'provider-registration',
         'filemanager*',
         'dashboard',
@@ -36,7 +56,7 @@ class Permissions
         'trainings.time_tracking',
     ];
 
-    private $exceptControllers = [
+    public $exceptControllers = [
         'LoginController',
 		'IndexController',
         'ForgotPasswordController',

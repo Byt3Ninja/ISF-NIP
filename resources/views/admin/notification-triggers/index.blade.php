@@ -5,6 +5,28 @@
 @section('content')
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-align-top mb-6">
+      @php
+        $tabs = [
+          ['title' => __('notification_templates.notification_templates'), 'url' => 'dashboard/admin/notification-templates', 'icon' => 'mail'],
+          ['title' => __('notification_triggers.notification_triggers'), 'url' => 'dashboard/admin/notification-triggers', 'icon' => 'mail-check'],
+        ]
+      @endphp
+      <ul class="nav nav-pills">
+        @foreach($tabs as $tab)
+          <li class="nav-item">
+            <a href="/{{ $tab['url'] }}" class="nav-link {{ Request::is($tab['url'] . '*') ? 'active' : '' }}">
+              <i class="ti ti-{{ $tab['icon'] }} me-2"></i>
+              {{ $tab['title'] }}
+            </a>
+          </li>
+        @endforeach
+      </ul>
+    </nav>
+    <!--/ Navigation Tabs -->
+    
     <div class="card">
       <div class="card-header border-bottom">
         <div class="d-flex flex-wrap justify-content-between align-items-center">
@@ -28,116 +50,114 @@
         </div>
       </div>
       
-      <div class="card-body">
-        <!-- Datatable filter configuration fields -->
-        <div class="row" id="datatable-filters">
-          <div class="col-12 col-md-4 mb-2 mb-md-0">
-            <select class="form-select form-select-sm dt-filter" id="filter-event" data-column="2">
-              <option value="" selected>{{ __('notification_triggers.all_events') }}</option>
-              @foreach($availableEvents as $eventKey => $eventLabel)
-                <option value="{{ $eventLabel }}">{{ $eventLabel }}</option>
-              @endforeach
-            </select>
-          </div>
-          <div class="col-12 col-md-4 mb-2 mb-md-0">
-            <select class="form-select form-select-sm dt-filter" id="filter-status" data-column="5">
-              <option value="" selected>{{ __('notification_triggers.all_status') }}</option>
-              <option value="Active">{{ __('notification_triggers.active') }}</option>
-              <option value="Inactive">{{ __('notification_triggers.inactive') }}</option>
-            </select>
-          </div>
+      <!-- Datatable filter configuration fields -->
+      <div class="row" id="datatable-filters">
+        <div class="col-12 col-md-4 mb-2 mb-md-0">
+          <select class="form-select form-select-sm dt-filter" id="filter-event" data-column="2">
+            <option value="" selected>{{ __('notification_triggers.all_events') }}</option>
+            @foreach($availableEvents as $eventKey => $eventLabel)
+              <option value="{{ $eventLabel }}">{{ $eventLabel }}</option>
+            @endforeach
+          </select>
         </div>
-        <!-- /Datatable filter configuration fields -->
-
-        <!-- Triggers Table -->
-        <div class="table-responsive mt-2">
-          <table id="triggers-list-datatable" class="table datatables-ajax">
-            <thead>
-              <tr class="table-light">
-                <th>{{ __('notification_triggers.name') }}</th>
-                <th>{{ __('notification_triggers.display_title') }}</th>
-                <th>{{ __('notification_triggers.event') }}</th>
-                <th>{{ __('notification_triggers.template') }}</th>
-                <th>{{ __('notification_triggers.priority') }}</th>
-                <th>{{ __('notification_triggers.status') }}</th>
-                <th>{{ __('notification_triggers.created_by') }}</th>
-                <th>{{ __('notification_triggers.created_at') }}</th>
-                <th>{{ __('notification_triggers.actions') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              @foreach($triggers as $trigger)
-              <tr id="row_{{ $trigger->id }}">
-                <td>
-                  <code class="text-primary">{{ $trigger->name }}</code>
-                </td>
-                <td>
-                  <strong>{{ $trigger->title }}</strong>
-                </td>
-                <td data-search="{{ $availableEvents[$trigger->event] ?? $trigger->event }}">
-                  <span class="badge bg-label-info">
-                    <i class="ti ti-bolt me-1"></i>
-                    {{ $availableEvents[$trigger->event] ?? $trigger->event }}
-                  </span>
-                </td>
-                <td>
-                  <a href="{{ route('notification-templates.show', $trigger->template) }}" class="text-decoration-none">
-                    {{ $trigger->template->title }}
-                  </a>
-                </td>
-                <td>
-                  <span class="badge bg-label-{{ $trigger->priority > 50 ? 'danger' : ($trigger->priority > 25 ? 'warning' : 'secondary') }}">
-                    {{ $trigger->priority }}
-                  </span>
-                </td>
-                <td data-search="{{ $trigger->is_active ? 'Active' : 'Inactive' }}">
-                  <span class="badge bg-label-{{ $trigger->is_active ? 'success' : 'secondary' }}">
-                    <i class="ti ti-circle-dot me-1"></i>
-                    {{ $trigger->is_active ? __('notification_triggers.active') : __('notification_triggers.inactive') }}
-                  </span>
-                </td>
-                <td>
-                  <small>{{ $trigger->creator->name ?? __('notification_triggers.unknown') }}</small>
-                </td>
-                <td>
-                  <small class="text-nowrap">{{ $trigger->created_at->format('M d, Y') }}</small>
-                </td>
-                <td>
-                  <div class="dropdown">
-                    <button type="button" class="btn btn-sm btn-icon dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                      <i class="ti ti-dots-vertical"></i>
-                    </button>
-                    <div class="dropdown-menu dropdown-menu-end">
-                      <a class="dropdown-item" href="{{ route('notification-triggers.show', $trigger) }}">
-                        <i class="ti ti-eye me-1"></i> {{ __('notification_triggers.view') }}
-                      </a>
-                      <a class="dropdown-item" href="{{ route('notification-triggers.edit', $trigger) }}">
-                        <i class="ti ti-edit me-1"></i> {{ __('notification_triggers.edit') }}
-                      </a>
-                      <button type="button" class="dropdown-item" onclick="toggleActive({{ $trigger->id }})">
-                        <i class="ti ti-{{ $trigger->is_active ? 'player-pause' : 'player-play' }} me-1"></i>
-                        {{ $trigger->is_active ?  __('notification_triggers.deactivate') : __('notification_triggers.activate') }}
-                      </button>
-                      <button type="button" class="dropdown-item" onclick="showCloneModal({{ $trigger->id }}, '{{ $trigger->name }}')">
-                        <i class="ti ti-copy me-1"></i>{{ __('notification_triggers.clone') }}
-                      </button>
-                      <button type="button" class="dropdown-item" onclick="testTrigger({{ $trigger->id }})">
-                        <i class="ti ti-send me-1"></i> {{ __('notification_triggers.test') }}
-                      </button>
-                      <div class="dropdown-divider"></div>
-                      <button type="button" class="dropdown-item text-danger" id="deleteAction" data-id="{{ $trigger->id }}" data-url="{{ route('notification-triggers.destroy', $trigger) }}">
-                        <i class="ti ti-trash me-1"></i> {{ __('notification_triggers.delete') }}
-                      </button>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-              @endforeach
-            </tbody>
-          </table>
+        <div class="col-12 col-md-4 mb-2 mb-md-0">
+          <select class="form-select form-select-sm dt-filter" id="filter-status" data-column="5">
+            <option value="" selected>{{ __('notification_triggers.all_status') }}</option>
+            <option value="Active">{{ __('notification_triggers.active') }}</option>
+            <option value="Inactive">{{ __('notification_triggers.inactive') }}</option>
+          </select>
         </div>
-
       </div>
+      <!-- /Datatable filter configuration fields -->
+
+      <!-- Triggers Table -->
+      <div class="card-datatable table-responsive">
+        <table id="triggers-list-datatable" class="table datatables-ajax">
+          <thead>
+            <tr class="table-light">
+              <th>{{ __('notification_triggers.name') }}</th>
+              <th>{{ __('notification_triggers.display_title') }}</th>
+              <th>{{ __('notification_triggers.event') }}</th>
+              <th>{{ __('notification_triggers.template') }}</th>
+              <th>{{ __('notification_triggers.priority') }}</th>
+              <th>{{ __('notification_triggers.status') }}</th>
+              <th>{{ __('notification_triggers.created_by') }}</th>
+              <th>{{ __('notification_triggers.created_at') }}</th>
+              <th>{{ __('notification_triggers.actions') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach($triggers as $trigger)
+            <tr id="row_{{ $trigger->id }}">
+              <td>
+                <code class="text-primary">{{ $trigger->name }}</code>
+              </td>
+              <td>
+                <strong>{{ $trigger->title }}</strong>
+              </td>
+              <td data-search="{{ $availableEvents[$trigger->event] ?? $trigger->event }}">
+                <span class="badge bg-label-info">
+                  <i class="ti ti-bolt me-1"></i>
+                  {{ $availableEvents[$trigger->event] ?? $trigger->event }}
+                </span>
+              </td>
+              <td>
+                <a href="{{ route('notification-templates.show', $trigger->template) }}" class="text-decoration-none">
+                  {{ $trigger->template->title }}
+                </a>
+              </td>
+              <td>
+                <span class="badge bg-label-{{ $trigger->priority > 50 ? 'danger' : ($trigger->priority > 25 ? 'warning' : 'secondary') }}">
+                  {{ $trigger->priority }}
+                </span>
+              </td>
+              <td data-search="{{ $trigger->is_active ? 'Active' : 'Inactive' }}">
+                <span class="badge bg-label-{{ $trigger->is_active ? 'success' : 'secondary' }}">
+                  <i class="ti ti-circle-dot me-1"></i>
+                  {{ $trigger->is_active ? __('notification_triggers.active') : __('notification_triggers.inactive') }}
+                </span>
+              </td>
+              <td>
+                <small>{{ $trigger->creator->name ?? __('notification_triggers.unknown') }}</small>
+              </td>
+              <td>
+                <small class="text-nowrap">{{ $trigger->created_at->format('M d, Y') }}</small>
+              </td>
+              <td>
+                <div class="dropdown">
+                  <button type="button" class="btn btn-sm btn-icon dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                    <i class="ti ti-dots-vertical"></i>
+                  </button>
+                  <div class="dropdown-menu dropdown-menu-end">
+                    <a class="dropdown-item" href="{{ route('notification-triggers.show', $trigger) }}">
+                      <i class="ti ti-eye me-1"></i> {{ __('notification_triggers.view') }}
+                    </a>
+                    <a class="dropdown-item" href="{{ route('notification-triggers.edit', $trigger) }}">
+                      <i class="ti ti-edit me-1"></i> {{ __('notification_triggers.edit') }}
+                    </a>
+                    <button type="button" class="dropdown-item" onclick="toggleActive({{ $trigger->id }})">
+                      <i class="ti ti-{{ $trigger->is_active ? 'player-pause' : 'player-play' }} me-1"></i>
+                      {{ $trigger->is_active ?  __('notification_triggers.deactivate') : __('notification_triggers.activate') }}
+                    </button>
+                    <button type="button" class="dropdown-item" onclick="showCloneModal({{ $trigger->id }}, '{{ $trigger->name }}')">
+                      <i class="ti ti-copy me-1"></i>{{ __('notification_triggers.clone') }}
+                    </button>
+                    <button type="button" class="dropdown-item" onclick="testTrigger({{ $trigger->id }})">
+                      <i class="ti ti-send me-1"></i> {{ __('notification_triggers.test') }}
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <button type="button" class="dropdown-item text-danger" id="deleteAction" data-id="{{ $trigger->id }}" data-url="{{ route('notification-triggers.destroy', $trigger) }}">
+                      <i class="ti ti-trash me-1"></i> {{ __('notification_triggers.delete') }}
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            @endforeach
+          </tbody>
+        </table>
+      </div>
+      
     </div>
   </div>
 </div>

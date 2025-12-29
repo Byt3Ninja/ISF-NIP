@@ -134,4 +134,5 @@ return [
    'step_deleted' => 'Step Deleted Successfully',
    'steps_reordered_successfully' => 'Steps Reordered Successfully',
    'step_order_changed_successfully' => 'Step Order Changed Successfully',
+   'max_concurrent_sessions_reached' => 'The maximum number of online sessions allowed at this time has been reached. Please select a different time slot.',
 ];

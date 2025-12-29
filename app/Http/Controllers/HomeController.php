@@ -214,8 +214,9 @@ class HomeController extends Controller
             if($user->hasRole('Registered')){
                 $services_requests_q .= " AND sr.user_id = " . $user->id;
             }
-            if ($has_org) {
-                $services_requests_q .= " AND s.organization_id = " . $user->organization_id;
+            $orgIds = $user->organizations_ids;
+            if ($has_org && !empty($orgIds) && !$user->hasRole('admin')) {
+                $services_requests_q .= " AND s.organization_id IN (" . implode(',', array_map('intval', $orgIds)) . ")";
             }
             $services_requests = collect(DB::select($services_requests_q));
         } else {
@@ -230,8 +231,9 @@ class HomeController extends Controller
                 WHERE
                     o.deleted_at IS NULL
             ";
-            if ($has_org) {
-                $organizations_q .= " AND o.id = " . $user->organization_id;
+            $orgIds = $user->organizations_ids;
+            if ($has_org && !empty($orgIds) && !$user->hasRole('admin')) {
+                $organizations_q .= " AND o.id IN (" . implode(',', array_map('intval', $orgIds)) . ")";
             }
             $organizations = collect(DB::select($organizations_q));
         } else {
@@ -254,8 +256,9 @@ class HomeController extends Controller
                 WHERE
                     c.deleted_at IS NULL
             ";
-            if ($has_org) {
-                $cycles_q .= " AND c.organization_id = " . $user->organization_id;
+            $orgIds = $user->organizations_ids;
+            if ($has_org && !empty($orgIds) && !$user->hasRole('admin')) {
+                $cycles_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $orgIds)) . ")";
             }
             $cycles = collect(DB::select($cycles_q));
             $cycles = $cycles->groupBy('id')->map(function ($groupedCycle) use ($l) {
@@ -655,6 +658,8 @@ class HomeController extends Controller
                     mr.zoom_date,
                     mr.start_url,
                     mr.zoom_passcode,
+                    mr.mentor_id AS `mentor_id`,
+                    mr.session_type AS `session_type`,
                     u.id AS `user_id`,
                     u.img_url AS `user_image_url`,
                     u.first_name_ar AS `first_name_ar`,
@@ -698,6 +703,7 @@ class HomeController extends Controller
                 $output->zoom_date = $session->zoom_date;
                 $output->start_url = $session->start_url;
                 $output->passcode = $session->zoom_passcode;
+                $output->session_type = $session->session_type;
 
                 $image = User::image_handler($session->user_image_url);
                 $user = new stdClass;
@@ -719,7 +725,7 @@ class HomeController extends Controller
         } else {
             $upcoming_sessions = collect([]);
         }
-
+        
         if (array_intersect(['dashboard_cards.my_programs'], $permissions)) {
             $my_cycles_q = "SELECT 
                     c.id AS `id`
@@ -1098,9 +1104,13 @@ class HomeController extends Controller
                 s.from,
                 s.to,
                 s.description,
-                s.data
+                s.data,
+                c.id AS cycle_id,
+                c.step_type
             FROM
                 steps s
+            LEFT JOIN
+                cycles c ON c.id = s.cycle_id
             WHERE
                 s.cycle_id = $cycle_id
                 AND s.cycle_id != 0
@@ -1109,42 +1119,71 @@ class HomeController extends Controller
                 s.arr asc
         ";
         $now = time();
-        $steps = collect(DB::select($steps_q))->map(function ($step) use ($l, $company, $stepData, $cycle_id, $now) {
+        $stepType = $company?->cycledata?->step_type;
+        $steps = collect(DB::select($steps_q));
+        $cycleSteps = $steps->pluck('id')->toArray();
+
+        // array_search($company->step, $cycleSteps)
+        $steps = $steps->map(function ($step) use ($l, $company, $stepData, $stepType, $cycle_id, $now) {
+            $starting = Carbon::parse($step->from)->format('Y-m-d 00:00:00');
+            $ending = Carbon::parse($step->to)->format('Y-m-d 23:59:59');
+
             $step->from = Carbon::parse($step->from)->format('d-m-Y');
             $step->to = Carbon::parse($step->to)->format('d-m-Y');
-
-            $status = $l == 'ar' ? 'لم تبدأ' : 'Not started';
             $status_flag = 'not_started';
+            $status = $l == 'ar' ? 'لم تبدأ' : 'Not started';
             $status_flag_tile = $l == 'ar' ? 'لم تبدأ' : 'Not started';
             $color = 'label-light';
             $textColor = 'light';
             if (!empty($step) && !empty($stepData))
             {
-                if( $now > Carbon::parse($step->to)->timestamp )
+                if( $stepType == 'time' )
                 {
-                    $status_flag = 'completed';
-                    $status_flag_tile = $l == 'ar' ? 'انتهت' : 'Completed';
-                    $status = 'Completed';
-                    $color = 'label-success';
-                    $textColor = 'success';
+                    if( $now > Carbon::parse($ending)->timestamp )
+                    {
+                        $status_flag = 'completed';
+                        $status_flag_tile = $l == 'ar' ? 'انتهت' : 'Completed';
+                        $status = 'Completed';
+                        $color = 'label-success';
+                        $textColor = 'success';
+                    }
+                    if( $now <= Carbon::parse($ending)->timestamp && $now >= Carbon::parse($starting)->timestamp )
+                    {
+                        $status_flag = 'ongoing';
+                        $status_flag_tile = $l == 'ar' ? 'جاري' : 'Ongoing';
+                        $status = 'Ongoing';
+                        $color = 'label-primary';
+                        $textColor = 'primary';
+                    }
+                    /* if ($stepData->arr > $step->arr) {
+                        $status = $l == 'ar' ? 'انتهت' : 'Completed';
+                        $color = 'label-success';
+                        $textColor = 'success';
+                    } elseif ($stepData->arr == $step->arr) {
+                        $status = $l == 'ar' ? 'بدأت' : 'Started';
+                        $color = 'label-primary';
+                        $textColor = 'primary';
+                    } */
                 }
-                if( $now <= Carbon::parse($step->to)->timestamp && $now >= Carbon::parse($step->from)->timestamp )
+                if( $stepType == 'cycle' )
                 {
-                    $status_flag = 'ongoing';
-                    $status_flag_tile = $l == 'ar' ? 'جاري' : 'Ongoing';
-                    $status = 'Ongoing';
-                    $color = 'label-primary';
-                    $textColor = 'primary';
+                    if( $stepData->arr > $step->arr )
+                    {
+                        $status_flag = 'completed';
+                        $status_flag_tile = $l == 'ar' ? 'انتهت' : 'Completed';
+                        $status = 'Completed';
+                        $color = 'label-success';
+                        $textColor = 'success';
+                    }
+                    elseif( $stepData->arr == $step->arr )
+                    {
+                        $status_flag = 'ongoing';
+                        $status_flag_tile = $l == 'ar' ? 'جاري' : 'Ongoing';
+                        $status = 'Ongoing';
+                        $color = 'label-primary';
+                        $textColor = 'primary';
+                    }
                 }
-                /* if ($stepData->arr > $step->arr) {
-                    $status = $l == 'ar' ? 'انتهت' : 'Completed';
-                    $color = 'label-success';
-                    $textColor = 'success';
-                } elseif ($stepData->arr == $step->arr) {
-                    $status = $l == 'ar' ? 'بدأت' : 'Started';
-                    $color = 'label-primary';
-                    $textColor = 'primary';
-                } */
             }
             $trType = $fLink = null;
             if ($company->approved) {
@@ -1174,6 +1213,8 @@ class HomeController extends Controller
                 mr.period,
                 mr.rate_comment,
                 mr.done,
+                mr.session_type,
+                mr.organization_id,
                 u.img_url AS `user_img_url`,
                 u.first_name_en AS `user_first_name_en`,
                 u.first_name_ar AS `user_first_name_ar`,
@@ -1190,7 +1231,12 @@ class HomeController extends Controller
                 m.last_name_en AS `mentor_last_name_en`,
                 m.last_name_ar AS `mentor_last_name_ar`,
                 m.img_url AS `mentor_img_url`,
-                msr.rating AS `mentor_rating`
+                msr.rating AS `mentor_rating`,
+                o.name_en AS `org_name_en`,
+                o.name_ar AS `org_name_ar`,
+                o.img_url AS `org_img_url`,
+                o.google_map_url AS `org_google_map_url`,
+                o.address AS `org_address`
             FROM
                 mentorship_requests mr
             LEFT JOIN
@@ -1201,6 +1247,8 @@ class HomeController extends Controller
                 companies c ON c.id = u.company_id
             LEFT JOIN
                mentorship_requests msr ON msr.mentor_id = m.id
+            LEFT JOIN
+                organizations o ON o.id = mr.organization_id
             WHERE
                 mr.user_id = $user->id
                 AND (
@@ -1212,6 +1260,7 @@ class HomeController extends Controller
                 mr.zoom_date ASC
         ";
         $nextSessions = collect(DB::select($nextSessions_q));
+        
         $nextSessions = $nextSessions->groupBy('id')->map(function ($groupedSession) use ($l) {
             $_session = $groupedSession->first();
             $session = new stdClass;
@@ -1226,6 +1275,8 @@ class HomeController extends Controller
             $session->period = $_session->period;
             $session->rate_comment = $_session->rate_comment;
             $session->done = $_session->done;
+            $session->session_type = $_session->session_type;
+            $session->organization = $_session->organization_id;
 
             $user = new stdClass;
             $user->id = $_session->user_id;
@@ -1250,6 +1301,14 @@ class HomeController extends Controller
             $mentor->image_url = User::image_handler($_session->mentor_img_url);
             $mentor->ratings = $groupedSession->sum('mentor_rating');
             $session->mentor = $mentor;
+
+            $org = new stdClass;
+            $org->id = $_session->organization_id;
+            $org->name = $_session->{'org_name_' . $l};
+            $org->image_url = Organization::image_handler($_session->org_img_url);
+            $org->google_map_url = $_session->org_google_map_url;
+            $org->address = $_session->org_address;
+            $session->organization = $org;
             return $session;
         })->values();
 
@@ -1618,7 +1677,7 @@ class HomeController extends Controller
             ];
             $data['countCards'][] = [
                 'color' => 'secondary',
-                'href' => '/dashboard/show/Mentors',
+                'href' => '/dashboard/mentors',
                 'icon' => 'ti ti-school',
                 'text' => 'Mentors',
                 'permissions' => ['mentors.list', 'dashboard.widgets_cards_my_mentors_view'],
@@ -1665,7 +1724,7 @@ class HomeController extends Controller
             ];
             $data['countCards'][] = [
                 'color' => 'secondary',
-                'href' => '/dashboard/show/Mentors',
+                'href' => '/dashboard/mentors',
                 'icon' => 'ti ti-school',
                 'text' => 'Mentors',
                 'permissions' => ['mentors.list', 'dashboard.widgets_cards_my_mentors_view'],
@@ -1720,7 +1779,7 @@ class HomeController extends Controller
             ];
             $data['countCards'][] = [
                 'color' => 'danger',
-                'href' => '/dashboard/show/Mentors',
+                'href' => '/dashboard/mentors',
                 'icon' => 'ti-school',
                 'text' => 'Mentors',
                 'permissions' => ['users.index', 'dashboard.widgets_cards_mentors_view'],
@@ -2451,7 +2510,8 @@ class HomeController extends Controller
         $profileComplete = method_exists($user, 'hasCompletedProfile') ? $user->hasCompletedProfile() : (!empty($user->phone) && !empty($user->country_id) && !empty($user->address) && !empty($user->timezone));
         $startupComplete = method_exists($user, 'hasCompletedStartup') ? $user->hasCompletedStartup() : ($user->company && !empty($user->company->name_en) && !empty($user->company->address_en) && !empty($user->company->sector) && !empty($user->company->stage));
         $data['pollingNeeded'] = !$profileComplete || !$startupComplete;
-
+        $settings = Settings::where('id', 1)->first();
+		$data['offline_allowed'] = $settings->allow_offline_sessions = 1 ? true : false;
         return view('includes.dashboard', $data);
     }
     protected function adminDashboard()

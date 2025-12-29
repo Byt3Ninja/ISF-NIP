@@ -87,17 +87,24 @@ class MessengerController extends Controller
 
         // Fetch additional data if needed
         $users = $mentors = $cycles = $organizations = null;
-        if( $user->hasAnyRole('Admin|OrganizationManager'))
+        if( $user->hasAnyRole('Admin|OrganizationManager') || $user->isSubAdmin())
         {
-            $cycles = Cycle::select('id', 'title')->get();
-            $users = Company::get();
+            if ($user->hasRole('Admin')) {
+                $cycles = Cycle::select('id', 'title')->get();
+                $users = Company::get();
+                $organizations = Organization::all();
+            } else {
+                $orgIds = $user->organizations_ids;
+                $cycles = Cycle::whereIn('organization_id', $orgIds)->select('id', 'title')->get();
+                $users = Company::whereIn('organization_id', $orgIds)->get();
+                $organizations = Organization::whereIn('id', $orgIds)->get();
+            }
             // $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
 			$mentors = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
 				->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
 				->where('roles.default_for', 'mentor')
 				->select('users.*')
 				->get();
-            $organizations = Organization::all();
         }
         elseif( $user->hasRole('Mentor'))
         {
@@ -420,18 +427,37 @@ class MessengerController extends Controller
     public function sendmsg(Request $request)
     {
         try {
+            $user = auth()->user();
+            // $senderId = $request->has('sender') ? $request->input('sender', null) : null;
+            // $senderId = $senderId ?? $user->id;
+            $senderId = $user->id;
+
+            $receiverId = $request->has('receiver') ? $request->input('receiver', null) : null;
+            if( ( !$receiverId || is_null( $receiverId ) ) && $request->has('company_id') )
+            {
+                $company = Company::find( $request->input('company_id') );
+                if( $company?->user?->id )
+                {
+                    $receiverId = $company?->user?->id ?? null;
+                }
+            }
+            if( !$receiverId || is_null( $receiverId ) )
+            {
+                return redirect()->back()->with('error', 'Receiver not specified');
+            }
+
             $new = new Messenger();
-            $new->sender = $request->input('sender');
-            $new->receiver = $request->input('receiver');
+            $new->sender = $senderId;
+            $new->receiver = $receiverId;
             $new->messgeId = $request->input('messgeId');
             $new->subject = $request->input('subject');
             $new->message = $request->input('message');
-            $new->user_id = auth()->user()->id;
+            // $new->user_id = auth()->user()->id;
             $new->save();
-            $rname = User::findOrFail($request->input('receiver'));
-            $sname =  User::findOrFail($request->input('sender'));
+            $rname = User::findOrFail( $receiverId );
+            $sname =  User::findOrFail( $senderId );
             /// notify user vi push
-            /// event(new WebMessage('NewMsg', $rname->first_name_en.' '.$rname->last_name_en, $request->input('receiver')));
+            /// event(new WebMessage('NewMsg', $rname->first_name_en.' '.$rname->last_name_en, $receiverId));
             /// Send Mail
             $user = new User();
             $user->email = $rname->email;
@@ -503,10 +529,18 @@ class MessengerController extends Controller
     {
         
         $users = $mentors = $cycles = $organizations = null;
-        if (Auth::user()->hasAnyRole('Admin|OrganizationManager')) {
-            $cycles = Cycle::select('id', 'title')->get();
-
-            $users = Company::get();
+        $authUser = Auth::user();
+        if ($authUser->hasAnyRole('Admin|OrganizationManager') || $authUser->isSubAdmin()) {
+            if ($authUser->hasRole('Admin')) {
+                $cycles = Cycle::select('id', 'title')->get();
+                $users = Company::get();
+                $organizations = Organization::all();
+            } else {
+                $orgIds = $authUser->organizations_ids;
+                $cycles = Cycle::whereIn('organization_id', $orgIds)->select('id', 'title')->get();
+                $users = Company::whereIn('organization_id', $orgIds)->get();
+                $organizations = Organization::whereIn('id', $orgIds)->get();
+            }
 
             // $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
 			$mentors = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
@@ -514,7 +548,6 @@ class MessengerController extends Controller
 				->where('roles.default_for', 'mentor')
 				->select('users.*')
 				->get();
-            $organizations = Organization::all();
             if ($request->has('cycle_id') && !empty($request->cycle_id)) {
                 $users = Company::where('cycle', $request->cycle_id)
                     ->whereHas('user', function ($query) {
