@@ -235,12 +235,18 @@ class SlotController extends Controller
 					'date' => 'required_if:type,Period',
 			]);
 			
+			$schedules = [];
+			$sessionTypes = $validated['session_type'] === 'Both'
+							? ['Online', 'Offline']
+							: [$validated['session_type']];
+			foreach ($sessionTypes as $sessionType) {
+
 			// Build base search query
 			$query = Schedule::where('user_id', auth()->id())
 					->where('type', $validated['type'])
 					->where('tfrom', $validated['tfrom'])
 					->where('tto', $validated['tto'])
-					->where('session_type', $validated['session_type']);
+					->where('session_type', $sessionType);
 
 			// Add type-specific conditions
 			if ($validated['type'] === 'Weekly') {
@@ -260,11 +266,7 @@ class SlotController extends Controller
 			}
 			$dayName = Carbon::parse($validated['date'])->format('l');
 			// Create slot
-			$schedules = [];
-			$sessionTypes = $validated['session_type'] === 'Both'
-							? ['Online', 'Offline']
-							: [$validated['session_type']];
-			foreach ($sessionTypes as $sessionType) {
+			
 				$slotData = [
 					'user_id' => auth()->id(),
 					'type' => $validated['type'],
