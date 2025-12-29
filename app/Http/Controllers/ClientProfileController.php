@@ -118,7 +118,7 @@ class ClientProfileController extends Controller
         $client = Auth::user();
         $mentors = CyclesMentors::where('user_id', Auth::user()->id ?? 0)->get();
 
-        $globalRoles = ['Admin', 'Organization Manager'];
+        $globalRoles = ['Admin', 'Organization Manager', 'subadmin'];
 
         if ($client->hasAnyRole($globalRoles)) {
             $mentorshipTasks = MentorshipTask::query()->orderByDesc('created_at')->get();
@@ -468,7 +468,7 @@ class ClientProfileController extends Controller
         $programFilter = $request->input('programFilter');
         $enrolledInProgramFilter = $request->input('enrolledInProgramFilter');
         if ($setting->mentor_list == 1) {
-            if (Auth::user()->hasanyRole('Mentor|Registered|Admin|OrganizationManager')) {
+            if (Auth::user()->hasAnyRole('Mentor|Registered|Admin|OrganizationManager|subadmin')) {
                 $l = app()->getLocale();
                 $firstNameColumn = $l == 'ar' ? 'first_name_en' : 'first_name_en';
                 $lastNameColumn = $l == 'ar' ? 'first_name_en' : 'last_name_en';
@@ -529,10 +529,11 @@ class ClientProfileController extends Controller
 
                 $mentors = $mentors->get();
 
-                $cycles = [];
+                $user = Auth::user();
+                $orgIds = $user->organizations_ids;
 
-                if (Auth::user()->organization_id) {
-                    $cycles = Cycle::where('organization_id', Auth::user()->organization_id)->get();
+                if (!$user->hasRole('Admin') && !empty($orgIds)) {
+                    $cycles = Cycle::whereIn('organization_id', $orgIds)->get();
                 } else {
                     $cycles = Cycle::all();
                 }
@@ -544,7 +545,7 @@ class ClientProfileController extends Controller
             }
         } else {
 
-            if (Auth::user()->hasanyRole('Admin|OrganizationManager')) {
+            if (Auth::user()->hasAnyRole('Admin|OrganizationManager|subadmin')) {
                 $l = app()->getLocale();
                 $firstNameColumn = $l == 'ar' ? 'first_name_en' : 'first_name_en';
                 $lastNameColumn = $l == 'ar' ? 'first_name_en' : 'last_name_en';
@@ -598,14 +599,16 @@ class ClientProfileController extends Controller
                     // If enrolledInProgramFilter is empty string (''), show all (no filter applied)
                 }
                 $mentors = $mentors->get();
-                
-                $cycles = [];
-                if (Auth::user()->organization_id) {
-                    $cycles = Cycle::where('organization_id', Auth::user()->organization_id)->get();
+
+                $user = Auth::user();
+                $orgIds = $user->organizations_ids;
+
+                if (!$user->hasRole('Admin') && !empty($orgIds)) {
+                    $cycles = Cycle::whereIn('organization_id', $orgIds)->get();
                 } else {
                     $cycles = Cycle::all();
                 }
-                
+
                 $settings = Settings::where('id', 1)->first();
 			    $offline_allowed = $settings->allow_offline_sessions = 1 ? true : false;
                 // $mentors = User::role('mentor')->get();

@@ -526,9 +526,9 @@ class ClientCompanyController extends Controller
                 //     return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
                 // }
 
-                if ($user->hasRole('organizationManager')) {
-                    $userorg = Organization::where('user_id', $user->id)->first();
-                    $cycles = Cycle::where('organization_id', $userorg->id)->with('companies')->get();
+                if ($user->hasAnyRole(['organizationManager', 'subadmin'])) {
+                    $orgIds = $user->organizations_ids;
+                    $cycles = Cycle::whereIn('organization_id', $orgIds)->with('companies')->get();
                     foreach ($cycles as $cycle) {
                         foreach ($cycle->companies as $company) {
                             if ($company->id == $id) {

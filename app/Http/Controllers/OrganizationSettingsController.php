@@ -71,7 +71,7 @@ class OrganizationSettingsController extends Controller
     protected function authorizeAccess(): void
     {
         $user = auth()->user();
-        if (!($user->hasRole('organizationManager') || $user->hasRole('Admin'))) {
+        if (!$user->hasAnyRole(['organizationManager', 'subadmin', 'Admin'])) {
             abort(403);
         }
     }

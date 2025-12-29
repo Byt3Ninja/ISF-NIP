@@ -29,9 +29,10 @@ class surveysController extends Controller
 	public function index()
 	{
 		$user = auth()->user();
+		$orgIds = $user->organizations_ids;
 		$surveys = Surveys::with('organization')
-			->when($user->organization_id, function ($query) use ($user) {
-				return $query->where('organization_id', $user->organization_id);
+			->when(!$user->hasRole('admin') && !empty($orgIds), function ($query) use ($orgIds) {
+				return $query->whereIn('organization_id', $orgIds);
 			})
 			->get();
 		return view('admin.surveys.index', compact('surveys'));
@@ -41,7 +42,7 @@ class surveysController extends Controller
 	{
 		$user = auth()->user();
 		$orgIds = $user->organizations_ids;
-		$hasOrg = !empty($user->organization_id) || count($orgIds) > 0;
+		$hasOrg = !empty($orgIds);
 
 		$organizations = Organization::when($hasOrg && !empty($orgIds) && !$user->hasRole('admin'), function ($query) use ($orgIds) {
 			return $query->whereIn('id', $orgIds);
@@ -91,7 +92,7 @@ class surveysController extends Controller
 	{
 		$user = auth()->user();
 		$orgIds = $user->organizations_ids;
-		$hasOrg = !empty($user->organization_id) || count($orgIds) > 0;
+		$hasOrg = !empty($orgIds);
 
 		$survey = Surveys::with(['organization', 'questions'])->findOrFail($id);
 		$organizations = Organization::when($hasOrg && !empty($orgIds) && !$user->hasRole('admin'), function ($query) use ($orgIds) {
@@ -156,7 +157,7 @@ class surveysController extends Controller
 	{
 		$user = auth()->user();
 		$orgIds = $user->organizations_ids;
-		$hasOrg = !empty($user->organization_id) || count($orgIds) > 0;
+		$hasOrg = !empty($orgIds);
 		$survey = Surveys::with(['questions'])->find($id);
 		if (empty($survey)) {
 			return redirect()->route('surveys.index')->with(['error' => 'surveyNotFound']);

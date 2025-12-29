@@ -25,7 +25,8 @@ class AdvancedExportController extends Controller
                 return response()->json(['error' => 'Unauthenticated'], 401);
             }
 
-            $organizationId = $user->organization_id;
+            $orgIds = $user->organizations_ids;
+            $organizationId = $user->hasRole('admin') ? null : (!empty($orgIds) ? $orgIds[0] : null);
             \Illuminate\Support\Facades\Log::info('AdvancedExportController: Status requested', ['user_id' => $user->id, 'org_id' => $organizationId]);
 
             $status = $this->exportService->getExportStatus($organizationId);
@@ -38,7 +39,9 @@ class AdvancedExportController extends Controller
 
     public function generate()
     {
-        $organizationId = Auth::user()->organization_id;
+        $user = Auth::user();
+        $orgIds = $user->organizations_ids;
+        $organizationId = $user->hasRole('admin') ? null : (!empty($orgIds) ? $orgIds[0] : null);
         try {
             $result = $this->exportService->generateExport($organizationId);
             return response()->json(['success' => true, 'data' => $result]);
@@ -49,7 +52,9 @@ class AdvancedExportController extends Controller
 
     public function download()
     {
-        $organizationId = Auth::user()->organization_id;
+        $user = Auth::user();
+        $orgIds = $user->organizations_ids;
+        $organizationId = $user->hasRole('admin') ? null : (!empty($orgIds) ? $orgIds[0] : null);
         $download = $this->exportService->downloadExport($organizationId);
 
         if ($download) {
@@ -61,7 +66,9 @@ class AdvancedExportController extends Controller
 
     public function progress()
     {
-        $organizationId = Auth::user()->organization_id;
+        $user = Auth::user();
+        $orgIds = $user->organizations_ids;
+        $organizationId = $user->hasRole('admin') ? null : (!empty($orgIds) ? $orgIds[0] : null);
         $progress = $this->exportService->getProgress($organizationId);
         return response()->json(['progress' => $progress]);
     }

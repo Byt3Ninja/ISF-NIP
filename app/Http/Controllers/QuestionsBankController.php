@@ -123,9 +123,10 @@ class QuestionsBankController extends Controller
 	public function create()
 	{
 		$user = auth()->user();
-		$organizations = new Organization;
-		if (isset($user->organization_id) && !empty($user->organization_id)) {
-			$organizations = $organizations->where('id', $user->organization_id);
+		$orgIds = $user->organizations_ids;
+		$organizations = Organization::query();
+		if (!$user->hasRole('admin') && !empty($orgIds)) {
+			$organizations = $organizations->whereIn('id', $orgIds);
 		}
 		$organizations = $organizations->with(['questionsCategories'])->get();
 
@@ -292,9 +293,10 @@ class QuestionsBankController extends Controller
 		$question = QuestionsBank::find($id);
 		$selectedOrganizations = $question->organizations->pluck('id')->toArray();
 		$user = auth()->user();
-		$organizations = new Organization;
-		if (isset($user->organization_id) && !empty($user->organization_id)) {
-			$organizations = $organizations->where('id', $user->organization_id);
+		$orgIds = $user->organizations_ids;
+		$organizations = Organization::query();
+		if (!$user->hasRole('admin') && !empty($orgIds)) {
+			$organizations = $organizations->whereIn('id', $orgIds);
 		}
 		$organizations = $organizations->with(['questionsCategories'])->get();
 		$categories = Category::where('category_type', 'Assesment')->get();

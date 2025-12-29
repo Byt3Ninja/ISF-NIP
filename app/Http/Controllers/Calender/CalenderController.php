@@ -25,7 +25,7 @@ class CalenderController extends Controller
             $data=[];
             $user = auth()->user();
             $orgIds = $user->hasRole('admin') ? null : $user->organizations_ids;
-            if ($user->hasAnyRole('Admin|Editor|Manager|organizationManager')) {
+            if ($user->hasAnyRole('Admin|Editor|Manager|organizationManager|subadmin')) {
 
                $data = $this->AdminCalender($orgIds);
 
