@@ -752,7 +752,7 @@
 																</span>
 																@else
 																<span class="warning">
-																	<p>{{ $session->organization->address }}</p>
+																	
 																	<a class="btn btn-sm btn-label-primary" href="{{ $session->organization->google_map_url }}" target="_blank">
 																		<i class="ti ti-map me-2"></i>
 																		{{ __('admin.Location') }}
