@@ -834,14 +834,32 @@
 									</td>
 									@if( $_user->ableTo('mentors.settings_modify', $permissions) )
 									<td>
-										<button
-											onclick="if (typeof fetchSlots === 'function') { fetchSlots({{ $mentor->id }}, {{ $mentor->cycle_id }}, {{ $mentor->organization_id }}); }"
-											{{-- onclick="request({{ $mentor->id }},'{{ $mentor->name }}', {{ $mentor->organization_id }}, {{ $mentor->cycle_id }})" --}}
-											title="{{ __('cycles.Request_Mentorship') }}"
-											type="button"
-											class="btn btn-icon rounded-circle btn-label-success">
-											<i class="fa fa-plus"></i>
-										</button>
+										@php
+											$schedules = App\Schedule::where('user_id', $mentor->id ?? auth()->id())
+														->where(function ($query) {$query
+																->whereNull('date')
+																->orWhere('date', '>', date('Y-m-d'))
+																->orWhere(function ($q) {
+																	$q->where('date', date('Y-m-d'))
+																	->where('tto', '>', date('H:i:s'));
+																});
+														})
+														->get();
+										@endphp
+										@if($schedules->isNotEmpty())
+											<button
+												onclick="if (typeof fetchSlots === 'function') { fetchSlots({{ $mentor->id }}, {{ $mentor->cycle_id }}, {{ $mentor->organization_id }}); }"
+												{{-- onclick="request({{ $mentor->id }},'{{ $mentor->name }}', {{ $mentor->organization_id }}, {{ $mentor->cycle_id }})" --}}
+												title="{{ __('cycles.Request_Mentorship') }}"
+												type="button"
+												class="btn btn-icon rounded-circle btn-label-success">
+												<i class="fa fa-plus"></i>
+											</button>
+										@else
+											<button type="button" class="btn btn-icon rounded-circle btn-label-success" disabled>
+												<i class="fa fa-plus"></i>
+											</button>
+										@endif
 									</td>
 									@endif
 								</tr>
