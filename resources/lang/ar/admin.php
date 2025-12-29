@@ -3120,4 +3120,5 @@ return [
 	'public_scope_hint' => 'المرشدون غير مرتبطين بأي موسسة',
 	'organization_scope_hint' => 'المرشدون المرتبطين بالمؤسسات فقط',
     'error_date_range' => 'يجب تحديد نطاق التاريخ بشكل صحيح.',
+	'Offline sessions are not allowed' => 'غير مسموح بجلسات عن بعد',
 ];
