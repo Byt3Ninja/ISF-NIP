@@ -8730,13 +8730,7 @@
                     "organizationmanager",
                     "subadmin"
                 ]
-            }
-        ]
-    },
-    {
-        "name": "Tasks Management",
-        "description": "Create new task",
-        "permissions": [
+            },
             {
                 "name": "tasks.store",
                 "description": "Create new task",
@@ -8746,13 +8740,7 @@
                     "admin",
                     "organizationmanager"
                 ]
-            }
-        ]
-    },
-    {
-        "name": "Tasks Management",
-        "description": "Edit task",
-        "permissions": [
+            },
             {
                 "name": "tasks.update",
                 "description": "Edit task",
