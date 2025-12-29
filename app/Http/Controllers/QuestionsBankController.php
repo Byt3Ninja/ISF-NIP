@@ -28,7 +28,7 @@ class QuestionsBankController extends Controller
 	public function index(Request $request)
 	{
 		$user = auth()->user();
-		$organization_id = $user->organization_id;
+		$organization_id = $user->hasRole('admin') ? null : $user->organizations_ids;
 		/* $questions = QuestionsBank::with(['organization']);
 		if (!empty($organization_id)) {
 			if (is_array($organization_id)) {

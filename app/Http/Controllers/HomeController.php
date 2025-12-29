@@ -96,7 +96,9 @@ class HomeController extends Controller
         $user = auth()->user();
         $l = App::getLocale();
         $permissions = [];
+        $organizations_ids = $user->organizations_ids;
         $has_org = !empty($user->organization_id) && !is_null($user->organization_id) && trim($user->organization_id) ? true : false;
+        if( !$has_org && count( $organizations_ids ) > 0 ) { $has_org = true; }
         if (auth()->check()) {
             $permissions = $user->myPermissions();
         }
@@ -290,8 +292,8 @@ class HomeController extends Controller
                 WHERE
                     s.deleted_at IS NULL
             ";
-            if ($has_org) {
-                $companies_q .= " AND c.organization_id = " . $user->organization_id;
+            if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+                $companies_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
             }
             $companies = collect(DB::select($companies_q));
         } else {
@@ -309,8 +311,8 @@ class HomeController extends Controller
                 WHERE
                     mr.deleted_at IS NULL
             ";
-            if ($has_org) {
-                $mentorship_requests_q .= " AND c.organization_id = " . $user->organization_id;
+            if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+                $mentorship_requests_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
             }
             $mentorship_requests = collect(DB::select($mentorship_requests_q));
         } else {
@@ -331,8 +333,8 @@ class HomeController extends Controller
                 WHERE
                     ts.deleted_at IS NULL
             ";
-            if ($has_org) {
-                $training_sessions_q .= " AND c.organization_id = " . $user->organization_id;
+            if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+                $training_sessions_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
             }
             $training_sessions = collect(DB::select($training_sessions_q))->map(function ($session) {
                 $session->duration = !empty($session->duration) ? $session->duration : 0;
@@ -416,8 +418,8 @@ class HomeController extends Controller
                     u.deleted_at IS NULL
                     AND r.default_for = 'mentor'
             ";
-            if ($has_org) {
-                $my_mentors_q .= " AND c.organization_id = " . $user->organization_id;
+            if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+                $my_mentors_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
             }
             $my_mentors = collect(DB::select($my_mentors_q));
             $my_mentors = $my_mentors->groupBy('id')->map(function ($user) {
@@ -491,8 +493,8 @@ class HomeController extends Controller
                 $inputs[] = $user->id;
             }
             $filtration_q .= " )";
-            if ($has_org) {
-                $filtration_q .= " AND c.organization_id = " . $user->organization_id;
+            if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+                $filtration_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
             }
             $filtration = collect(DB::select($filtration_q, $inputs));
         } else {
@@ -599,8 +601,8 @@ class HomeController extends Controller
             if (!$user->hasAnyRole(['admin', 'organizationmanager'])) {
                 $evaluation_q .= " AND fs.judges LIKE '%\"{$user->id}\"%'";
             }
-            if ($has_org) {
-                $evaluation_q .= " AND cy.organization_id = " . $user->organization_id;
+            if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+                $evaluation_q .= " AND cy.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
             }
             $evaluation = collect(DB::select($evaluation_q))->map(function ($e) {
                 $e->judges = array_map(function ($j) {
@@ -683,8 +685,8 @@ class HomeController extends Controller
                     AND mr.zoom_date >= ?
                     AND mr.approved = 'Yes'
             ";
-            if ($has_org) {
-                $upcoming_sessions_q .= " AND mr.organization_id = " . $user->organization_id;
+            if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+                $upcoming_sessions_q .= " AND mr.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
             }
             if (!empty($user->company_id) && !is_null($user->company_id) && trim($user->company_id)) {
                 $upcoming_sessions_q .= " AND mr.user_id = " . $user->id;
@@ -857,8 +859,8 @@ class HomeController extends Controller
         $latest_events = collect(DB::select($latest_events_q, [now()->format('Y-m-d')]));
 
         $conditions = '';
-        if ($has_org) {
-            $conditions = " WHERE s.organization_id = " . $user->organization_id;
+        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+            $conditions = " WHERE s.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
         }
         $latest_services_q = "SELECT
                 s.id,
@@ -1918,8 +1920,8 @@ class HomeController extends Controller
             INNER JOIN 
                 countries c ON u.country_id = c.id
         ";
-        if ($has_org) {
-            $country_data_q .= " WHERE u.organization_id = " . $user->organization_id;
+        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+            $country_data_q .= " WHERE u.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
         }
         $country_data_q .= " GROUP BY
                 c.name_en,
@@ -1934,8 +1936,8 @@ class HomeController extends Controller
         });
 
         $conditions = '';
-        if ($has_org) {
-            $conditions = " WHERE cy.organization_id = " . $user->organization_id;
+        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+            $conditions = " WHERE cy.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
         }
         $sector_data_q = "SELECT
                 s.name_en AS `sector_name_en`,
@@ -1961,8 +1963,8 @@ class HomeController extends Controller
             ];
         });
 
-        if ($has_org) {
-            $conditions = " AND u.organization_id = " . $user->organization_id;
+        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+            $conditions = " AND u.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
         }
         $project_types_q = "SELECT
                 c.business_type,
@@ -1987,8 +1989,8 @@ class HomeController extends Controller
             ];
         });
 
-        if ($has_org) {
-            $conditions = " AND cy.organization_id = " . $user->organization_id;
+        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+            $conditions = " AND cy.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
         }
         $developmentStages = collect(DB::select(
             "SELECT 
@@ -2062,8 +2064,8 @@ class HomeController extends Controller
             ];
         });
 
-        if ($has_org) {
-            $conditions = " WHERE u.organization_id = " . $user->organization_id;
+        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+            $conditions = " WHERE u.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
         }
         $project_status_q = "SELECT
                 c.title AS `cycle_title`,
@@ -2092,8 +2094,8 @@ class HomeController extends Controller
             ];
         });
 
-        if ($has_org) {
-            $conditions = " AND u.organization_id = " . $user->organization_id;
+        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+            $conditions = " AND u.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
         }
         $company_data_q = "SELECT
                 c.name_en AS `company_name_en`,
@@ -2137,8 +2139,8 @@ class HomeController extends Controller
             'companies' => $founders,
         ];
 
-        if ($has_org) {
-            $conditions = " AND cy.organization_id = " . $user->organization_id;
+        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+            $conditions = " AND cy.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
         }
         $company_sdg_q = "SELECT
                 c.Sustainable_development
@@ -2160,8 +2162,8 @@ class HomeController extends Controller
             ];
         })->values();
 
-        if ($has_org) {
-            $conditions = " AND u.organization_id = " . $user->organization_id;
+        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+            $conditions = " AND u.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
         }
         $sector_distribution_q = "SELECT
             c.sector,
@@ -2207,8 +2209,8 @@ class HomeController extends Controller
             INNER JOIN
                 states s ON u.state_id = s.id
         ";
-        if ($has_org) {
-            $users_gov_q .= " WHERE u.organization_id = " . $user->organization_id;
+        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+            $users_gov_q .= " WHERE u.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
         }
         $users_gov_q .= " GROUP BY
                         s.name_en,
@@ -2222,8 +2224,8 @@ class HomeController extends Controller
             FROM
                 users u
         ";
-        if ($has_org) {
-            $users_gender_q .= " WHERE u.organization_id = " . $user->organization_id;
+        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+            $users_gender_q .= " WHERE u.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
         }
         $users_gender_q .= " GROUP BY gender";
         $users_gender = collect(DB::select($users_gender_q));
