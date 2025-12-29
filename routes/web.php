@@ -68,6 +68,7 @@ Route::get('/reminderMentorShipRequest', 'IndexController@reminderMentorShipRequ
 //    }
 //    return view('admin.reports.company');
 //});
+// Route::view('upload_page', 'upload_test');
 
 
 /// Frontend routes ///
@@ -352,6 +353,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     // Invitations
     Route::group(['prefix' => 'mentors'], function () {
         Route::resource('invitations', 'InvitationController');
+        Route::post('File_Upload', 'InvitationController@updateFile')->name('invitations.upload');
     });
     
     // lowercase alias for backward-compatibility / ease of testing
