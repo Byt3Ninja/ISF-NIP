@@ -576,7 +576,7 @@
               days: type === 'weekly' ? key : null,
             }),
         })
-          .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok'))
+          .then(response => response.ok ? response.json() : Promise.reject(response))
           .then(result => {
             if( Array.isArray(result.data) )
             {
@@ -611,10 +611,11 @@
               });
             }
           })
-          .catch(error => {
+          .catch(async error => {
+            const data = await error.json();
             releaseFailureAlert({
               title: '{{ __('admin.Error') }}',
-              message: error?.message ? error.message : "{{ __('admin.unexpected_error') }}", 
+              message: error?.message ? error.message : data.message, 
             });
           });
     }
