@@ -760,7 +760,6 @@
 															<span class="text-warning"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }} </span>
 														@endif
 													@else
-													{{ var_dump($session->organization) }}
 													<span class="warning">
 														<a class="btn btn-sm btn-label-success" href="{{ $session->organization->google_map_url ?? '#' }}" target="_blank">
 															<i class="ti ti-map me-2"></i>
