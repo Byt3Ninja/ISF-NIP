@@ -676,13 +676,6 @@
                 'isVisible' => true
             ],
             [
-                'label' => __('admin.Companies'),
-                'icon' => 'ti ti-building',
-                'route' => 'users.view_companies',
-                'permission' => 'users.view_companies',
-                'isVisible' => true
-            ],
-            [
                 'label' => $l == 'en' ? 'Roles and Permissions' : 'الأدوار والأذونات',
                 'icon' => 'ti ti-shield-lock',
                 'route' => 'roles.index',
