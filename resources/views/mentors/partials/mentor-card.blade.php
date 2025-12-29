@@ -101,7 +101,15 @@
     <!-- Action Button -->
     <div class="row px-4 mt-auto">
       @if ($canRequestMentorship && auth()->user()->company->id && $mentor->id)
-        @if($mentor->schedule->isNotEmpty())
+        @php
+        $schedules = App\Schedule::where('user_id', $mentor->id)
+					->where(function ($query) {
+						$query->whereNull('date')
+							->orWhere('date', '>=', date('Y-m-d'));
+					})
+					->get();
+        @endphp
+        @if($schedules->isNotEmpty())
           <button 
             type="button" 
             class="btn btn-primary" 
