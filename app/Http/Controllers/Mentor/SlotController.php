@@ -154,16 +154,27 @@ class SlotController extends Controller
 		$offline_allowed = $settings ? ($settings->allow_offline_sessions = 1 ? true : false) : false;
 
 		$schedules = Schedule::where('user_id', $id ?? auth()->id())
-					->where(function ($query) {
-						$query->whereNull('date')
-							->orWhere('date', '>=', date('Y-m-d'));
-					})
-					->get();
+						->where(function ($query) {$query
+								->whereNull('date')
+								->orWhere('date', '>', date('Y-m-d'))
+								->orWhere(function ($q) {
+									$q->where('date', date('Y-m-d'))
+									->where('tto', '>', date('H:i:s'));
+								});
+						})
+						->get();
 		// Active-only filter
 		if ($request->has('active_only') && $request->active_only == 'true') {
-			$schedules = Schedule::where('active', 1)
-				->where('user_id', $id ?? auth()->id())
-				->get();
+			$schedules = Schedule::where('user_id', $id ?? auth()->id())
+						->where(function ($query) {$query
+								->whereNull('date')
+								->orWhere('date', '>', date('Y-m-d'))
+								->orWhere(function ($q) {
+									$q->where('date', date('Y-m-d'))
+									->where('tto', '>', date('H:i:s'));
+								});
+						})
+						->get();
 		}
 
 		$slots = collect(); // we will push items manually
