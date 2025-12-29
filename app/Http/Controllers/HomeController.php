@@ -1214,6 +1214,7 @@ class HomeController extends Controller
                 mr.rate_comment,
                 mr.done,
                 mr.session_type,
+                mr.organization_id,
                 u.img_url AS `user_img_url`,
                 u.first_name_en AS `user_first_name_en`,
                 u.first_name_ar AS `user_first_name_ar`,
@@ -1230,7 +1231,12 @@ class HomeController extends Controller
                 m.last_name_en AS `mentor_last_name_en`,
                 m.last_name_ar AS `mentor_last_name_ar`,
                 m.img_url AS `mentor_img_url`,
-                msr.rating AS `mentor_rating`
+                msr.rating AS `mentor_rating`,
+                o.name_en AS `org_name_en`,
+                o.name_ar AS `org_name_ar`,
+                o.img_url AS `org_img_url`,
+                o.google_map_url AS `org_google_map_url`,
+                o.address AS `org_address`
             FROM
                 mentorship_requests mr
             LEFT JOIN
@@ -1241,6 +1247,8 @@ class HomeController extends Controller
                 companies c ON c.id = u.company_id
             LEFT JOIN
                mentorship_requests msr ON msr.mentor_id = m.id
+            LEFT JOIN
+                organizations o ON o.id = mr.organization_id
             WHERE
                 mr.user_id = $user->id
                 AND (
@@ -1252,6 +1260,7 @@ class HomeController extends Controller
                 mr.zoom_date ASC
         ";
         $nextSessions = collect(DB::select($nextSessions_q));
+        
         $nextSessions = $nextSessions->groupBy('id')->map(function ($groupedSession) use ($l) {
             $_session = $groupedSession->first();
             $session = new stdClass;
@@ -1267,6 +1276,7 @@ class HomeController extends Controller
             $session->rate_comment = $_session->rate_comment;
             $session->done = $_session->done;
             $session->session_type = $_session->session_type;
+            $session->organization = $_session->organization_id;
 
             $user = new stdClass;
             $user->id = $_session->user_id;
@@ -1291,6 +1301,14 @@ class HomeController extends Controller
             $mentor->image_url = User::image_handler($_session->mentor_img_url);
             $mentor->ratings = $groupedSession->sum('mentor_rating');
             $session->mentor = $mentor;
+
+            $org = new stdClass;
+            $org->id = $_session->organization_id;
+            $org->name = $_session->{'org_name_' . $l};
+            $org->image_url = Organization::image_handler($_session->org_img_url);
+            $org->google_map_url = $_session->org_google_map_url;
+            $org->address = $_session->org_address;
+            $session->organization = $org;
             return $session;
         })->values();
 

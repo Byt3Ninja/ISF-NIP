@@ -671,14 +671,12 @@
 												<th>{{__('cycles.Approved')}}</th>
 												<th>{{__('cycles.Done')}}</th>
 												<th>{{__('mentor.session_type')}}</th>
-												@if (isset($offlineAllowed) && $offlineAllowed)
-													<th>{{__('mentor.session_location')}}</th>
-												@endif
-												<th>{{__('cycles.Actions')}}</th>
+												<th>{{__('dashboard.Meeting Link')}}</th>
 											</tr>
 										</thead>
 										<tbody>
 											@foreach($nextSessions as $session)
+											
 											<tr>
 												<td>
 													<div class="d-flex align-items-center gap-2">
@@ -735,12 +733,8 @@
 														{{ $session->session_type ?? __('admin.All') }}
 													</small>
 												</td>
-												@if (isset($offlineAllowed) && $offlineAllowed)
-													<td>
-														{{ isset($session->session_location) && $session->session_type == 'Offline' ? $session->session_location : 'N/A' }}
-													</td>
-												@endif
 												<td> 
+													
 													@php
 														$now = date('Y-m-d H:i');
 														$start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
@@ -748,16 +742,26 @@
 														@endphp
 													@if ($session->approved == 'Yes')
 														@if($now >= $start_time )
-														@if($now <= $end_time)
-														<span class="warning">
-															<a class="btn btn-sm btn-label-primary" href="{{ $session->join_url }}" target="_blank">
-																<i class="ti ti-brand-zoom me-2"></i>
-																{{ __('dashboard.Join now') }}
-															</a>
-														</span>
-														@else
-															<span class="text-danger"> <i class="ti ti-alarm"></i> {{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }} </span>
-														@endif
+															@if($now <= $end_time)
+																@if( $session->session_type == 'Online' )
+																<span class="warning">
+																	<a class="btn btn-sm btn-label-primary" href="{{ $session->join_url }}" target="_blank">
+																		<i class="ti ti-brand-zoom me-2"></i>
+																		{{ __('dashboard.Join now') }}
+																	</a>
+																</span>
+																@else
+																<span class="warning">
+																	<p>{{ $session->organization->address }}</p>
+																	<a class="btn btn-sm btn-label-primary" href="{{ $session->organization->google_map_url }}" target="_blank">
+																		<i class="ti ti-map me-2"></i>
+																		{{ __('admin.Location') }}
+																	</a>
+																</span>
+																@endif
+															@else
+																<span class="text-danger"> <i class="ti ti-alarm"></i> {{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }} </span>
+															@endif
 														@else 
 															<span class="text-warning"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }} </span>
 														@endif
