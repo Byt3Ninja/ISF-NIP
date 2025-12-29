@@ -193,13 +193,13 @@
                       <label for="{{$role}}Role" style="display: grid; place-items: center;" class="form-check custom-option custom-option-icon cursor-pointer">
                         <div class="d-flex align-items-center">
                           @if($role === 'Founder')
-                            <input name="role" class="form-check-input role-input" type="radio" value="registered" id="{{$role}}Role" checked required />
+                            <input name="role" class="form-check-input role-input" type="radio" value="registered" id="{{$role}}Role" @if(request('id') != 'MentorRole') checked @endif required />
                             <div class="form-check-label custom-option-content d-flex align-items-center">
                               <i class="ti ti-businessplan me-2"></i>
                               <span class="custom-option-title">{{ __('admin.'. $role) }}</span>
                             </div>
                           @else
-                            <input name="role" class="form-check-input role-input" type="radio" value="mentor" id="{{$role}}Role" required />
+                            <input name="role" class="form-check-input role-input" type="radio" value="mentor" id="{{$role}}Role" @if(request('id') == 'MentorRole') checked @endif required />
                             <div class="form-check-label custom-option-content d-flex align-items-center">
                               <i class="ti ti-user me-2"></i>
                               <span class="custom-option-title">{{ __('admin.'. $role) }}</span>
