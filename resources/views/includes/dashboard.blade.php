@@ -742,29 +742,31 @@
 														@endphp
 														
 													@if ($session->approved == 'Yes')
+													@if( $session->session_type == 'Online' )
 														@if($now >= $start_time )
 															@if($now <= $end_time)
-																@if( $session->session_type == 'Online' )
+																
 																<span class="warning">
 																	<a class="btn btn-sm btn-label-primary" href="{{ $session->join_url }}" target="_blank">
 																		<i class="ti ti-brand-zoom me-2"></i>
 																		{{ __('dashboard.Join now') }}
 																	</a>
 																</span>
-																@else
-																<span class="warning">
-																	<a class="btn btn-sm btn-label-success" href="{{ $session->organization->google_map_url ?? '#' }}" target="_blank">
-																		<i class="ti ti-map me-2"></i>
-																		{{ __('admin.Location') }}
-																	</a>
-																</span>
-																@endif
+																
 															@else
 																<span class="text-danger"> <i class="ti ti-alarm"></i> {{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }} </span>
 															@endif
 														@else 
 															<span class="text-warning"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }} </span>
 														@endif
+													@else
+													<span class="warning">
+														<a class="btn btn-sm btn-label-success" href="{{ $session->organization->google_map_url ?? '#' }}" target="_blank">
+															<i class="ti ti-map me-2"></i>
+															{{ __('admin.Location') }}
+														</a>
+													</span>
+													@endif
 													@elseif($session->approved == 'No')
 														{{ __('admin.No') }}
 													@else
