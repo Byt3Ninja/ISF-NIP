@@ -52,7 +52,7 @@ class ServiceController extends Controller
 		$Setting = Settings::where('id', 1)->first();
 		if ($user->hasRole('Admin')) {
 			$organizations = Organization::all();
-		} elseif ($user->hasRole('organizationManager') || $user->isSubAdmin()) {
+		} elseif ($user->hasAnyRole(['organizationManager', 'subadmin'])) {
 			$orgIds = $user->organizations_ids;
 			$organizations = Organization::whereIn('id', $orgIds)->get();
 		} else {
@@ -138,7 +138,7 @@ class ServiceController extends Controller
 		$serviceCategories = ServiceCategory::all();
 		if ($user->hasRole('Admin')) {
 			$organizations = Organization::all();
-		} elseif ($user->hasRole('organizationManager') || $user->isSubAdmin()) {
+		} elseif ($user->hasAnyRole(['organizationManager', 'subadmin'])) {
 			$orgIds = $user->organizations_ids;
 			$organizations = Organization::whereIn('id', $orgIds)->get();
 		} else {

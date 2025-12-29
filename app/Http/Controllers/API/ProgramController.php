@@ -440,8 +440,9 @@ public function index(Request $request)
       $locale = app()->getLocale();
       $query = Cycle::with(['organization', 'steps', 'mentors', 'companies']);
 
-      if ($user->hasRole('organizationManager')) {
-          $query->where('organization_id', $user->organization_id);
+      $orgIds = $user->organizations_ids;
+      if (!$user->hasRole('admin') && !empty($orgIds)) {
+          $query->whereIn('organization_id', $orgIds);
        }
 
         if ($request->filled('status')) {

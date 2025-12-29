@@ -48,7 +48,7 @@ class ProgramController extends Controller
             $cycles = Cycle::when($search, function ($query, $search) {
                 return $query->where('title', 'like', '%' . $search . '%');
             });
-        } else if ($user->hasRole('organizationManager') || $user->isSubAdmin()) {
+        } elseif ($user->hasAnyRole(['organizationManager', 'subadmin'])) {
             $orgIds = $user->organizations_ids;
             $cycles = Cycle::when(!empty($orgIds), function ($q) use ($orgIds) {
                 return $q->whereIn('organization_id', $orgIds);
@@ -123,7 +123,7 @@ class ProgramController extends Controller
             $cycles = Cycle::when($search, function ($query, $search) {
                 return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
             });
-        } else if (Auth()->user()->hasRole('organizationManager') || $user->isSubAdmin()) {
+        } elseif ($user->hasAnyRole(['organizationManager', 'subadmin'])) {
             $orgIds = $user->organizations_ids;
             $cycles = Cycle::when(!empty($orgIds), function ($q) use ($orgIds) {
                 return $q->whereIn('organization_id', $orgIds);
@@ -178,7 +178,7 @@ class ProgramController extends Controller
         $user = Auth()->user();
         $orgIds = $user->organizations_ids;
         $cycle = Cycle::where('id', $id);
-        if ($user->hasRole('organizationManager') || $user->isSubAdmin()) {
+        if ($user->hasAnyRole(['organizationManager', 'subadmin'])) {
             $cycle = $cycle->when(!empty($orgIds), function ($q) use ($orgIds) {
                 return $q->whereIn('organization_id', $orgIds);
             });
@@ -224,7 +224,7 @@ class ProgramController extends Controller
             $cycles = Cycle::when($search, function ($query, $search) {
                 return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
             });
-        } else if (Auth()->user()->hasRole('organizationManager') || $user->isSubAdmin()) {
+        } elseif ($user->hasAnyRole(['organizationManager', 'subadmin'])) {
             $orgIds = $user->organizations_ids;
             $cycles = Cycle::when(!empty($orgIds), function ($q) use ($orgIds) {
                 return $q->whereIn('organization_id', $orgIds);

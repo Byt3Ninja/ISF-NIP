@@ -58,7 +58,7 @@ class GoogleCalendarController extends Controller
         $user = auth()->user();
         $orgIds = $user->hasRole('admin') ? null : $user->organizations_ids;
 
-        if( $user->hasAnyRole('Admin|Editor|Manager|organizationManager') ) { $data = $this->AdminCalender( $user, $orgIds ); }
+        if( $user->hasAnyRole('Admin|Editor|Manager|organizationManager|subadmin') ) { $data = $this->AdminCalender( $user, $orgIds ); }
         elseif( $user->hasAnyRole('Mentor') ) { $data = $this->MentorCalender( $user ); }
         elseif( $user->hasRole('Judger') ) { $data = $this->JudgerCalender( $user ) ; }
         elseif( $user->hasRole('Registered|Page Manager|Pages Editor') ) { $data = $this->StartupCalender( $user ); }

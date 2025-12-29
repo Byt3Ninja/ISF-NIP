@@ -68,7 +68,7 @@ class ExportFTSData implements ShouldQueue
             $timeSheets = TimeSheet::all();
             $cycles = Cycle::all();
             $orgnization = Organization::all();
-        } elseif ($authUser->isSubAdmin()) {
+        } elseif ($authUser->hasAnyRole(['organizationManager', 'subadmin'])) {
             $orgIds = $authUser->organizations_ids;
             $orgnization = Organization::whereIn('id', $orgIds)->get();
             $cycles = Cycle::whereIn('organization_id', $orgIds)->get();
@@ -77,14 +77,7 @@ class ExportFTSData implements ShouldQueue
         } else {
             $timeSheets = TimeSheet::where('user_id', $authUser->id)->get();
 
-            if ($authUser->hasRole('organizationManager')) {
-                $organization = Organization::where('user_id', $authUser->id)->first();
-                if ($organization) {
-                    $cycles = Cycle::where('organization_id', $organization->id)->get();
-                    $users = User::where('organization_id', $organization->id)->role(['manager', 'coordinator'])->get();
-                    $orgnization = Organization::where('id', $organization->id)->get();
-                }
-            } elseif ($authUser->hasRole('manager')) {
+            if ($authUser->hasRole('manager')) {
                 $organization = Organization::where('user_id', $authUser->id)->first();
                 if ($organization) {
                     $cycles = Cycle::where('organization_id', $organization->id)->get();

@@ -799,7 +799,7 @@ public function judgerDashboard(): array
     $judgerId = $user->id;
     $lang = app()->getLocale();
     $orgIds = $user->organizations_ids;
-    $hasOrg = !empty($user->organization_id) || count($orgIds) > 0;
+    $hasOrg = !empty($orgIds);
     $inputs = [now()->format('Y-m-d'), $judgerId];
 
     $getNotEvaluatedCompanies = collect(DB::select("

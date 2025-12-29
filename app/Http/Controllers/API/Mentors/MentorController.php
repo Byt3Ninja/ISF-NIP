@@ -58,7 +58,7 @@ class MentorController extends Controller
       public function show($mentorId)
     {
         $user = auth()->user();
-        if(!$user->hasAnyRole(['Admin','organizationManager','Registered'])){
+        if(!$user->hasAnyRole(['Admin','organizationManager','subadmin','Registered'])){
             return $this->forbidden(__('api.forbidden'));
         }
         
@@ -124,7 +124,7 @@ class MentorController extends Controller
     {
         $user = auth()->user();
 
-        if (!$user->hasAnyRole(['Admin', 'organizationManager', 'Registered'])) {
+        if (!$user->hasAnyRole(['Admin', 'organizationManager', 'subadmin', 'Registered'])) {
             return $this->forbidden(__('api.forbidden'));
         }
 

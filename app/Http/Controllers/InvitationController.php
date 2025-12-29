@@ -17,12 +17,14 @@ class InvitationController extends Controller
 {
     public function index()
     {
-        if(auth()->user()->hasRole('admin')) {
+        $user = auth()->user();
+        if($user->hasRole('admin')) {
             $inviteMentors = InviteMentor::all();
             $allOrganizations = Organization::all();
-        }elseif(auth()->user()->hasRole('organizationManager')) {
-            $inviteMentors = InviteMentor::where('user_id', auth()->user()->id)->get();
-             $allOrganizations = Organization::where('user_id', auth()->user()->id)->get();
+        }elseif($user->hasAnyRole(['organizationManager', 'subadmin'])) {
+            $orgIds = $user->organizations_ids;
+            $inviteMentors = InviteMentor::where('user_id', $user->id)->get();
+            $allOrganizations = Organization::whereIn('id', $orgIds)->get();
         }
 
         $organizationMap = collect($allOrganizations)->keyBy('id');

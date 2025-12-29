@@ -21,11 +21,13 @@ class CompanyRepository
         $query = Company::query()->with(['teamMembers', 'country', 'state', 'city', 'cycleRelation.organization', 'sectoR', 'stagE']);
         $user = auth()->user();
 
-        if ($user && $user->hasRole('organizationManager')) {
-            $organizationId = $user->organization_id;
-            $query->whereHas('cycleRelation.organization', function ($q) use ($organizationId) {
-                $q->where('id', $organizationId);
-            });
+        if ($user && !$user->hasRole('admin')) {
+            $orgIds = $user->organizations_ids;
+            if (!empty($orgIds)) {
+                $query->whereHas('cycleRelation.organization', function ($q) use ($orgIds) {
+                    $q->whereIn('id', $orgIds);
+                });
+            }
         }
 
         if (!empty($filters['role']) && $filters['role'] === 'organizationManager') {
