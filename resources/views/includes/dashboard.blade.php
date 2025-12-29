@@ -740,6 +740,7 @@
 														$start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
 														$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+'. $session->period .' minutes'));
 														@endphp
+														{{ dd($session->organization) }}
 													@if ($session->approved == 'Yes')
 														@if($now >= $start_time )
 															@if($now <= $end_time)
