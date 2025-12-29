@@ -61,8 +61,8 @@ class MicrosoftCalendarController extends Controller
     public function syncEvents()
     {
         $user = auth()->user();
-        $organization_id = $user->organization_id;
-        if( $user->hasAnyRole('Admin|Editor|Manager|organizationManager') ) { $data = $this->AdminCalender( $user, $organization_id ); }
+        $orgIds = $user->hasRole('admin') ? null : $user->organizations_ids;
+        if( $user->hasAnyRole('Admin|Editor|Manager|organizationManager') ) { $data = $this->AdminCalender( $user, $orgIds ); }
         elseif( $user->hasAnyRole('Mentor') ) { $data = $this->MentorCalender( $user ); }
         elseif( $user->hasRole('Judger') ) { $data = $this->JudgerCalender( $user ) ; }
         elseif( $user->hasRole('Registered|Page Manager|Pages Editor') ) { $data = $this->StartupCalender( $user ); }
@@ -73,9 +73,9 @@ class MicrosoftCalendarController extends Controller
         return redirect( route('calendar.events_list') );
     }
 
-    protected function AdminCalender($user,$organization_id){
-        $mentorshipRequests = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
-            return $q->where('organization_id', $organization_id);
+    protected function AdminCalender($user,$orgIds){
+        $mentorshipRequests = MentorshipRequest::when(!empty($orgIds), function ($q) use ($orgIds) {
+            return $q->whereIn('organization_id', $orgIds);
         })->get();
         foreach ($mentorshipRequests as $key) {
 

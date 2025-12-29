@@ -64,8 +64,8 @@ class Formdata extends Model
         ->leftJoin('cycles as CYC', 'CYC.id', '=', 'S.cycle_id')
         ->leftJoin('organizations as O', 'O.id', '=', 'CYC.organization_id')
         ->whereNull('FD.deleted_at')
-        ->when($user->organization_id != null, function ($query) use ($user) {
-            return $query->where('CYC.organization_id', $user->organization_id);
+        ->when(!$user->hasRole('admin') && !empty($user->organizations_ids), function ($query) use ($user) {
+            return $query->whereIn('CYC.organization_id', $user->organizations_ids);
         })
         ->when($request->has('organization') && trim( $request->organization ), function ($query) use ($request) {
             return $query->where('O.name_en', 'LIKE', $request->organization);

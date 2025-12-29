@@ -798,7 +798,8 @@ public function judgerDashboard(): array
     $user = auth()->user();
     $judgerId = $user->id;
     $lang = app()->getLocale();
-    $hasOrg = $user->organization_id ? true : false;
+    $orgIds = $user->organizations_ids;
+    $hasOrg = !empty($user->organization_id) || count($orgIds) > 0;
     $inputs = [now()->format('Y-m-d'), $judgerId];
 
     $getNotEvaluatedCompanies = collect(DB::select("
@@ -863,8 +864,8 @@ public function judgerDashboard(): array
         $filtration_q .= " AND user_id = ? ";
         $inputs[] = $judgerId;
     }
-    if ($hasOrg) {
-        $filtration_q .= " AND c.organization_id = " . $user->organization_id;
+    if ($hasOrg && !empty($orgIds) && !$user->hasRole('admin')) {
+        $filtration_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $orgIds)) . ")";
     }
     $filtration = collect(DB::select($filtration_q, $inputs));
       $filtration = $filtration->groupBy('id')->map(function ($groupedSteps) use ($lang) {
@@ -946,8 +947,8 @@ public function judgerDashboard(): array
     if (!$user->hasAnyRole(['admin', 'organizationmanager'])) {
         $evaluation_q .= " AND fs.judges LIKE '%\"{$judgerId}\"%'";
     }
-    if ($hasOrg) {
-        $evaluation_q .= " AND cy.organization_id = " . $user->organization_id;
+    if ($hasOrg && !empty($orgIds) && !$user->hasRole('admin')) {
+        $evaluation_q .= " AND cy.organization_id IN (" . implode(',', array_map('intval', $orgIds)) . ")";
     }
 
     $evaluation = collect(DB::select($evaluation_q))->map(function ($e) {

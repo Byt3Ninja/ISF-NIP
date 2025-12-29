@@ -602,27 +602,22 @@ class ImporterController extends Controller
 
             if ($user->hasRole('Admin')) {
                 $organizations = Organization::select('id', 'name_en', 'name_ar')->get();
-            } elseif ($user->hasRole('organizationManager')) {
-                if ($user->organization_id) {
-                    $organization = Organization::select('id', 'name_en', 'name_ar')
-                        ->where('id', $user->organization_id)
-                        ->first();
-                    if ($organization) {
-                        $organizations = collect([$organization]);
-                        Log::info('Organization manager fetched their organization', [
-                            'user_id' => $user->id,
-                            'organization_id' => $user->organization_id
-                        ]);
-                    } else {
-                        Log::warning('Organization manager has no associated organization', [
-                            'user_id' => $user->id,
-                            'organization_id' => $user->organization_id
-                        ]);
-                    }
-                } else {
-                    Log::warning('Organization manager has no organization_id', ['user_id' => $user->id]);
-                }
             } else {
+                $orgIds = $user->organizations_ids;
+                if (!empty($orgIds)) {
+                    $organizations = Organization::select('id', 'name_en', 'name_ar')
+                        ->whereIn('id', $orgIds)
+                        ->get();
+                    Log::info('User fetched their organizations', [
+                        'user_id' => $user->id,
+                        'organization_ids' => $orgIds
+                    ]);
+                } else {
+                    Log::warning('User has no associated organizations', ['user_id' => $user->id]);
+                }
+            }
+
+            if ($organizations->isEmpty()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Forbidden: User lacks required role'

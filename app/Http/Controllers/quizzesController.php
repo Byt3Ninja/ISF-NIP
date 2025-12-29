@@ -34,7 +34,7 @@ class quizzesController extends Controller
 	public function index(Request $request)
 	{
 		$user = auth()->user();
-		$organization_id = $user->organization_id;
+		$orgIds = $user->organizations_ids;
 
 		$quizzes_q = "SELECT 
 		q.id AS quiz_id,
@@ -81,9 +81,8 @@ class quizzesController extends Controller
 			$quizzes_q .= "AND c.id = ? ";
 			$bindings[] = $request->Program_id;
 		}
-		if($user->hasRole('organizationManager')){
-			$quizzes_q .= "AND o.id = ? ";
-			$bindings[] = $organization_id;
+		if(!$user->hasRole('admin') && !empty($orgIds)){
+			$quizzes_q .= "AND o.id IN (" . implode(',', array_map('intval', $orgIds)) . ") ";
 		}
 
 		$quizzes_q = DB::select($quizzes_q, $bindings ?? []);
