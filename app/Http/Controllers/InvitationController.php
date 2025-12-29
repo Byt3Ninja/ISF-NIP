@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Invitation;
 use App\InviteMentor;
-use App\Mail\InviteMentorMail;
-use App\Jobs\SendInviteMentorEmail;
 use App\Organization;
+use Illuminate\Support\Str;
+use App\Mail\InviteMentorMail;
+use Illuminate\Http\UploadedFile;
+use App\Jobs\SendInviteMentorEmail;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Request;
 
 class InvitationController extends Controller
@@ -156,5 +159,42 @@ class InvitationController extends Controller
         dispatch(new SendInviteMentorEmail($invitation));
         
         return response()->json(['success' => true, 'message' => 'Invitation sent successfully.']);
+    }
+
+    private function uploadToUsersDisk(UploadedFile $file): array
+    {
+         $extension = $file->guessExtension();
+        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $safeName = Str::slug($originalName);
+        $date = now()->format('Y-m-d_H-i-s');
+        $fileName = $safeName . '_' . $date . '.' . $extension;
+        Storage::disk('UsersDiskInviteMentor')->putFileAs('', $file, $fileName);
+        return [
+            'file_name' => $fileName,
+            'file_url'  => Storage::disk('UsersDiskInviteMentor')->url($fileName),
+            'extension' => $extension,
+            'size'      => $file->getSize(),
+        ];
+    }
+
+    /**
+     * دالة الكونترولر
+     */
+    public function updateFile(Request $request)
+    {
+        
+        // التحقق من صحة البيانات
+        // قمت بإضافة (bail) لتتوقف عند أول خطأ، وهذا يوفر الأداء
+        $request->validate([
+            'file' => 'required|file|bail|mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx|max:10240',
+        ]);
+
+        // استدعاء دالة الرفع
+        $fileData = $this->uploadToUsersDisk($request->file('file'));
+        
+        return response()->json([
+            'success' => true,
+            'data' => $fileData
+        ]);
     }
 }

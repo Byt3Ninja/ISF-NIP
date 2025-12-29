@@ -97,6 +97,13 @@ return [
             'url' => env('APP_URL') . '/dashboard/uploads',
             'visibility' => 'private',
         ],
+        'UsersDiskInviteMentor' => [
+            'driver' => 'local',
+            'root' => storage_path('app/uploads/InviteMentor'),
+            'url' => env('APP_URL') . 'dashboard/uploads/InviteMentor',
+            'visibility' => 'private',
+            'throw' => true, 
+        ],
         'TrainingDisk' => [
             'driver' => 'local',
             'root' => storage_path('app/training'),
