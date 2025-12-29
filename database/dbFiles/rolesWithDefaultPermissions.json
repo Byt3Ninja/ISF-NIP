@@ -8766,13 +8766,7 @@
                     "admin",
                     "organizationmanager"
                 ]
-            }
-        ]
-    },
-    {
-        "name": "Invitations",
-        "description": "Create new invitation",
-        "permissions": [
+            },
             {
                 "name": "invitations.store",
                 "description": "Create new invitation",
@@ -8782,13 +8776,7 @@
                     "admin",
                     "organizationmanager"
                 ]
-            }
-        ]
-    },
-    {
-        "name": "Invitations",
-        "description": "Edit invitation",
-        "permissions": [
+            },
             {
                 "name": "invitations.update",
                 "description": "Edit invitation",
@@ -8798,13 +8786,7 @@
                     "admin",
                     "organizationmanager"
                 ]
-            }
-        ]
-    },
-    {
-        "name": "Invitations",
-        "description": "Delete invitation",
-        "permissions": [
+            },
             {
                 "name": "invitations.destroy",
                 "description": "Delete invitation",
