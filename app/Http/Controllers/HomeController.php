@@ -1801,7 +1801,7 @@ class HomeController extends Controller
                 'icon' => 'ti-calendar-event',
                 'text' => 'Mentorship requests Duration',
                 'permissions' => ['mentorships.sessions_list', 'dashboard.widgets_cards_mentorship_sessions_durations_view'],
-                'count' => $mentorship_requests->sum('period') / 60,
+                'count' => number_format( ( $mentorship_requests->sum('period') / 60 ), 2 ),
                 'isRating' => false,
             ];
             $data['countCards'][] = [
