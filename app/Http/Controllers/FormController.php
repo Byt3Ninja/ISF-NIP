@@ -289,8 +289,8 @@ class FormController extends Controller
 			->leftJoin('users AS UJ', 'UJ.id', '=', 'JC.user_id')
 			->whereNull('FD.deleted_at')
 			->where('FD.step_id', $id)
-			->when($user->organization_id != null, function ($query) use ($user) {
-				return $query->where('CYC.organization_id', $user->organization_id);
+			->when(!$user->hasRole('admin') && !empty($user->organizations_ids), function ($query) use ($user) {
+				return $query->whereIn('CYC.organization_id', $user->organizations_ids);
 			})
 		->get();
 

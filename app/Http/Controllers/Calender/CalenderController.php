@@ -24,10 +24,10 @@ class CalenderController extends Controller
             /// Calender Data
             $data=[];
             $user = auth()->user();
-            $organization_id = $user->organization_id;
+            $orgIds = $user->hasRole('admin') ? null : $user->organizations_ids;
             if ($user->hasAnyRole('Admin|Editor|Manager|organizationManager')) {
 
-               $data = $this->AdminCalender($organization_id);
+               $data = $this->AdminCalender($orgIds);
 
             }elseif ($user->hasAnyRole('Mentor')){
 
@@ -81,9 +81,9 @@ class CalenderController extends Controller
 
     }
 
-    protected function AdminCalender($organization_id){
-        $mentorshipRequests = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
-            return $q->where('organization_id', $organization_id);
+    protected function AdminCalender($orgIds){
+        $mentorshipRequests = MentorshipRequest::when(!empty($orgIds), function ($q) use ($orgIds) {
+            return $q->whereIn('organization_id', $orgIds);
         })->get();
         foreach ($mentorshipRequests as $key) {
             $data[] = [
