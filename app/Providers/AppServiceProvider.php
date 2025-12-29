@@ -49,14 +49,20 @@ class AppServiceProvider extends ServiceProvider
             }
             $l = App::getLocale();
             $organization_id = null;
+            $organization_ids = [];
             if (auth()->check()) {
-                if (auth()->user()->hasRole('Admin')) {
+                $user = auth()->user();
+                if ($user->hasRole('Admin')) {
                     /***/
+                } elseif ($user->hasAnyRole(['organizationManager', 'subadmin'])) {
+                    $organization_ids = $user->organizations_ids ?? [];
+                    $organization_id = $organization_ids[0] ?? null;
                 } else {
-                    $organization_id = auth()->user()->organization_id;
+                    $organization_id = $user->organization_id;
+                    $organization_ids = $organization_id ? [$organization_id] : [];
                 }
             }
-            $view->with(['l' => $l, 'organization_id' => $organization_id, '_user' => $_user, 'permissions' => $permissions]);
+            $view->with(['l' => $l, 'organization_id' => $organization_id, 'organization_ids' => $organization_ids, '_user' => $_user, 'permissions' => $permissions]);
         });
 
 

@@ -70,7 +70,7 @@ class HomeController extends Controller
             } elseif ($user->hasAnyRole('Registered|Page Manager|Pages Editor')) {
 
                 return view('admin.clients.dashboard');
-            } elseif ($user->hasAnyRole('organizationManager')) {
+            } elseif ($user->hasAnyRole('organizationManager|subadmin')) {
 
                 return $this->organizationDashboard();
             } elseif ($user->hasAnyRole('Mentor')) {
@@ -97,8 +97,7 @@ class HomeController extends Controller
         $l = App::getLocale();
         $permissions = [];
         $organizations_ids = $user->organizations_ids;
-        $has_org = !empty($user->organization_id) && !is_null($user->organization_id) && trim($user->organization_id) ? true : false;
-        if( !$has_org && count( $organizations_ids ) > 0 ) { $has_org = true; }
+        $has_org = !empty($organizations_ids);
         if (auth()->check()) {
             $permissions = $user->myPermissions();
         }
@@ -2827,19 +2826,20 @@ class HomeController extends Controller
     protected function organizationDashboard()
     {
         $l = app()->getLocale();
-        $organization_id = Auth::user()->organization_id;
-        $mentorshipRequests = MentorshipRequest::where('organization_id', $organization_id);
-        $forms = BuilderForm::where('organization_id', $organization_id);
-        $sessions = TrainingSession::whereHas('step', function ($q) use ($organization_id) {
-            $q->where('stype', 4)->whereHas('cycle', function ($query) use ($organization_id) {
-                $query->where('organization_id', $organization_id);
+        $user = Auth::user();
+        $orgIds = $user->organizations_ids;
+        $mentorshipRequests = MentorshipRequest::whereIn('organization_id', $orgIds);
+        $forms = BuilderForm::whereIn('organization_id', $orgIds);
+        $sessions = TrainingSession::whereHas('step', function ($q) use ($orgIds) {
+            $q->where('stype', 4)->whereHas('cycle', function ($query) use ($orgIds) {
+                $query->whereIn('organization_id', $orgIds);
             });
         });
         $messages = Messenger::where('receiver', auth()->id())->whereNull('read');
-        $startups = Company::whereHas('cycledata', function ($q) use ($organization_id) {
-            $q->where('organization_id', $organization_id);
+        $startups = Company::whereHas('cycledata', function ($q) use ($orgIds) {
+            $q->whereIn('organization_id', $orgIds);
         });
-        $cycles = Cycle::where('organization_id', $organization_id);
+        $cycles = Cycle::whereIn('organization_id', $orgIds);
 
         // ============> Counts Section <==================
         $data['startups'] = $startups->count();
@@ -2878,7 +2878,7 @@ class HomeController extends Controller
 
         // Demographic
         $data['usersgov'] = User::join('states', 'users.state_id', '=', 'states.id')
-            ->where('users.organization_id', $organization_id)
+            ->whereIn('users.organization_id', $orgIds)
             ->select(
                 'states.name_en as state_en',
                 'states.name_ar as state_ar',
@@ -2889,7 +2889,7 @@ class HomeController extends Controller
 
 
         // Male and Female Ratio
-        $usersgender = User::select('gender', DB::raw('count(*) as total'))->where('organization_id', $organization_id)->groupBy('gender')->get();
+        $usersgender = User::select('gender', DB::raw('count(*) as total'))->whereIn('organization_id', $orgIds)->groupBy('gender')->get();
         $data['usersgender'] = $usersgender;
 
         // Development Stage  

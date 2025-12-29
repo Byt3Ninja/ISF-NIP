@@ -201,7 +201,7 @@ class MentorsController extends Controller
 	{
 		$user = auth()->user();
 		$orgIds = $user->organizations_ids;
-		if (Auth::user()->hasAnyRole('organizationManager')) {
+		if (Auth::user()->hasAnyRole('organizationManager|subadmin')) {
 			$surveys = SurveyScopes::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
 				return $q->whereIn('organization_id', $orgIds);
 			})->with(['survey', 'responses'])->get();
@@ -352,7 +352,7 @@ class MentorsController extends Controller
 			'notes' => 'nullable|string|max:255',
 		]);
 		$user = auth()->user();
-		if($user->hasRole('admin') || $user->hasRole('organizationManager')){
+		if($user->hasAnyRole(['admin', 'organizationManager', 'subadmin'])){
 			
 			if ($request->has('selected_dates')) {
 				

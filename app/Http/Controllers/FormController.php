@@ -34,15 +34,12 @@ class FormController extends Controller
 			WHERE
 				BF.deleted_at IS NULL
 		";
-		if( $user->organization_id != null )
+		$orgIds = $user->organizations_ids;
+		if( !$user->hasRole('admin') && !empty($orgIds) )
 		{
-			$forms .= " AND BF.organization_id = ? ";
-			$forms = DB::select($forms, [$user->organization_id]);
+			$forms .= " AND BF.organization_id IN (" . implode(',', array_map('intval', $orgIds)) . ") ";
 		}
-		else
-		{
-			$forms = DB::select($forms);
-		}
+		$forms = DB::select($forms);
 		$forms = collect($forms);
 		$steps = DB::table('steps')->whereNull('deleted_at')->get();
 
@@ -182,17 +179,12 @@ class FormController extends Controller
 				FD.deleted_at IS NULL
 				AND FD.step_id = ? 
 		";
-		$params = [];
-		
-		if( $user->organization_id != null )
+		$orgIds = $user->organizations_ids;
+		if( !$user->hasRole('admin') && !empty($orgIds) )
 		{
-			$forms .= " AND CYC.organization_id = ? ";
-			$forms = DB::select($forms, [$id, $user->organization_id]);
+			$forms .= " AND CYC.organization_id IN (" . implode(',', array_map('intval', $orgIds)) . ") ";
 		}
-		else
-		{
-			$forms = DB::select($forms, [$id]);
-		}
+		$forms = DB::select($forms, [$id]);
 
 		$forms = collect($forms);
 		// نبدأ بتجميع كل الأسئلة حسب step_id

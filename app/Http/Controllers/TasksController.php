@@ -16,19 +16,20 @@ class TasksController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {            
-        $organization_id = auth()->user()->organization_id;
+    {
+        $user = auth()->user();
+        $orgIds = $user->organizations_ids;
 
         $programs = Cycle::select('id', 'title')
-        ->when(!is_null($organization_id), function ($q) use ($organization_id) {
-            $q->where('organization_id', $organization_id);
+        ->when(!$user->hasRole('admin') && !empty($orgIds), function ($q) use ($orgIds) {
+            $q->whereIn('organization_id', $orgIds);
         })
         ->get();
 
         $startups = Company::with('cycledata')
-            ->whereHas('cycledata', function ($q) use ($organization_id) {
-                $q->when(!is_null($organization_id), function ($q) use ($organization_id) {
-                    $q->where('organization_id', $organization_id);
+            ->whereHas('cycledata', function ($q) use ($user, $orgIds) {
+                $q->when(!$user->hasRole('admin') && !empty($orgIds), function ($q) use ($orgIds) {
+                    $q->whereIn('organization_id', $orgIds);
                 });
             })
             ->get()
@@ -46,9 +47,9 @@ class TasksController extends Controller
 
         // Fetch real tasks from database
         $tasksData = ProgramTask::with(['program', 'assignees', 'creator'])
-            ->when(!is_null($organization_id), function ($q) use ($organization_id) {
-                $q->whereHas('program', function($pq) use ($organization_id) {
-                    $pq->where('organization_id', $organization_id);
+            ->when(!$user->hasRole('admin') && !empty($orgIds), function ($q) use ($orgIds) {
+                $q->whereHas('program', function($pq) use ($orgIds) {
+                    $pq->whereIn('organization_id', $orgIds);
                 });
             })
             ->orderBy('created_at', 'desc')
