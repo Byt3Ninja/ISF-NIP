@@ -95,6 +95,7 @@ class MentorsController extends Controller
 			->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
 			->where('roles.default_for', 'mentor')
 			->select('users.*')
+			->with('inviteMentors')
 			->get();
 		$cList = CyclesMentors::where('cycle_id', $id)->pluck('user_id')->toArray();
 		$cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
@@ -120,6 +121,20 @@ class MentorsController extends Controller
 			});
 		}
 
+		$mentors = $mentors->map(function ($mentor) {
+			$scopes = $mentor->inviteMentors->pluck('scope')->unique()->values();
+
+			if ($scopes->isEmpty()) {
+				$mentor->scope = null;
+			} elseif ($scopes->count() > 1) {
+				$mentor->scope = 'all';
+			} else {
+				$mentor->scope = $scopes->first(); // public أو organization
+			}
+
+			return $mentor;
+		});
+
 		// تصفية حسب حالة الـ checked
 		if ($request->assigning != 0) {
 			$checkedStatus = $request->assigning; // القيمة ستكون "checked" أو "unchecked"
@@ -138,10 +153,9 @@ class MentorsController extends Controller
 				return true; // في حالة عدم تحديد أي فلتر
 			});
 		}
-			
 			$settings = Settings::where('id', 1)->first();
 			$offline_allowed = $settings->allow_offline_sessions == 1 ? true : false;
-			
+
 		return view('admin.settings.mentorship.assign', compact('mentors', 'id', 'cList', 'cycles', 'offline_allowed'));
 	}
 

@@ -189,6 +189,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsToMany(Organization::class, 'user_organizations')->withTimestamps();
     }
 
+    public function inviteMentors()
+    {
+        return $this->hasMany(InviteMentor::class, 'mentor_id');
+    }
+
     /**
      * Get all accessible organization IDs for this user.
      * - Admin: returns all organization IDs

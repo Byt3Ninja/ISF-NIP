@@ -3069,5 +3069,7 @@ return [
 	'organization_scope_hint' => 'Mentors related to organizations only',
     'error_date_range' => 'Program date range must be defined correctly.',
 	'Offline sessions are not allowed' => 'Offline sessions are not allowed',
+	'Email_Not_Configured' => 'Email is not configured',
+	'Email_Not_Enabled' => 'Email is not enabled',
 ];
 
