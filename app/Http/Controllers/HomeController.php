@@ -1339,7 +1339,7 @@ class HomeController extends Controller
             $schedule->t_to = substr($schedule->tto, 0, 5);
             $schedule->notes ? $schedule->notes : '...';
 
-            if ($schedule->type === 'Weekly') {
+            if (trim( strtolower( $schedule->type ) ) === 'weekly') {
                 return [
                     'id' => $schedule->id,
                     'weekday' => $schedule->days,
@@ -1359,6 +1359,16 @@ class HomeController extends Controller
                 ];
             }
         });
+
+        $currentTime = now();
+        $my_schedules = $my_schedules->filter(function ($schedule) use ( $currentTime ) {
+            if( $schedule['weekly'] == true ) { return true; }
+            else
+            {
+                $end_at = Carbon::parse( $schedule['date'] . $schedule['end_time'] . ':00' );
+                return $currentTime->lte( $end_at );
+            }
+        })->values();
 
         $setting = collect(DB::select("SELECT * FROM settings where `id` = 1 limit 1"))->first();
 
