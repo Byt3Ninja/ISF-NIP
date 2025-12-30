@@ -5434,8 +5434,30 @@
                 ]
             },
             {
-                "name": "screening.save_panels",
-                "description": "Save Screening Panels",
+                "name": "screening.add_judging_panels",
+                "description": "Add Judging Panels",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "screening.delete_judging_panel",
+                "description": "Delete Judging Panel",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "screening.delete_judging_panel",
+                "description": "Delete Judging Panel",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [

@@ -1528,6 +1528,7 @@ return [
 	'Selected organization does not exist' => 'Selected organization does not exist',
 	'MessageDraftSuccessfully' => 'Message Draft Successfully',
 	'Saved_successfully' => 'Saved successfully',
+	'Deleted_successfully' => 'Deleted successfully',
 	'licenseActivated' => 'License Activated Successfully!',
 	'License Activation Result' => 'License Activation Result',
 	'Go To Dashboard' => 'Go To Dashboard',

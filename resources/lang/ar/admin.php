@@ -1535,6 +1535,7 @@ return [
 	'Selected organization does not exist' => 'المؤسسة المحددة غير موجودة',
 	'MessageDraftSuccessfully' => 'تم حفظ الرسالة بنجاح',
 	'Saved_successfully' => 'تم الحفظ بنجاح',
+	'Deleted_successfully' => 'تم الحذف بنجاح',
 	'licenseActivated' => 'تم التفعيل بنجاح',
 	'License Activation Result' => 'نتيجة التفعيل',
 	'Go To Dashboard' => 'الذهاب الى لوحة التحكم',
