@@ -3074,7 +3074,7 @@ return [
 	'Offline sessions are not allowed' => 'Offline sessions are not allowed',
 	'Enable Section' => 'Enable Section',
 	'Disable Section' => 'Disable Section',
-	'Landing Page Sections' => 'Landing Page Sections'
+	'Landing Page Sections' => 'Landing Page Sections',
 	'Email_Not_Configured' => 'Email is not configured',
 	'Email_Not_Enabled' => 'Email is not enabled',
 ];
