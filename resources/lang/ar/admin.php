@@ -3130,4 +3130,6 @@ return [
 	'Enable Section' => 'تفعيل القسم',
 	'Disable Section' => 'الغاء التفعيل',
 	'Landing Page Sections' => 'أقسام صفحة الهبوط',
+	'Email_Not_Configured' => 'لم يتم تكوين البريد الالكتروني',
+	'Email_Not_Enabled' => ' لم يتم تفعيل البريد الاليكترونى'
 ];

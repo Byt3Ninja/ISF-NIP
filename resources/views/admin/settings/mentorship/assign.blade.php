@@ -187,10 +187,13 @@
               <!-- MENTORS CARD GRID -->
               <div class="row g-4 mb-4" id="mentors-grid">
                 @foreach ($mentors as $mentor)
+                {{-- {{ $mentor->scope }} --}}
                   <div class="col-lg-4 col-md-6 mentor-item-col"
                        data-name="{{ strtolower($mentor->name) }} {{ strtolower($mentor->title) }}"
                        data-specialization="{{ $mentor->bio->{'specialization_' . $l} ?? '' }}"
-                       data-rating="{{ number_format($mentor->mrating(), 1) }}">
+                       data-scope="{{ $mentor->scope }}"
+                       data-rating="{{ number_format($mentor->mrating(), 1) }}"
+                      >
                         
                         <div class="card h-100 position-relative shadow-xs border" id="card-{{ $mentor->id }}">
                             <div class="card-body d-flex flex-column position-relative">

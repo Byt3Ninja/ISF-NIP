@@ -28,7 +28,7 @@ class SlotController extends Controller
 	public function index()
 	{
 			$settings = Settings::where('id', 1)->first();
-			$offline_allowed = $settings->allow_offline_sessions = 1 ? true : false;			
+			$offline_allowed = $settings->allow_offline_sessions == 1 ? true : false;			
 			
 			return view('mentor.availability.index', compact('offline_allowed'));
 	}
@@ -151,9 +151,7 @@ class SlotController extends Controller
 	{
 		
 		$settings = Settings::where('id', 1)->first();
-		$offline_allowed = $settings ? ($settings->allow_offline_sessions = 1 ? true : false) : false;
-
-		
+		$offline_allowed = $settings ? ($settings->allow_offline_sessions == 1 ? true : false) : false;
 
 		$schedules = Schedule::where('user_id', $id ?? auth()->id())
 						->where(function ($query) {$query
