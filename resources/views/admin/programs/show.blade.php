@@ -278,24 +278,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
             <div class="d-flex gap-6">
               <div class="d--flex flex-shrink-0 w-px-100">
                 <div class="w-px-70 h-px-100">
-                  @if(!empty($cycle->organization->image_url))
-                  @php
-                  $imageUrl = $cycle->organization->image_url;
-              
-                   // استخراج المسار من الرابط
-                   $imagePath = parse_url($imageUrl, PHP_URL_PATH);
-              
-                   // إزالة أي أجزاء غير ضرورية في البداية مثل `/dashboard/uploads/files/`
-                   $fileN = ltrim(str_replace('/dashboard/uploads/files/', '', $imagePath), '/');
-              @endphp
-                  <img src="/{{ $imageUrl }}" class="w-100 h-100 border radius-15"
-                    style="object-fit: contain;" alt="Program Image" />
-                  @else
-                  <img src="/images/background/logo.png" class="w-100 h-100 border radius-15"
-                  style="object-fit: contain;" alt="Program Image" />
-
-                  @endif
-
+                  <img src="{{ $cycle->logo }}" class="w-100 h-100 border radius-15" style="object-fit: contain;" alt="Program Image" />
                 </div>
               </div>
               <div class="flex-grow-1">
