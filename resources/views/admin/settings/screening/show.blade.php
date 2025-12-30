@@ -219,10 +219,6 @@ $pills = [
                     $allCompanies = collect($judgers_list ?? [])
                         ->pluck('companies')
                         ->flatten()
-                        ->merge(
-                            \App\Company::whereIn('step', array_filter([$form->id ?? null, $cstep->id ?? null]))
-                                ->pluck('id')
-                        )
                         ->unique()
                         ->filter();
 
@@ -426,14 +422,14 @@ $pills = [
       <form id="stepForm" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="_token" value="">
         <div class="modal-body">
-          <div class="form-group mb-3">
+          <!-- <div class="form-group mb-3">
             <label class="form-label">{{ __('admin.screening.screening_type') }}</label>
             <select class="form-select" name="ScreeningSelect" id="screening-type" required>
               <option value="onetoall">{{ __('admin.screening.onetoall') }}</option>
               <option value="grouptoall">{{ __('admin.screening.grouptoall') }}</option>
               <option value="grouptogroup">{{ __('admin.screening.grouptogroup') }}</option>
             </select>
-          </div>
+          </div> -->
           <input type="hidden" name="sid" id="step-id-value">
           <input type="hidden" name="type" value="8">
           <div class="form-group mb-3">
@@ -738,15 +734,16 @@ $pills = [
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
           },
           success: function(response) {
+
             if (response.status) {
-              showAlert($('#model-validation-summary')[0], 'Screening guidelines saved successfully', 'success', 3000);
+              showAlert($('#model-validation-summary')[0], 'Screenings guidelines saved successfully', 'success', 3000);
             } else {
               showAlert($('#model-validation-summary')[0], response.message, 'danger');
             }
           },
           error: function(xhr) {
             const errorMessage = xhr.responseJSON?.message || 'An error occurred while saving screening guidelines';
-            showAlert($('#model-validation-summary')[0], errorMessage, 'danger');
+          
           }
         });
       });
