@@ -36,15 +36,15 @@
     'contact' => 'form-wizard-personal',
     'managers' => 'form-wizard-address',
     'landing' => 'form-wizard-social-link',
-    'section_form' => 'form-wizard-submit',
+    'custom_sections' => 'form-wizard-submit',
   ];
 
   $tabs = [
     ['id' => 'basics', 'title' => __('admin.Organization Basics'), 'step' => 1],
-    ['id' => 'contact', 'title' => __('admin.Contact Information'), 'step' => 2],
+    ['id' => 'contact', 'title' => __('admin.Contact Info'), 'step' => 2],
     ['id' => 'managers', 'title' => __('admin.Organization Manager'), 'step' => 3],
     ['id' => 'landing', 'title' => __('admin.Landing Page'), 'step' => 4],
-    ['id' => 'section_form', 'title' => __('admin.Custom Pages'), 'step' => 5],
+    ['id' => 'custom_sections', 'title' => __('admin.Custom Sections'), 'step' => 5],
   ];
 @endphp
 
@@ -73,7 +73,7 @@
           @endforeach
         @endif
 
-        <div class="bs-stepper wizard-icons wizard-icons-example">
+        <div class="bs-stepper wizard-numbered">
           <!-- Wizard header -->
           <div class="bs-stepper-header">
             @foreach ($tabs as $key => $tab)
@@ -84,17 +84,16 @@
                   data-tab-index="{{ $tab['step'] }}"
                   {{ ($tab['step'] > $maxStep) ? 'disabled' : '' }}
                 >
-                  <span class="bs-stepper-icon">
-                    <svg viewBox="0 0 58 58">
-                      <use xlink:href="/vuexy/assets/svg/icons/{{ $icons[$tab['id']] }}.svg"></use>
-                    </svg>
+                  <span class="bs-stepper-circle">{{ $tab['step'] }}</span>
+                  <span class="bs-stepper-label">
+                    <span class="bs-stepper-title">{{ __('admin.' . $tab['title']) }}</span>
+                    <span class="bs-stepper-subtitle">{{ __('admin.Add') }} {{ $tab['title'] }}</span>
                   </span>
-                  <span class="bs-stepper-label">{{ $tab['title'] }}</span>
                 </button>
               </div>
               @if (!$loop->last)
-                <div class="line">
-                  <div style="width: 50px; height: 2px;" class="bg-dark"></div>
+               <div class="line">
+                  <i class="ti ti-chevron-right"></i>
                 </div>
               @endif
             @endforeach
@@ -129,7 +128,7 @@
                     <small>{{ __('admin.setup') }} {{ $tab['title'] }}</small>
                   </div>
                   
-                  @if($tab['step'] <= 2)
+                  @if($tab['step'] <= 3)
                     @include(
                       'admin.organizations.wizard.partials._step' . $tab['step'] . '_' . $tab['id'], [
                         'organization' => $organization ?? null,
@@ -215,7 +214,7 @@
 
 @section('scripts')
   <script src="/vuexy/assets/vendor/libs/bs-stepper/bs-stepper.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
@@ -405,7 +404,7 @@
               }
             }
           }
-        }
+        },
       };
 
       // Initialize form validations
@@ -510,7 +509,7 @@
         const validator = validators[currentStep];
         
         if (action === 'draft') {
-          const selector = currentStep === 1 ? '#wizardForm' : `#organization_${['basics', 'contact_information', 'manager', 'landing_page', 'custom_pages'][currentStep - 1]}`;
+          const selector = currentStep === 1 ? '#wizardForm' : `#${['basics', 'contact', 'managers', 'landing', 'custom_sections'][currentStep - 1]}`;
           utils.copyFormDataToTarget(selector, '#draftForm', ['current_step', '_token', '_method']);
           $('#draftForm').find('[name="current_step"]').val(currentStep);
           $('#draftForm').submit();
@@ -561,8 +560,8 @@
           $('#wizardForm').submit();
         } else if (config.isEdit) {
           const $form = $(`#step${step}Form`);
-          const selector = `#organization_${['basics', 'contact_information', 'manager', 'landing_page', 'custom_pages'][step - 1]}`;
-          
+          const selector = `#${['basics', 'contact', 'managers', 'landing', 'custom_sections'][step - 1]}`;
+
           utils.copyFormDataToTarget(selector, $form, ['redirect_to', '_token', '_method']);
           $form.find('[name="redirect_to"]').val(action === 'same' ? 'same' : 'next');
           $form.submit();
@@ -598,19 +597,19 @@
           handleFormSubmit('next', step);
         });
 
-        $('.save-changes-step1-btn, .save-changes-step2-btn').on('click', function(e) {
+        $('.save-changes-step1-btn, .save-changes-step2-btn', '.save-changes-step3-btn').on('click', function(e) {
           e.preventDefault();
           const step = $(this).hasClass('save-changes-step1-btn') ? 1 : 2;
           handleFormSubmit('same', step);
         });
 
-        $('.save-continue-step1-btn, .save-continue-step2-btn').on('click', function(e) {
+        $('.save-continue-step1-btn, .save-continue-step2-btn', '.save-continue-step3-btn').on('click', function(e) {
           e.preventDefault();
           const step = $(this).hasClass('save-continue-step1-btn') ? 1 : 2;
           handleFormSubmit('next', step);
         });
 
-        $('.save-draft-step1-btn, .save-draft-step2-btn').on('click', function(e) {
+        $('.save-draft-step1-btn, .save-draft-step2-btn', '.save-draft-step3-btn').on('click', function(e) {
           e.preventDefault();
           const step = $(this).hasClass('save-draft-step1-btn') ? 1 : 2;
           handleFormSubmit('draft', step);
@@ -624,7 +623,7 @@
 
       // Override Stepper behavior for validation
       function initStepperWithValidation() {
-        const wizardIcons = document.querySelector('.wizard-icons-example');
+        const wizardIcons = document.querySelector('.wizard-numbered');
         if (!wizardIcons) return;
 
         // Initialize Stepper with linear: false to allow going back always
