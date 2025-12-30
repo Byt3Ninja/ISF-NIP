@@ -37,13 +37,13 @@ class Cycle extends Model
         if( trim( $img ) ) { return URL::to( $img ); }
 
         $org = $this->organization;
-        if( $org && $org->img_url )
+        if( $org && $org->imageUrl )
         {
-            if (str_starts_with($org->img_url, 'http') || str_starts_with($org->img_url, '/'))
+            if (str_starts_with($org->imageUrl, 'http') || str_starts_with($org->imageUrl, '/'))
             {
-                return $org->img_url;
+                return $org->imageUrl;
             }
-            return URL::to( $org->img_url );
+            return URL::to( $org->imageUrl );
         }
         return URL::to('/images/background/logo.png');
     }
