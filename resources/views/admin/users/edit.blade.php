@@ -108,7 +108,14 @@
 
         <div class="tab-content p-0">
           <!-- Info -->
-          <div class="tab-pane fade show active" id="navs-pills-info" role="tabpanel">  
+          <div class="tab-pane fade show active" id="navs-pills-info" role="tabpanel">
+            @if( $_user->ableTo('users.login_as', $permissions) )
+            <div class="text-end">
+              <button id="start-impersonation" class="btn btn-xs btn-outline-primary" data-href="{{ route('users.login_as', ['id' => $user->id]) }}">
+                <i class="fa-solid fa-user-secret me-2"></i> {{ __('admin.Impersonate this user') }}
+              </button>
+            </div>
+            @endif
             <form method="post" action="{{route('users.update', ['user' => $user->id])}}" enctype="multipart/form-data" id="info-form">
               {!! csrf_field() !!}
               @method('patch')
@@ -714,6 +721,21 @@
 </script>
 
 <script>
+
+  @if( $_user->ableTo('users.login_as', $permissions) )
+  $(document).on('click', '#start-impersonation', function(e) {
+    e.preventDefault();
+    var login_url = $(this).data('href');
+    alertify.confirm(
+			"{{ __('admin.Confirm Action') }}",
+			"{!! __('admin.ConfirmStartImpersonationMessage') !!}",
+			function() {
+				window.location.href = login_url;
+			},
+			function(){}
+		).set('labels', {ok: "<i class='fa fa-check me-2'></i> {{ __('admin.Yes') }}", cancel: "{{ __('admin.cancel') }}"});
+  });
+  @endif
 
   $(document).ready(function() {
     getStates($('#country_id').val());
