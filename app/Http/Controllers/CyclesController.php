@@ -643,7 +643,7 @@ class CyclesController extends Controller
         } elseif ($type == 7) {
             // Modify step
             $step = Step::where('id', $request->sid)->first()->toArray();
-            // dd($step);
+
             return response()->json($step);
         } elseif ($type == 8) {
             /// deleted saved data if type changed
@@ -1105,86 +1105,91 @@ class CyclesController extends Controller
     function my($id)
     {
         $step = Step::where(function($query) {
-        $query->where('stype', 1)
-              ->orWhere('stype', 5);
+            $query->where('stype', 1)->orWhere('stype', 5);
         })->where('id', $id)->first();
-            if (!$step) {
-                return redirect()->back()->with(['msg' => 'Error opening the selected form.', 'class' => 'danger']);
-            }
-            //        if ($step->to < now()->format('Y-m-d')){return redirect()->back()->with(['msg' => 'Error can\'t open form, step timed out.', 'class' => 'danger']);}
-            $id = $step->id;
+        if (!$step) {
+            return redirect()->back()->with(['msg' => 'Error opening the selected form.', 'class' => 'danger']);
+        }
+        $user = auth()->user();
+        // if ($step->to < now()->format('Y-m-d')){return redirect()->back()->with(['msg' => 'Error can\'t open form, step timed out.', 'class' => 'danger']);}
+        $id = $step->id;
 
-            $field_map_ids = Formfield::where('step_id', $id)
-                ->where('builder_forms_id', $step->data)
-                ->pluck('id')
-                ->toArray();
+        $get_fields = Formfield::where('step_id', $id)->where('builder_forms_id', $step->data)->get();
+        $field_map_ids = $get_fields->pluck('id')->toArray();
 
-            // جلب كل الحقول الخاصة بالـ step
-            $fields = $step->fields()
-                ->where('builder_forms_id', $step->data)
-                ->orderBy('form_fields.id', 'asc')
-                ->get();
+        // جلب كل الحقول الخاصة بالـ step
+        $fields = $step->fields()
+            ->where('builder_forms_id', $step->data)
+            ->orderBy('form_fields.id', 'asc')
+            ->get();
 
-            // تجهيز البيانات بشكل منسق
-            $structured = $fields->map(function ($field) {
-                $options = json_decode($field->pivot->options ?? '{}', true) ?? [];
-
-                return [
-                    'id'          => $field->id,
-                    'label'       => $options['label'] ?? '',
-                    'description' => $options['description'] ?? '',
-                    'section'     => $options['section'] ?? 'N/A',
-                    'type'        => $options['type'] ?? null,
-                    'is_required' => (bool)($options['validation']['required'] ?? 0),
-                    'options'     => isset($options['values'])
-                        ? (is_array($options['values']) ? $options['values'] : explode(',', $options['values']))
-                        : [],
-                    'logic'       => $options['logic'] ?? 'continue',
-                ];
-            })
-            ->groupBy('section')
-            ->map(function ($questions, $section_title) {
-                $first = $questions->first();
-
-                return [
-                    'title'       => $section_title,
-                    'description' => $first['description'] ?? '',
-                    'logic'       => is_array($first['logic']) ? ($first['logic']['section'] ?? 'continue') : ($first['logic'] ?? 'continue'),
-                    'questions'   => $questions->values()->map(function ($q) {
-                        return [
-                            'id'          => $q['id'],
-                            'label'       => $q['label'],
-                            'is_required' => $q['is_required'],
-                            'type'        => $q['type'],
-                            'options'     => $q['options'],
-                            'logic'       => $q['logic'],
-                        ];
-                    })->toArray(),
-                ];
-            })
-            ->values()
-            ->toArray();
-        $answers = [];
-            // البنية النهائية
-            $data = [
-                'id'          => $step->id,
-                'title'       => $step->title,
-                'description' => $step->description,
-                'build_data'  => $structured,
-                'field_ids' => implode(",", $field_map_ids)
+        // تجهيز البيانات بشكل منسق
+        $structured = $get_fields->map(function ($field) {
+            
+            $options = (array) $field->options;
+            return [
+                'id'          => $field->id,
+                'label'       => $options['label'] ?? '',
+                'description' => $options['description'] ?? '',
+                'section'     => $options['section'] ?? 'N/A',
+                'type'        => $options['type'] ?? null,
+                'is_required' => (bool)($options['validation']->required ?? 0),
+                'options'     => isset($options['values'])
+                    ? (is_array($options['values']) ? $options['values'] : explode(',', $options['values']))
+                    : [],
+                'logic'       => $options['logic'] ?? 'continue',
             ];
+        })
+        ->groupBy('section')
+        ->map(function ($questions, $section_title) {
+            $first = $questions->first();
+            return [
+                'title'       => $section_title,
+                'description' => $first['description'] ?? '',
+                'logic'       => is_array($first['logic']) ? ($first['logic']['section'] ?? 'continue') : ($first['logic'] ?? 'continue'),
+                'questions'   => $questions->values()->map(function ($q) {
+                    return [
+                        'id'          => $q['id'],
+                        'label'       => $q['label'],
+                        'is_required' => $q['is_required'],
+                        'type'        => $q['type'],
+                        'options'     => $q['options'],
+                        'logic'       => $q['logic'],
+                    ];
+                })->toArray(),
+            ];
+        })
+        ->values()
+        ->toArray();
 
-            // $field_map_ids = Formfield::where('step_id', $id)->where('builder_forms_id', $step->data)->select('id')->pluck('id')->toArray();
-            // $answers = [];
-            // $data = [
-            //     'title' => $step->title,
-            //     'fields' => $step->fields()->where('builder_forms_id', $step->data)->orderBy('form_fields.id', 'asc')->get(),
-            //     'form_id' => $step->id,
-            //     'field_ids' => implode(",", $field_map_ids)
-            // ];
-            //        if (Auth::user()->company->step==$id) {
-            $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->whereIn('form_data.field_id', $field_map_ids)->orderBy('form_data.id', 'ASC')->get();
-        //        }
+        $answers = [];
+
+        // البنية النهائية
+        $data = [
+            'id'          => $step->id,
+            'title'       => $step->title,
+            'description' => $step->description,
+            'build_data'  => $structured,
+            'field_ids' => implode(",", $field_map_ids)
+        ];
+
+        // $field_map_ids = Formfield::where('step_id', $id)->where('builder_forms_id', $step->data)->select('id')->pluck('id')->toArray();
+        // $answers = [];
+        // $data = [
+        //     'title' => $step->title,
+        //     'fields' => $step->fields()->where('builder_forms_id', $step->data)->orderBy('form_fields.id', 'asc')->get(),
+        //     'form_id' => $step->id,
+        //     'field_ids' => implode(",", $field_map_ids)
+        // ];
+
+
+        $inputs = [];
+        $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', $user->id)->whereIn('form_data.field_id', $field_map_ids)->orderBy('form_data.id', 'ASC')->get();
+        foreach ($answers as $answer) {
+            $inputs[ 'field_' . $answer->field_id] = $answer->answer;
+        };
+        session()->flashInput($inputs);
+
         return view('admin.settings.cycles.form', $data)->with('data', $data)->with('step', $step)->with('c', $step->cycle_id)->with('answers', $answers);
     }
 
@@ -1221,7 +1226,7 @@ class CyclesController extends Controller
                 ->withErrors($dynamic_validator)
                 ->withInput();
         }
-        //dd("ss");
+
         // gather the form data as field_name => [ label, data ]
         foreach ($field_map_ids as $fid) {
 

@@ -191,6 +191,15 @@
                                     name="{{ $field_name }}"
                                     {{ $question['is_required'] ? 'required' : '' }}
                                   />
+                                  @php
+                                  if( trim( old($field_name) ) && !empty( old($field_name) ) ):
+                                  @endphp
+                                    <div class="mt-2">
+                                      <a href="{{ URL::to( old($field_name) ) }}" target="_blank">
+                                        <i class="ti ti-download"></i> {{ __('admin.Download') }}
+                                      </a>
+                                    </div>
+                                  @php endif; @endphp
                                   @break
 
                                 @case('short_answer')
