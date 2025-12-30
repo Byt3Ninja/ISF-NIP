@@ -2522,7 +2522,7 @@ class HomeController extends Controller
         $startupComplete = method_exists($user, 'hasCompletedStartup') ? $user->hasCompletedStartup() : ($user->company && !empty($user->company->name_en) && !empty($user->company->address_en) && !empty($user->company->sector) && !empty($user->company->stage));
         $data['pollingNeeded'] = !$profileComplete || !$startupComplete;
         $settings = Settings::where('id', 1)->first();
-		$data['offline_allowed'] = $settings->allow_offline_sessions = 1 ? true : false;
+		$data['offline_allowed'] = $settings->allow_offline_sessions == 1 ? true : false;
         return view('includes.dashboard', $data);
     }
     protected function adminDashboard()
