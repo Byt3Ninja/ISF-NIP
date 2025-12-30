@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Settings;
 use App\Invitation;
 use App\InviteMentor;
 use App\Organization;
@@ -119,7 +120,7 @@ class InvitationController extends Controller
                             ];
                         })->toArray();
         
-
+                        
         return view('mentors.invitations.index', compact('invitations', 'organizations'));
     }
 
@@ -131,10 +132,23 @@ class InvitationController extends Controller
      */
     public function store(Request $request)
     {
+            
+        // هنعمل ان لو حاجة فى الsmtp مش موجودة فيرجع للادمن عشان يراجع على 
+        $setting = Settings::first();
+                        if($setting->enable_email == 1){
+                            if($setting->host != null){
+                                return response()->json(['success' => 'false', 'message' => 'admin.Email_Not_Configured'], 203);
+                            }else{
+                                return response()->json(['success' => 'false', 'message' => 'admin.Email_Not_Enabled'], 203);
+                            }
+                        }
+        
+        
         // Retrieve the data from the request
         $data = $request->all();
        // dd($data);
         $request->validate([
+            'invitee_name' => 'required',
             'invitee_email' => 'required|email',
             'invitation_scope' => 'required',
             'organizations' => 'nullable|array',
@@ -148,9 +162,9 @@ class InvitationController extends Controller
 
         $invitation = new InviteMentor;
         $invitation->email = $data['invitee_email'];
-        $invitation->name = $name;
+        $invitation->name = $data['invitee_name'] ?? $name;
         $invitation->user_id = auth()->user()->id;
-        $invitation->status = 'Sent';
+        $invitation->status = 'Sended';
         $invitation->scope = $data['invitation_scope'];
         $invitation->organization_ids = $data['organizations'] ?? [];
         $invitation->subject = $data['invitation_subject'];
@@ -184,9 +198,6 @@ class InvitationController extends Controller
      */
     public function updateFile(Request $request)
     {
-        
-        // التحقق من صحة البيانات
-        // قمت بإضافة (bail) لتتوقف عند أول خطأ، وهذا يوفر الأداء
         $request->validate([
             'file' => 'required|file|bail|mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx|max:10240',
         ]);
