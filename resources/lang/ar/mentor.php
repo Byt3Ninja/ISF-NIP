@@ -120,4 +120,6 @@ return [
     'mentor_not_entrolled_in_cycle' => 'المرشد ليس مسجل في برنامج',
     'add_new_slot' => 'اضافة فترة جديدة',
     'day' => 'اليوم',
+    'Offline_not_allowed' => 'لا يسمح بالجلسات Offline',
+    'Only_Online_allowed' => ' تم السماح للجلسة عن بعد فقط ',
 ];
