@@ -17,10 +17,11 @@ class FormBuilderController extends Controller
      */
    public function showBuilder(Request $request, $id = null)
     {
-        $organization_id = auth()->user()->organization_id;
+        $user = auth()->user();
+        $orgIds = $user->organizations_ids;
 
         // Check if there are no organizations
-        if (is_null($organization_id) && Organization::count() == 0) {
+        if (empty($orgIds) && Organization::count() == 0) {
             return redirect(route('organizations.index'))->with('message2', 'add organizations first');
         }
 
@@ -196,8 +197,8 @@ class FormBuilderController extends Controller
         }
 
         // Load builder forms list
-        if (!is_null(auth()->user()->organization_id)) {
-            $builderForms = BuilderForm::where('organization_id', auth()->user()->organization_id)->get();
+        if (!$user->hasRole('admin') && !empty($orgIds)) {
+            $builderForms = BuilderForm::whereIn('organization_id', $orgIds)->get();
         } else {
             $builderForms = BuilderForm::all();
         }

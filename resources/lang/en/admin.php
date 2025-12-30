@@ -139,6 +139,7 @@ return [
 	'DYes' => 'Yes, delete it',
 	'No' => 'No',
 	'Deleted' => 'Deleted',
+	'panel_delete_warning' => 'This will remove the panel and all associated judge/startup assignments. This action cannot be undone.',
 	'del' => 'Deleted Successfully',
 	'Zoom' => 'Zoom',
 	'Teams' => 'Teams',
@@ -2673,6 +2674,8 @@ return [
 		'add_judging_panels' => 'Add Judging Panels',
 		'add_panels_description' => 'Add judges and startups to each panel',
 		'schedule_session' => 'Schedule Session',
+		'no_panels_added' => 'No panels added yet.',
+		'add_first_panel' => 'Add your first panel',
 	],
 	'training_sessions' => 'Training Sessions',
 	'training_courses' => 'Training Courses',
@@ -3068,5 +3071,6 @@ return [
 	'error_date_range' => 'Program date range must be defined correctly.',
 	'setup' => 'Setup',
 	'setup_organization_wizard_description' => 'Setup you organization details step by step',
+	'Offline sessions are not allowed' => 'Offline sessions are not allowed',
 ];
 

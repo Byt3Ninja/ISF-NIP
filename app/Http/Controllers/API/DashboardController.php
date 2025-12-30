@@ -259,9 +259,14 @@ class DashboardController extends Controller
             $data = $this->dashboardService->mentorDashboard($user->id);
             return $this->success($data);
         }
-        elseif ($user->hasRole('organizationManager')) {
-            $data = $this->dashboardService->organizationManagerDashboard($user->organization_id, $nameColumn);
-            return $this->success($data);
+        elseif ($user->hasAnyRole(['organizationManager', 'subadmin'])) {
+            $orgIds = $user->organizations_ids;
+            $organizationId = !empty($orgIds) ? $orgIds[0] : null;
+            if ($organizationId) {
+                $data = $this->dashboardService->organizationManagerDashboard($organizationId, $nameColumn);
+                return $this->success($data);
+            }
+            return $this->forbidden(__('api.forbidden'));
         }
         elseif ($user->hasRole('Judger')) {
             $data = $this->dashboardService->judgerDashboard($nameColumn);

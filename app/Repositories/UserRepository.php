@@ -412,8 +412,11 @@ class UserRepository
         $errorMessage = '';
 
         $company = $user->company;
+        $orgIds = $user->organizations_ids;
         if ($company && $company->cycle != null) {
-            $companies = Company::where('organization_id', $user->organization_id)
+            $companies = Company::when(!empty($orgIds), function ($q) use ($orgIds) {
+                    return $q->whereIn('organization_id', $orgIds);
+                })
                 ->where('cycle', $company->cycle)
                 ->when($search, function ($query) use ($search, $name) {
                     $query->where($name, 'like', '%' . $search . '%');

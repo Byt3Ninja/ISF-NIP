@@ -153,17 +153,30 @@ class SlotController extends Controller
 		$settings = Settings::where('id', 1)->first();
 		$offline_allowed = $settings ? ($settings->allow_offline_sessions = 1 ? true : false) : false;
 
+		
+
 		$schedules = Schedule::where('user_id', $id ?? auth()->id())
-					->where(function ($query) {
-						$query->whereNull('date')
-							->orWhere('date', '>=', date('Y-m-d'));
-					})
-					->get();
+						->where(function ($query) {$query
+								->whereNull('date')
+								->orWhere('date', '>', date('Y-m-d'))
+								->orWhere(function ($q) {
+									$q->where('date', date('Y-m-d'))
+									->where('tto', '>', date('H:i:s'));
+								});
+						})
+						->get();
 		// Active-only filter
 		if ($request->has('active_only') && $request->active_only == 'true') {
-			$schedules = Schedule::where('active', 1)
-				->where('user_id', $id ?? auth()->id())
-				->get();
+			$schedules = Schedule::where('user_id', $id ?? auth()->id())
+						->where(function ($query) {$query
+								->whereNull('date')
+								->orWhere('date', '>', date('Y-m-d'))
+								->orWhere(function ($q) {
+									$q->where('date', date('Y-m-d'))
+									->where('tto', '>', date('H:i:s'));
+								});
+						})
+						->get();
 		}
 
 		$slots = collect(); // we will push items manually
@@ -226,6 +239,7 @@ class SlotController extends Controller
 
 	public function store(Request $request)
 	{
+		$settings = Settings::where('id', 1)->first();
 			$validated = $request->validate([
 					'session_type' => 'required',
 					'tfrom' => 'required',
@@ -241,6 +255,16 @@ class SlotController extends Controller
 							: [$validated['session_type']];
 			foreach ($sessionTypes as $sessionType) {
 
+				
+				$offline_allowed = $settings->allow_offline_sessions;
+				if ($sessionType == 'Offline'){
+					if ($offline_allowed == 0) {
+							return response()->json([
+								'success' => false,
+								'message' => __('mentor.Offline_not_allowed'),
+							], 422);
+					}
+				}
 			// Build base search query
 			$query = Schedule::where('user_id', auth()->id())
 					->where('type', $validated['type'])

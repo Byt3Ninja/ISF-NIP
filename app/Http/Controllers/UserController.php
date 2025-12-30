@@ -151,7 +151,7 @@ class UserController extends Controller
 		// Only admins can assign all organizations, Sub-Admin sees their assigned orgs
 		if ($authUser->hasRole('Admin')) {
 			$organizations = \App\Organization::all();
-		} elseif ($authUser->hasRole('organizationManager') || $authUser->isSubAdmin()) {
+		} elseif ($authUser->hasAnyRole(['organizationManager', 'subadmin'])) {
 			$orgIds = $authUser->organizations_ids;
 			$organizations = \App\Organization::whereIn('id', $orgIds)->get();
 		} else {

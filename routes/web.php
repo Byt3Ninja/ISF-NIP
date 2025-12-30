@@ -68,6 +68,7 @@ Route::get('/reminderMentorShipRequest', 'IndexController@reminderMentorShipRequ
 //    }
 //    return view('admin.reports.company');
 //});
+// Route::view('upload_page', 'upload_test');
 
 
 /// Frontend routes ///
@@ -352,6 +353,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     // Invitations
     Route::group(['prefix' => 'mentors'], function () {
         Route::resource('invitations', 'InvitationController');
+        Route::post('File_Upload', 'InvitationController@updateFile')->name('invitations.upload');
     });
     
     // lowercase alias for backward-compatibility / ease of testing
@@ -601,6 +603,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('screening/{id?}', 'ScreeningController@show');
     Route::get('/dashboard/screening/get/{formId}/{stepId}/{panel}', 'ScreeningController@get')->name('screening.get');
     Route::post('screening/update', 'ScreeningController@update');
+    Route::post('screening/save-panels', 'ScreeningController@savePanels')->name('screening.save_panels');
     Route::post('screening/save', 'ScreeningController@save');
     Route::post('screening/add', 'ScreeningController@add');
     Route::get('screening/results/{id?}', 'ScreeningController@results');

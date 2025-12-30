@@ -155,6 +155,7 @@ return [
 	'DYes' => 'نعم، قم بالحذف',
 	'No' => 'لا',
 	'Deleted' => 'تم الحذف',
+	'panel_delete_warning' => 'سيؤدي ذلك إلى إزالة اللجنة وجميع تعيينات المحكمين والشركات المرتبطة بها. لا يمكن التراجع عن هذا الإجراء.',
 	'FileDeleted' => 'تم حذف السجل بنجاح',
 	'Users' => 'المستخدمون',
 	'Roles' => 'الادوار',
@@ -2725,6 +2726,8 @@ return [
 		'add_judging_panels' => 'أضف لجان التقييم',
 		'add_panels_description' => 'أضف المحكمن والشركات إلى كل لجنة',
 		'schedule_session' => 'جدولة الجلسة',
+		'no_panels_added' => 'لم يتم إضافة لجان بعد.',
+		'add_first_panel' => 'أضف لجنتك الأولى',
 	],
 	'training_sessions' => 'جلسات التدريب',
 	'training_courses' => 'دورات التدريب',
@@ -3123,4 +3126,5 @@ return [
 	'setup' => 'إعداد',
 	'setup_organization_wizard_description' => 'قم بإعداد تفاصيل مؤسستك خطوة بخطوة.',
     'error_date_range' => 'يجب تحديد نطاق التاريخ بشكل صحيح.',
+	'Offline sessions are not allowed' => 'غير مسموح بجلسات عن بعد',
 ];

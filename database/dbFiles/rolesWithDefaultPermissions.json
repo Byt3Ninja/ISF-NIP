@@ -5434,6 +5434,17 @@
                 ]
             },
             {
+                "name": "screening.save_panels",
+                "description": "Save Screening Panels",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
                 "name": "screening.evaluation_show",
                 "description": "View Screening Evaluation Model",
                 "guard_name": "web",
@@ -8730,13 +8741,7 @@
                     "organizationmanager",
                     "subadmin"
                 ]
-            }
-        ]
-    },
-    {
-        "name": "Tasks Management",
-        "description": "Create new task",
-        "permissions": [
+            },
             {
                 "name": "tasks.store",
                 "description": "Create new task",
@@ -8746,13 +8751,7 @@
                     "admin",
                     "organizationmanager"
                 ]
-            }
-        ]
-    },
-    {
-        "name": "Tasks Management",
-        "description": "Edit task",
-        "permissions": [
+            },
             {
                 "name": "tasks.update",
                 "description": "Edit task",
@@ -8778,13 +8777,7 @@
                     "admin",
                     "organizationmanager"
                 ]
-            }
-        ]
-    },
-    {
-        "name": "Invitations",
-        "description": "Create new invitation",
-        "permissions": [
+            },
             {
                 "name": "invitations.store",
                 "description": "Create new invitation",
@@ -8794,13 +8787,7 @@
                     "admin",
                     "organizationmanager"
                 ]
-            }
-        ]
-    },
-    {
-        "name": "Invitations",
-        "description": "Edit invitation",
-        "permissions": [
+            },
             {
                 "name": "invitations.update",
                 "description": "Edit invitation",
@@ -8810,16 +8797,20 @@
                     "admin",
                     "organizationmanager"
                 ]
-            }
-        ]
-    },
-    {
-        "name": "Invitations",
-        "description": "Delete invitation",
-        "permissions": [
+            },
             {
                 "name": "invitations.destroy",
                 "description": "Delete invitation",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "invitations.upload",
+                "description": " Upload invitation file ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [

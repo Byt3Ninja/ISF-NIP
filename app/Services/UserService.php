@@ -227,8 +227,8 @@ class UserService
             return $this->userRepository->getCompaniesForRegisteredUser($user, $requestData);
         }
 
-        // Handle both organizationManager and Sub-Admin roles
-        if ($user->hasRole('organizationManager') || $user->isSubAdmin()) {
+        // Handle both organizationManager and subadmin roles
+        if ($user->hasAnyRole(['organizationManager', 'subadmin'])) {
             return $this->userRepository->getCompaniesForOrgManager($user, $requestData);
         }
 

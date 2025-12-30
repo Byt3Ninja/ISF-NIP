@@ -34,7 +34,7 @@ class quizzesController extends Controller
 	public function index(Request $request)
 	{
 		$user = auth()->user();
-		$organization_id = $user->organization_id;
+		$orgIds = $user->organizations_ids;
 
 		$quizzes_q = "SELECT 
 		q.id AS quiz_id,
@@ -81,9 +81,8 @@ class quizzesController extends Controller
 			$quizzes_q .= "AND c.id = ? ";
 			$bindings[] = $request->Program_id;
 		}
-		if($user->hasRole('organizationManager')){
-			$quizzes_q .= "AND o.id = ? ";
-			$bindings[] = $organization_id;
+		if(!$user->hasRole('admin') && !empty($orgIds)){
+			$quizzes_q .= "AND o.id IN (" . implode(',', array_map('intval', $orgIds)) . ") ";
 		}
 
 		$quizzes_q = DB::select($quizzes_q, $bindings ?? []);
@@ -135,9 +134,10 @@ class quizzesController extends Controller
 	public function create()
 	{
 		$user = auth()->user();
-		$organizations = new Organization;
-		if (isset($user->organization_id) && !empty($user->organization_id)) {
-			$organizations = $organizations->where('id', $user->organization_id);
+		$orgIds = $user->organizations_ids;
+		$organizations = Organization::query();
+		if (!$user->hasRole('admin') && !empty($orgIds)) {
+			$organizations = $organizations->whereIn('id', $orgIds);
 		}
 		$organizations = $organizations->get();
 		$trainings = Training::get();
@@ -188,17 +188,18 @@ class quizzesController extends Controller
 	public function edit($id)
 	{
 		$user = auth()->user();
+		$orgIds = $user->organizations_ids;
 		$quiz = Quizzes::with(['questions', 'organization']);
-		if (isset($user->organization_id) && !empty($user->organization_id)) {
-			$quiz = $quiz->where('organization_id', $user->organization_id);
+		if (!$user->hasRole('admin') && !empty($orgIds)) {
+			$quiz = $quiz->whereIn('organization_id', $orgIds);
 		}
 		$quiz = $quiz->find($id);
 		if (empty($quiz)) {
 			return redirect()->route('quizzes.index')->with(['error' => 'quizNotFound']);
 		} else {
-			$organizations = new Organization;
-			if (isset($user->organization_id) && !empty($user->organization_id)) {
-				$organizations = $organizations->where('id', $user->organization_id);
+			$organizations = Organization::query();
+			if (!$user->hasRole('admin') && !empty($orgIds)) {
+				$organizations = $organizations->whereIn('id', $orgIds);
 			}
 			$organizations = $organizations->get();
 			$trainings = Training::get();
@@ -216,9 +217,10 @@ class quizzesController extends Controller
 	public function update($id, Request $request)
 	{
 		$user = auth()->user();
+		$orgIds = $user->organizations_ids;
 		$quiz = Quizzes::with(['questions', 'organization']);
-		if (isset($user->organization_id) && !empty($user->organization_id)) {
-			$quiz = $quiz->where('organization_id', $user->organization_id);
+		if (!$user->hasRole('admin') && !empty($orgIds)) {
+			$quiz = $quiz->whereIn('organization_id', $orgIds);
 		}
 		$quiz = $quiz->find($id);
 		if (empty($quiz)) {
@@ -268,20 +270,21 @@ class quizzesController extends Controller
 	public function get_questions($id)
 	{
 		$user = auth()->user();
+		$orgIds = $user->organizations_ids;
 		$quiz = Quizzes::with(['questions', 'organization']);
 
-		if (isset($user->organization_id) && !empty($user->organization_id)) {
-			$quiz = $quiz->where('organization_id', $user->organization_id);
+		if (!$user->hasRole('admin') && !empty($orgIds)) {
+			$quiz = $quiz->whereIn('organization_id', $orgIds);
 		}
 		$quiz = $quiz->find($id);
-		
+
 		if (empty($quiz)) {
 			return redirect()->route('quizzes.index')->with(['error' => 'quizNotFound']);
 		} else {
 			$questions = QuestionsBank::where('group', 'quiz')->with(['category']);
-			if (isset($user->organization_id) && !empty($user->organization_id)) {
-				$questions = $questions->whereHas('organizations', function ($query) use ($user) {
-					$query->where('organization_id', $user->organization_id);
+			if (!$user->hasRole('admin') && !empty($orgIds)) {
+				$questions = $questions->whereHas('organizations', function ($query) use ($orgIds) {
+					$query->whereIn('organization_id', $orgIds);
 				});
 			}
 			$questions = $questions->get();
@@ -293,9 +296,10 @@ class quizzesController extends Controller
 	public function save_questions($id, Request $request)
 	{
 		$user = auth()->user();
+		$orgIds = $user->organizations_ids;
 		$quiz = Quizzes::with(['questions', 'organization']);
-		if (isset($user->organization_id) && !empty($user->organization_id)) {
-			$quiz = $quiz->where('organization_id', $user->organization_id);
+		if (!$user->hasRole('admin') && !empty($orgIds)) {
+			$quiz = $quiz->whereIn('organization_id', $orgIds);
 		}
 		$quiz = $quiz->find($id);
 		if (empty($quiz)) {

@@ -290,7 +290,7 @@ $pills = [
       <div class="tab-content bg-card shadow">
         <!-- Judging Panels Tab -->
         <div class="tab-pane fade show active" id="judging_panels" role="tabpanel" aria-labelledby="judging_panels-tab">
-          @include('partials.judging-panels')
+          @include('partials.judging-panels', ['id' => $id])
           <!-- Old Logic (should be removed) Once new logic done -->
           {{-- <div class="d-flex flex-column">
             @if (isset($cstep->data) && array_key_exists($cstep->data, $types))

@@ -105,7 +105,7 @@
               <td><a href="{{ route('surveys.edit', $survey->id) }}">{{ $survey->id }}</a></td>
               <td>{!! $survey->title !!}</td>
               <td>
-                <a href="{{ route('organizations.edit', $survey->organization->id ?? 0) }}">
+                <a href="{{ route('organizations.edit', $survey?->organization?->id ?? 0) }}">
                   {{ $survey?->organization?->{'name_' . $l} }}
                 </a>
               </td>

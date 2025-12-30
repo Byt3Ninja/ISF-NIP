@@ -91,19 +91,15 @@ class ScreeningController extends Controller
 			}
 
 			if ($request->filled('program')) {
-					$stepsQuery->whereHas('cycle', function ($c) use ($request) {
-							$c->where('id', $request->program);
-					});
-			}
+			$stepsQuery->where('cycle_id', $request->program);
+		}
 
-			if ($request->filled('judge')) {
-					$stepsQuery->where(function ($q) use ($request) {
-							// Check if judge is in the JSON list field
-							$q->whereRaw("JSON_CONTAINS(list, ?)", [json_encode($request->judge)])
-									->orWhereRaw("JSON_CONTAINS(list, ?)", [json_encode([$request->judge])])
-									->orWhereRaw("JSON_CONTAINS(list, ?)", [$request->judge]);
-					});
-			}
+		if ($request->filled('judge')) {
+			$judgeId = $request->judge;
+			$stepsQuery->whereHas('screenings', function ($q) use ($judgeId) {
+				$q->where('user_id', $judgeId);
+			});
+		}	
 
 			if ($request->filled('startup')) {
 					$stepsQuery->whereHas('companies', function ($c) use ($request) {
@@ -419,6 +415,58 @@ class ScreeningController extends Controller
 		}
 		$company = Company::where('id', $answers->pluck(['company_id'])->first())->first();
 		return view('admin.settings.screening.form', compact('answers', 'company'));
+	}
+
+	public function savePanels(Request $request)
+	{
+		$request->validate([
+			'step' => 'required|exists:steps,id',
+			'panels' => 'nullable|array',
+			'panels.*.judges' => 'required|array',
+			'panels.*.companies' => 'required|array',
+			'panels.*.session_date' => 'nullable|date',
+			'panels.*.meeting_link' => 'nullable|url',
+			'panels.*.start_time' => 'nullable',
+			'panels.*.end_time' => 'nullable',
+		]);
+
+		$stepId = $request->step;
+		$panels = $request->panels ?? [];
+
+		// Update Step list (judges mapping)
+		$stepList = [];
+		foreach ($panels as $index => $panel) {
+			$stepList[$index + 1] = array_map('intval', $panel['judges']);
+		}
+		Step::where('id', $stepId)->update(['list' => $panels ? json_encode($stepList) : null]);
+
+		// Clear existing screenings for this step
+		Screening::where('step_id', $stepId)->delete();
+
+		// Create new screenings if panels exist
+		foreach ($panels as $index => $panel) {
+			$panelNumber = $index + 1;
+			$judgeIds = array_unique(array_map('intval', $panel['judges']));
+			$companyIds = array_unique(array_map('intval', $panel['companies']));
+
+			foreach ($judgeIds as $judgeId) {
+				Screening::create([
+					'step_id' => $stepId,
+					'user_id' => $judgeId,
+					'panel' => $panelNumber,
+					'users' => $companyIds,
+					'session_date' => $panel['session_date'] ?? null,
+					'meeting_link' => $panel['meeting_link'] ?? null,
+					'start_time' => $panel['start_time'] ?? null,
+					'end_time' => $panel['end_time'] ?? null,
+				]);
+			}
+		}
+
+		return response()->json([
+			'success' => true,
+			'message' => __('admin.Saved_successfully')
+		]);
 	}
 
 	public function save(Request $request)

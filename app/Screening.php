@@ -9,7 +9,7 @@ class Screening extends Model
 {
     // use Auditable;
     public static $module = 'Screening';
-    protected $fillable = ['step_id','user_id','panel','users'];
+    protected $fillable = ['step_id','user_id','panel','users','session_date','meeting_link','start_time','end_time'];
     protected $casts = ['users' => 'array'];
 
     public function step(){
