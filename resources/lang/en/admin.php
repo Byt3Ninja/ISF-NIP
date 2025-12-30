@@ -3015,7 +3015,7 @@ return [
 	'End Color' => 'End Color',
 
 	// Landing Page Enable/Disable
-	'Landing page is published' => 'Landing page is published',
+	'Landing page is published' => 'Landing page will be published',
 	'Landing page is unpublished' => 'Landing page is unpublished',
 	'Enable Landing Page' => 'Enable Landing Page',
 
@@ -3072,5 +3072,8 @@ return [
 	'setup' => 'Setup',
 	'setup_organization_wizard_description' => 'Setup you organization details step by step',
 	'Offline sessions are not allowed' => 'Offline sessions are not allowed',
+	'Enable Section' => 'Enable Section',
+	'Disable Section' => 'Disable Section',
+	'Landing Page Sections' => 'Landing Page Sections'
 ];
 

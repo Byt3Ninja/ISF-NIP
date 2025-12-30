@@ -1,8 +1,8 @@
 <!-- Selected Managers Bar -->
-<div class="card mb-4 border-light shadow-sm">
-  <div class="card-body p-3">
+<div class="card bg-light-subtle shadow-none border-bottom border-top">
+  <div class="card-body py-4">
     <div class="d-flex justify-content-between align-items-center mb-2">
-      <h6 class="fw-bold text-primary mb-0">
+      <h6 class="card-title mb-0 ps-2">
         <i class="ti ti-users me-2"></i>{{ __('admin.Selected Managers') }}
       </h6>
       <button type="button" class="btn btn-sm btn-outline-danger border-0" id="clearAllManagers" style="display: none;">
@@ -19,114 +19,120 @@
   </div>
 </div>
 
-<!-- Navigation Tabs -->
-<ul class="nav nav-pills mb-3 gap-2" id="managerTabs" role="tablist">
-  <li class="nav-item">
-    <button class="nav-link active border" id="existing-manager-tab" data-bs-toggle="tab" data-bs-target="#existing-manager-content" type="button">
-      <i class="ti ti-user-search me-2"></i>{{ __('admin.Select Existing Manager') }}
-    </button>
-  </li>
-  <li class="nav-item">
-    <button class="nav-link border" id="create-manager-tab" data-bs-toggle="tab" data-bs-target="#create-manager-content" type="button">
-      <i class="ti ti-user-plus me-2"></i>{{ __('admin.Create New Manager') }}
-    </button>
-  </li>
-</ul>
+<div class="card shadow-none">
+  <div class="card-header border-bottom py-4 mb-6">
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-pills gap-2" id="managerTabs" role="tablist">
+      <li class="nav-item">
+        <button class="nav-link active border" id="existing-manager-tab" data-bs-toggle="tab" data-bs-target="#existing-manager-content" type="button">
+          <i class="ti ti-user-search me-2"></i>{{ __('admin.Select Existing Manager') }}
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link border" id="create-manager-tab" data-bs-toggle="tab" data-bs-target="#create-manager-content" type="button">
+          <i class="ti ti-user-plus me-2"></i>{{ __('admin.Create New Manager') }}
+        </button>
+      </li>
+    </ul>
 
-<div class="tab-content border rounded bg-card">
-  <!-- Tab: Select Existing Manager -->
-  <div class="tab-pane fade show active" id="existing-manager-content">
-    <div class="input-group input-group-lg mb-3">
-      <span class="input-group-text bg-white"><i class="ti ti-search text-muted"></i></span>
-      <input type="text" class="form-control border-start-0" id="managerSearchInput" placeholder="{{ __('admin.Search by name, email, or role') }}...">
-    </div>
-
-    <div id="managersList" class="list-group">
-      <!-- Populated via JS -->
-    </div>
-
-    <!-- States -->
-    <div id="managersLoading" class="text-center py-5" style="display: none;">
-      <div class="spinner-border text-primary" role="status"></div>
-    </div>
-
-    <div id="managersEmpty" class="text-center py-5 text-muted" style="display: none;">
-      <i class="ti ti-users-minus fs-1 d-block mb-2"></i>
-      {{ __('admin.No managers found') }}
-    </div>
-
-    <!-- Pagination -->
-    <div id="managersPagination" class="d-flex justify-content-between align-items-center mt-3 border-top pt-3" style="display: none;">
-      <small class="text-muted" id="managersInfo"></small>
-      <nav><ul class="pagination pagination-sm mb-0" id="managersPaginationList"></ul></nav>
-    </div>
   </div>
-
-  <!-- Tab: Create New Manager -->
-  <div class="tab-pane fade" id="create-manager-content">
-    <form id="createManagerForm">
-      <div class="row g-4">
-        @foreach(['en' => 'English', 'ar' => 'Arabic'] as $key => $lang)
-        <div class="col-md-6">
-          <label class="form-label">{{ __("admin.First Name ($lang)") }} @if($key == 'en')<span class="text-danger">*</span>@endif</label>
-          <input type="text" class="form-control" name="first_name_{{$key}}" id="manager_first_name_{{$key}}" dir="{{ $key == 'ar' ? 'rtl' : 'ltr' }}" placeholder="{{ $key == 'ar' ? __("admin.Enter first name in Arabic") : __("admin.Enter first name") }}">
-          <div class="invalid-feedback"></div>
+  <div class="card-body">
+    <div class="tab-content bg-card p-0 shadow-none">
+      <!-- Tab: Select Existing Manager -->
+      <div class="tab-pane fade show active" id="existing-manager-content">
+        <div class="input-group input-group-lg mb-6">
+          <span class="input-group-text bg-white"><i class="ti ti-search text-muted"></i></span>
+          <input type="text" class="form-control border-start-0" id="managerSearchInput" placeholder="{{ __('admin.Search by name, email, or role') }}...">
         </div>
-        <div class="col-md-6">
-          <label class="form-label">{{ __("admin.Last Name ($lang)") }} @if($key == 'en')<span class="text-danger">*</span>@endif</label>
-          <input type="text" class="form-control" name="last_name_{{$key}}" id="manager_last_name_{{$key}}" dir="{{ $key == 'ar' ? 'rtl' : 'ltr' }}" placeholder="{{ $key == 'ar' ? __("admin.Enter last name in Arabic") : __("admin.Enter last name") }}">
-          <div class="invalid-feedback"></div>
+    
+        <div id="managersList" class="list-group">
+          <!-- Populated via JS -->
         </div>
-        @endforeach
-
-        <div class="col-md-6">
-          <label class="form-label">{{ __('admin.Gender') }} <span class="text-danger">*</span></label>
-          <select class="form-select" name="gender" id="manager_gender">
-            <option value="">{{ __('admin.Select Gender') }}</option>
-            <option value="Male">{{ __('admin.Male') }}</option>
-            <option value="Female">{{ __('admin.Female') }}</option>
-          </select>
-          <div class="invalid-feedback"></div>
+    
+        <!-- States -->
+        <div id="managersLoading" class="text-center py-5" style="display: none;">
+          <div class="spinner-border text-primary" role="status"></div>
         </div>
-  
-        <div class="col-md-6">
-          <label class="form-label">{{ __('admin.Email') }} <span class="text-danger">*</span></label>
-          <input type="email" class="form-control" name="email" id="manager_email" placeholder="{{ __('admin.Enter email address') }}">
-          <div class="invalid-feedback"></div>
+    
+        <div id="managersEmpty" class="text-center py-5 text-muted" style="display: none;">
+          <i class="ti ti-users-minus fs-1 d-block mb-2"></i>
+          {{ __('admin.No managers found') }}
         </div>
-  
-        <div class="col-md-6">
-          <label class="form-label">{{ __('admin.Phone') }} <span class="text-danger">*</span></label>
-         <input type="tel" class="form-control" id="manager_phone" name="phone" placeholder="{{ __('admin.Enter phone number') }}">
-          <input type="hidden" id="manager_country_code" name="country_code">
-          <div class="invalid-feedback"></div>
-        </div>
-
-        <div class="col-md-6 form-password-toggle">
-          <label class="form-label" for="password">{{ __('auth.Password') }}</label>
-          <div class="input-group input-group-merge shadow-none">
-            <input type="password" name="password" id="manager_password" class="form-control" placeholder="{{ __('admin.Enter password') }}" />
-            <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
-          </div>
-          <div class="invalid-feedback"></div>
-        </div>
-
-        <div class="col-md-6 form-password-toggle">
-          <label class="form-label" for="password_confirmation">{{ __('admin.Confirm Password') }}</label>
-          <div class="input-group input-group-merge shadow-none">
-            <input type="password" name="password_confirmation" id="manager_password_confirmation" class="form-control" placeholder="{{ __('admin.Confirm password') }}" />
-            <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
-          </div>
-          <div class="invalid-feedback"></div>
-        </div>
-  
-        <div class="col-12 mt-4 text-end">
-          <button type="button" class="btn btn-primary px-4" id="createManagerBtn">
-            <i class="ti ti-user-plus me-1"></i>{{ __('admin.Create Manager') }}
-          </button>
+    
+        <!-- Pagination -->
+        <div id="managersPagination" class="d-flex justify-content-between align-items-center mt-3 border-top pt-3" style="display: none;">
+          <small class="text-muted" id="managersInfo"></small>
+          <nav><ul class="pagination pagination-sm mb-0" id="managersPaginationList"></ul></nav>
         </div>
       </div>
-    </form>
+    
+      <!-- Tab: Create New Manager -->
+      <div class="tab-pane fade" id="create-manager-content">
+        <form id="createManagerForm">
+          <div class="row g-4">
+            @foreach(['en' => 'English', 'ar' => 'Arabic'] as $key => $lang)
+            <div class="col-md-6">
+              <label class="form-label">{{ __("admin.First Name ($lang)") }} @if($key == 'en')<span class="text-danger">*</span>@endif</label>
+              <input type="text" class="form-control" name="first_name_{{$key}}" id="manager_first_name_{{$key}}" dir="{{ $key == 'ar' ? 'rtl' : 'ltr' }}" placeholder="{{ $key == 'ar' ? __("admin.Enter first name in Arabic") : __("admin.Enter first name") }}">
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ __("admin.Last Name ($lang)") }} @if($key == 'en')<span class="text-danger">*</span>@endif</label>
+              <input type="text" class="form-control" name="last_name_{{$key}}" id="manager_last_name_{{$key}}" dir="{{ $key == 'ar' ? 'rtl' : 'ltr' }}" placeholder="{{ $key == 'ar' ? __("admin.Enter last name in Arabic") : __("admin.Enter last name") }}">
+              <div class="invalid-feedback"></div>
+            </div>
+            @endforeach
+    
+            <div class="col-md-6">
+              <label class="form-label">{{ __('admin.Gender') }} <span class="text-danger">*</span></label>
+              <select class="form-select" name="gender" id="manager_gender">
+                <option value="">{{ __('admin.Select Gender') }}</option>
+                <option value="Male">{{ __('admin.Male') }}</option>
+                <option value="Female">{{ __('admin.Female') }}</option>
+              </select>
+              <div class="invalid-feedback"></div>
+            </div>
+      
+            <div class="col-md-6">
+              <label class="form-label">{{ __('admin.Email') }} <span class="text-danger">*</span></label>
+              <input type="email" class="form-control" name="email" id="manager_email" placeholder="{{ __('admin.Enter email address') }}">
+              <div class="invalid-feedback"></div>
+            </div>
+      
+            <div class="col-md-6">
+              <label class="form-label">{{ __('admin.Phone') }} <span class="text-danger">*</span></label>
+             <input type="tel" class="form-control" id="manager_phone" name="phone" placeholder="{{ __('admin.Enter phone number') }}">
+              <input type="hidden" id="manager_country_code" name="country_code">
+              <div class="invalid-feedback"></div>
+            </div>
+    
+            <div class="col-md-6 form-password-toggle">
+              <label class="form-label" for="password">{{ __('auth.Password') }}</label>
+              <div class="input-group input-group-merge shadow-none">
+                <input type="password" name="password" id="manager_password" class="form-control" placeholder="{{ __('admin.Enter password') }}" />
+                <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
+              </div>
+              <div class="invalid-feedback"></div>
+            </div>
+    
+            <div class="col-md-6 form-password-toggle">
+              <label class="form-label" for="password_confirmation">{{ __('admin.Confirm Password') }}</label>
+              <div class="input-group input-group-merge shadow-none">
+                <input type="password" name="password_confirmation" id="manager_password_confirmation" class="form-control" placeholder="{{ __('admin.Confirm password') }}" />
+                <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
+              </div>
+              <div class="invalid-feedback"></div>
+            </div>
+      
+            <div class="col-12 mt-4 text-end">
+              <button type="button" class="btn btn-primary px-4" id="createManagerBtn">
+                <i class="ti ti-user-plus me-1"></i>{{ __('admin.Create Manager') }}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </div>
 

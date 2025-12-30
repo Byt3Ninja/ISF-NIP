@@ -8,17 +8,6 @@
   <style>
     .iti { width: 100%; }
     .iti__country-list { z-index: 9999; max-height: 200px; }
-    .theme-option {
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .theme-option:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .theme-option.border-primary {
-      box-shadow: 0 0 0 1px #696cff;
-    }
   </style>
 @stop
 
@@ -100,7 +89,7 @@
           </div>
 
           <!-- Wizard content -->
-          <div class="bs-stepper-content">
+          <div class="bs-stepper-content p-0">
             <form
               action="{{ $isEdit ? route('organization.wizard.update.step1', $organization->id) : route('organization.wizard.store') }}"
               method="POST"
@@ -123,29 +112,21 @@
 
               @foreach ($tabs as $tab)
                 <div id="{{ $tab['id'] }}" class="content {{ $activeStep == $tab['step'] ? 'active' : '' }}">
-                  <div class="content-header mb-6">
+                  <div class="content-header py-4 px-8">
                     <h5 class="mb-0">{{ $tab['title'] }}</h5>
                     <small>{{ __('admin.setup') }} {{ $tab['title'] }}</small>
                   </div>
                   
-                  @if($tab['step'] <= 3)
                     @include(
                       'admin.organizations.wizard.partials._step' . $tab['step'] . '_' . $tab['id'], [
                         'organization' => $organization ?? null,
                         'assignedManagers' => $assignedManagers ?? collect(),
                       ]
                     )
-                  @endif
-                    {{-- @include(
-                      'admin.organizations.wizard.partials._step' . $tab['step'] . '_' . $tab['id'], [
-                        'organization' => $organization ?? null,
-                        'assignedManagers' => $assignedManagers ?? collect(),
-                      ]
-                    ) --}}
                 </div>
               @endforeach
 
-              <div class="row mt-6 border-top pt-6">
+              <div class="row border-top py-6 px-8">
                 <div class="col-12 d-flex justify-content-between">
                   <button type="button" class="btn btn-label-secondary btn-prev" {{ $activeStep <= 1 ? 'disabled' : '' }}>
                     <i class="ti ti-arrow-left ti-xs me-sm-2"></i>
@@ -157,7 +138,11 @@
                         <i class="ti ti-file me-2"></i>{{ __('admin.Save as Draft') }}
                       </button>
                     @endif
-                    @if($canPublish)
+                    @if($activeStep == 5)
+                      <button type="button" class="btn btn-success" id="publishBtn">
+                        <i class="ti ti-world me-2"></i>{{ __('admin.Publish') }}
+                      </button>
+                    @elseif($canPublish)
                       <button type="button" class="btn btn-success" id="publishBtn">
                         <i class="ti ti-world me-2"></i>{{ __('admin.Publish') }}
                       </button>
@@ -597,19 +582,19 @@
           handleFormSubmit('next', step);
         });
 
-        $('.save-changes-step1-btn, .save-changes-step2-btn', '.save-changes-step3-btn').on('click', function(e) {
+        $('.save-changes-step1-btn, .save-changes-step2-btn', '.save-changes-step3-btn', '.save-changes-step4-btn', '.save-changes-step5-btn').on('click', function(e) {
           e.preventDefault();
           const step = $(this).hasClass('save-changes-step1-btn') ? 1 : 2;
           handleFormSubmit('same', step);
         });
 
-        $('.save-continue-step1-btn, .save-continue-step2-btn', '.save-continue-step3-btn').on('click', function(e) {
+        $('.save-continue-step1-btn, .save-continue-step2-btn', '.save-continue-step3-btn', '.save-continue-step4-btn', '.save-continue-step5-btn').on('click', function(e) {
           e.preventDefault();
           const step = $(this).hasClass('save-continue-step1-btn') ? 1 : 2;
           handleFormSubmit('next', step);
         });
 
-        $('.save-draft-step1-btn, .save-draft-step2-btn', '.save-draft-step3-btn').on('click', function(e) {
+        $('.save-draft-step1-btn, .save-draft-step2-btn', '.save-draft-step3-btn', '.save-draft-step4-btn', '.save-draft-step5-btn').on('click', function(e) {
           e.preventDefault();
           const step = $(this).hasClass('save-draft-step1-btn') ? 1 : 2;
           handleFormSubmit('draft', step);

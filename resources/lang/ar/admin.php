@@ -3070,7 +3070,7 @@ return [
 	'End Color' => 'لون النهاية',
 
 	// Landing Page Enable/Disable
-	'Landing page is published' => 'الصفحة الرئيسية منشورة',
+	'Landing page is published' => 'الصفحة الرئيسية سوف منشورة',
 	'Landing page is unpublished' => 'الصفحة الرئيسية غير منشورة',
 	'Enable Landing Page' => 'تفعيل الصفحة الرئيسية',
 
@@ -3125,6 +3125,9 @@ return [
 	'organization_scope_hint' => 'المرشدون المرتبطين بالمؤسسات فقط',
 	'setup' => 'إعداد',
 	'setup_organization_wizard_description' => 'قم بإعداد تفاصيل مؤسستك خطوة بخطوة.',
-    'error_date_range' => 'يجب تحديد نطاق التاريخ بشكل صحيح.',
+	'error_date_range' => 'يجب تحديد نطاق التاريخ بشكل صحيح.',
 	'Offline sessions are not allowed' => 'غير مسموح بجلسات عن بعد',
+	'Enable Section' => 'تفعيل القسم',
+	'Disable Section' => 'الغاء التفعيل',
+	'Landing Page Sections' => 'أقسام صفحة الهبوط',
 ];

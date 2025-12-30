@@ -2,7 +2,7 @@
   $org = $organization ?? null;
 @endphp
 
-<div class="row">
+<div class="row p-8">
   <!--  Organization Logo -->
   <div class="col-12 mb-6">
     <div class="d-flex align-items-start align-items-sm-center gap-6">

@@ -4,7 +4,7 @@
 @endphp
 
 <!-- Contact Information Section -->
-<div class="mb-4">
+<div class="mb-4 px-8">
   <h6 class="d-flex align-items-center border-bottom pb-2 mb-3">
     <i class="ti ti-address-book me-2"></i>{{ __('admin.Contact Information') }}
   </h6>
@@ -178,7 +178,7 @@
 </div>
 
 <!-- Social Media Section -->
-<div class="mb-4">
+<div class="mb-4 px-8">
   <h6 class="d-flex align-items-center gap-2 border-bottom pb-2 mb-3">
     <i class="ti ti-share"></i>{{ __('admin.Social Media') }}
     <small class="text-muted fw-normal">({{ __('admin.Optional') }})</small>
@@ -306,7 +306,6 @@
     </div>
   </div>
 </div>
-
 
 @push('scripts')
 <script>
