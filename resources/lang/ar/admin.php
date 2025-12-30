@@ -3124,4 +3124,6 @@ return [
 	'organization_scope_hint' => 'المرشدون المرتبطين بالمؤسسات فقط',
     'error_date_range' => 'يجب تحديد نطاق التاريخ بشكل صحيح.',
 	'Offline sessions are not allowed' => 'غير مسموح بجلسات عن بعد',
+	'Email_Not_Configured' => 'لم يتم تكوين البريد الالكتروني',
+	'Email_Not_Enabled' => ' لم يتم تفعيل البريد الاليكترونى'
 ];
