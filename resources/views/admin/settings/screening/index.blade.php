@@ -59,8 +59,17 @@
         <div class="card-body py-4">
           <form id="filter-form" method="GET" action="/dashboard/screening">
             <div class="row g-3 align-items-center">
-              <div class="col-md-6 col-lg-3">
+              <div class="col-md-6 col-lg-2">
                 <input type="text" class="form-control bg-card" name="search" value="{{ request('search') }}" placeholder="{{ __('admin.screening.search_steps_placeholder') }}">
+              </div>
+
+              <div class="col-md-6 col-lg-2">
+                <select class="form-select bg-card" name="screening_type">
+                  <option value="">{{ __('admin.screening.all_types') }}</option>
+                  <option value="onetoall" {{ request('screening_type') == 'onetoall' ? 'selected' : '' }}>{{ __('admin.screening.onetoall') }}</option>
+                  <option value="grouptoall" {{ request('screening_type') == 'grouptoall' ? 'selected' : '' }}>{{ __('admin.screening.grouptoall') }}</option>
+                  <option value="grouptogroup" {{ request('screening_type') == 'grouptogroup' ? 'selected' : '' }}>{{ __('admin.screening.grouptogroup') }}</option>
+                </select>
               </div>
 
               <div class="col-md-6 col-lg-2">
@@ -101,7 +110,7 @@
 
               <div class="col-md-6 col-lg-1">
                 <div class="d-flex justify-content-lg-end gap-2">
-                  <button type="submit" class="btn btn-primary btn-icon" disabled>
+                  <button type="submit" class="btn btn-primary btn-icon">
                     <i class="ti ti-filter"></i>
                   </button>
                   @if(request('search') || request('status') || request('program') || request('judge') || request('startup'))
@@ -302,10 +311,8 @@
     dateFormat: 'Y-m-d'
   });
 
-  // Toggle submit button disable state on form change
-  $('#filter-form select, #filter-form input').on('change input', function () {
-    $('#filter-form button[type="submit"]').prop('disabled', $(this).val() ? false : true);
-  });
+  // No-op for button enabling as it is no longer disabled by default
+  // and we want filters to be easily reapplied/cleared.
 
 
   $('.edit-step-btn').on('click', function () {
