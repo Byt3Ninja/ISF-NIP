@@ -205,9 +205,6 @@ class ProgramController extends Controller
             ];
         }
 
-
-
-
         return view('admin.programs.show', compact('cycle', 'steps', 'judges', 'stepsData'));
     }
 
