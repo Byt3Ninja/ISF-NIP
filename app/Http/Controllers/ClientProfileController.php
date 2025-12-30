@@ -538,7 +538,7 @@ class ClientProfileController extends Controller
                     $cycles = Cycle::all();
                 }
              $settings = Settings::where('id', 1)->first();
-			$offline_allowed = $settings->allow_offline_sessions = 1 ? true : false;
+			$offline_allowed = $settings->allow_offline_sessions == 1 ? true : false;
            
                 // $mentors = User::role('mentor')->get();
                 return view('mentors.index', compact('mentors', 'cycles', 'offline_allowed'));
@@ -610,7 +610,7 @@ class ClientProfileController extends Controller
                 }
 
                 $settings = Settings::where('id', 1)->first();
-			    $offline_allowed = $settings->allow_offline_sessions = 1 ? true : false;
+			    $offline_allowed = $settings->allow_offline_sessions == 1 ? true : false;
                 // $mentors = User::role('mentor')->get();
                 return view('mentors.index', compact('mentors', 'cycles', 'offline_allowed'));
             } else {
