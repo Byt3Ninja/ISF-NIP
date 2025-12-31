@@ -161,15 +161,6 @@ class JudgerScreeningController extends Controller
             ],
         ]); */
 
-        $statusCounts = $companies->groupBy('status')->map->count();
-        $statusData = [
-            (object) ['status' => 'Startups', 'count' => $companies->count()],
-            (object) ['status' => 'NotStarted', 'count' => $statusCounts['not-started'] ?? 0],
-            (object) ['status' => 'In_Progress', 'count' => $statusCounts['in-progress'] ?? 0],
-            (object) ['status' => 'Completed', 'count' => $statusCounts['completed'] ?? 0],
-        ];
-        $statuses = ['not-started', 'in-progress', 'completed'];
-
         $companies = $companies->map(function( $company ) {
             $step_id = $company->step->id;
             $company->evaluation = ScreeningEvaluation::getEvaluationData( $step_id );
@@ -178,6 +169,15 @@ class JudgerScreeningController extends Controller
             $status = trim( strtolower( $company?->evaluation?->status ) ) ?? 'draft';
             return $status == 'published' ? true : false;
         })->values();
+
+        $statusCounts = $companies->groupBy('status')->map->count();
+        $statusData = [
+            (object) ['status' => 'Startups', 'count' => $companies->count()],
+            (object) ['status' => 'NotStarted', 'count' => $statusCounts['not-started'] ?? 0],
+            (object) ['status' => 'In_Progress', 'count' => $statusCounts['in-progress'] ?? 0],
+            (object) ['status' => 'Completed', 'count' => $statusCounts['completed'] ?? 0],
+        ];
+        $statuses = ['not-started', 'in-progress', 'completed'];
         // Add your logic here
         return view('judger.screening.index', compact('companies', 'screeningData', 'statusData', 'statuses'));
     }
