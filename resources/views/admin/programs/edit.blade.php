@@ -60,7 +60,7 @@
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="row">
             <h4 class="fw-bold mb-4">
-                {{ __('cycles.edit_program') }}
+                {{ __('cycles.program_setup') }}
             </h4>
             @if (session()->has('message'))
                 <x-alert type="success" message="{{ __('admin.' . session()->get('message')) }} {{ Session::forget('message') }}" />

@@ -2070,7 +2070,6 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "registered",
                     "organizationmanager",
                     "subadmin"
                 ]
@@ -2154,7 +2153,6 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "registered",
                     "organizationmanager",
                     "subadmin"
                 ]
@@ -5434,8 +5432,30 @@
                 ]
             },
             {
-                "name": "screening.save_panels",
-                "description": "Save Screening Panels",
+                "name": "screening.add_judging_panels",
+                "description": "Add Judging Panels",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "screening.delete_judging_panel",
+                "description": "Delete Judging Panel",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "screening.delete_judging_panel",
+                "description": "Delete Judging Panel",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -8755,6 +8775,16 @@
             {
                 "name": "tasks.update",
                 "description": "Edit task",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "tasks.destroy",
+                "description": "Delete task",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [

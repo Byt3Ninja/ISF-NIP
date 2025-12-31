@@ -215,6 +215,7 @@ class ScreeningController extends Controller
 				$query->whereIn('organization_id', $orgIds);
 			});
 		})->where('stype', 2)->orderBy('from')->get();
+		if( $id == 0 || $id == 'results' ) { $id = $steps->first()?->id ?? 0; }
 		// $judges = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->get();
 		$judges = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
 			->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
@@ -281,7 +282,34 @@ class ScreeningController extends Controller
 		$companies = [];
 		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
 		if( $cstep ) { $companies = Company::whereIn('step', [$form?->id ?? 0, $cstep?->id ?? 0])->get(); } else { $cstep = []; }
-		return view('admin.settings.screening.show', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'steps', 'id', 'svgs', 'evaluationForm'));
+
+        /** Prepare Judging Panels for View (Clean Code) */
+        $judgingPanels = [];
+        if ($cstep && isset($judgers_list) && count($judgers_list) > 0) {
+            foreach ($judgers_list as $panelId => $panelData) {
+                $screening = \App\Screening::where('step_id', $cstep->id)->where('panel', $panelId)->first();
+                $panelEntry = [
+                    'judges' => (array) ($panelData['judgers'] ?? []),
+                    'companies' => (array) ($panelData['companies'] ?? []),
+                    'session' => []
+                ];
+                if ($screening && $screening->session_date) {
+                    $panelEntry['session'] = [
+                        'date' => $screening->session_date,
+                        'start_time' => $screening->start_time ? substr($screening->start_time, 0, 5) : '',
+                        'end_time' => $screening->end_time ? substr($screening->end_time, 0, 5) : '',
+                        'meeting_link' => $screening->meeting_link
+                    ];
+                }
+                $judgingPanels[] = $panelEntry;
+            }
+        }
+
+        if (empty($judgingPanels)) {
+            $judgingPanels = [['judges' => [], 'companies' => [], 'session' => []]];
+        }
+
+		return view('admin.settings.screening.show', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'steps', 'id', 'svgs', 'evaluationForm', 'judgingPanels'));
 	}
 
 	public function update(Request $request)
@@ -417,7 +445,7 @@ class ScreeningController extends Controller
 		return view('admin.settings.screening.form', compact('answers', 'company'));
 	}
 
-	public function savePanels(Request $request)
+	public function addJudgingPanels(Request $request)
 	{
 		$request->validate([
 			'step' => 'required|exists:steps,id',
@@ -468,6 +496,52 @@ class ScreeningController extends Controller
 			'message' => __('admin.Saved_successfully')
 		]);
 	}
+
+    public function deleteJudgingPanel(Request $request)
+    {
+        $request->validate([
+            'step' => 'required|exists:steps,id',
+            'panel' => 'required|integer'
+        ]);
+
+        $stepId = $request->step;
+        $panelIdx = (int)$request->panel; // 1-based index from UI usually, or 0-based. Let's assume 1-based to match 'panel' column.
+        
+        $step = Step::findOrFail($stepId);
+        $list = json_decode($step->list, true) ?? [];
+        
+        // Remove the panel from the list
+        if (isset($list[$panelIdx])) {
+            unset($list[$panelIdx]);
+            
+            // Re-index remaining panels to keep sequence 1, 2, 3...
+            $newList = [];
+            $i = 1;
+            foreach ($list as $oldIdx => $data) {
+                $newList[$i++] = $data;
+            }
+            $step->update(['list' => !empty($newList) ? json_encode($newList) : null]);
+            
+            // Delete screenings for the target panel
+            Screening::where('step_id', $stepId)->where('panel', $panelIdx)->delete();
+            
+            // Shift subsequent screenings down if needed to maintain panel alignment
+            $screeningsToShift = Screening::where('step_id', $stepId)->where('panel', '>', $panelIdx)->get();
+            foreach ($screeningsToShift as $sc) {
+                $sc->update(['panel' => $sc->panel - 1]);
+            }
+
+            return response()->json([
+                'success' => true, 
+                'message' => __('admin.Deleted_successfully')
+            ]);
+        }
+
+        return response()->json([
+            'success' => false, 
+            'message' => __('admin.panel_not_found')
+        ], 404);
+    }
 
 	public function save(Request $request)
 	{
