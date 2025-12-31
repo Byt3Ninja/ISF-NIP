@@ -58,7 +58,7 @@ $tabs = [
             <table id="invitationsTable" class="table">
               <thead class="table-light">
                 <tr>
-                  <th>{{ __('admin.invitee_name') }}</th>
+                  <th>{{ __('admin.invitee') }}</th>
                   <th>{{ __('admin.subject') }}</th>
                   <th>{{ __('admin.Scope') }}</th>
                   <th>{{ __('admin.status') }}</th>
@@ -69,7 +69,7 @@ $tabs = [
               <tbody>
                 @foreach($invitations as $item)
                 <tr data-scope="{{ $item['scope'] }}" data-status="{{ $item['status'] }}">
-                  <td>{{ $item['invitee_name'] }}</td>
+                  <td><h6 class="mb-0 fw-semibold">{{ $item['invitee_name'] }}</h6> <small>{{ $item['invitee_email'] }}</small></td>
                   <td>{{ $item['subject'] }}</td>
                   <td>
                     <span class="badge bg-label-{{ $item['scope'] == 'Public' ? 'primary' : 'info' }}">
@@ -144,7 +144,7 @@ $tabs = [
                 <small class="text-muted">@lang('admin.original_message')</small>
               </div>
             </div>
-            <div class="p-3 bg-white border rounded shadow-sm">
+            <div class="p-3 bg-card border rounded shadow-none">
               <div id="originalMessageContent" class="text-body small">
                 <!-- Original message text goes here -->
               </div>
@@ -170,13 +170,13 @@ $tabs = [
                 <small class="text-muted m-0" id="inviteeEmailDisplay"></small>
               </div>
             </div>
-            <div class="p-3 border rounded shadow-sm bg-light-subtle">
-              <div id="replyMessageContent" class="text-body small mb-3">
+            <div class="p-3 border rounded shadow-none bg-light-subtle">
+              <div id="replyMessageContent" class="text-body small mb-3 border-bottom pb-3">
                 <!-- Invitee reply text goes here -->
               </div>
     
               <!-- Attachments specifically for this reply -->
-              <div id="attachmentsSection" class="border-top pt-2 mt-2">
+              <div id="attachmentsSection">
                 <p class="small fw-bold mb-2"><i class="ti ti-paperclip me-1"></i>@lang('admin.attachments')</p>
                 <div class="d-flex flex-column gap-2 ps-6" id="attachmentsList">
                   <!-- JS injected: <a class="btn btn-xs btn-white border">filename.pdf</a> -->
@@ -195,11 +195,11 @@ $tabs = [
           <div class="input-group">
             <textarea class="form-control" id="followUpMessage" rows="3" placeholder="@lang('admin.write_your_message')..."></textarea>
           </div>
-          <div class="d-flex justify-content-between align-items-center mt-3">
+          <div class="d-flex justify-content-between align-items-center mt-6">
             <div class="attachment-upload">
-              <button class="btn btn-sm btn-outline-secondary border-0" title="Attach Files">
+              {{-- <button class="btn btn-sm btn-outline-secondary border-0" title="Attach Files">
                 <i class="ti ti-paperclip fs-4"></i>
-              </button>
+              </button> --}}
             </div>
             <button type="button" class="btn btn-primary px-4" id="btnSendFollowUp">
               @lang('admin.Send_Message') <i class="ti ti-send ms-2"></i>
@@ -220,9 +220,17 @@ $tabs = [
       <div class="offcanvas-body">
         <form id="invitationForm" enctype="multipart/form-data" class="d-flex flex-column h-100">
           <meta name="csrf-token" content="{{ csrf_token() }}">
+          <input type="hidden" id="uploadedAttachments" name="attachments" value="[]">
           <div class="row">
             <div class="col-12 mb-4">
-              <label for="mentorEmail" class="form-label"> 
+              <label for="inviteeName" class="form-label">
+                @lang('admin.invitee_name')
+                <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="inviteeName" name="invitee_name" placeholder="@lang('admin.enter_invitee_name')" required maxlength="255">
+              <div class="invalid-feedback" id="inviteeNameError"></div>
+            </div>
+            <div class="col-12 mb-4">
+              <label for="mentorEmail" class="form-label">
                 @lang('admin.invitee_email')
                 <span class="text-danger">*</span></label>
               <input type="email" class="form-control" id="mentorEmail" name="invitee_email" placeholder="@lang('admin.enter_invitee_email')" required>
@@ -257,7 +265,7 @@ $tabs = [
               <textarea class="d-none" id="invitationMessage" name="invitation_message" maxlength="10000" required></textarea>
               <div class="invalid-feedback" id="invitationMessageError"></div>
             </div>
-          </div>        
+          </div>
 
           <div class="row mt-auto py-6 border-top">
             <div class="col-12">
@@ -292,6 +300,17 @@ $tabs = [
 @section('pagescripts')
 <script>
 $(function () {
+  // Translation variables for JavaScript
+  const translations = {
+    public: '{{ __("admin.public") }}',
+    organization: '{{ __("admin.organization") }}',
+    accepted: '{{ __("admin.accepted") }}',
+    pending: '{{ __("admin.pending") }}',
+    declined: '{{ __("admin.declined") }}',
+    view_details: '{{ __("admin.view_details") }}',
+    no_replies_yet: '{{ __("admin.no_replies_yet") }}',
+    no_attachments: '{{ __("admin.no_attachments") }}'
+  };
   /* =======================
    * Quill Editor
    * ======================= */
@@ -302,7 +321,7 @@ $(function () {
     ['bold', 'italic', 'underline', 'strike'],
     [{ list: 'ordered' }, { list: 'bullet' }],
     [{ color: [] }, { background: [] }],
-    ['image', 'link', 'file'],
+    ['image', 'file'],
     ['clean']
   ];
 
@@ -333,8 +352,8 @@ $(function () {
 
     input.onchange = () => {
       const files = Array.from(input.files);
-      let range = quill.getSelection(true);
-      
+      const range = quill.getSelection(true);
+
       const totalSize = files.reduce((total, file) => total + file.size, 0);
       const maxSize = 10 * 1024 * 1024; // 10 MB
 
@@ -343,19 +362,66 @@ $(function () {
         return;
       }
 
-      files.forEach((file, i) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const url = reader.result;
-          const index = range.index + i;
-          quill.insertEmbed(index, 'image', url);
-          quill.insertText(index + 1, '\n');
-        };
-        reader.readAsDataURL(file);
-      });
+      // Show loading indicator
+      const loadingText = '🖼️ Uploading images...';
+      quill.insertText(range.index, loadingText);
+      quill.insertText(range.index + loadingText.length, '\n');
 
-      // Move cursor to end
-      quill.setSelection(range.index + files.length + 1);
+      // Upload images sequentially
+      let uploadedCount = 0;
+      const uploadedImages = [];
+
+      files.forEach((file, index) => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        $.ajax({
+          url: '{{ route("invitations.upload") }}',
+          method: 'POST',
+          data: formData,
+          processData: false,
+          contentType: false,
+          headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+          },
+          success: function(response) {
+            if (response.success) {
+              uploadedImages.push({
+                name: file.name,
+                url: response.data.file_url
+              });
+              uploadedCount++;
+
+              // If all images uploaded, update the editor
+              if (uploadedCount === files.length) {
+                // Remove loading text
+                quill.deleteText(range.index, loadingText.length + 1);
+
+                // Insert uploaded image links
+                let insertIndex = range.index;
+                uploadedImages.forEach(image => {
+                  quill.insertText(insertIndex, `🖼️ ${image.name}`, { link: image.url });
+                  quill.insertText(insertIndex + image.name.length + 3, '\n');
+                  insertIndex += image.name.length + 4;
+                });
+
+                // Move cursor to end
+                quill.setSelection(insertIndex);
+
+                // Update the hidden attachments field
+                const currentAttachments = JSON.parse($('#uploadedAttachments').val() || '[]');
+                const newAttachments = [...currentAttachments, ...uploadedImages.map(i => i.url)];
+                $('#uploadedAttachments').val(JSON.stringify(newAttachments));
+              }
+            } else {
+              alert('{{ __("admin.upload_failed") }}: ' + (response.message || 'Unknown error'));
+            }
+          },
+          error: function(xhr) {
+            alert('{{ __("admin.upload_failed") }}: ' + (xhr.responseJSON?.message || 'Unknown error'));
+          }
+        });
+      });
     };
   }
 
@@ -379,16 +445,70 @@ $(function () {
         return;
       }
 
-      Array.from(input.files).forEach(file => {
-        const url = URL.createObjectURL(file);
-        const range = quill.getSelection(true);
+      // Show loading indicator
+      const range = quill.getSelection(true);
+      const loadingText = '📎 Uploading files...';
+      quill.insertText(range.index, loadingText);
+      quill.insertText(range.index + loadingText.length, '\n');
 
-        quill.insertText(
-          range.index,
-          `📎 ${file.name}`,
-          { link: url }
-        );
-        quill.insertText(range.index + file.name.length + 2, '\n');
+      // Upload files sequentially
+      let uploadedCount = 0;
+      const uploadedFiles = [];
+
+      files.forEach((file, index) => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        $.ajax({
+          url: '{{ route("invitations.upload") }}',
+          method: 'POST',
+          data: formData,
+          processData: false,
+          contentType: false,
+          headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+          },
+          success: function(response) {
+            if (response.success) {
+              uploadedFiles.push({
+                name: file.name,
+                url: response.data.file_url
+              });
+              uploadedCount++;
+
+              // If all files uploaded, update the editor
+              if (uploadedCount === files.length) {
+                // Remove loading text
+                quill.deleteText(range.index, loadingText.length + 1);
+
+                // Insert uploaded file links
+                let insertIndex = range.index;
+                uploadedFiles.forEach(file => {
+                  quill.insertText(
+                    insertIndex,
+                    `📎 ${file.name}`,
+                    { link: file.url }
+                  );
+                  quill.insertText(insertIndex + file.name.length + 2, '\n');
+                  insertIndex += file.name.length + 3;
+                });
+
+                // Move cursor to end
+                quill.setSelection(insertIndex);
+
+                // Update the hidden attachments field
+                const currentAttachments = JSON.parse($('#uploadedAttachments').val() || '[]');
+                const newAttachments = [...currentAttachments, ...uploadedFiles.map(f => f.url)];
+                $('#uploadedAttachments').val(JSON.stringify(newAttachments));
+              }
+            } else {
+              alert('{{ __("admin.upload_failed") }}: ' + (response.message || 'Unknown error'));
+            }
+          },
+          error: function(xhr) {
+            alert('{{ __("admin.upload_failed") }}: ' + (xhr.responseJSON?.message || 'Unknown error'));
+          }
+        });
       });
     };
   }
@@ -405,6 +525,7 @@ $(function () {
     responsive: true,
     processing: true,
     pageLength: 10,
+    order: [[4, 'desc']],
     dom:
       '<"row"' +
       '<"col-12 col-lg-9 d-flex flex-wrap align-items-center ps-0 ps-lg-6"l>' +
@@ -473,7 +594,7 @@ $(function () {
     $('#inviteeEmailDisplay').text(d.inviteeEmail);
     $('#invitationTitle').text(d.subject);
     $('#originalMessageContent').text(d.message);
-    $('#replyMessageContent').text(d.responseMessage);
+    $('#replyMessageContent').text(d.responseMessage || translations.no_replies_yet);
     $('#dateTimestamp').text(d.date);
 
     const scopeLabels = {
@@ -503,10 +624,14 @@ $(function () {
     );
 
     const attachments = (d.attachments || '').split(',').filter(a => a.trim());
-    $('#attachmentsSection').toggle(attachments.length > 0);
-    $('#attachmentsList').html(
-      attachments.map(a => `<a class="btn btn-xs btn-white border">${a}</a>`).join('')
-    );
+    $('#attachmentsSection').show();
+    if (attachments.length > 0) {
+      $('#attachmentsList').html(
+        attachments.map(a => `<a href="${a}" target="_blank" class="badge bg-card text-start text-primary border">${a.split('/').pop()}</a>`).join('')
+      );
+    } else {
+      $('#attachmentsList').html(`<span class="text-muted small">${translations.no_attachments}</span>`);
+    }
 
     $('#invitationOffcanvas').offcanvas('show');
   });
@@ -533,6 +658,12 @@ $(function () {
    * ======================= */
   const fv = FormValidation.formValidation(document.getElementById('invitationForm'), {
     fields: {
+      invitee_name: {
+        validators: {
+          notEmpty: { message: '{{ __('admin.invitee_name_required') }}' },
+          stringLength: { max: 255, message: '{{ __('admin.invitee_name_max_length') }}' }
+        }
+      },
       invitee_email: {
         validators: {
           notEmpty: { message: '{{ __('admin.Please enter the email address') }}' },
@@ -587,7 +718,7 @@ $(function () {
   fv.on('core.form.valid', () => {
     const $btn = $('#invitationForm button[type="submit"]')
       .prop('disabled', true)
-      .html('<i class="ti ti-loader me-1"></i> Sending...');
+      .html('<i class="ti ti-loader me-1"></i> @lang("admin.sending")...');
 
     $.ajax({
       url: '/dashboard/mentors/invitations',
@@ -596,14 +727,27 @@ $(function () {
       processData: false,
       contentType: false,
       headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-      success() {
-        releaseSuccessAlert({
-          title: '{{ __('admin.success') }}',
-          message:
-            '{{ app()->getLocale() === "ar" ? "تم إرسال الدعوة بنجاح" : "Invitation sent successfully." }}'
-        });
-        $('#newInvitationOffcanvas').offcanvas('hide');
-        location.reload();
+      success(response) {
+        if (response.success === true || response.success === "true") {
+          releaseSuccessAlert({
+            title: '{{ __('admin.success') }}',
+            message:
+              '{{ app()->getLocale() === "ar" ? "تم إرسال الدعوة بنجاح" : "Invitation sent successfully." }}'
+          });
+          $('#newInvitationOffcanvas').offcanvas('hide');
+          resetForm();
+
+          // Add new row to table in real-time
+          if (response.invitation) {
+            addInvitationToTable(response.invitation);
+          }
+        } else {
+          // Handle server-side validation errors
+          releaseFailureAlert({
+            title: '{{ __('admin.error') }}',
+            message: response.message || '{{ __('admin.unexpected_error') }}'
+          });
+        }
       },
       error(xhr) {
         releaseFailureAlert({
@@ -618,6 +762,106 @@ $(function () {
   });
 
   /* =======================
+   * Add Invitation to Table (Real-time)
+   * ======================= */
+  function addInvitationToTable(invitation) {
+    const scopeBadgeClass = invitation.scope === 'Public' ? 'primary' : 'info';
+    const scopeLabel = translations[invitation.scope.toLowerCase()] || invitation.scope;
+
+    let statusBadgeClass, statusIcon, statusLabel;
+    switch (invitation.status) {
+      case 'Accepted':
+        statusBadgeClass = 'success';
+        statusIcon = 'circle-check';
+        statusLabel = translations.accepted;
+        break;
+      case 'Pending':
+        statusBadgeClass = 'warning';
+        statusIcon = 'clock';
+        statusLabel = translations.pending;
+        break;
+      default:
+        statusBadgeClass = 'danger';
+        statusIcon = 'circle-x';
+        statusLabel = translations.declined;
+        break;
+    }
+
+    const newRow = `
+      <tr data-scope="${invitation.scope}" data-status="${invitation.status}">
+        <td>${invitation.invitee_name}<br><small>${invitation.invitee_email}</small></td>
+        <td>${invitation.subject}</td>
+        <td>
+          <span class="badge bg-label-${scopeBadgeClass}">
+            ${scopeLabel}
+          </span>
+        </td>
+        <td>
+          <span class="badge bg-label-${statusBadgeClass}">
+            <i class="ti ti-${statusIcon} ti-xs me-1"></i>
+            ${statusLabel}
+          </span>
+        </td>
+        <td>${invitation.created_at}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-primary text-nowrap view-details" data-bs-toggle="offcanvas" data-bs-target="#invitationOffcanvas" data-invitee-name="${invitation.invitee_name}" data-invitee-email="${invitation.invitee_email}" data-subject="${invitation.subject}" data-scope="${invitation.scope}" data-status="${invitation.status}" data-message="${invitation.message_content}" data-date="${invitation.created_at}" data-attachments="${(invitation.attachments || []).join(',')}" data-response-message="${invitation.response_message || ''}">
+            <i class="ti ti-eye me-1"></i> ${translations.view_details}
+          </button>
+        </td>
+      </tr>
+    `;
+
+    // Add row to DataTable
+    table.row.add($(newRow)[0]).draw(false);
+
+    // Update filters if needed
+    updateTableFilters();
+  }
+
+  function updateTableFilters() {
+    // Rebuild the filter options to include the new row data
+    const api = table;
+    const container = $('.dataTables_length').next('.d-flex');
+
+    // Remove existing filters
+    container.empty();
+
+    // Re-add filters
+    const addFilter = (col, id, label, width = 150) => {
+      const select = $(`
+        <select id="${id}" class="form-select" style="min-width:${width}px">
+          <option value="">${label}</option>
+        </select>
+      `)
+        .appendTo(container)
+        .on('change', function () {
+          const val = $(this).val();
+          api
+            .column(col)
+            .search(val ? `^\\s*${$.fn.dataTable.util.escapeRegex(val)}\\s*$` : '', true, false)
+            .draw();
+        });
+
+      api
+        .column(col)
+        .data()
+        .unique()
+        .sort()
+        .each(d => {
+          const text = $('<div>').html(d).text().replace(/\s+/g, ' ').trim();
+          text && select.append(`<option value="${text.toLowerCase()}">${text}</option>`);
+        });
+    };
+
+    addFilter(2, 'scopeFilter', '@lang('admin.all_scopes')');
+    addFilter(3, 'statusFilter', '@lang('admin.All_statuses')');
+
+    setTimeout(() => {
+      $('.form-control-sm, .form-select-sm').removeClass('form-control-sm form-select-sm');
+    }, 300);
+  }
+
+  /* =======================
    * Reset
    * ======================= */
   $('#newInvitationOffcanvas').on('hidden.bs.offcanvas', resetForm);
@@ -627,6 +871,7 @@ $(function () {
     fv.resetForm();
     $('#organizationsContainer').hide();
     $('#attachmentsList').empty();
+    $('#uploadedAttachments').val('[]');
     quill.setContents([]);
   }
 });
