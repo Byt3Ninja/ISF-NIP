@@ -8783,6 +8783,16 @@
                     "admin",
                     "organizationmanager"
                 ]
+            },
+            {
+                "name": "tasks.destroy",
+                "description": "Delete task",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
             }
         ]
     },
