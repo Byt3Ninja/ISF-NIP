@@ -137,17 +137,20 @@ const renumberPanels = () => {
     const idx = i + 1;
     const $panel = $(el);
     $panel.attr('data-index', i);
-    $panel.find('.accordion-button').attr('data-bs-target', `#panel-${idx}`).html(`<i class="ti ti-user-check me-2"></i> @lang('admin.screening.panel') #${idx}`);
+    $panel.find('.accordion-button').attr('data-bs-target', `#panel-${idx}`).html(`<i class="ti ti-user-check me-2"></i> {{ __('admin.screening.panel') }} #${idx}`);
     $panel.find('.accordion-collapse').attr('id', `panel-${idx}`);
     $panel.find('.session-toggle').attr('id', `session-toggle-${idx}`);
     $panel.find('[name*="panels["]').each(function() {
       $(this).attr('name', $(this).attr('name').replace(/panels\[\d+\]/, `panels[${i}]`));
     });
     
-    // Manage delete button visibility
+    // Always hide delete button for first panel
     const $btn = $panel.find('.remove-panel');
-    if (i === 0 && $panels.length === 1) $btn.addClass('d-none');
-    else $btn.removeClass('d-none');
+    if (i === 0) {
+      $btn.addClass('d-none');
+    } else {
+      $btn.removeClass('d-none');
+    }
   });
 };
 
@@ -164,8 +167,12 @@ $(document).on('change', '.select2', function() { updateSelectAllText($(this)); 
 
 $('#addPanelBtn').on('click', () => {
   const $clone = $('.accordion-item').first().clone();
-  const idx = $('.accordion-item').length + 1;
   
+  // mark as unsaved
+  $clone.attr('data-unsaved', 'true');
+  
+  const idx = $('.accordion-item').length + 1;
+
   $clone.find('.select2-container').remove();
   $clone.find('.select2').removeClass('select2-hidden-accessible');
   $clone.find('*').removeAttr('data-select2-id');
@@ -188,6 +195,14 @@ $('#addPanelBtn').on('click', () => {
 
 $(document).on('click', '.remove-panel', async function() {
   const $panel = $(this).closest('.accordion-item');
+
+  // If panel is not saved yet → remove silently
+  if ($panel.data('unsaved') === true || $panel.attr('data-unsaved') === 'true') {
+    $panel.remove();
+    renumberPanels();
+    return;
+  }
+
   const panelIdx = $panel.data('index') + 1; // 1-based index for backend
 
   const result = await Swal.fire({

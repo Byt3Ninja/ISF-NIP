@@ -21,7 +21,7 @@
     .slot-popup.popover {
       position: absolute;
       z-index: 9999;
-      pointer-events: none;
+      pointer-events: auto;
       font-size: 12px;
       white-space: nowrap;
       max-width: none;
@@ -187,6 +187,7 @@
         specific: {},
         weekly: {}
     };
+    let currentEventPopover = null;
 
     // Helper function to create a slot object
     const createSlotObject = (slot) => ({
@@ -349,7 +350,8 @@
                     endTime: slot.end,
                     extendedProps: {
                         sessionType: slot.sessionType,
-                        weekly: true
+                        weekly: true,
+                        id: slot.id
                     },
                     display: 'list-item'
                 });
@@ -366,7 +368,8 @@
                     allDay: false,
                     extendedProps: {
                         sessionType: slot.sessionType,
-                        weekly: false
+                        weekly: false,
+                        id: slot.id
                     },
                     display: 'list-item'
                 });
@@ -405,42 +408,129 @@
 
                 return { domNodes: arrayOfDomNodes };
             },
-            eventMouseEnter: function(arg) {
+            eventClick: function(arg) {
                 const event = arg.event;
                 const startTime = moment(event.start);
                 const endTime = event.end ? moment(event.end) : moment(event.start).add(1, 'hour'); // fallback if no end time
                 const duration = endTime.diff(startTime, 'minutes');
                 const repeatsStatus = event.extendedProps.weekly ? '{{ __("mentor.repeats_weekly") }}' : '{{ $l == "en" ? "Does not repeat" : "لا يتكرر" }}';
 
-                // Create or get popup element
-                let popup = document.querySelector('.slot-popup');
-                if (!popup) {
-                    popup = document.createElement('div');
-                    popup.className = 'popover slot-popup';
-                    const body = document.createElement('div');
-                    body.className = 'popover-body';
-                    popup.appendChild(body);
-                    document.body.appendChild(popup);
+                // Dispose any existing popovers
+                if (currentEventPopover) {
+                    currentEventPopover.dispose();
                 }
 
-                // Set popup content
-                const body = popup.querySelector('.popover-body');
-                body.innerHTML = `
-                    <div><strong>{{ $l == "en" ? "Duration" : "المدة" }}:</strong> ${duration} {{ __("mentor.min") }}</div>
-                    <div><strong>{{ $l == "en" ? "Repeats" : "يتكرر" }}:</strong> ${repeatsStatus}</div>
+                const popoverContent = `
+                    <div class="d-flex justify-content-between align-items-start">
+                      <div>
+                        <div><small>{{ __("mentor.duration") }}:</small> <small class="fw-semibold">${duration} {{ __("mentor.min") }}</small></div>
+                        <div><small>{{ __("mentor.repeats_weekly") }}:</small> <small class="fw-semibold">${event.extendedProps.weekly ? '{{ __('admin.Yes') }} ' : '{{ __('admin.No') }}'}</small></div>
+                        <div class="d-flex mt-3">
+                          <button class="btn btn-label-danger btn-xs delete-event-action">
+                            <i class="ti ti-trash ti-14px me-1"></i>
+                            {{ __('admin.Delete') }}
+                          </button>
+                        </div>
+                      </div>
+                      <button class="btn-close close-popover-action ms-6" aria-label="Close"></button>
+                    </div>
                 `;
 
-                // Position popup below the event
-                const rect = arg.el.getBoundingClientRect();
-                popup.style.left = (rect.left + rect.width / 2) + 'px';
-                popup.style.top = (rect.bottom + 5) + 'px';
-                popup.style.display = 'block';
-            },
-            eventMouseLeave: function(arg) {
-                const popup = document.querySelector('.slot-popup');
-                if (popup) {
-                    popup.style.display = 'none';
-                }
+                // Create popover on the clicked event element
+                const popover = new bootstrap.Popover(arg.el, {
+                    html: true,
+                    // title: `<small style="margin-bottom: 1rem;">{{ __("mentor.slot_details") }}</small>`,
+                    content: popoverContent,
+                    sanitize: false,
+                    container: 'body',
+                    trigger: 'manual'
+                });
+
+                popover.show();
+
+                const popoverTip = popover.tip;
+                popoverTip.classList.add('slot-popup');
+                $(popoverTip).find('.close-popover-action').on('click', () => {
+                    popover.dispose();
+                    currentEventPopover = null;
+                    $(document).off('click.outside-popover');
+                });
+
+                // Dispose popover when clicking outside
+                $(document).on('click.outside-popover', function(e) {
+                    if (currentEventPopover && !$(e.target).closest('.popover').length && !$(e.target).is(arg.el) && !$(e.target).closest(arg.el).length) {
+                        currentEventPopover.dispose();
+                        currentEventPopover = null;
+                        $(document).off('click.outside-popover');
+                    }
+                });
+                $(popoverTip).find('.delete-event-action').on('click', () => {
+                    const id = event.extendedProps.id;
+
+                    // Show SweetAlert confirmation before deletion
+                    Swal.fire({
+                        title: "{{__('mentor.delete_slot_confirm')}}",
+                        text: "{{__('admin.Recover')}}",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: "{{ __('admin.DYes') }}",
+                        cancelButtonText: "{{ __('admin.No') }}",
+                        reverseButtons: true,
+                        customClass: {
+                          confirmButton: 'btn btn-danger me-2',
+                          cancelButton: 'btn btn-label-secondary',
+                        },
+                        buttonsStyling: false,
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // API call to delete the slot from the server
+                            if (id) {
+                                fetch(`/dashboard/availability/slots/${id}`, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        "Accept": "application/json",
+                                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                                    }
+                                })
+                                .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok'))
+                                .then(result => {
+                                    if(result.success) {
+                                        releaseSuccessAlert({
+                                            'message': result?.message ? result.message : "{{ __('mentor.slot_removed_success') }}",
+                                        });
+                                        // Re-fetch data to update the calendar
+                                        fetch('/dashboard/availability/slots', {
+                                          headers: {
+                                            "Accept": "application/json"
+                                          }
+                                        })
+                                            .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok'))
+                                            .then(result => {
+                                                processSlots(result?.data ? result.data : []);
+                                                updateCalendarStyles();
+                                            });
+                                    } else {
+                                         releaseFailureAlert({
+                                            'title': '{{ __('admin.Error') }}',
+                                            'message': result?.message ? result.message : "{{ __('admin.unexpected_error') }}",
+                                        });
+                                    }
+                                })
+                                .catch(error => {
+                                    releaseFailureAlert({
+                                        'title': '{{ __('admin.Error') }}',
+                                        'message': error?.message ? error.message : "{{ __('admin.unexpected_error') }}",
+                                    });
+                                });
+                            }
+                        }
+                    });
+
+                    popover.dispose();
+                    currentEventPopover = null;
+                });
+
+                currentEventPopover = popover;
             }
         });
 
