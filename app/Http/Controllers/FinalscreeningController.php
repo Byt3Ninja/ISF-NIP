@@ -260,12 +260,10 @@ class FinalscreeningController extends Controller
 
         foreach( $judgers_list as $panel_id => $judgers_ids )
         {
-            $users_list = $finalscreenings->where('panel', $panel_id)->map(function($finalscreening) {
-                if( is_array( $finalscreening->companies ) ) { return $finalscreening->companies; }
-                else { return collect(json_decode($finalscreening->companies, true) ?? []); }
-            })->flatten()->unique()->values()->all();
-
-            $judgers_list[$panel_id] = ['judgers' => $judgers_ids, 'companies' => $users_list ];
+            // Finalscreening table doesn't have 'panel' column like Screening does
+            // It uses company_id directly, so we can't filter by panel
+            // Just set companies to empty for now - final screening uses different structure
+            $judgers_list[$panel_id] = ['judgers' => $judgers_ids, 'companies' => [] ];
         }
         $check = ScreeningEvaluation::where('step_id', $id)->first();
         if( empty( $check ) )
@@ -282,20 +280,11 @@ class FinalscreeningController extends Controller
         $judgingPanels = [];
         if ($cstep && isset($judgers_list) && count($judgers_list) > 0) {
             foreach ($judgers_list as $panelId => $panelData) {
-                $screening = \App\Finalscreening::where('step_id', $cstep->id)->where('panel', $panelId)->first();
                 $panelEntry = [
                     'judges' => (array) ($panelData['judgers'] ?? []),
                     'companies' => (array) ($panelData['companies'] ?? []),
                     'session' => []
                 ];
-                if ($screening && $screening->session_date) {
-                    $panelEntry['session'] = [
-                        'date' => $screening->session_date,
-                        'start_time' => $screening->start_time ? substr($screening->start_time, 0, 5) : '',
-                        'end_time' => $screening->end_time ? substr($screening->end_time, 0, 5) : '',
-                        'meeting_link' => $screening->meeting_link
-                    ];
-                }
                 $judgingPanels[] = $panelEntry;
             }
         }
