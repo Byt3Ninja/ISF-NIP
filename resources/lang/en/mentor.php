@@ -122,4 +122,5 @@ return [
     'day' => 'Day',
     'Offline_not_allowed' => 'Offline sessions are not allowed',
     'Only_Online_allowed' => 'Only online sessions are allowed',
+    'duration' => 'Duration',
 ];

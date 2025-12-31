@@ -122,4 +122,5 @@ return [
     'day' => 'اليوم',
     'Offline_not_allowed' => 'لا يسمح بالجلسات Offline',
     'Only_Online_allowed' => ' تم السماح للجلسة عن بعد فقط ',
+    'duration' => 'المدة',
 ];
