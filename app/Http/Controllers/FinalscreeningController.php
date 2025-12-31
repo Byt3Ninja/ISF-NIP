@@ -277,7 +277,34 @@ class FinalscreeningController extends Controller
         $companies = [];
         $evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
         if( $cstep ) { $companies = Company::whereIn('step', [$form?->id ?? 0, $cstep?->id ?? 0])->get(); } else { $cstep = []; }
-        return view('admin.settings.final.show', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'steps', 'id', 'svgs', 'evaluationForm'));
+
+        /** Prepare Judging Panels for View (Clean Code) */
+        $judgingPanels = [];
+        if ($cstep && isset($judgers_list) && count($judgers_list) > 0) {
+            foreach ($judgers_list as $panelId => $panelData) {
+                $screening = \App\Finalscreening::where('step_id', $cstep->id)->where('panel', $panelId)->first();
+                $panelEntry = [
+                    'judges' => (array) ($panelData['judgers'] ?? []),
+                    'companies' => (array) ($panelData['companies'] ?? []),
+                    'session' => []
+                ];
+                if ($screening && $screening->session_date) {
+                    $panelEntry['session'] = [
+                        'date' => $screening->session_date,
+                        'start_time' => $screening->start_time ? substr($screening->start_time, 0, 5) : '',
+                        'end_time' => $screening->end_time ? substr($screening->end_time, 0, 5) : '',
+                        'meeting_link' => $screening->meeting_link
+                    ];
+                }
+                $judgingPanels[] = $panelEntry;
+            }
+        }
+
+        if (empty($judgingPanels)) {
+            $judgingPanels = [['judges' => [], 'companies' => [], 'session' => []]];
+        }
+
+        return view('admin.settings.final.show', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'steps', 'id', 'svgs', 'evaluationForm', 'judgingPanels'));
     }
 
     public function update(Request $request)
