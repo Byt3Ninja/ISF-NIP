@@ -2711,6 +2711,7 @@ return [
 	'Select Industries' => 'Select Industries',
 	'Select the industries this organization focuses on' => 'Select the industries this organization focuses on',
 	'Organization Logo' => 'Organization Logo',
+	'upload_logo' => 'Upload Logo',
 	'No logo uploaded' => 'No logo uploaded',
 	'Accepted formats' => 'Accepted formats',
 	'Max size' => 'Max size',
@@ -2722,7 +2723,7 @@ return [
 	'Please complete the previous steps first' => 'Please complete the previous steps first',
 	'This organization is currently in draft mode' => 'This organization is currently in draft mode',
 	'Complete all required steps to publish it' => 'Complete all required steps to publish it',
-	'Please fix the errors before continuing' => 'Please fix the errors before continuing',
+	'Please fix the errors before continuing' => 'Please correct the highlighted errors to continue.',
 	'Optional' => 'Optional',
 
 	// Organization Wizard Validation Messages
@@ -3017,7 +3018,7 @@ return [
 	'End Color' => 'End Color',
 
 	// Landing Page Enable/Disable
-	'Landing page is published' => 'Landing page is published',
+	'Landing page is published' => 'Landing page will be published',
 	'Landing page is unpublished' => 'Landing page is unpublished',
 	'Enable Landing Page' => 'Enable Landing Page',
 
@@ -3070,8 +3071,13 @@ return [
 
 	'public_scope_hint' => 'Mentors not related to any organization',
 	'organization_scope_hint' => 'Mentors related to organizations only',
-    'error_date_range' => 'Program date range must be defined correctly.',
+	'error_date_range' => 'Program date range must be defined correctly.',
+	'setup' => 'Setup',
+	'setup_organization_wizard_description' => 'Setup you organization details step by step',
 	'Offline sessions are not allowed' => 'Offline sessions are not allowed',
+	'Enable Section' => 'Enable Section',
+	'Disable Section' => 'Disable Section',
+	'Landing Page Sections' => 'Landing Page Sections',
 	'Email_Not_Configured' => 'Email is not configured',
 	'Email_Not_Enabled' => 'Email is not enabled',
 ];

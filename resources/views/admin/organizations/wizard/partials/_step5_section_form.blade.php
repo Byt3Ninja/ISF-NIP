@@ -8,10 +8,6 @@
   $title = old("custom_sections.{$idx}.title", $sectionData->title ?? '');
   $content = old("custom_sections.{$idx}.content", $sectionData->content ?? '');
   $visibility = old("custom_sections.{$idx}.visibility", $sectionData->visibility ?? 'public');
-  $bgType = old("custom_sections.{$idx}.bg_type", $sectionData->bg_type ?? 'solid');
-  $bgColor = old("custom_sections.{$idx}.bg_color", $sectionData->bg_color ?? '#ffffff');
-  $bgGradientStart = old("custom_sections.{$idx}.bg_gradient_start", $sectionData->bg_gradient_start ?? '#ffffff');
-  $bgGradientEnd = old("custom_sections.{$idx}.bg_gradient_end", $sectionData->bg_gradient_end ?? '#f8f9fa');
 @endphp
 
 <div class="section-form py-3">
@@ -53,7 +49,7 @@
     </div>
 
     <!-- Visibility -->
-    <div class="col-md-6 mb-3">
+    <div class="col-md-12 mb-3">
       <label class="form-label fw-semibold">
         {{ __('admin.Visibility') }} <span class="text-danger">*</span>
       </label>
@@ -104,43 +100,6 @@
       @error("custom_sections.{$idx}.visibility")
         <div class="invalid-feedback d-block">{{ $message }}</div>
       @enderror
-    </div>
-
-    <!-- Background Color -->
-    <div class="col-md-6 mb-3">
-      <label class="form-label fw-semibold">{{ __('admin.Background Color') }}</label>
-      <div class="row">
-        <div class="col-12 mb-2">
-          <select class="form-select form-select-sm section-bg-type-select" name="custom_sections[{{ $idx }}][bg_type]" data-index="{{ $idx }}">
-            <option value="solid" {{ $bgType == 'solid' ? 'selected' : '' }}>{{ __('admin.Solid Color') }}</option>
-            <option value="gradient" {{ $bgType == 'gradient' ? 'selected' : '' }}>{{ __('admin.Gradient') }}</option>
-          </select>
-        </div>
-        <!-- Solid Color Input -->
-        <div class="col-12 section-solid-input {{ $bgType == 'gradient' ? 'd-none' : '' }}" data-index="{{ $idx }}">
-          <div class="input-group input-group-sm">
-            <input type="color" class="form-control form-control-color section-bg-color" name="custom_sections[{{ $idx }}][bg_color]" value="{{ $bgColor }}" data-index="{{ $idx }}" style="width: 50px; padding: 2px;">
-            <input type="text" class="form-control section-bg-color-text" value="{{ $bgColor }}" data-index="{{ $idx }}" placeholder="#ffffff">
-          </div>
-        </div>
-        <!-- Gradient Color Inputs -->
-        <div class="col-12 section-gradient-input {{ $bgType == 'solid' ? 'd-none' : '' }}" data-index="{{ $idx }}">
-          <div class="row g-2">
-            <div class="col-6">
-              <div class="input-group input-group-sm">
-                <input type="color" class="form-control form-control-color section-bg-gradient-start" name="custom_sections[{{ $idx }}][bg_gradient_start]" value="{{ $bgGradientStart }}" data-index="{{ $idx }}" style="width: 40px; padding: 2px;">
-                <input type="text" class="form-control section-bg-gradient-start-text" value="{{ $bgGradientStart }}" data-index="{{ $idx }}" placeholder="{{ __('admin.Start') }}">
-              </div>
-            </div>
-            <div class="col-6">
-              <div class="input-group input-group-sm">
-                <input type="color" class="form-control form-control-color section-bg-gradient-end" name="custom_sections[{{ $idx }}][bg_gradient_end]" value="{{ $bgGradientEnd }}" data-index="{{ $idx }}" style="width: 40px; padding: 2px;">
-                <input type="text" class="form-control section-bg-gradient-end-text" value="{{ $bgGradientEnd }}" data-index="{{ $idx }}" placeholder="{{ __('admin.End') }}">
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
