@@ -135,12 +135,11 @@ class InvitationController extends Controller
             
         // هنعمل ان لو حاجة فى الsmtp مش موجودة فيرجع للادمن عشان يراجع على 
         $setting = Settings::first();
-                        if($setting->enable_email == 1){
-                            if($setting->host != null){
-                                return response()->json(['success' => 'false', 'message' => 'admin.Email_Not_Configured'], 203);
-                            }else{
-                                return response()->json(['success' => 'false', 'message' => 'admin.Email_Not_Enabled'], 203);
-                            }
+                        if($setting->enable_email == 0){
+                            return response()->json(['success' => 'false', 'message' => 'admin.Email_Not_Enabled'], 203);
+                        }
+                        if($setting->host == null){
+                            return response()->json(['success' => 'false', 'message' => 'admin.Email_Not_Configured'], 203);
                         }
         
         
@@ -148,7 +147,7 @@ class InvitationController extends Controller
         $data = $request->all();
        // dd($data);
         $request->validate([
-            'invitee_name' => 'required',
+            'invitee_name' => 'nullable|string',
             'invitee_email' => 'required|email',
             'invitation_scope' => 'required',
             'organizations' => 'nullable|array',
