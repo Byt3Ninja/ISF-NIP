@@ -132,8 +132,7 @@ class InvitationController extends Controller
      */
     public function store(Request $request)
     {
-            
-        // هنعمل ان لو حاجة فى الsmtp مش موجودة فيرجع للادمن عشان يراجع على 
+           
         $setting = Settings::first();
                         if($setting->enable_email == 0){
                             return response()->json(['success' => 'false', 'message' => 'admin.Email_Not_Enabled'], 203);
@@ -147,13 +146,13 @@ class InvitationController extends Controller
         $data = $request->all();
        // dd($data);
         $request->validate([
-            'invitee_name' => 'nullable|string',
+            'invitee_name' => 'required|string',
             'invitee_email' => 'required|email',
             'invitation_scope' => 'required',
             'organizations' => 'nullable|array',
             'invitation_subject' => 'required',
             'invitation_message' => 'required',
-            'attachments' => 'nullable|array',
+            'attachments' => 'nullable',
         ]);
 
         // Store the data in the database
@@ -163,7 +162,7 @@ class InvitationController extends Controller
         $invitation->email = $data['invitee_email'];
         $invitation->name = $data['invitee_name'] ?? $name;
         $invitation->user_id = auth()->user()->id;
-        $invitation->status = 'Sended';
+        $invitation->status = 'Send';
         $invitation->scope = $data['invitation_scope'];
         $invitation->organization_ids = $data['organizations'] ?? [];
         $invitation->subject = $data['invitation_subject'];
@@ -172,8 +171,24 @@ class InvitationController extends Controller
         $invitation->save();
 
         dispatch(new SendInviteMentorEmail($invitation));
+
+        $invitation = InviteMentor::where('id', $invitation->id)->get()->map(function ($invite) {
+            return [
+                'invitee_name'     => $invite->name,
+                'invitee_email'    => $invite->email,
+                'subject'          => $invite->subject,
+                'scope'            => $invite->scope,
+                'status'           => $invite->status,
+                'message_content'  => $invite->message_content,
+                'response_message' => $invite->response_message ?? null,
+                'created_at'       => $invite->created_at->format('Y-m-d H:i:s'),
+                'attachments'      => $invite->attachments ?? [],
+            ];
+        });
         
-        return response()->json(['success' => true, 'message' => 'Invitation sent successfully.']);
+        return response()->json(['success' => true,
+         'message' => 'Invitation sent successfully.',
+        'data' => $invitation], 200);
     }
 
     private function uploadToUsersDisk(UploadedFile $file): array
