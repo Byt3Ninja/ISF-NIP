@@ -1155,7 +1155,7 @@ class CyclesController extends Controller
                         'is_required' => $q['is_required'],
                         'type'        => $q['type'],
                         'options'     => $q['options'],
-                        'logic'       => $q['logic'],
+                        'logic'       => (array) $q['logic'],
                     ];
                 })->toArray(),
             ];
