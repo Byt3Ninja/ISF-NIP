@@ -3,17 +3,11 @@
 namespace App\Mail;
 
 use App\InviteMentor;
-use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Contracts\Queue\ShouldQueue;
-
-
-class InviteMentorMail extends Mailable implements ShouldQueue
+class InviteMentorMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use SerializesModels;
 
    public InviteMentor $invitation;
 
@@ -33,12 +27,8 @@ class InviteMentorMail extends Mailable implements ShouldQueue
                          'organizations' => $this->invitation->organization_ids,
                      ]);
 
-        // Attach files if exist
-        if (!empty($this->invitation->attachments)) {
-            foreach ($this->invitation->attachments as $file) {
-                $mail->attach(storage_path('app/' . $file));
-            }
-        }
+        // Note: Attachments are stored as URLs and will be accessible via links in the email template
+        // Physical file attachments would need to be handled differently if required
 
         return $mail;
     }

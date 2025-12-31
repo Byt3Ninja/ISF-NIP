@@ -12,6 +12,7 @@ use Illuminate\Http\UploadedFile;
 use App\Jobs\SendInviteMentorEmail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Request;
 
 class InvitationController extends Controller
@@ -46,72 +47,13 @@ class InvitationController extends Controller
                 'subject'          => $invite->subject,
                 'scope'            => $invite->scope,
                 'status'           => $invite->status,
-                'message_content'  => strip_tags($invite->message_content),
+                'message_content'  => trim(preg_replace('/📎[^\n]*/', '', strip_tags($invite->message_content))),
                 'response_message' => '',
                 'created_at'       => $invite->created_at->format('Y-m-d H:i:s'),
                 'attachments'      => is_string($invite->attachments) ? json_decode($invite->attachments, true) : ($invite->attachments ?? []),
                 'organizations'    => $organizations,
             ];
         })->values()->toArray();
-
-        // dd($invitations);
-        // $invitations = [
-        //     [
-        //         'invitee_name'      => 'Ahmed Hassan',
-        //         'invitee_email'     => 'ahmed.hassan@example.com',
-        //         'subject'             => 'Annual Tech Conference',
-        //         'scope'             => 'Public',
-        //         'status'            => 'Pending',
-        //         'message_content'   => 'You are invited to join our annual tech conference.',
-        //         'response_message'  => 'Hello Ahmed, I am excited to join the tech conference.',
-        //         'created_at'    => '2025-01-10 10:00:00',
-        //         'attachments'       => [],
-        //     ],
-        //     [
-        //         'invitee_name'      => 'Sara Mohamed',
-        //         'invitee_email'     => 'sara.mohamed@example.com',
-        //         'subject'             => 'Company Strategy Meeting',
-        //         'scope'             => 'Organization',
-        //         'status'            => 'Accepted',
-        //         'message_content'   => 'Please attend the company strategy meeting.',
-        //         'response_message'  => 'I will be attending the strategy meeting.',
-        //         'created_at'    => '2025-01-15 14:30:00',
-        //         'attachments'       => ['agenda.pdf'],
-        //     ],
-        //     [
-        //         'invitee_name'      => 'Omar Khaled',
-        //         'invitee_email'     => 'omar.khaled@example.com',
-        //         'subject'             => 'Product Launch Event',
-        //         'scope'             => 'Public',
-        //         'status'            => 'Declined',
-        //         'message_content'   => 'Join us for the exciting product launch event.',
-        //         'response_message'  => 'Sorry, I can\'t make it.',
-        //         'created_at'    => '2025-01-18 09:00:00',
-        //         'attachments'       => ['product_brochure.pdf', 'invitation_card.jpg'],
-        //     ],
-        //     [
-        //         'invitee_name'      => 'Laila Mahmoud',
-        //         'invitee_email'     => 'laila.mahmoud@example.com',
-        //         'subject'             => 'HR Policy Workshop',
-        //         'scope'             => 'Organization',
-        //         'status'            => 'Pending',
-        //         'message_content'   => 'Workshop on new HR policies.',
-        //         'response_message'  => 'I will be attending the workshop.',
-        //         'created_at'    => '2025-01-22 11:00:00',
-        //         'attachments'       => [],
-        //     ],
-        //     [
-        //         'invitee_name'      => 'Youssef Adel',
-        //         'invitee_email'     => 'youssef.adel@example.com',
-        //         'subject'             => 'Networking Breakfast',
-        //         'scope'             => 'Public',
-        //         'status'            => 'Accepted',
-        //         'message_content'   => 'Network with industry leaders over breakfast.',
-        //         'response_message'  => 'I will be attending the networking event.',
-        //         'created_at'    => '2025-01-25 08:00:00',
-        //         'attachments'       => ['networking_guide.pdf'],
-        //     ],
-        // ];
 
         $organizations = $allOrganizations->map(function($org) {
                             return [
@@ -133,28 +75,27 @@ class InvitationController extends Controller
     public function store(Request $request)
     {
             
-        // هنعمل ان لو حاجة فى الsmtp مش موجودة فيرجع للادمن عشان يراجع على 
+        // Check if email settings are properly configured before sending invitation
         $setting = Settings::first();
-                        if($setting->enable_email == 1){
-                            if($setting->host != null){
-                                return response()->json(['success' => 'false', 'message' => 'admin.Email_Not_Configured'], 203);
-                            }else{
-                                return response()->json(['success' => 'false', 'message' => 'admin.Email_Not_Enabled'], 203);
-                            }
-                        }
+        if (!$setting || $setting->enable_email != 1) {
+            return response()->json(['success' => false, 'message' => __('admin.Email_Not_Enabled')], 203);
+        }
+        if (!$setting->host) {
+            return response()->json(['success' => false, 'message' => __('admin.Email_Not_Configured')], 203);
+        }
         
         
         // Retrieve the data from the request
         $data = $request->all();
        // dd($data);
         $request->validate([
-            'invitee_name' => 'required',
+            'invitee_name' => 'required|string|max:255',
             'invitee_email' => 'required|email',
             'invitation_scope' => 'required',
             'organizations' => 'nullable|array',
             'invitation_subject' => 'required',
             'invitation_message' => 'required',
-            'attachments' => 'nullable|array',
+            // 'attachments' => 'nullable|array',
         ]);
 
         // Store the data in the database
@@ -172,9 +113,43 @@ class InvitationController extends Controller
         $invitation->attachments = $data['attachments'] ?? [];
         $invitation->save();
 
-        dispatch(new SendInviteMentorEmail($invitation));
-        
-        return response()->json(['success' => true, 'message' => 'Invitation sent successfully.']);
+        // Send email synchronously for immediate feedback
+        try {
+            Mail::to($invitation->email)->send(new InviteMentorMail($invitation));
+
+            // Prepare invitation data for real-time table update
+            $organizationMap = Organization::all()->keyBy('id');
+            $orgIds = is_string($invitation->organization_ids) ? json_decode($invitation->organization_ids, true) : ($invitation->organization_ids ?? []);
+            $organizations = collect($orgIds)->map(function ($id) use ($organizationMap) {
+                return $organizationMap->has($id) ? [
+                    'id' => $id,
+                    'name' => $organizationMap[$id]['name_en']
+                ] : null;
+            })->filter()->values()->toArray();
+
+            $invitationData = [
+                'invitee_name'     => $invitation->name,
+                'invitee_email'    => $invitation->email,
+                'subject'          => $invitation->subject,
+                'scope'            => $invitation->scope,
+                'status'           => $invitation->status,
+                'message_content'  => trim(preg_replace('/📎[^\n]*/', '', strip_tags($invitation->message_content))),
+                'response_message' => '',
+                'created_at'       => $invitation->created_at->format('Y-m-d H:i:s'),
+                'attachments'      => is_string($invitation->attachments) ? json_decode($invitation->attachments, true) : ($invitation->attachments ?? []),
+                'organizations'    => $organizations,
+            ];
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Invitation sent successfully.',
+                'invitation' => $invitationData
+            ]);
+        } catch (\Exception $e) {
+            // Log the error and return failure response
+            Log::error('Failed to send invitation email: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Failed to send email. Please check email configuration.'], 500);
+        }
     }
 
     private function uploadToUsersDisk(UploadedFile $file): array

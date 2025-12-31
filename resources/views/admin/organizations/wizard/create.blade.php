@@ -95,7 +95,7 @@
               <input type="hidden" name="redirect_to" id="redirect_to" value="next">
 
               <!-- Error Alert -->
-              <div class="px-8" id="errorAlert" style="display: none;">
+              <div class="px-8 mt-6" id="errorAlert" style="display: none;">
                 <div class="alert alert-danger alert-dismissible">
                   <i class="ti ti-alert-triangle me-2"></i>
                   <span id="errorAlertMessage"></span>
@@ -151,15 +151,17 @@
               </div>
             </form>
 
-            @if(isset($organization) && $organization->is_draft)
-              <div class="alert alert-warning d-flex align-items-center mt-3" role="alert">
-                <i class="ti ti-alert-triangle me-2"></i>
-                <div>
-                  {{ __('admin.This organization is currently in draft mode') }}.
-                  {{ __('admin.Complete all required steps to publish it') }}.
+            <div class="px-8">
+              @if(isset($organization) && $organization->is_draft)
+                <div class="alert alert-warning d-flex align-items-center mt-3" role="alert">
+                  <i class="ti ti-alert-triangle me-2"></i>
+                  <div>
+                    {{ __('admin.This organization is currently in draft mode') }}.
+                    {{ __('admin.Complete all required steps to publish it') }}.
+                  </div>
                 </div>
-              </div>
-            @endif
+              @endif
+            </div>
 
             @if($isEdit)
               @foreach(range(2, 5) as $step)
