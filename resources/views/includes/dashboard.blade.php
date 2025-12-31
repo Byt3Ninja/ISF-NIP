@@ -693,7 +693,7 @@
 													</div>
 												</td>
 												<td>
-													<div style="cursor: pointer;" class="d-flex align-items-center"
+													<div style="cursor: pointer;" class="d-flex align-items-center gap-2"
 														onclick="mentor({{ $session->mentor_id }}, '{{ $session->mentor->name }}', '{{ $session->mentor->ratings }}')">
 														<div class="avatar">
 															<img 

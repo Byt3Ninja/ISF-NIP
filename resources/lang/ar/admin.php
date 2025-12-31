@@ -2763,6 +2763,7 @@ return [
 	'Select Industries' => 'اختر الصناعات',
 	'Select the industries this organization focuses on' => 'اختر الصناعات التي تركز عليها هذه المؤسسة',
 	'Organization Logo' => 'شعار المؤسسة',
+	'upload_logo' => 'رفع الشعار',
 	'No logo uploaded' => 'لم يتم رفع شعار',
 	'Accepted formats' => 'الصيغ المقبولة',
 	'Max size' => 'الحجم الأقصى',
@@ -3072,7 +3073,7 @@ return [
 	'End Color' => 'لون النهاية',
 
 	// Landing Page Enable/Disable
-	'Landing page is published' => 'الصفحة الرئيسية منشورة',
+	'Landing page is published' => 'الصفحة الرئيسية سوف منشورة',
 	'Landing page is unpublished' => 'الصفحة الرئيسية غير منشورة',
 	'Enable Landing Page' => 'تفعيل الصفحة الرئيسية',
 
@@ -3125,8 +3126,13 @@ return [
 
 	'public_scope_hint' => 'المرشدون غير مرتبطين بأي موسسة',
 	'organization_scope_hint' => 'المرشدون المرتبطين بالمؤسسات فقط',
-    'error_date_range' => 'يجب تحديد نطاق التاريخ بشكل صحيح.',
+	'setup' => 'إعداد',
+	'setup_organization_wizard_description' => 'قم بإعداد تفاصيل مؤسستك خطوة بخطوة.',
+	'error_date_range' => 'يجب تحديد نطاق التاريخ بشكل صحيح.',
 	'Offline sessions are not allowed' => 'غير مسموح بجلسات عن بعد',
+	'Enable Section' => 'تفعيل القسم',
+	'Disable Section' => 'الغاء التفعيل',
+	'Landing Page Sections' => 'أقسام صفحة الهبوط',
 	'Email_Not_Configured' => 'لم يتم تكوين البريد الالكتروني',
 	'Email_Not_Enabled' => ' لم يتم تفعيل البريد الاليكترونى'
 ];
