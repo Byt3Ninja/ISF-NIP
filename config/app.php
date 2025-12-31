@@ -238,4 +238,8 @@ return [
         'GeoIP' => \Torann\GeoIP\Facades\GeoIP::class,
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
     ],
+
+    'version' => env('APP_VERSION', '1.0.0'),
+    'build' => env('APP_BUILD', '0'),
+    'git_sha' => env('APP_GIT_SHA', ''),
 ];
