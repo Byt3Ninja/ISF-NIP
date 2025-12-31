@@ -12,6 +12,11 @@ class CycleCustomPagesController extends Controller
 {
 	public function add(Request $request, $id)
 	{
+		$user = auth()->user();
+		if( !$user->ableToAny(['programs.create', 'programs.edit']) )
+		{
+			return response()->json(['status' => false, 'message' => __('cycles.custom_pages_permissions')], 401);
+		}
 		if( $id == $request->cycleId )
 		{
 			$request->validate([
@@ -38,6 +43,11 @@ class CycleCustomPagesController extends Controller
 
 	public function view(Request $request, $id)
 	{
+		$user = auth()->user();
+		if( !$user->ableToAny(['programs.create', 'programs.edit']) )
+		{
+			return response()->json(['status' => false, 'message' => __('cycles.custom_pages_permissions')], 401);
+		}
 		if( $id == $request->cycleId )
 		{
 			$request->validate([
@@ -51,6 +61,11 @@ class CycleCustomPagesController extends Controller
 
 	public function update(Request $request, $id)
 	{
+		$user = auth()->user();
+		if( !$user->ableToAny(['programs.create', 'programs.edit']) )
+		{
+			return response()->json(['status' => false, 'message' => __('cycles.custom_pages_permissions')], 401);
+		}
 		if( $id == $request->cycleId )
 		{
 			$request->validate([
@@ -73,6 +88,11 @@ class CycleCustomPagesController extends Controller
 
 	public function reorder(Request $request, $id)
 	{
+		$user = auth()->user();
+		if( !$user->ableToAny(['programs.create', 'programs.edit']) )
+		{
+			return response()->json(['status' => false, 'message' => __('cycles.custom_pages_permissions')], 401);
+		}
 		if( $id == $request->cycleId )
 		{
 			$validated = $request->validate([
@@ -102,6 +122,11 @@ class CycleCustomPagesController extends Controller
 
 	public function toggle_status(Request $request, $id)
 	{
+		$user = auth()->user();
+		if( !$user->ableToAny(['programs.create', 'programs.edit']) )
+		{
+			return response()->json(['status' => false, 'message' => __('cycles.custom_pages_permissions')], 401);
+		}
 		if( $id == $request->cycleId )
 		{
 			$request->validate([
@@ -120,6 +145,11 @@ class CycleCustomPagesController extends Controller
 
 	public function toggle_visibility(Request $request, $id)
 	{
+		$user = auth()->user();
+		if( !$user->ableToAny(['programs.create', 'programs.edit']) )
+		{
+			return response()->json(['status' => false, 'message' => __('cycles.custom_pages_permissions')], 401);
+		}
 		if( $id == $request->cycleId )
 		{
 			$request->validate([
@@ -139,6 +169,11 @@ class CycleCustomPagesController extends Controller
 
 	public function delete(Request $request, $id)
 	{
+		$user = auth()->user();
+		if( !$user->ableToAny(['programs.create', 'programs.edit']) )
+		{
+			return response()->json(['status' => false, 'message' => __('cycles.custom_pages_permissions')], 401);
+		}
 		if( $id == $request->cycleId )
 		{
 			$request->validate([

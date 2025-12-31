@@ -118,7 +118,7 @@ class ProgramController extends Controller
         $user = auth()->user();
         $search = $request->input('search'); // التحقق من وجود البحث في الطلب
 
-        if (Auth()->user()->hasRole('Admin')) {
+        if ($user->hasRole('Admin')) {
             // إذا كان المستخدم Admin
             $cycles = Cycle::when($search, function ($query, $search) {
                 return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
@@ -132,7 +132,7 @@ class ProgramController extends Controller
             });
         } else {
             // إذا كان المستخدم ليس Admin
-            $Organization = Organization::where('user_id', auth()->user()->id)->first();
+            $Organization = Organization::where('user_id', $user->id)->first();
 
             if (!empty($Organization)) {
                 $cycles = Cycle::where('organization_id', $Organization->id)
@@ -175,7 +175,7 @@ class ProgramController extends Controller
      */
     public function show(string $id)
     {
-        $user = Auth()->user();
+        $user = auth()->user();
         $orgIds = $user->organizations_ids;
         $cycle = Cycle::where('id', $id);
         if ($user->hasAnyRole(['organizationManager', 'subadmin'])) {
@@ -216,7 +216,7 @@ class ProgramController extends Controller
         $user = auth()->user();
         $search = $request->input('search'); // التحقق من وجود البحث في الطلب
 
-        if (Auth()->user()->hasRole('Admin')) {
+        if ($user->hasRole('Admin')) {
             // إذا كان المستخدم Admin
             $cycles = Cycle::when($search, function ($query, $search) {
                 return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
@@ -230,7 +230,7 @@ class ProgramController extends Controller
             });
         } else {
             // إذا كان المستخدم ليس Admin
-            $Organization = Organization::where('user_id', auth()->user()->id)->first();
+            $Organization = Organization::where('user_id', $user->id)->first();
 
             if (!empty($Organization)) {
                 $cycles = Cycle::where('organization_id', $Organization->id)
@@ -439,6 +439,16 @@ class ProgramController extends Controller
         // إعادة التوجيه إلى الصفحة المطلوبة
         return redirect()->back(); // استبدل `your_desired_route` بالمسار المطلوب.
 
+    }
+
+    public function customPages( $id )
+    {
+        $user = auth()->user();
+        if( !$user->ableToAny(['programs.create', 'programs.edit']) ) { return abort(401); }
+        // dd( $id );
+        $ccycle = Cycle::with('custom_pages')->findOrFail($id);
+
+        return view('admin.programs.customPages', compact('ccycle', 'id'));
     }
 
     public function programReport(string $id , Request $request)
@@ -651,44 +661,52 @@ class ProgramController extends Controller
             '81-90'  => $publishedCompanies->whereBetween('score', [81, 90])->count(),
             '91-100' => $publishedCompanies->whereBetween('score', [91, 100])->count(),
         ];*/
-         $companyIds = $companies->pluck('id')->toArray();
-        if (!empty($companyIds)) {
-         $quizzesResults_q = "
-         SELECT 
-            qr.id AS qr_result_id,
-            qr.user_id AS qr_id,
-            qr.quiz_id AS qr_quiz_id,
-            qr.score AS qr_result_score,
-            qr.status AS qr_result_status,
-            qr.started_at AS qr_result_started_at,
-            qr.ended_at AS qr_result_ended_at,
-            q.id AS q_quiz_id,
-            q.title AS q_quiz_title,
-            q.organization_id AS q_quiz_organization_id,
-            q.training_id AS q_quiz_training_id,
-            q.description AS q_quiz_description,
-            q.start AS q_quiz_start,
-            q.end AS q_quiz_end,
-            q.status AS q_quiz_status, 
-            q.created_at AS q_quiz_created_at, 
-            o.name_ar as o_org_name_ar,
-            o.name_en as o_org_name_en,
-            c.id as c_company_id,
-            c.name_en as c_company_name_en,
-            c.name_ar as c_company_name_ar,
-            c.logo as c_company_logo
-    FROM quiz_results qr
-        LEFT JOIN quizzes q ON qr.quiz_id = q.id
-        LEFT JOIN trainings t ON t.id = q.training_id
-        LEFT JOIN organizations o ON o.id = q.organization_id
-        LEFT JOIN users u ON u.id = qr.user_id
-        LEFT JOIN companies c ON c.id = u.company_id
-        WHERE c.id IN (" . implode(',', $companyIds) . ")
-    ";
-        $quizzesResults = collect(DB::select($quizzesResults_q));    
-	} else {
-     $quizzesResults = collect();
-  }
+
+        $companyIds = $companies->pluck('id')->toArray();
+        if (!empty($companyIds))
+        {
+            $quizzesResults_q = "SELECT 
+                    qr.id AS qr_result_id,
+                    qr.user_id AS qr_id,
+                    qr.quiz_id AS qr_quiz_id,
+                    qr.score AS qr_result_score,
+                    qr.status AS qr_result_status,
+                    qr.started_at AS qr_result_started_at,
+                    qr.ended_at AS qr_result_ended_at,
+                    q.id AS q_quiz_id,
+                    q.title AS q_quiz_title,
+                    q.organization_id AS q_quiz_organization_id,
+                    q.training_id AS q_quiz_training_id,
+                    q.description AS q_quiz_description,
+                    q.start AS q_quiz_start,
+                    q.end AS q_quiz_end,
+                    q.status AS q_quiz_status, 
+                    q.created_at AS q_quiz_created_at, 
+                    o.name_ar as o_org_name_ar,
+                    o.name_en as o_org_name_en,
+                    c.id as c_company_id,
+                    c.name_en as c_company_name_en,
+                    c.name_ar as c_company_name_ar,
+                    c.logo as c_company_logo
+                FROM
+                    quiz_results qr
+                LEFT JOIN
+                    quizzes q ON qr.quiz_id = q.id
+                LEFT JOIN
+                    trainings t ON t.id = q.training_id
+                LEFT JOIN
+                    organizations o ON o.id = q.organization_id
+                LEFT JOIN
+                    users u ON u.id = qr.user_id
+                LEFT JOIN
+                    companies c ON c.id = u.company_id
+                WHERE
+                    c.id IN (" . implode(',', $companyIds) . ")
+            ";
+            $quizzesResults = collect(DB::select($quizzesResults_q));    
+	    } else {
+            $quizzesResults = collect();
+        }
 
         return view('admin.programs.program-report', [
            'cycle' => $cycle,
