@@ -66,14 +66,6 @@
                 </div>
               </div>
 
-              <div class="col-md-6 col-lg-2">
-                <select class="form-select select2 bg-card" name="screening_type" data-placeholder="{{ __('admin.screening.all_types') }}">
-                  <option value=""></option>
-                  <option value="onetoall" {{ request('screening_type') == 'onetoall' ? 'selected' : '' }}>{{ __('admin.screening.onetoall') }}</option>
-                  <option value="grouptoall" {{ request('screening_type') == 'grouptoall' ? 'selected' : '' }}>{{ __('admin.screening.grouptoall') }}</option>
-                  <option value="grouptogroup" {{ request('screening_type') == 'grouptogroup' ? 'selected' : '' }}>{{ __('admin.screening.grouptogroup') }}</option>
-                </select>
-              </div>
 
               <div class="col-md-6 col-lg-2">
                 <select class="form-select select2 bg-card" name="status" data-placeholder="{{ __('admin.All_statuses') }}">
@@ -110,7 +102,7 @@
                 </div>
               </div>
 
-              <div class="col-12 mt-3">
+              <div class="col-lg-2">
                 <div class="d-flex justify-content-end gap-2">
                   @if(request('search') || request('screening_type') || request('status') || request('program') || request('judge') || request('startup'))
                     <a href="/dashboard/screening" class="btn btn-label-secondary">

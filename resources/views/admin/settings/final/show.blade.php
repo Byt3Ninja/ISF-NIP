@@ -3,6 +3,27 @@
 @section('vendorstyle')
 <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
+<style>
+/* Center Summernote modals */
+.note-modal .modal-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+}
+
+/* Center buttons in Summernote modals */
+.note-modal .modal-footer {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.note-modal .modal-footer .btn {
+    min-width: 100px;
+}
+</style>
 @stop
 
 @php
@@ -504,6 +525,9 @@ $pills = [
 
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
+@if(app()->getLocale() == 'ar')
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/lang/summernote-ar-AR.min.js"></script>
+@endif
 <script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script>
 @stop
 
@@ -514,7 +538,10 @@ $pills = [
       const initialContent = $('#screening-guidelines-editor').val() || '';
 
       // Initialize Summernote editor
+      const locale = '{{ app()->getLocale() }}';
+      
       $('#screening-guidelines-editor').summernote({
+        lang: locale === 'ar' ? 'ar-AR' : 'en-US',
         placeholder: '{{ __('admin.screening_guidelines_placeholder') }}',
         tabsize: 2,
         height: 200,
@@ -527,6 +554,7 @@ $pills = [
           ['insert', ['link', 'picture', 'video']],
           ['view', ['fullscreen', 'codeview', 'help']]
         ],
+        dialogsInBody: true,
       });
 
       // Set the initial content after Summernote is initialized

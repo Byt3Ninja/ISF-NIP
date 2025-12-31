@@ -65,7 +65,8 @@
       <div class="row">
         <div class="col-12">
           <ul class="nav nav-pills mb-3 pb-3 border-bottom" id="pills-tab" role="tablist">
-            @if($hasGuidelines)
+            @if(trim(strip_tags($evaluationForm->screening_guidelines)) !== '')
+
             <li class="nav-item" role="presentation">
               <button class="nav-link active" id="pills-guidelines-tab" data-bs-toggle="pill"
                 data-bs-target="#pills-guidelines" type="button" role="tab" aria-controls="pills-guidelines"
