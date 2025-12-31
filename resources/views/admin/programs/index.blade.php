@@ -121,11 +121,13 @@
                       <i class="ti ti-dots-vertical"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
+                      @if( $_user->ableTo('programs.view', $permissions) )
                       <li>
                         <a class="dropdown-item" href="/dashboard/programlist/{{ $cycle->id }}">
                           <i class="ti ti-eye me-1"></i> {{ __('admin.View_Details') }}
                         </a>
                       </li>
+                      @endif
                       @if ($cycle->join_url)
                         <li>
                           <a 
@@ -155,6 +157,16 @@
                             href="/dashboard/programlist/edit/{{ $cycle->id }}"
                           >
                             <i class="ti ti-pencil me-1"></i> {{ __('cycles.Edit_Program') }}
+                          </a>
+                        </li>
+                      @endif
+                      @if ($_user->ableToAny(['programs.create', 'programs.edit'], $permissions))
+                        <li>
+                          <a 
+                            class="dropdown-item" 
+                            href="/dashboard/programlist/{{ $cycle->id }}/custom-pages"
+                          >
+                            <i class="ti ti-files me-1"></i> {{ __('cycles.Manage Custom Pages') }}
                           </a>
                         </li>
                       @endif
