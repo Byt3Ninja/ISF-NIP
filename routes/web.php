@@ -17,6 +17,7 @@ use App\Http\Controllers\Mentor\MentorshipTaskController;
 use App\Http\Controllers\Mentor\SlotController;
 use App\Http\Controllers\Judger\JudgerScreeningController;
 use App\Http\Controllers\AdvancedExportController;
+use App\Http\Controllers\TasksController;
 /* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
 Route::get('def-permission', function() {
     $jsonRole = File::get(base_path('database/dbFiles/rolesWithDefaultPermissions.json'));
@@ -544,6 +545,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::resource('faqs', 'FaqsController');
 
     // Tasks
+    Route::get('tasks/assignees/{program_id}', [TasksController::class, 'getAssignees'])->name('tasks.get_assignees');
+    Route::get('tasks/titles', [TasksController::class, 'getTaskTitles'])->name('tasks.get_titles');
     Route::resource('tasks', 'TasksController');
 
     // Forms
