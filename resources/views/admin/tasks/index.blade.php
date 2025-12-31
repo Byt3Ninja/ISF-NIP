@@ -402,7 +402,7 @@ $(function () {
 
 // Initialize Tagify for tags input
 const tagifyInput = document.getElementById('task-tags');
-const tagifyWhitelist = tagifyInput.dataset.whitelist ? JSON.parse('[' + tagifyInput.dataset.whitelist + ']') : [];
+const tagifyWhitelist = tagifyInput.dataset.whitelist ? JSON.parse(tagifyInput.dataset.whitelist) : [];
 
 const tagifyInstance = new Tagify(tagifyInput, {
   whitelist: tagifyWhitelist,

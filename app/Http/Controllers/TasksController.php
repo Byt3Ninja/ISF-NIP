@@ -323,6 +323,30 @@ class TasksController extends Controller
                 $task->assignees()->sync($assigneeData);
             }
 
+            // Handle file attachments
+            if ($request->hasFile('attachments')) {
+                $attachments = $task->attachments ?? [];
+                foreach ($request->file('attachments') as $file) {
+                    // Validate file size (10 MB)
+                    if ($file->getSize() > 10485760) continue;
+
+                    // Validate file type
+                    $allowedExtensions = ['pdf', 'docx', 'xlsx', 'png', 'jpg', 'jpeg'];
+                    $extension = strtolower($file->getClientOriginalExtension());
+                    if (!in_array($extension, $allowedExtensions)) continue;
+
+                    // Store the file
+                    $path = $file->store('tasks/attachments', 'public');
+                    $attachments[] = [
+                        'name' => $file->getClientOriginalName(),
+                        'path' => $path,
+                        'size' => $file->getSize(),
+                        'type' => $file->getMimeType()
+                    ];
+                }
+                $task->update(['attachments' => $attachments]);
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => app()->getLocale() == 'ar'
@@ -385,6 +409,50 @@ class TasksController extends Controller
                     ? 'حدث خطأ أثناء حذف المهمة'
                     : 'An error occurred while deleting the task.'
             ], 500);
+        }
+    }
+
+    /**
+     * Get companies/assignees by program ID.
+     */
+    public function getAssignees($programId)
+    {
+        try {
+            $companies = Company::where('cycle', $programId)
+                ->get()
+                ->map(function($company) {
+                    return [
+                        'id' => $company->id,
+                        'name' => $company->name,
+                        'logo' => $company->logo ? url($company->logo) : null,
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'data' => $companies
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Get unique task titles for suggestions.
+     */
+    public function getTaskTitles()
+    {
+        try {
+            $titles = ProgramTask::select('title')
+                ->distinct()
+                ->pluck('title');
+
+            return response()->json([
+                'success' => true,
+                'data' => $titles
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 }
