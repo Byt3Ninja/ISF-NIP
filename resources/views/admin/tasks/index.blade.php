@@ -93,7 +93,7 @@ $(function () {
       processing: true,
       responsive: true,
       data: tasks,
-      columns: [{ data: null }, { data: 'title' }, { data: 'program' }, { data: 'assignees' }, { data: 'priority' }, { data: 'overallStatus' }, { data: 'dueDate' }, { data: 'id' }],
+      columns: [{ data: null }, { data: 'title' }, { data: 'creator' }, { data: 'program' }, { data: 'assignees' }, { data: 'priority' }, { data: 'overallStatus' }, { data: 'dueDate' }, { data: 'id' }],
       columnDefs: [
         {
           className: 'control', orderable: false, searchable: false, responsivePriority: 2, targets: 0,
@@ -109,9 +109,16 @@ $(function () {
               </div>
             </div>`
         },
-        { targets: 2, render: (data, type, full) => `<span class="text-heading">${full.program.title}</span>` },
+        { targets: 2, render: (data, type, full) => `
+          <div>
+            <span class="text-heading">${full.creator.name}</span>
+            <small class="text-muted d-block text-capitalize">${full.creator.role}</small>
+          </div>
+          `,
+        },
+        { targets: 3, render: (data, type, full) => `<span class="text-heading">${full.program.title}</span>` },
         {
-          targets: 3,
+          targets: 4,
           render: (data, type, full) => {
             const assignees = full.assignees;
             let html = assignees.slice(0, 2).map(a => {
@@ -122,9 +129,9 @@ $(function () {
             return html;
           }
         },
-        { targets: 4, render: (d, t, f) => `<span class="badge ${priorityObj[f.priority].class}" text-capitalized>${priorityObj[f.priority].title}</span>` },
-        { targets: 5, render: (d, t, f) => `<span class="badge ${statusObj[f.overallStatus].class}" text-capitalized>${statusObj[f.overallStatus].title}</span>` },
-        { targets: 6, render: (d, t, f) => `<span class="text-heading">${f.dueDate}</span>` },
+        { targets: 5, render: (d, t, f) => `<span class="badge ${priorityObj[f.priority].class}" text-capitalized>${priorityObj[f.priority].title}</span>` },
+        { targets: 6, render: (d, t, f) => `<span class="badge ${statusObj[f.overallStatus].class}" text-capitalized>${statusObj[f.overallStatus].title}</span>` },
+        { targets: 7, render: (d, t, f) => `<span class="text-heading">${f.dueDate}</span>` },
         {
           targets: -1, searchable: false, orderable: false,
           render: () => `
@@ -135,7 +142,7 @@ $(function () {
             </div>`
         }
       ],
-      order: [[1, 'desc']],
+      order: [[6, 'desc']],
       dom: '<"row"<"col-12 col-lg-9 d-flex flex-wrap align-items-center ps-0 ps-lg-3"l><"col-12 col-lg-3 dt-action-buttons text-xl-end text-lg-start text-md-end text-start d-flex align-items-center justify-content-end flex-md-row flex-column mb-6 mb-md-0 pe-0 pe-lg-2"fB>>t<"row px-6"<"col-sm-12 col-lg-6"i><"col-sm-12 col-lg-6 d-flex justify-content-end"p>>',
       language: {
         url: document.dir == 'rtl'
@@ -149,8 +156,8 @@ $(function () {
         extend: 'collection', className: 'btn btn-label-secondary dropdown-toggle mx-4 waves-effect waves-light',
         text: '<i class="ti ti-file-export me-2 ti-xs"></i> {{ __('admin.Export') }}',
         buttons: [
-          { extend: 'csv', text: '<i class="ti ti-file-text me-2"></i>Csv', className: 'dropdown-item', exportOptions: { columns: [1, 2, 3, 4, 5, 6], format: { body: exportFormat } } },
-          { extend: 'excel', text: '<i class="ti ti-file-spreadsheet me-2"></i>Excel', className: 'dropdown-item', exportOptions: { columns: [1, 2, 3, 4, 5, 6], format: { body: exportFormat } } }
+          { extend: 'csv', text: '<i class="ti ti-file-text me-2"></i>Csv', className: 'dropdown-item', exportOptions: { columns: [1, 2, 3, 4, 5, 6, 7], format: { body: exportFormat } } },
+          { extend: 'excel', text: '<i class="ti ti-file-spreadsheet me-2"></i>Excel', className: 'dropdown-item', exportOptions: { columns: [1, 2, 3, 4, 5, 6, 7], format: { body: exportFormat } } }
         ]
       }],
       initComplete: function () {
@@ -172,9 +179,9 @@ $(function () {
           });
         };
 
-        addDropdownFilter(2, 'taskProgram', '{{ __('admin.Select Program') }}');
-        addDropdownFilter(4, 'taskPriority', '{{ __('admin.select_priority') }}');
-        addDropdownFilter(5, 'taskStatus', '{{ __('admin.Select Status') }}');
+        addDropdownFilter(3, 'taskProgram', '{{ __('admin.Select Program') }}');
+        addDropdownFilter(5, 'taskPriority', '{{ __('admin.select_priority') }}');
+        addDropdownFilter(6, 'taskStatus', '{{ __('admin.Select Status') }}');
 
         // Styles fix
         setTimeout(() => {
@@ -284,6 +291,7 @@ $(function () {
     $('#task-details-content').html(`
       <div class="row">
         <div class="col-12 mb-4"><h4>${data.title}</h4><p class="text-muted">${data.description}</p></div>
+        <div class="col-lg-6 mb-3"><strong>{{ __('admin.Created_By') }}:</strong> ${data.creator.name}</div>
         <div class="col-lg-6 mb-3"><strong>{{ __('admin.Program') }}:</strong> ${data.program.title}</div>
         <div class="col-lg-6 mb-3"><strong>{{ __('admin.Priority') }}:</strong> <span class="badge ${priorityObj[data.priority].class} ms-2">${priorityObj[data.priority].title}</span></div>
         <div class="col-lg-6 mb-3"><strong>{{ __('admin.overall_status') }}:</strong> <span class="badge ${statusObj[data.overallStatus].class} ms-2">${statusObj[data.overallStatus].title}</span></div>
