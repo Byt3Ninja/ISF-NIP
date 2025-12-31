@@ -15,17 +15,20 @@ class FormBuilderController extends Controller
     /**
      * show the builder
      */
-   public function showBuilder(Request $request, $id = null)
+    public function showBuilder(Request $request, $id = null)
     {
         $user = auth()->user();
         $orgIds = $user->organizations_ids;
+        
+        // Get organization_id from request or user's organization
+        $organization_id = $request->org_id ?? ($user->organization_id ?? null);
 
         // Check if there are no organizations
         if (empty($orgIds) && Organization::count() == 0) {
             return redirect(route('organizations.index'))->with('message2', 'add organizations first');
         }
 
-        // When there’s NO id in the URL → treat it as a new form creation
+        // When there's NO id in the URL → treat it as a new form creation
         // if (is_null($id)) {
         //     $title = null; // <-- new form, so title is null
         // } else {
@@ -418,7 +421,7 @@ class FormBuilderController extends Controller
                         break;
 
                     case 'checkboxes':
-                        $field_id = $fields['checkbox'] ?? 0;
+                        $field_id = $fields['radio'] ?? 0;
                         $values = collect($question['options'] ?? [])->map(fn($o) => trim($o))->implode(',');
                         $additional_config = ['type' => 'checkboxes','values' => $values];
                         break;
@@ -430,7 +433,7 @@ class FormBuilderController extends Controller
                         break;
 
                     case 'linear_scale':
-                        $field_id = $fields['range'] ?? 0;
+                        $field_id = $fields['input'] ?? 0;
                         $min = $question['min'] ?? 1;
                         $max = $question['max'] ?? 5;
                         $additional_config = [
