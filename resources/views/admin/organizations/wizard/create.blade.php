@@ -20,14 +20,6 @@
   $requestedStep = request()->get('step', 1);
   $activeStep = min($requestedStep, $maxStep);
 
-  $icons = [
-    'basics' => 'form-wizard-account',
-    'contact' => 'form-wizard-personal',
-    'managers' => 'form-wizard-address',
-    'landing' => 'form-wizard-social-link',
-    'custom_sections' => 'form-wizard-submit',
-  ];
-
   $tabs = [
     ['id' => 'basics', 'title' => __('admin.Organization Basics'), 'step' => 1],
     ['id' => 'contact', 'title' => __('admin.Contact Info'), 'step' => 2],
@@ -103,10 +95,12 @@
               <input type="hidden" name="redirect_to" id="redirect_to" value="next">
 
               <!-- Error Alert -->
-              <div class="alert alert-danger alert-dismissible mb-6" id="errorAlert" style="display: none;">
-                <i class="ti ti-alert-triangle me-2"></i>
-                <span id="errorAlertMessage"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              <div class="px-8" id="errorAlert" style="display: none;">
+                <div class="alert alert-danger alert-dismissible">
+                  <i class="ti ti-alert-triangle me-2"></i>
+                  <span id="errorAlertMessage"></span>
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
               </div>
               <!--/ Error Alert -->
 

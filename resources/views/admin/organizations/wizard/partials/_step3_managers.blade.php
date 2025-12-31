@@ -1,5 +1,5 @@
 <!-- Selected Managers Bar -->
-<div class="card bg-light-subtle shadow-none border-bottom border-top">
+<div class="card bg-light-subtle shadow-none border-bottom border-top rounded-0">
   <div class="card-body py-4">
     <div class="d-flex justify-content-between align-items-center mb-2">
       <h6 class="card-title mb-0 ps-2">
