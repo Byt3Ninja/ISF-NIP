@@ -889,7 +889,8 @@ class CyclesController extends Controller
                     }
                 }
             });
-            return redirect()->route('programs.edit', ['id' => $cycle->id])->with('message', 'Saved');
+            // return redirect()->route('programs.edit', ['id' => $cycle->id])->with('message', 'Saved');
+            return redirect()->route('programlist.index')->with('message', 'Saved');
         }
         else
         {
