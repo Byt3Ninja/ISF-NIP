@@ -305,6 +305,7 @@ return [
     'Attach_Delegation_Document' => 'إرفاق وثيقة التفويض',
     'edit_program' => 'تعديل البرنامج',
     'create_program' => 'إنشاء برنامج جديد',
+    'program_setup' => 'اعدادات البرنامج',
     'External_Participation_Label' => 'خيار المشاركة الخارجية',
     'Select_Organization' => 'اختر المنظمة',
     'Valid_from_to' => 'متاحة من / إلى',

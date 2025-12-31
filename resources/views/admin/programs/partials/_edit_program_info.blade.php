@@ -187,8 +187,7 @@
         name="description" 
         placeholder="{{ __('cycles.Description') }}"
         oninput="this.value = this.value.trimStart()" 
-        rows="3">
-      </textarea>
+        rows="3"></textarea>
       <div class="invalid-feedback"></div>
     </div>
   </div>

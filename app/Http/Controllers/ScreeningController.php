@@ -215,6 +215,7 @@ class ScreeningController extends Controller
 				$query->whereIn('organization_id', $orgIds);
 			});
 		})->where('stype', 2)->orderBy('from')->get();
+		if( $id == 0 || $id == 'results' ) { $id = $steps->first()?->id ?? 0; }
 		// $judges = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->get();
 		$judges = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
 			->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
