@@ -3087,5 +3087,5 @@ return [
 	'Email_Not_Configured' => 'Email is not configured',
 	'Email_Not_Enabled' => 'Email is not enabled',
 	'sending' => 'Sending',
-	'sended' => 'Sended',
+	'send' => 'Send',
 ];
