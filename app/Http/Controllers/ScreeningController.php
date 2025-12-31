@@ -908,7 +908,7 @@ class ScreeningController extends Controller
 			'criteria.*.subCriteria.*.id' => 'nullable|sometimes|integer|exists:screening_evaluation_criteria,id',
 			'criteria.*.subCriteria.*.name' => 'required_if:action,publish|nullable|string|max:255',
 			'criteria.*.subCriteria.*.weight' => 'required_if:action,publish|numeric|between:0,1',
-			'screening_guidelines' => 'nullable|string|max:5000',
+			'screening_guidelines' => 'nullable|string',
 		]);
 
 		$id = $request->stepId;

@@ -320,7 +320,7 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
                 </tr>
                 <tr>
                   <td>
-                    {{ __('admin.Screening by') }}:
+                    {{ __('admin.Screening') }}:
                   </td>
                   <td>
                     @if( $judges->count() > 0 )
