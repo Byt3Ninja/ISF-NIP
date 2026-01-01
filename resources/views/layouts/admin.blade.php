@@ -483,11 +483,13 @@
           icon: 'warning',
           title: title || '',
           html: message,
-          showCancelButton: false,
+          showCancelButton: true,
           showConfirmButton: true,
-          confirmButtonText: "{{ __('admin.OK') }}",
+          confirmButtonText: "{{ __('admin.Confirm') }}",
+          cancelButtonText: "{{ __('admin.Cancel') }}",
           customClass: {
             confirmButton: 'btn btn-primary',
+            cancelButton: 'btn btn-label-secondary',
           },
           buttonsStyling: false,
         }).then((result) => {
@@ -496,6 +498,7 @@
             return;
           }
 
+          if (onConfirm) onConfirm();
         }).catch((error) => {
           console.error('Error in warning alert:', error);
         });

@@ -397,6 +397,9 @@ document.addEventListener('DOMContentLoaded', function () {
 			releaseWarningAlert({
 				title: '{{ __("startup.valuation_date_changed") }}',
 				message: '{{ __("startup.valuation_date_changed_message") }}',
+				onConfirm: () => {
+					this.submit();
+				}
 			});
 		}
 		
