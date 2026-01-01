@@ -121,17 +121,20 @@
 					<h5 class="card-title mb-0">{{ $heading }}</h5>
 					<small class="text-muted">{{ __('startup.enter_valuation_date_and_financial_data_to_generate_metrics') }}</small>
 				</div>
-				<div class="d-flex flex-wrap align-items-md-center gap-3">
+				<div class="d-flex flex-wrap align-items-md-center gap-4">
 					<div class="d-flex align-items-center gap-2 mb-3 mb-md-0">
 						<label for="valuationDate" class="form-label text-nowrap">
 						{{ __('startup.valuation_date') }} <span class="text-danger">*</span>
 						</label>
-						<input type="hidden" id="valuationDateHidden" name="valuation_date">
+						<input type="hidden" id="valuationDateHidden" name="valuation_date" value="{{ isset($valuation_date) ? $valuation_date : '' }}">
+						{{-- Format date for display --}}
 						<input type="text" class="form-control" id="valuationDate" required>
 					</div>
 					<div class="d-flex align-items-center">
-						{{-- <button type="reset" class="btn btn-label-secondary me-3">{{ __('admin.Reset') }}</button> --}}
-						<button type="submit" class="btn btn-primary">{{ __('admin.Save') }}</button>
+						<button type="submit" class="btn btn-primary">
+							<i class="ti ti-device-floppy me-2"></i>
+							{{ __('admin.Save_Changes') }}
+						</button>
 					</div>
 				</div>
 			</div>
@@ -210,12 +213,18 @@
 <script>
 // Financial Projection Form Logic
 document.addEventListener('DOMContentLoaded', function () {
+
+	let currentValuationDate = "{{ isset($valuation_date) ? $valuation_date : '' }}"; // Track current valuation date
+	const oldValuationDate = "{{ isset($valuation_date) ? $valuation_date : '' }}"; // Injected from backend
+
+
 	const dateInput = document.getElementById('valuationDate');
+	const valudationDateHidden = document.getElementById('valuationDateHidden');
 	const formInputs = document.querySelectorAll('.input-trigger');
 
 	// Initialize Flatpickr for Valuation Date
 	flatpickr('#valuationDate', {
-		defaultDate: new Date(),
+		defaultDate: oldValuationDate ? new Date(oldValuationDate) : null,
 		plugins: [
 			new monthSelectPlugin({
 				shorthand: true,      // Jan, Feb, Mar
@@ -228,7 +237,10 @@ document.addEventListener('DOMContentLoaded', function () {
 				const valDate = moment(selectedDates[0]);
 				const valDateStr = valDate.format("YYYY-MM");
 				updateHeaders();
-				document.getElementById('valuationDateHidden').value = valDateStr;
+				currentValuationDate = valDateStr;
+				valudationDateHidden.value = valDateStr;
+
+				$(this.input).removeClass('is-invalid');
 			}
 		}
 	});
@@ -363,6 +375,36 @@ document.addEventListener('DOMContentLoaded', function () {
 			prevDebt = debt;
 		}
 	}
+
+	$('#financialForm').on('submit', function (e) {
+		e.preventDefault();
+
+		if (!currentValuationDate) {
+			releaseWarningAlert({
+				title: '{{ __("startup.valuation_date_required") }}',
+				message: '{{ __("startup.please_select_valuation_date_before_saving") }}',
+			});
+
+			$('#valuationDate').addClass('is-invalid');
+
+			return;
+		}
+
+		// Get valuation date
+		if (currentValuationDate !== oldValuationDate) {
+			// Valuation date changed, you can handle any specific logic here if needed
+			console.log('Valuation date has changed.');
+			releaseWarningAlert({
+				title: '{{ __("startup.valuation_date_changed") }}',
+				message: '{{ __("startup.valuation_date_changed_message") }}',
+			});
+		}
+		
+		console.log('Form submitted');
+		console.log('Old Valuation Date:', oldValuationDate);
+		console.log('Valuation Date:', currentValuationDate);
+		// this.submit();
+	});
 });
 </script>
 @endpush

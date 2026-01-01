@@ -505,4 +505,9 @@ return [
   'notes' => 'Notes',
   'no_deliverables' => 'No Deliverables',
   'failed' => 'Failed',
+
+  'valuation_date_required' => 'valuation date is required',
+  'please_select_valuation_date_before_saving' => 'Please select a valuation date before saving the form.',
+  'valuation_date_changed' => 'valuation date changed',
+  'valuation_date_changed_message' => 'Changing the valuation date will impact the financial metrics.',
 ];

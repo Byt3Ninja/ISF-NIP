@@ -507,4 +507,8 @@ return [
   'notes' => 'ملاحظات',
   'no_deliverables' => 'لا توجد مستندات',
   'failed' => 'فشل',
+  'valuation_date_required' => 'تاريخ التقييم مطلوب',
+  'please_select_valuation_date_before_saving' => 'يرجى اختيار تاريخ التقييم قبل حفظ النموذج',
+  'valuation_date_changed' => 'تغير تاريخ التقييم',
+  'valuation_date_changed_message' => 'تغيير تاريخ التقييم سوفيق على المقاييس المالية.',
 ];
