@@ -424,8 +424,9 @@
 
       // Initialize Select2
       function initSelect2() {
-        $('.select2').each(function() {
+        $('.select2').each(function () {
           const $el = $(this);
+
           if (!$el.hasClass('select2-hidden-accessible')) {
             $el.select2({
               placeholder: $el.data('placeholder'),
@@ -433,8 +434,31 @@
               multiple: $el.prop('multiple')
             });
           }
+
+          $el.on('change', function () {
+            const $wrapper = $el.closest(
+              '.form-group, .col-12, .col-6, .col-4, .col-3'
+            );
+
+            const fieldName = $el.attr('name') || $el.data('field');
+
+            // Remove bootstrap validation state
+            $el.removeClass('is-invalid');
+
+            // Hide validator message
+            $(`[data-field="${fieldName}"]`).hide();
+
+            // Hide validation message
+            $wrapper.find('.invalid-feedback').hide();
+
+            // Fix select2 UI invalid state
+            $el.next('.select2-container')
+              .find('.select2-selection')
+              .removeClass('is-invalid');
+          });
         });
       }
+
 
       // Tab Navigation
       function initTabNavigation() {
