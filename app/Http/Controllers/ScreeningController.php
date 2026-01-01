@@ -489,6 +489,19 @@ class ScreeningController extends Controller
 					'end_time' => $panel['end_time'] ?? null,
 				]);
 			}
+
+			// Sync to Finalscreening table if step type is 5 (Final Screening)
+			$step = Step::find($stepId);
+			if ($step && $step->stype == 5) {
+				foreach ($companyIds as $companyId) {
+					// We use updateOrCreate to ensure judges are updated if they changed
+					// Note: finalscreenings table stores judges as JSON encoded array
+					\App\Finalscreening::updateOrCreate(
+						['step_id' => $stepId, 'company_id' => $companyId],
+						['judges' => json_encode($judgeIds)]
+					);
+				}
+			}
 		}
 
 		return response()->json([

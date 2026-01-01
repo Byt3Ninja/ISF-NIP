@@ -260,10 +260,22 @@ class FinalscreeningController extends Controller
 
         foreach( $judgers_list as $panel_id => $judgers_ids )
         {
-            // Finalscreening table doesn't have 'panel' column like Screening does
-            // It uses company_id directly, so we can't filter by panel
-            // Just set companies to empty for now - final screening uses different structure
-            $judgers_list[$panel_id] = ['judgers' => $judgers_ids, 'companies' => [] ];
+            // Fetch assigned companies for this panel from the screenings table
+            // In screenings table, 'users' column stores company IDs as JSON array
+            $assignedCompanies = DB::table('screenings')
+                ->where('step_id', $cstep->id)
+                ->where('panel', $panel_id)
+                ->whereNull('deleted_at')
+                ->pluck('users')
+                ->map(function($item) {
+                    return is_array($item) ? $item : (json_decode($item, true) ?: []);
+                })
+                ->flatten()
+                ->unique()
+                ->values()
+                ->toArray();
+
+            $judgers_list[$panel_id] = ['judgers' => $judgers_ids, 'companies' => $assignedCompanies ];
         }
         $check = ScreeningEvaluation::where('step_id', $id)->first();
         if( empty( $check ) )
