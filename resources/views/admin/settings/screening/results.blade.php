@@ -103,7 +103,7 @@
 
                       <a
                         class="btn btn-outline-primary rounded-pill px-4 py-2 shadow-sm d-flex align-items-center"
-                        href="/dashboard/{{ $id }}/screening"
+                        href="/dashboard/screening/{{ $id }}"
                         data-bs-toggle="tooltip"
                         data-bs-placement="top"
                         title="{{ __('cycles.Manage screening settings') }}"
