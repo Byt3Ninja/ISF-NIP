@@ -478,7 +478,7 @@
         });
       }
 
-      const releaseWarningAlert = ({title, message}) => {
+      const releaseWarningAlert = ({title, message, onConfirm, onCancel}) => {
         Swal.fire({
           icon: 'warning',
           title: title || '',
@@ -487,9 +487,17 @@
           showConfirmButton: true,
           confirmButtonText: "{{ __('admin.OK') }}",
           customClass: {
-              confirmButton: 'btn btn-primary',
+            confirmButton: 'btn btn-primary',
           },
           buttonsStyling: false,
+        }).then((result) => {
+          if (!result.isConfirmed) {
+            if (onCancel) onCancel();
+            return;
+          }
+
+        }).catch((error) => {
+          console.error('Error in warning alert:', error);
         });
       }
 
