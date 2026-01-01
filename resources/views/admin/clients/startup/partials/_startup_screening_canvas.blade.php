@@ -1,7 +1,7 @@
 @php
   // Show the canvas if the query parameter 'screening' is set to 'true'
   $showCanvas = request()->query('screening') === 'true';
-  $hasGuidelines = !empty($evaluationForm->screening_guidelines) || !empty($evaluationForm->screening_guidelines_file);
+  $hasGuidelines = (trim(strip_tags($evaluationForm->screening_guidelines ?? '')) !== '') || !empty($evaluationForm->screening_guidelines_file);
 @endphp
 
 <style>
@@ -65,8 +65,7 @@
       <div class="row">
         <div class="col-12">
           <ul class="nav nav-pills mb-3 pb-3 border-bottom" id="pills-tab" role="tablist">
-            @if(trim(strip_tags($evaluationForm->screening_guidelines)) !== '')
-
+            @if($hasGuidelines)
             <li class="nav-item" role="presentation">
               <button class="nav-link active" id="pills-guidelines-tab" data-bs-toggle="pill"
                 data-bs-target="#pills-guidelines" type="button" role="tab" aria-controls="pills-guidelines"
@@ -76,16 +75,16 @@
             </li>
             @endif
             <li class="nav-item" role="presentation">
-              <button class="nav-link" id="pills-form-data-tab" data-bs-toggle="pill"
+              <button class="nav-link {{ !$hasGuidelines ? 'active' : '' }}" id="pills-form-data-tab" data-bs-toggle="pill"
                 data-bs-target="#pills-form-data" type="button" role="tab" aria-controls="pills-form-data"
-                aria-selected="false">
+                aria-selected="{{ !$hasGuidelines ? 'true' : 'false' }}">
                 {{ __('admin.Submissions')}}
               </button>
             </li>
             <li class="nav-item" role="presentation">
-              <button class="nav-link {{ !$hasGuidelines ? 'active' : '' }}" id="pills-screening-criteria-tab" data-bs-toggle="pill"
+              <button class="nav-link" id="pills-screening-criteria-tab" data-bs-toggle="pill"
                 data-bs-target="#pills-screening-criteria" type="button" role="tab" aria-controls="pills-screening-criteria"
-                aria-selected="{{ !$hasGuidelines ? 'true' : 'false' }}">
+                aria-selected="false">
                 {{ __('admin.Screening Criteria')}}
               </button>
             </li>
