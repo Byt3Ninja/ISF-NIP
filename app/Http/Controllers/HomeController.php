@@ -603,16 +603,14 @@ class HomeController extends Controller
             if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
                 $evaluation_q .= " AND cy.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
             }
-            if($evaluation_q != null){
-                $evaluation = collect(DB::select($evaluation_q))->map(function ($e) {
-                    $e->judges = array_map(function ($j) {
-                        return intval($j);
-                    }, json_decode($e?->judges, true));
-                    return $e;
-                });
-            }else{
-                $evaluation = collect([]);
-            }
+            $evaluation = collect(DB::select($evaluation_q))->map(function ($e) {
+                $judges = json_decode($e->judges, true);
+                if (!is_array($judges)) {
+                    $judges = [];
+                }
+                $e->judges = array_map('intval', $judges);
+                return $e;
+            });
             $evaluation = $evaluation->groupBy('step_id')->map(function( $groupedEvaluation ) use ( $l ) {
                 $_step = $groupedEvaluation->first();
                 $step = new stdClass;
