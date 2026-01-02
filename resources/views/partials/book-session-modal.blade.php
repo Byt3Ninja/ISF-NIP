@@ -30,6 +30,8 @@
       <input type="hidden" name="timeFrom" id="selectedStartTime">
       <input type="hidden" name="timeTo" id="selectedEndTime">
       <input type="hidden" name="session_type" id="selectedSessionType">
+      <input type="hidden" name="session_start_time" id="sessionStartTimeHidden">
+      <input type="hidden" name="session_end_time" id="sessionEndTimeHidden">
 
       <div class="modal-body">
         <div class="row mb-6 g-4">
@@ -52,7 +54,7 @@
                 </button>
               </div>
               <div id="slotsList" style="width: 100%; max-height: 320px; overflow-y: auto;">
-                <div class="text-center text-muted py-5 small">{{ __('admin.loading_slots') }}...</div>
+                <div class="text-center text-muted py-5 small">{{ __('admin.loading') }}...</div>
               </div>
             </div>
           </div>
@@ -76,28 +78,36 @@
             </div>
             <div class="col-md-6">
               <div class="d-flex gap-2">
-                <i class="ti ti-hourglass-empty"></i>
-                <div>
-                  <div class="small">{{ __('admin.duration') }}</div>
-                  <div class="fw-medium" id="detailDuration">-</div>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="d-flex gap-2">
-                <i class="ti ti-clock"></i>
-                <div>
-                  <div class="small">{{ __('mentor.time') }}</div>
-                  <div class="fw-medium" id="detailTime">-</div>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="d-flex gap-2">
                 <i class="ti ti-video"></i>
                 <div>
                   <div class="small">{{ __('mentor.session_type') }}</div>
                   <div class="fw-medium" id="detailType">-</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Session Start Time -->
+            <div class="col-md-6">
+              <label class="form-label small mb-1">{{ __('mentor.session_start_time') }}</label>
+              <select class="form-select bg-card" id="sessionStartTime" required>
+                <option value="">{{ __('admin.Select') }}...</option>
+              </select>
+            </div>
+            
+            <!-- Session End Time -->
+            <div class="col-md-6">
+              <label class="form-label small mb-1">{{ __('mentor.session_end_time') }}</label>
+              <select class="form-select bg-card" id="sessionEndTime" required>
+                <option value="">{{ __('admin.Select') }}...</option>
+              </select>
+            </div>
+            
+            <div class="col-12">
+              <div class="d-flex gap-2">
+                <i class="ti ti-hourglass-empty"></i>
+                <div>
+                  <div class="small">{{ __('admin.duration') }}</div>
+                  <div class="fw-medium" id="detailDuration">-</div>
                 </div>
               </div>
             </div>
@@ -178,6 +188,12 @@ $(document).ready(function() {
 
   const calcDuration = (start, end) => parseTime(end) - parseTime(start);
 
+  const formatTime = (minutes) => {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  };
+
   const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleDateString('en-US', { 
       weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' 
@@ -193,6 +209,86 @@ $(document).ready(function() {
   const getDayName = (dateStr) => {
     const utcDate = getUTCDate(new Date(dateStr));
     return utcDate.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
+  };
+
+  // Generate time options in 30-minute intervals
+  const generateTimeOptions = (startTime, endTime) => {
+    const options = [];
+    const startMinutes = parseTime(startTime);
+    const endMinutes = parseTime(endTime);
+    
+    for (let minutes = startMinutes; minutes <= endMinutes; minutes += 30) {
+      options.push({
+        value: formatTime(minutes),
+        minutes: minutes
+      });
+    }
+    
+    return options;
+  };
+
+  // Populate start time dropdown
+  const populateStartTimeOptions = (slot) => {
+    const $select = $('#sessionStartTime');
+    $select.empty().append('<option value="">{{ __('admin.Select') }}...</option>');
+    
+    const options = generateTimeOptions(slot.start_time, slot.end_time);
+    
+    // Remove the last option (end time) from start time options
+    options.slice(0, -1).forEach(opt => {
+      $select.append(`<option value="${opt.value}">${opt.value}</option>`);
+    });
+    
+    // Set default to slot start time
+    $select.val(slot.start_time);
+
+    // Update hidden input for start time
+    $('#sessionStartTimeHidden').val(slot.start_time);
+  };
+
+  // Populate end time dropdown based on selected start time
+  const populateEndTimeOptions = (slot, selectedStartTime) => {
+    const $select = $('#sessionEndTime');
+    $select.empty().append('<option value="">{{ __('admin.Select') }}...</option>');
+    
+    if (!selectedStartTime) return;
+    
+    const startMinutes = parseTime(selectedStartTime);
+    const slotEndMinutes = parseTime(slot.end_time);
+    
+    // Generate options starting from 30 minutes after selected start time
+    for (let minutes = startMinutes + 30; minutes <= slotEndMinutes; minutes += 30) {
+      const timeStr = formatTime(minutes);
+      $select.append(`<option value="${timeStr}">${timeStr}</option>`);
+    }
+    
+    // Set default to 30 minutes after start time
+    const defaultEndTime = formatTime(startMinutes + 30);
+    if ($select.find(`option[value="${defaultEndTime}"]`).length) {
+      $select.val(defaultEndTime);
+    } else {
+      $select.val($select.find('option:not(:first)').first().val());
+    }
+
+    // Update hidden input for end time
+    $('#sessionEndTimeHidden').val(defaultEndTime);
+  };
+
+  // Update duration display
+  const updateDurationDisplay = () => {
+    const startTime = $('#sessionStartTime').val();
+    const endTime = $('#sessionEndTime').val();
+    
+    if (startTime && endTime) {
+      const duration = calcDuration(startTime, endTime);
+      $('#detailDuration').text(`${duration} @lang('admin.min')`);
+      
+      // Update hidden inputs
+      $('#selectedStartTime').val(startTime);
+      $('#selectedEndTime').val(endTime);
+    } else {
+      $('#detailDuration').text('-');
+    }
   };
 
   // Slot filtering and retrieval
@@ -319,36 +415,55 @@ $(document).ready(function() {
     $card.addClass('selected');
     state.selectedSlot = slot;
 
-    const duration = calcDuration(slot.start_time, slot.end_time);
     $('#detailDate').text(formatDate(state.selectedDate));
-    $('#detailTime').text(`${slot.start_time} - ${slot.end_time}`);
-    $('#detailDuration').text(`${duration} @lang('admin.min')`);
     $('#detailType').text(slot.session_type === 'Online' ? '{{ __('mentor.online_video_call') }}' : slot.session_type);
-
     $('#selectedDateValue').val(state.selectedDate);
-    $('#selectedStartTime').val(slot.start_time);
-    $('#selectedEndTime').val(slot.end_time);
     $('#selectedSessionType').val(slot.session_type);
+
+    // Populate time dropdowns
+    populateStartTimeOptions(slot);
+    populateEndTimeOptions(slot, slot.start_time);
+    updateDurationDisplay();
 
     $('#sessionDetails').show();
     $('#slotError').hide();
+    
+    // Enable submit button when slot is selected
+    $('#submit-button').prop('disabled', false);
   };
+
+  // Event handlers for time selection
+  $('#sessionStartTime').on('change', function() {
+    const selectedStartTime = $(this).val();
+    if (state.selectedSlot && selectedStartTime) {
+      populateEndTimeOptions(state.selectedSlot, selectedStartTime);
+      updateDurationDisplay();
+
+      // Update hidden input for start time
+      $('#sessionStartTimeHidden').val(selectedStartTime);
+    }
+  });
+
+  $('#sessionEndTime').on('change', function() {
+    updateDurationDisplay();
+
+    // Update hidden input for end time
+    $('#sessionEndTimeHidden').val($(this).val());
+  });
 
   const initCalendar = () => {
     const dates = getAvailableDates();
     const today = getToday();
 
     if (!dates.length) {
-      // Disable submit button
       $('#submit-button').prop('disabled', true);
-
       $('#slotsList').html('<div class="text-center text-muted py-5">{{ __('mentor.no_availability_slots_added') }}</div>');
       $('#slotsDate').text('{{ __('mentor.no_availability_slots_added') }}');
       return;
     }
 
-    // Enable submit button
-    $('#submit-button').prop('disabled', false);
+    // Disable submit button initially until a slot is selected
+    $('#submit-button').prop('disabled', true);
 
     state.calendar = flatpickr("#calendar", {
       inline: true,
@@ -363,6 +478,8 @@ $(document).ready(function() {
         renderSlots(dateStr);
         $('#sessionDetails, #slotError').hide();
         $('#slotsDate').text(formatDate(dateStr));
+        // Disable submit when date changes
+        $('#submit-button').prop('disabled', true);
       },
       onDayCreate: (dObj, dStr, fp, dayElem) => {
         const dateStr = dayElem.dateObj.toISOString().split('T')[0];
@@ -391,6 +508,7 @@ $(document).ready(function() {
     state.selectedDate = getToday();
     
     $('#fileUpload, #additionalNotes').val('');
+    $('#sessionStartTime, #sessionEndTime').empty().append('<option value="">{{ __('admin.Select') }}...</option>');
     $('#fileName, #fileError, #sessionDetails, #slotError').hide();
     
     $('button[data-filter]').removeClass('active').first().addClass('active');
@@ -439,7 +557,6 @@ $(document).ready(function() {
       $('#bookingModal').modal('show');
       resetCalendar();
 
-      // Add offline filter button if offline is allowed and not already present
       if (!state.offlineDisabled && !$('#filter-buttons button[data-filter="offline"]').length) {
         $('#filter-buttons').append('<button type="button" class="btn btn-xs rounded border border-light" data-filter="offline"><i class="ti ti-map-pin ti-14px me-1"></i>{{ __("mentor.offline") }}</button>');
       }
@@ -475,6 +592,15 @@ $(document).ready(function() {
       return;
     }
 
+    const startTime = $('#sessionStartTime').val();
+    const endTime = $('#sessionEndTime').val();
+
+    if (!startTime || !endTime) {
+      e.preventDefault();
+      $('#slotError').text('{{ __('mentor.please_select_session_times') }}').show();
+      return;
+    }
+
     $('#slotError').hide();
     releaseSuccessAlert({
       title: '{{ __('mentor.success') }}',
@@ -484,7 +610,6 @@ $(document).ready(function() {
     $('#bookingModal').modal('hide');
     resetForm();
 
-    // Submit form
     this.submit();
   });
 

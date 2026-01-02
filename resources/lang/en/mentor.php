@@ -123,4 +123,6 @@ return [
     'Offline_not_allowed' => 'Offline sessions are not allowed',
     'Only_Online_allowed' => 'Only online sessions are allowed',
     'duration' => 'Duration',
+    'session_start_time' => 'Session Start Time',
+    'session_end_time' => 'Session End Time',
 ];

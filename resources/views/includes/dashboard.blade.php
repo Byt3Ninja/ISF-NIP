@@ -629,8 +629,8 @@
 													<b>{{ __('cycles.training location') }}:</b>
 													{{ $session->location }} <br>
 													@else
-													<a href="/dashboard/training/my/{{ $session->location }}">{{ __('cycles.Display course
-														contents') }} </a>
+													<a href="/dashboard/training/my/{{ $session->location }}">
+													{{ __('cycles.Display course contents') }} </a>
 													@endif
 												</td>
 											</tr>
@@ -2266,6 +2266,9 @@ document.addEventListener('DOMContentLoaded', function() {
 		});
 	</script>
 
+@if( array_intersect(['dashboard.widgets_tables_my_current_schedule_view'], $permissions) )
+@if( $_user->ableTo('slots.index', $permissions) )
+@if ( isset($$my_schedules) && count( $$my_schedules ) > 0 )
 	<script>
 		$(document).ready(function () {
 			// Initialize slots DataTable
@@ -2283,4 +2286,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			});
 		});
 	</script>
+@endif
+@endif
+@endif
 @stop
