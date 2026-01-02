@@ -49,6 +49,7 @@ class InvitationController extends Controller
                 'message_content'  => strip_tags($invite->message_content),
                 'response_message' => '',
                 'created_at'       => $invite->created_at->format('Y-m-d H:i:s'),
+                'accepted_at'      => $invite->updated_at == $invite->created_at ? 'N/A' : $invite->updated_at->format('Y-m-d H:i:s'),
                 'attachments'      => is_string($invite->attachments) ? json_decode($invite->attachments, true) : ($invite->attachments ?? []),
                 'organizations'    => $organizations,
             ];
@@ -179,9 +180,10 @@ class InvitationController extends Controller
                 'subject'          => $invite->subject,
                 'scope'            => $invite->scope,
                 'status'           => $invite->status,
-                'message_content'  => trim(preg_replace('/📎[^\n]*/', '', strip_tags($invite->message_content))),
+                'message_content'  => $invite->message_content ?? null,
                 'response_message' => $invite->response_message ?? null,
                 'created_at'       => $invite->created_at->format('Y-m-d H:i:s'),
+                'accepted_at'      => $invite->updated_at == $invite->created_at ? null : $invite->updated_at->format('Y-m-d H:i:s'),
                 'attachments'      => $invite->attachments ?? [],
             ];
         });
