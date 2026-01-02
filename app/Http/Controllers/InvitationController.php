@@ -179,7 +179,7 @@ class InvitationController extends Controller
                 'subject'          => $invite->subject,
                 'scope'            => $invite->scope,
                 'status'           => $invite->status,
-                'message_content'  => trim(preg_replace('/📎[^\n]*/', '', strip_tags($invite->message_content))),
+                'message_content'  => $invite->message_content ?? null,
                 'response_message' => $invite->response_message ?? null,
                 'created_at'       => $invite->created_at->format('Y-m-d H:i:s'),
                 'attachments'      => $invite->attachments ?? [],
