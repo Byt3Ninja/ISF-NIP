@@ -123,4 +123,6 @@ return [
     'Offline_not_allowed' => 'لا يسمح بالجلسات Offline',
     'Only_Online_allowed' => ' تم السماح للجلسة عن بعد فقط ',
     'duration' => 'المدة',
+    'session_start_time' => 'وقت بدء الجلسة',
+    'session_end_time' => 'وقت انتهاء الجلسة',
 ];
