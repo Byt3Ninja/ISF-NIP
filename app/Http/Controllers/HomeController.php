@@ -663,6 +663,8 @@ class HomeController extends Controller
                     mr.zoom_passcode,
                     mr.mentor_id AS `mentor_id`,
                     mr.session_type AS `session_type`,
+                    mr.Approved AS `approved`,
+                    mr.organization_id AS `organization_id`,
                     u.id AS `user_id`,
                     u.img_url AS `user_image_url`,
                     u.first_name_ar AS `first_name_ar`,
@@ -674,13 +676,18 @@ class HomeController extends Controller
                     c.id AS `company_id`,
                     c.logo AS `company_logo`,
                     c.name_ar AS `company_name_ar`,
-                    c.name_en AS `company_name_en`
+                    c.name_en AS `company_name_en`,
+                    o.google_map_url AS `google_map_url`,
+                    o.name_en AS `organization_name_en`,
+                    o.name_ar AS `organization_name_ar`
                 FROM
                     mentorship_requests mr
                 LEFT JOIN
                     users u ON u.id = mr.user_id
                 LEFT JOIN
                     companies c ON c.id = u.company_id
+                LEFT JOIN
+                    organizations o ON o.id = mr.organization_id
                 WHERE   
                     mr.deleted_at IS NULL
                     AND mr.zoom_date >= ?
@@ -707,6 +714,8 @@ class HomeController extends Controller
                 $output->start_url = $session->start_url;
                 $output->passcode = $session->zoom_passcode;
                 $output->session_type = $session->session_type;
+                $output->approved = $session->approved;
+                $output->organization_id = $session->organization_id;
 
                 $image = User::image_handler($session->user_image_url);
                 $user = new stdClass;
@@ -722,6 +731,12 @@ class HomeController extends Controller
                 $company->name = $session->{"company_name_{$l}"};
                 $user->company = $company;
                 $output->user = $user;
+
+                $organization = new stdClass;
+                $organization->id = $session->organization_id;
+                $organization->google_map_url = $session->google_map_url;
+                $organization->name = $session->{"organization_name_{$l}"};
+                $output->organization = $organization;
 
                 return $output;
             });
