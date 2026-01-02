@@ -984,7 +984,7 @@
 									</td>
 									<td> {{ FormatDate($session->zoom_date, 'Y-m-d H:i A') }} ({{ $session->period }}M) </td>
 									<td>
-										{{ $session->session_type ?? '' }}
+										{{ $session->session_type != null ?__('admin.'. $session->session_type) : '' }}
 									</td>
 									<td> {{ $session->admin_comment ?? '...' }} </td>
 									<td>
@@ -994,24 +994,38 @@
 											$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+' . $session->period .' minutes'));
 										@endphp
 										
-										@if( $now >= $start_time )
-											@if( $now <= $end_time )
-											<a href="{{ $session->start_url }}" target="_blank">
-												<button title="Start Meeting" type="button" data-value="{{ $session->id }}" type="button" class="btn btn-label-primary rounded">
-													<i class="ti ti-link"></i> {{ __('admin.Join Meeting') }}
-												</button>
-											</a>
-											@if( !empty( $session->passcode ) )
-												 | <button title="Show Passcode" type="button" data-passcode="{{ $session->passcode }}" type="button" class="btn btn-label-warning show-passcode rounded">
-													<i class="ti ti-key"></i>
-												</button>
-											@endif
+										
+											@if($session->session_type == 'Online')
+												@if( $now >= $start_time )
+													@if( $now <= $end_time )
+													
+														<a href="{{ $session->start_url }}" target="_blank">
+															<button title="Start Meeting" type="button" data-value="{{ $session->id }}" type="button" class="btn btn-label-primary rounded">
+																<i class="ti ti-link"></i> {{ __('admin.Join Meeting') }}
+															</button>
+														</a>
+														@if( !empty( $session->passcode ) )
+															| <button title="Show Passcode" type="button" data-passcode="{{ $session->passcode }}" type="button" class="btn btn-label-warning show-passcode rounded">
+																<i class="ti ti-key"></i>
+															</button>
+														@endif
+													@else
+														<span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
+													@endif
+												@else
+													<i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }}
+												@endif
 											@else
-												<span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
+											
+												<span class="warning">
+													<a class="btn btn-sm btn-label-success" href="{{ $session->organization->google_map_url ?? '#' }}" target="_blank">
+														<i class="ti ti-map me-2"></i>
+														{{ __('admin.Location') }}
+													</a>
+												</span>
 											@endif
-										@else
-											<i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }}
-										@endif
+										
+
 									</td>
 								</tr>
 								@endforeach
