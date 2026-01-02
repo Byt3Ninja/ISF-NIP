@@ -187,7 +187,7 @@ $pills = [
                 </h6>
               </div>
               <div class="p-3 bg-light-subtle rounded-2 border">
-                <div class="d-flex flex-wrap gap-2">
+                <div id="assigned-judges" class="d-flex flex-wrap gap-2">
                   @php
                     $allJudges = collect($judgers_list ?? [])
                         ->pluck('judgers')
@@ -235,7 +235,7 @@ $pills = [
                 </h6>
               </div>
               <div class="p-3 bg-light-subtle rounded-2 border">
-                <div class="d-flex flex-wrap gap-2">
+                <div id="assigned-companies" class="d-flex flex-wrap gap-2">
                   @php
                     $allCompanies = collect($judgers_list ?? [])
                         ->pluck('companies')
@@ -308,85 +308,6 @@ $pills = [
         <!-- Judging Panels Tab -->
         <div class="tab-pane fade show active" id="judging_panels" role="tabpanel" aria-labelledby="judging_panels-tab">
           @include('partials.judging-panels', ['id' => $id])
-          <!-- Old Logic (should be removed) Once new logic done -->
-          {{-- <div class="d-flex flex-column">
-            @if (isset($cstep->data) && array_key_exists($cstep->data, $types))
-              <h5 class="card-title primary">{{ __('cycles.' . $types[$cstep->data]) }}</h5>
-            @endif
-            <p class="text-muted">{{ __('cycles.Select judges from the menu') }}:</p>
-            <form action="/dashboard/screening/update" method="POST" enctype="multipart/form-data">
-              {!! csrf_field() !!}
-              <input type="hidden" value="" name="judges" id="judges">
-              <input type="hidden" value="{{ $cstep->id }}" name="step">
-              <input type="hidden" name="fid" value="{{ $form->id ?? '' }}">
-              @if ($cstep->data == 'grouptogroup')
-                <div class="text-end py-3"> <button id="addPanelBtn" type="button" class="btn btn-label-primary"> <i class="fas fa-fw fa-sm fa-plus me-2"></i> {{ __('admin.Add_New') }} </button> </div>
-                <div class="table-responsive">
-                  <table class="table table-bordered table-hover">
-                    <thead>
-                      <tr>
-                        <th style="width: 20% !important;" scope="col">{{ __('admin.Panel') }}</th>
-                        <th style="width: 40% !important;" scope="col">{{ __('admin.Judges') }}</th>
-                        <th style="width: 40% !important;" scope="col">{{ __('admin.Users') }}</th>
-                      </tr>
-                    </thead>
-                    <tbody id="panels-list-body">
-                      @foreach( $judgers_list as $key => $list )
-                        <tr data-panel="{{ $key }}">
-                          <td>
-                            <i title="Remove panel" class="remove-panel-btn cursor-pointer fas fa-fw fa-sm fa-minus-circle text-danger"></i> 
-                            {{ __('admin.Panel_list') }} {{ $key }}
-                          </td>
-                          <td>
-                            <select name="judges[{{ $key }}][]" class="select2 form-control panel judgers-selectors" multiple="multiple">
-                              @foreach( $judges as $judge )
-                                <option {{ in_array( $judge->id, $list['judgers'] ) ? 'selected' : '' }} value="{{ $judge->id }}">{{ $judge->{'first_name_' . $l} }} {{ $judge->{'last_name_' . $l} }} ({{ $judge->email }})</option>
-                              @endforeach
-                            </select>
-                          </td>
-                          <td>
-                            <select name="users[{{ $key }}][]" class="select2 form-control panel users-selectors" multiple="multiple">
-                              @foreach( $companies as $company )
-                                <option {{ in_array( $company->id, $list['companies'] ) ? 'selected' : '' }} value="{{ $company->id }}">{{ $company->{'name_' . $l} }}</option>
-                              @endforeach
-                            </select>
-                          </td>
-                        </tr>
-                      @endforeach
-                    </tbody>
-                  </table>
-                </div>
-              @else
-                <div class="form-group mt-6">
-                  <label class="form-label">{{ __('cycles.Judges list') }}</label>
-                  <select 
-                    id="judges-select" 
-                    name="judges[]" 
-                    class="select2 form-select" 
-                    {{ $cstep->data == 'onetoall' ? '' : 'multiple="multiple"' }}
-                    data-placeholder="{{ __('cycles.Select') }}..."  
-                  >
-                    <option value="">{{ __('cycles.Select') }}...</option>
-                    @foreach ($judges as $judge)
-                    <option value="{{ $judge->id }}" {{ in_array( intval( $judge->id ) , $judgersList->toArray()) ? 'selected' : '' }}>
-                      {{ $judge->{'first_name_' . $l} }} {{ $judge->{'last_name_' . $l} }} ({{ $judge->email }})
-                    </option>
-                    @endforeach
-                  </select>
-                </div>
-              @endif
-              <div class="form-check my-4">
-                <input class="form-check-input" type="checkbox" id="customSwitch1"  name="notify" />
-                <label class="form-check-label" for="customSwitch1">{{ __('cycles.Notify them') }}</label>
-              </div>
-              <div class="row">
-                <div class="col-12 d-flex justify-content-end">
-                  <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('admin.Update') }}</button>
-                </div>
-              </div>
-            </form>
-          </div> --}}
-          <!-- Old Logic (should be removed) Once new logic done -->
         </div>
         <!--/ Judging Panels Tab -->
         
@@ -570,8 +491,6 @@ $pills = [
     $('.edit-step-btn').on('click', function () {
       const stepData = $(this).data('step');
 
-      console.log('stepData', stepData)
-
       if (stepData) {
         $('#stepForm input[name="_token"]').val($('meta[name="csrf-token"]').attr('content'));
         $('#step-form-modal').modal('show');
@@ -686,51 +605,6 @@ $pills = [
         console.log('ScreeningSelect reinitialized in modal');
         // Ensure dropdown is not disabled
         $('#ScreeningSelect').prop('disabled', false);
-      });
-
-      // Function to update hidden judges input
-      function updateJudgesInput() {
-        let allJudges = [];
-
-        @if (optional($cstep)->data == 'grouptogroup')
-          // Collect judges from all panel selects
-          $('select[class*="panel"]').each(function() {
-            const selectedValues = $(this).val() || [];
-            console.log('Panel select:', $(this).attr('class'), 'Values:', selectedValues);
-            allJudges = allJudges.concat(selectedValues);
-          });
-        @else
-          // Collect judges from judges-select for onetoall or grouptoall
-          const selectedValues = $('#judges-select').val() || [];
-          console.log('Judges select:', selectedValues);
-          allJudges = selectedValues;
-        @endif
-
-        // Update hidden input with unique judge IDs as JSON string
-        allJudges = [...new Set(allJudges)].map(id => parseInt(id));
-        console.log('All judges:', allJudges);
-        $('#judges').val(JSON.stringify(allJudges));
-      }
-
-      // Initialize on page load
-      updateJudgesInput();
-
-      // Update on change for all judge selects
-      @if (optional($cstep)->data == 'grouptogroup')
-        $(document).on('change', 'select[class*="panel"]', updateJudgesInput);
-      @else
-        $('#judges-select').on('change', updateJudgesInput);
-      @endif
-
-      $('form[action="/dashboard/screening/update"]').on('submit', function(e) {
-        const judgesVal = $('#judges').val();
-        const judges = judgesVal ? JSON.parse(judgesVal) : [];
-        console.log('Submitting judges:', judges);
-        if (!judges || judges.length === 0) {
-          e.preventDefault();
-          alert('{{ __('Please_Choose_Judges') }}');
-          return false;
-        }
       });
 
       $('#stepForm form').on('submit', function(e) {

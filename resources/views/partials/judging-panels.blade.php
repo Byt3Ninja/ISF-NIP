@@ -111,202 +111,295 @@
 
 @push('scripts')
 <script>
-const isValidUrl = (str) => {
-  try { return new URL(str).protocol.startsWith('http'); }
-  catch { return false; }
-};
+$(function () {
 
-const initPlugins = (el) => {
-  $(el).find('.session-date').flatpickr({ dateFormat: 'Y-m-d', minDate: 'today' });
-  $(el).find('.session-time').flatpickr({ enableTime: true, noCalendar: true, dateFormat: 'H:i' });
-  $(el).find('.select2').each(function() {
-    $(this).select2({ placeholder: $(this).data('placeholder'), allowClear: true, width: '100%', dropdownParent: $(this).parent() });
+  const allJudges = @json($judges);
+  const allCompanies = @json($companies);
+  
+  const judgesMap = {};
+  allJudges.forEach(judge => {
+    judgesMap[judge.id] = judge;
   });
-};
-
-const updateSelectAllText = ($select) => {
-  const $link = $select.closest('.col-md-6').find('.select-all-toggle');
-  const total = $select.find('option').length;
-  const selected = ($select.val() || []).length;
-  $link.text(selected === total && total > 0 ? '{{ __("admin.deselect_all") }}' : '{{ __("admin.select_all") }}');
-};
-
-const renumberPanels = () => {
-  const $panels = $('.accordion-item');
-  $panels.each((i, el) => {
-    const idx = i + 1;
-    const $panel = $(el);
-    $panel.attr('data-index', i);
-    $panel.find('.accordion-button').attr('data-bs-target', `#panel-${idx}`).html(`<i class="ti ti-user-check me-2"></i> {{ __('admin.screening.panel') }} #${idx}`);
-    $panel.find('.accordion-collapse').attr('id', `panel-${idx}`);
-    $panel.find('.session-toggle').attr('id', `session-toggle-${idx}`);
-    $panel.find('[name*="panels["]').each(function() {
-      $(this).attr('name', $(this).attr('name').replace(/panels\[\d+\]/, `panels[${i}]`));
+  
+  const companiesMap = {};
+  allCompanies.forEach(company => {
+    companiesMap[company.id] = company;
+  });
+  
+  const isValidUrl = (str) => {
+    try { return new URL(str).protocol.startsWith('http'); }
+    catch { return false; }
+  };
+  
+  const initPlugins = (el) => {
+    $(el).find('.session-date').flatpickr({ dateFormat: 'Y-m-d', minDate: 'today' });
+    $(el).find('.session-time').flatpickr({ enableTime: true, noCalendar: true, dateFormat: 'H:i' });
+    $(el).find('.select2').each(function() {
+      $(this).select2({ placeholder: $(this).data('placeholder'), allowClear: true, width: '100%', dropdownParent: $(this).parent() });
     });
-    
-    // Always hide delete button for first panel
-    const $btn = $panel.find('.remove-panel');
-    if (i === 0) {
-      $btn.addClass('d-none');
-    } else {
-      $btn.removeClass('d-none');
-    }
-  });
-};
-
-initPlugins(document);
-
-$(document).on('click', '.select-all-toggle', function() {
-  const $select = $(this).closest('.col-md-6').find('select');
-  const allOpts = $select.find('option').map((_, el) => $(el).val()).get();
-  const curr = $select.val() || [];
-  $select.val(curr.length === allOpts.length ? null : allOpts).trigger('change');
-});
-
-$(document).on('change', '.select2', function() { updateSelectAllText($(this)); });
-
-$('#addPanelBtn').on('click', () => {
-  const $clone = $('.accordion-item').first().clone();
+  };
   
-  // mark as unsaved
-  $clone.attr('data-unsaved', 'true');
+  const updateSelectAllText = ($select) => {
+    const $link = $select.closest('.col-md-6').find('.select-all-toggle');
+    const total = $select.find('option').length;
+    const selected = ($select.val() || []).length;
+    $link.text(selected === total && total > 0 ? '{{ __("admin.deselect_all") }}' : '{{ __("admin.select_all") }}');
+  };
   
-  const idx = $('.accordion-item').length + 1;
-
-  $clone.find('.select2-container').remove();
-  $clone.find('.select2').removeClass('select2-hidden-accessible');
-  $clone.find('*').removeAttr('data-select2-id');
-  $clone.find('select, input[type="text"], input[type="url"]').val('');
-  $clone.find('.select-all-toggle').text('{{ __("admin.select_all") }}');
-  
-  $clone.find('.accordion-button').addClass('collapsed').attr('data-bs-target', `#panel-${idx}`).html(`<i class="ti ti-user-check me-2"></i> @lang('admin.screening.panel') #${idx}`);
-  $clone.find('.accordion-collapse').removeClass('show').attr('id', `panel-${idx}`);
-  $clone.find('.session-toggle').prop('checked', false).attr('id', `session-toggle-${idx}`);
-  $clone.find('.session-inputs').hide();
-  
-  if (!$clone.find('.remove-panel').length) {
-    $clone.find('.accordion-header').append('<button type="button" class="btn btn-icon btn-sm btn-outline-danger ms-2 me-4 remove-panel"><i class="ti ti-trash"></i></button>');
-  }
-  
-  $('#panels-container').append($clone);
-  renumberPanels();
-  initPlugins($clone);
-});
-
-$(document).on('click', '.remove-panel', async function() {
-  const $panel = $(this).closest('.accordion-item');
-
-  // If panel is not saved yet → remove silently
-  if ($panel.data('unsaved') === true || $panel.attr('data-unsaved') === 'true') {
-    $panel.remove();
-    renumberPanels();
-    return;
-  }
-
-  const panelIdx = $panel.data('index') + 1; // 1-based index for backend
-
-  const result = await Swal.fire({
-    icon: 'warning', title: '@lang("admin.SureDelete")', showCancelButton: true,
-    confirmButtonText: '@lang("admin.DYes")', cancelButtonText: '@lang("Cancel")',
-    customClass: { confirmButton: 'btn btn-danger me-2', cancelButton: 'btn btn-label-secondary' },
-    buttonsStyling: false
-  });
-
-  if (result.isConfirmed) {
-    try {
-      const response = await fetch('{{ route("screening.delete_judging_panel") }}', {
-        method: 'POST',
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest',
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({ step: '{{ $cstep->id }}', panel: panelIdx })
+  const renumberPanels = () => {
+    const $panels = $('.accordion-item');
+    $panels.each((i, el) => {
+      const idx = i + 1;
+      const $panel = $(el);
+      $panel.attr('data-index', i);
+      $panel.find('.accordion-button').attr('data-bs-target', `#panel-${idx}`).html(`<i class="ti ti-user-check me-2"></i> {{ __('admin.screening.panel') }} #${idx}`);
+      $panel.find('.accordion-collapse').attr('id', `panel-${idx}`);
+      $panel.find('.session-toggle').attr('id', `session-toggle-${idx}`);
+      $panel.find('[name*="panels["]').each(function() {
+        $(this).attr('name', $(this).attr('name').replace(/panels\[\d+\]/, `panels[${i}]`));
       });
-      const data = await response.json();
-      if (data.success) {
-        $panel.remove();
-        renumberPanels();
-        releaseSuccessAlert({ title: '{{ __('admin.success') }}', message: data.message });
-      } else {
-        releaseFailureAlert({ title: '{{ __('admin.error') }}', message: data.message });
-      }
-    } catch (e) {
-      releaseFailureAlert({ title: '{{ __('admin.error') }}', message: e?.message || '{{ __('admin.unexpected_error') }}' });
-    }
-  }
-});
-
-$(document).on('change', '.session-toggle', function() {
-  $(this).closest('.accordion-body').find('.session-inputs').toggle(this.checked);
-});
-
-$(document).on('submit', '#judging-panels-form', function(e) {
-  e.preventDefault();
-  let valid = true;
-  
-  $('.session-inputs input').removeClass('is-invalid');
-  $('.invalid-feedback').text('');
-  
-  $('.accordion-item').each(function() {
-    const $p = $(this);
-    if (!$p.find('.session-toggle').is(':checked')) return;
-    
-    const fields = {
-      session_date: { msg: '{{ __('admin.date_required') }}' },
-      meeting_link: { msg: '{{ __('admin.meeting_link_required') }}', url: true },
-      start_time: { msg: '{{ __('admin.start_time_required') }}' },
-      end_time: { msg: '{{ __('admin.end_time_required') }}' }
-    };
-    
-    $.each(fields, (name, cfg) => {
-      const $inp = $p.find(`input[name*="${name}"]`);
-      const val = $inp.val().trim();
       
-      if (!val) {
-        $inp.addClass('is-invalid');
-        $p.find(`.error-${name}`).text(cfg.msg);
-        valid = false;
-      } else if (cfg.url && !isValidUrl(val)) {
-        $inp.addClass('is-invalid');
-        $p.find(`.error-${name}`).text('{{ __('admin.meeting_link_url_required') }}');
+      // Always hide delete button for first panel
+      const $btn = $panel.find('.remove-panel');
+      if (i === 0) {
+        $btn.addClass('d-none');
+      } else {
+        $btn.removeClass('d-none');
+      }
+    });
+  };
+  
+  initPlugins(document);
+  
+  $(document).on('click', '.select-all-toggle', function() {
+    const $select = $(this).closest('.col-md-6').find('select');
+    const allOpts = $select.find('option').map((_, el) => $(el).val()).get();
+    const curr = $select.val() || [];
+    $select.val(curr.length === allOpts.length ? null : allOpts).trigger('change');
+  });
+  
+  $(document).on('change', '.select2', function() { updateSelectAllText($(this)); });
+  
+  $('#addPanelBtn').on('click', () => {
+    const $clone = $('.accordion-item').first().clone();
+    
+    // mark as unsaved
+    $clone.attr('data-unsaved', 'true');
+    
+    const idx = $('.accordion-item').length + 1;
+  
+    $clone.find('.select2-container').remove();
+    $clone.find('.select2').removeClass('select2-hidden-accessible');
+    $clone.find('*').removeAttr('data-select2-id');
+    $clone.find('select, input[type="text"], input[type="url"]').val('');
+    $clone.find('.select-all-toggle').text('{{ __("admin.select_all") }}');
+    
+    $clone.find('.accordion-button').addClass('collapsed').attr('data-bs-target', `#panel-${idx}`).html(`<i class="ti ti-user-check me-2"></i> @lang('admin.screening.panel') #${idx}`);
+    $clone.find('.accordion-collapse').removeClass('show').attr('id', `panel-${idx}`);
+    $clone.find('.session-toggle').prop('checked', false).attr('id', `session-toggle-${idx}`);
+    $clone.find('.session-inputs').hide();
+    
+    if (!$clone.find('.remove-panel').length) {
+      $clone.find('.accordion-header').append('<button type="button" class="btn btn-icon btn-sm btn-outline-danger ms-2 me-4 remove-panel"><i class="ti ti-trash"></i></button>');
+    }
+    
+    $('#panels-container').append($clone);
+    renumberPanels();
+    initPlugins($clone);
+  });
+  
+  $(document).on('click', '.remove-panel', async function() {
+    const $panel = $(this).closest('.accordion-item');
+  
+    // If panel is not saved yet → remove silently
+    if ($panel.data('unsaved') === true || $panel.attr('data-unsaved') === 'true') {
+      $panel.remove();
+      renumberPanels();
+      return;
+    }
+  
+    const panelIdx = $panel.data('index') + 1; // 1-based index for backend
+  
+    const result = await Swal.fire({
+      icon: 'warning', title: '@lang("admin.SureDelete")', showCancelButton: true,
+      confirmButtonText: '@lang("admin.DYes")', cancelButtonText: '@lang("Cancel")',
+      customClass: { confirmButton: 'btn btn-danger me-2', cancelButton: 'btn btn-label-secondary' },
+      buttonsStyling: false
+    });
+  
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch('{{ route("screening.delete_judging_panel") }}', {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+          },
+          body: JSON.stringify({ step: '{{ $cstep->id }}', panel: panelIdx })
+        });
+        const data = await response.json();
+        if (data.success) {
+          $panel.remove();
+          renumberPanels();
+          releaseSuccessAlert({ title: '{{ __('admin.success') }}', message: data.message });
+        } else {
+          releaseFailureAlert({ title: '{{ __('admin.error') }}', message: data.message });
+        }
+      } catch (e) {
+        releaseFailureAlert({ title: '{{ __('admin.error') }}', message: e?.message || '{{ __('admin.unexpected_error') }}' });
+      }
+    }
+  });
+  
+  $(document).on('change', '.session-toggle', function() {
+    $(this).closest('.accordion-body').find('.session-inputs').toggle(this.checked);
+  });
+  
+  $(document).on('submit', '#judging-panels-form', function(e) {
+    e.preventDefault();
+    let valid = true;
+    
+    $('.session-inputs input').removeClass('is-invalid');
+    $('.invalid-feedback').text('');
+    
+    $('.accordion-item').each(function() {
+      const $p = $(this);
+      if (!$p.find('.session-toggle').is(':checked')) return;
+      
+      const fields = {
+        session_date: { msg: '{{ __('admin.date_required') }}' },
+        meeting_link: { msg: '{{ __('admin.meeting_link_required') }}', url: true },
+        start_time: { msg: '{{ __('admin.start_time_required') }}' },
+        end_time: { msg: '{{ __('admin.end_time_required') }}' }
+      };
+      
+      $.each(fields, (name, cfg) => {
+        const $inp = $p.find(`input[name*="${name}"]`);
+        const val = $inp.val().trim();
+        
+        if (!val) {
+          $inp.addClass('is-invalid');
+          $p.find(`.error-${name}`).text(cfg.msg);
+          valid = false;
+        } else if (cfg.url && !isValidUrl(val)) {
+          $inp.addClass('is-invalid');
+          $p.find(`.error-${name}`).text('{{ __('admin.meeting_link_url_required') }}');
+          valid = false;
+        }
+      });
+      
+      const start = $p.find('input[name*="start_time"]').val();
+      const end = $p.find('input[name*="end_time"]').val();
+      if (start && end && start >= end) {
+        $p.find('input[name*="end_time"]').addClass('is-invalid');
+        $p.find('.error-end_time').text('{{ __('admin.end_time_must_be_after_start_time') }}');
         valid = false;
       }
     });
     
-    const start = $p.find('input[name*="start_time"]').val();
-    const end = $p.find('input[name*="end_time"]').val();
-    if (start && end && start >= end) {
-      $p.find('input[name*="end_time"]').addClass('is-invalid');
-      $p.find('.error-end_time').text('{{ __('admin.end_time_must_be_after_start_time') }}');
-      valid = false;
-    }
-  });
+    if (!valid) {
+      const $err = $('.is-invalid').first();
+      const $collapse = $err.closest('.accordion-collapse');
+      if (!$collapse.hasClass('show')) $collapse.collapse('show');
+      $('html, body').animate({ scrollTop: $err.offset().top - 100 }, 300);
   
-  if (!valid) {
-    const $err = $('.is-invalid').first();
-    const $collapse = $err.closest('.accordion-collapse');
-    if (!$collapse.hasClass('show')) $collapse.collapse('show');
-    $('html, body').animate({ scrollTop: $err.offset().top - 100 }, 300);
-  } else {
+      return;
+    }
+  
     fetch($(this).attr('action'), {
       method: 'POST', body: new FormData(this),
       headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
     })
     .then(r => r.json())
     .then(d => {
-      if (d.success) releaseSuccessAlert({ title: '{{ __('admin.success') }}', message: d.message });
-      else releaseFailureAlert({ title: '{{ __('admin.error') }}', message: d.message || '{{ __('admin.unexpected_error') }}' });
+      if (!d.success) {
+        releaseFailureAlert({
+          title: '{{ __('admin.error') }}',
+          message: d.message || '{{ __('admin.unexpected_error') }}' 
+        });
+  
+        return;
+      }
+  
+      releaseSuccessAlert({
+        title: '{{ __('admin.success') }}',
+        message: d?.message || '{{ __('admin.Saved_successfully') }}',
+      });
+  
+      if (d.data) {
+        updateStepAssignees(d.data || []);
+      }
     })
     .catch(e => releaseFailureAlert({ title: '{{ __('admin.error') }}', message: e?.message || '{{ __('admin.unexpected_error') }}' }));
-  }
-});
-
-$(document).on('input', '.session-inputs input', function() {
-  $(this).removeClass('is-invalid');
-  const field = $(this).attr('name').match(/\[([^\]]+)\]$/)[1];
-  $(this).closest('.accordion-item').find(`.error-${field}`).text('');
+  });
+  
+  const updateStepAssignees = (newAssignees) => {
+    const assignedJudgesContainer = $('#assigned-judges');
+    const assignedCompaniesContainer = $('#assigned-companies');
+  
+    assignedJudgesContainer.empty();
+    assignedCompaniesContainer.empty();
+  
+    const allJudgeIds = new Set();
+    const allCompanyIds = new Set();
+  
+    newAssignees.forEach(panel => {
+      (panel.judges || []).forEach(j => allJudgeIds.add(Number(j)));
+      (panel.companies || []).forEach(c => allCompanyIds.add(Number(c)));
+    });
+  
+    // Judges
+    allJudgeIds.forEach(judgeId => {
+      const judge = judgesMap[judgeId];
+      if (!judge) return;
+  
+      assignedJudgesContainer.append(`
+        <a href="/dashboard/users/${judge.id}/edit"
+           class="badge text-dark bg-card border px-3 py-2 rounded-pill d-flex align-items-center">
+          <div class="avatar avatar-xs me-2">
+            ${
+              judge.img_url
+                ? `<img src="${judge.img_url}" class="rounded-circle object-fit-cover">`
+                : `<div class="avatar-initial rounded-circle bg-label-secondary">
+                     <i class="ti ti-user ti-xs"></i>
+                   </div>`
+            }
+          </div>
+          ${judge.first_name_en} ${judge.last_name_en}
+        </a>
+      `);
+    });
+  
+    // Companies
+    allCompanyIds.forEach(companyId => {
+      const company = companiesMap[companyId];
+      if (!company) return;
+  
+      assignedCompaniesContainer.append(`
+        <a href="/dashboard/companyProfile/${company.id}"
+           class="badge text-dark bg-card border px-3 py-2 rounded-pill d-flex align-items-center">
+          <div class="avatar avatar-xs me-2">
+            ${
+              company.logo
+                ? `<img src="${company.logo}" class="rounded-circle object-fit-cover">`
+                : `<div class="avatar-initial rounded-circle bg-label-secondary">
+                     <i class="ti ti-building-skyscraper ti-xs"></i>
+                   </div>`
+            }
+          </div>
+          ${company.name_en}
+        </a>
+      `);
+    });
+  };
+  
+  $(document).on('input', '.session-inputs input', function() {
+    $(this).removeClass('is-invalid');
+    const field = $(this).attr('name').match(/\[([^\]]+)\]$/)[1];
+    $(this).closest('.accordion-item').find(`.error-${field}`).text('');
+  });
 });
 </script>
 @endpush
