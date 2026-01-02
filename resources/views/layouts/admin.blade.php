@@ -483,15 +483,16 @@
           icon: 'warning',
           title: title || '',
           html: message,
-          showCancelButton: true,
+          showCancelButton: onConfirm ? true : false,
           showConfirmButton: true,
-          confirmButtonText: "{{ __('admin.Confirm') }}",
-          cancelButtonText: "{{ __('admin.Cancel') }}",
+          confirmButtonText: onConfirm ? "{{ __('admin.Confirm') }}" : "{{ __('admin.OK') }}",
+          cancelButtonText: onConfirm ? "{{ __('admin.Cancel') }}" : '',
           customClass: {
-            confirmButton: 'btn btn-primary',
-            cancelButton: 'btn btn-label-secondary',
+            confirmButton: 'btn btn-primary ms-3',
+            cancelButton: onConfirm ? 'btn btn-label-secondary' : '',
           },
           buttonsStyling: false,
+          reverseButtons: true,
         }).then((result) => {
           if (!result.isConfirmed) {
             if (onCancel) onCancel();
