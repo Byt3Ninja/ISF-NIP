@@ -479,7 +479,8 @@ class MentorsController extends Controller
 			}
 
 		}else{
-			// dd($request->all());
+			dd($request->all());
+			
 				$this->meetingService = OnlineMeetingFactory::create();
 				$datefrom = $request->date . ' ' . $request->timeFrom;
 				$dateto = $request->date . ' ' . $request->timeTo;
