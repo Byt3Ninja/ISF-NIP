@@ -506,7 +506,8 @@ class ScreeningController extends Controller
 
 		return response()->json([
 			'success' => true,
-			'message' => __('admin.Saved_successfully')
+			'message' => __('admin.Saved_successfully'),
+			'data' => $panels
 		]);
 	}
 
