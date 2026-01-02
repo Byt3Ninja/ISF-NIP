@@ -166,7 +166,7 @@ class InvitationController extends Controller
         $invitation->scope = $data['invitation_scope'];
         $invitation->organization_ids = $data['organizations'] ?? [];
         $invitation->subject = $data['invitation_subject'];
-        $invitation->message_content = $data['invitation_message'];
+        $invitation->message_content = trim(preg_replace('/📎[^\n]*/', '', strip_tags($data['invitation_message'])));
         $invitation->attachments = $data['attachments'] ?? [];
         $invitation->save();
 
@@ -179,7 +179,7 @@ class InvitationController extends Controller
                 'subject'          => $invite->subject,
                 'scope'            => $invite->scope,
                 'status'           => $invite->status,
-                'message_content'  => $invite->message_content,
+                'message_content'  => trim(preg_replace('/📎[^\n]*/', '', strip_tags($invite->message_content))),
                 'response_message' => $invite->response_message ?? null,
                 'created_at'       => $invite->created_at->format('Y-m-d H:i:s'),
                 'attachments'      => $invite->attachments ?? [],
@@ -213,7 +213,7 @@ class InvitationController extends Controller
     public function updateFile(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|bail|mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx|max:10240',
+            'file' => 'required|file|bail|mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx,pptx|max:10240',
         ]);
 
         // استدعاء دالة الرفع
