@@ -984,7 +984,7 @@
 									</td>
 									<td> {{ FormatDate($session->zoom_date, 'Y-m-d H:i A') }} ({{ $session->period }}M) </td>
 									<td>
-										{{ $session->session_type != null ?__('admin.'. $session->session_type) : '' }}
+										{{ $session->session_type ?? '' }}
 									</td>
 									<td> {{ $session->admin_comment ?? '...' }} </td>
 									<td>
