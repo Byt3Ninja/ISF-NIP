@@ -62,6 +62,7 @@ $tabs = [
                   <th>{{ __('admin.subject') }}</th>
                   <th>{{ __('admin.Scope') }}</th>
                   <th>{{ __('admin.status') }}</th>
+                  <th>{{ __('admin.Accepted_At') }}</th>
                   <th>{{ __('admin.Created At') }}</th>
                   <th>{{ __('admin.actions') }}</th>
                 </tr>
@@ -86,6 +87,7 @@ $tabs = [
                       {{ __('admin.' . strtolower($item['status'])) }}
                     </span>
                   </td>
+                  <td>{{ $item['accepted_at'] }}</td>
                   <td>{{ $item['created_at'] }}</td>
                   <td>
                     <button class="btn btn-sm btn-outline-primary text-nowrap view-details" data-bs-toggle="offcanvas" data-bs-target="#invitationOffcanvas" data-invitee-name="{{ $item['invitee_name'] }}" data-invitee-email="{{ $item['invitee_email'] }}" data-subject="{{ $item['subject'] }}" data-scope="{{ $item['scope'] }}" data-status="{{ $item['status'] }}" data-message="{{ $item['message_content'] }}" data-date="{{ $item['created_at'] }}" data-attachments="{{ implode(',', $item['attachments']) }}" data-response-message="{{ $item['response_message'] }}">

@@ -3092,4 +3092,5 @@ return [
 	'Email_Not_Enabled' => 'Email is not enabled',
 	'sending' => 'Sending',
 	'send' => 'Send',
+	'Accepted_At' => 'Accepted At',
 ];
