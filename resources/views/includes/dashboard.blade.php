@@ -848,7 +848,7 @@
 										@endphp
 										@if($schedules->isNotEmpty())
 											<button
-												onclick="if (typeof fetchSlots === 'function') { fetchSlots({{ $mentor->id }}, {{ $mentor->cycle_id }}, {{ $mentor->organization_id }}); }"
+												onclick="if (typeof fetchSlots === 'function') { fetchSlots({{ $mentor->id }}, {{ $mentor->cycle_id }}, {{ auth()->user()->company->cycledata->organization_id }}); }"
 												{{-- onclick="request({{ $mentor->id }},'{{ $mentor->name }}', {{ $mentor->organization_id }}, {{ $mentor->cycle_id }})" --}}
 												title="{{ __('cycles.Request_Mentorship') }}"
 												type="button"
