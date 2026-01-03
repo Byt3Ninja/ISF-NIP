@@ -58,6 +58,16 @@ $(function () {
     'In Review': { title: '{{ __('admin.boardTitleReview') }}', class: 'bg-label-primary' },
     Completed: { title: '{{ __('admin.boardTitleCompleted') }}', class: 'bg-label-success' }
   };
+  const roleObj = {
+    admin: '{{ __('admin.Admin') }}',
+    editor: '{{ __('admin.Editor') }}',
+    manager: '{{ __('admin.Manager') }}',
+    judger: '{{ __('admin.Judger') }}',
+    mentor: '{{ __('admin.Mentor') }}',
+    startup: '{{ __('admin.Startup') }}',
+    organizationmanager: '{{ __('admin.organizationManager') }}',
+    'sub-admin': '{{ __('admin.Sub-Admin') }}'
+  };
 
   // Helper: Export Formatter
   const exportFormat = (inner) => {
@@ -112,7 +122,7 @@ $(function () {
         { targets: 2, render: (data, type, full) => `
           <div>
             <span class="text-heading">${full.creator.name}</span>
-            <small class="text-muted d-block text-capitalize">${full.creator.role}</small>
+            <small class="text-muted d-block text-uppercase">${roleObj[full.creator.role] || full.creator.role}</small>
           </div>
           `,
         },
@@ -292,7 +302,7 @@ $(function () {
       <div class="row">
         <div class="col-12 mb-4"><h4>${data.title}</h4><p class="text-muted">${data.description}</p></div>
         <div class="col-lg-6 mb-3"><strong>{{ __('admin.Created_By') }}:</strong> ${data.creator.name}</div>
-        <div class="col-lg-6 mb-3"><strong>{{ __('admin.Creator_Role') }}:</strong> <span class="text-capitalize">${data.creator.role}</span></div>
+        <div class="col-lg-6 mb-3"><strong>{{ __('admin.Creator_Role') }}:</strong> <span class="text-uppercase">${roleObj[data.creator.role] || data.creator.role}</span></div>
         <div class="col-lg-6 mb-3"><strong>{{ __('admin.Program') }}:</strong> ${data.program.title}</div>
         <div class="col-lg-6 mb-3"><strong>{{ __('admin.Priority') }}:</strong> <span class="badge ${priorityObj[data.priority].class} ms-2">${priorityObj[data.priority].title}</span></div>
         <div class="col-lg-6 mb-3"><strong>{{ __('admin.overall_status') }}:</strong> <span class="badge ${statusObj[data.overallStatus].class} ms-2">${statusObj[data.overallStatus].title}</span></div>
