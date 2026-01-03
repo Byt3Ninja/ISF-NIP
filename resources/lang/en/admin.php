@@ -3101,4 +3101,5 @@ return [
 	'send' => 'Send',
 	'Accepted_At' => 'Accepted At',
 	'All_Priorities' => 'All Priorities',
+	'Evaluation published successfully' => 'Evaluation published successfully',
 ];
