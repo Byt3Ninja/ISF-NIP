@@ -163,7 +163,7 @@ class InvitationController extends Controller
         $invitation->email = $data['invitee_email'];
         $invitation->name = $data['invitee_name'] ?? $name;
         $invitation->user_id = auth()->user()->id;
-        $invitation->status = 'Send';
+        $invitation->status = 'Sent';
         $invitation->scope = $data['invitation_scope'];
         $invitation->organization_ids = $data['organizations'] ?? [];
         $invitation->subject = $data['invitation_subject'];
@@ -183,7 +183,7 @@ class InvitationController extends Controller
                 'message_content'  => $invite->message_content ?? null,
                 'response_message' => $invite->response_message ?? null,
                 'created_at'       => $invite->created_at->format('Y-m-d H:i:s'),
-                'accepted_at'      => $invite->updated_at == $invite->created_at ? null : $invite->updated_at->format('Y-m-d H:i:s'),
+                'accepted_at'      => $invite->updated_at == $invite->created_at ? 'N/A' : $invite->updated_at->format('Y-m-d H:i:s'),
                 'attachments'      => $invite->attachments ?? [],
             ];
         });
