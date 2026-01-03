@@ -368,14 +368,6 @@ $pills = [
       <form id="stepForm" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="_token" value="">
         <div class="modal-body">
-          <div class="form-group mb-3">
-            <label class="form-label">{{ __('admin.screening.screening_type') }}</label>
-            <select class="form-select" name="ScreeningSelect" id="screening-type" required>
-              <option value="onetoall">{{ __('admin.screening.onetoall') }}</option>
-              <option value="grouptoall">{{ __('admin.screening.grouptoall') }}</option>
-              <option value="grouptogroup">{{ __('admin.screening.grouptogroup') }}</option>
-            </select>
-          </div>
           <input type="hidden" name="sid" id="step-id-value">
           <input type="hidden" name="type" value="8">
           <div class="form-group mb-3">
@@ -506,15 +498,6 @@ $pills = [
         $('#step-to-date').val(stepData.from);
         $('#step-description').val(stepData.description);
 
-        if (stepData.data) {
-          if (stepData.data == 'onetoall') {
-            $('#screening-type').val('onetoall');
-          } else if (stepData.data == 'grouptoall') {
-            $('#screening-type').val('grouptoall');
-          } else {
-            $('#screening-type').val('grouptogroup');
-          }
-        }
       }
     });
 
@@ -586,42 +569,16 @@ $pills = [
       // Initialize select2 for all selects
       $('.select2').each(function() {
         const $select = $(this);
-        const isScreeningType = $select.attr('id') === 'ScreeningSelect';
         let placeHolder = '';
-        if( $select.attr('id') === 'ScreeningSelect' ) { placeHolder = "{{ __('cycles.Choose screening type') }}"; }
-        else if( $select.hasClass('judgers-selectors') ) { placeHolder = "{{ __('cycles.Select judges') }}"; }
+        if( $select.hasClass('judgers-selectors') ) { placeHolder = "{{ __('cycles.Select judges') }}"; }
         else if( $select.hasClass('users-selectors') ) { placeHolder = "{{ __('cycles.Select Company') }}"; }
 
         $select.select2({
           placeholder: placeHolder,
-          // allowClear: isScreeningType,
-          dropdownParent: isScreeningType ? $('#stepForm') : null,
           width: '100%'
         });
       });
 
-      // Reinitialize ScreeningSelect when modal is shown to ensure interactivity
-      $('#stepForm').on('shown.bs.modal', function() {
-        $('#ScreeningSelect').select2('destroy').select2({
-          placeholder: '{{ __('cycles.Choose screening type') }}',
-          // allowClear: true,
-          dropdownParent: $('#stepForm'),
-          width: '100%'
-        });
-        console.log('ScreeningSelect reinitialized in modal');
-        // Ensure dropdown is not disabled
-        $('#ScreeningSelect').prop('disabled', false);
-      });
-
-      $('#stepForm form').on('submit', function(e) {
-        const screeningType = $('#ScreeningSelect').val();
-        console.log('Submitting screening type:', screeningType);
-        if (!screeningType) {
-          e.preventDefault();
-          alert('{{ __('Please select a screening type') }}');
-          return false;
-        }
-      });
 
       // Handle screening guidelines form submission with AJAX
       $('#screening-guidelines-form').on('submit', function(e) {
