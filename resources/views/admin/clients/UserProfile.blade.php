@@ -21,6 +21,17 @@ $canRequestMentorship =
 if ($canRequestMentorship) {
   $cycle = auth()->user()->company->cycledata;
 }
+
+ $schedules = App\Schedule::where('user_id', $client->id ?? auth()->id())
+  ->where(function ($query) {$query
+      ->whereNull('date')
+      ->orWhere('date', '>', date('Y-m-d'))
+      ->orWhere(function ($q) {
+        $q->where('date', date('Y-m-d'))
+        ->where('tto', '>', date('H:i:s'));
+      });
+  })
+  ->get();
 @endphp
 
 @section('content')
@@ -124,24 +135,20 @@ if ($canRequestMentorship) {
                       <i class="ti ti-user-check ti-xs me-2"></i>{{ __('admin.Follow') }}
                     </a>
 
-                    @if(!empty($order))
+                    @if($schedules->isNotEmpty())
                       <button
                         type="button" 
                         class="btn btn-primary" 
                         onclick="if (typeof fetchSlots === 'function') { fetchSlots({{ $client->id }}, {{ $cycle->id }}, {{ $cycle->organization_id }}); }"
                       >
-                        {{ __('cycles.Request_Mentorship') }}
-                        <i class="ti ti-calendar-plus ms-2"></i>
-                      </button>
-                      {{-- <button 
-                        onclick="request({{ $order->user_id }}, '{{ optional($order->user)->{'first_name_' . $l} }} {{ optional($order->user)->{'last_name_' . $l} }}', {{ $order->cycle->organization_id }}, {{ $order->cycle_id }})" 
-                        title="{{ __('cycles.Request_Mentorship') }}" 
-                        type="button" 
-                        class="btn btn-primary"
-                      >
                       <i class="ti ti-calendar-plus me-2"></i>
                         {{ __('cycles.Request_Mentorship') }}
-                      </button> --}}
+                      </button>
+                    @else
+                      <button type="button" class="btn btn-primary" disabled>
+                        <i class="ti ti-calendar-plus me-2"></i>
+                        {{ __('cycles.Not_Available_Request_Mentorship') }}
+                      </button>
                     @endif
                   </div>
                 </div>
