@@ -5,6 +5,10 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
 @stop
 
+@php
+$authUser = auth()->user();
+@endphp
+
 @section('content')
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
@@ -236,11 +240,11 @@ $(function () {
             },
             success: function(response) {
               window.dt_task.row($row).remove().draw();
-              showToast({type: 'success', message: '{{ __('admin.Task_deleted_successfully.') }}'});
+              releaseSuccessAlert({title: '{{ __('admin.Deleted') }}', message: '{{ __('admin.Task_deleted_successfully.') }}'});
             },
             error: function(xhr) {
               const errorMsg = xhr.responseJSON?.message;
-              showToast({type: 'error', message: errorMsg ? errorMsg : '{{ __('admin.unexpected_error') }}'});
+              releaseFailureAlert({title: '{{ __('admin.Error') }}', message: errorMsg ? errorMsg : '{{ __('admin.unexpected_error') }}'});
             }
           });
         }
@@ -461,6 +465,9 @@ const tagifyInstance = new Tagify(tagifyInput, {
     // Reset form validation first
     fv.resetForm(true);
 
+    // Re-enable submit button
+    $('.data-submit').prop('disabled', false);
+
     // Reset all form fields
     form.reset();
 
@@ -534,44 +541,59 @@ const tagifyInstance = new Tagify(tagifyInput, {
           'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         },
         success: function(response) {
+          console.log('response', response);
+          
+          // Map assignees from the response to match DataTable structure
+          const mappedAssignees = response.data.assignees.map(assignee => ({
+            id: assignee.id,
+            name: assignee.name || assignee.name_en || assignee.name_ar || 'Unknown',
+            status: assignee.pivot.status,
+            lastUpdated: assignee.pivot.last_updated.split(' ')[0] // Extract date part only
+          }));
+          
+          const taskObj = {
+            id: response.data.id,
+            title: response.data.title,
+            description: response.data.description,
+            creator: response.data.creator || { 
+              name: '{{ $authUser->name }}', 
+              role: '{{ $authUser->role }}' 
+            },
+            program: {
+              id: response.data.program.id,
+              title: response.data.program.title
+            },
+            assignees: mappedAssignees,
+            priority: response.data.priority,
+            overallStatus: response.data.status,
+            dueDate: response.data.due_date || 'N/A',
+            tags: response.data.tags || []
+          };
+          
           if (editRow) {
-            // Update the existing row with the new data
-            const taskObj = {
-              id: response.data.id || taskId,
-              title: response.data.title,
-              description: response.data.description,
-              program: { id: response.data.program_id, title: $('#task-program option:selected').text() },
-              assignees: selectedAssignees.length ? selectedAssignees : [{ company: 'Current User', status: 'Pending', lastUpdated: new Date().toISOString().split('T')[0] }],
-              priority: response.data.priority,
-              overallStatus: response.data.status,
-              dueDate: response.data.due_date,
-              tags: response.data.tags || []
-            };
-            window.dt_task.row(editRow).data(taskObj).draw();
-            showToast({type: 'success', message: '{{ __('admin.Task_updated_successfully.') }}'});
+            // Update existing row
+            window.dt_task.row(editRow).data(taskObj).draw(false);
+            releaseSuccessAlert({
+              title: '{{ __('admin.success') }}',
+              message: '{{ __('admin.Task_updated_successfully.') }}'
+            });
           } else {
-            // Add new task to the table
-            const taskObj = {
-              id: response.data.id,
-              title: response.data.title,
-              description: response.data.description,
-              program: { id: response.data.program_id, title: $('#task-program option:selected').text() },
-              assignees: selectedAssignees.length ? selectedAssignees : [{ company: 'Current User', status: 'Pending', lastUpdated: new Date().toISOString().split('T')[0] }],
-              priority: response.data.priority,
-              overallStatus: response.data.status,
-              dueDate: response.data.due_date,
-              tags: response.data.tags || []
-            };
-            window.dt_task.row.add(taskObj).draw('page');
-            showToast({type: 'success', message: '{{ __('admin.Task_added_successfully.') }}'});
+            // Add new row - use draw(false) to stay on current page
+            window.dt_task.row.add(taskObj).draw(false);
+            releaseSuccessAlert({
+              title: '{{ __('admin.success') }}',
+              message: '{{ __('admin.Task_added_successfully.') }}'
+            });
           }
+
+          $('.data-submit').prop('disabled', true);
           $('#addTaskModal').modal('hide');
           resetForm();
         },
         error: function(xhr) {
           console.error('Failed to save task:', xhr);
           const errorMsg = xhr.responseJSON?.message;
-          showToast({type: 'error', message: errorMsg ? errorMsg : '{{ __('admin.unexpected_error') }}'});
+          releaseFailureAlert({title: '{{ __('admin.Error') }}', message: errorMsg ? errorMsg : '{{ __('admin.unexpected_error') }}'});
         }
       });
     });
