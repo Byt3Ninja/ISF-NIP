@@ -235,7 +235,7 @@ if (!$activeGroup) {
               <li 
                 class="menu-item 
                 {{ $_user->hasRole('Admin') && $child['title'] === 'reminder_logs' ? 'd-none' : '' }} 
-                {{ env('APP_ENV') === 'production' && ($child['title'] === 'timesheets' || $child['title'] === 'projects') ? 'd-none' : '' }} 
+                {{ in_array(env('APP_ENV'), ['production', 'beta']) && ($child['title'] === 'timesheets' || $child['title'] === 'projects') ? 'd-none' : '' }} 
                 {{ $child['route'] === $activeItem ? 'active' : '' }}"
               >
                 <a 
