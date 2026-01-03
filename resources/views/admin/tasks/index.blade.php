@@ -179,9 +179,9 @@ $(function () {
           });
         };
 
-        addDropdownFilter(3, 'taskProgram', '{{ __('admin.Select Program') }}');
-        addDropdownFilter(5, 'taskPriority', '{{ __('admin.select_priority') }}');
-        addDropdownFilter(6, 'taskStatus', '{{ __('admin.Select Status') }}');
+        addDropdownFilter(3, 'taskProgram', '{{ __('admin.All_Programs') }}');
+        addDropdownFilter(5, 'taskPriority', '{{ __('admin.All_Priorities') }}');
+        addDropdownFilter(6, 'taskStatus', '{{ __('admin.All_statuses') }}');
 
         // Styles fix
         setTimeout(() => {

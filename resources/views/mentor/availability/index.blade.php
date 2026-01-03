@@ -147,6 +147,49 @@
 
               <div class="tab-pane fade" id="list-tab" role="tabpanel">
                 <div style="max-height: 500px; overflow-y: auto;">
+                  <div id="list-view-add-slot-form" style="display: none;">
+                    <div class="border rounded py-6 px-5 mb-4">
+                      <h6 class="mb-3">{{ __('mentor.add_new_slot') }}</h6>
+                      <div class="row mb-3">
+                        <div class="col-md-6 col-lg-4 mb-3">
+                          <label class="form-label">{{ __('mentor.day') }}</label>
+                          <select id="list-view-day-select" class="form-select">
+                            <option value="Sunday">{{ __('mentor.sunday') }}</option>
+                            <option value="Monday">{{ __('mentor.monday') }}</option>
+                            <option value="Tuesday">{{ __('mentor.tuesday') }}</option>
+                            <option value="Wednesday">{{ __('mentor.wednesday') }}</option>
+                            <option value="Thursday">{{ __('mentor.thursday') }}</option>
+                            <option value="Friday">{{ __('mentor.friday') }}</option>
+                            <option value="Saturday">{{ __('mentor.saturday') }}</option>
+                          </select>
+                        </div>
+                        <div class="col-md-6 col-lg-3 mb-3">
+                          <label class="form-label">{{ __('mentor.start_time') }}</label>
+                          <input type="text" id="list-view-start-time" class="form-control" placeholder="09:00">
+                        </div>
+                        <div class="col-md-6 col-lg-3 mb-3">
+                          <label class="form-label">{{ __('mentor.end_time') }}</label>
+                          <input type="text" id="list-view-end-time" class="form-control" placeholder="17:00">
+                        </div>
+                        <div class="col-md-6 col-lg-2 mb-3">
+                          <label class="form-label">{{ __('mentor.session_type') }}</label>
+                          <select id="list-view-session-type" class="form-select">
+                            <option value="Online">{{ __('mentor.online') }}</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-primary" id="save-list-view-slot">
+                          <i class="ti ti-plus me-2"></i>
+                          {{ __('admin.Add_New') }}
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="cancel-list-view-slot">
+                          <i class="ti ti-x me-2"></i>
+                          {{ __('mentor.cancel') }}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                   <div id="availability-list-view">
                     <!-- List view content will be injected here -->
                   </div>
@@ -264,6 +307,7 @@
     // Initialize session type select
     function initSessionTypeSelect() {
         $('#slot-session-type').html(getSessionTypeOptionsHTML());
+        $('#list-view-session-type').html(getSessionTypeOptionsHTML());
     }
 
     // Fetch slots on page load
@@ -713,6 +757,52 @@
     $('#add-single-slot').click(() => addSlot('specific'));
     $('#apply-to-weekday').click(() => addSlot('weekly'));
 
+    function renderAddNewSlotBox(visible = false) {
+      return `
+        <div id="list-view-add-slot-form" style="display: ${visible ? 'block' : 'none'};">
+          <div class="border rounded p-4 bg-light-subtle mb-4">
+            <h6 class="mb-3">{{ __('mentor.add_new_slot') }}</h6>
+            <div class="row mb-3">
+              <div class="col-md-6 col-lg-4 mb-3">
+                <label class="form-label">{{ __('mentor.day') }}</label>
+                <select id="list-view-day-select" class="form-select">
+                  <option value="Sunday">{{ __('mentor.sunday') }}</option>
+                  <option value="Monday">{{ __('mentor.monday') }}</option>
+                  <option value="Tuesday">{{ __('mentor.tuesday') }}</option>
+                  <option value="Wednesday">{{ __('mentor.wednesday') }}</option>
+                  <option value="Thursday">{{ __('mentor.thursday') }}</option>
+                  <option value="Friday">{{ __('mentor.friday') }}</option>
+                  <option value="Saturday">{{ __('mentor.saturday') }}</option>
+                </select>
+              </div>
+              <div class="col-md-6 col-lg-3 mb-3">
+                <label class="form-label">{{ __('mentor.start_time') }}</label>
+                <input type="text" id="list-view-start-time" class="form-control" placeholder="09:00">
+              </div>
+              <div class="col-md-6 col-lg-3 mb-3">
+                <label class="form-label">{{ __('mentor.end_time') }}</label>
+                <input type="text" id="list-view-end-time" class="form-control" placeholder="17:00">
+              </div>
+              <div class="col-md-6 col-lg-2 mb-3">
+                <label class="form-label">{{ __('mentor.session_type') }}</label>
+                <select id="list-view-session-type" class="form-select">
+                  ${getSessionTypeOptionsHTML()}
+                </select>
+              </div>
+            </div>
+            <div class="d-flex gap-2">
+              <button type="button" class="btn btn-sm btn-primary" id="save-list-view-slot">
+                {{ __('admin.Save') }}
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="cancel-list-view-slot">
+                {{ __('mentor.cancel') }}
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     // Render calendar view's slots list
     function updateSlotsList() {
         if (!currentSelectedDate) {
@@ -761,6 +851,12 @@
             { key: 'Saturday', display: '{{ __('mentor.saturday') }}' }
         ];
         let html = '';
+
+        // Check if there are any slots
+        const hasSlots = Object.values(availabilityData.weekly).some(slots => slots.length > 0) ||
+                         Object.values(availabilityData.specific).some(slots => slots.length > 0);
+
+        $('#list-view-add-slot-form').toggle(hasSlots);
 
         weekdaysOrder.forEach(day => {
             const weekdayKey = day.key;
@@ -817,47 +913,6 @@
                         <i class="ti ti-plus me-1"></i> {{ __('mentor.add_availability') }}
                     </button>
                 </div>
-                <div id="list-view-add-slot-form" style="display: none;">
-                    <div class="border rounded p-4 bg-light-subtle mb-4">
-                        <h6 class="mb-3">{{ __('mentor.add_new_slot') }}</h6>
-                        <div class="row mb-3">
-                            <div class="col-md-6 col-lg-4 mb-3">
-                                <label class="form-label">{{ __('mentor.day') }}</label>
-                                <select id="list-view-day-select" class="form-select">
-                                    <option value="Sunday">{{ __('mentor.sunday') }}</option>
-                                    <option value="Monday">{{ __('mentor.monday') }}</option>
-                                    <option value="Tuesday">{{ __('mentor.tuesday') }}</option>
-                                    <option value="Wednesday">{{ __('mentor.wednesday') }}</option>
-                                    <option value="Thursday">{{ __('mentor.thursday') }}</option>
-                                    <option value="Friday">{{ __('mentor.friday') }}</option>
-                                    <option value="Saturday">{{ __('mentor.saturday') }}</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6 col-lg-3 mb-3">
-                                <label class="form-label">{{ __('mentor.start_time') }}</label>
-                                <input type="text" id="list-view-start-time" class="form-control" placeholder="09:00">
-                            </div>
-                            <div class="col-md-6 col-lg-3 mb-3">
-                                <label class="form-label">{{ __('mentor.end_time') }}</label>
-                                <input type="text" id="list-view-end-time" class="form-control" placeholder="17:00">
-                            </div>
-                            <div class="col-md-6 col-lg-2 mb-3">
-                                <label class="form-label">{{ __('mentor.session_type') }}</label>
-                                <select id="list-view-session-type" class="form-select">
-                                    ${getSessionTypeOptionsHTML()}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-sm btn-primary" id="save-list-view-slot">
-                                {{ __('admin.Save') }}
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" id="cancel-list-view-slot">
-                                {{ __('mentor.cancel') }}
-                            </button>
-                        </div>
-                    </div>
-                </div>
             `;
         }
 
@@ -868,20 +923,6 @@
     $(document).on('click', '#show-add-slot-form-btn', function() {
       $('#empty-list-view').hide();
       $('#list-view-add-slot-form').show();
-      
-      // Initialize flatpickr for the new time inputs
-      flatpickr("#list-view-start-time", {
-          enableTime: true,
-          noCalendar: true,
-          dateFormat: "H:i",
-          time_24hr: true,
-      });
-      flatpickr("#list-view-end-time", {
-          enableTime: true,
-          noCalendar: true,
-          dateFormat: "H:i",
-          time_24hr: true,
-      });
     });
 
     // Cancel add slot form in list view
@@ -948,6 +989,12 @@
             updateSlotsList();
             updateCalendarStyles();
             updateMainCalendar();
+
+            // Reset form
+            $('#list-view-start-time').val('');
+            $('#list-view-end-time').val('');
+            $('#list-view-session-type').val('Online');
+            $('#list-view-day-select').val('Sunday');
 
             releaseSuccessAlert({
                 'title': '{{ __('mentor.slot_added_success') }}',
@@ -1197,6 +1244,23 @@
 
     $('button[data-bs-toggle="tab"][data-bs-target="#list-tab"]').on('shown.bs.tab', function (e) {
       updateListView();
+      // Initialize flatpickr for list view time pickers if not already initialized
+      if ($('#list-view-start-time').length && !$('#list-view-start-time')[0]._flatpickr) {
+        flatpickr("#list-view-start-time", {
+          enableTime: true,
+          noCalendar: true,
+          dateFormat: "H:i",
+          time_24hr: true,
+        });
+      }
+      if ($('#list-view-end-time').length && !$('#list-view-end-time')[0]._flatpickr) {
+        flatpickr("#list-view-end-time", {
+          enableTime: true,
+          noCalendar: true,
+          dateFormat: "H:i",
+          time_24hr: true,
+        });
+      }
     });
 </script>
 @stop
