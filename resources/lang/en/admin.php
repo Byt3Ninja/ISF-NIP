@@ -3093,4 +3093,5 @@ return [
 	'sending' => 'Sending',
 	'send' => 'Send',
 	'Accepted_At' => 'Accepted At',
+	'All_Priorities' => 'All Priorities',
 ];
