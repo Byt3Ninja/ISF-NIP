@@ -258,6 +258,7 @@ return [
 	'Price in EGP' => 'السعر $',
 	'Search' => 'بحث',
 	'Created_By' => 'تم الانشاء بواسطة',
+	'Creator_Role' => 'دور المنشئ',
 	'Priority' => 'الأهمية',
 	'overall_status' => 'الحالة العامة',
 	'Due_Date' => 'تاريخ الاستحقاق',
