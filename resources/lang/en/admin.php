@@ -263,6 +263,7 @@ return [
 	'Price in EGP' => 'Price in $',
 	'Search' => 'Search',
 	'Created_By' => 'Created By',
+	'Creator_Role' => 'Creator Role',
 	'Priority' => 'Priority',
 	'overall_status' => 'Overall Status',
 	'Due_Date' => 'Due Date',

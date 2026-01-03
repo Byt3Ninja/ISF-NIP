@@ -292,6 +292,7 @@ $(function () {
       <div class="row">
         <div class="col-12 mb-4"><h4>${data.title}</h4><p class="text-muted">${data.description}</p></div>
         <div class="col-lg-6 mb-3"><strong>{{ __('admin.Created_By') }}:</strong> ${data.creator.name}</div>
+        <div class="col-lg-6 mb-3"><strong>{{ __('admin.Creator_Role') }}:</strong> <span class="text-capitalize">${data.creator.role}</span></div>
         <div class="col-lg-6 mb-3"><strong>{{ __('admin.Program') }}:</strong> ${data.program.title}</div>
         <div class="col-lg-6 mb-3"><strong>{{ __('admin.Priority') }}:</strong> <span class="badge ${priorityObj[data.priority].class} ms-2">${priorityObj[data.priority].title}</span></div>
         <div class="col-lg-6 mb-3"><strong>{{ __('admin.overall_status') }}:</strong> <span class="badge ${statusObj[data.overallStatus].class} ms-2">${statusObj[data.overallStatus].title}</span></div>
