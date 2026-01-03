@@ -60,6 +60,20 @@ if (document.getElementById('layout-menu')) {
   menuToggler.forEach(item => {
     item.addEventListener('click', event => {
       event.preventDefault();
+
+      // Toggle search menu
+      const searchMenu = document.querySelectorAll('#search-menu');
+      const searchMenuIcon = document.querySelectorAll('#search-menu-icon');
+      if (searchMenu && searchMenuIcon) {
+        if (searchMenu[0].style.display === "none") {
+          searchMenu[0].style.display = "block";
+          searchMenuIcon[0].style.display = "none";
+        } else {
+          searchMenu[0].style.display = "none";
+          searchMenuIcon[0].style.display = "block";
+        }
+      }
+
       window.Helpers.toggleCollapsed();
       // Enable menu state with local storage support if enableMenuLocalStorage = true from config.js
       if (config.enableMenuLocalStorage && !window.Helpers.isSmallScreen()) {

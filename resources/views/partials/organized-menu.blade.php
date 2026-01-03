@@ -202,7 +202,7 @@ if (!$activeGroup) {
   
   <ul class="menu-inner py-1">
     <!-- Search Menu -->
-    <li class="w-100 px-3 mb-2 py-3 border-bottom">
+    <li id="search-menu" class="w-100 px-3 mb-2 py-3 border-bottom">
       <div class="input-group input-group-merge">
         <div class="input-group-text">
           <i class="ti ti-search text-muted"></i>
@@ -214,6 +214,13 @@ if (!$activeGroup) {
           placeholder="{{ __('settings.navigation.search_menu') }}" 
         />
       </div>
+    </li>
+    
+    <li id="search-menu-icon" class="menu-item" style="display: none;">
+      <a href="javascript:void(0);" class="menu-link">
+        <i class="menu-icon tf-icons ti ti-search"></i>
+        <div></div>
+      </a>
     </li>
 
     @foreach ($navigationItems as $group => $item)
