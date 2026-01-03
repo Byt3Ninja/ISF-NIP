@@ -194,8 +194,8 @@
                                $link = 'show-form/' . $step->id; 
                                $set = 'show-builder';            
                                  } elseif ($step->stype == 2) {
-                                  $link = $step->id . '/screening';
-                                  $set = $step->id . '/screening';
+                                  $link = 'screening/' . $step->id;
+                                  $set = 'screening/' . $step->id;
                                   } elseif ($step->stype == 3) {
                                      $link = 'mentorship/sessions';
                                      $set = 'mentorship/assign/' . $step->cycle_id;
