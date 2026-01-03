@@ -3156,4 +3156,5 @@ return [
 	'send' => 'تم الارسال',
 	'Accepted_At' => 'تم القبول في',
 	'All_Priorities' => 'جميع الأولويات',
+	'Evaluation published successfully' => 'تم نشر التقييم بنجاح',
 ];
