@@ -566,7 +566,7 @@ const tagifyInstance = new Tagify(tagifyInput, {
             assignees: mappedAssignees,
             priority: response.data.priority,
             overallStatus: response.data.status,
-            dueDate: response.data.due_date || 'N/A',
+            dueDate: response.data.due_date ? moment(response.data.due_date).format('YYYY-MM-DD') : 'N/A',
             tags: response.data.tags || []
           };
           
