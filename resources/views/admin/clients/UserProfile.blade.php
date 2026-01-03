@@ -6,6 +6,23 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/page-profile.css" />
 @stop
 
+@php
+$user = auth()->user();
+$company = $user->company;
+
+$canRequestMentorship =
+  $company &&
+  $company->cycle !== 0 &&
+  (
+    $user->hasRole('Registered') ||
+    (!$user->hasRole('Mentor') && !$user->hasRole('Admin'))
+  );
+  
+if ($canRequestMentorship) {
+  $cycle = auth()->user()->company->cycledata;
+}
+@endphp
+
 @section('content')
   <div class="content-wrapper">
     {{-- Alert Messages --}}
@@ -108,7 +125,11 @@
                     </a>
 
                     @if(!empty($order))
-                      <button type="button" class="btn btn-primary" onclick="fetchSlots({{ $client->id }})">
+                      <button
+                        type="button" 
+                        class="btn btn-primary" 
+                        onclick="if (typeof fetchSlots === 'function') { fetchSlots({{ $client->id }}, {{ $cycle->id }}, {{ $cycle->organization_id }}); }"
+                      >
                         {{ __('cycles.Request_Mentorship') }}
                         <i class="ti ti-calendar-plus ms-2"></i>
                       </button>
