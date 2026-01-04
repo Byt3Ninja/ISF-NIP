@@ -537,6 +537,10 @@
               $('#search-menu').hide();
               $('#search-menu-icon').show();
             }
+          } else {
+            // When menu is expanded, always show search input and hide icon
+            $('#search-menu').show();
+            $('#search-menu-icon').hide();
           }
         };
 
