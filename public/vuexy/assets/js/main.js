@@ -39,6 +39,9 @@ if (document.getElementById('layout-menu')) {
   //-----------------
 
   let layoutMenuEl = document.querySelectorAll('#layout-menu');
+  let searchMenuEl = document.querySelectorAll("#search-menu");
+  let searchMenuIconEl = document.querySelectorAll("#search-menu-icon");
+
   layoutMenuEl.forEach(function (element) {
     menu = new Menu(element, {
       orientation: isHorizontalLayout ? 'horizontal' : 'vertical',
@@ -61,19 +64,6 @@ if (document.getElementById('layout-menu')) {
     item.addEventListener('click', event => {
       event.preventDefault();
 
-      // Toggle search menu
-      const searchMenu = document.querySelectorAll('#search-menu');
-      const searchMenuIcon = document.querySelectorAll('#search-menu-icon');
-      if (searchMenu && searchMenuIcon) {
-        if (searchMenu[0].style.display === "none") {
-          searchMenu[0].style.display = "block";
-          searchMenuIcon[0].style.display = "none";
-        } else {
-          searchMenu[0].style.display = "none";
-          searchMenuIcon[0].style.display = "block";
-        }
-      }
-
       window.Helpers.toggleCollapsed();
       // Enable menu state with local storage support if enableMenuLocalStorage = true from config.js
       if (config.enableMenuLocalStorage && !window.Helpers.isSmallScreen()) {
@@ -82,6 +72,15 @@ if (document.getElementById('layout-menu')) {
             'templateCustomizer-' + templateName + '--LayoutCollapsed',
             String(window.Helpers.isCollapsed())
           );
+
+          if (window.Helpers.isCollapsed()) {
+            searchMenuEl[0].style.display = "none";
+            searchMenuIconEl[0].style.display = "block";
+          } else {
+            searchMenuEl[0].style.display = "block";
+            searchMenuIconEl[0].style.display = "none";
+          }
+
           // Update customizer checkbox state on click of menu toggler
           let layoutCollapsedCustomizerOptions = document.querySelector('.template-customizer-layouts-options');
           if (layoutCollapsedCustomizerOptions) {

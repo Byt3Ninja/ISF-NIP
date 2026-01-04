@@ -199,10 +199,10 @@ if (!$activeGroup) {
       <i class="ti ti-x d-block d-xl-none ti-md align-middle"></i>
     </a>
   </div>
-  
+
   <ul class="menu-inner py-1">
     <!-- Search Menu -->
-    <li id="search-menu" class="w-100 px-3 mb-2 py-3 border-bottom">
+    <li id="search-menu" class="menu-item px-3 mb-2 pb-4 pt-2 border-bottom">
       <div class="input-group input-group-merge">
         <div class="input-group-text">
           <i class="ti ti-search text-muted"></i>
