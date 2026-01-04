@@ -521,6 +521,40 @@
       }
     </script>
 
+    <script>
+      // Show/hide search menu
+      $(function () {
+        const html = document.documentElement;
+
+        const updateMenuState = () => {
+          if (window.Helpers.isCollapsed()) {
+            if (html.classList.contains('layout-menu-hover')) {
+              console.log('layout-menu-hover');
+              $('#search-menu').show();
+              $('#search-menu-icon').hide();
+            } else {
+              console.log('layout-menu-not-hover');
+              $('#search-menu').hide();
+              $('#search-menu-icon').show();
+            }
+          } else {
+            // When menu is expanded, always show search input and hide icon
+            $('#search-menu').show();
+            $('#search-menu-icon').hide();
+          }
+        };
+
+        // Run once on load
+        updateMenuState();
+
+        // Watch for class changes
+        new MutationObserver(updateMenuState).observe(html, {
+          attributes: true,
+          attributeFilter: ['class']
+        });
+      });
+    </script>
+
     @stack('scripts')
     <!-- END: Page JS-->
   </body>
