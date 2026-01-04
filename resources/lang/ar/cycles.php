@@ -364,7 +364,7 @@ return [
     'Please fix the validation errors before saving.' => 'يرجى إصلاح أخطاء التحقق قبل الحفظ.',
     'Sub-criterion weights must sum to 100%' => 'يجب أن تكون مجموع أوزان المعايير الفرعية 100%',
     'currently' => 'حاليًا',
-    'Warning: Category has weight but no sub-criteria. It won\'t contribute to score.' => 'تحذير: الفئة لها وزن ولكن لا توجد معايير فرعية. لن تساهم في النتيجة.',
+    'evaluation_criteria_score_warning' => 'يجب أن تتضمن المعايير ذات الوزن معايير فرعية.',
     'Total category weights must sum to 100%' => 'يجب أن تكون مجموع أوزان الفئات 100%',
     'Validation Errors:' => 'أخطاء التحقق:',
     'Category' => 'الفئة',

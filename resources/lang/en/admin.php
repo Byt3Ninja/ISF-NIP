@@ -3102,4 +3102,10 @@ return [
 	'Accepted_At' => 'Accepted At',
 	'All_Priorities' => 'All Priorities',
 	'Evaluation published successfully' => 'Evaluation published successfully',
+	'evaulation_publish_note' => 'Please note that once you publish the criteria for startups applying to join the program, you will not be able to modify them later. Please review the criteria carefully before publishing.',
+	'evaluation_unabled_to_publish' => 'Unable to publish: Please review and correct the validation errors listed above before publishing the evaluation model.',
+	'evaluation_unabled_to_publish_wights' => 'Unable to publish: Please ensure all category and sub-criterion weights sum to 100%.',
+	'weight_required' => 'Weight is required',
+	'weight_min_max' => 'Weight must be between 0 and 100',
+	'confirm_publication' => 'Confirm Publication',
 ];

@@ -3157,4 +3157,11 @@ return [
 	'Accepted_At' => 'تم القبول في',
 	'All_Priorities' => 'جميع الأولويات',
 	'Evaluation published successfully' => 'تم نشر التقييم بنجاح',
+	'evaulation_publish_note' => 'يرجى الملاحظة أنه عند نشر معايير الشركات المقدمة للانضمام إلى البرنامج، لن تتمكن من تعديلها لاحقًا. تأكد من مراجعة المعايير بعناية قبل النشر.',
+	'evaluation_unabled_to_publish' => 'لم يتم النشر: يرجى مراجعة وأصلح أخطاء التحقق المذكورة أعلاه قبل نشر للتقييم.',
+	'evaluation_unabled_to_publish_wights' => 'لم يتم النشر: يرجى أن يحتسب مجموع أوزان الفئات والمعايير الفرعية 100%.' ,
+	'weight_required' => 'الوزن مطلوب',
+	'weight_min_max' => 'الوزن يجب ان يكون بين 0 و 100',
+	'weight_must_be_number' => 'الوزن يجب ان يكون رقم',
+	'confirm_publication' => 'تأكيد النشر',
 ];

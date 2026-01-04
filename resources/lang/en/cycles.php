@@ -369,7 +369,7 @@ return [
     'Please fix the validation errors before saving.' => 'Please fix the validation errors before saving.',
     'Sub-criterion weights must sum to 100%' => 'Sub-criterion weights must sum to 100%',
     'currently' => 'currently',
-    'Warning: Category has weight but no sub-criteria. It won\'t contribute to score.' => 'Warning: Category has weight but no sub-criteria. It won\'t contribute to score.',
+    'evaluation_criteria_score_warning' => 'Criteria with weight must have subcriterions',
     'Total category weights must sum to 100%' => 'Total category weights must sum to 100%',
     'Validation Errors:' => 'Validation Errors:',
     'Category' => 'Category',

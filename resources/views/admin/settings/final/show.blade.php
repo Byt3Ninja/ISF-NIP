@@ -320,7 +320,6 @@ $pills = [
           <div class="d-flex flex-column">
             <h5 class="mb-1">{{ __('admin.screening_guidelines') }}</h5>
             <p class="mb-6 text-muted">{{ __('admin.screening_guidelines_description') }}</p>
-            <div id="model-validation-summary" style="display: none;"></div>
             <form id="screening-guidelines-form" action="{{ route('screening.evaluation_save_draft') }}" method="POST" enctype="multipart/form-data">
               {!! csrf_field() !!}
               <input type="hidden" name="action" value="draft">
