@@ -533,7 +533,6 @@
               $('#search-menu').show();
               $('#search-menu-icon').hide();
             } else {
-              console.log('layout-menu-not-hover');
               $('#search-menu').hide();
               $('#search-menu-icon').show();
             }

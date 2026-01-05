@@ -2,7 +2,6 @@
 
 @section('vendorstyle')
 <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
 <style>
 /* Center Summernote modals */
@@ -73,7 +72,7 @@ $pills = [
               </a>
               <h5 class="card-title fw-semibold mb-0">{{ $cstep->title }}</h5>
             </div>
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex flex-wrap align-items-md-center gap-3">
               <a class="btn btn-outline-primary" href="/dashboard/screening/results/{{ $id }}">
                 <i class="ti ti-file-text me-2"></i> {{ __('admin.view_results') }}
               </a>
@@ -277,7 +276,7 @@ $pills = [
 
       <!-- Navigation Pills -->
       <nav class="nav-align-top mb-6">
-        <ul class="nav nav-pills" role="tablist">
+        <ul class="nav nav-pills flex-column flex-md-row gap-2 gap-md-0" role="tablist">
           @foreach($pills as $key => $pill)
             <li class="nav-item">
               <a
@@ -358,14 +357,6 @@ $pills = [
       <form id="stepForm" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="_token" value="">
         <div class="modal-body">
-          <!-- <div class="form-group mb-3">
-            <label class="form-label">{{ __('admin.screening.screening_type') }}</label>
-            <select class="form-select" name="ScreeningSelect" id="screening-type" required>
-              <option value="onetoall">{{ __('admin.screening.onetoall') }}</option>
-              <option value="grouptoall">{{ __('admin.screening.grouptoall') }}</option>
-              <option value="grouptogroup">{{ __('admin.screening.grouptogroup') }}</option>
-            </select>
-          </div> -->
           <input type="hidden" name="sid" id="step-id-value">
           <input type="hidden" name="type" value="8">
           <div class="form-group mb-3">
@@ -439,10 +430,9 @@ $pills = [
 @if(app()->getLocale() == 'ar')
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/lang/summernote-ar-AR.min.js"></script>
 @endif
-<script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
-  <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
-  <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+<script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
+<script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
 @stop
 
 @section('pagescripts')
@@ -633,7 +623,6 @@ $pills = [
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
           },
           success: function(response) {
-
             if (response.status) {
               releaseSuccessAlert({
                 title: '{{ __('admin.success') }}',
