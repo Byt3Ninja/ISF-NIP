@@ -177,6 +177,10 @@ class SlotController extends Controller
 						->get();
 		}
 
+		if($offline_allowed == false){
+			$schedules = $schedules->where('session_type', '!=','Offline');
+		}
+
 		$slots = collect(); // we will push items manually
 
 		foreach ($schedules as $item) {
