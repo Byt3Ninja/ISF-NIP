@@ -355,6 +355,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::group(['prefix' => 'mentors'], function () {
         Route::resource('invitations', 'InvitationController');
         Route::post('File_Upload', 'InvitationController@updateFile')->name('invitations.upload');
+        Route::post('DeleteFile_Upload', 'InvitationController@deleteFile')->name('invitations.DeleteAttachment');
     });
     
     // lowercase alias for backward-compatibility / ease of testing

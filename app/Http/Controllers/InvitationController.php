@@ -226,4 +226,34 @@ class InvitationController extends Controller
             'data' => $fileData
         ]);
     }
+
+    private function deleteFromUsersDisk(string $fileName): bool
+    {
+        if (Storage::disk('UsersDiskInviteMentor')->exists($fileName)) {
+            return Storage::disk('UsersDiskInviteMentor')->delete($fileName);
+        }
+
+        return false;
+    }
+
+    public function deleteFile(Request $request)
+    {
+        $request->validate([
+            'file_name' => 'required|string',
+        ]);
+
+        $deleted = $this->deleteFromUsersDisk($request->file_name);
+
+        if (!$deleted) {
+            return response()->json([
+                'success' => false,
+                'message' => 'File not found or already deleted'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'File deleted successfully'
+        ]);
+    }
 }
