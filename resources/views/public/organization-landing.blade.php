@@ -78,6 +78,17 @@
   <script src="/vuexy/assets/js/front-config.js"></script>
 </head>
 
+@php
+ $sections = [
+   ['id' => 'howItWorks', 'icon' => 'list', 'label' => __('admin.How It Works')],
+   ['id' => 'achievements', 'icon' => 'trophy', 'label' => __('admin.Achievements & Impact')],
+   ['id' => 'media', 'icon' => 'share', 'label' => __('admin.Media & Recognition')],
+   ['id' => 'partners', 'icon' => 'users', 'label' => __('admin.Partners')],
+  ];
+
+  $colors = ['warning', 'success', 'danger', 'info', 'primary', 'secondary'];
+@endphp
+
 <body>
   <script src="/vuexy/assets/vendor/js/dropdown-hover.js"></script>
   <script src="/vuexy/assets/vendor/js/mega-dropdown.js"></script>
@@ -233,9 +244,14 @@
 
               <div>
                 <h5 class="mb-0 fw-semibold">{{ $isRtl ? $organization->name_ar : $organization->name_en }}</h5>
-                <small class="">
-                  <i class="ti ti-map-pin"></i> San Francisco, CA
-                </small>
+                @if($organization->city || $organization->country)
+                  <small>
+                    <i class="ti ti-map-pin"></i> 
+                    {{ optional($organization->city)->{'name_' . $l} ?? '-' }}
+                    {{ $organization->country ? ', ' : '' }}
+                    {{ optional($organization->country)->{'name_' . $l} ?? '-' }}
+                  </small>
+                @endif
               </div>
             </div>
 
@@ -298,8 +314,80 @@
     </div>
   </section>
 
+  <!-- Navigation Pills -->
+  <div class="px-6">
+    <div class="card border my-8 rounded-pill">
+      <div class="card-body py-4 px-12 pb-2">
+        <div class="nav-align-top">
+          <ul class="nav nav-tabs flex-nowrap pb-4 border-0" style="max-width: 100%; overflow-x: auto;" role="tablist">
+            @foreach ($sections as $tab)
+              <li class="nav-item" role="presentation">
+                <a
+                  type="button"
+                  class="nav-link {{ $loop->first ? 'active' : '' }}"
+                  id="tab-{{ $tab['id'] }}-trigger"
+                  href="#tab-{{ $tab['id'] }}"
+                  role="tab"
+                  aria-controls="tab-{{ $tab['id'] }}"
+                  aria-selected="{{ $loop->first ? 'true' : 'false' }}"
+                >
+                  <i class="ti ti-{{ $tab['icon'] }} me-1"></i>
+                  {{ $tab['label'] }}
+                </a>
+              </li>
+            @endforeach
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--/ Navigation Pills -->
+
+  <!-- How It Works Section -->
+  @if($landingPage->how_it_works_enabled && !empty($landingPage->process_steps))
+    <section id="tab-HowItWorks" class="section-py">
+      <div class="container">
+        @if($landingPage->how_it_works_subtitle)
+          <div class="text-center mb-4">
+            <span class="badge bg-label-primary">{{ $landingPage->how_it_works_subtitle }}</span>
+          </div>
+        @endif
+        @if($landingPage->how_it_works_title)
+          <h4 class="text-center mb-1">
+            {{ $landingPage->how_it_works_title ?: ($isRtl ? 'كيف تعمل' : 'How It Works') }}
+          </h4>
+        @endif
+        @if($landingPage->how_it_works_description)
+          <p class="text-center mb-12">
+            {{ $landingPage->how_it_works_description }}
+          </p>
+        @endif
+        <div class="row g-6 justify-content-center">
+          @foreach($landingPage->process_steps as $index => $step)
+            <div class="col-lg-3 col-6">
+              <div class="card h-100">
+                <div class="card-body text-center">
+                  <div class="badge rounded p-2 bg-label-{{ $colors[$index] }} mb-2">
+                    @if(!empty($step['icon']))
+                      <i class="ti {{ $step['icon'] }} ti-lg"></i>
+                    @else
+                      <span class="step-number">{{ $index + 1 }}</span>
+                    @endif
+                  </div>
+                  <h5 class="card-title mb-1">{{ $step['title'] }}</h5>
+                  <p class="mb-0">{{ $step['description'] }}</p>
+                </div>
+              </div>
+            </div>
+          @endforeach
+        </div>
+      </div>
+    </section>
+  @endif
+  <!--/ How It Works Section -->
+
   <!-- Footer: Start -->
-  {{-- <footer class="landing-footer bg-body footer-text">
+  <footer class="landing-footer bg-body footer-text">
     <div class="footer-top position-relative overflow-hidden z-1">
       <img src="/vuexy/assets/img/front-pages/backgrounds/footer-bg-light.png" alt="footer bg"
         class="footer-bg banner-bg-img z-n1" data-app-light-img="front-pages/backgrounds/footer-bg-light.png"
@@ -417,170 +505,8 @@
         </div>
       </div>
     </div>
-  </footer> --}}
+  </footer>
   <!-- Footer: End -->
-
-  <!-- Navbar -->
-  {{-- <nav class="navbar navbar-expand-lg landing-navbar sticky-top py-3">
-    <div class="container">
-      <a class="navbar-brand d-flex align-items-center" href="{{ url('/') }}">
-        @if($organization->img_url)
-        <img src="{{ $organization->imageUrl }}" alt="{{ $isRtl ? $organization->name_ar : $organization->name_en }}"
-          class="rounded me-2" style="height: 40px; width: auto;">
-        @endif
-        <span>{{ $isRtl ? $organization->name_ar : $organization->name_en }}</span>
-      </a>
-
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto align-items-center">
-          <!-- Language Toggle -->
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-              <i class="ti ti-language me-1"></i>
-              {{ $isRtl ? 'العربية' : 'English' }}
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end">
-              <li>
-                <a class="dropdown-item" href="/lang/{{ $isRtl ? 'en' : 'ar' }}">
-                  {{ $isRtl ? 'English' : 'العربية' }}
-                </a>
-              </li>
-            </ul>
-          </li>
-
-          @auth
-          <li class="nav-item">
-            <a class="btn btn-primary ms-3" href="{{ url('/dashboard') }}">
-              <i class="ti ti-dashboard me-1"></i>
-              {{ $isRtl ? 'لوحة التحكم' : 'Dashboard' }}
-            </a>
-          </li>
-          @else
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url('/login') }}">
-              {{ $isRtl ? 'تسجيل الدخول' : 'Login' }}
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="btn btn-primary ms-2" href="{{ url('/register') }}">
-              {{ $isRtl ? 'إنشاء حساب' : 'Register' }}
-            </a>
-          </li>
-          @endauth
-        </ul>
-      </div>
-    </div>
-  </nav> --}}
-
-  {{--
-  <!-- Hero Section -->
-  <section class="hero-section">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-10 {{ $isRtl ? 'text-end' : '' }}">
-          <!-- Logo and Organization Name Row -->
-          <div class="hero-header d-flex align-items-center mb-4 {{ $isRtl ? 'flex-row-reverse' : '' }}">
-            @if($organization->img_url)
-            <img src="{{ $organization->imageUrl }}"
-              alt="{{ $isRtl ? $organization->name_ar : $organization->name_en }}"
-              class="hero-logo {{ $isRtl ? 'ms-3' : 'me-3' }}">
-            @endif
-            <div>
-              <h1 class="hero-title mb-1">{{ $isRtl ? $organization->name_ar : $organization->name_en }}</h1>
-              @if(($organization->city && ($organization->city->name_en || $organization->city->name_ar)) ||
-              ($organization->country && ($organization->country->name_en || $organization->country->name_ar)))
-              <div class="hero-location">
-                <i class="ti ti-map-pin {{ $isRtl ? 'ms-1' : 'me-1' }}"></i>
-                @if($organization->city)
-                {{ $isRtl ? $organization->city->name_ar : $organization->city->name_en }}@if($organization->country),
-                @endif
-                @endif
-                @if($organization->country)
-                {{ $isRtl ? $organization->country->name_ar : $organization->country->name_en }}
-                @endif
-              </div>
-              @endif
-            </div>
-          </div>
-
-          <!-- Main Headline/Tagline -->
-          <h1 class="hero-org-name mb-3">
-            <span>
-              @if($organization->organizationType)
-              {{ $organization->organizationType->localizedName }}
-              @else
-              {{ $isRtl ? $organization->name_ar : $organization->name_en }}
-              @endif
-            </span>
-          </h1>
-
-          <!-- Description -->
-          @if($organization->bio)
-          <p class="hero-description">{{ $organization->bio }}</p>
-          @endif
-
-          <!-- Industry Tags with Icons -->
-          @if($organization->industries && $organization->industries->count() > 0)
-          <div class="hero-industries mt-4">
-            @foreach($organization->industries as $industry)
-            <span class="industry-tag">
-              <i class="ti {{ getIndustryIcon($industry->name_en) }} {{ $isRtl ? 'ms-2' : 'me-2' }}"></i>{{ $isRtl ?
-              $industry->name_ar : $industry->name_en }}
-            </span>
-            @endforeach
-          </div>
-          @endif
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- How It Works Section -->
-  @if($landingPage->how_it_works_enabled && !empty($landingPage->process_steps))
-  <section class="landing-section section-how-it-works">
-    <div class="container">
-      <div class="text-center mb-5">
-        @if($landingPage->how_it_works_subtitle)
-        <div class="section-bill-subtitle">
-          <span> {{ $landingPage->how_it_works_subtitle }} </span>
-        </div>
-        @endif
-        <h2 class="section-title">
-          {{ $landingPage->how_it_works_title ?: ($isRtl ? 'كيف تعمل' : 'How It Works') }}
-        </h2>
-        @if($landingPage->how_it_works_description)
-        <p class="section-subtitle">{{ $landingPage->how_it_works_description }}</p>
-        @endif
-      </div>
-
-      <div class="row g-4">
-        @foreach($landingPage->process_steps as $index => $step)
-        @if(!empty($step['title']))
-        <div class="col-md-6 col-lg-3">
-          <div class="step-card">
-            @if(!empty($step['icon']))
-            <div class="step-icon">
-              <i class="ti {{ $step['icon'] }}"></i>
-            </div>
-            @else
-            <div class="step-number">{{ $index + 1 }}</div>
-            @endif
-            <h5 class="fw-bold mb-2">{{ $step['title'] }}</h5>
-            @if(!empty($step['description']))
-            <p class="text-muted mb-0">{{ $step['description'] }}</p>
-            @endif
-          </div>
-        </div>
-        @endif
-        @endforeach
-      </div>
-    </div>
-  </section>
-  @endif
 
   <!-- Achievements Section -->
   @if($landingPage->achievements_enabled && !empty($landingPage->metrics))
