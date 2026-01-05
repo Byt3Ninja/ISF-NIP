@@ -46,7 +46,7 @@ class OrganizationCreatedNotification extends Notification implements ShouldQueu
      */
     public function via(object $notifiable): array
     {
-        $org = $notifiable->organization;
+        $org = $this->organization;
         $smtpSettings = $org?->organizationSettings;
         
         // Configure SMTP if settings exist
@@ -62,21 +62,21 @@ class OrganizationCreatedNotification extends Notification implements ShouldQueu
         // WhatsApp if enabled globally AND organization/user accepts it
         if (GlobalNotificationSettingsService::isWhatsAppEnabled() 
             && $orgAcceptWhatsapp 
-            && $notifiable->accept_whatsapp) {
+            && $this->user->accept_whatsapp) {
             $channels[] = WhatsAppChannel::class;
         }
 
         // Pusher (broadcast) if enabled globally AND organization/user accepts it
         if (GlobalNotificationSettingsService::isPusherEnabled() 
             && $orgAcceptPusher 
-            && $notifiable->accept_pusher) {
+            && $this->user->accept_pusher) {
             $channels[] = 'broadcast';
         }
 
         // Email if enabled globally AND organization/user accepts it
         if (GlobalNotificationSettingsService::isEmailEnabled() 
             && $orgAcceptEmail 
-            && $notifiable->accept_email) {
+            && $this->user->accept_email) {
             $channels[] = 'mail';
         }
 
@@ -93,7 +93,7 @@ class OrganizationCreatedNotification extends Notification implements ShouldQueu
      */
     public function toMail($notifiable)
     {
-        $org = $notifiable->organization;
+        $org = $this->organization;
         $smtpSettings = $org?->organizationSettings;
         
         // Get from address and name
