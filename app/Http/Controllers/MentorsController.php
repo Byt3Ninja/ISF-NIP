@@ -482,8 +482,8 @@ class MentorsController extends Controller
 			// dd($request->all());
 			
 				$this->meetingService = OnlineMeetingFactory::create();
-				$datefrom = $request->date . ' ' . $request->timeFrom;
-				$dateto = $request->date . ' ' . $request->timeTo;
+				$datefrom = $request->date . ' ' . $request->session_start_time;
+				$dateto = $request->date . ' ' . $request->session_end_time;
 				if ($request->period == '') {
 					$period = Carbon::parse($datefrom)->diffInMinutes(Carbon::parse($dateto));
 				} else {
