@@ -353,7 +353,7 @@ return [
 	'Judgers' => 'Judges',
 	'Managers' => 'Managers',
 	'New messages' => 'New messages',
-	'Contact us' => 'Contact us',
+	'Contact us' => 'Contact Us',
 	'Mentorship requests' => 'Mentorship Sessions',
 	'Mentorship Sessions Duration' => 'Mentorship Sessions Duration',
 	'No_Mentorship_Sessions_Startup' => 'No mentorship sessions available for this startup.',
@@ -3112,4 +3112,5 @@ return [
 	'explore_programs' => 'Explore Programs',
 	'follow_us' => 'Follow Us',
 	'login_or_register' => 'Login / Register',
+	'quick_links' => 'Quick Links',
 ];

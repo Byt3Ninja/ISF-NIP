@@ -3168,4 +3168,5 @@ return [
 	'explore_programs' => 'استكشف البرامج',
 	'follow_us' => 'تابعنا',
 	'login_or_register' => 'تسجيل الدخول',
+	'quick_links' => 'روابط سريعة',
 ];
