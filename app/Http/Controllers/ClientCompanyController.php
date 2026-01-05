@@ -681,7 +681,7 @@ class ClientCompanyController extends Controller
                         ? Carbon::parse($data['valuation_date'])->year
                         : (int) date('Y'); // add here year from Validation Date
             $financialprojection = FinancialProjection::where('company_id', $id)
-                                                        ->whereBetween('year', [$year - 1, $year + 2])
+                                                        // ->whereBetween('year', [$year - 1, $year + 2])
                                                         ->orderBy('year')
                                                         ->get();
             // dd($financialprojection);
