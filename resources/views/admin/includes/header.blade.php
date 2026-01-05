@@ -280,7 +280,7 @@
 
     // Organizations (Admin)
     [
-        'label' => $l == 'en' ? 'Manage Organizations' : 'إدارة المنظمات',
+        'label' => __('admin.Organizations'),
         'icon' => 'ti ti-layout-board',
         'route' => 'organizations.index',
         'permission' => 'organizations.index',

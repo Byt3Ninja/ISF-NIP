@@ -2,7 +2,7 @@
 
 @section('vendorstyle')
 <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
 <style>
 /* Center Summernote modals */
 .note-modal .modal-dialog {
@@ -58,11 +58,6 @@ $pills = [
     @endif
     <!--/ Alerts -->
 
-    {{-- <div class="d-flex flex-column mb-4">
-      <h4 class="mb-1">{{ __('admin.screening_step_details') }}</h4>
-      <p class="mb-0">{{ __('admin.screening_details_description') }}</p>
-    </div> --}}
-
     @if ($cstep)
        <!-- Screening Step Details Card -->
       <div class="card mb-6">
@@ -78,7 +73,7 @@ $pills = [
               </a>
               <h5 class="card-title fw-semibold mb-0">{{ $cstep->title }}</h5>
             </div>
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex flex-wrap align-items-md-center gap-3">
               <a class="btn btn-outline-primary" href="/dashboard/final/results/{{ $id }}">
                 <i class="ti ti-file-text me-2"></i> {{ __('admin.view_results') }}
               </a>
@@ -286,7 +281,7 @@ $pills = [
 
       <!-- Navigation Pills -->
       <nav class="nav-align-top mb-6">
-        <ul class="nav nav-pills" role="tablist">
+        <ul class="nav nav-pills flex-column flex-md-row gap-2 gap-md-0" role="tablist">
           @foreach($pills as $key => $pill)
             <li class="nav-item">
               <a
@@ -320,7 +315,6 @@ $pills = [
           <div class="d-flex flex-column">
             <h5 class="mb-1">{{ __('admin.screening_guidelines') }}</h5>
             <p class="mb-6 text-muted">{{ __('admin.screening_guidelines_description') }}</p>
-            <div id="model-validation-summary" style="display: none;"></div>
             <form id="screening-guidelines-form" action="{{ route('screening.evaluation_save_draft') }}" method="POST" enctype="multipart/form-data">
               {!! csrf_field() !!}
               <input type="hidden" name="action" value="draft">
@@ -441,7 +435,9 @@ $pills = [
 @if(app()->getLocale() == 'ar')
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/lang/summernote-ar-AR.min.js"></script>
 @endif
-<script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script>
+<script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
+<script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
+<script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
 @stop
 
 @section('pagescripts')
@@ -599,65 +595,27 @@ $pills = [
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
           },
           success: function(response) {
-            if (response.status) {
-              showAlert($('#model-validation-summary')[0], 'Screening guidelines saved successfully', 'success', 3000);
+           if (response.status) {
+              releaseSuccessAlert({
+                title: '{{ __('admin.success') }}',
+                message: response.message ? response.message : 'Screening guidelines saved successfully',
+              });
             } else {
-              showAlert($('#model-validation-summary')[0], response.message, 'danger');
+              releaseFailureAlert({
+                title: '{{ __('admin.Error') }}',
+                message: response.message ? response.message : '{{ __('admin.unexpected_error') }}',
+              });
             }
           },
           error: function(xhr) {
-            const errorMessage = xhr.responseJSON?.message || 'An error occurred while saving screening guidelines';
-            showAlert($('#model-validation-summary')[0], errorMessage, 'danger');
+            const errorMessage = xhr.responseJSON?.message || '{{ __('admin.unexpected_error') }}';
+            releaseFailureAlert({
+              title: '{{ __('admin.Error') }}',
+              message: errorMessage,
+            });
           }
         });
       });
-
-      // Helper function to show dismissible alerts
-      function showAlert(element, message, type = 'info', timeout = null) {
-        const alertTypes = {
-          'success': 'alert-success',
-          'danger': 'alert-danger',
-          'warning': 'alert-warning',
-          'info': 'alert-info'
-        };
-
-        const alertClass = alertTypes[type] || 'alert-info';
-
-        element.innerHTML = `
-          ${message}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
-        element.className = `alert ${alertClass} alert-dismissible`;
-        element.style.display = 'block';
-
-        // Initialize Bootstrap alert dismiss functionality
-        const dismissButton = element.querySelector('.btn-close');
-        if (dismissButton) {
-          dismissButton.addEventListener('click', function() {
-            element.style.display = 'none';
-            element.classList.remove('alert-success', 'alert-danger', 'alert-warning', 'alert-info');
-          });
-        }
-
-        // Auto-dismiss after timeout if specified
-        if (timeout) {
-          setTimeout(() => {
-            if (element.classList.contains(alertClass)) {
-              element.style.display = 'none';
-              element.classList.remove('alert-success', 'alert-danger', 'alert-warning', 'alert-info');
-            }
-          }, timeout);
-        }
-      }
     });
-
-    setTimeout(() => {
-      const alerts = document.querySelectorAll('.alert-dismissible');
-      alerts.forEach(alert => {
-        alert.style.transition = 'opacity 0.5s ease';
-        alert.style.opacity = '0';
-        setTimeout(() => alert.remove(), 500);
-      });
-    }, 20000);
   </script>
 @stop
