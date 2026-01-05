@@ -3164,4 +3164,8 @@ return [
 	'weight_min_max' => 'الوزن يجب ان يكون بين 0 و 100',
 	'weight_must_be_number' => 'الوزن يجب ان يكون رقم',
 	'confirm_publication' => 'تأكيد النشر',
+	'org_landing_heading' => 'تعجيل الشركات الناشئة',
+	'explore_programs' => 'استكشف البرامج',
+	'follow_us' => 'تابعنا',
+	'login_or_register' => 'تسجيل الدخول',
 ];

@@ -3108,4 +3108,8 @@ return [
 	'weight_required' => 'Weight is required',
 	'weight_min_max' => 'Weight must be between 0 and 100',
 	'confirm_publication' => 'Confirm Publication',
+	'org_landing_heading' => 'Accelerating transformative startups',
+	'explore_programs' => 'Explore Programs',
+	'follow_us' => 'Follow Us',
+	'login_or_register' => 'Login / Register',
 ];
