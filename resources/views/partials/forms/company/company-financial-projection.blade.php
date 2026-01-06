@@ -236,6 +236,12 @@ document.addEventListener('DOMContentLoaded', function () {
 			if (selectedDates.length) {
 				const valDate = moment(selectedDates[0]);
 				const valDateStr = valDate.format("YYYY-MM");
+
+				// Redirect with valuation_date param
+				const url = new URL(window.location.href);
+				url.searchParams.set('valuation_date', valDateStr);
+				window.location.href = url.href;
+
 				updateHeaders();
 				currentValuationDate = valDateStr;
 				valudationDateHidden.value = valDateStr;
