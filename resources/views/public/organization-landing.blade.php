@@ -255,7 +255,7 @@
                     alt="{{ $organization->name_en }}" 
                     width="50" 
                     height="50" 
-                    class="rounded-circle object-fit-contain"
+                    class="object-fit-contain rounded"
                   />
                 @endif
               </div>
@@ -794,8 +794,7 @@
   <footer class="landing-footer bg-body footer-text">
     <div class="footer-top position-relative overflow-hidden z-1">
       <img src="/vuexy/assets/img/front-pages/backgrounds/footer-bg-light.png" alt="footer bg"
-        class="footer-bg banner-bg-img z-n1" data-app-light-img="front-pages/backgrounds/footer-bg-light.png"
-        data-app-dark-img="front-pages/backgrounds/footer-bg-dark.png" />
+        class="footer-bg banner-bg-img z-n1" />
       <div class="container">
         <div class="row gx-0 gy-6 g-lg-10">
           <div class="col-lg-5">
