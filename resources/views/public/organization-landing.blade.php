@@ -584,11 +584,11 @@
           <div class="landing-reviews-btns">
             <button
               id="reviews-previous-btn"
-              class="btn btn-label-primary reviews-btn me-4 scaleX-n1-rtl"
+              class="btn btn-label-primary reviews-btn reviews-previous-btn me-4 scaleX-n1-rtl"
               type="button">
               <i class="ti ti-chevron-left ti-md"></i>
             </button>
-            <button id="reviews-next-btn" class="btn btn-label-primary reviews-btn scaleX-n1-rtl" type="button">
+            <button id="reviews-next-btn" class="btn btn-label-primary reviews-btn reviews-next-btn scaleX-n1-rtl" type="button">
               <i class="ti ti-chevron-right ti-md"></i>
             </button>
           </div>
@@ -620,8 +620,6 @@
                   </div>
                 @endforeach
               </div>
-              <div class="swiper-button-next"></div>
-              <div class="swiper-button-prev"></div>
             </div>
           </div>
         </div>
@@ -898,11 +896,7 @@
       const nav = document.querySelector('.layout-navbar'),
         animationImg = document.querySelectorAll('.hero-dashboard-img'),
         swiperLogos = document.getElementById('swiper-partners-logos'),
-        swiperPartners = document.getElementById('swiper-partners'),
-        PartnersPrevButton = document.getElementById('reviews-previous-btn'),
-        PartnersNextBtn = document.getElementById('reviews-next-btn'),
-        PartnersSliderPrev = document.querySelector('.swiper-button-prev'),
-        PartnersSliderNext = document.querySelector('.swiper-button-next');
+        swiperPartners = document.getElementById('swiper-partners');
 
       // swiper carousel
       // Customers reviews
@@ -919,8 +913,8 @@
           loop: true,
           loopAdditionalSlides: 1,
           navigation: {
-            nextEl: '.swiper-button-next',
-            prevEl: '.swiper-button-prev'
+            nextEl: '.reviews-next-btn',
+            prevEl: '.reviews-previous-btn'
           },
           breakpoints: {
             1200: {
@@ -933,21 +927,7 @@
         });
       }
 
-      // Reviews slider next and previous
-      // -----------------------------------
-      // Add click event listener to next button
-      if (PartnersNextBtn) {
-        PartnersNextBtn.addEventListener('click', function () {
-          PartnersSliderNext.click();
-        });
-      }
 
-      // Add click event listener to previous button
-      if (PartnersPrevButton) {
-        PartnersPrevButton.addEventListener('click', function () {
-          PartnersSliderPrev.click();
-        });
-      }
 
       // Review client logo
       // -----------------------------------
