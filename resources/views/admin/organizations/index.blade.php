@@ -118,10 +118,10 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                           </span>
                         @endif
                       </div>
-                      <h5 class="card-title line-clamp-2 mb-0">{{ $org->{'name_' . $l} }}</h5>
+                      <h5 class="card-title line-clamp-2 mb-0 w-px-200">{{ $org->{'name_' . $l} }}</h5>
                     </div>
 
-                    <div class="d-flex align-items-center">
+                    <div class="d-flex align-items-center ms-2">
                       <!-- Status Badge -->
                       @if($org->is_draft)
                         <span class="badge bg-label-warning rounded-pill">
