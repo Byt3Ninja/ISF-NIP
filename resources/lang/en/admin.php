@@ -3114,4 +3114,11 @@ return [
 	'login_or_register' => 'Login / Register',
 	'quick_links' => 'Quick Links',
 	'read_more' => 'Read More',
+	'get_in_touch' => 'Get In Touch',
+	'org_landing_contact_description' => 'Any question or remark? just write us a message',
+	'send_a_message' => 'Send a Message',
+	'send_message_description1' => 'If you would like to discuss anything related to payment, account, licensing,',
+	'send_message_description2' => 'partnerships, or have pre-sales questions, you’re at the right place.',
+	'full_name' => 'Full Name',
+	'send_inquiry' => 'Send Inquiry',
 ];

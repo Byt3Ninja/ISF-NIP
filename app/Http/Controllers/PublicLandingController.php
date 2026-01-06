@@ -23,6 +23,11 @@ class PublicLandingController extends Controller
      */
     public function show(Request $request, $slug)
     {
+        // Handle language query parameter
+        if ($request->query('lang')) {
+            return redirect(url()->current());
+        }
+
         // Find organization by slug
         $organization = Organization::where('slug', $slug)
             ->with(['landingPage', 'organizationType', 'industries', 'city', 'country'])
@@ -106,5 +111,43 @@ class PublicLandingController extends Controller
             'isPreview' => $isPreview,
             'theme' => $theme,
         ]);
+    }
+
+    /**
+     * Handle contact form submission for an organization.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $slug
+     * @return \Illuminate\Http\Response
+     */
+    public function submitContact(Request $request, $slug)
+    {
+        // Find organization by slug
+        $organization = Organization::where('slug', $slug)->first();
+
+        // Return 404 if organization doesn't exist
+        if (!$organization) {
+            abort(404);
+        }
+
+        // Validate the form data
+        $validated = $request->validate([
+            'fullname' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'message' => 'required|string|max:2000',
+        ]);
+
+        // Here you can save to database or send email
+        // For now, let's send an email to the organization's contact email
+        try {
+            \Mail::raw("New contact message from {$validated['fullname']} ({$validated['email']}):\n\n{$validated['message']}", function ($message) use ($organization, $validated) {
+                $message->to($organization->contact_email ?? 'admin@example.com')
+                        ->subject("Contact Form Submission from {$organization->name_en} Landing Page");
+            });
+
+            return back()->with('success', 'Your message has been sent successfully!');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to send message. Please try again later.');
+        }
     }
 }

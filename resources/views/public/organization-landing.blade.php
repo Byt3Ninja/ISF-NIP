@@ -54,6 +54,12 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/core.css" class="template-customizer-core-css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/theme-default.css" class="template-customizer-theme-css" />
 
+  <style>
+    html {
+      direction: {{ $l == 'ar' ? 'rtl' : 'ltr' }};
+    }
+  </style>
+
   <link rel="stylesheet" href="/vuexy/assets/css/demo.css" />
 
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/front-page.css" />
@@ -92,7 +98,6 @@
 <body>
   <script src="/vuexy/assets/vendor/js/dropdown-hover.js"></script>
   <script src="/vuexy/assets/vendor/js/mega-dropdown.js"></script>
-
   <!-- Preview Banner -->
   {{-- @if($isPreview)
   <div class="bg-primary bg-gradient text-white px-3 py-2 text-center">
@@ -117,7 +122,7 @@
             <!-- Brand -->
             <a href="javascript:void(0);" class="app-brand-link d-flex align-items-center">
               @if($organization->img_url)
-                <img src="{{ $organization->imageUrl }}" alt="Logo" width="32" height="32" class="me-2 object-fit-contain" />
+                <img src="{{ $organization->imageUrl }}" alt="Logo" width="32" height="32" class="me-2 object-fit-contain rounded" />
               @endif
               <span class="app-brand-text text-dark fw-bold">{{ Str::limit($isRtl ? $organization->name_ar : $organization->name_en, 10) }}</span>
             </a>
@@ -162,13 +167,13 @@
               <ul class="dropdown-menu dropdown-menu-end">
                 <li class="dropdown dropdown-language nav-item">
                   @if ($l == 'ar')
-                    <a class="dropdown-item" href="/lang/en" 
+                    <a class="dropdown-item" href="{{ url()->current() }}?lang=en"
                     data-language="en" data-text-direction="ltr">
                       <i class="flag-icon flag-icon-us me-2"></i>
                       <span class="selected-language">English</span>
                     </a>
                   @else
-                    <a class="dropdown-item" href="/lang/ar" 
+                    <a class="dropdown-item" href="{{ url()->current() }}?lang=ar"
                     data-language="ar" data-text-direction="rtl">
                       <i class="flag-icon flag-icon-sa me-2"></i>
                       <span class="selected-language">عربي</span>
@@ -226,7 +231,7 @@
 
     <!-- ============ HERO (FLEX-FILL) ============ -->
     <div id="hero-animation" class="flex-fill d-flex section-py landing-hero position-relative">
-      <div class="container">
+      <div class="container" style="{{$isRtl ? 'padding: 0 9rem;' : '' }}">
         <div class="row px-4 px-lg-0">
           <div class="col-lg-8 offset-lg-1">
 
@@ -296,7 +301,7 @@
               @endphp
 
               @if(array_filter($socialLinks))
-                <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 ms-lg-auto">
+                <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 m{{ $isRtl ? 'e' : 's' }}-lg-auto">
                   <span class="text-dark me-2 d-block">{{ __('admin.follow_us') }}</span>
                   <div class="d-flex align-items-center gap-2">
                     @foreach ($socialLinks as $icon => $link)
@@ -318,10 +323,10 @@
 
   <!-- Navigation Pills -->
   <div class="px-6">
-    <div class="card shadow-none border my-8 rounded-pill">
-      <div class="card-body py-4 px-12 pb-2">
+    <div class="card shadow-none border-0 my-8 rounded-pill">
+      <div class="card-body">
         <div class="nav-align-top">
-          <ul class="nav nav-tabs flex-nowrap pb-4 border-0" style="max-width: 100%; overflow-x: auto;" role="tablist">
+          <ul class="nav nav-pills justify-content-center flex-nowrap pb-4 border-0" style="max-width: 100%; overflow-x: auto;" role="tablist">
             @foreach ($sections as $tab)
               <li class="nav-item" role="presentation">
                 <a
@@ -333,7 +338,7 @@
                   aria-controls="tab-{{ $tab['id'] }}"
                   aria-selected="{{ $loop->first ? 'true' : 'false' }}"
                 >
-                  <i class="ti ti-{{ $tab['icon'] }} me-1"></i>
+                  {{-- <i class="ti ti-{{ $tab['icon'] }} me-1"></i> --}}
                   {{ $tab['label'] }}
                 </a>
               </li>
@@ -356,7 +361,13 @@
         @endif
         @if($landingPage->how_it_works_title)
           <h4 class="text-center mb-1">
-            {{ $landingPage->how_it_works_title ?: ($isRtl ? 'كيف تعمل' : 'How It Works') }}
+            <span class="position-relative fw-extrabold z-1">
+              {{ $landingPage->how_it_works_title ?: ($isRtl ? 'كيف تعمل' : 'How It Works') }}
+              <img
+                src="/vuexy/assets/img/front-pages/icons/section-title-icon.png"
+                alt="laptop charging"
+                class="section-title-img position-absolute object-fit-contain bottom-0 z-n1" />
+            </span>
           </h4>
         @endif
         @if($landingPage->how_it_works_description)
@@ -404,7 +415,13 @@
       @endif
       @if($landingPage->achievements_title)
         <h4 class="text-center mb-1">
-          {{ $landingPage->achievements_title ?: ($isRtl ? 'الإنجازات والأثر' : 'Achievements & Impact') }}
+          <span class="position-relative fw-extrabold z-1">
+            {{ $landingPage->achievements_title ?: ($isRtl ? 'الإنجازات والأثر' : 'Achievements & Impact') }}
+            <img
+              src="/vuexy/assets/img/front-pages/icons/section-title-icon.png"
+              alt="laptop charging"
+              class="section-title-img position-absolute object-fit-contain bottom-0 z-n1" />
+          </span>
         </h4>
       @endif
       @if($landingPage->achievements_description)
@@ -448,7 +465,13 @@
         </div>
       @endif
       <h4 class="text-center mb-1">
-        {{ $landingPage->media_title ?: ($isRtl ? 'الإعلام والتقدير' : 'Media & Recognition') }}
+        <span class="position-relative fw-extrabold z-1">
+          {{ $landingPage->media_title ?: ($isRtl ? 'الإعلام والتقدير' : 'Media & Recognition') }}
+          <img
+            src="/vuexy/assets/img/front-pages/icons/section-title-icon.png"
+            alt="laptop charging"
+            class="section-title-img position-absolute object-fit-contain bottom-0 z-n1" />
+        </span>
       </h4>
       @if($landingPage->media_description)
         <p class="text-center mb-12">{{ $landingPage->media_description }}</p>
@@ -530,7 +553,13 @@
           @endif
           @if($landingPage->partners_title)
             <h4 class="text-center mb-1">
-              {{ $landingPage->partners_title ?: ($isRtl ? 'شركاؤنا' : 'Our Partners') }}
+              <span class="position-relative fw-extrabold z-1">
+                {{ $landingPage->partners_title ?: ($isRtl ? 'شركاؤنا' : 'Our Partners') }}
+                <img
+                  src="/vuexy/assets/img/front-pages/icons/section-title-icon.png"
+                  alt="laptop charging"
+                  class="section-title-img position-absolute object-fit-contain bottom-0 z-n1" />
+              </span>
             </h4>
           @endif
           @if($landingPage->partners_description)
@@ -611,22 +640,140 @@
   </section>
   @endif
 
-  {{-- 
   <!-- Custom Sections -->
   @if(!empty($customSections))
-  @foreach($customSections as $customSection)
-  <section class="landing-section section-custom" style="{{ $customSection->getBackgroundStyle() }}">
-    <div class="container">
-      <div class="custom-section-content">
-        <h2 class="section-title text-center mb-4">{{ $customSection->title }}</h2>
-        <div class="custom-section-body">
-          {!! $customSection->content !!}
-        </div>
+  @foreach($customSections as $index => $customSection)
+  <section id="custom-{{ $customSection->id }}" class="section-py bg-{{ $index % 2 == 0 ? 'card' : 'body' }} ">
+    <div class="container d-flex flex-column align-items-center">
+      <div class="mb-12">
+        <span class="badge bg-label-primary">{{ $customSection->title }}</span>
+      </div>
+      <div class="w-50 d-flex justify-content-center">
+        <p>{!! $customSection->content !!}</p>
       </div>
     </div>
   </section>
   @endforeach
-  @endif --}}
+  @endif
+
+  <!-- Contact Us: Start -->
+  <section id="landingContact" class="section-py bg-body landing-contact">
+    <div class="container">
+      <div class="text-center mb-4">
+        <span class="badge bg-label-primary">{{ __('admin.Contact us') }}</span>
+      </div>
+      <h4 class="text-center mb-1">
+        <span class="position-relative fw-extrabold z-1"
+          >{{ __('admin.get_in_touch') }}
+          <img
+            src="/vuexy/assets/img/front-pages/icons/section-title-icon.png"
+            alt="laptop charging"
+            class="section-title-img position-absolute object-fit-contain bottom-0 z-n1" />
+        </span>
+      </h4>
+      <p class="text-center mb-12 pb-md-4">{{ __('admin.org_landing_contact_description') }}</p>
+      <div class="row g-6">
+        <div class="col-lg-5">
+          <div class="contact-img-box position-relative border p-2 h-100">
+            <img
+              src="/vuexy/assets/img/front-pages/icons/contact-border.png"
+              alt="contact border"
+              class="contact-border-img position-absolute d-none d-lg-block scaleX-n1-rtl" />
+            <img
+              src="/vuexy/assets/img/front-pages/landing-page/contact-customer-service.png"
+              alt="contact customer service"
+              class="contact-img w-100 scaleX-n1-rtl" />
+            <div class="p-4 pb-2">
+              <div class="row g-4">
+                <div class="col-md-6 col-lg-12 col-xl-6">
+                  <div class="d-flex align-items-center">
+                    <div class="badge bg-label-primary rounded p-1_5 me-3"><i class="ti ti-mail ti-lg"></i></div>
+                    <div>
+                      <p class="mb-0">{{ __('admin.Email') }}</p>
+                      <h6 class="mb-0">
+                        <a href="mailto:{{ $organization->contact_email }}" class="text-heading">{{ $organization->contact_email }}</a>
+                      </h6>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6 col-lg-12 col-xl-6">
+                  <div class="d-flex align-items-center">
+                    <div class="badge bg-label-success rounded p-1_5 me-3">
+                      <i class="ti ti-phone-call ti-lg"></i>
+                    </div>
+                    <div>
+                      <p class="mb-0">{{ __('admin.Phone') }}</p>
+                      <h6 class="mb-0"><a href="tel:{{ $organization->country_code }}{{ $organization->contact_phone }}" class="text-heading">{{ $organization->country_code }} {{ $organization->contact_phone }}</a></h6>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6 col-lg-12 col-xl-6">
+                  <div class="d-flex align-items-center">
+                    <div class="badge bg-label-warning rounded p-1_5 me-3"><i class="ti ti-map-pin ti-lg"></i></div>
+                    <div>
+                      <p class="mb-0">{{ __('admin.Address') }}</p>
+                      <h6 class="mb-0">{{ $organization->address }}</h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="card h-100">
+            <div class="card-body">
+              <h4 class="mb-2">{{ __('admin.send_a_message') }}</h4>
+              <p class="mb-6">
+                {{ __('admin.send_message_description1') }}<br
+                  class="d-none d-lg-block" />
+                {{ __('admin.send_message_description2') }}
+              </p>
+              @if(session('success'))
+                <div class="alert alert-success">{{ session('success') }}</div>
+              @endif
+              @if(session('error'))
+                <div class="alert alert-danger">{{ session('error') }}</div>
+              @endif
+              <form method="POST" action="{{ route('organization.contact.submit', $organization->slug) }}">
+                @csrf
+                <div class="row g-4">
+                  <div class="col-md-6">
+                    <label class="form-label" for="contact-form-fullname">{{ __('admin.full_name') }}</label>
+                    <input type="text" class="form-control" id="contact-form-fullname" name="fullname" placeholder="john" required />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label" for="contact-form-email">{{ __('admin.Email') }}</label>
+                    <input
+                      type="email"
+                      id="contact-form-email"
+                      class="form-control"
+                      name="email"
+                      placeholder="johndoe@gmail.com"
+                      required />
+                  </div>
+                  <div class="col-12 mb-4">
+                    <label class="form-label" for="contact-form-message">{{ __('admin.message') }}</label>
+                    <textarea
+                      id="contact-form-message"
+                      class="form-control"
+                      name="message"
+                      rows="9"
+                      placeholder="{{ __('messages.Write your message') }}"
+                      required></textarea>
+                  </div>
+                  <div class="col-12">
+                    <button type="submit" class="btn btn-primary">{{ __('admin.send_inquiry') }}</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Contact Us: End -->
 
   <!-- Footer: Start -->
   <footer class="landing-footer bg-body footer-text">
@@ -638,7 +785,8 @@
         <div class="row gx-0 gy-6 g-lg-10">
           <div class="col-lg-5">
             <a href="javascript:void(0);" class="app-brand-link d-flex align-items-center mb-6">
-              <img src="{{ $organization->image_url }}" alt="Logo" width="32" height="32" class="me-2 object-fit-contain">
+
+              <img src="{{ $organization->image_url }}" alt="Logo" width="32" height="32" class="me-2 object-fit-contain rounded">
               <span class="app-brand-text footer-text fw-bold ms-2 ps-1">
                 {{ $isRtl ? $organization->name_ar : $organization->name_en }}
               </span>
