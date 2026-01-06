@@ -35,33 +35,59 @@ class organizationsController extends Controller
 	{
 		$user = auth()->user();
 		$orgIds = $user->organizations_ids;
-		$organizations = Organization::with(['user', 'cycles']);
+		$organizationsQuery = Organization::with(['user', 'assignedUsers', 'cycles']);
 
 		// Filter by user's accessible organizations (unless admin)
 		if (!empty($orgIds) && !$user->hasRole('admin')) {
-			$organizations = $organizations->whereIn('id', $orgIds);
+			$organizationsQuery = $organizationsQuery->whereIn('id', $orgIds);
 		}
 
+		// Calculate stats from unfiltered organizations
+		$statsOrganizations = $organizationsQuery->get();
+		$stats = [
+			['label' => __('admin.Total'), 'value' => $statsOrganizations->count(), 'icon' => 'building'],
+			['label' => __('admin.Active'), 'value' => $statsOrganizations->where('status', 1)->count(), 'icon' => 'activity'],
+			['label' => __('admin.Inactive'), 'value' => $statsOrganizations->where('status', 0)->count(), 'icon' => 'ban'],
+			['label' => __('admin.Draft'), 'value' => $statsOrganizations->where('is_draft', true)->count(), 'icon' => 'file-text'],
+		];
+
+		// Now apply filters for display
 		if($request->status !== null && $request->status !== 'all') {
-			$organizations = $organizations->where('status', $request->status);
+			$organizationsQuery = $organizationsQuery->where('status', $request->status);
 		}
 
 		if($request->visibility !== null && $request->visibility !== 'all') {
 			if( $request->visibility == 'draft' ) {
-				$organizations = $organizations->where('is_draft', true);
+				$organizationsQuery = $organizationsQuery->where('is_draft', true);
 			}
 			else if( $request->visibility == 'published' ) {
-				$organizations = $organizations->where('is_draft', false);
+				$organizationsQuery = $organizationsQuery->where('is_draft', false);
 			}
 		}
 
-		$organizations = $organizations->get();
+		// Search functionality
+		if($request->search) {
+			$search = $request->search;
+			$organizationsQuery = $organizationsQuery->where(function($query) use ($search) {
+				$query->where('name_en', 'LIKE', '%' . $search . '%')
+					  ->orWhere('name_ar', 'LIKE', '%' . $search . '%')
+					  ->orWhereHas('user', function($q) use ($search) {
+						  $q->where('first_name_en', 'LIKE', '%' . $search . '%')
+							->orWhere('last_name_en', 'LIKE', '%' . $search . '%')
+							->orWhere('first_name_ar', 'LIKE', '%' . $search . '%')
+							->orWhere('last_name_ar', 'LIKE', '%' . $search . '%')
+							->orWhere('email', 'LIKE', '%' . $search . '%');
+					  });
+			});
+		}
+
+		$organizations = $organizationsQuery->paginate(9);
 		foreach ($organizations as $organization) {
 			$organization->total_startups = Company::whereHas('cycle', function ($query) use ($organization) {
 				$query->where('organization_id', $organization->id);
 			})->count();
 		}
-		return view('admin.organizations.index', compact('organizations'));
+		return view('admin.organizations.index', compact('organizations', 'stats'));
 	}
 
 	public function create()
@@ -199,7 +225,25 @@ class organizationsController extends Controller
 				$user->delete();
 			}
 			$organization->delete();
+
+			if (request()->ajax()) {
+				return response()->json([
+					'success' => true,
+					'message' => __('admin.DeletedSuccessfully')
+				]);
+			}
+
+			return redirect()->route('organizations.index')->with(['msg' => 'DeletedSuccessfully']);
 		}
+
+		if (request()->ajax()) {
+			return response()->json([
+				'success' => false,
+				'message' => __('admin.OrganizationNotFound')
+			], 404);
+		}
+
+		return redirect()->route('organizations.index')->with(['message2' => 'OrganizationNotFound']);
 	}
 
 	/**

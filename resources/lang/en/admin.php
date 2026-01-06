@@ -3121,4 +3121,6 @@ return [
 	'send_message_description2' => 'partnerships, or have pre-sales questions, you’re at the right place.',
 	'full_name' => 'Full Name',
 	'send_inquiry' => 'Send Inquiry',
+	'all_visiblity' => 'All Visibility',
+	'manage_organizations_description' => 'Manage and add new organizations',
 ];
