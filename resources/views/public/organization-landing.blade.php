@@ -933,12 +933,18 @@
       // Reviews slider next and previous
       // -----------------------------------
       // Add click event listener to next button
-      PartnersNextBtn.addEventListener('click', function () {
-        PartnersSliderNext.click();
-      });
-      PartnersPrevButton.addEventListener('click', function () {
-        PartnersSliderPrev.click();
-      });
+      if (PartnersNextBtn) {
+        PartnersNextBtn.addEventListener('click', function () {
+          PartnersSliderNext.click();
+        });
+      }
+
+      // Add click event listener to previous button
+      if (PartnersPrevButton) {
+        PartnersPrevButton.addEventListener('click', function () {
+          PartnersSliderPrev.click();
+        });
+      }
 
       // Review client logo
       // -----------------------------------
