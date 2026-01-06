@@ -287,18 +287,18 @@ class ClientCompanyController extends Controller
 
         $valuationDate = request('valuation_date');
         if (!$valuationDate || !in_array($valuationDate, $availableValuationDates)) {
-            $valuationDate = !empty($availableValuationDates) ? $availableValuationDates[0] : date('Y-m-d');
+            $valuationDate = date('Y-m-d');
         }
 
         $periods = [];
         $valuationYear = (int) date('Y', strtotime($valuationDate));
         
         $financials = FinancialProjection::where('company_id', $company->id)
-            ->where('valuation_date', $valuationDate)
+            ->whereBetween('year', [$valuationYear - 1, $valuationYear + 2])
             ->orderBy('year')
             ->get()
             ->keyBy('year');
-
+       
         $map = function ($fp) {
             return [
                 'revenue'        => (float) ($fp->revenues ?? 0),
