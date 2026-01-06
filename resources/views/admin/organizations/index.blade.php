@@ -111,7 +111,7 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                     <div class="d-flex align-items-center gap-2">
                       <div class="avatar avatar-md me-2 d-flex flex-shrink-0">
                         @if ($org->img_url)
-                          <img src="{{ $org->imageUrl }}" alt="logo" class="rounded object-fit-cover" width="50" height="50" />
+                          <img src="{{ $org->imageUrl }}" alt="logo" class="rounded object-fit-contain" />
                         @else
                           <span class="avatar-initial rounded bg-label-secondary">
                             {{ substr($org->name, 0, 2) }}
