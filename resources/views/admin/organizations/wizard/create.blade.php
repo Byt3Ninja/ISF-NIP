@@ -132,11 +132,7 @@
                         <i class="ti ti-file me-2"></i>{{ __('admin.Save as Draft') }}
                       </button>
                     @endif
-                    @if($activeStep == 5)
-                      <button type="button" class="btn btn-success" id="publishBtn">
-                        <i class="ti ti-world me-2"></i>{{ __('admin.Publish') }}
-                      </button>
-                    @elseif($canPublish)
+                    @if($canPublish && $activeStep == 5)
                       <button type="button" class="btn btn-success" id="publishBtn">
                         <i class="ti ti-world me-2"></i>{{ __('admin.Publish') }}
                       </button>
