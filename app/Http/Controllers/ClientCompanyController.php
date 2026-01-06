@@ -279,10 +279,10 @@ class ClientCompanyController extends Controller
         ];
         // Financial Projection
         $availableValuationDates = FinancialProjection::where('company_id', $company->id)
-            ->select('date_validate')
+            ->select('valuation_date')
             ->distinct()
-            ->orderBy('date_validate', 'desc')
-            ->pluck('date_validate')
+            ->orderBy('valuation_date', 'desc')
+            ->pluck('valuation_date')
             ->toArray();
 
         $valuationDate = request('valuation_date');
@@ -294,7 +294,7 @@ class ClientCompanyController extends Controller
         $valuationYear = (int) date('Y', strtotime($valuationDate));
         
         $financials = FinancialProjection::where('company_id', $company->id)
-            ->where('date_validate', $valuationDate)
+            ->where('valuation_date', $valuationDate)
             ->orderBy('year')
             ->get()
             ->keyBy('year');
@@ -678,13 +678,36 @@ class ClientCompanyController extends Controller
                 ->orderBy('created_at')->get();
                 
              
-                $year = !empty($data['valuation_date'])
-                        ? Carbon::parse($data['valuation_date'])->year
-                        : (int) date('Y'); // add here year from Validation Date
-            $financialprojection = FinancialProjection::where('company_id', $id)
-                                                        // ->whereBetween('year', [$year - 1, $year + 2])
-                                                        ->orderBy('year')
-                                                        ->get();
+                $year = !empty($request->valuation_date)
+                    ? Carbon::parse($request->valuation_date)->year
+                    : (int) date('Y');
+                $yearsRange = range($year - 1, $year + 2);
+                $financialprojectionArray = [];
+                foreach ($yearsRange as $_year) {
+                    $financialprojectionArray[$_year] = [];
+                }
+                $financialprojection = FinancialProjection::where('company_id', $id)
+                    ->whereBetween('year', [$year - 1, $year + 2])
+                    ->orderBy('year')
+                    ->get();
+                foreach ($financialprojection as $projection) {
+                    $financialprojectionArray[$projection->year] = $projection;
+                }
+                if ($financialprojection->isEmpty()) {
+                    $valuation_date = null;
+                } else {
+                    if (isset($financialprojection[1]) && !empty($financialprojection[1]->valuation_date)) {
+                        $formtat_valuation_date = $financialprojection[1]->valuation_date;
+                        $valuation_date = Carbon::parse($formtat_valuation_date)->format('Y-m');
+                    } else {
+                        $valuation_date = null;
+                    }
+                }
+                $financialprojection = $financialprojectionArray;
+
+           
+
+           
             // dd($financialprojection);
             return view('admin/clients/company', compact(
                 'client',
@@ -709,7 +732,8 @@ class ClientCompanyController extends Controller
                 'industries',
                 'employees',
                 'data',
-                'financialprojection'
+                'financialprojection',
+                'valuation_date'
             ));
         } catch (Exception $e) {
             //log what happend

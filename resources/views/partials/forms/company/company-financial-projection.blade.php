@@ -147,14 +147,14 @@
         <thead class="table-light">
           <tr>
             <th class="col-label">{{ __('startup.line_item') }}</th>
-            <th class="text-end" id="header-year-0">{{ __('startup.past_year') }}<br><small class="fw-normal text-muted">-</small>
+            <th class="" id="header-year-0">{{ __('startup.past_year') }}<br><small class="fw-normal text-muted">-</small>
             </th>
-            <th class="text-end" id="header-year-1">
+            <th class="" id="header-year-1">
               {{ __('startup.forecast_year_1') }}<br>
               <small class="fw-normal text-muted">-</small>
             </th>
-            <th class="text-end" id="header-year-2">{{ __('startup.year_2') }}<br><small class="fw-normal text-muted">-</small></th>
-            <th class="text-end" id="header-year-3">{{ __('startup.year_3') }}<br><small class="fw-normal text-muted">-</small></th>
+            <th class="" id="header-year-2">{{ __('startup.year_2') }}<br><small class="fw-normal text-muted">-</small></th>
+            <th class="" id="header-year-3">{{ __('startup.year_3') }}<br><small class="fw-normal text-muted">-</small></th>
           </tr>
         </thead>       
         <tbody>
@@ -214,7 +214,7 @@
 // Financial Projection Form Logic
 document.addEventListener('DOMContentLoaded', function () {
 
-	let currentValuationDate = "{{ isset($valuation_date) ? $valuation_date : '' }}"; // Track current valuation date
+	const currentValuationDate = "{{ request()->has('valuation_date') ? request()->input('valuation_date') : '' }}"; // Track current valuation date
 	const oldValuationDate = "{{ isset($valuation_date) ? $valuation_date : '' }}"; // Injected from backend
 
 
@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	// Initialize Flatpickr for Valuation Date
 	flatpickr('#valuationDate', {
-		defaultDate: oldValuationDate ? new Date(oldValuationDate) : null,
+		defaultDate: currentValuationDate ? new Date(currentValuationDate) : oldValuationDate ? new Date(oldValuationDate) : null,
 		plugins: [
 			new monthSelectPlugin({
 				shorthand: true,      // Jan, Feb, Mar
@@ -236,6 +236,12 @@ document.addEventListener('DOMContentLoaded', function () {
 			if (selectedDates.length) {
 				const valDate = moment(selectedDates[0]);
 				const valDateStr = valDate.format("YYYY-MM");
+
+				// Redirect with valuation_date param
+				const url = new URL(window.location.href);
+				url.searchParams.set('valuation_date', valDateStr);
+				window.location.href = url.href;
+
 				updateHeaders();
 				currentValuationDate = valDateStr;
 				valudationDateHidden.value = valDateStr;
