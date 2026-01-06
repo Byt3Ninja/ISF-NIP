@@ -1,4 +1,4 @@
-<section>
+<section class="mb-8">
   <!-- Company Info Card -->
   <div class="card">
     <div class="card-body">
@@ -8,7 +8,7 @@
             <div class="flex-shrink-0">
               <div class="company-logo me-4 me-md-0 shadow-xs border rounded">
                 <img 
-                  src="{{ $company->logo ? asset( $company->logo) : '/images/logo-placeholder.png' }}""
+                  src="{{ $company->logo ? asset( $company->logo) : '/images/logo-placeholder.png' }}"
                   onerror="this.src='/images/logo-placeholder.png'" 
                   class="rounded-3" alt="Company Logo" 
                   style="width: 170px; height: 150px; object-fit: cover;" />
@@ -29,17 +29,49 @@
                       @endif
                     </div>
                   </div>
-                  @if ($company->est_date)
-                  <div class="mb-2 mb-md-0">
-                    <span class="badge bg-label-info rounded-pill">
-                      <i class="ti ti-calendar ti-xs me-1"></i>
-                      {{ __('admin.Established in') }} {{ \Carbon\Carbon::parse($company->est_date)->format('Y') }}
-                    </span>
+                  <div class="d-flex align-items-center gap-2 mb-d mb-md-0">
+                    @if ($company->est_date)
+                      <span class="badge bg-label-info rounded-pill">
+                        <i class="ti ti-calendar ti-xs me-1"></i>
+                        {{ __('admin.Established in') }} {{ \Carbon\Carbon::parse($company->est_date)->format('Y') }}
+                      </span>
+                    @endif
+                    @if ($company->team_num)
+                      <span class="badge bg-label-warning rounded-pill">
+                        <i class="ti ti-users-group ti-xs me-1"></i>
+                        {{ __('startup.startup_size') }}:
+
+                        @php
+                            $singleDigits = ['1','2','3','4','5','6','7','8','9'];
+                            
+                            if (in_array($company->team_num, $singleDigits)) {
+                                echo __('startup.startup_size_' . $company->team_num);
+                            } else {
+                                // Translate "employees" based on language
+                                $numRange = $company->team_num; // e.g., "11-50 employees"
+                                if ($l === 'ar') {
+                                    $numRange = str_replace('employees', 'موظف', $numRange);
+                                } else {
+                                    // Keep English as is
+                                    $numRange = str_replace('موظف', 'employees', $numRange);
+                                }
+                                echo $numRange;
+                            }
+                        @endphp
+                      </span>
+                    @endif
+
+                    {{-- Alumni Badge --}}
+                    @if ($company->alumni == '1' || $company->alumni == 1)
+                      <span class="badge bg-label-danger rounded-pill">
+                        <i class="ti ti-pennant ti-xs me-1"></i>
+                        {{ __('startup.alumni') }}
+                      </span>
+                    @endif
                   </div>
-                  @endif
                 </div>
                 <div class="social-links d-flex align-items-center justify-content-start justify-content-md-end">
-                  <div class="d-flex align-items-center gap-2">
+                  <div class="d-flex flex-wrap flex-md-nowrap align-items-center gap-2">
                     @if ($company->facebook)
                     <a href="{{ strpos($company->facebook, 'http') === 0 ? $company->facebook : 'http://' . $company->facebook }}"
                        target="_blank" 
@@ -94,6 +126,20 @@
                        class="btn btn-icon btn-label-secondary rounded-pill waves-effect waves-light"
                        data-bs-toggle="tooltip" data-bs-placement="top" title="TikTok">
                       <i class="fa-brands fa-tiktok"></i>
+                    </a>
+                    @endif
+                    @if ($company->phone)
+                    <a href="tel:{{ $company->country_code . $company->phone }}" 
+                       class="btn btn-icon btn-label-primary rounded-pill waves-effect waves-light"
+                       data-bs-toggle="tooltip" data-bs-placement="top" title="Call {{ $company->country_code . $company->phone }}">
+                      <i class="ti ti-phone ti-sm"></i>
+                    </a>
+                    @endif
+                    @if ($company->email)
+                    <a href="mailto:{{ $company->email }}" 
+                       class="btn btn-icon btn-label-primary rounded-pill waves-effect waves-light"
+                       data-bs-toggle="tooltip" data-bs-placement="top" title="Email {{ $company->email }}">
+                      <i class="ti ti-mail ti-sm"></i>
                     </a>
                     @endif
                   </div>
@@ -238,7 +284,9 @@
                            class="text-secondary text-decoration-none hover-primary"
                            data-bs-toggle="tooltip" data-bs-placement="top" title="Open in Google Maps">
                           <i class="ti ti-external-link ti-xs me-1"></i>
-                          {{ optional($company->state)->{'name_' . $l} }}, {{ optional($company->city)->{'name_' . $l} }}, {{ optional($company->country)->{'name_' . $l} }}
+                          {{ optional($company->state)->{'name_' . $l} ? optional($company->state)->{'name_' . $l} . ', ' : '' }}
+                          {{ optional($company->city)->{'name_' . $l} ? optional($company->city)->{'name_' . $l} . ', ' : '' }} 
+                          {{ optional($company->country)->{'name_' . $l} }}
                         </a>
                       @else
                         <span class="text-secondary">
@@ -246,46 +294,13 @@
                         </span>
                       @endif
                     </div>
-                  </div>
-                  
-                  <!-- Contact Actions -->
-                  <div class="d-flex align-items-center gap-2">
-                    @if ($company->phone)
-                    <a href="tel:{{ $company->country_code . $company->phone }}" 
-                       class="btn btn-icon btn-label-primary rounded-pill waves-effect waves-light"
-                       data-bs-toggle="tooltip" data-bs-placement="top" title="Call {{ $company->country_code . $company->phone }}">
-                      <i class="ti ti-phone ti-sm"></i>
-                    </a>
-                    @endif
-                    @if ($company->email)
-                    <a href="mailto:{{ $company->email }}" 
-                       class="btn btn-icon btn-label-primary rounded-pill waves-effect waves-light"
-                       data-bs-toggle="tooltip" data-bs-placement="top" title="Email {{ $company->email }}">
-                      <i class="ti ti-mail ti-sm"></i>
-                    </a>
-                    @endif
-                  </div>
+                  </div>                  
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <!-- Action Button -->
-      {{-- <div class="col-md-2 d-flex flex-column align-items-center justify-content-center gap-2">
-        @if( $_user->hasAnyRole('Admin|organizationManager') || $_user->ableTo('company.profile_view_mine', $permissions) )
-        <a href="/dashboard/myCompany/{{ $company->id }}" class="btn btn-label-primary shadow-sm text-primary fw-bold"
-          style="border-radius: 15px;">
-          {{ __('admin.Edit') }} <i class="ti ti-edit mx-2"></i>
-        </a>
-        @else
-        <a href="" data-bs-toggle="modal" data-bs-target="#MessageModal"
-          class="btn btn-label-primary shadow-sm text-primary fw-bold text-nowrap" style="border-radius: 15px;">
-          {{ __('admin.Contact') }} <i class="ti ti-message mx-2"></i>
-        </a>
-        @endif
-      </div> --}}
-      <!-- / Action Button -->
     </div>
   </div>
   <!-- / Company Info Card -->

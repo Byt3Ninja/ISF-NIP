@@ -1,13 +1,7 @@
 @extends('layouts.admin')
 
 @section('style')
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
-<link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify.min.css">
-<link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify-bootstrap.min.css">
 
 <style>
   .daterangepicker {
@@ -59,10 +53,32 @@
       />
     @endif
 
+    <!-- Navigation Tabs -->
+    <nav class="nav-align-top mb-6">
+      @php
+        $tabs = [
+          ['title' => __('admin.training_sessions'), 'url' => 'dashboard/training/sessions', 'icon' => 'book'],
+          ['title' => __('admin.training_courses'), 'url' => 'dashboard/training/all', 'icon' => 'certificate'],
+          ['title' => __('admin.training_results'), 'url' => 'dashboard/training/results', 'icon' => 'report-analytics'],
+        ]
+      @endphp
+      <ul class="nav nav-pills">
+        @foreach($tabs as $tab)
+          <li class="nav-item">
+            <a href="/{{ $tab['url'] }}" class="nav-link {{ Request::is($tab['url'] . '*') ? 'active' : '' }}">
+              <i class="ti ti-{{ $tab['icon'] }} me-2"></i>
+              {{ $tab['title'] }}
+            </a>
+          </li>
+        @endforeach
+      </ul>
+    </nav>
+    <!--/ Navigation Tabs -->
+
     <div class="card">
       <!-- Heading & Actions -->
       <div class="card-header d-md-flex justify-content-between border-bottom pb-3 mb-6">
-        <h4 class="card-title">{{ __('admin.Training sessions') }}</h4>
+        <h5 class="card-title mb-0">{{ __('admin.Training sessions') }}</h5>
         <div class="d-flex align-items-center gap-3">
           <div class="btn-group">
             <button type="button" class="btn btn-label-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
@@ -138,169 +154,168 @@
             </div>
           </div>
         </div>
-
-        <!-- Table Data -->
-        <div class="table-responsive">
-          <table class="table table-hover" id="tblTraining">
-            <thead class="table-light">
+      </div>
+      <!-- Table Data -->
+      <div class="card-datatable table-responsive">
+        <table class="table table-hover" id="tblTraining">
+          <thead class="table-light">
+            <tr>
+              <th>{{ __('cycles.Title') }}</th>
+              <th>{{ __('cycles.Type') }}</th>
+              <th>{{ __('cycles.Program') }}</th>
+              <th>{{ __('cycles.Training_Step') }}</th>
+              <th>{{ __('cycles.Date_Time') }}</th>
+              <th>{{ __('cycles.details') }}</th>
+              <th>{{ __('cycles.Actions') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach ($sessions as $session)
               <tr>
-                <th>{{ __('cycles.Title') }}</th>
-                <th>{{ __('cycles.Type') }}</th>
-                <th>{{ __('cycles.Program') }}</th>
-                <th>{{ __('cycles.Training_Step') }}</th>
-                <th>{{ __('cycles.Date_Time') }}</th>
-                <th>{{ __('cycles.details') }}</th>
-                <th>{{ __('cycles.Actions') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              @foreach ($sessions as $session)
-                <tr>
-                  {{-- Title --}}
-                  <td><small class="text-nowrap">{{ $session->title }}</small></td>
+                {{-- Title --}}
+                <td><small class="text-nowrap">{{ $session->title }}</small></td>
 
-                  {{-- Type (badge) --}}
-                  <td>
-                    <small class="badge bg-label-{{ $session->type == 'offline' ? 'primary' : ($session->type == 'sessions' ? 'info' : 'success') }}">
-                      {{ $session->type == 'offline' ? __('cycles.Offline_Session') : ($session->type == 'sessions' ? __('cycles.Online_Session') : __('cycles.Online_Training')) }}
-                    </small>
-                  </td>
+                {{-- Type (badge) --}}
+                <td>
+                  <small class="badge bg-label-{{ $session->type == 'offline' ? 'primary' : ($session->type == 'sessions' ? 'info' : 'success') }}">
+                    {{ $session->type == 'offline' ? __('cycles.Offline_Session') : ($session->type == 'sessions' ? __('cycles.Online_Session') : __('cycles.Online_Training')) }}
+                  </small>
+                </td>
 
-                  {{-- Program --}}
-                  <td><small class="text-nowrap">{{ $session->step->cycle->title }}</small></td>
+                {{-- Program --}}
+                <td><small class="text-nowrap">{{ $session->step->cycle->title }}</small></td>
 
-                  {{-- Training Step --}}
-                  <td><small class="text-nowrap">{{ $session->step->title }}</small></td>
+                {{-- Training Step --}}
+                <td><small class="text-nowrap">{{ $session->step->title }}</small></td>
 
-                  {{-- Date & Time --}}
-                  <td>
-                    <small class="text-nowrap">
-                     @php
-                        $startDate = FormatDate($session->datetime, 'Y-m-d');
-                        $endDate   = $session->enddatetime ? FormatDate($session->enddatetime, 'Y-m-d') : null;
-                        $startTime = FormatDate($session->datetime, 'H:i:s');
-                        $endTime   = $session->enddatetime ? FormatDate($session->enddatetime, 'H:i:s') : null;
-                      @endphp
+                {{-- Date & Time --}}
+                <td>
+                  <small class="text-nowrap">
+                   @php
+                      $startDate = FormatDate($session->datetime, 'Y-m-d');
+                      $endDate   = $session->enddatetime ? FormatDate($session->enddatetime, 'Y-m-d') : null;
+                      $startTime = FormatDate($session->datetime, 'H:i:s');
+                      $endTime   = $session->enddatetime ? FormatDate($session->enddatetime, 'H:i:s') : null;
+                    @endphp
 
-                      {{-- Show dates --}}
-                      @if($endDate && $endDate !== $startDate)
-                        {{ $startDate }} - {{ $endDate }}
-                      @else
-                        {{ $startDate }}
-                      @endif
-                    </small>
-                    <br>
-                    {{-- Show times --}}
-                    <small>
-                      @if($endTime && $endTime !== $startTime)
-                        {{ $startTime }} - {{ $endTime }}
-                      @else
-                        {{ $startTime }}
-                      @endif
-                    </small>
-                  </td>
-
-                  {{-- Details (Trainer + Address if offline) --}}
-                  <td>
-                    @if($session->type == "offline" || $session->type == "sessions")
-                      <div class="text-nowrap">{{ __('cycles.trainer name') }}:</div> {{ $session->trainer_name }}<br>
-                      @if(!empty($session->training_Address))
-                        <small class="text-nowrap">{{ __('cycles.Training_Address') }}:</small> {{ $session->training_Address }}
-                      @endif
-                    {{-- @else
-                      <div class="text-nowrap">{{ __('cycles.trainer name') }}:</div>
-                      <div class="text-nowrap">{{ $session->course->user->{'first_name_' . $l} }} {{ $session->course->user->{'last_name_' . $l} }}</div> --}}
+                    {{-- Show dates --}}
+                    @if($endDate && $endDate !== $startDate)
+                      {{ $startDate }} - {{ $endDate }}
+                    @else
+                      {{ $startDate }}
                     @endif
-                  </td>
+                  </small>
+                  <br>
+                  {{-- Show times --}}
+                  <small>
+                    @if($endTime && $endTime !== $startTime)
+                      {{ $startTime }} - {{ $endTime }}
+                    @else
+                      {{ $startTime }}
+                    @endif
+                  </small>
+                </td>
 
-                  {{-- Actions --}}
-                  <td>
-                    <div class="d-flex align-items-center gap-2">
-                      {{-- Online session (Zoom) --}}
-                      @if ($session->type == 'sessions')
-                        @if ($session->start_url)
-                          <a href="{{ $session->start_url }}" target="_blank" class="btn btn-icon btn-label-success rounded-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('cycles.Start_Meeting') }}">
-                            <i class="ti ti-brand-zoom"></i>
-                          </a>
-                        @endif
-                        @if ($session->join_url)
-                          <a href="{{ $session->join_url }}" target="_blank" class="btn btn-icon btn-label-info rounded-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('cycles.Join_Meeting') }}">
-                            <i class="ti ti-user"></i>
-                          </a>
-                        @endif
-                        @if(!empty($session->zoom_passcode))
-                          <button data-passcode="{{ $session->zoom_passcode }}" class="btn btn-icon btn-label-warning rounded-circle show-passcode">
-                            <i class="ti ti-key"></i>
-                          </button>
-                        @endif
-                        <button onclick="openReportsModal({{ $session->id }})" class="btn btn-icon btn-label-warning rounded-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('admin.session_reports') }}">
-                          <i class="ti ti-file-text"></i>
+                {{-- Details (Trainer + Address if offline) --}}
+                <td>
+                  @if($session->type == "offline" || $session->type == "sessions")
+                    <div class="text-nowrap">{{ __('cycles.trainer name') }}:</div> {{ $session->trainer_name }}<br>
+                    @if(!empty($session->training_Address))
+                      <small class="text-nowrap">{{ __('cycles.Training_Address') }}:</small> {{ $session->training_Address }}
+                    @endif
+                  {{-- @else
+                    <div class="text-nowrap">{{ __('cycles.trainer name') }}:</div>
+                    <div class="text-nowrap">{{ $session->course->user->{'first_name_' . $l} }} {{ $session->course->user->{'last_name_' . $l} }}</div> --}}
+                  @endif
+                </td>
+
+                {{-- Actions --}}
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    {{-- Online session (Zoom) --}}
+                    @if ($session->type == 'sessions')
+                      @if ($session->start_url)
+                        <a href="{{ $session->start_url }}" target="_blank" class="btn btn-icon btn-label-success rounded-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('cycles.Start_Meeting') }}">
+                          <i class="ti ti-brand-zoom"></i>
+                        </a>
+                      @endif
+                      @if ($session->join_url)
+                        <a href="{{ $session->join_url }}" target="_blank" class="btn btn-icon btn-label-info rounded-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('cycles.Join_Meeting') }}">
+                          <i class="ti ti-user"></i>
+                        </a>
+                      @endif
+                      @if(!empty($session->zoom_passcode))
+                        <button type="button" data-passcode="{{ $session->zoom_passcode }}" class="btn btn-icon btn-label-warning rounded-circle show-passcode">
+                          <i class="ti ti-key"></i>
                         </button>
                       @endif
-                      {{-- Offline session --}}
-                      @if ($session->type == 'offline')
-                        @if ($session->QrCode)
-                          <button data-bs-toggle="modal" data-bs-target="#qrCodeModal{{ $session->id }}" class="btn btn-icon btn-label-warning rounded-circle">
-                            <i class="ti ti-qrcode"></i>
-                          </button>
-                        @else
-                          <button onclick="createQrCode({{ $session->id }})" class="btn btn-icon btn-label-success rounded-circle">
-                            <i class="ti ti-qrcode"></i>
-                          </button>
-                        @endif
+                      <button onclick="openReportsModal({{ $session->id }})" class="btn btn-icon btn-label-warning rounded-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('admin.session_reports') }}">
+                        <i class="ti ti-file-text"></i>
+                      </button>
+                    @endif
+                    {{-- Offline session --}}
+                    @if ($session->type == 'offline')
+                      @if ($session->QrCode)
+                        <button data-bs-toggle="modal" data-bs-target="#qrCodeModal{{ $session->id }}" class="btn btn-icon btn-label-warning rounded-circle">
+                          <i class="ti ti-qrcode"></i>
+                        </button>
+                      @else
+                        <button onclick="createQrCode({{ $session->id }})" class="btn btn-icon btn-label-success rounded-circle">
+                          <i class="ti ti-qrcode"></i>
+                        </button>
+                      @endif
 
-                        @if ($session->training_location)
-                          <a href="{{ $session->training_location }}" class="btn btn-icon btn-label-primary rounded-circle" target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('cycles.View_Location') }}">
-                            <i class="ti ti-map-pin"></i>
-                          </a>
-                        @endif
-
-                        <a href="/dashboard/training/Attendance-offline/{{ $session->id }}" class="btn btn-icon btn-label-dark rounded-circle">
-                          <i class="ti ti-calendar-check"></i>
+                      @if ($session->training_location)
+                        <a href="{{ $session->training_location }}" class="btn btn-icon btn-label-primary rounded-circle" target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('cycles.View_Location') }}">
+                          <i class="ti ti-map-pin"></i>
                         </a>
                       @endif
 
-                      {{-- Online training --}}
-                      @if ($session->type == 'online')
-                        <a href="/dashboard/training/all/{{ $session->training_Address }}">
-                          <button class="btn btn-icon btn-label-dark rounded-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('cycles.View_Course') }}">
-                            <i class="ti ti-book"></i>
-                          </button>
-                        </a>
-                      @endif
+                      <a href="/dashboard/training/Attendance-offline/{{ $session->id }}" class="btn btn-icon btn-label-dark rounded-circle">
+                        <i class="ti ti-calendar-check"></i>
+                      </a>
+                    @endif
 
-                      {{-- Common actions --}}
-                      <button onclick="editme({{ $session->id }})" class="btn btn-icon btn-label-info rounded-circle">
-                        <i class="ti ti-edit"></i>
-                      </button>
-                      <button onclick="deleteme({{ $session->id }})" class="btn btn-icon btn-label-danger rounded-circle">
-                        <i class="ti ti-trash"></i>
-                      </button>
+                    {{-- Online training --}}
+                    @if ($session->type == 'online')
+                      <a href="/dashboard/training/all/{{ $session->training_Address }}">
+                        <button class="btn btn-icon btn-label-dark rounded-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('cycles.View_Course') }}">
+                          <i class="ti ti-book"></i>
+                        </button>
+                      </a>
+                    @endif
+
+                    {{-- Common actions --}}
+                    <button onclick="editme({{ $session->id }})" class="btn btn-icon btn-label-info rounded-circle">
+                      <i class="ti ti-edit"></i>
+                    </button>
+                    <button onclick="deleteme({{ $session->id }})" class="btn btn-icon btn-label-danger rounded-circle">
+                      <i class="ti ti-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+              {{-- QR Modal --}}
+              <div class="modal fade" id="qrCodeModal{{ $session->id }}" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                  <div class="modal-content bg-label-secondary h-100 h-md-auto">
+                    <div class="modal-header">
+                      <h5 class="modal-title">QR Code</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                  </td>
-                </tr>
-
-                {{-- QR Modal --}}
-                <div class="modal fade" id="qrCodeModal{{ $session->id }}" tabindex="-1">
-                  <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content bg-label-secondary h-100 h-md-auto">
-                      <div class="modal-header">
-                        <h5 class="modal-title">QR Code</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                      </div>
-                      <div class="modal-body text-center">
-                        <img src="{{ asset($session->QrCode) }}" alt="QR Code" class="img-fluid">
-                      </div>
-                      <div onclick="createQrCode({{ $session->id }})" class="btn btn-label-info">
-                        {{ __('admin.Re_generate') }}
-                      </div>
+                    <div class="modal-body text-center">
+                      <img src="{{ asset($session->QrCode) }}" alt="QR Code" class="img-fluid">
+                    </div>
+                    <div onclick="createQrCode({{ $session->id }})" class="btn btn-label-info">
+                      {{ __('admin.Re_generate') }}
                     </div>
                   </div>
                 </div>
-              @endforeach
-            </tbody>
-          </table>
-        </div>
+              </div>
+            @endforeach
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -706,13 +721,31 @@
   </div>
 </div>
 @endforeach
+
+<!-- Passcode Modal -->
+<div class="modal fade" id="passcodeModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center">
+          <h4 class="mb-2">Meeting Passcode</h4>
+          <p class="mb-2">The passcode for this meeting is:</p>
+          <h5 class="mb-2" id="passcode"></h5>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>    
+<!--/ Passcode Modal -->
 @stop
 
 @section('scripts')
 <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
 <script src="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
 <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
-<script src="/app-assets/plugins/alertify/alertify.min.js"></script>
 @stop
 
 @section('pagescripts')
@@ -841,14 +874,9 @@
 
 <script>
     $(document).on('click', '.show-passcode', function(e) {
-      e.preventDefault();
-      let passcode = $(this).data('passcode');
-      alertify.defaults.transition = 'zoom';
-      alertify.defaults.theme.ok = 'btn btn-sm btn-danger';
-      alertify.defaults.theme.cancel = 'btn btn-sm btn-info';
-      alertify.defaults.theme.input = 'form-control';
-
-      alertify.alert('Meeting Passcode', `The passcode for this meeting is: <strong>${passcode}</strong>`, function() {});
+      const passcode = $(this).data('passcode');
+      $('#passcode').text(passcode);
+      $('#passcodeModal').modal('show');
     });
 
      $(`#addSessionForm .flatpickr-date`).on('change', function() {

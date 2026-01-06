@@ -64,8 +64,35 @@ class UserController extends Controller
 		return view('admin/users/index', compact('users'));
 	}
 
+	public function startImpersonate($id)
+	{
+		$user = User::find($id);
+		if( empty( $user ) )
+		{
+			Flash::error("User not found");
+			return back()->withInput()->with(['msg' => 'FailedStore']);
+		}
+		session([
+			'impersonator_id' => auth()->id(),
+		]);
+		auth()->login($user, true);
+		if( auth()->id() !== $user->id ) { Flash::error("User not found"); }
+		return redirect('/dashboard');
+	}
 
-
+	public function stopImpersonate()
+	{
+		if (! session()->has('impersonator_id')) {
+			abort(403);
+		}
+		$originalUser = User::find(session('impersonator_id'));
+		if( !$originalUser->ableTo('users.login_as') ) {
+			abort(401);
+		}
+		session()->forget('impersonator_id');
+		auth()->login($originalUser, true);
+		return redirect('/dashboard/users')->with('success', 'Impersonation ended');
+	}
 
 	/**
 	 * Show the form for creating a new resource.
@@ -117,10 +144,51 @@ class UserController extends Controller
 	 */
 	public function edit(User $user)
 	{
-		$roles =$this->userService->roleList()['data'];
-		$countries=$this->userService->countries();
+		$authUser = auth()->user();
+		$roles = $this->userService->roleList()['data'];
+		$countries = $this->userService->countries();
 
-		return view('admin/users/edit', compact('user', 'roles', 'countries'));
+		// Only admins can assign all organizations, Sub-Admin sees their assigned orgs
+		if ($authUser->hasRole('Admin')) {
+			$organizations = \App\Organization::all();
+		} elseif ($authUser->hasAnyRole(['organizationManager', 'subadmin'])) {
+			$orgIds = $authUser->organizations_ids;
+			$organizations = \App\Organization::whereIn('id', $orgIds)->get();
+		} else {
+			$organizations = collect();
+		}
+
+		return view('admin/users/edit', compact('user', 'roles', 'countries', 'organizations'));
+	}
+
+	/**
+	 * Update the organizations assigned to a Sub-Admin user.
+	 *
+	 * @param  \Illuminate\Http\Request  $request
+	 * @param  \App\User  $user
+	 * @return \Illuminate\Http\RedirectResponse
+	 */
+	public function updateOrganizations(Request $request, User $user)
+	{
+		$this->authorize('update', Auth::user());
+
+		// Validate that user is Sub-Admin
+		if (!$user->isSubAdmin()) {
+			return back()->with(['msg' => 'UserNotSubAdmin']);
+		}
+
+		// Validate organization IDs
+		$validated = $request->validate([
+			'organization_ids' => 'nullable|array',
+			'organization_ids.*' => 'exists:organizations,id',
+		]);
+
+		// Sync organizations
+		$organizationIds = $validated['organization_ids'] ?? [];
+		$user->organizations()->sync($organizationIds);
+
+		return redirect()->route('users.edit', $user->id)
+			->with(['success' => 'OrganizationsUpdatedSuccessfully']);
 	}
 
 	/**
@@ -153,14 +221,36 @@ class UserController extends Controller
 	 * @param  \App\User  $User
 	 * @return \Illuminate\Http\Response
 	 */
-	public function updatePassword(UpdateUserPasswordRequest $request,User $user)
+	public function updatePassword(UpdateUserPasswordRequest $request /*,User $user*/)
 	{
 		$this->authorize('updatePassword', Auth::user());
+		$user = User::find($request->id);
 	
 		$result= $this->userService->updatePassword($user, $request->all());
 
 		if ($result) {
 			return redirect()->route('users.index')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
+		} else {
+			return back()->withInput()->with(['msg' => 'FailedStore', 'class' => 'danger']);
+		}
+	}
+
+	/**
+	 * Update the specified resource in storage.
+	 *
+	 * @param  \Illuminate\Http\Request  $request
+	 * @param  \App\User  $User
+	 * @return \Illuminate\Http\Response
+	 */
+	public function updateMyPassword(UpdateUserPasswordRequest $request)
+	{
+		$this->authorize('updateMyPassword', Auth::user());
+	
+		$user = Auth::user();
+		$result = $this->userService->updatePassword($user, $request->all());
+
+		if ($result) {
+			return redirect()->back()->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
 		} else {
 			return back()->withInput()->with(['msg' => 'FailedStore', 'class' => 'danger']);
 		}
@@ -214,7 +304,9 @@ class UserController extends Controller
 	}
 	public function judger()
 	{
-		$judgers = User::role('Judger')->get();
+		$judgers = User::whereHas('roles', function ($query) {
+			$query->where('default_for', 'judger');
+		})->get();
 
 		return view('admin/users/judgers', compact('judgers'));
 	}

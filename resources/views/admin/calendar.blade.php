@@ -26,6 +26,18 @@
       align-items: center;
       gap: 1rem;
     }
+    .fc-event, .fc-event-main {
+      background-color: var(--bs-primary-bg-subtle) !important;
+    }
+
+    .fc-event-time {
+      display: none;
+    }
+
+    .fc-event-title {
+      color: var(--bs-black) !important;
+      font-size: 12px !important;
+    }
   </style>
 @stop
 

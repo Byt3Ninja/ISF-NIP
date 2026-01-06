@@ -17,9 +17,9 @@ class QuestionCategoriesController extends Controller
 	public function index()
 	{
         $user = auth()->user();
-        $organization_id = $user->organization_id;
+        $orgIds = $user->organizations_ids;
 		$categories = QuestionCategories::with(['organization']);
-		if( !empty( $organization_id ) ) { $categories = $categories->where('organization_id', $organization_id); }
+		if( !empty( $orgIds ) && !$user->hasRole('admin') ) { $categories = $categories->whereIn('organization_id', $orgIds); }
 		$categories = $categories->orderBy('id', 'desc')->get();
 
 		return view('admin.QuestionCategories.index', compact('categories'));
@@ -28,8 +28,9 @@ class QuestionCategoriesController extends Controller
 	public function create()
 	{
 		$user = auth()->user();
-		$organizations = new Organization;
-		if( isset( $user->organization_id ) && !empty( $user->organization_id ) ) { $organizations = $organizations->where('id', $user->organization_id); }
+		$orgIds = $user->organizations_ids;
+		$organizations = Organization::query();
+		if( !empty( $orgIds ) && !$user->hasRole('admin') ) { $organizations = $organizations->whereIn('id', $orgIds); }
 		$organizations = $organizations->get();
 		return view('admin.QuestionCategories.create', compact('organizations'));
 	}
@@ -56,8 +57,9 @@ class QuestionCategoriesController extends Controller
 	{
 		$category = QuestionCategories::find( $id );
 		$user = auth()->user();
-		$organizations = new Organization;
-		if( isset( $user->organization_id ) && !empty( $user->organization_id ) ) { $organizations = $organizations->where('id', $user->organization_id); }
+		$orgIds = $user->organizations_ids;
+		$organizations = Organization::query();
+		if( !empty( $orgIds ) && !$user->hasRole('admin') ) { $organizations = $organizations->whereIn('id', $orgIds); }
 		$organizations = $organizations->get();
 		return view('admin.QuestionCategories.edit', compact('category', 'organizations'));
 	}

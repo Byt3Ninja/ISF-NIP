@@ -565,13 +565,32 @@ class MentorshipTaskController extends Controller
 		]);
 		$id = $request->mentorship_request_id;
 		$task = MentorshipTask::where('mentorship_request_id', $id)->find($request->task_id);
+
 		if (empty($task)) {
-			$output = [
-				'message' => 'Task could not be found',
-				'errors' => ['task_id' => 'Task could not be found']
-			];
-			return response()->json($output, 422);
+				$output = [
+					'message' => 'Task could not be found',
+					'errors' => ['task_id' => 'Task could not be found']
+				];
+				return response()->json($output, 422);
 		}
+
+		// Normalize comment text
+    $commentText = trim($request->comment);
+
+    // Prevent duplicate comment (same user, same task, same text)
+    $exists = MentorshipTaskComment::where('mentorship_task_id', $request->task_id)
+        ->where('user_id', $user->id)
+        ->where('comment', $commentText)
+        ->exists();
+
+    if ($exists) {
+        return response()->json([
+            'status' => false,
+            'title' => 'Duplicate',
+            'message' => __('mentor.mentorshipTasks.comment_already_exists'),
+        ], 409);
+    }
+
 		$comment = new MentorshipTaskComment;
 		$comment->mentorship_task_id = $request->task_id;
 		$comment->user_id = $user->id;
@@ -626,24 +645,23 @@ class MentorshipTaskController extends Controller
 		if (empty($task)) {
 			return response()->json(['status' => false, 'title' => 'Failure', 'message' => 'Task not found'], 200);
 		} else {
-			$card = $task->id;
-			$session = $task->mentorship_request_id;
+			$card = (int) $task->id;
+			$session = (int) $task->mentorship_request_id;
 			$instance = Storage::disk('mentorship_tasks');
-			$target = "$session/$card";
-			if (!$instance->directoryExists($session)) {
-				$instance->makeDirectory("$session");
-				$instance->makeDirectory($target);
-			} elseif (!$instance->directoryExists($target)) {
-				$instance->makeDirectory($target);
-			}
+			$sessionDir = (string) $session;
+			$targetDir  = $sessionDir . '/' . $card;
+
+			if( !$instance->directoryExists( $sessionDir ) ) { $instance->makeDirectory($sessionDir); }
+			if( !$instance->directoryExists($targetDir) ) { $instance->makeDirectory($targetDir); }
+
 			$filesToAdd = [];
 			foreach ($request->attachments as $attachment) {
-				$check_file = $instance->missing($target . '/' . $attachment->getClientOriginalName());
+				$check_file = $instance->missing($targetDir . '/' . $attachment->getClientOriginalName());
 				if (!$check_file) {
 					$counter = 1;
 					do {
 						$file_name = str_replace('.' . $attachment->getClientOriginalExtension(), '', $attachment->getClientOriginalName()) . '-' . $counter++ . '.' . $attachment->getClientOriginalExtension();
-						$check_file = $instance->missing($target . '/' .  $file_name);
+						$check_file = $instance->missing($targetDir . '/' .  $file_name);
 					} while (!$check_file);
 				} else {
 					$file_name = $attachment->getClientOriginalName();
@@ -656,7 +674,7 @@ class MentorshipTaskController extends Controller
 					'file_name' => $attachment->getClientOriginalName(),
 					'file' => $file_name,
 				];
-				$path = $instance->putFileAs($target, $attachment, $file_name);
+				$path = $instance->putFileAs($targetDir, $attachment, $file_name);
 			}
 			MentorshipTaskFile::insert($filesToAdd);
 			$lang = app()->getLocale();
@@ -681,11 +699,11 @@ class MentorshipTaskController extends Controller
 			$instance = Storage::disk('mentorship_tasks');
 			$session = $file->mentorship_request_id;
 			$card = $file->mentorship_task_id;
-			$target = "$session/$card";
-			$check_file = $instance->missing($target . '/' . $file->file);
-			if (!$check_file) {
-				$instance->delete($target . '/' . $file->file);
-			}
+			$sessionDir = (string) $session;
+			$targetDir  = $sessionDir . '/' . $card;
+
+			$check_file = $instance->missing($targetDir . '/' . $file->file);
+			if( !$check_file ) { $instance->delete($targetDir . '/' . $file->file); }
 			$file->delete();
 			return response()->json(['status' => true, 'message' => 'File deleted successfully']);
 		}
@@ -763,7 +781,7 @@ class MentorshipTaskController extends Controller
 				}
 			}
 			if ($result) {
-				return redirect(route('mentorshipTasks.index', ['mentorship_id' => $request->mentorship_request_id]))->with(['message' => 'StoredSuccessfully']);
+				return redirect(route('mentorshipTasks.index', ['mentorship_id' => (int) $mentorship->id]))->with(['message' => 'StoredSuccessfully']);
 			} else {
 				return back()->withInput()->with(['message2' => 'FailedStore']);
 			}

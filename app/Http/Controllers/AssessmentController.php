@@ -12,6 +12,7 @@ use App\SubCategory;
 use App\QuestionsBank;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class AssessmentController extends Controller
@@ -135,7 +136,7 @@ class AssessmentController extends Controller
      */
     public function show(string $id)
     {
-       if (Auth::user()->hasAnyRole(['Admin', 'organizationManager']))
+       if (Auth::user()->hasAnyRole(['Admin', 'organizationManager', 'subadmin']))
         {
             $l = app()->getLocale();
             $assessment_user = Assessment::where('id', $id)->first();
@@ -233,73 +234,163 @@ class AssessmentController extends Controller
         } else { return redirect()->route('core.dashboard_view')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]); }
     }
 
+    /**
+     * Check if user can start a new assessment
+     */
+    protected function canStartAssessment($user)
+    {
+        // Check if user has a company
+        if ($user->HaveCompany === null) {
+            return [
+                'can_proceed' => false,
+                'redirect' => route('company.profile_view_mine'),
+                'message' => __('YouHaveNotCompany'),
+                'class' => 'danger'
+            ];
+        }
+
+        // Check if company has a stage set
+        $company = Company::find($user->company_id);
+        if ($company === null) {
+            return [
+                'can_proceed' => false,
+                'redirect' => route('company.profile_view_mine'),
+                'message' => __('YouHaveNotCompany'),
+                'class' => 'danger'
+            ];
+        }
+
+        if ($company->stage === null || !is_numeric($company->stage) || empty($company->stage)) {
+            return [
+                'can_proceed' => false,
+                'redirect' => route('company.profile_view_mine'),
+                'message' => __('ChooseYourStageFirst'),
+                'class' => 'danger'
+            ];
+        }
+
+        // Check if user already has an active assessment
+        $activeAssessment = Assessment::where('user_id', $user->id)
+            ->whereNull('end_date')
+            ->first();
+
+        if ($activeAssessment) {
+            return [
+                'can_proceed' => false,
+                'redirect' => route('assessments.take'),
+                'message' => __('AlreadyHaveAssessment'),
+                'class' => 'warning'
+            ];
+        }
+
+        return ['can_proceed' => true, 'company' => $company];
+    }
+
     public function MakeAssessment()
     {
-        if( Auth::user()->hasRole('Registered') )
-        {
-            $l = app()->getLocale();
-            $userid = auth()->user()->id;
-            $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();
+        if (!Auth::user()->hasRole('Registered')) {
+            return redirect()->route('core.dashboard_view')
+                ->with(['class' => 'danger', 'message' => __('You are not authorized to perform this action.')]);
+        }
 
-            $user_score = '';
-            if( $assessment_user != null ) { $user_score = UserScore::where('user_id', $userid)->where('assessment_id', $assessment_user->id)->get(); }
-            if( empty( $user_score ) )
-            {
-                $user = User::find($userid);
-                if( $user->HaveCompany != null )
-                {
-                    $companyid = $user->company_id;
-                    $company = Company::find($companyid);
-                    if( $company == null ) { return redirect()->route('company.profile_view_mine')->with(['class'=>'danger', 'message'=>__('YouHaveNotCompany')]); }
-                    $title = $company->{'name_'. $l } ." - ". now()->format('Y-m-d H:i:s');
+        $user = Auth::user();
+        $check = $this->canStartAssessment($user);
 
-                    $assessment = Assessment::create([
-                        'user_id' => $userid,
-                        'title' => $title,
-                        'start_date' => now(),
-                        'is_published' => 0,
-                    ]);
+        if (!$check['can_proceed']) {
+            // For AJAX requests, return JSON response
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $check['message'],
+                    'redirect' => $check['redirect']
+                ], 422);
+            }
+            // For regular requests, redirect with message
+            return redirect($check['redirect'])
+                ->with(['class' => $check['class'], 'message' => $check['message']]);
+        }
 
-                    $assessmentId = $assessment->id;
-                    $questions = QuestionsBank::where('group', 'assessment')->get();
+        $company = $check['company'];
+        $l = app()->getLocale();
+        
+        try {
+            DB::beginTransaction();
 
-                    if( $company->stage == null && !is_numeric( $company->stage ) && !empty( $company->stage ) )
-                    {
-                        $assessment = Assessment::find($assessmentId);
-                        $assessment->delete();
-                        return redirect()->route('company.profile_view_mine')->with(['class'=>'danger', 'msg'=>__('ChooseYourStageFirst')]);
-                    }
+            // Create new assessment
+            $assessment = Assessment::create([
+                'user_id' => $user->id,
+                'title' => $company->{'name_'. $l} . " - " . now()->format('Y-m-d H:i:s'),
+                'start_date' => now(),
+                'is_published' => 0,
+            ]);
 
-                    foreach( $questions as $question ) 
-                    {
-                        $weight = Weight::where('stage_id', $company->stage)->where('category_id', $question->ascategory_id)->where('subcategory_id', $question->subcategory_id)->first();
-                        if( $weight != null )
-                        {
-                            UserScore::create([
-                                'user_id' => $userid,
-                                'category_id' => $question->ascategory_id,
-                                'subcategory_id' => $question->subcategory_id,
-                                'stage_id' => $company->stage,
-                                'weight' => $weight->weight,
-                                'assessment_id' => $assessmentId,
-                                'QuestionBank' => $question->question, // اسم السؤال نفسه
-                                'explanation_QA_ar' => $question->explanation_QA_ar, 
-                                'explanation_QA_en' => $question->explanation_QA_en, 
-                                'Answers' => $question->answers, 
-                                'company_id' => $companyid,
-                            ]);
-                        }
-                        else
-                        {
-                            $assessment = Assessment::find($assessmentId);
-                            $assessment->delete();
-                            return redirect()->route('company.profile_view_mine')->with(['class'=>'danger', 'msg'=>__('ChooseYourStageFirst')]);
-                        }
-                    }
-                    return redirect()->route('assessments.take')->with(['class'=>'success', 'message'=>__('AssessmentCreated')]);
-                } else { return redirect()->back()->with(['class'=>'danger', 'message'=>__('YouHaveNotCompany')]); }
-            } else { return redirect()->route('assessments.take')->with(['class'=>'danger', 'message'=>__('AlreadyHaveAssessment')]); }
-        } else { return redirect()->route('core.dashboard_view')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]); }
+            // Get all assessment questions
+            $questions = QuestionsBank::where('group', 'assessment')->get();
+            $userScores = [];
+
+            // Prepare user scores
+            foreach ($questions as $question) {
+                $weight = Weight::where('stage_id', $company->stage)
+                    ->where('category_id', $question->ascategory_id)
+                    ->where('subcategory_id', $question->subcategory_id)
+                    ->first();
+
+                if (!$weight) {
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'message' => __('Invalid configuration for assessment questions. Please contact support.')
+                    ], 500);
+                }
+
+                $userScores[] = [
+                    'user_id' => $user->id,
+                    'category_id' => $question->ascategory_id,
+                    'subcategory_id' => $question->subcategory_id,
+                    'stage_id' => $company->stage,
+                    'weight' => $weight->weight,
+                    'assessment_id' => $assessment->id,
+                    'QuestionBank' => $question->question,
+                    'explanation_QA_ar' => $question->explanation_QA_ar,
+                    'explanation_QA_en' => $question->explanation_QA_en,
+                    'Answers' => $question->answers,
+                    'company_id' => $company->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+
+            // Bulk insert user scores for better performance
+            UserScore::insert($userScores);
+            DB::commit();
+
+            // For AJAX requests, return JSON response
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'redirect' => route('assessments.take'),
+                    'message' => __('AssessmentCreated')
+                ]);
+            }
+
+            // For regular requests, redirect to assessment
+            return redirect()->route('assessments.take')
+                ->with(['class' => 'success', 'message' => __('AssessmentCreated')]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error creating assessment: ' . $e->getMessage());
+            
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('Failed to create assessment. Please try again.')
+                ], 500);
+            }
+
+            return redirect()->back()
+                ->with(['class' => 'danger', 'message' => __('Failed to create assessment. Please try again.')]);
+        }
     }
 
     public function analysisAssessment()

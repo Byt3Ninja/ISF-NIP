@@ -63,6 +63,12 @@ class ScreeningEvaluationResults extends Model
 				if( empty( $comments ) || is_null( $comments ) ) { $comments = collect([]); }
 			}
 		}
+		$comments = $comments->map(function($comment) use ($get_comments) {
+			$evaluation_id = null;
+			$chkEvaluation = $get_comments->where('id', $comment->custom_field_id)->first();
+			$comment->evaluation_id = $chkEvaluation?->evaluation_id ?? null;
+			return $comment;
+		});
 
 		$l = app()->getLocale();
 		if( $getStep?->stype == 5 )
@@ -135,11 +141,20 @@ class ScreeningEvaluationResults extends Model
 		}
 		elseif( $getStep?->data != 'grouptogroup' ) { foreach( $judges as $index => $judge ) { $judges[$index]->startups = $companies->pluck('id'); } }
 
+		$scoped_comments = $comments->where('evaluation_id', $evaluation?->id)->values();
 		foreach( $judges as $index => $judge )
 		{
 			$judges[$index]->companies = collect([]);
 			foreach( $judge->startups as $company_id )
 			{
+				$_comment = '';
+				$_approval = 'pending';
+				$judge_comment = $scoped_comments->where('user_id', $judge->id)->where('company_id', $company_id)->first();
+				if( !empty( $judge_comment ) )
+				{
+					$_comment = $judge_comment?->value ?? '';
+					$_approval = intval( $judge_comment->is_approved ) === 1 ? 'approved' : ( $judge_comment->is_approved === null || intval( $judge_comment->is_approved ) === 2 ? 'pending' : 'disapproved' );
+				}
 				$_company = new stdClass;
 				$_company->id = $company_id;
 				$_results = $results->where('company_id', $company_id)->where('user_id', $judge->id)->values();
@@ -151,6 +166,8 @@ class ScreeningEvaluationResults extends Model
 				{
 					$_company->status = 'Not Evaluated';
 				}
+				$_company->comment = $_comment;
+				$_company->approval = $_approval;
 				$_company->results = $_results;
 				$judges[$index]->companies->push($_company);
 			}

@@ -6,8 +6,8 @@
 
 @section('style')
 <style>
-.card {
-  border-radius: 15px !important;
+.resize-none {
+  resize: none !important;
 }
 
 .radius-15 {
@@ -143,14 +143,45 @@
 </style>
 @stop
 
-@section('content')
+@php
+$env = env('APP_ENV');
 
+$pills = ['overview', 'milestones', 'team', 'pitch_deck', 'programs_summary', 'financial_report'];
+
+$pillsIcons = ['briefcase', 'target', 'users', 'file-text', 'components', 'database-dollar'];
+
+if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('registered') && $company?->id === $_user?->company_id ) )
+{
+  $pills[] = 'startup_growth';
+  $pillsIcons[] = 'chart-dots-2';
+}
+@endphp
+
+@section('content')
 @if($_user->hasRole('Judger'))
   @include('admin.clients.startup.partials._startup_screening_canvas')
 @endif
 
 <div class="content-wrapper position-relative">
   <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="row">
+			@if( session()->has('success') )
+			<div class="col-md-12 mb-2">
+				<div role="alert" class="alert alert-success alert-dismissible">
+					{{ session()->get('success') }}
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>
+			</div>
+			@endif
+			@if( session()->has('error') )
+			<div class="col-md-12 mb-2">
+				<div role="alert" class="alert alert-danger alert-dismissible">
+					{{ session()->get('error') }}
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>
+			</div>
+			@endif
+		</div>
     @if($_user->hasRole('Judger'))
       <div class="d-flex align-items-center gap-3 mb-6">
         <a id="save-screening-btn" class="btn btn-sm btn-icon shadow btn-white rounded-circle">
@@ -168,655 +199,91 @@
       </div>
     @else
       <div class="d-flex flex-wrap justify-content-between align-items-md-center mb-4">
-        <div class="d-flex align-items-center">
+        <div class="d-flex align-items-center mb-3 mb-md-0">
           <h4 class="fw-bold mb-0">{{ __('startup.startup_profile_heading') }}</h4>
           <h6 class="mb-0 ms-2">
             ( {{ $company && $company->CreatedTax == '1' ? __('startup.registered') : __('startup.not_registered') }} )
           </h6>
         </div>
         <div class="d-flex align-items-center gap-3">
-          @if( $_user->hasAnyRole('Admin|organizationManager') || $_user->ableTo('company.profile_view_mine', $permissions) )
-            <a href="/dashboard/myCompany/{{ $company->id }}" class="btn btn-primary"
-              style="border-radius: 15px;">
-              {{ __('admin.Edit') }} <i class="ti ti-edit ms-2"></i>
+          @if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->ableTo('company.profile_view_mine', $permissions) && $_user->hasRole('registered') && $_user->company_id == $company->id ) )
+            <a href="/dashboard/myCompany/{{ $company->id }}" class="btn btn-white text-primary shadow-sm border">
+              {{ __('startup.edit_info') }} <i class="ti ti-settings ms-2"></i>
             </a>
           @else
-            <a href="" data-bs-toggle="modal" data-bs-target="#MessageModal"
-              class="btn btn-label-primary" style="border-radius: 15px;">
+            <button data-bs-toggle="modal" data-bs-target="#MessageModal" class="btn btn-label-primary">
               {{ __('admin.Contact') }} <i class="ti ti-message ms-2"></i>
-            </a>
+            </button>
           @endif
         </div>
       </div>
     @endif
 
     @include('admin.clients.startup.partials._startup_info')
+    
+    <nav class="nav-align-top mb-8">
+      <ul class="nav nav-pills flex-column flex-md-row gap-2 gap-lg-0" role="tablist">
+        @foreach ($pills as $key => $pill)
+          <li class="nav-item">
+            <a href="#{{ $pill }}" 
+              class="nav-link {{$key == 0 ? 'active' : ''}}" 
+              data-bs-toggle="tab"
+              role="tab" 
+              aria-controls="{{ $pill }}" 
+              aria-selected="true" 
+            >
+              <i class="ti-sm ti ti-{{ $pillsIcons[$key] }} me-1_5"></i>
+              {{ __('startup.' . $pill) }}
+            </a>
+          </li>
+        @endforeach
+      </ul>
+    </nav>
 
-    <section class="w-100 mt-6 d-flex flex-column flex-md-row" style="gap: 2rem;">
-      <div class="section-3">
+    <div class="tab-content p-0 rounded mb-6">
+      <!-- Overview Section -->
+      <section class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+        @include('admin.clients.startup.partials._startup_overview')
+        @include('admin.clients.startup.partials._startup_about')
+      </section>
+      
+      <!-- Milestones Section -->
+      <section class="tab-pane fade" id="milestones" role="tabpanel" aria-labelledby="milestones-tab">
+        @include('admin.clients.startup.partials._startup_milestones')
+      </section>
+      
+      <!-- Team Section -->
+      <section class="tab-pane fade" id="team" role="tabpanel" aria-labelledby="team-tab">
         <div class="row">
-          <div class="col-6 col-md-4 mb-4">
-            <div class="card" style="height: 170px; background-color: #c4b5fd;">
-              <div class="card-body">
-                <div class="align-self-center d-flex flex-column text-center align-items-center">
-                  <div class="text-center">
-                    <img class="card-icon mb-2" src="/icons/development-stages.svg" alt="icon" />
-                  </div>
-                  <h5 class="mb-1 fw-semibold">{{ __('admin.Funding_Stage') }}</h5>
-                  <span
-                    class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4"
-                    style="width: fit-content;">
-                    {{ $company->development_stage ? __('admin.' . $company->development_stage) : __('admin.N/A') }}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-6 col-md-4 mb-4">
-            <div class="card" style="height: 170px; background-color: #7dd3fc;">
-              <div class="card-body">
-                <div class="align-self-center d-flex flex-column text-center align-items-center">
-                  <div class="text-center">
-                    <img class="card-icon mb-2" src="/icons/headquarter.svg" alt="icon" />
-                  </div>
-                  <h5 class="mb-1 fw-semibold">{{ __('admin.Country') }}</h5>
-                  <span
-                    class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4"
-                    style="width: fit-content;">
-                    {{-- <i class="flag-icon flag-icon-eg" style="font-size: 10px;"></i> --}}
-                    {{ optional($company->country)->{'name_' . $l} }}
-                    <i class="ti ti-flag ti-16px"></i>
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-6 col-md-4 mb-4">
-            <div class="card" style="height: 170px; background-color: #fdba74;">
-              <div class="card-body">
-                <div class="align-self-center d-flex flex-column text-center align-items-center">
-                  <div class="text-center">
-                    <img class="card-icon mb-2" src="/icons/coin.svg" alt="icon" />
-                  </div>
-                  @php
-                  $stage = App\Stage::where('id', $company->stage)->first();
-                  @endphp
-                  <h5 class="mb-1 fw-semibold">{{ __('admin.development_stage') }}</h5>
-
-                  @if(!is_numeric($company->stage))
-                  <span
-                    class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4"
-                    style="width: fit-content;">{{ $company->stage ? __('admin.stage_'.$company->stage) : __('admin.N/A') }}</span>
-                  @else
-                  <span
-                    class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4"
-                    style="width: fit-content;">{{ $stage != null ? $stage->{'name_' . $l} : __('admin.N/A') }}</span>
-                  @endif
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-6 col-md-4 mb-4">
-            <div class="card" style="height: 170px; background-color: #5eead4; overflow: hidden;">
-                <div class="py-6 px-2">
-                <div class="align-self-center d-flex flex-column text-center align-items-center w-100">
-                  <div class="text-center">
-                  <img class="card-icon mb-2" src="/icons/target-market.svg" alt="icon"
-                    style="width: 50px; height: 50px;"
-                  />
-                  </div>
-                  <h5 class="mb-2 fw-semibold">{{ __('admin.Targeted_Market') }}</h5>
-                  <div class="d-flex justify-content-center align-items-center gap-1 pb-2" style="width: 99.5%; overflow: auto; white-space: nowrap;">
-                  @if($company->targeted_market != null)
-                  @php
-                  $countryIds = json_decode($company->targeted_market, true);
-                  @endphp
-
-                  @if (is_array($countryIds) && count($countryIds) > 0)
-                  @php
-                  $targetedCountries = App\Country::whereIn('id', $countryIds)->get()->keyBy('id');
-                  @endphp
-                    @foreach (array_slice($countryIds, 0, 1) as $index => $countryId)
-                      <div
-                        class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-2"
-                        style="min-width: 110px;">
-                        <span class="line-clamp-1">
-                          {{ $targetedCountries[$countryId]->{'name_' . $l} ?? __('admin.N/A') }}
-                        </span>
-                      </div>
-                    @endforeach
-                    @if (is_array($countryIds) && count($countryIds) > 1)
-                    <button type="button" class="btn p-0" data-bs-toggle="modal" data-bs-target="#targetedMarketModal">
-                      <span
-                        class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-3 py-1"
-                        style="width: fit-content;"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="top"
-                        data-bs-title="{{ __('admin.Show more') }}">
-                        <i class="ti ti-dots ti-16px"></i>
-                      </span>
-                    </button>
-                    @endif
-                  @else
-                  <span
-                    class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4"
-                    style="width: fit-content;">{{ __('admin.N/A') }}</span>
-                  @endif
-                  @endif
-                  </div>
-                </div>
-                </div>
-            </div>
-          </div>
-          <div class="col-6 col-md-4 mb-4">
-            <div class="card" style="height: 170px; background-color: #fca5a5;">
-              <div class="card-body">
-                <div class="align-self-center d-flex flex-column text-center align-items-center">
-                  <div class="text-center">
-                    <img class="card-icon mb-2" src="/icons/business-modal.svg" alt="icon" />
-                  </div>
-                  <h5 class="mb-1 fw-semibold">{{ __('admin.Business Type') }}</h5>
-                  <div class="d-flex align-items-center justify-content-center mt-2" style="gap: 5px;">
-                    <span
-                      class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4"
-                      style="width: fit-content;">{{ $company->business_type ?? __('admin.N/A') }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-6 col-md-4 mb-4">
-            <div class="card bg-light">
-              <div class="card-body">
-                <div class="align-self-center d-flex flex-column text-center align-items-center">
-                  <div class="text-center">
-                    <img class="card-icon mb-2" src="/icons/industries.svg" alt="icon" />
-                  </div>
-                  <h5 class="mb-1 fw-semibold">{{ __('admin.Sector') }}</h5>
-                  <div class="d-flex align-items-center justify-content-center mt-2" style="gap: 5px;">
-                    @php
-                    $sector = App\Sector::where('id', $company->sector)->first();
-                    @endphp
-                    <span
-                      class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4"
-                      style="width: fit-content;">{{ $sector->name_en ?? __('admin.N/A') }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          @include('admin.clients.startup.partials._startup_founders')
+          @include('admin.clients.startup.partials._startup_shareholders')
+          @include('admin.clients.startup.partials._startup_investors')
         </div>
-      </div>
-      <div class="d-flex flex-grow-1 justify-content-center justify-content-md-start">
-        <div class="row d-flex flex-column w-100" style="gap: 1rem;">
-          <div class="border-primary w-100 rounded" style="border: 2px dashed; height: 100px;">
-            <div class="p-2" style="display: grid; place-items: center;">
-              <img class="sm-card-icon mb-2" src="/icons/coin.svg" alt="icon" />
-              <span class="text-black" style="font-size: 12px;">{{ __('admin.Funding_Target') }}</span>
-              <span class="text-primary commanums" style="font-size: 12px;">{{ $company->Funding_Target }}
-                {{ $company->Currency }}</span>
-            </div>
-          </div>
-          <div class="border-primary w-100 rounded" style="border: 2px dashed; height: 100px;">
-            <div class="p-2" style="display: grid; place-items: center;">
-              <img class="sm-card-icon mb-2" src="/icons/coin.svg" alt="icon" />
-              <span class="text-black" style="font-size: 12px;">{{ __('admin.Pre_money_Valuation') }}</span>
-              <span class="text-primary commanums" style="font-size: 12px;">{{ $company->Pre_money_Valuation }}
-                {{ $company->Currency }}</span>
-            </div>
-          </div>
-          <div class="border-primary w-100 rounded" style="border: 2px dashed; height: 100px;">
-            <div class="p-2" style="display: grid; place-items: center;">
-              <img class="sm-card-icon mb-2" src="/icons/coin.svg" alt="icon" />
-              <span class="text-black" style="font-size: 12px;">{{ __('admin.raised_fund') }}</span>
-              <span class="text-primary commanums" style="font-size: 12px;">{{ $company->raised_fund }}
-                {{ $company->Currency }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+      </section>
 
-    @include('admin.clients.startup.partials._working_team')
+      <!-- Pitch deck Section -->
+      <section class="tab-pane fade" id="pitch_deck" role="tabpanel" aria-labelledby="pitch-deck-tab">
+        @include('admin.clients.startup.partials._startup_pitch_deck')
+      </section>
 
-    @if($company->milestones && $company->count() > 0)
-    <section class="mt-6">
-      <div class="row">
-        <div class="col-12">
-          <div class="card">
-            <div class="card-body">
-              <div class="d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center">
-                  {{-- <i class="ti ti-target fs-3 me-3"></i> --}}
-                  <h5 class="mb-0">{{ $l == 'en' ? 'Milestones' : 'الإنجازات' }}</h5>
-                  <span class="badge bg-label-primary ms-3">{{ count($company->milestones) }}</span>
-                </div>
-                @if(count($company->milestones) > 3)
-                <div class="d-flex align-items-center gap-2">
-                  <button id="milestonesPrev" class="btn btn-icon btn-outline-secondary shadow-xs rounded-circle" disabled>
-                    <i class="ti ti-chevron-{{ $l == 'en' ? 'left' : 'right' }} ti-sm"></i>
-                  </button>
-                  <button id="milestonesNext" class="btn btn-icon btn-outline-secondary shadow-xs rounded-circle">
-                    <i class="ti ti-chevron-{{ $l == 'en' ? 'right' : 'left' }} ti-sm"></i>
-                  </button>
-                </div>
-                @endif
-              </div>
-              
-              <div class="position-relative">
-                <div id="milestonesCarousel" class="overflow-hidden">
-                  <div id="milestonesContainer" class="d-flex transition-all my-2" style="transform: translateX(0px); transition: transform 0.3s ease;">
-                    @foreach($company->milestones as $index => $milestone)
-                    <div class="milestone-card flex-shrink-0 pe-4" style="width: 33.333%;">
-                      <div class="card h-100 border shadow-xs">
-                        <div class="card-body d-flex flex-column">
-                          <!-- Milestone Header -->
-                          <div class="d-flex align-items-center mb-3">
-                            {{-- <div class="rounded-circle d-flex flex-shrink-0 align-items-center justify-content-center me-3 {{ $milestone->completion_percentage >= 100 ? 'bg-success' : 'bg-primary' }} text-white" 
-                                 style="width: 35px; height: 35px; font-size: 14px; font-weight: bold;">
-                              @if($milestone->completion_percentage >= 100)
-                                ✓
-                              @else
-                                {{ $index + 1 }}
-                              @endif
-                            </div> --}}
-                            <div class="flex-grow-1" style="max-width: calc(100% - 10px);">
-                              <h6 class="mb-0 fw-semibold line-clamp-2">{{ $milestone->name }}</h6>
-                              {{-- <small class="text-muted">
-                                {{ $l == 'ar' ? 'إنجاز' : 'Milestone' }} {{ $index + 1 }}
-                              </small> --}}
-                            </div>
-                          </div>
-                          
-                          <!-- Milestone Description -->
-                          <p class="text-muted mb-3 flex-grow-1" style="font-size: 0.9rem;">
-                            {{ $milestone->description }}
-                          </p>
-                          
-                          <!-- Progress Bar -->
-                          <div class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                              <small class="text-muted">{{ $l == 'ar' ? 'نسبة الإكمال' : 'Completion' }}</small>
-                              <small class="fw-semibold {{ $milestone->completion_percentage >= 100 ? 'text-success' : 'text-primary' }}">
-                                {{ $milestone->completion_percentage ?? 0 }}%
-                              </small>
-                            </div>
-                            <div class="progress" style="height: 6px;">
-                              <div class="progress-bar {{ $milestone->completion_percentage >= 100 ? 'bg-success' : 'bg-primary' }}" 
-                                   role="progressbar" 
-                                   style="width: {{ $milestone->completion_percentage ?? 0 }}%"
-                                   aria-valuenow="{{ $milestone->completion_percentage ?? 0 }}" 
-                                   aria-valuemin="0" 
-                                   aria-valuemax="100">
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <!-- Supporting Documents -->
-                          @if($milestone->documents)
-                            @php
-                              $documents = is_string($milestone->documents) ? json_decode($milestone->documents, true) : $milestone->documents;
-                              $documents = is_array($documents) ? $documents : [];
-                            @endphp
-                            @if(count($documents) > 0)
-                            <div class="mt-auto">
-                              <div class="d-flex align-items-center justify-content-between mb-2">
-                                <small class="text-muted">{{ $l == 'ar' ? 'المستندات' : 'Documents' }}</small>
-                                <span class="badge bg-label-secondary">{{ count($documents) }}</span>
-                              </div>
-                              <div class="d-flex flex-wrap gap-1">
-                                @foreach(array_slice($documents, 0, 3) as $doc)
-                                  <a href="{{ $doc['url'] ?? '#' }}" 
-                                     target="_blank" 
-                                     class="btn btn-xs btn-outline-primary p-1" 
-                                     title="{{ $doc['name'] ?? 'Document' }}">
-                                    <i class="ti ti-file-text" style="font-size: 12px;"></i>
-                                  </a>
-                                @endforeach
-                                @if(count($documents) > 3)
-                                  <span class="btn btn-xs btn-outline-secondary p-1" title="{{ count($documents) - 3 }} more documents">
-                                    +{{ count($documents) - 3 }}
-                                  </span>
-                                @endif
-                              </div>
-                            </div>
-                            @endif
-                          @endif
-                          
-                          <!-- Milestone Status Badge -->
-                          <div class="mt-2">
-                            {{-- @if($milestone->completion_percentage >= 100)
-                              <span class="badge bg-label-success">
-                                <i class="ti ti-check me-1"></i>
-                                {{ $l == 'ar' ? 'مكتمل' : 'Completed' }}
-                              </span>
-                            @elseif($milestone->completion_percentage > 0)
-                              <span class="badge bg-label-warning">
-                                <i class="ti ti-clock me-1"></i>
-                                {{ $l == 'ar' ? 'قيد التنفيذ' : 'In Progress' }}
-                              </span>
-                            @else
-                              <span class="badge bg-label-secondary">
-                                <i class="ti ti-calendar me-1"></i>
-                                {{ $l == 'ar' ? 'مخطط' : 'Planned' }}
-                              </span>
-                            @endif --}}
-                            
-                            @if($milestone->created_at)
-                              <small class="text-muted d-block mt-1">
-                                {{ $l == 'ar' ? 'أضيف في' : 'Added on' }} {{ $milestone->created_at->format('M Y') }}
-                              </small>
-                            @endif
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    @endforeach
-                  </div>
-                </div>
-              </div>            
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    @endif
+      @if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('registered') && $company?->id === $_user?->company_id ) )
+      <!-- Startup growth Section -->
+      <section class="tab-pane fade" id="startup_growth" role="tabpanel" aria-labelledby="startup-growth-tab">
+        @include('admin.clients.startup.partials._startup_growth')
+      </section>
+      @endif
 
-    <section>
-      <div class="row">
-        @include('admin.clients.startup.partials._startup_founders')
-        @include('admin.clients.startup.partials._startup_shareholders')
-        @include('admin.clients.startup.partials._startup_investors')
-      </div>
-    </section>
-    <!-- Sustainable Development Icons -->
-    @php
-    // تحويل السلسلة إلى مصفوفة بعد إزالة الشرطات المائلة
-    // $Sustainables = explode(',', $company->Sustainable_development);
-    $Sustainables = json_decode($company->Sustainable_development);
-    @endphp
-    @if (!empty($Sustainables) && count($Sustainables) > 0)
-    <section class="mt-6 row">
-      <div class="col-12">
-        <div class="card" style="min-height: 290px;">
-          <div class="p-4">
-            <h5 class="">
-              {{ $l == 'en' ? 'Sustainability Goals' : 'اهداف الاستدامة' }}
-            </h5>
-            <div class="row w-75">
-              @foreach ($Sustainables as $Sustainable)
-              @php
-              $icon = App\SustainableIcon::where('title', $Sustainable)->first();
-              @endphp
-              <div class="col-md-2 mb-2">
-                <div class="border light-shadow radius-15" style="display: grid; place-items: center;">
-                  @if ($icon && $icon->icon_ar)
-                  <img src="/images/sustainability/{{ $l }}/{{ $icon->icon_ar ?? '1.png' }}" alt="icon"
-                    style="width: 100px; height: 100px;">
-                  @endif
-                </div>
-              </div>
-              @endforeach
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    @endif
-    <!-- / Sustainable Development Icons -->
-
-    <section>
-      <div class="row">
-        <div class="col-12 col-md-6 mt-6">
-          <div class="card" style="height: 520px;">
-            <div class="card-body h-100">
-              <h5 class="card-title">{{ __('admin.Pitch_Deck') }}:</h5>
-              @if ($company->pitch_deck != null)
-              <div class="card-body text-center h-100">
-                <div class="d-flex flex-column justify-content-between align-items-center h-100">
-                  <iframe src="{{ url($company->pitch_deck) }}" target="_blank"
-                    style="width: 100%; height: 350px; object-fit:" class="img-fluid">
-                    <p>
-                      {{ $l == 'en' ? 'Your browser does not support iframes.' : 'متصفحك لا يدعم إطارات iframe.' }}
-                    </p>
-                  </iframe>
-                  <div class="mt-auto d-flex flex-column mb-6">
-                    <span class="text-muted">
-                      {{ $l == 'en' ? 'To get analysis for your pitch deck please' : 'للحصول على تحليل لعرضك التقديمي، يرجى' }}
-                    </span>
-                    @if($_user->hasAnyRole('Registered'))
-                    <a role="button"
-                      onclick="window.location.href='{{ route('company.profile_view_mine') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 0)"
-                      class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
-                      {{ $l == 'en' ? 'Click here' : 'اضغط هنا' }}
-                    </a>
-                    @endif
-                  </div>
-                </div>
-              </div>
-              @else
-              <div class="card-body text-center h-100">
-                <div class="d-flex flex-column justify-content-between align-items-center h-100">
-                  <img src="/images/deck.svg" style="width: 350px; height: 350px;" />
-                  <div class="mt-auto d-flex flex-column mb-6">
-                    <span class="text-muted">
-                      {{ $l == 'en' ? 'To get analysis for your pitch deck please upload your pitch deck' : 'للحصول على تحليل لعرضك التقديمي، يرجى تحميل عرضك التقديمي' }}
-                    </span>
-                    @if($_user->hasAnyRole('Registered'))
-                    <a role="button"
-                      onclick="window.location.href='{{ route('company.profile_view_mine') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 0)"
-                      class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
-                      {{ $l == 'en' ? 'Click here' : 'اضغط هنا' }}
-                    </a>
-                    @endif
-                  </div>
-                </div>
-              </div>
-              @endif
-            </div>
-          </div>
-        </div>
-        <div class="col-12 col-md-6 mt-6">
-          <div class="card flex-grow-1" style="height: 520px;">
-            <div class="card-body">
-              <h5 class="card-title">{{ __('admin.Pitch_Deck_Video') }}:</h5>
-              <div class="d-flex flex-column justify-content-between align-items-center" style="height: 90%">
-                @if ($company && $company->pitch_deck_video)
-                @php
-                $videoUrl = $company->pitch_deck_video;
-                $youtubePattern = '/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/]+\/[^\/]+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/';
-                $isYouTube = preg_match($youtubePattern, $videoUrl, $matches);
-                $videoId = $isYouTube ? $matches[1] : null;
-                @endphp
-
-                @if ($videoId)
-                {{-- Embed YouTube Video --}}
-                <iframe class="h-100 w-100" src="https://www.youtube.com/embed/{{ $videoId }}"
-                  title="YouTube video player" frameborder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowfullscreen>
-                </iframe>
-                @elseif (Str::contains($videoUrl, 'vimeo.com'))
-                {{-- Embed Vimeo Video --}}
-                @php
-                $vimeoId = preg_replace('/[^0-9]/', '', parse_url($videoUrl, PHP_URL_PATH));
-                @endphp
-                <iframe class="h-100 w-100" src="https://player.vimeo.com/video/{{ $vimeoId }}" frameborder="0"
-                  allow="autoplay; fullscreen; picture-in-picture" allowfullscreen>
-                </iframe>
-                @elseif (Str::endsWith($videoUrl, ['.mp4', '.webm', '.ogg']))
-                {{-- Direct Video File --}}
-                <video class="h-100 w-100" controls>
-                  <source src="{{ $videoUrl }}" type="video/mp4">
-                    {{ $l == 'en' ? 'Your browser does not support the video tag.' : 'متصفحك لا يدعم علامة الفيديو.' }}
-                </video>
-                @else
-                {{-- Unknown format --}}
-                <a href="{{ $videoUrl }}" target="_blank" class="btn btn-primary">
-                  {{ $l == 'en' ? 'View Video' : 'عرض الفيديو' }}
-                </a>
-                @endif
-
-                @else
-                <img id="deck-video-image" src="/images/deck-video.svg" style="width: 350px; height: height: 350px;" />
-                @endif
-
-                <div class="mt-auto d-flex flex-column pt-4 text-center">
-                  <span class="text-muted">
-                    {{ __('admin.To get analysis for your pitch deck please upload your pitch deck video') }}
-                  </span>
-                  @if($_user->hasAnyRole('Registered'))
-                  <a role="button"
-                    onclick="window.location.href='{{ route('company.profile_view_mine') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 1)"
-                    class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
-                    {{ $l == 'en' ? 'Click here' : 'اضغط هنا' }}
-                  </a>
-                  @endif
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="mt-6">
-      <div class="masonry">
-        @if ($company->pitch_deck_summary)
-        <div class="card">
-          <div class="card-body">
-            <h5 class="card-title">{{ __('admin.Pitch_Deck_Information') }}
-            </h5>
-            <div class="d-flex flex-column gap-2">
-              <div class="card" style="height: 132px;  overflow-y: auto;">
-                <div class="card-body">
-                  <h6 class="border-bottom d-flex gap-2 pb-2 d-flex align-items-center">
-                    {{ $company->pitch_deck_summary }}
-                  </h6>
-                  <p class="text-muted line-clamp-2 fs-6">
-                    {{ $company->pitch_deck_description }}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        @endif
-        @if ($company->business_model != null)
-        <div class="card">
-          <div class="card-body d-flex flex-column justify-content-between">
-            <h4>{{ __('admin.business_model') }}</h4>
-            <div class="d-flex justify-content-between py-4">
-              <div class="d-flex align-items-center">
-                <i class="ti ti-alert-circle ti-24px text-primary me-2"></i>
-                {{ $company ? __('admin.' . $company->business_model) : '' }}
-              </div>
-              @if ($company->business_model == 'Other')
-              <div class="d-flex align-items-center">
-                <i class="ti ti-chart-bar ti-24px text-primary me-2"></i>
-                {{ $company ? $company->other_business_model : '' }}
-              </div>
-              @endif
-            </div>
-            <div class="d-flex justify-content-between py-4">
-              <div class="d-flex align-items-center">
-                <i class="ti ti-flag ti-24px text-primary me-2"></i>
-                {{ $company ? $company->business_model_description : '' }}
-              </div>
-              @php
-              $fileNames = basename($company->business_plan);
-              @endphp
-              <div class="d-flex align-items-center">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div class="d-flex align-items-center gap-3">
-                    <i class="ti ti-file fs-1 text-warning"></i>
-                    <span>{{ $fileNames }}</span>
-                  </div>
-                  <a class="btn btn-transparent" href="{{ $company->business_plan }}" target="_blank" download>
-                    <i class="ti ti-download fs-3 text-primary"></i>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        @endif
-        @if ($company->about_problem != null)
-        <div class="card">
-          <div class="card-body">
-            <h5>{{ __('admin.about_problem') }}</h5>
-            <div class="d-flex gap-2 mb-3">
-              <i class="ti ti-alert-circle ti-24px text-primary me-2"></i>
-              <div class="line-clamp-2">
-                {{ $company ? $company->about_problem : '' }}
-              </div>
-            </div>
-            @if($company->about_market_opportunity)
-            <div class="d-flex gap-2 mb-3">
-              <div class="line-clamp-2">
-                <i class="ti ti-chart-bar ti-24px text-primary me-2"></i>
-                {{ $company ? $company->about_market_opportunity : '' }}
-              </div>
-            </div>
-            @endif
-            @if($company->about_competitors)
-            <div class="d-flex gap-2 mb-3">
-              <i class="ti ti-flag ti-24px text-primary me-2"></i>
-              <div class="line-clamp-2">
-                {{ $company ? $company->about_competitors : '' }}
-              </div>
-            </div>
-            @endif
-            @if($company->about_monetize)
-            <div class="d-flex gap-2 mb-3">
-              <i class="ti ti-cash ti-28px text-primary me-2"></i>
-              <div class="line-clamp-2">
-                {{ $company ? $company->about_monetize : '' }}
-              </div>
-            </div>
-            @endif
-            @if($company->about_challenges)
-            <div class="d-flex gap-2">
-              <i class="ti ti-target ti-24px text-primary me-2"></i>
-              <div class="line-clamp-2">
-                {{ $company ? $company->about_challenges : '' }}
-              </div>
-            </div>
-            @endif
-          </div>
-        </div>
-        @endif
-        @if ($company->financial_plan != null)
-        <div class="card">
-          <div class="card-body d-flex flex-column justify-content-between">
-            <h4>{{ __('admin.financial_plan') }}</h4>
-            <div class="d-flex justify-content-between py-4">
-              <div class="d-flex align-items-center">
-                <i class="ti ti-flag ti-24px text-primary me-2"></i>
-                {{ $company ? $company->financial_plan_description : '' }}
-              </div>
-              @php
-              $fileNamesf = basename($company->financial_plan);
-              @endphp
-              <div class="d-flex align-items-center">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div class="d-flex align-items-center gap-3">
-                    <i class="ti ti-file fs-1 text-warning"></i>
-                    <span>{{ $fileNamesf }}</span>
-                  </div>
-                  <a class="btn btn-transparent" href="{{ $company->financial_plan }}" target="_blank" download>
-                    <i class="ti ti-download fs-3 text-primary"></i>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        @endif
-      </div>
-    </section>
-
-    <section class="mt-6 px-4">
+      <!-- Programs Section -->
+      <section class="tab-pane fade" id="programs_summary" role="tabpanel" aria-labelledby="programs-summery-tab">
+        @include('admin.clients.startup.partials._startup_programs')
+      </section>
+      
+      <!-- Financial Section -->
+      <section class="tab-pane fade" id="financial_report" role="tabpanel" aria-labelledby="financial-report-tab">
+        @include('admin.clients.startup.partials._startup_financial_report')
+      </section>
+    </div>
+    {{-- <section class="mt-6 px-4">
       <div class="row">
         @if ($company->cycle)
         @hasanyrole('Admin|organizationManager')
@@ -853,7 +320,7 @@
                 </tr>
                 <tr>
                   <td>
-                    {{ __('admin.Screening by') }}:
+                    {{ __('admin.Screening') }}:
                   </td>
                   <td>
                     @if( $judges->count() > 0 )
@@ -909,9 +376,10 @@
         @endrole
         @endif
       </div>
-    </section>
+    </section> --}}
   </div>
 </div>
+
 <!-- Modal -->
 <div class="modal fade text-left" id="MessageModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33"
   aria-hidden="true">
@@ -927,8 +395,8 @@
       </div>
       <form method="post" action="/dashboard/send_message" enctype="multipart/form-data">
         {!! csrf_field() !!}
-        <input type="hidden" name="sender" value="{{ $_user->id }}">
-        <input type="hidden" name="receiver" value="{{ $company?->user?->id }}">
+        {{--  <input type="hidden" name="sender" value="{{ $_user->id }}">  --}}
+        <input type="hidden" name="company_id" value="{{ $company->id }}">
         <div class="modal-body">
           <div class="form-group mb-3">
             <label class="form-label fs-6 mb-1">{{ __('messages.Subject') }}:</label>
@@ -1101,6 +569,7 @@
           final_comment: ''
         };
         var tempEvalMap = {};
+        var tempFormDataMap = {};
         data.forEach(item => {
           const name = item.name;
           const value = item.value;
@@ -1108,8 +577,14 @@
               result.id = parseInt(value);
           } else if (name === 'evaluation_program_id') {
               result.program = parseInt(value);
+          } else if (name === 'is_approved') {
+              result.is_approved = value;
           } else if (name === 'final_comments') {
               result.final_comment = value;
+          } else if (name.startsWith('formComment_')) {
+              const formDataId = name.split('_')[1];
+              tempFormDataMap[formDataId] = tempFormDataMap[formDataId] || { id: parseInt(formDataId), comment: '' };
+              tempFormDataMap[formDataId].comment = value ? value.trim() : null;
           } else if (name.startsWith('score_')) {
               const evalId = name.split('_')[1];
               tempEvalMap[evalId] = tempEvalMap[evalId] || { id: parseInt(evalId), score: null, comment: '' };
@@ -1121,6 +596,7 @@
           }
         });
         result.evaluation = Object.values(tempEvalMap).filter(entry => entry.score !== null || entry.comment !== '');
+        result.comments = Object.values(tempFormDataMap).filter(entry => entry.comment !== '');
 
         // Show a loading indicator
         const saveBtn = document.getElementById('save_screening_btn');
@@ -1128,6 +604,26 @@
         const originalSaveBtnHtml = saveBtn.innerHTML;
         const originalPublishBtnHtml = publishBtn.innerHTML;
         
+        if (type === 'publish') {
+          let missingScores = false;
+          const scoreSelects = document.querySelectorAll('.score-select');
+          scoreSelects.forEach(select => {
+            if (!select.value || select.value === '') {
+              missingScores = true;
+              select.classList.add('is-invalid');
+            } else {
+              select.classList.remove('is-invalid');
+            }
+          });
+
+          if (missingScores) {
+            alert('{{ __("admin.please_select_score") }}');
+            // Navigate to the criteria tab if not already there
+            document.getElementById('pills-screening-criteria-tab').click();
+            return;
+          }
+        }
+
         if (type === 'draft') {
           const saveIcon = saveBtn.querySelector('i');
           if (saveIcon) {

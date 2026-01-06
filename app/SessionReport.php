@@ -24,4 +24,12 @@ class SessionReport extends Model
     {
         return $this->belongsTo(TrainingSession::class, 'session_id');
     }
+    public function mentorshipRequest()
+    {
+        return $this->belongsTo(MentorshipRequest::class, 'mentorship_request_id');
+    }
+    public function participant()
+    {
+        return $this->belongsTo(User::class, 'participant_user_id');
+    }
 }

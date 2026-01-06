@@ -43,7 +43,7 @@ return [
     'Specialization' => 'التخصص',
     'Linkedin' => 'Linkedin',
     'Request' => 'الطلب',
-    'Add mentorship session with' => 'إضافة طلب إرشاد جديد',
+    'Add mentorship session with' => 'اضافة طاب جلسة ارشاد مع',
     'Start meeting Date/ Time' => 'تاريخ ووقت البدأ',
     'Meeting duration' => 'مدة الاجتماع',
     'Minutes' => 'دقائق',
@@ -183,4 +183,7 @@ return [
     'Completion of all prerequisites is required before you can join the program.' => 'إكمال جميع المتطلبات مطلوب قبل أن تتمكن من الانضمام للبرنامج.',
     'Complete Prerequisites & Join' => 'إكمال المتطلبات والانضمام',
     'Complete Prerequisites' => 'إكمال المتطلبات',
+    'Type' => 'نوع',
+    'Session_Type' => 'نوع الجلسه',
+    'Meeting_Link/Map' => 'الموعد/خريطة',
 ];

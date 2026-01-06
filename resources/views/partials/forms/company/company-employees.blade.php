@@ -217,11 +217,7 @@ document.addEventListener('DOMContentLoaded', function () {
   
   const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
   
-  @if(auth()->user() && auth()->user()->company)
-    const companyId = {{ auth()->user()->company->id }};
-  @else
-    const companyId = null;
-  @endif
+  const companyId = {{ request()->route('id') ? request()->route('id') : auth()->user()->company?->id }};
 
   // Constants for validation messages and allowed file types
   const MESSAGES = {
@@ -260,18 +256,27 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   function loadExistingEmployees() {
-    @if(auth()->user() && auth()->user()->company)
-      @if(auth()->user()->company->employees && auth()->user()->company->employees->count() > 0)
-        const existingEmployees = @json(auth()->user()->company->employees);
-        
-        existingEmployees.forEach((employee, index) => {
-          const employeeCard = createEmployeeCard(index === 0, employee);
-          populateEmployeeCard(employeeCard, employee);
-        });
-        updateEmployeeNumbers();
-      @else
-        createEmployeeCard(true);
-      @endif
+    @if($employees && $employees->count() > 0)
+    @php
+      $employees->map(function($emp) {
+        return [
+          'id' => $emp->id,
+          'full_name' => $emp->full_name,
+          'job_title' => $emp->job_title,
+          'gender' => $emp->gender,
+          'employment_type' => $emp->employment_type,
+          'hiring_date' => $emp->hiring_date ? $emp->hiring_date->format('Y-m-d') : null,
+          'documents' => $emp->documents
+        ];
+      });
+    @endphp
+    const existingEmployees = @json($employees);
+      
+      existingEmployees.forEach((employee, index) => {
+        const employeeCard = createEmployeeCard(index === 0, employee);
+        populateEmployeeCardInForm(employeeCard, employee);
+      });
+      updateEmployeeNumbers();
     @else
       createEmployeeCard(true);
     @endif
@@ -330,7 +335,7 @@ document.addEventListener('DOMContentLoaded', function () {
     card.querySelector('.employee-job-title-display').textContent = employee.job_title;
     card.querySelector('.employee-gender-display').textContent = GENDER_LABELS[employee.gender] || employee.gender;
     card.querySelector('.employee-employment-type-display').textContent = EMPLOYMENT_TYPE_LABELS[employee.employment_type] || employee.employment_type;
-    card.querySelector('.employee-hiring-date-display').textContent = formatDate(employee.hiring_data);
+    card.querySelector('.employee-hiring-date-display').textContent = formatDate(employee.hiring_date);
     
     // Handle documents
     const documents = parseDocuments(employee.documents);
@@ -375,6 +380,36 @@ document.addEventListener('DOMContentLoaded', function () {
     addValidationClearListeners(card);
   }
 
+  function populateEmployeeCardInForm(card, employee) {
+    Object.assign(card.dataset, { employeeId: employee.id, isNew: false });
+    card.employeeData = employee;
+    
+    // Keep form section visible, hide display section
+    card.querySelector('.employee-form-section').classList.remove('d-none');
+    card.querySelector('.employee-display-section').classList.add('d-none');
+    
+    // Button visibility
+    card.querySelector('.remove-unsaved-employee-btn').classList.add('d-none');
+    card.querySelector('.delete-employee-btn').classList.remove('d-none');
+    card.querySelector('.cancel-edit-btn').classList.add('d-none');
+    
+    // Change button text to "Update"
+    const submitBtn = card.querySelector('.submit-employee-btn');
+    submitBtn.textContent = '{{ __("admin.Update") }}';
+    
+    // Populate form fields
+    card.querySelector('.employee-name').value = employee.full_name || '';
+    card.querySelector('.employee-job-title').value = employee.job_title || '';
+    card.querySelector('.employee-gender').value = employee.gender || '';
+    card.querySelector('.employee-employment-type').value = employee.employment_type || '';
+    card.querySelector('.employee-hiring-date').value = employee.hiring_date ? moment(employee.hiring_date).format('YYYY-MM-DD') : '';
+    
+    // Populate existing documents
+    populateExistingDocumentsInForm(card);
+    
+    addValidationClearListeners(card);
+  }
+
   function createEmployeeCard(isInitialCard = false, existingData = null) {
     const newCard = employeeCardTemplate.content.cloneNode(true).querySelector('.employee-card');
     
@@ -399,13 +434,26 @@ document.addEventListener('DOMContentLoaded', function () {
     // Button visibility
     const removeBtn = newCard.querySelector('.remove-unsaved-employee-btn');
     const deleteBtn = newCard.querySelector('.delete-employee-btn');
+    const submitBtn = newCard.querySelector('.submit-employee-btn');
     
     removeBtn.classList.toggle('d-none', isInitialCard);
     deleteBtn.classList.add('d-none');
+    
+    // Set button text - "Save" for new employees, "Update" for existing
+    if (existingData) {
+      submitBtn.textContent = '{{ __("admin.Update") }}';
+    } else {
+      submitBtn.textContent = '{{ __("admin.Save") }}';
+    }
 
     employeesContainer.appendChild(newCard);
     updateEmployeeNumbers();
     addValidationClearListeners(newCard);
+
+    // Initialize Flatpickr for employee hiring date
+    $('.employee-hiring-date').flatpickr({
+      dateFormat: "Y-m-d",
+    });
     
     return newCard;
   }
@@ -489,7 +537,7 @@ document.addEventListener('DOMContentLoaded', function () {
       job_title: { errorSelector: '.employee-job-title-error', inputSelector: '.employee-job-title' },
       gender: { errorSelector: '.employee-gender-error', inputSelector: '.employee-gender' },
       employment_type: { errorSelector: '.employee-employment-type-error', inputSelector: '.employee-employment-type' },
-      hiring_data: { errorSelector: '.employee-hiring-date-error', inputSelector: '.employee-hiring-date' },
+      hiring_date: { errorSelector: '.employee-hiring-date-error', inputSelector: '.employee-hiring-date' },
       documents: { errorSelector: '.employee-documents-error', inputSelector: '.employee-documents' }
     };
 
@@ -508,79 +556,118 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function handleSuccessfulSubmission(card, data, inputs) {
-    // Switch to display mode
-    card.querySelector('.employee-form-section').classList.add('d-none');
-    card.querySelector('.employee-display-section').classList.remove('d-none');
+    try {
+      // Keep form mode visible (don't switch to display mode)
+      // card.querySelector('.employee-form-section').classList.add('d-none');
+      // card.querySelector('.employee-display-section').classList.remove('d-none');
 
-    // Update card state
-    card.dataset.isNew = false;
-    if (data.employee?.id) card.dataset.employeeId = data.employee.id;
-    
-    // Update employee data for future edits
-    if (data.employee) {
-      card.employeeData = data.employee;
-    }
+      // Update card state
+      card.dataset.isNew = false;
+      if (data.employee?.id) card.dataset.employeeId = data.employee.id;
+      
+      // Update employee data for future edits
+      if (data.employee) {
+        card.employeeData = {
+          id: data.employee.id,
+          full_name: data.employee.full_name,
+          job_title: data.employee.job_title,
+          gender: data.employee.gender,
+          employment_type: data.employee.employment_type,
+          hiring_date: data.employee.hiring_date ? moment(data.employee.hiring_date).format('YYYY-MM-DD') : '',
+          documents: data.employee.documents
+        };
+      }
 
-    // Update button visibility and status
-    card.querySelector('.remove-unsaved-employee-btn').classList.add('d-none');
-    card.querySelector('.delete-employee-btn').classList.remove('d-none');
-    card.querySelector('.employee-status-badge').classList.remove('d-none');
-    card.querySelector('.employee-status-bar').classList.remove('bg-warning');
-    card.querySelector('.employee-status-bar').classList.add('bg-success');
+      // Update button visibility and status - safely check for elements
+      const removeBtn = card.querySelector('.remove-unsaved-employee-btn');
+      const deleteBtn = card.querySelector('.delete-employee-btn');
+      const cancelBtn = card.querySelector('.cancel-edit-btn');
+      
+      if (removeBtn) removeBtn.classList.add('d-none');
+      if (deleteBtn) deleteBtn.classList.remove('d-none');
+      if (cancelBtn) cancelBtn.classList.add('d-none');
+      
+      // Update button text to "Update" since it's now a saved employee
+      const submitBtn = card.querySelector('.submit-employee-btn');
+      if (submitBtn) {
+        submitBtn.textContent = '{{ __("admin.Update") }}';
+      }
+      
+      // Update status indicators (if in display mode)
+      const displaySection = card.querySelector('.employee-display-section');
+      if (displaySection && !displaySection.classList.contains('d-none')) {
+        const statusBadge = card.querySelector('.employee-status-badge');
+        const statusBar = card.querySelector('.employee-status-bar');
+        if (statusBadge) statusBadge.classList.remove('d-none');
+        if (statusBar) {
+          statusBar.classList.remove('bg-warning');
+          statusBar.classList.add('bg-success');
+        }
+      }
 
-    // Update display content
-    card.querySelector('.employee-name-display').textContent = inputs.name.value;
-    card.querySelector('.employee-job-preview').textContent = inputs.jobTitle.value;
-    card.querySelector('.employee-name-display-preview').textContent = inputs.name.value;
-    card.querySelector('.employee-job-title-display').textContent = inputs.jobTitle.value;
-    card.querySelector('.employee-gender-display').textContent = GENDER_LABELS[inputs.gender.value] || inputs.gender.value;
-    card.querySelector('.employee-employment-type-display').textContent = EMPLOYMENT_TYPE_LABELS[inputs.employmentType.value] || inputs.employmentType.value;
-    card.querySelector('.employee-hiring-date-display').textContent = formatDate(inputs.startDate.value);
+      // Update display content - safely check for elements
+      const nameDisplay = card.querySelector('.employee-name-display');
+      const jobPreview = card.querySelector('.employee-job-preview');
+      const nameDisplayPreview = card.querySelector('.employee-name-display-preview');
+      const jobTitleDisplay = card.querySelector('.employee-job-title-display');
+      const genderDisplay = card.querySelector('.employee-gender-display');
+      const employmentTypeDisplay = card.querySelector('.employee-employment-type-display');
+      const hiringDateDisplay = card.querySelector('.employee-hiring-date-display');
+      
+      if (nameDisplay && inputs.name) nameDisplay.textContent = inputs.name.value;
+      if (jobPreview && inputs.jobTitle) jobPreview.textContent = inputs.jobTitle.value;
+      if (nameDisplayPreview && inputs.name) nameDisplayPreview.textContent = inputs.name.value;
+      if (jobTitleDisplay && inputs.jobTitle) jobTitleDisplay.textContent = inputs.jobTitle.value;
+      if (genderDisplay && inputs.gender) genderDisplay.textContent = GENDER_LABELS[inputs.gender.value] || inputs.gender.value;
+      if (employmentTypeDisplay && inputs.employmentType) employmentTypeDisplay.textContent = EMPLOYMENT_TYPE_LABELS[inputs.employmentType.value] || inputs.employmentType.value;
+      if (hiringDateDisplay && inputs.startDate) hiringDateDisplay.textContent = formatDate(inputs.startDate.value);
 
-    // Update documents list
-    const documents = data.employee?.documents ? parseDocuments(data.employee.documents) : [];
-    const uploadedFilesList = card.querySelector('.uploaded-files-list');
-    const documentsCount = card.querySelector('.employee-documents-count');
-    const noDocumentsDiv = card.querySelector('.employee-no-documents');
-    
-    uploadedFilesList.innerHTML = '';
-    documentsCount.textContent = documents.length;
-    
-    if (documents.length > 0) {
-      noDocumentsDiv.classList.add('d-none');
-      documents.forEach(doc => {
-        const listItem = document.createElement('div');
-        listItem.className = 'mb-2';
-        listItem.innerHTML = `
-          <div class="card border-0 bg-light">
-            <div class="card-body p-3">
-              <div class="d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center gap-3">
-                  <div class="avatar avatar-sm bg-label-primary rounded">
-                    <i class="${getFileIcon(doc.name)}"></i>
-                  </div>
-                  <div>
-                    <h6 class="mb-0">${doc.name}</h6>
-                    <small class="text-muted">{{ $l == 'ar' ? 'مستند داعم' : 'Supporting Document' }}</small>
-                  </div>
-                </div>
-                <a href="${doc.url}" target="_blank" class="btn btn-sm btn-outline-primary">
-                  <i class="ti ti-download me-1"></i>{{ $l == 'ar' ? 'تحميل' : 'Download' }}
-                </a>
-              </div>
-            </div>
-          </div>
-        `;
-        uploadedFilesList.appendChild(listItem);
+      // Update form fields with server response (in case server modified anything)
+      if (data.employee) {
+        const nameInput = card.querySelector('.employee-name');
+        const jobTitleInput = card.querySelector('.employee-job-title');
+        const genderInput = card.querySelector('.employee-gender');
+        const employmentTypeInput = card.querySelector('.employee-employment-type');
+        const hiringDateInput = card.querySelector('.employee-hiring-date');
+        
+        if (nameInput && data.employee.full_name) {
+          nameInput.value = data.employee.full_name;
+        }
+        if (jobTitleInput && data.employee.job_title) {
+          jobTitleInput.value = data.employee.job_title;
+        }
+        if (genderInput && data.employee.gender) {
+          genderInput.value = data.employee.gender;
+        }
+        if (employmentTypeInput && data.employee.employment_type) {
+          employmentTypeInput.value = data.employee.employment_type;
+        }
+        if (hiringDateInput && data.employee.hiring_date) {
+          hiringDateInput.value = data.employee.hiring_date ? moment(data.employee.hiring_date).format('YYYY-MM-DD') : '';
+        }
+      }
+
+      // Update documents list in form (since we're keeping form visible)
+      populateExistingDocumentsInForm(card);
+      
+      // Clear file input
+      const documentsInput = card.querySelector('.employee-documents');
+      if (documentsInput) {
+        documentsInput.value = '';
+      }
+
+      releaseSuccessAlert({
+        title: '{{ __('admin.Success!') }}',
+        message: data.state || (data.employee?.id ? MESSAGES.editSuccess : MESSAGES.addSuccess),
       });
-    } else {
-      noDocumentsDiv.classList.remove('d-none');
+    } catch (error) {
+      console.error('Error in handleSuccessfulSubmission:', error);
+      // Still show success message even if there's a minor DOM error
+      releaseSuccessAlert({
+        title: '{{ __('admin.Success!') }}',
+        message: data.state || (data.employee?.id ? MESSAGES.editSuccess : MESSAGES.addSuccess),
+      });
     }
-
-    releaseSuccessAlert({
-      title: '{{ __('admin.Success!') }}',
-      message: data.state || (data.employee?.id ? MESSAGES.editSuccess : MESSAGES.addSuccess),
-    });
   }
 
   function handleEmployeeDelete(card) {
@@ -599,14 +686,16 @@ document.addEventListener('DOMContentLoaded', function () {
       cancelButtonText: "{{ __('Cancel') }}"
     }).then((result) => {
       if (result.isConfirmed) {
-        const formData = new FormData();
-        formData.append('_token', csrfToken);
-        formData.append('id', card.dataset.employeeId);
+        const employeeId = card.dataset.employeeId;
         
         fetch(`{{ route('company.employees_delete', '') }}/${companyId}`, {
           method: 'DELETE',
-          body: formData,
-          headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+          headers: { 
+            'X-CSRF-TOKEN': csrfToken, 
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ id: employeeId })
         })
         .then(response => {
           if (!response.ok) {
@@ -730,6 +819,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const showRemoveBtn = !card.classList.contains('initial-employee-card') && card.dataset.isNew === 'true';
     card.querySelector('.remove-unsaved-employee-btn').classList.toggle('d-none', !showRemoveBtn);
 
+    // Change button text to "Update"
+    const submitBtn = card.querySelector('.submit-employee-btn');
+    submitBtn.textContent = '{{ __("admin.Update") }}';
+
     // Populate form with saved data
     const employee = card.employeeData;
     if (employee) {
@@ -737,7 +830,7 @@ document.addEventListener('DOMContentLoaded', function () {
       card.querySelector('.employee-job-title').value = employee.job_title || '';
       card.querySelector('.employee-gender').value = employee.gender || '';
       card.querySelector('.employee-employment-type').value = employee.employment_type || '';
-      card.querySelector('.employee-hiring-date').value = employee.hiring_data || '';
+      card.querySelector('.employee-hiring-date').value = employee.hiring_date || '';
     }
 
     populateExistingDocumentsInForm(card);
@@ -881,7 +974,7 @@ document.addEventListener('DOMContentLoaded', function () {
           'job_title': jobTitleInput.value,
           'gender': genderInput.value,
           'employment_type': employmentTypeInput.value,
-          'hiring_data': startDateInput.value
+          'hiring_date': startDateInput.value
         }).forEach(([key, value]) => formData.append(key, value));
         
         // Add files
@@ -917,11 +1010,46 @@ document.addEventListener('DOMContentLoaded', function () {
           body: formData,
           headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
         })
-        .then(response => response.ok ? response.json() : Promise.reject(`HTTP ${response.status}: ${response.statusText}`))
+        .then(async response => {
+          const contentType = response.headers.get('content-type');
+          let data;
+          
+          // Try to parse JSON response
+          if (contentType && contentType.includes('application/json')) {
+            try {
+              data = await response.json();
+            } catch (e) {
+              console.error('Failed to parse JSON response:', e);
+              if (!response.ok) {
+                return Promise.reject(`HTTP ${response.status}: ${response.statusText}`);
+              }
+              // If response is ok but JSON parsing failed, treat as success
+              data = { success: true };
+            }
+          } else {
+            // Non-JSON response
+            const text = await response.text();
+            if (!response.ok) {
+              return Promise.reject(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            data = { success: true, message: text };
+          }
+          
+          if (!response.ok) {
+            return Promise.reject(data);
+          }
+          
+          return data;
+        })
         .then(data => {
+          // Handle validation errors
           if (data.errors) {
             handleServerValidationErrors(card, data.errors);
-          } else if (data.state || data.success) {
+            return;
+          }
+          
+          // Handle successful response
+          if (data.success || data.state || data.employee) {
             handleSuccessfulSubmission(card, data, {
               name: nameInput,
               jobTitle: jobTitleInput,
@@ -929,18 +1057,56 @@ document.addEventListener('DOMContentLoaded', function () {
               employmentType: employmentTypeInput,
               startDate: startDateInput
             });
+          } else {
+            // If response doesn't match expected format, log it
+            console.warn('Unexpected response format:', data);
+            // Still try to handle it if employee data exists
+            if (data.employee) {
+              handleSuccessfulSubmission(card, data, {
+                name: nameInput,
+                jobTitle: jobTitleInput,
+                gender: genderInput,
+                employmentType: employmentTypeInput,
+                startDate: startDateInput
+              });
+            } else {
+              // If we can't handle it, show a warning but don't treat as error
+              console.warn('Could not process response:', data);
+            }
           }
         })
         .catch(error => {
           console.error('Error:', error);
+          // Check if error has a message property or errors object
+          let errorMessage = MESSAGES.error;
+          
+          if (typeof error === 'string') {
+            errorMessage = error;
+          } else if (error?.message) {
+            errorMessage = error.message;
+          } else if (error?.errors) {
+            if (error.errors.general?.[0]) {
+              errorMessage = error.errors.general[0];
+            } else if (error.errors.employee?.[0]) {
+              errorMessage = error.errors.employee[0];
+            } else {
+              const firstError = Object.values(error.errors)[0];
+              errorMessage = Array.isArray(firstError) ? firstError[0] : firstError;
+            }
+          }
+          
           releaseFailureAlert({
             title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
-            message: MESSAGES.error
+            message: errorMessage
           });
         })
         .finally(() => {
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '{{ __("admin.Save") }}';
+          // Restore button text based on whether it's a new or existing employee
+          const isEditing = card.dataset.isNew === 'false' && 
+                           card.dataset.employeeId && 
+                           !card.dataset.employeeId.toString().startsWith('temp_');
+          submitBtn.innerHTML = isEditing ? '{{ __("admin.Update") }}' : '{{ __("admin.Save") }}';
         });
       } else {
         if (firstInvalidInput) {
@@ -967,7 +1133,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   // Initialize Flatpickr for employee hiring date
-  flatpickr(".employee-hiring-date", {
+  $('.employee-hiring-date').flatpickr({
     dateFormat: "Y-m-d",
   });
 });

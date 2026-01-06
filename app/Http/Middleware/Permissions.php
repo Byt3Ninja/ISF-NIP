@@ -11,7 +11,28 @@ use Spatie\Permission\PermissionRegistrar;
 
 class Permissions
 {
-    private $exceptNames = [
+    public $exceptNames = [
+        'core.dashboard_view',
+        'organizations.logo',
+        'organization.landing.asset',
+        'organization.landing.public',
+        'organization.wizard.store',
+        'organization.wizard.update.step1',
+        'organization.wizard.update.step2',
+        'organization.wizard.update.step3',
+        'organization.wizard.update.step4',
+        'organization.wizard.update.step5',
+        'organization.wizard.step5.reorder',
+        'organization.wizard.step5.delete',
+        'organization.wizard.preview',
+        'organization.wizard.check.slug',
+        'organization.wizard.generate.slug',
+        'organization.wizard.managers.list',
+        'organization.wizard.managers.create',
+        'organization.wizard.draft',
+        'organization.wizard.draft.update',
+        'organization.wizard.publish',
+        'provider-registration',
         'filemanager*',
         'dashboard',
         'dashboard/dashboard',
@@ -35,7 +56,7 @@ class Permissions
         'trainings.time_tracking',
     ];
 
-    private $exceptControllers = [
+    public $exceptControllers = [
         'LoginController',
 		'IndexController',
         'ForgotPasswordController',
@@ -73,7 +94,27 @@ class Permissions
                 {
                     if( $this->match( $route ) && !$user->ableTo( $permission ) )
                     {
-                        abort('401', $permission);
+                        if( $request->expectsJson() )
+                        {
+                            // Force English locale for JSON responses to ensure consistent API responses
+                            $currentLocale = app()->getLocale();
+                            app()->setLocale('en');
+
+                            $response = response()->json([
+                                'status' => false,
+                                'title' => __('auth.unauthorized'),
+                                'message' => __('auth.not_authorized_permission') . " ($permission)",
+                            ], 401);
+
+                            // Restore original locale
+                            app()->setLocale($currentLocale);
+
+                            return $response;
+                        }
+                        else
+                        {
+                            abort('401', $permission);
+                        }
                     }
                 }
             }

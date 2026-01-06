@@ -31,7 +31,6 @@
 <!-- Content wrapper -->
 <div class="content-wrapper">
 	<div class="container-xxl flex-grow-1 container-p-y">
-		
 		@if( $_user->hasAnyRole('Registered', 'Admin') )
 		@php
 		
@@ -47,7 +46,7 @@
 		<div class="content-body">
 			@if( session()->has('success') )
 			<div class="row">
-				<div class="col-md-12">
+				<div class="col-md-12 mb-6">
 					<div role="alert" class="alert alert-success alert-dismissible fade show mb-2">
 						{{ __('dashboard.'. session()->get('success')) }}
 						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -57,7 +56,7 @@
 			@endif
 			@if( session()->has('error') )
 			<div class="row">
-				<div class="col-md-12">
+				<div class="col-md-12 mb-6">
 					<div role="alert" class="alert alert-danger alert-dismissible fade show mb-2">
 						{{ __('dashboard.'.session()->get('error')) }}
 						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -67,7 +66,7 @@
 			@endif
 			@if( session()->has('msg') )
 			<div class="row">
-				<div class="col-md-12">
+				<div class="col-md-12 mb-6">
 					<div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2"
 						role="alert">
 						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -94,56 +93,35 @@
 		@endif
 		@endif
 
-		<!-- Demo Invitation Notification -->
-		{{-- <div class="col-md-12">
-			<div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
-				<div class="d-flex justify-content-between align-items-center">
-					<div class="d-flex align-items-center">
-						<i class="ti ti-mail me-3 ti-24px"></i>
-						<div>
-							<h6 class="mb-1">{{ __('dashboard.New Invitation Received!') }}</h6>
-							<small class="text-muted">{{ __('dashboard.You have been invited to participate in the Startup Pitch Competition 2025') }}</small>
-						</div>
-					</div>
-					<div class="d-flex gap-2">
-						<button type="button" class="btn btn-sm btn-outline-primary" onclick="openInvitationModal()">
-							<i class="ti ti-eye me-1"></i>
-							{{ __('dashboard.View Details') }}
-						</button>
-						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-					</div>
-				</div>
-			</div>
-		</div> --}}
-		<div class="row g-6">
-			
-			<!-- Count cards -->
+		<!-- Count Cards -->
+		<div class="row g-6">	
 			@foreach( $countCards as $card )
-			@if( array_intersect($card['permissions'], $permissions) == $card['permissions'] )
-			<a href="{{ $card['href'] }}" class="col-lg-3 col-sm-6">
-				<div class="card card-border-shadow-{{ $card['color'] }} h-100">
-					<div class="card-body">
-						<div class="d-flex justify-content-center align-items-center mb-2">
-							<div class="avatar me-4">
-								<span class="avatar-initial rounded bg-label-primary">
-									<i class="ti {{ $card['icon'] }} text-{{ $card['color'] }} ti-28px"></i>
-								</span>
+				@if( array_intersect($card['permissions'], $permissions) == $card['permissions'] )
+					<a href="{{ $card['href'] }}" class="col-lg-3 col-sm-6">
+						<div class="card card-border-shadow-{{ $card['color'] }} h-100">
+							<div class="card-body">
+								<div class="d-flex justify-content-center align-items-center mb-2">
+									<div class="avatar me-4">
+										<span class="avatar-initial rounded bg-label-primary">
+											<i class="ti {{ $card['icon'] }} text-{{ $card['color'] }} ti-28px"></i>
+										</span>
+									</div>
+									<h4 class="mb-0 text-center">{{ $card['count'] }}</h4>
+								</div>
+								<p class="mb-1 text-center"> @if( Str::contains($card['text'], '.') )
+										{{ __($card['text']) ?: $card['text'] }}
+									@else
+										{{ __('admin.' . $card['text']) ?: $card['text'] }}
+									@endif</p>
 							</div>
-							<h4 class="mb-0 text-center">{{ $card['count'] }}</h4>
 						</div>
-						<p class="mb-1 text-center"> @if( Str::contains($card['text'], '.') )
-								{{ __($card['text']) ?: $card['text'] }}
-							@else
-								{{ __('admin.' . $card['text']) ?: $card['text'] }}
-							@endif</p>
-					</div>
-				</div>
-			</a>
-			@endif
+					</a>
+				@endif
 			@endforeach
-			<!-- / Count cards -->
 		</div>
-		<div class="row mt-6">
+		<!--/ Count Cards -->
+
+		<div class="row mb-6">
 			@foreach( $graphsCards as $card )
 			@if( array_intersect($card['permissions'], $permissions) == $card['permissions'] )
 			<div class="{{ $card['div-class'] }}">
@@ -163,7 +141,8 @@
 			@endif
 			@endforeach
 		</div>
-		<div class="row mt-6">
+
+		<div class="row">
 			@if( array_intersect(['dashboard.widgets_tables_latest_services_view'], $permissions) )
 			@if( $_user->hasRole('Registered') )
 			@if($_user->company?->cycle != null)
@@ -199,8 +178,9 @@
 						@else
 						<div class="widget-todo-title-wrapper d-flex justify-content-between align-items-center mb-75">
 							<div class="widget-todo-title-area d-flex align-items-center">
-								<span class="widget-todo-title ml-50"> <i class="bx bxs-bell-ring text-danger"></i> {{ __('dashboard.No
-									services added') }}.</span>
+								<span class="widget-todo-title ml-50"> <i class="bx bxs-bell-ring text-danger"></i> 
+								{{ __('dashboard.No services added') }}.
+								</span>
 							</div>
 						</div>
 						@endif
@@ -210,6 +190,7 @@
 			@endif
 			@endif
 			@endif
+
 			@if( array_intersect(['dashboard.widgets_tables_available_surveys_view'], $permissions) )
 			@if( $_user->hasRole('Registered') )
 			@if($_user->company?->cycle != null)
@@ -278,7 +259,7 @@
 				<section>
 					<div class="row">
 						<div class="col-md-12">
-							<div class="card mt-10">
+							<div class="card mb-6">
 								<div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom">
 									<div class="d-flex align-items-center py-2">
 										<i class="ti ti-calendar-event ti-24px"></i>
@@ -322,20 +303,20 @@
 			@endif
 			@endif
 			@endif
+
 			@if( array_intersect(['dashboard.widgets_tables_current_enrolled_program_view'], $permissions) )
 			<div class="col-12">
 				<section>
 					<div class="row">
 						<div class="col-md-12">
 							@if( $company && $cycle_id != 0 )
-							<div class="card mt-10">
-								<div class="card-header border-bottom">
-									<h5 style="text-transform: capitalize">
-										<i class="ti ti-briefcase ti-24px"></i>
-										<span class="mx-2">{{ __('dashboard.My progress') }} : {{ $cycleData->title }}</span>
-									</h5>
-									<span class="text-capitalize">{{ __('dashboard.start from') . ': ' . $cycleData->start_format . ' ' .
-										__('dashboard.to') . ': ' . $cycleData->end_format }}</span>
+							<div class="card mb-6">
+								<div class="card-header text-capitalize border-bottom">
+									<h5 class="card-title mb-0">{{ __('dashboard.My progress') }} : {{ $cycleData->title }}</h5>
+									<div class="tex-muted">
+										{{ __('dashboard.start from') . ': ' . $cycleData->start_format . ' ' .
+										__('dashboard.to') . ': ' . $cycleData->end_format }}
+									</div>
 									<div class="d-flex align-items-center mt-3">
 										@if( !is_null( $organization ) )
 										<img src="{{ $organization->image_url }}" alt="avatar" class="rounded-circle" height="35"
@@ -346,9 +327,9 @@
 										<span class="mx-3 text-secondary">{{ $organization->name }}</span>
 									</div>
 								</div>
-								<div class="table-responsive text-nowrap">
+								<div class="card-datatable table-responsive text-nowrap">
 									<table class="table">
-										<thead class="bg-label-light">
+										<thead class="table-light">
 											<tr>
 												<th>{{ $l == 'ar' ? 'المرحلة' : 'Step' }}</th>
 												<th>{{ $l == 'ar' ? 'الحالة' : 'Status' }}</th>
@@ -376,8 +357,7 @@
 													{{ $step->title }}
 													@endif
 												</td>
-												<td><span class="badge bg-{{ $step->color }} text-{{ $step->textColor }}">{{ __('admin.'.$step->status)
-														}}</span></td>
+												<td><span class="badge bg-{{ $step->color }} text-{{ $step->textColor }}">{{ $step->status_flag_tile }}</span></td>
 												<td>{{ $step->from }}</td>
 												<td>{{ $step->to }}</td>
 												<td style="height: 50px;">
@@ -386,7 +366,7 @@
 												</td>
 												<td>
 													@if( $step->stype == 1 || $step->stype == 5 )
-													@if( $step->status == 'On going' )
+													@if( $step->status_flag == 'ongoing' )
 														<a href="/dashboard/cycles/my/{{ $step->id }}" class="btn btn-sm btn-primary"
 															title="{{ __('admin.Submit') }}"> 
 															{{ __('admin.Submit') }} 
@@ -417,114 +397,103 @@
 								</div>
 							</div>
 							@else
-							 <div class="card">
-    <div class="card-header border-bottom">
-        <h5 class="card-title d-flex align-items-center">
-            <i class="ti ti-clipboard-list ti-28px"></i>
-            <span class="mx-2">{{ __('dashboard.IncubationList') }}</span>
-        </h5>
-    </div>
-
-    <div class="card-body">
-        @if(count($workingCycles) > 0)
-            @foreach($workingCycles as $cycle)
-                <div class="border-bottom">
-                    <div class="card-header">
-                        <h4 class="primary">
-                            <i class="bx bxs-bell"></i>
-                            {{ $cycle->title }}
-                        </h4>
-
-                        <div class="d-flex align-items-center mt-2">
-                            <div class="media-left">
-                                @if(!empty($cycle->organization->image_url))
-                                    <img
-                                        src="{{ $cycle->organization->image_url }}"
-                                        alt="{{ $cycle->organization->name }} avatar"
-                                        class="rounded-circle"
-                                        height="40"
-                                        width="40"
-                                    >
-                                @endif
-                            </div>
-
-                            <div class="mx-2">{{ $cycle->organization->name }}</div>
-                        </div>
-                    </div>
-
-                    <div class="card-body bg-rgba-light">
-                        <p class="card-text mb-2">{{ $cycle->description }}</p>
-                        @php $hasPreRequests = !empty($cycle->pre_requests) && count($cycle->pre_requests) > 0; @endphp
-						
-
-												<div class="alert alert-info alert-dismissible p-3 rounded mb-4 position-relative"
-													style="display: {{ $hasPreRequests ? 'block' : 'none' }};">
-													<h6 class="d-flex align-items-center">
-														<i class="ti ti-info-circle text-info ti-24px me-2"></i>
-														@if($_user->company && $_user->company->name)
-														{{ __('dashboard.To join this program as a startup, please complete these requirements first:') }}
-														@else
-														{{ __('dashboard.To get started with this program, please complete your profile requirements:') }}
-														@endif
-													</h6>
-													<ul class="list-unstyled mb-0 d-flex flex-wrap gap-2">
-														@foreach($cycle->pre_requests as $pr)
-														<li id="{{ $pr['id'] }}" class="pre-request-item">
-															<a href="{{ $pr['url'] }}?action=complete-profile" class="btn btn-sm btn-outline-info d-flex align-items-center gap-2" role="button"
-																aria-label="{{ __($pr['label']) }}">
-																<i class="ti ti-external-link"></i>
-																<span>{{ __($pr['label']) }}</span>
-															</a>
-														</li>
-														@endforeach
-													</ul>
-													@if($_user->company && $_user->company->name)
-													<p class="text-muted small mt-2 mb-0">
-														<i class="ti ti-lightbulb me-1"></i>
-														{{ __('dashboard.Completing these steps will help your startup get the most out of the program.') }}
-													</p>
-													@else
-													<p class="text-muted small mt-2 mb-0">
-														<i class="ti ti-lightbulb me-1"></i>
-														{{ __('dashboard.Setting up your profile properly will ensure you have access to all program features.') }}
-													</p>
+							<div class="card mb-6">
+								<div class="card-header border-bottom">
+									<h5 class="card-title mb-0">{{ __('dashboard.IncubationList') }}</h5>
+								</div>
+								<div class="card-body">
+									@if(count($workingCycles) > 0)
+									@foreach($workingCycles as $cycle)
+									<div class="border-bottom">
+										<div class="card-header">
+											<h4 class="primary">
+												<i class="bx bxs-bell"></i>
+												{{ $cycle->title }}
+											</h4>
+							
+											<div class="d-flex align-items-center mt-2">
+												<div class="media-left">
+													@if(!empty($cycle->organization->image_url))
+													<img src="{{ $cycle->organization->image_url }}" alt="{{ $cycle->organization->name }} avatar"
+														class="rounded-circle" height="40" width="40">
 													@endif
-													<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="position: absolute; top: 0; {{ $l == 'en' ? 'right' : 'left' }}: 0.15rem;">
-													</button>
 												</div>
-
-                        <div class="d-flex align-items-center justify-content-between" style="width:100%">
-                            <small class="text-muted" style="text-transform: capitalize">
-                                {{ __('dashboard.start from') }} {{ $cycle->start }}
-                            </small>
-
-                            <button
-                                class="btn btn-primary"
-                                onclick="handleJoinClick(this)"
-                                data-cycle-id="{{ $cycle->id }}"
-                                data-has-pre="{{ $hasPreRequests ? 'true' : 'false' }}"
-                                data-join-url="{{ url('/dashboard/cycles/view/' . $cycle->id) }}"
-                                data-pre-requests="{{ json_encode(collect($cycle->pre_requests ?? [])->map(function($pr) { return ['url' => $pr['url'] ?? '#', 'label' => __($pr['label'] ?? ''), 'action' => $pr['action'] ?? '']; })->toArray()) }}"
-                            >
-                                <span class="me-2">{{ __('dashboard.Join now') }}</span>
-                                <i class="ti ti-arrows-join"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        @else
-            <div class="text-center py-4">
-                <h5 class="m-75 p-75">
-                    <div class="avatar bg-rgba-warning m-0 mr-75 d-inline-flex align-items-center justify-content-center">
-                        <div class="avatar-content"> <i class="bx bx-stats text-warning"></i> </div>
-                    </div>
-                    {{ __('dashboard.No Cycles started yet') }}...
-                </h5>
-            </div>
-        @endif
-    </div>
-</div>
+							
+												<div class="mx-2">{{ $cycle->organization->name }}</div>
+											</div>
+										</div>
+							
+										<div class="card-body bg-rgba-light">
+											<p class="card-text mb-2">{{ $cycle->description }}</p>
+											@php $hasPreRequests = !empty($cycle->pre_requests) && count($cycle->pre_requests) > 0; @endphp
+							
+							
+											<div class="alert alert-info alert-dismissible p-3 rounded mb-4 position-relative"
+												style="display: {{ $hasPreRequests ? 'block' : 'none' }};">
+												<h6 class="d-flex align-items-center">
+													<i class="ti ti-info-circle text-info ti-24px me-2"></i>
+													@if($_user->company && $_user->company->name)
+													{{ __('dashboard.To join this program as a startup, please complete these requirements first:') }}
+													@else
+													{{ __('dashboard.To get started with this program, please complete your profile requirements:') }}
+													@endif
+												</h6>
+												<ul class="list-unstyled mb-0 d-flex flex-wrap gap-2">
+													@foreach($cycle->pre_requests as $pr)
+													<li id="{{ $pr['id'] }}" class="pre-request-item">
+														<a href="{{ $pr['url'] }}?action=complete-profile"
+															class="btn btn-sm btn-outline-info d-flex align-items-center gap-2" role="button"
+															aria-label="{{ __($pr['label']) }}">
+															<i class="ti ti-external-link"></i>
+															<span>{{ __($pr['label']) }}</span>
+														</a>
+													</li>
+													@endforeach
+												</ul>
+												@if($_user->company && $_user->company->name)
+												<p class="text-muted small mt-2 mb-0">
+													<i class="ti ti-lightbulb me-1"></i>
+													{{ __('dashboard.Completing these steps will help your startup get the most out of the program.') }}
+												</p>
+												@else
+												<p class="text-muted small mt-2 mb-0">
+													<i class="ti ti-lightbulb me-1"></i>
+													{{ __('dashboard.Setting up your profile properly will ensure you have access to all program features.') }}
+												</p>
+												@endif
+												<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"
+													style="position: absolute; top: 0; {{ $l == 'en' ? 'right' : 'left' }}: 0.15rem;">
+												</button>
+											</div>
+							
+											<div class="d-flex align-items-center justify-content-between" style="width:100%">
+												<small class="text-muted" style="text-transform: capitalize">
+													{{ __('dashboard.start from') }} {{ $cycle->start }}
+												</small>
+							
+												<button class="btn btn-primary" onclick="handleJoinClick(this)" data-cycle-id="{{ $cycle->id }}"
+													data-has-pre="{{ $hasPreRequests ? 'true' : 'false' }}"
+													data-join-url="{{ url('/dashboard/cycles/view/' . $cycle->id) }}"
+													data-pre-requests="{{ json_encode(collect($cycle->pre_requests ?? [])->map(function($pr) { return ['url' => $pr['url'] ?? '#', 'label' => __($pr['label'] ?? ''), 'action' => $pr['action'] ?? '']; })->toArray()) }}">
+													<span class="me-2">{{ __('dashboard.Join now') }}</span>
+													<i class="ti ti-arrows-join"></i>
+												</button>
+											</div>
+										</div>
+									</div>
+									@endforeach
+									@else
+									<div class="text-center py-4">
+										<h5 class="m-75 p-75">
+											<div class="avatar bg-rgba-warning m-0 mr-75 d-inline-flex align-items-center justify-content-center">
+												<div class="avatar-content"> <i class="bx bx-stats text-warning"></i> </div>
+											</div>
+											{{ __('dashboard.No Cycles started yet') }}...
+										</h5>
+									</div>
+									@endif
+								</div>
+							</div>
 							@endif
 						</div>
 					</div>
@@ -537,134 +506,137 @@
 				<section>
 					<div class="row">
 						<div class="col-md-12">
-							<div class="card mt-10">
+							<div class="card mb-6">
 								<div class="card-header border-bottom">
-									<h5 class="card-title align-items-center">
-										<i class='bx bx-card font-medium-4 mr-1'></i> {{ __("admin.Final_Session") }}
-									</h5>
+									<h5 class="card-title mb-0">{{ __("admin.Final_Session") }}</h5>
 								</div>
-								<div class="card-body">
-									@if( !is_null( $myFinal ) && $myFinal->join_url )
-									<div class="table-responsive">
-										<table class="table mb-0 sessonsTable">
-											<thead class="bg-label-light">
-												<tr>
-													<th>{{__('cycles.User/Title')}}</th>
-													<th>{{__('admin.Judger')}}</th>
-													<th>{{__('cycles.Date/Time')}}</th>
-													<th>{{__('cycles.Done')}}</th>
-													<th>{{__('cycles.Actions')}}</th>
-												</tr>
-											</thead>
-											<tbody>
-												<tr>
-													<td>
-														<div class="d-flex align-items-center">
-															<a class="media-left" href="/dashboard/users/{{ $myFinal->company->user->id }}/edit">
-																<img src="{{ $myFinal->company->user->image_url }}" alt="avatar"
-																	class="rounded-circle me-3" height="40" width="40">
-															</a>
-															<a href="/dashboard/users/{{ $myFinal->company->user->id }}/edit">
-																<div class="media-body">
-																	<h6 class="media-heading mb-0 text-nowrap">{{ $myFinal->company->user->name }}</h6>
-																	<span class="font-small-2 text-nowrap">{{ $myFinal->company->user->title }}</span>
-																</div>
-															</a>
-														</div>
-													</td>
-													<td>
-														@foreach( $myFinal->judges as $judger )
-														@if(!empty($judge))
-														<div style="cursor: pointer;" class="d-flex align-items-center">
-															<div class="chip-body">
-																<div class="avatar">
-																	<img class="img-fluid rounded-circle me-3" src="{{ $judger->img_url }}" alt="photo"
-																		height="20" width="20">
-																</div>
-																<span class="chip-text text-nowrap"> {{ $judger->name }} </span>
+								@if( !is_null( $myFinal ) && $myFinal->join_url )
+								<div class="card-datatable table-responsive">
+									<table class="table mb-0 sessonsTable">
+										<thead class="table-light">
+											<tr>
+												<th>{{__('cycles.User/Title')}}</th>
+												<th>{{__('admin.Judger')}}</th>
+												<th>{{__('cycles.Date/Time')}}</th>
+												<th>{{__('cycles.Done')}}</th>
+												<th>{{__('cycles.Actions')}}</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>
+													<div class="d-flex align-items-center">
+														<a class="media-left" href="/dashboard/users/{{ $myFinal->company->user->id }}/edit">
+															<img src="{{ $myFinal->company->user->image_url }}" alt="avatar"
+																class="rounded-circle me-3" height="40" width="40">
+														</a>
+														<a href="/dashboard/users/{{ $myFinal->company->user->id }}/edit">
+															<div class="media-body">
+																<h6 class="media-heading mb-0 text-nowrap">{{ $myFinal->company->user->name }}</h6>
+																<span class="font-small-2 text-nowrap">{{ $myFinal->company->user->title }}</span>
 															</div>
+														</a>
+													</div>
+												</td>
+												<td>
+													@foreach( $myFinal->judges as $judger )
+													@if(!empty($judge))
+													<div style="cursor: pointer;" class="d-flex align-items-center">
+														<div class="chip-body">
+															<div class="avatar">
+																<img class="img-fluid rounded-circle me-3" src="{{ $judger->img_url }}" alt="photo"
+																	height="20" width="20">
+															</div>
+															<span class="chip-text text-nowrap"> {{ $judger->name }} </span>
 														</div>
-														@endif
-														@endforeach
-													</td>
-													<td> {{ $myFinal->datetime }} <br>({{ $myFinal->duration }}M) </td>
-													<td> {{ $myFinal->datetime < now() ? __('Yes') : __('No') }} </td>
-													<td> <a href="{{ $myFinal->join_url }}" target="_blank">({{__('dashboard.Join now')}})</a>
-													</td>
-												</tr>
-											</tbody>
-										</table>
-									</div>
-									@else
-									<div class="text-center">
-										<h3>{{__('dashboard.Your final session will start soon')}}.</h3>
-									</div>
-									@endif
+													</div>
+													@endif
+													@endforeach
+												</td>
+												<td> {{ $myFinal->datetime }} <br>({{ $myFinal->duration }}M) </td>
+												<td> {{ $myFinal->datetime < now() ? __('Yes') : __('No') }} </td>
+												<td> 
+													@php
+														$endTime = \Carbon\Carbon::parse($myFinal->datetime)->addMinutes($myFinal->duration);
+													@endphp
+													@if(now() > $endTime)
+														<span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
+													@else
+														<a href="{{ $myFinal->join_url }}" target="_blank">({{__('dashboard.Join now')}})</a>
+													@endif
+												</td>
+											</tr>
+										</tbody>
+									</table>
 								</div>
+								@else
+								<div class="text-center">
+									<h3>{{__('dashboard.Your final session will start soon')}}.</h3>
+								</div>
+								@endif
 							</div>
 						</div>
 					</div>
 				</section>
 			</div>
 			@endif
+
 			@if( $cType != 5 && array_intersect(['dashboard.widgets_tables_my_last_training_view'], $permissions) &&
 			$sessions->count() > 0 )
 			<div class="col-12">
 				<section>
 					<div class="row">
 						<div class="col-md-12">
-							<div class="card mt-10">
+							<div class="card mb-6">
 								<div class="card-header border-bottom">
-									<h5 style="text-transform: capitalize">
-										<i class="ti ti-clipboard-list ti-28px"></i>
-										<span class="mx-2"> {{ __('dashboard.My Latest training') }} ::
-											<a href="/dashboard/training/my">{{ __('dashboard.Show all') }}</a>
-										</span>
-									</h5>
-								</div>
-								<div class="card-body">
-									<div class="table-responsive">
-										<table class="table mb-0" id="trainingtable">
-											<thead class="bg-label-light">
-												<tr>
-													<th>#</th>
-													<th>{{ __('cycles.Type') }}</th>
-													<th>{{ __('cycles.Title') }}</th>
-													<th>{{ __('cycles.Start') }}</th>
-													<th>{{ __('cycles.End') }}</th>
-													<th>{{ __('cycles.details') }}</th>
-												</tr>
-											</thead>
-											<tbody>
-												@foreach( $sessions as $key => $session )
-												<tr>
-													<td>{{ $key + 1 }}</td>
-													<td>{{ __('cycles.' . $session->type) }}</td>
-													<td>{{ $session->title }}</td>
-													<td>{{ FormatDate($session->datetime, 'Y-m-d H:i A') ?? '-' }} </td>
-													<td>{{ FormatDate($session->end_datetime, 'Y-m-d H:i A') ?? '-' }}</td>
-													<td>
-														@if( $session->type == 'sessions' )
-														{{ __('cycles.Duration') }}: {{ $session->duration }} {{ __('cycles.Minutes') }} :
-														<a href="{{ $session->join_url }}" target="_blank">
-															<button title="Join only" type="button"
-																class="btn btn-icon rounded-circle btn-light-primary"> <i class="ti ti-brand-zoom"></i>
-															</button>
-														</a>
-														@elseif ($session->type == 'offline')
-														<b>{{ __('cycles.trainer name') }}:</b> {{ $session->trainer_name }}<br>
-														<b>{{ __('cycles.training location') }}:</b>
-														{{ $session->location }} <br>
-														@else
-														<a href="/dashboard/training/my/{{ $session->location }}">{{ __('cycles.Display course
-															contents') }} </a>
-														@endif
-													</td>
-												</tr>
-												@endforeach
-											</tbody>
-										</table>
+									<div class="d-flex align-items-center">
+										<h5 style="text-transform: capitalize">
+											{{ __('dashboard.My Latest training') }} ::
+										</h5>
+										<a href="/dashboard/training/my">{{ __('dashboard.Show all') }}</a>
 									</div>
+								</div>
+								<div class="card-datatable table-responsive">
+									<table class="table mb-0" id="trainingtable">
+										<thead class="table-light">
+											<tr>
+												<th>#</th>
+												<th>{{ __('cycles.Type') }}</th>
+												<th>{{ __('cycles.Title') }}</th>
+												<th>{{ __('cycles.Start') }}</th>
+												<th>{{ __('cycles.End') }}</th>
+												<th>{{ __('cycles.details') }}</th>
+											</tr>
+										</thead>
+										<tbody>
+											@foreach( $sessions as $key => $session )
+											<tr>
+												<td>{{ $key + 1 }}</td>
+												<td>{{ __('cycles.' . $session->type) }}</td>
+												<td>{{ $session->title }}</td>
+												<td>{{ FormatDate($session->datetime, 'Y-m-d H:i A') ?? '-' }} </td>
+												<td>{{ FormatDate($session->end_datetime, 'Y-m-d H:i A') ?? '-' }}</td>
+												<td>
+													@if( $session->type == 'sessions' )
+													{{ __('cycles.Duration') }}: {{ $session->duration }} {{ __('cycles.Minutes') }} :
+													<a href="{{ $session->join_url }}" target="_blank">
+														<button title="Join only" type="button"
+															class="btn btn-icon rounded-circle btn-light-primary"> <i class="ti ti-brand-zoom"></i>
+														</button>
+													</a>
+													@elseif ($session->type == 'offline')
+													<b>{{ __('cycles.trainer name') }}:</b> {{ $session->trainer_name }}<br>
+													<b>{{ __('cycles.training location') }}:</b>
+													{{ $session->location }} <br>
+													@else
+													<a href="/dashboard/training/my/{{ $session->location }}">
+													{{ __('cycles.Display course contents') }} </a>
+													@endif
+												</td>
+											</tr>
+											@endforeach
+										</tbody>
+									</table>
 								</div>
 							</div>
 						</div>
@@ -672,127 +644,139 @@
 				</section>
 			</div>
 			@endif
+
 			@if( array_intersect(['dashboard.widgets_tables_mentors_sessions_view'], $permissions) )
 			<div class="col-12">
 				<section>
 					<div class="row">
 						<div class="col-md-12">
-							<div class="card mt-10">
+							<div class="card mb-6">
 								<div class="card-header border-bottom">
 									<div class="d-flex justify-content-between align-items-center">
-										<div class="d-flex align-items-center">
-											<i class='ti ti-calendar-event me-2'></i> 
-											<h5 class="card-title mb-0">
-												{{ __("dashboard.UpcomingMentorsSession") }}
-												{{-- @if($days!=14)
-												<div onclick="redirectWithDays('14')" class="btn btn-label-success" id="forteenDays"> 14
-													{{__('cycles.days')}}</div>
-												@else
-												<div onclick="redirectWithDays('14')" class="btn btn-label-warning" id="forteenDays"> 14
-													{{__('cycles.days')}}</div>
-												@endif
-												@if($days!=7)
-												<div onclick="redirectWithDays('7')" class="btn btn-label-success" id="sevenDays"> 7
-													{{__('cycles.days')}}</div>
-												@else
-												<div onclick="redirectWithDays('7')" class="btn btn-label-warning" id="sevenDays"> 7
-													{{__('cycles.days')}}</div>
-												@endif --}}
-											</h5>
-										</div>
+										<h5 class="card-title mb-0">{{ __("dashboard.UpcomingMentorsSession") }}</h5>
 										<a class="btn btn-sm btn-primary" href="/dashboard/mentorship/mine">
 											<i class="ti ti-eye me-2 ti-16px"></i>
 											{{__('cycles.showAll')}}
 										</a>
 									</div>
 								</div>
-								<div class="card-body">
-									<div class="table-responsive">
-										<table class="table mb-0 sessonsTable">
-											<thead class="bg-label-light">
-												<tr>
-													<th>{{__('cycles.User/Title')}}</th>
-													<th>{{__('cycles.Mentor')}}</th>
-													@if ($_user->hasRole('Admin'))<th>{{__('cycles.Rate/Comment')}}</th>@endif
-													<th>{{__('cycles.Date/Time')}}</th>
-													<th>{{__('cycles.Approved')}}</th>
-													<th>{{__('cycles.Done')}}</th>
-													<th>{{__('cycles.Actions')}}</th>
-												</tr>
-											</thead>
-											<tbody>
-												@foreach($nextSessions as $session)
-												<tr>
-													<td>
-														<div class="d-flex align-items-center gap-2">
-															<a class="media-left" href="/dashboard/users/{{ $session->user_id }}/edit">
-																<img src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle me-3"
-																	height="40" width="40">
-															</a>
-															<a href="/dashboard/users/{{ $session->user_id }}/edit">
-																<div class="media-body">
-																	<h6 class="media-heading mb-0 text-nowrap">{{ $session->user->name }}</h6>
-																	<span class="font-small-2 text-nowrap">{{$session->user->title }}</span>
-																</div>
-															</a>
-														</div>
-													</td>
-													<td>
-														<div style="cursor: pointer;" class="d-flex align-items-center"
-															onclick="mentor({{ $session->mentor_id }}, '{{ $session->mentor->name }}', '{{ $session->mentor->ratings }}')">
-															<div class="avatar">
-																<img 
-																	class="img-fluid rounded-circle me-3" 
-																	src="{{$session->mentor->image_url ?? '/icons/account.svg'}}"
-																	alt="image" height="20" width="20"
-																/>
+								<div class="card-datatable table-responsive">
+									<table class="table mb-0 sessonsTable">
+										<thead class="table-light">
+											<tr>
+												<th>{{__('cycles.User/Title')}}</th>
+												<th>{{__('cycles.Mentor')}}</th>
+												@if ($_user->hasRole('Admin'))<th>{{__('cycles.Rate/Comment')}}</th>@endif
+												<th>{{__('cycles.Date/Time')}}</th>
+												<th>{{__('cycles.Approved')}}</th>
+												<th>{{__('cycles.Done')}}</th>
+												<th>{{__('mentor.session_type')}}</th>
+												<th>{{__('dashboard.Meeting Link')}}</th>
+											</tr>
+										</thead>
+										<tbody>
+											@foreach($nextSessions as $session)
+											
+											<tr>
+												<td>
+													<div class="d-flex align-items-center gap-2">
+														<a class="media-left" href="/dashboard/users/{{ $session->user_id }}/edit">
+															<img src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle me-3"
+																height="40" width="40">
+														</a>
+														<a href="/dashboard/users/{{ $session->user_id }}/edit">
+															<div class="media-body">
+																<h6 class="media-heading mb-0 text-nowrap">{{ $session->user->name }}</h6>
+																<span class="font-small-2 text-nowrap">{{$session->user->title }}</span>
 															</div>
-															<span class="chip-text text-nowrap"> {{$session->mentor->name}} </span>
+														</a>
+													</div>
+												</td>
+												<td>
+													<div style="cursor: pointer;" class="d-flex align-items-center gap-2"
+														onclick="mentor({{ $session->mentor_id }}, '{{ $session->mentor->name }}', '{{ $session->mentor->ratings }}')">
+														<div class="avatar">
+															<img 
+																class="img-fluid rounded-circle me-3" 
+																src="{{$session->mentor->image_url ?? '/icons/account.svg'}}"
+																alt="image" height="20" width="20"
+															/>
 														</div>
-													</td>
-													@if ($_user->hasRole('Admin'))
-													<td> <small> {!! $session->rate_comment ? str_repeat('<i class="bx bxs-star"
-																style="color: #fc960f;"></i>', $session->rating) . '<br>' . $session->rate_comment :
-															$session->comment !!} </small> </td>
-													@endif
-													<td> {{ $session->zoom_date }} <br> ({{ $session->period }}M) </td>
-													<td>
-														<div class="d-flex align-items-center gap-1"> {!! __( $session->approved ) ??'<span
-																class="warning">'.__('Waiting').'</span>' !!} </div>
-													</td>
-													<td> {{ $session->done ?__('Yes') : __('No') }} </td>
-													<td> 
-														@php
-															$now = date('Y-m-d H:i');
-															$start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
-															$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+'. $session->period .' minutes'));
-															@endphp
-														@if ($session->approved == 'Yes')
-															@if($now >= $start_time )
+														<span class="chip-text text-nowrap"> {{$session->mentor->name}} </span>
+													</div>
+												</td>
+												@if ($_user->hasRole('Admin'))
+												<td> <small> {!! $session->rate_comment ? str_repeat('<i class="bx bxs-star"
+															style="color: #fc960f;"></i>', $session->rating) . '<br>' . $session->rate_comment :
+														$session->comment !!} </small> </td>
+												@endif
+												<td> {{ $session->zoom_date }} <br> ({{ $session->period }}M) </td>
+												<td>
+													<div class="d-flex align-items-center gap-1"> {!! __( $session->approved ) ??'<span
+															class="warning">'.__('Waiting').'</span>' !!} </div>
+												</td>
+												<td> {{ $session->done ?__('Yes') : __('No') }} </td>
+												<td> 
+													@php
+														$badgeColor = 'secondary';
+														$badgeIcon = 'screen-share';
+														if ($session->session_type == 'Online') {
+															$badgeColor = 'success';
+															$badgeIcon = 'video';
+														} elseif($session->session_type == 'Offline'){
+															$badgeColor = 'warning';
+															$badgeIcon = 'map';
+														}
+													@endphp
+													<small class="badge bg-label-{{ $badgeColor }}">
+														<i class="ti ti-{{ $badgeIcon }} ti-16px me-1"></i>
+														{{ $session->session_type ?? __('admin.All') }}
+													</small>
+												</td>
+												<td> 
+													
+													@php
+														$now = date('Y-m-d H:i');
+														$start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
+														$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+'. $session->period .' minutes'));
+														@endphp
+														
+													@if ($session->approved == 'Yes')
+													@if( $session->session_type == 'Online' )
+														@if($now >= $start_time )
 															@if($now <= $end_time)
-															<span class="warning">
-																<a class="btn btn-sm btn-label-primary" href="{{ $session->join_url }}" target="_blank">
-																	<i class="ti ti-brand-zoom me-2"></i>
-																	{{ __('dashboard.Join now') }}
-																</a>
-															</span>
+																
+																<span class="warning">
+																	<a class="btn btn-sm btn-label-primary" href="{{ $session->join_url }}" target="_blank">
+																		<i class="ti ti-brand-zoom me-2"></i>
+																		{{ __('dashboard.Join now') }}
+																	</a>
+																</span>
+																
 															@else
-																<span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
+																<span class="text-danger"> <i class="ti ti-alarm"></i> {{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }} </span>
 															@endif
-															@else 
-																<span class="text-warning"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }} </span>
-															@endif
-														@elseif($session->approved == 'No')
-															{{ __('admin.No') }}
-														@else
-															{!! '<span class="text-primary">' . __('admin.Waiting_for_approval') . '</span>' !!}
+														@else 
+															<span class="text-warning"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }} </span>
 														@endif
-													</td>
-												</tr>
-												@endforeach
-											</tbody>
-										</table>
-									</div>
+													@else
+													<span class="warning">
+														<a class="btn btn-sm btn-label-success" href="{{ $session->organization->google_map_url ?? '#' }}" target="_blank">
+															<i class="ti ti-map me-2"></i>
+															{{ __('admin.Location') }}
+														</a>
+													</span>
+													@endif
+													@elseif($session->approved == 'No')
+														{{ __('admin.No') }}
+													@else
+														{!! '<span class="text-primary">' . __('admin.Waiting_for_approval') . '</span>' !!}
+													@endif
+												</td>
+											</tr>
+											@endforeach
+										</tbody>
+									</table>
 								</div>
 							</div>
 						</div>
@@ -800,276 +784,272 @@
 				</section>
 			</div>
 			@endif
+			
 			@if( array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_null($cycle_id) )
 			<div class="col-12">
-				<div class="card mt-10">
-					<section>
-						<div class="row">
-							<div class="col-md-12">
-								<div class="card">
-									<div class="card-header border-bottom mb-4">
-										<h5 class="card-title align-items-center">
-											<i class="ti ti-school ti-28px"></i>
-											<span class="mx-2">{{ __("dashboard.Mentors") }}</span>
-										</h5>
-									</div>
-									<div class="card-body">
-										<div class="table-responsive">
-											<table class="table" id="mentorstable">
-												<thead class="bg-label-light">
-													<tr>
-														<th>#</th>
-														<th>{{__('dashboard.Name/Title')}}</th>
-														<th>{{__('dashboard.Bio')}}</th>
-														<th>{{__('dashboard.Specialization')}}</th>
-														<th>{{__('dashboard.Linkedin')}}</th>
-														@if( $_user->ableTo('mentors.settings_modify', $permissions) )<th>
-															{{__('dashboard.Request')}}</th>@endif
-													</tr>
-												</thead>
-												<tbody>
-													@foreach($mentors->filter(function($mentor) use ($cycle_id) { return in_array($cycle_id,
-													$mentor->mentor_cycles); })->values() as $key => $mentor)
-													<tr>
-														<td>{{$key+1}}</td>
-														<td>
-															<div class="d-flex align-items-center gap-1">
-																<a class="media-left"> <img src="{{ $mentor->image_url }}" alt="avatar"
-																		class="rounded-circle me-3" height="40" width="40"> </a>
-																@if( $_user->ableTo('mentors.profile_view', $permissions) )<a target="_blank"
-																	href="{{route('mentors.profile_view', $mentor->id)}}">@endif
-																	<div class="media-body">
-																		<h6 class="media-heading mb-0 text-nowrap">{{ $mentor->name ?? '-' }}</h6>
-																		<span class="font-small-2 text-nowrap">{{ $mentor->title ?? '-' }}</span>
-																	</div>
-																	@if( $_user->ableTo('mentors.profile_view', $permissions) )
-																</a>@endif
-															</div>
-														</td>
-														<td> {{ $mentor->bio ?? '-' }} </td>
-														<td> {{ $mentor->specialization ?? '-' }} </td>
-														<td>
-															@if( $mentor->linkedin ?? 0 )
-															<a title="Linkedin URL" target="_blank" href="{{ $mentor->linkedin }}"
-																class="btn btn-icon rounded-circle btn-label-primary"> <i
-																	class="fa-brands fa-linkedin-in"></i></a>
-															@endif
-														</td>
-														@if( $_user->ableTo('mentors.settings_modify', $permissions) )
-														<td>
-															<button
-																onclick="request({{ $mentor->id }},'{{ $mentor->name }}', {{ $mentor->organization_id }}, {{ $mentor->cycle_id }})"
-																title="Add new request" type="button"
-																class="btn btn-icon rounded-circle btn-label-success">
-																<i class="fa fa-plus"></i>
-															</button>
-														</td>
-														@endif
-													</tr>
-													@endforeach
-												</tbody>
-											</table>
+				<div class="card mb-6">
+					<div class="card-header border-bottom">
+						<h5 class="card-title mb-0">{{ __("dashboard.Mentors") }}</h5>
+					</div>
+					<div class="card-datatable table-responsive">
+						<table class="table" id="mentorstable">
+							<thead class="table-light">
+								<tr>
+									<th>#</th>
+									<th>{{__('dashboard.Name/Title')}}</th>
+									<th>{{__('dashboard.Bio')}}</th>
+									<th>{{__('dashboard.Specialization')}}</th>
+									<th>{{__('dashboard.Linkedin')}}</th>
+									@if( $_user->ableTo('mentors.settings_modify', $permissions) )<th>
+										{{__('dashboard.Request')}}</th>@endif
+								</tr>
+							</thead>
+							<tbody>
+								@foreach($mentors->filter(function($mentor) use ($cycle_id) { return in_array($cycle_id,
+								$mentor->mentor_cycles); })->values() as $key => $mentor)
+								<tr>
+									<td>{{$key+1}}</td>
+									<td>
+										<div class="d-flex align-items-center gap-1">
+											<a class="media-left"> <img src="{{ $mentor->image_url }}" alt="avatar"
+													class="rounded-circle me-3" height="40" width="40"> </a>
+											@if( $_user->ableTo('mentors.profile_view', $permissions) )<a target="_blank"
+												href="{{route('mentors.profile_view', $mentor->id)}}">@endif
+												<div class="media-body">
+													<h6 class="media-heading mb-0 text-nowrap">{{ $mentor->name ?? '-' }}</h6>
+													<span class="font-small-2 text-nowrap">{{ $mentor->title ?? '-' }}</span>
+												</div>
+												@if( $_user->ableTo('mentors.profile_view', $permissions) )
+											</a>@endif
 										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</section>
+									</td>
+									<td> {{ $mentor->bio ?? '-' }} </td>
+									<td> {{ $mentor->specialization ?? '-' }} </td>
+									<td>
+										@if( $mentor->linkedin ?? 0 )
+										<a title="Linkedin URL" target="_blank" href="{{ $mentor->linkedin }}"
+											class="btn btn-icon rounded-circle btn-label-primary"> <i
+												class="fa-brands fa-linkedin-in"></i></a>
+										@endif
+									</td>
+									@if( $_user->ableTo('mentors.settings_modify', $permissions) )
+									<td>
+										@php
+											$schedules = App\Schedule::where('user_id', $mentor->id ?? auth()->id())
+														->where(function ($query) {$query
+																->whereNull('date')
+																->orWhere('date', '>', date('Y-m-d'))
+																->orWhere(function ($q) {
+																	$q->where('date', date('Y-m-d'))
+																	->where('tto', '>', date('H:i:s'));
+																});
+														})
+														->get();
+										@endphp
+										@if($schedules->isNotEmpty())
+											<button
+												onclick="if (typeof fetchSlots === 'function') { fetchSlots({{ $mentor->id }}, {{ $mentor->cycle_id }}, {{ auth()->user()->company->cycledata->organization_id }}); }"
+												{{-- onclick="request({{ $mentor->id }},'{{ $mentor->name }}', {{ $mentor->organization_id }}, {{ $mentor->cycle_id }})" --}}
+												title="{{ __('cycles.Request_Mentorship') }}"
+												type="button"
+												class="btn btn-icon rounded-circle btn-label-success">
+												<i class="fa fa-plus"></i>
+											</button>
+										@else
+											<button type="button" class="btn btn-icon rounded-circle btn-label-success" disabled>
+												<i class="fa fa-plus"></i>
+											</button>
+										@endif
+									</td>
+									@endif
+								</tr>
+								@endforeach
+							</tbody>
+						</table>
+					</div>
 				</div>
 			</div>
 			@endif
 
 			@if( array_intersect(['dashboard.widgets_tables_my_current_schedule_view'], $permissions) )
+			@if( $_user->ableTo('slots.index', $permissions) )
 			<div class="col-12">
-				<div class="card mt-10">
-					<section>
-						<div class="row">
-							<div class="col-md-12">
-								<div class="card">
-									<div class="card-header mb-4">
-										<div class="d-flex justify-content-between align-items-center">
-											<div class="d-flex align-items-center">
-												<i class="ti ti-calendar-plus ti-24px"></i>
-												<span class="mx-2">{{ __("dashboard.My current schedule") }}</span>
-											</div>
-											@if( $_user->ableTo('mentors.settings_modify', $permissions) )
-											<button id="addSchedule"
-												onclick="this.querySelector('.spinner-border').classList.remove('d-none'); mentorSchedule(1, undefined, 0)"
-												type="button" class="btn btn-sm btn-label-primary">
-												{{ __('dashboard.Schedule') }}
-												<i class="ti ti-calendar ms-2"></i>
-												<span class="spinner-border spinner-border-sm d-none ms-2" role="status"
-													aria-hidden="true"></span>
-											</button>
-											@endif
-										</div>
-									</div>
-									<div class="card-body">
-										<div class="table-responsive">
-											<table class="table">
-												<thead>
-													<th> {{ '#' }} </th>
-													<th> {{ __('dashboard.Days') }} </th>
-													<th> {{ __('dashboard.Time') }} </th>
-													<th> {{ __('dashboard.Notes') }} </th>
-													<th> {{ __('dashboard.Actions') }} </th>
-												</thead>
-												<tbody>
-													@foreach( $my_schedules as $key => $schedule )
-													<tr class="text-{{ $schedule->active ? 'primary' : 'danger' }}">
-														<td> {{ $loop->iteration }} </td>
-														@php
-														$days = str_replace('"', '', $schedule->days);
-														@endphp
-														<td> {{ __('admin.'.$days) }} </td>
-														<td> {{ __('dashboard.from') }} {{ $schedule->t_from }} {{ __('dashboard.to') }} {{
-															$schedule->t_to }} </td>
-														<td> {{ $schedule->notes }} </td>
-														<td>
-															<div class="dropdown">
-																<button type="button" class="btn p-0 dropdown-toggle hide-arrow"
-																	data-bs-toggle="dropdown"> <i class="ti ti-dots-vertical"></i> </button>
-																<div class="dropdown-menu">
-																	{{-- <button class="dropdown-item" onclick="mentorSchedule(1, undefined, 0)" type="button"> <i
-																			class="ti ti-pencil me-2"></i> Edit </button> --}}
-																	{{-- <button class="dropdown-item"
-																		onclick="mentorSchedule(2, {{ $schedule->id }}, {{ $schedule->active }})" type="button">
-																		<i class="ti ti-{{ $schedule->active ? 'eye' : 'eye-off' }} me-2"></i>
-																		{{ $schedule->active ? 'Deactivate' : 'Activate' }}
-																	</button> --}}
-																	<button onclick="mentorSchedule(3,{{ $schedule->id }},0)" type="button"
-																		class="dropdown-item"><i class="ti ti-trash me-2"></i> {{ __('admin.Delete') }}</button>
-																</div>
-															</div>
-														</td>
-													</tr>
-													@endforeach
-													@if( $my_schedules->count() == 0 )
-													<tr>
-														<td class="text-center" colspan="5">{{ __('cycles.No data available in table') }}</td>
-													</tr>
-													@endif
-												</tbody>
-											</table>
-										</div>
-									</div>
-								</div>
-							</div>
+				<div class="card mb-6">
+					<div class="card-header">
+						<div class="d-flex justify-content-between align-items-center">
+							<h5 class="card-title mb-0">{{ __("mentor.my_availability_slots") }}</h5>
+
+							@if ($_user->ableTo('slots.index', $permissions) )
+								<a href="{{ route('slots.index') }}" class="btn btn-primary">
+									<i class="ti ti-calendar-cog me-2"></i>
+									{{ __("mentor.manage_availability") }}
+								</a>
+							@endif
 						</div>
-					</section>
+					</div>
+					<div class="card-datatable table-responsive">
+						<table class="datatables-basic table slots-table">
+							<thead class="table-light">
+								<th> {{ __('mentor.days_date') }} </th>
+								<th> {{ __('dashboard.Weekly') }} </th>
+								<th> {{ __('mentor.start_time') }} </th>
+								<th> {{ __('mentor.end_time') }} </th>
+								<th> {{ __('mentor.session_type') }} </th>
+								<th> {{ __('dashboard.Actions') }} </th>
+							</thead>
+							<tbody>
+								@foreach( $my_schedules as $key => $schedule )
+								<tr>
+									<td> {{ $schedule['weekly'] ? $schedule['weekday'] : $schedule['date'] }} </td>
+									<td> 
+										<span class="badge bg-label-{{ $schedule['weekly'] ? 'success' : 'warning' }}">
+											{{ $schedule['weekly'] ? __('Yes') : __('No') }}
+										</span>
+									</td>
+									<td> {{ $schedule['start_time'] }} </td>
+									<td> {{ $schedule['end_time'] }} </td>
+									<td>
+										<span class="badge bg-label-{{ $schedule['session_type'] == 'Online' ? 'info' : ($schedule['session_type'] == 'Offline' ? 'secondary' : 'primary') }}">
+											{{ $schedule['session_type'] == 'Online' ? __('mentor.online') : ($schedule['session_type'] == 'Offline' ? __('mentor.offline') : __('mentor.both')) }}
+										</span>
+									</td>
+									<td>
+										<button 
+											type="button"
+											class="btn btn-sm btn-label-danger delete-slot"
+											data-value="{{ $schedule['id'] ?? 0 }}"
+										>
+											<i class="ti ti-trash ti-16px"></i>
+										</button>
+									</td>
+								</tr>
+								@endforeach
+								@if( $my_schedules->count() == 0 )
+								<tr>
+									<td class="text-center" colspan="6">{{ __('cycles.No data available in table') }}</td>
+								</tr>
+								@endif
+							</tbody>
+						</table>
+					</div>
 				</div>
 			</div>
+			@endif
 			@endif
 
 			@if( array_intersect(['dashboard.widgets_tables.my_next_mentorship_sessions_view'], $permissions) )
 			<div class="col-12">
-				<div class="card mt-10">
-					<section>
-						<div class="row">
-							<div class="col-md-12">
-								<div class="card">
-									<div class="card-header mb-4">
-										<h5 class="card-title align-items-center">
-											<i class="ti ti-calendar-stats ti-24px"></i>
-											<span class="mx-2">{{ __("dashboard.My next mentorship sessions") }}</span>
-										</h5>
-									</div>
-									<div class="card-body">
-										<div class="table-responsive">
-											<table class="table">
-												<thead>
-													<th> {{ '#' }} </th>
-													<th> {{ __('dashboard.Company') }} </th>
-													<th> {{ __('dashboard.User') }} </th>
-													<th> {{ __('dashboard.Date') }} </th>
-													<th> {{ __('dashboard.Admin Notes') }} </th>
-													<th> {{ __('dashboard.Meeting Link') }} </th>
-												</thead>
-												<tbody>
-													@foreach( $upcoming_sessions as $key => $session )
-													<tr>
-														<td> {{ $loop->iteration }} </td>
-														<td>
-															@if( $_user->ableTo('company.profile_view', $permissions) )<a class="text-dark"
-																href="/dashboard/companyProfile/{{ $session->user->company->id }}">@endif
-																<img src="{{ $session->user->company->logo_url }}" alt="avatar" class="rounded-circle"
-																	height="40" width="40">
-																<span class="fw-medium"> {{ $session->user->company->name }}</span>
-																@if( $_user->ableTo('company.profile_view', $permissions) )</a>@endif
-														</td>
-														<td>
-															@if( $_user->ableTo('users.edit', $permissions) )<a
-																class="text-dark d-flex align-items-center gap-2"
-																href="/dashboard/users/{{ $session->user->id }}/edit">@endif
-																<img src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle"
-																	height="35" width="35" style="border: 2px solid #ddd;">
-																<div class="media-body">
-																	<h6 class="media-heading mb-0" style="font-size: 14px;">{{ $session->user->name }}
-																	</h6>
-																	<span class="font-small-2" style="font-size:11px;">{{ $session->user->title }}</span>
-																</div>
-																@if( $_user->ableTo('users.edit', $permissions) )
-															</a>@endif
-														</td>
-														<td> {{ FormatDate($session->zoom_date, 'Y-m-d H:i A') }} ({{ $session->period }}M) </td>
-														<td> {{ $session->admin_comment ?? '...' }} </td>
-														<td>
-															@php
-																$now = date('Y-m-d H:i');
-																$start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
-																$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+' . $session->period .' minutes'));
-															@endphp
-															
-															@if( $now >= $start_time )
-																@if( $now <= $end_time )
-																<a href="{{ $session->start_url }}" target="_blank">
-																	<button title="Start Meeting" type="button" data-value="{{ $session->id }}" type="button" class="btn btn-label-primary rounded">
-																		<i class="ti ti-link"></i> {{ __('admin.Join Meeting') }}
-																	</button>
-																</a>
-																@if( !empty( $session->passcode ) )
-																	 | <button title="Show Passcode" type="button" data-passcode="{{ $session->passcode }}" type="button" class="btn btn-label-warning show-passcode rounded">
-																		<i class="ti ti-key"></i>
-																	</button>
-																@endif
-																@else
-																	<span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
-																@endif
-															@else
-																<i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }}
-															@endif
-														</td>
-													</tr>
-													@endforeach
-													@if( $upcoming_sessions->count() == 0 )
-													<tr>
-														<td class="text-center" colspan="6">{{ __('cycles.No data available in table') }}</td>
-													</tr>
+				<div class="card mb-6">
+					<div class="card-header">
+						<h5 class="card-title mb-0 text-capitalize">
+							{{ __("dashboard.My next mentorship sessions") }}
+						</h5>
+					</div>
+					<div class="card-datatable table-responsive">
+						<table class="table">
+							<thead class="table-light">
+								<th> {{ '#' }} </th>
+								<th> {{ __('dashboard.Company') }} </th>
+								<th> {{ __('dashboard.User') }} </th>
+								<th> {{ __('dashboard.Date') }} </th>
+								<th> {{ __('dashboard.Session_Type') }} </th>
+								<th> {{ __('dashboard.Admin Notes') }} </th>
+								<th> {{ __('dashboard.Meeting Link') }} </th>
+							</thead>
+							<tbody>
+								@foreach( $upcoming_sessions as $key => $session )
+								<tr>
+									<td> {{ $loop->iteration }} </td>
+									<td>
+										@if( $_user->ableTo('company.profile_view', $permissions) )<a class="text-dark"
+											href="/dashboard/companyProfile/{{ $session->user->company->id }}">@endif
+											<img src="{{ $session->user->company->logo_url }}" alt="avatar" class="rounded-circle"
+												height="40" width="40">
+											<span class="fw-medium"> {{ $session->user->company->name }}</span>
+											@if( $_user->ableTo('company.profile_view', $permissions) )</a>@endif
+									</td>
+									<td>
+										@if( $_user->ableTo('users.edit', $permissions) )<a
+											class="text-dark d-flex align-items-center gap-2"
+											href="/dashboard/users/{{ $session->user->id }}/edit">@endif
+											<img src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle"
+												height="35" width="35" style="border: 2px solid #ddd;">
+											<div class="media-body">
+												<h6 class="media-heading mb-0" style="font-size: 14px;">{{ $session->user->name }}
+												</h6>
+												<span class="font-small-2" style="font-size:11px;">{{ $session->user->title }}</span>
+											</div>
+											@if( $_user->ableTo('users.edit', $permissions) )
+										</a>@endif
+									</td>
+									<td> {{ FormatDate($session->zoom_date, 'Y-m-d H:i A') }} ({{ $session->period }}M) </td>
+									<td>
+										{{ $session->session_type ?? '' }}
+									</td>
+									<td> {{ $session->admin_comment ?? '...' }} </td>
+									<td>
+										@php
+											$now = date('Y-m-d H:i');
+											$start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
+											$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+' . $session->period .' minutes'));
+										@endphp
+										
+										
+											@if($session->session_type == 'Online')
+												@if( $now >= $start_time )
+													@if( $now <= $end_time )
+													
+														<a href="{{ $session->start_url }}" target="_blank">
+															<button title="Start Meeting" type="button" data-value="{{ $session->id }}" type="button" class="btn btn-label-primary rounded">
+																<i class="ti ti-link"></i> {{ __('admin.Join Meeting') }}
+															</button>
+														</a>
+														@if( !empty( $session->passcode ) )
+															| <button title="Show Passcode" type="button" data-passcode="{{ $session->passcode }}" type="button" class="btn btn-label-warning show-passcode rounded">
+																<i class="ti ti-key"></i>
+															</button>
+														@endif
+													@else
+														<span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
 													@endif
-												</tbody>
-											</table>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</section>
+												@else
+													<i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }}
+												@endif
+											@else
+											
+												<span class="warning">
+													<a class="btn btn-sm btn-label-success" href="{{ $session->organization->google_map_url ?? '#' }}" target="_blank">
+														<i class="ti ti-map me-2"></i>
+														{{ __('admin.Location') }}
+													</a>
+												</span>
+											@endif
+										
+
+									</td>
+								</tr>
+								@endforeach
+								@if( $upcoming_sessions->count() == 0 )
+								<tr>
+									<td class="text-center" colspan="6">{{ __('cycles.No data available in table') }}</td>
+								</tr>
+								@endif
+							</tbody>
+						</table>
+					</div>
 				</div>
 			</div>
 			@endif
 
 			@if( array_intersect(['dashboard.widgets_tables_my_judging_list_view'], $permissions) )
 			<div class="col-12">
-				<div class="card mt-10">
+				<div class="card">
 					<section>
 						<div class="row">
 							<div class="col-md-12">
-								<div class="card">
-									<div class="card-header border-bottom mb-4">
-										<h5 class="card-title align-items-center">
-											<i class="ti ti-calendar-stats ti-24px"></i>
-											<span class="mx-2">{{ __('dashboard.Your Judging List') }}</span>
-										</h5>
+								<div class="card mb-6">
+									<div class="card-header border-bottom">
+										<h5 class="card-title align-items-center">{{ __('dashboard.Your Judging List') }}</h5>
 									</div>
 									<div class="card-body">
 										@if( $initial_screening_steps->count() > 0)
@@ -1171,16 +1151,13 @@
 
 			@if( array_intersect(['dashboard.widgets_tables_program_final_screening_view'], $permissions) )
 			<div class="col-12">
-				<div class="card mt-10">
+				<div class="card">
 					<section>
 						<div class="row">
 							<div class="col-md-12">
-								<div class="card">
-									<div class="card-header border-bottom mb-4">
-										<h5 class="card-title align-items-center">
-											<i class="ti ti-calendar-stats ti-24px"></i>
-											<span class="mx-2">{{ __('dashboard.Cycle final screening') }}</span>
-										</h5>
+								<div class="card mb-6">
+									<div class="card-header border-bottom">
+										<h5 class="card-title mb-0"></h5>
 									</div>
 									<div class="card-body">
 										@foreach( $final_screening_steps as $step )
@@ -1295,94 +1272,284 @@
 			@endif
 		</div>
 		
-		<div class="row mt-6">
-			@if( $_user->ableTo('mentorship.sessions_Rate', $permissions))
-			@if( $notrated_mens )
+		<div class="row">
+			@if( $_user->ableTo('mentorship.sessions_Rate', $permissions) && $notrated_mens)
 			<div class="col-12">
-				<div class="card shadow-sm">
-					<div class="card-header py-3 d-flex justify-content-between align-items-center">
+				<div class="card mb-6">
+					<div class="card-header border-bottom d-flex justify-content-between align-items-center">
 						<h5 class="card-title mb-0">
-							{{__('dashboard.Rate mentorship session with')}}:
-							<span class="fw-bold">{{$notrated_men->{'first_name_'.$l} ?? '' }} {{$notrated_men->{'last_name_'.$l} ?? ''
-								}}</span>
+							{{__('dashboard.Rate mentorship session with')}}
+							<span class="fw-bold">
+								{{$notrated_men->{'first_name_'.$l} ?? '' }} {{$notrated_men->{'last_name_'.$l} ?? ''}}
+							</span>
+						</h5>
+					</div>
+					<div class="card-datatable table-responsive">
+						<table id="ratingsTable" class="table" style="width:100%">
+							<thead class="table-light">
+								<tr>
+									<th class="fw-semibold">{{__('admin.Mentor')}}</th>
+									<th class="fw-semibold">{{__('dashboard.Your session was in')}}</th>
+									<th class="fw-semibold">{{__('dashboard.Did you attend this session?')}}</th>
+									<th class="fw-semibold">{{ __('dashboard.Rate from 1 star "bad" to 5 stars "best"') }}</th>
+									<th class="fw-semibold">{{ __('dashboard.Your opinion important kindly write any notes about this session') }}</th>
+									<th class="fw-semibold text-center">{{__('dashboard.Submit')}}</th>
+								</tr>
+							</thead>
+							<tbody>
+								@foreach ($notrated_mens as $notrated_men)
+								<tr class="border-bottom">
+									<form method="post" action="/dashboard/mentorship/rate" enctype="multipart/form-data" autocomplete="off"
+										class="row g-3">
+										@csrf
+										<input type="hidden" name="id" value="{{$notrated_men->mr_id}}">
+										<input type="hidden" name="rate" value="0" id="rate">
+										<td class="align-middle">
+											<div class="d-flex align-items-center">
+												<div
+													class="avatar avatar-sm me-2 bg-primary rounded-circle d-flex align-items-center justify-content-center">
+													<span class="text-white fw-bold">{{substr($notrated_men->{'MentorName_'.$l}, 0, 1)}}</span>
+												</div>
+												<div>
+													<p class="mb-0 fw-semibold">{{$notrated_men->{'MentorName_'.$l} }}</p>
+													<small class="text-muted">ID: {{ $notrated_men->mr_id }}</small>
+												</div>
+											</div>
+										</td>
+										<td class="align-middle">
+											<div class="d-flex align-items-center">
+												<i class="bx bx-time-five me-2 text-muted"></i>
+												<span>{{$notrated_men->zoom_date}}</span>
+											</div>
+										</td>
+										<td class="align-middle">
+											<div class="form-check form-check-inline">
+												<input class="form-check-input" type="radio" name="done" id="doneyes-{{$notrated_men->mr_id}}"
+													checked="">
+												<label class="form-check-label" for="doneyes-{{$notrated_men->mr_id}}">{{__('Yes')}}</label>
+											</div>
+											<div class="form-check form-check-inline">
+												<input class="form-check-input" type="radio" name="done" id="doneno-{{$notrated_men->mr_id}}">
+												<label class="form-check-label" for="doneno-{{$notrated_men->mr_id}}">{{__('No')}}</label>
+											</div>
+										</td>
+										<td class="align-middle">
+											<div class="full-star-ratings" data-rateyo-full-star="true" data-rateyo-rating="0"
+												data-rateyo-num-stars="5" data-rateyo-star-width="24px"></div>
+										</td>
+										<td class="align-middle">
+											<textarea class="form-control form-control-sm border-1" id="comment-{{$notrated_men->mr_id}}"
+												name="comment" rows="3" required
+												placeholder="{{ __('dashboard.Write your notes here') }}..."></textarea>
+										</td>
+										<td class="align-middle text-center">
+											<button type="submit" class="btn btn-primary btn-sm px-3">
+												<i class="bx bx-check me-1"></i>
+												<span>{{__('dashboard.Submit')}}</span>
+											</button>
+										</td>
+									</form>
+								</tr>
+								@endforeach
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			@endif
+
+			@if( $_user->ableTo('services.rate', $permissions) && $unrated_services_requests->count() > 0 )
+			<div class="col-12">
+				<div class="card mb-6">
+					<div class="card-header border-bottom d-flex justify-content-between align-items-center">
+						<h5 class="card-title mb-0">
+							{{ __('dashboard.Rate') . ' ' . __('dashboard.service') }} 
 						</h5>
 					</div>
 					<div class="card-body p-4">
-						<div class="table-responsive">
-							<table id="ratingsTable" class="table" style="width:100%">
-								<thead class="table-light">
-									<tr>
-										<th class="fw-semibold">{{__('admin.Mentor')}}</th>
-										<th class="fw-semibold">{{__('dashboard.Your session was in')}}</th>
-										<th class="fw-semibold">{{__('dashboard.Did you attend this session?')}}</th>
-										<th class="fw-semibold">{{ __('dashboard.Rate from 1 star "bad" to 5 stars "best"') }}</th>
-										<th class="fw-semibold">{{ __('dashboard.Your opinion important kindly write any notes about this session') }}</th>
-										<th class="fw-semibold text-center">{{__('dashboard.Submit')}}</th>
-									</tr>
-								</thead>
-								<tbody>
-									@foreach ($notrated_mens as $notrated_men)
-									<tr class="border-bottom">
-										<form method="post" action="/dashboard/mentorship/rate" enctype="multipart/form-data" autocomplete="off"
-											class="row g-3">
-											@csrf
-											<input type="hidden" name="id" value="{{$notrated_men->mr_id}}">
-											<input type="hidden" name="rate" value="0" id="rate">
-											<td class="align-middle">
-												<div class="d-flex align-items-center">
-													<div
-														class="avatar avatar-sm me-2 bg-primary rounded-circle d-flex align-items-center justify-content-center">
-														<span class="text-white fw-bold">{{substr($notrated_men->{'MentorName_'.$l}, 0, 1)}}</span>
+						<div class="accordion stick-top accordion-custom-button" id="rateServicesAccordion">
+							@foreach($unrated_services_requests as $index => $service_request)
+								<div class="accordion-item">
+									<h2 class="accordion-header">
+										<button class="accordion-button {{ $loop->first ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $index }}" aria-expanded="{{ $loop->first ? 'true' : 'false' }}" aria-controls="collapse{{ $index }}">
+											{{ $service_request->service->name }} By {{ $service_request->provider->name }}
+										</button>
+									</h2>
+									<div id="collapse{{ $index }}" class="accordion-collapse collapse {{ $loop->first ? 'show' : '' }}" data-bs-parent="#rateServicesAccordion">
+										<div class="accordion-body pt-4">
+											<form method="POST" action="/dashboard/directory/{{ $service_request->id }}/rate" enctype="multipart/form-data" autocomplete="off">
+												@csrf
+												<div class="form-group mb-4 row">
+													<div class="col-9">
+														{{ __('dashboard.Your request was in') }}
 													</div>
-													<div>
-														<p class="mb-0 fw-semibold">{{$notrated_men->{'MentorName_'.$l} }}</p>
-														<small class="text-muted">ID: {{ $notrated_men->mr_id }}</small>
+													<div class="col-3 text-end">
+														<strong> {{ $service_request->date_time }} </strong>
 													</div>
 												</div>
-											</td>
-											<td class="align-middle">
-												<div class="d-flex align-items-center">
-													<i class="bx bx-time-five me-2 text-muted"></i>
-													<span>{{$notrated_men->zoom_date}}</span>
+
+												<fieldset class="form-group mb-4">
+													<label class="form-label" for="is_service_done_{{ $service_request->id }}"> {{ __('dashboard.Did you get this service?') }} </label>
+													<select class="select2 form-control" required id="is_service_done_{{ $service_request->id }}" name="is_service_done_{{ $service_request->id }}">
+														<option value="Yes">{{ __('admin.Yes') }}</option>
+														<option value="No">{{ __('admin.No') }}</option>
+													</select>
+												</fieldset>
+
+												<fieldset class="form-group mb-4">
+													<label class="form-label" for="service_rate_{{ $service_request->id }}"> {{ __('dashboard.Rate from 1 star "bad" to 5 stars "best"') }} </label>
+													<input type="hidden" name="service_rate_{{ $service_request->id }}" value="0" id="service_rate_{{ $service_request->id }}">
+													<div class="full-services-star-ratings" data-element="{{ $service_request->id }}" data-rateyo-full-star="true"></div>
+												</fieldset>
+
+												<fieldset class="form-group mb-4">
+													<label class="form-label" for="service_comment_{{ $service_request->id }}"> {{ __('dashboard.Your opinion important kindly write any notes about this service') }} </label>
+													<textarea class="form-control" id="service_comment_{{ $service_request->id }}" name='service_comment_{{ $service_request->id }}' rows="4" required placeholder="{{__('dashboard.Write your notes here')}}" ></textarea>
+												</fieldset>
+
+												<div class="row mt-4">
+													<div class="col-12 text-end">
+														<button type="submit" class="btn btn-primary ml-1"> {{ __('dashboard.Submit') }} </button>
+													</div>
 												</div>
-											</td>
-											<td class="align-middle">
-												<div class="form-check form-check-inline">
-													<input class="form-check-input" type="radio" name="done" id="doneyes-{{$notrated_men->mr_id}}"
-														checked="">
-													<label class="form-check-label" for="doneyes-{{$notrated_men->mr_id}}">{{__('Yes')}}</label>
-												</div>
-												<div class="form-check form-check-inline">
-													<input class="form-check-input" type="radio" name="done" id="doneno-{{$notrated_men->mr_id}}">
-													<label class="form-check-label" for="doneno-{{$notrated_men->mr_id}}">{{__('No')}}</label>
-												</div>
-											</td>
-											<td class="align-middle">
-												<div class="full-star-ratings" data-rateyo-full-star="true" data-rateyo-rating="0"
-													data-rateyo-num-stars="5" data-rateyo-star-width="24px"></div>
-											</td>
-											<td class="align-middle">
-												<textarea class="form-control form-control-sm border-1" id="comment-{{$notrated_men->mr_id}}"
-													name="comment" rows="3" required
-													placeholder="{{ __('dashboard.Write your notes here') }}..."></textarea>
-											</td>
-											<td class="align-middle text-center">
-												<button type="submit" class="btn btn-primary btn-sm px-3">
-													<i class="bx bx-check me-1"></i>
-													<span>{{__('dashboard.Submit')}}</span>
-												</button>
-											</td>
-										</form>
-									</tr>
-									@endforeach
-								</tbody>
-							</table>
+											</form>
+										</div>
+									</div>
+								</div>
+							@endforeach
 						</div>
 					</div>
 				</div>
 			</div>
 			@endif
+
+			<!-- Startup Milestones -->
+			@php
+				$milestones = [
+					[
+						'title' => 'MVP Launch',
+						'description' => 'Launch the first version',
+						'category' => 'Technical',
+						'status' => 'completed',
+						'visibility' => 'public',
+						'date' => '2024-03-01',
+					],
+					[
+						'title' => 'First Paying Customer',
+						'description' => 'Get your first paying customer',
+						'category' => 'Marketing',
+						'status' => 'completed',
+						'visibility' => 'public',
+						'date' => '2024-04-15',
+					],
+					[
+						'title' => 'Seed Round Funding',
+						'description' => 'Closing $2M seed round',
+						'category' => 'Finance',
+						'status' => 'in_progress',
+						'visibility' => 'public',
+						'date' => '2024-05-01',
+					],
+					[
+						'title' => 'Seeding State',
+						'description' => 'Closing $4k seed round',
+						'category' => 'Software Development',
+						'status' => 'pending',
+						'visibility' => 'public',
+						'date' => '2024-05-01',
+					]
+				];
+			@endphp
+			@if ($_user->hasRole('Registered'))
+				<div class="col-12">
+					<div class="card">
+						<div class="card-header border-bottom mb-6">
+							<div class="d-flex justify-content-between align-items-center">
+								<div>
+									<h5 class="card-title mb-1">{{ __('startup.milestones') }}</h5>
+									<p class="small text-muted mb-0">{{ __('startup.track_your_milestones') }}</p>
+								</div>
+								@if ($_user->ableTo('company.profile_view_mine', $permissions) && isset($company->id))
+									<button 
+										class="btn btn-primary"
+										onclick="localStorage.setItem('activeCompanyTab', 9);window.location.href = '/dashboard/myCompany/{{ $company->id }}'"
+									>
+										<i class="ti ti-flag-cog"></i>
+										<span class="d-none d-md-inline ms-2">
+											{{ isset($milestones) && count($milestones) > 0 ? __('admin.Manage') : __('admin.Add') }}
+											{{ __('startup.milestones') }}
+										</span>
+									</button>
+								@endif
+							</div>
+						</div>
+		
+						@if (isset($milestones) && count($milestones) > 0)
+							<div class="card-body">
+								<!-- Timeline -->
+								<div class="position-relative">
+			
+									<!-- Vertical line -->
+									<div class="bg-light ms-2" style="position:absolute; top:0; bottom:0; start:10px; width:2px;"></div>
+									@foreach ($milestones as $milestone)
+										<div class="d-{{ $milestone['visibility'] === 'private' ? 'none' : 'flex' }} mb-4 position-relative ps-8">
+											<div class="position-absolute top-0 start-0 me-3">
+												<div class="rounded-circle w-px-20 h-px-20 d-flex justify-content-center align-items-center
+														{{
+															$milestone['status'] === 'completed'
+																? 'badge bg-success'
+																: (
+																		$milestone['status'] === 'in_progress'
+																				? 'badge bg-primary'
+																				: 'bg-white border border-2 border-warning'
+																	)
+														}}">
+														@if ($milestone['status'] === 'completed')
+															<i class="ti ti-circle-check ti-xs"></i>
+														@elseif ($milestone['status'] === 'in_progress')
+															<i class="ti ti-progress-bolt ti-xs"></i>
+														@else
+															<i></i>
+														@endif
+												</div>
+											</div>
+
+											<div class="flex-grow-1">
+												<div class="d-flex justify-content-between">
+													<h6 class="fw-semibold mb-1">{{ $milestone['title'] }}</h6>
+													<span class="text-muted">{{ $milestone['date'] }}</span>
+												</div>
+				
+												<div class="mb-2">
+													<span class="badge bg-label-secondary me-2">
+														{{ $milestone['category'] }}
+													</span>
+													<span class="badge bg-label-{{ $milestone['status'] === 'completed' ? 'success' : ( $milestone['status'] === 'in_progress' ? 'primary' : 'warning') }}">
+														@if ($milestone['status'] === 'completed')
+															{{ __('startup.completed') }}
+														@elseif ($milestone['status'] === 'in_progress')
+															{{ __('startup.in_progress') }}
+														@else
+															{{ __('startup.pending') }}
+														@endif
+													</span>
+												</div>
+												<div class="w-75">
+													<small class="text-muted line-clamp-2">{{ $milestone['description'] }}</small>
+												</div>
+											</div>
+										</div>
+									@endforeach
+								</div>
+							</div>
+						@else
+							@include('includes.no-result', ['message' => __('startup.no_milestones_added_yet')])
+						@endif
+					</div>
+				</div>
 			@endif
+			<!--/ Startup Milestones -->
+			
 		</div>
 	</div>
 </div>
@@ -1496,15 +1663,23 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 					<i class="ti ti-x me-2"></i>
 					{{ __('admin.Cancel') }}
 				</button>
-				<button type="button" class="btn btn-primary" id="completePrerequisitesBtn">
+				<a class="btn btn-primary" id="completePrerequisitesBtn">
 					<i class="ti ti-external-link me-2"></i>
 					{{ __('dashboard.Complete Prerequisites & Join') }}
-				</button>
+				</a>
 			</div>
 		</div>
 	</div>
 </div>
 <!-- / Program Prerequisites Modal -->
+
+<!-- Request Mentorship Session Modal -->
+@if ( $_user->hasRole('Registered'))
+	@if(auth()->user()->company?->id != null)
+		@include('partials.book-session-modal')
+	@endif
+@endif
+
 @stop
 
 @section('scripts')
@@ -1565,109 +1740,117 @@ document.addEventListener('DOMContentLoaded', function() {
 	<script src="/vuexy/assets/js/mentor-schedule.js"></script>
 @endif
 <script>
-window.handleJoinClick = function(button) {
-    const cycleId = button.getAttribute('data-cycle-id');
-    const hasPreRequests = button.getAttribute('data-has-pre');
-    const joinUrl = button.getAttribute('data-join-url');
-    const preRequests = JSON.parse(button.getAttribute('data-pre-requests') || '[]');
+	let completionCheckInterval = null;
 
-    if (hasPreRequests === 'true') {
-        // Populate modal
-        const list = document.getElementById('prerequisitesList');
-        list.innerHTML = '';
-        preRequests.forEach(pr => {
-            const li = document.createElement('li');
-            li.className = 'list-group-item d-flex align-items-center';
-            li.innerHTML = `
-                <i class="ti ti-circle-check me-2 text-warning"></i>
-                <a href="${pr.url}?action=complete-profile" target="_blank" class="text-decoration-none flex-grow-1">${pr.label}</a>
-            `;
-            list.appendChild(li);
-        });
+	// -------------------------------------------------------
+	// MAIN JOIN BUTTON HANDLER
+	// -------------------------------------------------------
+	window.handleJoinClick = function(button) {
+		const hasPreRequests = button.getAttribute('data-has-pre');
+		const preRequests = JSON.parse(button.getAttribute('data-pre-requests') || '[]');
 
-        // Set buttons
-        document.getElementById('completePrerequisitesBtn').onclick = function() {
-            if (preRequests.length > 0) {
-                const firstReq = preRequests[0];
-                if (firstReq.action === 'complete-profile') {
-                    window.location.href = firstReq.url + '?action=complete-profile';
-                } else {
-                    localStorage.setItem('prerequisitesOpened', 'true');
-                    window.open(`${firstReq.url}?action=complete-profile`, '_blank');
-                }
-            }
-            $('#prerequisitesModal').modal('hide');
-        };
+		if (hasPreRequests === 'true') {
+			populatePrerequisiteModal(preRequests);
 
-        // Show modal
-        $('#prerequisitesModal').modal('show');
-    } else {
-        window.location.href = joinUrl;
+			// Start polling ONLY while modal is open
+			startCompletionStatusCheck();
+
+			$('#prerequisitesModal').on('hidden.bs.modal', stopCompletionStatusCheck);
+			$('#prerequisitesModal').modal('show');
+		} else {
+			window.location.href = button.getAttribute('data-join-url');
+		}
+	};
+
+	// -------------------------------------------------------
+	// POPULATE MODAL ITEMS
+	// -------------------------------------------------------
+	function populatePrerequisiteModal(preRequests) {
+		console.log('Populating prerequisites modal with:', preRequests);
+    const list = document.getElementById('prerequisitesList');
+    list.innerHTML = '';
+
+    preRequests.forEach(pr => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item d-flex align-items-center';
+        li.innerHTML = `
+            <i class="ti ti-circle-check me-2 text-warning"></i>
+            <a href="${pr.url}?action=complete-profile" 
+               target="_blank" 
+               class="text-decoration-none flex-grow-1">
+               ${pr.label}
+            </a>`;
+        list.appendChild(li);
+    });
+
+    // ----------------------------------------
+    // Attach modal action button link
+    // ----------------------------------------
+    const modalBtn = document.getElementById('completePrerequisitesBtn');
+
+    if (preRequests.length > 0) {
+			const firstUrl = `${preRequests[0].url}?action=complete-profile`;
+
+			modalBtn.setAttribute('href', firstUrl);
+			
+			// Save state so page refreshes when returning
+			modalBtn.onclick = function () {
+				localStorage.setItem('prerequisitesOpened', 'true');
+			};
     }
-}
+	}
 
-// Check if page should refresh when user returns from completing prerequisites
-window.addEventListener('focus', function() {
-    if (localStorage.getItem('prerequisitesOpened') === 'true') {
-        localStorage.removeItem('prerequisitesOpened');
-        // Refresh the page to update prerequisite status
-        window.location.reload();
-    }
-});
 
-// Real-time completion status checking
-let completionCheckInterval;
+	// -------------------------------------------------------
+	// SINGLE CHECKER FUNCTION
+	// -------------------------------------------------------
+	function checkCompletionStatus() {
+		return fetch('{{ route('cycles.completion_status_check') }}', {
+			method: 'GET',
+			headers: {
+				'X-Requested-With': 'XMLHttpRequest',
+				'Content-Type': 'application/json',
+				'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+			}
+		})
+		.then(res => res.json())
+		.then(data => {
+			updateUIWithCompletionStatus(data);
 
-function startCompletionStatusCheck() {
-    // Check every 5 seconds to reduce API calls
-    completionCheckInterval = setInterval(function() {
-        fetch('{{ route('cycles.completion_status_check') }}', {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            updateUIWithCompletionStatus(data);
-        })
-        .catch(error => {
-            console.log('Error checking completion status:', error);
-        });
-    }, 5000); // Check every 5 seconds to reduce API calls
-}
+			// Auto-stop polling when prerequisites are completed
+			if (!data.has_pre_requests) {
+				stopCompletionStatusCheck();
+				$('#prerequisitesModal').modal('hide');
+			}
+		})
+		.catch(err => console.error("Error:", err));
+	}
 
-function updateUIWithCompletionStatus(data) {
+	// -------------------------------------------------------
+	// UPDATE UI BASED ON COMPLETION STATUS
+	// -------------------------------------------------------
+
+	function updateUIWithCompletionStatus(data) {
     const hasPreRequests = data.has_pre_requests;
     const preRequests = data.pre_requests || [];
-		
-    // Find all join buttons
+
+    // Update Join buttons
     const joinButtons = document.querySelectorAll('button[onclick*="handleJoinClick"]');
-    if (joinButtons.length === 0) {
-        console.log('No join buttons found');
-        return;
-    }
-
-    // Update each button appearance and text
     joinButtons.forEach(joinButton => {
-			joinButton.className = 'btn btn-primary';
-			joinButton.innerHTML = '<span class="me-2">{{ __('dashboard.Join now') }}</span><i class="ti ti-arrows-join"></i>';
-  
-			// Update button data attributes
-			joinButton.setAttribute('data-has-pre', hasPreRequests ? 'true' : 'false');
-			joinButton.setAttribute('data-pre-requests', JSON.stringify(preRequests.map(pr => ({
-					url: `${pr.url}?action=complete-profile`,
-					label: pr.label,
-			}))));
-	});
+        joinButton.className = 'btn btn-primary';
+        joinButton.innerHTML = '<span class="me-2">{{ __("dashboard.Join now") }}</span><i class="ti ti-arrows-join"></i>';
 
-    // Find all prerequisites alerts
+        joinButton.setAttribute('data-has-pre', hasPreRequests ? 'true' : 'false');
+        joinButton.setAttribute('data-pre-requests', JSON.stringify(preRequests.map(pr => ({
+            url: `${pr.url}?action=complete-profile`,
+            label: pr.label,
+        }))));
+    });
+
+    // Update alert boxes
     const alertDivs = document.querySelectorAll('.alert.alert-info');
     alertDivs.forEach(alertDiv => {
         if (hasPreRequests) {
-            // Update the alert content
             const listElement = alertDiv.querySelector('.list-unstyled');
             if (listElement) {
                 listElement.innerHTML = '';
@@ -1675,93 +1858,115 @@ function updateUIWithCompletionStatus(data) {
                     const li = document.createElement('li');
                     li.className = 'pre-request-item';
                     li.innerHTML = `
-                        <a href="${pr.url}?action=complete-profile" class="btn btn-sm btn-outline-info d-flex align-items-center gap-2" role="button" aria-label="${pr.label}">
-                            <i class="ti ti-external-link"></i>
-                            <span>${pr.label}</span>
-                        </a>
-                    `;
+                        <a href="${pr.url}?action=complete-profile"
+                           class="btn btn-sm btn-outline-info d-flex align-items-center gap-2">
+                           <i class="ti ti-external-link"></i>
+                           <span>${pr.label}</span>
+                        </a>`;
                     listElement.appendChild(li);
                 });
             }
             alertDiv.style.display = 'block';
         } else {
-            // Hide the alert if no prerequisites
             alertDiv.style.display = 'none';
         }
     });
-}
+	}
 
-// Start checking when page loads
-@if(isset($pollingNeeded) && $pollingNeeded)
-document.addEventListener('DOMContentLoaded', function() {
-    startCompletionStatusCheck();
-});
-@endif
-</script>
-<script>
-	// Initialize DataTable with pagination configuration
-    $(document).on('click', '.show-passcode', function(e) {
-      e.preventDefault();
-      let passcode = $(this).data('passcode');
-      alertify.defaults.transition = 'zoom';
-      alertify.defaults.theme.ok = 'btn btn-sm btn-danger';
-      alertify.defaults.theme.cancel = 'btn btn-sm btn-info';
-      alertify.defaults.theme.input = 'form-control';
+	// -------------------------------------------------------
+	// START POLLING — ONLY WHEN NEEDED
+	// -------------------------------------------------------
+	function startCompletionStatusCheck() {
+		if (completionCheckInterval) return; // Prevent duplicates
 
-      alertify.alert('Meeting Passcode', `The passcode for this meeting is: <strong>${passcode}</strong>`, function() {});
-    });
-	$(document).ready(function() {
-		$("#ratingsTable").DataTable({
-			"pageLength": 5,
-			"lengthMenu": [5, 10, 25, 50],
-			"searching": true,
-			"ordering": true,
-			"info": true,
-			"responsive": true,
-			@if( $l == 'ar' )
-			"language": {
-				"sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
-				"sLoadingRecords": "جارٍ التحميل...", 
-				"sProcessing": "جارٍ التحميل...",
-				"sLengthMenu": "أظهر _MENU_ مدخلات", 
-				"sZeroRecords": "لم يعثر على أية سجلات",
-				"sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-				"sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل", 
-				"sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-				"sInfoPostFix": "", 
-				"sSearch": "ابحث:", 
-				"sUrl": "",
-				"oPaginate": {"sFirst": "الأول", "sPrevious": "السابق", "sNext": "التالي", "sLast": "الأخير"},
-				"oAria": {"sSortAscending": ": تفعيل لترتيب العمود تصاعدياً", "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"}
-			}
-			@endif
-		});
+		completionCheckInterval = setInterval(checkCompletionStatus, 5000);
+	}
+
+	// -------------------------------------------------------
+	// STOP POLLING
+	// -------------------------------------------------------
+	function stopCompletionStatusCheck() {
+		if (completionCheckInterval) {
+			clearInterval(completionCheckInterval);
+			completionCheckInterval = null;
+		}
+	}
+
+	// -------------------------------------------------------
+	// REFRESH WHEN USER RETURNS TO PAGE
+	// -------------------------------------------------------
+	window.addEventListener('focus', function() {
+		if (localStorage.getItem('prerequisitesOpened') === 'true') {
+			localStorage.removeItem('prerequisitesOpened');
+			window.location.reload();
+		}
 	});
+
 </script>
-<script>
-	$(document).ready(function() {
-		var today = new Date().toISOString().split('T')[0]; // الحصول على تاريخ اليوم بصيغة yyyy-mm-dd
-		$('#dfrom, #dto').datepicker({
-			format: 'yyyy-mm-dd',
-			autoclose: true,
-			todayHighlight: true,
+
+	<script>
+		// Initialize DataTable with pagination configuration
+		$(document).on('click', '.show-passcode', function(e) {
+		e.preventDefault();
+		let passcode = $(this).data('passcode');
+		alertify.defaults.transition = 'zoom';
+		alertify.defaults.theme.ok = 'btn btn-sm btn-danger';
+		alertify.defaults.theme.cancel = 'btn btn-sm btn-info';
+		alertify.defaults.theme.input = 'form-control';
+
+		alertify.alert('Meeting Passcode', `The passcode for this meeting is: <strong>${passcode}</strong>`, function() {});
 		});
 
-		
-		$('.DatePicker').datepicker({
-			format: 'yyyy-m-d H:i',
-			onGenerate: function( ct ) { jQuery(this).find('.xdsoft_date').toggleClass('xdsoft_disabled'); },
-			autoclose: true,
-			todayHighlight: true,
-			startDate: today,
-			maxDate: '{{date('Y/m/d',strtotime("-1 days"))}}',
-			timepicker: true
+		$(document).ready(function() {
+			$("#ratingsTable").DataTable({
+				"pageLength": 5,
+				"lengthMenu": [5, 10, 25, 50],
+				"searching": true,
+				"ordering": true,
+				"info": true,
+				"responsive": true,
+				@if( $l == 'ar' )
+				"language": {
+					"sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
+					"sLoadingRecords": "جارٍ التحميل...", 
+					"sProcessing": "جارٍ التحميل...",
+					"sLengthMenu": "أظهر _MENU_ مدخلات", 
+					"sZeroRecords": "لم يعثر على أية سجلات",
+					"sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+					"sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل", 
+					"sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+					"sInfoPostFix": "", 
+					"sSearch": "ابحث:", 
+					"sUrl": "",
+					"oPaginate": {"sFirst": "الأول", "sPrevious": "السابق", "sNext": "التالي", "sLast": "الأخير"},
+					"oAria": {"sSortAscending": ": تفعيل لترتيب العمود تصاعدياً", "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"}
+				}
+				@endif
+			});
 		});
+	</script>
+	<script>
+		$(document).ready(function() {
+			var today = new Date().toISOString().split('T')[0]; // الحصول على تاريخ اليوم بصيغة yyyy-mm-dd
+			$('#dfrom, #dto').datepicker({
+				format: 'yyyy-mm-dd',
+				autoclose: true,
+				todayHighlight: true,
+			});
 
+			$('.DatePicker').datepicker({
+				format: 'yyyy-m-d H:i',
+				onGenerate: function( ct ) { jQuery(this).find('.xdsoft_date').toggleClass('xdsoft_disabled'); },
+				autoclose: true,
+				todayHighlight: true,
+				startDate: today,
+				maxDate: '{{date('Y/m/d',strtotime("-1 days"))}}',
+				timepicker: true
+			});
 		});
-</script>
-<script>
-	// User distribution by country
+	</script>
+	<script>
+		// User distribution by country
 		const userDistributionData = @json($countries);
 
 		// Sector Breakdown Chart Data
@@ -1812,15 +2017,15 @@ document.addEventListener('DOMContentLoaded', function() {
 		const cyclesStartupName = '';
 		const cyclesStartupLabels = null;
 		const cyclesStartupData = null;
-</script>
-<script src="/app-assets/vendors/js/extensions/jquery.rateyo.min.js"></script>
-<script src="/vuexy/assets/js/app-admin-dashboard.js"></script>
-<script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
-<script src="/vuexy/assets/js/charts-apex.js"></script>
-<script src="/vuexy/assets/js/charts-chartjs.js"></script>
-<script src="/vuexy/assets/js/mentorship-session.js"></script>
-<script>
-	function redirectWithDays(showValue) {
+	</script>
+	<script src="/app-assets/vendors/js/extensions/jquery.rateyo.min.js"></script>
+	<script src="/vuexy/assets/js/app-admin-dashboard.js"></script>
+	<script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
+	<script src="/vuexy/assets/js/charts-apex.js"></script>
+	<script src="/vuexy/assets/js/charts-chartjs.js"></script>
+	{{-- <script src="/vuexy/assets/js/mentorship-session.js"></script> --}}
+	<script>
+		function redirectWithDays(showValue) {
 			// الحصول على قيم التواريخ
 			const forteendays = document.getElementById('forteenDays').value;
 			const sevendays = document.getElementById('sevenDays').value;
@@ -1838,10 +2043,19 @@ document.addEventListener('DOMContentLoaded', function() {
 			var instance = fullStar.rateYo({rtl: isRtl});
 			// Rating onSet Event
 			if( instance.length ) { instance.rateYo({rtl: isRtl}).on('rateyo.set', function (e, data) { $('#rate').val(data.rating); }); }
+
+			var fullServiceStar = $('.full-services-star-ratings');
+			fullServiceStar.each(function (index, oneInstance) {
+				var oneServiceInstance = $(oneInstance).rateYo({rtl: isRtl});
+				if( oneServiceInstance.length )
+				{
+					oneServiceInstance.rateYo({rtl: isRtl}).on('rateyo.set', function (e, data) { $(oneInstance).parent().find('input').val(data.rating); });
+				}
+			})
 		});
-</script>
-<script>
-	$(document).ready(function() {
+	</script>
+	<script>
+		$(document).ready(function() {
 			$("#mentorstable").DataTable({
 				"responsive": true,
 				"searching": true,
@@ -2010,5 +2224,83 @@ document.addEventListener('DOMContentLoaded', function() {
 			}
 		  });
 		});
-</script>
+
+		$('.delete-slot').click(function() {
+		  const slotId = $(this).data('value');
+		  const buttonElement = $(this);
+			const rowElement = buttonElement.closest('tr');
+
+			console.log('Deleting slot ID:', slotId);
+			console.log('rowElement', rowElement);
+
+		  Swal.fire({
+				title: "{{__('mentor.delete_slot_confirm')}}",
+				text: "{{__('admin.Recover')}}",
+				showCancelButton: true,
+				confirmButtonText: "{{ __('admin.DYes') }}",
+				cancelButtonText: "{{ __('admin.No') }}",
+				reverseButtons: true,
+				customClass: {
+					confirmButton: 'btn btn-danger me-2',
+					cancelButton: 'btn btn-label-secondary',
+				},
+				buttonsStyling: false,
+		  }).then((result) => {
+				if (result.isConfirmed) {
+					// Show loading state
+					buttonElement.prop('disabled', true).html('<i class="ti ti-loader ti-spin"></i>');
+					
+					$.ajax({
+						type: "DELETE",
+						url: `/dashboard/availability/slots/${slotId}`,
+						headers: {
+							'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+						},
+						success: function(response) {
+							// console.log('response', response);
+							buttonElement.prop('disabled', false).html('<i class="ti ti-trash ti-16px"></i>');
+							rowElement.remove(); // Remove the row from the table immediately
+							
+							releaseSuccessAlert({
+								title: response?.title || "{{ __('admin.Deleted') }}!",
+								message:response?.message || "{{ __('admin.DeletedSuccessfully') }}.",
+							});
+						},
+						error: function(jqXHR, statusText, error) {
+							buttonElement.prop('disabled', false).html('<i class="ti ti-trash ti-16px"></i>');
+
+							releaseFailureAlert({
+								title: jqXHR.responseJSON?.title || "{{ __('admin.Error') }}!",
+								message: jqXHR.responseJSON?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
+							});
+						}
+					});
+				}
+		  });
+		});
+	</script>
+
+@if( array_intersect(['dashboard.widgets_tables_my_current_schedule_view'], $permissions) )
+@if( $_user->ableTo('slots.index', $permissions) )
+@if ( isset($$my_schedules) && count( $$my_schedules ) > 0 )
+	<script>
+		$(document).ready(function () {
+			// Initialize slots DataTable
+			$('.slots-table')?.DataTable({
+				responsive: true,
+				processing: true,
+				searching: false,
+				lengthChange: false,
+				pageLength: 7,
+				language: {
+					url: '{{ $l }}' == "ar"
+						? "https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json"
+						: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json",
+				},
+			});
+		});
+	</script>
+@endif
+@endif
+@endif
 @stop

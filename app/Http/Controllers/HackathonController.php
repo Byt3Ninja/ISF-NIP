@@ -33,44 +33,89 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use App\Notifications\StatusHackathonInvitation;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 
 class HackathonController extends Controller
 {
+
+    public function get_team_media( $path = null )
+    {
+		try {
+			$instance = Storage::disk('programTeams');
+			if( $instance->directoryExists( $path ) ) { return response()->view('errors.404')->setStatusCode( 404 ); }
+			$file = $instance->response( $path );
+			$mimeType = $instance->mimeType($path);
+			if( $mimeType == 'image/svg' ) { $mimeType = 'image/svg+xml'; }
+			$file->headers->set('Content-Type', $mimeType);
+			return $file;
+		} catch( \Throwable $th ) { return response()->view('errors.404')->setStatusCode( 404 ); }
+    }
+
     public function index(Request $request)
     {
         $user = Auth::user();
-        $hackathons_query = "SELECT
-        c.id as 'c_id',
-        c.title as 'c_title',
-        c.description as 'c_description',
-        c.start as 'c_start_date',
-        c.end as 'c_end_date',
-        c.type as 'c_type',
-        c.img_url as 'c_img_url',
-        c.created_at as 'c_created_at',
-        c.updated_at as 'c_updated_at',
+        // $hackathons_query = "SELECT
+        // c.id as 'c_id',
+        // c.title as 'c_title',
+        // c.description as 'c_description',
+        // c.start as 'c_start_date',
+        // c.end as 'c_end_date',
+        // c.type as 'c_type',
+        // c.img_url as 'c_img_url',
+        // c.created_at as 'c_created_at',
+        // c.updated_at as 'c_updated_at',
       
-        o.id as 'o_id',
-        o.name_ar as 'o_name_ar',
-        o.name_en as 'o_name_en',
-        o.img_url as 'o_logo',
-        o.created_at as 'o_created_at',
-        o.updated_at as 'o_updated_at'
-        FROM 
-        cycles as c
-        LEFT JOIN organizations as o ON c.organization_id = o.id
-        WHERE c.type = 'Hackathon'
-        ";
-        if($request->searchHackathon != null){
-            $hackathons_query .= " AND c.title LIKE '%".$request->searchHackathon."%'";
-        }
-        if($user->organization_id != null){
-            $hackathons_query .= " AND c.organization_id = ".$user->organization_id;
-        }
+        // o.id as 'o_id',
+        // o.name_ar as 'o_name_ar',
+        // o.name_en as 'o_name_en',
+        // o.img_url as 'o_logo',
+        // o.created_at as 'o_created_at',
+        // o.updated_at as 'o_updated_at'
+        // FROM 
+        // cycles as c
+        // LEFT JOIN organizations as o ON c.organization_id = o.id
+        // WHERE c.type = 'Hackathon'
+        // ";
+        // if($request->searchHackathon != null){
+        //     $hackathons_query .= " AND c.title LIKE '%".$request->searchHackathon."%'";
+        // }
+        // if($user->organization_id != null){
+        //     $hackathons_query .= " AND c.organization_id = ".$user->organization_id;
+        // }
         
-        $hackathons_query .= "  ORDER BY c.start ASC";
-        $hackathons_raw = collect(DB::select($hackathons_query));
+        // $hackathons_query .= "  ORDER BY c.start ASC";
+        // $hackathons_raw = collect(DB::select($hackathons_query));
 
+        $hackathons_raw = DB::table('cycles as c')
+            ->select([
+                'c.id AS c_id',
+                'c.title AS c_title',
+                'c.description AS c_description',
+                'c.start AS c_start_date',
+                'c.end AS c_end_date',
+                'c.type AS c_type',
+                'c.img_url AS c_img_url',
+                'c.created_at AS c_created_at',
+                'c.updated_at AS c_updated_at',
+            
+                'o.id AS o_id',
+                'o.name_ar AS o_name_ar',
+                'o.name_en AS o_name_en',
+                'o.img_url AS o_logo',
+                'o.created_at AS o_created_at',
+                'o.updated_at AS o_updated_at',
+            ])
+            ->leftJoin('organizations as o', 'c.organization_id', '=', 'o.id')
+            ->where('c.type', 'Hackathon')
+            ->when($request->searchHackathon, function ($query, $searchHackathon) {
+                return $query->where('c.title', 'like', '%' . $searchHackathon . '%');
+            })
+            ->when(!$user->hasRole('admin') && !empty($user->organizations_ids), function ($query) use ($user) {
+                return $query->whereIn('c.organization_id', $user->organizations_ids);
+            })
+            ->orderBy('c.start', 'asc')
+        ->get();
+ 
         $hackathon_ids = $hackathons_raw->pluck('c_id')->toArray();
 
         $step = Step::where('stype', 1)->whereIn('cycle_id', $hackathons_raw->pluck('c_id'))->get();
@@ -654,9 +699,9 @@ class HackathonController extends Controller
             }
 
             // فلترة حسب organization إذا موجودة
-            if (!empty($user->organization_id)) {
-                $forms .= " AND CYC.organization_id = ? ";
-                $params[] = $user->organization_id;
+            $orgIds = $user->organizations_ids;
+            if (!$user->hasRole('admin') && !empty($orgIds)) {
+                $forms .= " AND CYC.organization_id IN (" . implode(',', array_map('intval', $orgIds)) . ") ";
             }
             $forms .= " ORDER BY FD.created_at";
             $forms = DB::select($forms, $params);
@@ -881,7 +926,7 @@ class HackathonController extends Controller
             'field_ids' => implode(",", $field_map_ids)
         ];
 
-        $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->whereIn('form_data.field_id', $field_map_ids)->orderBy('id', 'ASC')->get();
+        $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->whereIn('form_data.field_id', $field_map_ids)->orderBy('form_fields.id', 'ASC')->get();
         $days = request()->query('days', 14);
         $company = $user->company;
         $stepData = $company?->stepdata;
@@ -1149,13 +1194,12 @@ class HackathonController extends Controller
       LEFT JOIN organizations as O ON O.id = CYC.organization_id
       LEFT JOIN form_fields as FF ON FF.builder_forms_id = S.data
       WHERE CYC.type = 'Hackathon' AND S.id = ? AND FD.deleted_at IS NULL";
-      if($user->organization_id != null){
-      $forms .= " AND CYC.organization_id = ? ";
-      $forms = DB::select($forms, [$user->organization_id]);
-      }else{
-      $forms = DB::select($forms,[$id]);
+      $orgIds = $user->organizations_ids;
+      if(!$user->hasRole('admin') && !empty($orgIds)){
+          $forms .= " AND CYC.organization_id IN (" . implode(',', array_map('intval', $orgIds)) . ") ";
       }
-        $forms = collect($forms);
+      $forms = DB::select($forms, [$id]);
+      $forms = collect($forms);
 
     
         $C = 1;
@@ -1363,29 +1407,41 @@ class HackathonController extends Controller
 
         // Handle image upload
         $newImageUrl = null;
-        
+
         if ($request->hasFile('team_image')) {
             // Delete old image if exists
             if ($teamFormation->img_team) {
-                $oldImagePath = public_path($teamFormation->img_team);
+                /* $oldImagePath = public_path($teamFormation->img_team);
                 if (file_exists($oldImagePath)) {
                     unlink($oldImagePath);
+                } */
+                $storage_image_path = str_replace('programs/teams/', '', $teamFormation->img_team);
+                if( Storage::disk('programTeams')->exists($storage_image_path) )
+                {
+                    Storage::disk('programTeams')->delete($storage_image_path);
                 }
             }
             
             // Upload new image
             $image = $request->file('team_image');
             $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('programs/teams/'), $imageName);
+            // $image->move(public_path('programs/teams/'), $imageName);
+            $path = Storage::disk('programTeams')->putFileAs('', $image, $imageName);
             
             $teamFormation->img_team = 'programs/teams/' . $imageName;
             $newImageUrl = '/programs/teams/' . $imageName;
         } elseif ($request->remove_image) {
             // Remove existing image
             if ($teamFormation->img_team) {
-                $oldImagePath = public_path($teamFormation->img_team);
+                /* $oldImagePath = public_path($teamFormation->img_team);
                 if (file_exists($oldImagePath)) {
                     unlink($oldImagePath);
+                } */
+
+                $storage_image_path = str_replace('programs/teams/', '', $teamFormation->img_team);
+                if( Storage::disk('programTeams')->exists($storage_image_path) )
+                {
+                    Storage::disk('programTeams')->delete($storage_image_path);
                 }
                 $teamFormation->img_team = null;
             }
@@ -1878,12 +1934,12 @@ class HackathonController extends Controller
                 AND FD.step_id = ?
                 AND FD.user_id = ?
         ";
-        $params = [];
-        if( $user->organization_id != null )
+        $orgIds = $user->organizations_ids;
+        if( !$user->hasRole('admin') && !empty($orgIds) )
         {
-            $forms .= " AND CYC.organization_id = ? ";
-            $forms = DB::select($forms, [$step_id, $user_id, $user->organization_id]);
-        } else { $forms = DB::select($forms, [$step_id, $user_id]); }
+            $forms .= " AND CYC.organization_id IN (" . implode(',', array_map('intval', $orgIds)) . ") ";
+        }
+        $forms = DB::select($forms, [$step_id, $user_id]);
         $forms = collect($forms);
         $C = 1;
 

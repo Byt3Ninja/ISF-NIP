@@ -3,7 +3,47 @@
 @section('content')
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
-      
+      <div class="row">
+        @if( session()->has('success') )
+        <div class="col-md-12 mb-6">
+          <div role="alert" class="alert alert-success alert-dismissible">
+            {{ session()->get('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        </div>
+        @endif
+        @if( session()->has('error') )
+        <div class="col-md-12 mb-6">
+          <div role="alert" class="alert alert-danger alert-dismissible">
+            {{ session()->get('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        </div>
+        @endif
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="nav-align-top mb-6">
+        @php
+          $tabs = [
+            ['title' => __('admin.All Services'), 'url' => 'dashboard/services', 'icon' => 'arrows-move'],
+            ['title' => __('admin.Services Requests'), 'url' => 'dashboard/requests/all', 'icon' => 'ti ti-briefcase'],
+            ['title' => __('admin.Services Categories'), 'url' => 'dashboard/serviceCategories', 'icon' => 'layout-grid'],
+          ]
+        @endphp
+        <ul class="nav nav-pills">
+          @foreach($tabs as $tab)
+            <li class="nav-item">
+              <a href="/{{ $tab['url'] }}" class="nav-link {{ Request::is($tab['url'] . '*') ? 'active' : '' }}">
+                <i class="ti ti-{{ $tab['icon'] }} me-2"></i>
+                {{ $tab['title'] }}
+              </a>
+            </li>
+          @endforeach
+        </ul>
+      </nav>
+      <!--/ Navigation Tabs -->
+
       <div class="card">
         <div class="card-header d-flex flex-wrap justify-content-between align-items-center border-bottom">
           <h5 class="card-title text-capitalize mb-3 mb-md-0">{{ __('cycles.Services requests') }}</h5>
@@ -17,7 +57,7 @@
                 <li><a class="dropdown-item" href="javascript:void(0)" id="exportCsv"><i class="ti ti-file-text me-2"></i>CSV</a></li>
               </ul>
             </div>
-            @if (count($received) > 0 && $countold)
+            @if( $_user->ableTo('service_requests.list_archived') || ( count($received) > 0 && $countold > 0 ) )
               <a href="/dashboard/requests/old" class="btn btn-primary text-nowrap">
                 <i class="ti ti-eye me-1 me-md-2"></i>
                 {{ __('cycles.Show old records') }}
@@ -26,88 +66,86 @@
           </div>
         </div>
 
-        <div class="card-body">          
-          <div class="table-responsive">
-            <table class="table services-requests-table">
-              <thead class="table-light">
+        <div class="card-datatable table-responsive">
+          <table class="table services-requests-table">
+            <thead class="table-light">
+              <tr>
+                <th>#</th>
+                <th>{{ __('cycles.SenderName') }}</th>
+                <th>{{ __('cycles.Service') }}</th>
+                <th>{{ __('admin.Status') }}</th>
+                <th>{{ __('cycles.Comments') }}</th>
+                <th>{{ __('cycles.Date/Time') }}</th>
+                <th>{{ __('cycles.Actions') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @foreach ($received as $n => $rec)
+                @php
+                  $user = $rec->user?->{'first_name_' . $l} . ' ' . $rec->user?->{'last_name_' . $l};
+                @endphp
                 <tr>
-                  <th>#</th>
-                  <th>{{ __('cycles.SenderName') }}</th>
-                  <th>{{ __('cycles.Service') }}</th>
-                  <th>{{ __('admin.Status') }}</th>
-                  <th>{{ __('cycles.Comments') }}</th>
-                  <th>{{ __('cycles.Date/Time') }}</th>
-                  <th>{{ __('cycles.Actions') }}</th>
+                  <td>{{ $n + 1 }}</td>
+                  <td>
+                    @if (!empty($rec->user->company))
+                      <div class="d-flex align-items-center gap-2">
+                        <a href="/dashboard/companyProfile/{{ $rec->user->company->id }}">
+                          <img 
+                            src="/191014/{{ $rec->user->img_url ?? '/images/logo-placeholder.png' }}" 
+                            alt="avatar"
+                            class="rounded-circle border shadow-sm" 
+                            height="40" 
+                            width="40"
+                            onerror="this.onerror=null;this.src='/images/logo-placeholder.png';"  
+                          />
+                        </a>
+                        <a href="/dashboard/companyProfile/{{ $rec->user->company->id }}">
+                          <div class="media-body">
+                            <h6 class="media-heading mb-0">{{ $user }}</h6>
+                            <span class="font-small-2">{{ $rec->user->{'title_' . $l} }}
+                              @if ($rec->user->company)
+                                - {{ $rec->user->company->{'name_' . $l} }}
+                              @endif
+                            </span>
+                          </div>
+                        </a>
+                      </div>
+                    @else
+                      No Company
+                    @endif
+                  </td>
+                  <td>{{ $rec->service->{'name_' . $l} }}</td>
+                  <td>
+                    @if($rec->status == 'Pending')
+                      <span class="badge bg-label-warning">{{ __('admin.Pending') }}</span>
+                    @else
+                      <span class="badge bg-label-success">{{ __('admin.Done') }}</span>
+                    @endif
+                  </td>
+                  <td>{{ $rec->comment ?? '-' }}</td>
+                  <td>{{ $rec->date_time }}</td>
+                  <td>
+                    <button
+                      onclick="reply(
+                        {{ $rec->id }}, 
+                        '{{ addslashes($user) }}', 
+                        '{{ addslashes($rec->service->{'name_' . $l} ?? '-') }}',
+                        '{{ addslashes($rec->service->vendor_name ?? '-') }}',
+                        '{{ addslashes($rec->service->vendor_email ?? '-') }}',
+                        '{{ addslashes($rec->service->vendor_phone ?? '-') }}'
+                    );"
+                      type="button" class="btn btn-icon rounded-circle btn-label-info mr-1">
+                      <i class="ti ti-edit text-info"></i>
+                    </button>
+                    <button
+                      onclick="OpenModal({{ $rec->user_id }},'{{ $user }}','{{ $rec->service->{'name_' . $l} }}');"
+                      type="button" class="btn btn-icon rounded-circle btn-label-primary mr-1">
+                      <i class="ti ti-brand-telegram"></i></button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                @foreach ($received as $n => $rec)
-                  @php
-                    $user = $rec->user?->{'first_name_' . $l} . ' ' . $rec->user?->{'last_name_' . $l};
-                  @endphp
-                  <tr>
-                    <td>{{ $n + 1 }}</td>
-                    <td>
-                      @if (!empty($rec->user->company))
-                        <div class="d-flex align-items-center gap-2">
-                          <a href="/dashboard/companyProfile/{{ $rec->user->company->id }}">
-                            <img 
-                              src="/191014/{{ $rec->user->img_url ?? '/images/logo-placeholder.png' }}" 
-                              alt="avatar"
-                              class="rounded-circle border shadow-sm" 
-                              height="40" 
-                              width="40"
-                              onerror="this.onerror=null;this.src='/images/logo-placeholder.png';"  
-                            />
-                          </a>
-                          <a href="/dashboard/companyProfile/{{ $rec->user->company->id }}">
-                            <div class="media-body">
-                              <h6 class="media-heading mb-0">{{ $user }}</h6>
-                              <span class="font-small-2">{{ $rec->user->{'title_' . $l} }}
-                                @if ($rec->user->company)
-                                  - {{ $rec->user->company->{'name_' . $l} }}
-                                @endif
-                              </span>
-                            </div>
-                          </a>
-                        </div>
-                      @else
-                        No Company
-                      @endif
-                    </td>
-                    <td>{{ $rec->service->{'name_' . $l} }}</td>
-                    <td>
-                      @if($rec->status == 'Pending')
-                        <span class="badge bg-label-warning">{{ __('admin.Pending') }}</span>
-                      @else
-                        <span class="badge bg-label-success">{{ __('admin.Done') }}</span>
-                      @endif
-                    </td>
-                    <td>{{ $rec->comment ?? '-' }}</td>
-                    <td>{{ $rec->date_time }}</td>
-                    <td>
-                      <button
-                        onclick="reply(
-                          {{ $rec->id }}, 
-                          '{{ addslashes($user) }}', 
-                          '{{ addslashes($rec->service->{'name_' . $l} ?? '-') }}',
-                          '{{ addslashes($rec->service->vendor_name ?? '-') }}',
-                          '{{ addslashes($rec->service->vendor_email ?? '-') }}',
-                          '{{ addslashes($rec->service->vendor_phone ?? '-') }}'
-                      );"
-                        type="button" class="btn btn-icon rounded-circle btn-label-info mr-1">
-                        <i class="ti ti-edit text-info"></i>
-                      </button>
-                      <button
-                        onclick="OpenModal({{ $rec->user_id }},'{{ $user }}','{{ $rec->service->{'name_' . $l} }}');"
-                        type="button" class="btn btn-icon rounded-circle btn-label-primary mr-1">
-                        <i class="ti ti-brand-telegram"></i></button>
-                    </td>
-                  </tr>
-                @endforeach
-              </tbody>
-            </table>
-          </div>
+              @endforeach
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -187,10 +225,10 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-label-primary" data-bs-dismiss="modal" onclick="approve('Yes')">
+          <button type="button" class="btn btn-label-primary" data-bs-dismiss="modal" onclick="serviceRequestAction('approve')">
             <span class="d-none d-sm-block">{{ __('cycles.Approve') }}</span>
           </button>
-          <button type="button" class="btn btn-label-danger ml-1" onclick="approve('No')">
+          <button type="button" class="btn btn-label-danger ml-1" onclick="serviceRequestAction('reject')">
             <span class="d-none d-sm-block">{{ __('cycles.Disapprove') }}</span>
           </button>
         </div>
@@ -309,18 +347,48 @@
     $('#ReplyModal').modal('show');
   }
 
-  function approve(stat) {
+  function serviceRequestAction(stat) {
     const comment = $('#admin_comment').val();
     const id = $('#resid').val();
     $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
-    $.post('/dashboard/requests/approve', { id, stat, comment })
-      .done(() => {
-        location.reload();
+    $.post('/dashboard/requests/take_action', { id, stat, comment })
+      .done((response) => {
+        if( response.status )
+        {
+					Swal.fire({
+						icon: 'success',
+						title: response.title || 'Success',
+						html: response.message || 'Service request ' + stat + 'd successfully',
+						timer: 2500,
+						timerProgressBar: true,
+						showCancelButton: false,
+						confirmButtonText: 'Close',
+						customClass: {
+							confirmButton: 'btn mx-1 bg-primary text-white',
+						}
+					}).then((result) => { location.reload(); });
+        }
+        else
+        {
+					Swal.fire({
+						icon: 'warning',
+						title: response.title || 'Failed',
+						html: response.message || 'Something went wrong',
+						timer: 2500,
+						timerProgressBar: true,
+						showCancelButton: false,
+						confirmButtonText: 'OK',
+						customClass: {
+							confirmButton: 'btn mx-1 bg-primary text-white',
+						}
+					});
+        }
       })
       .fail(err => {
+        var response = err.responseJSON;
         releaseFailureAlert({
-          title: "{{ __('admin.Error') }}",
-          message: "{{ __('admin.An unexpected error occurred, please try again later') }}",
+          title: response.title || "{{ __('admin.Error') }}",
+          message: response.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
         });
       });
   }

@@ -5,6 +5,26 @@
 
 @section('vendorstyle')
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
+<style>
+  .draft-ribbon {
+    position: absolute;
+    top: 12px;
+    left: -35px;
+    background: #0d6efd;
+    color: white;
+    padding: 5px 40px;
+    font-size: 11px;
+    font-weight: 600;
+    transform: rotate(-45deg);
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .org-card {
+    position: relative;
+    overflow: hidden;
+  }
+</style>
 @stop
 
 @section('content')
@@ -74,11 +94,25 @@
                       </div>
                     </div>
                   </div>
+                  <div class="col-12 col-sm-3 mb-3 mb-sm-0">
+                    <div class="badge bg-label-secondary d-flex align-items-center py-2" style="height: auto;">
+                      <div class="badge card">
+                        <i class="ti ti-circle-dot fs-2 text-primary"></i>
+                      </div>
+                      <div class="ms-2 py-1">
+                        <h6 class="mb-0 fw-bold text-primary">{{ __('admin.Draft') }}</h6>
+                        <h5 class="mb-0 text-start">{{ $organizations->where('is_draft', true)->count() }}</h5>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div class="col-12 col-lg-4 mt-3 mt-lg-0">
-                <div class="w-100 h-100 d-flex justify-content-lg-end justify-content-center align-items-center">
-                  @if ($_user->ableTo('organizations.create', $permissions))
+                <div class="w-100 h-100 d-flex justify-content-lg-end justify-content-center align-items-center gap-2">
+                  @if ($_user->ableToAny(['organization.wizard.create', 'organization.wizard.store'], $permissions))
+                    <a href="{{ route('organization.wizard.create') }}" class="btn btn-outline-primary">
+                      <i class="ti ti-wand me-2"></i> {{ __('admin.Create with Wizard') }}
+                    </a>
                     <a href="{{ route('organizations.create') }}" class="btn btn-primary">
                       <i class="ti ti-plus me-2"></i> {{ __('admin.Add_New') }}
                     </a>
@@ -91,31 +125,45 @@
 
         <div class="card mb-6">
           <div class="card-body">
-            <div class="row">
-              <div class="col-12 col-md-3 mb-3 mb-md-0">
-                <form id="status-form" method="GET" action="{{ route('organizations.index') }}">
-                  <select id="status-select" class="form-select" name="status">
-                    <option value="" selected>{{ __('admin.Status') }}</option>
-                    <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>
+            <form id="status-form" method="GET" action="{{ route('organizations.index') }}">
+              <div class="row">
+                <div class="col-12 col-md-2 mb-3 mb-md-0">
+                    <select id="status-select" class="form-select" name="status">
+                      <option value="" selected>{{ __('admin.Status') }}</option>
+                      <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>
+                        {{ __('admin.All') }}
+                      </option>
+                      <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>
+                        {{ __('admin.Active') }}
+                      </option>
+                      <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>
+                        {{ __('admin.Inactive') }}
+                      </option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-2 mb-3 mb-md-0">
+                  <select id="visibility-select" class="form-select" name="visibility">
+                    <option value="" selected>{{ __('admin.Visibility') }}</option>
+                    <option value="all" {{ request('visibility') == 'all' ? 'selected' : '' }}>
                       {{ __('admin.All') }}
                     </option>
-                    <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>
-                      {{ __('admin.Active') }}
+                    <option value="published" {{ request('visibility') == 'published' ? 'selected' : '' }}>
+                      {{ __('admin.Published') }}
                     </option>
-                    <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>
-                      {{ __('admin.Inactive') }}
+                    <option value="draft" {{ request('visibility') == 'draft' ? 'selected' : '' }}>
+                      {{ __('admin.Draft') }}
                     </option>
                   </select>
-                </form>
-              </div>
-              <div class="col-12 col-md-6"></div>
-              <div class="col-12 col-md-3">
-                <div class="position-relative w-100 h-100 d-flex justify-content-end align-items-center">
-                  <input type="text" id="search-org" class="form-control" placeholder="{{ __('admin.Search') }}" />
-                  <i class="ti ti-search position-absolute top-50 mx-2 translate-middle-y"></i>
+                </div>
+                <div class="col-12 col-md-5"></div>
+                <div class="col-12 col-md-3">
+                  <div class="position-relative w-100 h-100 d-flex justify-content-end align-items-center">
+                    <input type="text" id="search-org" class="form-control" placeholder="{{ __('admin.Search') }}" />
+                    <i class="ti ti-search position-absolute top-50 mx-2 translate-middle-y"></i>
+                  </div>
                 </div>
               </div>
-            </div>
+            </form>
           </div>
         </div>
 
@@ -124,6 +172,9 @@
           @foreach ($organizations as $organization)
             <div class="col-12 col-md-6 col-lg-4 mb-6">
               <div class="card org-card">
+                @if($organization->is_draft)
+                  <div class="draft-ribbon">{{ __('admin.Draft') }}</div>
+                @endif
                 <div class="card-body">
                   <div class="d-flex justify-content-between align-items-center">
                     <h5 class="card-title text-primary fw-semibold mb-0">
@@ -147,11 +198,11 @@
                   <!-- Organization Image -->
                   <div class="card mt-3 d-flex justify-content-center align-items-center position-relative"
                     style="height: 150px; width: 100%;">
-                    <img 
-                      src="/{{ $organization->image_url ?? '/images/background/logo.png' }}"
-                      onerror="this.src='/images/background/logo.png'" alt="Organization Image" 
+                    <img
+                      src="{{ $organization->imageUrl }}"
+                      onerror="this.src='/images/logo-placeholder.png'" alt="Organization Image"
                       class="rounded img-fluid"
-                      style="height: 120px; min-width: 200px; object-fit: cover;" 
+                      style="height: 120px; min-width: 200px; object-fit: cover;"
                     />
                     <!-- Status Badge -->
                     <div
@@ -209,6 +260,14 @@
                             </a>
                           </li>
                         @endif
+                        @if ($_user->ableToAny(['organization.wizard.edit'], $permissions))
+                          <li>
+                            <a class="dropdown-item"
+                              href="{{ route('organization.wizard.edit', ['id' => $organization->id]) }}">
+                              <i class="ti ti-wand text-primary me-2"></i>{{ __('admin.Edit with Wizard') }}
+                            </a>
+                          </li>
+                        @endif
                         @if ($_user->ableTo('organizations.destroy', $permissions))
                           <li>
                             <button class="dropdown-item" id="deleteAction" data-id="{{ $organization->id }}"
@@ -237,6 +296,9 @@
   <script>
     // Filter Organizations
     $(document).on("change", "#status-select", function(e) {
+      $("#status-form").submit();
+    });
+    $(document).on("change", "#visibility-select", function(e) {
       $("#status-form").submit();
     });
 

@@ -1,7 +1,6 @@
 @extends('layouts.admin')
 
 @section('style')
-  <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
   <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
 @stop
 
@@ -50,132 +49,123 @@
           <div class="col-xl-12 col-md-12 col-sm-12">
             <div class="card">
               <div class="card-header border-bottom">
-                <h5 class="card-title align-items-center">
-                  <i class='bx bx-card font-medium-4 mr-1'></i>
-                  {{ $l == 'en' ? 'Mentorship Sessions' : 'جلسات الارشاد' }}
-                </h5>
+                <h5 class="card-title mb-0">{{ __('admin.tasks') }}</h5>
               </div>
-              <div class="card-body">
-                <div class="card-text">
-                  <div class="table-responsive">
-                    <table class="table mb-0 mt-3" id="userstable">
-                      <thead class="table-light">
-                        <tr>
-                          <th class="text-center">#</th>
-                          <th class="text-center">{{__('cycles.Company')}}</th>
-                          <th class="text-center">{{__('cycles.User/Title')}}</th>
-                          <th class="text-center">{{__('cycles.Rate/Comment')}}</th>
-                          <th class="text-center">{{__('cycles.Date/Time')}}</th>
-                          <th class="text-center">{{__('mentor.mentorshipTasks.completedTasks')}}</th>
-                          <th class="text-center">{{__('mentor.mentorshipTasks.nonCompletedTasks')}}</th>
-                          @if( $_user->ableTo('mentorshipTasks.index', $permissions) )<th class="text-center">{{__('mentor.mentorshipTasks.all')}}</th>@endif
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @foreach($sessions as $session)
-                              
-                        <tr>
-                          <td class="text-center">{{ $loop->iteration }}</td>
-                          <td class="text-center">
-                            <div class="d-flex align-items-center gap-1">
-                              @if( $_user->ableTo('company.profile_view', $permissions) )<a class="media-left mr-50" href="/dashboard/companyProfile/{{$session->user->company->id}}">@endif
-                                <img 
-                                  src="{{
-                                    $session->user->company->logo_url ?? '/images/logo-placeholder.png'
-                                  }}" 
-                                  alt="avatar" 
-                                  class="rounded-circle w-px-40 h-px-40 border border-light"
-                                  onerror="this.src='/images/logo-placeholder.png';"
-                                >
-                                @if( $_user->ableTo('company.profile_view', $permissions) )</a>@endif
-                              <a href="/dashboard/companyProfile/{{$session->user->company->id}}">
-                                <div class="d-flex align-items-center gap-1 text-nowrap">
-                                  {{$session->user->company->name }}
-                                </div>
-                              </a>
-                            </div>
-                          </td>
-                          <td class="text-center">
-                            {{-- /show/UserProfile/{{$session->user->id}} --}}
-                            <a 
-                              href="@role('Mentor') /dashboard/companyProfile/{{$session->user->company->id}} @else /dashboard/show/myProfile @endrole" 
-                              class="d-flex align-items-center gap-1"
-                            >
-                              <img 
-                                src="{{$session->user->image_url ?? '/icons/account.svg'}}" alt="avatar" 
-                                class="rounded-circle w-px-40 h-px-40 border border-light"
-                                onerror="this.src='/icons/account.svg';"
-                              />
-                              <div class="">
-                                <h6 class="media-heading mb-0 text-nowrap">{{$session->user->name }} </h6>
-                                <span class="font-small-2 text-nowrap">{{$session->user->title }}</span>
-                              </div>
-                            </a>
-                          </td>
+              <div class="card-datatable table-responsive datatable-basic">
+                <table class="table mb-0 mt-3" id="userstable">
+                  <thead class="table-light">
+                    <tr>
+                      <th class="text-center">#</th>
+                      <th class="text-center">{{__('cycles.Company')}}</th>
+                      <th class="text-center">{{__('cycles.User/Title')}}</th>
+                      <th class="text-center">{{__('cycles.Rate/Comment')}}</th>
+                      <th class="text-center">{{__('cycles.Date/Time')}}</th>
+                      <th class="text-center">{{__('mentor.mentorshipTasks.completedTasks')}}</th>
+                      <th class="text-center">{{__('mentor.mentorshipTasks.nonCompletedTasks')}}</th>
+                      @if( $_user->ableTo('mentorshipTasks.index', $permissions) )<th class="text-center">{{__('mentor.mentorshipTasks.all')}}</th>@endif
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @foreach($sessions as $session)
+                          
+                    <tr>
+                      <td class="text-center">{{ $loop->iteration }}</td>
+                      <td>
+                        @if( $_user->ableTo('company.profile_view', $permissions) )
+                        <a 
+                          class="d-flex align-items-center gap-2" 
+                          href="/dashboard/companyProfile/{{$session->user->company->id}}"
+                        >
+                          <img 
+                            src="{{
+                              $session->user->company->logo_url ?? '/images/logo-placeholder.png'
+                            }}" 
+                            alt="avatar" 
+                            class="rounded-circle w-px-40 h-px-40 border border-light"
+                            onerror="this.src='/images/logo-placeholder.png';"
+                            onerror="if(this.src!='/images/logo-placeholder.png'){this.onerror=null;this.src='/images/logo-placeholder.png';}"
+                          >
+                          <small class="text-dark">{{$session->user->company->name }}</small>
+                        @endif
+                      </td>
+                      <td>
+                        <a 
+                          href="@role('Mentor') /dashboard/show/UserProfile/{{$session->user->id}} @else /dashboard/show/myProfile @endrole" 
+                          class="d-flex align-items-center gap-2"
+                        >
+                          <img 
+                            src="{{$session->user->image_url ?? '/icons/account.svg'}}" alt="avatar" 
+                            class="rounded-circle w-px-40 h-px-40 border border-light"
+                            onerror="if(this.src!='/icons/account.svg'){this.onerror=null;this.src='/icons/account.svg';}"
+                          />
+                          <div>
+                            <div class="small mb-0 text-dark fw-semibold">{{$session->user->name }} </div>
+                            <div class="small text-muted">{{$session->user->title }}</div>
+                          </div>
+                        </a>
+                      </td>
 
-                          <td class="text-center">
-                            <small>
-                                @if( Auth::user()->hasRole('Mentor') )
-                                    @php
-                                    $available_surv = \App\SurveyResponses::where('user_id', $session->mentor_id)
-                                        ->where('triggered_at', $session->id)
-                                        ->where('triggered_by', 'session')
-                                        ->first();
-                                    @endphp
-                                    @if(isset($available_surv) && $available_surv->responses && count($available_surv->responses) > 0)
-                                        <button data-id="{{ $available_surv->id }}" class="btn btn-sm btn-label-success open-responses"> {{ __('admin.answered') }} </button>
-                                    @elseif(isset($available_surv))
-                                        <a href="{{ route('surveys.take', ['id' => $available_surv->id]) }}" class="btn btn-sm btn-label-dark rounded w-100">{{ __('dashboard.startSurvey') }}</a>
-                                    @endif
-                                @elseif( Auth::user()->hasRole('Registered') )
-                                    @php
-                                    $available_surv = \App\SurveyResponses::where('user_id', Auth::id())
-                                        ->where('triggered_at', $session->id)
-                                        ->where('triggered_by', 'session')
-                                        ->first();
-                                    @endphp
-                                    @if(isset($available_surv) && $available_surv->responses && count($available_surv->responses) > 0)
-                                        <button data-id="{{ $available_surv->id }}" class="btn btn-sm btn-label-success open-responses"> {{ __('admin.answered') }} </button>
-                                    @elseif(isset($available_surv))
-                                        <a href="{{ route('surveys.take', ['id' => $available_surv->id]) }}" class="btn btn-sm btn-label-dark rounded w-100">{{ __('dashboard.startSurvey') }}</a>
-                                    @endif
+                      <td class="text-center">
+                        <small>
+                            @if( Auth::user()->hasRole('Mentor') )
+                                @php
+                                $available_surv = \App\SurveyResponses::where('user_id', $session->mentor_id)
+                                    ->where('triggered_at', $session->id)
+                                    ->where('triggered_by', 'session')
+                                    ->first();
+                                @endphp
+                                @if(isset($available_surv) && $available_surv->responses && count($available_surv->responses) > 0)
+                                    <button data-id="{{ $available_surv->id }}" class="btn btn-sm btn-label-success open-responses"> {{ __('admin.answered') }} </button>
+                                @elseif(isset($available_surv))
+                                    <a href="{{ route('surveys.take', ['id' => $available_surv->id]) }}" class="btn btn-sm btn-label-dark rounded w-100">{{ __('dashboard.startSurvey') }}</a>
                                 @endif
-                            </small>
-                        </td>
-                        
-                          <td>
-                            <div class="d-flex flex-column gap-0 justify-content-center align-items-center">
-                              <p class="text-nowrap text-capitalize">{{$session->zoom_date}}</p>
-                              <p class="text-nowrap" style="margin-top: -10px;">
-                                @if($session->period)
-                                  ({{ $session->period }} {{ $l == 'en' ? 'Min' : 'دقيقة' }})
+                            @elseif( Auth::user()->hasRole('Registered') )
+                                @php
+                                $available_surv = \App\SurveyResponses::where('user_id', Auth::id())
+                                    ->where('triggered_at', $session->id)
+                                    ->where('triggered_by', 'session')
+                                    ->first();
+                                @endphp
+                                @if(isset($available_surv) && $available_surv->responses && count($available_surv->responses) > 0)
+                                    <button data-id="{{ $available_surv->id }}" class="btn btn-sm btn-label-success open-responses"> {{ __('admin.answered') }} </button>
+                                @elseif(isset($available_surv))
+                                    <a href="{{ route('surveys.take', ['id' => $available_surv->id]) }}" class="btn btn-sm btn-label-dark rounded w-100">{{ __('dashboard.startSurvey') }}</a>
                                 @endif
-                              </p>
-                            </div>
-                          </td>
-
-                          <td class="text-center"> {{
-                            $session->mentorshipTasks()->where('status','completed')->whereNotNull('title')->count() }}
-                          </td>
-                          <td class="text-center"> {{
-                            $session->mentorshipTasks()->where('status','pending')->whereNotNull('title')->count() }}</td>
-                          @if( $_user->ableTo('mentorshipTasks.index', $permissions) )
-                          <td class="text-center">
-
-                            <a href="{{ route('mentorshipTasks.index',['mentorship_id'=>$session->id]) }}"
-                              title="{{ __('mentor.mentorshipTasks.tasks') }}"
-                              class="btn {{ $session->mentorshipTasks()->whereNull('title')->count()?'btn-label-warning':'btn-label-primary'  }}">
-                              <i class="ti ti-eye me-2"></i>
-                              {{ $l == 'en' ? 'View' : 'عرض' }}</a>
-                              
-                            </td>
                             @endif
-                        </tr>
-                        @endforeach
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+                        </small>
+                    </td>
+                    
+                      <td>
+                        <div class="d-flex flex-column gap-0 justify-content-center align-items-center">
+                          <small class="text-nowrap text-capitalize">{{$session->zoom_date}}</small>
+                          <small class="text-nowrap">
+                            @if($session->period)
+                              ({{ $session->period }} {{ $l == 'en' ? 'Min' : 'دقيقة' }})
+                            @endif
+                          </small>
+                        </div>
+                      </td>
+
+                      <td class="text-center"> {{
+                        $session->mentorshipTasks()->where('status','completed')->whereNotNull('title')->count() }}
+                      </td>
+                      <td class="text-center"> {{
+                        $session->mentorshipTasks()->where('status','pending')->whereNotNull('title')->count() }}</td>
+                      @if( $_user->ableTo('mentorshipTasks.index', $permissions) )
+                      <td class="text-center">
+
+                        <a href="{{ route('mentorshipTasks.index',['mentorship_id'=>$session->id]) }}"
+                          title="{{ __('mentor.mentorshipTasks.tasks') }}"
+                          class="btn btn-sm {{ $session->mentorshipTasks()->whereNull('title')->count()?'btn-label-warning':'btn-primary'  }}">
+                          <i class="ti ti-eye me-1"></i>
+                          {{ $l == 'en' ? 'View' : 'عرض' }}</a>
+                          
+                        </td>
+                        @endif
+                    </tr>
+                    @endforeach
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -227,13 +217,11 @@
 @stop
 
 @section('pagescripts')
-  <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
-  <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
   <script src="/js/jquery.datetimepicker.full.min.js"></script>
   <script>
     $(document).ready(function() {
       $('.table').DataTable({
-          "responsive": true, "searching": true, "lengthChange": false, "paging": true, "bInfo": false,
+          "responsive": true, "searching": true, "lengthChange": true, "paging": true, "bInfo": false,
           "columnDefs": [
               {"orderable": false, "targets":  [5]},
           ],

@@ -1,3 +1,40 @@
+@php
+  $alumni = App\Almuni::where('company_id', auth()->user()?->company?->id)->get();
+$programs = collect();
+foreach ($alumni as $alumnus) {
+    if (!$alumnus->program) {
+        continue;
+    }
+    $programsRaw = json_decode($alumnus->program, true);
+    if (!is_array($programsRaw)) {
+        continue;
+    }
+    foreach ($programsRaw as $program) {
+
+        $programs->push((object) [
+            'id'     => $program['ID'] ?? null,
+            'name'   => $program['Program Name'] ?? '',
+            'cohort' => $program['Cohort'] ?? '',
+        ]);
+    }
+}
+$currentProgram = App\Cycle::where(
+    'id',
+    auth()->user()?->company?->cycle
+)->first();
+if ($currentProgram) {
+    $programs->push((object) [
+        'id'     => $currentProgram->id,
+        'name'   => $currentProgram->title ?? $currentProgram->name ?? '',
+        'cohort' => $currentProgram->cohort ?? '',
+    ]);
+}
+$programs = $programs
+    ->filter(fn ($p) => $p->id)
+    ->unique('id')
+    ->values();
+
+@endphp
 <div class="row">
   <!-- Milestone Cards Container -->
   <div id="milestones-container" class="col-12">
@@ -28,27 +65,29 @@
 
           <!-- Form for adding/editing a milestone -->
           <div class="milestone-form-section">
-            <div class="mb-3">
+            <div class="mb-4">
               <label for="milestone-title-input" class="form-label mb-1">{{ __('admin.Milestone_Name') }}</label>
               <input 
                 type="text" 
                 id="milestone-title-input" 
                 class="form-control milestone-title" 
                 placeholder="{{ __('admin.Milestone_Name') }}"
+                required
               />
               <div class="invalid-feedback milestone-title-error"></div>
             </div>
-            <div class="mb-3">
+            <div class="mb-4">
               <label for="milestone-description-textarea" class="form-label mb-1">{{ __('admin.Description') }}</label>
               <textarea 
                 id="milestone-description-textarea" 
                 class="form-control milestone-description" 
                 rows="3"
                 placeholder="{{ __('admin.Description') }}"
+                required
               ></textarea>
               <div class="invalid-feedback milestone-description-error"></div>
             </div>
-            <div class="mb-3">
+            <div class="mb-4">
               <label for="milestone-completion-input" class="form-label mb-1">
                 {{ $l == 'ar' ? 'نسبة الإكتمال (%)' : 'Completion Percentage (%)' }}
               </label>
@@ -62,7 +101,80 @@
               />
               <div class="invalid-feedback milestone-completion-error"></div>
             </div>
-            <div class="mb-3">
+
+            <div class="mb-4">
+              <label for="milestone-status-select" class="form-label mb-1">
+                {{ __('admin.Category') }}
+              </label>
+              @php
+                $categories = [
+                  ['id' => 1, 'name' => 'Finance'],
+                  ['id' => 2, 'name' => 'Planning'],
+                  ['id' => 3, 'name' => 'Design'],
+                  ['id' => 4, 'name' => 'Development'],
+                  ['id' => 5, 'name' => 'Testing'],
+                  ['id' => 6, 'name' => 'Delivery'],
+                ]
+              @endphp
+              <select class="form-select milestone-category" id="milestone-category-select" required data-placeholder="{{ __('admin.select_category') }}">
+                <option value="">{{ __('admin.select_category') }}</option>
+                @foreach ($categories as $category)
+                  <option value="{{ $category['id'] }}">
+                    {{ $category['name'] }}
+                  </option>
+                @endforeach
+              </select>
+              <div class="invalid-feedback milestone-category-error"></div>
+            </div>
+
+            <div class="mb-4">
+              <label for="milestone-status-select" class="form-label mb-1">
+                {{ __('admin.Status') }}
+              </label>
+              <select class="form-select milestone-status" id="milestone-status-select" required data-placeholder="{{ __('admin.Select Status') }}">
+                <option value="">{{ __('admin.Select Status') }}</option>
+                <option value="not_started"> {{ __('startup.not_started') }} </option>
+                <option value="in_progress">{{ __('startup.in_progress') }}</option>
+                <option value="completed">{{ __('startup.completed') }}</option>
+                <option value="pending">{{ __('startup.pending') }}</option>
+              </select>
+              <div class="invalid-feedback milestone-status-error"></div>
+            </div>
+
+            <div class="mb-4">
+              <label for="milestone-date-input" class="form-label mb-1">
+                {{ __('startup.milestone_date') }}
+              </label>
+              <input id="milestone-date-input" required class="form-control milestone-date" type="text" placeholder="{{ __('startup.milestone_date') }}">
+              <div class="invalid-feedback milestone-date-error"></div>
+            </div>
+
+            <div class="mb-4">
+              <label for="milestone-visibility-select" class="form-label mb-1">
+                {{ __('cycles.visibility') }}
+              </label>
+              <select class="form-select milestone-visibility" id="milestone-visibility-select" required>
+                <option value="">{{ __('startup.select_visibility') }}</option>
+                <option value="public"> {{ __('startup.public') }} </option>
+                <option value="private">{{ __('startup.private') }}</option>
+              </select>
+              <div class="invalid-feedback milestone-visibility-error"></div>
+            </div>
+
+            <div class="mb-4">
+              <label for="milestone-cohort-select" class="form-label mb-1">
+                {{ __('startup.program_cohort') }}
+              </label>
+              <select class="form-select milestone-cohort" id="milestone-cohort-select">
+                <option value="">{{ __('startup.select_program_cohort') }}</option>
+                @foreach ($programs as $cycle)
+                  <option value="{{ $cycle->id }}">{{ $cycle->name ." - ". $cycle->cohort }}</option>
+                @endforeach
+              </select>
+              <div class="invalid-feedback milestone-cohort-error"></div>
+            </div>
+
+            <div class="mb-4">
               <label for="milestone-documents-input" class="form-label mb-1">
                 {{ $l == 'ar' ? 'المستندات الداعمة' : 'Supporting Documents' }}
               </label>
@@ -139,12 +251,8 @@ document.addEventListener('DOMContentLoaded', function () {
   
   const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
   
-  @if(auth()->user() && auth()->user()->company)
-    const companyId = {{ auth()->user()->company->id }};
-  @else
-    const companyId = null;
-  @endif
-
+  const companyId = {{ request()->route('id') ? request()->route('id') : auth()->user()->company?->id }};
+  
   // Constants for validation messages and allowed file types
   const MESSAGES = {
     titleRequired: "{{ __('startup.milestone_title_required') }}",
@@ -153,6 +261,10 @@ document.addEventListener('DOMContentLoaded', function () {
     descriptionMaxLength: "{{ __('startup.milestone_description_max_length') }}",
     completionRequired: "{{ __('startup.completion_percentage_required') }}",
     completionRange: "{{ __('startup.completion_percentage_range') }}",
+    categoryRequired: "{{ __('startup.category_required') }}",
+    statusRequired: "{{ __('startup.status_required') }}",
+    visibilityRequired: "{{ __('startup.visibility_required') }}",
+    dateRequired: "{{ __('startup.milestone_date_required') }}",
     fileType: "{{ __('startup.milestone_document_invalid_type') }}",
     fileSize: "{{ __('startup.document_too_large') }}",
     saving: "{{ __('startup.saving') }}",
@@ -168,18 +280,14 @@ document.addEventListener('DOMContentLoaded', function () {
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
   function loadExistingMilestones() {
-    @if(auth()->user() && auth()->user()->company)
-      @if(auth()->user()->company->milestones && auth()->user()->company->milestones->count() > 0)
-        const existingMilestones = @json(auth()->user()->company->milestones);
-        
-        existingMilestones.forEach((milestone, index) => {
-          const milestoneCard = createMilestoneCard(index === 0, milestone);
-          populateMilestoneCard(milestoneCard, milestone);
-        });
-        updateMilestoneNumbers();
-      @else
-        createMilestoneCard(true);
-      @endif
+    @if($milestones && $milestones->count() > 0)
+      const existingMilestones = @json($milestones);
+      
+      existingMilestones.forEach((milestone, index) => {
+        const milestoneCard = createMilestoneCard(index === 0, milestone);
+        populateMilestoneCard(milestoneCard, milestone);
+      });
+      updateMilestoneNumbers();
     @else
       createMilestoneCard(true);
     @endif
@@ -322,7 +430,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function clearSingleValidation(inputElement) {
     if (!inputElement) return;
-    
+
     inputElement.classList.remove('is-invalid');
     const card = inputElement.closest('.milestone-card');
     if (!card) return;
@@ -331,9 +439,13 @@ document.addEventListener('DOMContentLoaded', function () {
       'milestone-title': '.milestone-title-error',
       'milestone-description': '.milestone-description-error',
       'milestone-completion': '.milestone-completion-error',
+      'milestone-category': '.milestone-category-error',
+      'milestone-status': '.milestone-status-error',
+      'milestone-visibility': '.milestone-visibility-error',
+      'milestone-date': '.milestone-date-error',
       'milestone-documents': '.milestone-documents-error'
     };
-    
+
     for (const [inputClass, errorClass] of Object.entries(errorClassMap)) {
       if (inputElement.classList.contains(inputClass)) {
         const errorDiv = card.querySelector(errorClass);
@@ -344,7 +456,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function addValidationClearListeners(card) {
-    const inputs = card.querySelectorAll('.milestone-title, .milestone-description, .milestone-completion, .milestone-documents');
+    const inputs = card.querySelectorAll('.milestone-title, .milestone-description, .milestone-completion, .milestone-category, .milestone-status, .milestone-visibility, .milestone-date, .milestone-documents');
     inputs.forEach(input => {
       ['input', 'change', 'keyup'].forEach(eventType => {
         input.addEventListener(eventType, () => clearSingleValidation(input));
@@ -357,13 +469,17 @@ document.addEventListener('DOMContentLoaded', function () {
       name: { errorSelector: '.milestone-title-error', inputSelector: '.milestone-title' },
       description: { errorSelector: '.milestone-description-error', inputSelector: '.milestone-description' },
       completion_percentage: { errorSelector: '.milestone-completion-error', inputSelector: '.milestone-completion' },
+      category: { errorSelector: '.milestone-category-error', inputSelector: '.milestone-category' },
+      status: { errorSelector: '.milestone-status-error', inputSelector: '.milestone-status' },
+      date: { errorSelector: '.milestone-date-error', inputSelector: '.milestone-date' },
+      visibility: { errorSelector: '.milestone-visibility-error', inputSelector: '.milestone-visibility' },
       documents: { errorSelector: '.milestone-documents-error', inputSelector: '.milestone-documents' }
     };
 
     Object.entries(errors).forEach(([field, messages]) => {
       const fieldKey = field.startsWith('documents.') ? 'documents' : field;
       const mapping = fieldMap[fieldKey];
-      
+
       if (mapping) {
         const errorElement = card.querySelector(mapping.errorSelector);
         const inputElement = card.querySelector(mapping.inputSelector);
@@ -657,6 +773,11 @@ document.addEventListener('DOMContentLoaded', function () {
       const titleInput = card.querySelector('.milestone-title');
       const descriptionInput = card.querySelector('.milestone-description');
       const completionInput = card.querySelector('.milestone-completion');
+      const categoryInput = card.querySelector('.milestone-category');
+      const statusInput = card.querySelector('.milestone-status');
+      const dateInput = card.querySelector('.milestone-date');
+      const visibilityInput = card.querySelector('.milestone-visibility');
+      const milestoneCohort = card.querySelector('.milestone-cohort');
       const documentsInput = card.querySelector('.milestone-documents');
 
       // Clear previous errors
@@ -676,7 +797,11 @@ document.addEventListener('DOMContentLoaded', function () {
           if (!completionInput.value.trim()) return false;
           const percentage = parseFloat(completionInput.value);
           return isNaN(percentage) || percentage < 0 || percentage > 100;
-        }}
+        }},
+        { input: categoryInput, errorSelector: '.milestone-category-error', message: MESSAGES.categoryRequired, validate: () => !categoryInput.value.trim() },
+        { input: statusInput, errorSelector: '.milestone-status-error', message: MESSAGES.statusRequired, validate: () => !statusInput.value.trim() },
+        { input: dateInput, errorSelector: '.milestone-date-error', message: MESSAGES.dateRequired, validate: () => !dateInput.value.trim() },
+        { input: visibilityInput, errorSelector: '.milestone-visibility-error', message: MESSAGES.visibilityRequired || 'Visibility is required', validate: () => !visibilityInput.value.trim() }
       ];
 
       // Validate inputs - stop at first error per input
@@ -719,7 +844,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       }
 
-
       if (isValid) {
         // Show loading state
         submitBtn.disabled = true;
@@ -731,7 +855,12 @@ document.addEventListener('DOMContentLoaded', function () {
           '_token': csrfToken,
           'name': titleInput.value,
           'description': descriptionInput.value,
-          'completion_percentage': completionInput.value
+          'completion_percentage': completionInput.value,
+          'category': categoryInput.value,
+          'status': statusInput.value,
+          'date': dateInput.value,
+          'visibility': visibilityInput.value,
+          'cohort': milestoneCohort.value
         }).forEach(([key, value]) => formData.append(key, value));
         
         // Add files
@@ -806,6 +935,13 @@ document.addEventListener('DOMContentLoaded', function () {
     } else if (cancelEditBtn) {
       handleCancelEdit(card);
     }
+  });
+
+  // Initialize Flatpickr for milestone date
+  $('#milestone-date-input').flatpickr({ 
+    enableTime: false,
+    dateFormat: 'Y-m-d',
+    minDate: 'today',
   });
 });
 </script>

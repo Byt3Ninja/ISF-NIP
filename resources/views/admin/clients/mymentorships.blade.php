@@ -17,98 +17,124 @@
               <div class="col-12">
                 <div class="card">
                   <div class="card-header d-flex justify-content-between flex-wrap align-items-center border-bottom">
-                    <h5 class="card-title mb-0">{{ __('admin.Mentorship requests') }}</h5>
+                    <h5 class="card-title mb-0">{{ __('startup.mentorship_requests.label') }}</h5>
                   </div>
                   <div class="card-content">
-                    <div class="card-body card-dashboard">
-                      <div class="table-responsive">
-                        <table class="table zero-configuration">
-                          <thead class="table-light">
+                    <div class="card-datatable table-responsive">
+                      <table class="table zero-configuration">
+                        <thead class="table-light">
+                          <tr>
+                            <th>#</th>
+                            <th>{{ __('admin.Mentor') }}</th>
+                            <th>{{ __('admin.Date') }}</th>
+                            <th>{{ __('admin.Comment') }}</th>
+                            <th>{{ __('admin.Rate') }}</th>
+                            <th>{{ __('mentor.session_type') }}</th>
+                            <th>{{ __('startup.mentorship_requests.Meeting_Link/Map') }}</th>
+                            {{-- <th>{{__('mentor.mentorshipTasks.all')}}</th> --}}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @foreach ($sessions as $n => $session)
                             <tr>
-                              <th>#</th>
-                              <th>{{ __('admin.Mentor') }}</th>
-                              <th>{{ __('admin.Date') }}</th>
-                              <th>{{ __('admin.Notes') }}</th>
-                              <th>{{ __('admin.Rate') }}</th>
-                              <th>{{ __('dashboard.Meeting Link') }}</th>
-                              {{--                                                        <th>{{__('mentor.mentorshipTasks.all')}}</th> --}}
-                            </tr>
-                          </thead>
-                          <tbody>
-                            @foreach ($sessions as $n => $session)
-                              <tr>
-                                <td>{{ $n + 1 }}</td>
-                                <td>
-
-                                  <div class="d-flex align-items-center">
-                                    <a class="media-left">
-                                      <img src="{{ $session->mentor?->image_url }}" alt="avatar" class="rounded-circle me-3"
-                                        height="40" width="40">
-                                    </a>
-                                    <div class="media-body">
-
-                                      <a href="{{ route('mentors.profile_view', $session->mentor->id ?? '0') }}">
-
-                                        <h6 class="media-heading mb-0 text-nowrap">{{ $session->mentor?->{'first_name_' . $l} }}
-                                          {{ $session->mentor?->{'last_name_' . $l} }}</h6>
-                                        <span class="font-small-2 text-nowrap">{{ $session->mentor?->{'title_' . $l} }}</span>
-                                      </a>
-                                    </div>
+                              <td>{{ $n + 1 }}</td>
+                              <td>
+                                <a 
+                                  href="{{ $session->mentor->id ? route('mentors.profile_view', $session->mentor->id) : 'javascript:void(0)' }}" 
+                                  class="d-flex align-items-center gap-2"
+                                >
+                                  <img 
+                                    src="{{ $session->mentor?->image_url ?? '/icons/account.svg' }}" 
+                                    alt="avatar" 
+                                    class="rounded-circle"
+                                    height="40" width="40"
+                                  />
+                                  <div>
+                                    <h6 class="mb-0 text-nowrap">
+                                      {{ $session->mentor?->{'first_name_' . $l} }}
+                                      {{ $session->mentor?->{'last_name_' . $l} }}
+                                    </h6>
+                                    <small class="text-muted">{{ $session->mentor?->{'title_' . $l} }}</small>
                                   </div>
-
-                                </td>
-                                <td>{{ $session->zoom_date }} ({{ $session->period }}M)</td>
-                                <td>
-                                  <p class="line-clamp-3" style="max-width: 300px;">
-                                    {{ $session->admin_comment ?? $session->comment }}
-                                  </p>
-                                </td>
-
-
-                                <td>
-                                  @if ($session->rating)
-                                    <span title="{{ $session->rate_comment }}">
-                                      {!! str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>', $session->rating) !!}
-                                    </span>
-                                  @endif
-                                </td>
+                                </a>
+                              </td>
+                              <td>{{ $session->zoom_date }} ({{ $session->period }}M)</td>
+                              <td>
                                 @php
-															$now = date('Y-m-d H:i');
-															$start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
-															$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+'. $session->period .' minutes'));
-															@endphp
-                              <td class=" py-1">
-                              @if ($session->approved == 'Yes')
-                                @if($now >= $start_time )
-                                @if($now <= $end_time)
-                                <span class="warning">
-                                      <a href="{{ $session?->join_url }}" target="_blank">
-                                        <button title="Join meeting" type="button"
-                                          class="btn btn-icon rounded-circle btn-label-primary">
-                                          <i class="ti ti-brand-zoom"></i></button>
-                                      </a>
-                                      </span>
-                                  @else
-                                     <span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
-                                  @endif
-                                  @else 
-                                     <span class="text-warning"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }} </span>
-                                  @endif
-                                  @elseif($session->approved == 'No')
-                                    {{ __('admin.No') }}
-                                  @else
-                                    {!! '<span class="text-primary">' . __('admin.Waiting_for_approval') . '</span>' !!}
+                                  $comment = $session->admin_comment ?? $session->comment;
+                                @endphp
+                                @if($comment)
+                                  <p class="small text-muted d-block">{!! $session->comment !!}</p>
+                                @else
+                                  <small class="text-muted block">{{ __('admin.No comment provided') }}</small>
                                 @endif
                               </td>
-                                {{--                                                                <td class="text-center"> --}}
-                                {{--                                                                    <a href="{{ route('startup.mentorshipTasks.index',['mentorship_id'=>$session->id]) }}" title="{{ __('mentor.mentorshipTasks.tasks') }}" class="btn btn-icon rounded-circle btn-info"> --}}
-                                {{--                                                                        <i class="bx bxs-tag"></i> {{ __('mentor.mentorshipTasks.tasks') }}</a> --}}
-                                {{--                                                                </td> --}}
-                              </tr>
-                            @endforeach
-                          </tbody>
-                        </table>
-                      </div>
+                              <td>
+                                <div class="d-flex align-items-center gap-1 mb-1">
+                                  <strong>{{ number_format($session->rating ?? 0, 1) }}</strong>
+                                  <i class="ti ti-star-filled ti-16px text-warning"></i>
+                                </div>
+                              </td>
+                              <td style="max-width: 150px;">
+                                @php
+                                  $badgeColor = 'secondary';
+                                  $badgeIcon = 'screen-share';
+                                  if ($session->session_type == 'Online') {
+                                    $badgeColor = 'success';
+                                    $badgeIcon = 'video';
+                                  } elseif ($session->session_type == 'Offline'){
+                                    $badgeColor = 'warning';
+                                    $badgeIcon = 'map';
+                                  }
+                                @endphp
+                                <small class="badge bg-label-{{ $badgeColor }}">
+                                  <i class="ti ti-{{ $badgeIcon }} ti-16px me-1"></i>
+                                  {{ $session->session_type ?? __('admin.All') }}
+                                </small>
+                              </td>
+                              @php
+                                $now = date('Y-m-d H:i');
+                                $start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
+                                $end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+'. $session->period .' minutes'));
+                              @endphp
+                              <td>
+                                @if ($session->approved === 'Yes')
+                                  @if ($now < $start_time)
+                                    <span class="text-warning">
+                                        <i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }}
+                                    </span>
+                                  @elseif ($now > $end_time)
+                                    <small class="text-danger">{{ __('admin.Meeting_Expired') }}</small>
+                                  @else
+                                    @if (isset($session->session_type) && $session->session_type == 'Offline')
+                                      <td>
+                                        {{ isset($session->session_location) && $session->session_type == 'Offline' ? $session->session_location : 'N/A' }}
+                                      </td>
+                                    @endif
+                                    <a href="{{ $session?->join_url }}" target="_blank">
+                                      <button type="button" class="btn btn-sm btn-primary">
+                                        <i class="ti ti-brand-zoom"></i> {{ __('startup.mentorship_requests.join_now') }}
+                                      </button>
+                                    </a>
+                                  @endif
+
+                                @elseif ($session->approved === 'No')
+                                  <small class="text-muted">{{ __('startup.mentorship_requests.no_link') }}</small>
+                                @else
+                                  <small class="text-info">
+                                    {{ __('admin.Waiting_for_approval') }}
+                                  </small>
+                                @endif
+                              </td>
+
+                              {{-- <td class="text-center"> --}}
+                              {{--     <a href="{{ route('startup.mentorshipTasks.index',['mentorship_id'=>$session->id]) }}" title="{{ __('mentor.mentorshipTasks.tasks') }}" class="btn btn-icon rounded-circle btn-info"> --}}
+                              {{--         <i class="bx bxs-tag"></i> {{ __('mentor.mentorshipTasks.tasks') }}</a> --}}
+                              {{-- </td> --}}
+                            </tr>
+                          @endforeach
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 </div>

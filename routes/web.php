@@ -10,15 +10,29 @@ use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ImporterController;
 use App\Http\Controllers\ActivityControlller;
+use App\Http\Controllers\ClientCompanyController;
 use App\Http\Controllers\HackathonController;
 use App\Http\Controllers\Mentor\MentorProgramController;
 use App\Http\Controllers\Mentor\MentorshipTaskController;
+use App\Http\Controllers\Mentor\SlotController;
 use App\Http\Controllers\Judger\JudgerScreeningController;
+use App\Http\Controllers\AdvancedExportController;
+use App\Http\Controllers\TasksController;
 /* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
-
+Route::get('def-permission', function() {
+    $jsonRole = File::get(base_path('database/dbFiles/rolesWithDefaultPermissions.json'));
+    $dataRole = json_decode($jsonRole, true);
+    $dataRole = collect( $dataRole )->flatMap(function($role) {
+        return $role['permissions'];
+    });
+    $judges = $dataRole->filter(function($permission) {
+        return in_array('judger', $permission['default_for']);
+    })->values();
+    dd( $judges->pluck('name')->toArray() );
+});
 Route::get('test', function () {
-    $user = User::find(1); 
-$user->notify(new WelcomeUserNotification($user,'12345'));
+    $user = User::find(1);
+    $user->notify(new WelcomeUserNotification($user, '12345'));
 });
 
 Route::get('default-permissions', function () {
@@ -55,9 +69,11 @@ Route::get('/reminderMentorShipRequest', 'IndexController@reminderMentorShipRequ
 //    }
 //    return view('admin.reports.company');
 //});
+// Route::view('upload_page', 'upload_test');
 
 
 /// Frontend routes ///
+Route::get('programs/teams/{files?}', 'HackathonController@get_team_media')->where('files', '.*');
 Route::get('lang/{locale}', 'IndexController@lang');
 Route::get('js-translations/{locale?}', 'IndexController@getJsTranslations')->name('js.translations');
 Route::get('/', 'IndexController@home');
@@ -75,6 +91,10 @@ Route::get('page/{id}', 'IndexController@page');
 Route::get('search', 'IndexController@search');
 Route::get('event/{id}', 'IndexController@event');
 Route::post('eventregister', 'IndexController@eventregister');
+
+Route::get('/provider-registration', 'serviceProviderController@registration');
+Route::post('/provider-registration', 'serviceProviderController@registration_request')->name('provider-registration');
+Route::get('/provider-registration/files/{files?}', 'serviceProviderController@get_media')->where('files', '.*');
 
 // test middleware
 Route::get('/testting', function () {
@@ -96,8 +116,7 @@ Route::get('/2otp', function () {
 Route::get('/db-migrate', 'IndexController@dbMigrate');
 Route::get('/seed-permissions', 'IndexController@seedPermissions');
 Auth::routes(['verify' => true]);
-Route::get('organizations/set-password/{invitationId}', 'SettingsController@showSetPasswordForm')
-    ->name('invitations.set_password_view_form');
+Route::get('organizations/set-password/{invitationId}', 'SettingsController@showSetPasswordForm')->name('invitations.set_password_view_form');
 Route::post('organizations/settings/accept/{invitationId}', 'SettingsController@acceptInvitation')->name('invitations.accept');
 
 Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa']], function () {
@@ -121,7 +140,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     // Chat
     Route::get('chat', 'ChatController@index');
-    
+
     // Chat API routes (using web session authentication)
     Route::get('chat/messages', 'ChatController@messages')->name('chat.messages');
     Route::get('chat/users', 'ChatController@getUsers')->name('chat.users');
@@ -178,10 +197,15 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     //waiting list
     Route::post('hackathon/leaveTeam', 'HackathonController@leaveTeam')->name('hackathon.leaveTeam');
     // Route::get('hackathon/manage', [HackathonController::class, 'manage']);
-    
+
     Route::get('hackathon/details/{id}', [HackathonController::class, 'show']);
     Route::post('hackathon/likeProject', [HackathonController::class, 'likeProject']);
 
+    // Service Providers
+
+    Route::resource('services_providers', 'serviceProviderController');
+    Route::get('services-providers/requests', 'serviceProviderController@requests')->name('services_providers.requests');
+    Route::post('services-providers/requests/take-action', 'serviceProviderController@takeAction')->name('services_providers.takeAction');
 
     Route::get('calendar/{id}/edit', 'SettingsController@editcal')->name('calendar.events_edit');
     Route::post('calendar/{id}/update', 'SettingsController@updatecal')->name('calendar.events_update');
@@ -224,9 +248,10 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('updateevent/{id}', 'EventsController@updateevent')->name('events.update');
     Route::get('deleteevent/{id}', 'EventsController@deleteevent')->name('events.delete');
     // Settings Routes
-    Route::any('settings', 'SettingsController@get_settings')->name('settings.system_general_view');
+    Route::any('settings', 'SettingsController@index')->name('settings.index');
+    Route::any('settings/general', 'SettingsController@get_settings')->name('settings.system_general_view');
     Route::get('industry-settings', 'SettingsController@industrySettings')->name('settings.industry_view');
-    Route::get('expertise-settings', 'SettingsController@expertiseSettings')->name('settings.expertise_view');
+    Route::get('expertise-settings', 'ExpertiseController@index')->name('settings.expertise_view');
     Route::get('notification-settings', 'SettingsController@notificationSettings')->name('settings.notification_view');
     Route::put('notification-settings', 'SettingsController@updateNotificationSettings')->name('settings.notification_update');
     Route::post('update_settings', 'SettingsController@update_settings')->name('settings.system_general_update');
@@ -253,38 +278,67 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('whatsapp/session/{sessionId}/send', 'IndexController@sendMessage')->where('sessionId', '[0-9]+')->name('whatsapp.session.send');
     Route::post('whatsapp/getWASession', 'WhatsAppSessionController@getWASessionID')->name('whatsapp.session.getsessionid');
 
-
-
-
     Route::get('organizations/settings', 'SettingsController@showSettings')->name('settings.organization_manage');
     Route::put('organizations/settings/updateMeeting', 'SettingsController@meetingSetting')->name('settings.organization_meeting_manage');
     Route::put('organizations/settings/socialLogin', 'SettingsController@socialSetting')->name('settings.organization_social_manage');
     Route::put('organizations/settings/general', 'SettingsController@generalSetting')->name('settings.organization.general.manage');
+    Route::put('organizations/settings/smtp', 'OrganizationSettingsController@updateSmtp')->name('settings.organization.smtp_update');
+    Route::put('organizations/settings/notifications', 'OrganizationSettingsController@updateNotifications')->name('settings.organization.notifications_update');
     Route::post('organizations/settings/invite', 'SettingsController@inviteUser')->name('organization.users_invite');
     Route::post('organizations/settings/resend-invitation/{invitationId}', 'SettingsController@resendInvitation')->name('organization.users_invitations_resend');
     Route::delete('organizations/settings/cancel-invitation/{invitationId}', 'SettingsController@cancelInvitation')->name('organization.users_invitations_cancel');
     Route::get('organizations/settings/reminder-logs', 'SettingsController@ReminderLogs')->name('organization.ReminderLogs');
     Route::post('organizations/reminder-logs/destroy', 'ReminderLogController@destroy')->name('organization.destroyReminderLogs');
 
+    Route::resource('organization-types', 'OrganizationTypesController');
+
+    // Organization Wizard Routes (multi-step creation/editing)
+    Route::prefix('organization')->name('organization.wizard.')->group(function () {
+        Route::get('/create', 'OrganizationWizardController@create')->name('create');
+        Route::post('/create', 'OrganizationWizardController@store')->name('store');
+        Route::get('/{id}/edit', 'OrganizationWizardController@edit')->name('edit');
+        Route::put('/{id}/step1', 'OrganizationWizardController@updateStep1')->name('update.step1');
+        Route::put('/{id}/step2', 'OrganizationWizardController@updateStep2')->name('update.step2');
+        Route::put('/{id}/step3', 'OrganizationWizardController@updateStep3')->name('update.step3');
+        Route::get('/{id}/managers', 'OrganizationWizardController@getManagers')->name('managers.list');
+        Route::post('/{id}/managers', 'OrganizationWizardController@createManager')->name('managers.create');
+        // Step 4: Landing Page
+        Route::put('/{id}/step4', 'OrganizationWizardController@updateStep4')->name('update.step4');
+        Route::get('/{id}/preview', 'OrganizationWizardController@previewLandingPage')->name('preview');
+        Route::post('/generate-slug/{id?}', 'OrganizationWizardController@generateSlug')->name('generate.slug');
+        Route::post('/check-slug/{id?}', 'OrganizationWizardController@checkSlugAvailability')->name('check.slug');
+        // Step 5: Custom Sections
+        Route::put('/{id}/step5', 'OrganizationWizardController@updateStep5')->name('update.step5');
+        Route::post('/{id}/step5/reorder', 'OrganizationWizardController@reorderStep5Sections')->name('step5.reorder');
+        Route::delete('/{id}/step5/{sectionId}', 'OrganizationWizardController@deleteStep5Section')->name('step5.delete');
+        Route::post('/draft', 'OrganizationWizardController@saveDraft')->name('draft');
+        Route::put('/{id}/draft', 'OrganizationWizardController@saveDraft')->name('draft.update');
+        Route::post('/{id}/publish', 'OrganizationWizardController@publish')->name('publish');
+    });
+
     //services categories Manager routes
     Route::resource('serviceCategories', 'ServiceCategoryController');
     //Services Manager routes
+    
     Route::resource('services', 'ServiceController');
-    //Services requests
+    // Services requests
     Route::get('requests/all', 'ServiceController@requests')->name('service_requests.list_all');
     Route::get('requests/old', 'ServiceController@oldrequests')->name('service_requests.list_archived');
-    Route::post('requests/approve', 'ServiceController@approve');
-    Route::get('requests/mine', 'ServiceController@myrequests')->name('service_requests.list_mine');
-    //Services Directory
-    Route::get('directory', 'HomeController@directory')->name('users.directory_view');
-    Route::post('directory/{id}', 'HomeController@showone');
-    Route::post('directory/{id}/rate', 'HomeController@rateservice');
-    Route::post('servicerequest', 'HomeController@servicereq');
+    Route::post('requests/take_action', 'ServiceController@serviceAction')->name('service_requests.take_action');
+    Route::get('requests/mine', 'ServiceController@myRequests')->name('service_requests.list_mine');
+
+    // Services Directory
+    Route::get('directory', 'ServiceController@availableServices')->name('users.directory_view');
+    Route::post('directory/{id}', 'ServiceController@details');
+    Route::post('directory/{id}/rate', 'ServiceController@rate');
+    Route::post('service/request', 'ServiceController@book_service')->name('services.request_service');
+
     //Types Manager routes
     Route::resource('types', 'TypeController');
     //Partners Manager routes
     Route::resource('partners', 'PartnersController');
     Route::resource('stages', 'StageController');
+    Route::resource('expertises', 'ExpertiseController');
     //Press Manger routes
     Route::resource('press', 'PressController');
     //Client's Profile
@@ -293,11 +347,17 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('/myProfile', 'ClientProfileController@update')->name('user.profile_update_basic');
     Route::post('/myProfile/bio', 'ClientProfileController@Updatebio')->name('user.profile_update_bio');
     Route::post('/myProfile/password', 'ClientProfileController@updatePassword')->name('user.account_update_password');
-Route::post('/myProfile/notification-settings', 'ClientProfileController@updateNotificationSettings')->name('user.notification_settings_update');
+    Route::post('/myProfile/notification-settings', 'ClientProfileController@updateNotificationSettings')->name('user.notification_settings_update');
     Route::get('/show/UserProfile/{id}', 'ClientProfileController@showMintorprofile')->name('mentors.profile_view');
-    Route::get('/show/Mentors', 'ClientProfileController@showMintors')->name('mentors.list');
+    Route::get('/mentors', 'ClientProfileController@showMintors')->name('mentors.list');
+
+    // Invitations
+    Route::group(['prefix' => 'mentors'], function () {
+        Route::resource('invitations', 'InvitationController');
+        Route::post('File_Upload', 'InvitationController@updateFile')->name('invitations.upload');
+    });
+    
     // lowercase alias for backward-compatibility / ease of testing
-    Route::get('/show/mentors', 'ClientProfileController@showMintors')->name('mentors.list.lowercase');
     Route::get('/confirm-email/{token}', 'ClientProfileController@confirmEmailUpdate')->name('user.profile_email_confirm');
 
     Route::group(['prefix' => '2fa'], function () {
@@ -368,16 +428,32 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::post('/delete-document', 'ClientCompanyController@deleteDocument')->name('company.profile_documents_delete');
     Route::post('/delete-image/{id?}', 'ClientCompanyController@deleteImage')->name('company.profile_images_delete');
 
+    // startup growth
+
+    Route::post('/startupGrowth/add', 'startupCustomerGrowthController@addRecord');
+
+    // Company Alumni
+    Route::get('/companyProfile/{id}/alumni/{cycle_id}', [ClientCompanyController::class, 'companyAlumni'])->name('company.alumni_view');
+
+    // Company Perks
+    Route::get('perks', [ClientCompanyController::class, 'companyPerks']);
+
     // Company Profile Employees
-    Route::delete('/employees/delete/{id}','ClientCompanyController@deleteEmployee')->name('company.employees_delete');
+    Route::get('/employees/{id}', 'ClientCompanyController@getEmployees')->name('company.getEmployees');
+    Route::delete('/employees/delete/{id}', 'ClientCompanyController@deleteEmployee')->name('company.employees_delete');
     Route::post('/employees/edit/{id}', 'ClientCompanyController@editEmployee')->name('company.employees_edit');
     Route::post('/employees/add/{id}', 'ClientCompanyController@addEmployee')->name('company.employees_add');
+
+    // Almuni 
+    Route::post('/AddCompanyalumni/{id}', 'ClientCompanyController@addCompanyAlumni')->name('company.addCompanyAlumni');
+    
+
 
     //Industry
     Route::post('/industries/technologies', 'TechnologyController@create_technologies')->name('settings.create_technologies');
     Route::put('/industries/tech/{id}', 'TechnologyController@update_technologies')->name('settings.update_technologies');
     Route::delete('/industries/technologies/{id}', 'TechnologyController@delete_technologies')->name('settings.delete_technologies');
-    
+
     Route::post('/industries', 'IndustryController@store')->name('settings.create_industries');
     Route::put('/industries/industry/{id}', 'IndustryController@update')->name('settings.update_industries');
     Route::delete('/industries/{id}', 'IndustryController@destroy')->name('settings.delete_industries');
@@ -392,9 +468,13 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     //like a service
     Route::post('/likeService', 'ClientCompanyController@likeService')->name('services.like');
     //Users  Manager routes
+    Route::get('/users/impersonate-start/{id}', 'UserController@startImpersonate')->name('users.login_as');
+    Route::post('/users/impersonate-stop', 'UserController@stopImpersonate');
     Route::resource('users', 'UserController');
     Route::get('/judger', 'UserController@judger')->name('users.judger');
     Route::post('/users/password', 'UserController@updatePassword')->name('user.profile_update_password');
+    Route::post('/users/update_my_password', 'UserController@updateMyPassword')->name('user.profile_update_my_password');
+    Route::patch('/users/{user}/organizations', 'UserController@updateOrganizations')->name('users.update_organizations');
     Route::get('/companies', 'ClientCompanyController@companies')->name('users.view_companies');
     // Export startups (CSV / Excel) - preserves current filters passed as query params
     Route::get('/companies/export', 'CompanyExportController@export')->name('users.companies_export');
@@ -417,7 +497,7 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::post('/send_message', 'MessengerController@sendmsg');
     Route::get('/sendmessage', 'MessengerController@sendmessage')->name('messages.send');
     Route::post('/sendmessage', 'MessengerController@savemessage')->name('messages.save');
-    Route::post('/sendteammessage','HackathonController@sendTeamMessage')->name('messages.send_team_message');
+    Route::post('/sendteammessage', 'HackathonController@sendTeamMessage')->name('messages.send_team_message');
     Route::post('/sendReplymessage', 'MessengerController@sendReplyMessage')->name('messages.reply');
     Route::get('/get-users-by-cycle', 'MessengerController@getUsersByProgram')->name('messages.recipients_list_by_program');
 
@@ -455,6 +535,7 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     //Audit Logs
     Route::resource('audit-logs', 'AuditLogsController', ['except' => ['create', 'store', 'edit', 'update']]);
     //Permissions
+    Route::post('permissions/strip-from-roles', 'PermissionsController@stripFromRoles');
     Route::resource('permissions', 'PermissionsController');
     // permissions groups
     Route::resource('permission-groups', 'PermissionGroupsController');
@@ -463,12 +544,24 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     //Faqs
     Route::resource('faqs', 'FaqsController');
 
+    // Tasks
+    Route::get('tasks/assignees/{program_id}', [TasksController::class, 'getAssignees'])->name('tasks.get_assignees');
+    Route::get('tasks/titles', [TasksController::class, 'getTaskTitles'])->name('tasks.get_titles');
+    Route::resource('tasks', 'TasksController');
+
     // Forms
-    Route::get('forms-list', 'FormController@index')->name('forms.index');
+    Route::get('forms', 'FormController@index')->name('forms.index');
 
     Route::get('forms-submissions', 'FormController@submissions')->name('forms_submissions.index');
     Route::get('forms-submissions/export/{type}', 'FormController@export');
     Route::get('submission-details/{id}', 'FormController@submissionDetails')->name('form_submission_details.index');
+    Route::get('submission-export/{id?}', 'FormController@exportSubmissionDetails')->name('form_submission_details.export');
+
+    // Advanced Export
+    Route::get('forms-submissions/advanced-export/status', 'AdvancedExportController@status')->name('forms_submissions.export.status');
+    Route::post('forms-submissions/advanced-export/generate', 'AdvancedExportController@generate')->name('forms_submissions.export.generate');
+    Route::get('forms-submissions/advanced-export/download', 'AdvancedExportController@download')->name('forms_submissions.export.download');
+    Route::get('forms-submissions/advanced-export/progress', 'AdvancedExportController@progress')->name('forms_submissions.export.progress');
 
     //BuilderForm Builder
     Route::get('show-builder/{id?}', 'FormBuilderController@showBuilder')->name('forms.builder_view');
@@ -477,10 +570,11 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::post('builder/{set}', 'FormBuilderController@modifyForm');
     Route::post('submit-form', 'FormBuilderController@handleFormRequest')->name('forms.submissions_create');
     Route::get('builder/organization/{id?}', 'FormBuilderController@builderByOrganization');
+    Route::delete('form/{id}/delete', 'FormBuilderController@deleteForm')->name('forms.delete');
     //Cycles
     Route::get('cycles/{id?}', 'CyclesController@index')->name('cycles.list');
     Route::get('cycles/{id}/registered', 'CyclesController@users')->name('cycles.users_manage');
-    
+
     Route::post('cycles/{id}/add_page', 'CycleCustomPagesController@add');
     Route::post('cycles/{id}/show_page', 'CycleCustomPagesController@view');
     Route::post('cycles/{id}/update_page', 'CycleCustomPagesController@update');
@@ -488,7 +582,7 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::post('cycles/{id}/toggle_status', 'CycleCustomPagesController@toggle_status');
     Route::post('cycles/{id}/toggle_visibility', 'CycleCustomPagesController@toggle_visibility');
     Route::post('cycles/{id}/delete_page', 'CycleCustomPagesController@delete');
-    
+
     Route::post('cycles/modify', 'CyclesController@modify')->name('cycles.modify');
     Route::post('cycles/validate-url', 'CyclesController@validateURL');
     Route::get('cycles/view/{c?}/{s?}', 'CyclesController@view')->name('cycles.view');
@@ -508,9 +602,12 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::post('mentorshipschedule/destroy', 'MentorshipScheduleController@destroy')->name('mentorship.schedule_destroy');
 
     //Screening
-    Route::get('screening', 'ScreeningController@index');
+    Route::get('screening', 'ScreeningController@index')->name('screening.index');
+    Route::get('screening/{id?}', 'ScreeningController@show');
     Route::get('/dashboard/screening/get/{formId}/{stepId}/{panel}', 'ScreeningController@get')->name('screening.get');
     Route::post('screening/update', 'ScreeningController@update');
+    Route::post('screening/add-judging-panels', 'ScreeningController@addJudgingPanels')->name('screening.add_judging_panels');
+    Route::post('screening/delete-judging-panel', 'ScreeningController@deleteJudgingPanel')->name('screening.delete_judging_panel');
     Route::post('screening/save', 'ScreeningController@save');
     Route::post('screening/add', 'ScreeningController@add');
     Route::get('screening/results/{id?}', 'ScreeningController@results');
@@ -531,8 +628,16 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::post('zoom/{id}/update', 'MeetingController@update');
     Route::post('zoom/{id}/delete', 'MeetingController@destroy');
     Route::get('zoom/{id}/registrants', 'MeetingController@registrants');
+
     //Mentors
     Route::post('mentors/modify', 'MentorsController@modify')->name('mentors.settings_modify');
+
+    // Availability Slots
+    Route::get('availability', 'Mentor\SlotController@index')->name('slots.index');
+    Route::get('availability/slots/{user_id?}', 'Mentor\SlotController@getSlots')->name('slots.read');
+    Route::post('availability/slots/store', 'Mentor\SlotController@store')->name('slots.store');
+    Route::post('availability/slots/{id}/copy', 'Mentor\SlotController@copy')->name('slots.copy');
+    Route::delete('availability/slots/{id}', 'Mentor\SlotController@destroy')->name('slots.destroy');
 
     Route::get('program/show', 'Mentor\MentorProgramController@show');
 
@@ -580,7 +685,7 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::get('training/viewCourse/{id}', 'TrainingController@showCourse')->name('trainings.course_view');
     Route::get('quizResults', 'quizzesController@quizResults')->name('quizzes.quiz_Results_view');
     Route::get('quizResults/{id}', 'quizzesController@quizResultsdetails')->name('quizzes.quiz_results_view_details');
-    Route::post('/track-duration',  'TrainingController@timeTracking')->name('trainings.time_tracking');
+    Route::post('/track-duration', 'TrainingController@timeTracking')->name('trainings.time_tracking');
 
 
 
@@ -630,7 +735,7 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::get('surveys/start/{id?}', 'surveysController@survey_taking')->name('surveys.take');
     Route::post('surveys/start/{id?}', 'surveysController@survey_submit')->name('surveys.submit');
     Route::post('surveys/{survey}/questions/delete', 'surveysController@delete_questions')->name('surveys.questions_delete');
-    
+
 
     //Rooms routes
     Route::resource('rooms', 'RoomsController');
@@ -643,7 +748,8 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::get('/upcomingBusyReview', 'BookingController@upcomingBusyReview')->name('bookings.review_upcoming_busy');
     Route::get('/oldReview', 'BookingController@oldReview')->name('bookings.review_past');
     //Final Screening
-    Route::get('final', 'FinalscreeningController@index')->name('screening.index');
+    Route::get('final', 'FinalscreeningController@index');
+    Route::get('final/{id}', 'FinalscreeningController@show');
     Route::get('{id?}/final', 'FinalscreeningController@index')->name('screening.show');
     Route::post('final/update', 'FinalscreeningController@update')->name('screening.update');
     Route::post('final/save', 'FinalscreeningController@save')->name('screening.store');
@@ -659,6 +765,8 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::post('programlist/create', 'ProgramController@edit')->name('programs.create');
     Route::get('programlist/edit/{id}', 'ProgramController@edit')->name('programs.edit');
     Route::get('programlist/show/{id}', 'ProgramController@show')->name('programs.view');
+    Route::get('programlist/{id}/custom-pages', 'ProgramController@customPages');
+    
     Route::post('programlist/Email', 'ProgramController@SentEmail')->name('programs.send_email');
     Route::get('/export-Prog', 'ProgramController@exportProg')->name('programs.export');
     Route::get('programlist/report/{id}', 'ProgramController@programReport')->name('programs.report');
@@ -743,10 +851,10 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
         Route::get('notification-templates/{notificationTemplate}/preview', 'NotificationTemplateController@preview')->name('notification-templates.preview');
         Route::post('notification-templates/{notificationTemplate}/clone', 'NotificationTemplateController@clone')->name('notification-templates.clone');
         Route::post('notification-templates/{notificationTemplate}/test-send', 'NotificationTemplateController@testSend')->name('notification-templates.test-send');
-        
+
         // Resource routes come last
         Route::resource('notification-templates', 'NotificationTemplateController');
-        
+
         /* Notification Triggers Routes - MOVED INSIDE DASHBOARD GROUP */
         // Define specific routes BEFORE resource routes to avoid conflicts
         Route::get('notification-triggers/events', 'NotificationTriggerController@getEvents')->name('notification-triggers.events');
@@ -755,18 +863,18 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
         Route::post('notification-triggers/{notificationTrigger}/toggle-active', 'NotificationTriggerController@toggleActive')->name('notification-triggers.toggle-active');
         Route::post('notification-triggers/{notificationTrigger}/clone', 'NotificationTriggerController@clone')->name('notification-triggers.clone');
         Route::post('notification-triggers/{notificationTrigger}/test', 'NotificationTriggerController@test')->name('notification-triggers.test');
-        
+
         // Resource routes come last
         Route::resource('notification-triggers', 'NotificationTriggerController');
     });
 
 
 
-     /* Start of Activities Routes */
+    /* Start of Activities Routes */
     Route::get('/activities', [ActivityControlller::class, 'index'])->name('activities.index');
     Route::post('/log-activity', [ActivityControlller::class, 'logActivity'])->name('activity.log');
     Route::delete('/activities/{id}', [ActivityControlller::class, 'destroy'])->name('activities.destroy');
-    
+
     // Security actions for suspicious logins
     Route::post('/activities/force-logout', [ActivityControlller::class, 'forceLogout'])->name('activities.force-logout');
     Route::post('/activities/reset-password', [ActivityControlller::class, 'resetPassword'])->name('activities.reset-password');
@@ -812,7 +920,10 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     });
 });
 
-
+// Organization Logo from Storage
+Route::get('organizations/logo/{filename?}', 'OrganizationWizardController@getLogo')->name('organizations.logo');
+// Organization Landing Page Assets from Storage
+Route::get('organization/{organizationId}/landing-assets/{type}/{filename?}', 'OrganizationWizardController@getLandingAsset')->name('organization.landing.asset');
 
 ///// Reports routes
 //Route::group(['prefix' => 'reports',  'middleware' => ['auth', 'verified']], function(){
@@ -829,12 +940,16 @@ Route::get('/callback/{provider}', 'SocialController@callback');
 Route::get('/auth/google', 'SocialController@redirectToGoogle');
 Route::get('/auth/google/callback', 'SocialController@handleGoogleCallback');
 
-Route::get('/auth/microsoft/redirect/{mentorship_id}',  'MicrosoftController@redirect')->name('integrations.auth_microsoft_redirect');
-Route::get('/auth/microsoft/callback',  'MicrosoftController@callback')->name('integrations.auth_microsoft_callback');
+Route::get('/auth/microsoft/redirect/{mentorship_id}', 'MicrosoftController@redirect')->name('integrations.auth_microsoft_redirect');
+Route::get('/auth/microsoft/callback', 'MicrosoftController@callback')->name('integrations.auth_microsoft_callback');
 
 // --------------------> Linked In <-------------------
 Route::get('/auth/linkedin/{data?}', 'SocialController@redirectToLinkedIn')->name('integrations.auth_linkedin_login');
 Route::get('/auth/linkedin-openid/callback', 'SocialController@handleLinkedInCallback')->name('integrations.auth_linkedin_callback');
+
+// Public Organization Landing Page
+Route::get('/o/{slug}', 'PublicLandingController@show')->name('organization.landing.public');
+Route::post('/o/{slug}/contact', 'PublicLandingController@submitContact')->name('organization.contact.submit');
 
 Route::get('/{org_slug}/join/{step_slug}', 'ExternalCyclesController@publicJoin')->name('public.join');
 Route::get('/{org_slug}/program/{program_slug}', 'ExternalCyclesController@publicProgramJoin')->name('public.program_join');

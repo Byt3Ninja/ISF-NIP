@@ -133,6 +133,10 @@ class MentorshipSessionController extends Controller
              return $this->conflict(__('api.session_already_exists'));
         }
 
+        if (\App\Settings::hasReachedMaxConcurrentSessions($date->timestamp, $duration)) {
+             return $this->validationError(__('api.max_concurrent_sessions_reached'));
+        }
+
         if (!$request->override_availability) {
            $dayName = $date->format('l'); 
            $time = $date->format('H:i:s');

@@ -12,7 +12,7 @@ class ScreeningEvaluation extends Model
 	use HasFactory;
 
 	protected $table = 'screening_evaluation';
-	protected $fillable = ['step_id', 'status'];
+	protected $fillable = ['step_id', 'status', 'screening_guidelines'];
 	protected $casts = [
 		'step_id' => 'integer',
 		'status' => 'boolean',
@@ -47,6 +47,7 @@ class ScreeningEvaluation extends Model
 				se.id AS evaluation_id,
 				se.step_id,
 				se.status,
+				se.screening_guidelines,
 				sec.id AS criteria_id,
 				sec.title AS criteria_name,
 				sec.weight AS criteria_weight,
@@ -70,6 +71,7 @@ class ScreeningEvaluation extends Model
 			$evaluation->id = $_e->evaluation_id;
 			$evaluation->step = $_e->step_id;
 			$evaluation->status = $_e->status == 0 ? 'Draft' : 'Published';
+			$evaluation->screening_guidelines = $_e->screening_guidelines;
 			$categories = $e->whereNull('criteria_parent_id')->groupBy('criteria_id')->map(function ( $criteria ) {
 				$c = $criteria->first();
 				$category = new stdClass;
@@ -86,6 +88,12 @@ class ScreeningEvaluation extends Model
 				return $category;
 			})->filter(function( $category ) { return !is_null( $category->id ); })->values();
 			$evaluation->categories = $categories;
+
+			// Fetch screening guidelines from the associated cycle (fallback if no evaluation-specific guidelines)
+			$step = Step::with('cycle')->find($_e->step_id);
+			$evaluation->screening_guidelines = $evaluation->screening_guidelines ?: ($step && $step->cycle ? $step->cycle->program_guideline : null);
+			$evaluation->screening_guidelines_file = $step && $step->cycle ? $step->cycle->program_guideline_file : null;
+
 			return $evaluation;
 		})->values();
 		if( !is_array( $id ) ) { $evaluationForm = $evaluationForm->first(); }

@@ -51,7 +51,7 @@
                 <button
                   type="button" 
                   id="reset-company-logo"
-                  onclick="document.querySelector('#company-logo').src = '/images/logo-placeholder.png'; document.querySelector('#file1').value = '';"
+                  {{-- onclick="document.querySelector('#company-logo').src = '/images/logo-placeholder.png'; document.querySelector('#file1').value = '';" --}}
                   class="btn btn-label-secondary btn-sm"
                 >
                   {{ $l == 'en' ? 'Reset' : 'إعادة تعيين' }}
@@ -155,7 +155,7 @@
                     id="website" 
                     name="website" 
                     {{-- placeholder="{{ $l == 'en' ? 'Website URL' : 'رابط الموقع' }}"  --}}
-                    placeholder="e.g. https://website.com""
+                    placeholder="e.g. https://website.com"
                     value="{{ $client->company->website ?? old('website') }}" 
                     pattern="https?://.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid website URL.' : 'يرجى إدخال رابط موقع صالح.' }}"
@@ -465,4 +465,47 @@
       }
     });
   });
+
+  $('#reset-company-logo').on('click', function () {
+  Swal.fire({
+    title: "{{__('startup.startup_logo_delete_confirm')}}",
+    text: "{{__('admin.Recover')}}",
+    icon: "warning",
+    reverseButtons: true,
+    showCancelButton: true,
+    confirmButtonText: "{{ __('admin.DYes') }}",
+    cancelButtonText: "{{ __('admin.No') }}",
+    customClass: {
+      confirmButton: "btn btn-danger",
+      cancelButton: "btn btn-label-secondary"
+    }
+  }).then(function (result) {
+    if (result.isConfirmed) {
+
+      $.ajax({
+        url: "{{ route('company.profile_images_delete', $client->company->id ?? 0) }}",
+        type: "POST",
+        headers: {
+          "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function (data) {
+         releaseSuccessAlert({
+            title: "{{ __('admin.Deleted') }}",
+            message: "{{ __('startup.startup_logo_deleted') }}",
+          });
+
+          // Remove image preview or reset UI
+          $('#company-logo').attr('src', '/images/logo-placeholder.png');
+        },
+
+        error: function (xhr) {
+          releaseFailureAlert({
+            title: "{{ __('admin.Failed') }}",
+            message: xhr?.responseJSON?.message ? xhr?.responseJSON?.message : "{{ __('startup.startup_logo_delete_failed') }}",
+          });
+        }
+      });
+    }
+  });
+});
 </script>

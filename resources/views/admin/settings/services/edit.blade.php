@@ -93,6 +93,14 @@
                                                 </fieldset>
 
                                                 <fieldset class="form-group mt-3">
+                                                    <label class="form-label" for="basicInput">{{ __('admin.Service Status') }}</label>
+                                                    <select class="select2 form-control" required id="status" name='status'>
+                                                        <option value="1" {{ old('status', $service->status) == 1 ? 'selected' : ''}} >{{ __('admin.Active') }}</option>
+                                                        <option value="0" {{ old('status', $service->status) == 0 ? 'selected' : ''}} >{{ __('admin.Not Active') }}</option>
+                                                    </select>
+                                                </fieldset>
+
+                                                <fieldset class="form-group mt-3">
                                                     <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Services Categories')}}</label>
                                                     <select class="select2 form-control" required
                                                         id="service_category_id" name='service_category_id'>
@@ -127,27 +135,32 @@
                                                         @endforeach
                                                     </div>
                                                 </fieldset>
+                                                @if( !$_user->hasRole('serviceProvider') )
                                                 <!-- Vendor Details -->
+                                                <fieldset class="form-group mb-4">
+                                                    <label class="form-label" for="basicInput">{{ __('admin.Service Provider') }}</label>
+                                                    <select class="select2 form-control" required id="service_provider_id" name='service_provider_id'>
+                                                        <option value="">{{ __('admin.Service Provider') }}</option>
+                                                        @foreach ($providers as $provider)
+                                                            <option value="{{ $provider->id }}" {{ old('service_provider_id', $service->service_provider_id)==$provider->id ? 'selected' : '' }}> {{ $provider->company_name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </fieldset>
                                                 <fieldset class="form-group mt-3">
                                                     <label class="fs-5 mb-2">{{ __('admin.Vendor_Name') }}</label>
-                                                    <input type="text" class="form-control col-md-6 col-sm-12"
-                                                        name="vendor_name"
-                                                        value="{{ old('vendor_name', $service->vendor_name) }}">
+                                                    <input type="text" class="form-control col-md-6 col-sm-12" id="vendor_name" name="vendor_name" value="{{ old('vendor_name', $service->vendor_name) }}" readonly disabled>
                                                 </fieldset>
 
                                                 <fieldset class="form-group mt-3">
                                                     <label class="fs-5 mb-2">{{ __('admin.Vendor_Email') }}</label>
-                                                    <input type="email" class="form-control col-md-6 col-sm-12"
-                                                        name="vendor_email"
-                                                        value="{{ old('vendor_email', $service->vendor_email) }}">
+                                                    <input type="email" class="form-control col-md-6 col-sm-12" id="vendor_email" name="vendor_email" value="{{ old('vendor_email', $service->vendor_email) }}" readonly disabled>
                                                 </fieldset>
 
                                                 <fieldset class="form-group mt-3">
                                                     <label class="fs-5 mb-2">{{ __('admin.Vendor_Phone') }}</label>
-                                                    <input type="text" class="form-control col-md-6 col-sm-12"
-                                                        name="vendor_phone"
-                                                        value="{{ old('vendor_phone', $service->vendor_phone) }}">
+                                                    <input type="text" class="form-control col-md-6 col-sm-12" id="vendor_phone" name="vendor_phone" value="{{ old('vendor_phone', $service->vendor_phone) }}" readonly disabled>
                                                 </fieldset>
+                                                @endif
 
                                                 <!-- Visibility Controls -->
                                                 <fieldset class="form-group mt-3">
@@ -222,18 +235,31 @@
 @stop
 @section('pagescripts')
 @parent
-<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
-<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-      var quill = new Quill('#quill-editor', {
-        theme: 'snow'
-      });
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+    <script>
+        var providers = @json( $providers );
+        $(document).on('change', '#service_provider_id', function() {
+            var provider_id = $(this).val();
+            var provider = providers.find(function(provider) {
+                return provider.id == provider_id;
+            });
+            if( typeof provider !== 'undefined' )
+            {
+                $('#vendor_name').val( provider.company_name );
+                $('#vendor_email').val( provider.email );
+                $('#vendor_phone').val( provider.phone );
+            }
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+        var quill = new Quill('#quill-editor', {
+            theme: 'snow'
+        });
 
-      var descriptionInput = document.getElementById('description_en');
-      quill.on('text-change', function () {
-        descriptionInput.value = quill.root.innerHTML;
-      });
-    });
-</script>
+        var descriptionInput = document.getElementById('description_en');
+        quill.on('text-change', function () {
+            descriptionInput.value = quill.root.innerHTML;
+        });
+        });
+    </script>
 @stop

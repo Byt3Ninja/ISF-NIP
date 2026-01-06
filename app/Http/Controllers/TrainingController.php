@@ -523,44 +523,44 @@ class TrainingController extends Controller
 		
 		Log::info($request->all());
 		$user= Auth::user();
-		if(!$user->hasAnyRole('registered')){
-			return back()->withInput()->with(['class' => 'danger', 'message' => 'ErrorNoPermissions']);
+		if($user->hasRole('Registered')){
+			
+		 	$request->validate([
+				'duration_minutes' => 'required|integer|min:1',
+				'trainingId' => 'required|integer',
+			]);
+
+			$training = TrainingSession::where('training_Address', $request->trainingId)->where('step_id', $user->company->step)->first();
+
+			TrainingDuration::create([
+				'user_id' => $user->id,
+				'company_id' => $user->company_id,
+				'cycle_id' => $user->company->cycle,
+				'step_id' => $user->company->step,
+				'training_sessions_id' => $training->id,
+				'page_url' => $request->page_url,
+				'duration_minutes' => $request->duration_minutes,
+			]);
+
+			$totalDuration = TrainingDuration::where('training_sessions_id', $training->id)->sum('duration_minutes');
+
+			TrainingSession::where('id', $training->id)->update([
+				'duration' => $totalDuration,
+			]);
+
+			return response()->json(['status' => 'success']);
 		}
-		
-		 $request->validate([
-            'duration_minutes' => 'required|integer|min:1',
-			'trainingId' => 'required|integer',
-        ]);
-
-		$training = TrainingSession::where('training_Address', $request->trainingId)->where('step_id', $user->company->step)->first();
-
-        TrainingDuration::create([
-            'user_id' => $user->id,
-			'company_id' => $user->company_id,
-			'cycle_id' => $user->company->cycle,
-			'step_id' => $user->company->step,
-			'training_sessions_id' => $training->id,
-            'page_url' => $request->page_url,
-            'duration_minutes' => $request->duration_minutes,
-        ]);
-
-		$totalDuration = TrainingDuration::where('training_sessions_id', $training->id)->sum('duration_minutes');
-
-		TrainingSession::where('id', $training->id)->update([
-			'duration' => $totalDuration,
-		]);
-
-        return response()->json(['status' => 'success']);
 	}
 
 	public function results($id = 0)
 	{
 		try {
-			$organization_id = auth()->user()->organization_id;
-			$sessions = TrainingSession::when(!is_null($organization_id), function ($q) use ($organization_id) {
-				return $q->whereHas('step', function ($query) use ($organization_id) {
-					$query->whereHas('cycle', function ($qer) use ($organization_id) {
-						$qer->where('organization_id', $organization_id);
+			$user = auth()->user();
+			$orgIds = $user->organizations_ids;
+			$sessions = TrainingSession::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->whereHas('step', function ($query) use ($orgIds) {
+					$query->whereHas('cycle', function ($qer) use ($orgIds) {
+						$qer->whereIn('organization_id', $orgIds);
 					});
 				});
 			})->where('type', 'online')->orderBy('datetime')->get();
@@ -592,11 +592,12 @@ class TrainingController extends Controller
 	public function sessions(Request $request, $id = 0)
 	{
 		try {
-			$organization_id = auth()->user()->organization_id;
+			$user = auth()->user();
+			$orgIds = $user->organizations_ids;
 
-			$steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
-				return $q->whereHas('cycle', function ($query) use ($organization_id) {
-					$query->where('organization_id', $organization_id);
+			$steps = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->whereHas('cycle', function ($query) use ($orgIds) {
+					$query->whereIn('organization_id', $orgIds);
 				});
 			})->where('stype', 4)->get();
 
@@ -713,6 +714,9 @@ class TrainingController extends Controller
 			$duration = $start->diffInMinutes($end);
 
 			if ($type == 'sessions') {
+				if (\App\Settings::hasReachedMaxConcurrentSessions($datetimeStamp, $duration)) {
+					return back()->with(['message' => __('cycles.MaxConcurrentSessionsReached'), 'class' => 'danger']);
+				}
 				$_session = $this->addorcreatSession($type, $datetime, $duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email);
 
 				if( $_session['success'] == false )
@@ -1426,13 +1430,14 @@ class TrainingController extends Controller
 
 	public function sessionsReport(Request $request)
 	{
-		
-		try {
-			$organization_id = auth()->user()->organization_id;
 
-			$steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
-				return $q->whereHas('cycle', function ($query) use ($organization_id) {
-					$query->where('organization_id', $organization_id);
+		try {
+			$user = auth()->user();
+			$orgIds = $user->organizations_ids;
+
+			$steps = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->whereHas('cycle', function ($query) use ($orgIds) {
+					$query->whereIn('organization_id', $orgIds);
 				});
 			})->where('stype', 4)->get();
 			$sessions = TrainingSession::with('reports')->orderBy('datetime', 'ASC');

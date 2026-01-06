@@ -43,152 +43,159 @@
 							</div>
 						</div>
 						@endif
-						<div class="card-body">
-							<div class="table table-responsive">
-								<table class="table mb-0" id="assessments-table">
-									<thead class="table-light">
-										<tr>
-											<th>#</th>
-											<th>{{ __('admin.Company') }}</th>
-											<th>{{ __('admin.Founder') }}</th>
-											<th>{{ __('admin.start_date') }}</th>
-											<th>{{ __('admin.end_date') }}</th>
-											<th>{{ __('admin.Created at') }}</th>
-											@if( $_user->ableToAny(['assessments.show', 'question-assessments.questions_manage', 'assessments.edit', 'assessments.update', 'assessments.destroy'], $permissions) )<th>{{ __('admin.Actions') }}</th>@endif
-										</tr>
-									</thead>
-									<tbody>
-										@php $c = 1; @endphp
-										@foreach ($assessments as $assessment)
-											<tr data-founder-id="{{ $assessment->user_id }}" data-company-id="{{ optional($assessment->user->company)->id ?? '0' }}">
-												<td>{{$c++}}</td>
-												<td>
-													@if($assessment->user->company)
-													<a href="{{ route('company.profile_view', $assessment->user->company->id) }}">
-														{{ $assessment->user->company->{'name_'.app()->getLocale()} }}
-													</a>
-													@else
-													<span class="text-muted">{{ $l == 'en' ? 'No Company' : 'لا توجد شركة' }}</span>
-													@endif
-												</td>
-												<td>{{ $assessment->user->{'first_name_'.$l} }} {{ $assessment->user->{'last_name_'.$l} }}</td>
-												<td>{{$assessment->start_date }}</td>
-												<td>{{$assessment->end_date }}</td>
-												<td>{{$assessment->created_at}}</td>
-												@if( $_user->ableToAny(['assessments.show', 'assessments.questions_manage', 'assessments.edit', 'assessments.update', 'assessments.destroy'], $permissions) )
-												<td>
-													@if( $_user->ableTo('assessments.show', $permissions) )
-													<a 
-														class="btn btn-icon btn-label-primary rounded-circle" 
-														href="{{ route('assessments.show', $assessment->id) }}"
-														data-bs-toggle="tooltip"
-														data-bs-placement="top"
-														title="{{ __('admin.View') }}"
-													>
-														<i class="ti ti-eye"></i>
-													</a>
-													@endif
-													@if( $_user->ableTo('assessments.questions_manage', $permissions) )
-													<a 
-														class="btn btn-icon btn-label-secondary rounded-circle"
-														href="{{ route('assessments.questions_manage', $assessment->id) }}"
-														data-bs-toggle="tooltip"
-														data-bs-placement="top"
-														title="{{ __('admin.manageQuestions') }}">
-														<i class="ti ti-list-check"></i>
-													</a>
-													@endif
-													@if( $_user->ableToAny(['assessments.edit', 'assessments.update'], $permissions) )
-														<button 
-															class="btn btn-icon btn-label-info rounded-circle" 
-															data-bs-toggle="modal" 
-															data-bs-target="#EditAssessment{{ $assessment->id }}"
-															data-bs-placement="top"
-															title="{{ __('admin.Edit') }}"
-														>
-															<i class="ti ti-pencil"></i>
-														</button>
-													@endif
-													@if( $_user->ableTo('assessments.destroy', $permissions) )
-														<form action="{{ route('assessments.destroy', $assessment->id) }}" method="POST" style="display: inline-block;">
-															@csrf
-															@method('DELETE')
-															<button 
-																class="btn btn-icon btn-label-danger rounded-circle" 
-																type="submit" 
-																onclick="return confirmDelete(event, {{ $assessment->id }})"
-																data-bs-toggle="tooltip"
-																data-bs-placement="top"
-																title="{{ __('admin.Delete') }}"
-															>
-																<i class="ti ti-trash"></i>
-															</button>
-														</form>
-													@endif
-												</td>
+						<div class="card-datatable table-responsive">
+							<table class="table mb-0" id="assessments-table">
+								<thead class="table-light">
+									<tr>
+										<th>#</th>
+										<th>{{ __('admin.Company') }}</th>
+										<th>{{ __('admin.Founder') }}</th>
+										<th>{{ __('admin.start_date') }}</th>
+										<th>{{ __('admin.end_date') }}</th>
+										<th>{{ __('admin.Created at') }}</th>
+										@if( $_user->ableToAny(['assessments.show', 'question-assessments.questions_manage', 'assessments.edit', 'assessments.update', 'assessments.destroy'], $permissions) )<th>{{ __('admin.Actions') }}</th>@endif
+									</tr>
+								</thead>
+								<tbody>
+									@php $c = 1; @endphp
+									@foreach ($assessments as $assessment)
+										<tr data-founder-id="{{ $assessment->user_id }}" data-company-id="{{ optional($assessment->user->company)->id ?? '0' }}">
+											<td>{{$c++}}</td>
+											<td>
+												@if($assessment->user->company)
+												<a 
+													href="{{ route('company.profile_view', $assessment->user->company->id) }}"
+													class="d-flex align-items-center gap-2"
+												>
+													<img 
+														src="{{ $assessment->user->company->logo ?? '/images/logo-placeholder.png' }}" 
+														alt="logo" 
+														class="rounded-circle border"
+														height="40" width="40"
+													/>
+													<span class="fs-6 mb-0 text-dark">{{ $assessment->user->company->{'name_'.app()->getLocale()} }}</span>
+												</a>
+												@else
+												<span class="text-muted">{{ $l == 'en' ? 'No Company' : 'لا توجد شركة' }}</span>
 												@endif
-											</tr>
-											@if( $_user->ableToAny(['assessments.edit', 'assessments.update'], $permissions) )
-											<!-- Edit Assessment Modal -->
-											<div class="modal fade" id="EditAssessment{{ $assessment->id }}" tabindex="-1" aria-labelledby="EditAssessmentLabel{{ $assessment->id }}" aria-hidden="true" role="dialog" data-bs-backdrop="static">
-												<div class="modal-dialog modal-md" role="document">
-													<div class="modal-content" style="background-color: white;">
-														<div class="modal-header">
-															<h5 class="modal-title mb-0" id="EditAssessmentLabel{{ $assessment->id }}">{{__('admin.Edit')}} ({{$assessment->user->name}})</h5>
-															<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-														</div>
-														<div class="modal-body">
-															<form class="pt-0" action="{{ route('assessments.update', $assessment->id) }}" method="POST">
-																@csrf
-																@method('PUT')
-																<div class="row">
-																	<div class="col-md-6 mb-4">
-																		<label class="form-label fs-6"> {{ $l == 'en' ? 'User' : 'المستخدم' }} </label>
-																		<select class="form-select edit-select2" name="user_id">
-																			<option value="" disabled selected> {{ $l == 'en' ? 'Select User' : 'اختر المستخدم ' }} </option>
-																			@foreach ($users as $user)
-																				<option value="{{ $user->id }}" {{ $user->id == $assessment->user_id ? 'selected' : '' }}	>{{ $user->name }}</option>
-																			@endforeach
-																		</select>
-																	</div>
-																	<div class="col-md-6 mb-4">
-																		<label for="start_date" class="form-label" >{{__('admin.start_date')}}</label>
-																		<input class="form-control date"
-																			id="start_date"
-																			type="text"
-																			name="start_date"
-																			autocomplete="off"
-																			value="{{ $assessment->start_date }}"
-																		/>
-																	</div>
-																	<div class="col-md-6 mb-4">
-																		<label for="end_date" class="form-label" >{{__('admin.end_date')}}</label>
-																		<input class="form-control date"
-																			id="end_date"
-																			type="text"
-																			name="end_date"
-																			autocomplete="off"
-																			value="{{ $assessment->end_date }}"
-																		/>
-																	</div>
+											</td>
+											<td>{{ $assessment->user->{'first_name_'.$l} }} {{ $assessment->user->{'last_name_'.$l} }}</td>
+											<td>{{$assessment->start_date }}</td>
+											<td>{{$assessment->end_date }}</td>
+											<td>{{$assessment->created_at}}</td>
+											@if( $_user->ableToAny(['assessments.show', 'assessments.questions_manage', 'assessments.edit', 'assessments.update', 'assessments.destroy'], $permissions) )
+											<td>
+												@if( $_user->ableTo('assessments.show', $permissions) )
+												<a 
+													class="btn btn-icon btn-label-primary rounded-circle" 
+													href="{{ route('assessments.show', $assessment->id) }}"
+													data-bs-toggle="tooltip"
+													data-bs-placement="top"
+													title="{{ __('admin.View') }}"
+												>
+													<i class="ti ti-eye"></i>
+												</a>
+												@endif
+												@if( $_user->ableTo('assessments.questions_manage', $permissions) )
+												<a 
+													class="btn btn-icon btn-label-secondary rounded-circle"
+													href="{{ route('assessments.questions_manage', $assessment->id) }}"
+													data-bs-toggle="tooltip"
+													data-bs-placement="top"
+													title="{{ __('admin.manageQuestions') }}">
+													<i class="ti ti-list-check"></i>
+												</a>
+												@endif
+												@if( $_user->ableToAny(['assessments.edit', 'assessments.update'], $permissions) )
+													<button 
+														class="btn btn-icon btn-label-info rounded-circle" 
+														data-bs-toggle="modal" 
+														data-bs-target="#EditAssessment{{ $assessment->id }}"
+														data-bs-placement="top"
+														title="{{ __('admin.Edit') }}"
+													>
+														<i class="ti ti-pencil"></i>
+													</button>
+												@endif
+												@if( $_user->ableTo('assessments.destroy', $permissions) )
+													<form action="{{ route('assessments.destroy', $assessment->id) }}" method="POST" style="display: inline-block;">
+														@csrf
+														@method('DELETE')
+														<button 
+															class="btn btn-icon btn-label-danger rounded-circle" 
+															type="submit" 
+															onclick="return confirmDelete(event, {{ $assessment->id }})"
+															data-bs-toggle="tooltip"
+															data-bs-placement="top"
+															title="{{ __('admin.Delete') }}"
+														>
+															<i class="ti ti-trash"></i>
+														</button>
+													</form>
+												@endif
+											</td>
+											@endif
+										</tr>
+										@if( $_user->ableToAny(['assessments.edit', 'assessments.update'], $permissions) )
+										<!-- Edit Assessment Modal -->
+										<div class="modal fade" id="EditAssessment{{ $assessment->id }}" tabindex="-1" aria-labelledby="EditAssessmentLabel{{ $assessment->id }}" aria-hidden="true" role="dialog" data-bs-backdrop="static">
+											<div class="modal-dialog modal-md" role="document">
+												<div class="modal-content" style="background-color: white;">
+													<div class="modal-header">
+														<h5 class="modal-title mb-0" id="EditAssessmentLabel{{ $assessment->id }}">{{__('admin.Edit')}} ({{$assessment->user->name}})</h5>
+														<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+													</div>
+													<div class="modal-body">
+														<form class="pt-0" action="{{ route('assessments.update', $assessment->id) }}" method="POST">
+															@csrf
+															@method('PUT')
+															<div class="row">
+																<div class="col-md-6 mb-4">
+																	<label class="form-label fs-6"> {{ $l == 'en' ? 'User' : 'المستخدم' }} </label>
+																	<select class="form-select edit-select2" name="user_id">
+																		<option value="" disabled selected> {{ $l == 'en' ? 'Select User' : 'اختر المستخدم ' }} </option>
+																		@foreach ($users as $user)
+																			<option value="{{ $user->id }}" {{ $user->id == $assessment->user_id ? 'selected' : '' }}	>{{ $user->name }}</option>
+																		@endforeach
+																	</select>
 																</div>
-																<div class="d-flex align-items-center justify-content-end gap-3 mt-4">
-																	<button type="reset" class="btn btn-label-secondary" data-bs-dismiss="modal">{{__('admin.Cancel')}}</button>
-																	@if( $_user->ableToAny(['assessments.edit', 'assessments.update'], $permissions) )
-																	<button type="submit" class="btn btn-primary data-submit">{{__('admin.submit')}}</button>
-																	@endif
+																<div class="col-md-6 mb-4">
+																	<label for="start_date" class="form-label" >{{__('admin.start_date')}}</label>
+																	<input class="form-control date"
+																		id="start_date"
+																		type="text"
+																		name="start_date"
+																		autocomplete="off"
+																		value="{{ $assessment->start_date }}"
+																	/>
 																</div>
-															</form>
-														</div>
+																<div class="col-md-6 mb-4">
+																	<label for="end_date" class="form-label" >{{__('admin.end_date')}}</label>
+																	<input class="form-control date"
+																		id="end_date"
+																		type="text"
+																		name="end_date"
+																		autocomplete="off"
+																		value="{{ $assessment->end_date }}"
+																	/>
+																</div>
+															</div>
+															<div class="d-flex align-items-center justify-content-end gap-3 mt-4">
+																<button type="reset" class="btn btn-label-secondary" data-bs-dismiss="modal">{{__('admin.Cancel')}}</button>
+																@if( $_user->ableToAny(['assessments.edit', 'assessments.update'], $permissions) )
+																<button type="submit" class="btn btn-primary data-submit">{{__('admin.submit')}}</button>
+																@endif
+															</div>
+														</form>
 													</div>
 												</div>
 											</div>
-											<!--/ Edit Assessment Modal -->
-											@endif
-										@endforeach
-									</tbody>
-								</table>
-							</div>
+										</div>
+										<!--/ Edit Assessment Modal -->
+										@endif
+									@endforeach
+								</tbody>
+							</table>
 						</div>
 					</div>
 				</div>

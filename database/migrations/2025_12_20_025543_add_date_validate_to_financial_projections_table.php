@@ -1,0 +1,32 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('financial_projections', function (Blueprint $table) {
+            if (!Schema::hasColumn('financial_projections', 'date_validate')) {
+                $table->date('date_validate')->nullable()->after('id');
+            }
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('financial_projections', function (Blueprint $table) {
+            if (Schema::hasColumn('financial_projections', 'date_validate')) {
+                $table->dropColumn('date_validate');
+            }
+        });
+    }
+};

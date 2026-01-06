@@ -146,10 +146,11 @@ class CyclesController extends Controller
     }
     public function index($id = 0)
     {
-        $organization_id = auth()->user()->organization_id;
+        $user = auth()->user();
+        $orgIds = $user->organizations_ids;
 
-        $cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
-            return $q->where('organization_id', $organization_id);
+        $cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+            return $q->whereIn('organization_id', $orgIds);
         })->with(['organization'])->orderBy('start', 'DESC')->get();
 
         $steps = null;
@@ -196,18 +197,19 @@ class CyclesController extends Controller
 
     public function users(Request $request, $id)
     {
-        $organization_id = auth()->user()->organization_id;
+        $user = auth()->user();
+        $orgIds = $user->organizations_ids;
 
         if ($id == 0) {
-            $cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
-                return $q->where('organization_id', $organization_id);
+            $cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+                return $q->whereIn('organization_id', $orgIds);
             })->orderBy('id', 'DESC')->get();
             if (!empty($cycles->toArray())) {
                 $id = $cycles->pluck('id')[0];
             }
         } else {
-            $cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
-                return $q->where('organization_id', $organization_id);
+            $cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+                return $q->whereIn('organization_id', $orgIds);
             })->get();
         }
         $companies = Company::where('cycle', $id);
@@ -263,6 +265,7 @@ class CyclesController extends Controller
         if ($request->has('date_range')) {
 
             $dates = explode(' - ', $request->date_range);
+            if( count( $dates ) < 2 ) { return redirect()->back()->with(['message2' => 'error_date_range', 'class' => 'danger']); }
             $request->merge([
                 'start' => Carbon::createFromFormat('m/d/Y', trim($dates[0]))->format('Y-m-d'), // التاريخ الأول
                 'end' => Carbon::createFromFormat('m/d/Y', trim($dates[1]))->format('Y-m-d'),   // التاريخ الثاني
@@ -284,7 +287,7 @@ class CyclesController extends Controller
                 'public_slug' => [
                     Rule::requiredIf($request->is_public == 1),
                     'nullable',
-                    'regex:/^[a-zA-Z0-9]+$/',
+                    'regex:/^[a-zA-Z0-9_-]+$/',
                     Rule::unique('cycles', 'public_slug')->ignore($request->id),
                 ],
                 'start' => 'required|date',
@@ -294,6 +297,7 @@ class CyclesController extends Controller
                 'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'program_step_type' => ['required', 'in:cycle,time'],
+                'cohort' => 'required|string|max:250',
             ], [
                 'public_slug.required_if' => __('cycles.Public URL required'),
                 'public_slug.unique' => __('cycles.Public URL already exist'),
@@ -394,9 +398,9 @@ class CyclesController extends Controller
                             'updated_at' => now(),
                         ]);
                     }
-                }else{
-                    DB::table('mentorship_schedules')->where('cycle_id', $cycle->id)->delete();
-                }
+            }else{
+                DB::table('mentorship_schedules')->where('cycle_id', $cycle->id)->delete();
+            }
 
 
            
@@ -437,7 +441,6 @@ class CyclesController extends Controller
                 return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
             }
             /// add new step
-       
             $stype = $request->stype;
             
             $data = null;
@@ -469,7 +472,7 @@ class CyclesController extends Controller
                         ]);
                     }
                 }
-            } elseif ($stype == 2) {
+            }elseif ($stype == 2) {
                 if (is_null($request->fromDate) || is_null($request->toDate)) {
                     return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
                 }
@@ -484,7 +487,7 @@ class CyclesController extends Controller
                     'from' => $request->fromDate,
                     'to' => $request->toDate
                 ]);
-            } elseif ($stype == 3) {
+            }elseif ($stype == 3) {
                 if (is_null($request->fromDate) || is_null($request->toDate)) {
                     return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
                 }
@@ -499,7 +502,7 @@ class CyclesController extends Controller
                     'from' => $request->fromDate,
                     'to' => $request->toDate
                 ]);
-            } elseif ($stype == 4) {
+            }elseif ($stype == 4) {
                 if (is_null($request->fromDate) || is_null($request->toDate)) {
                     return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
                 }
@@ -515,7 +518,7 @@ class CyclesController extends Controller
                     'from' => $request->fromDate,
                     'to' => $request->toDate
                 ]);
-            } elseif ($stype == 5) {
+            }elseif ($stype == 5) {
                 if (is_null($request->fromDate) || is_null($request->toDate)) {
                     return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
                 }
@@ -583,6 +586,34 @@ class CyclesController extends Controller
                 'to' => $request->toDate,
                 'count_team_number' => $request->count_team_number ??0,
                 ]);
+            }elseif ($stype == 7) {
+                
+                $validator = Validator::make($request->all(), [
+                    'title' => 'required|string|max:100',
+                    'description' => 'required|string|max:100',
+                    ]);
+                if ($validator->fails()) {
+                    return redirect()->back()
+                    ->withInput()
+                    ->with([
+                    'message2' => $validator->errors()->first(),
+                    'class' => 'danger'
+                    ]);
+                }
+              if (is_null($request->fromDate) || is_null($request->toDate)) {
+                   return redirect()->back()->with(['message2' => __('admin.AddDateFirst'), 'class' => 'danger']);
+               }
+                
+                Step::insert([
+                'cycle_id' => $request->cid,
+                'title' => $request->title,
+                'description' => $request->description,
+                'stype' => $stype,
+                'data' => null,
+                'arr' => $request->arr,
+                'from' => $request->fromDate,
+                'to' => $request->toDate,
+                ]);
             }
             return redirect()->back()->with('message', 'Saved');
         } elseif ($type == 6) {
@@ -612,7 +643,7 @@ class CyclesController extends Controller
         } elseif ($type == 7) {
             // Modify step
             $step = Step::where('id', $request->sid)->first()->toArray();
-            // dd($step);
+
             return response()->json($step);
         } elseif ($type == 8) {
             /// deleted saved data if type changed
@@ -704,7 +735,7 @@ class CyclesController extends Controller
                 'title' => 'required|string|max:250',
                 'description' => 'required|string|max:100',
                 'is_public' => 'required|boolean',
-                'public_slug' => 'nullable|required_if:is_public,1|unique:cycles,public_slug,' . $request->id . ',id|regex:/^[a-zA-Z0-9]+$/',
+                'public_slug' => 'nullable|required_if:is_public,1|unique:cycles,public_slug,' . $request->id . ',id|regex:/^[a-zA-Z0-9_-]+$/',
                 'start' => 'required|date|before:end',
                 'end' => 'required|date|after:start',
                 'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:2048',
@@ -727,7 +758,8 @@ class CyclesController extends Controller
                     return redirect()->back()->with('message2', 'Cycle_title_already_exist');
                 }
 
-            DB::transaction(function () use ($request, $slugs) {
+            $cycle = null;
+            DB::transaction(function () use ($request, $slugs, &$cycle) {
                 $private = null;
                 if ($request->private) {
                     $private = sha1(now());
@@ -785,7 +817,6 @@ class CyclesController extends Controller
                     $cycle->financial_guideline_file =  $request->file('financial_policy_pdf')->storeAs('programs', $originalName, 'public_uploads');
                 }
 
-
                 $cycle->legal_guideline = $request->legal_policy;
                 if ($request->hasFile('legal_policy_pdf')) {
                     $originalName = $request->file('legal_policy_pdf')->getClientOriginalName();
@@ -826,20 +857,20 @@ class CyclesController extends Controller
                     $requiredFields = ['host', 'mail', 'mailpassword', 'port', 'encryption'];
                     $missing = [];
 
-                 $setting = Settings::first();
+                    $setting = Settings::first();
 
-             foreach ($requiredFields as $field) {
-                if (!$setting || is_null($setting->$field) || $setting->$field === '') {
-                    $missing[] = $field;
-                  }
-                }
+                    foreach ($requiredFields as $field) {
+                        if (!$setting || is_null($setting->$field) || $setting->$field === '') {
+                            $missing[] = $field;
+                        }
+                    }
 
-            if (!empty($missing)) {
-                 return redirect()->back()->with([
-                    'message2' => __('missing_mail_settings', ['fields' => implode(', ', $missing)]),
-                    'class' => 'danger'
-                ]);
-             }                   
+                    if (!empty($missing)) {
+                        return redirect()->back()->with([
+                            'message2' => __('missing_mail_settings', ['fields' => implode(', ', $missing)]),
+                            'class' => 'danger'
+                        ]);
+                    }  
 
                     $admin = User::role('Admin')->orderBy('id')->first();
 
@@ -858,6 +889,7 @@ class CyclesController extends Controller
                     }
                 }
             });
+            // return redirect()->route('programs.edit', ['id' => $cycle->id])->with('message', 'Saved');
             return redirect()->route('programlist.index')->with('message', 'Saved');
         }
         else
@@ -1065,7 +1097,7 @@ class CyclesController extends Controller
             //     'field_ids' => implode(",", $field_map_ids)
             // ];
             if( $user->company->step == $id ) {
-                $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->orderBy('id', 'ASC')->select('answer')->pluck('answer')->toArray();
+                $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->orderBy('form_data.id', 'ASC')->select('answer')->pluck('answer')->toArray();
             }
             return view('admin.settings.cycles.form', $data)->with('data', $data)->with('step', $step)->with('c', $c)->with('answers', $answers);
         }
@@ -1074,86 +1106,91 @@ class CyclesController extends Controller
     function my($id)
     {
         $step = Step::where(function($query) {
-        $query->where('stype', 1)
-              ->orWhere('stype', 5);
+            $query->where('stype', 1)->orWhere('stype', 5);
         })->where('id', $id)->first();
-            if (!$step) {
-                return redirect()->back()->with(['msg' => 'Error opening the selected form.', 'class' => 'danger']);
-            }
-            //        if ($step->to < now()->format('Y-m-d')){return redirect()->back()->with(['msg' => 'Error can\'t open form, step timed out.', 'class' => 'danger']);}
-            $id = $step->id;
+        if (!$step) {
+            return redirect()->back()->with(['msg' => 'Error opening the selected form.', 'class' => 'danger']);
+        }
+        $user = auth()->user();
+        // if ($step->to < now()->format('Y-m-d')){return redirect()->back()->with(['msg' => 'Error can\'t open form, step timed out.', 'class' => 'danger']);}
+        $id = $step->id;
 
-            $field_map_ids = Formfield::where('step_id', $id)
-                ->where('builder_forms_id', $step->data)
-                ->pluck('id')
-                ->toArray();
+        $get_fields = Formfield::where('step_id', $id)->where('builder_forms_id', $step->data)->get();
+        $field_map_ids = $get_fields->pluck('id')->toArray();
 
-            // جلب كل الحقول الخاصة بالـ step
-            $fields = $step->fields()
-                ->where('builder_forms_id', $step->data)
-                ->orderBy('form_fields.id', 'asc')
-                ->get();
+        // جلب كل الحقول الخاصة بالـ step
+        $fields = $step->fields()
+            ->where('builder_forms_id', $step->data)
+            ->orderBy('form_fields.id', 'asc')
+            ->get();
 
-            // تجهيز البيانات بشكل منسق
-            $structured = $fields->map(function ($field) {
-                $options = json_decode($field->pivot->options ?? '{}', true) ?? [];
-
-                return [
-                    'id'          => $field->id,
-                    'label'       => $options['label'] ?? '',
-                    'description' => $options['description'] ?? '',
-                    'section'     => $options['section'] ?? 'N/A',
-                    'type'        => $options['type'] ?? null,
-                    'is_required' => (bool)($options['validation']['required'] ?? 0),
-                    'options'     => isset($options['values'])
-                        ? (is_array($options['values']) ? $options['values'] : explode(',', $options['values']))
-                        : [],
-                    'logic'       => $options['logic'] ?? 'continue',
-                ];
-            })
-            ->groupBy('section')
-            ->map(function ($questions, $section_title) {
-                $first = $questions->first();
-
-                return [
-                    'title'       => $section_title,
-                    'description' => $first['description'] ?? '',
-                    'logic'       => is_array($first['logic']) ? ($first['logic']['section'] ?? 'continue') : ($first['logic'] ?? 'continue'),
-                    'questions'   => $questions->values()->map(function ($q) {
-                        return [
-                            'id'          => $q['id'],
-                            'label'       => $q['label'],
-                            'is_required' => $q['is_required'],
-                            'type'        => $q['type'],
-                            'options'     => $q['options'],
-                            'logic'       => $q['logic'],
-                        ];
-                    })->toArray(),
-                ];
-            })
-            ->values()
-            ->toArray();
-        $answers = [];
-            // البنية النهائية
-            $data = [
-                'id'          => $step->id,
-                'title'       => $step->title,
-                'description' => $step->description,
-                'build_data'  => $structured,
-                'field_ids' => implode(",", $field_map_ids)
+        // تجهيز البيانات بشكل منسق
+        $structured = $get_fields->map(function ($field) {
+            
+            $options = (array) $field->options;
+            return [
+                'id'          => $field->id,
+                'label'       => $options['label'] ?? '',
+                'description' => $options['description'] ?? '',
+                'section'     => $options['section'] ?? 'N/A',
+                'type'        => $options['type'] ?? null,
+                'is_required' => (bool)($options['validation']->required ?? 0),
+                'options'     => isset($options['values'])
+                    ? (is_array($options['values']) ? $options['values'] : explode(',', $options['values']))
+                    : [],
+                'logic'       => $options['logic'] ?? 'continue',
             ];
+        })
+        ->groupBy('section')
+        ->map(function ($questions, $section_title) {
+            $first = $questions->first();
+            return [
+                'title'       => $section_title,
+                'description' => $first['description'] ?? '',
+                'logic'       => is_array($first['logic']) ? ($first['logic']['section'] ?? 'continue') : ($first['logic'] ?? 'continue'),
+                'questions'   => $questions->values()->map(function ($q) {
+                    return [
+                        'id'          => $q['id'],
+                        'label'       => $q['label'],
+                        'is_required' => $q['is_required'],
+                        'type'        => $q['type'],
+                        'options'     => $q['options'],
+                        'logic'       => (array) $q['logic'],
+                    ];
+                })->toArray(),
+            ];
+        })
+        ->values()
+        ->toArray();
 
-            // $field_map_ids = Formfield::where('step_id', $id)->where('builder_forms_id', $step->data)->select('id')->pluck('id')->toArray();
-            // $answers = [];
-            // $data = [
-            //     'title' => $step->title,
-            //     'fields' => $step->fields()->where('builder_forms_id', $step->data)->orderBy('form_fields.id', 'asc')->get(),
-            //     'form_id' => $step->id,
-            //     'field_ids' => implode(",", $field_map_ids)
-            // ];
-            //        if (Auth::user()->company->step==$id) {
-            $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->whereIn('form_data.field_id', $field_map_ids)->orderBy('id', 'ASC')->get();
-        //        }
+        $answers = [];
+
+        // البنية النهائية
+        $data = [
+            'id'          => $step->id,
+            'title'       => $step->title,
+            'description' => $step->description,
+            'build_data'  => $structured,
+            'field_ids' => implode(",", $field_map_ids)
+        ];
+
+        // $field_map_ids = Formfield::where('step_id', $id)->where('builder_forms_id', $step->data)->select('id')->pluck('id')->toArray();
+        // $answers = [];
+        // $data = [
+        //     'title' => $step->title,
+        //     'fields' => $step->fields()->where('builder_forms_id', $step->data)->orderBy('form_fields.id', 'asc')->get(),
+        //     'form_id' => $step->id,
+        //     'field_ids' => implode(",", $field_map_ids)
+        // ];
+
+
+        $inputs = [];
+        $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', $user->id)->whereIn('form_data.field_id', $field_map_ids)->orderBy('form_data.id', 'ASC')->get();
+        foreach ($answers as $answer) {
+            $inputs[ 'field_' . $answer->field_id] = $answer->answer;
+        };
+        session()->flashInput($inputs);
+
         return view('admin.settings.cycles.form', $data)->with('data', $data)->with('step', $step)->with('c', $step->cycle_id)->with('answers', $answers);
     }
 
@@ -1190,7 +1227,7 @@ class CyclesController extends Controller
                 ->withErrors($dynamic_validator)
                 ->withInput();
         }
-        //dd("ss");
+
         // gather the form data as field_name => [ label, data ]
         foreach ($field_map_ids as $fid) {
 
@@ -1314,17 +1351,18 @@ class CyclesController extends Controller
         }
     }
 
-    private function storeUploadedFile(Request $request, string $inputName, string $subfolder = '')
-    {
-        if ($request->hasFile($inputName)) {
-            $file = $request->file($inputName);
-            $filename  = $file->getClientOriginalName();
-            $path = $subfolder ? "$subfolder/$filename" : $filename;
+    // private function storeUploadedFile(Request $request, string $inputName, string $subfolder = '')
+    // {
+    //     if( !$request->hasFile( $inputName ) ) { return null; }
+    //     $file = $request->file( $inputName );
+    //     abort_unless($file->isValid(), 400);
 
-            Storage::disk('public_uploads')->put($path, file_get_contents($file->getRealPath()));
+    //     $raw_name = str_replace('.' . $file->getClientOriginalExtension(), '', $file->getClientOriginalName()) . '-' . $file->getClientOriginalExtension();
+    //     $filename = time() . '_' . $raw_name . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
 
-            return $path;
-        }
-        return null;
-    }
+    //     $path = $subfolder ? "$subfolder/$filename" : $filename;
+    //     Storage::disk('public_uploads')->put($path, file_get_contents($file->getRealPath()));
+
+    //     return $path;
+    // }
 }

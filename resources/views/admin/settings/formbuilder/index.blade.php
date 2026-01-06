@@ -20,17 +20,21 @@
 
 @php
   $user = Auth::user();
-  if($user->hasRole('organizationManager')) {
-    $organizations = App\Organization::where('id', $user->organization_id)->get();
-    $allBuilderForms = App\BuilderForm::where('organization_id', $user->organization_id)->with('organization', 'cycles')->get();
-  } else {
+  if($user->hasRole('Admin')) {
     $organizations = App\Organization::all();
     $allBuilderForms = App\BuilderForm::with('organization', 'cycles')->get();
+  } elseif($user->hasRole('organizationManager') || $user->isSubAdmin()) {
+    $orgIds = $user->organizations_ids;
+    $organizations = App\Organization::whereIn('id', $orgIds)->get();
+    $allBuilderForms = App\BuilderForm::whereIn('organization_id', $orgIds)->with('organization', 'cycles')->get();
+  } else {
+    $organizations = collect();
+    $allBuilderForms = collect();
   }
 
     $mode = !request()->segment(3) ? 'ADD' : 'EDIT';
 
-    $orgIdParam = request()->get('org_id') || (isset($title->organization_id) ? $title->organization_id : null);
+    $orgIdParam = request()->get('org_id') ?? $title->organization_id ?? $title->organization_id ?? null
 @endphp
 
 @section('content')
@@ -103,20 +107,31 @@
             value="{{ old('title', optional($title)->form_name ?? '') }}"
           />
         </div>
-        @if (is_null(auth()->user()->organization_id))
+        @php
+          $authUser = auth()->user();
+          $userOrgIds = $authUser->organizations_ids;
+          $showOrgDropdown = $authUser->hasRole('admin') || ($authUser->isSubAdmin() && count($userOrgIds) > 1);
+        @endphp
+        @if ($showOrgDropdown)
         <div class="form-group mt-4" id="mmenu1">
           <label class="form-label">{{ __('builder.Organization') }}</label>
-          <div class="form-group mb-0">           
+          <div class="form-group mb-0">
             <select class="select2 form-control" id="organization_id" name="organization_id" data-placeholder="{{ __('builder.Select_Organization') }}" required>
               <option value="" disabled {{ !$orgIdParam ? 'selected' : '' }}>{{ __('builder.Select_Organization') }}</option>
-              @foreach (\App\Organization::all() as $org)
-              <option value="{{ $org->id }}" {{ $org->id == $orgIdParam ? 'selected' : '' }}>{{ $org->name }}</option>
-              @endforeach
+              @if($authUser->hasRole('admin'))
+                @foreach (\App\Organization::all() as $org)
+                <option value="{{ $org->id }}" {{ $org->id == $orgIdParam ? 'selected' : '' }}>{{ $org->name }}</option>
+                @endforeach
+              @else
+                @foreach ($authUser->organizations as $org)
+                <option value="{{ $org->id }}" {{ $org->id == $orgIdParam ? 'selected' : '' }}>{{ $org->name }}</option>
+                @endforeach
+              @endif
             </select>
           </div>
         </div>
         @else
-        <input type="hidden" name="organization_id" value="{{ auth()->user()->organization_id }}" id="organization_id">
+        <input type="hidden" name="organization_id" value="{{ $userOrgIds[0] ?? '' }}" id="organization_id">
         @endif
       </div>
     </div>
@@ -154,19 +169,30 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        @if (is_null(auth()->user()->organization_id))
+        @php
+          $authUserModal = auth()->user();
+          $userOrgIdsModal = $authUserModal->organizations_ids;
+          $showOrgDropdownModal = $authUserModal->hasRole('admin') || ($authUserModal->isSubAdmin() && count($userOrgIdsModal) > 1);
+        @endphp
+        @if ($showOrgDropdownModal)
         <div class="mb-4" id="mmenu1">
           <label class="form-label">{{ __('builder.Select_Organization') }}: </label>
           <div class="form-group mb-0">
             <select class="select2 form-control" id="organization_id" name="organization_id" data-placeholder="{{ __('builder.Select_Organization') }}" required>
-              @foreach (\App\Organization::all() as $org)
-              <option value="{{ $org->id }}" {{ $org->id == request('org_id') ? 'selected' : '' }}>{{ $org->name }}</option>
-              @endforeach
+              @if($authUserModal->hasRole('admin'))
+                @foreach (\App\Organization::all() as $org)
+                <option value="{{ $org->id }}" {{ $org->id == request('org_id') ? 'selected' : '' }}>{{ $org->name }}</option>
+                @endforeach
+              @else
+                @foreach ($authUserModal->organizations as $org)
+                <option value="{{ $org->id }}" {{ $org->id == request('org_id') ? 'selected' : '' }}>{{ $org->name }}</option>
+                @endforeach
+              @endif
             </select>
           </div>
         </div>
         @else
-        <input type="hidden" name="organization_id" value="{{ auth()->user()->organization_id }}" id="organization_id">
+        <input type="hidden" name="organization_id" value="{{ $userOrgIdsModal[0] ?? '' }}" id="organization_id">
         @endif
 
         <div class="form-group">

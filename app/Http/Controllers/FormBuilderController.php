@@ -15,16 +15,20 @@ class FormBuilderController extends Controller
     /**
      * show the builder
      */
-   public function showBuilder(Request $request, $id = null)
+    public function showBuilder(Request $request, $id = null)
     {
-        $organization_id = auth()->user()->organization_id;
+        $user = auth()->user();
+        $orgIds = $user->organizations_ids;
+        
+        // Get organization_id from request or user's organization
+        $organization_id = $request->org_id ?? ($user->organization_id ?? null);
 
         // Check if there are no organizations
-        if (is_null($organization_id) && Organization::count() == 0) {
+        if (empty($orgIds) && Organization::count() == 0) {
             return redirect(route('organizations.index'))->with('message2', 'add organizations first');
         }
 
-        // When there’s NO id in the URL → treat it as a new form creation
+        // When there's NO id in the URL → treat it as a new form creation
         // if (is_null($id)) {
         //     $title = null; // <-- new form, so title is null
         // } else {
@@ -196,8 +200,8 @@ class FormBuilderController extends Controller
         }
 
         // Load builder forms list
-        if (!is_null(auth()->user()->organization_id)) {
-            $builderForms = BuilderForm::where('organization_id', auth()->user()->organization_id)->get();
+        if (!$user->hasRole('admin') && !empty($orgIds)) {
+            $builderForms = BuilderForm::whereIn('organization_id', $orgIds)->get();
         } else {
             $builderForms = BuilderForm::all();
         }
@@ -283,15 +287,6 @@ class FormBuilderController extends Controller
        
 
 
-        // return response()->json($data);
-
-    
-
-        // $form_id_toshow = $id;
-        // $the_form = BuilderForm::findOrFail($form_id_toshow);
-        // $field_map_ids = BuilderField::where('builder_form_id', $form_id_toshow)->select('id')->pluck('id')->toArray();
-
-        // $data = [
         //     'title' => 'the form',
         //     'fields' => $the_form->fields()->orderBy('builder_fields.id', 'asc')->get(),
         //     'buolderform_id' => $form_id_toshow,
@@ -426,7 +421,7 @@ class FormBuilderController extends Controller
                         break;
 
                     case 'checkboxes':
-                        $field_id = $fields['checkbox'] ?? 0;
+                        $field_id = $fields['radio'] ?? 0;
                         $values = collect($question['options'] ?? [])->map(fn($o) => trim($o))->implode(',');
                         $additional_config = ['type' => 'checkboxes','values' => $values];
                         break;
@@ -438,7 +433,7 @@ class FormBuilderController extends Controller
                         break;
 
                     case 'linear_scale':
-                        $field_id = $fields['range'] ?? 0;
+                        $field_id = $fields['input'] ?? 0;
                         $min = $question['min'] ?? 1;
                         $max = $question['max'] ?? 5;
                         $additional_config = [
@@ -568,5 +563,69 @@ class FormBuilderController extends Controller
             'data' => $output,
             'appear' => $appear
         ]);
+    }
+
+    /**
+     * Delete a form with validation
+     */
+    public function deleteForm($id)
+    {
+        try {
+            $form = BuilderForm::findOrFail($id);
+            
+            // Check if form is used in any program steps
+            $usedInSteps = $form->steps()->count();
+            if ($usedInSteps > 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'form_used_in_steps',
+                    'message_en' => 'This form cannot be deleted because it is used in program steps.',
+                    'message_ar' => 'لا يمكن حذف هذا النموذج لأنه مستخدم في خطوات البرنامج'
+                ], 422);
+            }
+            
+            $builderFieldIds = BuilderField::where('builder_form_id', $id)->pluck('id');
+            $hasSubmissions = false;
+            
+            if ($builderFieldIds->isNotEmpty()) {
+                $hasSubmissions = DB::table('form_data')
+                    ->whereIn('field_id', $builderFieldIds)
+                    ->exists();
+            }
+                
+            if ($hasSubmissions) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'form_has_submissions',
+                    'message_en' => 'You cannot delete this form because it has existing submissions.',
+                    'message_ar' => 'لا يمكنك حذف هذا النموذج لأنه يحتوي على تقديمات'
+                ], 422);
+            }
+            
+            // Delete form fields relationship
+            $form->fields()->detach();
+            
+            // Delete builder fields
+            BuilderField::where('builder_form_id', $id)->delete();
+            
+            // Delete the form
+            $form->delete();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'form_deleted_successfully',
+                'message_en' => 'Form deleted successfully.',
+                'message_ar' => 'تم حذف النموذج بنجاح'
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'error_deleting_form',
+                'message_en' => 'An error occurred while deleting the form.',
+                'message_ar' => 'حدث خطأ أثناء حذف النموذج',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

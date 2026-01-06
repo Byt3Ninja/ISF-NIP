@@ -1,118 +1,29 @@
 @php
   // Show the canvas if the query parameter 'screening' is set to 'true'
   $showCanvas = request()->query('screening') === 'true';
+  $hasGuidelines = (trim(strip_tags($evaluationForm->screening_guidelines ?? '')) !== '') || !empty($evaluationForm->screening_guidelines_file);
 @endphp
 
 <style>
-  .subcriteria-container .nav-tabs .nav-link {
-    padding: 0.75rem 1rem;
-    border-radius: 0.375rem 0.375rem 0 0;
-    transition: all 0.2s ease-in-out;
+  #rightModalCanvas {
+    width: 50vw;
   }
-  
-  .subcriteria-container .nav-tabs .nav-link:not(.active):hover {
-    background-color: rgba(67, 89, 113, 0.04);
-  }
-  
-  .subcriteria-container .tab-content .card {
-    border-top-left-radius: 0;
-    box-shadow: 0 0.25rem 1rem rgba(161, 172, 184, 0.15);
-    margin-bottom: 1.5rem;
-  }
-  
-  /* Styles for responsive sub-criteria display */
-  .subcriteria-container .nav-tabs {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(67, 89, 113, 0.2) transparent;
-  }
-  
-  .subcriteria-container .nav-tabs::-webkit-scrollbar {
-    height: 5px;
-  }
-  
-  .subcriteria-container .nav-tabs::-webkit-scrollbar-thumb {
-    background: rgba(67, 89, 113, 0.2);
-    border-radius: 10px;
-  }
-  
-  .subcriteria-container .nav-tabs::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  
-  .subcriteria-container .nav-tabs .nav-item {
-    min-width: 150px;
-    flex-shrink: 0;
-  }
-  
-  .subcriteria-container .nav-tabs .nav-link {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-  /* Dropdown for mobile and many criteria */
-  .subcriteria-dropdown {
-    display: none;
-    margin-bottom: 1rem;
-  }
-  
-  /* For many sub-criteria, style the tabs better */
-  .subcriteria-container.many-criteria .nav-tabs .nav-item {
-    min-width: 120px;
-  }
-  
-  /* Horizontal scrolling indicators */
-  .subcriteria-container .nav-tabs.has-more-right::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    height: 100%;
-    width: 30px;
-    background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.9));
-    pointer-events: none;
-    z-index: 1;
-  }
-  
-  .subcriteria-container .nav-tabs.has-more-left::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 30px;
-    background: linear-gradient(to left, rgba(255,255,255,0), rgba(255,255,255,0.9));
-    pointer-events: none;
-    z-index: 1;
-  }
-  
-  /* Responsive adjustments */
-  @media (max-width: 992px) {
-    .subcriteria-dropdown {
-      display: block;
-    }
-    .subcriteria-container .subcriteria-tabs {
-      display: none;
-    }
-  }
-  
-  @media (max-width: 768px) {
-    .subcriteria-container .tab-content .card .card-body {
-      padding: 1rem;
-    }
-  }
-  
-  /* When there are 5 or more sub-criteria */
-  @media (min-width: 993px) {
-    .subcriteria-container.many-criteria .nav-tabs {
-      position: relative;
-      padding: 0 15px;
+  @media screen and (max-width: 768px) {
+    #rightModalCanvas {
+      width: 100%;
     }
   }
 
+  .selected-score-badge {
+    display: none;
+    margin-top: 8px;
+    font-size: 0.875rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
 </style>
+
 
 @if( !empty( $evaluationForm ) && $evaluationForm->status == 'Published' )
 <div class="screening-gavel" data-bs-target="#rightModalCanvas" data-bs-toggle="offcanvas" aria-controls="rightModalCanvas"
@@ -122,7 +33,7 @@
 
 
 <div class="offcanvas offcanvas-end {{ $showCanvas ? 'show' : '' }}" tabindex="-1" id="rightModalCanvas"
-  aria-labelledby="rightModalCanvasLabel" style="width: 50vw;">
+  aria-labelledby="rightModalCanvasLabel">
   <div class="offcanvas-body">
     <form id="screening_evaluation_form">
       <div class="d-flex justify-content-between align-items-center mb-6">
@@ -154,17 +65,26 @@
       <div class="row">
         <div class="col-12">
           <ul class="nav nav-pills mb-3 pb-3 border-bottom" id="pills-tab" role="tablist">
+            @if($hasGuidelines)
             <li class="nav-item" role="presentation">
-              <button class="nav-link" id="pills-form-data-tab" data-bs-toggle="pill"
+              <button class="nav-link active" id="pills-guidelines-tab" data-bs-toggle="pill"
+                data-bs-target="#pills-guidelines" type="button" role="tab" aria-controls="pills-guidelines"
+                aria-selected="true">
+                {{ __('admin.Guidelines') }}
+              </button>
+            </li>
+            @endif
+            <li class="nav-item" role="presentation">
+              <button class="nav-link {{ !$hasGuidelines ? 'active' : '' }}" id="pills-form-data-tab" data-bs-toggle="pill"
                 data-bs-target="#pills-form-data" type="button" role="tab" aria-controls="pills-form-data"
-                aria-selected="false">
+                aria-selected="{{ !$hasGuidelines ? 'true' : 'false' }}">
                 {{ __('admin.Submissions')}}
               </button>
             </li>
             <li class="nav-item" role="presentation">
-              <button class="nav-link active" id="pills-screening-criteria-tab" data-bs-toggle="pill"
+              <button class="nav-link" id="pills-screening-criteria-tab" data-bs-toggle="pill"
                 data-bs-target="#pills-screening-criteria" type="button" role="tab" aria-controls="pills-screening-criteria"
-                aria-selected="true">
+                aria-selected="false">
                 {{ __('admin.Screening Criteria')}}
               </button>
             </li>
@@ -184,32 +104,80 @@
             </li>
           </ul>
           <div class="tab-content shadow-none p-2" id="pills-tabContent">
-            <div class="tab-pane fade" id="pills-form-data" role="tabpanel" aria-labelledby="pills-form-data-tab">
+            @if($hasGuidelines)
+            <div class="tab-pane fade show active" id="pills-guidelines" role="tabpanel" aria-labelledby="pills-guidelines-tab">
+              <div class="row mb-6">
+                <div class="col-12">
+                  <h5 class="mb-4">{{ __('admin.Screening Guidelines') }}</h5>
+                  <div class="mb-4">
+                    {!! $evaluationForm->screening_guidelines !!}
+                  </div>
+                  @if(!empty($evaluationForm->screening_guidelines_file))
+                  <div class="mb-4">
+                    <iframe src="{{ url($evaluationForm->screening_guidelines_file) }}" style="width: 100%; height: 500px; border: none;"></iframe>
+                  </div>
+                  @endif
+                  <div class="d-flex justify-content-end">
+                    <button type="button" class="btn btn-primary" onclick="document.getElementById('pills-form-data-tab').click()">
+                      {{ __('admin.Continue') }} <i class="ti ti-arrow-right ms-2"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            @endif
+            <div class="tab-pane fade {{ !$hasGuidelines ? 'show active' : '' }}" id="pills-form-data" role="tabpanel" aria-labelledby="pills-form-data-tab">
               <div class="row mb-6">
                   <div class="col-12">
-                    <h5 class="mb-0">{{ __('admin.Submissions')}}</h5>
+                    <h5 class="mb-0">
+                      {{  __('admin.Submissions') . ' ' .  __('cycles.for') }}  {{ trim( $formTitle ) ?  ' | ' . trim( $formTitle ) : '' }}
+                    </h5>
                   </div>
                   <div class="col-12 my-6">
-                    <table class="table table-bordered table-hover">
-                      <tbody>
-                        @foreach( $formData as $dataEntry )
-                        <tr>
-                          <td> {{ $dataEntry->question }} </td>
-                          <td>
-                            @if( $dataEntry->field_type == 'file' )
-                              <a target="_blank" href="{{ URL::to('/'. $dataEntry->answer) }}"> {{ __('admin.Download File') }} </a>
-                            @else
-                              {{ $dataEntry->answer }}
-                            @endif
-                          </td>
-                        </tr>
-                        @endforeach
-                      </tbody>
-                    </table>
+                    <div class="container-fluid px-0">
+                      @if( $formData->count() > 0 )
+                        <div class="accordion" id="formSubmissionAccordion">
+                          @foreach( $formData as $index => $dataEntry )
+                            <div class="accordion-item">
+                              <h2 class="accordion-header">
+                                <button class="accordion-button {{ $loop->first ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $index }}" aria-expanded="{{ $loop->first ? 'true' : 'false' }}" aria-controls="collapse{{ $index }}">
+                                  {{ $dataEntry->question }}
+                                </button>
+                              </h2>
+                              <div id="collapse{{ $index }}" class="accordion-collapse collapse {{ $loop->first ? 'show' : '' }}" data-bs-parent="#formSubmissionAccordion">
+                                <div class="accordion-body pt-4">
+                                  @if( $dataEntry->field_type == 'file' )
+                                    <a target="_blank" href="{{ URL::to('/'. $dataEntry->answer) }}"> {{ __('admin.Download File') }} </a>
+                                  @else
+                                    {{ $dataEntry->answer }}
+                                  @endif
+                                  <div class="mt-5">
+                                    <div class="form-group">
+                                      <label for="formComment_{{ $dataEntry->id }}" class="form-label">{{ __('admin.Comment') }}</label>
+                                      <textarea class="form-control resize-none" id="formComment_{{ $dataEntry->id }}" name="formComment_{{ $dataEntry->id }}" rows="6"
+                                        placeholder="{{ __('admin.Enter your comment here...') }}">{{ $dataEntry?->comment->comment ?? '' }}</textarea>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          @endforeach
+                        </div>
+                      @else
+                        <div class="text-center">
+                          {{ __('cycles.no_submissions_yet') }}
+                        </div>
+                      @endif
+                    </div>
+                  </div>
+                  <div class="d-flex justify-content-end">
+                    <button type="button" class="btn btn-primary" onclick="document.getElementById('pills-screening-criteria-tab').click()">
+                      {{ __('admin.Continue') }} <i class="ti ti-arrow-right ms-2"></i>
+                    </button>
                   </div>
               </div>
             </div>
-            <div class="tab-pane fade show active" id="pills-screening-criteria" role="tabpanel"
+            <div class="tab-pane fade" id="pills-screening-criteria" role="tabpanel"
               aria-labelledby="pills-screening-criteria-tab">
               <!-- Content for Screening Criteria -->
               <div class="steps">
@@ -249,7 +217,7 @@
                             <div class="subcriteria-container">
                               <div class="nav-align-top">
                                 <!-- Mobile/Responsive Dropdown for Sub-Criteria -->
-                                <div class="subcriteria-dropdown">
+                                <div class="subcriteria-dropdown d-block d-md-none">
                                   <label class="form-label">{{ __('admin.Select Sub-Criteria') }}</label>
                                   <select class="form-select subcriteria-select" id="subcriteria-select-{{ $key }}" data-criteria-key="{{ $key }}">
                                     @foreach( $criteria->subCriteria as $sub_key => $subCriteria )
@@ -261,7 +229,7 @@
                                 </div>
                                 
                                 <!-- Desktop Tabs for Sub-Criteria -->
-                                <ul class="nav nav-tabs nav-fill subcriteria-tabs" role="tablist">
+                                <ul class="nav nav-tabs nav-fill subcriteria-tabs mb-6" role="tablist">
                                   @foreach( $criteria->subCriteria as $sub_key => $subCriteria )
                                   <li class="nav-item">
                                     <button type="button" class="nav-link {{ $loop->first ? 'active' : '' }}" 
@@ -280,23 +248,39 @@
                                   @foreach( $criteria->subCriteria as $sub_key => $subCriteria )
                                   <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" 
                                     id="tab{{ $key . '_' . $sub_key }}" role="tabpanel">
-                                    <div class="card">
+                                    <div class="card shadow-sm border">
                                       <div class="card-body">
                                         <div class="row">
-                                          <div class="col-12 col-md-6">
-                                            <div class="form-group mb-4">
+                                          <div class="col-12">
+                                            <div class="form-group mb-6">
                                               <label for="score_{{ $subCriteria->id }}" class="form-label">{{ __('admin.Score') }}</label>
-                                              <select class="form-select score-select mb-1" id="score_{{ $subCriteria->id }}" name="score_{{ $subCriteria->id }}">
+                                              <select class="form-select score-select mb-1" id="score_{{ $subCriteria->id }}" name="score_{{ $subCriteria->id }}" data-subcriteria-id="{{ $subCriteria->id }}">
                                                 <option value="">{{ __('admin.Select score') }}</option>
-                                                <option value="1" {{ $subCriteria?->result?->score == 1 ? 'selected' : '' }}>1</option>
-                                                <option value="2" {{ $subCriteria?->result?->score == 2 ? 'selected' : '' }}>2</option>
-                                                <option value="3" {{ $subCriteria?->result?->score == 3 ? 'selected' : '' }}>3</option>
-                                                <option value="4" {{ $subCriteria?->result?->score == 4 ? 'selected' : '' }}>4</option>
-                                                <option value="5" {{ $subCriteria?->result?->score == 5 ? 'selected' : '' }}>5</option>
+                                                <option value="1" {{ $subCriteria?->result?->score == 1 ? 'selected' : '' }}>1 - {{ __('admin.score_1') }}</option>
+                                                <option value="2" {{ $subCriteria?->result?->score == 2 ? 'selected' : '' }}>2 - {{ __('admin.score_2') }}</option>
+                                                <option value="3" {{ $subCriteria?->result?->score == 3 ? 'selected' : '' }}>3 - {{ __('admin.score_3') }}</option>
+                                                <option value="4" {{ $subCriteria?->result?->score == 4 ? 'selected' : '' }}>4 - {{ __('admin.score_4') }}</option>
+                                                <option value="5" {{ $subCriteria?->result?->score == 5 ? 'selected' : '' }}>5 - {{ __('admin.score_5') }}</option>
+                                                <option value="6" {{ $subCriteria?->result?->score == 6 ? 'selected' : '' }}>6 - {{ __('admin.score_6') }}</option>
+                                                <option value="7" {{ $subCriteria?->result?->score == 7 ? 'selected' : '' }}>7 - {{ __('admin.score_7') }}</option>
+                                                <option value="8" {{ $subCriteria?->result?->score == 8 ? 'selected' : '' }}>8 - {{ __('admin.score_8') }}</option>
+                                                <option value="9" {{ $subCriteria?->result?->score == 9 ? 'selected' : '' }}>9 - {{ __('admin.score_9') }}</option>
+                                                <option value="10" {{ $subCriteria?->result?->score == 10 ? 'selected' : '' }}>10 - {{ __('admin.score_10') }}</option>
                                               </select>
                                               <small class="text-muted">
-                                                {{ $l == 'en' ? "'Score 1 = Lowest, 5 = Highest'" : "'1 = الأدنى، 5 = الأعلى'" }}
+                                                {{ $l == 'en' ? "'Score 1 = Lowest, 10 = Highest'" : "'1 = الأدنى، 10 = الأعلى'" }}
                                               </small>
+                                              <div class="selected-score-badge" id="badge_score_{{ $subCriteria->id }}">
+                                                @if($subCriteria?->result?->score)
+                                                  @php
+                                                    $score = $subCriteria->result->score;
+                                                    $badgeClass = $score <= 3 ? 'bg-label-danger' : ($score <= 5 ? 'bg-label-warning' : ($score <= 7 ? 'bg-label-info' : ($score <= 9 ? 'bg-label-primary' : 'bg-label-success')));
+                                                  @endphp
+                                                  <span class="p-2 fw-semibold badge {{ $badgeClass }}">
+                                                    {{ $subCriteria->result->score }} - {{ __('admin.score_' . $subCriteria->result->score) }}
+                                                  </span>
+                                                @endif
+                                              </div>
                                             </div>
                                           </div>
                                           <div class="col-12">
@@ -335,6 +319,14 @@
               </div>
             </div>
             <div class="tab-pane fade" id="pills-final-comments" role="tabpanel" aria-labelledby="pills-final-comments-tab">
+              <div class="form-group mb-5">
+                <label for="is_approved" class="form-label">{{ __('admin.Your Decision')}}</label>
+                <select class="form-select" name="is_approved" id="is_approved">
+                  <option value="" {{ is_null( $evaluationForm->is_approved ) ? 'selected' : '' }}>{{ __('admin.Not Decided yet') }}</option>
+                  <option value="1" {{ ( $evaluationForm->is_approved === 1 || $evaluationForm->is_approved === true ) ? 'selected' : '' }}>{{ __('admin.Decision Approved') }}</option>
+                  <option value="0" {{ ( $evaluationForm->is_approved === 0 || $evaluationForm->is_approved === false ) ? 'selected' : '' }}>{{ __('admin.Decision Disapproved') }}</option>
+                </select>
+              </div>
               <div class="form-group">
                 <label for="final_comments" class="form-label">{{ __('admin.Final Comments')}}</label>
                 <textarea 
@@ -350,12 +342,12 @@
             <div class="tab-pane fade" id="pills-view-evaluation" role="tabpanel" aria-labelledby="pills-view-evaluation-tab">
               <div class="row mb-6">
                 @foreach( $evaluationForm->categories as $key => $criteria )
-                <div class="col-3 pb-3">
+                <div class="col-6 col-md-3 pb-3">
                   <div class="border border-dark rounded px-3 py-2">
                     <h6 class="mb-0 text-secondary fw-semibold">{{ $criteria->name }}</h6>
                     <div class="d-flex justify-content-between align-items-center mt-1">
                       <span class="fs-5 fw-bold mb-0 text-dark">
-                        {{ number_format( ($criteria->subCriteria->sum(function($subCriteria) { return $subCriteria->result->score; }) / ($criteria->subCriteria->count() * 5)) * 100, 2) }}
+                        {{ number_format( ($criteria->subCriteria->sum(function($subCriteria) { return $subCriteria->result->score; }) / ($criteria->subCriteria->count() * 10)) * 100, 2) }}
                       </span>
                       <span class="fs-5 fw-bold text-primary mb-0">%</span>
                     </div>
@@ -392,3 +384,43 @@
   </div>
 </div>
 @endif
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Function to get Bootstrap badge class based on score
+  function getBadgeClass(score) {
+    if (score <= 3) return 'bg-label-danger';
+    if (score <= 5) return 'bg-label-warning';
+    if (score <= 7) return 'bg-label-info';
+    if (score <= 9) return 'bg-label-primary';
+    return 'bg-label-success';
+  }
+
+  // Handle score selection changes
+  document.querySelectorAll('.score-select').forEach(function(select) {
+    select.addEventListener('change', function() {
+      var score = this.value;
+      var subcriteriaId = this.getAttribute('data-subcriteria-id');
+      var badgeContainer = document.getElementById('badge_score_' + subcriteriaId);
+
+      if (score && score !== '') {
+        // Show the badge with selected score
+        var badgeClass = getBadgeClass(parseInt(score));
+        badgeContainer.innerHTML = '<span class="p-2 fw-semibold badge ' + badgeClass + '">' + this.options[this.selectedIndex].text + '</span>';
+        badgeContainer.style.display = 'block';
+      } else {
+        // Hide the badge if no score selected
+        badgeContainer.style.display = 'none';
+        badgeContainer.innerHTML = '';
+      }
+    });
+
+    // Trigger change event on page load for pre-selected values
+    if (select.value && select.value !== '') {
+      select.dispatchEvent(new Event('change'));
+    }
+  });
+});
+</script>
+@endpush

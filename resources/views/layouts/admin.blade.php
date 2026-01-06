@@ -19,12 +19,17 @@
     <div class="layout-wrapper layout-content-navbar">
       <div class="layout-container">
         <!-- Sidebar Menu -->
-        @include('admin.includes.menu')
+        @if ($_user->hasAnyRole('Admin|organizationManager|subadmin'))
+          @include('partials.organized-menu')
+        @elseif ($_user->hasRole('Registered'))
+          @include('partials.menu-startup')
+        @else
+          @include('partials.menu')
+        @endif
 
         <div class="layout-page">
           <!-- Navbar -->
           @include('admin.includes.header')
-
 
           <!-- Content -->
           @yield('content')
@@ -441,7 +446,7 @@
         
         // Simple toast notification - you can enhance this with your preferred toast library
         const toast = `
-          <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'info'} border-0" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
+          <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} border-0" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
             <div class="d-flex">
               <div class="toast-body">${message}</div>
               <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
@@ -473,18 +478,30 @@
         });
       }
 
-      const releaseWarningAlert = ({title, message}) => {
+      const releaseWarningAlert = ({title, message, onConfirm, onCancel}) => {
         Swal.fire({
           icon: 'warning',
           title: title || '',
           html: message,
-          showCancelButton: false,
+          showCancelButton: onConfirm ? true : false,
           showConfirmButton: true,
-          confirmButtonText: "{{ __('admin.OK') }}",
+          confirmButtonText: onConfirm ? "{{ __('admin.Confirm') }}" : "{{ __('admin.OK') }}",
+          cancelButtonText: onConfirm ? "{{ __('admin.Cancel') }}" : '',
           customClass: {
-              confirmButton: 'btn btn-primary',
+            confirmButton: 'btn btn-primary ms-3',
+            cancelButton: onConfirm ? 'btn btn-label-secondary' : '',
           },
           buttonsStyling: false,
+          reverseButtons: true,
+        }).then((result) => {
+          if (!result.isConfirmed) {
+            if (onCancel) onCancel();
+            return;
+          }
+
+          if (onConfirm) onConfirm();
+        }).catch((error) => {
+          console.error('Error in warning alert:', error);
         });
       }
 
@@ -502,6 +519,39 @@
           buttonsStyling: false,
         });
       }
+    </script>
+
+    <script>
+      // Show/hide search menu
+      $(function () {
+        const html = document.documentElement;
+
+        const updateMenuState = () => {
+          if (window.Helpers.isCollapsed()) {
+            if (html.classList.contains('layout-menu-hover')) {
+              console.log('layout-menu-hover');
+              $('#search-menu').show();
+              $('#search-menu-icon').hide();
+            } else {
+              $('#search-menu').hide();
+              $('#search-menu-icon').show();
+            }
+          } else {
+            // When menu is expanded, always show search input and hide icon
+            $('#search-menu').show();
+            $('#search-menu-icon').hide();
+          }
+        };
+
+        // Run once on load
+        updateMenuState();
+
+        // Watch for class changes
+        new MutationObserver(updateMenuState).observe(html, {
+          attributes: true,
+          attributeFilter: ['class']
+        });
+      });
     </script>
 
     @stack('scripts')

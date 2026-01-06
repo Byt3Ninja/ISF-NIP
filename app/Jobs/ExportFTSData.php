@@ -61,30 +61,30 @@ class ExportFTSData implements ShouldQueue
 
         $timeSheets = collect();
         $orgnization = collect();
+        $authUser = auth()->user();
 
-        if (auth()->user()->hasRole('Admin')) {
+        if ($authUser->hasRole('Admin')) {
             $users = User::all();
             $timeSheets = TimeSheet::all();
             $cycles = Cycle::all();
             $orgnization = Organization::all();
+        } elseif ($authUser->hasAnyRole(['organizationManager', 'subadmin'])) {
+            $orgIds = $authUser->organizations_ids;
+            $orgnization = Organization::whereIn('id', $orgIds)->get();
+            $cycles = Cycle::whereIn('organization_id', $orgIds)->get();
+            $users = User::whereIn('organization_id', $orgIds)->role(['manager', 'coordinator'])->get();
+            $timeSheets = TimeSheet::whereIn('user_id', $users->pluck('id'))->get();
         } else {
-            $timeSheets = TimeSheet::where('user_id', auth()->user()->id)->get();
+            $timeSheets = TimeSheet::where('user_id', $authUser->id)->get();
 
-            if (auth()->user()->hasRole('organizationManager')) {
-                $organization = Organization::where('user_id', auth()->user()->id)->first();
-                if ($organization) {
-                    $cycles = Cycle::where('organization_id', $organization->id)->get();
-                    $users = User::where('organization_id', $organization->id)->role(['manager', 'coordinator'])->get();
-                    $orgnization = Organization::where('id', $organization->id)->get();
-                }
-            } elseif (auth()->user()->hasRole('manager')) {
-                $organization = Organization::where('user_id', auth()->user()->id)->first();
+            if ($authUser->hasRole('manager')) {
+                $organization = Organization::where('user_id', $authUser->id)->first();
                 if ($organization) {
                     $cycles = Cycle::where('organization_id', $organization->id)->get();
                     $users = User::where('organization_id', $organization->id)->role('coordinator')->get();
                     $orgnization = Organization::where('id', $organization->id)->get();
                 }
-            } elseif (auth()->user()->hasRole('coordinator')) {
+            } elseif ($authUser->hasRole('coordinator')) {
                 $users = collect();
             }
         }

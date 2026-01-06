@@ -1,6 +1,6 @@
 <!-- Founders Column -->
 <div class="col-md-12 mb-3">
-  <div class="card shadow-sm" style="border-radius: 15px;">
+  <div class="card shadow-sm">
     <div class="p-4">
       <h5 class="card-title border-bottom pb-2 mb-6">{{ __('admin.Founders') }}</h5>
       <form 
@@ -107,7 +107,7 @@
       @if($client->company)
       <div class="ShowTableFounders mt-4">
         @foreach ($fonders as $fonder)
-        <div class="card shadow-sm mb-4 position-relative" style="border-radius: 15px;">
+        <div class="card shadow-sm mb-4 position-relative">
           <span 
             class="position-absolute cursor-pointer top-0 end-0 p-4" 
             onclick="togglePopup({{ $fonder->id }})"
@@ -117,7 +117,7 @@
           <div class="p-3">
             <div class="d-flex align-items-center">
               <div 
-                class="border d-flex radius-15 flex-shrink-0" 
+                class="border d-flex rounded flex-shrink-0" 
                 style="width: 80px; height: 80px;"
               >
                 <img 

@@ -39,7 +39,7 @@
 											</button>
 
 											<a class="btn btn-outline-primary rounded-pill px-4 py-2 shadow-sm d-flex align-items-center"
-												href="/dashboard/{{ $id }}/final"
+												href="/dashboard/final/{{ $id }}"
 												data-bs-toggle="tooltip"
 												data-bs-placement="top"
 												title="{{ __('cycles.Manage Final Screening') }}"
@@ -233,50 +233,69 @@
 													</div>
 												</div>
 											</div>
-
-											<!-- Judge Filter -->
-											<div class="col-lg-3 col-md-6">
-												<label class="form-label fw-semibold mb-2 text-dark">
-													<i class="ti ti-user-check me-1 text-info"></i>
-													{{ __('cycles.Judge') }}
-												</label>
-												<select id="judge-filter" class="form-select">
-													<option value="">{{ __('cycles.All Judges') }}</option>
-													@foreach ($judges->unique('id') as $judge)
-														<option value="{{ $judge->id }}">{{ Str::limit($judge->name, 25) }}</option>
-													@endforeach
-												</select>
+											<div class="col-lg-9 col-md-6">
+												<div class="row g-3">
+													<!-- Judge Filter -->
+													<div class="col-lg-3 col-md-6">
+														<label class="form-label fw-semibold mb-2 text-dark">
+															<i class="ti ti-user-check me-1 text-info"></i>
+															{{ __('cycles.Judge') }}
+														</label>
+														<select id="judge-filter" class="form-select">
+															<option value="">{{ __('cycles.All Judges') }}</option>
+															@foreach ($judges->unique('id') as $judge)
+																<option value="{{ $judge->id }}">{{ Str::limit($judge->name, 25) }}</option>
+															@endforeach
+														</select>
+													</div>
+    
+													<!-- Approval Filter -->
+													<div class="col-lg-3 col-md-6">
+														<label class="form-label fw-semibold mb-2 text-dark">
+														<i class="ti ti-chart-line me-1 text-info"></i>
+														{{ __('cycles.Approval Status') }}
+														</label>
+														<select id="approval-filter" class="form-select">
+														<option value="">{{ __('cycles.All Status') }}</option>
+														<option value="approved">{{ __('cycles.Approved') }}</option>
+														<option value="disapproved">{{ __('cycles.Disapproved') }}</option>
+														<option value="pending">{{ __('cycles.Pending') }}</option>
+														<option value="mixed">{{ __('cycles.Mixed') }}</option>
+														</select>
+													</div>
+		
+													<!-- Score Range Filter -->
+													<div class="col-lg-3 col-md-6">
+														<label class="form-label fw-semibold mb-2 text-dark">
+															<i class="ti ti-chart-line me-1 text-success"></i>
+															{{ __('cycles.Score Range') }}
+														</label>
+														<select id="score-filter" class="form-select">
+															<option value="">{{ __('cycles.All Scores') }}</option>
+															<option value="excellent">{{ __('cycles.Excellent') }} (75-100%)</option>
+															<option value="good">{{ __('cycles.Good') }} (50-74%)</option>
+															<option value="average">{{ __('cycles.Average') }} (25-49%)</option>
+															<option value="poor">{{ __('cycles.Poor') }} (0-24%)</option>
+														</select>
+													</div>
+		
+													<!-- Status Filter -->
+													<div class="col-lg-3 col-md-6">
+														<label class="form-label fw-semibold mb-2 text-dark">
+															<i class="ti ti-flag me-1 text-warning"></i>
+															{{ __('cycles.Evaluation Status') }}
+														</label>
+														<select id="status-filter" class="form-select">
+															<option value="">{{ __('cycles.All Status') }}</option>
+															<option value="published">{{ __('cycles.Published') }}</option>
+															<option value="draft">{{ __('cycles.Draft') }}</option>
+															<option value="not-evaluated">{{ __('cycles.Not Evaluated') }}</option>
+															{{-- <option value="mixed">{{ __('cycles.Mixed Status') }}</option> --}}
+														</select>
+													</div>
+												</div>
 											</div>
 
-											<!-- Score Range Filter -->
-											<div class="col-lg-3 col-md-6">
-												<label class="form-label fw-semibold mb-2 text-dark">
-													<i class="ti ti-chart-line me-1 text-success"></i>
-													{{ __('cycles.Score Range') }}
-												</label>
-												<select id="score-filter" class="form-select">
-													<option value="">{{ __('cycles.All Scores') }}</option>
-													<option value="excellent">{{ __('cycles.Excellent') }} (75-100%)</option>
-													<option value="good">{{ __('cycles.Good') }} (50-74%)</option>
-													<option value="average">{{ __('cycles.Average') }} (25-49%)</option>
-													<option value="poor">{{ __('cycles.Poor') }} (0-24%)</option>
-												</select>
-											</div>
-
-											<!-- Status Filter -->
-											<div class="col-lg-3 col-md-6">
-												<label class="form-label fw-semibold mb-2 text-dark">
-													<i class="ti ti-flag me-1 text-warning"></i>
-													{{ __('cycles.Evaluation Status') }}
-												</label>
-												<select id="status-filter" class="form-select">
-													<option value="">{{ __('cycles.All Status') }}</option>
-													<option value="published">{{ __('cycles.Published') }}</option>
-													<option value="draft">{{ __('cycles.Draft') }}</option>
-													<option value="not-evaluated">{{ __('cycles.Not Evaluated') }}</option>
-													{{-- <option value="mixed">{{ __('cycles.Mixed Status') }}</option> --}}
-												</select>
-											</div>
 										</div>
 
 										<!-- Filter Actions -->
@@ -303,6 +322,15 @@
 												$hasPublished = false;
 												$hasDraft = false;
 												$hasNotEvaluated = false;
+												$companyApprovals = [];
+												$companyApprovalStatus = 'mixed';
+												$companyJudges = $company->judges;
+												$statusIcons = [
+													'approved' => 'circle-check text-success',
+													'pending' => 'clock text-primary',
+													'disapproved' => 'circle-x text-danger',
+													'mixed' => 'exclamation-circle text-warning'
+												];
 												
 												foreach ($judges as $judge) {
 													if (in_array($company->id, $judge->startups->toArray())) {
@@ -310,13 +338,17 @@
 														if ($scoped_company) {
 															$status = strtolower($scoped_company->status ?? 'not-evaluated');
 															$evaluationStatuses[] = $status;
+															$companyApprovals[] = $scoped_company->approval;
 															
 															if ($status === 'published') $hasPublished = true;
 															elseif ($status === 'draft') $hasDraft = true;
 															else $hasNotEvaluated = true;
-														}
+														} else { $companyApprovals[] = 'pending'; }
 													}
 												}
+												$companyApprovals = collect($companyApprovals)->unique()->values();
+												$companyApprovalStatus = $companyApprovals->count() > 1 ? 'mixed' : $companyApprovals->first();
+												$approvalIcon = $statusIcons[$companyApprovalStatus] ?? 'question-circle text-muted';
 												
 												// Determine primary status for filtering
 												$primaryStatus = 'not-evaluated';
@@ -386,6 +418,7 @@
 											@endphp
 											
 											<div class="col-xl-4 col-lg-6 col-md-12 company-card" 
+													 data-approval-status="{{ strtolower($companyApprovalStatus) }}"
 													 data-company-name="{{ strtolower($company->name) }}"
 													 data-user-name="{{ strtolower($company->resolveUser()->name) }}"
 													 data-category="{{ strtolower($categoryString) }}"
@@ -470,6 +503,9 @@
 																		<h6 class="mb-0 fw-semibold text-dark">{{ $company->resolveUser()->name }}</h6>
 																		<small class="text-muted">{{ $company->resolveUser()->title ?: __('cycles.No title') }}</small>
 																	</a>
+																</div>
+																<div class="flex-grow-1 text-end">
+																	<i title="{{ ucFirst( $companyApprovalStatus ) }}" class="ti ti-{{ $approvalIcon }} ti-sm"></i> 
 																</div>
 															</div>
 														</div>
@@ -627,6 +663,7 @@
 			judge: '',
 			score: '',
 			status: '',
+			approval: '',
 			sort: 'name-asc'
 		};
 
@@ -650,7 +687,7 @@
 			});
 
 			// Filter change handlers
-			$('#judge-filter, #score-filter, #status-filter, #sort-filter').on('change', function() {
+			$('#judge-filter, #approval-filter, #score-filter, #status-filter, #sort-filter').on('change', function() {
 				const filterId = $(this).attr('id');
 				const filterType = filterId.replace('-filter', '');
 				currentFilters[filterType] = $(this).val();
@@ -671,6 +708,7 @@
 				filteredCards = filteredCards.filter(card => {
 					const $card = $(card);
 					const companyName = $card.data('company-name') || '';
+					const approvalStatus = $card.data('approval-status') || '';
 					const userName = $card.data('user-name') || '';
 					const category = $card.data('category') || '';
 					
@@ -733,6 +771,15 @@
 						default:
 							return true;
 					}
+				});
+			}
+
+			// Apply approval filter
+			if (currentFilters.approval) {
+				filteredCards = filteredCards.filter(card => {
+					const $card = $(card);
+					const primaryApprovalStatus = $card.data('approval-status') || 'mixed';
+					return currentFilters.approval === primaryApprovalStatus;
 				});
 			}
 

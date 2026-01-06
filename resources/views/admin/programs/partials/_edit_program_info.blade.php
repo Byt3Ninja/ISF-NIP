@@ -1,28 +1,39 @@
 <div class="row">
 
-  @if ($_user->hasRole('organizationManager'))
-  <input type="hidden" name="organization_id2" value="{{ $_user->organization_id }}">
+  @php
+    $userOrgIds = $_user->organizations_ids;
+    $showOrgDropdown = $_user->hasRole('Admin') || ($_user->isSubAdmin() && count($userOrgIds) > 1);
+    $isSingleOrg = ($_user->hasRole('organizationManager') && !$_user->isSubAdmin()) || ($_user->isSubAdmin() && count($userOrgIds) == 1);
+  @endphp
+
+  @if ($isSingleOrg)
+  <input type="hidden" name="organization_id2" value="{{ $userOrgIds[0] ?? $_user->organization_id }}">
   @endif
 
   <!-- Organizations -->
-  @if (!$_user->hasRole('organizationManager'))
+  @if ($showOrgDropdown)
   <div class="col-md-6">
     <div class="form-group mb-4">
       <label for="organization" class="form-label fs-6 fw-semibold">
         {{ __('cycles.Select_Organization') }}
       </label>
-      <select 
-        class="form-select select2" 
-        id="organization" 
+      <select
+        class="form-select select2"
+        id="organization"
         name="organization_id2"
         data-placeholder="{{ __('cycles.Select_Organization') }}"
         value="{{ old('organization_id2', isset($ccycle) ? $ccycle->organization_id : '') }}"
       >
         <option value="">{{ __('cycles.Select_Organization') }}</option>
-        @foreach (\App\Organization::all() as $org)
-        @php if( $_user->hasRole('organizationManager') && $org->id != $_user->organization_id ) { continue; } @endphp
-        <option value="{{ $org->id }}">{{ $org->{'name_' . app()->getLocale()} }}</option>
-        @endforeach
+        @if($_user->hasRole('Admin'))
+          @foreach (\App\Organization::all() as $org)
+          <option value="{{ $org->id }}">{{ $org->{'name_' . app()->getLocale()} }}</option>
+          @endforeach
+        @else
+          @foreach ($_user->organizations as $org)
+          <option value="{{ $org->id }}">{{ $org->{'name_' . app()->getLocale()} }}</option>
+          @endforeach
+        @endif
       </select>
       <div class="invalid-feedback"></div>
     </div>
@@ -176,8 +187,7 @@
         name="description" 
         placeholder="{{ __('cycles.Description') }}"
         oninput="this.value = this.value.trimStart()" 
-        rows="3">
-      </textarea>
+        rows="3"></textarea>
       <div class="invalid-feedback"></div>
     </div>
   </div>

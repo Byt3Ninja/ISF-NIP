@@ -2,23 +2,24 @@
 
 namespace App\Services;
 
-use App\Mail\OrganizationCreatedMail;
-use App\Notifications\WelcomeJudgerNotification;
-use App\Notifications\WelcomeUserNotification;
+use Log;
 use App\User;
+use App\InviteMentor;
 use App\Mail\WelcomeUserMail;
-use App\Repositories\UserRepository;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Log;
 use Spatie\Permission\Models\Role;
 use App\Http\Resources\UserResource;
-use Google\Service\ServiceControl\Auth;
+use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Database\Eloquent\Builder;
+use App\Mail\OrganizationCreatedMail;
+use Google\Service\ServiceControl\Auth;
+use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Illuminate\Database\Eloquent\Builder;
+use App\Notifications\WelcomeUserNotification;
+use App\Notifications\WelcomeJudgerNotification;
 
 
 class UserService
@@ -88,10 +89,14 @@ class UserService
     {
         try{
 
- 
+
         $result = $this->userRepository->create($data);
          
         if($result['success'] ==true){
+            $update_invite_mentor = InviteMentor::where('email', $data['email'])->first();
+            if($update_invite_mentor){
+                $update_invite_mentor->update(['mentor_id' => $result['data']->id, 'status' => 'Accepted']);
+            }
         $user=$result['data'];
         Storage::disk('UsersLFM')->makeDirectory("$user->id");
 		Storage::disk('UsersLFM')->makeDirectory("$user->id/BusinessPlans");
@@ -227,7 +232,8 @@ class UserService
             return $this->userRepository->getCompaniesForRegisteredUser($user, $requestData);
         }
 
-        if ($user->hasRole('organizationManager')) {
+        // Handle both organizationManager and subadmin roles
+        if ($user->hasAnyRole(['organizationManager', 'subadmin'])) {
             return $this->userRepository->getCompaniesForOrgManager($user, $requestData);
         }
 

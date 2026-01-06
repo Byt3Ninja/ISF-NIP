@@ -18,7 +18,10 @@ if($user)
     <span class="position-relative">
       <i class="ti ti-bell ti-md"></i>
       @if ($all > 0)
-      <span class="badge badge-notifications bg-danger w-px-20 h-px-20 rounded-circle d-flex justify-content-center align-items-center">{{ $all }}</span>
+      <span 
+        class="badge badge-notifications bg-danger rounded-circle d-flex justify-content-center align-items-center flex-shrink-0 w-px-20 h-px-20">
+        {{ $all }}
+      </span>
       @endif
     </span>
   </a>

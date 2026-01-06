@@ -4,6 +4,16 @@
         "description": null,
         "permissions": [
             {
+                "name": "settings.index",
+                "description": "View Main Settings Page",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
                 "name": "settings.system_general_view",
                 "description": "View General Settings",
                 "guard_name": "web",
@@ -118,7 +128,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -128,7 +139,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -138,7 +150,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -148,7 +161,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -158,7 +172,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -168,7 +183,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -178,7 +194,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -311,7 +328,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -322,7 +340,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -332,7 +351,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -342,7 +362,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -353,7 +374,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -363,7 +385,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -373,7 +396,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -383,7 +407,92 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Expertise",
+        "description": null,
+        "permissions": [
+            {
+                "name": "expertises.index",
+                "description": "List Expertise",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "expertises.create",
+                "description": "Create Expertise ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "expertises.store",
+                "description": "Save New Expertise",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "expertises.show",
+                "description": "View Expertise Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "expertises.edit",
+                "description": "Edit Expertise Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "expertises.update",
+                "description": "Save Expertise Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "expertises.destroy",
+                "description": "Delete Expertise",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]
@@ -399,7 +508,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "registered"
+                    "registered",
+                    "serviceProvider"
                 ]
             },
             {
@@ -754,9 +864,7 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin",
-                    "mentor",
-                    "judger"
+                    "admin"
                 ]
             },
             {
@@ -823,6 +931,97 @@
         ]
     },
     {
+        "name": "Services Provider",
+        "description": null,
+        "permissions": [
+            {
+                "name": "services_providers.index",
+                "description": "List All Services Providers",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "services_providers.create",
+                "description": "Create Service Provider Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "services_providers.store",
+                "description": "Save New Service Provider",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "services_providers.show",
+                "description": "Show Service Provider Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "services_providers.edit",
+                "description": "Edit Service Provider Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "services_providers.update",
+                "description": "Save Service Provider Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "services_providers.destroy",
+                "description": "Delete Service Provider",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "services_providers.requests",
+                "description": "List Service Provider Register Requests",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "services_providers.takeAction",
+                "description": "Approve / Reject Service Provider Register Requests",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
         "name": "Services",
         "description": null,
         "permissions": [
@@ -834,7 +1033,9 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
-                    "registered"
+                    "subadmin",
+                    "registered",
+                    "serviceProvider"
                 ]
             },
             {
@@ -844,7 +1045,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin",
+                    "serviceProvider"
                 ]
             },
             {
@@ -854,7 +1057,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin",
+                    "serviceProvider"
                 ]
             },
             {
@@ -865,7 +1070,9 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
-                    "registered"
+                    "subadmin",
+                    "registered",
+                    "serviceProvider"
                 ]
             },
             {
@@ -875,7 +1082,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin",
+                    "serviceProvider"
                 ]
             },
             {
@@ -885,7 +1094,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin",
+                    "serviceProvider"
                 ]
             },
             {
@@ -895,7 +1106,27 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "services.request_service",
+                "description": "Request Service (Startups)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "services.rate",
+                "description": "Rate Service",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "registered"
                 ]
             },
             {
@@ -905,7 +1136,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]
@@ -1586,7 +1818,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "subadmin"
                 ]
             },
             {
@@ -1613,7 +1846,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "subadmin"
                 ]
             },
             {
@@ -1622,7 +1856,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "subadmin"
                 ]
             },
             {
@@ -1631,12 +1866,107 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "subadmin"
                 ]
             },
             {
                 "name": "organizations.destroy",
                 "description": "Delete Organization",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Organization Wizard",
+        "description": null,
+        "permissions": [
+            {
+                "name": "organization.wizard.create",
+                "description": "Create Organization Wizard",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "organization.wizard.edit",
+                "description": "Edit Organization Wizard",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "subadmin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Organization Types",
+        "description": null,
+        "permissions": [
+            {
+                "name": "organization-types.index",
+                "description": "List Organization Types",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "organization-types.create",
+                "description": "Create Organization Types Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "organization-types.store",
+                "description": "Save New Organization Types",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "organization-types.show",
+                "description": "View Organization Types Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "organization-types.edit",
+                "description": "Edit Organization Types Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "organization-types.update",
+                "description": "Save Organization Types Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "organization-types.destroy",
+                "description": "Delete Organization Types",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -1657,7 +1987,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1668,7 +1999,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1679,7 +2011,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1690,7 +2023,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1701,7 +2035,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1712,7 +2047,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1723,7 +2059,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1733,8 +2070,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1745,7 +2082,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1756,7 +2094,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1767,7 +2106,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1778,7 +2118,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1789,7 +2130,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1800,7 +2142,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1810,8 +2153,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1822,7 +2165,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1833,7 +2177,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1844,7 +2189,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1855,7 +2201,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1866,7 +2213,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1877,7 +2225,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1888,7 +2237,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1899,7 +2249,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1910,7 +2261,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1921,7 +2273,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1932,7 +2285,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1943,7 +2297,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1954,7 +2309,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1965,7 +2321,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1992,8 +2349,7 @@
                     "admin"
                 ]
             },
-
-                        {
+            {
                 "name": "users.companies_export",
                 "description": "List Users",
                 "guard_name": "web",
@@ -2002,8 +2358,6 @@
                     "admin"
                 ]
             },
-
-            
             {
                 "name": "users.create",
                 "description": "Create User Form",
@@ -2050,6 +2404,15 @@
                 ]
             },
             {
+                "name": "users.update_organizations",
+                "description": "Assign Organizations to Sub-Admin Users",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
                 "name": "users.destroy",
                 "description": "Delete User",
                 "guard_name": "web",
@@ -2066,8 +2429,8 @@
                 "default_for": [
                     "admin",
                     "mentor",
-                    "judger",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2077,7 +2440,17 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "users.login_as",
+                "description": "Login As User",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
                 ]
             }
         ]
@@ -2432,7 +2805,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2442,7 +2816,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2452,7 +2827,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2462,7 +2838,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2472,7 +2849,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2482,7 +2860,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2492,7 +2871,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]
@@ -2508,7 +2888,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2518,7 +2899,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2528,7 +2910,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2538,7 +2921,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2548,7 +2932,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2558,7 +2943,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2568,7 +2954,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]
@@ -2584,7 +2971,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2594,7 +2982,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2604,7 +2993,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2615,7 +3005,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2625,7 +3016,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2635,7 +3027,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2645,7 +3038,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2655,7 +3049,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2665,7 +3060,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2676,7 +3072,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2687,7 +3084,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2698,7 +3096,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2709,7 +3108,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2719,7 +3119,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2729,7 +3130,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2739,7 +3141,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]
@@ -2756,6 +3159,7 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "registered"
                 ]
             },
@@ -2767,6 +3171,7 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "registered"
                 ]
             },
@@ -2777,7 +3182,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2788,6 +3194,7 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "registered"
                 ]
             },
@@ -2799,6 +3206,7 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "registered"
                 ]
             },
@@ -2810,6 +3218,7 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "registered"
                 ]
             },
@@ -2821,6 +3230,7 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "registered"
                 ]
             },
@@ -2832,6 +3242,7 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "registered"
                 ]
             },
@@ -2843,6 +3254,7 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "registered"
                 ]
             },
@@ -2854,6 +3266,7 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "registered"
                 ]
             },
@@ -2865,6 +3278,7 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "registered"
                 ]
             },
@@ -2876,6 +3290,7 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "registered"
                 ]
             },
@@ -2887,6 +3302,7 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "registered"
                 ]
             },
@@ -2898,6 +3314,7 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "registered"
                 ]
             },
@@ -2909,6 +3326,7 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "registered"
                 ]
             },
@@ -2920,6 +3338,7 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "registered"
                 ]
             },
@@ -2930,8 +3349,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
-                   
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2941,8 +3360,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
-                   
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2953,8 +3372,8 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "registered"
-                   
                 ]
             },
             {
@@ -2965,8 +3384,8 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "registered"
-                   
                 ]
             },
             {
@@ -2977,8 +3396,8 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "registered"
-                   
                 ]
             },
             {
@@ -2989,8 +3408,8 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "registered"
-                   
                 ]
             },
             {
@@ -3001,8 +3420,8 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "registered"
-                   
                 ]
             },
             {
@@ -3013,8 +3432,8 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "registered"
-                   
                 ]
             },
             {
@@ -3025,8 +3444,8 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "registered"
-                   
                 ]
             },
             {
@@ -3037,8 +3456,8 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "registered"
-                   
                 ]
             },
             {
@@ -3049,11 +3468,11 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "registered",
                     "mentor"
                 ]
             }
-
         ]
     },
     {
@@ -3067,7 +3486,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3077,7 +3497,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3088,7 +3509,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3099,7 +3521,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3109,7 +3532,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3119,7 +3543,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3129,7 +3554,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3139,7 +3565,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3150,7 +3577,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3160,7 +3588,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3172,7 +3601,8 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3184,7 +3614,8 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3194,7 +3625,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3204,7 +3636,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]
@@ -3221,7 +3654,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3231,7 +3665,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3241,7 +3676,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3252,7 +3688,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3262,7 +3699,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3272,7 +3710,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3282,7 +3721,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3292,7 +3732,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3302,7 +3743,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]
@@ -3434,7 +3876,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3444,7 +3887,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3454,7 +3898,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3464,7 +3909,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3474,7 +3920,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3484,7 +3931,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3494,7 +3942,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3504,7 +3953,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3514,7 +3964,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3524,7 +3975,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3534,7 +3986,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3544,7 +3997,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]
@@ -3752,7 +4206,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "mentor"
+                    "mentor",
+                    "registered"
                 ]
             },
             {
@@ -3782,7 +4237,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "mentor"
+                    "mentor",
+                    "registered"
                 ]
             },
             {
@@ -3792,7 +4248,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "mentor"
+                    "mentor",
+                    "registered"
                 ]
             },
             {
@@ -3802,7 +4259,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "mentor"
+                    "mentor",
+                    "registered"
                 ]
             }
         ]
@@ -3819,7 +4277,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3831,7 +4290,8 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3842,7 +4302,9 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin",
+                    "serviceProvider"
                 ]
             },
             {
@@ -3853,7 +4315,9 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin",
+                    "serviceProvider"
                 ]
             },
             {
@@ -3864,7 +4328,21 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "service_requests.take_action",
+                "description": "Take Action on a Service Request (Approve, Disapprove)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "serviceProvider"
                 ]
             },
             {
@@ -3875,7 +4353,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3886,7 +4365,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3897,7 +4377,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]
@@ -3940,7 +4421,9 @@
                     "mentor",
                     "judger",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin",
+                    "serviceProvider"
                 ]
             },
             {
@@ -3953,7 +4436,8 @@
                     "mentor",
                     "judger",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -3966,7 +4450,9 @@
                     "mentor",
                     "judger",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin",
+                    "serviceProvider"
                 ]
             },
             {
@@ -3979,11 +4465,12 @@
                     "mentor",
                     "judger",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
-                "name": "user.profile_update_password",
+                "name": "user.profile_update_my_password",
                 "description": "Update Own Profile Password",
                 "guard_name": "web",
                 "is_core": 0,
@@ -3991,7 +4478,10 @@
                     "admin",
                     "mentor",
                     "judger",
-                    "organizationmanager"
+                    "registered",
+                    "organizationmanager",
+                    "subadmin",
+                    "serviceProvider"
                 ]
             },
             {
@@ -4001,7 +4491,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin",
+                    "serviceProvider"
                 ]
             },
             {
@@ -4013,7 +4505,8 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4026,7 +4519,9 @@
                     "mentor",
                     "judger",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin",
+                    "serviceProvider"
                 ]
             },
             {
@@ -4039,10 +4534,10 @@
                     "mentor",
                     "judger",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
-
             {
                 "name": "user.notification_settings_update",
                 "description": "Update Own Profile Notification Settings",
@@ -4053,7 +4548,19 @@
                     "mentor",
                     "judger",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "settings.organization.notifications_update",
+                "description": "Update Organization Notification Settings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]
@@ -4071,7 +4578,8 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4082,7 +4590,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4093,10 +4602,10 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
-
             {
                 "name": "mentors.add",
                 "description": "Add New Mentor",
@@ -4104,7 +4613,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4115,6 +4625,7 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "registered"
                 ]
             }
@@ -4134,7 +4645,8 @@
                     "mentor",
                     "judger",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4145,7 +4657,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4158,7 +4671,8 @@
                     "mentor",
                     "judger",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4269,7 +4783,43 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "company.getEmployees",
+                "description": " Get Company Employees",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "company.addCompanyAlumni",
+                "description": " Add Alumni to Company",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "company.alumni_view",
+                "description": " View company program details (alumni)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "registered"
                 ]
             }
         ]
@@ -4498,6 +5048,7 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "judger",
                     "registered"
                 ]
@@ -4548,7 +5099,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4558,7 +5110,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4568,7 +5121,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4578,7 +5132,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4588,7 +5143,19 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "forms.delete",
+                "description": "Delete Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4598,7 +5165,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4608,7 +5176,63 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "form_submission_details.export",
+                "description": "Export Form Submissions Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "forms_submissions.export.status",
+                "description": "Check Advanced Export Status",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "forms_submissions.export.generate",
+                "description": "Generate Advanced Export",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "forms_submissions.export.download",
+                "description": "Download Advanced Export",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "forms_submissions.export.progress",
+                "description": "Check Export Progress",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]
@@ -4624,7 +5248,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4635,7 +5260,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4645,7 +5271,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4655,7 +5282,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]
@@ -4672,7 +5300,8 @@
                 "default_for": [
                     "admin",
                     "judger",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4683,7 +5312,8 @@
                 "default_for": [
                     "admin",
                     "judger",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4694,7 +5324,8 @@
                 "default_for": [
                     "admin",
                     "judger",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4704,8 +5335,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "judger",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4716,7 +5347,8 @@
                 "default_for": [
                     "admin",
                     "judger",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4727,7 +5359,8 @@
                 "default_for": [
                     "admin",
                     "judger",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4738,7 +5371,8 @@
                 "default_for": [
                     "admin",
                     "judger",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4748,7 +5382,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4758,8 +5393,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "judger",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4770,7 +5405,8 @@
                 "default_for": [
                     "admin",
                     "judger",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4780,7 +5416,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4790,7 +5427,41 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "screening.add_judging_panels",
+                "description": "Add Judging Panels",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "screening.delete_judging_panel",
+                "description": "Delete Judging Panel",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "screening.delete_judging_panel",
+                "description": "Delete Judging Panel",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4800,7 +5471,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4810,7 +5482,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4820,7 +5493,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4830,7 +5504,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4840,7 +5515,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4850,7 +5526,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4860,7 +5537,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4870,7 +5548,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4880,7 +5559,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4890,7 +5570,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4920,12 +5601,13 @@
             },
             {
                 "name": "screening.results_report",
-                "description": " All Screening Results Report ",
+                "description": " All Screening Results Report",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]
@@ -4942,7 +5624,8 @@
                 "default_for": [
                     "admin",
                     "mentor",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4953,7 +5636,8 @@
                 "default_for": [
                     "admin",
                     "mentor",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4964,7 +5648,8 @@
                 "default_for": [
                     "admin",
                     "mentor",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4975,7 +5660,8 @@
                 "default_for": [
                     "admin",
                     "mentor",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4986,7 +5672,8 @@
                 "default_for": [
                     "admin",
                     "mentor",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -4997,7 +5684,8 @@
                 "default_for": [
                     "admin",
                     "mentor",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5007,7 +5695,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5017,9 +5706,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5031,7 +5720,8 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5042,7 +5732,8 @@
                 "default_for": [
                     "admin",
                     "mentor",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5053,7 +5744,8 @@
                 "default_for": [
                     "admin",
                     "mentor",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5064,7 +5756,8 @@
                 "default_for": [
                     "admin",
                     "mentor",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5076,7 +5769,8 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5088,7 +5782,8 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5100,7 +5795,8 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5111,7 +5807,8 @@
                 "default_for": [
                     "admin",
                     "mentor",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5123,7 +5820,8 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5133,8 +5831,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "mentor",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5144,8 +5842,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "mentor",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5156,7 +5854,8 @@
                 "default_for": [
                     "admin",
                     "mentor",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5167,7 +5866,8 @@
                 "default_for": [
                     "admin",
                     "mentor",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]
@@ -5183,7 +5883,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5193,7 +5894,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5203,7 +5905,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5213,7 +5916,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5223,7 +5927,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5233,7 +5938,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5243,7 +5949,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5254,7 +5961,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5264,7 +5972,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5274,7 +5983,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5285,7 +5995,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5295,7 +6006,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5305,7 +6017,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5315,7 +6028,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5325,7 +6039,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5335,7 +6050,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5345,7 +6061,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5356,7 +6073,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5366,7 +6084,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5377,7 +6096,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5387,7 +6107,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5397,7 +6118,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5407,7 +6129,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5418,7 +6141,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5428,7 +6152,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5438,7 +6163,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5448,7 +6174,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5458,7 +6185,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5468,7 +6196,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5478,7 +6207,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5488,7 +6218,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5498,7 +6229,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5508,7 +6240,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5519,7 +6252,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5529,7 +6263,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5540,7 +6275,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5550,7 +6286,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5560,7 +6297,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]
@@ -5717,7 +6455,9 @@
                     "mentor",
                     "judger",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin",
+                    "serviceProvider"
                 ]
             },
             {
@@ -5729,7 +6469,8 @@
                     "admin",
                     "judger",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5740,7 +6481,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5751,7 +6493,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5762,7 +6505,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5773,7 +6517,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]
@@ -5855,7 +6600,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5865,7 +6611,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5875,7 +6622,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -5885,7 +6633,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]
@@ -6025,7 +6774,8 @@
                 "default_for": [
                     "admin",
                     "judger",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6035,7 +6785,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6045,7 +6796,8 @@
                 "is_core": 0,
                 "default_for": [
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6058,7 +6810,8 @@
                     "mentor",
                     "registered",
                     "judger",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6068,7 +6821,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6079,7 +6833,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6089,7 +6844,8 @@
                 "is_core": 0,
                 "default_for": [
                     "mentor",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6100,7 +6856,8 @@
                 "default_for": [
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6112,7 +6869,8 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6123,7 +6881,8 @@
                 "default_for": [
                     "admin",
                     "judger",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6135,7 +6894,8 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6147,7 +6907,8 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6157,7 +6918,8 @@
                 "is_core": 0,
                 "default_for": [
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6168,7 +6930,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6179,7 +6942,8 @@
                 "default_for": [
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6190,6 +6954,7 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "judger"
                 ]
             },
@@ -6201,7 +6966,8 @@
                 "default_for": [
                     "admin",
                     "judger",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6212,6 +6978,7 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
+                    "subadmin",
                     "mentor"
                 ]
             },
@@ -6223,7 +6990,8 @@
                 "default_for": [
                     "admin",
                     "mentor",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6234,7 +7002,8 @@
                 "default_for": [
                     "admin",
                     "mentor",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6245,7 +7014,8 @@
                 "default_for": [
                     "admin",
                     "mentor",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6256,7 +7026,8 @@
                 "default_for": [
                     "admin",
                     "mentor",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6266,7 +7037,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6276,7 +7048,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6286,7 +7059,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6296,7 +7070,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6306,7 +7081,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6316,7 +7092,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6326,7 +7103,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6336,7 +7114,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6346,7 +7125,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6356,7 +7136,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]
@@ -6372,7 +7153,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6384,7 +7166,8 @@
                     "mentor",
                     "judger",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6397,7 +7180,8 @@
                     "mentor",
                     "judger",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6408,7 +7192,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6420,7 +7205,8 @@
                     "admin",
                     "judger",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6430,7 +7216,8 @@
                 "is_core": 0,
                 "default_for": [
                     "mentor",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6449,7 +7236,8 @@
                 "is_core": 0,
                 "default_for": [
                     "judger",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]
@@ -6569,7 +7357,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6578,7 +7367,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6587,7 +7377,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6596,7 +7387,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6605,7 +7397,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6614,7 +7407,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6623,10 +7417,10 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
-
             {
                 "name": "mentorship.schedule_store",
                 "description": " Add Mentorship Schedule",
@@ -6634,10 +7428,10 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
-
             {
                 "name": "mentorship.schedule_update",
                 "description": " Update Mentorship Schedule",
@@ -6645,17 +7439,19 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
-            "name": "mentorship.schedule_destroy",
+                "name": "mentorship.schedule_destroy",
                 "description": " Delete Mentorship Schedule",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6665,7 +7461,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6675,7 +7472,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]
@@ -6692,7 +7490,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6703,7 +7502,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6714,7 +7514,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6725,7 +7526,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6736,7 +7538,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6747,7 +7550,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6758,7 +7562,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6769,7 +7574,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6780,7 +7586,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]
@@ -6940,7 +7747,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -6951,7 +7759,8 @@
                 "default_for": [
                     "admin",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -7028,7 +7837,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -7038,7 +7848,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -7048,7 +7859,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -7058,7 +7870,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]
@@ -7067,418 +7880,389 @@
         "name": "Activity Log",
         "description": null,
         "permissions": [
-        {
-            "name": "activities.index",
-            "description": "View Activity Log Page",
-            "guard_name": "web",
-            "is_core": 0,
-            "default_for": [
-                "admin",
-                "organizationmanager"
-            ]
-        },
-        {
-            "name": "activity.log",
-            "description": "Create Activity Log",
-            "guard_name": "web",
-            "is_core": 0,
-            "default_for": [
-                "admin",
-                "organizationmanager"
-            ]
-        },
-        {
-            "name": "activities.destroy",
-            "description": "Delete Activity Log",
-            "guard_name": "web",
-            "is_core": 0,
-            "default_for": [
-                "admin",
-                "organizationmanager"
-            ]
-        },
-        {
-            "name": "activities.force-logout",
-            "description": "Force Logout User",
-            "guard_name": "web",
-            "is_core": 0,
-            "default_for": [
-                "admin",
-                "organizationmanager"
-            ]
-        },
-        {
-            "name": "activities.reset-password",
-            "description": "Reset User Password",
-            "guard_name": "web",
-            "is_core": 0,
-            "default_for": [
-                "admin",
-                "organizationmanager"
-            ]
-        },
-        {
-            "name": "activities.block-ip",
-            "description": "Block IP Address",
-            "guard_name": "web",
-            "is_core": 0,
-            "default_for": [
-                "admin",
-                "organizationmanager"
-            ]
-        },
-        {
-            "name": "activities.load-more",
-            "description": "Load More Activities",
-            "guard_name": "web",
-            "is_core": 0,
-            "default_for": [
-                "admin",
-                "organizationmanager"
-            ]
-        }
-    ]
-
-
-    },
-    {
-        "name":"Notification",
-        "description":"Notification Templates",
-        "permissions":[
             {
-                "name":"notification-templates.index",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+                "name": "activities.index",
+                "description": "View Activity Log Page",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
-
-                      {
-                "name":"settings.notification_update",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
-                    "admin",
-                    "organizationmanager"
-                ]
-            },
-
-
-                      {
-                "name":"settings.notification_view",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
-                    "admin",
-                    "organizationmanager"
-                ]
-            },
-
-
-
-            
-                        {
-                "name":"notification-templates.create",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
-                    "admin",
-                    "organizationmanager"
-                ]
-            },
-
-
-                        {
-                "name":"notification-templates.store",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
-                    "admin",
-                    "organizationmanager"
-                ]
-            },
-
-
-                        {
-                "name":"notification-templates.show",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
-                    "admin",
-                    "organizationmanager"
-                ]
-            },
-
-                                    {
-                "name":"notification-templates.edit",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
-                    "admin",
-                    "organizationmanager"
-                ]
-            },
-
-
-
-                                    {
-                "name":"notification-templates.update",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
-                    "admin",
-                    "organizationmanager"
-                ]
-            },
-
-
-
-                                    {
-                "name":"notification-templates.destroy",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
-                    "admin",
-                    "organizationmanager"
-                ]
-            },
-
-
-
-                                    {
-                "name":"notification-templates.variables",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
-                    "admin",
-                    "organizationmanager"
-                ]
-            },
-
-
-                                                {
-                "name":"notification-templates.preview",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
-                    "admin",
-                    "organizationmanager"
-                ]
-            },
-
-
-
-
-                                                {
-                "name":"notification-templates.clone",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
-                    "admin",
-                    "organizationmanager"
-                ]
-            },
-
-
-
-
             {
-                "name":"notification-templates.test-send",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+                "name": "activity.log",
+                "description": "Create Activity Log",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "activities.destroy",
+                "description": "Delete Activity Log",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "activities.force-logout",
+                "description": "Force Logout User",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "activities.reset-password",
+                "description": "Reset User Password",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "activities.block-ip",
+                "description": "Block IP Address",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "activities.load-more",
+                "description": "Load More Activities",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
-
-            
         ]
     },
     {
-        "name":"notification triggers",
-        "description":"Notification Triggers",
-        "permissions":[
+        "name": "Notification",
+        "description": "Notification Templates",
+        "permissions": [
             {
-                "name":"notification-triggers.events",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+                "name": "notification-templates.index",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
-
-                        {
-                "name":"notification-triggers.recipient-types",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+            {
+                "name": "settings.notification_update",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
-
-
-
-                        {
-                "name":"notification-triggers.sample-conditions",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
-                    "admin",
-                    "organizationmanager"
+            {
+                "name": "settings.organization.smtp_update",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
-
-
-
-                        {
-                "name":"notification-triggers.toggle-active",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+            {
+                "name": "settings.notification_view",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
-
-
-
-                        {
-                "name":"notification-triggers.clone",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+            {
+                "name": "notification-templates.create",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
-
-
-
-
-                        {
-                "name":"notification-triggers.test",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+            {
+                "name": "notification-templates.store",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
-
-
-                                    {
-                "name":"notification-triggers.show",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+            {
+                "name": "notification-templates.show",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
-
-
-
-
-                                    {
-                "name":"notification-triggers.index",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+            {
+                "name": "notification-templates.edit",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
-
-
-
-
-                                    {
-                "name":"notification-triggers.create",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+            {
+                "name": "notification-templates.update",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
-
-
-
-
-                                    {
-                "name":"notification-triggers.store",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+            {
+                "name": "notification-templates.destroy",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
-
-
-                                                {
-                "name":"notification-triggers.edit",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+            {
+                "name": "notification-templates.variables",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
-
-
-
-                                                {
-                "name":"notification-triggers.update",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+            {
+                "name": "notification-templates.preview",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
-
-
-
-
-                                                {
-                "name":"notification-triggers.destroy",
-                "description":"List Notification Templates",
-                "guard_name":"web",
-                "is_core":0,
-                 "default_for": [
+            {
+                "name": "notification-templates.clone",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "notification-templates.test-send",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "notification triggers",
+        "description": "Notification Triggers",
+        "permissions": [
+            {
+                "name": "notification-triggers.events",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "notification-triggers.recipient-types",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "notification-triggers.sample-conditions",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "notification-triggers.toggle-active",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "notification-triggers.clone",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "notification-triggers.test",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "notification-triggers.show",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "notification-triggers.index",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "notification-triggers.create",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "notification-triggers.store",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "notification-triggers.edit",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "notification-triggers.update",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "notification-triggers.destroy",
+                "description": "List Notification Templates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]
@@ -7496,11 +8280,11 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
-
-                        {
+            {
                 "name": "chat.index",
                 "description": "View Chat Messages",
                 "guard_name": "web",
@@ -7509,11 +8293,11 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
-
-                                    {
+            {
                 "name": "chat.users",
                 "description": "View Chat Messages",
                 "guard_name": "web",
@@ -7522,11 +8306,11 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
-
-                                               {
+            {
                 "name": "chat.conversation",
                 "description": "View Chat Messages",
                 "guard_name": "web",
@@ -7535,11 +8319,11 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
-
-                                               {
+            {
                 "name": "chat.conversation.create",
                 "description": "View Chat Messages",
                 "guard_name": "web",
@@ -7548,11 +8332,11 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
-
-                                                           {
+            {
                 "name": "chat.conversation.messages",
                 "description": "View Chat Messages",
                 "guard_name": "web",
@@ -7561,11 +8345,11 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
-
-                                                                       {
+            {
                 "name": "chat.typing",
                 "description": "Typing indicator",
                 "guard_name": "web",
@@ -7574,13 +8358,10 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
-
-
-            
-            
             {
                 "name": "chat.groups",
                 "description": "View Chat Groups",
@@ -7590,7 +8371,8 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -7602,7 +8384,8 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -7614,7 +8397,8 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -7625,7 +8409,8 @@
                 "default_for": [
                     "admin",
                     "mentor",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -7637,7 +8422,8 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -7648,7 +8434,8 @@
                 "default_for": [
                     "admin",
                     "mentor",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -7660,7 +8447,8 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -7672,7 +8460,8 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -7684,7 +8473,8 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -7696,7 +8486,8 @@
                     "admin",
                     "mentor",
                     "registered",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -7708,136 +8499,355 @@
                     "admin",
                     "mentor",
                     "registered",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Mentorship Dashboard",
+        "description": "View and analyze mentorship program reports and statistics",
+        "permissions": [
+            {
+                "name": "dashboard.summary",
+                "description": "View mentorship summary KPIs",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "dashboard.weekly_trends",
+                "description": "View weekly mentorship trends",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "dashboard.mentor_hours",
+                "description": "View mentor hours contributed",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "dashboard.mentor_performance",
+                "description": "Analyze mentor performance",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "dashboard.startup_engagement",
+                "description": "View startup engagement metrics",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "dashboard.trends_by_program",
+                "description": "View program-based mentorship trends",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "dashboard.peak_activity",
+                "description": "View mentorship peak activity times",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Training Dashboard",
+        "description": "View and analyze training program reports and statistics",
+        "permissions": [
+            {
+                "name": "training.summary",
+                "description": "View training summary KPIs",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "training.session_types",
+                "description": "View training session type counts",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "training.monthly_trends",
+                "description": "View monthly training session trends",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "training.type_breakdown",
+                "description": "View session type distribution breakdown",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "training.hours_trend",
+                "description": "View training hours trend per month",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "training.trainers",
+                "description": "Analyze trainer performance and contribution",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "training.topics",
+                "description": "Analyze training topics and engagement",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "training.recent_sessions",
+                "description": "View list of recent training sessions",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "trainings.sessions_join",
+                "description": " Attendance to Training Session",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "registered",
+                    "mentor"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "slots",
+        "description": "Slots management for mentors",
+        "permissions": [
+            {
+                "name": "slots.index",
+                "description": "View mentor availability slots",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "mentor"
+                ]
+            },
+            {
+                "name": "slots.read",
+                "description": "Get mentor availability slots",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "mentor",
+                    "registered"
+                ]
+            },
+            {
+                "name": "slots.store",
+                "description": "Create new mentor availability slots",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "mentor"
+                ]
+            },
+            {
+                "name": "slots.copy",
+                "description": "Apply new mentor availability slots to multiple days",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "mentor"
+                ]
+            },
+            {
+                "name": "slots.destroy",
+                "description": "Delete mentor availability slots",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "mentor"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Tasks Management",
+        "description": "Tasks management",
+        "permissions": [
+            {
+                "name": "tasks.index",
+                "description": "View tasks list",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "tasks.store",
+                "description": "Create new task",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "tasks.update",
+                "description": "Edit task",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "tasks.destroy",
+                "description": "Delete task",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
                     "organizationmanager"
                 ]
             }
         ]
     },
     {
-       "name": "Mentorship Dashboard",
-       "description": "View and analyze mentorship program reports and statistics",
-       "permissions": [
-     {
-      "name": "dashboard.summary",
-      "description": "View mentorship summary KPIs",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin","organizationmanager"]
-     },
-    {
-      "name": "dashboard.weekly_trends",
-      "description": "View weekly mentorship trends",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin","organizationmanager"]
-    },
-    {
-      "name": "dashboard.mentor_hours",
-      "description": "View mentor hours contributed",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin","organizationmanager"]
-    },
-    {
-      "name": "dashboard.mentor_performance",
-      "description": "Analyze mentor performance",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin", "organizationmanager"]
-    },
-    {
-      "name": "dashboard.startup_engagement",
-      "description": "View startup engagement metrics",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin", "organizationmanager"]
-    },
-    {
-      "name": "dashboard.trends_by_program",
-      "description": "View program-based mentorship trends",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin", "organizationmanager"]
-    },
-    {
-      "name": "dashboard.peak_activity",
-      "description": "View mentorship peak activity times",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin", "organizationmanager"]
+        "name": "Invitations",
+        "description": "Manage invitations sent to mentors",
+        "permissions": [
+            {
+                "name": "invitations.index",
+                "description": "View invitations list",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "invitations.store",
+                "description": "Create new invitation",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "invitations.update",
+                "description": "Edit invitation",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "invitations.destroy",
+                "description": "Delete invitation",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "invitations.upload",
+                "description": " Upload invitation file ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }
+        ]
     }
-    ]
-    },
-    {
-     "name": "Training Dashboard",
-     "description": "View and analyze training program reports and statistics",
-     "permissions": [
-    {
-      "name": "training.summary",
-      "description": "View training summary KPIs",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin", "organizationmanager"]
-    },
-    {
-      "name": "training.session_types",
-      "description": "View training session type counts",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin", "organizationmanager"]
-    },
-    {
-      "name": "training.monthly_trends",
-      "description": "View monthly training session trends",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin", "organizationmanager"]
-    },
-    {
-      "name": "training.type_breakdown",
-      "description": "View session type distribution breakdown",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin", "organizationmanager"]
-    },
-    {
-      "name": "training.hours_trend",
-      "description": "View training hours trend per month",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin", "organizationmanager"]
-    },
-    {
-      "name": "training.trainers",
-      "description": "Analyze trainer performance and contribution",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin", "organizationmanager"]
-    },
-    {
-      "name": "training.topics",
-      "description": "Analyze training topics and engagement",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin", "organizationmanager"]
-    },
-    {
-      "name": "training.recent_sessions",
-      "description": "View list of recent training sessions",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin", "organizationmanager"]
-    },
-    {
-      "name": "trainings.sessions_join",
-      "description": " Attendance to Training Session",
-      "guard_name": "web",
-      "is_core": 0,
-      "default_for": ["admin", "organizationmanager", "registered", "mentor"]
-    }
-   ]
-}
-
-
-
 ]

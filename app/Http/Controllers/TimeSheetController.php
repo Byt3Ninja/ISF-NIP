@@ -28,11 +28,12 @@ class TimeSheetController extends Controller
 		else
 		{
 			$timeSheets= TimeSheet::where('user_id', auth()->user()->id)->get();
-			if( auth()->user()->hasRole('organizationManager') )
+			if( auth()->user()->hasAnyRole(['organizationManager', 'subadmin']) )
 			{
-				$organization = Organization::where('user_id', '=', auth()->user()->id)->first();
-				$cycles = Cycle::where('organization_id', '=', $organization->id)->get();
-				$users =User::where('organization_id','=', $organization->id)->role(['manager', 'coordinator'])->get();
+				$user = auth()->user();
+				$orgIds = $user->organizations_ids;
+				$cycles = Cycle::whereIn('organization_id', $orgIds)->get();
+				$users = User::whereIn('organization_id', $orgIds)->role(['manager', 'coordinator'])->get();
 			}
 			elseif( auth()->user()->hasRole('manager') )
 			{
@@ -162,37 +163,36 @@ class TimeSheetController extends Controller
 		$timeSheets = collect();
 		$organization = collect();
 
-		if( auth()->user()->hasRole('Admin') )
+		$authUser = auth()->user();
+		if( $authUser->hasRole('Admin') )
 		{
 			$users = User::all();
 			$timeSheets = TimeSheet::all();
 			$cycles = Cycle::all();
 			$organization = Organization::all();
 		}
+		elseif( $authUser->hasAnyRole(['organizationManager', 'subadmin']) )
+		{
+			$orgIds = $authUser->organizations_ids;
+			$organization = Organization::whereIn('id', $orgIds)->get();
+			$cycles = Cycle::whereIn('organization_id', $orgIds)->get();
+			$users = User::whereIn('organization_id', $orgIds)->role(['manager', 'coordinator'])->get();
+			$timeSheets = TimeSheet::whereIn('user_id', $users->pluck('id'))->get();
+		}
 		else
 		{
-			$timeSheets = TimeSheet::where('user_id', auth()->user()->id)->get();
-			if( auth()->user()->hasRole('organizationManager') )
+			$timeSheets = TimeSheet::where('user_id', $authUser->id)->get();
+			if( $authUser->hasRole('manager') )
 			{
-				$organization = Organization::where('user_id', auth()->user()->id)->first();
-				if( $organization )
+				$org = Organization::where('user_id', $authUser->id)->first();
+				if( $org )
 				{
-					$cycles = Cycle::where('organization_id', $organization->id)->get();
-					$users = User::where('organization_id', $organization->id)->role(['manager', 'coordinator'])->get();
-					$organization = Organization::where('id', $organization->id)->get();
+					$cycles = Cycle::where('organization_id', $org->id)->get();
+					$users = User::where('organization_id', $org->id)->role('coordinator')->get();
+					$organization = Organization::where('id', $org->id)->get();
 				}
 			}
-			elseif( auth()->user()->hasRole('manager') )
-			{
-				$organization = Organization::where('user_id', auth()->user()->id)->first();
-				if( $organization )
-				{
-					$cycles = Cycle::where('organization_id', $organization->id)->get();
-					$users = User::where('organization_id', $organization->id)->role('coordinator')->get();
-					$organization = Organization::where('id', $organization->id)->get();
-				}
-			}
-			elseif( auth()->user()->hasRole('coordinator') )
+			elseif( $authUser->hasRole('coordinator') )
 			{
 				$users = collect();
 			}
@@ -249,38 +249,37 @@ class TimeSheetController extends Controller
 		$timeSheets = collect();
 		$organization = collect();
 
-		if( auth()->user()->hasRole('Admin') )
+		$authUser = auth()->user();
+		if( $authUser->hasRole('Admin') )
 		{
 			$users = User::all();
 			$timeSheets = TimeSheet::all();
 			$cycles = Cycle::all();
 			$organization = Organization::all();
 		}
+		elseif( $authUser->hasAnyRole(['organizationManager', 'subadmin']) )
+		{
+			$orgIds = $authUser->organizations_ids;
+			$organization = Organization::whereIn('id', $orgIds)->get();
+			$cycles = Cycle::whereIn('organization_id', $orgIds)->get();
+			$users = User::whereIn('organization_id', $orgIds)->role(['manager', 'coordinator'])->get();
+			$timeSheets = TimeSheet::whereIn('user_id', $users->pluck('id'))->get();
+		}
 		else
 		{
-			$timeSheets = TimeSheet::where('user_id', auth()->user()->id)->get();
-			
-			if( auth()->user()->hasRole('organizationManager') )
+			$timeSheets = TimeSheet::where('user_id', $authUser->id)->get();
+
+			if( $authUser->hasRole('manager') )
 			{
-				$organization = Organization::where('user_id', auth()->user()->id)->first();
-				if( $organization )
+				$org = Organization::where('user_id', $authUser->id)->first();
+				if( $org )
 				{
-					$cycles = Cycle::where('organization_id', $organization->id)->get();
-					$users = User::where('organization_id', $organization->id)->role(['manager', 'coordinator'])->get();
-					$organization = Organization::where('id', $organization->id)->get();
+					$cycles = Cycle::where('organization_id', $org->id)->get();
+					$users = User::where('organization_id', $org->id)->role('coordinator')->get();
+					$organization = Organization::where('id', $org->id)->get();
 				}
 			}
-			elseif( auth()->user()->hasRole('manager') )
-			{
-				$organization = Organization::where('user_id', auth()->user()->id)->first();
-				if( $organization )
-				{
-					$cycles = Cycle::where('organization_id', $organization->id)->get();
-					$users = User::where('organization_id', $organization->id)->role('coordinator')->get();
-					$organization = Organization::where('id', $organization->id)->get();
-				}
-			}
-			elseif( auth()->user()->hasRole('coordinator') )
+			elseif( $authUser->hasRole('coordinator') )
 			{
 				$users = collect();
 			}

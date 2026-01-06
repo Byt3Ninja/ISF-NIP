@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Traits\ConfiguresSmtp;
 use App\User;
 use App\ServicesRequests;
 use Illuminate\Bus\Queueable;
@@ -9,11 +10,31 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Throwable;
 
 class ServiceRequestNotification extends Mailable implements ShouldQueue
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, ConfiguresSmtp;
 
+    /**
+     * The number of times the job may be attempted.
+     *
+     * @var int
+     */
+    public $tries = 3;
+
+    /**
+     * The number of seconds to wait before retrying the job.
+     *
+     * @var int
+     */
+    public $backoff = 60;
+
+    /**
+     * Service request instance.
+     *
+     * @var ServicesRequests
+     */
     protected $request;
 
     public function __construct($request)
@@ -40,5 +61,20 @@ class ServiceRequestNotification extends Mailable implements ShouldQueue
                         'requester' => $requester,
                         'request' => $this->request,
                     ]);
+    }
+
+    /**
+     * Handle a job failure.
+     *
+     * @param Throwable $exception
+     * @return void
+     */
+    public function failed(Throwable $exception): void
+    {
+        Log::error('ServiceRequestNotification failed after all retries', [
+            'error' => $exception->getMessage(),
+            'trace' => $exception->getTraceAsString(),
+            'request_id' => $this->request->id ?? null,
+        ]);
     }
 }

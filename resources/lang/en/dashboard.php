@@ -102,7 +102,7 @@ return [
     'User' => 'User',
     'Date' => 'Date',
     'Admin Notes' => 'Admin Notes',
-    'Meeting Link' => 'Meeting Link',
+    'Meeting Link' => 'Meeting Link/Map',
     'Add new' => 'Add new',
     'Choose type' => 'Choose type',
     'Add one day' => 'Add one day',
@@ -183,4 +183,7 @@ return [
     'Completion of all prerequisites is required before you can join the program.' => 'Completion of all prerequisites is required before you can join the program.',
     'Complete Prerequisites & Join' => 'Complete Prerequisites & Join',
     'Complete Prerequisites' => 'Complete Prerequisites',
+    'Type' => 'Type',
+    'Session_Type' => 'Session Type',
+    'Meeting_Link/Map' => 'Meeting Link/Map',
 ];

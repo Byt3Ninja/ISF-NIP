@@ -94,4 +94,35 @@ class PermissionsController extends Controller
         app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
         return back();
     }
+
+    public function stripFromRoles(Request $request)
+    {
+        $user = auth()->user();
+        if( $user->ableToAny(['roles.edit', 'roles.update', 'permissions.edit', 'permissions.update']) )
+        {
+            $permissionId = $request->input('permission', null);
+            $roleId = $request->input('role', null);
+
+            DB::table('role_has_permissions')->where('permission_id', $permissionId)->where('role_id', $roleId)->delete();
+            app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+
+            $getPermissionRoles = DB::table('role_has_permissions AS rhp')
+                ->select([
+                    'rhp.role_id',
+                    'r.name',
+                    'rhp.permission_id'
+                ])
+                ->leftJoin('roles AS r', 'rhp.role_id', '=', 'r.id')
+                ->where('rhp.permission_id', $permissionId)
+            ->get()->map(function($role) {
+                $role->url = route('roles.edit', ['role' => $role->role_id]);
+                return $role;
+            }); 
+            return response()->json([
+                'status' => true,
+                'message' => 'Done',
+                'data' => $getPermissionRoles
+            ]);
+        } else { return abort( 401 ); }
+    }
 }

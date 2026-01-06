@@ -21,10 +21,13 @@ return [
 
     'allowed_origins' => [
         'https://front.growthlabs.app',
+        'https://pma.growthlabs.app',
         'http://localhost:3000',
         'https://localhost:3000',
         'http://localhost:3000',
         'https://localhost:3001',
+        'http://localhost:5173',
+        'http://localhost:4173',
     ],
 
     'allowed_origins_patterns' => [],

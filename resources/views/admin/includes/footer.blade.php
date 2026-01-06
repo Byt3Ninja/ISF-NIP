@@ -1,7 +1,6 @@
 <p class="d-flex justify-content-between align-items-center">
   <span class="float-left d-inline-block" style="direction: ltr">
-    VI portal {{ env('Version') }} -
-    {{-- USAID Funded --}} &copy; {{ date('Y') }}
+    VI portal {{ env('APP_VERSION') ? 'V' . env('APP_VERSION') : '' }} - &copy; {{ date('Y') }}
   </span>
   {{-- <span class="float-right d-sm-inline-block d-none">Developed by <i class="bx bxs-heart pink mx-50 font-small-3"></i><a class="text-uppercase" href="https://masterencode.com" target="_blank">masterencode</a></span> --}}
   <button class="btn btn-primary btn-icon scroll-top" type="button">

@@ -122,7 +122,7 @@ class UserRepository
                         $user->img_url = $img_url;
                     }
 
-                if ($data['role'] == "4" && !auth()?->user()?->hasRole('admin')) {
+                if ($data['role'] == "mentor" && !auth()?->user()?->hasRole('admin')) {
                
                     UsersBio::create([
                         'user_id' => $user->id,
@@ -149,7 +149,7 @@ class UserRepository
                     $user->title_en = $data['title_en'];
 
                 }
-                    $role = Role::find($data['role']);
+                    $role = Role::where('name', $data['role'])->first();
                     DB::table('model_has_roles')->insert([
                         'role_id' => $role->id,
                         'model_type' => User::class,
@@ -311,10 +311,11 @@ class UserRepository
         $users = User::role($role->name)->get();
 
         return [
-                'id'         => $role->id,
-                'name'       => $role->name,
-                'totalUsers' => $users->count(),
-                'avatars'    => $users->map(function ($user) {
+                'id'          => $role->id,
+                'name'        => $role->name,
+                'default_for' => $role->default_for,
+                'totalUsers'  => $users->count(),
+                'avatars'     => $users->map(function ($user) {
                     return $user->img_url 
                         ? Storage::disk('public_uploads')->url($user->img_url) 
                         : null;
@@ -411,8 +412,11 @@ class UserRepository
         $errorMessage = '';
 
         $company = $user->company;
+        $orgIds = $user->organizations_ids;
         if ($company && $company->cycle != null) {
-            $companies = Company::where('organization_id', $user->organization_id)
+            $companies = Company::when(!empty($orgIds), function ($q) use ($orgIds) {
+                    return $q->whereIn('organization_id', $orgIds);
+                })
                 ->where('cycle', $company->cycle)
                 ->when($search, function ($query) use ($search, $name) {
                     $query->where($name, 'like', '%' . $search . '%');
@@ -433,6 +437,7 @@ class UserRepository
     }
     /**
      * Summary of getCompaniesForOrgManager
+     * Supports both single organization (organizationManager) and multiple organizations (Sub-Admin)
      * @param \App\User $user
      * @param array $filters
      * @return array{companies: mixed, errorMessage: string}
@@ -446,7 +451,14 @@ class UserRepository
         $stage = $filters['stage'] ?? null;
         $companies = collect();
 
-        $cycle_ids = Cycle::where('organization_id', $user->organization_id)->pluck('id');
+        // Get organization IDs - supports both single and multiple organizations
+        $orgIds = $user->organizations_ids;
+
+        if (empty($orgIds)) {
+            return ['companies' => $companies, 'errorMessage' => ''];
+        }
+
+        $cycle_ids = Cycle::whereIn('organization_id', $orgIds)->pluck('id');
         $companies = Company::whereIn('cycle', $cycle_ids)
             ->when($search, function ($query) use ($search, $name) {
                 $query->where($name, 'like', '%' . $search . '%');

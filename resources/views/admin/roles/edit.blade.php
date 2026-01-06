@@ -71,28 +71,19 @@ $tabs = $_permissions->groupBy('group')->map(function ($groupPermissions, $group
             <div class="col-12 col-md-6 form-group mb-6">
               <label class="form-label fs-6 mb-1 fw-semibold" for="default_for">{{ __('admin.roleType') }}</label>
               <select name="default_for" id="default_for" class="form-select border-light light-shadow">
-                <option value="admin" {{ $role->default_for == 'admin' ? 'selected' : '' }}>{{ __('admin.roleAdmin') }}
-                </option>
-                <option value="editor" {{ $role->default_for == 'editor' ? 'selected' : '' }}>{{ __('admin.roleEditor')
-                  }}</option>
-                <option value="coordinator" {{ $role->default_for == 'coordinator' ? 'selected' : '' }}>{{
-                  __('admin.roleCoordinator') }}</option>
-                <option value="page" {{ $role->default_for == 'page' ? 'selected' : '' }}>{{ __('admin.rolePageManager')
-                  }}</option>
-                <option value="manager" {{ $role->default_for == 'manager' ? 'selected' : '' }}>{{
-                  __('admin.roleManager') }}</option>
-                <option value="mentor" {{ $role->default_for == 'mentor' ? 'selected' : '' }}>{{ __('admin.roleMentor')
-                  }}</option>
-                <option value="judger" {{ $role->default_for == 'judger' ? 'selected' : '' }}>{{ __('admin.roleJudger')
-                  }}</option>
-                <option value="registered" {{ $role->default_for == 'registered' ? 'selected' : '' }}>{{
-                  __('admin.roleRegistered') }}</option>
-                <option value="pages" {{ $role->default_for == 'pages' ? 'selected' : '' }}>{{
-                  __('admin.rolePagesEditor') }}</option>
-                <option value="organizationmanager" {{ $role->default_for == 'organizationmanager' ? 'selected' : ''
-                  }}>{{ __('admin.roleOrganizationManager') }}</option>
-                <option value="other" {{ $role->default_for == 'other' ? 'selected' : '' }}>{{ __('admin.roleOther') }}
-                </option>
+                <option value="admin" {{ $role->default_for == 'admin' ? 'selected' : '' }}>{{ __('admin.roleAdmin') }} </option>
+                <option value="editor" {{ $role->default_for == 'editor' ? 'selected' : '' }}>{{ __('admin.roleEditor') }}</option>
+                <option value="coordinator" {{ $role->default_for == 'coordinator' ? 'selected' : '' }}>{{ __('admin.roleCoordinator') }}</option>
+                <option value="page" {{ $role->default_for == 'page' ? 'selected' : '' }}>{{ __('admin.rolePageManager') }}</option>
+                <option value="manager" {{ $role->default_for == 'manager' ? 'selected' : '' }}>{{ __('admin.roleManager') }}</option>
+                <option value="mentor" {{ $role->default_for == 'mentor' ? 'selected' : '' }}>{{ __('admin.roleMentor') }}</option>
+                <option value="judger" {{ $role->default_for == 'judger' ? 'selected' : '' }}>{{ __('admin.roleJudger') }}</option>
+                <option value="registered" {{ $role->default_for == 'registered' ? 'selected' : '' }}>{{ __('admin.roleRegistered') }}</option>
+                <option value="pages" {{ $role->default_for == 'pages' ? 'selected' : '' }}>{{ __('admin.rolePagesEditor') }}</option>
+                <option value="organizationmanager" {{ $role->default_for == 'organizationmanager' ? 'selected' : '' }}>{{ __('admin.roleOrganizationManager') }}</option>
+                <option value="subadmin" {{ $role->default_for == 'subadmin' ? 'selected' : '' }}>{{ __('admin.Sub-Admin') }}</option>
+                <option value="serviceProvider" {{ $role->default_for == 'serviceProvider' ? 'selected' : '' }}>{{ __('admin.roleServiceProvider') }}</option>
+                <option value="other" {{ $role->default_for == 'other' ? 'selected' : '' }}>{{ __('admin.roleOther') }}</option>
               </select>
             </div>
           </div>

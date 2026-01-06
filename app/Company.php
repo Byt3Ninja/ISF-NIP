@@ -4,6 +4,7 @@ namespace App;
 
 use App\User;
 use App\Like;
+use App\Step;
 use App\Traits\Auditable;
 use Illuminate\Support\Facades\App;
 use Illuminate\Database\Eloquent\Model;
@@ -307,10 +308,10 @@ class Company extends Model
     {
         return $this->belongsTo(Cycle::class, 'cycle', 'id');
     }
-     public function cycleRelation()
-{
-    return $this->belongsTo(Cycle::class, 'cycle');
-}
+    public function cycleRelation()
+    {
+        return $this->belongsTo(Cycle::class, 'cycle');
+    }
 
     public static function static_categories()
     {
@@ -355,12 +356,54 @@ class Company extends Model
     }
 
     public function teamMembers()
-   {
-     return $this->hasMany(Team_member::class, 'Company_id');
-   }
+    {
+        return $this->hasMany(Team_member::class, 'Company_id');
+    }
 
-   public function milestones()
-   {
-      return $this->hasMany(Milestone::class, 'Company_id');
-   }
+
+    public function employees()
+    {
+        return $this->hasMany(Employee::class, 'company_id');
+    }
+
+    public function milestones()
+    {
+        return $this->hasMany(Milestone::class, 'Company_id');
+    }
+
+    public static function form( $company )
+    {
+        $current_step = $company->stepdata;
+        if( $current_step->stype == 2 )
+        {
+            $programSteps = $company->cycledata->steps;
+            $previousSteps = $programSteps->where('arr', '<', $current_step->arr)->sortBy('arr')->where('stype', 1)->values();
+            $form = $previousSteps->first();
+            // $form = Step::where('cycle_id', $current_step?->cycle_id)->where('arr', $current_step?->arr - 1)->first();
+        }
+        else
+        {
+            $form = Step::where('cycle_id', $current_step?->cycle_id)->where('arr', $current_step?->arr)->first();
+        }
+
+        if( !empty( $form ) )
+        {
+            $formData = $form?->formData;
+            if( !empty( $formData ) ) { $formData = $formData->where('company_id', $company->id)->values(); }
+            $formData = $formData->map(function ($item) {
+                $field = $item->field()->first();
+                $field_type = '';
+                if( isset( $field?->options?->type ) ) { $field_type = $field?->options?->type; }
+                $item->field_type = $field_type;
+                $item->comment = '';
+                return $item;
+            });
+            $form->formData = $formData;
+        }
+        return $form;
+    }
+    public function companyRelations()
+    {
+        return $this->hasMany(CompanyRelation::class, 'company_id', 'id');
+    }
 }

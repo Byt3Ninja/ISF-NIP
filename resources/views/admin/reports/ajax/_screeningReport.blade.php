@@ -11,7 +11,7 @@
             title="{{ __('cycles.Go to judges page') }}"
           @else
             title="{{ __('cycles.Filter by') . ' ' . __('admin.' . $item['label']) }}"
-            data-filter-type="{{ $key == 1 ? 'total' : ($key == 2 ? 'not-evaluated' : ($key == 3 ? 'draft' : 'published')) }}"
+            data-filter-type="{{ $key == 1 ? 'total' : ($key == 2 ? 'not-assigned' : ($key == 3 ? 'not-evaluated' : ( $key == 4 ? 'draft' : 'published' ))) }}"
             onclick="filterByScreeningKPI(this)"
           @endif
         >
@@ -139,6 +139,7 @@
 					<div class="col-lg-2 col-md-4 col-sm-6">
 						<select id="screening-status-filter" class="form-select">
 							<option value="">{{ __('cycles.All Status') }}</option>
+							<option value="not-assigned">{{ __('admin.Not Assigned') }}</option>
 							<option value="published">{{ __('cycles.Published') }}</option>
 							<option value="draft">{{ __('admin.In Progress') }}</option>
 							<option value="not-evaluated">{{ __('cycles.Not Evaluated') }}</option>
@@ -298,7 +299,7 @@
                             class="progress-circle position-absolute w-100 h-100"
                             style="
                               background: conic-gradient(
-                                {{ $averageScore >= 75 ? '#28a745' : ($averageScore >= 50 ? '#17a2b8' : ($averageScore >= 25 ? '#ffc107' : '#dc3545')) }}
+                                {{ $averageScore >= 75 ? 'var(--bs-success)' : ($averageScore >= 50 ? 'var(--bs-info)' : ($averageScore >= 25 ? 'var(--bs-warning)' : 'var(--bs-danger)')) }}
                                   {{ $averageScore * 3.6 }}deg,
                                 #e9ecef {{ $averageScore * 3.6 }}deg
                               );
@@ -306,7 +307,7 @@
                             "
                           ></div>
                           <span class="fw-bold text-dark position-relative" style="font-size: 0.875rem">
-                            {{ $averageScore }} %
+														{{ number_format($averageScore, 1) }} %
                           </span>
                         </div>
                         <div class="small text-muted text-nowrap">{{ __('cycles.Avg Score') }}</div>
@@ -840,7 +841,7 @@
 									<div class="circular-progress-large position-relative d-inline-flex align-items-center justify-content-center" style="width: 90px; height: 90px;">
 										<div class="progress-circle position-absolute w-100 h-100" style="
 											background: conic-gradient(
-												${totalScore >= 75 ? '#28a745' : (totalScore >= 50 ? '#17a2b8' : (totalScore >= 25 ? '#ffc107' : '#dc3545'))}
+												${totalScore >= 75 ? 'var(--bs-primary)' : (totalScore >= 50 ? 'var(--bs-info)' : (totalScore >= 25 ? 'var(--bs-warning)' : 'var(--bs-danger)'))}
 												${totalScore * 3.6}deg,
 												rgba(255,255,255,0.3) ${totalScore * 3.6}deg
 											);
@@ -1086,10 +1087,15 @@
 		// Clear all current filters first
 		clearAllScreeningFilters();
 		
+		console.log(filterType);
 		// Apply the specific filter based on KPI card clicked
 		switch(filterType) {
 			case 'total':
 				// Show all - filters are already cleared
+				break;
+			case 'not-assigned':
+				screeningCurrentFilters.status = 'not-assigned';
+				$('#screening-status-filter').val('not-assigned');
 				break;
 			case 'not-evaluated':
 				screeningCurrentFilters.status = 'not-evaluated';

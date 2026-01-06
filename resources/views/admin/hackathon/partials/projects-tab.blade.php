@@ -202,7 +202,7 @@
             <h5 class="alert alert-danger">
               {{ $l == 'en' ? 'You can not submit projects now' : ' لا يمكنك تقديم المشاريع الان' }},
               {{ $l == 'en' ? 'will be opening on '. $data_evi['start']?->format('F j, Y') : 'سوف يتم فتحها' .
-              $data_evi['start']->format('F j, Y') }}
+              $data_evi['start']?->format('F j, Y') }}
             </h5>
           </div>
           @endif

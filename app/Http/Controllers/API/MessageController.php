@@ -111,8 +111,11 @@ class MessageController extends Controller
         $recipients = User::whereIn('organization_id', $request->userId ?? [])->get();
 
       } else {
-        $recipients = User::where('organization_id', auth()->user()->organization_id)
-        ->get();
+        $user = auth()->user();
+        $orgIds = $user->organizations_ids;
+        $recipients = User::when(!$user->hasRole('admin') && !empty($orgIds), function ($q) use ($orgIds) {
+            return $q->whereIn('organization_id', $orgIds);
+        })->get();
       }
 
       if ($recipients->isEmpty()) {

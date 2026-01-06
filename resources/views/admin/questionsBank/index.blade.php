@@ -6,9 +6,31 @@
 
 <div class="content-wrapper">
 	<div class="container-xxl flex-grow-1 container-p-y">
-			<div class="content-header row my-2">
+			<div class="content-header row">
+				<!-- Navigation Tabs -->
+				<nav class="nav-align-top mb-6">
+					@php
+						$tabs = [
+							['title' => __('admin.Categories'), 'url' => 'dashboard/question-categories', 'icon' => 'category-2'],
+							['title' => __('admin.Questions'), 'url' => 'dashboard/questions-bank', 'icon' => 'question-mark'],
+							['title' => __('admin.weights'), 'url' => 'dashboard/weights', 'icon' => 'weight'],
+						]
+					@endphp
+					<ul class="nav nav-pills">
+						@foreach($tabs as $tab)
+							<li class="nav-item">
+								<a href="/{{ $tab['url'] }}" class="nav-link {{ Request::is($tab['url'] . '*') ? 'active' : '' }}">
+									<i class="ti ti-{{ $tab['icon'] }} me-2"></i>
+									{{ $tab['title'] }}
+								</a>
+							</li>
+						@endforeach
+					</ul>
+				</nav>
+				<!--/ Navigation Tabs -->
+
 				@if( session()->has('success') )
-					<div class="col-md-12">
+					<div class="col-md-12 mb-6">
 						<div role="alert" class="alert alert-success alert-dismissible fade show mb-2">
               {{ __('admin.'. session()->get('success')) }}
 							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -16,7 +38,7 @@
 					</div>
 				@endif
 				@if( session()->has('error') )
-					<div class="col-md-12">
+					<div class="col-md-12 mb-6">
 						<div class="alert alert-danger alert-dismissible mb-2" role="alert">
               {{ __('admin.'.session()->get('error')) }}
 							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -94,83 +116,83 @@
 											</div>
 										</div>
 									</div>
-									<!-- datatable start -->
-									<div class="table-responsive">
-										<table id="organizations-list-datatable" class="table datatables-ajax">
-											<thead>
-											<tr class="table-light">
-												<th>#</th>
-												<th>{{__('admin.question')}}</th>
-												<th class="text-center">{{__('admin.Organization')}}</th>
-												<th class="text-center">{{__('admin.questionGroup')}}</th>
-												<th class="text-center">{{__('admin.question_Type')}}</th>
-												<th class="text-center">{{__('admin.question_difficulty')}}</th>
-												<th class="text-center">{{__('admin.Actions')}}</th>
-											</tr>
-											</thead>
-											<tbody>
-												@foreach( $questions as $question )
-													<tr id="row_{{ $question->id }}" data-group="{{ $question->group }}">
-														<td><a href="{{ URL::to('dashboard/questions-bank/' . $question->id . '/edit') }}">{{ $question->id }}</a></td>
-														<td>{{ $question->question }}</td>
-														<td>
-															@foreach( $question->organizations as $organization )
-																<div>
-																	<a href="{{ URL::to('dashboard/organizations/' . optional($organization)->id . '/edit') }}">
-																		{{ optional($organization)->name }}
-																	</a>
-																</div>
-															@endforeach
-														</td>
-														<td class="text-center">
-															@if( $question->group == 'quiz' )
-																<span class="badge bg-label-primary rounded-pill">{{ __('admin.Quiz') }}</span>
-															@elseif( $question->group == 'survey' )
-																<span class="badge bg-label-info rounded-pill">{{ __('admin.Survey') }}</span>
-															@elseif( $question->group == 'assessment' )
-																<span class="badge bg-label-warning rounded-pill">{{ __('admin.Assessment') }}</span>
-															@else
-																<span class="badge bg-label-secondary rounded-pill">{{ ucfirst($question->group) }}</span>
-															@endif
-														</td>
-														<td class="text-center">
-															@if( $question->group == 'quiz' )
-															<span class="badge bg-label-secondary rounded-pill">
-																{{ $question->type == 'mcq' ? __('admin.type_mcq') : ( $question->type == 'tfq' ? __('admin.type_tfq') : '-') }}
-															</span>
-															@elseif( $question->group == 'survey' )
-															<span class="badge bg-label-success rounded-pill">
-																{{ $question->survey_type == 'stars' ? __('admin.survey_type_stars') : ( $question->survey_type == 'radio' ? __('admin.survey_type_radio') : __('admin.surveyQuestionAndAnswer')) }}
-															</span>
+								</div>
+								<!-- datatable start -->
+								<div class="card-datatable table-responsive">
+									<table id="organizations-list-datatable" class="table datatables-ajax">
+										<thead>
+										<tr class="table-light">
+											<th>#</th>
+											<th>{{__('admin.question')}}</th>
+											<th class="text-center">{{__('admin.Organization')}}</th>
+											<th class="text-center">{{__('admin.questionGroup')}}</th>
+											<th class="text-center">{{__('admin.question_Type')}}</th>
+											<th class="text-center">{{__('admin.question_difficulty')}}</th>
+											<th class="text-center">{{__('admin.Actions')}}</th>
+										</tr>
+										</thead>
+										<tbody>
+											@foreach( $questions as $question )
+												<tr id="row_{{ $question->id }}" data-group="{{ $question->group }}">
+													<td><a href="{{ URL::to('dashboard/questions-bank/' . $question->id . '/edit') }}">{{ $question->id }}</a></td>
+													<td>{{ $question->question }}</td>
+													<td>
+														@foreach( $question->organizations as $organization )
+															<div>
+																<a href="{{ URL::to('dashboard/organizations/' . optional($organization)->id . '/edit') }}">
+																	{{ optional($organization)->name }}
+																</a>
+															</div>
+														@endforeach
+													</td>
+													<td class="text-center">
+														@if( $question->group == 'quiz' )
+															<span class="badge bg-label-primary rounded-pill">{{ __('admin.Quiz') }}</span>
+														@elseif( $question->group == 'survey' )
+															<span class="badge bg-label-info rounded-pill">{{ __('admin.Survey') }}</span>
+														@elseif( $question->group == 'assessment' )
+															<span class="badge bg-label-warning rounded-pill">{{ __('admin.Assessment') }}</span>
+														@else
+															<span class="badge bg-label-secondary rounded-pill">{{ ucfirst($question->group) }}</span>
+														@endif
+													</td>
+													<td class="text-center">
+														@if( $question->group == 'quiz' )
+														<span class="badge bg-label-secondary rounded-pill">
+															{{ $question->type == 'mcq' ? __('admin.type_mcq') : ( $question->type == 'tfq' ? __('admin.type_tfq') : '-') }}
+														</span>
+														@elseif( $question->group == 'survey' )
+														<span class="badge bg-label-success rounded-pill">
+															{{ $question->survey_type == 'stars' ? __('admin.survey_type_stars') : ( $question->survey_type == 'radio' ? __('admin.survey_type_radio') : __('admin.surveyQuestionAndAnswer')) }}
+														</span>
 
-															@elseif( $question->group == 'assessment' )
-															<span class="badge bg-label-success rounded-pill">
-																{{ ( $question->survey_type == null ? __('admin.Assessment') : '-') }}
-															</span>
+														@elseif( $question->group == 'assessment' )
+														<span class="badge bg-label-success rounded-pill">
+															{{ ( $question->survey_type == null ? __('admin.Assessment') : '-') }}
+														</span>
+														@endif
+													</td>
+													<td class="text-center">
+														@if( $question->group == 'quiz' )
+															@if( $question->difficulty == 'easy' )
+															<span class="badge bg-label-success rounded-pill"> {{ __('admin.difficulty_easy') }}</span>
+															@elseif( $question->difficulty == 'medium' )
+															<span class="badge bg-label-warning rounded-pill">{{ __('admin.difficulty_medium') }}</span>
+															@elseif( $question->difficulty == 'hard' )
+															<span class="badge bg-label-danger rounded-pill">{{ __('admin.difficulty_hard') }}</span>
 															@endif
-														</td>
-														<td class="text-center">
-															@if( $question->group == 'quiz' )
-																@if( $question->difficulty == 'easy' )
-																<span class="badge bg-label-success rounded-pill"> {{ __('admin.difficulty_easy') }}</span>
-																@elseif( $question->difficulty == 'medium' )
-																<span class="badge bg-label-warning rounded-pill">{{ __('admin.difficulty_medium') }}</span>
-																@elseif( $question->difficulty == 'hard' )
-																<span class="badge bg-label-danger rounded-pill">{{ __('admin.difficulty_hard') }}</span>
-																@endif
-															@else
-																-
-															@endif
-														</td>
-														<td class="d-flex align-items-center justify-content-center gap-3">
-															<a href="{{ route('questions-bank.edit', ['questions_bank' => $question->id]) }}" class="btn btn-sm btn-label-info btn-icon rounded-pill"> <i class="ti ti-edit"></i></a>
-															<button id='deleteAction' data-id='{{ $question->id }}' data-url="{{ route('questions-bank.destroy', ['questions_bank' => $question->id]) }}" class="btn btn-sm btn-label-danger btn-icon rounded-circle"> <i class="ti ti-trash"></i></button>
-														</td>
-													</tr>
-												@endforeach
-											</tbody>
-										</table>
-									</div>
+														@else
+															-
+														@endif
+													</td>
+													<td class="d-flex align-items-center justify-content-center gap-3">
+														<a href="{{ route('questions-bank.edit', ['questions_bank' => $question->id]) }}" class="btn btn-sm btn-label-info btn-icon rounded-pill"> <i class="ti ti-edit"></i></a>
+														<button id='deleteAction' data-id='{{ $question->id }}' data-url="{{ route('questions-bank.destroy', ['questions_bank' => $question->id]) }}" class="btn btn-sm btn-label-danger btn-icon rounded-circle"> <i class="ti ti-trash"></i></button>
+													</td>
+												</tr>
+											@endforeach
+										</tbody>
+									</table>
 								</div>
 							</div>
 						</div>

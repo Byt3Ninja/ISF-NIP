@@ -73,6 +73,16 @@ class UserPolicy
     {
         return $user->ableTo('users.update');
     }
+    /**
+     * Determine whether the user can update his own password.
+     * @param \App\User $user
+     * @param \App\User $model
+     * @return bool
+     */
+    public function updateMyPassword(User $user, User $model): bool
+    {
+        return $user->ableTo('user.profile_update_my_password');
+    }
 
     /**
      * Determine whether the user can delete the model.

@@ -61,6 +61,12 @@ return [
             'url' => env('APP_URL') . '/pitch_decks',
             'visibility' => 'public',
         ],
+        'programTeams' => [
+            'driver' => 'local',
+            'root'   => storage_path('app/public/programs/teams'),
+            'url' => env('APP_URL') . '/programs/teams',
+            'visibility' => 'public',
+        ],
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
@@ -79,11 +85,24 @@ return [
             'url' => env('APP_URL') . '/images/resource',
             'visibility' => 'public',
         ],
+        'serviceProvider' => [
+            'driver' => 'local',
+            'root' => storage_path('app/uploads/service_provider'),
+            'url' => env('APP_URL') . '/dashboard/uploads/service_provider',
+            'visibility' => 'public',
+        ],
         'UsersDisk' => [
             'driver' => 'local',
             'root' => storage_path('app/uploads'),
             'url' => env('APP_URL') . '/dashboard/uploads',
             'visibility' => 'private',
+        ],
+        'UsersDiskInviteMentor' => [
+            'driver' => 'local',
+            'root' => storage_path('app/uploads/InviteMentor'),
+            'url' => env('APP_URL') . 'dashboard/uploads/InviteMentor',
+            'visibility' => 'private',
+            'throw' => true, 
         ],
         'TrainingDisk' => [
             'driver' => 'local',
@@ -139,6 +158,20 @@ return [
             'driver' => 'local',
             'root'   => public_path('documents'),
             'url' => env('APP_URL') . '/documents',
+            'visibility' => 'public',
+        ],
+
+        'organizations' => [
+            'driver' => 'local',
+            'root' => storage_path('app/organizations'),
+            'url' => env('APP_URL') . '/dashboard/organizations/logo',
+            'visibility' => 'private',
+        ],
+
+        'organization_landing' => [
+            'driver' => 'local',
+            'root' => storage_path('app/organization_landing'),
+            'url' => env('APP_URL') . '/organization-wizard',
             'visibility' => 'public',
         ],
     ],

@@ -175,9 +175,10 @@
 					</div>
 					<div class="bg-white rounded border border-light p-2 p-md-4">
 						<h4 id="task-details-name" class="fw-medium">{{ __('admin.Task_Name') }}</h4>
-						<div class="bg-label-secondary p-2 rounded mb-3">
+						<div class="bg-label-secondary p-2 rounded mb-3" style="max-width: 100%;">
 							<h6 class="fw-semibold mb-1">{{ __('admin.Description') }}</h6>
-							<p id="task-details-contents" class="text-secondary"></p>
+							<p id="task-details-contents" class="text-secondary" style="white-space: normal; word-break: break-word; overflow-wrap: break-word;">
+							</p>
 						</div>
 						<div
 							class="mb-3 w-100 d-flex flex-wrap flex-md-nowrap justify-content-between gap-2 align-items-center pb-2 border-bottom">
@@ -208,6 +209,11 @@
 									<h6 class="fw-semibold mb-0"><i class="ti ti-paperclip text-primary ti-24px me-2"></i>{{ __('admin.Attachments') }}</h6>
 									<h6 class="mb-0"><span class="badge bg-white text-dark" id="attachmentCount">0</span></h6>
 								</div>
+								<input type="file" id="fileInput" style="display: none;" multiple onchange="handleFileUpload(event)" data-task="" />
+								<button type="button" class="btn btn-sm btn-outline-info" style="width: 24px;"
+									onclick="document.getElementById('fileInput').click();">
+									<i class="ti ti-plus ti-16px"></i>
+								</button>
 							</div>
 							<div class="d-flex flex-wrap gap-2" id="fileList"></div>
 						</div>
@@ -770,7 +776,6 @@
 	<script src="/vuexy/assets/js/forms-typeahead.js"></script>
 	<script>
 		let data = @json($data);
-		console.log('startup', data);
 		var kanban;
 		var boards = @json($kanban);
 		var lang = '{{ $l }}';
@@ -927,7 +932,7 @@
 												<i class="ti ti-trash text-danger ti-16px"></i>
 											</div>
 										</div>
-										<div class="text-muted mb-0 text-wrap px-2 text-${lang == 'ar' ? 'right' : 'left'}" style="overflow-wrap: break-word;">
+										<div class="comment-text text-muted mb-0 text-wrap px-2 text-${lang == 'ar' ? 'right' : 'left'}" style="overflow-wrap: break-word;">
 											${comment.comment}
 										</div>
 									</div>
@@ -1165,9 +1170,8 @@
 		// Handle attachments upload
 		function handleFileUpload(event) {
 			const files = event.target.files;
-			
-			// Render files handler
-			renderFilesHandler(files, 'upload');
+			const task_id = $('#fileInput').attr('data-task');
+			validateAndUploadFiles(files, task_id, 'view');
 		}
 		
 		// Handle attachments create
@@ -1203,8 +1207,8 @@
 					`;
 					fileList.appendChild(fileDiv);
 				});
+				attachmentCount.textContent = files.length;
 			} else {
-				console.log('create/edit mode');
 				const fileList = mode === 'create' ? document.getElementById('createFileList') : document.getElementById('editFileList');
 				const attachmentCount = mode === 'create' ? document.getElementById('createAttachmentCount') : document.getElementById('editAttachmentCount');
 				fileList.innerHTML = '';
@@ -1225,14 +1229,8 @@
 						</a>
 					`;
 					fileList.appendChild(fileDiv);
-					if (mode === 'create') {
-						attachmentCount.textContent = files.length;
-					}
 				});
-				// Set attachment count for edit mode as well
-				if (mode === 'edit') {
-					attachmentCount.textContent = files.length;
-				}
+				attachmentCount.textContent = files.length;
 			}
 		}
 
@@ -1536,9 +1534,27 @@
 			e.preventDefault();
 			const commentInput = document.getElementById('commentInput');
 			const commentList = document.getElementById('commentList');
+
+			const allComments = commentList.querySelectorAll('div .comment-text');
+			
 			const commentText = commentInput.value.trim();
-			if( commentText )
-			{
+
+			let alreadyExists = false;
+			
+			if (commentText) {
+				allComments.forEach(comment => {
+					console.log('comment.textContent.trim()', comment.textContent.trim());
+					if (comment.textContent.trim() === commentText.trim()) {
+						alreadyExists = true;
+					}
+				});
+
+				if (alreadyExists) {
+					commentInput.value = '';
+					releaseWarningAlert({ message: "{{ __('mentor.mentorshipTasks.comment_already_exists') }}" });
+					return;
+				}
+
 				let task_id = $(this).attr('data-task');
 				var send_data = {
 					_token: "{{ csrf_token() }}",
@@ -1570,7 +1586,7 @@
 										<i class="ti ti-trash text-danger ti-16px"></i>
 									</div>
 								</div>
-								<div class="text-muted mb-0 text-wrap px-2 text-${lang == 'ar' ? 'right' : 'left'}" style="overflow-wrap: break-word;">
+								<div class="comment-text text-muted mb-0 text-wrap px-2 text-${lang == 'ar' ? 'right' : 'left'}" style="overflow-wrap: break-word;">
 									${commentText}
 								</div>
 							`;

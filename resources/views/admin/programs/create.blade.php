@@ -28,14 +28,14 @@
 
    $labels = [
       'program_info' => $l == 'ar' ? 'معلومات البرنامج' : 'Program Info',
-      'custom_pages' => $l == 'ar' ? 'صفحات مخصصة' : 'Custom Pages',
+      // 'custom_pages' => $l == 'ar' ? 'صفحات مخصصة' : 'Custom Pages',
       'Program_Settings' => $l == 'ar' ? 'إعدادات البرنامج' : 'Program Settings',
     ];
 
   $tabs = [
     ['id' => 'program_info', 'label' => $labels['program_info'], 'active' => true],
     ['id' => 'program_settings', 'label' => $labels['Program_Settings'], 'active' => false],
-    ['id' => 'custom_pages', 'label' => $labels['custom_pages'], 'active' => false],
+    // ['id' => 'custom_pages', 'label' => $labels['custom_pages'], 'active' => false],
   ];
 @endphp
 
@@ -44,7 +44,7 @@
   <div class="container-xxl flex-grow-1 container-p-y">
     <div class="row">
       <h4 class="fw-bold mb-4">
-        {{ __('cycles.create_program') }}
+        {{ __('cycles.program_setup') }}
       </h4>
       @if (session()->has('message'))
         <x-alert type="success" message="{{ __('admin.' . session()->get('message')) }} {{ Session::forget('message') }}" />      @endif
@@ -288,10 +288,10 @@
           return isValid;
         },
         
-        'custom_pages': function() {
+        // 'custom_pages': function() {
           // Custom pages validation - this tab is optional
-          return true;
-        }
+          // return true;
+        // }
       };
 
       // Function to validate current tab
@@ -403,12 +403,18 @@
         
         if (validateCurrentTab(currentTabId)) {
           // Save current progress (you can implement auto-save here if needed)
-          navigateToTab(currentTab + 1, false);
+          if( currentTab == 1 )
+          {
+            submitProgram();
+          }
+          else
+          {
+            navigateToTab(currentTab + 1, false);
+          }
         }
       });
 
-      // Publish button click handler
-      $(document).on('click', '.publish-btn', function() {
+      function submitProgram() {
         const currentTab = parseInt($(this).data('current-tab'));
         
         // Validate all tabs before publishing
@@ -449,6 +455,10 @@
         
         // Submit the form
         $('#hidden-submit-btn').click();
+      }
+      // Publish button click handler
+      $(document).on('click', '.publish-btn', function() {
+        submitProgram();
       });
 
       // Tab click handler - prevent direct navigation to disabled tabs

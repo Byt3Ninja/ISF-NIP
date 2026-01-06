@@ -29,7 +29,8 @@ class DatabaseSeeder extends Seeder
         $this->call(MigrateOrgIdSeeder::class);
         $this->call(SustainableIconSeeder::class);
         $this->call(WeightsTableSeeder::class);
-        $this->call(CycleSeeder::class);
-        $this->call(CompanySeeder::class);
+        // $this->call(CycleSeeder::class);
+        // $this->call(CompanySeeder::class);
+        // $this->call(SlotSeeder::class);
     }
 }

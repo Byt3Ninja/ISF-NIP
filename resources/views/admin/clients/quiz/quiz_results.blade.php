@@ -4,6 +4,27 @@
 <div class="content-wrapper">
 	<div class="container-xxl flex-grow-1 container-p-y">
 
+		<!-- Navigation Tabs -->
+		<nav class="nav-align-top mb-6">
+			@php
+				$tabs = [
+					['title' => __('admin.quizzes'), 'url' => 'dashboard/quizzes', 'icon' => 'clock-bolt'],
+					['title' => __('admin.quizzes_results'), 'url' => 'dashboard/quizResults', 'icon' => 'checklist'],
+				]
+			@endphp
+			<ul class="nav nav-pills">
+				@foreach($tabs as $tab)
+					<li class="nav-item">
+						<a href="/{{ $tab['url'] }}" class="nav-link {{ Request::is($tab['url'] . '*') ? 'active' : '' }}">
+							<i class="ti ti-{{ $tab['icon'] }} me-2"></i>
+							{{ $tab['title'] }}
+						</a>
+					</li>
+				@endforeach
+			</ul>
+		</nav>
+		<!--/ Navigation Tabs -->
+
 		@if(session()->has('msg'))
 		<div class="row">
 			<div class="col-md-12">
@@ -21,7 +42,7 @@
 
 		<div class="card">
 			<div class="card-header d-flex justify-content-between align-items-center border-bottom">
-				<h5 class="card-title mb-3 mb-md-0">{{ __('admin.quizResults') }}</h4>
+				<h5 class="card-title mb-3 mb-md-0">{{ __('admin.quizzes_results') }}</h4>
 				<div class="dropdown">
 					<button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
 						<i class="ti ti-file-export me-2"></i>{{ __('admin.Export') }}
@@ -32,8 +53,8 @@
 					</ul>
 				</div>
 			</div>
-			<div class="card-body">
-				<table class="table table-responsive quizzes-results-table">
+			<div class="card-datatable table-responsive datatable-basic">
+				<table class="table quizzes-results-table">
 					<thead class="table-light">
 						<tr>
 							<th class="text-center" style="width: 5%;"> # </th>
@@ -83,9 +104,9 @@
 							</td>
 							<td class="text-center">
 								@if ($quizzesResult->qr_result_status == 1)
-									<span class="badge bg-label-success rounded-pill">{{ __('admin.Completed') }}</span>
+									<span class="badge bg-label-success">{{ __('admin.Completed') }}</span>
 								@else
-									<span class="badge bg-label-warning rounded-pill">{{ __('admin.Pending') }}</span>
+									<span class="badge bg-label-warning">{{ __('admin.Pending') }}</span>
 								@endif
 							</td>
 							<td>{{ $quizzesResult->qr_result_started_at }}</td>
@@ -93,7 +114,7 @@
 
 							<td class="text-center">
 								<a href="quizResults/{{ $quizzesResult->qr_result_id }}"
-									class="btn btn-label-primary btn-sm rounded-pill shadow-sm">
+									class="btn btn-label-primary btn-sm">
 									<i class="ti ti-eye me-1"></i>
 									{{ __('admin.quizViewResults') }}
 								</a>
@@ -142,7 +163,7 @@
 				var filterContainer = $('<div class="d-flex flex-wrap gap-2 mt-3 mt-md-0 ms-md-3"></div>');
 
 				// Organization Filter
-				var orgSelect = $('<select class="form-select form-select-sm" style="width: auto; max-width: 130px;"><option value="">{{ __("admin.All_Organizations") }}</option></select>');
+				var orgSelect = $('<select class="form-select form-select-sm" style="width: auto; max-width: 120px;"><option value="">{{ __("admin.All_Organizations") }}</option></select>');
 				var organizations = [];
 				table.column(2).data().unique().sort().each(function(d) {
 						if (d && !organizations.includes(d)) {
@@ -153,7 +174,7 @@
 				filterContainer.append(orgSelect);
 
 				// Training Filter
-				var trainingSelect = $('<select class="form-select form-select-sm" style="width: auto; max-width: 130px;"><option value="">{{ __("admin.All_Trainings") }}</option></select>');
+				var trainingSelect = $('<select class="form-select form-select-sm" style="width: auto; max-width: 120px;"><option value="">{{ __("admin.All_Trainings") }}</option></select>');
 				var trainings = [];
 				table.column(3).data().unique().sort().each(function(d) {
 						if (d && !trainings.includes(d)) {
@@ -164,7 +185,7 @@
 				filterContainer.append(trainingSelect);
 
 				// Startup/Company Filter
-				var companySelect = $('<select class="form-select form-select-sm" style="width: auto; max-width: 130px;"><option value="">{{ __("cycles.All Startups") }}</option></select>');
+				var companySelect = $('<select class="form-select form-select-sm" style="width: auto; max-width: 120px;"><option value="">{{ __("cycles.All Startups") }}</option></select>');
 				var companies = [];
 				table.column(4).data().unique().sort().each(function(d) {
 						var $cell = $(d);
@@ -177,7 +198,7 @@
 				filterContainer.append(companySelect);
 
 				// User Filter
-				var userSelect = $('<select class="form-select form-select-sm" style="width: auto; max-width: 130px;"><option value="">{{ __("admin.List All") }}</option></select>');
+				var userSelect = $('<select class="form-select form-select-sm" style="width: auto; max-width: 120px;"><option value="">{{ __("admin.List All") }}</option></select>');
 				var users = [];
 				table.column(5).data().unique().sort().each(function(d) {
 						var $cell = $(d);
@@ -190,7 +211,7 @@
 				filterContainer.append(userSelect);
 
 				// Status Filter
-				var statusSelect = $('<select class="form-select form-select-sm" style="width: auto; max-width: 130px;"><option value="">{{ __("admin.All_statuses") }}</option><option value="{{ __("admin.Completed") }}">{{ __("admin.Completed") }}</option><option value="{{ __("admin.Pending") }}">{{ __("admin.Pending") }}</option></select>');
+				var statusSelect = $('<select class="form-select form-select-sm" style="width: auto; max-width: 120px;"><option value="">{{ __("admin.All_statuses") }}</option><option value="{{ __("admin.Completed") }}">{{ __("admin.Completed") }}</option><option value="{{ __("admin.Pending") }}">{{ __("admin.Pending") }}</option></select>');
 				filterContainer.append(statusSelect);
 
 				// Append filter container after length selector

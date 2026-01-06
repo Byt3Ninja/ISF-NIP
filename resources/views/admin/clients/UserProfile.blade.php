@@ -6,6 +6,34 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/page-profile.css" />
 @stop
 
+@php
+$user = auth()->user();
+$company = $user->company;
+
+$canRequestMentorship =
+  $company &&
+  $company->cycle !== 0 &&
+  (
+    $user->hasRole('Registered') ||
+    (!$user->hasRole('Mentor') && !$user->hasRole('Admin'))
+  );
+  
+if ($canRequestMentorship) {
+  $cycle = auth()->user()->company->cycledata;
+}
+
+ $schedules = App\Schedule::where('user_id', $client->id ?? auth()->id())
+  ->where(function ($query) {$query
+      ->whereNull('date')
+      ->orWhere('date', '>', date('Y-m-d'))
+      ->orWhere(function ($q) {
+        $q->where('date', date('Y-m-d'))
+        ->where('tto', '>', date('H:i:s'));
+      });
+  })
+  ->get();
+@endphp
+
 @section('content')
   <div class="content-wrapper">
     {{-- Alert Messages --}}
@@ -38,17 +66,22 @@
         <div class="col-12">
           <article class="card mb-6">
             <header class="user-profile-header-banner">
-              <img src="/vuexy/assets/img/pages/profile-banner.png" 
-                   alt="Banner image" 
-                   class="rounded-top" />
+              <img 
+                src="/vuexy/assets/img/pages/profile-banner.png" 
+                alt="Banner image" 
+                class="rounded-top" 
+              />
             </header>
 
             <div class="user-profile-header d-flex flex-column flex-lg-row text-sm-start text-center mb-5">
               <figure class="flex-shrink-0 mt-n2 mx-sm-0 mx-auto">
-                <img src="{{ $client->image_url }}" 
-                     alt="{{ $client->first_name_en }} {{ $client->last_name_en }}"
-                     class="d-block ms-0 ms-sm-6 rounded user-profile-img" 
-                     style="height: 130px" />
+                <img 
+                  src="{{ $client->image_url ?: '/images/user-placeholder.jpeg' }}"
+                  alt="{{ $client->first_name_en }} {{ $client->last_name_en }}"
+                  class="d-block ms-0 ms-sm-6 rounded user-profile-img object-fit-cover" 
+                  style="height: 130px" 
+                  onerror="this.onerror=null; this.src='/images/user-placeholder.jpeg';" 
+                />
               </figure>
 
               <div class="flex-grow-1 mt-3 mt-lg-5">
@@ -102,15 +135,19 @@
                       <i class="ti ti-user-check ti-xs me-2"></i>{{ __('admin.Follow') }}
                     </a>
 
-                    @if(!empty($order))
-                      <button 
-                        onclick="request({{ $order->user_id }}, '{{ optional($order->user)->{'first_name_' . $l} }} {{ optional($order->user)->{'last_name_' . $l} }}', {{ $order->cycle->organization_id }}, {{ $order->cycle_id }})" 
-                        title="Add new request" 
+                    @if($schedules->isNotEmpty())
+                      <button
                         type="button" 
-                        class="btn btn-primary"
+                        class="btn btn-primary" 
+                        onclick="if (typeof fetchSlots === 'function') { fetchSlots({{ $client->id }}, {{ $cycle->id }}, {{ $cycle->organization_id }}); }"
                       >
                       <i class="ti ti-calendar-plus me-2"></i>
                         {{ __('cycles.Request_Mentorship') }}
+                      </button>
+                    @else
+                      <button type="button" class="btn btn-primary" disabled>
+                        <i class="ti ti-calendar-plus me-2"></i>
+                        {{ __('cycles.Not_Available_Request_Mentorship') }}
                       </button>
                     @endif
                   </div>
@@ -177,52 +214,54 @@
 
             {{-- Statistics Cards --}}
             @hasanyrole('Admin|organizationManager')
-              <div class="col-lg-3 col-sm-6">
-                <article class="card card-border-shadow-primary h-100">
-                  <div class="card-body">
-                    <div class="d-flex justify-content-center align-items-center mb-2">
-                      <div class="avatar me-4">
-                        <span class="avatar-initial rounded bg-label-primary">
-                          <i class="ti-brand-my-oppo text-primary ti-28px"></i>
-                        </span>
+              <div class="row mb-6">
+                <div class="col-6 col-md-4">
+                  <article class="card card-border-shadow-primary h-100">
+                    <div class="card-body">
+                      <div class="d-flex justify-content-center align-items-center mb-2">
+                        <div class="avatar me-4">
+                          <span class="avatar-initial rounded bg-label-primary">
+                            <i class="ti-brand-my-oppo text-primary ti-28px"></i>
+                          </span>
+                        </div>
+                        <p class="mb-0 text-center h4">{{ $mentrequests_count }}</p>
                       </div>
-                      <p class="mb-0 text-center h4">{{ $mentrequests_count }}</p>
+                      <p class="mb-1 text-center">{{ __('admin.Mentorship requests') }}</p>
                     </div>
-                    <p class="mb-1 text-center">{{ __('admin.Mentorship requests') }}</p>
-                  </div>
-                </article>
-              </div>
-
-              <div class="col-lg-3 col-sm-6">
-                <article class="card card-border-shadow-primary h-100">
-                  <div class="card-body">
-                    <div class="d-flex justify-content-center align-items-center mb-2">
-                      <div class="avatar me-4">
-                        <span class="avatar-initial rounded bg-label-primary">
-                          <i class="ti-calendar-event text-primary ti-28px"></i>
-                        </span>
+                  </article>
+                </div>
+  
+                <div class="col-6 col-md-4">
+                  <article class="card card-border-shadow-primary h-100">
+                    <div class="card-body">
+                      <div class="d-flex justify-content-center align-items-center mb-2">
+                        <div class="avatar me-4">
+                          <span class="avatar-initial rounded bg-label-primary">
+                            <i class="ti-calendar-event text-primary ti-28px"></i>
+                          </span>
+                        </div>
+                        <p class="mb-0 text-center h4">{{ $mentrequests_period }}</p>
                       </div>
-                      <p class="mb-0 text-center h4">{{ $mentrequests_period }}</p>
+                      <p class="mb-1 text-center">{{ __('admin.Mentorship requests Duration') }}</p>
                     </div>
-                    <p class="mb-1 text-center">{{ __('admin.Mentorship requests Duration') }}</p>
-                  </div>
-                </article>
-              </div>
-
-              <div class="col-lg-3 col-sm-6">
-                <article class="card card-border-shadow-primary h-100">
-                  <div class="card-body">
-                    <div class="d-flex justify-content-center align-items-center mb-2">
-                      <div class="avatar me-4">
-                        <span class="avatar-initial rounded bg-label-primary">
-                          <i class="ti-calendar-event text-primary ti-28px"></i>
-                        </span>
+                  </article>
+                </div>
+  
+                <div class="col-6 col-md-4">
+                  <article class="card card-border-shadow-primary h-100">
+                    <div class="card-body">
+                      <div class="d-flex justify-content-center align-items-center mb-2">
+                        <div class="avatar me-4">
+                          <span class="avatar-initial rounded bg-label-primary">
+                            <i class="ti-calendar-event text-primary ti-28px"></i>
+                          </span>
+                        </div>
+                        <p class="mb-0 text-center h4">{{ number_format($average_rating ?? 0, 1) }}</p>
                       </div>
-                      <p class="mb-0 text-center h4">{{ number_format($average_rating ?? 0, 1) }}</p>
+                      <p class="mb-1 text-center">{{ __('admin.Mentorship Avr Rating') }}</p>
                     </div>
-                    <p class="mb-1 text-center">{{ __('admin.Mentorship Avr Rating') }}</p>
-                  </div>
-                </article>
+                  </article>
+                </div>
               </div>
             @endhasanyrole
           </section>
@@ -395,7 +434,7 @@
                           <tr>
                             <td>{{ $n + 1 }}</td>
                             <td>{{ $mentor->cycle->title ?? '' }}</td>
-                            <td>{{ $mentor->cycle->description ?? '' }}</td>
+                            <td>{{ strip_tags($mentor->cycle->description) }}</td>
                             <td>{{ $mentor->cycle->start ?? '' }}</td>
                             <td>{{ $mentor->cycle->end ?? '' }}</td>
                           </tr>
@@ -411,9 +450,20 @@
       </div>
     </div>
   </div>
-  
+
+  @if(!empty($order))
+    @include(
+      'partials.book-session-modal',
+      [
+        'mentor_id' => $client->id,
+        'user_id' => $order->user_id,
+        'cycle_id' => $order->cycle_id,
+        'organization_id' => $order->cycle->organization_id,
+      ]
+    )
+  @endif
   {{-- Session Request Modal --}}
- @include('admin.clients.startup.partials._session_modal')
+ {{-- @include('admin.clients.startup.partials._session_modal') --}}
 @stop
 
 @section('pagescripts')

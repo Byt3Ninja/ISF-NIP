@@ -158,7 +158,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                       @elseif($projectStatus == 80)
                         <span class="badge bg-label-success">{{ __('admin.Ready for Pitch') }}</span>
                       @elseif($projectStatus == 100)
-                        <span class="badge bg-label-dark">{{ __('admin.Submitted') }}</span>
+                        <span class="badge bg-label-dark">{{ __('admin.Project Submitted') }}</span>
                       @else
                         <span class="badge bg-label-secondary">{{ $l == 'en' ? 'Not Set' : 'غير محدد' }}</span>
                       @endif
@@ -438,7 +438,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                   @endif
                   
                   @if($leaderOrnot->count() > 0)
-                    @if (app()->environment('local', 'dev', 'test'))
+                    {{-- @if (app()->environment('local', 'dev', 'test'))
                       <form method="POST" action="/dashboard/hackathon/deleteTeamInfo" id="deleteTeamForm">
                         <div class="modal-body">
                           @csrf
@@ -446,7 +446,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                           </div>
                           <button type="submit" class="btn btn-sm btn-danger"><i class="ti ti-trash me-1"></i>{{ $l == 'en' ? 'Delete Team' : 'حذف الفريق' }}</button>
                       </form>
-                    @endif
+                    @endif --}}
                     <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editTeamInfoModal">
                       <i class="ti ti-edit me-1"></i>
                       {{ $l == 'en' ? 'Edit Team Info' : 'تعديل معلومات الفريق' }}

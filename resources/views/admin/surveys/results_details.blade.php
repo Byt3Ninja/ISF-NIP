@@ -167,7 +167,7 @@
 </div>
 @stop
 @section('pagescripts')
-	<script src="https://cdn.ckeditor.com/4.13.1/standard/ckeditor.js"></script>
+	<script src="https://cdn.ckeditor.com/4.22.1/full/ckeditor.js"></script>
 	<script src="https://code.jquery.com/ui/1.14.0/jquery-ui.min.js" integrity="sha256-Fb0zP4jE3JHqu+IBB9YktLcSjI1Zc6J2b6gTjB0LpoM=" crossorigin="anonymous"></script>
 	<script type="text/javascript">
 	</script>

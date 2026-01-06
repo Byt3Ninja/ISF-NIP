@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use App\CyclesMentors;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 
 if (! function_exists('in_array_2d')) {
@@ -53,6 +54,7 @@ if (!function_exists('getPusherConfig')) {
         return DB::table('settings')->select('PUSHER_APP_KEY', 'PUSHER_APP_CLUSTER')->first();
     }
 }
+
 if (!function_exists('FormatDate')) {
     function FormatDate($stamp, $format)
     {
@@ -219,5 +221,165 @@ if( !function_exists('date_ranges') )
 if (! function_exists('route_exists')) {
     function route_exists(string $name): bool {
         return \Illuminate\Support\Facades\Route::has($name);
+    }
+}
+
+if( !function_exists('URLSlug') )
+{
+	function URLSlug( $url )
+	{
+		return str_replace(' ', '-', $url);
+	}
+}
+
+if( !function_exists('uploader') )
+{
+	function uploader( $disk, $file, $target, $get_path = false )
+	{
+        $original_name = $file->getClientOriginalName();
+        $file_extension = $file->getClientOriginalExtension();
+		$location = trim( $target ) ? $target . '/' .  $original_name : $original_name;
+        $check_file = Storage::disk($disk)->missing( $location );
+		if( !$check_file )
+		{
+			$counter = 1;
+			do {
+				$file_name = str_replace( '.' . $file_extension, '', $original_name ) . '-' . $counter++ . '.' . $file_extension;
+				$file_location = trim( $target ) ? $target . '/' .  $file_name : $file_name;
+				$check_file = Storage::disk($disk)->missing( $file_location );
+			} while ( !$check_file );
+		} else { $file_name = $original_name; }
+		$raw_name = str_replace( '.' . $file_extension, '', $file_name );
+		$file_name = URLSlug( $file_name );
+		$file_name = strtolower( $file_name );
+		$path = Storage::disk($disk)->putFileAs($target, $file, $file_name);
+		if( $get_path === true )
+		{
+			$url = str_replace( '/index.php', '', URL::to("provider-registration/files/$path") );
+			$url = strtolower( $url );
+			return ['url' => $url, 'raw' => $raw_name, 'file' => $file_name ];
+		}
+		return $file_name;
+	}
+}
+
+/**
+ * Get section background CSS value for landing pages.
+ *
+ * @param object $landingPage The landing page model
+ * @param string $section The section name (e.g., 'hero', 'how_it_works')
+ * @param string $defaultColor1 Default color if no custom color is set
+ * @param string $defaultColor2 Unused, kept for backward compatibility
+ * @return string CSS background value (color or gradient)
+ */
+if (!function_exists('getSectionBackground')) {
+    function getSectionBackground($landingPage, $section, $defaultColor1, $defaultColor2 = null)
+    {
+        $bgType = $landingPage->{$section . '_bg_type'} ?? 'solid';
+        $bgColor = $landingPage->{$section . '_bg_color'};
+        $gradientStart = $landingPage->{$section . '_bg_gradient_start'};
+        $gradientEnd = $landingPage->{$section . '_bg_gradient_end'};
+
+        if ($bgType === 'gradient' && $gradientStart && $gradientEnd) {
+            return "linear-gradient(135deg, {$gradientStart} 0%, {$gradientEnd} 100%)";
+        } elseif ($bgColor) {
+            return $bgColor;
+        } else {
+            return $defaultColor1;
+        }
+    }
+}
+
+/**
+ * Get appropriate icon class for an industry based on its name.
+ *
+ * @param string $industryName The industry name to match
+ * @return string Tabler icon class
+ */
+if (!function_exists('getIndustryIcon')) {
+    function getIndustryIcon($industryName)
+    {
+        $industryIcons = [
+            'ai' => 'ti-brain',
+            'ml' => 'ti-robot',
+            'artificial intelligence' => 'ti-brain',
+            'machine learning' => 'ti-robot',
+            'website' => 'ti-world',
+            'fintech' => 'ti-coin',
+            'financial' => 'ti-coin',
+            'finance' => 'ti-coin',
+            'banking' => 'ti-building-bank',
+            'health' => 'ti-heart-rate-monitor',
+            'fitness' => 'ti-heart-rate-monitor',
+            'healthtech' => 'ti-heart-rate-monitor',
+            'healthcare' => 'ti-heart-rate-monitor',
+            'medical' => 'ti-heart-rate-monitor',
+            'ecommerce' => 'ti-shopping-cart',
+            'e-commerce' => 'ti-shopping-cart',
+            'retail' => 'ti-shopping-cart',
+            'clean' => 'ti-leaf',
+            'cleantech' => 'ti-leaf',
+            'green' => 'ti-leaf',
+            'sustainability' => 'ti-leaf',
+            'environment' => 'ti-leaf',
+            'edtech' => 'ti-school',
+            'education' => 'ti-school',
+            'learning' => 'ti-school',
+            'beauty' => 'ti-palette',
+            'music' => 'ti-music',
+            'pets' => 'ti-paw',
+            'holiday' => 'ti-beach',
+            'clothing' => 'ti-shirt',
+            'fashion' => 'ti-shirt',
+            'children' => 'ti-device-gamepad-2',
+            'games' => 'ti-device-gamepad-2',
+            'toys' => 'ti-device-gamepad-2',
+            'biotech' => 'ti-dna',
+            'biotechnology' => 'ti-dna',
+            'foodtech' => 'ti-tools-kitchen-2',
+            'food' => 'ti-tools-kitchen-2',
+            'beverage' => 'ti-tools-kitchen-2',
+            'technology' => 'ti-laptop',
+            'sports' => 'ti-basketball',
+            'agtech' => 'ti-plant',
+            'agriculture' => 'ti-plant',
+            'proptech' => 'ti-home',
+            'housewares home design' => 'ti-home',
+            'real estate' => 'ti-home',
+            'property' => 'ti-home',
+            'logistics' => 'ti-truck',
+            'transport' => 'ti-truck',
+            'mobility' => 'ti-car',
+            'saas' => 'ti-cloud',
+            'cloud' => 'ti-cloud',
+            'software' => 'ti-code',
+            'cyber' => 'ti-shield-lock',
+            'security' => 'ti-shield-lock',
+            'iot' => 'ti-cpu',
+            'hardware' => 'ti-cpu',
+            'blockchain' => 'ti-link',
+            'crypto' => 'ti-currency-bitcoin',
+            'gaming' => 'ti-device-gamepad-2',
+            'media' => 'ti-movie',
+            'entertainment' => 'ti-movie',
+            'travel' => 'ti-plane',
+            'tourism' => 'ti-plane',
+            'hr' => 'ti-users',
+            'human resources' => 'ti-users',
+            'recruitment' => 'ti-users',
+            'legal' => 'ti-gavel',
+            'legaltech' => 'ti-gavel',
+            'insurance' => 'ti-umbrella',
+            'insurtech' => 'ti-umbrella',
+        ];
+
+        $name = strtolower($industryName);
+        foreach ($industryIcons as $keyword => $icon) {
+            if (strpos($name, $keyword) !== false) {
+                return $icon;
+            }
+        }
+
+        return 'ti-tag'; // Default icon
     }
 }

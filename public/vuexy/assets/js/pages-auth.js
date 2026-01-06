@@ -4,25 +4,24 @@
 
 'use strict';
 
-// const lang = document.documentElement.lang;
-
 const translations = {
   en: {
     username: {
       notEmpty: 'Please enter username',
       stringLength: 'Username must be more than 6 characters'
     },
-    first_name_en: {
+    first_name: {
       notEmpty: 'Please enter first name',
       stringOnly: 'This field letters letters only.'
     },
-    last_name_en: {
+    last_name: {
       notEmpty: 'Please enter last name',
       stringOnly: 'This field letters letters only.'
     },
     phone: {
-      notEmpty: 'Please enter your phone',
-      phone: 'Phone should be consist of numbers only'
+      notEmpty: 'Please enter your phone number',
+      phone: 'Phone number should contain numbers only',
+      invalid: 'Invalid phone number'
     },
     email: {
       notEmpty: 'Please enter your email',
@@ -69,17 +68,18 @@ const translations = {
       notEmpty: 'يرجى إدخال اسم المستخدم',
       stringLength: 'يجب أن يكون اسم المستخدم أكثر من 6 أحرف'
     },
-    first_name_en: {
+    first_name: {
       notEmpty: 'يرجى إدخال الاسم الأول',
       stringOnly: 'هذا الحقل يقبل الحروف فقط'
     },
-    last_name_en: {
+    last_name: {
       notEmpty: 'يرجى إدخال الاسم الأخير',
       stringOnly: 'هذا الحقل يقبل الحروف فقط'
     },
     phone: {
       notEmpty: 'يرجى إدخال رقم الهاتف',
       phone: 'يجب أن يتكون الهاتف من أرقام فقط',
+      invalid: 'رقم هاتف غير صحيح'
     },
     email: {
       notEmpty: 'يرجى إدخال بريدك الإلكتروني',
@@ -123,6 +123,9 @@ const translations = {
   }
 };
 
+const lang = document.documentElement.lang || 'en';
+let iti; // Declare iti in a scope accessible by custom validator
+
 function getValidationConfig(lang, isMentor) {
   const config = {
     fields: {
@@ -137,26 +140,18 @@ function getValidationConfig(lang, isMentor) {
           }
         }
       },
-      first_name_en: {
+      first_name: {
         validators: {
           notEmpty: {
-            message: translations[lang].first_name_en.notEmpty
-          },
-          // regexp: {
-          //   regexp: /^[a-zA-Z\u0621-\u064A]*$/i,
-          //   message: translations[lang].first_name_en.stringOnly
-          // }
+            message: translations[lang].first_name.notEmpty
+          }
         }
       },
-      last_name_en: {
+      last_name: {
         validators: {
           notEmpty: {
-            message: translations[lang].last_name_en.notEmpty
-          },
-          // regexp: {
-          //   regexp: /^[a-zA-Z\u0621-\u064A]*$/i,
-          //   message: translations[lang].last_name_en.stringOnly
-          // }
+            message: translations[lang].last_name.notEmpty
+          }
         }
       },
       phone: {
@@ -164,10 +159,117 @@ function getValidationConfig(lang, isMentor) {
           notEmpty: {
             message: translations[lang].phone.notEmpty
           },
-          // regexp: {
-          //   regexp: /^[0-9]+$/,
-          //   message: translations[lang].phone.phone
-          // }
+          callback: {
+            message: translations[lang].phone.invalid,
+            callback: function(input) {
+              const value = input.value.trim();
+              
+              // Skip validation if empty (handled by notEmpty validator)
+              if (value === '') {
+                return { valid: true };
+              }
+              
+              // Check if contains only numbers and allowed phone characters
+              const numericRegex = /^[\d\s\+\-\(\)]+$/;
+              if (!numericRegex.test(value)) {
+                return {
+                  valid: false,
+                  message: translations[lang].phone.phone
+                };
+              }
+              
+              // Get selected country
+              let selectedCountry = '';
+              if (iti && typeof iti.getSelectedCountryData === 'function') {
+                const countryData = iti.getSelectedCountryData();
+                selectedCountry = countryData.iso2 || '';
+              }
+              
+              // For Egypt, allow numbers starting with 0
+              if (selectedCountry.toLowerCase() === 'eg') {
+                // Egyptian phone number validation
+                // Format: 0XXXXXXXXX (11 digits) or XXXXXXXXXX (10 digits)
+                const cleanNumber = value.replace(/[\s\-\(\)]/g, '');
+                
+                // Check if it's a valid Egyptian number
+                if (cleanNumber.startsWith('0')) {
+                  // Should be 11 digits total
+                  if (cleanNumber.length === 11 && /^0(10|11|12|15|2)\d{8}$/.test(cleanNumber)) {
+                    return { valid: true };
+                  } else {
+                    return {
+                      valid: false,
+                      message: translations[lang].phone.invalid
+                    };
+                  }
+                } else if (cleanNumber.length === 10 && /^(10|11|12|15|2)\d{8}$/.test(cleanNumber)) {
+                  // 10 digits without leading 0
+                  return { valid: true };
+                } else {
+                  return {
+                    valid: false,
+                    message: translations[lang].phone.invalid
+                  };
+                }
+              }
+              
+              // Validate using intl-tel-input for other countries
+              if (iti && typeof iti.isValidNumber === 'function') {
+                const isValid = iti.isValidNumber();
+                
+                if (!isValid) {
+                  // Get the validation error
+                  if (typeof iti.getValidationError === 'function') {
+                    const error = iti.getValidationError();
+                    let message = translations[lang].phone.invalid;
+                    
+                    // Check if intlTelInputUtils is available
+                    if (window.intlTelInputUtils && window.intlTelInputUtils.validationError) {
+                      switch (error) {
+                        case window.intlTelInputUtils.validationError.INVALID_COUNTRY_CODE:
+                          message = translations[lang].phone.invalid;
+                          break;
+                        case window.intlTelInputUtils.validationError.TOO_SHORT:
+                          message = translations[lang].phone.invalid;
+                          break;
+                        case window.intlTelInputUtils.validationError.TOO_LONG:
+                          message = translations[lang].phone.invalid;
+                          break;
+                        case window.intlTelInputUtils.validationError.NOT_A_NUMBER:
+                          message = translations[lang].phone.phone;
+                          break;
+                        default:
+                          message = translations[lang].phone.invalid;
+                      }
+                    }
+                    
+                    return {
+                      valid: false,
+                      message: message
+                    };
+                  }
+                  
+                  return {
+                    valid: false,
+                    message: translations[lang].phone.invalid
+                  };
+                }
+                
+                return { valid: true };
+              }
+              
+              // If iti is not available, do basic validation
+              const phoneRegex = /^\+?[\d\s\-\(\)]{8,}$/;
+              if (!phoneRegex.test(value)) {
+                return {
+                  valid: false,
+                  message: translations[lang].phone.invalid
+                };
+              }
+              
+              return { valid: true };
+            }
+          }
         }
       },
       email: {
@@ -216,7 +318,7 @@ function getValidationConfig(lang, isMentor) {
           regexp: {
             regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).{8,}$/,
             message: translations[lang].password_confirmation.strong
-          },
+          }
         }
       },
       terms: {
@@ -225,7 +327,7 @@ function getValidationConfig(lang, isMentor) {
             message: translations[lang].terms.notEmpty
           }
         }
-      },
+      }
     },
     plugins: {
       trigger: new FormValidation.plugins.Trigger(),
@@ -265,7 +367,7 @@ function getValidationConfig(lang, isMentor) {
         }
       }
     };
-    config.fields.userbio = {
+    config.fields.bio_en = {
       validators: {
         notEmpty: {
           message: translations[lang].bio.notEmpty
@@ -294,6 +396,44 @@ document.addEventListener('DOMContentLoaded', function (e) {
     const mentorInputsWrapper = document.getElementById('mentorInputsWrapper');
     const mentorRoleRadio = document.getElementById('MentorRole');
     const founderRoleRadio = document.getElementById('FounderRole');
+    const phoneInput = document.getElementById("phone");
+    const countryCodeInput = document.querySelector("#phone_code");
+    
+    // Initialize the phone input
+    if (phoneInput) {
+      iti = intlTelInput(phoneInput, {
+        initialCountry: 'eg',
+        preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
+        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+        formatOnDisplay: false,
+        separateDialCode: true,
+        autoPlaceholder: "aggressive",
+        customPlaceholder: function(selectedCountryPlaceholder) {
+          return "e.g. " + selectedCountryPlaceholder;
+        }
+      });
+
+      // Set initial country code
+      if (countryCodeInput) {
+        const initialCountryData = iti.getSelectedCountryData();
+        if (initialCountryData && initialCountryData.dialCode) {
+          countryCodeInput.value = initialCountryData.dialCode;
+        }
+      }
+
+      // Update country code when country changes
+      phoneInput.addEventListener('countrychange', function() {
+        const countryData = iti.getSelectedCountryData();
+        if (countryCodeInput && countryData && countryData.dialCode) {
+          countryCodeInput.value = countryData.dialCode;
+        }
+        
+        // Revalidate phone field when country changes
+        if (validationInstance) {
+          validationInstance.revalidateField('phone');
+        }
+      });
+    }
 
     let validationInstance;
     let validationConfig = getValidationConfig(lang, false);
@@ -302,22 +442,43 @@ document.addEventListener('DOMContentLoaded', function (e) {
       if (validationInstance) {
         validationInstance.destroy();
       }
+      
       validationInstance = FormValidation.formValidation(registerForm, config);
+
+      // Add event listeners for phone input
+      if (phoneInput) {
+        phoneInput.addEventListener('input', function() {
+          if (validationInstance) {
+            validationInstance.revalidateField('phone');
+          }
+        });
+        
+        phoneInput.addEventListener('blur', function() {
+          if (validationInstance) {
+            validationInstance.revalidateField('phone');
+          }
+        });
+      }
     }
 
     if (mentorRoleRadio) {
-      mentorRoleRadio.addEventListener('change', () => {
+      mentorRoleRadio.addEventListener('change', function() {
         if (mentorRoleRadio.checked) {
           validationConfig = getValidationConfig(lang, true);
           initializeValidation(validationConfig);
-          mentorInputsWrapper.style.display = 'block';
-          // Remove 'expertise[]' validation once a value is selected
+          if (mentorInputsWrapper) {
+            mentorInputsWrapper.style.display = 'block';
+          }
+          
+          // Setup expertise field
           const expertiseField = registerForm.querySelector('[name="expertise[]"]');
-          if (expertiseField) {
+          if (expertiseField && typeof $ !== 'undefined' && $.fn.select2) {
             $(expertiseField).select2();
-            $(expertiseField).on('change', () => {
-            validationInstance.updateFieldStatus('expertise[]', 'NotValidated');
-          });
+            $(expertiseField).on('change', function() {
+              if (validationInstance) {
+                validationInstance.updateFieldStatus('expertise[]', 'NotValidated');
+              }
+            });
           }
         }
       });
@@ -325,25 +486,31 @@ document.addEventListener('DOMContentLoaded', function (e) {
 
     if (registerForm && !registerForm.hasAttribute('data-validation-initialized')) {
       registerForm.setAttribute('data-validation-initialized', 'true');
-      initializeValidation(validationConfig);
+      
+      // Wait a bit for intl-tel-input to fully initialize
+      setTimeout(function() {
+        initializeValidation(validationConfig);
+      }, 100);
     }
 
     if (founderRoleRadio) {
-      founderRoleRadio.addEventListener('change', () => {
+      founderRoleRadio.addEventListener('change', function() {
         if (founderRoleRadio.checked) {
           validationConfig = getValidationConfig(lang, false);
-          mentorInputsWrapper.style.display = 'none';
+          if (mentorInputsWrapper) {
+            mentorInputsWrapper.style.display = 'none';
+          }
           initializeValidation(validationConfig);
         }
       });
     }
 
-    //  Two Steps Verification
+    // Two Steps Verification
     const numeralMask = document.querySelectorAll('.numeral-mask');
 
     // Verification masking
     if (numeralMask.length) {
-      numeralMask.forEach(e => {
+      numeralMask.forEach(function(e) {
         new Cleave(e, {
           numeral: true
         });

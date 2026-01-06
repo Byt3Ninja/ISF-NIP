@@ -70,7 +70,7 @@ class HomeController extends Controller
             } elseif ($user->hasAnyRole('Registered|Page Manager|Pages Editor')) {
 
                 return view('admin.clients.dashboard');
-            } elseif ($user->hasAnyRole('organizationManager')) {
+            } elseif ($user->hasAnyRole('organizationManager|subadmin')) {
 
                 return $this->organizationDashboard();
             } elseif ($user->hasAnyRole('Mentor')) {
@@ -96,7 +96,8 @@ class HomeController extends Controller
         $user = auth()->user();
         $l = App::getLocale();
         $permissions = [];
-        $has_org = !empty($user->organization_id) && !is_null($user->organization_id) && trim($user->organization_id) ? true : false;
+        $organizations_ids = $user->organizations_ids;
+        $has_org = !empty($organizations_ids);
         if (auth()->check()) {
             $permissions = $user->myPermissions();
         }
@@ -214,8 +215,9 @@ class HomeController extends Controller
             if($user->hasRole('Registered')){
                 $services_requests_q .= " AND sr.user_id = " . $user->id;
             }
-            if ($has_org) {
-                $services_requests_q .= " AND s.organization_id = " . $user->organization_id;
+            $orgIds = $user->organizations_ids;
+            if ($has_org && !empty($orgIds) && !$user->hasRole('admin')) {
+                $services_requests_q .= " AND s.organization_id IN (" . implode(',', array_map('intval', $orgIds)) . ")";
             }
             $services_requests = collect(DB::select($services_requests_q));
         } else {
@@ -230,8 +232,9 @@ class HomeController extends Controller
                 WHERE
                     o.deleted_at IS NULL
             ";
-            if ($has_org) {
-                $organizations_q .= " AND o.id = " . $user->organization_id;
+            $orgIds = $user->organizations_ids;
+            if ($has_org && !empty($orgIds) && !$user->hasRole('admin')) {
+                $organizations_q .= " AND o.id IN (" . implode(',', array_map('intval', $orgIds)) . ")";
             }
             $organizations = collect(DB::select($organizations_q));
         } else {
@@ -254,8 +257,9 @@ class HomeController extends Controller
                 WHERE
                     c.deleted_at IS NULL
             ";
-            if ($has_org) {
-                $cycles_q .= " AND c.organization_id = " . $user->organization_id;
+            $orgIds = $user->organizations_ids;
+            if ($has_org && !empty($orgIds) && !$user->hasRole('admin')) {
+                $cycles_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $orgIds)) . ")";
             }
             $cycles = collect(DB::select($cycles_q));
             $cycles = $cycles->groupBy('id')->map(function ($groupedCycle) use ($l) {
@@ -287,8 +291,8 @@ class HomeController extends Controller
                 WHERE
                     s.deleted_at IS NULL
             ";
-            if ($has_org) {
-                $companies_q .= " AND c.organization_id = " . $user->organization_id;
+            if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+                $companies_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
             }
             $companies = collect(DB::select($companies_q));
         } else {
@@ -306,8 +310,8 @@ class HomeController extends Controller
                 WHERE
                     mr.deleted_at IS NULL
             ";
-            if ($has_org) {
-                $mentorship_requests_q .= " AND c.organization_id = " . $user->organization_id;
+            if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+                $mentorship_requests_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
             }
             $mentorship_requests = collect(DB::select($mentorship_requests_q));
         } else {
@@ -328,8 +332,8 @@ class HomeController extends Controller
                 WHERE
                     ts.deleted_at IS NULL
             ";
-            if ($has_org) {
-                $training_sessions_q .= " AND c.organization_id = " . $user->organization_id;
+            if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+                $training_sessions_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
             }
             $training_sessions = collect(DB::select($training_sessions_q))->map(function ($session) {
                 $session->duration = !empty($session->duration) ? $session->duration : 0;
@@ -413,8 +417,8 @@ class HomeController extends Controller
                     u.deleted_at IS NULL
                     AND r.default_for = 'mentor'
             ";
-            if ($has_org) {
-                $my_mentors_q .= " AND c.organization_id = " . $user->organization_id;
+            if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+                $my_mentors_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
             }
             $my_mentors = collect(DB::select($my_mentors_q));
             $my_mentors = $my_mentors->groupBy('id')->map(function ($user) {
@@ -488,8 +492,8 @@ class HomeController extends Controller
                 $inputs[] = $user->id;
             }
             $filtration_q .= " )";
-            if ($has_org) {
-                $filtration_q .= " AND c.organization_id = " . $user->organization_id;
+            if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+                $filtration_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
             }
             $filtration = collect(DB::select($filtration_q, $inputs));
         } else {
@@ -596,13 +600,15 @@ class HomeController extends Controller
             if (!$user->hasAnyRole(['admin', 'organizationmanager'])) {
                 $evaluation_q .= " AND fs.judges LIKE '%\"{$user->id}\"%'";
             }
-            if ($has_org) {
-                $evaluation_q .= " AND cy.organization_id = " . $user->organization_id;
+            if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+                $evaluation_q .= " AND cy.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
             }
             $evaluation = collect(DB::select($evaluation_q))->map(function ($e) {
-                $e->judges = array_map(function ($j) {
-                    return intval($j);
-                }, json_decode($e->judges, true));
+                $judges = json_decode($e->judges, true);
+                if (!is_array($judges)) {
+                    $judges = [];
+                }
+                $e->judges = array_map('intval', $judges);
                 return $e;
             });
             $evaluation = $evaluation->groupBy('step_id')->map(function( $groupedEvaluation ) use ( $l ) {
@@ -655,6 +661,10 @@ class HomeController extends Controller
                     mr.zoom_date,
                     mr.start_url,
                     mr.zoom_passcode,
+                    mr.mentor_id AS `mentor_id`,
+                    mr.session_type AS `session_type`,
+                    mr.Approved AS `approved`,
+                    mr.organization_id AS `organization_id`,
                     u.id AS `user_id`,
                     u.img_url AS `user_image_url`,
                     u.first_name_ar AS `first_name_ar`,
@@ -666,20 +676,25 @@ class HomeController extends Controller
                     c.id AS `company_id`,
                     c.logo AS `company_logo`,
                     c.name_ar AS `company_name_ar`,
-                    c.name_en AS `company_name_en`
+                    c.name_en AS `company_name_en`,
+                    o.google_map_url AS `google_map_url`,
+                    o.name_en AS `organization_name_en`,
+                    o.name_ar AS `organization_name_ar`
                 FROM
                     mentorship_requests mr
                 LEFT JOIN
                     users u ON u.id = mr.user_id
                 LEFT JOIN
                     companies c ON c.id = u.company_id
+                LEFT JOIN
+                    organizations o ON o.id = mr.organization_id
                 WHERE   
                     mr.deleted_at IS NULL
                     AND mr.zoom_date >= ?
                     AND mr.approved = 'Yes'
             ";
-            if ($has_org) {
-                $upcoming_sessions_q .= " AND mr.organization_id = " . $user->organization_id;
+            if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+                $upcoming_sessions_q .= " AND mr.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
             }
             if (!empty($user->company_id) && !is_null($user->company_id) && trim($user->company_id)) {
                 $upcoming_sessions_q .= " AND mr.user_id = " . $user->id;
@@ -698,6 +713,9 @@ class HomeController extends Controller
                 $output->zoom_date = $session->zoom_date;
                 $output->start_url = $session->start_url;
                 $output->passcode = $session->zoom_passcode;
+                $output->session_type = $session->session_type;
+                $output->approved = $session->approved;
+                $output->organization_id = $session->organization_id;
 
                 $image = User::image_handler($session->user_image_url);
                 $user = new stdClass;
@@ -714,12 +732,18 @@ class HomeController extends Controller
                 $user->company = $company;
                 $output->user = $user;
 
+                $organization = new stdClass;
+                $organization->id = $session->organization_id;
+                $organization->google_map_url = $session->google_map_url;
+                $organization->name = $session->{"organization_name_{$l}"};
+                $output->organization = $organization;
+
                 return $output;
             });
         } else {
             $upcoming_sessions = collect([]);
         }
-
+        
         if (array_intersect(['dashboard_cards.my_programs'], $permissions)) {
             $my_cycles_q = "SELECT 
                     c.id AS `id`
@@ -851,8 +875,8 @@ class HomeController extends Controller
         $latest_events = collect(DB::select($latest_events_q, [now()->format('Y-m-d')]));
 
         $conditions = '';
-        if ($has_org) {
-            $conditions = " WHERE s.organization_id = " . $user->organization_id;
+        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+            $conditions = " WHERE s.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
         }
         $latest_services_q = "SELECT
                 s.id,
@@ -1098,9 +1122,13 @@ class HomeController extends Controller
                 s.from,
                 s.to,
                 s.description,
-                s.data
+                s.data,
+                c.id AS cycle_id,
+                c.step_type
             FROM
                 steps s
+            LEFT JOIN
+                cycles c ON c.id = s.cycle_id
             WHERE
                 s.cycle_id = $cycle_id
                 AND s.cycle_id != 0
@@ -1109,36 +1137,71 @@ class HomeController extends Controller
                 s.arr asc
         ";
         $now = time();
-        $steps = collect(DB::select($steps_q))->map(function ($step) use ($l, $company, $stepData, $cycle_id, $now) {
+        $stepType = $company?->cycledata?->step_type;
+        $steps = collect(DB::select($steps_q));
+        $cycleSteps = $steps->pluck('id')->toArray();
+
+        // array_search($company->step, $cycleSteps)
+        $steps = $steps->map(function ($step) use ($l, $company, $stepData, $stepType, $cycle_id, $now) {
+            $starting = Carbon::parse($step->from)->format('Y-m-d 00:00:00');
+            $ending = Carbon::parse($step->to)->format('Y-m-d 23:59:59');
+
             $step->from = Carbon::parse($step->from)->format('d-m-Y');
             $step->to = Carbon::parse($step->to)->format('d-m-Y');
-
+            $status_flag = 'not_started';
             $status = $l == 'ar' ? 'لم تبدأ' : 'Not started';
+            $status_flag_tile = $l == 'ar' ? 'لم تبدأ' : 'Not started';
             $color = 'label-light';
             $textColor = 'light';
             if (!empty($step) && !empty($stepData))
             {
-                if( $now > Carbon::parse($step->to)->timestamp )
+                if( $stepType == 'time' )
                 {
-                    $status = $l == 'ar' ? 'انتهت' : 'Completed';
-                    $color = 'label-success';
-                    $textColor = 'success';
+                    if( $now > Carbon::parse($ending)->timestamp )
+                    {
+                        $status_flag = 'completed';
+                        $status_flag_tile = $l == 'ar' ? 'انتهت' : 'Completed';
+                        $status = 'Completed';
+                        $color = 'label-success';
+                        $textColor = 'success';
+                    }
+                    if( $now <= Carbon::parse($ending)->timestamp && $now >= Carbon::parse($starting)->timestamp )
+                    {
+                        $status_flag = 'ongoing';
+                        $status_flag_tile = $l == 'ar' ? 'جاري' : 'Ongoing';
+                        $status = 'Ongoing';
+                        $color = 'label-primary';
+                        $textColor = 'primary';
+                    }
+                    /* if ($stepData->arr > $step->arr) {
+                        $status = $l == 'ar' ? 'انتهت' : 'Completed';
+                        $color = 'label-success';
+                        $textColor = 'success';
+                    } elseif ($stepData->arr == $step->arr) {
+                        $status = $l == 'ar' ? 'بدأت' : 'Started';
+                        $color = 'label-primary';
+                        $textColor = 'primary';
+                    } */
                 }
-                if( $now <= Carbon::parse($step->to)->timestamp && $now >= Carbon::parse($step->from)->timestamp )
+                if( $stepType == 'cycle' )
                 {
-                    $status = $l == 'ar' ? 'يحدث اﻵن' : 'On going';
-                    $color = 'label-primary';
-                    $textColor = 'primary';
+                    if( $stepData->arr > $step->arr )
+                    {
+                        $status_flag = 'completed';
+                        $status_flag_tile = $l == 'ar' ? 'انتهت' : 'Completed';
+                        $status = 'Completed';
+                        $color = 'label-success';
+                        $textColor = 'success';
+                    }
+                    elseif( $stepData->arr == $step->arr )
+                    {
+                        $status_flag = 'ongoing';
+                        $status_flag_tile = $l == 'ar' ? 'جاري' : 'Ongoing';
+                        $status = 'Ongoing';
+                        $color = 'label-primary';
+                        $textColor = 'primary';
+                    }
                 }
-                /* if ($stepData->arr > $step->arr) {
-                    $status = $l == 'ar' ? 'انتهت' : 'Completed';
-                    $color = 'label-success';
-                    $textColor = 'success';
-                } elseif ($stepData->arr == $step->arr) {
-                    $status = $l == 'ar' ? 'بدأت' : 'Started';
-                    $color = 'label-primary';
-                    $textColor = 'primary';
-                } */
             }
             $trType = $fLink = null;
             if ($company->approved) {
@@ -1148,6 +1211,8 @@ class HomeController extends Controller
             }
 
             $step->status = $status;
+            $step->status_flag = $status_flag;
+            $step->status_flag_tile = $status_flag_tile;
             $step->color = $color;
             $step->textColor = $textColor;
             $step->trType = $trType;
@@ -1166,6 +1231,8 @@ class HomeController extends Controller
                 mr.period,
                 mr.rate_comment,
                 mr.done,
+                mr.session_type,
+                mr.organization_id,
                 u.img_url AS `user_img_url`,
                 u.first_name_en AS `user_first_name_en`,
                 u.first_name_ar AS `user_first_name_ar`,
@@ -1182,7 +1249,12 @@ class HomeController extends Controller
                 m.last_name_en AS `mentor_last_name_en`,
                 m.last_name_ar AS `mentor_last_name_ar`,
                 m.img_url AS `mentor_img_url`,
-                msr.rating AS `mentor_rating`
+                msr.rating AS `mentor_rating`,
+                o.name_en AS `org_name_en`,
+                o.name_ar AS `org_name_ar`,
+                o.img_url AS `org_img_url`,
+                o.google_map_url AS `org_google_map_url`,
+                o.address AS `org_address`
             FROM
                 mentorship_requests mr
             LEFT JOIN
@@ -1193,6 +1265,8 @@ class HomeController extends Controller
                 companies c ON c.id = u.company_id
             LEFT JOIN
                mentorship_requests msr ON msr.mentor_id = m.id
+            LEFT JOIN
+                organizations o ON o.id = mr.organization_id
             WHERE
                 mr.user_id = $user->id
                 AND (
@@ -1204,6 +1278,7 @@ class HomeController extends Controller
                 mr.zoom_date ASC
         ";
         $nextSessions = collect(DB::select($nextSessions_q));
+        
         $nextSessions = $nextSessions->groupBy('id')->map(function ($groupedSession) use ($l) {
             $_session = $groupedSession->first();
             $session = new stdClass;
@@ -1218,6 +1293,8 @@ class HomeController extends Controller
             $session->period = $_session->period;
             $session->rate_comment = $_session->rate_comment;
             $session->done = $_session->done;
+            $session->session_type = $_session->session_type;
+            $session->organization = $_session->organization_id;
 
             $user = new stdClass;
             $user->id = $_session->user_id;
@@ -1242,6 +1319,14 @@ class HomeController extends Controller
             $mentor->image_url = User::image_handler($_session->mentor_img_url);
             $mentor->ratings = $groupedSession->sum('mentor_rating');
             $session->mentor = $mentor;
+
+            $org = new stdClass;
+            $org->id = $_session->organization_id;
+            $org->name = $_session->{'org_name_' . $l};
+            $org->image_url = Organization::image_handler($_session->org_img_url);
+            $org->google_map_url = $_session->org_google_map_url;
+            $org->address = $_session->org_address;
+            $session->organization = $org;
             return $session;
         })->values();
 
@@ -1255,7 +1340,9 @@ class HomeController extends Controller
                 s.tfrom,
                 s.tto,
                 s.notes,
-                s.active
+                s.active,
+                s.session_type,
+                s.date
             FROM
                 schedules s
             WHERE
@@ -1263,32 +1350,42 @@ class HomeController extends Controller
         ";
         $my_schedules = collect(DB::select($my_schedules_q))->map(function ($schedule) {
             $schedule->active = $schedule->active == 1 || $schedule->active == true ? true : false;
-            $date_from = Carbon::parse($schedule->dfrom)->format('d-m-Y');
-            $date_to = Carbon::parse($schedule->dto)->format('d-m-Y');
-            $_days = '';
-            switch ($schedule->type) {
-                case 'Weekly': {
-                        $_days = 'Weekly (' . str_replace(['[', ']', '"'], ' ', json_encode($schedule->days)) . ')';
-                        break;
-                    }
-                case 'WorkingDays': {
-                        $_days = __('dashboard.All working days');
-                        break;
-                    }
-                case 'Period': {
-                        $_days = __('dashboard.from') . $date_from . __('dashboard.to') . $date_to;
-                        break;
-                    }
-                default: {
-                        $_days = $date_to;
-                    }
-            }
-            $schedule->_days = $_days;
+            // $date_from = Carbon::parse($schedule->dfrom)->format('d-m-Y');
+            // $date_to = Carbon::parse($schedule->dto)->format('d-m-Y');
             $schedule->t_from = substr($schedule->tfrom, 0, 5);
             $schedule->t_to = substr($schedule->tto, 0, 5);
             $schedule->notes ? $schedule->notes : '...';
-            return $schedule;
+
+            if (trim( strtolower( $schedule->type ) ) === 'weekly') {
+                return [
+                    'id' => $schedule->id,
+                    'weekday' => $schedule->days,
+                    'start_time' => $schedule->t_from,
+                    'end_time' => $schedule->t_to,
+                    'session_type' => $schedule->session_type,
+                    'weekly' => true
+                ];
+            } else {
+                return [
+                    'id' => $schedule->id,
+                    'date' => $schedule->date ?? $schedule->date_to ?? null,
+                    'start_time' => $schedule->t_from,
+                    'end_time' => $schedule->t_to,
+                    'session_type' => $schedule->session_type,
+                    'weekly' => false
+                ];
+            }
         });
+
+        $currentTime = now();
+        $my_schedules = $my_schedules->filter(function ($schedule) use ( $currentTime ) {
+            if( $schedule['weekly'] == true ) { return true; }
+            else
+            {
+                $end_at = Carbon::parse( $schedule['date'] . $schedule['end_time'] . ':00' );
+                return $currentTime->lte( $end_at );
+            }
+        })->values();
 
         $setting = collect(DB::select("SELECT * FROM settings where `id` = 1 limit 1"))->first();
 
@@ -1608,7 +1705,7 @@ class HomeController extends Controller
             ];
             $data['countCards'][] = [
                 'color' => 'secondary',
-                'href' => '/dashboard/show/Mentors',
+                'href' => '/dashboard/mentors',
                 'icon' => 'ti ti-school',
                 'text' => 'Mentors',
                 'permissions' => ['mentors.list', 'dashboard.widgets_cards_my_mentors_view'],
@@ -1655,7 +1752,7 @@ class HomeController extends Controller
             ];
             $data['countCards'][] = [
                 'color' => 'secondary',
-                'href' => '/dashboard/show/Mentors',
+                'href' => '/dashboard/mentors',
                 'icon' => 'ti ti-school',
                 'text' => 'Mentors',
                 'permissions' => ['mentors.list', 'dashboard.widgets_cards_my_mentors_view'],
@@ -1710,7 +1807,7 @@ class HomeController extends Controller
             ];
             $data['countCards'][] = [
                 'color' => 'danger',
-                'href' => '/dashboard/show/Mentors',
+                'href' => '/dashboard/mentors',
                 'icon' => 'ti-school',
                 'text' => 'Mentors',
                 'permissions' => ['users.index', 'dashboard.widgets_cards_mentors_view'],
@@ -1732,7 +1829,7 @@ class HomeController extends Controller
                 'icon' => 'ti-calendar-event',
                 'text' => 'Mentorship requests Duration',
                 'permissions' => ['mentorships.sessions_list', 'dashboard.widgets_cards_mentorship_sessions_durations_view'],
-                'count' => $mentorship_requests->sum('period') / 60,
+                'count' => number_format( ( $mentorship_requests->sum('period') / 60 ), 2 ),
                 'isRating' => false,
             ];
             $data['countCards'][] = [
@@ -1849,8 +1946,8 @@ class HomeController extends Controller
             INNER JOIN 
                 countries c ON u.country_id = c.id
         ";
-        if ($has_org) {
-            $country_data_q .= " WHERE u.organization_id = " . $user->organization_id;
+        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+            $country_data_q .= " WHERE u.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
         }
         $country_data_q .= " GROUP BY
                 c.name_en,
@@ -1865,8 +1962,8 @@ class HomeController extends Controller
         });
 
         $conditions = '';
-        if ($has_org) {
-            $conditions = " WHERE cy.organization_id = " . $user->organization_id;
+        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+            $conditions = " WHERE cy.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
         }
         $sector_data_q = "SELECT
                 s.name_en AS `sector_name_en`,
@@ -1892,8 +1989,8 @@ class HomeController extends Controller
             ];
         });
 
-        if ($has_org) {
-            $conditions = " AND u.organization_id = " . $user->organization_id;
+        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+            $conditions = " AND u.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
         }
         $project_types_q = "SELECT
                 c.business_type,
@@ -1918,8 +2015,8 @@ class HomeController extends Controller
             ];
         });
 
-        if ($has_org) {
-            $conditions = " AND cy.organization_id = " . $user->organization_id;
+        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+            $conditions = " AND cy.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
         }
         $developmentStages = collect(DB::select(
             "SELECT 
@@ -1993,8 +2090,8 @@ class HomeController extends Controller
             ];
         });
 
-        if ($has_org) {
-            $conditions = " WHERE u.organization_id = " . $user->organization_id;
+        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+            $conditions = " WHERE u.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
         }
         $project_status_q = "SELECT
                 c.title AS `cycle_title`,
@@ -2023,8 +2120,8 @@ class HomeController extends Controller
             ];
         });
 
-        if ($has_org) {
-            $conditions = " AND u.organization_id = " . $user->organization_id;
+        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+            $conditions = " AND u.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
         }
         $company_data_q = "SELECT
                 c.name_en AS `company_name_en`,
@@ -2068,8 +2165,8 @@ class HomeController extends Controller
             'companies' => $founders,
         ];
 
-        if ($has_org) {
-            $conditions = " AND cy.organization_id = " . $user->organization_id;
+        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+            $conditions = " AND cy.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
         }
         $company_sdg_q = "SELECT
                 c.Sustainable_development
@@ -2091,8 +2188,8 @@ class HomeController extends Controller
             ];
         })->values();
 
-        if ($has_org) {
-            $conditions = " AND u.organization_id = " . $user->organization_id;
+        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+            $conditions = " AND u.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
         }
         $sector_distribution_q = "SELECT
             c.sector,
@@ -2138,8 +2235,8 @@ class HomeController extends Controller
             INNER JOIN
                 states s ON u.state_id = s.id
         ";
-        if ($has_org) {
-            $users_gov_q .= " WHERE u.organization_id = " . $user->organization_id;
+        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+            $users_gov_q .= " WHERE u.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
         }
         $users_gov_q .= " GROUP BY
                         s.name_en,
@@ -2153,8 +2250,8 @@ class HomeController extends Controller
             FROM
                 users u
         ";
-        if ($has_org) {
-            $users_gender_q .= " WHERE u.organization_id = " . $user->organization_id;
+        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+            $users_gender_q .= " WHERE u.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
         }
         $users_gender_q .= " GROUP BY gender";
         $users_gender = collect(DB::select($users_gender_q));
@@ -2316,6 +2413,52 @@ class HomeController extends Controller
 
         $notRated_men = DB::select($notRated_men, [$dateRate, Auth::id()]);
         $notRated_men = collect($notRated_men);
+        // check for rating services
+
+        $service_requests = DB::table('services_requests AS sr')
+            ->select([
+                'sr.id AS id',
+                'sr.service_id AS service_id',
+                's.name_en AS service_name_en',
+                's.name_ar AS service_name_ar',
+                's.service_provider_id AS service_provider_id',
+                'sp.company_name AS provider_name',
+                'sp.email AS provider_email',
+                'sp.phone AS provider_phone',
+                'sr.comment AS comment',
+                'sr.date_time AS date_time',
+                'sr.rate AS rate',
+                'sr.rate_comment AS rate_comment',
+                'sr.done AS done',
+            ])
+            ->leftJoin('services AS s', 's.id', '=', 'sr.service_id')
+            ->leftJoin('service_providers AS sp', 'sp.id', '=', 's.service_provider_id')
+            ->where('sr.user_id', $user->id)
+            ->where('sr.approved', 'Yes')
+            ->whereNull('sr.rate')
+            ->whereNull('sr.done')
+            ->whereNull('sr.deleted_at')
+            ->get();
+
+        $service_requests = $service_requests->map(function ( $item ) use ($l) {
+            $_request = new stdClass;
+            $_request->id = $item->id;
+            $_request->service = new stdClass;
+            $_request->service->id = $item->service_id;
+            $_request->service->name = $item->{'service_name_' . $l};
+            $_request->provider = new stdClass;
+            $_request->provider->id = $item->service_provider_id;
+            $_request->provider->name = $item->provider_name;
+            $_request->provider->email = $item->provider_email;
+            $_request->provider->phone = $item->provider_phone;
+            $_request->comment = $item->comment;
+            $_request->date_time = $item->date_time;
+            $_request->rate = $item->rate;
+            $_request->rate_comment = $item->rate_comment;
+            $_request->done = $item->done;
+            return $_request;
+        });
+        $data['unrated_services_requests'] = $service_requests;
         $data['notrated_mens'] = $notRated_men;
         $data['initial_screening_steps'] = $filtration;
         $data['final_screening_steps'] = $evaluation;
@@ -2395,7 +2538,8 @@ class HomeController extends Controller
         $profileComplete = method_exists($user, 'hasCompletedProfile') ? $user->hasCompletedProfile() : (!empty($user->phone) && !empty($user->country_id) && !empty($user->address) && !empty($user->timezone));
         $startupComplete = method_exists($user, 'hasCompletedStartup') ? $user->hasCompletedStartup() : ($user->company && !empty($user->company->name_en) && !empty($user->company->address_en) && !empty($user->company->sector) && !empty($user->company->stage));
         $data['pollingNeeded'] = !$profileComplete || !$startupComplete;
-
+        $settings = Settings::where('id', 1)->first();
+		$data['offline_allowed'] = $settings->allow_offline_sessions == 1 ? true : false;
         return view('includes.dashboard', $data);
     }
     protected function adminDashboard()
@@ -2709,19 +2853,20 @@ class HomeController extends Controller
     protected function organizationDashboard()
     {
         $l = app()->getLocale();
-        $organization_id = Auth::user()->organization_id;
-        $mentorshipRequests = MentorshipRequest::where('organization_id', $organization_id);
-        $forms = BuilderForm::where('organization_id', $organization_id);
-        $sessions = TrainingSession::whereHas('step', function ($q) use ($organization_id) {
-            $q->where('stype', 4)->whereHas('cycle', function ($query) use ($organization_id) {
-                $query->where('organization_id', $organization_id);
+        $user = Auth::user();
+        $orgIds = $user->organizations_ids;
+        $mentorshipRequests = MentorshipRequest::whereIn('organization_id', $orgIds);
+        $forms = BuilderForm::whereIn('organization_id', $orgIds);
+        $sessions = TrainingSession::whereHas('step', function ($q) use ($orgIds) {
+            $q->where('stype', 4)->whereHas('cycle', function ($query) use ($orgIds) {
+                $query->whereIn('organization_id', $orgIds);
             });
         });
         $messages = Messenger::where('receiver', auth()->id())->whereNull('read');
-        $startups = Company::whereHas('cycledata', function ($q) use ($organization_id) {
-            $q->where('organization_id', $organization_id);
+        $startups = Company::whereHas('cycledata', function ($q) use ($orgIds) {
+            $q->whereIn('organization_id', $orgIds);
         });
-        $cycles = Cycle::where('organization_id', $organization_id);
+        $cycles = Cycle::whereIn('organization_id', $orgIds);
 
         // ============> Counts Section <==================
         $data['startups'] = $startups->count();
@@ -2760,7 +2905,7 @@ class HomeController extends Controller
 
         // Demographic
         $data['usersgov'] = User::join('states', 'users.state_id', '=', 'states.id')
-            ->where('users.organization_id', $organization_id)
+            ->whereIn('users.organization_id', $orgIds)
             ->select(
                 'states.name_en as state_en',
                 'states.name_ar as state_ar',
@@ -2771,7 +2916,7 @@ class HomeController extends Controller
 
 
         // Male and Female Ratio
-        $usersgender = User::select('gender', DB::raw('count(*) as total'))->where('organization_id', $organization_id)->groupBy('gender')->get();
+        $usersgender = User::select('gender', DB::raw('count(*) as total'))->whereIn('organization_id', $orgIds)->groupBy('gender')->get();
         $data['usersgender'] = $usersgender;
 
         // Development Stage  
@@ -3117,9 +3262,11 @@ class HomeController extends Controller
 
     public function directory(Request $request)
     {
+        // deprecated and moved to ServiceController.php
         $t = $request->input('type');
         $find = $request->input('find');
         $services = Service::with('serviceCategory')
+            ->where('status', true)
             ->whereHas('organizations')
             ->get()
             ->map(function ($service) {
@@ -3144,6 +3291,7 @@ class HomeController extends Controller
     }
     public function rateservice($id, Request $request)
     {
+        // deprecated and moved to ServiceController.php
         if ($request && $id) {
             $request->done ? $done = 1 : $done = null;
             ServicesRequests::updateOrInsert(['id' => $id], ['rate' => $request->rate, 'rate_comment' => $request->comment, 'done' => $done]);
@@ -3153,6 +3301,7 @@ class HomeController extends Controller
     }
     public function showone($id, Request $request)
     {
+        // deprecated and moved to ServiceController.php
         if ($request && $id) {
             $service = Service::findOrFail($id);
             $rate = (int)$service->myRate();
@@ -3164,6 +3313,7 @@ class HomeController extends Controller
 
     public function servicereq(Request $request)
     {
+        // deprecated and moved to ServiceController.php
         if ($request) {
             $serviceRequest = ServicesRequests::create([
                 'service_id' => $request->id,
@@ -3176,7 +3326,8 @@ class HomeController extends Controller
 
             $service = Service::find($request->id);
 
-            if ($service && $service->vendor_email) {
+            if( $service && $service->vendor_email && !in_array(env('APP_ENV', 'local'), ['local']) )
+            {
                 // Create anonymous notifiable for vendor email
                 Notification::route('mail', $service->vendor_email)->notify(new ServiceRequestNotification($serviceRequest));
             }

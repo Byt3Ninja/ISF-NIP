@@ -39,6 +39,9 @@ if (document.getElementById('layout-menu')) {
   //-----------------
 
   let layoutMenuEl = document.querySelectorAll('#layout-menu');
+  let searchMenuEl = document.querySelectorAll("#search-menu");
+  let searchMenuIconEl = document.querySelectorAll("#search-menu-icon");
+
   layoutMenuEl.forEach(function (element) {
     menu = new Menu(element, {
       orientation: isHorizontalLayout ? 'horizontal' : 'vertical',
@@ -60,6 +63,7 @@ if (document.getElementById('layout-menu')) {
   menuToggler.forEach(item => {
     item.addEventListener('click', event => {
       event.preventDefault();
+
       window.Helpers.toggleCollapsed();
       // Enable menu state with local storage support if enableMenuLocalStorage = true from config.js
       if (config.enableMenuLocalStorage && !window.Helpers.isSmallScreen()) {
@@ -68,6 +72,15 @@ if (document.getElementById('layout-menu')) {
             'templateCustomizer-' + templateName + '--LayoutCollapsed',
             String(window.Helpers.isCollapsed())
           );
+
+          if (window.Helpers.isCollapsed()) {
+            searchMenuEl[0].style.display = "none";
+            searchMenuIconEl[0].style.display = "block";
+          } else {
+            searchMenuEl[0].style.display = "block";
+            searchMenuIconEl[0].style.display = "none";
+          }
+
           // Update customizer checkbox state on click of menu toggler
           let layoutCollapsedCustomizerOptions = document.querySelector('.template-customizer-layouts-options');
           if (layoutCollapsedCustomizerOptions) {
@@ -411,307 +424,95 @@ if (document.getElementById('layout-menu')) {
   }
 })();
 
-// ! Removed following code if you do't wish to use jQuery. Remember that navbar search functionality will stop working on removal.
-// if (typeof $ !== 'undefined') {
-//   $(function () {
-//     // ! TODO: Required to load after DOM is ready, did this now with jQuery ready.
-//     window.Helpers.initSidebarToggle();
-//     // Toggle Universal Sidebar
-
-//     // Navbar Search with autosuggest (typeahead)
-//     // ? You can remove the following JS if you don't want to use search functionality.
-//     //----------------------------------------------------------------------------------
-
-//     var searchToggler = $('.search-toggler'),
-//       searchInputWrapper = $('.search-input-wrapper'),
-//       searchInput = $('.search-input'),
-//       contentBackdrop = $('.content-backdrop');
-
-//     // Open search input on click of search icon
-//     if (searchToggler.length) {
-//       searchToggler.on('click', function () {
-//         if (searchInputWrapper.length) {
-//           searchInputWrapper.toggleClass('d-none');
-//           searchInput.focus();
-//         }
-//       });
-//     }
-//     // Open search on 'CTRL+/'
-//     $(document).on('keydown', function (event) {
-//       let ctrlKey = event.ctrlKey,
-//         slashKey = event.which === 191;
-
-//       if (ctrlKey && slashKey) {
-//         if (searchInputWrapper.length) {
-//           searchInputWrapper.toggleClass('d-none');
-//           searchInput.focus();
-//         }
-//       }
-//     });
-//     // Note: Following code is required to update container class of typeahead dropdown width on focus of search input. setTimeout is required to allow time to initiate Typeahead UI.
-//     setTimeout(function () {
-//       var twitterTypeahead = $('.twitter-typeahead');
-//       searchInput.on('focus', function () {
-//         if (searchInputWrapper.hasClass('container-xxl')) {
-//           searchInputWrapper.find(twitterTypeahead).addClass('container-xxl');
-//           twitterTypeahead.removeClass('container-fluid');
-//         } else if (searchInputWrapper.hasClass('container-fluid')) {
-//           searchInputWrapper.find(twitterTypeahead).addClass('container-fluid');
-//           twitterTypeahead.removeClass('container-xxl');
-//         }
-//       });
-//     }, 10);
-
-//     if (searchInput.length) {
-//       // Filter config
-//       var filterConfig = function (data) {
-//         return function findMatches(q, cb) {
-//           let matches;
-//           matches = [];
-//           data.filter(function (i) {
-//             if (i.name.toLowerCase().startsWith(q.toLowerCase())) {
-//               matches.push(i);
-//             } else if (
-//               !i.name.toLowerCase().startsWith(q.toLowerCase()) &&
-//               i.name.toLowerCase().includes(q.toLowerCase())
-//             ) {
-//               matches.push(i);
-//               matches.sort(function (a, b) {
-//                 return b.name < a.name ? 1 : -1;
-//               });
-//             } else {
-//               return [];
-//             }
-//           });
-//           cb(matches);
-//         };
-//       };
-
-//       // Search JSON
-//       var searchJson = 'search-vertical.json'; // For vertical layout
-//       if ($('#layout-menu').hasClass('menu-horizontal')) {
-//         var searchJson = 'search-horizontal.json'; // For vertical layout
-//       }
-//       // Search API AJAX call
-//       var searchData = {
-//         pages: [
-//            {
-//             id: '1',
-//             name: 'Dashboard',
-//             url: '/',
-//             icon: 'tabler-smart-home',
-//             section: 'navigation'
-//           },
-//           {
-//             id: '2',
-//             name: 'Profile',
-//             url: '/show/myProfile',
-//             icon: 'tabler-user',
-//             section: 'navigation'
-//           },
-//           {
-//             id: '3',
-//             name: 'Calendar',
-//             url: '/calendar',
-//             icon: 'tabler-calendar',
-//             section: 'navigation'
-//           },
-//           {
-//             id: '4',
-//             name: 'Messages',
-//             url: '/messages',
-//             icon: 'tabler-message',
-//             section: 'navigation'
-//           },
-//           {
-//             id: '5',
-//             name: 'Settings',
-//             url: '/settings',
-//             icon: 'tabler-settings',
-//             section: 'navigation'
-//           },
-//         ]
-//       }
-//       // Init typeahead on searchInput
-//       searchInput.each(function () {
-//         var $this = $(this);
-//         searchInput
-//           .typeahead(
-//             {
-//               hint: false,
-//               classNames: {
-//                 menu: 'tt-menu navbar-search-suggestion',
-//                 cursor: 'active',
-//                 suggestion: 'suggestion d-flex justify-content-between px-4 py-2 w-100'
-//               }
-//             },
-//             // ? Add/Update blocks as per need
-//             // Pages
-//             {
-//               name: 'pages',
-//               display: 'name',
-//               limit: 5,
-//               source: filterConfig(searchData.pages),
-//               templates: {
-//                 header: '<h6 class="suggestions-header text-primary mb-0 mx-4 mt-3 pb-2">Pages</h6>',
-//                 suggestion: function ({ url, icon, name }) {
-//                   return (
-//                     '<a href="' +
-//                     '/dashboard' + url +
-//                     '">' +
-//                     '<div>' +
-//                     '<i class="ti ' +
-//                     icon +
-//                     ' me-2"></i>' +
-//                     '<span class="align-middle">' +
-//                     name +
-//                     '</span>' +
-//                     '</div>' +
-//                     '</a>'
-//                   );
-//                 },
-//                 notFound:
-//                   '<div class="not-found px-4 py-2">' +
-//                   '<h6 class="suggestions-header text-primary mb-2">Pages</h6>' +
-//                   '<p class="py-2 mb-0"><i class="ti ti-alert-circle ti-xs me-2"></i> No Results Found</p>' +
-//                   '</div>'
-//               }
-//             },
-//             // Files
-//             {
-//               name: 'files',
-//               display: 'name',
-//               limit: 4,
-//               source: filterConfig(searchData.files),
-//               templates: {
-//                 header: '<h6 class="suggestions-header text-primary mb-0 mx-4 mt-3 pb-2">Files</h6>',
-//                 suggestion: function ({ src, name, subtitle, meta }) {
-//                   return (
-//                     '<a href="javascript:;">' +
-//                     '<div class="d-flex w-50">' +
-//                     '<img class="me-3" src="' +
-//                     assetsPath +
-//                     src +
-//                     '" alt="' +
-//                     name +
-//                     '" height="32">' +
-//                     '<div class="w-75">' +
-//                     '<h6 class="mb-0">' +
-//                     name +
-//                     '</h6>' +
-//                     '<small class="text-muted">' +
-//                     subtitle +
-//                     '</small>' +
-//                     '</div>' +
-//                     '</div>' +
-//                     '<small class="text-muted">' +
-//                     meta +
-//                     '</small>' +
-//                     '</a>'
-//                   );
-//                 },
-//                 notFound:
-//                   '<div class="not-found px-4 py-2">' +
-//                   '<h6 class="suggestions-header text-primary mb-2">Files</h6>' +
-//                   '<p class="py-2 mb-0"><i class="ti ti-alert-circle ti-xs me-2"></i> No Results Found</p>' +
-//                   '</div>'
-//               }
-//             },
-//             // Members
-//             {
-//               name: 'members',
-//               display: 'name',
-//               limit: 4,
-//               source: filterConfig(searchData.members),
-//               templates: {
-//                 header: '<h6 class="suggestions-header text-primary mb-0 mx-4 mt-3 pb-2">Members</h6>',
-//                 suggestion: function ({ name, src, subtitle }) {
-//                   return (
-//                     '<a href="app-user-view-account.html">' +
-//                     '<div class="d-flex align-items-center">' +
-//                     '<img class="rounded-circle me-3" src="' +
-//                     assetsPath +
-//                     src +
-//                     '" alt="' +
-//                     name +
-//                     '" height="32">' +
-//                     '<div class="user-info">' +
-//                     '<h6 class="mb-0">' +
-//                     name +
-//                     '</h6>' +
-//                     '<small class="text-muted">' +
-//                     subtitle +
-//                     '</small>' +
-//                     '</div>' +
-//                     '</div>' +
-//                     '</a>'
-//                   );
-//                 },
-//                 notFound:
-//                   '<div class="not-found px-4 py-2">' +
-//                   '<h6 class="suggestions-header text-primary mb-2">Members</h6>' +
-//                   '<p class="py-2 mb-0"><i class="ti ti-alert-circle ti-xs me-2"></i> No Results Found</p>' +
-//                   '</div>'
-//               }
-//             }
-//           )
-//           //On typeahead result render.
-//           .bind('typeahead:render', function () {
-//             // Show content backdrop,
-//             contentBackdrop.addClass('show').removeClass('fade');
-//           })
-//           // On typeahead select
-//           .bind('typeahead:select', function (ev, suggestion) {
-//             // Open selected page
-//             if (suggestion.url) {
-//               window.location = suggestion.url;
-//             }
-//           })
-//           // On typeahead close
-//           .bind('typeahead:close', function () {
-//             // Clear search
-//             searchInput.val('');
-//             $this.typeahead('val', '');
-//             // Hide search input wrapper
-//             searchInputWrapper.addClass('d-none');
-//             // Fade content backdrop
-//             contentBackdrop.addClass('fade').removeClass('show');
-//           });
-
-//         // On searchInput keyup, Fade content backdrop if search input is blank
-//         searchInput.on('keyup', function () {
-//           if (searchInput.val() == '') {
-//             contentBackdrop.addClass('fade').removeClass('show');
-//           }
-//         });
-//       });
-
-//       // Init PerfectScrollbar in search result
-//       var psSearch;
-//       $('.navbar-search-suggestion').each(function () {
-//         psSearch = new PerfectScrollbar($(this)[0], {
-//           wheelPropagation: false,
-//           suppressScrollX: true
-//         });
-//       });
-
-//       searchInput.on('keyup', function () {
-//         psSearch.update();
-//       });
-//     }
-//   });
-// }
-
+// Handle search modal logic
 document.getElementById('menuSearch')?.addEventListener('input', function() {
-    const searchTerm = this.value.toLowerCase();
-    const menuItems = document.querySelectorAll('#menuGrid .nav-item');
+  const searchTerm = this.value.toLowerCase();
+  const menuItems = document.querySelectorAll('#menuGrid .nav-item');
+  
+  menuItems.forEach(item => {
+    const label = item.getAttribute('data-label');
+    if (label.includes(searchTerm)) {
+      item.style.display = 'block';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+});
+
+// Handle search menu logic
+document.getElementById("search-menu-input")?.addEventListener("input", function () {
+  const searchTerm = this.value.toLowerCase();
+
+  const menu = document.querySelector('.menu-inner, .startup-menu-inner');
+  const items = menu.querySelectorAll('.menu-item');
+  const headers = menu.querySelectorAll('.menu-header');
+
+  let anyVisible = false;
+
+  // 1️⃣ Handle menu items (both grouped & flat)
+  items.forEach(item => {
+    if (item.id === 'search-menu') {
+      item.style.display = 'block';
+      return;
+    }
+
+    if (item.id === 'search-menu-icon') {
+      item.style.display = 'none';
+      return;
+    }
     
-    menuItems.forEach(item => {
-        const label = item.getAttribute('data-label');
+    const hasSub = item.querySelector('.menu-sub');
+    let match = false;
+
+    if (hasSub) {
+      // GROUPED MENU
+      const children = item.querySelectorAll('.menu-sub .menu-item');
+
+      children.forEach(child => {
+        const label = child.querySelector('.menu-link div')?.textContent.toLowerCase() || '';
+
         if (label.includes(searchTerm)) {
-            item.style.display = 'block';
+          child.style.display = 'block';
+          match = true;
         } else {
-            item.style.display = 'none';
+          child.style.display = 'none';
         }
-    });
+      });
+
+      if (match || searchTerm === '') {
+        item.style.display = 'block';
+        item.classList.add('open');
+        anyVisible = true;
+      } else {
+        item.style.display = 'none';
+        item.classList.remove('open');
+      }
+    } else {
+      // FLAT MENU
+      const label = item.querySelector('.menu-link div')?.textContent.toLowerCase() || '';
+
+      if (label.includes(searchTerm) || searchTerm === '') {
+        item.style.display = 'block';
+        anyVisible = true;
+      } else {
+        item.style.display = 'none';
+      }
+    }
+  });
+
+  // 2️⃣ Handle section headers
+  headers.forEach(header => {
+    let next = header.nextElementSibling;
+    let hasVisibleItem = false;
+
+    while (next && !next.classList.contains('menu-header')) {
+      if (next.classList.contains('menu-item') && next.style.display !== 'none') {
+        hasVisibleItem = true;
+        break;
+      }
+      next = next.nextElementSibling;
+    }
+
+    header.style.display = hasVisibleItem ? 'block' : 'none';
+  });
 });

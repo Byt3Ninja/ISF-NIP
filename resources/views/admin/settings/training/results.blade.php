@@ -12,13 +12,36 @@
     </div>
     @endif
     @if (session()->has('message2'))
-    <div class="alert alert-danger alert-dismissible mb-2" role="alert">
+    <div class="alert alert-danger alert-dismissible mb-6" role="alert">
       {{ __('admin.' . session()->get('message2')) }}
       <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
       </button>
     </div>
     @endif
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-align-top mb-6">
+      @php
+        $tabs = [
+          ['title' => __('admin.training_sessions'), 'url' => 'dashboard/training/sessions', 'icon' => 'book'],
+          ['title' => __('admin.training_courses'), 'url' => 'dashboard/training/all', 'icon' => 'certificate'],
+          ['title' => __('admin.training_results'), 'url' => 'dashboard/training/results', 'icon' => 'report-analytics'],
+        ]
+      @endphp
+      <ul class="nav nav-pills">
+        @foreach($tabs as $tab)
+          <li class="nav-item">
+            <a href="/{{ $tab['url'] }}" class="nav-link {{ Request::is($tab['url'] . '*') ? 'active' : '' }}">
+              <i class="ti ti-{{ $tab['icon'] }} me-2"></i>
+              {{ $tab['title'] }}
+            </a>
+          </li>
+        @endforeach
+      </ul>
+    </nav>
+    <!--/ Navigation Tabs -->
+
     @if (count($sessions) > 0)
     <div class="card">
       <div class="card-header border-bottom">
