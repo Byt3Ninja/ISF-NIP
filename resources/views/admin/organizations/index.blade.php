@@ -108,8 +108,8 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                 <div class="card-body flex-fill d-flex flex-column">
                   <!-- Header -->
                   <div class="d-flex justify-content-between align-items-start mb-4">
-                    <div class="d-flex align-items-center gap-3">
-                      <div class="avatar avatar-md me-2">
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="avatar avatar-md me-2 d-flex flex-shrink-0">
                         @if ($org->img_url)
                           <img src="{{ $org->imageUrl }}" alt="logo" class="rounded object-fit-cover" width="50" height="50" />
                         @else
@@ -118,10 +118,10 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                           </span>
                         @endif
                       </div>
-                      <h5 class="card-title mb-0">{{ $org->{'name_' . $l} }}</h5>
+                      <h5 class="card-title line-clamp-2 mb-0">{{ $org->{'name_' . $l} }}</h5>
                     </div>
 
-                    <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center">
                       <!-- Status Badge -->
                       @if($org->is_draft)
                         <span class="badge bg-label-warning rounded-pill">
