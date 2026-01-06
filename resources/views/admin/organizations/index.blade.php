@@ -118,7 +118,7 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                           </span>
                         @endif
                       </div>
-                      <h5 class="card-title line-clamp-2 mb-0 w-px-200">{{ $org->{'name_' . $l} }}</h5>
+                      <h5 class="card-title line-clamp-2 mb-0 w-px-{{ $org->is_draft ? '150' : '200' }}">{{ $org->{'name_' . $l} }}</h5>
                     </div>
 
                     <div class="d-flex align-items-center ms-2">
