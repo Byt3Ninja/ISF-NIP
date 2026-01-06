@@ -3113,4 +3113,5 @@ return [
 	'follow_us' => 'Follow Us',
 	'login_or_register' => 'Login / Register',
 	'quick_links' => 'Quick Links',
+	'read_more' => 'Read More',
 ];

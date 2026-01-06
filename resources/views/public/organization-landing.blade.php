@@ -38,7 +38,7 @@
   <link rel="canonical" href="{{ url('/o/' . $organization->slug) }}">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="/vuexy/assets/img/favicon/favicon.ico" />
+  <link rel="shortcut icon" type="image/x-icon" href="/app-assets/images/ico/favicon.ico">
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -80,28 +80,26 @@
 
 @php
  $sections = [
-   ['id' => 'howItWorks', 'icon' => 'list', 'label' => __('admin.How It Works')],
+   ['id' => 'how-it-works', 'icon' => 'list', 'label' => __('admin.How It Works')],
    ['id' => 'achievements', 'icon' => 'trophy', 'label' => __('admin.Achievements & Impact')],
    ['id' => 'media', 'icon' => 'share', 'label' => __('admin.Media & Recognition')],
    ['id' => 'partners', 'icon' => 'users', 'label' => __('admin.Partners')],
   ];
 
-  $colors = ['warning', 'success', 'danger', 'info', 'primary', 'secondary'];
+  $colors = ['warning', 'success', 'danger', 'info', 'primary', 'secondary', 'dark', 'success', 'primary', 'danger', 'info', 'warning', 'secondary'];
 @endphp
 
 <body>
   <script src="/vuexy/assets/vendor/js/dropdown-hover.js"></script>
   <script src="/vuexy/assets/vendor/js/mega-dropdown.js"></script>
 
-  {{-- {{ dd($organization) }} --}}
-
-  @if($isPreview)
   <!-- Preview Banner -->
-  <div class="preview-banner">
+  {{-- @if($isPreview)
+  <div class="bg-primary bg-gradient text-white px-3 py-2 text-center">
     <i class="ti ti-eye me-2"></i>
     {{ $isRtl ? 'وضع المعاينة - هذه الصفحة غير مرئية للعامة' : 'Preview Mode - This page is not publicly visible' }}
   </div>
-  @endif
+  @endif --}}
 
   <section class="min-vh-90 d-flex flex-column">
     <!-- Navbar: Start -->
@@ -119,7 +117,7 @@
             <!-- Brand -->
             <a href="javascript:void(0);" class="app-brand-link d-flex align-items-center">
               @if($organization->img_url)
-                <img src="{{ $organization->img_url }}" alt="Logo" width="32" height="32" class="me-2 object-fit-contain" />
+                <img src="{{ $organization->imageUrl }}" alt="Logo" width="32" height="32" class="me-2 object-fit-contain" />
               @endif
               <span class="app-brand-text text-dark fw-bold">{{ Str::limit($isRtl ? $organization->name_ar : $organization->name_en, 10) }}</span>
             </a>
@@ -234,11 +232,15 @@
 
             <!-- Logo + Location -->
             <div class="d-flex align-items-center mb-4">
-              <div class="avatar avatar-lg bg-card rounded-3 d-flex align-items-center justify-content-center me-3">
+              <div class="me-6">
                 @if($organization->img_url)
-                  <img src="{{ $organization->img_url }}" alt="{{ $organization->name_en }}" class="rounded-circle">
-                @else
-                  <i class="ti ti-rocket ti-lg text-primary"></i>
+                  <img 
+                    src="{{ $organization->imageUrl }}" 
+                    alt="{{ $organization->name_en }}" 
+                    width="50" 
+                    height="50" 
+                    class="rounded-circle object-fit-contain"
+                  />
                 @endif
               </div>
 
@@ -261,7 +263,7 @@
             </h1>
             
             <!-- Description -->
-            <h2 class="hero-sub-title h5 mb-6 line-clamp-3">
+            <h2 class="hero-sub-title h5 mb-6 mb-md-12 line-clamp-3">
               {{ $organization->bio }}
             </h2>
 
@@ -316,7 +318,7 @@
 
   <!-- Navigation Pills -->
   <div class="px-6">
-    <div class="card border my-8 rounded-pill">
+    <div class="card shadow-none border my-8 rounded-pill">
       <div class="card-body py-4 px-12 pb-2">
         <div class="nav-align-top">
           <ul class="nav nav-tabs flex-nowrap pb-4 border-0" style="max-width: 100%; overflow-x: auto;" role="tablist">
@@ -326,7 +328,7 @@
                   type="button"
                   class="nav-link {{ $loop->first ? 'active' : '' }}"
                   id="tab-{{ $tab['id'] }}-trigger"
-                  href="#tab-{{ $tab['id'] }}"
+                  href="#{{ $tab['id'] }}"
                   role="tab"
                   aria-controls="tab-{{ $tab['id'] }}"
                   aria-selected="{{ $loop->first ? 'true' : 'false' }}"
@@ -345,7 +347,7 @@
 
   <!-- How It Works Section -->
   @if($landingPage->how_it_works_enabled && !empty($landingPage->process_steps))
-    <section id="tab-HowItWorks" class="section-py">
+    <section id="how-it-works" class="section-py">
       <div class="container">
         @if($landingPage->how_it_works_subtitle)
           <div class="text-center mb-4">
@@ -364,14 +366,19 @@
         @endif
         <div class="row g-6 justify-content-center">
           @foreach($landingPage->process_steps as $index => $step)
-            <div class="col-lg-3 col-6">
-              <div class="card h-100">
+            <div class="col-lg-3">
+              <div class="card shadow-none border h-100 position-relative">
+                <div class="avatar avatar-sm" style="position: absolute; top: -1rem; left: 14px; transform: translateX(-50%);">
+                  <div class="avatar-initial rounded-circle bg-label-primary">
+                    {{ abs($index + 1) }}
+                  </div>
+                </div>
                 <div class="card-body text-center">
-                  <div class="badge rounded p-2 bg-label-{{ $colors[$index] }} mb-2">
+                  <div class="badge rounded p-4 bg-label-{{ $colors[$index] }} mb-4">
                     @if(!empty($step['icon']))
                       <i class="ti {{ $step['icon'] }} ti-lg"></i>
                     @else
-                      <span class="step-number">{{ $index + 1 }}</span>
+                      <span>{{ $index + 1 }}</span>
                     @endif
                   </div>
                   <h5 class="card-title mb-1">{{ $step['title'] }}</h5>
@@ -388,37 +395,43 @@
 
   <!-- Achievements Section -->
   @if($landingPage->achievements_enabled && !empty($landingPage->metrics))
-  <section class="landing-section section-achievements">
+  <section id="achievements" class="section-py bg-body landing-reviews">
     <div class="container">
-      <div class="text-center mb-5">
-        @if($landingPage->achievements_subtitle)
-        <div class="section-bill-subtitle">
-          <span> {{ $landingPage->achievements_subtitle }} </span>
+      @if($landingPage->achievements_subtitle)
+        <div class="text-center mb-4">
+          <span class="badge bg-label-primary">{{ $landingPage->achievements_subtitle }}</span>
         </div>
-        @endif
-        <h2 class="section-title">
+      @endif
+      @if($landingPage->achievements_title)
+        <h4 class="text-center mb-1">
           {{ $landingPage->achievements_title ?: ($isRtl ? 'الإنجازات والأثر' : 'Achievements & Impact') }}
-        </h2>
-        @if($landingPage->achievements_description)
-        <p class="section-subtitle">{{ $landingPage->achievements_description }}</p>
-        @endif
-      </div>
+        </h4>
+      @endif
+      @if($landingPage->achievements_description)
+        <p class="text-center mb-12">
+          {{ $landingPage->achievements_description }}
+        </p>
+      @endif
 
-      <div class="row g-4 justify-content-center">
-        @foreach($landingPage->metrics as $metric)
-        @if(!empty($metric['number']) || !empty($metric['label']))
-        <div class="col-6 col-md-4 col-lg-3">
-          <div class="metric-card">
-            @if(!empty($metric['icon']))
-            <div class="metric-icon">
-              <i class="ti {{ $metric['icon'] }}"></i>
+      <div class="row g-6 justify-content-center">
+        @foreach($landingPage->metrics as $index => $metric)
+          @if(!empty($metric['number']) || !empty($metric['label']))
+            <div class="col-12 col-md-4 col-lg-3">
+              <div class="card h-100">
+                <div class="card-body">
+                  <div class="card-icon mb-4">
+                    <span class="badge bg-label-{{ $colors[$index + 1] }} rounded p-2">
+                      @if(!empty($metric['icon']))
+                        <i class="ti {{ $metric['icon'] }} ti-26px"></i>
+                      @endif
+                    </span>
+                  </div>
+                  <h4 class="card-title">{{ $metric['number'] ?? '' }}</h4>
+                  <p class="card-text">{{ $metric['label'] ?? '' }}</p>
+                </div>
+              </div>
             </div>
-            @endif
-            <div class="metric-number">{{ $metric['number'] ?? '' }}</div>
-            <div class="metric-label">{{ $metric['label'] ?? '' }}</div>
-          </div>
-        </div>
-        @endif
+          @endif
         @endforeach
       </div>
     </div>
@@ -426,58 +439,74 @@
   @endif
 
   <!-- Media & Recognition Section -->
-  {{-- @if($landingPage->media_enabled && !empty($articlesWithUrls))
-  <section class="landing-section section-media">
+  @if($landingPage->media_enabled && !empty($articlesWithUrls))
+  <section id="media" class="section-py">
     <div class="container">
-      <div class="text-center mb-5">
-        @if($landingPage->media_subtitle)
-        <div class="section-bill-subtitle">
-          <span> {{ $landingPage->media_subtitle }} </span>
+      @if($landingPage->media_subtitle)
+        <div class="text-center mb-4">
+          <span class="badge bg-label-primary">{{ $landingPage->media_subtitle }}</span>
         </div>
-        @endif
-        <h2 class="section-title">
-          {{ $landingPage->media_title ?: ($isRtl ? 'الإعلام والتقدير' : 'Media & Recognition') }}
-        </h2>
-        @if($landingPage->media_description)
-        <p class="section-subtitle">{{ $landingPage->media_description }}</p>
-        @endif
-      </div>
+      @endif
+      <h4 class="text-center mb-1">
+        {{ $landingPage->media_title ?: ($isRtl ? 'الإعلام والتقدير' : 'Media & Recognition') }}
+      </h4>
+      @if($landingPage->media_description)
+        <p class="text-center mb-12">{{ $landingPage->media_description }}</p>
+      @endif
 
-      <div class="row g-4">
+      <div class="row g-6">
         @foreach($articlesWithUrls as $article)
         @if(!empty($article['title']))
-        <div class="col-md-6 col-lg-4">
-          <div class="article-card">
-            @if(!empty($article['image_url']))
-            <img src="{{ $article['image_url'] }}" alt="{{ $article['title'] }}" class="article-image">
-            @else
-            <div class="article-image d-flex align-items-center justify-content-center">
-              <i class="ti ti-news text-muted" style="font-size: 3rem;"></i>
-            </div>
-            @endif
-            <div class="article-body">
-              @if(!empty($article['publication_name']))
-              <div class="article-publication">{{ $article['publication_name'] }}</div>
-              @endif
-              <h5 class="article-title">
-                @if(!empty($article['link']))
-                <a href="{{ $article['link'] }}" target="_blank" class="text-decoration-none text-dark">
-                  {{ $article['title'] }}
-                  <i class="ti ti-external-link ms-1" style="font-size: 0.8rem;"></i>
-                </a>
-                @else
-                {{ $article['title'] }}
-                @endif
-              </h5>
-              @if(!empty($article['summary']))
-              <p class="article-summary">{{ $article['summary'] }}</p>
-              @endif
-              @if(!empty($article['date']))
-              <div class="article-date">
-                <i class="ti ti-calendar me-1"></i>
-                {{ \Carbon\Carbon::parse($article['date'])->format('M d, Y') }}
+        <div class="col-lg-6">
+          <div class="card h-100">
+            <div class="card-body">
+              <div class="row">
+                <div class="col-12 col-md-3 mb-6 mb-md-0">
+                  @if(!empty($article['image_url']))
+                    <img 
+                      src="{{ $article['image_url'] }}"
+                      alt="article-img"
+                      class="w-100 h-px-100 rounded-2 border object-fit-cover"
+                    />
+                  @else
+                    <div class="w-100 h-px-100 rounded-2 border d-flex align-items-center justify-content-center">
+                      <i class="ti ti-news ti-xl"></i>
+                    </div>
+                  @endif
+                </div>
+                <div class="col-12 col-md-9">
+                  <div class="d-flex flex-column h-100">
+                    <div class="flex-grow-1">
+                      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
+                        @if(!empty($article['publication_name']))
+                          <h6 class="text-dark mb-3 mb-md-0">{{ $article['publication_name'] }}</h6>
+                        @endif
+  
+                        @if(!empty($article['date']))
+                          <span class="small text-muted">
+                            <i class="ti ti-calendar ti-sm me-1"></i>
+                            {{ \Carbon\Carbon::parse($article['date'])->format('M d, Y') }}
+                          </span>
+                        @endif
+                      </div>
+  
+                      <h5 class="card-title">{{ $article['title'] }}</h5>
+                      
+                      @if(!empty($article['summary']))
+                        <p class="card-text mb-4">{{ $article['summary'] }}</p>
+                      @endif
+                    </div>
+                    
+                    <div class="mt-auto">
+                      @if(!empty($article['link']))
+                        <a href="{{ $article['link'] }}" target="_blank" class="btn btn-sm btn-text-primary">
+                          {{ __('admin.read_more') }} <i class="ti ti-arrow-right ms-2"></i>
+                        </a>
+                      @endif
+                    </div>
+                  </div>
+                </div>
               </div>
-              @endif
             </div>
           </div>
         </div>
@@ -488,43 +517,101 @@
   </section>
   @endif
 
-  <!-- Partners Section -->
   @if($landingPage->partners_enabled && !empty($partnersWithUrls))
-  <section class="landing-section section-partners">
+  <section id="partners" class="section-py bg-body landing-reviews pb-0">
+    <!-- Partners slider: Start -->
     <div class="container">
-      <div class="text-center mb-5">
-        @if($landingPage->partners_subtitle)
-        <div class="section-bill-subtitle">
-          <span> {{ $landingPage->partners_subtitle }} </span>
-        </div>
-        @endif
-        <h2 class="section-title">
-          {{ $landingPage->partners_title ?: ($isRtl ? 'شركاؤنا' : 'Our Partners') }}
-        </h2>
-        @if($landingPage->partners_description)
-        <p class="section-subtitle">{{ $landingPage->partners_description }}</p>
-        @endif
-      </div>
-
-      <div class="partners-grid">
-        @foreach($partnersWithUrls as $partner)
-        @if(!empty($partner['logo_url']) || !empty($partner['name']))
-        <div class="text-center" title="{{ $partner['name'] ?? '' }}">
-          @if(!empty($partner['logo_url']))
-          <img src="{{ $partner['logo_url'] }}" alt="{{ $partner['name'] ?? 'Partner' }}" class="partner-logo">
-          @else
-          <div class="d-inline-flex align-items-center justify-content-center bg-light rounded px-4 py-3">
-            <span class="fw-semibold text-muted">{{ $partner['name'] ?? '' }}</span>
-          </div>
+      <div class="row align-items-center gx-0 gy-4 g-lg-5 mb-5 pb-md-5">
+        <div class="col-md-6 col-lg-5 col-xl-3">
+          @if($landingPage->partners_subtitle)
+            <div class="text-center mb-4">
+              <span class="badge bg-label-primary">{{ $landingPage->partners_subtitle }}</span>
+            </div>
           @endif
+          @if($landingPage->partners_title)
+            <h4 class="text-center mb-1">
+              {{ $landingPage->partners_title ?: ($isRtl ? 'شركاؤنا' : 'Our Partners') }}
+            </h4>
+          @endif
+          @if($landingPage->partners_description)
+            <p class="text-center mb-12">
+              {{ $landingPage->partners_description }}
+            </p>
+          @endif
+
+          <div class="landing-reviews-btns">
+            <button
+              id="reviews-previous-btn"
+              class="btn btn-label-primary reviews-btn me-4 scaleX-n1-rtl"
+              type="button">
+              <i class="ti ti-chevron-left ti-md"></i>
+            </button>
+            <button id="reviews-next-btn" class="btn btn-label-primary reviews-btn scaleX-n1-rtl" type="button">
+              <i class="ti ti-chevron-right ti-md"></i>
+            </button>
+          </div>
         </div>
-        @endif
-        @endforeach
+        <div class="col-md-6 col-lg-7 col-xl-9">
+          <div class="swiper-reviews-carousel overflow-hidden">
+            <div class="swiper" id="swiper-reviews">
+              <div class="swiper-wrapper">
+                @foreach($partnersWithUrls as $partner)
+                  <div class="swiper-slide">
+                    <div class="card h-100">
+                      <div class="card-body text-center d-flex flex-column justify-content-between h-100">
+                        <div class="mb-4">
+                          @if(!empty($partner['logo_url']))
+                            <img
+                              src="{{ $partner['logo_url'] }}"
+                              alt="partner logo"
+                              class="w-px-50 h-px-50 img-fluid" 
+                            />
+                          @else
+                            <div class="d-inline-flex align-items-center justify-content-center bg-light rounded px-4 py-3">
+                              <span class="fw-semibold text-muted">{{ $partner['name'] ?? '' }}</span>
+                            </div>
+                          @endif
+                        </div>
+                        <h6 class="mb-0">{{ $partner['name'] }}</h6>
+                      </div>
+                    </div>
+                  </div>
+                @endforeach
+              </div>
+              <div class="swiper-button-next"></div>
+              <div class="swiper-button-prev"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+    <!-- Partners slider: End -->
+    <hr class="m-0 mt-6 mt-md-12" />
+    <!-- Logo slider: Start -->
+    <div class="container">
+      <div class="swiper-logo-carousel py-8">
+        <div class="swiper" id="swiper-clients-logos">
+          <div class="swiper-wrapper">
+            @foreach($partnersWithUrls as $partner)
+              <div class="swiper-slide">
+                <img
+                  src="{{ $partner['logo_url'] }}"
+                  alt="client logo"
+                  class="client-logo"
+                  {{-- data-app-light-img="{{ $partner['logo_url'] }}"
+                  data-app-dark-img="{{ $partner['logo_url'] }}"  --}}
+                />
+              </div>
+            @endforeach
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Logo slider: End -->
   </section>
   @endif
 
+  {{-- 
   <!-- Custom Sections -->
   @if(!empty($customSections))
   @foreach($customSections as $customSection)
@@ -550,9 +637,9 @@
       <div class="container">
         <div class="row gx-0 gy-6 g-lg-10">
           <div class="col-lg-5">
-            <a href="javascript:void(0);" class="app-brand-link mb-6">
-              <img src="{{ $organization->image_url }}" alt="logo" class="app-brand-logo demo">
-              <span class="app-brand-text demo footer-link fw-bold ms-2 ps-1">
+            <a href="javascript:void(0);" class="app-brand-link d-flex align-items-center mb-6">
+              <img src="{{ $organization->image_url }}" alt="Logo" width="32" height="32" class="me-2 object-fit-contain">
+              <span class="app-brand-text footer-text fw-bold ms-2 ps-1">
                 {{ $isRtl ? $organization->name_ar : $organization->name_en }}
               </span>
             </a>
@@ -638,7 +725,7 @@
   <script src="/vuexy/assets/js/front-main.js"></script>
 
   <!-- Page JS -->
-  {{-- <script src="/vuexy/assets/js/front-page-landing.js"></script> --}}
+  <script src="/vuexy/assets/js/front-page-landing.js"></script>
 </body>
 
 </html>

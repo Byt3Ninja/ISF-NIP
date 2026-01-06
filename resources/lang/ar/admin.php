@@ -3169,4 +3169,5 @@ return [
 	'follow_us' => 'تابعنا',
 	'login_or_register' => 'تسجيل الدخول',
 	'quick_links' => 'روابط سريعة',
+	'read_more' => 'قراءة المزيد',
 ];
