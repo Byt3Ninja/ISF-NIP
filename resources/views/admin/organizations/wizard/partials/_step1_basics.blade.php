@@ -11,7 +11,7 @@
         class="d-block w-px-100 h-px-100 rounded border shadow-sm"
         alt="logo"
         src="{{ $org && $org->img_url ? $org->imageUrl : '/images/logo-placeholder.png' }}"
-        onerror="this.onerror=null;this.src='/images/user-placeholder.jpeg'"
+        onerror="this.onerror=null;this.src='/images/logo-placeholder.png'"
       />
       <div class="button-wrapper">
         <div class="d-flex align-items-start align-items-center">

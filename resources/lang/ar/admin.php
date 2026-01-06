@@ -3169,4 +3169,12 @@ return [
 	'follow_us' => 'تابعنا',
 	'login_or_register' => 'تسجيل الدخول',
 	'quick_links' => 'روابط سريعة',
+	'read_more' => 'قراءة المزيد',
+	'get_in_touch' => 'كن على تواصل',
+	'org_landing_contact_description' => 'أي سؤال أو تعليق؟ فقط اكتب لنا رسالة',
+	'send_a_message' => 'أرسل رسالة',
+	'send_message_description1' => 'إذا كنت ترغب مناقشة أي شيء متعلق بالدفع، الحساب، الترخيص،',
+	'send_message_description2' => 'الشراكات، أو لديك أسئلة مبيعة قبل البيع، فأنك في المكان الصحيح',
+	'full_name' => 'الاسم الكامل',
+	'send_inquiry' => 'أرسل استفسار',
 ];

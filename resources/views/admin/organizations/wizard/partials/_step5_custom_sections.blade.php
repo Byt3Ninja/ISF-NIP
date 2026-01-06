@@ -134,7 +134,7 @@
       <input type="hidden" name="custom_sections[__INDEX__][id]" value="">
       <input type="hidden" name="custom_sections[__INDEX__][title]" value="" class="hidden-title">
       <input type="hidden" name="custom_sections[__INDEX__][content]" value="" class="hidden-content">
-      <input type="hidden" name="custom_sections[__INDEX__][visibility]" value="public" class="hidden-visibility">
+      <input type="hidden" name="custom_sections[__INDEX__][visibility]" value="" class="hidden-visibility">
       <input type="hidden" name="custom_sections[__INDEX__][sort_order]" value="__INDEX__" class="hidden-sort-order">
     </div>
   </div>

@@ -132,11 +132,7 @@
                         <i class="ti ti-file me-2"></i>{{ __('admin.Save as Draft') }}
                       </button>
                     @endif
-                    @if($activeStep == 5)
-                      <button type="button" class="btn btn-success" id="publishBtn">
-                        <i class="ti ti-world me-2"></i>{{ __('admin.Publish') }}
-                      </button>
-                    @elseif($canPublish)
+                    @if($canPublish)
                       <button type="button" class="btn btn-success" id="publishBtn">
                         <i class="ti ti-world me-2"></i>{{ __('admin.Publish') }}
                       </button>
@@ -542,6 +538,27 @@
             if (confirm(config.translations.publishText)) $('#publishForm').submit();
           }
           return;
+        }
+
+        // For step 5, sync TinyMCE content before submitting
+        if (currentStep === 5) {
+          $('.custom-section-card.editing').each(function() {
+            const card = $(this);
+            const textarea = card.find('.rich-text-editor');
+            const editorId = textarea.attr('id');
+            if (editorId && typeof tinymce !== 'undefined') {
+              const editor = tinymce.get(editorId);
+              if (editor) {
+                editor.save();
+              }
+            }
+            // Sync to hidden inputs
+            const form = card.find('.section-form-container');
+            const hidden = card.find('.section-hidden-inputs');
+            hidden.find('.hidden-title').val(form.find('.section-title-input').val());
+            hidden.find('.hidden-content').val(form.find('.section-content-input').val());
+            hidden.find('.hidden-visibility').val(form.find('.visibility-radio:checked').val());
+          });
         }
 
         if (!validator) {

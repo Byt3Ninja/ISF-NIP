@@ -7,7 +7,7 @@
   // Get values
   $title = old("custom_sections.{$idx}.title", $sectionData->title ?? '');
   $content = old("custom_sections.{$idx}.content", $sectionData->content ?? '');
-  $visibility = old("custom_sections.{$idx}.visibility", $sectionData->visibility ?? 'public');
+  $visibility = old("custom_sections.{$idx}.visibility", $sectionData->visibility ?? ($sectionData ? 'public' : ''));
 @endphp
 
 <div class="section-form py-3">
@@ -36,6 +36,7 @@
         {{ __('admin.Section Content') }} <span class="text-danger">*</span>
       </label>
       <textarea
+        id="content_{{ $idx }}"
         class="form-control rich-text-editor section-content-input @error("custom_sections.{$idx}.content") is-invalid @enderror"
         name="custom_sections[{{ $idx }}][content]"
         rows="6"

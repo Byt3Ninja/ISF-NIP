@@ -950,6 +950,7 @@ Route::get('/auth/linkedin-openid/callback', 'SocialController@handleLinkedInCal
 
 // Public Organization Landing Page
 Route::get('/o/{slug}', 'PublicLandingController@show')->name('organization.landing.public');
+Route::post('/o/{slug}/contact', 'PublicLandingController@submitContact')->name('organization.contact.submit');
 
 Route::get('/{org_slug}/join/{step_slug}', 'ExternalCyclesController@publicJoin')->name('public.join');
 Route::get('/{org_slug}/program/{program_slug}', 'ExternalCyclesController@publicProgramJoin')->name('public.program_join');
