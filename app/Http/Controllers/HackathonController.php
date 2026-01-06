@@ -110,8 +110,8 @@ class HackathonController extends Controller
             ->when($request->searchHackathon, function ($query, $searchHackathon) {
                 return $query->where('c.title', 'like', '%' . $searchHackathon . '%');
             })
-            ->when($user->organization_id, function ($query) use ($user) {
-                return $query->where('c.organization_id', $user->organization_id);
+            ->when(!$user->hasRole('admin') && !empty($user->organizations_ids), function ($query) use ($user) {
+                return $query->whereIn('c.organization_id', $user->organizations_ids);
             })
             ->orderBy('c.start', 'asc')
         ->get();
@@ -699,9 +699,9 @@ class HackathonController extends Controller
             }
 
             // فلترة حسب organization إذا موجودة
-            if (!empty($user->organization_id)) {
-                $forms .= " AND CYC.organization_id = ? ";
-                $params[] = $user->organization_id;
+            $orgIds = $user->organizations_ids;
+            if (!$user->hasRole('admin') && !empty($orgIds)) {
+                $forms .= " AND CYC.organization_id IN (" . implode(',', array_map('intval', $orgIds)) . ") ";
             }
             $forms .= " ORDER BY FD.created_at";
             $forms = DB::select($forms, $params);
@@ -1194,13 +1194,12 @@ class HackathonController extends Controller
       LEFT JOIN organizations as O ON O.id = CYC.organization_id
       LEFT JOIN form_fields as FF ON FF.builder_forms_id = S.data
       WHERE CYC.type = 'Hackathon' AND S.id = ? AND FD.deleted_at IS NULL";
-      if($user->organization_id != null){
-      $forms .= " AND CYC.organization_id = ? ";
-      $forms = DB::select($forms, [$user->organization_id]);
-      }else{
-      $forms = DB::select($forms,[$id]);
+      $orgIds = $user->organizations_ids;
+      if(!$user->hasRole('admin') && !empty($orgIds)){
+          $forms .= " AND CYC.organization_id IN (" . implode(',', array_map('intval', $orgIds)) . ") ";
       }
-        $forms = collect($forms);
+      $forms = DB::select($forms, [$id]);
+      $forms = collect($forms);
 
     
         $C = 1;
@@ -1935,12 +1934,12 @@ class HackathonController extends Controller
                 AND FD.step_id = ?
                 AND FD.user_id = ?
         ";
-        $params = [];
-        if( $user->organization_id != null )
+        $orgIds = $user->organizations_ids;
+        if( !$user->hasRole('admin') && !empty($orgIds) )
         {
-            $forms .= " AND CYC.organization_id = ? ";
-            $forms = DB::select($forms, [$step_id, $user_id, $user->organization_id]);
-        } else { $forms = DB::select($forms, [$step_id, $user_id]); }
+            $forms .= " AND CYC.organization_id IN (" . implode(',', array_map('intval', $orgIds)) . ") ";
+        }
+        $forms = DB::select($forms, [$step_id, $user_id]);
         $forms = collect($forms);
         $C = 1;
 

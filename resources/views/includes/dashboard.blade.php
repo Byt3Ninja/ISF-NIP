@@ -629,8 +629,8 @@
 													<b>{{ __('cycles.training location') }}:</b>
 													{{ $session->location }} <br>
 													@else
-													<a href="/dashboard/training/my/{{ $session->location }}">{{ __('cycles.Display course
-														contents') }} </a>
+													<a href="/dashboard/training/my/{{ $session->location }}">
+													{{ __('cycles.Display course contents') }} </a>
 													@endif
 												</td>
 											</tr>
@@ -693,7 +693,7 @@
 													</div>
 												</td>
 												<td>
-													<div style="cursor: pointer;" class="d-flex align-items-center"
+													<div style="cursor: pointer;" class="d-flex align-items-center gap-2"
 														onclick="mentor({{ $session->mentor_id }}, '{{ $session->mentor->name }}', '{{ $session->mentor->ratings }}')">
 														<div class="avatar">
 															<img 
@@ -834,14 +834,32 @@
 									</td>
 									@if( $_user->ableTo('mentors.settings_modify', $permissions) )
 									<td>
-										<button
-											onclick="if (typeof fetchSlots === 'function') { fetchSlots({{ $mentor->id }}, {{ $mentor->cycle_id }}, {{ $mentor->organization_id }}); }"
-											{{-- onclick="request({{ $mentor->id }},'{{ $mentor->name }}', {{ $mentor->organization_id }}, {{ $mentor->cycle_id }})" --}}
-											title="{{ __('cycles.Request_Mentorship') }}"
-											type="button"
-											class="btn btn-icon rounded-circle btn-label-success">
-											<i class="fa fa-plus"></i>
-										</button>
+										@php
+											$schedules = App\Schedule::where('user_id', $mentor->id ?? auth()->id())
+														->where(function ($query) {$query
+																->whereNull('date')
+																->orWhere('date', '>', date('Y-m-d'))
+																->orWhere(function ($q) {
+																	$q->where('date', date('Y-m-d'))
+																	->where('tto', '>', date('H:i:s'));
+																});
+														})
+														->get();
+										@endphp
+										@if($schedules->isNotEmpty())
+											<button
+												onclick="if (typeof fetchSlots === 'function') { fetchSlots({{ $mentor->id }}, {{ $mentor->cycle_id }}, {{ auth()->user()->company->cycledata->organization_id }}); }"
+												{{-- onclick="request({{ $mentor->id }},'{{ $mentor->name }}', {{ $mentor->organization_id }}, {{ $mentor->cycle_id }})" --}}
+												title="{{ __('cycles.Request_Mentorship') }}"
+												type="button"
+												class="btn btn-icon rounded-circle btn-label-success">
+												<i class="fa fa-plus"></i>
+											</button>
+										@else
+											<button type="button" class="btn btn-icon rounded-circle btn-label-success" disabled>
+												<i class="fa fa-plus"></i>
+											</button>
+										@endif
 									</td>
 									@endif
 								</tr>
@@ -976,24 +994,38 @@
 											$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+' . $session->period .' minutes'));
 										@endphp
 										
-										@if( $now >= $start_time )
-											@if( $now <= $end_time )
-											<a href="{{ $session->start_url }}" target="_blank">
-												<button title="Start Meeting" type="button" data-value="{{ $session->id }}" type="button" class="btn btn-label-primary rounded">
-													<i class="ti ti-link"></i> {{ __('admin.Join Meeting') }}
-												</button>
-											</a>
-											@if( !empty( $session->passcode ) )
-												 | <button title="Show Passcode" type="button" data-passcode="{{ $session->passcode }}" type="button" class="btn btn-label-warning show-passcode rounded">
-													<i class="ti ti-key"></i>
-												</button>
-											@endif
+										
+											@if($session->session_type == 'Online')
+												@if( $now >= $start_time )
+													@if( $now <= $end_time )
+													
+														<a href="{{ $session->start_url }}" target="_blank">
+															<button title="Start Meeting" type="button" data-value="{{ $session->id }}" type="button" class="btn btn-label-primary rounded">
+																<i class="ti ti-link"></i> {{ __('admin.Join Meeting') }}
+															</button>
+														</a>
+														@if( !empty( $session->passcode ) )
+															| <button title="Show Passcode" type="button" data-passcode="{{ $session->passcode }}" type="button" class="btn btn-label-warning show-passcode rounded">
+																<i class="ti ti-key"></i>
+															</button>
+														@endif
+													@else
+														<span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
+													@endif
+												@else
+													<i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }}
+												@endif
 											@else
-												<span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
+											
+												<span class="warning">
+													<a class="btn btn-sm btn-label-success" href="{{ $session->organization->google_map_url ?? '#' }}" target="_blank">
+														<i class="ti ti-map me-2"></i>
+														{{ __('admin.Location') }}
+													</a>
+												</span>
 											@endif
-										@else
-											<i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }}
-										@endif
+										
+
 									</td>
 								</tr>
 								@endforeach
@@ -2248,6 +2280,9 @@ document.addEventListener('DOMContentLoaded', function() {
 		});
 	</script>
 
+@if( array_intersect(['dashboard.widgets_tables_my_current_schedule_view'], $permissions) )
+@if( $_user->ableTo('slots.index', $permissions) )
+@if ( isset($$my_schedules) && count( $$my_schedules ) > 0 )
 	<script>
 		$(document).ready(function () {
 			// Initialize slots DataTable
@@ -2265,4 +2300,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			});
 		});
 	</script>
+@endif
+@endif
+@endif
 @stop

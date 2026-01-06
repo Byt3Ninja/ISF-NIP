@@ -2,6 +2,7 @@
 
 namespace App;
 
+use URL;
 use App\Step;
 use Carbon\Carbon;
 use App\Traits\Auditable;
@@ -29,6 +30,22 @@ class Cycle extends Model
     public function getEndFormatAttribute()
     {
         return date('Y-m-d',strtotime($this->attributes['end']));
+    }
+    public function getLogoAttribute()
+    {
+        $img = $this->img_url;
+        if( trim( $img ) ) { return URL::to( $img ); }
+
+        $org = $this->organization;
+        if( $org && $org->imageUrl )
+        {
+            if (str_starts_with($org->imageUrl, 'http') || str_starts_with($org->imageUrl, '/'))
+            {
+                return $org->imageUrl;
+            }
+            return URL::to( $org->imageUrl );
+        }
+        return URL::to('/images/background/logo.png');
     }
     // =============> Relations <========================
     public function organization(){

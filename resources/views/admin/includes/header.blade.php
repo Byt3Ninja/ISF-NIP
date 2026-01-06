@@ -169,7 +169,17 @@
         'icon' => 'ti ti-activity ti-md me-2 me-lg-4 ti-lg',
         'route' => '/dashboard/hackathon',
         'permission' => 'hackathon.view',
-        'isVisible' => $_user->hasRole("Registered"),
+        'isVisible' => true,
+        'subItems' => []
+    ],
+
+    // Perks & Discounts
+    [
+        'label' => $l == 'en' ? 'Perks & Discounts' : 'المزايا والخصومات',
+        'icon' => 'ti ti-gift ti-md me-2 me-lg-4 ti-lg',
+        'route' => '/dashboard/perks',
+        'permission' => $_user->hasRole("Registered"),
+        'isVisible' => true,
         'subItems' => []
     ],
 
@@ -200,7 +210,7 @@
 
     // Services Directory
     [
-        'label' => $l == 'en' ? 'Directory' : 'دليل الخدمات',
+        'label' => __('admin.Services'),
         'icon' => 'ti ti-search',
         'route' => 'users.directory_view',
         'permission' => 'users.directory_view',
@@ -270,7 +280,7 @@
 
     // Organizations (Admin)
     [
-        'label' => $l == 'en' ? 'Manage Organizations' : 'إدارة المنظمات',
+        'label' => __('admin.Organizations'),
         'icon' => 'ti ti-layout-board',
         'route' => 'organizations.index',
         'permission' => 'organizations.index',
@@ -336,13 +346,6 @@
                 'isVisible' => true
             ],
             [
-                'label' => $l == 'en' ? 'Hackathons' : 'الهاكاثونات',
-                'icon' => 'ti ti-trophy',
-                'route' => '/dashboard/hackathon',
-                'permission' => 'hackathon.view',
-                'isVisible' => true
-            ],
-            [
                 'label' => $l == 'en' ? 'Steps' : 'الخطوات',
                 'icon' => 'ti ti-stairs',
                 'route' => '/dashboard/cycles',
@@ -396,8 +399,8 @@
         'label' => $l == 'en' ? 'Assessments' : 'التقييمات',
         'icon' => 'ti ti-circle-dashed-check ti-md me-3',
         'route' => null,
-        'permission' => ['assessments.index', 'assessments.take', 'assessments.results_analysis_view'],
-        'isVisible' => $_user->ableToAny(["assessments.index", "assessments.take", "assessments.results_analysis_view"], $permissions),
+        'permission' => ['assessments.index'],
+        'isVisible' => $_user->ableToAny(["assessments.index"], $permissions),
         'subItems' => [
             [
                 'label' => $l == 'en' ? 'Manage Assessments' : 'إدارة التقييمات',

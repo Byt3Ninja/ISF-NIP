@@ -60,12 +60,16 @@
           <form id="filter-form" method="GET" action="/dashboard/screening">
             <div class="row g-3 align-items-center">
               <div class="col-md-6 col-lg-3">
-                <input type="text" class="form-control bg-card" name="search" value="{{ request('search') }}" placeholder="{{ __('admin.screening.search_steps_placeholder') }}">
+                <div class="input-group input-group-merge">
+                  <span class="input-group-text" id="basic-addon-search31"><i class="ti ti-search"></i></span>
+                  <input type="text" class="form-control bg-card" name="search" value="{{ request('search') }}" placeholder="{{ __('admin.screening.search_steps_placeholder') }}" aria-label="Search" aria-describedby="basic-addon-search31">
+                </div>
               </div>
 
+
               <div class="col-md-6 col-lg-2">
-                <select class="form-select bg-card" name="status">
-                  <option value="">{{ __('admin.All_statuses') }}</option>
+                <select class="form-select select2 bg-card" name="status" data-placeholder="{{ __('admin.All_statuses') }}">
+                  <option value=""></option>
                   <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>{{ __('admin.In_Progress') }}</option>
                   <option value="upcoming" {{ request('status') == 'upcoming' ? 'selected' : '' }}>{{ __('admin.Upcoming') }}</option>
                   <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>{{ __('admin.completed') }}</option>
@@ -73,42 +77,41 @@
               </div>
 
               <div class="col-md-6 col-lg-2">
-                <select class="form-select bg-card" name="program">
-                  <option value="">{{ __('admin.All_Programs') }}</option>
+                <select class="form-select select2 bg-card" name="program" data-placeholder="{{ __('admin.All_Programs') }}">
+                  <option value=""></option>
                   @foreach($screeningSteps->pluck('program')->unique('id') as $program)
                     <option value="{{ $program->id }}" {{ request('program') == $program->id ? 'selected' : '' }}>{{ Str::limit($program->title, 25) }}</option>
                   @endforeach
                 </select>
               </div>
 
-              <div class="col-md-6 col-lg-2">
-                <select class="form-select bg-card" name="judge">
-                  <option value="">{{ __('cycles.All Judges') }}</option>
-                  @foreach($screeningSteps->pluck('judges')->flatten()->unique('id') as $judge)
-                    <option value="{{ $judge->id }}" {{ request('judge') == $judge->id ? 'selected' : '' }}>{{ $judge->name }}</option>
-                  @endforeach
-                </select>
+              <div class="col-md-6 col-lg-3">
+                <div class="d-flex gap-2">
+                  <select class="form-select select2 bg-card flex-grow-1" name="judge" data-placeholder="{{ __('cycles.All Judges') }}">
+                    <option value=""></option>
+                    @foreach($screeningSteps->pluck('judges')->flatten()->unique('id') as $judge)
+                      <option value="{{ $judge->id }}" {{ request('judge') == $judge->id ? 'selected' : '' }}>{{ $judge->name }}</option>
+                    @endforeach
+                  </select>
+                  <select class="form-select select2 bg-card flex-grow-1" name="startup" data-placeholder="{{ __('admin.all_startups') }}">
+                    <option value=""></option>
+                    @foreach($screeningSteps->pluck('companies')->flatten()->unique('id') as $company)
+                      <option value="{{ $company->id }}" {{ request('startup') == $company->id ? 'selected' : '' }}>{{ Str::limit($company->name, 25) }}</option>
+                    @endforeach
+                  </select>
+                </div>
               </div>
 
-              <div class="col-md-6 col-lg-2">
-                <select class="form-select bg-card" name="startup">
-                  <option value="">{{ __('admin.all_startups') }}</option>
-                  @foreach($screeningSteps->pluck('companies')->flatten()->unique('id') as $company)
-                    <option value="{{ $company->id }}" {{ request('startup') == $company->id ? 'selected' : '' }}>{{ Str::limit($company->name, 25) }}</option>
-                  @endforeach
-                </select>
-              </div>
-
-              <div class="col-md-6 col-lg-1">
-                <div class="d-flex justify-content-lg-end gap-2">
-                  <button type="submit" class="btn btn-primary btn-icon" disabled>
-                    <i class="ti ti-filter"></i>
-                  </button>
-                  @if(request('search') || request('status') || request('program') || request('judge') || request('startup'))
-                    <a href="/dashboard/screening" class="btn bg-card border btn-icon">
-                      <i class="ti ti-refresh"></i>
+              <div class="col-lg-2">
+                <div class="d-flex justify-content-end gap-2">
+                  @if(request('search') || request('screening_type') || request('status') || request('program') || request('judge') || request('startup'))
+                    <a href="/dashboard/screening" class="btn btn-label-secondary">
+                      <i class="ti ti-refresh me-1"></i> {{ __('admin.Reset') }}
                     </a>
                   @endif
+                  <button type="submit" class="btn btn-primary">
+                    <i class="ti ti-filter me-1"></i> {{ __('admin.Filter') }}
+                  </button>
                 </div>
               </div>
             </div>
@@ -296,16 +299,26 @@
 
 @section('pagescripts')
 <script>
-  // Initialize date pickers
-  $('.date').flatpickr({
-    enableTime: false,
-    dateFormat: 'Y-m-d'
+  $(function () {
+    // Initialize Select2
+    $('.select2').each(function () {
+      var $this = $(this);
+      $this.wrap('<div class="position-relative"></div>').select2({
+        placeholder: $this.data('placeholder'),
+        dropdownParent: $this.parent(),
+        allowClear: true
+      });
+    });
+
+    // Initialize date pickers
+    $('.date').flatpickr({
+      enableTime: false,
+      dateFormat: 'Y-m-d'
+    });
   });
 
-  // Toggle submit button disable state on form change
-  $('#filter-form select, #filter-form input').on('change input', function () {
-    $('#filter-form button[type="submit"]').prop('disabled', $(this).val() ? false : true);
-  });
+  // No-op for button enabling as it is no longer disabled by default
+  // and we want filters to be easily reapplied/cleared.
 
 
   $('.edit-step-btn').on('click', function () {

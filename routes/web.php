@@ -17,6 +17,7 @@ use App\Http\Controllers\Mentor\MentorshipTaskController;
 use App\Http\Controllers\Mentor\SlotController;
 use App\Http\Controllers\Judger\JudgerScreeningController;
 use App\Http\Controllers\AdvancedExportController;
+use App\Http\Controllers\TasksController;
 /* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
 Route::get('def-permission', function() {
     $jsonRole = File::get(base_path('database/dbFiles/rolesWithDefaultPermissions.json'));
@@ -68,6 +69,7 @@ Route::get('/reminderMentorShipRequest', 'IndexController@reminderMentorShipRequ
 //    }
 //    return view('admin.reports.company');
 //});
+// Route::view('upload_page', 'upload_test');
 
 
 /// Frontend routes ///
@@ -352,6 +354,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     // Invitations
     Route::group(['prefix' => 'mentors'], function () {
         Route::resource('invitations', 'InvitationController');
+        Route::post('File_Upload', 'InvitationController@updateFile')->name('invitations.upload');
     });
     
     // lowercase alias for backward-compatibility / ease of testing
@@ -542,6 +545,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::resource('faqs', 'FaqsController');
 
     // Tasks
+    Route::get('tasks/assignees/{program_id}', [TasksController::class, 'getAssignees'])->name('tasks.get_assignees');
+    Route::get('tasks/titles', [TasksController::class, 'getTaskTitles'])->name('tasks.get_titles');
     Route::resource('tasks', 'TasksController');
 
     // Forms
@@ -601,6 +606,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('screening/{id?}', 'ScreeningController@show');
     Route::get('/dashboard/screening/get/{formId}/{stepId}/{panel}', 'ScreeningController@get')->name('screening.get');
     Route::post('screening/update', 'ScreeningController@update');
+    Route::post('screening/add-judging-panels', 'ScreeningController@addJudgingPanels')->name('screening.add_judging_panels');
+    Route::post('screening/delete-judging-panel', 'ScreeningController@deleteJudgingPanel')->name('screening.delete_judging_panel');
     Route::post('screening/save', 'ScreeningController@save');
     Route::post('screening/add', 'ScreeningController@add');
     Route::get('screening/results/{id?}', 'ScreeningController@results');
@@ -758,6 +765,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('programlist/create', 'ProgramController@edit')->name('programs.create');
     Route::get('programlist/edit/{id}', 'ProgramController@edit')->name('programs.edit');
     Route::get('programlist/show/{id}', 'ProgramController@show')->name('programs.view');
+    Route::get('programlist/{id}/custom-pages', 'ProgramController@customPages');
+    
     Route::post('programlist/Email', 'ProgramController@SentEmail')->name('programs.send_email');
     Route::get('/export-Prog', 'ProgramController@exportProg')->name('programs.export');
     Route::get('programlist/report/{id}', 'ProgramController@programReport')->name('programs.report');
@@ -940,6 +949,7 @@ Route::get('/auth/linkedin-openid/callback', 'SocialController@handleLinkedInCal
 
 // Public Organization Landing Page
 Route::get('/o/{slug}', 'PublicLandingController@show')->name('organization.landing.public');
+Route::post('/o/{slug}/contact', 'PublicLandingController@submitContact')->name('organization.contact.submit');
 
 Route::get('/{org_slug}/join/{step_slug}', 'ExternalCyclesController@publicJoin')->name('public.join');
 Route::get('/{org_slug}/program/{program_slug}', 'ExternalCyclesController@publicProgramJoin')->name('public.program_join');

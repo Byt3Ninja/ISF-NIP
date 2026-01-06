@@ -1,1085 +1,955 @@
 <!DOCTYPE html>
-<html lang="{{ $l }}" dir="{{ $isRtl ? 'rtl' : 'ltr' }}" data-textdirection="{{ $isRtl ? 'rtl' : 'ltr' }}"
-    class="light-style layout-navbar-fixed layout-compact" data-theme="theme-default" data-assets-path="/vuexy/assets/"
-    data-template="vertical-menu-template" data-style="light">
-
+<html
+  lang="{{ $l }}"
+  dir="{{ $l == 'ar' ? 'rtl' : 'ltr' }}"
+  data-textdirection="{{ $l == 'ar' ? 'rtl' : 'ltr' }}"
+  class="light-style layout-navbar-fixed layout-menu-fixed layout-compact"
+  data-theme="theme-default"
+  data-assets-path="/vuexy/assets/"
+  data-template="vertical-menu-template"
+  data-style="light"
+>
 <head>
-    {{--  @include('admin.includes.head')  --}}
+  <meta charset="utf-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-    <!-- SEO Meta Tags -->
-    <title>{{ $isRtl ? $organization->name_ar : $organization->name_en }} - {{ config('app.name') }}</title>
-    <meta name="description" content="{{ Str::limit($organization->bio, 160) }}">
-    <meta name="keywords" content="{{ $organization->industries->pluck($isRtl ? 'name_ar' : 'name_en')->implode(', ') }}">
+  <title>{{ __('admin.Landing Page') }} - {{ $isRtl ? $organization->name_ar : $organization->name_en }}</title>
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ url('/o/' . $organization->slug) }}">
-    <meta property="og:title" content="{{ $isRtl ? $organization->name_ar : $organization->name_en }}">
-    <meta property="og:description" content="{{ Str::limit($organization->bio, 200) }}">
-    @if($organization->img_url)
-        <meta property="og:image" content="{{ $organization->imageUrl }}">
-    @endif
+  <meta name="description" content="{{ Str::limit($organization->bio, 160) }}">
+  <meta name="keywords" content="{{ $organization->industries->pluck($isRtl ? 'name_ar' : 'name_en')->implode(', ') }}">
 
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="{{ url('/o/' . $organization->slug) }}">
-    <meta property="twitter:title" content="{{ $isRtl ? $organization->name_ar : $organization->name_en }}">
-    <meta property="twitter:description" content="{{ Str::limit($organization->bio, 200) }}">
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ url('/o/' . $organization->slug) }}">
+  <meta property="og:title" content="{{ $isRtl ? $organization->name_ar : $organization->name_en }}">
+  <meta property="og:description" content="{{ Str::limit($organization->bio, 200) }}">
+  @if($organization->img_url)
+    <meta property="og:image" content="{{ $organization->imageUrl }}">
+  @endif
 
-    <!-- Canonical URL -->
-    <link rel="canonical" href="{{ url('/o/' . $organization->slug) }}">
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="{{ url('/o/' . $organization->slug) }}">
+  <meta property="twitter:title" content="{{ $isRtl ? $organization->name_ar : $organization->name_en }}">
+  <meta property="twitter:description" content="{{ Str::limit($organization->bio, 200) }}">
 
-    <!-- Favicon -->
-    <link rel="shortcut icon" type="image/x-icon" href="/app-assets/images/ico/favicon.ico">
+  <!-- Canonical URL -->
+  <link rel="canonical" href="{{ url('/o/' . $organization->slug) }}">
 
-    <!-- Flag Icons CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css">
+  <!-- Favicon -->
+  <link rel="shortcut icon" type="image/x-icon" href="/app-assets/images/ico/favicon.ico">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&ampdisplay=swap"
+    rel="stylesheet" />
 
-    <!-- Icons -->
-    <link rel="stylesheet" href="/vuexy/assets/vendor/fonts/fontawesome.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/fonts/tabler-icons.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/fonts/flag-icons.css" />
-    <!-- End Icons -->
+  <link rel="stylesheet" href="/vuexy/assets/vendor/fonts/tabler-icons.css" />
 
-    <!-- Core CSS -->
-    <link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/core.css" class="template-customizer-core-css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/theme-default.css" class="template-customizer-theme-css" />
-    <link rel="stylesheet" href="/vuexy/assets/css/demo.css" />
-    <!-- End Core CSS -->
+  <!-- Core CSS -->
 
-    <!-- Vendors CSS -->
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/node-waves/node-waves.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/typeahead-js/typeahead.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/swiper/swiper.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-checkboxes-jquery/datatables.checkboxes.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-rowgroup-bs5/rowgroup.bootstrap5.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/core.css" class="template-customizer-core-css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/theme-default.css" class="template-customizer-theme-css" />
 
-    <!-- For Searchable Select -->
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
-    <!-- For Date & Time Picker -->
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
+  <style>
+    html {
+      direction: {{ $l == 'ar' ? 'rtl' : 'ltr' }};
+    }
+  </style>
 
-    {{-- <link rel="stylesheet" href="/app-assets/plugins/sweatalert/sweetalert2.min.css"> --}}
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
+  <link rel="stylesheet" href="/vuexy/assets/css/demo.css" />
 
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/front-page.css" />
+  <!-- Vendors CSS -->
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/node-waves/node-waves.css" />
 
-    @php
-        // Theme color configurations
-        $themeConfig = [
-            'gradient' => [
-                'heroGradient' => 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                'heroTextColor' => '#ffffff',
-                'primaryColor' => '#667eea',
-                'secondaryColor' => '#764ba2',
-                'sectionBg' => '#f8f9fa',
-                'cardBg' => '#ffffff',
-            ],
-            'minimal' => [
-                'heroGradient' => 'linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%)',
-                'heroTextColor' => '#333333',
-                'primaryColor' => '#333333',
-                'secondaryColor' => '#666666',
-                'sectionBg' => '#ffffff',
-                'cardBg' => '#f8f9fa',
-            ],
-            'vuexy' => [
-                'heroGradient' => 'linear-gradient(135deg, #7367f0 0%, #9e95f5 100%)',
-                'heroTextColor' => '#ffffff',
-                'primaryColor' => '#7367f0',
-                'secondaryColor' => '#9e95f5',
-                'sectionBg' => '#f8f9fa',
-                'cardBg' => '#ffffff',
-            ],
-        ];
-        $currentTheme = $themeConfig[$theme] ?? $themeConfig['gradient'];
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/nouislider/nouislider.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/swiper/swiper.css" />
 
-        // Get section backgrounds with defaults (alternating #f8f7fa and #ffffff)
-        // Using getSectionBackground() helper from app/Http/Helpers/Helpers.php
-        $heroBg = getSectionBackground($landingPage, 'hero', '#667eea', '#764ba2');
-        $howItWorksBg = getSectionBackground($landingPage, 'how_it_works', '#f8f7fa', '#ffffff');
-        $achievementsBg = getSectionBackground($landingPage, 'achievements', '#ffffff', '#f8f7fa');
-        $mediaBg = getSectionBackground($landingPage, 'media', '#f8f7fa', '#ffffff');
-        $partnersBg = getSectionBackground($landingPage, 'partners', '#ffffff', '#f8f7fa');
+  <!-- Page CSS -->
 
-        // Determine if hero has dark background for text color
-        $heroTextColor = '#ffffff';
-        if ($landingPage->hero_bg_type === 'solid' && $landingPage->hero_bg_color) {
-            // Simple lightness check for solid color
-            $hex = ltrim($landingPage->hero_bg_color, '#');
-            if (strlen($hex) === 6) {
-                $r = hexdec(substr($hex, 0, 2));
-                $g = hexdec(substr($hex, 2, 2));
-                $b = hexdec(substr($hex, 4, 2));
-                $luminance = (0.299 * $r + 0.587 * $g + 0.114 * $b) / 255;
-                $heroTextColor = $luminance > 0.5 ? '#333333' : '#ffffff';
-            }
-        }
-    @endphp
+  <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/front-page-landing.css" />
 
-    <style>
-        :root {
-            --theme-primary: {{ $currentTheme['primaryColor'] }};
-            --theme-secondary: {{ $currentTheme['secondaryColor'] }};
-            --theme-hero-gradient: {{ $currentTheme['heroGradient'] }};
-            --theme-hero-text: {{ $heroTextColor }};
-            --theme-section-bg: {{ $currentTheme['sectionBg'] }};
-            --theme-card-bg: {{ $currentTheme['cardBg'] }};
-            --hero-bg: {{ $heroBg }};
-            --how-it-works-bg: {{ $howItWorksBg }};
-            --achievements-bg: {{ $achievementsBg }};
-            --media-bg: {{ $mediaBg }};
-            --partners-bg: {{ $partnersBg }};
-        }
+  <!-- Helpers -->
+  <script src="/vuexy/assets/vendor/js/helpers.js"></script>
+  <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
 
-        body {
-            font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
+  <!--? Template customizer: To hide customizer set displayCustomizer value false in config.js.  -->
+  <script src="/vuexy/assets/vendor/js/template-customizer.js"></script>
 
-        /* Hero Section */
-        .hero-section {
-            background: var(--hero-bg);
-            color: var(--theme-hero-text);
-            padding: 60px 0 80px;
-            min-height: auto;
-        }
-
-        @if($theme === 'minimal' || ($landingPage->hero_bg_type === 'solid' && $heroTextColor === '#333333'))
-        .hero-section {
-            border-bottom: 1px solid #e9ecef;
-        }
-        @endif
-
-        .hero-header {
-            margin-bottom: 2rem;
-        }
-
-        .hero-logo {
-            width: 70px;
-            height: 70px;
-            object-fit: contain;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .hero-org-name {
-            font-size: 0.8rem;
-            line-height: 1.37 !important;
-            font-weight: 700;
-            color: var(--theme-hero-text);
-            margin: 0;
-        }
-
-        .hero-org-name span{
-            border: 1px solid lightgray;
-            padding: 0.05rem 0.95rem;
-            border-radius: 25px;
-        }
-
-        .hero-location {
-            font-size: 0.9rem;
-            color: var(--theme-hero-text);
-            opacity: 0.8;
-        }
-
-        .hero-location i {
-            font-size: 0.85rem;
-        }
-
-        .hero-title {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            line-height: 1.2;
-        }
-
-        .hero-description {
-            font-size: 1.15rem;
-            opacity: 0.85;
-            line-height: 1.8;
-            max-width: 800px;
-        }
-
-        .hero-industries {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 2rem;
-        }
-
-        .industry-tag {
-            display: inline-flex;
-            align-items: center;
-            padding: 10px 20px;
-            border-radius: 50px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            background: rgba(255, 255, 255, 0.15);
-            color: var(--theme-hero-text);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            transition: all 0.2s ease;
-        }
-
-        @if($theme === 'minimal' || ($landingPage->hero_bg_type === 'solid' && $heroTextColor === '#333333'))
-        .industry-tag {
-            background: #f5f5f5;
-            color: #333;
-            border: 1px solid #e0e0e0;
-        }
-
-        .industry-tag:hover {
-            background: #eaeaea;
-        }
-        @else
-        .industry-tag:hover {
-            background: rgba(255, 255, 255, 0.25);
-        }
-        @endif
-
-        .industry-tag i {
-            font-size: 1rem;
-        }
-
-        /* Section Styles */
-        .landing-section {
-            padding: 80px 0;
-        }
-
-        .section-how-it-works {
-            background: var(--how-it-works-bg);
-        }
-
-        .section-achievements {
-            background: var(--achievements-bg);
-        }
-
-        .section-media {
-            background: var(--media-bg);
-        }
-
-        .section-partners {
-            background: var(--partners-bg);
-        }
-
-        .section-alt {
-            background: var(--theme-section-bg);
-        }
-
-        .section-title {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 0.5rem;
-        }
-
-        .section-bill-subtitle {
-            margin-bottom: 0.5rem;
-        }
-
-        .section-bill-subtitle span {
-            font-size: 0.8rem;
-            color: #666;
-            border: 1px solid lightgray;
-            background-color: lightgray;
-            padding: 0.25rem 0.75rem;
-            border-radius: 25px;
-        }
-
-        .section-subtitle {
-            font-size: 1.1rem;
-            color: #666;
-            margin-bottom: 2rem;
-        }
-
-        /* Process Steps */
-        .step-card {
-            background: var(--theme-card-bg);
-            border-radius: 16px;
-            padding: 30px;
-            height: 100%;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-            border: 1px solid #e9ecef;
-        }
-
-        .step-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        .step-number {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: var(--theme-primary);
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-
-        .step-icon {
-            font-size: 2rem;
-            color: var(--theme-primary);
-            margin-bottom: 15px;
-        }
-
-        /* Metrics */
-        .metric-card {
-            background: var(--theme-card-bg);
-            border-radius: 16px;
-            padding: 30px;
-            text-align: center;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-            border: 1px solid #e9ecef;
-            height: 100%;
-        }
-
-        .metric-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%);
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            margin: 0 auto 15px;
-        }
-
-        .metric-number {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--theme-primary);
-            margin-bottom: 5px;
-        }
-
-        .metric-label {
-            font-size: 1rem;
-            color: #666;
-        }
-
-        /* Articles */
-        .article-card {
-            background: var(--theme-card-bg);
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-            border: 1px solid #e9ecef;
-            height: 100%;
-            transition: all 0.3s ease;
-        }
-
-        .article-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        .article-image {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            background: #f8f9fa;
-        }
-
-        .article-body {
-            padding: 20px;
-        }
-
-        .article-publication {
-            font-size: 0.85rem;
-            color: var(--theme-primary);
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .article-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 10px;
-            line-height: 1.4;
-        }
-
-        .article-summary {
-            font-size: 0.9rem;
-            color: #666;
-            line-height: 1.6;
-        }
-
-        .article-date {
-            font-size: 0.8rem;
-            color: #999;
-            margin-top: 10px;
-        }
-
-        /* Partners */
-        .partners-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 30px;
-            align-items: center;
-        }
-
-        .partner-logo {
-            height: 60px;
-            max-width: 150px;
-            object-fit: contain;
-            filter: grayscale(100%);
-            opacity: 0.7;
-            transition: all 0.3s ease;
-        }
-
-        .partner-logo:hover {
-            filter: grayscale(0%);
-            opacity: 1;
-        }
-
-        /* Custom Sections */
-        .section-custom {
-            padding: 80px 0;
-        }
-
-        .custom-section-content {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .custom-section-body {
-            line-height: 1.8;
-            font-size: 1.1rem;
-        }
-
-        .custom-section-body h1,
-        .custom-section-body h2,
-        .custom-section-body h3,
-        .custom-section-body h4,
-        .custom-section-body h5,
-        .custom-section-body h6 {
-            margin-top: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .custom-section-body p {
-            margin-bottom: 1rem;
-        }
-
-        .custom-section-body ul,
-        .custom-section-body ol {
-            margin-bottom: 1rem;
-            padding-{{ $isRtl ? 'right' : 'left' }}: 2rem;
-        }
-
-        .custom-section-body img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            margin: 1rem 0;
-        }
-
-        .custom-section-body a {
-            color: {{ $currentTheme['primaryColor'] }};
-            text-decoration: underline;
-        }
-
-        .custom-section-body a:hover {
-            text-decoration: none;
-        }
-
-        /* Footer */
-        .landing-footer {
-            background: #1a1a2e;
-            color: #ffffff;
-            padding: 60px 0 30px;
-        }
-
-        .footer-logo {
-            width: 60px;
-            height: 60px;
-            object-fit: contain;
-            border-radius: 10px;
-            background: #ffffff;
-            padding: 5px;
-        }
-
-        .footer-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .footer-description {
-            font-size: 0.9rem;
-            opacity: 0.8;
-            max-width: 300px;
-        }
-
-        .footer-social a {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            color: #ffffff;
-            margin: 0 5px;
-            transition: all 0.3s ease;
-        }
-
-        .footer-social a:hover {
-            background: var(--theme-primary);
-            transform: translateY(-3px);
-        }
-
-        .footer-links a {
-            color: rgba(255, 255, 255, 0.8);
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        .footer-links a:hover {
-            color: #ffffff;
-        }
-
-        .footer-copyright {
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding-top: 20px;
-            margin-top: 40px;
-            font-size: 0.9rem;
-            opacity: 0.7;
-        }
-
-        /* Preview Banner */
-        .preview-banner {
-            background: #ff9800;
-            color: #ffffff;
-            padding: 10px;
-            text-align: center;
-            font-weight: 600;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 9999;
-        }
-
-        @if($isPreview)
-        body {
-            padding-top: 45px;
-        }
-        @endif
-
-        /* Navbar */
-        .landing-navbar {
-            background: #ffffff;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .navbar-brand {
-            font-weight: 700;
-            color: #333 !important;
-        }
-
-        .nav-link {
-            color: #666 !important;
-            font-weight: 500;
-        }
-
-        .nav-link:hover {
-            color: var(--theme-primary) !important;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2rem;
-            }
-
-            .hero-org-name {
-                font-size: 1.2rem;
-            }
-
-            .hero-logo {
-                width: 55px;
-                height: 55px;
-            }
-
-            .hero-location {
-                font-size: 0.8rem;
-            }
-
-            .hero-section {
-                padding: 40px 0 60px;
-            }
-
-            .hero-description {
-                font-size: 1rem;
-            }
-
-            .hero-industries {
-                gap: 8px;
-            }
-
-            .industry-tag {
-                padding: 8px 14px;
-                font-size: 0.8rem;
-            }
-
-            .landing-section {
-                padding: 50px 0;
-            }
-
-            .metric-number {
-                font-size: 2rem;
-            }
-        }
-    </style>
+  <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+  <script src="/vuexy/assets/js/front-config.js"></script>
 </head>
 
+@php
+ $sections = [
+   ['id' => 'how-it-works', 'label' => __('admin.How It Works'), 'visible' => $landingPage->how_it_works_enabled && !empty($landingPage->process_steps)],
+   ['id' => 'achievements', 'label' => __('admin.Achievements & Impact'), 'visible' => $landingPage->achievements_enabled && !empty($landingPage->metrics)],
+   ['id' => 'media', 'label' => __('admin.Media & Recognition'), 'visible' => $landingPage->media_enabled && !empty($articlesWithUrls)],
+   ['id' => 'partners', 'label' => __('admin.Partners'), 'visible' => $landingPage->partners_enabled && !empty($partnersWithUrls)],
+  ];
+
+  if (!empty($customSections)) {
+    foreach ($customSections as $customSection) {
+      $sections[] = [
+        'id' => 'custom-' . $customSection->id,
+        'label' => $customSection->title,
+        'visible' => !empty($customSection->content),
+      ];
+    }
+  }
+
+  $colors = ['warning', 'success', 'danger', 'info', 'primary', 'secondary', 'dark', 'success', 'primary', 'danger', 'info', 'warning', 'secondary'];
+@endphp
+
 <body>
-    @if($isPreview)
-    <!-- Preview Banner -->
-    <div class="preview-banner">
-        <i class="ti ti-eye me-2"></i>
-        {{ $isRtl ? 'وضع المعاينة - هذه الصفحة غير مرئية للعامة' : 'Preview Mode - This page is not publicly visible' }}
-    </div>
-    @endif
+  <script src="/vuexy/assets/vendor/js/dropdown-hover.js"></script>
+  <script src="/vuexy/assets/vendor/js/mega-dropdown.js"></script>
+  
+  <!-- Preview Banner -->
+  {{-- @if($isPreview)
+  <div class="bg-primary bg-gradient text-white px-3 py-2 text-center">
+    <i class="ti ti-eye me-2"></i>
+    {{ $isRtl ? 'وضع المعاينة - هذه الصفحة غير مرئية للعامة' : 'Preview Mode - This page is not publicly visible' }}
+  </div>
+  @endif --}}
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg landing-navbar sticky-top py-3">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="{{ url('/') }}">
-                @if($organization->img_url)
-                    <img src="{{ $organization->imageUrl }}" alt="{{ $isRtl ? $organization->name_ar : $organization->name_en }}"
-                         class="rounded me-2" style="height: 40px; width: auto;">
-                @endif
-                <span>{{ $isRtl ? $organization->name_ar : $organization->name_en }}</span>
-            </a>
-
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+  <section class="min-vh-90 d-flex flex-column">
+    <!-- Navbar: Start -->
+    <nav class="layout-navbar shadow-none py-0">
+      <div class="container">
+        <div class="navbar navbar-expand-lg landing-navbar px-3 px-md-8">
+          <!-- Brand logo and name -->
+          <div class="navbar-brand app-brand demo d-flex py-0 py-lg-2 me-4 me-xl-8">
+            <!-- Mobile menu toggle -->
+            <button class="navbar-toggler border-0 px-0 me-4" type="button" data-bs-toggle="collapse"
+              data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+              aria-label="Toggle navigation">
+              <i class="ti ti-menu-2 ti-lg align-middle text-heading fw-medium"></i>
             </button>
+            <!-- Brand -->
+            <a href="javascript:void(0);" class="app-brand-link d-flex align-items-center">
+              @if($organization->img_url)
+                <img src="{{ $organization->imageUrl }}" alt="Logo" width="32" height="32" class="me-2 object-fit-contain rounded" />
+              @endif
+              <span class="app-brand-text text-dark fw-bold">{{ Str::limit($isRtl ? $organization->name_ar : $organization->name_en, 10) }}</span>
+            </a>
+          </div>
 
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
-                    <!-- Language Toggle -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                            <i class="ti ti-language me-1"></i>
-                            {{ $isRtl ? 'العربية' : 'English' }}
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li>
-                                <a class="dropdown-item" href="/lang/{{ $isRtl ? 'en' : 'ar' }}">
-                                    {{ $isRtl ? 'English' : 'العربية' }}
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
+          <!-- Menu links -->
+          <div class="collapse navbar-collapse landing-nav-menu" id="navbarSupportedContent">
+            <button class="navbar-toggler border-0 text-heading position-absolute end-0 top-0 scaleX-n1-rtl" type="button"
+              data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+              aria-expanded="false" aria-label="Toggle navigation">
+              <i class="ti ti-x ti-lg"></i>
+            </button>
+            {{-- <ul class="navbar-nav me-auto">
+              <li class="nav-item">
+                <a class="nav-link fw-medium" aria-current="page" href="#hero">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link fw-medium" aria-current="page" href="#hero">How it works</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link fw-medium" href="#about">Achievements & Impact</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link fw-medium" href="#services">Media & Recognition</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link fw-medium" href="#team">Our Partners</a>
+              </li>
+            </ul> --}}
+          </div>
+          <div class="landing-menu-overlay d-lg-none"></div>
 
-                    @auth
-                    <li class="nav-item">
-                        <a class="btn btn-primary ms-3" href="{{ url('/dashboard') }}">
-                            <i class="ti ti-dashboard me-1"></i>
-                            {{ $isRtl ? 'لوحة التحكم' : 'Dashboard' }}
-                        </a>
-                    </li>
-                    @else
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url('/login') }}">
-                            {{ $isRtl ? 'تسجيل الدخول' : 'Login' }}
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-primary ms-2" href="{{ url('/register') }}">
-                            {{ $isRtl ? 'إنشاء حساب' : 'Register' }}
-                        </a>
-                    </li>
-                    @endauth
-                </ul>
-            </div>
+          <!-- Right toolbar -->
+          <ul class="navbar-nav flex-row align-items-center ms-auto">
+            
+            <!-- Language -->
+            <li class="nav-item dropdown-language dropdown me-2 me-xl-1">
+              <a class="nav-link dropdown-toggle hide-arrow"
+                href="javascript:void(0);" data-bs-toggle="dropdown">
+                <i class="ti ti-language rounded-circle ti-md"></i>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li class="dropdown dropdown-language nav-item">
+                  @if ($l == 'ar')
+                    <a class="dropdown-item" href="/lang/en" 
+                      data-language="en" data-text-direction="ltr">
+                      <i class="flag-icon flag-icon-us me-2"></i>
+                      <span class="selected-language">English</span>
+                    </a>
+                  @else
+                    <a class="dropdown-item" href="/lang/ar" 
+                      data-language="ar" data-text-direction="rtl">
+                      <i class="flag-icon flag-icon-sa me-2"></i>
+                      <span class="selected-language">عربي</span>
+                    </a>
+                  @endif
+                </li>
+              </ul>
+            </li>
+            <!--/ Language -->
+
+            <!-- Style Switcher -->
+            <li class="nav-item dropdown-style-switcher dropdown me-2 me-xl-1">
+              <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                <i class="ti ti-lg"></i>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end dropdown-styles">
+                <li>
+                  <a class="dropdown-item" href="javascript:void(0);" data-theme="light">
+                    <span class="align-middle"><i class="ti ti-sun me-3"></i>Light</span>
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="javascript:void(0);" data-theme="dark">
+                    <span class="align-middle"><i class="ti ti-moon-stars me-3"></i>Dark</span>
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="javascript:void(0);" data-theme="system">
+                    <span class="align-middle"><i class="ti ti-device-desktop-analytics me-3"></i>System</span>
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <!-- Login/Register -->
+            @auth
+              <li class="nav-item">
+                <a class="btn btn-primary" href="{{ url('/dashboard') }}">
+                <i class="ti ti-dashboard me-2"></i>
+                  {{ __('admin.Dashboard') }}
+                </a>
+              </li>
+            @else
+              <li>
+                <a href="/login" class="btn btn-primary">
+                  <span class="tf-icons ti ti-login scaleX-n1-rtl me-md-1"></span>
+                  <span class="d-none d-md-block">{{ __('admin.login_or_register') }}</span>
+                </a>
+              </li>
+            @endauth
+          </ul>
         </div>
+      </div>
     </nav>
+    <!-- Navbar: End -->
 
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-10 {{ $isRtl ? 'text-end' : '' }}">
-                    <!-- Logo and Organization Name Row -->
-                    <div class="hero-header d-flex align-items-center mb-4 {{ $isRtl ? 'flex-row-reverse' : '' }}">
-                        @if($organization->img_url)
-                            <img src="{{ $organization->imageUrl }}" alt="{{ $isRtl ? $organization->name_ar : $organization->name_en }}"
-                                 class="hero-logo {{ $isRtl ? 'ms-3' : 'me-3' }}">
-                        @endif
-                        <div>
-                            <h1 class="hero-title mb-1">{{ $isRtl ? $organization->name_ar : $organization->name_en }}</h1>
-                            @if(($organization->city && ($organization->city->name_en || $organization->city->name_ar)) || ($organization->country && ($organization->country->name_en || $organization->country->name_ar)))
-                                <div class="hero-location">
-                                    <i class="ti ti-map-pin {{ $isRtl ? 'ms-1' : 'me-1' }}"></i>
-                                    @if($organization->city)
-                                        {{ $isRtl ? $organization->city->name_ar : $organization->city->name_en }}@if($organization->country), @endif
-                                    @endif
-                                    @if($organization->country)
-                                        {{ $isRtl ? $organization->country->name_ar : $organization->country->name_en }}
-                                    @endif
-                                </div>
-                            @endif
-                        </div>
-                    </div>
+    <!-- ============ HERO (FLEX-FILL) ============ -->
+    <div class="flex-fill d-flex section-py landing-hero position-relative">
+      <div class="container" style="{{$isRtl ? 'padding: 0 9rem;' : '' }}">
+        <div class="row px-4 px-lg-0">
+          <div class="col-lg-8 offset-lg-1">
 
-                    <!-- Main Headline/Tagline -->
-                    <h1 class="hero-org-name mb-3">
-                        <span>
-                            @if($organization->organizationType)
-                                {{ $organization->organizationType->localizedName }}
-                            @else
-                                {{ $isRtl ? $organization->name_ar : $organization->name_en }}
-                            @endif
-                        </span>
-                    </h1>
+            <!-- Logo + Location -->
+            <div class="d-flex align-items-center mb-4">
+              <div class="me-6">
+                @if($organization->img_url)
+                  <img 
+                    src="{{ $organization->imageUrl }}" 
+                    alt="{{ $organization->name_en }}" 
+                    width="50" 
+                    height="50" 
+                    class="object-fit-contain rounded"
+                  />
+                @endif
+              </div>
 
-                    <!-- Description -->
-                    @if($organization->bio)
-                        <p class="hero-description">{{ $organization->bio }}</p>
-                    @endif
+              <div>
+                <h5 class="mb-0 fw-semibold">{{ $isRtl ? $organization->name_ar : $organization->name_en }}</h5>
+                @if($organization->city || $organization->country)
+                  <small>
+                    <i class="ti ti-map-pin"></i> 
+                    {{ optional($organization->city)->{'name_' . $l} ?? '-' }}
+                    {{ $organization->country ? ', ' : '' }}
+                    {{ optional($organization->country)->{'name_' . $l} ?? '-' }}
+                  </small>
+                @endif
+              </div>
+            </div>
 
-                    <!-- Industry Tags with Icons -->
-                    @if($organization->industries && $organization->industries->count() > 0)
-                        <div class="hero-industries mt-4">
-                            @foreach($organization->industries as $industry)
-                                <span class="industry-tag">
-                                    <i class="ti {{ getIndustryIcon($industry->name_en) }} {{ $isRtl ? 'ms-2' : 'me-2' }}"></i>{{ $isRtl ? $industry->name_ar : $industry->name_en }}
-                                </span>
-                            @endforeach
-                        </div>
-                    @endif
+            <!-- Headline -->
+            <h1 class="fw-bold display-4 mb-3 text-dark">
+              {{ __('admin.org_landing_heading') }}
+            </h1>
+            
+            <!-- Description -->
+            <h2 class="hero-sub-title h5 mb-6 mb-md-12 line-clamp-3">
+              {{ $organization->bio }}
+            </h2>
+
+            <!-- Industries -->
+            @if($organization->industries && $organization->industries->count() > 0)
+              <div class="d-flex flex-wrap gap-2 mb-8">
+                @foreach($organization->industries as $industry)
+                <span class="badge rounded-pill bg-card text-dark px-3 py-2">
+                  {{ $isRtl ? $industry->name_ar : $industry->name_en }}
+                </span>
+                @endforeach
+              </div>
+            @endif
+
+            <!-- CTA + Social -->
+            <div class="d-flex align-items-center flex-wrap">
+              <button class="btn btn-xl btn-primary mb-8 mb-md-4">
+                {{ __('admin.explore_programs') }}
+              </button>
+
+              @php
+                $socialLinks = [
+                  'x' => $organization->twitter_handle,
+                  'linkedin' => $organization->linkedin_company_url,
+                  'facebook' => $organization->facebook_page_url,
+                  'instagram' => $organization->instagram_profile_url,
+                  'tiktok' => $organization->tiktok_url,
+                  'youtube' => $organization->youtube_channel_url
+                ]
+              @endphp
+
+              @if(array_filter($socialLinks))
+                <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 m{{ $isRtl ? 'e' : 's' }}-lg-auto">
+                  <span class="text-dark me-2 d-block">{{ __('admin.follow_us') }}</span>
+                  <div class="d-flex align-items-center gap-2">
+                    @foreach ($socialLinks as $icon => $link)
+                      @if(!empty($link))
+                        <a href="{{ $link }}" class="btn btn-icon btn-white waves-effect waves-light">
+                          <i class="ti ti-brand-{{ $icon }}"></i>
+                        </a>
+                      @endif
+                    @endforeach
+                  </div>
                 </div>
+              @endif
             </div>
+          </div>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 
-    <!-- How It Works Section -->
-    @if($landingPage->how_it_works_enabled && !empty($landingPage->process_steps))
-    <section class="landing-section section-how-it-works">
-        <div class="container">
-            <div class="text-center mb-5">
-                @if($landingPage->how_it_works_subtitle)
-                    <div class="section-bill-subtitle">
-                        <span> {{ $landingPage->how_it_works_subtitle }} </span>
-                    </div>
-                @endif
-                <h2 class="section-title">
-                    {{ $landingPage->how_it_works_title ?: ($isRtl ? 'كيف تعمل' : 'How It Works') }}
-                </h2>
-                @if($landingPage->how_it_works_description)
-                    <p class="section-subtitle">{{ $landingPage->how_it_works_description }}</p>
-                @endif
-            </div>
-
-            <div class="row g-4">
-                @foreach($landingPage->process_steps as $index => $step)
-                    @if(!empty($step['title']))
-                    <div class="col-md-6 col-lg-3">
-                        <div class="step-card">
-                            @if(!empty($step['icon']))
-                                <div class="step-icon">
-                                    <i class="ti {{ $step['icon'] }}"></i>
-                                </div>
-                            @else
-                                <div class="step-number">{{ $index + 1 }}</div>
-                            @endif
-                            <h5 class="fw-bold mb-2">{{ $step['title'] }}</h5>
-                            @if(!empty($step['description']))
-                                <p class="text-muted mb-0">{{ $step['description'] }}</p>
-                            @endif
-                        </div>
-                    </div>
-                    @endif
-                @endforeach
-            </div>
+  <!-- Navigation Pills -->
+  <div class="px-6">
+    <div class="card shadow-none border-0 my-8 rounded-pill">
+      <div class="card-body">
+        <div class="nav-align-top">
+          <ul class="nav nav-pills justify-content-lg-center flex-nowrap pb-4 border-0" style="max-width: 100%; overflow-x: auto;" role="tablist">
+            @foreach ($sections as $tab)
+              @if ($tab['visible'])
+                <li class="nav-item" role="presentation">
+                  <a
+                    type="button"
+                    class="nav-link {{ $loop->first ? 'bg-label-primary border border-primary' : '' }}"
+                    id="tab-{{ $tab['id'] }}-trigger"
+                    href="#{{ $tab['id'] }}"
+                    role="tab"
+                    aria-controls="tab-{{ $tab['id'] }}"
+                    aria-selected="{{ $loop->first ? 'true' : 'false' }}"
+                  >
+                    {{-- <i class="ti ti-{{ $tab['icon'] }} me-1"></i> --}}
+                    {{ $tab['label'] }}
+                  </a>
+                </li>
+              @endif
+            @endforeach
+          </ul>
         </div>
-    </section>
-    @endif
+      </div>
+    </div>
+  </div>
+  <!--/ Navigation Pills -->
 
-    <!-- Achievements Section -->
-    @if($landingPage->achievements_enabled && !empty($landingPage->metrics))
-    <section class="landing-section section-achievements">
-        <div class="container">
-            <div class="text-center mb-5">
-                @if($landingPage->achievements_subtitle)
-                    <div class="section-bill-subtitle">
-                        <span> {{ $landingPage->achievements_subtitle }} </span>
-                    </div>
-                @endif
-                <h2 class="section-title">
-                    {{ $landingPage->achievements_title ?: ($isRtl ? 'الإنجازات والأثر' : 'Achievements & Impact') }}
-                </h2>
-                @if($landingPage->achievements_description)
-                    <p class="section-subtitle">{{ $landingPage->achievements_description }}</p>
-                @endif
-            </div>
-
-            <div class="row g-4 justify-content-center">
-                @foreach($landingPage->metrics as $metric)
-                    @if(!empty($metric['number']) || !empty($metric['label']))
-                    <div class="col-6 col-md-4 col-lg-3">
-                        <div class="metric-card">
-                            @if(!empty($metric['icon']))
-                                <div class="metric-icon">
-                                    <i class="ti {{ $metric['icon'] }}"></i>
-                                </div>
-                            @endif
-                            <div class="metric-number">{{ $metric['number'] ?? '' }}</div>
-                            <div class="metric-label">{{ $metric['label'] ?? '' }}</div>
-                        </div>
-                    </div>
-                    @endif
-                @endforeach
-            </div>
-        </div>
-    </section>
-    @endif
-
-    <!-- Media & Recognition Section -->
-    @if($landingPage->media_enabled && !empty($articlesWithUrls))
-    <section class="landing-section section-media">
-        <div class="container">
-            <div class="text-center mb-5">
-                @if($landingPage->media_subtitle)
-                    <div class="section-bill-subtitle">
-                        <span> {{ $landingPage->media_subtitle }} </span>
-                    </div>
-                @endif
-                <h2 class="section-title">
-                    {{ $landingPage->media_title ?: ($isRtl ? 'الإعلام والتقدير' : 'Media & Recognition') }}
-                </h2>
-                @if($landingPage->media_description)
-                    <p class="section-subtitle">{{ $landingPage->media_description }}</p>
-                @endif
-            </div>
-
-            <div class="row g-4">
-                @foreach($articlesWithUrls as $article)
-                    @if(!empty($article['title']))
-                    <div class="col-md-6 col-lg-4">
-                        <div class="article-card">
-                            @if(!empty($article['image_url']))
-                                <img src="{{ $article['image_url'] }}" alt="{{ $article['title'] }}" class="article-image">
-                            @else
-                                <div class="article-image d-flex align-items-center justify-content-center">
-                                    <i class="ti ti-news text-muted" style="font-size: 3rem;"></i>
-                                </div>
-                            @endif
-                            <div class="article-body">
-                                @if(!empty($article['publication_name']))
-                                    <div class="article-publication">{{ $article['publication_name'] }}</div>
-                                @endif
-                                <h5 class="article-title">
-                                    @if(!empty($article['link']))
-                                        <a href="{{ $article['link'] }}" target="_blank" class="text-decoration-none text-dark">
-                                            {{ $article['title'] }}
-                                            <i class="ti ti-external-link ms-1" style="font-size: 0.8rem;"></i>
-                                        </a>
-                                    @else
-                                        {{ $article['title'] }}
-                                    @endif
-                                </h5>
-                                @if(!empty($article['summary']))
-                                    <p class="article-summary">{{ $article['summary'] }}</p>
-                                @endif
-                                @if(!empty($article['date']))
-                                    <div class="article-date">
-                                        <i class="ti ti-calendar me-1"></i>
-                                        {{ \Carbon\Carbon::parse($article['date'])->format('M d, Y') }}
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                @endforeach
-            </div>
-        </div>
-    </section>
-    @endif
-
-    <!-- Partners Section -->
-    @if($landingPage->partners_enabled && !empty($partnersWithUrls))
-    <section class="landing-section section-partners">
-        <div class="container">
-            <div class="text-center mb-5">
-                @if($landingPage->partners_subtitle)
-                    <div class="section-bill-subtitle">
-                        <span> {{ $landingPage->partners_subtitle }} </span>
-                    </div>
-                @endif
-                <h2 class="section-title">
-                    {{ $landingPage->partners_title ?: ($isRtl ? 'شركاؤنا' : 'Our Partners') }}
-                </h2>
-                @if($landingPage->partners_description)
-                    <p class="section-subtitle">{{ $landingPage->partners_description }}</p>
-                @endif
-            </div>
-
-            <div class="partners-grid">
-                @foreach($partnersWithUrls as $partner)
-                    @if(!empty($partner['logo_url']) || !empty($partner['name']))
-                        <div class="text-center" title="{{ $partner['name'] ?? '' }}">
-                            @if(!empty($partner['logo_url']))
-                                <img src="{{ $partner['logo_url'] }}" alt="{{ $partner['name'] ?? 'Partner' }}" class="partner-logo">
-                            @else
-                                <div class="d-inline-flex align-items-center justify-content-center bg-light rounded px-4 py-3">
-                                    <span class="fw-semibold text-muted">{{ $partner['name'] ?? '' }}</span>
-                                </div>
-                            @endif
-                        </div>
-                    @endif
-                @endforeach
-            </div>
-        </div>
-    </section>
-    @endif
-
-    <!-- Custom Sections -->
-    @if(!empty($customSections))
-        @foreach($customSections as $customSection)
-            <section class="landing-section section-custom" style="{{ $customSection->getBackgroundStyle() }}">
-                <div class="container">
-                    <div class="custom-section-content">
-                        <h2 class="section-title text-center mb-4">{{ $customSection->title }}</h2>
-                        <div class="custom-section-body">
-                            {!! $customSection->content !!}
-                        </div>
-                    </div>
+  <!-- How It Works Section -->
+  @if($landingPage->how_it_works_enabled && !empty($landingPage->process_steps))
+    <section id="how-it-works" class="section-py">
+      <div class="container">
+        @if($landingPage->how_it_works_subtitle)
+          <div class="text-center mb-4">
+            <span class="badge bg-label-primary">{{ $landingPage->how_it_works_subtitle }}</span>
+          </div>
+        @endif
+        @if($landingPage->how_it_works_title)
+          <h4 class="text-center mb-1">
+            <span class="position-relative fw-extrabold z-1">
+              {{ $landingPage->how_it_works_title ?: ($isRtl ? 'كيف تعمل' : 'How It Works') }}
+              <img
+                src="/vuexy/assets/img/front-pages/icons/section-title-icon.png"
+                alt="laptop charging"
+                class="section-title-img position-absolute object-fit-contain bottom-0 z-n1" />
+            </span>
+          </h4>
+        @endif
+        @if($landingPage->how_it_works_description)
+          <p class="text-center mb-12">
+            {{ $landingPage->how_it_works_description }}
+          </p>
+        @endif
+        <div class="row g-6 justify-content-center">
+          @foreach($landingPage->process_steps as $index => $step)
+            <div class="col-lg-3">
+              <div class="card shadow-none border h-100 position-relative">
+                <div class="avatar avatar-sm" style="position: absolute; top: -1rem; left: 14px; transform: translateX(-50%);">
+                  <div class="avatar-initial rounded-circle bg-label-primary">
+                    {{ abs($index + 1) }}
+                  </div>
                 </div>
-            </section>
+                <div class="card-body text-center">
+                  <div class="badge rounded p-4 bg-label-{{ $colors[$index] }} mb-4">
+                    @if(!empty($step['icon']))
+                      <i class="ti {{ $step['icon'] }} ti-lg"></i>
+                    @else
+                      <span>{{ $index + 1 }}</span>
+                    @endif
+                  </div>
+                  <h5 class="card-title mb-1">{{ $step['title'] }}</h5>
+                  <p class="mb-0">{{ $step['description'] }}</p>
+                </div>
+              </div>
+            </div>
+          @endforeach
+        </div>
+      </div>
+    </section>
+  @endif
+  <!--/ How It Works Section -->
+
+  <!-- Achievements Section -->
+  @if($landingPage->achievements_enabled && !empty($landingPage->metrics))
+  <section id="achievements" class="section-py bg-body landing-reviews">
+    <div class="container">
+      @if($landingPage->achievements_subtitle)
+        <div class="text-center mb-4">
+          <span class="badge bg-label-primary">{{ $landingPage->achievements_subtitle }}</span>
+        </div>
+      @endif
+      @if($landingPage->achievements_title)
+        <h4 class="text-center mb-1">
+          <span class="position-relative fw-extrabold z-1">
+            {{ $landingPage->achievements_title ?: ($isRtl ? 'الإنجازات والأثر' : 'Achievements & Impact') }}
+            <img
+              src="/vuexy/assets/img/front-pages/icons/section-title-icon.png"
+              alt="laptop charging"
+              class="section-title-img position-absolute object-fit-contain bottom-0 z-n1" />
+          </span>
+        </h4>
+      @endif
+      @if($landingPage->achievements_description)
+        <p class="text-center mb-12">
+          {{ $landingPage->achievements_description }}
+        </p>
+      @endif
+
+      <div class="row g-6 justify-content-center">
+        @foreach($landingPage->metrics as $index => $metric)
+          @if(!empty($metric['number']) || !empty($metric['label']))
+            <div class="col-12 col-md-4 col-lg-3">
+              <div class="card h-100">
+                <div class="card-body">
+                  <div class="card-icon mb-4">
+                    <span class="badge bg-label-{{ $colors[$index + 1] }} rounded p-2">
+                      @if(!empty($metric['icon']))
+                        <i class="ti {{ $metric['icon'] }} ti-26px"></i>
+                      @endif
+                    </span>
+                  </div>
+                  <h4 class="card-title">{{ $metric['number'] ?? '' }}</h4>
+                  <p class="card-text">{{ $metric['label'] ?? '' }}</p>
+                </div>
+              </div>
+            </div>
+          @endif
         @endforeach
-    @endif
+      </div>
+    </div>
+  </section>
+  @endif
 
-    <!-- Footer -->
-    <footer class="landing-footer">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-4 mb-4 mb-lg-0">
-                    <div class="d-flex align-items-center mb-3">
-                        @if($organization->img_url)
-                            <img src="{{ $organization->imageUrl }}" alt="{{ $isRtl ? $organization->name_ar : $organization->name_en }}"
-                                 class="footer-logo me-3">
-                        @endif
-                        <div>
-                            <h5 class="footer-title text-white mb-0">{{ $isRtl ? $organization->name_ar : $organization->name_en }}</h5>
-                        </div>
-                    </div>
-                    @if($organization->bio)
-                        <p class="footer-description">{{ Str::limit($organization->bio, 150) }}</p>
-                    @endif
-                </div>
-
-                <div class="col-lg-4 mb-4 mb-lg-0">
-                    <h6 class="fw-bold mb-3 text-white">{{ $isRtl ? 'تواصل معنا' : 'Contact Us' }}</h6>
-                    <ul class="list-unstyled footer-links">
-                        @if($organization->contact_email)
-                            <li class="mb-2">
-                                <i class="ti ti-mail me-2"></i>
-                                <a href="mailto:{{ $organization->contact_email }}">{{ $organization->contact_email }}</a>
-                            </li>
-                        @endif
-                        @if($organization->contact_phone)
-                            <li class="mb-2">
-                                <i class="ti ti-phone me-2"></i>
-                                <a href="tel:{{ $organization->country_code }}{{ $organization->contact_phone }}">
-                                    {{ $organization->country_code }} {{ $organization->contact_phone }}
-                                </a>
-                            </li>
-                        @endif
-                        @if($organization->address)
-                            <li class="mb-2">
-                                <i class="ti ti-map-pin me-2"></i>
-                                <span>{{ $organization->address }}</span>
-                            </li>
-                        @endif
-                    </ul>
-                </div>
-
-                <div class="col-lg-4">
-                    <h6 class="fw-bold text-white mb-3">{{ $isRtl ? 'تابعنا' : 'Follow Us' }}</h6>
-                    <div class="footer-social">
-                        @if($organization->linkedin_company_url)
-                            <a href="{{ $organization->linkedin_company_url }}" target="_blank" title="LinkedIn">
-                                <i class="ti ti-brand-linkedin"></i>
-                            </a>
-                        @endif
-                        @if($organization->twitter_handle)
-                            <a href="{{ $organization->twitter_handle }}" target="_blank" title="Twitter">
-                                <i class="ti ti-brand-twitter"></i>
-                            </a>
-                        @endif
-                        @if($organization->facebook_page_url)
-                            <a href="{{ $organization->facebook_page_url }}" target="_blank" title="Facebook">
-                                <i class="ti ti-brand-facebook"></i>
-                            </a>
-                        @endif
-                        @if($organization->instagram_profile_url)
-                            <a href="{{ $organization->instagram_profile_url }}" target="_blank" title="Instagram">
-                                <i class="ti ti-brand-instagram"></i>
-                            </a>
-                        @endif
-                        @if($organization->youtube_channel_url)
-                            <a href="{{ $organization->youtube_channel_url }}" target="_blank" title="YouTube">
-                                <i class="ti ti-brand-youtube"></i>
-                            </a>
-                        @endif
-                        @if($organization->tiktok_url)
-                            <a href="{{ $organization->tiktok_url }}" target="_blank" title="TikTok">
-                                <i class="ti ti-brand-tiktok"></i>
-                            </a>
-                        @endif
-                    </div>
-                </div>
-            </div>
-
-            <div class="text-center footer-copyright">
-                &copy; {{ date('Y') }} {{ $isRtl ? $organization->name_ar : $organization->name_en }}.
-                {{ $isRtl ? 'جميع الحقوق محفوظة.' : 'All rights reserved.' }}
-            </div>
+  <!-- Media & Recognition Section -->
+  @if($landingPage->media_enabled && !empty($articlesWithUrls))
+  <section id="media" class="section-py">
+    <div class="container">
+      @if($landingPage->media_subtitle)
+        <div class="text-center mb-4">
+          <span class="badge bg-label-primary">{{ $landingPage->media_subtitle }}</span>
         </div>
-    </footer>
+      @endif
+      <h4 class="text-center mb-1">
+        <span class="position-relative fw-extrabold z-1">
+          {{ $landingPage->media_title ?: ($isRtl ? 'الإعلام والتقدير' : 'Media & Recognition') }}
+          <img
+            src="/vuexy/assets/img/front-pages/icons/section-title-icon.png"
+            alt="laptop charging"
+            class="section-title-img position-absolute object-fit-contain bottom-0 z-n1" />
+        </span>
+      </h4>
+      @if($landingPage->media_description)
+        <p class="text-center mb-12">{{ $landingPage->media_description }}</p>
+      @endif
 
-    <!-- Scripts -->
-    <script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
-    <script src="/vuexy/assets/vendor/libs/popper/popper.js"></script>
-    <script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
-    <!-- Jquery Js -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+      <div class="row g-6">
+        @foreach($articlesWithUrls as $article)
+        @if(!empty($article['title']))
+        <div class="col-lg-6">
+          <div class="card h-100">
+            <div class="card-body">
+              <div class="row">
+                <div class="col-12 col-md-3 mb-6 mb-md-0">
+                  @if(!empty($article['image_url']))
+                    <img 
+                      src="{{ $article['image_url'] }}"
+                      alt="article-img"
+                      class="w-100 h-px-100 rounded-2 border object-fit-cover"
+                    />
+                  @else
+                    <div class="w-100 h-px-100 rounded-2 border d-flex align-items-center justify-content-center">
+                      <i class="ti ti-news ti-xl"></i>
+                    </div>
+                  @endif
+                </div>
+                <div class="col-12 col-md-9">
+                  <div class="d-flex flex-column h-100">
+                    <div class="flex-grow-1">
+                      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
+                        @if(!empty($article['publication_name']))
+                          <h6 class="text-dark mb-3 mb-md-0">{{ $article['publication_name'] }}</h6>
+                        @endif
+  
+                        @if(!empty($article['date']))
+                          <span class="small text-muted">
+                            <i class="ti ti-calendar ti-sm me-1"></i>
+                            {{ \Carbon\Carbon::parse($article['date'])->format('M d, Y') }}
+                          </span>
+                        @endif
+                      </div>
+  
+                      <h5 class="card-title">{{ $article['title'] }}</h5>
+                      
+                      @if(!empty($article['summary']))
+                        <p class="card-text mb-4">{{ $article['summary'] }}</p>
+                      @endif
+                    </div>
+                    
+                    <div class="mt-auto">
+                      @if(!empty($article['link']))
+                        <a href="{{ $article['link'] }}" target="_blank" class="btn btn-sm btn-text-primary">
+                          {{ __('admin.read_more') }} <i class="ti ti-arrow-right ms-2"></i>
+                        </a>
+                      @endif
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        @endif
+        @endforeach
+      </div>
+    </div>
+  </section>
+  @endif
 
-    <!-- Helpers -->
-    <script src="/vuexy/assets/vendor/js/helpers.js"></script>
-    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+  @if($landingPage->partners_enabled && !empty($partnersWithUrls))
+  <section id="partners" class="section-py bg-body landing-reviews pb-0">
+    <!-- Partners slider: Start -->
+    <div class="container">
+      <div class="row align-items-center gx-0 gy-4 g-lg-5 mb-5 pb-md-5">
+        <div class="col-md-6 col-lg-5 col-xl-3">
+          @if($landingPage->partners_subtitle)
+            <div class="text-center mb-4">
+              <span class="badge bg-label-primary">{{ $landingPage->partners_subtitle }}</span>
+            </div>
+          @endif
+          @if($landingPage->partners_title)
+            <h4 class="text-center mb-1">
+              <span class="position-relative fw-extrabold z-1">
+                {{ $landingPage->partners_title ?: ($isRtl ? 'شركاؤنا' : 'Our Partners') }}
+                <img
+                  src="/vuexy/assets/img/front-pages/icons/section-title-icon.png"
+                  alt="laptop charging"
+                  class="section-title-img position-absolute object-fit-contain bottom-0 z-n1" />
+              </span>
+            </h4>
+          @endif
+          @if($landingPage->partners_description)
+            <p class="text-center mb-12">
+              {{ $landingPage->partners_description }}
+            </p>
+          @endif
 
-    <!--? Template customizer: To hide customizer set displayCustomizer value false in config.js.  -->
-    <script src="/vuexy/assets/vendor/js/template-customizer.js"></script>
+          <div class="landing-reviews-btns">
+            <button
+              id="reviews-previous-btn"
+              class="btn btn-label-primary reviews-btn reviews-previous-btn me-4 scaleX-n1-rtl"
+              type="button">
+              <i class="ti ti-chevron-left ti-md"></i>
+            </button>
+            <button id="reviews-next-btn" class="btn btn-label-primary reviews-btn reviews-next-btn scaleX-n1-rtl" type="button">
+              <i class="ti ti-chevron-right ti-md"></i>
+            </button>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-7 col-xl-9">
+          <div class="swiper-partners-carousel overflow-hidden">
+            <div class="swiper" id="swiper-partners">
+              <div class="swiper-wrapper">
+                @foreach($partnersWithUrls as $partner)
+                  <div class="swiper-slide">
+                    <div class="card h-100">
+                      <div class="card-body text-center d-flex flex-column justify-content-between h-100">
+                        <div class="mb-4">
+                          @if(!empty($partner['logo_url']))
+                            <img
+                              src="{{ $partner['logo_url'] }}"
+                              alt="partner logo"
+                              class="w-px-50 h-px-50 img-fluid" 
+                            />
+                          @else
+                            <div class="d-inline-flex align-items-center justify-content-center bg-light rounded px-4 py-3">
+                              <span class="fw-semibold text-muted">{{ $partner['name'] ?? '' }}</span>
+                            </div>
+                          @endif
+                        </div>
+                        <h6 class="mb-0">{{ $partner['name'] }}</h6>
+                      </div>
+                    </div>
+                  </div>
+                @endforeach
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Partners slider: End -->
+    <hr class="m-0 mt-6 mt-md-12" />
+    <!-- Logo slider: Start -->
+    <div class="container">
+      <div class="swiper-logo-carousel py-8">
+        <div class="swiper" id="swiper-partners-logos">
+          <div class="swiper-wrapper">
+            @foreach($partnersWithUrls as $partner)
+              <div class="swiper-slide">
+                @if(!empty($partner['logo_url']))
+                  <img
+                    src="{{ $partner['logo_url'] }}"
+                    alt="partner logo"
+                    class="client-logo"
+                  />
+                @else
+                  <div class="d-inline-flex align-items-center justify-content-center bg-light rounded px-4 py-3">
+                    <span class="fw-semibold text-muted">{{ $partner['name'] ?? '' }}</span>
+                  </div>
+                @endif
+              </div>
+            @endforeach
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Logo slider: End -->
+  </section>
+  @endif
 
-    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
-    <script src="/vuexy/assets/js/config.js"></script>
+  <!-- Custom Sections -->
+  @if(!empty($customSections))
+    @foreach($customSections as $index => $customSection)
+      @if(!empty($customSection->content))
+        <section id="custom-{{ $customSection->id }}" class="section-py bg-{{ $index % 2 == 0 ? 'card' : 'body' }} ">
+          <div class="container d-flex flex-column align-items-center">
+            <div class="mb-12">
+              <span class="badge bg-label-primary">{{ $customSection->title }}</span>
+            </div>
+            <div class="w-50 d-flex justify-content-center">
+              <p>{!! $customSection->content !!}</p>
+            </div>
+          </div>
+        </section>
+      @endif
+    @endforeach
+  @endif
+
+  <!-- Contact Us: Start -->
+  <section id="landingContact" class="section-py bg-body landing-contact">
+    <div class="container">
+      <div class="text-center mb-4">
+        <span class="badge bg-label-primary">{{ __('admin.Contact us') }}</span>
+      </div>
+      <h4 class="text-center mb-1">
+        <span class="position-relative fw-extrabold z-1"
+          >{{ __('admin.get_in_touch') }}
+          <img
+            src="/vuexy/assets/img/front-pages/icons/section-title-icon.png"
+            alt="laptop charging"
+            class="section-title-img position-absolute object-fit-contain bottom-0 z-n1" />
+        </span>
+      </h4>
+      <p class="text-center mb-12 pb-md-4">{{ __('admin.org_landing_contact_description') }}</p>
+      <div class="row g-6">
+        <div class="col-lg-5">
+          <div class="contact-img-box position-relative border p-2 h-100">
+            <img
+              src="/vuexy/assets/img/front-pages/icons/contact-border.png"
+              alt="contact border"
+              class="contact-border-img position-absolute d-none d-lg-block scaleX-n1-rtl" />
+            <img
+              src="/vuexy/assets/img/front-pages/landing-page/contact-customer-service.png"
+              alt="contact customer service"
+              class="contact-img w-100 scaleX-n1-rtl" />
+            <div class="p-4 pb-2">
+              <div class="row g-4">
+                <div class="col-md-6 col-lg-12 col-xl-6">
+                  <div class="d-flex align-items-center">
+                    <div class="badge bg-label-primary rounded p-1_5 me-3"><i class="ti ti-mail ti-lg"></i></div>
+                    <div>
+                      <p class="mb-0">{{ __('admin.Email') }}</p>
+                      <h6 class="mb-0">
+                        <a href="mailto:{{ $organization->contact_email }}" class="text-heading">{{ $organization->contact_email }}</a>
+                      </h6>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6 col-lg-12 col-xl-6">
+                  <div class="d-flex align-items-center">
+                    <div class="badge bg-label-success rounded p-1_5 me-3">
+                      <i class="ti ti-phone-call ti-lg"></i>
+                    </div>
+                    <div>
+                      <p class="mb-0">{{ __('admin.Phone') }}</p>
+                      <h6 class="mb-0"><a href="tel:{{ $organization->country_code }}{{ $organization->contact_phone }}" class="text-heading">{{ $organization->country_code }} {{ $organization->contact_phone }}</a></h6>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6 col-lg-12 col-xl-6">
+                  <div class="d-flex align-items-center">
+                    <div class="badge bg-label-warning rounded p-1_5 me-3"><i class="ti ti-map-pin ti-lg"></i></div>
+                    <div>
+                      <p class="mb-0">{{ __('admin.Address') }}</p>
+                      <h6 class="mb-0">{{ $organization->address }}</h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="card h-100">
+            <div class="card-body">
+              <h4 class="mb-2">{{ __('admin.send_a_message') }}</h4>
+              <p class="mb-6">
+                {{ __('admin.send_message_description1') }}<br
+                  class="d-none d-lg-block" />
+                {{ __('admin.send_message_description2') }}
+              </p>
+              @if(session('success'))
+                <div class="alert alert-success">{{ session('success') }}</div>
+              @endif
+              @if(session('error'))
+                <div class="alert alert-danger">{{ session('error') }}</div>
+              @endif
+              <form method="POST" action="{{ route('organization.contact.submit', $organization->slug) }}">
+                @csrf
+                <div class="row g-4">
+                  <div class="col-md-6">
+                    <label class="form-label" for="contact-form-fullname">{{ __('admin.full_name') }}</label>
+                    <input type="text" class="form-control" id="contact-form-fullname" name="fullname" placeholder="john" required />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label" for="contact-form-email">{{ __('admin.Email') }}</label>
+                    <input
+                      type="email"
+                      id="contact-form-email"
+                      class="form-control"
+                      name="email"
+                      placeholder="johndoe@gmail.com"
+                      required />
+                  </div>
+                  <div class="col-12 mb-4">
+                    <label class="form-label" for="contact-form-message">{{ __('admin.message') }}</label>
+                    <textarea
+                      id="contact-form-message"
+                      class="form-control"
+                      name="message"
+                      rows="9"
+                      placeholder="{{ __('messages.Write your message') }}"
+                      required></textarea>
+                  </div>
+                  <div class="col-12">
+                    <button type="submit" class="btn btn-primary">{{ __('admin.send_inquiry') }}</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Contact Us: End -->
+
+  <!-- Footer: Start -->
+  <footer class="landing-footer bg-body footer-text">
+    <div class="footer-top position-relative overflow-hidden z-1">
+      <img src="/vuexy/assets/img/front-pages/backgrounds/footer-bg-light.png" alt="footer bg"
+        class="footer-bg banner-bg-img z-n1" />
+      <div class="container">
+        <div class="row gx-0 gy-6 g-lg-10">
+          <div class="col-lg-5">
+            <a href="javascript:void(0);" class="app-brand-link d-flex align-items-center mb-6">
+
+              <img src="{{ $organization->image_url }}" alt="Logo" width="32" height="32" class="me-2 object-fit-contain rounded">
+              <span class="app-brand-text footer-text fw-bold ms-2 ps-1">
+                {{ $isRtl ? $organization->name_ar : $organization->name_en }}
+              </span>
+            </a>
+            <p class="footer-text footer-logo-description mb-6 d-block w-break-word text-break">
+              {{ $organization->bio ? nl2br(Str::limit(strip_tags($organization->bio), 150)) : '' }}
+            </p>
+            <div class="footer-text pe-8">
+              <span>
+                <i class="ti ti-map-pin ti-sm me-1"></i>
+                {{ __('admin.Address') }}
+              </span>
+              <p class="d-block w-break-word text-break mt-2">{{ $organization->address }}</p>
+            </div>
+          </div>
+          <div class="col-lg-2 col-md-4 col-sm-6">
+            <h6 class="footer-title mb-6">{{ __('admin.quick_links') }}</h6>
+            <ul class="navbar-nav list-unstyled">
+              @foreach($sections as $section)
+                <li class="nav-item mb-4">
+                  <a href="#{{ $section['id'] }}" class="footer-link">{{ $section['label'] }}</a>
+                </li>
+              @endforeach
+            </ul>
+          </div>
+          <div class="col-lg-2 col-md-4">
+            <h6 class="footer-title mb-6">{{ __('admin.Contact us') }}</h6>
+            <ul class="list-unstyled">
+              @if($organization->contact_email)
+                <li class="mb-2 text-nowrap">
+                  <i class="ti ti-mail me-1 text-white"></i>
+                  <a class="footer-link" href="mailto:{{ $organization->contact_email }}">{{ $organization->contact_email }}</a>
+                </li>
+              @endif
+              @if($organization->contact_phone)
+                <li class="mb-2 text-nowrap">
+                  <i class="ti ti-phone me12 text-white"></i>
+                  <a class="footer-link" href="tel:{{ $organization->country_code }}{{ $organization->contact_phone }}">
+                    {{ $organization->country_code }} {{ $organization->contact_phone }}
+                  </a>
+                </li>
+              @endif
+            </ul>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <h6 class="footer-title mb-6">{{ __('admin.follow_us') }}</h6>
+            <div>
+              @if(array_filter($socialLinks))
+                @foreach($socialLinks as $icon => $link)
+                  <a href="{{ $link }}" class="me-3 text-white" target="_blank">
+                    <i class="ti ti-brand-{{ $icon }} ti-lg"></i>
+                  </a>
+                @endforeach
+              @endif
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom py-3 py-md-5">
+      <div class="container d-flex flex-wrap justify-content-between flex-md-row flex-column text-center text-md-start">
+        <div class="footer-bottom-text mb-2 mb-md-0">
+          &copy; {{ date('Y') }} {{ $isRtl ? $organization->name_ar : $organization->name_en }}.
+          {{ $isRtl ? 'جميع الحقوق محفوظة.' : 'All rights reserved.' }}
+        </div>
+      </div>
+    </div>
+  </footer>
+  <!-- Footer: End -->
+
+  <!-- Core JS -->
+  <!-- build:js assets/vendor/js/core.js -->
+  <script src="/vuexy/assets/vendor/libs/popper/popper.js"></script>
+  <script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
+  <script src="/vuexy/assets/vendor/libs/node-waves/node-waves.js"></script>
+
+  <!-- endbuild -->
+
+  <!-- Vendors JS -->
+  <script src="/vuexy/assets/vendor/libs/nouislider/nouislider.js"></script>
+  <script src="/vuexy/assets/vendor/libs/swiper/swiper.js"></script>
+
+  <!-- Main JS -->
+  <script src="/vuexy/assets/js/front-main.js"></script>
+
+  <!-- Page JS -->
+  <script>
+    (function () {
+      'use strict';
+
+      const nav = document.querySelector('.layout-navbar'),
+        animationImg = document.querySelectorAll('.hero-dashboard-img'),
+        swiperLogos = document.getElementById('swiper-partners-logos'),
+        swiperPartners = document.getElementById('swiper-partners');
+
+      // swiper carousel
+      // Customers reviews
+      // -----------------------------------
+      if (swiperPartners) {
+        new Swiper(swiperPartners, {
+          slidesPerView: 1,
+          spaceBetween: 0,
+          grabCursor: true,
+          autoplay: {
+            delay: 3000,
+            disableOnInteraction: false
+          },
+          loop: true,
+          loopAdditionalSlides: 1,
+          navigation: {
+            nextEl: '.reviews-next-btn',
+            prevEl: '.reviews-previous-btn'
+          },
+          breakpoints: {
+            1200: {
+              slidesPerView: 3
+            },
+            992: {
+              slidesPerView: 2
+            }
+          }
+        });
+      }
+
+
+
+      // Review client logo
+      // -----------------------------------
+      if (swiperLogos) {
+        new Swiper(swiperLogos, {
+          slidesPerView: 2,
+          autoplay: {
+            delay: 3000,
+            disableOnInteraction: false
+          },
+          breakpoints: {
+            992: {
+              slidesPerView: 5
+            },
+            768: {
+              slidesPerView: 3
+            }
+          }
+        });
+      }
+    })();
+  </script>
 </body>
+
 </html>

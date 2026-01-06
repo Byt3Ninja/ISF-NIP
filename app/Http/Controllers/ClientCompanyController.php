@@ -46,13 +46,14 @@ use Illuminate\Validation\Rule;
 use App\Services\CompanyService;
 use App\ScreeningEvaluationResults;
 use Illuminate\Support\Facades\Log;
+use App\ScreeningEvaluationCriteria;
 use Illuminate\Support\Facades\Auth;
+use Google\Service\PolyService\Format;
 use App\ScreeningEvaluationCustomFields;
 use Illuminate\Support\Facades\Validator;
 use \Illuminate\Validation\ValidationException;
 use Intervention\Image\ImageManagerStatic as Image;
 use App\Http\Requests\StoreUpdateClientCompanyRequest;
-use Google\Service\PolyService\Format;
 use URL, File, DB, Exception, Session, Storage, stdClass;
 
 class ClientCompanyController extends Controller
@@ -434,7 +435,7 @@ class ClientCompanyController extends Controller
      * @param  \App\Company  $Type
      * @return \Illuminate\Http\Response
      */
-    public function editOrCreate($id = null)
+    public function editOrCreate(Request $request, $id = null)
     {
         $user = auth()->user();
         try {
@@ -526,9 +527,9 @@ class ClientCompanyController extends Controller
                 //     return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
                 // }
 
-                if ($user->hasRole('organizationManager')) {
-                    $userorg = Organization::where('user_id', $user->id)->first();
-                    $cycles = Cycle::where('organization_id', $userorg->id)->with('companies')->get();
+                if ($user->hasAnyRole(['organizationManager', 'subadmin'])) {
+                    $orgIds = $user->organizations_ids;
+                    $cycles = Cycle::whereIn('organization_id', $orgIds)->with('companies')->get();
                     foreach ($cycles as $cycle) {
                         foreach ($cycle->companies as $company) {
                             if ($company->id == $id) {
@@ -675,14 +676,14 @@ class ClientCompanyController extends Controller
             $milestones = Milestone::where('company_id', $id)
                 ->orderBy('created_at')->get();
                 
+             
                 $year = !empty($data['valuation_date'])
                         ? Carbon::parse($data['valuation_date'])->year
                         : (int) date('Y'); // add here year from Validation Date
             $financialprojection = FinancialProjection::where('company_id', $id)
-                                                        ->whereBetween('year', [$year - 1, $year + 2])
+                                                        // ->whereBetween('year', [$year - 1, $year + 2])
                                                         ->orderBy('year')
                                                         ->get();
-            
             // dd($financialprojection);
             return view('admin/clients/company', compact(
                 'client',
@@ -3414,244 +3415,133 @@ class ClientCompanyController extends Controller
             $company_id = $company->id;
             $cycle_id = $company->cycle;
 
-            $_steps = Step::where('cycle_id', $cycle_id)
-                ->where('stype', 2)
-                ->orderBy('arr')
-                ->get();
+            $step = Step::where('cycle_id', $cycle_id)
+                ->orderBy('arr');
+                
+            $_stepsScreening = $step->where('stype', 2)->get();
             // $metadata = collect([]);
             // foreach($_steps as $step) {
             //     $metadata->push(ScreeningEvaluationResults::metadata($step->id));
             // }
-            
-            $companies = Company::where('cycle', $cycle_id)->get();
-            $stepsData = collect();
-            $l = app()->getLocale();
-            foreach ($_steps as $step) {
-                $evaluation = ScreeningEvaluation::where('step_id', $step->id)->first();
-                $results = ScreeningEvaluationResults::where('evaluation_id', $evaluation?->id)->get();
-                $get_comments = ScreeningEvaluationCustomFields::where('name', 'final_comment')
-                    ->where('evaluation_id', $evaluation?->id)
-                    ->with('values')
-                    ->first();
 
-                $comments = collect([]);
-                if($get_comments && $get_comments->values) {
-                    $comments = $get_comments->values->map(function($c) {
-                        $c->evaluation_id = $c->evaluation_id;
-                        return $c;
-                    });
-                }
-                $getUsers = Screening::where('step_id', $step->id)->with('user')->get();
-                $judges = $getUsers->map(function($item) use ($l) {
-                    $user = $item->user;
-                    $j = new stdClass;
-                    $j->id = $user->id ?? 0;
-                    $j->name = ($user->{'first_name_' . $l} ?? '') . ' ' . ($user->{'last_name_' . $l} ?? '');
-                    $j->phone = $user->phone ?? '';
-                    $j->email = $user->email ?? '';
-                    $j->image_url = $user->image_url ?? '';
-                    return $j;
-                })->unique('id')->values();
-                $judges = $judges->map(function($judge) use ($getUsers) {
-                    $startups = $getUsers->where('user_id', $judge->id)
-                        ->map(fn($i) => $i->users)
-                        ->flatten()
-                        ->unique()
-                        ->filter()
-                        ->values();
-                    $judge->startups = $startups->pluck('id')->values();
-                    return $judge;
+            $screeningsEvaluations = ScreeningEvaluation::whereIn(
+                    'step_id',
+                    $_stepsScreening->pluck('id')
+                )->get();
+
+            $getCriteria = ScreeningEvaluationCriteria::whereIn(
+                    'evaluation_id',
+                    $screeningsEvaluations->pluck('id')
+                )
+                ->get()
+                ->map(function ($criterion) {
+                    $criterion->criteria_weight = 100;
+                    return $criterion;
                 });
-                foreach ($judges as $jdx => $judge) {
-                    $judges[$jdx]->companies = collect([]);
-                    foreach ($judge->startups as $cid) {
 
-                        $_comment = '';
-                        $_approval = 'pending';
-
-                        $judge_comment = $comments->where('user_id', $judge->id)
-                            ->where('company_id', $cid)
-                            ->first();
-
-                        if($judge_comment) {
-                            $_comment = $judge_comment->value ?? '';
-                            $_approval = intval($judge_comment->is_approved) === 1
-                                ? 'approved'
-                                : (intval($judge_comment->is_approved) === 2 ? 'disapproved' : 'pending');
-                        }
-
-                        $_results = $results->where('company_id', $cid)
-                            ->where('user_id', $judge->id)
-                            ->values();
-
-                        $_company = new stdClass;
-                        $_company->id = $cid;
-                        $_company->status = $_results->count() > 0
-                            ? ($_results->where('status', 0)->count() > 0 ? 'Draft' : 'Published')
-                            : 'Not Evaluated';
-                        $_company->comment = $_comment;
-                        $_company->approval = $_approval;
-                        $_company->results = $_results;
-
-                        $judges[$jdx]->companies->push($_company);
-                    }
-                }
-                foreach ($companies as $cidx => $comp) {
-                    $avg = $judges
-                        ->filter(fn($j) => $j->companies->where('status', 'Published')->where('id', $comp->id)->isNotEmpty())
-                        ->avg(function($j) use ($comp) {
-                            $item = $j->companies->where('status', 'Published')->where('id', $comp->id)->first();
-                            return $item ? $item->results->sum(fn($r) => $r->score ?? 0) : null;
-                        });
-                    $companies[$cidx]->average_score = $avg ?? 0;
-                }
-                
-                $stepsData->push([
-                    'step_id' => $step->id,
-                    'step_title' => $step->title,
-                    'overall_average_score' => $companies->avg('average_score'),
-                    'date' => $step?->created_at?->format('Y-m-d'),
-                    'companies' => $companies->map(function($c) { 
+            $getResult = ScreeningEvaluationResults::whereIn(
+                    'evaluation_id',
+                    $screeningsEvaluations->pluck('id')
+                )->where('company_id', $company_id)->get();
+               
+            $stepsData = $screeningsEvaluations->map(function ($evaluation) use ($getResult, $getCriteria) {
+                $evaluationResults = $getResult->where('evaluation_id', $evaluation->id);
+                $criteriaBreakdown = $getCriteria->where('evaluation_id', $evaluation->id)
+                    ->map(function ($criterion) use ($evaluationResults) {
+                        $criterionScores = $evaluationResults->where('criteria_id', $criterion->id);
                         return [
-                            'company_id' => $c->id,
-                            'average_score' => $c->average_score
+                            'criterion' => $criterion->title ?? 'N/A', 
+                            'weight'    => $criterion->weight ?? 0, 
+                            'score'     => round($criterionScores->avg('score'), 2),
                         ];
-                    })->values(),
-                    'judges' => $judges->map(function($j) {
+                    })->values();
+
+                $judgesData = $evaluationResults->groupBy('user_id')
+                    ->map(function ($judgeResults) {
+                        $judge = $judgeResults->first()->user; 
+                        
                         return [
-                            'judge_id' => $j->id,
-                            'judge_name' => $j->name,
-                            'phone' => $j->phone,
-                            'email' => $j->email,
-                            'image_url' => $j->image_url,
-                            'evaluations' => $j->companies->map(function($c) {
-                                return [
-                                    'company_id' => $c->id,
-                                    'score' => $c->results->sum(fn($r) => $r->score ?? 0),
-                                    'status' => $c->status,
-                                    'comment' => $c->comment,
-                                    'approval' => $c->approval
-                                ];
-                            })->values()
+                            'judge_id'         => $judge->id ?? 0,
+                            'judge_name'       => $judge->name ?? 'Unknown',
+                            'judge_link'       => route('users.show', $judge->id ?? 0), 
+                            'individual_score' => round($judgeResults->avg('score'), 2),
+                            'comments'         => $judgeResults->pluck('comment')->filter()->values()->all(),
                         ];
-                    })->values()
-                ]);
-            }
+                    })->values();
+
+                $overallScore = $evaluationResults->isEmpty() ? 0 : $evaluationResults->avg('score');
+
+                return [
+                    'step_id'            => $evaluation->step_id ?? 0,
+                    'step_name'          => $evaluation->step->name ?? 'Step Name',
+                    'overall_score'      => round($overallScore, 2),
+                    'criteria_breakdown' => $criteriaBreakdown,
+                    'judges'             => $judgesData,
+                ];
+            });
             $screeningData = $stepsData;
-
-
-
         // return or view
         //  dd($screeningData);
-
-
                 $almuni->screening = json_encode($screeningData);
 
                     //Final Screening
-                $company_id = $company->id;
                 $cycle_id = $company->cycle;
-                $_steps = Step::where('cycle_id', $cycle_id)
-                    ->where('stype', 5)
-                    ->orderBy('arr')
-                    ->get();
-                $companies = Company::where('cycle', $cycle_id)->get();
-                $finalstepsData = collect();
+                $_stepFinal = $step->where('stype', 5)->get();
+               $screeningsEvaluations = ScreeningEvaluation::whereIn(
+                    'step_id',
+                    $_stepFinal->pluck('id')
+                )->get();
 
-                $l = app()->getLocale();
+            $getCriteria = ScreeningEvaluationCriteria::whereIn(
+                    'evaluation_id',
+                    $screeningsEvaluations->pluck('id')
+                )
+                ->get()
+                ->map(function ($criterion) {
+                    $criterion->criteria_weight = 100;
+                    return $criterion;
+                });
 
-                foreach ($_steps as $step) {
+            $getResult = ScreeningEvaluationResults::whereIn(
+                    'evaluation_id',
+                    $screeningsEvaluations->pluck('id')
+                )->where('company_id', $company_id)->get();
+               
+            $finalstepsData = $screeningsEvaluations->map(function ($evaluation) use ($getResult, $getCriteria) {
+                $evaluationResults = $getResult->where('evaluation_id', $evaluation->id);
+                $criteriaBreakdown = $getCriteria->where('evaluation_id', $evaluation->id)
+                    ->map(function ($criterion) use ($evaluationResults) {
+                        $criterionScores = $evaluationResults->where('criteria_id', $criterion->id);
+                        return [
+                            'criterion' => $criterion->title ?? 'N/A', 
+                            'weight'    => $criterion->weight ?? 0, 
+                            'score'     => round($criterionScores->avg('score'), 2),
+                        ];
+                    })->values();
 
-                    $finals = Finalscreening::where('step_id', $step->id)
-                        ->with(['company', 'company.users'])
-                        ->get()
-                        ->map(function($f) {
-                            $f->judgers_ids = array_map(fn($i) => intval($i), $f->judges);
-                            return $f;
-                        });
+                $judgesData = $evaluationResults->groupBy('user_id')
+                    ->map(function ($judgeResults) {
+                        $judge = $judgeResults->first()->user; 
+                        
+                        return [
+                            'judge_id'         => $judge->id ?? 0,
+                            'judge_name'       => $judge->name ?? 'Unknown',
+                            'judge_link'       => route('users.show', $judge->id ?? 0), 
+                            'individual_score' => round($judgeResults->avg('score'), 2),
+                            'comments'         => $judgeResults->pluck('comment')->filter()->values()->all(),
+                        ];
+                    })->values();
 
-                    $users_ids = $finals
-                        ->map(fn($f) => array_map(fn($i) => intval($i), $f->judges))
-                        ->flatten()
-                        ->unique()
-                        ->values();
+                $overallScore = $evaluationResults->isEmpty() ? 0 : $evaluationResults->avg('score');
 
-                    $judges = User::whereIn('id', $users_ids)
-                        ->get()
-                        ->map(function($user) use ($l) {
-                            $j = new stdClass;
-                            $j->id = $user->id ?? 0;
-                            $j->name = ($user->{'first_name_' . $l} ?? '') . ' ' . ($user->{'last_name_' . $l} ?? '');
-                            $j->phone = $user->phone ?? '';
-                            $j->email = $user->email ?? '';
-                            $j->image_url = $user->image_url ?? '';
-                            return $j;
-                        })->unique('id')->values();
-                    $judges = $judges->map(function($item) use ($finals) {
-                        $startups = $finals
-                            ->filter(fn($f) => in_array($item->id, $f->judgers_ids))
-                            ->values()
-                            ->map(fn($f) => $f?->company?->users)
-                            ->flatten()
-                            ->unique()
-                            ->filter(fn($i) => !is_null($i))
-                            ->values();
-
-                        $item->startups = $startups;
-                        return $item;
-                    });
-                    foreach ($judges as $idx => $judge) {
-                        $startup_ids = $judge->startups->pluck('id')->toArray();
-                        $get_companies = $companies->filter(fn($c) => $c->users->whereIn('id', $startup_ids)->count() > 0);
-                        $judges[$idx]->startups = $get_companies->pluck('id');
-                    }
-                    $judges = $judges->map(function($judge) use ($companies) {
-                        $judge->companies = collect([]);
-                        foreach ($judge->startups as $company_id) {
-                            $_company = new stdClass;
-                            $_company->id = $company_id;
-                            $_company->status = 'Not Evaluated';
-                            $_company->results = collect([]);
-                            $_company->comment = '';
-                            $_company->approval = 'pending';
-                            $judge->companies->push($_company);
-                        }
-                        return $judge;
-                    });
-                    $_companies = $companies->map(function($comp) use ($judges, $step) {
-                        $average_score = $judges
-                            ->filter(fn($j) => in_array($comp->id, $j->startups->toArray()))
-                            ->avg(fn($j) => $j->companies->where('id', $comp->id)->first()->results->sum(fn($r) => $r->score ?? 0));
-                        $comp->average_score = $average_score ?? 0;
-                        $comp->judges = $judges;
-                        $comp->company_step_id = $step->id;
-                        $comp->company_cycle_id = $step->cycle_id;
-                        return $comp;
-                    });
-                    $stepsData->push([
-                        'step_id' => $step->id,
-                        'step_title' => $step->title,
-                        'companies' => $_companies->map(fn($c) => [
-                            'company_id' => $c->id,
-                            'average_score' => $c->average_score
-                        ])->values(),
-                        'judges' => $judges->map(function($j) {
-                            return [
-                                'judge_id' => $j->id,
-                                'judge_name' => $j->name,
-                                'phone' => $j->phone,
-                                'email' => $j->email,
-                                'image_url' => $j->image_url,
-                                'evaluations' => $j->companies->map(fn($c) => [
-                                    'company_id' => $c->id,
-                                    'score' => $c->results->sum(fn($r) => $r->score ?? 0),
-                                    'status' => $c->status,
-                                    'comment' => $c->comment,
-                                    'approval' => $c->approval
-                                ])->values()
-                            ];
-                        })->values()
-                    ]);
-                }
+                return [
+                    'step_id'            => $evaluation->step_id ?? 0,
+                    'step_name'          => $evaluation->step->name ?? 'Step Name',
+                    'overall_score'      => round($overallScore, 2),
+                    'criteria_breakdown' => $criteriaBreakdown,
+                    'judges'             => $judgesData,
+                ];
+            });
                 $FinalscreeningData = $finalstepsData;
 
                 // dd($FinalscreeningData);

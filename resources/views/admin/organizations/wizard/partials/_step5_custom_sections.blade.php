@@ -7,13 +7,10 @@
 @endphp
 
 <!-- Custom Sections Header -->
-<div class="card mb-4 border-0 shadow-sm">
-  <div class="card-header bg-white border-bottom-0 py-3">
+<div class="card mb-4 rounded-0 border-top border-bottom shadow-none">
+  <div class="card-header py-3">
     <div class="d-flex justify-content-between align-items-center">
       <div>
-        <h5 class="mb-1 fw-bold">
-          <i class="ti ti-layout-grid me-2 text-primary"></i>{{ __('admin.Custom Sections') }}
-        </h5>
         <small class="text-muted">{{ __('admin.Add rich content sections to your landing page') }}</small>
       </div>
       <div class="d-flex align-items-center gap-2">
@@ -32,7 +29,7 @@
 <div id="customSectionsContainer">
   @forelse($sections as $index => $section)
     <div class="card mb-3 border shadow-sm custom-section-card" data-section-id="{{ $section->id }}" data-index="{{ $index }}">
-      <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+      <div class="card-header py-3 d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center">
           <span class="drag-handle me-3 text-muted cursor-grab" style="cursor: grab;">
             <i class="ti ti-grip-vertical fs-5"></i>
@@ -68,15 +65,11 @@
         <input type="hidden" name="custom_sections[{{ $index }}][title]" value="{{ $section->title }}" class="hidden-title">
         <input type="hidden" name="custom_sections[{{ $index }}][content]" value="{{ $section->content }}" class="hidden-content">
         <input type="hidden" name="custom_sections[{{ $index }}][visibility]" value="{{ $section->visibility }}" class="hidden-visibility">
-        <input type="hidden" name="custom_sections[{{ $index }}][bg_type]" value="{{ $section->bg_type }}" class="hidden-bg-type">
-        <input type="hidden" name="custom_sections[{{ $index }}][bg_color]" value="{{ $section->bg_color }}" class="hidden-bg-color">
-        <input type="hidden" name="custom_sections[{{ $index }}][bg_gradient_start]" value="{{ $section->bg_gradient_start }}" class="hidden-bg-gradient-start">
-        <input type="hidden" name="custom_sections[{{ $index }}][bg_gradient_end]" value="{{ $section->bg_gradient_end }}" class="hidden-bg-gradient-end">
         <input type="hidden" name="custom_sections[{{ $index }}][sort_order]" value="{{ $section->sort_order }}" class="hidden-sort-order">
       </div>
     </div>
   @empty
-    <div class="text-center py-5 empty-state" id="sectionsEmptyState">
+    <div class="text-center py-5 empty-state bg-light-subtle border border-dashed" id="sectionsEmptyState">
       <div class="avatar avatar-lg bg-label-primary mb-3">
         <span class="avatar-initial"><i class="ti ti-layout-grid fs-2"></i></span>
       </div>
@@ -141,11 +134,7 @@
       <input type="hidden" name="custom_sections[__INDEX__][id]" value="">
       <input type="hidden" name="custom_sections[__INDEX__][title]" value="" class="hidden-title">
       <input type="hidden" name="custom_sections[__INDEX__][content]" value="" class="hidden-content">
-      <input type="hidden" name="custom_sections[__INDEX__][visibility]" value="public" class="hidden-visibility">
-      <input type="hidden" name="custom_sections[__INDEX__][bg_type]" value="solid" class="hidden-bg-type">
-      <input type="hidden" name="custom_sections[__INDEX__][bg_color]" value="#ffffff" class="hidden-bg-color">
-      <input type="hidden" name="custom_sections[__INDEX__][bg_gradient_start]" value="#ffffff" class="hidden-bg-gradient-start">
-      <input type="hidden" name="custom_sections[__INDEX__][bg_gradient_end]" value="#f8f9fa" class="hidden-bg-gradient-end">
+      <input type="hidden" name="custom_sections[__INDEX__][visibility]" value="" class="hidden-visibility">
       <input type="hidden" name="custom_sections[__INDEX__][sort_order]" value="__INDEX__" class="hidden-sort-order">
     </div>
   </div>
@@ -174,13 +163,404 @@
   .sortable-chosen {
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
   }
-  .empty-state {
-    border: 2px dashed #e9ecef;
-    border-radius: 0.5rem;
-    background: #fafafa;
-  }
   .section-form-container {
     background: #f8f7fa;
     border-top: 1px solid #e9ecef;
   }
 </style>
+
+@push('scripts')
+<script>
+@if($isEdit && $maxStep >= 5)
+(function() {
+  const maxSections = 10;
+  let sectionIndex = {{ $customSections->count() ?? 0 }};
+  let tinyMCEInitialized = {};
+
+  // Initialize Sortable for drag & drop
+  const container = document.getElementById('customSectionsContainer');
+  if (container) {
+    new Sortable(container, {
+      handle: '.drag-handle',
+      animation: 150,
+      ghostClass: 'sortable-ghost',
+      chosenClass: 'sortable-chosen',
+      onEnd: function(evt) {
+        updateSortOrders();
+        saveReorder();
+      }
+    });
+  }
+
+  // Initialize TinyMCE for existing editors
+  function initTinyMCE(selector) {
+    if (typeof tinymce === 'undefined') {
+      console.warn('TinyMCE not loaded');
+      return;
+    }
+
+    tinymce.init({
+      selector: selector,
+      height: 250,
+      menubar: false,
+      plugins: 'lists link image paste',
+      toolbar: 'undo redo | formatselect | bold italic underline | bullist numlist | link | removeformat',
+      content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial; font-size: 14px; }',
+      directionality: '{{ $l == "ar" ? "rtl" : "ltr" }}',
+      branding: false,
+      promotion: false,
+      setup: function(editor) {
+        editor.on('change', function() {
+          editor.save();
+          syncHiddenInputs($(editor.getElement()).closest('.custom-section-card'));
+        });
+      }
+    });
+  }
+
+  // Initialize existing editors on page load
+  setTimeout(function() {
+    initTinyMCE('.rich-text-editor');
+  }, 500);
+
+  // Add Section Button
+  $('#addSectionBtn, #addFirstSectionBtn').on('click', function() {
+    console.log('clicked')
+    if (sectionIndex >= maxSections) {
+      toastr.warning('{{ __("admin.Maximum 10 sections allowed") }}');
+      return;
+    }
+
+    addNewSection();
+  });
+
+  function addNewSection() {
+    // Hide empty state
+    $('#sectionsEmptyState').hide();
+
+    // Get template and replace index
+    const template = document.getElementById('sectionTemplate').innerHTML;
+    const html = template.replace(/__INDEX__/g, sectionIndex);
+
+    // Add to container
+    $('#customSectionsContainer').append(html);
+
+    // Initialize TinyMCE for new section
+    setTimeout(function() {
+      initTinyMCE('#customSectionsContainer .custom-section-card:last-child .rich-text-editor');
+    }, 100);
+
+    // Update counter
+    sectionIndex++;
+    updateSectionCount();
+
+    // Auto-expand new section for editing
+    const newCard = $('#customSectionsContainer .custom-section-card:last-child');
+    newCard.find('.section-form-container').show();
+    newCard.find('.section-hidden-inputs').hide();
+    newCard.addClass('editing');
+  }
+
+  // Edit Section Button
+  $(document).on('click', '.edit-section-btn', function() {
+    const card = $(this).closest('.custom-section-card');
+    toggleSectionEdit(card, true);
+  });
+
+  // Done Editing Button
+  $(document).on('click', '.done-editing-btn', function() {
+    const card = $(this).closest('.custom-section-card');
+    toggleSectionEdit(card, false);
+  });
+
+  function toggleSectionEdit(card, isEditing) {
+    if (isEditing) {
+      card.find('.section-form-container').slideDown();
+      card.find('.section-hidden-inputs').hide();
+      card.addClass('editing');
+
+      // Re-initialize TinyMCE if needed
+      const textarea = card.find('.rich-text-editor');
+      if (textarea.length && !tinymce.get(textarea.attr('id'))) {
+        setTimeout(function() {
+          initTinyMCE('#' + textarea.attr('id'));
+        }, 100);
+      }
+    } else {
+      // Save TinyMCE content
+      card.find('.rich-text-editor').each(function() {
+        const editor = tinymce.get(this.id);
+        if (editor) {
+          editor.save();
+        }
+      });
+
+      // Sync to hidden inputs
+      syncHiddenInputs(card);
+
+      // Update display title
+      const title = card.find('.section-title-input').val() || '{{ __("admin.Untitled Section") }}';
+      card.find('.section-title-display').text(title);
+
+      // Update visibility badge
+      const visibility = card.find('.visibility-radio:checked').val() || 'public';
+      const badgeClass = visibility === 'public' ? 'success' : (visibility === 'participants' ? 'info' : 'warning');
+      const iconClass = visibility === 'public' ? 'world' : (visibility === 'participants' ? 'users' : 'lock');
+      const visibilityLabels = {
+        'public': '{{ __("admin.public") }}',
+        'participants': '{{ __("admin.participants") }}',
+        'admins_only': '{{ __("admin.admins_only") }}'
+      };
+      card.find('.badge').removeClass('bg-label-success bg-label-info bg-label-warning')
+        .addClass('bg-label-' + badgeClass)
+        .html('<i class="ti ti-' + iconClass + ' me-1"></i>' + visibilityLabels[visibility]);
+
+      card.find('.section-form-container').slideUp();
+      card.find('.section-hidden-inputs').show();
+      card.removeClass('editing');
+    }
+  }
+
+  function syncHiddenInputs(card) {
+    const form = card.find('.section-form-container');
+    const hidden = card.find('.section-hidden-inputs');
+
+    hidden.find('.hidden-title').val(form.find('.section-title-input').val());
+    hidden.find('.hidden-content').val(form.find('.section-content-input').val());
+    hidden.find('.hidden-visibility').val(form.find('.visibility-radio:checked').val());
+  }
+
+  // Delete Section Button
+  $(document).on('click', '.delete-section-btn', function() {
+    const card = $(this).closest('.custom-section-card');
+    const sectionId = card.data('section-id');
+
+    if (confirm('{{ __("admin.Are you sure you want to delete this section?") }}')) {
+      if (sectionId) {
+        // Delete from server
+        $.ajax({
+          url: '{{ $isEdit ? route("organization.wizard.step5.delete", [$organization->id, "__ID__"]) : "" }}'.replace('__ID__', sectionId),
+          type: 'DELETE',
+          headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+          },
+          success: function(response) {
+            if (response.success) {
+              card.slideUp(300, function() {
+                $(this).remove();
+                updateSectionCount();
+                checkEmptyState();
+              });
+              toastr.success(response.message);
+            } else {
+              toastr.error(response.message);
+            }
+          },
+          error: function() {
+            toastr.error('{{ __("admin.Error deleting section") }}');
+          }
+        });
+      } else {
+        // Just remove from DOM (new unsaved section)
+        card.slideUp(300, function() {
+          $(this).remove();
+          updateSectionCount();
+          checkEmptyState();
+        });
+      }
+    }
+  });
+
+  // Preview Section Button
+  $(document).on('click', '.preview-section-btn', function() {
+    const card = $(this).closest('.custom-section-card');
+
+    // Save TinyMCE content first
+    card.find('.rich-text-editor').each(function() {
+      const editor = tinymce.get(this.id);
+      if (editor) {
+        editor.save();
+      }
+    });
+
+    const title = card.find('.section-title-input').val() || card.find('.hidden-title').val() || '{{ __("admin.Untitled Section") }}';
+    const content = card.find('.section-content-input').val() || card.find('.hidden-content').val() || '';
+
+    const previewHtml = `
+      <div class="p-4 rounded bg-light">
+        <h4 class="mb-3">${title}</h4>
+        <div class="section-content">${content}</div>
+      </div>
+    `;
+
+    $('#sectionPreviewContent').html(previewHtml);
+    new bootstrap.Modal(document.getElementById('sectionPreviewModal')).show();
+  });
+
+  // Title input sync
+  $(document).on('input', '.section-title-input', function() {
+    const card = $(this).closest('.custom-section-card');
+    card.find('.section-title-display').text($(this).val() || '{{ __("admin.New Section") }}');
+  });
+
+  function updateSectionCount() {
+    const count = $('.custom-section-card').length;
+    $('#currentCount').text(count);
+
+    if (count >= maxSections) {
+      $('#addSectionBtn').prop('disabled', true);
+    } else {
+      $('#addSectionBtn').prop('disabled', false);
+    }
+  }
+
+  function checkEmptyState() {
+    if ($('.custom-section-card').length === 0) {
+      $('#sectionsEmptyState').show();
+    }
+  }
+
+  function updateSortOrders() {
+    $('.custom-section-card').each(function(index) {
+      $(this).find('.hidden-sort-order').val(index);
+      $(this).find('input[name$="[sort_order]"]').val(index);
+    });
+  }
+
+  function saveReorder() {
+    const orderedIds = [];
+    $('.custom-section-card').each(function() {
+      const id = $(this).data('section-id');
+      if (id) {
+        orderedIds.push(id);
+      }
+    });
+
+    if (orderedIds.length === 0) return;
+
+    $.ajax({
+      url: '{{ $isEdit ? route("organization.wizard.step5.reorder", $organization->id) : "" }}',
+      type: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+      },
+      data: {
+        ordered_ids: orderedIds
+      },
+      success: function(response) {
+        if (response.success) {
+          toastr.success(response.message);
+        }
+      },
+      error: function() {
+        toastr.error('{{ __("admin.Error reordering sections") }}');
+      }
+    });
+  }
+
+  // Save Step 5
+  // $('#saveStep5').on('click', function() {
+  //   submitStep5Form();
+  // });
+
+  // // Save as Draft Step 5
+  // $('#saveAsDraftStep5').on('click', function() {
+  //   // Close all editing sections first
+  //   $('.custom-section-card.editing').each(function() {
+  //     toggleSectionEdit($(this), false);
+  //   });
+
+  //   $('#draftForm input[name="current_step"]').val(5);
+  //   copyStep5DataToDraft();
+  //   $('#draftForm').submit();
+  // });
+
+  // Publish Step 5
+  // $('#publishStep5').on('click', function() {
+  //   // First save, then publish
+  //   submitStep5Form(function() {
+  //     $('#publishForm').submit();
+  //   });
+  // });
+
+  // function submitStep5Form(callback) {
+  //   // Close all editing sections first and sync data
+  //   $('.custom-section-card.editing').each(function() {
+  //     toggleSectionEdit($(this), false);
+  //   });
+
+  //   // Build form data
+  //   const formData = new FormData();
+  //   formData.append('_token', '{{ csrf_token() }}');
+  //   formData.append('_method', 'PUT');
+
+  //   // Collect section data
+  //   $('.custom-section-card').each(function(index) {
+  //     const card = $(this);
+  //     const sectionId = card.data('section-id') || '';
+
+  //     formData.append('custom_sections[' + index + '][id]', sectionId);
+  //     formData.append('custom_sections[' + index + '][title]', card.find('.hidden-title').val() || card.find('.section-title-input').val() || '');
+  //     formData.append('custom_sections[' + index + '][content]', card.find('.hidden-content').val() || card.find('.section-content-input').val() || '');
+  //     formData.append('custom_sections[' + index + '][visibility]', card.find('.hidden-visibility').val() || card.find('.visibility-radio:checked').val() || 'public');
+  //     formData.append('custom_sections[' + index + '][bg_type]', card.find('.hidden-bg-type').val() || card.find('.section-bg-type-select').val() || 'solid');
+  //     formData.append('custom_sections[' + index + '][bg_color]', card.find('.hidden-bg-color').val() || card.find('.section-bg-color').val() || '#ffffff');
+  //     formData.append('custom_sections[' + index + '][bg_gradient_start]', card.find('.hidden-bg-gradient-start').val() || card.find('.section-bg-gradient-start').val() || '#ffffff');
+  //     formData.append('custom_sections[' + index + '][bg_gradient_end]', card.find('.hidden-bg-gradient-end').val() || card.find('.section-bg-gradient-end').val() || '#f8f9fa');
+  //     formData.append('custom_sections[' + index + '][sort_order]', index);
+  //   });
+
+  //   $.ajax({
+  //     url: '{{ $isEdit ? route("organization.wizard.update.step5", $organization->id) : "" }}',
+  //     type: 'POST',
+  //     data: formData,
+  //     processData: false,
+  //     contentType: false,
+  //     success: function(response) {
+  //       toastr.success('{{ __("admin.Custom sections saved successfully") }}');
+  //       if (callback) {
+  //         callback();
+  //       } else {
+  //         // Reload page to reflect changes
+  //         window.location.reload();
+  //       }
+  //     },
+  //     error: function(xhr) {
+  //       if (xhr.status === 422) {
+  //         const errors = xhr.responseJSON.errors;
+  //         Object.keys(errors).forEach(function(key) {
+  //           toastr.error(errors[key][0]);
+  //         });
+  //       } else {
+  //         toastr.error('{{ __("admin.Error saving custom sections") }}');
+  //       }
+  //     }
+  //   });
+  // }
+
+  // function copyStep5DataToDraft() {
+  //   const draftForm = $('#draftForm');
+
+  //   // Remove previous Step 5 inputs
+  //   draftForm.find('[name^="custom_sections"]').remove();
+
+  //   // Copy section data
+  //   $('.custom-section-card').each(function(index) {
+  //     const card = $(this);
+  //     const prefix = 'custom_sections[' + index + ']';
+
+  //     draftForm.append('<input type="hidden" name="' + prefix + '[id]" value="' + (card.data('section-id') || '') + '">');
+  //     draftForm.append('<input type="hidden" name="' + prefix + '[title]" value="' + (card.find('.hidden-title').val() || '') + '">');
+  //     draftForm.append('<input type="hidden" name="' + prefix + '[content]" value="' + (card.find('.hidden-content').val() || '') + '">');
+  //     draftForm.append('<input type="hidden" name="' + prefix + '[visibility]" value="' + (card.find('.hidden-visibility').val() || 'public') + '">');
+  //     draftForm.append('<input type="hidden" name="' + prefix + '[bg_type]" value="' + (card.find('.hidden-bg-type').val() || 'solid') + '">');
+  //     draftForm.append('<input type="hidden" name="' + prefix + '[bg_color]" value="' + (card.find('.hidden-bg-color').val() || '#ffffff') + '">');
+  //     draftForm.append('<input type="hidden" name="' + prefix + '[bg_gradient_start]" value="' + (card.find('.hidden-bg-gradient-start').val() || '#ffffff') + '">');
+  //     draftForm.append('<input type="hidden" name="' + prefix + '[bg_gradient_end]" value="' + (card.find('.hidden-bg-gradient-end').val() || '#f8f9fa') + '">');
+  //     draftForm.append('<input type="hidden" name="' + prefix + '[sort_order]" value="' + index + '">');
+  //   });
+  // }
+})();
+@endif
+</script>
+@endpush

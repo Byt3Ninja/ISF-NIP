@@ -2,7 +2,28 @@
 
 @section('vendorstyle')
 <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+<style>
+/* Center Summernote modals */
+.note-modal .modal-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+}
+
+/* Center buttons in Summernote modals */
+.note-modal .modal-footer {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.note-modal .modal-footer .btn {
+    min-width: 100px;
+}
+</style>
 @stop
 
 @php
@@ -37,11 +58,6 @@ $pills = [
     @endif
     <!--/ Alerts -->
 
-    {{-- <div class="d-flex flex-column mb-4">
-      <h4 class="mb-1">{{ __('admin.screening_step_details') }}</h4>
-      <p class="mb-0">{{ __('admin.screening_details_description') }}</p>
-    </div> --}}
-
     @if ($cstep)
        <!-- Screening Step Details Card -->
       <div class="card mb-6">
@@ -57,7 +73,7 @@ $pills = [
               </a>
               <h5 class="card-title fw-semibold mb-0">{{ $cstep->title }}</h5>
             </div>
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex flex-wrap align-items-md-center gap-3">
               <a class="btn btn-outline-primary" href="/dashboard/final/results/{{ $id }}">
                 <i class="ti ti-file-text me-2"></i> {{ __('admin.view_results') }}
               </a>
@@ -166,7 +182,7 @@ $pills = [
                 </h6>
               </div>
               <div class="p-3 bg-light-subtle rounded-2 border">
-                <div class="d-flex flex-wrap gap-2">
+                <div id="assigned-judges" class="d-flex flex-wrap gap-2">
                   @php
                     $allJudges = collect($judgers_list ?? [])
                         ->pluck('judgers')
@@ -214,7 +230,7 @@ $pills = [
                 </h6>
               </div>
               <div class="p-3 bg-light-subtle rounded-2 border">
-                <div class="d-flex flex-wrap gap-2">
+                <div id="assigned-companies" class="d-flex flex-wrap gap-2">
                   @php
                     $allCompanies = collect($judgers_list ?? [])
                         ->pluck('companies')
@@ -265,7 +281,7 @@ $pills = [
 
       <!-- Navigation Pills -->
       <nav class="nav-align-top mb-6">
-        <ul class="nav nav-pills" role="tablist">
+        <ul class="nav nav-pills flex-column flex-md-row gap-2 gap-md-0" role="tablist">
           @foreach($pills as $key => $pill)
             <li class="nav-item">
               <a
@@ -291,85 +307,6 @@ $pills = [
         <!-- Judging Panels Tab -->
         <div class="tab-pane fade show active" id="judging_panels" role="tabpanel" aria-labelledby="judging_panels-tab">
           @include('partials.judging-panels')
-          <!-- Old Logic (should be removed) Once new logic done -->
-          {{-- <div class="d-flex flex-column">
-            @if (isset($cstep->data) && array_key_exists($cstep->data, $types))
-              <h5 class="card-title primary">{{ __('cycles.' . $types[$cstep->data]) }}</h5>
-            @endif
-            <p class="text-muted">{{ __('cycles.Select judges from the menu') }}:</p>
-            <form action="/dashboard/screening/update" method="POST" enctype="multipart/form-data">
-              {!! csrf_field() !!}
-              <input type="hidden" value="" name="judges" id="judges">
-              <input type="hidden" value="{{ $cstep->id }}" name="step">
-              <input type="hidden" name="fid" value="{{ $form->id ?? '' }}">
-              @if ($cstep->data == 'grouptogroup')
-                <div class="text-end py-3"> <button id="addPanelBtn" type="button" class="btn btn-label-primary"> <i class="fas fa-fw fa-sm fa-plus me-2"></i> {{ __('admin.Add_New') }} </button> </div>
-                <div class="table-responsive">
-                  <table class="table table-bordered table-hover">
-                    <thead>
-                      <tr>
-                        <th style="width: 20% !important;" scope="col">{{ __('admin.Panel') }}</th>
-                        <th style="width: 40% !important;" scope="col">{{ __('admin.Judges') }}</th>
-                        <th style="width: 40% !important;" scope="col">{{ __('admin.Users') }}</th>
-                      </tr>
-                    </thead>
-                    <tbody id="panels-list-body">
-                      @foreach( $judgers_list as $key => $list )
-                        <tr data-panel="{{ $key }}">
-                          <td>
-                            <i title="Remove panel" class="remove-panel-btn cursor-pointer fas fa-fw fa-sm fa-minus-circle text-danger"></i> 
-                            {{ __('admin.Panel_list') }} {{ $key }}
-                          </td>
-                          <td>
-                            <select name="judges[{{ $key }}][]" class="select2 form-control panel judgers-selectors" multiple="multiple">
-                              @foreach( $judges as $judge )
-                                <option {{ in_array( $judge->id, $list['judgers'] ) ? 'selected' : '' }} value="{{ $judge->id }}">{{ $judge->{'first_name_' . $l} }} {{ $judge->{'last_name_' . $l} }} ({{ $judge->email }})</option>
-                              @endforeach
-                            </select>
-                          </td>
-                          <td>
-                            <select name="users[{{ $key }}][]" class="select2 form-control panel users-selectors" multiple="multiple">
-                              @foreach( $companies as $company )
-                                <option {{ in_array( $company->id, $list['companies'] ) ? 'selected' : '' }} value="{{ $company->id }}">{{ $company->{'name_' . $l} }}</option>
-                              @endforeach
-                            </select>
-                          </td>
-                        </tr>
-                      @endforeach
-                    </tbody>
-                  </table>
-                </div>
-              @else
-                <div class="form-group mt-6">
-                  <label class="form-label">{{ __('cycles.Judges list') }}</label>
-                  <select 
-                    id="judges-select" 
-                    name="judges[]" 
-                    class="select2 form-select" 
-                    {{ $cstep->data == 'onetoall' ? '' : 'multiple="multiple"' }}
-                    data-placeholder="{{ __('cycles.Select') }}..."  
-                  >
-                    <option value="">{{ __('cycles.Select') }}...</option>
-                    @foreach ($judges as $judge)
-                    <option value="{{ $judge->id }}" {{ in_array( intval( $judge->id ) , $judgersList->toArray()) ? 'selected' : '' }}>
-                      {{ $judge->{'first_name_' . $l} }} {{ $judge->{'last_name_' . $l} }} ({{ $judge->email }})
-                    </option>
-                    @endforeach
-                  </select>
-                </div>
-              @endif
-              <div class="form-check my-4">
-                <input class="form-check-input" type="checkbox" id="customSwitch1"  name="notify" />
-                <label class="form-check-label" for="customSwitch1">{{ __('cycles.Notify them') }}</label>
-              </div>
-              <div class="row">
-                <div class="col-12 d-flex justify-content-end">
-                  <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('admin.Update') }}</button>
-                </div>
-              </div>
-            </form>
-          </div> --}}
-          <!-- Old Logic (should be removed) Once new logic done -->
         </div>
         <!--/ Judging Panels Tab -->
 
@@ -378,7 +315,6 @@ $pills = [
           <div class="d-flex flex-column">
             <h5 class="mb-1">{{ __('admin.screening_guidelines') }}</h5>
             <p class="mb-6 text-muted">{{ __('admin.screening_guidelines_description') }}</p>
-            <div id="model-validation-summary" style="display: none;"></div>
             <form id="screening-guidelines-form" action="{{ route('screening.evaluation_save_draft') }}" method="POST" enctype="multipart/form-data">
               {!! csrf_field() !!}
               <input type="hidden" name="action" value="draft">
@@ -426,14 +362,6 @@ $pills = [
       <form id="stepForm" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="_token" value="">
         <div class="modal-body">
-          <div class="form-group mb-3">
-            <label class="form-label">{{ __('admin.screening.screening_type') }}</label>
-            <select class="form-select" name="ScreeningSelect" id="screening-type" required>
-              <option value="onetoall">{{ __('admin.screening.onetoall') }}</option>
-              <option value="grouptoall">{{ __('admin.screening.grouptoall') }}</option>
-              <option value="grouptogroup">{{ __('admin.screening.grouptogroup') }}</option>
-            </select>
-          </div>
           <input type="hidden" name="sid" id="step-id-value">
           <input type="hidden" name="type" value="8">
           <div class="form-group mb-3">
@@ -504,7 +432,12 @@ $pills = [
 
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
-<script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script>
+@if(app()->getLocale() == 'ar')
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/lang/summernote-ar-AR.min.js"></script>
+@endif
+<script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
+<script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
+<script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
 @stop
 
 @section('pagescripts')
@@ -514,7 +447,10 @@ $pills = [
       const initialContent = $('#screening-guidelines-editor').val() || '';
 
       // Initialize Summernote editor
+      const locale = '{{ app()->getLocale() }}';
+      
       $('#screening-guidelines-editor').summernote({
+        lang: locale === 'ar' ? 'ar-AR' : 'en-US',
         placeholder: '{{ __('admin.screening_guidelines_placeholder') }}',
         tabsize: 2,
         height: 200,
@@ -527,6 +463,7 @@ $pills = [
           ['insert', ['link', 'picture', 'video']],
           ['view', ['fullscreen', 'codeview', 'help']]
         ],
+        dialogsInBody: true,
       });
 
       // Set the initial content after Summernote is initialized
@@ -557,15 +494,6 @@ $pills = [
         $('#step-to-date').val(stepData.from);
         $('#step-description').val(stepData.description);
 
-        if (stepData.data) {
-          if (stepData.data == 'onetoall') {
-            $('#screening-type').val('onetoall');
-          } else if (stepData.data == 'grouptoall') {
-            $('#screening-type').val('grouptoall');
-          } else {
-            $('#screening-type').val('grouptogroup');
-          }
-        }
       }
     });
 
@@ -637,87 +565,16 @@ $pills = [
       // Initialize select2 for all selects
       $('.select2').each(function() {
         const $select = $(this);
-        const isScreeningType = $select.attr('id') === 'ScreeningSelect';
         let placeHolder = '';
-        if( $select.attr('id') === 'ScreeningSelect' ) { placeHolder = "{{ __('cycles.Choose screening type') }}"; }
-        else if( $select.hasClass('judgers-selectors') ) { placeHolder = "{{ __('cycles.Select judges') }}"; }
+        if( $select.hasClass('judgers-selectors') ) { placeHolder = "{{ __('cycles.Select judges') }}"; }
         else if( $select.hasClass('users-selectors') ) { placeHolder = "{{ __('cycles.Select Company') }}"; }
 
         $select.select2({
           placeholder: placeHolder,
-          // allowClear: isScreeningType,
-          dropdownParent: isScreeningType ? $('#stepForm') : null,
           width: '100%'
         });
       });
 
-      // Reinitialize ScreeningSelect when modal is shown to ensure interactivity
-      $('#stepForm').on('shown.bs.modal', function() {
-        $('#ScreeningSelect').select2('destroy').select2({
-          placeholder: '{{ __('cycles.Choose screening type') }}',
-          // allowClear: true,
-          dropdownParent: $('#stepForm'),
-          width: '100%'
-        });
-        console.log('ScreeningSelect reinitialized in modal');
-        // Ensure dropdown is not disabled
-        $('#ScreeningSelect').prop('disabled', false);
-      });
-
-      // Function to update hidden judges input
-      function updateJudgesInput() {
-        let allJudges = [];
-
-        @if (optional($cstep)->data == 'grouptogroup')
-          // Collect judges from all panel selects
-          $('select[class*="panel"]').each(function() {
-            const selectedValues = $(this).val() || [];
-            console.log('Panel select:', $(this).attr('class'), 'Values:', selectedValues);
-            allJudges = allJudges.concat(selectedValues);
-          });
-        @else
-          // Collect judges from judges-select for onetoall or grouptoall
-          const selectedValues = $('#judges-select').val() || [];
-          console.log('Judges select:', selectedValues);
-          allJudges = selectedValues;
-        @endif
-
-        // Update hidden input with unique judge IDs as JSON string
-        allJudges = [...new Set(allJudges)].map(id => parseInt(id));
-        console.log('All judges:', allJudges);
-        $('#judges').val(JSON.stringify(allJudges));
-      }
-
-      // Initialize on page load
-      updateJudgesInput();
-
-      // Update on change for all judge selects
-      @if (optional($cstep)->data == 'grouptogroup')
-        $(document).on('change', 'select[class*="panel"]', updateJudgesInput);
-      @else
-        $('#judges-select').on('change', updateJudgesInput);
-      @endif
-
-      $('form[action="/dashboard/final/update"]').on('submit', function(e) {
-        const judgesVal = $('#judges').val();
-        const judges = judgesVal ? JSON.parse(judgesVal) : [];
-        console.log('Submitting judges:', judges);
-        if (!judges || judges.length === 0) {
-          e.preventDefault();
-          alert('{{ __('Please_Choose_Judges') }}');
-          return false;
-        }
-      });
-
-      $('#stepForm form').on('submit', function(e) {
-        const screeningType = $('#ScreeningSelect').val();
-        console.log('Submitting screening type:', screeningType);
-        if (!screeningType) {
-          e.preventDefault();
-          alert('{{ __('Please select a screening type') }}');
-          return false;
-        }
-      });
 
       // Handle screening guidelines form submission with AJAX
       $('#screening-guidelines-form').on('submit', function(e) {
@@ -738,65 +595,27 @@ $pills = [
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
           },
           success: function(response) {
-            if (response.status) {
-              showAlert($('#model-validation-summary')[0], 'Screening guidelines saved successfully', 'success', 3000);
+           if (response.status) {
+              releaseSuccessAlert({
+                title: '{{ __('admin.success') }}',
+                message: response.message ? response.message : 'Screening guidelines saved successfully',
+              });
             } else {
-              showAlert($('#model-validation-summary')[0], response.message, 'danger');
+              releaseFailureAlert({
+                title: '{{ __('admin.Error') }}',
+                message: response.message ? response.message : '{{ __('admin.unexpected_error') }}',
+              });
             }
           },
           error: function(xhr) {
-            const errorMessage = xhr.responseJSON?.message || 'An error occurred while saving screening guidelines';
-            showAlert($('#model-validation-summary')[0], errorMessage, 'danger');
+            const errorMessage = xhr.responseJSON?.message || '{{ __('admin.unexpected_error') }}';
+            releaseFailureAlert({
+              title: '{{ __('admin.Error') }}',
+              message: errorMessage,
+            });
           }
         });
       });
-
-      // Helper function to show dismissible alerts
-      function showAlert(element, message, type = 'info', timeout = null) {
-        const alertTypes = {
-          'success': 'alert-success',
-          'danger': 'alert-danger',
-          'warning': 'alert-warning',
-          'info': 'alert-info'
-        };
-
-        const alertClass = alertTypes[type] || 'alert-info';
-
-        element.innerHTML = `
-          ${message}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
-        element.className = `alert ${alertClass} alert-dismissible`;
-        element.style.display = 'block';
-
-        // Initialize Bootstrap alert dismiss functionality
-        const dismissButton = element.querySelector('.btn-close');
-        if (dismissButton) {
-          dismissButton.addEventListener('click', function() {
-            element.style.display = 'none';
-            element.classList.remove('alert-success', 'alert-danger', 'alert-warning', 'alert-info');
-          });
-        }
-
-        // Auto-dismiss after timeout if specified
-        if (timeout) {
-          setTimeout(() => {
-            if (element.classList.contains(alertClass)) {
-              element.style.display = 'none';
-              element.classList.remove('alert-success', 'alert-danger', 'alert-warning', 'alert-info');
-            }
-          }, timeout);
-        }
-      }
     });
-
-    setTimeout(() => {
-      const alerts = document.querySelectorAll('.alert-dismissible');
-      alerts.forEach(alert => {
-        alert.style.transition = 'opacity 0.5s ease';
-        alert.style.opacity = '0';
-        setTimeout(() => alert.remove(), 500);
-      });
-    }, 20000);
   </script>
 @stop

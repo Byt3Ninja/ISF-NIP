@@ -14,7 +14,7 @@ class MentorshipScheduleController extends Controller
     {
         $user = auth()->user();
         $orgIds = $user->organizations_ids;
-        if(auth()->user()->hasRole('organizationManager')) {
+        if(auth()->user()->hasAnyRole(['organizationManager', 'subadmin'])) {
             $scahedules = MentorshipSchedule::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
                 return $q->whereIn('organization_id', $orgIds);
             })->get();
@@ -51,12 +51,12 @@ class MentorshipScheduleController extends Controller
        $query = MentorshipSchedule::where('value', $request->value)
                                   ->where('unit', $request->unit);
 
-       if(auth()->user()->hasRole('organizationManager')){
+       if(auth()->user()->hasAnyRole(['organizationManager', 'subadmin'])){
            $query->when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
                return $q->whereIn('organization_id', $orgIds);
            });
        }
-       
+
        if($query->exists()) {
            return response()->json([
                'errors' => [
@@ -69,8 +69,17 @@ class MentorshipScheduleController extends Controller
        $schedule->value = $request->value;
        $schedule->unit = $request->unit;
        $schedule->is_active = $request->has('is_active') ? 1 : 0;
-       if(auth()->user()->hasRole('organizationManager')){
-           $schedule->organization_id = auth()->user()->organization_id;
+       if(auth()->user()->hasAnyRole(['organizationManager', 'subadmin'])){
+           if ($user->hasRole('subadmin')) {
+               // Subadmin must select - validate organization_id is in their list
+               if (!$request->organization_id || !in_array($request->organization_id, $orgIds)) {
+                   return response()->json(['error' => 'Please select a valid organization'], 422);
+               }
+               $schedule->organization_id = $request->organization_id;
+           } else {
+               // organizationManager uses their single org
+               $schedule->organization_id = $orgIds[0] ?? null;
+           }
        }
        $schedule->save();
 
@@ -121,7 +130,7 @@ class MentorshipScheduleController extends Controller
         $orgIds = $user->organizations_ids;
 
         // Check authorization
-        if(auth()->user()->hasRole('organizationManager') &&
+        if(auth()->user()->hasAnyRole(['organizationManager', 'subadmin']) &&
            !empty($orgIds) && !in_array($schedule->organization_id, $orgIds)) {
             return response()->json([
                 'error' => 'Unauthorized to update this schedule'
@@ -133,7 +142,7 @@ class MentorshipScheduleController extends Controller
                                   ->where('unit', $request->unit)
                                   ->where('id', '!=', $request->id);
 
-        if(auth()->user()->hasRole('organizationManager')){
+        if(auth()->user()->hasAnyRole(['organizationManager', 'subadmin'])){
             $query->when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
                 return $q->whereIn('organization_id', $orgIds);
             });
@@ -179,7 +188,7 @@ class MentorshipScheduleController extends Controller
         $orgIds = $user->organizations_ids;
 
         // Check authorization
-        if(auth()->user()->hasRole('organizationManager') &&
+        if(auth()->user()->hasAnyRole(['organizationManager', 'subadmin']) &&
            !empty($orgIds) && !in_array($schedule->organization_id, $orgIds)) {
             return response()->json([
                 'success' => false,

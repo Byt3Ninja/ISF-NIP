@@ -74,12 +74,14 @@
         <section>
           <div class="card">
             <div class="card-header d-flex flex-wrap justify-content-between align-items-lg-center border-bottom">
-              <h5 class="card-title mb-6 mb-lg-0">
-                {{ __('cycles.assign_mentors_to') }}
-                <span class="fw-bold ms-1">
-                  {{ $cycles->where('id', request('id'))->pluck('title')->implode(', ') }}
-                </span>
-              </h5>
+              <div class="w-25">
+                <h5 class="card-title mb-6 mb-lg-0">
+                  {{ __('cycles.assign_mentors_to') }}
+                  <span class="fw-bold ms-1">
+                    {{ $cycles->where('id', request('id'))->pluck('title')->implode(', ') }}
+                  </span>
+                </h5>
+              </div>
               
               <!-- PHP Logic for Filters -->
               @php
@@ -101,35 +103,37 @@
                 $specializations = array_unique($specializations);
               @endphp
               <!-- Filters Section -->
-              <div class="row g-3 justify-content-lg-end">
-                <div class="col-md-2">
-                  <select id="scopeFilter" class="form-select">
-                    <option value="">{{ __('admin.Scope') }} ({{ __('admin.All') }})</option>
-                    @foreach ($scopeOptions as $option)
-                      <option value="{{ $option['key'] }}" {{ request('scope') == $option['key'] ? 'selected' : '' }}>
-                        {{ $option['label'] }}  ( {{ $option['hint'] }} )
-                      </option>
-                    @endforeach
-                  </select>
-                </div>
-                <div class="col-md-3">
-                  <select id="specializationFilter" class="form-select">
-                    <option value="">{{ __('cycles.Specialization') }} ({{ __('admin.All') }})</option>
-                    @foreach ($specializations as $spec)
-                      <option value="{{ $spec }}" {{ request('specialization') == $spec ? 'selected' : '' }}>{{ $spec }}</option>
-                    @endforeach
-                  </select>
-                </div>
-                <div class="col-md-2">
-                  <select id="ratingFilter" class="form-select">
-                    <option value="0">{{ __('admin.Rating') }} ({{ __('admin.All') }})</option>
-                    @for($i=1; $i<=5; $i++)
-                      <option value="{{ $i }}" {{ request('rate') == $i ? 'selected' : '' }}>{{ $i }}</option>
-                    @endfor
-                  </select>
-                </div>
-                <div class="col-md-3">
-                    <input type="text" id="clientSearchInput" class="form-control" placeholder="{{ (__('admin.Search')) }}...">
+              <div class="w-75">
+                <div class="row g-3 justify-content-lg-end">
+                  <div class="col-md-2">
+                    <select id="scopeFilter" class="form-select">
+                      <option value="">{{ __('admin.Scope') }} ({{ __('admin.All') }})</option>
+                      @foreach ($scopeOptions as $option)
+                        <option value="{{ $option['key'] }}" {{ request('scope') == $option['key'] ? 'selected' : '' }}>
+                          {{ $option['label'] }}  ( {{ $option['hint'] }} )
+                        </option>
+                      @endforeach
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <select id="specializationFilter" class="form-select">
+                      <option value="">{{ __('cycles.Specialization') }} ({{ __('admin.All') }})</option>
+                      @foreach ($specializations as $spec)
+                        <option value="{{ $spec }}" {{ request('specialization') == $spec ? 'selected' : '' }}>{{ $spec }}</option>
+                      @endforeach
+                    </select>
+                  </div>
+                  <div class="col-md-2">
+                    <select id="ratingFilter" class="form-select">
+                      <option value="0">{{ __('admin.Rating') }} ({{ __('admin.All') }})</option>
+                      @for($i=1; $i<=5; $i++)
+                        <option value="{{ $i }}" {{ request('rate') == $i ? 'selected' : '' }}>{{ $i }}</option>
+                      @endfor
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                      <input type="text" id="clientSearchInput" class="form-control" placeholder="{{ (__('admin.Search')) }}...">
+                  </div>
                 </div>
               </div>
             </div>
@@ -190,7 +194,9 @@
                   <div class="col-lg-4 col-md-6 mentor-item-col"
                        data-name="{{ strtolower($mentor->name) }} {{ strtolower($mentor->title) }}"
                        data-specialization="{{ $mentor->bio->{'specialization_' . $l} ?? '' }}"
-                       data-rating="{{ number_format($mentor->mrating(), 1) }}">
+                       data-scope="{{ $mentor->scope ?? 'null' }}"
+                       data-rating="{{ number_format($mentor->mrating(), 1) }}"
+                      >
                         
                         <div class="card h-100 position-relative shadow-xs border" id="card-{{ $mentor->id }}">
                             <div class="card-body d-flex flex-column position-relative">
@@ -307,6 +313,7 @@
         const noResultsDiv = document.getElementById('no-results');
         const specializationFilter = document.getElementById('specializationFilter');
         const ratingFilter = document.getElementById('ratingFilter');
+        const scopeFilter = document.getElementById('scopeFilter');
 
         // --- Initialization ---
         let currentPage = 1;
@@ -422,6 +429,11 @@
             applyFilters();
         });
 
+        // 9. Scope Filter
+        scopeFilter.addEventListener('change', function() {
+            applyFilters();
+        });
+
         // --- Core Functions ---
 
         function checkForChanges() {
@@ -511,6 +523,7 @@
             const searchTerm = searchInput.value.toLowerCase();
             const selectedSpecialization = specializationFilter.value;
             const selectedRating = parseFloat(ratingFilter.value);
+            const selectedScope = scopeFilter.value;
 
             visibleItems = allMentorCols.filter(col => {
                 // Check search term
@@ -525,7 +538,10 @@
                     mentorRating >= selectedRating - 0.5 && mentorRating < selectedRating + 0.5
                 );
 
-                return matchesSearch && matchesSpecialization && matchesRating;
+                // Check scope
+                const matchesScope = !selectedScope || col.dataset.scope.toLowerCase() === selectedScope.toLowerCase();
+
+                return matchesSearch && matchesSpecialization && matchesRating && matchesScope;
             });
 
             currentPage = 1;

@@ -20,16 +20,16 @@ class JudgerScreeningController extends Controller
         $user = auth()->user();
         $user_id = $user->id;
 
-        $screenedStepIds = DB::table('screenings')
-            ->whereNull('deleted_at')
-            ->where('user_id', $user_id)
-            ->pluck('step_id')
-            ->toArray();
+        $screenings = \App\Screening::where('user_id', $user_id)->get();
+        $assignedCompanyIds = $screenings->pluck('users')->flatten()->filter()->unique()->toArray();
+        $screenedStepIds = $screenings->pluck('step_id')->unique()->toArray();
 
-        if( empty( $screenedStepIds ) ) { $companies = collect(); }
-        else
-        {
-            $placeholders = implode(',', array_fill(0, count($screenedStepIds), '?'));
+        if (empty($assignedCompanyIds)) {
+            $companies = collect();
+        } else {
+            $placeholders = implode(',', array_fill(0, count($assignedCompanyIds), '?'));
+            $stepPlaceholders = implode(',', array_fill(0, count($screenedStepIds), '?'));
+            
             $companies_q = "SELECT
                     cm.id AS `company_id`,
                     cm.name_en AS `company_name_en`,
@@ -47,10 +47,12 @@ class JudgerScreeningController extends Controller
                     steps s ON s.id = cm.step
                 WHERE
                     cm.deleted_at IS NULL
-                    AND s.id IN ($placeholders)
+                    AND cm.id IN ($placeholders)
+                    AND s.id IN ($stepPlaceholders)
             ";
 
-            $companies = collect(DB::select($companies_q, $screenedStepIds));
+            $bindings = array_merge($assignedCompanyIds, $screenedStepIds);
+            $companies = collect(DB::select($companies_q, $bindings));
         }
 
         $l = app()->getLocale();
@@ -159,15 +161,6 @@ class JudgerScreeningController extends Controller
             ],
         ]); */
 
-        $statusCounts = $companies->groupBy('status')->map->count();
-        $statusData = [
-            (object) ['status' => 'Startups', 'count' => $companies->count()],
-            (object) ['status' => 'NotStarted', 'count' => $statusCounts['not-started'] ?? 0],
-            (object) ['status' => 'In_Progress', 'count' => $statusCounts['in-progress'] ?? 0],
-            (object) ['status' => 'Completed', 'count' => $statusCounts['completed'] ?? 0],
-        ];
-        $statuses = ['not-started', 'in-progress', 'completed'];
-
         $companies = $companies->map(function( $company ) {
             $step_id = $company->step->id;
             $company->evaluation = ScreeningEvaluation::getEvaluationData( $step_id );
@@ -176,6 +169,15 @@ class JudgerScreeningController extends Controller
             $status = trim( strtolower( $company?->evaluation?->status ) ) ?? 'draft';
             return $status == 'published' ? true : false;
         })->values();
+
+        $statusCounts = $companies->groupBy('status')->map->count();
+        $statusData = [
+            (object) ['status' => 'Startups', 'count' => $companies->count()],
+            (object) ['status' => 'NotStarted', 'count' => $statusCounts['not-started'] ?? 0],
+            (object) ['status' => 'In_Progress', 'count' => $statusCounts['in-progress'] ?? 0],
+            (object) ['status' => 'Completed', 'count' => $statusCounts['completed'] ?? 0],
+        ];
+        $statuses = ['not-started', 'in-progress', 'completed'];
         // Add your logic here
         return view('judger.screening.index', compact('companies', 'screeningData', 'statusData', 'statuses'));
     }

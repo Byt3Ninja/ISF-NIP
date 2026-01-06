@@ -87,7 +87,7 @@ class MessengerController extends Controller
 
         // Fetch additional data if needed
         $users = $mentors = $cycles = $organizations = null;
-        if( $user->hasAnyRole('Admin|OrganizationManager') || $user->isSubAdmin())
+        if( $user->hasAnyRole('Admin|OrganizationManager|subadmin'))
         {
             if ($user->hasRole('Admin')) {
                 $cycles = Cycle::select('id', 'title')->get();
@@ -530,7 +530,7 @@ class MessengerController extends Controller
         
         $users = $mentors = $cycles = $organizations = null;
         $authUser = Auth::user();
-        if ($authUser->hasAnyRole('Admin|OrganizationManager') || $authUser->isSubAdmin()) {
+        if ($authUser->hasAnyRole('Admin|OrganizationManager|subadmin')) {
             if ($authUser->hasRole('Admin')) {
                 $cycles = Cycle::select('id', 'title')->get();
                 $users = Company::get();

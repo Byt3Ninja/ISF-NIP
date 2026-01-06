@@ -360,8 +360,7 @@ class ZoomService implements OnlineMeetingServiceInterface
         $timeZone = 'Africa/Cairo'; // Default, same logic as createMeeting for dynamic timezone
          if ($user) {
             try{
-                if ($user->hasRole('Admin')) {
-
+                if ($user->hasAnyRole(['Admin', 'subadmin'])) {
                     $setting = Settings::where('id', 1)->first();
                     if ($setting && $setting->timezone) {
                         $timeZone = $setting->timezone;

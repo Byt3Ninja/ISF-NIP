@@ -29,9 +29,10 @@ class surveysController extends Controller
 	public function index()
 	{
 		$user = auth()->user();
+		$orgIds = $user->organizations_ids;
 		$surveys = Surveys::with('organization')
-			->when($user->organization_id, function ($query) use ($user) {
-				return $query->where('organization_id', $user->organization_id);
+			->when(!$user->hasRole('admin') && !empty($orgIds), function ($query) use ($orgIds) {
+				return $query->whereIn('organization_id', $orgIds);
 			})
 			->get();
 		return view('admin.surveys.index', compact('surveys'));
@@ -40,20 +41,17 @@ class surveysController extends Controller
 	public function create()
 	{
 		$user = auth()->user();
-		$organization_id = null;
-		if (isset($user->organization_id) && !empty($user->organization_id)) {
-			$organization_id = $user->organization_id;
-		}
+		$orgIds = $user->organizations_ids;
+		$hasOrg = !empty($orgIds);
 
-		$organizations = Organization::when($organization_id, function ($query) use ($organization_id) {
-			return $query->where('id', $organization_id);
+		$organizations = Organization::when($hasOrg && !empty($orgIds) && !$user->hasRole('admin'), function ($query) use ($orgIds) {
+			return $query->whereIn('id', $orgIds);
 		})->get();
 
 		$questions = QuestionsBank::where('group', 'survey');
-		if (!is_null($organization_id)) {
-			$organization_questions_ids = OrgQuestionsBank::where('organization_id', $organization_id)->pluck('question_id')->toArray();
+		if ($hasOrg && !empty($orgIds) && !$user->hasRole('admin')) {
+			$organization_questions_ids = OrgQuestionsBank::whereIn('organization_id', $orgIds)->pluck('question_id')->toArray();
 			$questions = $questions->whereIn('id', $organization_questions_ids);
-			// $questions = $questions->where('organization_id', $organization_id);
 		}
 		$questions = $questions->get();
 		return view('admin.surveys.create', compact('organizations', 'questions'));
@@ -93,22 +91,19 @@ class surveysController extends Controller
 	public function edit($id)
 	{
 		$user = auth()->user();
-		$organization_id = null;
-		if (isset($user->organization_id) && !empty($user->organization_id)) {
-			$organization_id = $user->organization_id;
-		}
+		$orgIds = $user->organizations_ids;
+		$hasOrg = !empty($orgIds);
 
 		$survey = Surveys::with(['organization', 'questions'])->findOrFail($id);
-		$organizations = Organization::when($organization_id, function ($query) use ($organization_id) {
-			return $query->where('id', $organization_id);
+		$organizations = Organization::when($hasOrg && !empty($orgIds) && !$user->hasRole('admin'), function ($query) use ($orgIds) {
+			return $query->whereIn('id', $orgIds);
 		})->get();
 
 
 		$availableQuestions = QuestionsBank::where('group', 'survey');
-		if (!is_null($organization_id)) {
-			$organization_questions_ids = OrgQuestionsBank::where('organization_id', $organization_id)->pluck('question_id')->toArray();
+		if ($hasOrg && !empty($orgIds) && !$user->hasRole('admin')) {
+			$organization_questions_ids = OrgQuestionsBank::whereIn('organization_id', $orgIds)->pluck('question_id')->toArray();
 			$availableQuestions = $availableQuestions->whereIn('id', $organization_questions_ids);
-			// $availableQuestions = $availableQuestions->where('organization_id', $organization_id);
 		}
 		$availableQuestions = $availableQuestions->select('id', 'question', 'survey_type', 'answers')->get();
 		return view('admin.surveys.edit', compact('survey', 'organizations', 'availableQuestions'));
@@ -161,19 +156,16 @@ class surveysController extends Controller
 	public function get_questions($id)
 	{
 		$user = auth()->user();
-		$organization_id = null;
+		$orgIds = $user->organizations_ids;
+		$hasOrg = !empty($orgIds);
 		$survey = Surveys::with(['questions'])->find($id);
-		if (isset($user->organization_id) && !empty($user->organization_id)) {
-			$organization_id = $user->organization_id;
-		}
 		if (empty($survey)) {
 			return redirect()->route('surveys.index')->with(['error' => 'surveyNotFound']);
 		} else {
 			$questions = QuestionsBank::where('group', 'survey');
-			if (!is_null($organization_id)) {
-				$organization_questions_ids = OrgQuestionsBank::where('organization_id', $organization_id)->pluck('question_id')->toArray();
+			if ($hasOrg && !empty($orgIds) && !$user->hasRole('admin')) {
+				$organization_questions_ids = OrgQuestionsBank::whereIn('organization_id', $orgIds)->pluck('question_id')->toArray();
 				$questions = $questions->whereIn('id', $organization_questions_ids);
-				// $questions = $questions->where('organization_id', $organization_id);
 			}
 			$questions = $questions->get();
 			return view('admin.surveys.questions', compact('survey', 'questions'));
@@ -200,11 +192,7 @@ class surveysController extends Controller
 	public function get_results($id, Request $request)
 	{
 		$user = auth()->user();
-		$organization_id = null;
 		$survey = Surveys::with(['questions'])->find($id);
-		if (isset($user->organization_id) && !empty($user->organization_id)) {
-			$organization_id = $user->organization_id;
-		}
 		if (empty($survey)) {
 			return redirect()->route('surveys.index')->with(['error' => 'surveyNotFound']);
 		} else {

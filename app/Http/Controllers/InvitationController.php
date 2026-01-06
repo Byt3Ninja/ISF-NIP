@@ -2,24 +2,30 @@
 
 namespace App\Http\Controllers;
 
+use App\Settings;
 use App\Invitation;
 use App\InviteMentor;
-use App\Mail\InviteMentorMail;
-use App\Jobs\SendInviteMentorEmail;
 use App\Organization;
+use Illuminate\Support\Str;
+use App\Mail\InviteMentorMail;
+use Illuminate\Http\UploadedFile;
+use App\Jobs\SendInviteMentorEmail;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Request;
 
 class InvitationController extends Controller
 {
     public function index()
     {
-        if(auth()->user()->hasRole('admin')) {
+        $user = auth()->user();
+        if($user->hasRole('admin')) {
             $inviteMentors = InviteMentor::all();
             $allOrganizations = Organization::all();
-        }elseif(auth()->user()->hasRole('organizationManager')) {
-            $inviteMentors = InviteMentor::where('user_id', auth()->user()->id)->get();
-             $allOrganizations = Organization::where('user_id', auth()->user()->id)->get();
+        }elseif($user->hasAnyRole(['organizationManager', 'subadmin'])) {
+            $orgIds = $user->organizations_ids;
+            $inviteMentors = InviteMentor::where('user_id', $user->id)->get();
+            $allOrganizations = Organization::whereIn('id', $orgIds)->get();
         }
 
         $organizationMap = collect($allOrganizations)->keyBy('id');
@@ -43,6 +49,7 @@ class InvitationController extends Controller
                 'message_content'  => strip_tags($invite->message_content),
                 'response_message' => '',
                 'created_at'       => $invite->created_at->format('Y-m-d H:i:s'),
+                'accepted_at'      => $invite->updated_at == $invite->created_at ? 'N/A' : $invite->updated_at->format('Y-m-d H:i:s'),
                 'attachments'      => is_string($invite->attachments) ? json_decode($invite->attachments, true) : ($invite->attachments ?? []),
                 'organizations'    => $organizations,
             ];
@@ -114,7 +121,7 @@ class InvitationController extends Controller
                             ];
                         })->toArray();
         
-
+                        
         return view('mentors.invitations.index', compact('invitations', 'organizations'));
     }
 
@@ -126,16 +133,27 @@ class InvitationController extends Controller
      */
     public function store(Request $request)
     {
+           
+        $setting = Settings::first();
+                        if($setting->enable_email == 0){
+                            return response()->json(['success' => 'false', 'message' => 'admin.Email_Not_Enabled'], 203);
+                        }
+                        if($setting->host == null){
+                            return response()->json(['success' => 'false', 'message' => 'admin.Email_Not_Configured'], 203);
+                        }
+        
+        
         // Retrieve the data from the request
         $data = $request->all();
        // dd($data);
         $request->validate([
+            'invitee_name' => 'required|string',
             'invitee_email' => 'required|email',
             'invitation_scope' => 'required',
             'organizations' => 'nullable|array',
             'invitation_subject' => 'required',
             'invitation_message' => 'required',
-            'attachments' => 'nullable|array',
+            'attachments' => 'nullable',
         ]);
 
         // Store the data in the database
@@ -143,18 +161,69 @@ class InvitationController extends Controller
 
         $invitation = new InviteMentor;
         $invitation->email = $data['invitee_email'];
-        $invitation->name = $name;
+        $invitation->name = $data['invitee_name'] ?? $name;
         $invitation->user_id = auth()->user()->id;
         $invitation->status = 'Sent';
         $invitation->scope = $data['invitation_scope'];
         $invitation->organization_ids = $data['organizations'] ?? [];
         $invitation->subject = $data['invitation_subject'];
-        $invitation->message_content = $data['invitation_message'];
+        $invitation->message_content = trim(preg_replace('/📎[^\n]*/', '', strip_tags($data['invitation_message'])));
         $invitation->attachments = $data['attachments'] ?? [];
         $invitation->save();
 
         dispatch(new SendInviteMentorEmail($invitation));
+
+        $invitation = InviteMentor::where('id', $invitation->id)->get()->map(function ($invite) {
+            return [
+                'invitee_name'     => $invite->name,
+                'invitee_email'    => $invite->email,
+                'subject'          => $invite->subject,
+                'scope'            => $invite->scope,
+                'status'           => $invite->status,
+                'message_content'  => $invite->message_content ?? null,
+                'response_message' => $invite->response_message ?? null,
+                'created_at'       => $invite->created_at->format('Y-m-d H:i:s'),
+                'accepted_at'      => $invite->updated_at == $invite->created_at ? 'N/A' : $invite->updated_at->format('Y-m-d H:i:s'),
+                'attachments'      => $invite->attachments ?? [],
+            ];
+        });
         
-        return response()->json(['success' => true, 'message' => 'Invitation sent successfully.']);
+        return response()->json(['success' => true,
+         'message' => 'Invitation sent successfully.',
+        'data' => $invitation], 200);
+    }
+
+    private function uploadToUsersDisk(UploadedFile $file): array
+    {
+         $extension = $file->guessExtension();
+        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $safeName = Str::slug($originalName);
+        $date = now()->format('Y-m-d_H-i-s');
+        $fileName = $safeName . '_' . $date . '.' . $extension;
+        Storage::disk('UsersDiskInviteMentor')->putFileAs('', $file, $fileName);
+        return [
+            'file_name' => $fileName,
+            'file_url'  => Storage::disk('UsersDiskInviteMentor')->url($fileName),
+            'extension' => $extension,
+            'size'      => $file->getSize(),
+        ];
+    }
+
+    /**
+     * دالة الكونترولر
+     */
+    public function updateFile(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|bail|mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx,pptx|max:10240',
+        ]);
+
+        // استدعاء دالة الرفع
+        $fileData = $this->uploadToUsersDisk($request->file('file'));
+        
+        return response()->json([
+            'success' => true,
+            'data' => $fileData
+        ]);
     }
 }

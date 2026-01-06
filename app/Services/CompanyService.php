@@ -36,7 +36,7 @@ class CompanyService
         }
 
         if (
-            $user->hasAnyRole(['Admin', 'organizationManager']) ||
+            $user->hasAnyRole(['Admin', 'organizationManager', 'subadmin']) ||
             ($user->hasRole('Registered') && $user->company_id == $company->id)
         ) {
             return [

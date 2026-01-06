@@ -21,7 +21,7 @@
     .slot-popup.popover {
       position: absolute;
       z-index: 9999;
-      pointer-events: none;
+      pointer-events: auto;
       font-size: 12px;
       white-space: nowrap;
       max-width: none;
@@ -147,6 +147,49 @@
 
               <div class="tab-pane fade" id="list-tab" role="tabpanel">
                 <div style="max-height: 500px; overflow-y: auto;">
+                  <div id="list-view-add-slot-form" style="display: none;">
+                    <div class="border rounded py-6 px-5 mb-4">
+                      <h6 class="mb-3">{{ __('mentor.add_new_slot') }}</h6>
+                      <div class="row mb-3">
+                        <div class="col-md-6 col-lg-4 mb-3">
+                          <label class="form-label">{{ __('mentor.day') }}</label>
+                          <select id="list-view-day-select" class="form-select">
+                            <option value="Sunday">{{ __('mentor.sunday') }}</option>
+                            <option value="Monday">{{ __('mentor.monday') }}</option>
+                            <option value="Tuesday">{{ __('mentor.tuesday') }}</option>
+                            <option value="Wednesday">{{ __('mentor.wednesday') }}</option>
+                            <option value="Thursday">{{ __('mentor.thursday') }}</option>
+                            <option value="Friday">{{ __('mentor.friday') }}</option>
+                            <option value="Saturday">{{ __('mentor.saturday') }}</option>
+                          </select>
+                        </div>
+                        <div class="col-md-6 col-lg-3 mb-3">
+                          <label class="form-label">{{ __('mentor.start_time') }}</label>
+                          <input type="text" id="list-view-start-time" class="form-control" placeholder="09:00">
+                        </div>
+                        <div class="col-md-6 col-lg-3 mb-3">
+                          <label class="form-label">{{ __('mentor.end_time') }}</label>
+                          <input type="text" id="list-view-end-time" class="form-control" placeholder="17:00">
+                        </div>
+                        <div class="col-md-6 col-lg-2 mb-3">
+                          <label class="form-label">{{ __('mentor.session_type') }}</label>
+                          <select id="list-view-session-type" class="form-select">
+                            <option value="Online">{{ __('mentor.online') }}</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-primary" id="save-list-view-slot">
+                          <i class="ti ti-plus me-2"></i>
+                          {{ __('admin.Add_New') }}
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="cancel-list-view-slot">
+                          <i class="ti ti-x me-2"></i>
+                          {{ __('mentor.cancel') }}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                   <div id="availability-list-view">
                     <!-- List view content will be injected here -->
                   </div>
@@ -187,6 +230,7 @@
         specific: {},
         weekly: {}
     };
+    let currentEventPopover = null;
 
     // Helper function to create a slot object
     const createSlotObject = (slot) => ({
@@ -263,6 +307,7 @@
     // Initialize session type select
     function initSessionTypeSelect() {
         $('#slot-session-type').html(getSessionTypeOptionsHTML());
+        $('#list-view-session-type').html(getSessionTypeOptionsHTML());
     }
 
     // Fetch slots on page load
@@ -349,7 +394,8 @@
                     endTime: slot.end,
                     extendedProps: {
                         sessionType: slot.sessionType,
-                        weekly: true
+                        weekly: true,
+                        id: slot.id
                     },
                     display: 'list-item'
                 });
@@ -366,7 +412,8 @@
                     allDay: false,
                     extendedProps: {
                         sessionType: slot.sessionType,
-                        weekly: false
+                        weekly: false,
+                        id: slot.id
                     },
                     display: 'list-item'
                 });
@@ -405,42 +452,129 @@
 
                 return { domNodes: arrayOfDomNodes };
             },
-            eventMouseEnter: function(arg) {
+            eventClick: function(arg) {
                 const event = arg.event;
                 const startTime = moment(event.start);
                 const endTime = event.end ? moment(event.end) : moment(event.start).add(1, 'hour'); // fallback if no end time
                 const duration = endTime.diff(startTime, 'minutes');
                 const repeatsStatus = event.extendedProps.weekly ? '{{ __("mentor.repeats_weekly") }}' : '{{ $l == "en" ? "Does not repeat" : "لا يتكرر" }}';
 
-                // Create or get popup element
-                let popup = document.querySelector('.slot-popup');
-                if (!popup) {
-                    popup = document.createElement('div');
-                    popup.className = 'popover slot-popup';
-                    const body = document.createElement('div');
-                    body.className = 'popover-body';
-                    popup.appendChild(body);
-                    document.body.appendChild(popup);
+                // Dispose any existing popovers
+                if (currentEventPopover) {
+                    currentEventPopover.dispose();
                 }
 
-                // Set popup content
-                const body = popup.querySelector('.popover-body');
-                body.innerHTML = `
-                    <div><strong>{{ $l == "en" ? "Duration" : "المدة" }}:</strong> ${duration} {{ __("mentor.min") }}</div>
-                    <div><strong>{{ $l == "en" ? "Repeats" : "يتكرر" }}:</strong> ${repeatsStatus}</div>
+                const popoverContent = `
+                    <div class="d-flex justify-content-between align-items-start">
+                      <div>
+                        <div><small>{{ __("mentor.duration") }}:</small> <small class="fw-semibold">${duration} {{ __("mentor.min") }}</small></div>
+                        <div><small>{{ __("mentor.repeats_weekly") }}:</small> <small class="fw-semibold">${event.extendedProps.weekly ? '{{ __('admin.Yes') }} ' : '{{ __('admin.No') }}'}</small></div>
+                        <div class="d-flex mt-3">
+                          <button class="btn btn-label-danger btn-xs delete-event-action">
+                            <i class="ti ti-trash ti-14px me-1"></i>
+                            {{ __('admin.Delete') }}
+                          </button>
+                        </div>
+                      </div>
+                      <button class="btn-close close-popover-action ms-6" aria-label="Close"></button>
+                    </div>
                 `;
 
-                // Position popup below the event
-                const rect = arg.el.getBoundingClientRect();
-                popup.style.left = (rect.left + rect.width / 2) + 'px';
-                popup.style.top = (rect.bottom + 5) + 'px';
-                popup.style.display = 'block';
-            },
-            eventMouseLeave: function(arg) {
-                const popup = document.querySelector('.slot-popup');
-                if (popup) {
-                    popup.style.display = 'none';
-                }
+                // Create popover on the clicked event element
+                const popover = new bootstrap.Popover(arg.el, {
+                    html: true,
+                    // title: `<small style="margin-bottom: 1rem;">{{ __("mentor.slot_details") }}</small>`,
+                    content: popoverContent,
+                    sanitize: false,
+                    container: 'body',
+                    trigger: 'manual'
+                });
+
+                popover.show();
+
+                const popoverTip = popover.tip;
+                popoverTip.classList.add('slot-popup');
+                $(popoverTip).find('.close-popover-action').on('click', () => {
+                    popover.dispose();
+                    currentEventPopover = null;
+                    $(document).off('click.outside-popover');
+                });
+
+                // Dispose popover when clicking outside
+                $(document).on('click.outside-popover', function(e) {
+                    if (currentEventPopover && !$(e.target).closest('.popover').length && !$(e.target).is(arg.el) && !$(e.target).closest(arg.el).length) {
+                        currentEventPopover.dispose();
+                        currentEventPopover = null;
+                        $(document).off('click.outside-popover');
+                    }
+                });
+                $(popoverTip).find('.delete-event-action').on('click', () => {
+                    const id = event.extendedProps.id;
+
+                    // Show SweetAlert confirmation before deletion
+                    Swal.fire({
+                        title: "{{__('mentor.delete_slot_confirm')}}",
+                        text: "{{__('admin.Recover')}}",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: "{{ __('admin.DYes') }}",
+                        cancelButtonText: "{{ __('admin.No') }}",
+                        reverseButtons: true,
+                        customClass: {
+                          confirmButton: 'btn btn-danger me-2',
+                          cancelButton: 'btn btn-label-secondary',
+                        },
+                        buttonsStyling: false,
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // API call to delete the slot from the server
+                            if (id) {
+                                fetch(`/dashboard/availability/slots/${id}`, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        "Accept": "application/json",
+                                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                                    }
+                                })
+                                .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok'))
+                                .then(result => {
+                                    if(result.success) {
+                                        releaseSuccessAlert({
+                                            'message': result?.message ? result.message : "{{ __('mentor.slot_removed_success') }}",
+                                        });
+                                        // Re-fetch data to update the calendar
+                                        fetch('/dashboard/availability/slots', {
+                                          headers: {
+                                            "Accept": "application/json"
+                                          }
+                                        })
+                                            .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok'))
+                                            .then(result => {
+                                                processSlots(result?.data ? result.data : []);
+                                                updateCalendarStyles();
+                                            });
+                                    } else {
+                                         releaseFailureAlert({
+                                            'title': '{{ __('admin.Error') }}',
+                                            'message': result?.message ? result.message : "{{ __('admin.unexpected_error') }}",
+                                        });
+                                    }
+                                })
+                                .catch(error => {
+                                    releaseFailureAlert({
+                                        'title': '{{ __('admin.Error') }}',
+                                        'message': error?.message ? error.message : "{{ __('admin.unexpected_error') }}",
+                                    });
+                                });
+                            }
+                        }
+                    });
+
+                    popover.dispose();
+                    currentEventPopover = null;
+                });
+
+                currentEventPopover = popover;
             }
         });
 
@@ -623,6 +757,52 @@
     $('#add-single-slot').click(() => addSlot('specific'));
     $('#apply-to-weekday').click(() => addSlot('weekly'));
 
+    function renderAddNewSlotBox(visible = false) {
+      return `
+        <div id="list-view-add-slot-form" style="display: ${visible ? 'block' : 'none'};">
+          <div class="border rounded p-4 bg-light-subtle mb-4">
+            <h6 class="mb-3">{{ __('mentor.add_new_slot') }}</h6>
+            <div class="row mb-3">
+              <div class="col-md-6 col-lg-4 mb-3">
+                <label class="form-label">{{ __('mentor.day') }}</label>
+                <select id="list-view-day-select" class="form-select">
+                  <option value="Sunday">{{ __('mentor.sunday') }}</option>
+                  <option value="Monday">{{ __('mentor.monday') }}</option>
+                  <option value="Tuesday">{{ __('mentor.tuesday') }}</option>
+                  <option value="Wednesday">{{ __('mentor.wednesday') }}</option>
+                  <option value="Thursday">{{ __('mentor.thursday') }}</option>
+                  <option value="Friday">{{ __('mentor.friday') }}</option>
+                  <option value="Saturday">{{ __('mentor.saturday') }}</option>
+                </select>
+              </div>
+              <div class="col-md-6 col-lg-3 mb-3">
+                <label class="form-label">{{ __('mentor.start_time') }}</label>
+                <input type="text" id="list-view-start-time" class="form-control" placeholder="09:00">
+              </div>
+              <div class="col-md-6 col-lg-3 mb-3">
+                <label class="form-label">{{ __('mentor.end_time') }}</label>
+                <input type="text" id="list-view-end-time" class="form-control" placeholder="17:00">
+              </div>
+              <div class="col-md-6 col-lg-2 mb-3">
+                <label class="form-label">{{ __('mentor.session_type') }}</label>
+                <select id="list-view-session-type" class="form-select">
+                  ${getSessionTypeOptionsHTML()}
+                </select>
+              </div>
+            </div>
+            <div class="d-flex gap-2">
+              <button type="button" class="btn btn-sm btn-primary" id="save-list-view-slot">
+                {{ __('admin.Save') }}
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="cancel-list-view-slot">
+                {{ __('mentor.cancel') }}
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     // Render calendar view's slots list
     function updateSlotsList() {
         if (!currentSelectedDate) {
@@ -671,6 +851,12 @@
             { key: 'Saturday', display: '{{ __('mentor.saturday') }}' }
         ];
         let html = '';
+
+        // Check if there are any slots
+        const hasSlots = Object.values(availabilityData.weekly).some(slots => slots.length > 0) ||
+                         Object.values(availabilityData.specific).some(slots => slots.length > 0);
+
+        $('#list-view-add-slot-form').toggle(hasSlots);
 
         weekdaysOrder.forEach(day => {
             const weekdayKey = day.key;
@@ -727,47 +913,6 @@
                         <i class="ti ti-plus me-1"></i> {{ __('mentor.add_availability') }}
                     </button>
                 </div>
-                <div id="list-view-add-slot-form" style="display: none;">
-                    <div class="border rounded p-4 bg-light-subtle mb-4">
-                        <h6 class="mb-3">{{ __('mentor.add_new_slot') }}</h6>
-                        <div class="row mb-3">
-                            <div class="col-md-6 col-lg-4 mb-3">
-                                <label class="form-label">{{ __('mentor.day') }}</label>
-                                <select id="list-view-day-select" class="form-select">
-                                    <option value="Sunday">{{ __('mentor.sunday') }}</option>
-                                    <option value="Monday">{{ __('mentor.monday') }}</option>
-                                    <option value="Tuesday">{{ __('mentor.tuesday') }}</option>
-                                    <option value="Wednesday">{{ __('mentor.wednesday') }}</option>
-                                    <option value="Thursday">{{ __('mentor.thursday') }}</option>
-                                    <option value="Friday">{{ __('mentor.friday') }}</option>
-                                    <option value="Saturday">{{ __('mentor.saturday') }}</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6 col-lg-3 mb-3">
-                                <label class="form-label">{{ __('mentor.start_time') }}</label>
-                                <input type="text" id="list-view-start-time" class="form-control" placeholder="09:00">
-                            </div>
-                            <div class="col-md-6 col-lg-3 mb-3">
-                                <label class="form-label">{{ __('mentor.end_time') }}</label>
-                                <input type="text" id="list-view-end-time" class="form-control" placeholder="17:00">
-                            </div>
-                            <div class="col-md-6 col-lg-2 mb-3">
-                                <label class="form-label">{{ __('mentor.session_type') }}</label>
-                                <select id="list-view-session-type" class="form-select">
-                                    ${getSessionTypeOptionsHTML()}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-sm btn-primary" id="save-list-view-slot">
-                                {{ __('admin.Save') }}
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" id="cancel-list-view-slot">
-                                {{ __('mentor.cancel') }}
-                            </button>
-                        </div>
-                    </div>
-                </div>
             `;
         }
 
@@ -778,20 +923,6 @@
     $(document).on('click', '#show-add-slot-form-btn', function() {
       $('#empty-list-view').hide();
       $('#list-view-add-slot-form').show();
-      
-      // Initialize flatpickr for the new time inputs
-      flatpickr("#list-view-start-time", {
-          enableTime: true,
-          noCalendar: true,
-          dateFormat: "H:i",
-          time_24hr: true,
-      });
-      flatpickr("#list-view-end-time", {
-          enableTime: true,
-          noCalendar: true,
-          dateFormat: "H:i",
-          time_24hr: true,
-      });
     });
 
     // Cancel add slot form in list view
@@ -858,6 +989,12 @@
             updateSlotsList();
             updateCalendarStyles();
             updateMainCalendar();
+
+            // Reset form
+            $('#list-view-start-time').val('');
+            $('#list-view-end-time').val('');
+            $('#list-view-session-type').val('Online');
+            $('#list-view-day-select').val('Sunday');
 
             releaseSuccessAlert({
                 'title': '{{ __('mentor.slot_added_success') }}',
@@ -1107,6 +1244,23 @@
 
     $('button[data-bs-toggle="tab"][data-bs-target="#list-tab"]').on('shown.bs.tab', function (e) {
       updateListView();
+      // Initialize flatpickr for list view time pickers if not already initialized
+      if ($('#list-view-start-time').length && !$('#list-view-start-time')[0]._flatpickr) {
+        flatpickr("#list-view-start-time", {
+          enableTime: true,
+          noCalendar: true,
+          dateFormat: "H:i",
+          time_24hr: true,
+        });
+      }
+      if ($('#list-view-end-time').length && !$('#list-view-end-time')[0]._flatpickr) {
+        flatpickr("#list-view-end-time", {
+          enableTime: true,
+          noCalendar: true,
+          dateFormat: "H:i",
+          time_24hr: true,
+        });
+      }
     });
 </script>
 @stop

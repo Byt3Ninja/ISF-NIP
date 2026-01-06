@@ -1122,12 +1122,12 @@ class ReportController extends Controller
         return sprintf('%02d:%02d', $hours, $minutes);
     }
 
-    protected function companiesReport($orgIds, $user,$company_id, $program_id = null){
-        $data['company']= Company::find($company_id);
-        $mentorRequests =  MentorshipRequest::where('user_id',$data['company']?->user?->id);
-        $training_sessions = TrainingSession::whereHas('step',function ($q)use ($organization_id,$company_id){
-            $q->where('stype',4)->whereHas('companies',function ($q)use ($company_id){
-             $q->where('companies.id',$company_id);
+    protected function companiesReport($orgIds, $user, $company_id, $program_id = null){
+        $data['company'] = Company::find($company_id);
+        $mentorRequests =  MentorshipRequest::where('user_id', $data['company']?->user?->id);
+        $training_sessions = TrainingSession::whereHas('step', function ($q) use ($company_id) {
+            $q->where('stype',4)->whereHas('companies',function ($q) use ($company_id) {
+                $q->where('companies.id',$company_id);
             });
         });
 

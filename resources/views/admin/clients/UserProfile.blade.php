@@ -6,6 +6,34 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/page-profile.css" />
 @stop
 
+@php
+$user = auth()->user();
+$company = $user->company;
+
+$canRequestMentorship =
+  $company &&
+  $company->cycle !== 0 &&
+  (
+    $user->hasRole('Registered') ||
+    (!$user->hasRole('Mentor') && !$user->hasRole('Admin'))
+  );
+  
+if ($canRequestMentorship) {
+  $cycle = auth()->user()->company->cycledata;
+}
+
+ $schedules = App\Schedule::where('user_id', $client->id ?? auth()->id())
+  ->where(function ($query) {$query
+      ->whereNull('date')
+      ->orWhere('date', '>', date('Y-m-d'))
+      ->orWhere(function ($q) {
+        $q->where('date', date('Y-m-d'))
+        ->where('tto', '>', date('H:i:s'));
+      });
+  })
+  ->get();
+@endphp
+
 @section('content')
   <div class="content-wrapper">
     {{-- Alert Messages --}}
@@ -107,20 +135,20 @@
                       <i class="ti ti-user-check ti-xs me-2"></i>{{ __('admin.Follow') }}
                     </a>
 
-                    @if(!empty($order))
-                      <button type="button" class="btn btn-primary" onclick="fetchSlots({{ $client->id }})">
-                        {{ __('cycles.Request_Mentorship') }}
-                        <i class="ti ti-calendar-plus ms-2"></i>
-                      </button>
-                      {{-- <button 
-                        onclick="request({{ $order->user_id }}, '{{ optional($order->user)->{'first_name_' . $l} }} {{ optional($order->user)->{'last_name_' . $l} }}', {{ $order->cycle->organization_id }}, {{ $order->cycle_id }})" 
-                        title="{{ __('cycles.Request_Mentorship') }}" 
+                    @if($schedules->isNotEmpty())
+                      <button
                         type="button" 
-                        class="btn btn-primary"
+                        class="btn btn-primary" 
+                        onclick="if (typeof fetchSlots === 'function') { fetchSlots({{ $client->id }}, {{ $cycle->id }}, {{ $cycle->organization_id }}); }"
                       >
                       <i class="ti ti-calendar-plus me-2"></i>
                         {{ __('cycles.Request_Mentorship') }}
-                      </button> --}}
+                      </button>
+                    @else
+                      <button type="button" class="btn btn-primary" disabled>
+                        <i class="ti ti-calendar-plus me-2"></i>
+                        {{ __('cycles.Not_Available_Request_Mentorship') }}
+                      </button>
                     @endif
                   </div>
                 </div>

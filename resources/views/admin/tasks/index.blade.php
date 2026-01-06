@@ -5,6 +5,10 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
 @stop
 
+@php
+$authUser = auth()->user();
+@endphp
+
 @section('content')
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
@@ -58,6 +62,16 @@ $(function () {
     'In Review': { title: '{{ __('admin.boardTitleReview') }}', class: 'bg-label-primary' },
     Completed: { title: '{{ __('admin.boardTitleCompleted') }}', class: 'bg-label-success' }
   };
+  const roleObj = {
+    admin: '{{ __('admin.Admin') }}',
+    editor: '{{ __('admin.Editor') }}',
+    manager: '{{ __('admin.Manager') }}',
+    judger: '{{ __('admin.Judger') }}',
+    mentor: '{{ __('admin.Mentor') }}',
+    startup: '{{ __('admin.Startup') }}',
+    organizationmanager: '{{ __('admin.organizationManager') }}',
+    'sub-admin': '{{ __('admin.Sub-Admin') }}'
+  };
 
   // Helper: Export Formatter
   const exportFormat = (inner) => {
@@ -93,7 +107,7 @@ $(function () {
       processing: true,
       responsive: true,
       data: tasks,
-      columns: [{ data: null }, { data: 'title' }, { data: 'program' }, { data: 'assignees' }, { data: 'priority' }, { data: 'overallStatus' }, { data: 'dueDate' }, { data: 'id' }],
+      columns: [{ data: null }, { data: 'title' }, { data: 'creator' }, { data: 'program' }, { data: 'assignees' }, { data: 'priority' }, { data: 'overallStatus' }, { data: 'dueDate' }, { data: 'id' }],
       columnDefs: [
         {
           className: 'control', orderable: false, searchable: false, responsivePriority: 2, targets: 0,
@@ -109,9 +123,16 @@ $(function () {
               </div>
             </div>`
         },
-        { targets: 2, render: (data, type, full) => `<span class="text-heading">${full.program.title}</span>` },
+        { targets: 2, render: (data, type, full) => `
+          <div>
+            <span class="text-heading">${full.creator.name}</span>
+            <small class="text-muted d-block text-uppercase">${roleObj[full.creator.role] || full.creator.role}</small>
+          </div>
+          `,
+        },
+        { targets: 3, render: (data, type, full) => `<span class="text-heading">${full.program.title}</span>` },
         {
-          targets: 3,
+          targets: 4,
           render: (data, type, full) => {
             const assignees = full.assignees;
             let html = assignees.slice(0, 2).map(a => {
@@ -122,9 +143,9 @@ $(function () {
             return html;
           }
         },
-        { targets: 4, render: (d, t, f) => `<span class="badge ${priorityObj[f.priority].class}" text-capitalized>${priorityObj[f.priority].title}</span>` },
-        { targets: 5, render: (d, t, f) => `<span class="badge ${statusObj[f.overallStatus].class}" text-capitalized>${statusObj[f.overallStatus].title}</span>` },
-        { targets: 6, render: (d, t, f) => `<span class="text-heading">${f.dueDate}</span>` },
+        { targets: 5, render: (d, t, f) => `<span class="badge ${priorityObj[f.priority].class}" text-capitalized>${priorityObj[f.priority].title}</span>` },
+        { targets: 6, render: (d, t, f) => `<span class="badge ${statusObj[f.overallStatus].class}" text-capitalized>${statusObj[f.overallStatus].title}</span>` },
+        { targets: 7, render: (d, t, f) => `<span class="text-heading">${f.dueDate}</span>` },
         {
           targets: -1, searchable: false, orderable: false,
           render: () => `
@@ -135,7 +156,7 @@ $(function () {
             </div>`
         }
       ],
-      order: [[1, 'desc']],
+      order: [[6, 'desc']],
       dom: '<"row"<"col-12 col-lg-9 d-flex flex-wrap align-items-center ps-0 ps-lg-3"l><"col-12 col-lg-3 dt-action-buttons text-xl-end text-lg-start text-md-end text-start d-flex align-items-center justify-content-end flex-md-row flex-column mb-6 mb-md-0 pe-0 pe-lg-2"fB>>t<"row px-6"<"col-sm-12 col-lg-6"i><"col-sm-12 col-lg-6 d-flex justify-content-end"p>>',
       language: {
         url: document.dir == 'rtl'
@@ -149,8 +170,8 @@ $(function () {
         extend: 'collection', className: 'btn btn-label-secondary dropdown-toggle mx-4 waves-effect waves-light',
         text: '<i class="ti ti-file-export me-2 ti-xs"></i> {{ __('admin.Export') }}',
         buttons: [
-          { extend: 'csv', text: '<i class="ti ti-file-text me-2"></i>Csv', className: 'dropdown-item', exportOptions: { columns: [1, 2, 3, 4, 5, 6], format: { body: exportFormat } } },
-          { extend: 'excel', text: '<i class="ti ti-file-spreadsheet me-2"></i>Excel', className: 'dropdown-item', exportOptions: { columns: [1, 2, 3, 4, 5, 6], format: { body: exportFormat } } }
+          { extend: 'csv', text: '<i class="ti ti-file-text me-2"></i>Csv', className: 'dropdown-item', exportOptions: { columns: [1, 2, 3, 4, 5, 6, 7], format: { body: exportFormat } } },
+          { extend: 'excel', text: '<i class="ti ti-file-spreadsheet me-2"></i>Excel', className: 'dropdown-item', exportOptions: { columns: [1, 2, 3, 4, 5, 6, 7], format: { body: exportFormat } } }
         ]
       }],
       initComplete: function () {
@@ -172,9 +193,9 @@ $(function () {
           });
         };
 
-        addDropdownFilter(2, 'taskProgram', '{{ __('admin.Select Program') }}');
-        addDropdownFilter(4, 'taskPriority', '{{ __('admin.select_priority') }}');
-        addDropdownFilter(5, 'taskStatus', '{{ __('admin.Select Status') }}');
+        addDropdownFilter(3, 'taskProgram', '{{ __('admin.All_Programs') }}');
+        addDropdownFilter(5, 'taskPriority', '{{ __('admin.All_Priorities') }}');
+        addDropdownFilter(6, 'taskStatus', '{{ __('admin.All_statuses') }}');
 
         // Styles fix
         setTimeout(() => {
@@ -219,11 +240,11 @@ $(function () {
             },
             success: function(response) {
               window.dt_task.row($row).remove().draw();
-              showToast({type: 'success', message: '{{ __('admin.Task_deleted_successfully.') }}'});
+              releaseSuccessAlert({title: '{{ __('admin.Deleted') }}', message: '{{ __('admin.Task_deleted_successfully.') }}'});
             },
             error: function(xhr) {
               const errorMsg = xhr.responseJSON?.message;
-              showToast({type: 'error', message: errorMsg ? errorMsg : '{{ __('admin.unexpected_error') }}'});
+              releaseFailureAlert({title: '{{ __('admin.Error') }}', message: errorMsg ? errorMsg : '{{ __('admin.unexpected_error') }}'});
             }
           });
         }
@@ -284,6 +305,8 @@ $(function () {
     $('#task-details-content').html(`
       <div class="row">
         <div class="col-12 mb-4"><h4>${data.title}</h4><p class="text-muted">${data.description}</p></div>
+        <div class="col-lg-6 mb-3"><strong>{{ __('admin.Created_By') }}:</strong> ${data.creator.name}</div>
+        <div class="col-lg-6 mb-3"><strong>{{ __('admin.Creator_Role') }}:</strong> <span class="text-uppercase">${roleObj[data.creator.role] || data.creator.role}</span></div>
         <div class="col-lg-6 mb-3"><strong>{{ __('admin.Program') }}:</strong> ${data.program.title}</div>
         <div class="col-lg-6 mb-3"><strong>{{ __('admin.Priority') }}:</strong> <span class="badge ${priorityObj[data.priority].class} ms-2">${priorityObj[data.priority].title}</span></div>
         <div class="col-lg-6 mb-3"><strong>{{ __('admin.overall_status') }}:</strong> <span class="badge ${statusObj[data.overallStatus].class} ms-2">${statusObj[data.overallStatus].title}</span></div>
@@ -402,7 +425,7 @@ $(function () {
 
 // Initialize Tagify for tags input
 const tagifyInput = document.getElementById('task-tags');
-const tagifyWhitelist = tagifyInput.dataset.whitelist ? JSON.parse('[' + tagifyInput.dataset.whitelist + ']') : [];
+const tagifyWhitelist = tagifyInput.dataset.whitelist ? JSON.parse(tagifyInput.dataset.whitelist) : [];
 
 const tagifyInstance = new Tagify(tagifyInput, {
   whitelist: tagifyWhitelist,
@@ -441,6 +464,9 @@ const tagifyInstance = new Tagify(tagifyInput, {
   const resetForm = () => {
     // Reset form validation first
     fv.resetForm(true);
+
+    // Re-enable submit button
+    $('.data-submit').prop('disabled', false);
 
     // Reset all form fields
     form.reset();
@@ -515,44 +541,59 @@ const tagifyInstance = new Tagify(tagifyInput, {
           'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         },
         success: function(response) {
+          console.log('response', response);
+          
+          // Map assignees from the response to match DataTable structure
+          const mappedAssignees = response.data.assignees.map(assignee => ({
+            id: assignee.id,
+            name: assignee.name || assignee.name_en || assignee.name_ar || 'Unknown',
+            status: assignee.pivot.status,
+            lastUpdated: assignee.pivot.last_updated.split(' ')[0] // Extract date part only
+          }));
+          
+          const taskObj = {
+            id: response.data.id,
+            title: response.data.title,
+            description: response.data.description,
+            creator: response.data.creator || { 
+              name: '{{ $authUser->name }}', 
+              role: '{{ $authUser->role }}' 
+            },
+            program: {
+              id: response.data.program.id,
+              title: response.data.program.title
+            },
+            assignees: mappedAssignees,
+            priority: response.data.priority,
+            overallStatus: response.data.status,
+            dueDate: response.data.due_date ? moment(response.data.due_date).format('YYYY-MM-DD') : 'N/A',
+            tags: response.data.tags || []
+          };
+          
           if (editRow) {
-            // Update the existing row with the new data
-            const taskObj = {
-              id: response.data.id || taskId,
-              title: response.data.title,
-              description: response.data.description,
-              program: { id: response.data.program_id, title: $('#task-program option:selected').text() },
-              assignees: selectedAssignees.length ? selectedAssignees : [{ company: 'Current User', status: 'Pending', lastUpdated: new Date().toISOString().split('T')[0] }],
-              priority: response.data.priority,
-              overallStatus: response.data.status,
-              dueDate: response.data.due_date,
-              tags: response.data.tags || []
-            };
-            window.dt_task.row(editRow).data(taskObj).draw();
-            showToast({type: 'success', message: '{{ __('admin.Task_updated_successfully.') }}'});
+            // Update existing row
+            window.dt_task.row(editRow).data(taskObj).draw(false);
+            releaseSuccessAlert({
+              title: '{{ __('admin.success') }}',
+              message: '{{ __('admin.Task_updated_successfully.') }}'
+            });
           } else {
-            // Add new task to the table
-            const taskObj = {
-              id: response.data.id,
-              title: response.data.title,
-              description: response.data.description,
-              program: { id: response.data.program_id, title: $('#task-program option:selected').text() },
-              assignees: selectedAssignees.length ? selectedAssignees : [{ company: 'Current User', status: 'Pending', lastUpdated: new Date().toISOString().split('T')[0] }],
-              priority: response.data.priority,
-              overallStatus: response.data.status,
-              dueDate: response.data.due_date,
-              tags: response.data.tags || []
-            };
-            window.dt_task.row.add(taskObj).draw('page');
-            showToast({type: 'success', message: '{{ __('admin.Task_added_successfully.') }}'});
+            // Add new row - use draw(false) to stay on current page
+            window.dt_task.row.add(taskObj).draw(false);
+            releaseSuccessAlert({
+              title: '{{ __('admin.success') }}',
+              message: '{{ __('admin.Task_added_successfully.') }}'
+            });
           }
+
+          $('.data-submit').prop('disabled', true);
           $('#addTaskModal').modal('hide');
           resetForm();
         },
         error: function(xhr) {
           console.error('Failed to save task:', xhr);
           const errorMsg = xhr.responseJSON?.message;
-          showToast({type: 'error', message: errorMsg ? errorMsg : '{{ __('admin.unexpected_error') }}'});
+          releaseFailureAlert({title: '{{ __('admin.Error') }}', message: errorMsg ? errorMsg : '{{ __('admin.unexpected_error') }}'});
         }
       });
     });

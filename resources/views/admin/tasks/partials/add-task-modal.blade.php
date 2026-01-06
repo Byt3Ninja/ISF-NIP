@@ -113,7 +113,7 @@
                 id="task-tags"
                 name="taskTags"
                 placeholder="{{ __('admin.Select_Tags') }}"
-                data-whitelist='[{{ $tags->pluck('name')->map(function($tag) { return '"' . $tag . '"'; })->join(', ') }}]'
+                data-whitelist='@json($tags->pluck('name'))'
               />
             </div>
             <div class="col-12 mb-4">

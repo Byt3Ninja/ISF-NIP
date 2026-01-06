@@ -95,6 +95,7 @@ class MentorsController extends Controller
 			->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
 			->where('roles.default_for', 'mentor')
 			->select('users.*')
+			->with('inviteMentors')
 			->get();
 		$cList = CyclesMentors::where('cycle_id', $id)->pluck('user_id')->toArray();
 		$cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
@@ -120,6 +121,20 @@ class MentorsController extends Controller
 			});
 		}
 
+		$mentors = $mentors->map(function ($mentor) {
+			$scopes = $mentor->inviteMentors->pluck('scope')->unique()->values();
+
+			if ($scopes->isEmpty()) {
+				$mentor->scope = null;
+			} elseif ($scopes->count() > 1) {
+				$mentor->scope = 'all';
+			} else {
+				$mentor->scope = $scopes->first(); // public أو organization
+			}
+
+			return $mentor;
+		});
+
 		// تصفية حسب حالة الـ checked
 		if ($request->assigning != 0) {
 			$checkedStatus = $request->assigning; // القيمة ستكون "checked" أو "unchecked"
@@ -138,10 +153,9 @@ class MentorsController extends Controller
 				return true; // في حالة عدم تحديد أي فلتر
 			});
 		}
-			
 			$settings = Settings::where('id', 1)->first();
-			$offline_allowed = $settings->allow_offline_sessions = 1 ? true : false;
-			
+			$offline_allowed = $settings->allow_offline_sessions == 1 ? true : false;
+		
 		return view('admin.settings.mentorship.assign', compact('mentors', 'id', 'cList', 'cycles', 'offline_allowed'));
 	}
 
@@ -201,7 +215,7 @@ class MentorsController extends Controller
 	{
 		$user = auth()->user();
 		$orgIds = $user->organizations_ids;
-		if (Auth::user()->hasAnyRole('organizationManager')) {
+		if (Auth::user()->hasAnyRole('organizationManager|subadmin')) {
 			$surveys = SurveyScopes::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
 				return $q->whereIn('organization_id', $orgIds);
 			})->with(['survey', 'responses'])->get();
@@ -344,12 +358,15 @@ class MentorsController extends Controller
 
 	public function addWait(Request $request)
 	{
+		$settings = Settings::where('id', 1)->first();
+
+		
 		
 		$request->validate([
 			'notes' => 'nullable|string|max:255',
 		]);
 		$user = auth()->user();
-		if($user->hasRole('admin') || $user->hasRole('organizationManager')){
+		if($user->hasAnyRole(['admin', 'organizationManager', 'subadmin'])){
 			
 			if ($request->has('selected_dates')) {
 				
@@ -392,6 +409,11 @@ class MentorsController extends Controller
 				if ($schedules == null) {
 					$errors[] = "Mentor not available on $date from $time_from to $time_to";
 					continue;
+				}
+				if($request->session_type == 'Offline'){
+					if($settings->allow_offline_sessions == 0){
+						$errors[] = 'Offline sessions are not allowed';
+					}
 				}
 
 				if (Carbon::parse($date)->toDateString() < now()->toDateString()) {
@@ -458,9 +480,10 @@ class MentorsController extends Controller
 
 		}else{
 			// dd($request->all());
+			
 				$this->meetingService = OnlineMeetingFactory::create();
-				$datefrom = $request->date . ' ' . $request->timeFrom;
-				$dateto = $request->date . ' ' . $request->timeTo;
+				$datefrom = $request->date . ' ' . $request->session_start_time;
+				$dateto = $request->date . ' ' . $request->session_end_time;
 				if ($request->period == '') {
 					$period = Carbon::parse($datefrom)->diffInMinutes(Carbon::parse($dateto));
 				} else {
@@ -477,6 +500,13 @@ class MentorsController extends Controller
 				]);
 				if ($schedules == null) {
 					return back()->with(['class' => 'danger','msg' => 'mentor_not_available_in_this_time']);
+				}
+				if($request->session_type == 'Offline'){
+					
+					if($settings->allow_offline_sessions == 0){
+						
+						return back()->with(['class' => 'danger','msg' => 'Offline sessions are not allowed']);
+					}
 				}
 				
 				if (\App\Settings::hasReachedMaxConcurrentSessions(Carbon::parse($datefrom)->timestamp, $period)) {

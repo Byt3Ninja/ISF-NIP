@@ -260,12 +260,22 @@ class FinalscreeningController extends Controller
 
         foreach( $judgers_list as $panel_id => $judgers_ids )
         {
-            $users_list = $finalscreenings->where('panel', $panel_id)->map(function($finalscreening) {
-                if( is_array( $finalscreening->companies ) ) { return $finalscreening->companies; }
-                else { return collect(json_decode($finalscreening->companies, true) ?? []); }
-            })->flatten()->unique()->values()->all();
+            // Fetch assigned companies for this panel from the screenings table
+            // In screenings table, 'users' column stores company IDs as JSON array
+            $assignedCompanies = DB::table('screenings')
+                ->where('step_id', $cstep->id)
+                ->where('panel', $panel_id)
+                ->whereNull('deleted_at')
+                ->pluck('users')
+                ->map(function($item) {
+                    return is_array($item) ? $item : (json_decode($item, true) ?: []);
+                })
+                ->flatten()
+                ->unique()
+                ->values()
+                ->toArray();
 
-            $judgers_list[$panel_id] = ['judgers' => $judgers_ids, 'companies' => $users_list ];
+            $judgers_list[$panel_id] = ['judgers' => $judgers_ids, 'companies' => $assignedCompanies ];
         }
         $check = ScreeningEvaluation::where('step_id', $id)->first();
         if( empty( $check ) )
@@ -277,7 +287,25 @@ class FinalscreeningController extends Controller
         $companies = [];
         $evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
         if( $cstep ) { $companies = Company::whereIn('step', [$form?->id ?? 0, $cstep?->id ?? 0])->get(); } else { $cstep = []; }
-        return view('admin.settings.final.show', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'steps', 'id', 'svgs', 'evaluationForm'));
+
+        /** Prepare Judging Panels for View (Clean Code) */
+        $judgingPanels = [];
+        if ($cstep && isset($judgers_list) && count($judgers_list) > 0) {
+            foreach ($judgers_list as $panelId => $panelData) {
+                $panelEntry = [
+                    'judges' => (array) ($panelData['judgers'] ?? []),
+                    'companies' => (array) ($panelData['companies'] ?? []),
+                    'session' => []
+                ];
+                $judgingPanels[] = $panelEntry;
+            }
+        }
+
+        if (empty($judgingPanels)) {
+            $judgingPanels = [['judges' => [], 'companies' => [], 'session' => []]];
+        }
+
+        return view('admin.settings.final.show', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'steps', 'id', 'svgs', 'evaluationForm', 'judgingPanels'));
     }
 
     public function update(Request $request)
