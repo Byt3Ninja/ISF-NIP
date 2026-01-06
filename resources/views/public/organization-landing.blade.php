@@ -25,7 +25,7 @@
   <meta property="og:title" content="{{ $isRtl ? $organization->name_ar : $organization->name_en }}">
   <meta property="og:description" content="{{ Str::limit($organization->bio, 200) }}">
   @if($organization->img_url)
-      <meta property="og:image" content="{{ $organization->imageUrl }}">
+    <meta property="og:image" content="{{ $organization->imageUrl }}">
   @endif
 
   <!-- Twitter -->
@@ -86,11 +86,21 @@
 
 @php
  $sections = [
-   ['id' => 'how-it-works', 'icon' => 'list', 'label' => __('admin.How It Works')],
-   ['id' => 'achievements', 'icon' => 'trophy', 'label' => __('admin.Achievements & Impact')],
-   ['id' => 'media', 'icon' => 'share', 'label' => __('admin.Media & Recognition')],
-   ['id' => 'partners', 'icon' => 'users', 'label' => __('admin.Partners')],
+   ['id' => 'how-it-works', 'label' => __('admin.How It Works'), 'visible' => $landingPage->how_it_works_enabled && !empty($landingPage->process_steps)],
+   ['id' => 'achievements', 'label' => __('admin.Achievements & Impact'), 'visible' => $landingPage->achievements_enabled && !empty($landingPage->metrics)],
+   ['id' => 'media', 'label' => __('admin.Media & Recognition'), 'visible' => $landingPage->media_enabled && !empty($articlesWithUrls)],
+   ['id' => 'partners', 'label' => __('admin.Partners'), 'visible' => $landingPage->partners_enabled && !empty($partnersWithUrls)],
   ];
+
+  if (!empty($customSections)) {
+    foreach ($customSections as $customSection) {
+      $sections[] = [
+        'id' => 'custom-' . $customSection->id,
+        'label' => $customSection->title,
+        'visible' => !empty($customSection->content),
+      ];
+    }
+  }
 
   $colors = ['warning', 'success', 'danger', 'info', 'primary', 'secondary', 'dark', 'success', 'primary', 'danger', 'info', 'warning', 'secondary'];
 @endphp
@@ -98,6 +108,7 @@
 <body>
   <script src="/vuexy/assets/vendor/js/dropdown-hover.js"></script>
   <script src="/vuexy/assets/vendor/js/mega-dropdown.js"></script>
+  
   <!-- Preview Banner -->
   {{-- @if($isPreview)
   <div class="bg-primary bg-gradient text-white px-3 py-2 text-center">
@@ -167,14 +178,14 @@
               <ul class="dropdown-menu dropdown-menu-end">
                 <li class="dropdown dropdown-language nav-item">
                   @if ($l == 'ar')
-                    <a class="dropdown-item" href="{{ url()->current() }}?lang=en"
-                    data-language="en" data-text-direction="ltr">
+                    <a class="dropdown-item" href="/lang/en" 
+                      data-language="en" data-text-direction="ltr">
                       <i class="flag-icon flag-icon-us me-2"></i>
                       <span class="selected-language">English</span>
                     </a>
                   @else
-                    <a class="dropdown-item" href="{{ url()->current() }}?lang=ar"
-                    data-language="ar" data-text-direction="rtl">
+                    <a class="dropdown-item" href="/lang/ar" 
+                      data-language="ar" data-text-direction="rtl">
                       <i class="flag-icon flag-icon-sa me-2"></i>
                       <span class="selected-language">عربي</span>
                     </a>
@@ -230,7 +241,7 @@
     <!-- Navbar: End -->
 
     <!-- ============ HERO (FLEX-FILL) ============ -->
-    <div id="hero-animation" class="flex-fill d-flex section-py landing-hero position-relative">
+    <div class="flex-fill d-flex section-py landing-hero position-relative">
       <div class="container" style="{{$isRtl ? 'padding: 0 9rem;' : '' }}">
         <div class="row px-4 px-lg-0">
           <div class="col-lg-8 offset-lg-1">
@@ -326,22 +337,24 @@
     <div class="card shadow-none border-0 my-8 rounded-pill">
       <div class="card-body">
         <div class="nav-align-top">
-          <ul class="nav nav-pills justify-content-center flex-nowrap pb-4 border-0" style="max-width: 100%; overflow-x: auto;" role="tablist">
+          <ul class="nav nav-pills justify-content-lg-center flex-nowrap pb-4 border-0" style="max-width: 100%; overflow-x: auto;" role="tablist">
             @foreach ($sections as $tab)
-              <li class="nav-item" role="presentation">
-                <a
-                  type="button"
-                  class="nav-link {{ $loop->first ? 'active' : '' }}"
-                  id="tab-{{ $tab['id'] }}-trigger"
-                  href="#{{ $tab['id'] }}"
-                  role="tab"
-                  aria-controls="tab-{{ $tab['id'] }}"
-                  aria-selected="{{ $loop->first ? 'true' : 'false' }}"
-                >
-                  {{-- <i class="ti ti-{{ $tab['icon'] }} me-1"></i> --}}
-                  {{ $tab['label'] }}
-                </a>
-              </li>
+              @if ($tab['visible'])
+                <li class="nav-item" role="presentation">
+                  <a
+                    type="button"
+                    class="nav-link {{ $loop->first ? 'bg-label-primary border border-primary' : '' }}"
+                    id="tab-{{ $tab['id'] }}-trigger"
+                    href="#{{ $tab['id'] }}"
+                    role="tab"
+                    aria-controls="tab-{{ $tab['id'] }}"
+                    aria-selected="{{ $loop->first ? 'true' : 'false' }}"
+                  >
+                    {{-- <i class="ti ti-{{ $tab['icon'] }} me-1"></i> --}}
+                    {{ $tab['label'] }}
+                  </a>
+                </li>
+              @endif
             @endforeach
           </ul>
         </div>
@@ -581,8 +594,8 @@
           </div>
         </div>
         <div class="col-md-6 col-lg-7 col-xl-9">
-          <div class="swiper-reviews-carousel overflow-hidden">
-            <div class="swiper" id="swiper-reviews">
+          <div class="swiper-partners-carousel overflow-hidden">
+            <div class="swiper" id="swiper-partners">
               <div class="swiper-wrapper">
                 @foreach($partnersWithUrls as $partner)
                   <div class="swiper-slide">
@@ -619,7 +632,7 @@
     <!-- Logo slider: Start -->
     <div class="container">
       <div class="swiper-logo-carousel py-8">
-        <div class="swiper" id="swiper-clients-logos">
+        <div class="swiper" id="swiper-partners-logos">
           <div class="swiper-wrapper">
             @foreach($partnersWithUrls as $partner)
               <div class="swiper-slide">
@@ -642,18 +655,20 @@
 
   <!-- Custom Sections -->
   @if(!empty($customSections))
-  @foreach($customSections as $index => $customSection)
-  <section id="custom-{{ $customSection->id }}" class="section-py bg-{{ $index % 2 == 0 ? 'card' : 'body' }} ">
-    <div class="container d-flex flex-column align-items-center">
-      <div class="mb-12">
-        <span class="badge bg-label-primary">{{ $customSection->title }}</span>
-      </div>
-      <div class="w-50 d-flex justify-content-center">
-        <p>{!! $customSection->content !!}</p>
-      </div>
-    </div>
-  </section>
-  @endforeach
+    @foreach($customSections as $index => $customSection)
+      @if(!empty($customSection->content))
+        <section id="custom-{{ $customSection->id }}" class="section-py bg-{{ $index % 2 == 0 ? 'card' : 'body' }} ">
+          <div class="container d-flex flex-column align-items-center">
+            <div class="mb-12">
+              <span class="badge bg-label-primary">{{ $customSection->title }}</span>
+            </div>
+            <div class="w-50 d-flex justify-content-center">
+              <p>{!! $customSection->content !!}</p>
+            </div>
+          </div>
+        </section>
+      @endif
+    @endforeach
   @endif
 
   <!-- Contact Us: Start -->
@@ -807,7 +822,7 @@
             <ul class="navbar-nav list-unstyled">
               @foreach($sections as $section)
                 <li class="nav-item mb-4">
-                  <a href="#{{ $section['id'] }}" target="_blank" class="footer-link">{{ $section['label'] }}</a>
+                  <a href="#{{ $section['id'] }}" class="footer-link">{{ $section['label'] }}</a>
                 </li>
               @endforeach
             </ul>
@@ -816,14 +831,14 @@
             <h6 class="footer-title mb-6">{{ __('admin.Contact us') }}</h6>
             <ul class="list-unstyled">
               @if($organization->contact_email)
-                <li class="mb-2">
-                  <i class="ti ti-mail me-2 text-white"></i>
+                <li class="mb-2 text-nowrap">
+                  <i class="ti ti-mail me-1 text-white"></i>
                   <a class="footer-link" href="mailto:{{ $organization->contact_email }}">{{ $organization->contact_email }}</a>
                 </li>
               @endif
               @if($organization->contact_phone)
-                <li class="mb-2">
-                  <i class="ti ti-phone me-2 text-white"></i>
+                <li class="mb-2 text-nowrap">
+                  <i class="ti ti-phone me12 text-white"></i>
                   <a class="footer-link" href="tel:{{ $organization->country_code }}{{ $organization->contact_phone }}">
                     {{ $organization->country_code }} {{ $organization->contact_phone }}
                   </a>
@@ -873,7 +888,79 @@
   <script src="/vuexy/assets/js/front-main.js"></script>
 
   <!-- Page JS -->
-  <script src="/vuexy/assets/js/front-page-landing.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      const nav = document.querySelector('.layout-navbar'),
+        animationImg = document.querySelectorAll('.hero-dashboard-img'),
+        swiperLogos = document.getElementById('swiper-partners-logos'),
+        swiperPartners = document.getElementById('swiper-partners'),
+        PartnersPrevButton = document.getElementById('reviews-previous-btn'),
+        PartnersNextBtn = document.getElementById('reviews-next-btn'),
+        PartnersSliderPrev = document.querySelector('.swiper-button-prev'),
+        PartnersSliderNext = document.querySelector('.swiper-button-next');
+
+      // swiper carousel
+      // Customers reviews
+      // -----------------------------------
+      if (swiperPartners) {
+        new Swiper(swiperPartners, {
+          slidesPerView: 1,
+          spaceBetween: 0,
+          grabCursor: true,
+          autoplay: {
+            delay: 3000,
+            disableOnInteraction: false
+          },
+          loop: true,
+          loopAdditionalSlides: 1,
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev'
+          },
+          breakpoints: {
+            1200: {
+              slidesPerView: 3
+            },
+            992: {
+              slidesPerView: 2
+            }
+          }
+        });
+      }
+
+      // Reviews slider next and previous
+      // -----------------------------------
+      // Add click event listener to next button
+      PartnersNextBtn.addEventListener('click', function () {
+        PartnersSliderNext.click();
+      });
+      PartnersPrevButton.addEventListener('click', function () {
+        PartnersSliderPrev.click();
+      });
+
+      // Review client logo
+      // -----------------------------------
+      if (swiperLogos) {
+        new Swiper(swiperLogos, {
+          slidesPerView: 2,
+          autoplay: {
+            delay: 3000,
+            disableOnInteraction: false
+          },
+          breakpoints: {
+            992: {
+              slidesPerView: 5
+            },
+            768: {
+              slidesPerView: 3
+            }
+          }
+        });
+      }
+    })();
+  </script>
 </body>
 
 </html>

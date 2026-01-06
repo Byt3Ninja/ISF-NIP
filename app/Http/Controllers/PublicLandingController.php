@@ -23,11 +23,6 @@ class PublicLandingController extends Controller
      */
     public function show(Request $request, $slug)
     {
-        // Handle language query parameter
-        if ($request->query('lang')) {
-            return redirect(url()->current());
-        }
-
         // Find organization by slug
         $organization = Organization::where('slug', $slug)
             ->with(['landingPage', 'organizationType', 'industries', 'city', 'country'])
