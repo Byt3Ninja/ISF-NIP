@@ -214,7 +214,7 @@
 // Financial Projection Form Logic
 document.addEventListener('DOMContentLoaded', function () {
 
-	let currentValuationDate = "{{ isset($valuation_date) ? $valuation_date : '' }}"; // Track current valuation date
+	const currentValuationDate = "{{ request()->has('valuation_date') ? request()->input('valuation_date') : '' }}"; // Track current valuation date
 	const oldValuationDate = "{{ isset($valuation_date) ? $valuation_date : '' }}"; // Injected from backend
 
 
@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	// Initialize Flatpickr for Valuation Date
 	flatpickr('#valuationDate', {
-		defaultDate: oldValuationDate ? new Date(oldValuationDate) : null,
+		defaultDate: currentValuationDate ? new Date(currentValuationDate) : oldValuationDate ? new Date(oldValuationDate) : null,
 		plugins: [
 			new monthSelectPlugin({
 				shorthand: true,      // Jan, Feb, Mar
