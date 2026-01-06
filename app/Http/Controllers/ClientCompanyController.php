@@ -437,6 +437,7 @@ class ClientCompanyController extends Controller
      */
     public function editOrCreate(Request $request, $id = null)
     {
+        
         $user = auth()->user();
         try {
             if( $id == null )
@@ -733,6 +734,7 @@ class ClientCompanyController extends Controller
      */
     public function updateOrStore(StoreUpdateClientCompanyRequest $request, $id = null)
     {
+        
         try {
             $user = Auth::user();
             if (!is_null($id)) {
@@ -1750,11 +1752,12 @@ class ClientCompanyController extends Controller
             }
             if ($data['CompanyN'] == 15) {
                 
+               
                 if($data['valuation_date'] == null){
                     return redirect()->back()->with(['msg' => 'Please enter the valuation date', 'class' => 'danger']);
                 }
                 
-                $baseDate = Carbon::createFromFormat('Y-m-d', $data['valuation_date']);
+                $baseDate = Carbon::createFromFormat('Y-m', $data['valuation_date']);
 
                 // من سنة قبل لحد سنتين بعد
                 $startOffset = -1;
