@@ -636,13 +636,17 @@
           <div class="swiper-wrapper">
             @foreach($partnersWithUrls as $partner)
               <div class="swiper-slide">
-                <img
-                  src="{{ $partner['logo_url'] }}"
-                  alt="client logo"
-                  class="client-logo"
-                  {{-- data-app-light-img="{{ $partner['logo_url'] }}"
-                  data-app-dark-img="{{ $partner['logo_url'] }}"  --}}
-                />
+                @if(!empty($partner['logo_url']))
+                  <img
+                    src="{{ $partner['logo_url'] }}"
+                    alt="partner logo"
+                    class="client-logo"
+                  />
+                @else
+                  <div class="d-inline-flex align-items-center justify-content-center bg-light rounded px-4 py-3">
+                    <span class="fw-semibold text-muted">{{ $partner['name'] ?? '' }}</span>
+                  </div>
+                @endif
               </div>
             @endforeach
           </div>
