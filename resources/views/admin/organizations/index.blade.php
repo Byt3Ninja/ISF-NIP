@@ -5,148 +5,80 @@
 
 @section('vendorstyle')
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
-<style>
-  .draft-ribbon {
-    position: absolute;
-    top: 12px;
-    left: -35px;
-    background: #0d6efd;
-    color: white;
-    padding: 5px 40px;
-    font-size: 11px;
-    font-weight: 600;
-    transform: rotate(-45deg);
-    z-index: 10;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  }
-
-  .org-card {
-    position: relative;
-    overflow: hidden;
-  }
-</style>
 @stop
+
+@php
+$colors = ['primary', 'info', 'danger', 'warning'];
+@endphp
 
 @section('content')
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
       @if (session()->has('msg'))
-        <x-alert type="success" message="{{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }}" />
+        <x-alert 
+          type="success" 
+          message="{{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }}" 
+        />
       @endif
       @if (session()->has('message2'))
-        <x-alert type="danger"
-          message="{{ __('admin.' . session()->get('message2')) }} {{ Session::forget('message2') }}" />
+        <x-alert
+          type="danger"
+          message="{{ __('admin.' . session()->get('message2')) }} {{ Session::forget('message2') }}" 
+        />
       @endif
 
-      @if ($organizations->isEmpty())
-        <div class="row h-100">
-          <div class="col-12 d-flex flex-column justify-content-center align-items-center">
-            <img 
-              src="/icons/not-found.svg"
-              width="337"
-              height="234"
-            />
-            <h3 class="text-center mt-4">{{ __('admin.No_Data_Found') }}</h3>
-            <!-- Add New Org Button -->
-            @if ($_user->ableTo('organizations.create', $permissions))
-              <a href="{{ route('organizations.create') }}" class="btn btn-lg btn-primary" style="width: 200px;">
-                <i class="ti ti-plus me-2"></i> {{ __('admin.Add_New') }}
-              </a>
-            @endif
-          </div>
-        </div>
-      @else
-        <div class="card mb-6">
-          <div class="card-body">
-            <div class="row">
-              <div class="col-12 col-lg-8">
-                <div class="row">
-                  <div class="col-12 col-sm-3 mb-3 mb-sm-0">
-                    <div class="badge bg-label-secondary d-flex align-items-center py-2" style="height: auto;">
-                      <div class="badge card">
-                        <i class="ti ti-layout-board fs-2 text-primary"></i>
-                      </div>
-                      <div class="ms-2 py-1">
-                        <h6 class="mb-0 fw-bold text-primary">{{ __('admin.Organizations') }}</h6>
-                        <h5 class="mb-0 text-start">{{ $organizations->count() }}</h5>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-12 col-sm-3 mb-3 mb-sm-0">
-                    <div class="badge bg-label-secondary d-flex align-items-center py-2" style="height: auto;">
-                      <div class="badge card">
-                        <i class="ti ti-circle-dot fs-2 text-success"></i>
-                      </div>
-                      <div class="ms-2 py-1">
-                        <h6 class="mb-0 fw-bold text-success">{{ __('admin.Active') }}</h6>
-                        <h5 class="mb-0 text-start">{{ $organizations->where('status', 1)->count() }}</h5>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-12 col-sm-3 mb-3 mb-sm-0">
-                    <div class="badge bg-label-secondary d-flex align-items-center py-2" style="height: auto;">
-                      <div class="badge card">
-                        <i class="ti ti-circle-dot fs-2 text-warning"></i>
-                      </div>
-                      <div class="ms-2 py-1">
-                        <h6 class="mb-0 fw-bold text-warning">{{ __('admin.Inactive') }}</h6>
-                        <h5 class="mb-0 text-start">{{ $organizations->where('status', 0)->count() }}</h5>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-12 col-sm-3 mb-3 mb-sm-0">
-                    <div class="badge bg-label-secondary d-flex align-items-center py-2" style="height: auto;">
-                      <div class="badge card">
-                        <i class="ti ti-circle-dot fs-2 text-primary"></i>
-                      </div>
-                      <div class="ms-2 py-1">
-                        <h6 class="mb-0 fw-bold text-primary">{{ __('admin.Draft') }}</h6>
-                        <h5 class="mb-0 text-start">{{ $organizations->where('is_draft', true)->count() }}</h5>
-                      </div>
-                    </div>
-                  </div>
+      <div class="row g-6 mb-6">
+        @foreach($stats as $key => $stat)
+          <div class="col-6 col-xl-3">
+            <div class="card h-100">
+              <div class="card-body d-flex justify-content-between align-items-center">
+                <div class="card-title mb-0">
+                  <h5 class="mb-1 me-2">{{ $stat['value'] ?? 0 }}</h5>
+                  <p class="mb-0">{{ $stat['label'] }}</p>
                 </div>
-              </div>
-              <div class="col-12 col-lg-4 mt-3 mt-lg-0">
-                <div class="w-100 h-100 d-flex justify-content-lg-end justify-content-center align-items-center gap-2">
-                  @if ($_user->ableToAny(['organization.wizard.create', 'organization.wizard.store'], $permissions))
-                    <a href="{{ route('organization.wizard.create') }}" class="btn btn-outline-primary">
-                      <i class="ti ti-wand me-2"></i> {{ __('admin.Create with Wizard') }}
-                    </a>
-                    <a href="{{ route('organizations.create') }}" class="btn btn-primary">
-                      <i class="ti ti-plus me-2"></i> {{ __('admin.Add_New') }}
-                    </a>
-                  @endif
+                <div class="card-icon">
+                  <span class="badge bg-label-{{ $colors[$key] }} rounded p-2">
+                    <i class="ti ti-{{ $stat['icon'] }} ti-26px"></i>
+                  </span>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        @endforeach
+      </div>
 
-        <div class="card mb-6">
-          <div class="card-body">
-            <form id="status-form" method="GET" action="{{ route('organizations.index') }}">
-              <div class="row">
-                <div class="col-12 col-md-2 mb-3 mb-md-0">
-                    <select id="status-select" class="form-select" name="status">
-                      <option value="" selected>{{ __('admin.Status') }}</option>
-                      <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>
-                        {{ __('admin.All') }}
-                      </option>
-                      <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>
-                        {{ __('admin.Active') }}
-                      </option>
-                      <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>
-                        {{ __('admin.Inactive') }}
-                      </option>
-                    </select>
+      <div class="card mb-6">
+        <div class="card-body">
+          <div class="row gy-4">
+            <div class="col-lg-3">
+              <div class="card-title mb-0">
+                <h5 class="mb-0">{{ __('admin.Manage Organizations') }}</h5>
+                <p class="mb-0">{{ __('admin.manage_organizations_description') }}</p>
+              </div>
+            </div>
+            <div class="col-lg-9">
+              <form class="row gy-4 gx-3 justify-content-end align-items-center" id="status-form" method="GET" action="{{ route('organizations.index') }}">
+                <div class="col-12 col-lg-4">
+                  <!-- Search Input -->
+                  <div class="input-group input-group-merge">
+                    <span class="input-group-text" id="searchInput"><i class="ti ti-search text-muted"></i></span>
+                    <input type="text" id="search-input" class="form-control h-px-40" name="search" value="{{ request('search') }}" placeholder="{{ __('admin.Search') }}..." aria-label="Search" aria-describedby="basic-addon-search31">
+                  </div>
                 </div>
-                <div class="col-12 col-md-2 mb-3 mb-md-0">
-                  <select id="visibility-select" class="form-select" name="visibility">
-                    <option value="" selected>{{ __('admin.Visibility') }}</option>
-                    <option value="all" {{ request('visibility') == 'all' ? 'selected' : '' }}>
-                      {{ __('admin.All') }}
+                <div class="col-6 col-lg-2">
+                  <select class="form-select" id="status-select" name="status">
+                    <option value="">{{ __('admin.All_statuses') }}</option>
+                    <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>
+                      {{ __('admin.Active') }}
                     </option>
+                    <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>
+                      {{ __('admin.Inactive') }}
+                    </option>
+                  </select>
+                </div>
+                <div class="col-6 col-lg-2">
+                  <select class="form-select" id="visibility-select" name="visibility">
+                    <option value="">{{ __('admin.all_visiblity') }}</option>
                     <option value="published" {{ request('visibility') == 'published' ? 'selected' : '' }}>
                       {{ __('admin.Published') }}
                     </option>
@@ -155,136 +87,156 @@
                     </option>
                   </select>
                 </div>
-                <div class="col-12 col-md-5"></div>
-                <div class="col-12 col-md-3">
-                  <div class="position-relative w-100 h-100 d-flex justify-content-end align-items-center">
-                    <input type="text" id="search-org" class="form-control" placeholder="{{ __('admin.Search') }}" />
-                    <i class="ti ti-search position-absolute top-50 mx-2 translate-middle-y"></i>
-                  </div>
+                <div class="col-lg-2 d-flex justify-content-end">
+                  @if ($_user->ableToAny(['organization.wizard.create', 'organization.wizard.store'], $permissions))
+                    <a href="{{ route('organization.wizard.create') }}" class="btn btn-primary text-nowrap">
+                      <i class="ti ti-plus me-2"></i> {{ __('admin.Add_New') }}
+                    </a>
+                  @endif
                 </div>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
         </div>
+      </div>
 
-        <!-- Organizations List -->
-        <div class="row">
-          @foreach ($organizations as $organization)
-            <div class="col-12 col-md-6 col-lg-4 mb-6">
-              <div class="card org-card">
-                @if($organization->is_draft)
-                  <div class="draft-ribbon">{{ __('admin.Draft') }}</div>
-                @endif
-                <div class="card-body">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="card-title text-primary fw-semibold mb-0">
-                      {{ $organization->{'name_' . $l} }}
-                    </h5>
-                    <div class="d-flex align-items-center gap-2">
-                      <!-- Mail Icon -->
-                      @if (optional($organization->user)->email)
-                        <a href="mailto:{{ $organization->user->email }}" class="text-decoration-none">
-                          <i class="ti ti-mail fs-4 text-primary"></i>
-                        </a>
-                      @endif
-                      <!-- Phone Icon -->
-                      @if (optional($organization->user)->phone)
-                        <a href="tel:{{ $organization->user->phone }}" class="text-decoration-none">
-                          <i class="ti ti-phone fs-4 text-primary"></i>
-                        </a>
-                      @endif
-                    </div>
-                  </div>
-                  <!-- Organization Image -->
-                  <div class="card mt-3 d-flex justify-content-center align-items-center position-relative"
-                    style="height: 150px; width: 100%;">
-                    <img
-                      src="{{ $organization->imageUrl }}"
-                      onerror="this.src='/images/logo-placeholder.png'" alt="Organization Image"
-                      class="rounded img-fluid"
-                      style="height: 120px; min-width: 200px; object-fit: cover;"
-                    />
-                    <!-- Status Badge -->
-                    <div
-                      class="bg-{{ $organization->status == 1 ? 'success' : 'warning' }} shadow rounded-circle position-absolute bottom-0 end-0 m-2"
-                      style="width: 15px; height: 15px;" data-bs-toggle="tooltip" data-bs-placement="top"
-                      title="{{ $organization->status == 1 ? __('admin.Active') : __('admin.Inactive') }}">
-                    </div>
-                  </div>
-                  <!-- Organization Mangaer -->
-                  <div class="d-flex flex-column mt-3">
-                    <p class="mb-1">{{ __('admin.organization_manager') }}</p>
-                    <div class="d-flex justify-content-center align-items-center rounded border p-2">
-                      <img src="{{ $organization->user->img_url ?? '/images/placeholder.png' }}"
-                        onerror="this.src='/images/user-placeholder.jpeg'" alt="Manager Image"
-                        class="rounded-circle img-fluid border" style="height: 35px; width: 35px; object-fit: cover;" />
-                      <span class="ms-3">{{ $organization->user->name ?? '' }}</span>
-                    </div>
-                  </div>
-                  <div class="d-flex justify-content-between mt-3">
-                    <a href="{{ route('users.view_companies', ['orgnization' => $organization->id]) }}" >
-                    <div class="d-flex align-items-center gap-2">
-                      <div class="badge bg-label-warning px-2">
-                        <i class="ti ti-building-skyscraper fs-4"></i>
+      @if (!empty($organizations) && $organizations->count() > 0)
+        <div class="row g-6 mb-6">
+          @foreach ($organizations as $org)
+            <div class="col-lg-4" data-org-id="{{ $org->id }}">
+              <div class="card h-100">
+                <div class="card-body flex-fill d-flex flex-column">
+                  <!-- Header -->
+                  <div class="d-flex justify-content-between align-items-start mb-4">
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="avatar avatar-md me-2">
+                        @if ($org->img_url)
+                          <img src="{{ $org->imageUrl }}" alt="logo" class="rounded object-fit-cover" width="50" height="50" />
+                        @else
+                          <span class="avatar-initial rounded bg-label-secondary">
+                            {{ substr($org->name, 0, 2) }}
+                          </span>
+                        @endif
                       </div>
-                      <p class="fw-semibold mb-0">{{ __('admin.Startups') }}</p>
-                      <p
-                        class="fw-semibold mb-0 bg-light rounded-circle w-px-20 h-px-20 d-flex justify-content-center align-items-center">
-                        {{ $organization->total_startups }}
-                      </p>
+                      <h5 class="card-title mb-0">{{ $org->{'name_' . $l} }}</h5>
                     </div>
-                  </a>
-                    <a href="{{ route('programlist.index', ['organization_id' => $organization->id]) }}" >
-                      <div class="d-flex align-items-center gap-2">
-                        <div class="badge bg-label-info px-2 py-1">
-                          <i class="ti ti-components fs-4"></i>
+
+                    <div class="d-flex align-items-center gap-3">
+                      <!-- Status Badge -->
+                      @if($org->is_draft)
+                        <span class="badge bg-label-warning rounded-pill">
+                          {{ __('admin.Draft') }}
+                        </span>
+                      @endif
+      
+                      <!-- Dropdown -->
+                      <div class="dropdown">
+                        <button class="btn btn-text-secondary rounded-pill btn-icon btn-sm dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                          <i class="ti ti-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                          @if ($_user->ableTo('organization.wizard.edit', $permissions))
+                            <li>
+                              <a class="dropdown-item" href="{{ route('organization.wizard.edit', $org->id) }}">
+                                <i class="ti ti-edit me-2"></i> {{ __('admin.Edit') }}
+                              </a>
+                            </li>
+                          @endif
+                          @if ($_user->ableTo('organization.wizard.edit', $permissions))
+                          <li>
+                            <a class="dropdown-item" href="{{ route('organization.wizard.edit', $org->id) }}?step=4">
+                              <i class="ti ti-layout me-2"></i> {{ __('admin.Edit') }} {{ __('admin.Landing Page') }}
+                            </a>
+                          </li>
+                          @endif
+                          @if ($org->slug && $_user->ableTo('organization.wizard.preview', $permissions))
+                            <li>
+                              <a class="dropdown-item" href="{{ route('organization.wizard.preview', $org->id) }}" target="_blank">
+                                <i class="ti ti-eye me-2"></i> {{ __('admin.Preview') }} {{ __('admin.Landing Page') }}
+                              </a>
+                            </li>
+                          @endif
+                          @if ($_user->ableTo('organizations.destroy', $permissions))
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                              <a class="dropdown-item text-danger" id="deleteAction" data-id="{{ $org->id }}"
+                                  data-url="{{ route('organizations.destroy', ['organization' => $org->id]) }}">
+                                <i class="ti ti-trash me-2"></i> {{ __('admin.Delete') }}
+                              </a>
+                            </li>
+                          @endif
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="flex-grow-1">
+                    <!-- Description -->
+                    <p class="mb-4 line-clamp-3">{{ $org->bio }}</p>
+    
+                    <!-- Managers -->
+                    <div class="mb-4">
+                      <div class="text-secondary mb-2">{{ __('admin.Managers') }}</div>
+                      <div class="d-flex align-items-center avatar-group my-4">
+                        @if($org->assignedUsers->isNotEmpty())
+                          @foreach($org->assignedUsers->take(3) as $manager)
+                            <div class="avatar" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="{{ $manager->name }}">
+                              <img src="{{ $manager->img_url }}" alt="Avatar" class="rounded-circle pull-up">
+                            </div>
+                          @endforeach
+                          @if($org->assignedUsers->count() > 3)
+                            <div class="avatar" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="{{ $org->assignedUsers->count() - 3 }} more">
+                              <span class="avatar-initial rounded-circle pull-up text-heading" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="{{ $org->assignedUsers->count() - 3 }} more">+{{ $org->assignedUsers->count() - 3 }}</span>
+                            </div>
+                          @endif
+                        @else
+                          <div class="avatar">
+                            <span class="avatar-initial rounded-circle pull-up text-heading">{{ substr($org->user->name ?? 'N', 0, 2) }}</span>
+                          </div>
+                        @endif
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <hr>
+
+                  <!-- Stats -->
+                  <div class="row g-3">
+                    <div class="col-6">
+                      <a href="{{ route('users.view_companies', ['orgnization' => $org->id]) }}" class="d-flex align-items-center">
+                        <div class="badge rounded bg-label-info me-4 p-2">
+                          <i class="ti ti-building-skyscraper ti-lg"></i>
                         </div>
-                        <p class="fw-semibold mb-0">{{ __('admin.Cycles') }}</p>
-                        <p
-                          class="fw-semibold mb-0 bg-light rounded-circle w-px-20 h-px-20 d-flex justify-content-center align-items-center">
-                          {{ $organization->cycles->count() }}
-                        </p>
-                      </div>
-                    </a>
-                    <div class="dropdown">
-                      <button class="btn btn-sm btn-icon rounded-circle shadow" type="button"
-                        id="dropdownMenuButton{{ $organization->id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="ti ti-dots-vertical"></i>
-                      </button>
-                      <ul class="dropdown-menu p-0" aria-labelledby="dropdownMenuButton{{ $organization->id }}">
-                        @if ($_user->ableToAny(['organizations.edit', 'organizations.update'], $permissions))
-                          <li>
-                            <a class="dropdown-item"
-                              href="{{ route('organizations.edit', ['organization' => $organization->id]) }}">
-                              <i class="ti ti-edit text-info me-2"></i>{{ __('admin.Edit') }}
-                            </a>
-                          </li>
-                        @endif
-                        @if ($_user->ableToAny(['organization.wizard.edit'], $permissions))
-                          <li>
-                            <a class="dropdown-item"
-                              href="{{ route('organization.wizard.edit', ['id' => $organization->id]) }}">
-                              <i class="ti ti-wand text-primary me-2"></i>{{ __('admin.Edit with Wizard') }}
-                            </a>
-                          </li>
-                        @endif
-                        @if ($_user->ableTo('organizations.destroy', $permissions))
-                          <li>
-                            <button class="dropdown-item" id="deleteAction" data-id="{{ $organization->id }}"
-                              data-url="{{ route('organizations.destroy', ['organization' => $organization->id]) }}">
-                              <i class="ti ti-trash text-danger me-2"></i>{{ __('admin.Delete') }}
-                            </button>
-                          </li>
-                        @endif
-                      </ul>
+                        <div class="card-info">
+                          <h5 class="mb-0">{{ $org->total_startups }}</h5>
+                          <small class="text-secondary">{{ __('admin.Startups') }}</small>
+                        </div>
+                      </a>
+                    </div>
+
+                    <div class="col-6">
+                      <a href="{{ route('programlist.index', ['organization_id' => $org->id]) }}" class="d-flex align-items-center">
+                        <div class="badge rounded bg-label-primary me-4 p-2">
+                          <i class="ti ti-components ti-lg"></i>
+                        </div>
+                        <div class="card-info">
+                          <h5 class="mb-0">{{ $org->cycles->count() }}</h5>
+                          <small class="text-secondary">{{ __('admin.Cycles') }}</small>
+                        </div>
+                      </a>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           @endforeach
+
+          <div class="col-12 mt-12">
+             {{ $organizations->links('pagination::bootstrap-5') }}
+          </div>
         </div>
-        <!--/ Organizations List -->
+      @else
+        @include('includes.no-result', ['message' => __('admin.No_Data_Found')])
       @endif
     </div>
   </div>
@@ -302,12 +254,40 @@
       $("#status-form").submit();
     });
 
-    // Search Organizations
-    $(document).on("keyup", "#search-org", function(e) {
-      var value = $(this).val().toLowerCase();
-      $(".org-card").filter(function() {
-        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    // Debounce helper
+    const debounce = (fn, delay = 1000) => {
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+      };
+    };
+
+    // Create debounced search handler
+    const handleSearch = debounce((value) => {
+      // Show loading spinner
+      $('#searchInput i').removeClass('ti-search').addClass('ti-loader-2 ti-spin');
+
+      const url = new URL(window.location);
+      if (value.trim()) {
+        url.searchParams.set('search', value.trim());
+      } else {
+        url.searchParams.delete('search');
+      }
+      // Preserve other query parameters
+      const currentParams = new URLSearchParams(window.location.search);
+      ['status', 'visibility', 'page'].forEach(param => {
+        if (currentParams.has(param)) {
+          url.searchParams.set(param, currentParams.get(param));
+        }
       });
+
+      window.location.href = url.href;
+    }, 800);
+
+    // Bind debounced search event to input
+    $('#search-input').on('input', function() {
+      handleSearch($(this).val());
     });
   </script>
 
@@ -339,15 +319,32 @@
                   '_token': token
                 },
                 function(response) {
-                  // Swal.fire({
-                  //   type: 'success',
-                  //   title: "{{ __('admin.Deleted') }}!",
-                  //   html: "{{ __('admin.DeletedSuccessfully') }}.",
-                  // });
-                  location.reload();
+                  if (response.success) {
+                    releaseSuccessAlert({
+                      title: "{{ __('admin.Deleted') }}!",
+                      message: "{{ __('admin.DeletedSuccessfully') }}.",
+                    });
+
+                    // Remove the organization card from DOM
+                    $('div[data-org-id="' + $(this).data('id') + '"]').fadeOut(300, function() {
+                      $(this).remove();
+                    });
+                  } else {
+                    releaseFailureAlert({
+                      title: "{{ __('admin.Error') }}",
+                      message: response.message ? response.message : "{{ __('admin.DeleteFailed') }}"
+                    });
+                  }
+                }.bind(this)
+              ).fail(function(xhr) {
+                let errorMessage = "{{ __('admin.DeleteFailed') }}";
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                  errorMessage = xhr.responseJSON.message;
                 }
-              ).fail(function(error) {
-                console.log(error);
+                releaseFailureAlert({
+                  title: "{{ __('admin.Error') }}",
+                  message: errorMessage
+                })
               });
             }
           })
