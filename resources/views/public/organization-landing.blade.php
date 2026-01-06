@@ -255,7 +255,7 @@
                     alt="{{ $organization->name_en }}" 
                     width="50" 
                     height="50" 
-                    class="rounded-circle object-fit-contain"
+                    class="object-fit-contain rounded"
                   />
                 @endif
               </div>
@@ -584,11 +584,11 @@
           <div class="landing-reviews-btns">
             <button
               id="reviews-previous-btn"
-              class="btn btn-label-primary reviews-btn me-4 scaleX-n1-rtl"
+              class="btn btn-label-primary reviews-btn reviews-previous-btn me-4 scaleX-n1-rtl"
               type="button">
               <i class="ti ti-chevron-left ti-md"></i>
             </button>
-            <button id="reviews-next-btn" class="btn btn-label-primary reviews-btn scaleX-n1-rtl" type="button">
+            <button id="reviews-next-btn" class="btn btn-label-primary reviews-btn reviews-next-btn scaleX-n1-rtl" type="button">
               <i class="ti ti-chevron-right ti-md"></i>
             </button>
           </div>
@@ -620,8 +620,6 @@
                   </div>
                 @endforeach
               </div>
-              <div class="swiper-button-next"></div>
-              <div class="swiper-button-prev"></div>
             </div>
           </div>
         </div>
@@ -636,13 +634,17 @@
           <div class="swiper-wrapper">
             @foreach($partnersWithUrls as $partner)
               <div class="swiper-slide">
-                <img
-                  src="{{ $partner['logo_url'] }}"
-                  alt="client logo"
-                  class="client-logo"
-                  {{-- data-app-light-img="{{ $partner['logo_url'] }}"
-                  data-app-dark-img="{{ $partner['logo_url'] }}"  --}}
-                />
+                @if(!empty($partner['logo_url']))
+                  <img
+                    src="{{ $partner['logo_url'] }}"
+                    alt="partner logo"
+                    class="client-logo"
+                  />
+                @else
+                  <div class="d-inline-flex align-items-center justify-content-center bg-light rounded px-4 py-3">
+                    <span class="fw-semibold text-muted">{{ $partner['name'] ?? '' }}</span>
+                  </div>
+                @endif
               </div>
             @endforeach
           </div>
@@ -794,8 +796,7 @@
   <footer class="landing-footer bg-body footer-text">
     <div class="footer-top position-relative overflow-hidden z-1">
       <img src="/vuexy/assets/img/front-pages/backgrounds/footer-bg-light.png" alt="footer bg"
-        class="footer-bg banner-bg-img z-n1" data-app-light-img="front-pages/backgrounds/footer-bg-light.png"
-        data-app-dark-img="front-pages/backgrounds/footer-bg-dark.png" />
+        class="footer-bg banner-bg-img z-n1" />
       <div class="container">
         <div class="row gx-0 gy-6 g-lg-10">
           <div class="col-lg-5">
@@ -895,11 +896,7 @@
       const nav = document.querySelector('.layout-navbar'),
         animationImg = document.querySelectorAll('.hero-dashboard-img'),
         swiperLogos = document.getElementById('swiper-partners-logos'),
-        swiperPartners = document.getElementById('swiper-partners'),
-        PartnersPrevButton = document.getElementById('reviews-previous-btn'),
-        PartnersNextBtn = document.getElementById('reviews-next-btn'),
-        PartnersSliderPrev = document.querySelector('.swiper-button-prev'),
-        PartnersSliderNext = document.querySelector('.swiper-button-next');
+        swiperPartners = document.getElementById('swiper-partners');
 
       // swiper carousel
       // Customers reviews
@@ -916,8 +913,8 @@
           loop: true,
           loopAdditionalSlides: 1,
           navigation: {
-            nextEl: '.swiper-button-next',
-            prevEl: '.swiper-button-prev'
+            nextEl: '.reviews-next-btn',
+            prevEl: '.reviews-previous-btn'
           },
           breakpoints: {
             1200: {
@@ -930,21 +927,7 @@
         });
       }
 
-      // Reviews slider next and previous
-      // -----------------------------------
-      // Add click event listener to next button
-      if (PartnersNextBtn) {
-        PartnersNextBtn.addEventListener('click', function () {
-          PartnersSliderNext.click();
-        });
-      }
 
-      // Add click event listener to previous button
-      if (PartnersPrevButton) {
-        PartnersPrevButton.addEventListener('click', function () {
-          PartnersSliderPrev.click();
-        });
-      }
 
       // Review client logo
       // -----------------------------------
