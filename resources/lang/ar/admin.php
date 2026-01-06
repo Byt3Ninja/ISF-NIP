@@ -1837,7 +1837,7 @@ return [
 	'SurveyStoredSuccessfully' => 'تم انشاء الاستبيان بنجاح',
 	'meeting_id' => 'معرف الجلسة',
 	'All_Organizations' => 'جميع المنظمات',
-	'All_statuses' => 'جميع الحالات',
+	'All_statuses' => 'كل الحالات',
 	'All_Programs' => 'جميع البرامج',
 	'Mentorships' => 'ارشادات',
 	'submitDate' => 'تاريخ الارسال',
@@ -3177,4 +3177,6 @@ return [
 	'send_message_description2' => 'الشراكات، أو لديك أسئلة مبيعة قبل البيع، فأنك في المكان الصحيح',
 	'full_name' => 'الاسم الكامل',
 	'send_inquiry' => 'أرسل استفسار',
+	'all_visiblity' => 'كل الرؤية',
+	'manage_organizations_description' => 'إدارة و إضافة مؤسسات جديدة',
 ];
