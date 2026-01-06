@@ -182,7 +182,7 @@ if (!$activeGroup) {
     <a href="/dashboard" class="app-brand-link">
       <img 
         @if (!is_null($_user->organization) && isset($_user->organization->img_url))
-          src="{{ asset($_user->organization->img_url) }}"
+          src="{{ $_user->organization->imageUrl }}"
         @elseif (!empty($setting->Logo))
           src="/images/logo/{{ $setting->Logo }}"
         @else
