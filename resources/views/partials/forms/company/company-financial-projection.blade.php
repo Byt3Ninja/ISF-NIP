@@ -147,14 +147,14 @@
         <thead class="table-light">
           <tr>
             <th class="col-label">{{ __('startup.line_item') }}</th>
-            <th class="text-end" id="header-year-0">{{ __('startup.past_year') }}<br><small class="fw-normal text-muted">-</small>
+            <th class="" id="header-year-0">{{ __('startup.past_year') }}<br><small class="fw-normal text-muted">-</small>
             </th>
-            <th class="text-end" id="header-year-1">
+            <th class="" id="header-year-1">
               {{ __('startup.forecast_year_1') }}<br>
               <small class="fw-normal text-muted">-</small>
             </th>
-            <th class="text-end" id="header-year-2">{{ __('startup.year_2') }}<br><small class="fw-normal text-muted">-</small></th>
-            <th class="text-end" id="header-year-3">{{ __('startup.year_3') }}<br><small class="fw-normal text-muted">-</small></th>
+            <th class="" id="header-year-2">{{ __('startup.year_2') }}<br><small class="fw-normal text-muted">-</small></th>
+            <th class="" id="header-year-3">{{ __('startup.year_3') }}<br><small class="fw-normal text-muted">-</small></th>
           </tr>
         </thead>       
         <tbody>
