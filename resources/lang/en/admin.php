@@ -3123,4 +3123,6 @@ return [
 	'send_inquiry' => 'Send Inquiry',
 	'all_visiblity' => 'All Visibility',
 	'manage_organizations_description' => 'Manage and add new organizations',
+	'provided_by' => 'Provided by',
+	'services_subtitle' => 'Manage and oversee all services',
 ];

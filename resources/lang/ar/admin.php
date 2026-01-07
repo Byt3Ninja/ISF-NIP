@@ -3179,4 +3179,6 @@ return [
 	'send_inquiry' => 'أرسل استفسار',
 	'all_visiblity' => 'كل الرؤية',
 	'manage_organizations_description' => 'إدارة و إضافة مؤسسات جديدة',
+	'provided_by' => 'مقدمه من',
+	'services_subtitle' => 'إدارة جميع الخدمات',
 ];
