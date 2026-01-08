@@ -1507,7 +1507,9 @@ class HomeController extends Controller
                 WHERE
                     q.status = 'published'
                     ";
-            $my_quizzes_q .= " AND q.organization_id = $organization_id ";
+                    if($organization_id != null){
+                        $my_quizzes_q .= " AND q.organization_id = $organization_id ";
+                    }
             $my_quizzes = collect(DB::select($my_quizzes_q, [$user->id]))->groupBy('id')->map(function ($items) {
                 $item = $items->first();
                 $quiz = new stdClass;
