@@ -1503,12 +1503,12 @@ class HomeController extends Controller
                 FROM
                     quizzes q
                 LEFT JOIN
-                    quiz_results qr ON qr.quiz_id = q.id AND qr.user_id = $user->id
+                    quiz_results qr ON qr.quiz_id = q.id AND qr.user_id = ?
                 WHERE
                     q.status = 'published'
-                    AND q.organization_id = $organization_id
-            ";
-            $my_quizzes = collect(DB::select($my_quizzes_q))->groupBy('id')->map(function ($items) {
+                    ";
+            $my_quizzes_q .= " AND q.organization_id = $organization_id ";
+            $my_quizzes = collect(DB::select($my_quizzes_q, [$user->id]))->groupBy('id')->map(function ($items) {
                 $item = $items->first();
                 $quiz = new stdClass;
                 $quiz->id = $item->id;
