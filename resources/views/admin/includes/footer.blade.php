@@ -1,6 +1,6 @@
 <p class="d-flex justify-content-between align-items-center">
   <span class="float-left d-inline-block" style="direction: ltr">
-    VI portal {{ env('APP_VERSION') ? 'V' . env('APP_VERSION') : '' }} - &copy; {{ date('Y') }}
+    Incubator Pro {{ env('APP_VERSION') ? 'v' . env('APP_VERSION') : '' }} {{ env('APP_BUILD') ? '(Build ' . env('APP_BUILD') . ')' : '' }} - &copy; {{ date('Y') }}
   </span>
   {{-- <span class="float-right d-sm-inline-block d-none">Developed by <i class="bx bxs-heart pink mx-50 font-small-3"></i><a class="text-uppercase" href="https://masterencode.com" target="_blank">masterencode</a></span> --}}
   <button class="btn btn-primary btn-icon scroll-top" type="button">
