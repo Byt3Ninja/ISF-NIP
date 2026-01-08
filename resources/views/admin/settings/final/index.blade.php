@@ -307,7 +307,6 @@
     $('#filter-form button[type="submit"]').prop('disabled', $(this).val() ? false : true);
   });
 
-
   $('.edit-step-btn').on('click', function () {
     const stepData = $(this).data('step');
 
