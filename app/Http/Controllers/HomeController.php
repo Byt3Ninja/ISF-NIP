@@ -1449,6 +1449,8 @@ class HomeController extends Controller
                         mr.mentor_id = $user->id
                         AND mr.approved = 'Yes'
                         AND mr.cycle_id in ($cycle_idMentor) ";
+            }else{
+                $my_mentorship_requests_q = "";
             }
             
             $my_mentorship_requests = collect(DB::select($my_mentorship_requests_q))->map(function ($item) {
