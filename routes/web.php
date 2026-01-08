@@ -392,7 +392,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     //Assessments
     Route::get('/question-assessment', 'AssessmentController@assessment')->name('assessments.take');
-    Route::get('/assessment-create', 'AssessmentController@MakeAssessment')->name('assessments.assign');
+    Route::post('/assessment-create', 'AssessmentController@MakeAssessment')->name('assessments.assign');
     Route::get('/analysis-assessment', 'AssessmentController@analysisAssessment')->name('assessments.results_analysis_view');
     Route::get('/history-assessment', 'AssessmentController@historyAssessment')->name('assessments.results_history_view');
     Route::get('/category-assessment', 'CatigoriesController@index')->name('assessments.results_by_category_view');

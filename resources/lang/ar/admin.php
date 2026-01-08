@@ -3183,4 +3183,5 @@ return [
 	'provided_by' => 'مقدمه من',
 	'services_subtitle' => 'إدارة جميع الخدمات',
 	'completed_mentorship_sessions' => 'جلسات الارشاد المنتهية',
+	'new_assessment' => 'تقييم جديد',
 ];
