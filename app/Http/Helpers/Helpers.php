@@ -382,4 +382,21 @@ if (!function_exists('getIndustryIcon')) {
 
         return 'ti-tag'; // Default icon
     }
+
+    if (!function_exists('active')) {
+        function active(...$patterns) {
+            foreach ($patterns as $pattern) {
+                if (request()->is($pattern)) {
+                    return 'active';
+                }
+            }
+            return '';
+        }
+    }
+
+    if (!function_exists('menuItem')) {
+        function menuItem($pattern) {
+            return request()->is($pattern) ? 'active menu-item' : 'menu-item';
+        }
+    }
 }

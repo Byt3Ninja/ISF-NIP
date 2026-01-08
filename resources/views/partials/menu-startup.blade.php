@@ -12,18 +12,6 @@
       : ($setting->Logo
         ? "/images/logo/$setting->Logo"
         : "/images/background/logo.png");
-
-  if (!function_exists('active')) {
-    function active($pattern) {
-      return Request::is($pattern) ? 'active' : '';
-    }
-  }
-
-  if (!function_exists('menuItem')) {
-    function menuItem($pattern) {
-      return Request::is($pattern) ? 'active menu-item' : 'menu-item';
-    }
-  }
 @endphp
 
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
@@ -111,7 +99,7 @@
 
       {{-- Analysis & Assessment --}}
       @if($setting->assessment == 1 && $_user->ableTo('assessments.results_analysis_view', $permissions))
-        <li class="{{ active('dashboard/analysis-assessment') }} menu-item">
+        <li class="{{ active('dashboard/analysis-assessment', 'dashboard/question-assessment*', 'dashboard/history-assessment*') }} menu-item">
           <a href="/dashboard/analysis-assessment" class="menu-link">
             <i class="menu-icon tf-icons ti ti-chart-pie"></i>
             <div>{{ $l == 'en' ? 'Analysis & Assessment' : 'تحليل وتقييم' }}</div>
