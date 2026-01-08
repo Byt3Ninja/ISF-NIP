@@ -15,7 +15,9 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        User::create([
+        User::firstOrCreate(
+            ['email' => 'admin@growthlabs.app'],
+            [
             'first_name_en'=>'Super',
             'last_name_en'=>'Admin',
             'first_name_ar'=>'سوبر',
