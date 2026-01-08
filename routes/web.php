@@ -642,6 +642,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     Route::get('program/show', 'Mentor\MentorProgramController@show');
 
+    Route::get('mentor/surveys', 'MentorsController@surveys');
+    Route::get('mentor/sessions', 'MentorsController@mentorshipSessions');
     Route::post('mentors/modify', 'MentorsController@modify')->name('mentors.settings_modify');
     Route::post('mentorship/add', 'MentorsController@add')->name('mentors.add');
     Route::get('mentorship/assign/{id?}', 'MentorsController@list')->name('mentorships.requests_list');
