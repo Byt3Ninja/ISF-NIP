@@ -296,6 +296,24 @@
           <div>{{ __('mentor.enrolled_programs') }}</div>
         </a>
       </li>
+      <li class="{{ Request::is('dashboard/mentor/sessions') ? 'active' : '' }} menu-item">
+        <a href="/dashboard/mentor/sessions" class="menu-link">
+          <i class="menu-icon tf-icons ti ti-calendar-event"></i>
+          <div class="d-flex align-items-center justify-content-between w-100">
+            <span>{{ __('admin.Mentorship Sessions') }}</span>
+            <span class="badge badge-center rounded-pill bg-danger ms-2">4</span>
+          </div>
+        </a>
+      </li>
+      <li class="{{ Request::is('dashboard/mentor/surveys') ? 'active' : '' }} menu-item">
+        <a href="/dashboard/mentor/surveys" class="menu-link">
+          <i class="menu-icon tf-icons ti ti-notes"></i>
+          <div class="d-flex align-items-center justify-content-between w-100">
+            <span>{{ __('admin.surveys') }}</span>
+            <span class="badge badge-center rounded-pill bg-danger ms-2">3</span>
+          </div>
+        </a>
+      </li>
     @endif
 
     @if($_user->hasRole('Judger'))

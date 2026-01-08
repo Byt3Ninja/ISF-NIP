@@ -3184,4 +3184,10 @@ return [
 	'services_subtitle' => 'إدارة جميع الخدمات',
 	'completed_mentorship_sessions' => 'جلسات الارشاد المنتهية',
 	'new_assessment' => 'تقييم جديد',
+	'survey_status' => 'حالة الاستبيان',
+	'session_status' => 'حالة الجلسة',
+	'overdue' => 'متاخر',
+	'view_all_sessions' => 'عرض كل الجلسات',
+	'view_surveys' => 'عرض الاستبيانات',
+	'survey_reminder_message' => 'لديك استبيانات معلقة لإكمالها. يرجى تخصيص بعض الوقت لملئها.',
 ];

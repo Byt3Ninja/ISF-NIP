@@ -31,18 +31,30 @@
 <!-- Content wrapper -->
 <div class="content-wrapper">
 	<div class="container-xxl flex-grow-1 container-p-y">
-		@if( $_user->hasAnyRole('Registered', 'Admin') )
-		@php
-		
-		@endphp
 		@if(Auth::user()->hasRole('Registered') || Auth::user()->hasRole('Mentor'))
 			@if( isset($newhackathon) && $newhackathon )
-			{{-- @if(now()->diffInDays($newhackathon->created_at) < 300) --}}
-			@include('admin.includes.banner_header', ['newhackathon' => $newhackathon])
-			<br>
-					@endif
+				{{-- @if(now()->diffInDays($newhackathon->created_at) < 300) --}}
+				@include('admin.includes.banner_header', ['newhackathon' => $newhackathon])
+				<br>
+			@endif
 		@endif
+
+		@if (Auth::user()->hasRole('Mentor'))
+			<div class="alert alert-primary alert-dismissible fade show d-flex align-items-center" role="alert">
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-clipboard-check-fill flex-shrink-0 me-3" viewBox="0 0 16 16">
+						<path d="M6.5 0A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3Zm3 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3Z"/>
+						<path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1A2.5 2.5 0 0 1 9.5 5h-3A2.5 2.5 0 0 1 4 2.5v-1Zm6.854 7.354-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L7.5 10.793l2.646-2.647a.5.5 0 0 1 .708.708Z"/>
+				</svg>
+				<div class="flex-grow-1">
+					<strong>{{ __('admin.Reminder') }}:</strong> {{ __('admin.survey_reminder_message') }}
+					<a href="/dashboard/mentor/surveys" class="btn btn-sm btn-primary ms-2">
+						{{ __('admin.view_surveys') }} <i class="ti ti-arrow-{{ $l == 'en' ? 'right' : 'left' }} ti-xs ms-1"></i>
+					</a>
+				</div>
+				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+			</div>
 		@endif
+
 		<div class="content-body">
 			@if( session()->has('success') )
 			<div class="row">
@@ -940,10 +952,14 @@
 			@if( array_intersect(['dashboard.widgets_tables.my_next_mentorship_sessions_view'], $permissions) )
 			<div class="col-12">
 				<div class="card mb-6">
-					<div class="card-header">
+					<div class="card-header d-flex justify-content-between align-items-center">
 						<h5 class="card-title mb-0 text-capitalize">
 							{{ __("dashboard.My next mentorship sessions") }}
 						</h5>
+						<a href="/dashboard/mentor/sessions" class="btn btn-primary">
+							<i class="ti ti-calendar-event me-2"></i>
+							{{ __("admin.view_all_sessions") }}
+						</a>
 					</div>
 					<div class="card-datatable table-responsive">
 						<table class="table">

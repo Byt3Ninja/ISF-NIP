@@ -3129,4 +3129,10 @@ return [
 	'services_subtitle' => 'Manage and oversee all services',
 	'completed_mentorship_sessions' => 'Completed Mentorship Sessions',
 	'new_assessment' => 'New Assessment',
+	'survey_status' => 'Survey Status',
+	'session_status' => 'Session Status',
+	'overdue' => 'Overdue',
+	'view_all_sessions' => 'View all Sessions',
+	'view_surveys' => 'View Surveys',
+	'survey_reminder_message' => 'You have pending surveys that need completion.',
 ];
