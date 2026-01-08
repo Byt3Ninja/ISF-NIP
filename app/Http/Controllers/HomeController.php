@@ -1426,19 +1426,8 @@ class HomeController extends Controller
                     ];
                 }
             }
-            if ($user->hasAnyRole(['registered'])) {
-                $my_mentorship_requests_q = "SELECT
-                        mr.id,
-                        mr.period,
-                        mr.zoom_date
-                    FROM
-                        mentorship_requests mr
-                    WHERE
-                        mr.user_id = $user->id
-                        AND mr.approved = 'Yes'
-                        AND mr.cycle_id = $cycle_id
-                ";
-            }elseif( $user->hasAnyRole(['mentor']) ){
+            
+            if( $user->hasAnyRole(['mentor']) ){
                 $my_mentorship_requests_q = "SELECT
                         mr.id,
                         mr.period,
@@ -1450,7 +1439,17 @@ class HomeController extends Controller
                         AND mr.approved = 'Yes'
                         AND mr.cycle_id in ($cycle_idMentor) ";
             }else{
-                $my_mentorship_requests_q = "";
+                $my_mentorship_requests_q = "SELECT
+                        mr.id,
+                        mr.period,
+                        mr.zoom_date
+                    FROM
+                        mentorship_requests mr
+                    WHERE
+                        mr.user_id = $user->id
+                        AND mr.approved = 'Yes'
+                        AND mr.cycle_id = $cycle_id
+                ";
             }
             
             $my_mentorship_requests = collect(DB::select($my_mentorship_requests_q))->map(function ($item) {
