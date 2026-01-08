@@ -278,7 +278,7 @@ class AssessmentController extends Controller
             return [
                 'can_proceed' => false,
                 'redirect' => route('assessments.take'),
-                'message' => __('AlreadyHaveAssessment'),
+                'message' => __('admin.AlreadyHaveAssessment'),
                 'class' => 'warning'
             ];
         }

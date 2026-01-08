@@ -3127,4 +3127,6 @@ return [
 	'manage_organizations_description' => 'Manage and add new organizations',
 	'provided_by' => 'Provided by',
 	'services_subtitle' => 'Manage and oversee all services',
+	'completed_mentorship_sessions' => 'Completed Mentorship Sessions',
+	'new_assessment' => 'New Assessment',
 ];
