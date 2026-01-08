@@ -13,7 +13,7 @@ class SustainableIconSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('sustainable_icon')->insert([
+       $sustainableIcons = [
             ['id' => 1, 'title' => 'no_poverty', 'icon_ar' => '1.png', 'icon_en' => '1.png', 'created_at' => now(), 'updated_at' => now()],
             ['id' => 2, 'title' => 'zero_hunger', 'icon_ar' => '2.png', 'icon_en' => '2.png', 'created_at' => now(), 'updated_at' => now()],
             ['id' => 3, 'title' => 'good_health', 'icon_ar' => '3.png', 'icon_en' => '3.png', 'created_at' => now(), 'updated_at' => now()],
@@ -31,6 +31,16 @@ class SustainableIconSeeder extends Seeder
             ['id' => 15, 'title' => 'life_on_land', 'icon_ar' => '15.png', 'icon_en' => '15.png', 'created_at' => now(), 'updated_at' => now()],
             ['id' => 16, 'title' => 'peace_justice', 'icon_ar' => '16.png', 'icon_en' => '16.png', 'created_at' => now(), 'updated_at' => now()],
             ['id' => 17, 'title' => 'partnership_goals', 'icon_ar' => '17.png', 'icon_en' => '17.png', 'created_at' => now(), 'updated_at' => now()],
-        ]);
+        ];
+
+        foreach ($sustainableIcons as $icon) {
+            DB::table('sustainable_icon')->updateOrInsert(
+                ['id' => $icon['id']], // شرط الوجود
+                array_merge($icon, [
+                    'updated_at' => now(),
+                    'created_at' => now(),
+                ])
+            );
+        }
     }
 }
