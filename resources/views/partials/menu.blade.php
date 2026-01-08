@@ -852,6 +852,18 @@
     @endif
   </ul>
 </aside>
+<p class="d-flex justify-content-between align-items-center">
+    <span style="direction: ltr">
+        Incubator Pro
+        {{ config('app.version') ? 'v' . config('app.version') : '' }}
+        {{ config('app.build') ? '(Build ' . config('app.build') . ')' : '' }}
+        - &copy; {{ now()->year }}
+    </span>
+
+    <button class="btn btn-primary btn-icon scroll-top" type="button">
+        <i class="ti ti-arrow-up"></i>
+    </button>
+</p>
 <!-- / Menu -->
 
 <script>
