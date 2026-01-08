@@ -81,9 +81,9 @@ $tabs = [
                     <span class="badge
                       @if($item['status'] == 'Accepted') bg-label-success
                       @elseif($item['status'] == 'Pending') bg-label-warning
-                      @else bg-label-danger
+                      @else bg-label-info
                       @endif">
-                      <i class="ti ti-{{ $item['status'] == 'Accepted' ? 'circle-check' : ($item['status'] == 'Pending' ? 'clock' : 'circle-x') }} ti-xs me-1"></i>
+                      {{-- <i class="ti ti-{{ $item['status'] == 'Accepted' ? 'circle-check' : ($item['status'] == 'Pending' ? 'clock' : 'circle-x') }} ti-xs me-1"></i> --}}
                       {{ __('admin.' . strtolower($item['status'])) }}
                     </span>
                   </td>
@@ -189,7 +189,7 @@ $tabs = [
         </div>
     
         <!-- 3. Sticky Follow-up Section (Footer) -->
-        <div class="offcanvas-footer border-top pt-4">
+        {{-- <div class="offcanvas-footer border-top pt-4">
           <label class="form-label fw-bold small text-primary mb-2">
             <i class="ti ti-arrow-back-up me-1"></i> 
             @lang('admin.send_follow_up_message')
@@ -199,15 +199,15 @@ $tabs = [
           </div>
           <div class="d-flex justify-content-between align-items-center mt-6">
             <div class="attachment-upload">
-              {{-- <button class="btn btn-sm btn-outline-secondary border-0" title="Attach Files">
+              <button class="btn btn-sm btn-outline-secondary border-0" title="Attach Files">
                 <i class="ti ti-paperclip fs-4"></i>
-              </button> --}}
+              </button>
             </div>
             <button type="button" class="btn btn-primary px-4" id="btnSendFollowUp">
               @lang('admin.Send_Message') <i class="ti ti-send ms-2"></i>
             </button>
           </div>
-        </div>
+        </div> --}}
       </div>
     </div>
 
@@ -309,6 +309,7 @@ $(function () {
     accepted: '{{ __("admin.accepted") }}',
     pending: '{{ __("admin.pending") }}',
     declined: '{{ __("admin.declined") }}',
+    sent: '{{ __("admin.sent") }}',
     view_details: '{{ __("admin.view_details") }}',
     no_replies_yet: '{{ __("admin.no_replies_yet") }}',
     no_attachments: '{{ __("admin.no_attachments") }}'
@@ -403,8 +404,8 @@ $(function () {
                 let insertIndex = range.index;
                 uploadedImages.forEach(image => {
                   quill.insertText(insertIndex, `🖼️ ${image.name}`, { link: image.url });
-                  quill.insertText(insertIndex + image.name.length + 3, '\n');
-                  insertIndex += image.name.length + 4;
+                  quill.insertText(insertIndex + image.name.length + 4, '\n');
+                  insertIndex += image.name.length + 5;
                 });
 
                 // Move cursor to end
@@ -491,8 +492,8 @@ $(function () {
                     `📎 ${file.name}`,
                     { link: file.url }
                   );
-                  quill.insertText(insertIndex + file.name.length + 2, '\n');
-                  insertIndex += file.name.length + 3;
+                  quill.insertText(insertIndex + file.name.length + 4, '\n');
+                  insertIndex += file.name.length + 5;
                 });
 
                 // Move cursor to end
@@ -504,21 +505,69 @@ $(function () {
                 $('#uploadedAttachments').val(JSON.stringify(newAttachments));
               }
             } else {
-              alert('{{ __("admin.upload_failed") }}: ' + (response.message || 'Unknown error'));
+              alert(response?.message ? response?.message : '{{ __("admin.File upload failed") }}');
             }
           },
           error: function(xhr) {
-            alert('{{ __("admin.upload_failed") }}: ' + (xhr.responseJSON?.message || 'Unknown error'));
+            alert(xhr.responseJSON?.message ? xhr.responseJSON.message : '{{ __("admin.File upload failed") }}');
           }
         });
       });
     };
   }
 
+  // Debounced detection for removed uploaded files
+  let _deleteDebounceTimer = null;
   quill.on('text-change', () => {
     $('#invitationMessage').val(quill.root.innerHTML);
     fv && fv.revalidateField('invitation_message');
+
+    // debounce to avoid many rapid requests
+    clearTimeout(_deleteDebounceTimer);
+    _deleteDebounceTimer = setTimeout(() => {
+      detectAndDeleteRemovedFiles();
+    }, 900);
   });
+
+  // Detect links/images present in editor and call server to delete removed uploads
+  function detectAndDeleteRemovedFiles() {
+    try {
+      const currentAttachments = JSON.parse($('#uploadedAttachments').val() || '[]');
+      if (!Array.isArray(currentAttachments) || currentAttachments.length === 0) return;
+
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(quill.root.innerHTML, 'text/html');
+      const anchors = Array.from(doc.querySelectorAll('a')).map(a => a.href).filter(Boolean);
+      const imgs = Array.from(doc.querySelectorAll('img')).map(i => i.src).filter(Boolean);
+      const present = [...anchors, ...imgs];
+
+      // Files that were uploaded before but no longer present in editor
+      const removed = currentAttachments.filter(u => !present.includes(u));
+      if (removed.length === 0) return;
+
+      removed.forEach(url => {
+        // send only the stored file name (basename) as expected by controller
+        const fileName = url.split('/').pop();
+        $.ajax({
+          url: '{{ route("invitations.DeleteAttachment") }}',
+          method: 'POST',
+          data: { file_name: fileName },
+          headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+          success: function(response) {
+            // on success remove from hidden attachments
+            const cur = JSON.parse($('#uploadedAttachments').val() || '[]');
+            const updated = (cur || []).filter(u => u !== url);
+            $('#uploadedAttachments').val(JSON.stringify(updated));
+          },
+          error: function(xhr) {
+            alert(xhr.responseJSON?.message ? xhr.responseJSON.message : '{{ __("admin.File upload failed") }}');
+          }
+        });
+      });
+    } catch (e) {
+      alert(e?.message ? e?.message : '{{ __("admin.File upload failed") }}'); 
+    }
+  }
 
   /* =======================
    * DataTable
@@ -527,7 +576,7 @@ $(function () {
     responsive: true,
     processing: true,
     pageLength: 10,
-    order: [[4, 'desc']],
+    order: [[5, 'desc']],
     dom:
       '<"row"' +
       '<"col-12 col-lg-9 d-flex flex-wrap align-items-center ps-0 ps-lg-6"l>' +
@@ -595,7 +644,7 @@ $(function () {
     $('#inviteeNameDisplay').text(d.inviteeName);
     $('#inviteeEmailDisplay').text(d.inviteeEmail);
     $('#invitationTitle').text(d.subject);
-    $('#originalMessageContent').text(d.message);
+    $('#originalMessageContent').text(d.message.replace(/🖼️[^\n]*/g, '').replace(/📎[^\n]*/g, '').trim());
     $('#replyMessageContent').text(d.responseMessage || translations.no_replies_yet);
     $('#dateTimestamp').text(d.date);
 
@@ -607,7 +656,8 @@ $(function () {
     const statusLabels = {
       Accepted: '@lang("admin.accepted")',
       Pending: '@lang("admin.pending")',
-      Declined: '@lang("admin.declined")'
+      Declined: '@lang("admin.declined")',
+      Sent: '@lang("admin.sent")'
     };
 
     $('#invitationScopeDisplay').html(
@@ -619,7 +669,8 @@ $(function () {
     $('#invitationStatus').html(
       `<span class="badge bg-label-${
         d.status === 'Accepted' ? 'success' :
-        d.status === 'Pending' ? 'warning' : 'danger'
+        d.status === 'Pending' ? 'warning' :
+        d.status === 'Sent' ? 'info' : 'danger'
       }">
         ${statusLabels[d.status] || d.status}
       </span>`
@@ -740,8 +791,8 @@ $(function () {
           resetForm();
 
           // Add new row to table in real-time
-          if (response.invitation) {
-            addInvitationToTable(response.invitation);
+          if (response.data && response.data.length > 0) {
+            addInvitationToTable(response.data[0]);
           }
         } else {
           // Handle server-side validation errors
@@ -782,6 +833,11 @@ $(function () {
         statusIcon = 'clock';
         statusLabel = translations.pending;
         break;
+      case 'Sent':
+        statusBadgeClass = 'info';
+        statusIcon = 'send';
+        statusLabel = translations.sent;
+        break;
       default:
         statusBadgeClass = 'danger';
         statusIcon = 'circle-x';
@@ -800,13 +856,14 @@ $(function () {
         </td>
         <td>
           <span class="badge bg-label-${statusBadgeClass}">
-            <i class="ti ti-${statusIcon} ti-xs me-1"></i>
+            <!-- <i class="ti ti-${statusIcon} ti-xs me-1"></i> -->
             ${statusLabel}
           </span>
         </td>
+        <td>${invitation.accepted_at}</td>
         <td>${invitation.created_at}</td>
         <td>
-          <button class="btn btn-sm btn-outline-primary text-nowrap view-details" data-bs-toggle="offcanvas" data-bs-target="#invitationOffcanvas" data-invitee-name="${invitation.invitee_name}" data-invitee-email="${invitation.invitee_email}" data-subject="${invitation.subject}" data-scope="${invitation.scope}" data-status="${invitation.status}" data-message="${invitation.message_content}" data-date="${invitation.created_at}" data-attachments="${(invitation.attachments || []).join(',')}" data-response-message="${invitation.response_message || ''}">
+          <button class="btn btn-sm btn-outline-primary text-nowrap view-details" data-bs-toggle="offcanvas" data-bs-target="#invitationOffcanvas" data-invitee-name="${invitation.invitee_name}" data-invitee-email="${invitation.invitee_email}" data-subject="${invitation.subject}" data-scope="${invitation.scope}" data-status="${invitation.status}" data-message="${invitation.message_content}" data-date="${invitation.created_at}" data-attachments="${JSON.parse(invitation.attachments || '[]').join(',')}" data-response-message="${invitation.response_message || ''}">
             <i class="ti ti-eye me-1"></i> ${translations.view_details}
           </button>
         </td>

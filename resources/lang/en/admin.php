@@ -1742,6 +1742,7 @@ return [
 	'Map Columns' => 'Map Columns',
 	'No data to preview' => 'No data to preview (no mappings or no data).',
 	'File uploaded successfully' => 'File uploaded successfully',
+	'File upload failed' => 'Failed to upload file',
 	'Error uploading file' => 'Error uploading file',
 	'OR' => 'أو',
 	'No columns are mapped' => 'No columns are mapped. Proceed to review anyway? You won\'t be able to import data.',
@@ -3099,6 +3100,7 @@ return [
 	'Email_Not_Enabled' => 'Email is not enabled',
 	'sending' => 'Sending',
 	'send' => 'Send',
+	'sent' => 'Sent',
 	'Accepted_At' => 'Accepted At',
 	'All_Priorities' => 'All Priorities',
 	'Evaluation published successfully' => 'Evaluation published successfully',
@@ -3123,4 +3125,6 @@ return [
 	'send_inquiry' => 'Send Inquiry',
 	'all_visiblity' => 'All Visibility',
 	'manage_organizations_description' => 'Manage and add new organizations',
+	'provided_by' => 'Provided by',
+	'services_subtitle' => 'Manage and oversee all services',
 ];

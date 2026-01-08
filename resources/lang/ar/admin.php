@@ -1751,6 +1751,7 @@ return [
 	'No data to preview' => 'لا توجد بيانات للمعاينة (لا توجد تخطيطات أو بيانات).',
 	'File uploaded successfully' => 'تم تحميل الملف بنجاح',
 	'File upload failed' => 'فشل تحميل الملف',
+	'Error uploading file' => 'خطأ في تحميل الملف',
 	'OR' => 'أو',
 	'No columns are mapped' => 'لم يتم تخطيط أي أعمدة. تابع المراجعة على أي حال؟ لن تتمكن من استيراد البيانات.',
 	'Please upload a valid CSV file' => 'يرجى تحميل ملف CSV صالح',
@@ -3179,4 +3180,6 @@ return [
 	'send_inquiry' => 'أرسل استفسار',
 	'all_visiblity' => 'كل الرؤية',
 	'manage_organizations_description' => 'إدارة و إضافة مؤسسات جديدة',
+	'provided_by' => 'مقدمه من',
+	'services_subtitle' => 'إدارة جميع الخدمات',
 ];

@@ -232,7 +232,7 @@ $colors = ['primary', 'info', 'danger', 'warning'];
           @endforeach
 
           <div class="col-12 mt-12">
-             {{ $organizations->links('pagination::bootstrap-5') }}
+            {{ $organizations->links('pagination::bootstrap-5') }}
           </div>
         </div>
       @else

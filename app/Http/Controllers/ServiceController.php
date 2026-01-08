@@ -27,18 +27,49 @@ class ServiceController extends Controller
 	 *
 	 * @return \Illuminate\Http\Response
 	 */
-	public function index()
+	public function index(Request $request)
 	{
-		$user = auth()->user();
-		$services = Service::with('serviceCategory')
-			->when($user->hasRole('serviceProvider'), function ($query) use ($user) {
-				$provider_id = $user?->service_provider?->id ?? 0;
-				return $query->where('service_provider_id', $provider_id);
-			})
-		->get();
-		$Setting = Settings::where('id', 1)->first();
-		return view('admin/settings/services/index', compact('services','Setting'));
+			$user = auth()->user();
+
+			$services = Service::with('serviceCategory')
+					->when($user->hasRole('serviceProvider'), function ($query) use ($user) {
+							$provider_id = $user?->service_provider?->id ?? 0;
+							$query->where('service_provider_id', $provider_id);
+					})
+					->when($request->has('search') && !empty($request->search), function ($query) use ($request) {
+							$query->where(function ($q) use ($request) {
+									$searchTerms = explode(' ', strtolower($request->search));
+									foreach ($searchTerms as $term) {
+											$term = '%' . $term . '%';
+											$q->where(function ($subQ) use ($term) {
+													$subQ->whereRaw('LOWER(name_en) LIKE ?', [$term])
+															->orWhereRaw('LOWER(name_ar) LIKE ?', [$term])
+															->orWhereRaw('LOWER(description_en) LIKE ?', [$term])
+															->orWhereRaw('LOWER(description_ar) LIKE ?', [$term])
+															->orWhereRaw('LOWER(vendor_name) LIKE ?', [$term])
+															->orWhereHas('serviceCategory', function ($catQ) use ($term) {
+																	$catQ->whereRaw('LOWER(name_en) LIKE ?', [$term])
+																			->orWhereRaw('LOWER(name_ar) LIKE ?', [$term]);
+															});
+											});
+									}
+							});
+					})
+					->when($request->has('org-id') && !empty($request->{'org-id'}) && $request->{'org-id'} !== 'all', function ($query) use ($request) {
+							$query->whereHas('organizations', function ($q) use ($request) {
+									$q->where('organizations.id', $request->{'org-id'});
+							});
+					})
+					->when($request->has('status') && $request->status !== 'all', function ($query) use ($request) {
+							$query->where('status', $request->status);
+					})
+					->paginate(9);
+
+			$Setting = Settings::where('id', 1)->first();
+
+			return view('admin/settings/services/index', compact('services', 'Setting'));
 	}
+
 
 	/**
 	 * Show the form for creating a new resource.
