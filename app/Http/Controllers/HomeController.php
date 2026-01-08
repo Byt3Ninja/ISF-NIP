@@ -1566,10 +1566,10 @@ class HomeController extends Controller
             }
         }
             $surveysToAdd = [];
-            if( $user->hasAnyRole(['registered']) ){
-            $surveys = SurveyScopes::where('cycle_id', $cycle_id)->whereIn('type', ['startup', 'both'])->orWhereNull('type')->with(['myResponses'])->get();
-            } elseif( $user->hasAnyRole(['mentor']) ){
-            $surveys = SurveyScopes::whereIn('cycle_id', $user->mentorCycles->pluck('id'))->whereIn('type', ['mentor', 'both'])->orWhereNull('type')->with(['myResponses'])->get();
+            if( $user->hasAnyRole(['mentor']) ){
+                $surveys = SurveyScopes::whereIn('cycle_id', $user->mentorCycles->pluck('id'))->whereIn('type', ['mentor', 'both'])->orWhereNull('type')->with(['myResponses'])->get();
+            } else{
+                $surveys = SurveyScopes::where('cycle_id', $cycle_id)->whereIn('type', ['startup', 'both'])->orWhereNull('type')->with(['myResponses'])->get();
             }
                 $mentorship = collect($surveyEligible)
                         ->where('triggered_on', 'mentorship');
