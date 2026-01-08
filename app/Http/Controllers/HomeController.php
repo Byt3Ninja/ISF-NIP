@@ -1019,6 +1019,7 @@ class HomeController extends Controller
             $cycle->pre_requests = $preRequests;
             return $cycle;
         });
+        
         $myFinal = null;
         $days = request()->query('days', 14);
         $company = $user->company;
@@ -1219,6 +1220,7 @@ class HomeController extends Controller
                     }
                 }
             }
+            
             $trType = $fLink = null;
             if ($company->approved) {
                 $trType = 'my/' . $step->id;
@@ -1235,6 +1237,7 @@ class HomeController extends Controller
             $step->fLink = $fLink;
             return $step;
         });
+        
         $nextSessions_q = "SELECT
                 mr.id,
                 mr.mentor_id,
@@ -1404,8 +1407,15 @@ class HomeController extends Controller
         })->values();
 
         $setting = collect(DB::select("SELECT * FROM settings where `id` = 1 limit 1"))->first();
+        
+        if($user->hasAnyRole(['mentor'])){
+            $cyclementor = $user->mentorCycles->pluck('id')->toArray();
+            $cycle_idMentor = implode(',', $cyclementor);
+        } else {
+            $cycle_idMentor = [];
+        }
 
-        if ($company && $cycle_id != 0) {
+        if ($cycle_id != 0 || $cycle_idMentor != 0) {
             $surveyEligible = [];
             foreach ($steps as $step) {
                 if ((optional($step)->stype == 3 || optional($step)->stype == 4) && (now() > Carbon::parse($step->to)->format('Y-m-d H:i:s'))) {
@@ -1416,25 +1426,39 @@ class HomeController extends Controller
                     ];
                 }
             }
-
-            $my_mentorship_requests_q = "SELECT
-                    mr.id,
-                    mr.period,
-                    mr.zoom_date
-                FROM
-                    mentorship_requests mr
-                WHERE
-                    mr.user_id = $user->id
-                    AND mr.approved = 'Yes'
-                    AND mr.cycle_id = $cycle_id
-            ";
+            if ($user->hasAnyRole(['registered'])) {
+                $my_mentorship_requests_q = "SELECT
+                        mr.id,
+                        mr.period,
+                        mr.zoom_date
+                    FROM
+                        mentorship_requests mr
+                    WHERE
+                        mr.user_id = $user->id
+                        AND mr.approved = 'Yes'
+                        AND mr.cycle_id = $cycle_id
+                ";
+            }elseif( $user->hasAnyRole(['mentor']) ){
+                $my_mentorship_requests_q = "SELECT
+                        mr.id,
+                        mr.period,
+                        mr.zoom_date
+                    FROM
+                        mentorship_requests mr
+                    WHERE
+                        mr.mentor_id = $user->id
+                        AND mr.approved = 'Yes'
+                        AND mr.cycle_id in ($cycle_idMentor) ";
+            }
+            
             $my_mentorship_requests = collect(DB::select($my_mentorship_requests_q))->map(function ($item) {
                 $item->end_at = Carbon::parse($item->zoom_date)->addMinutes($item->period)->format('Y-m-d H:i:s');
                 return $item;
             })->filter(function ($item) {
                 return !empty($item->zoom_date) && !empty($item->period) && now() > $item->end_at;
             })->values();
-
+        
+            if( $user->hasAnyRole(['registered']) ){
             $my_trainings_q = "SELECT
                     ts.id,
                     ts.type,
@@ -1466,6 +1490,7 @@ class HomeController extends Controller
             })->filter(function ($item) {
                 return now() > $item->end_at;
             })->values();
+        
 
             $my_quizzes_q = "SELECT
                     q.id,
@@ -1512,7 +1537,7 @@ class HomeController extends Controller
                     return false;
                 }
             })->values();
-
+        }
             foreach ($my_mentorship_requests as $mentorship) {
                 $surveyEligible[] = [
                     'triggered_on' => 'mentorship',
@@ -1520,7 +1545,9 @@ class HomeController extends Controller
                     'triggered_by' => 'session'
                 ];
             }
-
+            if( $user->hasAnyRole(['registered']) ){
+                
+            
             foreach ($my_trainings as $session) {
                 $surveyEligible[] = [
                     'triggered_on' => 'training',
@@ -1536,15 +1563,25 @@ class HomeController extends Controller
                     'triggered_by' => 'quiz'
                 ];
             }
+        }
             $surveysToAdd = [];
+            if( $user->hasAnyRole(['registered']) ){
             $surveys = SurveyScopes::where('cycle_id', $cycle_id)->whereIn('type', ['startup', 'both'])->orWhereNull('type')->with(['myResponses'])->get();
-
+            } elseif( $user->hasAnyRole(['mentor']) ){
+            $surveys = SurveyScopes::whereIn('cycle_id', $user->mentorCycles->pluck('id'))->whereIn('type', ['mentor', 'both'])->orWhereNull('type')->with(['myResponses'])->get();
+            }
+                $mentorship = collect($surveyEligible)
+                        ->where('triggered_on', 'mentorship');
+                // dd($surveys);
             foreach ($surveys as $survey_scope) {
                 $my_responses = $survey_scope->myResponses;
-                if ($survey_scope->scope == 'mentorship' && array_key_exists('mentorship', $surveyEligible)) {
+                
+              
+                if ($survey_scope->scope == 'mentorship' && $mentorship->isNotEmpty()) {
+                  
                     $due = $survey_scope->trigger_by_due;
                     $session = $survey_scope->trigger_by_session;
-                    $mentorship = collect($surveyEligible['mentorship']);
+                    $mentorship = $mentorship;
                     $triggers = [];
                     if ($due == true) {
                         $triggers[] = 'due';
@@ -1552,6 +1589,7 @@ class HomeController extends Controller
                     if ($session == true) {
                         $triggers[] = 'session';
                     }
+                   
                     $triggers = array_unique($triggers);
                     if (count($triggers) == 0) {
                         $mentorship = $mentorship->where('triggered_at', null);
@@ -1574,6 +1612,7 @@ class HomeController extends Controller
                             ];
                         }
                     }
+                  
                 } elseif ($survey_scope->scope == 'training' && array_key_exists('training', $surveyEligible)) {
                     $due = $survey_scope->trigger_by_due;
                     $quiz = $survey_scope->trigger_by_quiz;
@@ -1612,13 +1651,14 @@ class HomeController extends Controller
                     }
                 }
             }
-
             if (!empty($surveysToAdd)) {
+                // dd($surveysToAdd);
                 SurveyResponses::insert($surveysToAdd);
             }
         }
-
+        
         $available_surveys = SurveyResponses::where('user_id', $user->id)->where('cycle_id', $cycle_id)->whereNull('responses')->get();
+        
         $available_surveys = $available_surveys->map(function ($item) {
             $middleware = collect([]);
             if ($item->triggered_on == 'mentorship') {
@@ -1960,7 +2000,7 @@ class HomeController extends Controller
                 'isRating' => false,
             ];
        
-
+            
         // start of graphs queries ----
         $country_data_q = "SELECT
                 c.name_en AS `country_name_en`,
