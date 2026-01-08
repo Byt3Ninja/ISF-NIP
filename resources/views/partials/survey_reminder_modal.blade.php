@@ -2,9 +2,9 @@
 
 @php
   $survey_data = []; // Initialize as empty array
-
   if (Auth::check() && Auth::user()->hasAnyRole('Registered|Mentor')) {
     $user_id = Auth::id();     
+   
       $completed_survey_ids = \App\SurveyResponses::where('user_id', $user_id)
         ->whereNotNull('responses')
         ->pluck('survey_id')
@@ -17,7 +17,7 @@
         })
         ->with('survey')
         ->get();
-       
+      
         if(Auth::check() && Auth::user()->hasAnyRole('Registered')){
           $existsInTraining = \DB::table('attendance_training_offline')->whereIn('training_session_id', $incomplete_responses->pluck('triggered_at'))->where('user_id', $user_id)->exists();
 
