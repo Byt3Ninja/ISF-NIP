@@ -3,10 +3,6 @@
 @section('title', __('admin.Organizations'))
 @section('subTitle', __('admin.Organizations`s List'))
 
-@section('vendorstyle')
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
-@stop
-
 @php
 $colors = ['primary', 'info', 'danger', 'warning'];
 @endphp
@@ -180,17 +176,17 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                       <div class="d-flex align-items-center avatar-group my-4">
                         @if($org->assignedUsers->isNotEmpty())
                           @foreach($org->assignedUsers->take(3) as $manager)
-                            <div class="avatar" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="{{ $manager->name }}">
+                            <div class="avatar" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $manager->name }}">
                               <img src="{{ $manager->img_url }}" alt="Avatar" class="rounded-circle pull-up">
                             </div>
                           @endforeach
                           @if($org->assignedUsers->count() > 3)
-                            <div class="avatar" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="{{ $org->assignedUsers->count() - 3 }} more">
-                              <span class="avatar-initial rounded-circle pull-up text-heading" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="{{ $org->assignedUsers->count() - 3 }} more">+{{ $org->assignedUsers->count() - 3 }}</span>
+                            <div class="avatar" data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{ $org->assignedUsers->count() - 3 }} more">
+                              <span class="avatar-initial rounded-circle pull-up text-heading" data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{ $org->assignedUsers->count() - 3 }} more">+{{ $org->assignedUsers->count() - 3 }}</span>
                             </div>
                           @endif
                         @else
-                          <div class="avatar">
+                          <div class="avatar" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $org->user->name ?? 'N' }}">
                             <span class="avatar-initial rounded-circle pull-up text-heading">{{ substr($org->user->name ?? 'N', 0, 2) }}</span>
                           </div>
                         @endif
@@ -243,8 +239,6 @@ $colors = ['primary', 'info', 'danger', 'warning'];
 @stop
 
 @section('scripts')
-  <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
-
   <script>
     // Filter Organizations
     $(document).on("change", "#status-select", function(e) {
