@@ -307,18 +307,6 @@
       });
     });
 
-    // Export functionality (simplified for cards)
-    $('#exportExcel, #exportCsv').on('click', function() {
-      // For now, just show a message that export is not implemented for card view
-      // In a full implementation, you would collect visible card data and export
-      Swal.fire({
-        title: "Export Not Available",
-        text: "Export functionality is currently only available in table view.",
-        icon: "info",
-        confirmButtonText: "OK"
-      });
-    });
-
     // Handle organization modal trigger
     $(document).on('click', '.orgs-modal-trigger', function() {
       var orgs = $(this).data('orgs');
