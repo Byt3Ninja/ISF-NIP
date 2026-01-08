@@ -1751,6 +1751,7 @@ return [
 	'No data to preview' => 'لا توجد بيانات للمعاينة (لا توجد تخطيطات أو بيانات).',
 	'File uploaded successfully' => 'تم تحميل الملف بنجاح',
 	'File upload failed' => 'فشل تحميل الملف',
+	'Error uploading file' => 'خطأ في تحميل الملف',
 	'OR' => 'أو',
 	'No columns are mapped' => 'لم يتم تخطيط أي أعمدة. تابع المراجعة على أي حال؟ لن تتمكن من استيراد البيانات.',
 	'Please upload a valid CSV file' => 'يرجى تحميل ملف CSV صالح',
