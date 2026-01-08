@@ -288,7 +288,7 @@
               </div>
             
               <!-- Done Filter -->
-              <div class="col-12">
+              <div class="col-12" id="completionFilter" style="display: {{ request()->show == 'all' || request()->show == 'approved' ? 'block' : 'none' }}">
                 <label for="doneValueSelect" class="form-label">{{ __('cycles.Completion_Status') }}</label>
                 <select class="form-select select2" name="done" data-placeholder="{{ __('cycles.Select_Completion_Status') }}" id="doneValueSelect">
                   <option value="all" {{ request()->done == 'all' ? 'selected' : '' }}>{{ __('cycles.All') }}</option>
@@ -1237,11 +1237,13 @@
 
     // Handle show filter change
     $('#showSelect').on('change', function() {
-      // Show rating filter if 'show' is 'approved' or 'all'
+      // Show rating and completion filters if 'show' is 'approved' or 'all'
       if (this.value === 'approved' || this.value === 'all') {
         $('#rateFilter').show();
+        $('#completionFilter').show();
       } else {
         $('#rateFilter').hide();
+        $('#completionFilter').hide();
       }
     });
   </script>

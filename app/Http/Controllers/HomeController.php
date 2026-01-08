@@ -314,8 +314,24 @@ class HomeController extends Controller
                 $mentorship_requests_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
             }
             $mentorship_requests = collect(DB::select($mentorship_requests_q));
+
+            $completed_mentorship_sessions_q = "SELECT
+                    mr.id
+                FROM
+                    mentorship_requests mr
+                LEFT JOIN
+                    cycles c ON mr.cycle_id = c.id
+                WHERE
+                    mr.deleted_at IS NULL
+                    AND mr.done = 1
+            ";
+            if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+                $completed_mentorship_sessions_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
+            }
+            $completed_mentorship_sessions = collect(DB::select($completed_mentorship_sessions_q));
         } else {
             $mentorship_requests = collect([]);
+            $completed_mentorship_sessions = collect([]);
         }
 
         if (array_intersect(['dashboard.widgets_cards_training_sessions_view', 'dashboard.widgets_cards_training_sessions_durations_view'], $permissions)) {
@@ -1794,6 +1810,15 @@ class HomeController extends Controller
                 'text' => 'Cycles',
                 'permissions' => ['cycles.list', 'dashboard.widgets_cards_programs_view'],
                 'count' => $cycles->count(),
+                'isRating' => false,
+            ];
+             $data['countCards'][] = [
+                'color' => 'success',
+                'href' => '/dashboard/mentorship/sessions?show=all&done=yes',
+                'icon' => 'ti-calendar-check',
+                'text' => 'completed_mentorship_sessions',
+                'permissions' => ['mentorships.sessions_list'],
+                'count' => $completed_mentorship_sessions->count(),
                 'isRating' => false,
             ];
             $data['countCards'][] = [
