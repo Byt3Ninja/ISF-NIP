@@ -190,7 +190,7 @@ $getSetting = App\Settings::find(1);
           src="/images/background/logo.png" 
         @endif
         alt="avatar" 
-        class="object-fit-contain me-2 rounded-circle border p-1 bg-card"
+        class="object-fit-cover me-2 rounded-circle border p-1 bg-card"
         style="width: 50px; height: 50px;"
       />
     </a>
