@@ -181,7 +181,7 @@ if (!$activeGroup) {
   <div class="app-brand demo bg-light-subtle border-bottom" style="height: 70px;">
     <a href="/dashboard" class="app-brand-link">
       <img 
-        @if (!is_null($_user->organization) && isset($_user->organization->img_url))
+        @if (!is_null($_user->organization) && isset($_user->organization->imageUrl))
           src="{{ $_user->organization->imageUrl }}"
         @elseif (!empty($setting->Logo))
           src="/images/logo/{{ $setting->Logo }}"

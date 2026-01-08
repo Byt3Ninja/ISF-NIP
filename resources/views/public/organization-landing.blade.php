@@ -598,7 +598,7 @@
             <div class="swiper" id="swiper-partners">
               <div class="swiper-wrapper">
                 @foreach($partnersWithUrls as $partner)
-                  <div class="swiper-slide">
+                  <div class="swiper-slide me-4">
                     <div class="card h-100">
                       <div class="card-body text-center d-flex flex-column justify-content-between h-100">
                         <div class="mb-4">
