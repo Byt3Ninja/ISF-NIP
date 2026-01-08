@@ -115,13 +115,16 @@
 
 	 <form id="financialForm" method="post" enctype="multipart/form-data" action="{{ route('company.profile_update_mine', isset($client) && $client->company ? $client->company->id : auth()->user()->id) }}">
     {!! csrf_field() !!}
-		<div class="card-header">
-			<div class="d-flex flex-wrap align-items-md-center justify-content-between gap-3">
-				<div>
-					<h5 class="card-title mb-0">{{ $heading }}</h5>
-					<small class="text-muted">{{ __('startup.enter_valuation_date_and_financial_data_to_generate_metrics') }}</small>
-				</div>
-				<div class="d-flex flex-wrap align-items-md-center gap-4">
+		<div class="card-header border-bottom">
+			<h5 class="card-title mb-0">{{ $heading }}</h5>
+			<p class="mb-0 text-muted">{{ __('startup.enter_valuation_date_and_financial_data_to_generate_metrics') }}</p>
+		</div>
+		
+		<input name="CompanyN" type="hidden" value="15">
+
+		<div class="card-body">
+			<div class="row">
+				<div class="col-lg-4">
 					<div class="d-flex align-items-center gap-2 mb-3 mb-md-0">
 						<label for="valuationDate" class="form-label text-nowrap">
 						{{ __('startup.valuation_date') }} <span class="text-danger">*</span>
@@ -130,7 +133,25 @@
 						{{-- Format date for display --}}
 						<input type="text" class="form-control" id="valuationDate" required>
 					</div>
-					<div class="d-flex align-items-center">
+				</div>
+				<div class="col-lg-4">
+					<div class="d-flex align-items-center gap-2 mb-3 mb-md-0">
+						<label for="Currency" class="form-label text-nowrap">
+						{{ __('settings.Currency') }} <span class="text-danger">*</span>
+						</label>
+						<select class="form-control form-select" name="Currency" id="Currency" required>
+							<option value="">{{ __('settings.Currency') }}</option>
+							@foreach ($Currencies as $Currency)
+								<option value="{{ $Currency->currency_code }}"
+									{{ $client->company && $client->company->Currency == $Currency->currency_code ? 'selected' : '' }}>
+									{{ $Currency->currency_name }}
+								</option>
+							@endforeach
+						</select>
+					</div>
+				</div>
+				<div class="col-lg-4">
+					<div class="d-flex justify-content-end align-items-center">
 						<button type="submit" class="btn btn-primary">
 							<i class="ti ti-device-floppy me-2"></i>
 							{{ __('admin.Save_Changes') }}
@@ -140,21 +161,21 @@
 			</div>
 		</div>
 
-		<input name="CompanyN" type="hidden" value="15">
-    
     <div class="card-datatable table-responsive">
       <table class="datatable-basic table mb-0" id="financialTable">
         <thead class="table-light">
           <tr>
-            <th class="col-label">{{ __('startup.line_item') }}</th>
-            <th class="" id="header-year-0">{{ __('startup.past_year') }}<br><small class="fw-normal text-muted">-</small>
+            <th class="col-label">
+							{{ __('startup.line_item') }} ( Euro )
+						</th>
+            <th class="" id="header-year-0">{{ __('startup.past_year') }}<br><small class="fw-normal text-secondary">-</small>
             </th>
             <th class="" id="header-year-1">
               {{ __('startup.forecast_year_1') }}<br>
-              <small class="fw-normal text-muted">-</small>
+              <small class="fw-normal text-secondary">-</small>
             </th>
-            <th class="" id="header-year-2">{{ __('startup.year_2') }}<br><small class="fw-normal text-muted">-</small></th>
-            <th class="" id="header-year-3">{{ __('startup.year_3') }}<br><small class="fw-normal text-muted">-</small></th>
+            <th class="" id="header-year-2">{{ __('startup.year_2') }}<br><small class="fw-normal text-secondary">-</small></th>
+            <th class="" id="header-year-3">{{ __('startup.year_3') }}<br><small class="fw-normal text-secondary">-</small></th>
           </tr>
         </thead>       
         <tbody>
@@ -404,15 +425,12 @@ document.addEventListener('DOMContentLoaded', function () {
 				title: '{{ __("startup.valuation_date_changed") }}',
 				message: '{{ __("startup.valuation_date_changed_message") }}',
 				onConfirm: () => {
-					this.submit();
+					const url = new URL(window.location.href);
+					url.searchParams.set('valuation_date', currentValuationDate);
+					window.location.href = url.href;
 				}
 			});
 		}
-		
-		console.log('Form submitted');
-		console.log('Old Valuation Date:', oldValuationDate);
-		console.log('Valuation Date:', currentValuationDate);
-		// this.submit();
 	});
 });
 </script>

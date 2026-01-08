@@ -252,4 +252,13 @@ $getSetting = App\Settings::find(1);
       </li>
     @endforeach
   </ul>
+
+  <div class="p-6">
+    <span style="direction: ltr">
+        Incubator Pro
+        {{ config('app.version') ? 'v' . config('app.version') : '' }}
+        {{ config('app.build') ? '(Build ' . config('app.build') . ')' : '' }}
+        - &copy; {{ now()->year }}
+    </span>
+  </div>
 </aside>

@@ -88,7 +88,7 @@
 
       {{-- Startup Profile --}}
       @if($_user->ableTo('company.profile_view', $permissions))
-        <li class="{{ active('dashboard/companyProfile*') }} menu-item">
+        <li class="{{ active('dashboard/companyProfile*', 'dashboard/myCompany/*') }} menu-item">
           <a href="{{ $isMineOnly ? route('company.profile_view_mine') : route('company.profile_view', $companyId) }}"
             class="menu-link">
             <i class="menu-icon tf-icons ti ti-building-skyscraper"></i>
