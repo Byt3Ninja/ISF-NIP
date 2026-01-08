@@ -215,32 +215,23 @@ class FinalscreeningController extends Controller
 
         if ($id == 0) {
             $id = $steps->pluck('id')->first();
-            $cstep = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
-                return $q->whereHas('cycle', function ($query) use ($orgIds) {
-                    $query->whereIn('organization_id', $orgIds);
-                });
-            })->where('stype', 5)->where('id', $id)->first();
-        } else {
-            $cstep = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
-                return $q->whereHas('cycle', function ($query) use ($orgIds) {
-                    $query->whereIn('organization_id', $orgIds);
-                });
-            })->where('stype', 5)->where('id', $id)->first();
-
-            if( empty( $cstep ) ) {
-                return abort(404);
-            }
         }
 
-        if ($cstep) {
-            $form = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
-                return $q->whereHas('cycle', function ($query) use ($orgIds) {
-                    $query->whereIn('organization_id', $orgIds);
-                });
-            })->where('cycle_id', $cstep->cycle_id)->where('stype', 1)->where('arr', $cstep->arr - 1)->first();
-        } else {
-            $form = collect([]);
+        $cstep = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+            return $q->whereHas('cycle', function ($query) use ($orgIds) {
+                $query->whereIn('organization_id', $orgIds);
+            });
+        })->where('stype', 5)->where('id', $id)->first();
+
+        if (! $cstep) {
+            abort(404);
         }
+
+        $form = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+            return $q->whereHas('cycle', function ($query) use ($orgIds) {
+                $query->whereIn('organization_id', $orgIds);
+            });
+        })->where('cycle_id', $cstep->cycle_id)->where('stype', 1)->where('arr', $cstep->arr - 1)->first();
         $judgers_count = 0;
         $cList = collect(json_decode($cstep?->list, true) ?? []);
         if( in_array( $cstep?->data, ['onetoall', 'grouptoall']) ) { $judgers_count = $cList->count(); }

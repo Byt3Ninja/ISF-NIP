@@ -237,15 +237,15 @@ class ScreeningController extends Controller
 				});
 			})->where('stype', 2)->where('id', $id)->first();
 		}
-		if ($cstep) {
-			$form = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
-				return $q->whereHas('cycle', function ($query) use ($orgIds) {
-					$query->whereIn('organization_id', $orgIds);
-				});
-			})->where('cycle_id', $cstep->cycle_id)->where('stype', 1)->where('arr', $cstep->arr - 1)->first();
-		} else {
-			$form = collect([]);
+		if (! $cstep) {
+			abort(404);
 		}
+
+		$form = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+			return $q->whereHas('cycle', function ($query) use ($orgIds) {
+				$query->whereIn('organization_id', $orgIds);
+			});
+		})->where('cycle_id', $cstep->cycle_id)->where('stype', 1)->where('arr', $cstep->arr - 1)->first();
 		$judgers_count = 0;
 		$cList = collect(json_decode($cstep?->list, true) ?? []);
 		if( in_array( $cstep?->data, ['onetoall', 'grouptoall']) ) { $judgers_count = $cList->count(); }

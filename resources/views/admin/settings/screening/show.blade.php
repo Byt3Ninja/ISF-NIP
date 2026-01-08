@@ -532,6 +532,7 @@ $pills = [
                 title: '{{__('Deleted!')}}',
                 message: '{{  $l == 'en' ? 'The screening step has been deleted successfully.' : 'تم حذف مرحلة التصفية بنجاح.' }}',
               });
+              window.location.href = "/dashboard/screening";
             },
             error: function(error) {
               releaseFailureAlert({
