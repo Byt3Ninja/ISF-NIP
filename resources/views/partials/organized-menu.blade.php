@@ -175,6 +175,7 @@ if (Route::is(
 if (!$activeGroup) {
   $activeGroup = 'dashboard';
 }
+$getSetting = App\Settings::find(1);
 @endphp
 
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
@@ -183,8 +184,8 @@ if (!$activeGroup) {
       <img 
         @if (!is_null($_user->organization) && isset($_user->organization->img_url))
           src="{{ $_user->organization->imageUrl }}"
-        @elseif (!empty($setting->Logo))
-          src="/images/logo/{{ $setting->Logo }}"
+        @elseif (!empty($getSetting->Logo))
+          src="/images/logo/{{ $getSetting->Logo }}"
         @else
           src="/images/background/logo.png" 
         @endif
