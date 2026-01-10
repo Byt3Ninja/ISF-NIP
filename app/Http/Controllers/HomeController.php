@@ -1589,7 +1589,7 @@ class HomeController extends Controller
                 $my_responses = $survey_scope->myResponses;
                 
               
-                if ($survey_scope->scope == 'mentorship' && $mentorship->isNotEmpty()) {
+                if ($survey_scope->scope == 'mentorship' && $mentorship->isNotEmpty() && $cycle_id != 0) {
                   
                     $due = $survey_scope->trigger_by_due;
                     $session = $survey_scope->trigger_by_session;
