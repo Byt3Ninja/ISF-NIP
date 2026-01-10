@@ -8,7 +8,6 @@
   data-template="vertical-menu-template" 
   data-style="light"
 >
-
 <head>
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -21,7 +20,6 @@
   </title>
   <link rel="apple-touch-icon" href="/app-assets/images/ico/apple-icon-120.png">
   <link rel="shortcut icon" type="image/x-icon" href="/app-assets/images/ico/favicon.ico">
-
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -92,7 +90,11 @@
   @php
   $setting = App\Settings::first();
   $logo =setting('Logo','images/background/logo.png');
-  $accountRoles = ['Founder', 'Mentor'];
+  $accountRoles = [
+    ['label' => 'Founder', 'icon' => 'ti ti-businessplan'],
+    ['label' => 'Mentor', 'icon' => 'ti ti-user'],
+    ['label' => 'Service Provider', 'icon' => 'ti ti-briefcase'],
+  ];
   $termsUrl = setting('terms_url','#') ;
   $privacyUrl = setting('privacy_url','#');
   @endphp
@@ -169,7 +171,7 @@
       <div class="register-card-wrapper py-6">
         <!-- Register Card -->
         <div class="card mt-6 mt-lg-0">
-          <div class="px-4 px-md-4 py-6">
+          <div class="px-4 px-md-6 py-6">
             <!-- Logo -->
             <div class="app-brand justify-content-center mb-4">
               <a href="/dashboard" class="app-brand-link">
@@ -179,38 +181,39 @@
             <!-- /Logo -->
 
             <h4 class="mb-1 text-center lh-base text-capitalize">{{ __('auth.formHeading') }} 🚀</h4>
-            <p class="mb-6 text-center">{{ __('auth.formSubHeading') }}</p>
+            <p class="mb-8 text-center">{{ __('auth.formSubHeading') }}</p>
 
               @if (App\Settings::findOrFail(1)->set_order)
-                <form id="registerForm" class="mb-6 px-md-8" method="POST" action="{{ route('register') }}" enctype="multipart/form-data">
+                <form id="registerForm" class="mb-6 px-md-4" method="POST" action="{{ route('register') }}" enctype="multipart/form-data">
                   @csrf
-                  <div class="row">
+                  <div class="row gx-3 mb-4" dir="{{ $l == 'en' ? 'ltr': 'rtl' }}">
                     <!-- Switch Role -->
-       
                     @foreach($accountRoles as $key => $role)
-                
-                    <div class="col-6 mb-4">
-                      <label for="{{$role}}Role" style="display: grid; place-items: center;" class="form-check custom-option custom-option-icon cursor-pointer">
-                        <div class="d-flex align-items-center">
-                          @if($role === 'Founder')
-                            <input name="role" class="form-check-input role-input" type="radio" value="registered" id="{{$role}}Role" @if(request('id') != 'MentorRole') checked @endif required />
+                      <div class="col-md-4 mb-4">
+                        <label for="{{ $role['label'] }}Role" style="display: grid; place-items: center;" class="form-check custom-option custom-option-icon cursor-pointer ps-md-3">
+                          <div class="d-flex align-items-center">
+                            <input 
+                              id="{{ $role['label'] }}Role" 
+                              name="role" 
+                              class="form-check-input role-input" 
+                              type="radio" 
+                              value="{{ $role['label'] }}" 
+                              @if(request('id') == 'MentorRole' && $role['label'] == 'Mentor') checked @endif 
+                              required
+                            />
                             <div class="form-check-label custom-option-content d-flex align-items-center">
-                              <i class="ti ti-businessplan me-2"></i>
-                              <span class="custom-option-title">{{ __('admin.'. $role) }}</span>
+                              <i class="{{ $role['icon'] }} me-2"></i>
+                              <span class="custom-option-title text-nowrap">{{ __('admin.'. $role['label']) }}</span>
                             </div>
-                          @else
-                            <input name="role" class="form-check-input role-input" type="radio" value="mentor" id="{{$role}}Role" @if(request('id') == 'MentorRole') checked @endif required />
-                            <div class="form-check-label custom-option-content d-flex align-items-center">
-                              <i class="ti ti-user me-2"></i>
-                              <span class="custom-option-title">{{ __('admin.'. $role) }}</span>
-                            </div>
-                          @endif
-                        </div>
-                      </label>
-                    </div>
+                          </div>
+                        </label>
+                      </div>
                     @endforeach
-                    <!--/ Switch Role -->
+                  </div>
+                  <!--/ Switch Role -->
 
+
+                  <div class="row">
                     <div>
                       @if (session('error'))
                         <div class="row">
@@ -238,6 +241,7 @@
                         </div>
                       @endif
 
+                      <div id="profilePhotoWrapper" style="display: block;">
                       <div class="col-12 mb-6">
                         <label class="form-label fs-6 fw-bold d-block text-{{ $l == 'ar' ? 'end' : 'start' }}">
                           {{ $l == 'en' ? 'Profile photo' : 'الصورة الشخصية' }}
@@ -277,27 +281,65 @@
                           @enderror
                         </div>
                       </div>
-
-                      <div class="col-12 mb-3">
-                        <label for="first_name" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('auth.firstName') }}</label>
-                        <div class="input-group input-group-merge">
-                          <input name="first_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="first_name" placeholder="{{ __('auth.First English Name') }}" required autofocus />
-                          @error('first_name')
-                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
-                        @enderror
-                        </div>
                       </div>
 
-                      <div class="col-12 mb-3">
-                        <label for="last_name" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __("auth.secondName") }}</label>
-                        <div class="input-group input-group-merge">
-                          <input name="last_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="last_name" placeholder="{{ __('auth.Last English Name') }}" required />
+                      <div id="personalDetailsWrapper" style="display: block;">
+                        <div class="col-12 mb-3">
+                          <label for="first_name" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('auth.firstName') }}</label>
+                          <div class="input-group input-group-merge">
+                            <input name="first_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="first_name" placeholder="{{ __('auth.First English Name') }}" required autofocus />
+                            @error('first_name')
+                            <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                          @enderror
+                          </div>
                         </div>
-                        @error('last_name')
-                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
-                        @enderror
-                      </div>
 
+                        <div class="col-12 mb-3">
+                          <label for="last_name" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __("auth.secondName") }}</label>
+                          <div class="input-group input-group-merge">
+                            <input name="last_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="last_name" placeholder="{{ __('auth.Last English Name') }}" required />
+                          </div>
+                          @error('last_name')
+                            <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                          @enderror
+                        </div>
+
+                        
+                        <div class="col-12 mb-4">
+                          <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="gender">{{ __('auth.gender') }}</label>
+                          <select class="form-select select2 text-{{ $l == 'ar' ? 'end' : 'start' }}" name="gender" id="gender" required>
+                            <option value="Male">{{ __('Male') }}</option>
+                            <option value="Female">{{ __('Female') }}</option>
+                          </select>
+                          
+                          @error('gender')
+                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                          @enderror
+                        </div>
+                      </div>
+                      
+                      <div id="serviceProviderInputsWrapper" style="display: none;">
+                        <div class="col-12 mb-3">
+                          <label for="company_name" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $l == 'en' ? 'Company Name' : 'اسم الشركة' }}</label>
+                          <div class="input-group input-group-merge">
+                            <input name="company_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="company_name" placeholder="{{ $l == 'en' ? 'Company Name' : 'اسم الشركة' }}" />
+                          </div>
+                          @error('company_name')
+                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                          @enderror
+                        </div>
+                        
+                        <div class="col-12 mb-3">
+                          <label for="contact_name" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $l == 'en' ? 'Contact Name' : 'اسم المتصل' }}</label>
+                          <div class="input-group input-group-merge">
+                            <input name="contact_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="contact_name" placeholder="{{ $l == 'en' ? 'Contact Name' : 'اسم المتصل' }}" />
+                          </div>
+                          @error('contact_name')
+                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                          @enderror
+                        </div>
+                      </div>
+                      
                       <div class="col-12 mb-3">
                         <label for="email" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('auth.E-Mail') }}</label>
                         <div class="input-group input-group-merge">
@@ -307,7 +349,7 @@
                           <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
                         @enderror
                       </div>
-
+                      
                       <div class="col-12 mb-4 form-password-toggle">
                         <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="password">{{ __('auth.Password') }}</label>
                         <div class="input-group input-group-merge">
@@ -330,18 +372,6 @@
                         @enderror
                       </div>
 
-                      <div class="col-12 mb-4">
-                        <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="gender">{{ __('auth.gender') }}</label>
-                        <select class="form-select select2 text-{{ $l == 'ar' ? 'end' : 'start' }}" name="gender" id="gender" required>
-                          <option value="Male">{{ __('Male') }}</option>
-                          <option value="Female">{{ __('Female') }}</option>
-                        </select>
-
-                        @error('gender')
-                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
-                        @enderror
-                      </div>
-
                       <div class="col-12 mb-4 d-grid">
                         <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="phone">{{ __('auth.Phone') }}</label>
                         <input id="phone" type="tel" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" placeholder="{{ __('auth.Phone') }}" name="phone" required />
@@ -354,6 +384,7 @@
                           <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
                         @enderror
                       </div>
+
                       <div id="mentorInputsWrapper" style="display: none;">
                         <div class="col-12 mb-3">
                           <label for="Title" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('admin.JobTitleEn') }}</label>
@@ -447,25 +478,24 @@
                 <span>{{ $l == 'en' ? 'Sign in instead' : 'سجل الدخول' }}</span>
               </a>
             </p>
-            @if ((isset($setting) && ($setting->LINKEDIN_LOGIN ?? 'disabled') === 'enabled') ||(isset($setting) && ($setting->GOOGLE_LOGIN ?? 'disabled') === 'enabled'))
-            <div class="divider my-6 mx-auto" style="width: 80%;">
-              <div class="divider-text">{{ __('auth.or') }}</div>
-            </div>
-            @endif
-            @php
-            $data = request('data') ?? '2521';
-        @endphp
-            <div class="d-flex justify-content-center">
-             @if(isset($setting) && ($setting->LINKEDIN_LOGIN ?? 'disabled') === 'enabled')
-              <a href="{{ route('integrations.auth_linkedin_login', $data) }}" class="btn btn-sm btn-icon rounded-circle btn-text-facebook me-3 shadow-sm" style="background-color: #0077b5;">
-                <i class="fa-brands fa-linkedin-in text-white"></i>
-              </a>
+            <div id="socialLoginSection" style="display: block;">
+              @if ((isset($setting) && ($setting->LINKEDIN_LOGIN ?? 'disabled') === 'enabled') ||(isset($setting) && ($setting->GOOGLE_LOGIN ?? 'disabled') === 'enabled'))
+              <div class="divider my-6 mx-auto" style="width: 80%;">
+                <div class="divider-text">{{ __('auth.or') }}</div>
+              </div>
               @endif
-              @if(isset($setting) && ($setting->GOOGLE_LOGIN ?? 'disabled') === 'enabled')
-              <a href="{{ url('/auth/redirect/google') }}" class="btn btn-sm bg-white border btn-icon rounded-circle btn-text-google-plus shadow-sm">
-                <img src="/icons/google-icon.svg" alt="google" width="20" height="20">
-              </a>
-              @endif
+              <div class="d-flex justify-content-center">
+               @if(isset($setting) && ($setting->LINKEDIN_LOGIN ?? 'disabled') === 'enabled')
+                <a href="{{ route('integrations.auth_linkedin_login', '2521') }}" class="btn btn-sm btn-icon rounded-circle btn-text-facebook me-3 shadow-sm" style="background-color: #0077b5;">
+                  <i class="fa-brands fa-linkedin-in text-white"></i>
+                </a>
+                @endif
+                @if(isset($setting) && ($setting->GOOGLE_LOGIN ?? 'disabled') === 'enabled')
+                <a href="{{ url('/auth/redirect/google') }}" class="btn btn-sm bg-white border btn-icon rounded-circle btn-text-google-plus shadow-sm">
+                  <img src="/icons/google-icon.svg" alt="google" width="20" height="20">
+                </a>
+                @endif
+              </div>
             </div>
           </div>
         </div>
@@ -493,35 +523,72 @@
   <script src="/vuexy/assets/js/pages-auth.js"></script>
   <script src="/vuexy/assets/js/forms-selects.js"></script>
 
-  <script>
-
-
-
-  </script>
 <script>
 // Role-specific configuration
 const ROLE_CONFIG = {
-  'registered': {
+  'Founder': {
     name: 'founder',
     hash: '2521',
     type: '3',
-    showMentorFields: false
+    showMentorFields: false,
+    showServiceProviderFields: false,
+    showSocialLogin: true
   },
-  'mentor': {
+  'Mentor': {
     name: 'mentor',
     hash: '2520',
     type: 'mentor',
-    showMentorFields: true
+    showMentorFields: true,
+    showServiceProviderFields: false,
+    showSocialLogin: true
+  },
+  'Service Provider': {
+    name: 'service_provider',
+    hash: '2522',
+    type: 'service_provider',
+    showMentorFields: false,
+    showServiceProviderFields: true,
+    showSocialLogin: false
   }
 };
 
 const mentorWrapper = document.getElementById('mentorInputsWrapper');
-const mentorFields = mentorWrapper.querySelectorAll('input, select, textarea');
+const serviceProviderWrapper = document.getElementById('serviceProviderInputsWrapper');
+const personalDetailsWrapper = document.getElementById('personalDetailsWrapper');
+const profilePhotoWrapper = document.getElementById('profilePhotoWrapper');
+const socialLoginSection = document.getElementById('socialLoginSection');
+const mentorFields = mentorWrapper ? mentorWrapper.querySelectorAll('input, select, textarea') : [];
+const serviceProviderFields = serviceProviderWrapper ? serviceProviderWrapper.querySelectorAll('input, select, textarea') : [];
+const personalDetailFields = personalDetailsWrapper ? personalDetailsWrapper.querySelectorAll('input, select, textarea') : [];
 
-// Update mentor fields visibility based on role
-function updateMentorFieldsVisibility(selectedRole) {
+// Update role-specific fields visibility
+function updateRoleFieldsVisibility(selectedRole) {
+  console.log('Selected role:', selectedRole);
   const config = ROLE_CONFIG[selectedRole];
   
+  // Handle profile photo
+  if (config.showServiceProviderFields) {
+    profilePhotoWrapper.style.display = 'none';
+  } else {
+    profilePhotoWrapper.style.display = 'block';
+  }
+  
+  // Handle personal details (First Name, Last Name, Gender)
+  if (config.showServiceProviderFields) {
+    personalDetailsWrapper.style.display = 'none';
+    personalDetailFields.forEach(f => {
+      f.disabled = true;
+      f.setAttribute('disabled', 'disabled');
+    });
+  } else {
+    personalDetailsWrapper.style.display = 'block';
+    personalDetailFields.forEach(f => {
+      f.disabled = false;
+      f.removeAttribute('disabled');
+    });
+  }
+  
+  // Handle mentor fields
   if (config.showMentorFields) {
     mentorWrapper.style.display = 'block';
     mentorFields.forEach(f => {
@@ -531,9 +598,29 @@ function updateMentorFieldsVisibility(selectedRole) {
   } else {
     mentorWrapper.style.display = 'none';
     mentorFields.forEach(f => {
+      f.disabled = true;
+      f.setAttribute('disabled', 'disabled');
+    });
+  }
+
+  // Handle service provider fields
+  if (config.showServiceProviderFields) {
+    serviceProviderWrapper.style.display = 'block';
+    serviceProviderFields.forEach(f => {
       f.disabled = false;
       f.removeAttribute('disabled');
     });
+  } else {
+    serviceProviderWrapper.style.display = 'none';
+    serviceProviderFields.forEach(f => {
+      f.disabled = true;
+      f.setAttribute('disabled', 'disabled');
+    });
+  }
+
+  // Handle social login visibility
+  if (socialLoginSection) {
+    socialLoginSection.style.display = config.showSocialLogin ? 'block' : 'none';
   }
 }
 
@@ -544,16 +631,23 @@ document.addEventListener('DOMContentLoaded', function() {
   const data = urlParams.get('data');
 
   const mentorRadio = document.getElementById('MentorRole');
+  const serviceProviderRadio = document.getElementById('Service ProviderRole');
 
   if ((type === 'mentor' || data === '2520') && mentorRadio) {
     mentorRadio.checked = true;
-    // We need to trigger the change event to make sure other scripts depending on it run.
     mentorRadio.dispatchEvent(new Event('change'));
+  } else if ((type === 'service_provider' || data === '2522') && serviceProviderRadio) {
+    serviceProviderRadio.checked = true;
+    serviceProviderRadio.dispatchEvent(new Event('change'));
   } else {
+    console.log('here')
     // Manually trigger for the default case
     const checkedRole = document.querySelector('input[name="role"]:checked');
     if (checkedRole) {
-      updateMentorFieldsVisibility(checkedRole.value);
+      updateRoleFieldsVisibility(checkedRole.value);
+    } else {
+      document.getElementById('FounderRole').checked = true;
+      updateRoleFieldsVisibility('Founder');
     }
   }
 });
@@ -564,13 +658,7 @@ document.querySelectorAll('.role-input').forEach(input => {
     const selectedRole = this.value;
     const config = ROLE_CONFIG[selectedRole];
     
-    updateMentorFieldsVisibility(selectedRole);
-    
-    // Update URL with role data
-    // const url = new URL(window.location.href);
-    // url.searchParams.set('type', config.type);
-    // url.searchParams.set('data', config.hash);
-    // window.history.pushState({}, '', url);
+    updateRoleFieldsVisibility(selectedRole);
   });
 });
 </script>
