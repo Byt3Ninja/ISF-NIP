@@ -1429,7 +1429,7 @@ class HomeController extends Controller
             
             if( $user->hasAnyRole(['mentor']) ){
                 if( empty($cycle_idMentor) ){
-                    $cycle_idMentor = 0;
+                    $cycle_idMentor = [];
                 }
                 $my_mentorship_requests_q = "SELECT
                         mr.id,
