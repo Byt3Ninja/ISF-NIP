@@ -1428,6 +1428,9 @@ class HomeController extends Controller
             }
             
             if( $user->hasAnyRole(['mentor']) ){
+                if( empty($cycle_idMentor) ){
+                    $cycle_idMentor = 0;
+                }
                 $my_mentorship_requests_q = "SELECT
                         mr.id,
                         mr.period,
