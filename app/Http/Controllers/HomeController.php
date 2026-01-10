@@ -1428,19 +1428,25 @@ class HomeController extends Controller
             }
             
             if( $user->hasAnyRole(['mentor']) ){
-                if( empty($cycle_idMentor) ){
-                    $cycle_idMentor = [];
+                
+                if (empty($cycle_idMentor)) {
+                    $my_mentorship_requests_q = "SELECT
+                            mr.id,
+                            mr.period,
+                            mr.zoom_date
+                        FROM mentorship_requests mr
+                        WHERE 1 = 0";
+                } else {
+                    $my_mentorship_requests_q = "SELECT
+                            mr.id,
+                            mr.period,
+                            mr.zoom_date
+                        FROM mentorship_requests mr
+                        WHERE
+                            mr.mentor_id = {$user->id}
+                            AND mr.approved = 'Yes'
+                            AND mr.cycle_id IN ($cycle_idMentor)";
                 }
-                $my_mentorship_requests_q = "SELECT
-                        mr.id,
-                        mr.period,
-                        mr.zoom_date
-                    FROM
-                        mentorship_requests mr
-                    WHERE
-                        mr.mentor_id = $user->id
-                        AND mr.approved = 'Yes'
-                        AND mr.cycle_id in ($cycle_idMentor) ";
             }else{
                 $my_mentorship_requests_q = "SELECT
                         mr.id,
