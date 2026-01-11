@@ -39,6 +39,11 @@
 			@endif
 		@endif
 
+		@if (Auth::user()->hasRole('serviceProvider'))
+			<div class="alert alert-primary alert-dismissible fade show d-flex align-items-center" role="alert">
+				<p> {{ __('admin.Congratolation_You_Are_Waiting_Approvel_From_Admin') }} </p>
+			</div>
+		@endif
 		@if (Auth::user()->hasRole('Mentor'))
 			<div class="alert alert-primary alert-dismissible fade show d-flex align-items-center" role="alert">
 				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-clipboard-check-fill flex-shrink-0 me-3" viewBox="0 0 16 16">

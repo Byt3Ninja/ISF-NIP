@@ -3135,4 +3135,5 @@ return [
 	'view_all_sessions' => 'View all Sessions',
 	'view_surveys' => 'View Surveys',
 	'survey_reminder_message' => 'You have pending surveys that need completion.',
+	'Congratolation_You_Are_Waiting_Approvel_From_Admin' => 'Congratolation! You are waiting form admin approval.',
 ];

@@ -12,10 +12,13 @@ use App\Permission;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
+use App\serviceProviderRegistration;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Builder;
+use App\Mail\serviceProviderRegistrationMail;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class UserRepository
@@ -98,69 +101,66 @@ class UserRepository
     public function create(array $data)
     {
         try {
-            $user = DB::transaction(function () use ($data) {
 
-
-                $user = User::create(attributes: [
-                    'first_name_en' => $data['first_name'],
-                    'last_name_en' => $data['last_name'],
-                    //this is a bug #1232
-                    'first_name_ar' => $data['first_name'],
-                    'last_name_ar' => $data['last_name'],
-                    //end bug
-                    'email' => $data['email'],
-                    'phone' => $data['phone'],
-                    'country_code' => $data['country_code'],
-                    'gender' => $data['gender'],
-                    'password' => Hash::make($data['password']),
-                    'email_verified_at' => setting('VFEmail') == 1 ? null : now(),
-                ]);
-
-                    if (isset($data['img_url']) && $data['img_url']) {
-                        $img_url = $data['img_url'];
-                        $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
-                        $user->img_url = $img_url;
-                    }
-
-                if ($data['role'] == "mentor" && !auth()?->user()?->hasRole('admin')) {
-               
-                    UsersBio::create([
-                        'user_id' => $user->id,
-                        'bio_en' => $data['bio_en'],
-                        'linkedin' => $data['Linkedin'],
+            
+             
+                $user = DB::transaction(function () use ($data) {
+                    $user = User::create(attributes: [
+                        'first_name_en' => $data['first_name'],
+                        'last_name_en' => $data['last_name'],
+                        //this is a bug #1232
+                        'first_name_ar' => $data['first_name'],
+                        'last_name_ar' => $data['last_name'],
+                        //end bug
+                        'email' => $data['email'],
+                        'phone' => $data['phone'],
+                        'country_code' => $data['country_code'],
+                        'gender' => $data['gender'] ?? 'male',
+                        'password' => Hash::make($data['password']),
+                        'email_verified_at' => setting('VFEmail') == 1 ? null : now(),
                     ]);
 
-                    if (!empty($data['expertise'])) {
-
-                        $expertises = [];
-                        foreach ($data['expertise'] as $expertiseId) {
-                            $expertises[] = [
-                                'expertise_id' => $expertiseId,
-                                'mentor_id' => $user->id
-                            ];
+                        if (isset($data['img_url']) && $data['img_url']) {
+                            $img_url = $data['img_url'];
+                            $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
+                            $user->img_url = $img_url;
                         }
-                        DB::table('mentor_expertise')->insert($expertises);
 
+                    if ($data['role'] == "mentor" && !auth()?->user()?->hasRole('admin')) {
+                
+                        UsersBio::create([
+                            'user_id' => $user->id,
+                            'bio_en' => $data['bio_en'],
+                            'linkedin' => $data['Linkedin'],
+                        ]);
+
+                        if (!empty($data['expertise'])) {
+
+                            $expertises = [];
+                            foreach ($data['expertise'] as $expertiseId) {
+                                $expertises[] = [
+                                    'expertise_id' => $expertiseId,
+                                    'mentor_id' => $user->id
+                                ];
+                            }
+                            DB::table('mentor_expertise')->insert($expertises);
+
+                        }
+                        $user->title_en = $data['title_en'];
                     }
+                        $role = Role::where('name', $data['role'])->first();
+                        DB::table('model_has_roles')->insert([
+                            'role_id' => $role->id,
+                            'model_type' => User::class,
+                            'model_id' => $user->id,
+                        ]);
 
 
+                        $user->save();
 
-
-                    $user->title_en = $data['title_en'];
-
-                }
-                    $role = Role::where('name', $data['role'])->first();
-                    DB::table('model_has_roles')->insert([
-                        'role_id' => $role->id,
-                        'model_type' => User::class,
-                        'model_id' => $user->id,
-                    ]);
-
-
-                    $user->save();
-
-                   return $user->fresh(['roles']);
-            });
+                    return $user->fresh(['roles']);
+                });
+            
 
 
             return [
@@ -176,6 +176,67 @@ class UserRepository
             'message' => 'Failed to create user',
             'data'    => null,
             'errors'  => [$e->getMessage()]
+            ];
+        }
+    }
+
+    public function registerServiceProvider(array $data)
+    {
+        
+        try {
+           
+                $email = $data['email'];
+                $user = User::where('email', $email)->first();
+                if($user){
+                    return [
+                        'success' => false,
+                        'message' => 'Email already exists',
+                        'data'    => null,
+                        'errors'  => ['Email already exists']
+                        ];
+                }
+                $parse_name = explode(' ', $data['contact_name']);
+					$first_name = $parse_name[0];
+                    $last_name = isset($parse_name[1]) ? $parse_name[1] : '';
+                    $data['first_name'] = $first_name;
+                    $data['last_name'] = $last_name;
+                $contact_name = $data['contact_name'];
+                $registration = new serviceProviderRegistration;
+                $registration->company_name = $data['company_name'];
+                $registration->contact_name = $data['contact_name'];
+                $registration->email = $data['email'];
+                $registration->country_code = $data['country_code'];
+                $registration->phone = '+' . $data['country_code'] . $data['phone'];
+                $registration->status = null;
+                $registration->user_id = null;
+                $registration->ip_address = request()->ip();
+                $registration->save();
+
+                if( !in_array(env('APP_ENV', 'local'), ['local']) )
+                {
+                    if( config('mail.driver') && config('mail.host') && config('mail.port') && config('mail.username') && config('mail.password') )
+                    {
+                        Mail::to($registration->email)->queue(new serviceProviderRegistrationMail( $contact_name ));
+                    }
+                }
+                
+            
+                return $registration;
+            
+
+            return [
+                'success' => true,
+                'message' => 'Service Provider registered successfully',
+                'data'    => $registration,
+                'errors'  => null
+            ];
+
+        } catch (\Throwable $e) {
+            return [
+                'success' => false,
+                'message' => 'Failed to register Service Provider',
+                'data'    => null,
+                'errors'  => [$e->getMessage()]
             ];
         }
     }
