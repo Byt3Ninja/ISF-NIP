@@ -48,20 +48,20 @@ class UserService
         if($paginate){        
         $users = $this->userRepository->paginate($query, $filters['per_page'] ?? 10, $filters['page'] ?? 1,'desc');
                 return [
-            'data' => UserResource::collection($users),
-            'meta' => [
-                'currentPage' => $users->currentPage(),
-                'lastPage' => $users->lastPage(),
-                'total' => $users->total(),
-                'path' => $users->path(),
-                'links' => [
-                    'first' => $users->url(1),
-                    'last' => $users->url($users->lastPage()),
-                    'prev' => $users->previousPageUrl(),
-                    'next' => $users->nextPageUrl(),
-                ]
-            ]
-        ];
+                    'data' => UserResource::collection($users),
+                    'meta' => [
+                        'currentPage' => $users->currentPage(),
+                        'lastPage' => $users->lastPage(),
+                        'total' => $users->total(),
+                        'path' => $users->path(),
+                        'links' => [
+                            'first' => $users->url(1),
+                            'last' => $users->url($users->lastPage()),
+                            'prev' => $users->previousPageUrl(),
+                            'next' => $users->nextPageUrl(),
+                        ]
+                    ]
+                ];
         }else {
             $users = $query->get();
         }
@@ -89,7 +89,7 @@ class UserService
     {
         try{
 
-
+        $result_service_provider = $this->userRepository->registerServiceProvider($data);
         $result = $this->userRepository->create($data);
          
         if($result['success'] ==true){

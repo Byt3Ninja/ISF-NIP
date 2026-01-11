@@ -178,8 +178,10 @@ class serviceProviderController extends Controller
 
 					DB::beginTransaction();
 					$password = Str::password(10, symbols: true);
-
-					$provider_user = new User;
+					$provider_user = User::where('email', $email)->first();
+					if($provider_user == null){
+						$provider_user = new User;
+					}
 					$provider_user->first_name_en = $first_name;
 					$provider_user->last_name_en = $last_name;
 					$provider_user->first_name_ar = $first_name;

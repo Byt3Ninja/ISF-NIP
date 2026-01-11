@@ -1781,6 +1781,7 @@ class ClientCompanyController extends Controller
                     return redirect()->back()->with(['msg' => 'Please enter the valuation date', 'class' => 'danger']);
                 }
                 
+                
                 $baseDate = Carbon::createFromFormat('Y-m', $data['valuation_date']);
 
                 // من سنة قبل لحد سنتين بعد
@@ -1802,6 +1803,7 @@ class ClientCompanyController extends Controller
                     $addFinancial->user_id = auth()->id();
                     $addFinancial->valuation_date = $yearDate->format('Y-m-d');
                     $addFinancial->year = $yearDate->year;
+                    $addFinancial->currency = $data['Currency'];
 
                     // البيانات الرقمية
                     $addFinancial->revenues = $data["rev_$i"];
