@@ -12,6 +12,8 @@ use App\Settings;
 use Carbon\Carbon;
 use App\SurveyScopes;
 use App\CyclesMentors;
+use App\SurveyQuestions;
+use App\SurveyResponses;
 use App\Events\WebMessage;
 use App\MentorshipRequest;
 use Illuminate\Http\Request;
@@ -1212,11 +1214,176 @@ class MentorsController extends Controller
 
 	public function mentorshipSessions() 
 	{
-		return view('mentor.mentorship-sessions.index');
+		$user = auth()->user();
+
+		$mentorshipRequests = MentorshipRequest::where('mentor_id', $user->id)
+			->with('user.company')
+			->orderBy('created_at', 'DESC')
+			->get();
+
+		$surveys = SurveyResponses::where('user_id', $user->id)
+			->where('triggered_on', 'mentorship')
+			->get()
+			->keyBy('triggered_at'); 
+
+			$mentorship_sessions = $mentorshipRequests->map(function ($session) use ($surveys) {
+
+			$survey = $surveys->get($session->id);
+				// dd($survey);
+			return (object) [
+				'id' => $session->id,
+				'zoom_date' => $session->zoom_date,
+				'period' => $session->period,
+				'status' => $session->done
+					? 'Completed'
+					: ($session->zoom_date > now() ? 'Pending' : 'In_Progress'),
+
+				'session_type' => $session->session_type,
+				'location' => $session->session_type === 'Offline' ? $session->location : null,
+				'start_url' => $session->start_url,
+				'passcode' => $session->zoom_passcode,
+				'comment' => $session->comment,
+
+				'user' => (object) [
+					'id' => $session->user->id,
+					'name' => trim(
+						$session->user->first_name_en . ' ' . $session->user->last_name_en
+					),
+					'image_url' => $session->user->img_url
+						? asset($session->user->img_url)
+						: '/icons/avatar.svg',
+
+					'company' => (object) [
+						'id' => optional($session->user->company)->id,
+						'name' => optional($session->user->company)->name_en,
+						'logo_url' => optional($session->user->company)->logo
+							? asset($session->user->company->logo)
+							: '/images/logo-placeholder.png',
+					],
+				],
+				
+				'survey' => isset($survey->id) ? (object) [
+					'id' => optional($survey)->id,
+					'status' => $survey->responses != null
+						? 'Completed'
+						: 'Pending',
+
+					'is_required' => optional($survey)->survey->is_required ?? false,
+				] : null,
+			];
+			
+		});
+		
+	// dd($mentorship_sessions[]);
+
+		return view('mentor.mentorship-sessions.index', compact('mentorship_sessions'));
 	}	
 	
 	public function surveys() 
 	{
-		return view('mentor.surveys.index');
-	}	
+		$user = auth()->user();
+
+		
+
+		$availableSurveys = SurveyResponses::where('user_id', $user->id)
+    ->where('triggered_on', 'mentorship')
+    ->with('survey_scope')
+    ->orderBy('created_at', 'desc')
+    ->get();
+
+		$surveyQuestionsCount = SurveyQuestions::whereIn(
+        'survey_id',
+        $availableSurveys->pluck('survey_id')
+    )
+    ->select('survey_id', DB::raw('count(*) as total'))
+    ->groupBy('survey_id')
+    ->pluck('total', 'survey_id');
+
+	$mentorshipRequests = MentorshipRequest::where('mentor_id', $user->id)
+    ->with('user.company')
+    ->orderBy('zoom_date', 'desc')
+    ->get();
+
+		//dd($mentorshipRequests[0], $availableSurveys[0], $surveyQuestionsCount);
+
+	$surveys = $availableSurveys->map(function ($survey) use (
+    $mentorshipRequests,
+    $surveyQuestionsCount
+) {
+
+    $responses = json_decode($survey->responses, true) ?? [];
+    $totalQuestions = $surveyQuestionsCount[$survey->survey_id] ?? 0;
+    $completedQuestions = count($responses);
+
+    // أقرب جلسة قبل تاريخ إنشاء الـ survey
+    $mentorship = $mentorshipRequests
+        ->where('zoom_date', '<=', $survey->created_at)
+        ->first();
+
+    return (object) [
+        'id' => $survey->id,
+        'title' => ucfirst($survey->survey_scope->scope) . ' Survey',
+
+        'created_at' => $survey->created_at->format('Y-m-d H:i'),
+        'due_date' => $survey->created_at->copy()->addDays(7)->format('Y-m-d H:i'),
+
+        'status' => $completedQuestions === 0
+            ? 'Pending'
+            : ($completedQuestions < $totalQuestions ? 'In_Progress' : 'Completed'),
+
+        'survey_type' => ucfirst($survey->triggered_on),
+
+        'total_questions' => $totalQuestions,
+        'completed_questions' => $completedQuestions,
+
+        'is_required' => (bool) $survey->survey->is_required,
+
+        'user' => $mentorship
+            ? (object)[
+                'id' => $mentorship->user->id,
+                'name' => trim(
+                    $mentorship->user->first_name_en . ' ' .
+                    $mentorship->user->last_name_en
+                ),
+                'image_url' => $mentorship->user->img_url
+                    ? asset($mentorship->user->img_url)
+                    : '/icons/avatar.svg',
+
+                'company' => (object)[
+                    'id' => optional($mentorship->user->company)->id,
+                    'name' => optional($mentorship->user->company)->name_en,
+                    'logo_url' => optional($mentorship->user->company)->logo
+                        ? asset($mentorship->user->company->logo)
+                        : '/images/logo-placeholder.png',
+                ],
+            ]
+            : null,
+
+        'session' => $mentorship
+            ? (object)[
+                'id' => $mentorship->id,
+                'zoom_date' => $mentorship->zoom_date->format('Y-m-d H:i'),
+            ]
+            : null,
+    ];
+});
+		
+$surveys = $surveys->sortBy(function($survey) {
+    $statusPriority = [
+        'In_Progress' => 1,
+        'Pending' => 2,
+        'Completed' => 3,
+    ];
+    return $statusPriority[$survey->status] ?? 999;
+});
+	 //dd($surveys[120]);
+		return view('mentor.surveys.index', compact('surveys'));
+	}
+	function surveyStatus($survey, $totalQuestions) {
+		$answered = count(json_decode($survey->responses, true) ?? []);
+
+		if ($answered === 0) return 'Pending';
+		if ($answered < $totalQuestions) return 'In_Progress';
+		return 'Completed';
+	}
 }

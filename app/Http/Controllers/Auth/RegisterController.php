@@ -66,7 +66,22 @@ class RegisterController extends Controller
      */
     protected function validator(array $data)
     {
-
+        
+        if($data['role'] == 'Service Provider'){
+            $data['role'] = 'serviceProvider';
+        $parse_name = explode(' ', $data['contact_name']);
+					$first_name = $parse_name[0];
+                    $last_name = isset($parse_name[1]) ? $parse_name[1] : '';
+					$data['first_name'] = $first_name;
+					$data['last_name'] = $last_name;
+        }
+        if($data['role'] == 'Founder'){
+            $data['role'] = 'registered';
+        }
+        if($data['role'] == 'Mentor'){
+            $data['role'] = 'mentor';
+        }
+                    
     return Validator::make($data, (new StoreUserRequest())->rules());
     }
     /**
@@ -77,6 +92,20 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+        if($data['role'] == 'Service Provider'){
+            $data['role'] = 'serviceProvider';
+        $parse_name = explode(' ', $data['contact_name']);
+					$first_name = $parse_name[0];
+                    $last_name = isset($parse_name[1]) ? $parse_name[1] : '';
+					$data['first_name'] = $first_name;
+					$data['last_name'] = $last_name;
+        }
+        if($data['role'] == 'Founder'){
+            $data['role'] = 'registered';
+        }
+        if($data['role'] == 'Mentor'){
+            $data['role'] = 'mentor';
+        }
 
        $user= $this->userService->store($data);
     

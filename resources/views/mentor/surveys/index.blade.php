@@ -1,193 +1,7 @@
 @extends('layouts.admin')
 
 @php
-$surveys = collect([
-    (object)[
-        'id' => 1,
-        'title' => 'Q1 Mentorship Feedback',
-        'created_at' => now(),
-        'due_date' => '2025-01-20 23:59:59',
-        'status' => 'Pending',
-        'survey_type' => 'Mentorship',
-        'total_questions' => 10,
-        'completed_questions' => 0,
-        'is_required' => true,
-        'user' => (object)[
-            'id' => 11,
-            'name' => 'Ahmed Ali',
-            'image_url' => '/icons/avatar.svg',
-            'company' => (object)[
-                'id' => 101,
-                'name' => 'Tech Solutions',
-                'logo_url' => '/images/logo-placeholder.png',
-            ],
-        ],
-        'session' => (object)[
-            'id' => 1,
-            'zoom_date' => '2025-01-10 14:00:00',
-        ],
-    ],
-    (object)[
-        'id' => 2,
-        'title' => 'Program Evaluation Survey',
-        'created_at' => '2025-01-05 10:00:00',
-        'due_date' => '2025-01-15 23:59:59',
-        'status' => 'Completed',
-        'survey_type' => 'Program',
-        'total_questions' => 15,
-        'completed_questions' => 15,
-        'is_required' => false,
-        'user' => (object)[
-            'id' => 12,
-            'name' => 'Sara Mohamed',
-            'image_url' => '/icons/avatar.svg',
-            'company' => (object)[
-                'id' => 102,
-                'name' => 'InnovateX',
-                'logo_url' => '/images/logo-placeholder.png',
-            ],
-        ],
-        'session' => null,
-    ],
-    (object)[
-        'id' => 3,
-        'title' => 'Monthly Check-in',
-        'created_at' => '2025-01-08 09:00:00',
-        'due_date' => '2025-01-22 23:59:59',
-        'status' => 'In_Progress',
-        'survey_type' => 'Program',
-        'total_questions' => 8,
-        'completed_questions' => 4,
-        'is_required' => true,
-        'user' => (object)[
-            'id' => 13,
-            'name' => 'Omar Hassan',
-            'image_url' => '/icons/avatar.svg',
-            'company' => (object)[
-                'id' => 103,
-                'name' => 'NextGen Labs',
-                'logo_url' => '/images/logo-placeholder.png',
-            ],
-        ],
-        'session' => (object)[
-            'id' => 3,
-            'zoom_date' => '2025-01-12 16:30:00',
-        ],
-    ],
-    (object)[
-        'id' => 4,
-        'title' => 'Quarterly Assessment',
-        'created_at' => '2025-01-02 08:00:00',
-        'due_date' => '2025-01-25 23:59:59',
-        'status' => 'Pending',
-        'survey_type' => 'Assessment',
-        'total_questions' => 20,
-        'completed_questions' => 0,
-        'is_required' => false,
-        'user' => (object)[
-            'id' => 14,
-            'name' => 'Mona Adel',
-            'image_url' => '/icons/avatar.svg',
-            'company' => (object)[
-                'id' => 104,
-                'name' => 'Bright Minds',
-                'logo_url' => '/images/logo-placeholder.png',
-            ],
-        ],
-        'session' => null,
-    ],
-    (object)[
-        'id' => 5,
-        'title' => 'Exit Survey',
-        'created_at' => '2025-01-01 12:00:00',
-        'due_date' => '2025-01-10 23:59:59',
-        'status' => 'Completed',
-        'survey_type' => 'Program',
-        'total_questions' => 12,
-        'completed_questions' => 12,
-        'is_required' => true,
-        'user' => (object)[
-            'id' => 15,
-            'name' => 'Youssef Samir',
-            'image_url' => '/icons/avatar.svg',
-            'company' => (object)[
-                'id' => 105,
-                'name' => 'CodeCraft',
-                'logo_url' => '/images/logo-placeholder.png',
-            ],
-        ],
-        'session' => null,
-    ],
-    (object)[
-        'id' => 6,
-        'title' => 'Mid-Program Feedback',
-        'created_at' => '2025-01-06 15:30:00',
-        'due_date' => '2025-01-18 23:59:59',
-        'status' => 'Pending',
-        'survey_type' => 'Program',
-        'total_questions' => 10,
-        'completed_questions' => 0,
-        'is_required' => true,
-        'user' => (object)[
-            'id' => 16,
-            'name' => 'Nada Fathy',
-            'image_url' => '/icons/avatar.svg',
-            'company' => (object)[
-                'id' => 106,
-                'name' => 'FutureSoft',
-                'logo_url' => '/images/logo-placeholder.png',
-            ],
-        ],
-        'session' => null,
-    ],
-    (object)[
-        'id' => 7,
-        'title' => 'Workshop Evaluation',
-        'created_at' => '2025-01-07 11:00:00',
-        'due_date' => '2025-01-17 23:59:59',
-        'status' => 'In_Progress',
-        'survey_type' => 'Workshop',
-        'total_questions' => 6,
-        'completed_questions' => 3,
-        'is_required' => false,
-        'user' => (object)[
-            'id' => 17,
-            'name' => 'Khaled Nabil',
-            'image_url' => '/icons/avatar.svg',
-            'company' => (object)[
-                'id' => 107,
-                'name' => 'AI Works',
-                'logo_url' => '/images/logo-placeholder.png',
-            ],
-        ],
-        'session' => null,
-    ],
-    (object)[
-        'id' => 8,
-        'title' => 'Mentorship Satisfaction',
-        'created_at' => '2025-01-04 13:00:00',
-        'due_date' => '2025-01-14 23:59:59',
-        'status' => 'Completed',
-        'survey_type' => 'Mentorship',
-        'total_questions' => 10,
-        'completed_questions' => 10,
-        'is_required' => true,
-        'user' => (object)[
-            'id' => 18,
-            'name' => 'Salma Tarek',
-            'image_url' => '/icons/avatar.svg',
-            'company' => (object)[
-                'id' => 108,
-                'name' => 'DesignPro',
-                'logo_url' => '/images/logo-placeholder.png',
-            ],
-        ],
-        'session' => (object)[
-            'id' => 8,
-            'zoom_date' => '2025-01-17 10:30:00',
-        ],
-    ],
-]);
+
 
 // Sort surveys by status priority: In_Progress > Pending > Completed
 $surveys = $surveys->sortBy(function($survey) {
@@ -352,17 +166,17 @@ $surveys = $surveys->sortBy(function($survey) {
               <td>
                 <div class="d-flex align-items-center flex-wrap text-nowrap gap-2">
                   @if ($survey->status == 'Pending')
-                    <a href="/dashboard/surveys/{{ $survey->id }}" class="btn btn-sm btn-primary">
+                    <a href="/dashboard/surveys/start/{{ $survey->id }}" class="btn btn-sm btn-primary">
                       <i class="ti ti-player-play ti-xs me-1"></i>
                       {{ __('admin.start_survey') }}
                     </a>
                   @elseif ($survey->status == 'In_Progress')
-                    <a href="/dashboard/surveys/{{ $survey->id }}" class="btn btn-sm btn-primary">
+                    <a href="/dashboard/surveys/start/{{ $survey->id }}" class="btn btn-sm btn-primary">
                       <i class="ti ti-progress ti-xs me-1"></i>
                       {{ __('admin.complete_survey') }}
                     </a>
                   @elseif ($survey->status == 'Completed')
-                    <a href="/dashboard/surveys/{{ $survey->id }}" class="btn btn-sm btn-primary">
+                    <a href="/dashboard/surveys/start/{{ $survey->id }}" class="btn btn-sm btn-primary">
                       <i class="ti ti-eye ti-xs me-1"></i>
                       {{ __('admin.view_survey') }}
                     </a>
