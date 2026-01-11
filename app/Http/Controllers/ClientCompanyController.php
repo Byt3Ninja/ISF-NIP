@@ -76,6 +76,10 @@ class ClientCompanyController extends Controller
         $user = auth()->user();
         $user_id = $user->id;
         $company = $this->companyService->getCompanyRelation($id);
+        // dd($company['type']);
+        if($company['type'] == 'not_found'){
+            return redirect()->back()->with('message2', 'Company Not Found');
+        }
         if (!empty($company->Sustainable_development)) {
             $sustainableDevelopment = json_decode($company->Sustainable_development, true);
             $icons = SustainableIcon::whereIn('title', $sustainableDevelopment)->get();
