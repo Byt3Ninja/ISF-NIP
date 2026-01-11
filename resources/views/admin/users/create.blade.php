@@ -35,8 +35,8 @@
 @endsection
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <div class="card">
       <div class="card-header mb-6 border-bottom">
         <h5 class="card-title mb-0 text-capitalize">{{ __('admin.Add new user') }}</h5>

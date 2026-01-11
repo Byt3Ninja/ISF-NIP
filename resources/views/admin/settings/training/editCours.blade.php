@@ -43,8 +43,8 @@
 
 @section('content')
   <!-- BEGIN: Content-->
-  <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
+  <div class="">
+    <div class="">
       <div class="row  d-flex justify-content-center">
         <div class="col-12 col-md-8 col-lg-9">
           <div class="card">

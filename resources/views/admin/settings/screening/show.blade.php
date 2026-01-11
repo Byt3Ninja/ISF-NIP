@@ -46,8 +46,8 @@ $pills = [
 @endphp
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <!-- Alerts -->
     @if (session()->has('message'))
       <x-alert type="success" message="{{ __('admin.' . session()->get('message')) }} {{ Session::forget('message') }}" />

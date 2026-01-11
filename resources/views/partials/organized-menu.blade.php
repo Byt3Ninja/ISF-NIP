@@ -1,65 +1,5 @@
 @php
-$navigationItems = [
-  'dashboard' => [
-    'title' => 'dashboard_and_analytics',
-    'children' => [
-      ['title' => 'dashboard', 'route' => 'core.dashboard_view'],
-      ['title' => 'reports', 'route' => 'reports.list'],
-      ['title' => 'activities', 'route' => 'activities.index'],
-      ['title' => 'projects', 'route' => 'projects.index'],
-    ],
-  ],
-
-  'programs' => [
-    'title' => 'program_management',
-    'children' => [
-      ['title' => 'programs', 'route' => 'programlist.index'],
-      ['title' => 'forms', 'route' => 'forms.index'],
-      ['title' => 'screening', 'route' => 'screening.index'],
-      ['title' => 'assessment', 'route' => 'assessments.index'],
-      ['title' => 'training', 'route' => 'trainings.sessions_list'],
-      ['title' => 'mentorship', 'route' => 'mentorships.requests_view'],
-      ['title' => 'mentorship_sessions', 'route' => 'mentorships.sessions_list'],
-      ['title' => 'tasks', 'route' => 'tasks.index'],
-      ['title' => 'questions', 'route' => 'question-categories.index'],
-      ['title' => 'quizzes', 'route' => 'quizzes.index'],
-      ['title' => 'surveys', 'route' => 'surveys.index'],
-    ],
-  ],
-
-  'people' => [
-    'title' => 'people_and_organizations',
-    'children' => [
-      ['title' => 'organization_types', 'route' => 'organization-types.index'],
-      ['title' => 'organizations', 'route' => 'organizations.index'],
-      ['title' => 'users', 'route' => 'users.index'],
-      ['title' => 'startups', 'route' => 'users.view_companies'],
-      ['title' => 'judges', 'route' => 'users.judger'],
-      ['title' => 'mentors', 'route' => 'mentors.list'],
-      ['title' => 'service_providers', 'route' => 'services_providers.index'],
-    ],
-  ],
-
-  'services' => [
-    'title' => 'services_and_resources',
-    'children' => [
-      ['title' => 'services', 'route' => 'services.index'],
-      ['title' => 'file_manager', 'route' => 'my_files.list'],
-      ['title' => 'rooms', 'route' => 'rooms.index'],
-      ['title' => 'timesheets', 'route' => 'TimeSheet.index'],
-    ],
-  ],
-
-  'admin' => [
-    'title' => 'system_and_settings',
-    'children' => [
-      ['title' => 'settings', 'route' => 'settings.index'],
-      ['title' => 'logs_viewer', 'route' => 'audit-logs.index'],
-      ['title' => 'reminder_logs', 'route' => 'organization.ReminderLogs'],
-      ['title' => 'documentations', 'route' => 'documentation.index'],
-    ],
-  ],
-];
+$navigationItems = config('navigation');
 
 $navigationIcons = [
   'dashboard' => 'smart-home',
@@ -95,6 +35,12 @@ if ($currentRoute) {
       }
     }
   }
+}
+
+// Special case: Make services active if URL contains 'requests/all' or 'serviceCategories'
+if (strpos(request()->getRequestUri(), 'requests/all') !== false || strpos(request()->getRequestUri(), 'serviceCategories') !== false) {
+  $activeGroup = 'services';
+  $activeItem = 'services.index';
 }
 
 // Special case: Make screening active if URL contains 'final' or 'screening'
@@ -232,7 +178,7 @@ $getSetting = App\Settings::find(1);
         </a>
         <ul class="menu-sub">
           @foreach ($item['children'] as $child)
-            @if ($_user->ableTo($child['route'], $permissions))
+            @if ($_user->ableTo($child['route'], $permissions) && isset($child['menuOnly']) && $child['menuOnly'] == true)
               <li 
                 class="menu-item 
                 {{ $_user->hasRole('Admin') && $child['title'] === 'reminder_logs' ? 'd-none' : '' }} 
@@ -253,10 +199,11 @@ $getSetting = App\Settings::find(1);
     @endforeach
   </ul>
 
-  <div class="p-6">
+  <div class="px-6 py-4 border-top">
     <span style="direction: ltr">
         Incubator Pro
         {{ config('app.version') ? 'v' . config('app.version') : '' }}
+        <br />
         {{ config('app.build') ? '(Build ' . config('app.build') . ')' : '' }}
         - &copy; {{ now()->year }}
     </span>

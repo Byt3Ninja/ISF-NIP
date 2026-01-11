@@ -5329,6 +5329,17 @@
                 ]
             },
             {
+                "name": "screening.final",
+                "description": "List Final Screening Sessions\/Entries",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
                 "name": "screening.index",
                 "description": "List Screening Sessions\/Entries",
                 "guard_name": "web",

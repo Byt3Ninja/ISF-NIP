@@ -7,8 +7,8 @@
 @section('index_url', '/dashboard/audit-logs')
 @section('content')
 <!-- BEGIN: Content-->
-  <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
+  <div class="">
+    <div class="">
       <div class="content-overlay"></div>
         <div class="content-body">
             <div class="row">

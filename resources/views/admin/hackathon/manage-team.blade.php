@@ -9,8 +9,8 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
 @endphp
 
 <!-- Main Content -->
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <!-- Page Header -->
     <div class="row mb-4">
       <div class="col-12">

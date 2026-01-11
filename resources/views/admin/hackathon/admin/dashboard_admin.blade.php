@@ -45,8 +45,8 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
 @endphp
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
       <h1 class="fw-bold">{{ __('admin.Hackathon_Dashboard') }}</h1>
       <a class="btn btn-primary btn-lg" href="/dashboard/hackathon/dashboard/winners/{{ $idParam }}" role="button">

@@ -6,8 +6,8 @@
 	$startups = App\Company::all();
 	$founders = App\User::role('Registered')->get();
 	@endphp
-	<div class="content-wrapper">
-		<div class="container-xxl flex-grow-1 container-p-y">
+	<div class="">
+		<div class="">
 			@if (session()->has('message'))
 				<div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible" role="alert">
 					{{ __('admin.' . session()->get('message')) }}

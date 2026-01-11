@@ -721,7 +721,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('training/session-reports-data', 'TrainingController@getSessionReportsData')->name('trainings.session_reports_data');
 
 
-    Route::get('/Totalsurveys', 'MentorsController@total_surveys')->name('surveys.dashboard_count_view');
+    Route::get('/surveys/results', 'MentorsController@total_surveys')->name('surveys.dashboard_count_view');
     // questions bank
     Route::resource('question-categories', 'QuestionCategoriesController');
     Route::resource('questions-bank', 'QuestionsBankController');
@@ -751,7 +751,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/upcomingBusyReview', 'BookingController@upcomingBusyReview')->name('bookings.review_upcoming_busy');
     Route::get('/oldReview', 'BookingController@oldReview')->name('bookings.review_past');
     //Final Screening
-    Route::get('final', 'FinalscreeningController@index');
+    Route::get('final', 'FinalscreeningController@index')->name('screening.final');
     Route::get('final/{id}', 'FinalscreeningController@show');
     Route::get('{id?}/final', 'FinalscreeningController@index')->name('screening.show');
     Route::post('final/update', 'FinalscreeningController@update')->name('screening.update');

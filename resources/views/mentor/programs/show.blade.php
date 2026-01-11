@@ -1,8 +1,8 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <ul class="nav nav-pills flex-nowrap mb-6" role="tablist" style="max-width: 100%; overflow-x: auto;">
       <li class="nav-item me-2" role="presentation">
         <a class="nav-link active" id="enrolled-programs-tab" data-bs-toggle="tab" href="#enrolled-programs" role="tab" aria-controls="enrolled-programs" aria-selected="true">

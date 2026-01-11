@@ -234,7 +234,7 @@
             </div>
             <div class="content-right">
                 <div class="content-overlay"></div>
-                <div class="content-wrapper">
+                <div class="">
                     <div class="content-header row">
                     </div>
                     <div class="content-body">

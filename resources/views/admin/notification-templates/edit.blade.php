@@ -8,8 +8,8 @@
 @endsection
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     @if(session('success'))
       <div class="alert alert-success alert-dismissible fade show" role="alert">
         <i class="ti ti-check me-2"></i>

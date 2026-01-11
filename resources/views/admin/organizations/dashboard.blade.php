@@ -83,10 +83,10 @@
   @endphp
 
   <!-- Content wrapper -->
-  <div class="content-wrapper">
+  <div class="">
     
     
-    <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="">
       <!-- Alert -->
       @if (session()->has('msg'))
         <div class="alert alert-danger alert-dismissible" role="alert">

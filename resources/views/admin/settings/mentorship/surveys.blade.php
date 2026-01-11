@@ -73,8 +73,8 @@
 @section('subTitle', __('admin.surveysList'))
 
 @section('content')
-	<div class="content-wrapper">
-		<div class="container-xxl flex-grow-1 container-p-y">
+	<div class="">
+		<div class="">
 			<!-- Enhanced Breadcrumb -->
 			<div class="d-flex align-items-center gap-3 mb-6">
 				<a href="javascript:history.back()" class="btn btn-sm btn-icon shadow btn-white rounded-circle">

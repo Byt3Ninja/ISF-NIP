@@ -15,6 +15,7 @@
 
   <!-- BEGIN: Body-->
   <body>
+    {{-- {{ dump(request()->route()->getName()) }} --}}
     <!-- Layout wrapper -->
     <div class="layout-wrapper layout-content-navbar">
       <div class="layout-container">
@@ -31,8 +32,17 @@
           <!-- Navbar -->
           @include('admin.includes.header')
 
-          <!-- Content -->
-          @yield('content')
+          <div class="content-wrapper">
+            <div class="container-xxl flex-grow-1 pt-4 pb-8">
+
+              <!-- Breadcrumb -->
+              @include('components.breadcrumbs')
+
+              </nav>
+              <!-- Content -->
+              @yield('content')
+            </div>
+          </div>
 
           <!-- Survey Reminder Modal -->
           @include('partials.survey_reminder_modal')
@@ -127,40 +137,31 @@
       @endif
     @endauth
 
-    {{-- @auth
-      <script>
-        console.log('User roles:', @json(auth()->user()->roles->pluck('name')));
-        console.log('Has Registered role:', @json(auth()->user()->hasRole('Registered')));
-        console.log('Has Mentor role:', @json(auth()->user()->hasRole('Mentor')));
-        console.log('Has any role (Registered|Mentor):', @json(auth()->user()->hasRole('Registered') || auth()->user()->hasRole('Mentor')));
-      </script>
-    @endauth --}}
-
    @if (auth()->user()->hasRole('Registered') || auth()->user()->hasRole('Mentor'))
       <script>console.log('Echo script section executing - user has correct role');</script>
       <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
       <script>
         console.log('Pusher script executed');
-        const pusherConfig = @json(getPusherConfig());
+        // const pusherConfig = @json(getPusherConfig());
         console.log("pusherConfig", pusherConfig);
         const pusherAppKey = pusherConfig.PUSHER_APP_KEY;
         const pusherCluster = pusherConfig.PUSHER_APP_CLUSTER;
         
-        console.log('Pusher credentials:', { pusherAppKey, pusherCluster });
+        // console.log('Pusher credentials:', { pusherAppKey, pusherCluster });
         
         // Ensure Pusher is available globally
         window.Pusher = Pusher;
-        console.log('Pusher loaded:', typeof Pusher, Pusher);
+        // console.log('Pusher loaded:', typeof Pusher, Pusher);
         
         // Load Laravel Echo dynamically to ensure proper loading
         (function() {
-          console.log('Starting Echo dynamic load...');
+          // console.log('Starting Echo dynamic load...');
           const script = document.createElement('script');
           script.src = 'https://cdn.jsdelivr.net/npm/laravel-echo@1.17.1/dist/echo.iife.js';
           script.onload = function() {
-            console.log('Echo script loaded successfully');
-            console.log('typeof Echo after load:', typeof Echo);
-            console.log('window.Echo before init:', window.Echo);
+            // console.log('Echo script loaded successfully');
+            // console.log('typeof Echo after load:', typeof Echo);
+            // console.log('window.Echo before init:', window.Echo);
             
             // Initialize Laravel Echo after script loads
             if (typeof Echo !== 'undefined') {
@@ -177,7 +178,7 @@
                     }
                   }
                 });
-                console.log('Echo initialized successfully:', window.Echo);
+                // console.log('Echo initialized successfully:', window.Echo);
                 
                 // Test Echo connection
                 window.Echo.connector.pusher.connection.bind('connected', () => {
