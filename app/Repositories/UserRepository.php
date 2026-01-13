@@ -87,7 +87,7 @@ class UserRepository
     {
     $page = $page ?? Paginator::resolveCurrentPage();
 
-    return $query->orderBy('created_at', $direction)
+    return $query->with(['roles', 'company'])->orderBy('created_at', $direction)
                  ->paginate($perPage, ['*'], 'page', $page);
     }
 
