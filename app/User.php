@@ -205,19 +205,23 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function getOrganizationsIdsAttribute(): array
     {
+        if (isset($this->attributes['_cached_organizations_ids'])) {
+            return $this->attributes['_cached_organizations_ids'];
+        }
+
         if ($this->hasRole('admin')) {
-            return Organization::pluck('id')->toArray();
+            $result = Organization::pluck('id')->toArray();
+        } elseif ($this->hasRole('subadmin')) {
+            $result = $this->organizations()->pluck('organizations.id')->toArray();
+        } elseif ($this->organization_id) {
+            $result = [$this->organization_id];
+        } else {
+            $result = [];
         }
 
-        if ($this->hasRole('subadmin')) {
-            return $this->organizations()->pluck('organizations.id')->toArray();
-        }
+        $this->attributes['_cached_organizations_ids'] = $result;
 
-        if ($this->organization_id) {
-            return [$this->organization_id];
-        }
-
-        return [];
+        return $result;
     }
 
     /**
