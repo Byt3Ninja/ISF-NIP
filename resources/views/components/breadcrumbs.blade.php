@@ -1,4 +1,8 @@
-@php($crumbs = breadcrumbs())
+@php
+if(isset($crumbs)){
+  $crumbs = breadcrumbs();
+}
+@endphp
 
 <style>
   .hide-before::before {
@@ -6,7 +10,7 @@
   }
 </style>
 
-@if($crumbs)
+@if(isset($crumbs))
   @if(!Route::is('core.dashboard_view') && !Route::is('core.admin_access'))
       <ol class="breadcrumb align-items-center bg-card rounded p-2 shadow-xs">
         {{-- Back Button --}}
