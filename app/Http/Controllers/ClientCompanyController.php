@@ -2686,7 +2686,8 @@ class ClientCompanyController extends Controller
         // Pass the language variable
         $l = app()->getLocale();
 
-        return view('admin/users/companies', compact('companies', 'l'));
+        $SustainableIcons = SustainableIcon::all();
+        return view('admin/users/companies', compact('companies', 'l', 'SustainableIcons'));
     }
 
     public function companyAlumni(Request $request, $id, $cycle_id)
