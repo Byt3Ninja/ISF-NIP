@@ -1,16 +1,14 @@
 @php
   $msgs = 0;
-  if (Auth::user()->hasAnyRole('Admin|Manager')) {
+  if ($_user->hasAnyRole('Admin|Manager')) {
       $msgs = App\Messages::where('read', 0)->count();
   }
-  $_setting = App\Settings::find(1);
-  $messages = App\Messenger::where('receiver', Auth::user()->id)
+  $_setting = $_settings;
+  $unread_messages = App\Messenger::where('receiver', Auth::user()->id)
       ->whereNull('read')
       ->count();
-  $all = $msgs + $messages;
-  isset(Auth::user()->company()->first()->id)
-      ? ($companyid = Auth::user()->company()->first()->id)
-      : ($companyid = null);
+  $all = $msgs + $unread_messages;
+  $companyid = $_user->company?->id ?? null;
 
   $menuItems = [
     // Main Dashboard
@@ -1163,10 +1161,6 @@ $menuItems = $menuItems->flatMap(function($item) {
               <span class="align-middle">{{ __('admin.settings') }}</span>
             </a>
           </li>
-          <?php
-            $cmessages = App\Messenger::where('receiver', auth()->id())->whereNull('read');
-            $unread = $cmessages->count();
-          ?>
 
           @if( $_user->ableTo('messages.list', $permissions) )
             <li>
@@ -1174,10 +1168,10 @@ $menuItems = $menuItems->flatMap(function($item) {
                 <i class="ti ti-message me-3 ti-md"></i>
                 <span class="align-middle">
                   {{ __('admin.Messages') }}
-                  @if ($unread > 0)
+                  @if ($unread_messages > 0)
                     <div class="flex-shrink-0 float-end" style="width: 24px; height: 24px;">
                       <small class="badge bg-danger rounded-circle w-100 h-100 d-flex align-items-center justify-content-center ms-2">
-                        {{ $unread }}
+                        {{ $unread_messages }}
                       </small>
                     </div>
                   @endif
