@@ -255,7 +255,7 @@ class ClientCompanyController extends Controller
             if(!empty($almuni->training)){   
                 $trainingToSum = collect(json_decode($almuni->training, true));
             }
-            if(!empty($almuni->training)){   
+            if(!empty($almuni->final_screening)){
                 $finalScreenAvg = collect(json_decode($almuni->final_screening, true));
             }
         }
@@ -268,18 +268,98 @@ class ClientCompanyController extends Controller
         $totalMentorshipHours = sprintf('%02d:%02d', $hours, $minutes);
         // Training
         $curentCycleTraining = $company->cycledata?->trainingSessions?->where('user_id', $company->user->id)->sum('duration') ?? 0;
-        $totalMinutesTraining = collect($trainingToSum)->sum('duration') ?? 0 +$curentCycleTraining;
+        $totalMinutesTraining = (collect($trainingToSum)->sum('duration') ?? 0) + $curentCycleTraining;
         $hoursTraining   = intdiv($totalMinutesTraining, 60);
         $minutesTraining = $totalMinutesTraining % 60;
         $totalMentorshipHoursTraining = sprintf('%02d:%02d', $hoursTraining, $minutesTraining);
-        
 
+        // Calculate avgFinalScreening from current cycle + alumni
+        $currentFinalScreening = null;
+        if ($company->cycle) {
+            $finalSteps = Step::where('cycle_id', $company->cycle)
+                ->where('stype', 5) // Final Screening
+                ->pluck('id');
+
+            if ($finalSteps->isNotEmpty()) {
+                $evaluations = ScreeningEvaluation::whereIn('step_id', $finalSteps)->pluck('id');
+
+                if ($evaluations->isNotEmpty()) {
+                    $currentResults = ScreeningEvaluationResults::whereIn('evaluation_id', $evaluations)
+                        ->where('company_id', $company->id)
+                        ->get();
+
+                    if ($currentResults->isNotEmpty()) {
+                        $currentFinalScreening = $currentResults->avg('score');
+                    }
+                }
+            }
+        }
+
+        // Get alumni final screening scores
+        $alumniScores = collect();
+        foreach ($almunies as $almuni) {
+            if (!empty($almuni->final_screening)) {
+                $finalScreeningData = collect(json_decode($almuni->final_screening, true));
+                $overallScores = $finalScreeningData->pluck('overall_score')->filter();
+
+                if ($overallScores->isNotEmpty()) {
+                    $alumniScores->push($overallScores->avg());
+                }
+            }
+        }
+
+        // Combine current and alumni scores
+        $allScores = collect();
+        if ($currentFinalScreening !== null) {
+            $allScores->push($currentFinalScreening);
+        }
+        if ($alumniScores->isNotEmpty()) {
+            $allScores = $allScores->merge($alumniScores);
+        }
+
+        $avgFinalScreening = $allScores->isNotEmpty() ? round($allScores->avg(), 2) : 0;
+
+        // Calculate avgAttendanceRate from mentorship sessions only
+        $currentMentorships = collect();
+        if ($company->cycledata) {
+            $currentMentorships = $company->cycledata->mentorshipRequests()
+                ->where('user_id', $company->user->id)
+                ->get();
+        }
+
+        // Get alumni mentorship sessions
+        $alumniMentorships = collect();
+        foreach ($almunies as $almuni) {
+            if (!empty($almuni->mentorship)) {
+                $mentorshipData = collect(json_decode($almuni->mentorship, true));
+                $alumniMentorships = $alumniMentorships->merge($mentorshipData);
+            }
+        }
+
+        // Calculate attendance rate
+        $currentAttended = $currentMentorships->where('done', 1)->count();
+        $currentTotal = $currentMentorships->count();
+
+        // Alumni data may have 'status' or 'done' field
+        $alumniAttended = $alumniMentorships->filter(function ($session) {
+            return (isset($session['status']) && $session['status'] === 'Attended') ||
+                   (isset($session['done']) && $session['done'] == 1);
+        })->count();
+        $alumniTotal = $alumniMentorships->count();
+
+        // Calculate total
+        $totalAttended = $currentAttended + $alumniAttended;
+        $totalSessions = $currentTotal + $alumniTotal;
+
+        $avgAttendanceRate = $totalSessions > 0
+            ? round(($totalAttended / $totalSessions) * 100, 2)
+            : 0;
 
         $programsSummary = [
             'totalMentorshipHours' => $totalMentorshipHours,
             'totalTrainingHours'   => $totalMentorshipHoursTraining,
-            'avgFinalScreening'    => 85.0,
-            'avgAttendanceRate'    => 92.5,
+            'avgFinalScreening'    => $avgFinalScreening,
+            'avgAttendanceRate'    => $avgAttendanceRate,
         ];
         // Financial Projection
         $availableValuationDates = FinancialProjection::where('company_id', $company->id)
