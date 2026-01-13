@@ -57,10 +57,10 @@
 
 @section('content')
 <!-- Content wrapper -->
-<div class="content-wrapper">
+<div class="">
   <!-- Content -->
 
-  <div class="container-xxl flex-grow-1 container-p-y">
+  <div class="">
     <div class="app-chat card overflow-hidden">
       <div class="row g-0">
         <!-- Sidebar Left -->

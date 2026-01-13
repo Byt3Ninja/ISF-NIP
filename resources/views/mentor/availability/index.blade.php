@@ -34,8 +34,8 @@
 
 @section('content')
 
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
   
     <div class="d-flex justify-content-between align-items-center mb-6">
       <h4 class="card-title mb-0 text-dark f">{{ __('mentor.weekly_availability_slots') }}</h4>

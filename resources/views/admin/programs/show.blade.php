@@ -254,8 +254,8 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 @endphp
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <!-- Alert -->
     @if (session()->has('message'))
       <div class="alert alert-success alert-dismissible" role="alert">

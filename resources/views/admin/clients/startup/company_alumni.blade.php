@@ -256,8 +256,8 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
 @endphp
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl grow container-p-y" id="contentToExport">
+<div class="">
+  <div class="" id="contentToExport">
     <div class="row g-3 align-items-center mb-4">
       <div class="col-12 col-md-6">
         <h4 class="mb-1">

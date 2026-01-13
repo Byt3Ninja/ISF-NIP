@@ -39,8 +39,8 @@
 
 @section('content')
 
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <div class="card mb-4">
       <div class="card-header d-flex flex-column flex-md-row align-items-md-center justify-content-between">
         <div class="mb-4 mb-md-0">

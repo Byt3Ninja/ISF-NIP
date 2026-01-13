@@ -49,8 +49,8 @@
 @stop
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <div class="content-overlay"></div>
     {{--
     <h5 class="content-header-title float-left pr-1 mb-0">

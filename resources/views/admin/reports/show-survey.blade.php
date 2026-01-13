@@ -1,8 +1,8 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <h3 class="fw-bold mb-4">{{ __('admin.Survey_Report') }}</h3>
     <div class="card mb-4">
       <div class="card-body">

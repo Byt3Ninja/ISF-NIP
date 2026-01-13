@@ -162,8 +162,8 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
   @include('admin.clients.startup.partials._startup_screening_canvas')
 @endif
 
-<div class="content-wrapper position-relative">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="position-relative">
+  <div class="">
     <div class="row">
 			@if( session()->has('success') )
 			<div class="col-md-12 mb-2">

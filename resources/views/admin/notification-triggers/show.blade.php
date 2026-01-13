@@ -3,8 +3,8 @@
 @section('title', __('notification_triggers.trigger_details'))
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <div class="row">
       <div class="col-12">
         <div class="card">
@@ -15,7 +15,7 @@
                 <i class="ti ti-edit me-2"></i> {{ __('notification_triggers.edit') }}
               </a>
               <a href="{{ route('notification-triggers.index') }}" class="btn btn-label-secondary">
-                <i class="ti ti-arrow-left me-2"></i> {{ __('notification_triggers.back_to_list') }}
+                <i class="ti ti-arrow-{{ $l == 'en' ? 'left' : 'right' }} me-2"></i> {{ __('notification_triggers.back_to_list') }}
               </a>
             </div>
           </div>

@@ -4,8 +4,8 @@
 
 @section('content')
 <!-- Main Content -->
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     
     {{-- Breadcrumb Navigation --}}
     {{-- <nav aria-label="breadcrumb" class="mb-4">

@@ -5,8 +5,8 @@
 
 @section('content')
   <!-- BEGIN: Content-->
-  <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
+  <div class="">
+    <div class="">
       @if (session()->has('msg'))
       <div class="row mb-6">
         <div class="col-md-12">
@@ -73,7 +73,7 @@
                                     @if( $_user->ableToAny(['documentation.edit', 'documentation.update'], $permissions) )
                                     <li>
                                       <a class="dropdown-item d-flex align-items-center" title="Edit" href="{{ route('documentation.edit', ['documentation' => $doc->id]) }}">
-                                        <i class="ti ti-pencil me-1"></i> {{ __('Edit') }}
+                                        <i class="ti ti-pencil me-1"></i> {{ __('admin.Edit') }}
                                       </a>
                                     </li>
                                     @endif

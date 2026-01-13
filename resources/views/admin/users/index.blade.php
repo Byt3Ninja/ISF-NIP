@@ -4,8 +4,8 @@
 @section('subTitle', __('admin.Users`s List'))
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     @if (session()->has('msg'))
       <x-alert type="success" message="{{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }}" />
     @endif

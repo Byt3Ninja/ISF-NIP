@@ -1,8 +1,8 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <div class="content-body">
       <!-- Alerts -->
       <section id="multiple-column-form">
@@ -30,8 +30,8 @@
       <!-- / Alert -->
 
       <!-- Header -->
-      <div class="card mb-8">
-        <div class="card-body">
+      <div class="card mb-6">
+        <div class="card-body py-4">
           <div class="row">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
               <div class="d-flex bg-label-info p-2 justify-content-center align-items-center rounded shadow">

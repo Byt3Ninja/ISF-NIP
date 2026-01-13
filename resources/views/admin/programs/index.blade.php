@@ -1,8 +1,8 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <div class="content-header">
       @if (session()->has('message'))
         <x-alert 
@@ -25,8 +25,8 @@
     </div>
 
     <!-- Header -->
-    <div class="card shadow-sm mb-8">
-      <div class="card-body">
+    <div class="card shadow-sm mb-6">
+      <div class="card-body py-4">
         <div class="row">
           <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
             <div class="d-flex bg-label-primary p-2 justify-content-center align-items-center rounded shadow">

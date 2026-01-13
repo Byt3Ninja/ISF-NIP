@@ -4,8 +4,8 @@
 @section('subTitle', __('admin.EditSurvey'))
 
 @section('content')
-<div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y" style="padding: 2rem 4rem !important;">
+<div class="">
+    <div class="" style="padding: 2rem 4rem !important;">
         <div>
             <div class="w-100 d-flex flex-wrap justify-content-between align-items-center mb-6">
                 <h3 class="fw-bold mb-0">{{ __('admin.EditSurvey') }}</h3>

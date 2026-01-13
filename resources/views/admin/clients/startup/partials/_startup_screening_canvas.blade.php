@@ -301,7 +301,7 @@
 
                             <div class="col-12 d-flex justify-content-between mt-12">
                               <button type="button" class="btn btn-label-secondary btn-prev" {{ $loop->first ? 'disabled' : '' }}>
-                                <i class="ti ti-arrow-left ti-xs me-sm-2 me-0"></i>
+                                <i class="ti ti-arrow-{{ $l == 'en' ? 'left' : 'right' }} ti-xs me-sm-2 me-0"></i>
                                 <span class="align-middle d-sm-inline-block d-none">{{ __('admin.Previous') }}</span>
                               </button>
                               <button type="button" class="btn btn-primary btn-next" {{ $loop->last ? 'disabled' : '' }}>

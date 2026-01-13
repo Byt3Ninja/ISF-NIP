@@ -43,8 +43,8 @@
 
 <body class="vertical-layout vertical-menu-modern semi-dark-layout 1-column  navbar-sticky footer-static bg-full-screen-image  blank-page blank-page" data-open="click" data-menu="vertical-menu-modern" data-col="1-column" data-layout="semi-dark-layout">
     <!-- BEGIN: Content-->
-    <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="">
+    <div class="">
       <div class="content-overlay"></div>
             <div class="content-header row">
             </div>

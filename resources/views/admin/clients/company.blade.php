@@ -36,9 +36,9 @@
 
 @section('content')
   <!-- Content wrapper -->
-  <div class="content-wrapper" style="margin-bottom: 5rem;">
+  <div class="" style="margin-bottom: 5rem;">
     <!-- Content -->
-    <div class="container-xxl flex-grow-1 container-p-y overflow-x-hidden" style="max-width: 100%;">
+    <div class="overflow-x-hidden" style="max-width: 100%;">
       <!-- Tabs (mobile) -->
       <div style="max-width: 100%; overflow-x: auto;" class="mb-4 d-md-none">
         <ul class="nav nav-pills flex-nowrap" role="tablist">
