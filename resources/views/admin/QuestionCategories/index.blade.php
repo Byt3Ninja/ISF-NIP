@@ -8,8 +8,8 @@
 	<div class="">
 		@php
 			$tabs = [
-				['title' => __('admin.Categories'), 'url' => 'dashboard/question-categories', 'icon' => 'category-2'],
 				['title' => __('admin.Questions'), 'url' => 'dashboard/questions-bank', 'icon' => 'question-mark'],
+				['title' => __('admin.Categories'), 'url' => 'dashboard/question-categories', 'icon' => 'category-2'],
 				['title' => __('admin.weights'), 'url' => 'dashboard/weights', 'icon' => 'weight'],
 			]
 		@endphp

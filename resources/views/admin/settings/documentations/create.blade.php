@@ -107,8 +107,12 @@
                                 </textarea>
                               </div>
                             </div>
-                            <div class="col-12 d-flex justify-content-end">
-                              <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('cycles.Submit') }}</button>
+                            <div class="col-12 d-flex justify-content-between align-items-center">
+                              <a href="{{ route('documentation.index') }}" class="btn btn-label-secondary me-2">
+                                <i class="ti ti-arrow-{{ $l == 'en' ? 'left' : 'right' }} me-2"></i>
+                                {{ __('admin.Back') }}
+                              </a>
+                              <button type="submit" class="btn btn-primary">{{ __('cycles.Submit') }}</button>
                             </div>
                           </div>
                         </div>

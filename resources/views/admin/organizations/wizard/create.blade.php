@@ -123,7 +123,7 @@
               <div class="row border-top py-6 px-8">
                 <div class="col-12 d-flex justify-content-between">
                   <button type="button" class="btn btn-label-secondary btn-prev" {{ $activeStep <= 1 ? 'disabled' : '' }}>
-                    <i class="ti ti-arrow-left ti-xs me-sm-2"></i>
+                    <i class="ti ti-arrow-{{ $l == 'en' ? 'left' : 'right' }} ti-xs me-sm-2"></i>
                     <span class="align-middle d-sm-inline-block d-none">{{ __('admin.Previous') }}</span>
                   </button>
                   <div class="d-flex align-items-center gap-3">

@@ -74,7 +74,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
       <p>{{ $l == 'en' ? 'You can create a new team or join an existing team from the hackathon details page.' : 'يمكنك
         إنشاء فريق جديد أو الانضمام إلى فريق موجود من خلال صفحة تفاصيل الهاكثون.' }}</p>
       <a href="#" class="btn btn-primary mt-3">
-        <i class="ti ti-arrow-left me-1"></i>
+        <i class="ti ti-arrow-{{ $l == 'en' ? 'left' : 'right' }} me-1"></i>
         {{ $l == 'en' ? 'Back to Hackathon & Setup Team' : 'العودة لصفحة الهاكثون وتكوين فريق' }}
       </a>
     </div>

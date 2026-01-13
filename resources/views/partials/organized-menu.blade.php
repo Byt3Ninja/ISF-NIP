@@ -73,16 +73,10 @@ if (strpos(request()->getRequestUri(), '/organization-types') !== false) {
   $activeItem = 'organization-types.index';
 }
 
-// Special case: Make questions active if URL contains '/questions-bank'
-if (strpos(request()->getRequestUri(), '/questions-bank') !== false) {
+// Special case: Make questions active if URL contains '/questions-bank' or '/question-categories' or '/weights'
+if (strpos(request()->getRequestUri(), '/questions-bank') !== false || strpos(request()->getRequestUri(), '/question-categories') !== false || strpos(request()->getRequestUri(), '/weights') !== false) {
   $activeGroup = 'programs';
-  $activeItem = 'question-categories.index';
-}
-
-// Special case: Make questions active if URL contains '/weights'
-if (strpos(request()->getRequestUri(), '/weights') !== false) {
-  $activeGroup = 'programs';
-  $activeItem = 'question-categories.index';
+  $activeItem = 'questions-bank.index';
 }
 
 // Special case: Make mentors active if URL contains '/invitations'

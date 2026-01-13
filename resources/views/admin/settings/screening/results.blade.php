@@ -748,7 +748,7 @@
                     {{ __('admin.No_Screening_Startups') }}
                   </p>
                   <a href="/dashboard/cycles" class="btn btn-primary rounded-pill px-4">
-                    <i class="ti ti-arrow-left me-2"></i>
+                    <i class="ti ti-arrow-{{ $l == 'en' ? 'left' : 'right' }} me-2"></i>
                     {{ __('cycles.Cycles') }}
                   </a>
                 </div>

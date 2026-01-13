@@ -604,7 +604,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     //Screening
     Route::get('screening', 'ScreeningController@index')->name('screening.index');
-    Route::get('screening/{id?}', 'ScreeningController@show');
+    Route::get('screening/{id?}', 'ScreeningController@show')->name('screening.manage');
     Route::get('/dashboard/screening/get/{formId}/{stepId}/{panel}', 'ScreeningController@get')->name('screening.get');
     Route::post('screening/update', 'ScreeningController@update');
     Route::post('screening/add-judging-panels', 'ScreeningController@addJudgingPanels')->name('screening.add_judging_panels');
@@ -752,7 +752,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/oldReview', 'BookingController@oldReview')->name('bookings.review_past');
     //Final Screening
     Route::get('final', 'FinalscreeningController@index')->name('screening.final');
-    Route::get('final/{id}', 'FinalscreeningController@show');
+    Route::get('final/{id}', 'FinalscreeningController@show')->name('screening.manage_final');
     Route::get('{id?}/final', 'FinalscreeningController@index')->name('screening.show');
     Route::post('final/update', 'FinalscreeningController@update')->name('screening.update');
     Route::post('final/save', 'FinalscreeningController@save')->name('screening.store');

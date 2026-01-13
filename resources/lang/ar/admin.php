@@ -2933,7 +2933,7 @@ return [
 	'invitation_scope_required' => 'يرجى اختيار نطاق الدعوة',
 	'organizations_select_required' => 'يرجى اختيار مؤسسة واحده على الأقل',
 	'new_invitation' => 'دعوة جديدة',
-	'subject' => 'العنوان',
+	'subject' => 'الموضوع',
 	'invitee' => 'المدعو',
 	'invitee_name' => 'اسم المدعو',
 	'invitee_email' => 'البريد الإلكتروني للمدعو',

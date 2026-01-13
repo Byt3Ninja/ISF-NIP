@@ -13,14 +13,16 @@
         {{-- Back Button --}}
         <li class="breadcrumb-item active">
           <a 
-            @if ($crumbs['child_group'] && !Route::is($crumbs['child_group'] . '.index'))
+            @if ($crumbs['group_route'] && !Route::is($crumbs['group_route']))
+              href="{{ route($crumbs['group_route']) }}"
+            @elseif ($crumbs['child_group'] && !Route::is($crumbs['child_group'] . '.index'))
               href="{{ route($crumbs['child_group'] . '.index') }}"
             @else
               href="{{ route('core.dashboard_view') }}"
             @endif
-            class="btn btn-icon btn-text-secondary rounded-pill waves-effect waves-light mb-0"
+            class="btn btn-sm btn-icon btn-text-secondary rounded-pill waves-effect waves-light mb-0"
           >
-            <i class="ti ti-arrow-left"></i>
+            <i class="ti ti-arrow-{{ $l == 'en' ? 'left' : 'right' }}"></i>
           </a>
         </li>
 
@@ -40,7 +42,11 @@
         @if ($crumbs['child_group'] && !Route::is($crumbs['child_group'] . '.index'))
           <li class="breadcrumb-item active">
             <a 
-              href="{{ route($crumbs['child_group'] . '.index') }}"
+              @if ($crumbs['group_route'] && !Route::is($crumbs['group_route']))
+                href="{{ route($crumbs['group_route']) }}"
+              @else
+                href="{{ route($crumbs['child_group'] . '.index') }}"
+              @endif
             >
               {{ __('settings.navigation.' . $crumbs['child_group']) }}
             </a>
