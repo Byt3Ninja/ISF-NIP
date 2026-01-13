@@ -88,10 +88,9 @@
       @if ($cycles && $cycles->count() > 0)
         @foreach ($cycles as $cycle)
           @php
-            $totalSteps = app(\App\Step::class)->where('cycle_id', '=', $cycle->id)->count();
+            $totalSteps = $cycle->steps->count();
 
-            $totalStepsFinish = app(\App\Step::class)
-              ->where('cycle_id', '=', $cycle->id)
+            $totalStepsFinish = $cycle->steps
               ->where('from', '<=', Carbon\Carbon::now())
               ->where('to', '<=', Carbon\Carbon::now())
               ->count();
@@ -221,7 +220,7 @@
                   >
                     <i class="ti ti-building-skyscraper ti-lg text-info"></i>
                     <div class="d-flex align-items-center gap-2 mt-1">
-                      <strong>{{ app(\App\Company::class)->where('cycle', '=', $cycle->id)->count() }}</strong>
+                      <strong>{{ $cycle->companies->count() }}</strong>
                       <span>{{ __('admin.Startups') }}</span>
                     </div>
                   </a>
@@ -235,7 +234,7 @@
                   >
                     <i class="ti ti-recycle ti-lg text-success"></i>
                     <div class="d-flex align-items-center gap-2 mt-1">
-                      <strong>{{ app(\App\Step::class)->where('cycle_id', '=', $cycle->id)->count() }}</strong>
+                      <strong>{{ $cycle->steps->count() }}</strong>
                       <span>{{ __('cycles.steps') }}</span>
                     </div>
                   </a>
@@ -251,7 +250,7 @@
                   >
                     <i class="ti ti-users ti-lg text-warning"></i>
                     <div class="d-flex align-items-center gap-2 mt-1">
-                      <strong>{{ $cycle->mentors()->distinct()->get()->count() }}</strong>
+                      <strong>{{ $cycle->mentors->unique('id')->count() }}</strong>
                       <span>{{ __('admin.Mentors') }}</span>
                     </div>
                   </a>
