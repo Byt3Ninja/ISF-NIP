@@ -663,7 +663,7 @@ class MentorsController extends Controller
 		$user = auth()->user();
 		$orgIds = $user->organizations_ids;
 		if ($request->show == 'all') {
-			 $query = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+			$query = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
 				return $q->whereIn('organization_id', $orgIds);
 			})->when($request->start_date && $request->end_date, function ($q) use ($request) {
 				// التأكد من أن التواريخ متوافقة مع التنسيق المناسب
@@ -677,7 +677,7 @@ class MentorsController extends Controller
 				return $q->where('cycle_id', $request->cycle_id);
 			});
 		} elseif ($request->show == 'approved') {
-			 $query = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+			$query = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
 				return $q->whereIn('organization_id', $orgIds);
 			})->whereNotNull('start_url')->when($request->start_date && $request->end_date, function ($q) use ($request) {
 				$startDate = Carbon::parse($request->start_date)->startOfDay();
@@ -688,7 +688,7 @@ class MentorsController extends Controller
 				return $q->where('cycle_id', $request->cycle_id);
 			});
 		} elseif ($request->show == 'disapproved') {
-			 $query = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+			$query = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
 				return $q->whereIn('organization_id', $orgIds);
 			})->where('approved', 'No')->when($request->start_date && $request->end_date, function ($q) use ($request) {
 				$startDate = Carbon::parse($request->start_date)->startOfDay();
@@ -699,7 +699,7 @@ class MentorsController extends Controller
 				return $q->where('cycle_id', $request->cycle_id);
 			});
 		} else {
-			 $query = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+			$query = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
 				return $q->whereIn('organization_id', $orgIds);
 			})->whereNull('approved')->when($request->start_date && $request->end_date, function ($q) use ($request) {
 				$startDate = Carbon::parse($request->start_date)->startOfDay();
@@ -712,19 +712,19 @@ class MentorsController extends Controller
 			});
 		}
 
-    	if ($request->filled('done') && $request->done !== 'all') {
-         $query->where('approved', 'Yes');
-   		 if ($request->done === 'yes') {
-        	$query->where('done', 1);
-    	} elseif ($request->done === 'no') {
-        	$query->whereNull('done');
-   		 }
-    	}
+		if ($request->filled('done') && $request->done !== 'all') {
+			$query->where('approved', 'Yes');
+			if ($request->done === 'yes') {
+				$query->where('done', 1);
+			} elseif ($request->done === 'no') {
+				$query->whereNull('done');
+			}
+		}
 		if ($request->filled('session_type') && $request->session_type != 'all') {
 			$query->where('session_type', $request->session_type);
 		}
 
-		$sessions = $query->orderBy('id', 'DESC')->get();
+		$sessions = $query->with(['user.company', 'mentor'])->orderBy('id', 'DESC')->get();
 
 		// Add rate filtering - filter after retrieval for better accuracy
 		if ($request->filled('rate') && $request->rate != 'all' && ($request->show == 'all' || $request->show == 'approved')) {
@@ -744,9 +744,9 @@ class MentorsController extends Controller
 		if(!empty($orgIds) && !$user->hasRole('admin')) {
 			$cycles = \App\Cycle::whereIn('organization_id', $orgIds)->get();
 		} else {
-				$cycles = \App\Cycle::all();
+			$cycles = \App\Cycle::all();
 		}
-		// dd($sessions[300]);
+
 		return view('admin.settings.mentorship.sessions', compact('sessions', 'cycles'));
 	}
 
