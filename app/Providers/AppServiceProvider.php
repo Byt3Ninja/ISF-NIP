@@ -32,7 +32,30 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Broadcast::routes();
-        view()->composer('*', function ($view) {
+
+        if (Schema::hasTable('settings'))
+        {
+            try {
+                $settings = Settings::find(1);
+
+                if ($settings) {
+                    Config::set('mail.driver', 'smtp');
+                    Config::set('mail.host', $settings->host);
+                    Config::set('mail.port', $settings->Port);
+                    Config::set('mail.username', $settings->Mail);
+                    Config::set('mail.password', $settings->Mailpassword);
+                    Config::set('mail.encryption', $settings->encryption);
+                
+                    Config::set('mail.from.address', $settings->Mail);
+                    Config::set('mail.from.name', $settings->title ?? 'Your App Name');
+                }
+            } catch (\Exception $e) {
+                $settings = null;
+                // يمكنك تسجيل الخطأ هنا إذا فشل الاتصال بقاعدة البيانات
+                // Log::error('Could not load mail settings from database: ' . $e->getMessage());
+            }
+        }
+        view()->composer('*', function ($view) use ($settings) {
             if (session()->has('locale')) {
                 \App::setLocale(session()->get('locale'));
             } elseif (auth()->check()) {
@@ -62,7 +85,7 @@ class AppServiceProvider extends ServiceProvider
                     $organization_ids = $organization_id ? [$organization_id] : [];
                 }
             }
-            $view->with(['l' => $l, 'organization_id' => $organization_id, 'organization_ids' => $organization_ids, '_user' => $_user, 'permissions' => $permissions]);
+            $view->with(['l' => $l, 'organization_id' => $organization_id, 'organization_ids' => $organization_ids, '_user' => $_user, 'permissions' => $permissions, '_settings' => $settings]);
         });
 
 
@@ -115,27 +138,6 @@ class AppServiceProvider extends ServiceProvider
 				app()->setLocale( $lang );
 			}
         }
-
-        if (Schema::hasTable('settings')) {
-        try {
-            $settings = DB::table('settings')->where('id', 1)->first();
-
-            if ($settings) {
-                Config::set('mail.driver', 'smtp');
-                Config::set('mail.host', $settings->host);
-                Config::set('mail.port', $settings->Port);
-                Config::set('mail.username', $settings->Mail);
-                Config::set('mail.password', $settings->Mailpassword);
-                Config::set('mail.encryption', $settings->encryption);
-                
-                Config::set('mail.from.address', $settings->Mail);
-                Config::set('mail.from.name', $settings->title ?? 'Your App Name');
-            }
-        } catch (\Exception $e) {
-            // يمكنك تسجيل الخطأ هنا إذا فشل الاتصال بقاعدة البيانات
-            // Log::error('Could not load mail settings from database: ' . $e->getMessage());
-        }
-    }
 
         // Register the WireChat Message observer
         Message::observe(WireChatMessageObserver::class);
