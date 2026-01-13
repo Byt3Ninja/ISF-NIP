@@ -116,9 +116,6 @@
             <div class="col-md-4 mb-6">
               <div class="card h-100">
                 <div class="card-body d-flex flex-column">
-                  @php
-                    $client = App\User::where('company_id', $company->id)->first();
-                  @endphp
                   <div class="d-flex justify-content-between align-items-center">
                     <a href="/dashboard/companyProfile/{{ $company->id }}" class="w-75">
                       <h5 class="text-dark mb-0 fw-bold line-clamp-1 text-truncate">
@@ -164,10 +161,7 @@
 
                   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                     <h6 class="fw-semibold text-capitalize line-clamp-2 mb-0">
-                      @php
-                        $sector = App\Sector::where('id', $company->sector)->first();
-                      @endphp
-                      {{ $sector ? $sector->{'name_' . $l} : $company->sector }}
+                      {{ $company->sectoR ? $company->sectoR->{'name_' . $l} : $company->sector }}
                     </h6>
                     <div class="d-flex flex-nowrap align-items-center gap-2">
                       @if ($company->stage && optional($company->stagE)->{'name_' . $l})
@@ -196,7 +190,7 @@
                                   <div class="row justify-content-center">
                                     @foreach ($Sustainables as $Sustainable)
                                       @php
-                                        $icon = App\SustainableIcon::where('title', $Sustainable)->first();
+                                        $icon = $SustainableIcons->where('title', $Sustainable)->first();
                                       @endphp
                                       <div class="col-md-3 col-sm-4 col-6 mb-3">
                                         <div class="border shadow-sm rounded p-3 d-flex justify-content-center align-items-center"
@@ -222,10 +216,7 @@
 
                 <!-- Founders -->
                   @php
-                  $founders = App\Team_member::where([
-                      ['TeamMember', 'Founder'],
-                      ['Company_id', $company->id],
-                  ])->get();
+                    $founders = $company->teamMembers->where('TeamMember', 'Founder');
                   @endphp
 
                   @if (count($founders) > 0)
@@ -422,7 +413,7 @@
                 <option value=""></option>
 
                 @php
-                  $sectors = App\Sector::whereNull('parent_id')->get();
+                  $sectors = App\Sector::whereNull('parent_id')->with('children')->get();
                   $selectedSectors = request('sectors', []);
                 @endphp
 
