@@ -65,7 +65,7 @@
             <label for="expertises" class="form-label">{{ __('admin.Expertises') }}</label>
             <select name="expertises[]" id="expertises" class="form-select select2" multiple="multiple" data-placeholder="{{ __('admin.select_expertises') }}">
               @php
-              $expertises = App\Expertise::where('parent_id', null)->get();
+              $expertises = App\Expertise::whereNull('parent_id')->with('children')->get();
               $selectedExpertises = request('expertises', []);
               @endphp
               @foreach ($expertises as $expertise_group)

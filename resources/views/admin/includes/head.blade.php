@@ -1,4 +1,4 @@
-@php($gtag = \App\Settings::findorfail(1)->first('url'))
+@php($gtag = $_settings?->url ?? null)
 
 <!-- Goggle Tag Manger -->
 @if ($gtag)
