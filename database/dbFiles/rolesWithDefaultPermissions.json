@@ -4821,6 +4821,15 @@
                     "subadmin",
                     "registered"
                 ]
+            },
+            {
+                "name": "company.perks_view",
+                "description": " View company perks and discounts",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "registered"
+                ]
             }
         ]
     },

@@ -6,7 +6,7 @@ if (! function_exists('breadcrumbs')) {
     function breadcrumbs()
     {
         $currentRoute = Route::currentRouteName();
-        $navigation   = config('navigation');
+        $navigation   = config('navigation')();
 
         foreach ($navigation as $section) {
             foreach ($section['children'] as $child) {

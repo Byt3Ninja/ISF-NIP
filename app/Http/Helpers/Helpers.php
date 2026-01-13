@@ -393,10 +393,4 @@ if (!function_exists('getIndustryIcon')) {
             return '';
         }
     }
-
-    if (!function_exists('menuItem')) {
-        function menuItem($pattern) {
-            return request()->is($pattern) ? 'active menu-item' : 'menu-item';
-        }
-    }
 }
