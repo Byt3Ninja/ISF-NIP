@@ -141,9 +141,9 @@
       <script>console.log('Echo script section executing - user has correct role');</script>
       <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
       <script>
-        console.log('Pusher script executed');
-        // const pusherConfig = @json(getPusherConfig());
-        console.log("pusherConfig", pusherConfig);
+        // console.log('Pusher script executed');
+        const pusherConfig = @json(getPusherConfig());
+        // console.log("pusherConfig", pusherConfig);
         const pusherAppKey = pusherConfig.PUSHER_APP_KEY;
         const pusherCluster = pusherConfig.PUSHER_APP_CLUSTER;
         

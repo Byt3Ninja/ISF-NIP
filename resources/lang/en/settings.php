@@ -352,5 +352,7 @@ return [
 		'learning' => 'Learning',
 		'startup_workspace' => 'Startup Workspace',
 		'engagement' => 'Engagement',
+		'availability' => 'Availability',
+		'startup_hub' => 'Startup Hub',
 	],
 ];

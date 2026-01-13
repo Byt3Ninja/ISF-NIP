@@ -162,6 +162,24 @@
         'isVisible' => $_user->hasRole("Mentor"),
         'subItems' => []
     ],
+    // mentorship sessions (for Mentors)
+    [
+        'label' => __('admin.Mentorship Sessions'),
+        'icon' => 'ti ti-calendar-event ti-md me-2 me-lg-4 ti-lg',
+        'route' => '/dashboard/mentor/sessions',
+        'permission' => null,
+        'isVisible' => $_user->hasRole("Mentor"),
+        'subItems' => []
+    ],
+    // Surveys (for Mentors)
+    [
+        'label' => __('admin.Surveys'),
+        'icon' => 'ti ti-notes ti-md me-2 me-lg-4 ti-lg',
+        'route' => '/dashboard/mentor/surveys',
+        'permission' => null,
+        'isVisible' => $_user->hasRole("Mentor"),
+        'subItems' => []
+    ],
 
     // Hackathon
     [

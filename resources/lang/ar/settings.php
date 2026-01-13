@@ -355,5 +355,7 @@ return [
 		'learning' => 'التلعيم',
 		'startup_workspace' => 'مساحة العمل',
 		'engagement' => 'المشاركة',
+		'availability' => 'التواجد',
+		'startup_hub' => 'الشركات الناشئة',
 	],
 ];
