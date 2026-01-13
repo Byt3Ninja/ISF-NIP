@@ -35,7 +35,7 @@ if ($canRequestMentorship) {
 @endphp
 
 @section('content')
-  <div class="content-wrapper">
+  <div class="">
     {{-- Alert Messages --}}
     @if(session()->has('error'))
       <div class="row">
@@ -60,7 +60,7 @@ if ($canRequestMentorship) {
       </div>
     @endif
 
-    <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="">
       {{-- Profile Header Section --}}
       <section class="row">
         <div class="col-12">

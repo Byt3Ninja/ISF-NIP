@@ -22,9 +22,9 @@
 
 @section('content')
   <!-- Content wrapper -->
-  <div class="content-wrapper">
+  <div class="">
     <!-- Content -->
-    <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="">
       <div class="card form-card">
         <div class="card-header">
           <h3 class="card-title border-bottom fw-bold pb-3">

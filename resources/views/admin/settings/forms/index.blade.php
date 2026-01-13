@@ -31,8 +31,8 @@
   }
 @endphp
 
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
 
     <!-- Navigation Pills -->
     <div class="card shadow-sm p-4 mb-4">

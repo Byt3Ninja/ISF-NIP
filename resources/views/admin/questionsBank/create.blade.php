@@ -5,8 +5,8 @@
 
 @section('content')
 <!-- BEGIN: Content-->
-<div class="content-wrapper">
-	<div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+	<div class="">
 		<div class="content-overlay"></div>
 		
 		<div class="content-body">
@@ -241,7 +241,7 @@
 									<div class="col-12 mt-12">
 										<div class="d-flex justify-content-end gap-3">
 											<a href="{{ route('questions-bank.index') }}" class="btn btn-outline-secondary">
-												<i class="ti ti-arrow-left me-1"></i>
+												<i class="ti ti-arrow-{{ $l == 'en' ? 'left' : 'right' }} me-1"></i>
 												{{__('admin.Cancel')}}
 											</a>
 											<button type="submit" class="btn btn-primary">

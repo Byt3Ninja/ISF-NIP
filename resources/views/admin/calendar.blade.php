@@ -43,11 +43,11 @@
 
 @section('content')
   <!-- Content wrapper -->
-  <div class="content-wrapper">
+  <div class="">
     <!-- Content -->
 
     @if( session()->has('success') || session()->has('error') || session()->has('msg') )
-    <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="">
       @if( session()->has('success') )
       <div role="alert" class="alert alert-success alert-dismissible fade show mb-2">
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -79,7 +79,7 @@
       @endif
     </div>
     @endif
-    <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="">
       <div class="card app-calendar-wrapper">
         <div class="row g-0">
           <!-- Calendar Sidebar -->

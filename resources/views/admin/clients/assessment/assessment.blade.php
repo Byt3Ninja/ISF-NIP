@@ -5,8 +5,8 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
 @endphp
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <!-- Pills (Mobile) -->
     <div class="row mb-4 d-block d-md-none">
       <div class="col-12">

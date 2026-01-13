@@ -2,9 +2,9 @@
 
 @section('content')
 <!-- Content wrapper -->
-<div class="content-wrapper">
+<div class="">
   <!-- Content -->
-  <div class="container-xxl flex-grow-1 container-p-y">
+  <div class="">
     @include('judger.screening.partials.screening-header-card')
     
     <!-- Screening Table -->

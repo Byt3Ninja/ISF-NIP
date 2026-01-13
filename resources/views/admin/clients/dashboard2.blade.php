@@ -56,7 +56,7 @@
 <!-- BEGIN: Content-->
 <div class="app-content content">
 	<div class="content-overlay"></div>
-	<div class="content-wrapper">
+	<div class="">
 		@include('admin.includes.heading')
 		<div class="content-header row"> </div>
 		<div class="content-body">

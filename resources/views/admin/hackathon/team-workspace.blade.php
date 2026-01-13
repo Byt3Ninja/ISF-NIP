@@ -53,8 +53,8 @@
 
 @section('content')
 <!-- Main Content -->
-<div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+    <div class="">
         <!-- Simple Header -->
         <div class="mb-4">
             <h3 class="mb-1">

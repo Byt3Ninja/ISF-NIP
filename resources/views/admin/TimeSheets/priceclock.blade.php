@@ -1,8 +1,8 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="content-wrapper">
-	<div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+	<div class="">
     <section id="multiple-column-form">
       @if (session()->has('message'))
       <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible" role="alert">

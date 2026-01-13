@@ -29,8 +29,8 @@
 	'danger']) !!}</div>
 @endif
 <!-- Content wrapper -->
-<div class="content-wrapper">
-	<div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+	<div class="">
 		@if(Auth::user()->hasRole('Registered') || Auth::user()->hasRole('Mentor'))
 			@if( isset($newhackathon) && $newhackathon )
 				{{-- @if(now()->diffInDays($newhackathon->created_at) < 300) --}}

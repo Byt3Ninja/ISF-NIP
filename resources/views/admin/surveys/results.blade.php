@@ -5,8 +5,8 @@
 @section('subTitle', __('admin.manageQuestions'))
 
 @section('content')
-<div class="content-wrapper">
-	<div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+	<div class="">
 		<div class="content-body">
 			<div class="row">
 				<div class="col-md-12">

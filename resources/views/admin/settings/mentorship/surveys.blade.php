@@ -73,26 +73,8 @@
 @section('subTitle', __('admin.surveysList'))
 
 @section('content')
-	<div class="content-wrapper">
-		<div class="container-xxl flex-grow-1 container-p-y">
-			<!-- Enhanced Breadcrumb -->
-			<div class="d-flex align-items-center gap-3 mb-6">
-				<a href="javascript:history.back()" class="btn btn-sm btn-icon shadow btn-white rounded-circle">
-					<i class="ti ti-chevron-{{ $l == 'en' ? 'left' : 'right' }} ti-md text-dark"></i>
-				</a>
-				<a href="{{ route('mentorships.requests_view',['id' => $cycle->id]) }}" class="d-flex align-items-center gap-2 text-decoration-none">
-					<i class="ti ti-users fs-4 text-primary"></i>
-					<strong class="text-dark">{{ __('admin.Mentorships') }}</strong>
-				</a>
-				<div class="d-flex align-items-center gap-1">
-					<i class="ti ti-chevron-{{ $l == 'en' ? 'right' : 'left' }} ti-xs text-muted"></i>
-					<div class="d-flex align-items-center gap-2">
-						<i class="ti ti-clipboard-list fs-4 text-primary"></i>
-						<strong class="text-dark">{{ __('admin.mentorshipSurveys') }}</strong>
-					</div>
-				</div>
-			</div>
-
+	<div class="">
+		<div class="">
 			<!-- Enhanced Program Overview -->
 			<div class="row mb-4">
 				<div class="col-12">

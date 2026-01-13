@@ -1,29 +1,17 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
-   <!-- Navigation Tabs -->
-    <nav class="nav-align-top mb-6">
-      @php
-        $tabs = [
-          ['title' => __('admin.initial_screening'), 'url' => 'dashboard/screening', 'icon' => 'scale'],
-          ['title' => __('admin.Final Screening'), 'url' => 'dashboard/final', 'icon' => 'gavel'],
-        ];
-      @endphp
-      <ul class="nav nav-pills">
-        @foreach($tabs as $tab)
-          <li class="nav-item">
-            <a href="/{{ $tab['url'] }}" class="nav-link {{ Request::is($tab['url'] . '*') ? 'active' : '' }}">
-              <i class="ti ti-{{ $tab['icon'] }} me-2 d-none d-md-inline"></i>
-              {{ $tab['title'] }}
-            </a>
-          </li>
-        @endforeach
-      </ul>
-    </nav>
-    <!--/ Navigation Tabs -->
-  
+<div class="">
+  <div class="">
+    @php
+      $tabs = [
+        ['title' => __('admin.initial_screening'), 'url' => 'dashboard/screening', 'icon' => 'scale'],
+        ['title' => __('admin.Final Screening'), 'url' => 'dashboard/final', 'icon' => 'gavel'],
+      ];
+    @endphp
+    
+    <x-navigation-pills :tabs="$tabs" />
+
     <!-- Alerts -->
     @if (session()->has('message'))
       <x-alert type="success" message="{{ __('admin.' . session()->get('message')) }} {{ Session::forget('message') }}" />

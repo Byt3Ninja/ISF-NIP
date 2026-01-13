@@ -122,8 +122,8 @@
 
 @section('content')
 
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
 
     <div class="d-flex align-items-center mb-4">
       <i class="ti ti-dashboard text-primary fs-3 me-2 d-none d-md-inline"></i>

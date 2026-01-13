@@ -3,15 +3,15 @@
 @section('title', __('notification_triggers.create_trigger'))
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <div class="row">
       <div class="col-12">
         <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center border-bottom">
             <h5 class="mb-0">{{ __('notification_triggers.create_trigger') }}</h5>
             <a href="{{ route('notification-triggers.index') }}" class="btn btn-label-secondary">
-              <i class="ti ti-arrow-left me-2"></i> {{ __('notification_triggers.back_to_list') }}
+              <i class="ti ti-arrow-{{ $l == 'en' ? 'left' : 'right' }} me-2"></i> {{ __('notification_triggers.back_to_list') }}
             </a>
           </div>
 

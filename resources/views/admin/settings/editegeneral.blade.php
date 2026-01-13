@@ -36,9 +36,9 @@ $tabs = collect([
 
 @section('content')
 <!-- Content wrapper -->
-<div class="content-wrapper">
+<div class="">
   <!-- Content -->
-  <div class="container-xxl flex-grow-1 container-p-y">
+  <div class="">
     <!-- Alert -->
     @if (session()->has('message'))
     <div class="alert alert-success alert-dismissible" role="alert">

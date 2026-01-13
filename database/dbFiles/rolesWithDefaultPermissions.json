@@ -5329,6 +5329,28 @@
                 ]
             },
             {
+                "name": "screening.final",
+                "description": "List Final Screening Sessions\/Entries",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "screening.manage_final",
+                "description": "manage Final Screening Sessions\/Entries",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
                 "name": "screening.index",
                 "description": "List Screening Sessions\/Entries",
                 "guard_name": "web",
@@ -5347,6 +5369,17 @@
                 "default_for": [
                     "admin",
                     "judger",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "screening.manage",
+                "description": "manage Specific Screening Session\/Entry",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
                     "organizationmanager",
                     "subadmin"
                 ]

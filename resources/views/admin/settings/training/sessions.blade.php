@@ -43,8 +43,8 @@
 @stop
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <!-- Alert -->
     @if (session()->has('message') || session()->has('message2'))
      <x-alert 
@@ -53,27 +53,14 @@
       />
     @endif
 
-    <!-- Navigation Tabs -->
-    <nav class="nav-align-top mb-6">
-      @php
-        $tabs = [
-          ['title' => __('admin.training_sessions'), 'url' => 'dashboard/training/sessions', 'icon' => 'book'],
-          ['title' => __('admin.training_courses'), 'url' => 'dashboard/training/all', 'icon' => 'certificate'],
-          ['title' => __('admin.training_results'), 'url' => 'dashboard/training/results', 'icon' => 'report-analytics'],
-        ]
-      @endphp
-      <ul class="nav nav-pills">
-        @foreach($tabs as $tab)
-          <li class="nav-item">
-            <a href="/{{ $tab['url'] }}" class="nav-link {{ Request::is($tab['url'] . '*') ? 'active' : '' }}">
-              <i class="ti ti-{{ $tab['icon'] }} me-2"></i>
-              {{ $tab['title'] }}
-            </a>
-          </li>
-        @endforeach
-      </ul>
-    </nav>
-    <!--/ Navigation Tabs -->
+    @php
+      $tabs = [
+        ['title' => __('admin.training_sessions'), 'url' => 'dashboard/training/sessions', 'icon' => 'book'],
+        ['title' => __('admin.training_courses'), 'url' => 'dashboard/training/all', 'icon' => 'certificate'],
+        ['title' => __('admin.training_results'), 'url' => 'dashboard/training/results', 'icon' => 'report-analytics'],
+      ]
+    @endphp
+    <x-navigation-pills :tabs="$tabs" />
 
     <div class="card">
       <!-- Heading & Actions -->

@@ -7,30 +7,17 @@
 
 @section('content')
   <!-- BEGIN: Content-->
-  <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
-      <!-- Navigation Tabs -->
-			<nav class="nav-align-top mb-6">
-				@php
-					$tabs = [
-						['title' => __('cycles.All requests'), 'show' => 'all', 'icon' => 'bulb'],
-            ['title' => __('cycles.New requests only'), 'show' => '', 'icon' => 'brand-speedtest'],
-						['title' => __('cycles.approved requests'), 'show' => 'approved', 'icon' => 'circle-check'],
-            ['title' => __('cycles.disapproved requests'), 'show' => 'disapproved', 'icon' => 'playstation-x'],
-					]
-				@endphp
-				<ul class="nav nav-pills flex-column flex-sm-row gap-2 gap-lg-0">
-					@foreach($tabs as $tab)
-						<li class="nav-item">
-							<a href="/dashboard/mentorship/sessions?show={{ $tab['show'] }}" class="nav-link {{ Request::get('show') == $tab['show'] ? 'active' : '' }}">
-								<i class="ti ti-{{ $tab['icon'] }} me-2"></i>
-								{{ $tab['title'] }}
-							</a>
-						</li>
-					@endforeach
-				</ul>
-			</nav>
-			<!--/ Navigation Tabs -->
+  <div class="">
+    <div class="">
+      @php
+        $tabs = [
+          ['title' => __('cycles.All requests'), 'url' => 'dashboard/mentorship/sessions?show=all', 'show' => 'all', 'icon' => 'bulb'],
+          ['title' => __('cycles.New requests only'), 'url' => 'dashboard/mentorship/sessions', 'show' => '', 'icon' => 'brand-speedtest'],
+          ['title' => __('cycles.approved requests'), 'url' => 'dashboard/mentorship/sessions?show=approved', 'show' => 'approved', 'icon' => 'circle-check'],
+          ['title' => __('cycles.disapproved requests'), 'url' => 'dashboard/mentorship/sessions?show=disapproved', 'show' => 'disapproved', 'icon' => 'playstation-x'],
+        ]
+      @endphp
+      <x-navigation-pills :tabs="$tabs" />
 
       <div class="content-body">
         <section id="alerts">

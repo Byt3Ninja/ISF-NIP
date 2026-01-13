@@ -15,29 +15,17 @@
 @endphp
 
 @section('content')
-<div class="content-wrapper">
-	<div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+	<div class="">
 
-		<!-- Navigation Tabs -->
-		<nav class="nav-align-top mb-6">
-			@php
-				$tabs = [
-					['title' => __('admin.surveys'), 'url' => 'dashboard/surveys', 'icon' => 'device-imac-search'],
-					['title' => __('admin.surveys_results'), 'url' => 'dashboard/Totalsurveys', 'icon' => 'report-search'],
-				]
-			@endphp
-			<ul class="nav nav-pills">
-				@foreach($tabs as $tab)
-					<li class="nav-item">
-						<a href="/{{ $tab['url'] }}" class="nav-link {{ Request::is($tab['url'] . '*') ? 'active' : '' }}">
-							<i class="ti ti-{{ $tab['icon'] }} me-2"></i>
-							{{ $tab['title'] }}
-						</a>
-					</li>
-				@endforeach
-			</ul>
-		</nav>
-		<!--/ Navigation Tabs -->
+		@php
+      $tabs = [
+        ['title' => __('admin.surveys'), 'route' => 'surveys.index', 'icon' => 'device-imac-search'],
+        ['title' => __('admin.surveys_results'), 'route' => 'surveys.dashboard_count_view', 'icon' => 'report-search'],
+      ]
+    @endphp
+    
+    <x-navigation-pills :tabs="$tabs" />
 
 		<div class="row">
 			@if( session()->has('success') )

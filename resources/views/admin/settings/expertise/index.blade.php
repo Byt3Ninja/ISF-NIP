@@ -6,9 +6,9 @@
 
 @section('content')
 <!-- Content wrapper -->
-<div class="content-wrapper" dir="{{ $l == 'ar' ? 'rtl' : 'ltr' }}">
+<div class="" dir="{{ $l == 'ar' ? 'rtl' : 'ltr' }}">
   <!-- Content -->
-  <div class="container-xxl grow container-p-y">    
+  <div class="">    
     <!-- Navigation Tabs -->
     <ul class="nav nav-pills flex-nowrap overflow-x-auto mb-6">
       <li class="nav-item">

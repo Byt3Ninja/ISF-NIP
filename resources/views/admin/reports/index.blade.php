@@ -4,8 +4,8 @@
 @section('subTitle', __('admin.View and analyze reports'))
 
 @section('content')
-<div class="content-wrapper mb-12">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <div class="row py-md-3 h-100">
       <div class="col-md-12 h-100">
         {{-- Alerts --}}

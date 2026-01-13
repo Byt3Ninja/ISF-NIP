@@ -1,8 +1,8 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+    <div class="">
         <div class="card card-body">
             <div class="mb-4">
                 <h4 class="fw-bold mb-2">{{ __('admin.Advanced Startup & Founder Importer') }}</h4>

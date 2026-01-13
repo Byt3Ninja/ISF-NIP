@@ -4,8 +4,8 @@
 @section('subTitle', __('admin.Services directory'))
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
 
     <div class="card">
       <div class="card-content">

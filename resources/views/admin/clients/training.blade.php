@@ -68,10 +68,10 @@
 
 @section('content')
   <!-- Content wrapper -->
-  <div class="content-wrapper">
+  <div class="">
     <!-- Content -->
 
-    <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="">
       <div class="row">
         <div class="col-lg-8">
           <div class="card shadow-sm mb-4" style="border-radius: 1rem;">
@@ -380,7 +380,7 @@
 <!-- BEGIN: Content-->
     <div class="app-content content">
         <div class="content-overlay"></div>
-        <div class="content-wrapper">
+        <div class="">
             <div class="content-header row">
                 <div class="content-header-left col-12 mb-2 mt-1">
                     <div class="row breadcrumbs-top">
