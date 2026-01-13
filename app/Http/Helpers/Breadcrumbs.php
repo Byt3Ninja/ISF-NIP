@@ -1,25 +1,41 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 if (! function_exists('breadcrumbs')) {
     function breadcrumbs()
     {
         $currentRoute = Route::currentRouteName();
-        $navigation   = config('navigation');
+        $navigation   = config('navigation')();
 
-        foreach ($navigation as $section) {
-            foreach ($section['children'] as $child) {
-                if ($child['route'] === $currentRoute) {
+        foreach ($navigation as $item) {
+            if (!isset($item['children']) || !is_array($item['children'])) {
+                if (request()->is($item['url'])) {
                     return [
-                        'parent' => $section['title'],
-                        'child'  => $child['title'],
-                        'child_group' => isset($child['group']) ? $child['group'] : null,
-                        'route'  => $child['route'],
-                        'group_route' => isset($child['group_route']) ? $child['group_route'] : null
+                        'parent' => null,
+                        'child'  => $item['title'],
+                        'child_group' => null,
+                        'route'  => $item['url'],
+                        'group_route' => null,
                     ];
                 }
             }
+
+            else {
+                foreach ($item['children'] as $child) {
+                    if ($child['route'] === $currentRoute) {
+                        return [
+                            'parent' => $item['title'],
+                            'child'  => $child['title'],
+                            'child_group' => isset($child['group']) ? $child['group'] : null,
+                            'route'  => $child['route'],
+                            'group_route' => isset($child['group_route']) ? $child['group_route'] : null
+                        ];
+                    }
+                }
+            }
+
         }
 
         return null;

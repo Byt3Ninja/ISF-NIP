@@ -3,7 +3,7 @@
 @section('content')
 <div class="">
   <div class="">
-    <ul class="nav nav-pills flex-nowrap mb-6" role="tablist" style="max-width: 100%; overflow-x: auto;">
+    {{-- <ul class="nav nav-pills flex-nowrap mb-6" role="tablist" style="max-width: 100%; overflow-x: auto;">
       <li class="nav-item me-2" role="presentation">
         <a class="nav-link active" id="enrolled-programs-tab" data-bs-toggle="tab" href="#enrolled-programs" role="tab" aria-controls="enrolled-programs" aria-selected="true">
           <i class="ti ti-components me-2"></i>{{ __('mentor.enrolled_programs') }}
@@ -14,7 +14,7 @@
           <i class="ti ti-versions me-2"></i>{{ __('admin.Mentorship Sessions') }}
         </a>
       </li>
-    </ul>
+    </ul> --}}
     <div class="tab-content p-0 shadow-none">
       <div class="tab-pane fade show active" id="enrolled-programs" role="tabpanel" aria-labelledby="enrolled-programs-tab">
         @foreach($cycles as $cycle)

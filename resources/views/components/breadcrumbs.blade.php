@@ -7,18 +7,17 @@
 </style>
 
 @if($crumbs)
-  @if(!Route::is('core.dashboard_view'))
-    <nav aria-label="breadcrumb">
+  @if(!Route::is('core.dashboard_view') && !Route::is('core.admin_access'))
       <ol class="breadcrumb align-items-center bg-card rounded p-2 shadow-xs">
         {{-- Back Button --}}
         <li class="breadcrumb-item active">
           <a 
-            @if ($crumbs['group_route'] && !Route::is($crumbs['group_route']))
+            @if (isset($crumbs['group_route']) && !Route::is($crumbs['group_route']))
               href="{{ route($crumbs['group_route']) }}"
-            @elseif ($crumbs['child_group'] && !Route::is($crumbs['child_group'] . '.index'))
-              href="{{ route($crumbs['child_group'] . '.index') }}"
+            @elseif (isset($crumbs['child_group']) && !Route::is($crumbs['child_group'] . '.index'))
+              href="{{ (Route::has($crumbs['child_group'] . '.index')) ? route($crumbs['child_group'] . '.index') : url()->previous() }}"
             @else
-              href="{{ route('core.dashboard_view') }}"
+              href="/dashboard"
             @endif
             class="btn btn-sm btn-icon btn-text-secondary rounded-pill waves-effect waves-light mb-0"
           >
@@ -28,24 +27,26 @@
 
         {{-- Dashboard Link --}}
         <li class="breadcrumb-item active hide-before">
-          <a href="{{ route('core.dashboard_view') }}">
+          <a href="/dashboard">
             {{ __('admin.Dashboard') }}
           </a>
         </li>
 
         {{-- Parent --}}
-        <li class="breadcrumb-item active">
-          {{ __('settings.navigation.' . $crumbs['parent']) }}
-        </li>
+        @if (isset($crumbs['parent']))
+          <li class="breadcrumb-item active">
+            {{ __('settings.navigation.' . $crumbs['parent']) }}
+          </li>
+        @endif
         
         {{-- Child Group --}}
-        @if ($crumbs['child_group'] && !Route::is($crumbs['child_group'] . '.index'))
+        @if (isset($crumbs['child_group']) && !Route::is($crumbs['child_group'] . '.index'))
           <li class="breadcrumb-item active">
             <a 
-              @if ($crumbs['group_route'] && !Route::is($crumbs['group_route']))
+              @if (isset($crumbs['group_route']) && !Route::is($crumbs['group_route']))
                 href="{{ route($crumbs['group_route']) }}"
               @else
-                href="{{ route($crumbs['child_group'] . '.index') }}"
+                href="{{ (Route::has($crumbs['child_group'] . '.index')) ? route($crumbs['child_group'] . '.index') : url()->previous() }}"
               @endif
             >
               {{ __('settings.navigation.' . $crumbs['child_group']) }}
