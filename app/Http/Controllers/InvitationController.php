@@ -29,9 +29,17 @@ class InvitationController extends Controller
         }
 
         $organizationMap = collect($allOrganizations)->keyBy('id');
+        
         $invitations = $inviteMentors->map(function ($invite) use ($organizationMap) {
-            $orgIds = is_string($invite->organization_ids) ? json_decode($invite->organization_ids, true) : ($invite->organization_ids ?? []);
+            // $orgIds = is_string($invite->organization_ids) ? json_decode($invite->organization_ids, true) : ($invite->organization_ids ?? []);
+            $orgIds = [];
 
+            if (is_string($invite->organization_ids)) {
+                $orgIds = json_decode($invite->organization_ids, true) ?? [];
+            } elseif (is_array($invite->organization_ids)) {
+                $orgIds = $invite->organization_ids;
+            }
+            
             // جلب name لكل ID من الـ organizationMap
             $organizations = collect($orgIds)->map(function ($id) use ($organizationMap) {
                 return $organizationMap->has($id) ? [
@@ -39,7 +47,7 @@ class InvitationController extends Controller
                     'name' => $organizationMap[$id]['name_en']
                 ] : null;
             })->filter()->values()->toArray(); 
-
+            
             return [
                 'invitee_name'     => $invite->name,
                 'invitee_email'    => $invite->email,
@@ -54,7 +62,7 @@ class InvitationController extends Controller
                 'organizations'    => $organizations,
             ];
         })->values()->toArray();
-
+       
         // dd($invitations);
         // $invitations = [
         //     [
@@ -121,7 +129,7 @@ class InvitationController extends Controller
                             ];
                         })->toArray();
         
-                        
+                     
         return view('mentors.invitations.index', compact('invitations', 'organizations'));
     }
 
@@ -145,7 +153,7 @@ class InvitationController extends Controller
         
         // Retrieve the data from the request
         $data = $request->all();
-       // dd($data);
+    //    dd($data);
         $request->validate([
             'invitee_name' => 'required|string',
             'invitee_email' => 'required|email',
