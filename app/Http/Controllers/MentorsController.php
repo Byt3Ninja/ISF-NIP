@@ -664,7 +664,9 @@ class MentorsController extends Controller
 		$orgIds = $user->organizations_ids;
 		if ($request->show == 'all') {
 			$query = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
-				return $q->whereIn('organization_id', $orgIds);
+				return $q->where(function ($q) use ($orgIds) {
+					$q->whereHas('cycle', fn($c) => $c->whereIn('organization_id', $orgIds));
+				});
 			})->when($request->start_date && $request->end_date, function ($q) use ($request) {
 				// التأكد من أن التواريخ متوافقة مع التنسيق المناسب
 				$startDate = Carbon::parse($request->start_date)->startOfDay();
@@ -678,7 +680,9 @@ class MentorsController extends Controller
 			});
 		} elseif ($request->show == 'approved') {
 			$query = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
-				return $q->whereIn('organization_id', $orgIds);
+				return $q->where(function ($q) use ($orgIds) {
+					$q->whereHas('cycle', fn($c) => $c->whereIn('organization_id', $orgIds));
+				});
 			})->whereNotNull('start_url')->when($request->start_date && $request->end_date, function ($q) use ($request) {
 				$startDate = Carbon::parse($request->start_date)->startOfDay();
 				$endDate = Carbon::parse($request->end_date)->endOfDay();
@@ -689,7 +693,9 @@ class MentorsController extends Controller
 			});
 		} elseif ($request->show == 'disapproved') {
 			$query = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
-				return $q->whereIn('organization_id', $orgIds);
+				return $q->where(function ($q) use ($orgIds) {
+					$q->whereHas('cycle', fn($c) => $c->whereIn('organization_id', $orgIds));
+				});
 			})->where('approved', 'No')->when($request->start_date && $request->end_date, function ($q) use ($request) {
 				$startDate = Carbon::parse($request->start_date)->startOfDay();
 				$endDate = Carbon::parse($request->end_date)->endOfDay();
@@ -700,7 +706,9 @@ class MentorsController extends Controller
 			});
 		} else {
 			$query = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
-				return $q->whereIn('organization_id', $orgIds);
+				return $q->where(function ($q) use ($orgIds) {
+					$q->whereHas('cycle', fn($c) => $c->whereIn('organization_id', $orgIds));
+				});
 			})->whereNull('approved')->when($request->start_date && $request->end_date, function ($q) use ($request) {
 				$startDate = Carbon::parse($request->start_date)->startOfDay();
 				$endDate = Carbon::parse($request->end_date)->endOfDay();

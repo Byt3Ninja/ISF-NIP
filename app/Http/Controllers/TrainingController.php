@@ -209,20 +209,16 @@ class TrainingController extends Controller
 	{
 		try {
 			$courses = Training::orderBy('created_at', 'DESC');
-			if ($request->catTr_id) {
+			if( $request->catTr_id )
+			{
 				$courses = $courses->whereHas('categories', function ($query) use ($request) {
 					$query->whereIn('categories_id', (array) $request->catTr_id);
 				})
-					->where('status', 1)
-					->orderBy('created_at', 'DESC');
+				->where('status', 1)
+				->orderBy('created_at', 'DESC');
 			}
-			if ($request->status) {
-				if ($request->status == "draft") {
-					$courses = $courses->where('Status', 0);
-				} else {
-					$courses = $courses->where('Status', 1);
-				}
-			}
+			if( $request->status ) { $courses = $courses->where('Status', $request->status == "draft" ? 0 : 1); }
+
 			$courses = $courses->get();
 			if ($id == 0 && count($courses)) {
 				$id = $courses->pluck('id')[0];
@@ -525,7 +521,7 @@ class TrainingController extends Controller
 		$user= Auth::user();
 		if($user->hasRole('Registered')){
 			
-		 	$request->validate([
+			$request->validate([
 				'duration_minutes' => 'required|integer|min:1',
 				'trainingId' => 'required|integer',
 			]);
@@ -564,25 +560,24 @@ class TrainingController extends Controller
 					});
 				});
 			})->where('type', 'online')->orderBy('datetime')->get();
-			if ($id == 0) {
-				$id = $sessions->pluck('id')->first();
-				$csession = TrainingSession::where('type', 'online')->where('id', $id)->first();
-			} else {
-				$csession = TrainingSession::where('type', 'online')->where('id', $id)->first();
-			}
+			if ($id == 0) { $id = $sessions->pluck('id')->first(); }
+			$csession = TrainingSession::where('type', 'online')->where('id', $id)->first();
 			$contents = 0;
 
 			if ($csession) {
 				$contents = TrainingContent::where('training_id', $csession->training_Address)->count();
 			}
-			$steps11 = Step::where('id', $csession?->step_id)->orderBy('arr')->get();
+
+			$get_online_session = Step::where('id', $csession?->step_id)->orderBy('arr')->get();
 			$companies = collect([]);
-			foreach ($steps11 as $steps1) {
-				$companies = Company::where('cycle', $steps1->cycle_id)->get();
+			$companies_cycle_ids = $get_online_session->pluck('cycle_id')->toArray();
+			if( count( $companies_cycle_ids ) > 0 )
+			{
+				$companies = Company::whereIn('cycle', $companies_cycle_ids)->get();
 			}
+			
 			$uniqueCycleIds = $companies->pluck('cycle')->unique();
 			$steps = Step::whereIn('cycle_id', $uniqueCycleIds)->orderBy('arr')->get();
-
 
 			return view('admin.settings.training.results', compact('csession', 'sessions', 'id', 'contents', 'steps'));
 		} catch (\Throwable $e) {
@@ -604,18 +599,24 @@ class TrainingController extends Controller
 			if ($id == 0) {
 				$id = $steps->pluck('id')->first();
 			}
+			$steps_ids = $steps->pluck('id')->toArray();
 			if($request->company_id != 0) { 
 				$company = Company::find($request->company_id);
 				$id = $company->step;
-			 }
+			}
 			
 			// $sessions = TrainingSession::where('step_id', $id)->with('reports')->orderBy('datetime', 'ASC');
 			$sessions = TrainingSession::with('reports')->orderBy('datetime', 'ASC');
-			if($request->company_id != 0) { 
+			if( $request->company_id != 0 )
+			{ 
 				$company = Company::find($request->company_id);
 				$sessions = $sessions->where('step_id', $company->step);
-			 }
-			 $sessions = $sessions->get();
+			}
+			else
+			{
+				$sessions = $sessions->whereIn('step_id', $steps_ids);
+			}
+			$sessions = $sessions->get();
 
 			$cycles = TrainingSession::with('step.cycle')->get()->pluck('step.cycle')->unique('id');
 			
@@ -1111,7 +1112,7 @@ class TrainingController extends Controller
                 return redirect()->back()->with(['message2' => 'session report is not available yet']);
             }
         } elseif ($isTeams) {
-			 $participants = $response['participants'] ?? [];
+			$participants = $response['participants'] ?? [];
 
             if (empty($participants)) {
                 Log::warning('Teams sessionReport: participants empty', ['response' => $response]);
