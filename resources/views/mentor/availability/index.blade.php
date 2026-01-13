@@ -36,18 +36,18 @@
 
 <div class="">
   <div class="">
-  
-    <div class="d-flex justify-content-between align-items-center mb-6">
-      <h4 class="card-title mb-0 text-dark f">{{ __('mentor.weekly_availability_slots') }}</h4>
-
-      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#availabilityModal">
-        <i class="ti ti-plus me-1"></i> {{ __('mentor.add_availability') }}
-      </button>
-    </div>
-  
-    <div class="card mb-5">
+    <div class="min-vh-100 card mb-5">
+      <div class="card-header border-bottom mb-6">
+        <div class="d-flex justify-content-between align-items-center">
+          <h4 class="mb-0">{{ __('mentor.weekly_availability_slots') }}</h4>
+    
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#availabilityModal">
+            <i class="ti ti-plus me-1"></i> {{ __('mentor.add_availability') }}
+          </button>
+        </div>
+      </div>
       <div class="card-body">
-          <div id="main-calendar"></div>
+        <div id="main-calendar"></div>
       </div>
     </div>
   </div>

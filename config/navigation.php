@@ -1,7 +1,18 @@
 <?php
 return function () {
   $user = auth()->user();
-  $l = app()->getLocale();
+
+  if ($user && $user->hasRole('Mentor')) {
+    return [
+      ['title' => 'dashboard', 'url' => 'dashboard'],
+      ['title' => 'availability', 'url' => 'dashboard/availability'],
+      ['title' => 'startup_hub', 'url' => 'dashboard/companies'],
+      ['title' => 'tasks', 'url' => 'dashboard/mentor/mentorshipSessions'],
+      ['title' => 'programs', 'url' => 'dashboard/program/show'],
+      ['title' => 'mentorship_sessions', 'url' => 'dashboard/mentor/sessions'],
+      ['title' => 'surveys', 'url' => 'dashboard/mentor/surveys'],
+    ];
+  }
 
   if ($user && $user->hasRole('Registered')) {
     return [
