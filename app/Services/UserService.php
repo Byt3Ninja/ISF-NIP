@@ -63,7 +63,7 @@ class UserService
                     ]
                 ];
         }else {
-            $users = $query->get();
+            $users = $query->with(['roles', 'company'])->get();
         }
         return [
             'data' => UserResource::collection($users),
