@@ -1,5 +1,5 @@
 @php
-$navigationItems = config('navigation');
+$navigationItems = config('navigation')();
 
 $navigationIcons = [
   'dashboard' => 'smart-home',

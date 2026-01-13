@@ -25,7 +25,7 @@
                         <h5 class="mb-0 fw-bold text-heading">{{ $company->{'name_' . $l} }}</h5>
                       </a>
                       @else
-                        <h5 class="mb-0 fw-bold text-heading">{{ $company->{'name_' . $l} }}</h5>
+                        <h5 class="mb-0 text-heading">{{ $company->{'name_' . $l} }}</h5>
                       @endif
                     </div>
                   </div>
