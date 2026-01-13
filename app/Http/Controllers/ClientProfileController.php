@@ -466,6 +466,7 @@ class ClientProfileController extends Controller
         $expertisesSearch = $request->input('expertises', []);
         $linkedin = $request->input('linkedin');
         $programFilter = $request->input('programFilter');
+        $scopeFilter = $request->input('scopeFilter');
         $enrolledInProgramFilter = $request->input('enrolledInProgramFilter');
         if ($setting->mentor_list == 1) {
             if (Auth::user()->hasAnyRole('Mentor|Registered|Admin|OrganizationManager|subadmin')) {
@@ -526,6 +527,25 @@ class ClientProfileController extends Controller
                         ->toArray();
                     $mentors = $mentors->whereIn('id', $mentorIds);
                 }
+                if (!empty($scopeFilter) && $scopeFilter !== 'all') {
+
+                    if ($scopeFilter === 'public') {
+
+                        $mentors->where(function ($q) {
+                            $q->whereDoesntHave('inviteMentors') // مش موجود في invite
+                            ->orWhereHas('inviteMentors', function ($q2) {
+                                $q2->where('scope', 'public'); // موجود و public
+                            });
+                        });
+
+                    } else {
+
+                        $mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter) {
+                            $query->where('scope', $scopeFilter);
+                        });
+
+                    }
+                }
 
                 $mentors = $mentors->get();
 
@@ -539,7 +559,7 @@ class ClientProfileController extends Controller
                 }
              $settings = Settings::where('id', 1)->first();
 			$offline_allowed = $settings->allow_offline_sessions == 1 ? true : false;
-           
+            
                 // $mentors = User::role('mentor')->get();
                 return view('mentors.index', compact('mentors', 'cycles', 'offline_allowed'));
             }
@@ -598,7 +618,22 @@ class ClientProfileController extends Controller
                     }
                     // If enrolledInProgramFilter is empty string (''), show all (no filter applied)
                 }
+                if (!empty($scopeFilter) && $scopeFilter !== 'all') {
+                    if ($scopeFilter === 'public') {
+                        $mentors->where(function ($q) {
+                            $q->whereDoesntHave('inviteMentors')
+                            ->orWhereHas('inviteMentors', function ($q2) {
+                                $q2->where('scope', 'public'); 
+                            });
+                        });
+                    } else {
+                        $mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter) {
+                            $query->where('scope', $scopeFilter);
+                        });
+                    }
+                }
                 $mentors = $mentors->get();
+               
 
                 $user = Auth::user();
                 $orgIds = $user->organizations_ids;
