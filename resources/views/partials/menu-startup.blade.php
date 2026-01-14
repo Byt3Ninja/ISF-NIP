@@ -78,6 +78,7 @@ $navigationIcons = [
             {{ $child['title'] == 'analysis_and_assessment' && $setting->assessment != 1 ? 'd-none' : '' }}
             {{ $child['title'] == 'swot_analysis' && !in_array(env('APP_ENV','local'), ['local', 'dev']) ? 'd-none' : '' }}
           >
+          @if(isset($user->company))
             <a 
               class="menu-link"
               href="{{ $child['route'] == 'company.profile_view' && isset($_user->company->id) ? route('company.profile_view', $_user?->company?->id ?? 0) : route($child['route']) }}" 
@@ -85,6 +86,7 @@ $navigationIcons = [
               <i class="menu-icon tf-icons ti ti-{{ $navigationIcons[$child['title']] }}"></i>
               <div>{{ __('settings.navigation.' . $child['title']) }}</div>
             </a>
+          @endif
           </li>
         @endif
       @endforeach
