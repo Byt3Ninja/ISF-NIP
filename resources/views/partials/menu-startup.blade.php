@@ -74,7 +74,7 @@ $navigationIcons = [
             {{ Request::is('dashboard') && $child['title'] == 'dashboard' ? 'active' : '' }}
             {{ Request::is('dashboard/myCompany/*') && $child['title'] == 'my_company' ? 'active' : '' }}
             {{ Request::route()->getName() == $child['route'] || Route::is($child['route']) ? 'active' : '' }}"
-            {{ $item['title'] == 'startup_workspace' && (!isset($_user->company->id) || $_user->HaveCompany == 0) ? 'd-none' : '' }}
+            {{ $item['title'] == 'startup_workspace' && (!isset($_user->company) || $_user->HaveCompany == 0) ? 'd-none' : '' }}
             {{ $child['title'] == 'analysis_and_assessment' && $setting->assessment != 1 ? 'd-none' : '' }}
             {{ $child['title'] == 'swot_analysis' && !in_array(env('APP_ENV','local'), ['local', 'dev']) ? 'd-none' : '' }}
           >
