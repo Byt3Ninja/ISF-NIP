@@ -113,7 +113,7 @@
 	@endphp
 	{{-- END MERGE --}}
 
-	 <form id="financialForm" method="post" enctype="multipart/form-data" action="{{ route('company.profile_update_mine', isset($client) && $client->company ? $client->company->id : auth()->user()->id) }}">
+	 <form method="post" enctype="multipart/form-data" action="{{ route('company.profile_update_mine', isset($client) && $client->company ? $client->company->id : auth()->user()->id) }}">
     {!! csrf_field() !!}
 		<div class="card-header border-bottom">
 			<h5 class="card-title mb-0">{{ $heading }}</h5>
@@ -143,7 +143,7 @@
 							<option value="">{{ __('settings.Currency') }}</option>
 							@foreach ($Currencies as $Currency)
 								<option value="{{ $Currency->currency_code }}"
-									{{ $client->company && $client->company->Currency == $Currency->currency_code ? 'selected' : '' }}>
+									{{ $getCurrancy == $Currency->currency_code ? 'selected' : '' }}>
 									{{ $Currency->currency_name }}
 								</option>
 							@endforeach
