@@ -526,6 +526,7 @@ class ClientCompanyController extends Controller
        
         $user = auth()->user();
         try {
+            
             if( $id == null )
             {
                 $client = User::where('HaveCompany', 1)->with('company')->with('company.city')->find($user->id);
@@ -600,6 +601,7 @@ class ClientCompanyController extends Controller
                     $country->emoji = $emoji;
                     return $country;
                 });
+                
             }
             else
             {
@@ -610,6 +612,7 @@ class ClientCompanyController extends Controller
                         return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
                     }
                 }
+                   
                 // if (!$user->hasAnyRole('Admin|organizationManager')) {
                 //     return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
                 // }
@@ -692,6 +695,7 @@ class ClientCompanyController extends Controller
                     $country->emoji = $emoji;
                     return $country;
                 });
+               
             }
 
             $l = app()->getLocale();
@@ -708,7 +712,7 @@ class ClientCompanyController extends Controller
                         'name' => $tech->name,
                     ];
                 })->values()->toArray();
-
+                    
                 // Get selected technologies as names (for display in tags)
                 $selectedTechnologies = DB::table('technologies')
                     ->whereIn('id', $selectedTechnologyIds)
@@ -719,6 +723,7 @@ class ClientCompanyController extends Controller
                 $technologiesSelected = $selectedTechnologies; // Selected tech names for tags
 
                 $allSectors = DB::table('sectors')->get();
+                
                 $industries = StaticCategory::with('sectors')->get();
                 $data = $industries->map(function ($industry) use ($l, $allSectors, $selectedIndustryId, $selectedSectorIds) {
                     if ($industry->sectors->isNotEmpty()) {
@@ -740,6 +745,7 @@ class ClientCompanyController extends Controller
                         'sectors' => $sectorsList,
                     ];
                 });
+               
             } else {
                 $industries = StaticCategory::with('sectors')->get();
                 $technologies = DB::table('technologies')->get()->map(function ($tech) {
@@ -767,19 +773,23 @@ class ClientCompanyController extends Controller
                 $year = !empty($request->valuation_date)
                     ? Carbon::parse($request->valuation_date)->year
                     : (int) date('Y');
+                    
                 $yearsRange = range($year - 1, $year + 2);
                 $financialprojectionArray = [];
                 foreach ($yearsRange as $_year) {
                     $financialprojectionArray[$_year] = [];
                 }
+               $getCurrancy = '';
                 $financialprojection = FinancialProjection::where('company_id', $id)
                     ->whereBetween('year', [$year - 1, $year + 2])
                     ->orderBy('year')
                     ->get();
+                   
                 foreach ($financialprojection as $projection) {
                     $financialprojectionArray[$projection->year] = $projection;
                 }
                 if ($financialprojection->isEmpty()) {
+                    
                     $valuation_date = null;
                 } else {
                     if (isset($financialprojection[1]) && !empty($financialprojection[1]->valuation_date)) {
@@ -789,12 +799,13 @@ class ClientCompanyController extends Controller
                     } else {
                         $valuation_date = null;
                     }
+                    
+                    $financialprojection = $financialprojectionArray;
                 }
-                $financialprojection = $financialprojectionArray;
 
           
 
-           
+          
             // dd($financialprojection);
             return view('admin/clients/company', compact(
                 'client',
