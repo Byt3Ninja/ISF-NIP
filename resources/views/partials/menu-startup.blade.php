@@ -81,7 +81,11 @@ $navigationIcons = [
           
             <a 
               class="menu-link"
+              @if(isset($_user->company))
               href="{{ $child['route'] == 'company.profile_view' && isset($_user->company) ? route('company.profile_view',  $_user->company->id ?? 0) : route($child['route']) }}" 
+              @else
+              href="{{ route($child['route']) }}" 
+              @endif
             >
               <i class="menu-icon tf-icons ti ti-{{ $navigationIcons[$child['title']] }}"></i>
               <div>{{ __('settings.navigation.' . $child['title']) }}</div>
