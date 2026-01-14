@@ -1,5 +1,5 @@
 @php
-if(isset($crumbs)){
+if(!isset($crumbs)){
   $crumbs = breadcrumbs();
 }
 @endphp
