@@ -36,7 +36,7 @@
             <div class="container-xxl flex-grow-1 pt-4 pb-8">
 
               <!-- Breadcrumb -->
-              @include('components.breadcrumbs')
+              {{-- @include('components.breadcrumbs') --}}
 
               </nav>
               <!-- Content -->
