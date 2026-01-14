@@ -56,6 +56,8 @@ use Intervention\Image\ImageManagerStatic as Image;
 use App\Http\Requests\StoreUpdateClientCompanyRequest;
 use URL, File, DB, Exception, Session, Storage, stdClass;
 
+use function Psy\debug;
+
 class ClientCompanyController extends Controller
 {
     /**
@@ -521,7 +523,7 @@ class ClientCompanyController extends Controller
      */
     public function editOrCreate(Request $request, $id = null)
     {
-        
+       
         $user = auth()->user();
         try {
             if( $id == null )
@@ -783,13 +785,14 @@ class ClientCompanyController extends Controller
                     if (isset($financialprojection[1]) && !empty($financialprojection[1]->valuation_date)) {
                         $formtat_valuation_date = $financialprojection[1]->valuation_date;
                         $valuation_date = Carbon::parse($formtat_valuation_date)->format('Y-m');
+                        $getCurrancy = $financialprojection[1]->currency;
                     } else {
                         $valuation_date = null;
                     }
                 }
                 $financialprojection = $financialprojectionArray;
 
-           
+          
 
            
             // dd($financialprojection);
@@ -817,7 +820,8 @@ class ClientCompanyController extends Controller
                 'employees',
                 'data',
                 'financialprojection',
-                'valuation_date'
+                'valuation_date',
+                'getCurrancy'
             ));
         } catch (Exception $e) {
             //log what happend
