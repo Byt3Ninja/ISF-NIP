@@ -2,7 +2,7 @@
 
 <!-- Goggle Tag Manger -->
 @if ($gtag)
-  <script async src="https://www.googletagmanager.com/gtag/js?id={!! $gtag->url !!}"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id={!! (is_string($gtag) ? json_decode($gtag)->url : $gtag->url) !!}"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
 
