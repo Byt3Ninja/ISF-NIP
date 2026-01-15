@@ -61,6 +61,15 @@
       </a>
     </li>
 
+     @if($_user->hasRole('Judger'))
+      <li class="{{ Request::is('dashboard/judger/screening*') ? 'active' : '' }} menu-item">
+        <a href="/dashboard/judger/screening" class="menu-link">
+          <i class="menu-icon tf-icons ti ti-gavel"></i>
+          <div>{{ __('admin.Screening') }}</div>
+        </a>
+      </li>
+    @endif
+
     {{-- <li class="{{ Request::is('*myProfile') ? 'active' : '' }} menu-item">
       <a href="{{ route('user.profile_view') }}" class="menu-link">
         <i class="ti ti-user me-3 ti-md"></i>
@@ -316,20 +325,12 @@
       </li>
     @endif
 
-    @if($_user->hasRole('Judger'))
-      <li class="{{ Request::is('dashboard/judger/screening*') ? 'active' : '' }} menu-item">
-        <a href="/dashboard/judger/screening" class="menu-link">
-          <i class="menu-icon tf-icons ti ti-gavel"></i>
-          <div>{{ __('admin.Screening') }}</div>
-        </a>
-      </li>
-    @endif
 
-    @if( $_user->ableToAny(['users.list', 'audit_logs.list', 'screening.form_view', 'reports.list'], $permissions) )
+    {{-- @if( $_user->ableToAny(['users.list', 'audit_logs.list', 'screening.form_view', 'reports.list'], $permissions) )
       <li class="menu-header small">
         <span>{{ __('admin.Portal Settings') }}</span>
       </li>
-    @endif
+    @endif --}}
 
     @if ($_user->hasAnyRole('Admin'))
       <li class="{{ Request::is('*organization-types*') ? 'active' : '' }} menu-item">

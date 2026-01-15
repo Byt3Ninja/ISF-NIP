@@ -9,9 +9,9 @@
   <div class="">
     @php
       $tabs = [
-        ['title' => __('admin.All Services'), 'url' => 'dashboard/services', 'icon' => 'arrows-move'],
-        ['title' => __('admin.Services Requests'), 'url' => 'dashboard/requests/all', 'icon' => 'ti ti-briefcase'],
-        ['title' => __('admin.Services Categories'), 'url' => 'dashboard/serviceCategories', 'icon' => 'layout-grid'],
+        ['title' => __('admin.All Services'), 'route' => 'services.index', 'icon' => 'arrows-move'],
+        ['title' => __('admin.Services Requests'), 'route' => 'service_requests.list_all', 'icon' => 'ti ti-briefcase'],
+        ['title' => __('admin.Services Categories'), 'route' => 'serviceCategories.index', 'icon' => 'layout-grid'],
       ]
     @endphp
     <x-navigation-pills :tabs="$tabs" />

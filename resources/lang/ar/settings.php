@@ -348,6 +348,9 @@ return [
 		'hackathons' => 'هاكاثون',
 		'perks_and_discounts' => 'المزايا والخصومات',
 		'services_requests' => 'طلبات الخدمات',
+		'services_categories' => 'فئات الخدمات',
+		'create_service_category' => 'فئة خدمة جديدة',
+		'edit_service_category' => 'تعديل فئة الخدمة',
 		'mentorship_requests' => 'طلبات الإرشاد',
 		'my_courses' => 'دوراتي',
 		'file_manager' => 'مدير الملفات',
@@ -357,5 +360,6 @@ return [
 		'engagement' => 'المشاركة',
 		'availability' => 'التواجد',
 		'startup_hub' => 'الشركات الناشئة',
+		'all_tasks' => 'كل المهام',
 	],
 ];

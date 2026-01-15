@@ -345,6 +345,9 @@ return [
 		'hackathons' => 'Hackathons',
 		'perks_and_discounts' => 'Perks and Discounts',
 		'services_requests' => 'Services Requests',
+		'services_categories' => 'Services Categories',
+		'create_service_category' => 'Create Service Category',
+		'edit_service_category' => 'Edit Service Category',
 		'mentorship_requests' => 'Mentorship Requests',
 		'my_courses' => 'My Courses',
 		'file_manager' => 'File Manager',
@@ -354,5 +357,6 @@ return [
 		'engagement' => 'Engagement',
 		'availability' => 'Availability',
 		'startup_hub' => 'Startup Hub',
+		'all_tasks' => 'All Tasks',
 	],
 ];

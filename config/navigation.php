@@ -2,12 +2,21 @@
 return function () {
   $user = auth()->user();
 
+  if ($user && $user->hasRole('Judger')) {
+    return [
+      ['title' => 'dashboard', 'url' => 'dashboard'],
+      ['title' => 'screening', 'url' => 'dashboard/judger/screening'],
+      ['title' => 'file_manager', 'url' => 'dashboard/myFiles'],
+    ];
+  }
+
   if ($user && $user->hasRole('Mentor')) {
     return [
       ['title' => 'dashboard', 'url' => 'dashboard'],
       ['title' => 'availability', 'url' => 'dashboard/availability'],
       ['title' => 'startup_hub', 'url' => 'dashboard/companies'],
       ['title' => 'tasks', 'url' => 'dashboard/mentor/mentorshipSessions'],
+      ['title' => 'all_tasks', 'url'  => 'dashboard/mentor/mentorshipTasks'],
       ['title' => 'programs', 'url' => 'dashboard/program/show'],
       ['title' => 'mentorship_sessions', 'url' => 'dashboard/mentor/sessions'],
       ['title' => 'surveys', 'url' => 'dashboard/mentor/surveys'],
@@ -53,6 +62,7 @@ return function () {
           ['title' => 'my_courses', 'route'  => 'trainings.my_sessions_mine', 'menuOnly' => true],
           ['title' => 'quizzes', 'route'  => 'quizzes.dashboard_view', 'menuOnly' => true],
           ['title' => 'tasks', 'route'  => 'mentorships.sessions_list_detailed', 'menuOnly' => true],
+          ['title' => 'all_tasks', 'route'  => 'mentorshipTasks.index', 'menuOnly' => false],
         ]
       ],
       'resources' => [
@@ -134,6 +144,10 @@ return function () {
       'title' => 'services_and_resources',
       'children' => [
         ['title' => 'services', 'route' => 'services.index', 'menuOnly' => true],
+        ['title' => 'services_requests', 'route' => 'service_requests.list_all', 'menuOnly' => false],
+        ['title' => 'services_categories', 'route' => 'serviceCategories.index', 'menuOnly' => false],
+        ['title' => 'create_service_category', 'route' => 'serviceCategories.create', 'menuOnly' => false],
+        ['title' => 'edit_service_category', 'route' => 'serviceCategories.edit', 'menuOnly' => false],
         ['title' => 'create_service', 'route' => 'services.create', 'group' => 'services', 'menuOnly' => false],
         ['title' => 'edit_service', 'route' => 'services.edit', 'group' => 'services', 'menuOnly' => false],
         ['title' => 'file_manager', 'route' => 'my_files.list', 'group' => 'services', 'menuOnly' => true],
