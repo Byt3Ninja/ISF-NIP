@@ -2,6 +2,14 @@
 return function () {
   $user = auth()->user();
 
+  if ($user && $user->hasRole('Judger')) {
+    return [
+      ['title' => 'dashboard', 'url' => 'dashboard'],
+      ['title' => 'screening', 'url' => 'dashboard/judger/screening'],
+      ['title' => 'file_manager', 'url' => 'dashboard/myFiles'],
+    ];
+  }
+
   if ($user && $user->hasRole('Mentor')) {
     return [
       ['title' => 'dashboard', 'url' => 'dashboard'],
