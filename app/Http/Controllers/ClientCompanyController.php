@@ -1742,7 +1742,7 @@ class ClientCompanyController extends Controller
                     }
                 }
 
-                $validated = $request->validate(['industry_id' => ['required', 'integer', 'exists:industries,id']]);
+                $validated = $request->validate(['industry_id' => ['required', 'integer', 'exists:static_categories,id']]);
                 $industryId = (int) $validated['industry_id'];
 
                 DB::beginTransaction();
