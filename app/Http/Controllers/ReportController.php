@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Step;
 use App\User;
+use stdClass;
 use App\Cycle;
+use App\Almuni;
 use App\Company;
 use App\FinalData;
 use App\Screening;
+use Carbon\Carbon;
 use App\SurveyScopes;
 use App\Finalscreening;
 use App\SurveyResponses;
@@ -15,14 +18,12 @@ use App\TrainingSession;
 use App\MentorshipRequest;
 use App\ScreeningEvaluation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\ScreeningEvaluationResults;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use App\Exports\FinalScreeningReportExport;
-use App\Exports\ScreeningReportExport;
 use Maatwebsite\Excel\Facades\Excel;
-use Carbon\Carbon;
-use stdClass;
+use App\Exports\ScreeningReportExport;
+use App\Exports\FinalScreeningReportExport;
 
 class ReportController extends Controller
 {
@@ -1124,6 +1125,13 @@ class ReportController extends Controller
 
     protected function companiesReport($orgIds, $user, $company_id, $program_id = null){
         $data['company'] = Company::find($company_id);
+        if($data['company']){
+            
+           $data['company']->alumni = Almuni::where('company_id', $data['company']?->id)->exists();
+        }
+        
+        
+
         $mentorRequests =  MentorshipRequest::where('user_id', $data['company']?->user?->id);
         $training_sessions = TrainingSession::whereHas('step', function ($q) use ($company_id) {
             $q->where('stype',4)->whereHas('companies',function ($q) use ($company_id) {
