@@ -1151,43 +1151,83 @@ class ReportController extends Controller
         }
         $data['mentorship_sessions']=$mentorRequests->get();
         $data['training_sessions']=$training_sessions->get();
-
+        
         // Adjusted Static Programs List
-        $programs = [
-            (object)[
-                'program_name' => 'Full Stack Development Bootcamp',
-                'organization' => 'Tech Academy',
-                'mentorship_sessions_count' => 12,
-                'attendance_rate' => 92, // percentage
-                'training_sessions_count' => 40,
-                'average_screening_score' => 80, // int or float
-                'average_final_screening_score' => 85, // int or float
-                'status' => 'ongoing',
-                'current_step' => 'Training Phase',
-            ],
-            (object)[
-                'program_name' => 'Digital Marketing Training',
-                'organization' => 'Marketing Institute',
-                'mentorship_sessions_count' => 8,
-                'attendance_rate' => 88,
-                'training_sessions_count' => 25,
-                'average_screening_score' => 75,
-                'average_final_screening_score' => 78,
-                'status' => 'completed',
-                'current_step' => 'Final Evaluation',
-            ],
-            (object)[
-                'program_name' => 'Project Management Mentorship',
-                'organization' => 'PMI Center',
-                'mentorship_sessions_count' => 10,
-                'attendance_rate' => 95,
-                'training_sessions_count' => 18,
-                'average_screening_score' => 90,
-                'average_final_screening_score' => 92,
-                'status' => 'ongoing',
-                'current_step' => 'initial screening',
-            ],
-        ];
+
+        $programs = [];
+
+$groupedTrainingSessions = $data['training_sessions']
+    ->groupBy('step_id');
+
+foreach ($groupedTrainingSessions as $stepId => $trainingSessions) {
+
+    $step = optional($trainingSessions->first())->step;
+    // جلسات الإرشاد المرتبطة بنفس البرنامج
+    $mentorRequests = $data['mentorship_sessions']
+        ->where('cycle_id', $step?->cycle_id);
+    $mentorshipCount = $mentorRequests->count();
+    $attendanceRate = $mentorshipCount
+        ? round(($mentorRequests->sum('done') / $mentorshipCount) * 100)
+        : 0;
+    $programs[] = (object)[
+        'program_name' => $step?->title ?? 'N/A',
+        'organization' => $data['company']->cycledata->organization->name_ar,
+
+        'mentorship_sessions_count' => $mentorshipCount,
+        'attendance_rate' => $attendanceRate,
+
+        'training_sessions_count' => $trainingSessions->count(),
+
+        // لو عندك score
+        'average_screening_score' => round(
+            $mentorRequests->avg('screening_score') ?? 0
+        ),
+
+        'average_final_screening_score' => round(
+            $mentorRequests->avg('final_score') ?? 0
+        ),
+
+        'status' => $step?->status ?? 'ongoing',
+
+        'current_step' => $step?->title ?? 'Training Phase',
+    ];
+}
+
+        // $programs = [
+        //     (object)[
+        //         'program_name' => 'Full Stack Development Bootcamp',
+        //         'organization' => 'Tech Academy',
+        //         'mentorship_sessions_count' => 12,
+        //         'attendance_rate' => 92, // percentage
+        //         'training_sessions_count' => 40,
+        //         'average_screening_score' => 80, // int or float
+        //         'average_final_screening_score' => 85, // int or float
+        //         'status' => 'ongoing',
+        //         'current_step' => 'Training Phase',
+        //     ],
+        //     (object)[
+        //         'program_name' => 'Digital Marketing Training',
+        //         'organization' => 'Marketing Institute',
+        //         'mentorship_sessions_count' => 8,
+        //         'attendance_rate' => 88,
+        //         'training_sessions_count' => 25,
+        //         'average_screening_score' => 75,
+        //         'average_final_screening_score' => 78,
+        //         'status' => 'completed',
+        //         'current_step' => 'Final Evaluation',
+        //     ],
+        //     (object)[
+        //         'program_name' => 'Project Management Mentorship',
+        //         'organization' => 'PMI Center',
+        //         'mentorship_sessions_count' => 10,
+        //         'attendance_rate' => 95,
+        //         'training_sessions_count' => 18,
+        //         'average_screening_score' => 90,
+        //         'average_final_screening_score' => 92,
+        //         'status' => 'ongoing',
+        //         'current_step' => 'initial screening',
+        //     ],
+        // ];
 
         $data['programs'] = $programs;
 
