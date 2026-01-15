@@ -357,5 +357,6 @@ return [
 		'engagement' => 'Engagement',
 		'availability' => 'Availability',
 		'startup_hub' => 'Startup Hub',
+		'all_tasks' => 'All Tasks',
 	],
 ];

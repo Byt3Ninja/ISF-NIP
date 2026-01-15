@@ -16,6 +16,7 @@ return function () {
       ['title' => 'availability', 'url' => 'dashboard/availability'],
       ['title' => 'startup_hub', 'url' => 'dashboard/companies'],
       ['title' => 'tasks', 'url' => 'dashboard/mentor/mentorshipSessions'],
+      ['title' => 'all_tasks', 'url'  => 'dashboard/mentor/mentorshipTasks'],
       ['title' => 'programs', 'url' => 'dashboard/program/show'],
       ['title' => 'mentorship_sessions', 'url' => 'dashboard/mentor/sessions'],
       ['title' => 'surveys', 'url' => 'dashboard/mentor/surveys'],
@@ -61,6 +62,7 @@ return function () {
           ['title' => 'my_courses', 'route'  => 'trainings.my_sessions_mine', 'menuOnly' => true],
           ['title' => 'quizzes', 'route'  => 'quizzes.dashboard_view', 'menuOnly' => true],
           ['title' => 'tasks', 'route'  => 'mentorships.sessions_list_detailed', 'menuOnly' => true],
+          ['title' => 'all_tasks', 'route'  => 'mentorshipTasks.index', 'menuOnly' => false],
         ]
       ],
       'resources' => [

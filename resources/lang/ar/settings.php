@@ -360,5 +360,6 @@ return [
 		'engagement' => 'المشاركة',
 		'availability' => 'التواجد',
 		'startup_hub' => 'الشركات الناشئة',
+		'all_tasks' => 'كل المهام',
 	],
 ];
