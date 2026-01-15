@@ -1,13 +1,3 @@
-<div class="d-flex align-items-center gap-3 mb-6">
-  <a href="javascript:history.back()" class="btn btn-sm btn-icon shadow btn-white rounded-circle">
-    <i class="ti ti-chevron-{{ $l == 'en' ? 'left' : 'right' }} ti-md text-dark"></i>
-  </a>
-  <a class="d-flex align-items-center gap-2 text-capitalize">
-    <i class="ti ti-gavel fs-4 text-primary"></i>
-    <strong class="text-dark">{{ __('admin.Screening') }}</strong>
-  </a>
-</div>
-
 <div class="card card-body mb-6">
   <div class="row">
     <div class="col-12">
