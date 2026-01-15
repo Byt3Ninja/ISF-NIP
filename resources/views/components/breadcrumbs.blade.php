@@ -32,10 +32,12 @@ if(!isset($crumbs)){
         </li>
 
         {{-- Parent --}}
-        @if (isset($crumbs['parent']))
-          <li class="breadcrumb-item active">
-            {{ __('settings.navigation.' . $crumbs['parent']) }}
-          </li>
+        @if (!$_user->hasAnyRole('Judger|Mentor|serviceProvider'))
+          @if (isset($crumbs['parent']))
+            <li class="breadcrumb-item active">
+              {{ __('settings.navigation.' . $crumbs['parent']) }}
+            </li>
+          @endif
         @endif
         
         {{-- Child Group --}}
