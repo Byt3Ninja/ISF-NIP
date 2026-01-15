@@ -24,7 +24,7 @@
     <form action="{{ route('swot.save') }}" method="POST">
         @csrf
 
-        <input type="hidden" name="company_id" value="{{ auth()->user()->company->id }}">
+        <input type="hidden" name="company_id" value="{{ auth()->user()?->company?->id }}">
 
          <div class="row mt-3">
             <div class="col-md-6">
