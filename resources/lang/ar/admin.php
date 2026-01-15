@@ -3191,4 +3191,5 @@ return [
 	'view_surveys' => 'عرض الاستبيانات',
 	'survey_reminder_message' => 'لديك استبيانات معلقة لإكمالها. يرجى تخصيص بعض الوقت لملئها.',
 	'Congratolation_You_Are_Waiting_Approvel_From_Admin' => 'تهانينا! تنتظر الموافقة من قبل المسئول.',
+	'Success' => 'نجاح',
 ];
