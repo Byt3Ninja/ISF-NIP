@@ -186,6 +186,11 @@ class SlotController extends Controller
 		foreach ($schedules as $item) {
 			$isWeekly = $item->type == 'Weekly';
 
+			if($item->session_type == 'Offline'){
+					$user = auth()->user();
+					$location = $user->company->cycledata->organization->google_map_url;
+				}
+
 			if ($isWeekly) {
 				// cleanWeekday() must return an array of weekdays
 				$weekdays = $this->cleanWeekday($item->days);
@@ -199,9 +204,11 @@ class SlotController extends Controller
 						'end_time'     => substr($item->tto, 0, 5),
 						'session_type' => $item->session_type,
 						'weekly'       => true,
+						'location'     => $location ?? null,
 					]);
 				}
 			} else {
+				
 				// Non-weekly: single slot per row
 				$slots->push([
 					'id'           => $item->id,
@@ -211,14 +218,16 @@ class SlotController extends Controller
 					'end_time'     => substr($item->tto, 0, 5),
 					'session_type' => $item->session_type,
 					'weekly'       => false,
+					'location'     => $location ?? null,
 				]);
 			}
+			
 		}
-
 		// Calculate blocked intervals
 		$settings = Settings::where('id', 1)->first();
 		$maxLimit = $settings ? (int)$settings->max_concurrent_sessions : 0;
 		$blockedIntervals = $this->getBlockedIntervals($maxLimit);
+		
 
 		// If fetching for a mentor, include mentor info
 		if ($id) {
