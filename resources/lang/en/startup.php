@@ -456,6 +456,9 @@ return [
     'growth_profit' => 'Growth Profit',
     'cost_goods_sold' => 'Cost of Goods Sold',
     'revenue' => 'Revenue',
+    'interest' => 'Interest',
+    'taxes' => 'Taxes',
+    'capital_expenditures' => 'Capital Expenditures',
   ],
   'badges' => [
     'badges_recognition' => 'Badges & Recognition',

@@ -457,6 +457,9 @@ return [
     'growth_profit' => 'النمو الربح',
     'cost_goods_sold' => 'تكلفة البضائع المباعة',
     'revenue' => 'الربح',
+    'interest' => 'الفائدة',
+    'taxes' => 'الضرايب',
+    'capital_expenditures' => 'النفقات الرأسية',
   ],
 
   'badges' => [
