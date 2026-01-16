@@ -108,7 +108,7 @@
                               </div>
                             </div>
                             <div class="col-12 d-flex justify-content-between align-items-center">
-                              <a href="{{ route('documentation.index') }}" class="btn btn-label-secondary me-2">
+                              <a id="back-button" href="#" role="button" aria-label="Go back" class="btn btn-label-secondary me-2">
                                 <i class="ti ti-arrow-{{ $l == 'en' ? 'left' : 'right' }} me-2"></i>
                                 {{ __('admin.Back') }}
                               </a>

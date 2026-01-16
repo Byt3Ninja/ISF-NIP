@@ -7,6 +7,8 @@
 <div class="card">
 	{{-- MERGE financialProjection VALUES INTO $sections --}}
 	@php
+			$requestDate = request()->get('valuation_date');
+			$currentDate = $requestDate ?? (isset($valuation_date) ? $valuation_date : null);
 			// -----------------------
 			// DEFINE SECTIONS FIRST
 			// -----------------------
@@ -113,7 +115,7 @@
 	@endphp
 	{{-- END MERGE --}}
 
-	 <form method="post" enctype="multipart/form-data" action="{{ route('company.profile_update_mine', isset($client) && $client->company ? $client->company->id : auth()->user()->id) }}">
+	 <form id="financialForm" method="post" enctype="multipart/form-data" action="{{ route('company.profile_update_mine', isset($client) && $client->company ? $client->company->id : auth()->user()->id) }}">
     {!! csrf_field() !!}
 		<div class="card-header border-bottom">
 			<h5 class="card-title mb-0">{{ $heading }}</h5>
@@ -129,7 +131,7 @@
 						<label for="valuationDate" class="form-label text-nowrap">
 						{{ __('startup.valuation_date') }} <span class="text-danger">*</span>
 						</label>
-						<input type="hidden" id="valuationDateHidden" name="valuation_date" value="{{ isset($valuation_date) ? $valuation_date : '' }}">
+						<input type="hidden" id="valuationDateHidden" name="valuation_date" value="{{ $currentDate ? $currentDate : '' }}">
 						{{-- Format date for display --}}
 						<input type="text" class="form-control" id="valuationDate" required>
 					</div>
@@ -235,9 +237,10 @@
 // Financial Projection Form Logic
 document.addEventListener('DOMContentLoaded', function () {
 
-	const currentValuationDate = "{{ request()->has('valuation_date') ? request()->input('valuation_date') : '' }}"; // Track current valuation date
+	const currentValuationDate = "{{ $currentDate ? $currentDate : '' }}"; // Track current valuation date
 	const oldValuationDate = "{{ isset($valuation_date) ? $valuation_date : '' }}"; // Injected from backend
-
+	console.log('currentValuationDate', currentValuationDate);
+	console.log('oldValuationDate', oldValuationDate);
 
 	const dateInput = document.getElementById('valuationDate');
 	const valudationDateHidden = document.getElementById('valuationDateHidden');
@@ -430,7 +433,12 @@ document.addEventListener('DOMContentLoaded', function () {
 					window.location.href = url.href;
 				}
 			});
+
+			return;
 		}
+
+		// Submit the form
+		this.submit();
 	});
 });
 </script>

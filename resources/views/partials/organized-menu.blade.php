@@ -85,6 +85,12 @@ if (strpos(request()->getRequestUri(), '/invitations') !== false) {
   $activeItem = 'mentors.list';
 }
 
+// Special case: Make startups active if URL contains '/myCompany'
+if (strpos(request()->getRequestUri(), '/myCompany') !== false) {
+  $activeGroup = 'people';
+  $activeItem = 'users.view_companies';
+}
+
 // Special case: Make programs active if URL contains 'programlist' or 'hackathon' or 'cycles' or '/mentorship/assign/'
 if (strpos(request()->getRequestUri(), 'programlist') !== false || strpos(request()->getRequestUri(), 'hackathon') !== false || strpos(request()->getRequestUri(), 'cycles') !== false || strpos(request()->getRequestUri(), '/mentorship/assign/') !== false) {
   $activeGroup = 'programs';
