@@ -1294,96 +1294,96 @@ class MentorsController extends Controller
 		
 
 		$availableSurveys = SurveyResponses::where('user_id', $user->id)
-    ->where('triggered_on', 'mentorship')
-    ->with('survey_scope')
-    ->orderBy('created_at', 'desc')
-    ->get();
+			->where('triggered_on', 'mentorship')
+			->with('survey_scope')
+			->orderBy('created_at', 'desc')
+			->get();
 
-		$surveyQuestionsCount = SurveyQuestions::whereIn(
-        'survey_id',
-        $availableSurveys->pluck('survey_id')
-    )
-    ->select('survey_id', DB::raw('count(*) as total'))
-    ->groupBy('survey_id')
-    ->pluck('total', 'survey_id');
+				$surveyQuestionsCount = SurveyQuestions::whereIn(
+				'survey_id',
+				$availableSurveys->pluck('survey_id')
+			)
+			->select('survey_id', DB::raw('count(*) as total'))
+			->groupBy('survey_id')
+			->pluck('total', 'survey_id');
 
-	$mentorshipRequests = MentorshipRequest::where('mentor_id', $user->id)
-    ->with('user.company')
-    ->orderBy('zoom_date', 'desc')
-    ->get();
+			$mentorshipRequests = MentorshipRequest::where('mentor_id', $user->id)
+			->with('user.company')
+			->orderBy('zoom_date', 'desc')
+			->get();
 
-		//dd($mentorshipRequests[0], $availableSurveys[0], $surveyQuestionsCount);
+				//dd($mentorshipRequests[0], $availableSurveys[0], $surveyQuestionsCount);
 
-	$surveys = $availableSurveys->map(function ($survey) use (
-    $mentorshipRequests,
-    $surveyQuestionsCount
-) {
+			$surveys = $availableSurveys->map(function ($survey) use (
+			$mentorshipRequests,
+			$surveyQuestionsCount
+		) {
 
-    $responses = json_decode($survey->responses, true) ?? [];
-    $totalQuestions = $surveyQuestionsCount[$survey->survey_id] ?? 0;
-    $completedQuestions = count($responses);
+			$responses = json_decode($survey->responses, true) ?? [];
+			$totalQuestions = $surveyQuestionsCount[$survey->survey_id] ?? 0;
+			$completedQuestions = count($responses);
 
-    // أقرب جلسة قبل تاريخ إنشاء الـ survey
-    $mentorship = $mentorshipRequests
-        ->where('zoom_date', '<=', $survey->created_at)
-        ->first();
+			// أقرب جلسة قبل تاريخ إنشاء الـ survey
+			$mentorship = $mentorshipRequests
+				->where('zoom_date', '<=', $survey->created_at)
+				->first();
 
-    return (object) [
-        'id' => $survey->id,
-        'title' => ucfirst($survey->survey_scope->scope) . ' Survey',
+			return (object) [
+				'id' => $survey->id,
+				'title' => ucfirst($survey->survey_scope->scope) . ' Survey',
 
-        'created_at' => $survey->created_at->format('Y-m-d H:i'),
-        'due_date' => $survey->created_at->copy()->addDays(7)->format('Y-m-d H:i'),
+				'created_at' => $survey->created_at->format('Y-m-d H:i'),
+				'due_date' => $survey->created_at->copy()->addDays(7)->format('Y-m-d H:i'),
 
-        'status' => $completedQuestions === 0
-            ? 'Pending'
-            : ($completedQuestions < $totalQuestions ? 'In_Progress' : 'Completed'),
+				'status' => $completedQuestions === 0
+					? 'Pending'
+					: ($completedQuestions < $totalQuestions ? 'In_Progress' : 'Completed'),
 
-        'survey_type' => ucfirst($survey->triggered_on),
+				'survey_type' => ucfirst($survey->triggered_on),
 
-        'total_questions' => $totalQuestions,
-        'completed_questions' => $completedQuestions,
+				'total_questions' => $totalQuestions,
+				'completed_questions' => $completedQuestions,
 
-        'is_required' => (bool) $survey->survey->is_required,
+				'is_required' => (bool) $survey->survey->is_required,
 
-        'user' => $mentorship
-            ? (object)[
-                'id' => $mentorship->user->id,
-                'name' => trim(
-                    $mentorship->user->first_name_en . ' ' .
-                    $mentorship->user->last_name_en
-                ),
-                'image_url' => $mentorship->user->img_url
-                    ? asset($mentorship->user->img_url)
-                    : '/icons/avatar.svg',
+				'user' => $mentorship
+					? (object)[
+						'id' => $mentorship->user->id,
+						'name' => trim(
+							$mentorship->user->first_name_en . ' ' .
+							$mentorship->user->last_name_en
+						),
+						'image_url' => $mentorship->user->img_url
+							? asset($mentorship->user->img_url)
+							: '/icons/avatar.svg',
 
-                'company' => (object)[
-                    'id' => optional($mentorship->user->company)->id,
-                    'name' => optional($mentorship->user->company)->name_en,
-                    'logo_url' => optional($mentorship->user->company)->logo
-                        ? asset($mentorship->user->company->logo)
-                        : '/images/logo-placeholder.png',
-                ],
-            ]
-            : null,
+						'company' => (object)[
+							'id' => optional($mentorship->user->company)->id,
+							'name' => optional($mentorship->user->company)->name_en,
+							'logo_url' => optional($mentorship->user->company)->logo
+								? asset($mentorship->user->company->logo)
+								: '/images/logo-placeholder.png',
+						],
+					]
+					: null,
 
-        'session' => $mentorship
-            ? (object)[
-                'id' => $mentorship->id,
-                'zoom_date' => $mentorship->zoom_date->format('Y-m-d H:i'),
-            ]
-            : null,
-    ];
-});
-		
-$surveys = $surveys->sortBy(function($survey) {
-    $statusPriority = [
-        'In_Progress' => 1,
-        'Pending' => 2,
-        'Completed' => 3,
-    ];
-    return $statusPriority[$survey->status] ?? 999;
-});
+				'session' => $mentorship
+					? (object)[
+						'id' => $mentorship->id,
+						'zoom_date' => $mentorship->zoom_date->format('Y-m-d H:i'),
+					]
+					: null,
+			];
+		});
+				
+		$surveys = $surveys->sortBy(function($survey) {
+			$statusPriority = [
+				'In_Progress' => 1,
+				'Pending' => 2,
+				'Completed' => 3,
+			];
+			return $statusPriority[$survey->status] ?? 999;
+		});
 	 //dd($surveys[120]);
 		return view('mentor.surveys.index', compact('surveys'));
 	}
