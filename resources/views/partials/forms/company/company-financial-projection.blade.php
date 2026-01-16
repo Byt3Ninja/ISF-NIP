@@ -123,7 +123,6 @@
 		</div>
 		
 		<input name="CompanyN" type="hidden" value="15">
-
 		<div class="card-body">
 			<div class="row">
 				<div class="col-lg-4">
@@ -143,10 +142,12 @@
 						</label>
 						<select class="form-control form-select" name="Currency" id="Currency" required>
 							<option value="" disabled>{{ __('settings.Currency') }}</option>
+							
 							@foreach ($Currencies as $Currency)
+							
 								<option value="{{ $Currency->currency_code }}"
 									{{ $getCurrancy == $Currency->currency_code ? 'selected' : '' }}>
-									{{ $Currency->currency_name }}
+									{{ __('admin.' . $Currency->currency_name) }}
 								</option>
 							@endforeach
 						</select>
@@ -168,7 +169,7 @@
         <thead class="table-light">
           <tr>
             <th class="col-label">
-							{{ __('startup.line_item') }} ( Euro )
+							{{ __('startup.line_item') }} ( {{ __('admin.'.$getCurrancy) }} )
 						</th>
             <th class="" id="header-year-0">{{ __('startup.past_year') }}<br><small class="fw-normal text-secondary">-</small>
             </th>
