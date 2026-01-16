@@ -195,11 +195,12 @@ if (!isset($crumbs)) {
     }
 
     Swal.fire({
-      title: 'You have unsaved changes. Leave anyway?',
+      title: '{{ __('settings.navigation.unsaved_changes') }}',
+      text: '{{ __('settings.navigation.unsaved_changes_message') }}',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Leave anyway',
-      cancelButtonText: 'Stay',
+      confirmButtonText: '{{ __('settings.navigation.leaveanyway') }}',
+      cancelButtonText: '{{ __('settings.navigation.stay') }}',
       customClass: {
         confirmButton: 'btn btn-primary ms-3',
         cancelButton: 'btn btn-label-secondary',
