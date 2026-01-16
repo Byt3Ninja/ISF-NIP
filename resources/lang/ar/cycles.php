@@ -618,4 +618,5 @@ return [
     'startups_will_be_affected' => 'شركات سوف يتم تغيير المرحلة فيها',
     'MaxConcurrentSessionsReached' => 'تم الوصول إلى الحد الأقصى للجلسات التدريبية عبر الإنترنت في هذا الوقت. يرجى اختيار وقت آخر',
     'Total Sub-criteria Weight' => 'مجموع وزن المعايير الفرعية',
+    'Join_Cycle_First' => 'الرجاء الانضمام للبرنامج اولا',
 ];

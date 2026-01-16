@@ -96,27 +96,35 @@
 
     <!-- Action Button -->
     <div class="row px-4 mt-auto">
-      @if ($canRequestMentorship && auth()->user()?->company?->id && $mentor?->id)
-        @if($mentor?->schedule->isNotEmpty())
-          <button 
-            type="button" 
-            class="btn btn-primary" 
-            onclick="if (typeof fetchSlots === 'function') { fetchSlots({{ $mentor?->id }}, {{ $getCycle?->id }}, {{ $getCycle?->organization_id }}); }"
-          >
-            {{ __('cycles.Request_Mentorship') }}
-            <i class="ti ti-calendar-plus ms-2"></i>
-          </button>
+      @if($getCycle?->id != 0 || $getCycle?->id != null)
+        @if ($canRequestMentorship && auth()->user()?->company?->id && $mentor?->id)
+          @if($mentor?->schedule->isNotEmpty())
+            <button 
+              type="button" 
+              class="btn btn-primary" 
+              onclick="if (typeof fetchSlots === 'function') { fetchSlots({{ $mentor?->id }}, {{ $getCycle?->id }}, {{ $getCycle?->organization_id }}); }"
+            >
+              {{ __('cycles.Request_Mentorship') }}
+              <i class="ti ti-calendar-plus ms-2"></i>
+            </button>
+            
+          @else
+            <button type="button" class="btn btn-primary" disabled>
+              {{ __('cycles.Not_Available_Request_Mentorship') }}
+              <i class="ti ti-calendar-plus ms-2"></i>
+            </button>
+          @endif
         @else
-          <button type="button" class="btn btn-primary" disabled>
-            {{ __('cycles.Not_Available_Request_Mentorship') }}
-            <i class="ti ti-calendar-plus ms-2"></i>
-          </button>
+          <a href="{{ route('mentors.profile_view', $mentor?->id ?? 0) }}" class="btn btn-primary">
+            {{ __('admin.View Profile') }}
+          </a>
         @endif
-      @else
-        <a href="{{ route('mentors.profile_view', $mentor?->id ?? 0) }}" class="btn btn-primary">
-          {{ __('admin.View Profile') }}
-        </a>
-      @endif
+        @else
+            <button type="button" class="btn btn-primary" disabled>
+              {{ __('cycles.Join_Cycle_First') }}
+              <i class="ti ti-calendar-plus ms-2"></i>
+            </button>
+          @endif
     </div>
   </div>
 </div>
