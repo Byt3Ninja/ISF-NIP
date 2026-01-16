@@ -38,7 +38,6 @@
               <!-- Breadcrumb -->
               @include('components.breadcrumbs')
 
-              </nav>
               <!-- Content -->
               @yield('content')
             </div>

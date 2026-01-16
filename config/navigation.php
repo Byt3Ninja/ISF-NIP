@@ -39,6 +39,8 @@ return function () {
         'children' => [
           ['title' => 'my_company', 'route' => 'company.profile_view', 'menuOnly' => true],
           ['title' => 'analysis_and_assessment', 'route' => 'assessments.results_analysis_view', 'menuOnly' => true],
+          ['title' => 'questions_assessment', 'route' => 'assessments.take', 'menuOnly' => false],
+          ['title' => 'history_assessment', 'route' => 'assessments.results_history_view', 'menuOnly' => false],
           ['title' => 'swot_analysis', 'route' => 'swot.view', 'menuOnly' => true],
           ['title' => 'edit_startup_profile', 'route' => 'company.profile_view_mine', 'group' => 'my_company', 'menuOnly' => false],
         ]

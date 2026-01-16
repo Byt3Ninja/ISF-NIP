@@ -381,6 +381,8 @@ return [
 		'notification_templates' => 'Notification Templates',
 		'notification_triggers' => 'Notification Triggers',
 		'license_key' => 'License Key',
+		'questions_assessment' => 'Questions Assessment',
+		'history_assessment' => 'Assessment History',
 		
 		'unsaved_changes' => 'Unsaved Changes',
 		'unsaved_changes_message' => 'You have unsaved changes. Are you sure you want to leave?',
