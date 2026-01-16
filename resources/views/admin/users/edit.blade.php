@@ -409,7 +409,10 @@
                 </div>
               </div>
               <div class="col-12 d-flex justify-content-end align-items-center gap-4 mt-8">
-                <a href="{{ route('users.index') }}" class="btn btn-label-secondary">{{ __('admin.Cancel') }}</a>
+                <a id="back-button" href="#" role="button" aria-label="Go back" class="btn btn-label-secondary">
+                  <i class="ti ti-arrow-{{ $l == 'en' ? 'left' : 'right' }} me-2"></i>
+                  {{ __('admin.Back') }}
+                </a>
                 <button type="submit" class="btn btn-primary">{{ __('admin.Update') }}</button>
               </div>
             </form>

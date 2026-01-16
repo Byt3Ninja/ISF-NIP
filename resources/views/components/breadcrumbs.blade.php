@@ -84,8 +84,8 @@ if (!isset($crumbs)) {
     debug: false
   };
 
-  const backButton = document.querySelector(CONFIG.backButtonSelector);
-  if (!backButton) return;
+  const backButtons = document.querySelectorAll(CONFIG.backButtonSelector);
+  if (!backButtons.length) return;
 
   const initialState = new Map();
   const log = (...a) => CONFIG.debug && console.log('[DIRTY]', ...a);
@@ -186,42 +186,45 @@ if (!isset($crumbs)) {
   /* ===============================
    * BACK BUTTON HANDLER
    * =============================== */
-  backButton.addEventListener('click', function (e) {
-    e.preventDefault();
-
-    if (!isPageDirty()) {
-      window.location.href = CONFIG.backHref;
-      return;
-    }
-
-    Swal.fire({
-      title: '{{ __('settings.navigation.unsaved_changes') }}',
-      text: '{{ __('settings.navigation.unsaved_changes_message') }}',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: '{{ __('settings.navigation.leaveanyway') }}',
-      cancelButtonText: '{{ __('settings.navigation.stay') }}',
-      customClass: {
-        confirmButton: 'btn btn-primary ms-3',
-        cancelButton: 'btn btn-label-secondary',
-      },
-      buttonsStyling: false,
-      reverseButtons: true,
-    }).then(r => {
-      if (r.isConfirmed) {
+  backButtons.forEach(button => {
+    button.addEventListener('click', function (e) {
+      e.preventDefault();
+  
+      if (!isPageDirty()) {
         window.location.href = CONFIG.backHref;
+        return;
       }
+  
+      Swal.fire({
+        title: '{{ __('settings.navigation.unsaved_changes') }}',
+        text: '{{ __('settings.navigation.unsaved_changes_message') }}',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: '{{ __('settings.navigation.leaveanyway') }}',
+        cancelButtonText: '{{ __('settings.navigation.stay') }}',
+        customClass: {
+          confirmButton: 'btn btn-primary ms-3',
+          cancelButton: 'btn btn-label-secondary',
+        },
+        buttonsStyling: false,
+        reverseButtons: true,
+      }).then(r => {
+        if (r.isConfirmed) {
+          window.location.href = CONFIG.backHref;
+        }
+      });
     });
   });
+
 
   /* ===============================
    * PAGE CLOSE / REFRESH
    * =============================== */
-  window.addEventListener('beforeunload', function (e) {
-    if (!isPageDirty()) return;
-    e.preventDefault();
-    e.returnValue = '';
-  });
+  // window.addEventListener('beforeunload', function (e) {
+  //   if (!isPageDirty()) return;
+  //   e.preventDefault();
+  //   e.returnValue = '';
+  // });
 })();
 </script>
 @endpush

@@ -510,5 +510,5 @@ return [
   'valuation_date_required' => 'تاريخ التقييم مطلوب',
   'please_select_valuation_date_before_saving' => 'يرجى اختيار تاريخ التقييم قبل حفظ النموذج',
   'valuation_date_changed' => 'تغير تاريخ التقييم',
-  'valuation_date_changed_message' => 'تغيير تاريخ التقييم سوفيق على المقاييس المالية.',
+  'valuation_date_changed_message' => 'تغيير تاريخ التقييم سوف يؤثر على المقاييس المالية.',
 ];
