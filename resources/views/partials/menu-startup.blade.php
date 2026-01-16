@@ -73,6 +73,8 @@ $navigationIcons = [
             class="menu-item 
             {{ Request::is('dashboard') && $child['title'] == 'dashboard' ? 'active' : '' }}
             {{ Request::is('dashboard/myCompany/*') && $child['title'] == 'my_company' ? 'active' : '' }}
+            {{ Request::is('dashboard/question-assessment') && $child['title'] == 'analysis_and_assessment' ? 'active' : '' }}
+            {{ Request::is('dashboard/history-assessment') && $child['title'] == 'analysis_and_assessment' ? 'active' : '' }}
             {{ Request::route()->getName() == $child['route'] || Route::is($child['route']) ? 'active' : '' }}"
             {{ $item['title'] == 'startup_workspace' && (!isset($_user->company) || $_user->HaveCompany == 0) ? 'd-none' : '' }}
             {{ $child['title'] == 'analysis_and_assessment' && $setting->assessment != 1 ? 'd-none' : '' }}

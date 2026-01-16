@@ -384,6 +384,8 @@ return [
 		'notification_templates' => 'قوالب الإشعارات',
 		'notification_triggers' => 'مستويات الإشعارات',
 		'license_key' => 'مفتاح الترخيص',
+		'questions_assessment' => 'تقييم الأسئلة',
+		'history_assessment' => 'تاريخ التقييم',
 
 		'unsaved_changes' => 'تغييرات غير محفوظة',
 		'unsaved_changes_message' => 'لديك تغييرات غير محفوظة. هل أنت متأكد أنك تريد المغادرة؟',
