@@ -1170,7 +1170,7 @@ foreach ($groupedTrainingSessions as $stepId => $trainingSessions) {
         ? round(($mentorRequests->sum('done') / $mentorshipCount) * 100)
         : 0;
     $programs[] = (object)[
-        'program_name' => $step?->title ?? 'N/A',
+        'program_name' => $step?->cycle->title ?? 'N/A',
         'organization' => $data['company']->cycledata->organization->name_ar,
 
         'mentorship_sessions_count' => $mentorshipCount,
@@ -1191,6 +1191,52 @@ foreach ($groupedTrainingSessions as $stepId => $trainingSessions) {
 
         'current_step' => $step?->title ?? 'Training Phase',
     ];
+}
+$almunies = Almuni::where('company_id', $data['company']->id)->get();
+
+foreach ($almunies as $almuni) {
+
+    $programsRaw = json_decode($almuni->program ?? '[]', true);
+    if (!is_array($programsRaw)) continue;
+
+    foreach ($programsRaw as $p) {
+        $p = (object)$p;
+        $mentorshipData = collect(json_decode($almuni->mentorship ?? '[]', true));
+        $mentorshipCount = $mentorshipData->count();
+        $attendanceRate = $mentorshipCount
+            ? round(($mentorshipData->where('attendance', 'Attended')->count() / $mentorshipCount) * 100)
+            : 0;
+        $trainingData = collect(json_decode($almuni->training ?? '[]', true));
+        $finalScreeningData = collect(json_decode($almuni->final_screening ?? '[]', true));
+        $screeningData = collect(json_decode($almuni->screening ?? '[]', true));
+        $orgName = 'N/A';
+        if (isset($p->Organization)) {
+            $org = $p->Organization;
+            if (is_array($org)) {
+                $orgName = $org['name_ar'] ?? $org['name_en'] ?? $org['name'] ?? 'N/A';
+            } elseif (is_object($org)) {
+                $orgName = $org->name_ar ?? $org->name_en ?? $org->name ?? 'N/A';
+            } elseif (is_string($org)) {
+                $orgName = $org;
+            }
+        }
+
+        $programs[] = (object)[
+            'program_name' => $p->Program_Name ?? $p->title ?? 'N/A',
+            'organization' => $orgName,
+            'mentorship_sessions_count' => $mentorshipCount,
+            'attendance_rate' => $attendanceRate,
+            'training_sessions_count' => $trainingData->count(),
+            'average_screening_score' => round(
+                $screeningData->avg('overall_score') ?? 0
+            ),
+            'average_final_screening_score' => round(
+                $finalScreeningData->avg('overall_score') ?? 0
+            ),
+            'status' => 'complete',
+            'current_step' => 'Alumni',
+        ];
+    }
 }
 
         // $programs = [
