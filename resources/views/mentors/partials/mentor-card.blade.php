@@ -1,4 +1,5 @@
 <!-- Mentor Card -->
+@if(isset($mentor) && $mentor)
 <div class="col-md-4 rounded mb-6">
   <div class="position-relative">
     <img 
@@ -120,3 +121,4 @@
   </div>
 </div>
 <!--/ Mentor Card -->
+@endif
