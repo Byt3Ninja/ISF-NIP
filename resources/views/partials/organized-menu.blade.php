@@ -95,6 +95,8 @@ if (strpos(request()->getRequestUri(), 'programlist') !== false || strpos(reques
 if (Route::is(
   'settings.*',
   'roles.*',
+  'permissions.*',
+  'permission-groups.*',
   'importer.*',
   'currencies.*',
   'Tags.*',
