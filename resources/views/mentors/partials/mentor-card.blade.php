@@ -96,7 +96,7 @@
 
     <!-- Action Button -->
     <div class="row px-4 mt-auto">
-      @if ($canRequestMentorship && auth()->user()->company->id && $mentor?->id)
+      @if ($canRequestMentorship && auth()->user()?->company?->id && $mentor?->id)
         @if($mentor?->schedule->isNotEmpty())
           <button 
             type="button" 
