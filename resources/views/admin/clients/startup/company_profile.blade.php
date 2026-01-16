@@ -182,42 +182,26 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
 			</div>
 			@endif
 		</div>
-    @if($_user->hasRole('Judger'))
-      <div class="d-flex align-items-center gap-3 mb-6">
-        <a id="save-screening-btn" class="btn btn-sm btn-icon shadow btn-white rounded-circle">
-          <i class="ti ti-chevron-{{ $l == 'en' ? 'left' : 'right' }} ti-md text-dark"></i>
-        </a>
-        <a id="save-screening-btn" class="d-flex align-items-center gap-2 text-capitalize">
-          <i class="ti ti-gavel fs-4 text-primary"></i>
-          <strong class="text-dark">{{ __('admin.Screening') }}</strong>
-        </a>
-        <i class="ti ti-chevrons-{{ $l== 'en' ? 'right' : 'left' }}"></i>
-        <div class="d-flex align-items-center gap-2 text-capitalize">
-          <i class="ti ti ti-file-text fs-4 text-primary"></i>
-          <strong class="text-dark">{{ __('admin.Company profile') }}</strong>
-        </div>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-md-center mb-4">
+      <div class="d-flex align-items-center mb-3 mb-md-0">
+        <h4 class="mb-0">{{ __('startup.startup_profile_heading') }}</h4>
+        <h6 class="mb-0 ms-2">
+          ( {{ $company && $company->CreatedTax == '1' ? __('startup.registered') : __('startup.not_registered') }} )
+        </h6>
       </div>
-    @else
-      <div class="d-flex flex-wrap justify-content-between align-items-md-center mb-4">
-        <div class="d-flex align-items-center mb-3 mb-md-0">
-          <h4 class="mb-0">{{ __('startup.startup_profile_heading') }}</h4>
-          <h6 class="mb-0 ms-2">
-            ( {{ $company && $company->CreatedTax == '1' ? __('startup.registered') : __('startup.not_registered') }} )
-          </h6>
-        </div>
-        <div class="d-flex align-items-center gap-3">
-          @if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->ableTo('company.profile_view_mine', $permissions) && $_user->hasRole('registered') && $_user->company_id == $company->id ) )
-            <a href="/dashboard/myCompany/{{ $company->id }}" class="btn btn-white text-primary shadow-sm border">
-              {{ __('startup.edit_info') }} <i class="ti ti-settings ms-2"></i>
-            </a>
-          @else
-            <button data-bs-toggle="modal" data-bs-target="#MessageModal" class="btn btn-label-primary">
-              {{ __('admin.Contact') }} <i class="ti ti-message ms-2"></i>
-            </button>
-          @endif
-        </div>
+      <div class="d-flex align-items-center gap-3">
+        @if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->ableTo('company.profile_view_mine', $permissions) && $_user->hasRole('registered') && $_user->company_id == $company->id ) )
+          <a href="/dashboard/myCompany/{{ $company->id }}" class="btn btn-white text-primary shadow-sm border">
+            {{ __('startup.edit_info') }} <i class="ti ti-settings ms-2"></i>
+          </a>
+        @else
+          <button data-bs-toggle="modal" data-bs-target="#MessageModal" class="btn btn-label-primary">
+            {{ __('admin.Contact') }} <i class="ti ti-message ms-2"></i>
+          </button>
+        @endif
       </div>
-    @endif
+    </div>
 
     @include('admin.clients.startup.partials._startup_info')
     

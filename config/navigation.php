@@ -1,11 +1,14 @@
 <?php
 return function () {
   $user = auth()->user();
+  $request = request();
+  $company_id = isset(auth()->user()->company->id) ? auth()->user()->company->id : $request->id;
 
   if ($user && $user->hasRole('Judger')) {
     return [
       ['title' => 'dashboard', 'url' => 'dashboard'],
       ['title' => 'screening', 'url' => 'dashboard/judger/screening'],
+      ['title' => 'startup_profile', 'url' => 'dashboard/companyProfile/'.$company_id],
       ['title' => 'file_manager', 'url' => 'dashboard/myFiles'],
     ];
   }
