@@ -115,7 +115,7 @@
 	@endphp
 	{{-- END MERGE --}}
 
-	 <form id="financialForm" method="post" enctype="multipart/form-data" action="{{ route('company.profile_update_mine', isset($client) && $client->company ? $client->company->id : auth()->user()->id) }}">
+	 <form  method="post" enctype="multipart/form-data" action="{{ route('company.profile_update_mine', isset($client) && $client->company ? $client->company->id : auth()->user()->id) }}">
     {!! csrf_field() !!}
 		<div class="card-header border-bottom">
 			<h5 class="card-title mb-0">{{ $heading }}</h5>
@@ -142,7 +142,7 @@
 						{{ __('settings.Currency') }} <span class="text-danger">*</span>
 						</label>
 						<select class="form-control form-select" name="Currency" id="Currency" required>
-							<option value="">{{ __('settings.Currency') }}</option>
+							<option value="" disabled>{{ __('settings.Currency') }}</option>
 							@foreach ($Currencies as $Currency)
 								<option value="{{ $Currency->currency_code }}"
 									{{ $getCurrancy == $Currency->currency_code ? 'selected' : '' }}>
@@ -237,7 +237,7 @@
 // Financial Projection Form Logic
 document.addEventListener('DOMContentLoaded', function () {
 
-	const currentValuationDate = "{{ $currentDate ? $currentDate : '' }}"; // Track current valuation date
+	let currentValuationDate = "{{ $currentDate ? $currentDate : '' }}"; // Track current valuation date
 	const oldValuationDate = "{{ isset($valuation_date) ? $valuation_date : '' }}"; // Injected from backend
 	console.log('currentValuationDate', currentValuationDate);
 	console.log('oldValuationDate', oldValuationDate);
