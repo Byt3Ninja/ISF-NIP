@@ -3192,4 +3192,13 @@ return [
 	'survey_reminder_message' => 'لديك استبيانات معلقة لإكمالها. يرجى تخصيص بعض الوقت لملئها.',
 	'Congratolation_You_Are_Waiting_Approvel_From_Admin' => 'تهانينا! تنتظر الموافقة من قبل المسئول.',
 	'Success' => 'نجاح',
+	'Egyptian pound' => 'جنيه مصري',
+	'United Arab Emirates dirham' => 'درهم امارات',
+	'Euro' => 'يورو',
+	'Mexican Peso' => 'بيسو مكسيكي',
+	'United States' => 'دولار امريكي',
+	'AED' => 'درهم امارات',
+	'USD' => 'دولار امريكي',
+	'EUR' => 'يورو',
+	'pes' => 'بيسو مكسيكي',
 ];

@@ -3137,4 +3137,13 @@ return [
 	'survey_reminder_message' => 'You have pending surveys that need completion.',
 	'Congratolation_You_Are_Waiting_Approvel_From_Admin' => 'Congratolation! You are waiting form admin approval.',
 	'Success' => 'Success',
+	'Egyptian pound' => 'Egyptian pound',
+	'United Arab Emirates dirham' => 'United Arab Emirates dirham',
+	'Euro' => 'Euro',
+	'Mexican Peso' => 'Mexican Peso',
+	'United States' => 'United States Dollar ',
+	'AED' => 'AED',
+	'USD' => 'USD',
+	'pes' => 'pesos',
+	'EUR' => 'EUR',
 ];
