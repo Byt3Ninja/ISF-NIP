@@ -1044,7 +1044,7 @@ class CyclesController extends Controller
                 $options = json_decode($field->pivot->options ?? '{}', true) ?? [];
 
                 return [
-                    'id'          => $field->id,
+                    'id'          => $field->pivot->id,
                     'label'       => $options['label'] ?? '',
                     'description' => $options['description'] ?? '',
                     'section'     => $options['section'] ?? 'N/A',
@@ -1196,15 +1196,19 @@ class CyclesController extends Controller
 
     public function saveForm(Request $request)
     {
+     
         $id = $request->id;
         $validator = Validator::make($request->all(), [
             'id' => 'required|integer|exists:steps,id',
             'field_ids' => 'required|string',
         ]);
         abort_if($validator->fails(), 422, "Data error");
+        
+        
 
         // generating validation rules based on dynamic field config data
         $field_map_ids = explode(",", $request->input('field_ids'));
+        
         $field_required_rules = collect($field_map_ids)->mapWithKeys(function ($id) {
             $field_options = Formfield::findOrFail($id)->options;
             if ($field_options->validation->required == 1) {
@@ -1217,15 +1221,15 @@ class CyclesController extends Controller
                 return ['field_' . $id => 'nullable'];
             }
         });
-
         $dynamic_validator = Validator::make($request->all(), $field_required_rules->toArray(), [
             'required' => "field can't be left blank",
             'email' => 'field must be a valid email address'
         ]);
+        
         if ($dynamic_validator->fails()) {
             return redirect()->back()
-                ->withErrors($dynamic_validator)
-                ->withInput();
+            ->withErrors($dynamic_validator)
+            ->withInput();
         }
 
         // gather the form data as field_name => [ label, data ]
@@ -1299,6 +1303,19 @@ class CyclesController extends Controller
 
         return redirect(url('/dashboard'))->with(['msg' => 'formSubmittedSuccessfully', 'class' => 'success']);
     }
+
+    function normalizeFieldName($fieldName)
+{
+    if (preg_match('/^field_\d+_(\d+)$/', $fieldName, $matches)) {
+        return 'field_' . intval($matches[1]);
+    }
+
+    if (preg_match('/^field_(\d+)$/', $fieldName, $matches)) {
+        return 'field_' . intval($matches[1]);
+    }
+
+    return $fieldName;
+}
 
     public function testSend(Request $request)
     {
