@@ -305,21 +305,33 @@
           <div>{{ __('mentor.enrolled_programs') }}</div>
         </a>
       </li>
+      @php
+        $countRequest = 0;
+        $countRequest = App\MentorShipRequest::where('mentor_id', auth()->id())
+                      ->where('approved', 'Yes')
+                      ->where('zoom_date', '>=', date('Y-m-d'))
+                      ->count();
+        
+      @endphp
       <li class="{{ Request::is('dashboard/mentor/sessions') ? 'active' : '' }} menu-item">
         <a href="/dashboard/mentor/sessions" class="menu-link">
           <i class="menu-icon tf-icons ti ti-calendar-event"></i>
           <div class="d-flex align-items-center justify-content-between w-100">
             <span>{{ __('admin.Mentorship Sessions') }}</span>
-            <span class="badge badge-center rounded-pill bg-danger ms-2">4</span>
+            <span class="badge badge-center rounded-pill bg-danger ms-2">{{ $countRequest }}</span>
           </div>
         </a>
       </li>
+      @php
+        $countSurvey = 0;
+        $countSurvey = App\SurveyResponses::where('user_id', auth()->id())->whereNull('responses')->count();
+      @endphp
       <li class="{{ Request::is('dashboard/mentor/surveys') ? 'active' : '' }} menu-item">
         <a href="/dashboard/mentor/surveys" class="menu-link">
           <i class="menu-icon tf-icons ti ti-notes"></i>
           <div class="d-flex align-items-center justify-content-between w-100">
             <span>{{ __('admin.surveys') }}</span>
-            <span class="badge badge-center rounded-pill bg-danger ms-2">3</span>
+            <span class="badge badge-center rounded-pill bg-danger ms-2">{{ $countSurvey }}</span>
           </div>
         </a>
       </li>
