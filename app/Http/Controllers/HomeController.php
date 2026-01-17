@@ -706,8 +706,9 @@ class HomeController extends Controller
                     organizations o ON o.id = mr.organization_id
                 WHERE   
                     mr.deleted_at IS NULL
-                    AND mr.zoom_date >= ?
+                    AND DATE_ADD(mr.zoom_date, INTERVAL mr.period MINUTE) >= ?
                     AND mr.approved = 'Yes'
+                    
             ";
             if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
                 $upcoming_sessions_q .= " AND mr.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
@@ -719,7 +720,7 @@ class HomeController extends Controller
                 $upcoming_sessions_q .= " AND mr.mentor_id = " . $user->id;
             }
             $params = [];
-            $params[] = date("Y-m-d 00:00:00");
+            $params[] = date("Y-m-d H:i:s");
             $l = app()->getLocale();
             $upcoming_sessions = collect(DB::select($upcoming_sessions_q, $params))->map(function ($session) use ($l) {
                 $output = new stdClass;
