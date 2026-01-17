@@ -34,8 +34,13 @@ class InviteMentorMail extends Mailable implements ShouldQueue
                      ]);
 
         // Attach files if exist
-        if (!empty($this->invitation->attachments)) {
-            foreach ($this->invitation->attachments as $file) {
+        $attachments = $this->invitation->attachments;
+        if (is_string($attachments)) {
+            $attachments = json_decode($attachments, true) ?? [];
+        }
+
+        if (!empty($attachments) && is_array($attachments)) {
+            foreach ($attachments as $file) {
                 $mail->attach(storage_path('app/' . $file));
             }
         }
