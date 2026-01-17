@@ -1678,7 +1678,7 @@ class HomeController extends Controller
             }
             if (!empty($surveysToAdd)) {
                 // dd($surveysToAdd);
-                SurveyResponses::insert($surveysToAdd);
+                //SurveyResponses::insert($surveysToAdd);
             }
         }
         
