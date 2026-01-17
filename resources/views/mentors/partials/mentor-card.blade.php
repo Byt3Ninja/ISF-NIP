@@ -96,7 +96,7 @@
 
     <!-- Action Button -->
     <div class="row px-4 mt-auto">
-      @if(isset($getCycle) && $getCycle?->id != 0 || $getCycle?->id != null)
+      @if(isset($getCycle) && $getCycle?->id != 0 || isset($getCycle) && $getCycle?->id != null)
         @if ($canRequestMentorship && auth()->user()?->company?->id && $mentor?->id)
           @if($mentor?->schedule->isNotEmpty())
             <button 
