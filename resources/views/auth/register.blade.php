@@ -95,8 +95,8 @@
     ['label' => 'Mentor', 'icon' => 'ti ti-user'],
     // ['label' => 'Service Provider', 'icon' => 'ti ti-briefcase'],
   ];
-  $termsUrl = setting('terms_url','#') ;
-  $privacyUrl = setting('privacy_url','#');
+  $termsUrl = setting('terms_url', $setting->terms_url ?? '#');
+  $privacyUrl = setting('privacy_url', $setting->privacy_url ?? '#');
   @endphp
 
   <!-- Content -->
