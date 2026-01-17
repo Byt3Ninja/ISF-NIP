@@ -93,7 +93,7 @@
   $accountRoles = [
     ['label' => 'Founder', 'icon' => 'ti ti-businessplan'],
     ['label' => 'Mentor', 'icon' => 'ti ti-user'],
-    ['label' => 'Service Provider', 'icon' => 'ti ti-briefcase'],
+    // ['label' => 'Service Provider', 'icon' => 'ti ti-briefcase'],
   ];
   $termsUrl = setting('terms_url','#') ;
   $privacyUrl = setting('privacy_url','#');
@@ -189,7 +189,7 @@
                   <div class="row gx-3 mb-4" dir="{{ $l == 'en' ? 'ltr': 'rtl' }}">
                     <!-- Switch Role -->
                     @foreach($accountRoles as $key => $role)
-                      <div class="col-md-4 mb-4">
+                      <div class="col-md-6 mb-6">
                         <label for="{{ $role['label'] }}Role" style="display: grid; place-items: center;" class="form-check custom-option custom-option-icon cursor-pointer ps-md-3">
                           <div class="d-flex align-items-center">
                             <input 
