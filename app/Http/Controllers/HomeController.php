@@ -1579,22 +1579,34 @@ class HomeController extends Controller
         }
             $surveysToAdd = [];
             if( $user->hasAnyRole(['mentor']) ){
-                $surveys = SurveyScopes::whereIn('cycle_id', $user->mentorCycles->pluck('id'))->whereIn('type', ['mentor', 'both'])->orWhereNull('type')->with(['myResponses'])->get();
+                $surveys = SurveyScopes::whereIn('cycle_id', $user->mentorCycles->pluck('id'))
+                    ->where(function($query) {
+                        $query->whereIn('type', ['mentor', 'both'])
+                              ->orWhereNull('type');
+                    })
+                    ->with(['myResponses'])
+                    ->get();
             } else{
-                $surveys = SurveyScopes::where('cycle_id', $cycle_id)->whereIn('type', ['startup', 'both'])->orWhereNull('type')->with(['myResponses'])->get();
+                $surveys = SurveyScopes::where('cycle_id', $cycle_id)
+                    ->where(function($query) {
+                        $query->whereIn('type', ['startup', 'both'])
+                              ->orWhereNull('type');
+                    })
+                    ->with(['myResponses'])
+                    ->get();
             }
-                $mentorship = collect($surveyEligible)
-                        ->where('triggered_on', 'mentorship');
-                // dd($surveys);
+
             foreach ($surveys as $survey_scope) {
                 $my_responses = $survey_scope->myResponses;
-                
-              
-                if ($survey_scope->scope == 'mentorship' && $mentorship->isNotEmpty() && $cycle_id != 0) {
-                  
+
+                // Initialize fresh collection for each survey to avoid overwriting issues
+                $mentorshipFiltered = collect($surveyEligible)->where('triggered_on', 'mentorship');
+                $trainingFiltered = collect($surveyEligible)->where('triggered_on', 'training');
+
+                if ($survey_scope->scope == 'mentorship' && $mentorshipFiltered->isNotEmpty()) {
+
                     $due = $survey_scope->trigger_by_due;
                     $session = $survey_scope->trigger_by_session;
-                    $mentorship = $mentorship;
                     $triggers = [];
                     if ($due == true) {
                         $triggers[] = 'due';
@@ -1602,21 +1614,21 @@ class HomeController extends Controller
                     if ($session == true) {
                         $triggers[] = 'session';
                     }
-                   
+
                     $triggers = array_unique($triggers);
                     if (count($triggers) == 0) {
-                        $mentorship = $mentorship->where('triggered_at', null);
+                        $mentorshipFiltered = $mentorshipFiltered->where('triggered_at', null);
                     } else {
-                        $mentorship = $mentorship->whereIn('triggered_by', $triggers);
+                        $mentorshipFiltered = $mentorshipFiltered->whereIn('triggered_by', $triggers);
                     }
-                    $mentorship = $mentorship->values();
-                    foreach ($mentorship as $conditions) {
+                    $mentorshipFiltered = $mentorshipFiltered->values();
+                    foreach ($mentorshipFiltered as $conditions) {
                         $checkResponse = $my_responses->where('triggered_on', $conditions['triggered_on'])->where('triggered_at', $conditions['triggered_at'])->where('triggered_by', $conditions['triggered_by'])->first();
                         if (empty($checkResponse)) {
                             $surveysToAdd[] = [
                                 'user_id' => $user->id,
                                 'survey_id' => $survey_scope->survey_id,
-                                'cycle_id' => $cycle_id,
+                                'cycle_id' => $survey_scope->cycle_id,
                                 'scope_id' => $survey_scope->id,
                                 'triggered_on' => $conditions['triggered_on'],
                                 'triggered_at' => $conditions['triggered_at'],
@@ -1625,12 +1637,12 @@ class HomeController extends Controller
                             ];
                         }
                     }
-                  
-                } elseif ($survey_scope->scope == 'training' && array_key_exists('training', $surveyEligible)) {
+
+                } elseif ($survey_scope->scope == 'training' && $trainingFiltered->isNotEmpty()) {
                     $due = $survey_scope->trigger_by_due;
                     $quiz = $survey_scope->trigger_by_quiz;
                     $session = $survey_scope->trigger_by_session;
-                    $training = collect($surveyEligible['training']);
+                    $triggers = [];
                     if ($due == true) {
                         $triggers[] = 'due';
                     }
@@ -1642,18 +1654,18 @@ class HomeController extends Controller
                     }
                     $triggers = array_unique($triggers);
                     if (count($triggers) == 0) {
-                        $training = $training->where('triggered_at', null);
+                        $trainingFiltered = $trainingFiltered->where('triggered_at', null);
                     } else {
-                        $training = $training->whereIn('triggered_by', $triggers);
+                        $trainingFiltered = $trainingFiltered->whereIn('triggered_by', $triggers);
                     }
-                    $training = $training->values();
-                    foreach ($training as $conditions) {
+                    $trainingFiltered = $trainingFiltered->values();
+                    foreach ($trainingFiltered as $conditions) {
                         $checkResponse = $my_responses->where('triggered_on', $conditions['triggered_on'])->where('triggered_at', $conditions['triggered_at'])->where('triggered_by', $conditions['triggered_by'])->first();
                         if (empty($checkResponse)) {
                             $surveysToAdd[] = [
                                 'user_id' => $user->id,
                                 'survey_id' => $survey_scope->survey_id,
-                                'cycle_id' => $cycle_id,
+                                'cycle_id' => $survey_scope->cycle_id,
                                 'scope_id' => $survey_scope->id,
                                 'triggered_on' => $conditions['triggered_on'],
                                 'triggered_at' => $conditions['triggered_at'],
