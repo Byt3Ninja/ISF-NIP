@@ -235,7 +235,6 @@ class QuestionsBankController extends Controller
 			$question->save();
 			$question->organizations()->attach($request->organization_id);
 		} else {
-
 			$rules = [
 				'ascategory_id' => 'required|exists:categories,id',
 				'subcategory_id' => 'required|exists:sub_categories,id',
@@ -277,6 +276,8 @@ class QuestionsBankController extends Controller
 			$question->explanation_QA_ar = $request->explanation_QA_ar;
 			$question->explanation_QA_en = $request->explanation_QA_en;
 			$question->save();
+			/* Add Relation Between Question And Organization  from OrgQuestionBank */
+			$question->organizations()->attach($request->organization_id); 
 		}
 
 		return redirect()->route('questions-bank.index')->with('success', 'StoredSuccessfully');
