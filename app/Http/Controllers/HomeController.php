@@ -1713,6 +1713,44 @@ class HomeController extends Controller
             } elseif (!$middleware->count()) {
                 return false;
             }
+
+            // الحصول على تاريخ إنشاء الـ survey scope
+            $surveyScope = $item->survey_scope;
+            $surveyCreatedAt = $surveyScope ? $surveyScope->created_at : null;
+
+            // فحص التوقيت للـ mentorship sessions
+            if ($item->triggered_on == 'mentorship' && $item->triggered_by == 'session') {
+                if (!empty($middleware->zoom_date) && !empty($middleware->period)) {
+                    // 1. فحص أن الـ request تم بعد إنشاء الـ survey
+                    if ($surveyCreatedAt && Carbon::parse($middleware->zoom_date) <= Carbon::parse($surveyCreatedAt)) {
+                        return false; // الـ request قديم وتم قبل إنشاء الـ survey
+                    }
+
+                    // 2. فحص أن الجلسة انتهت
+                    $endAt = Carbon::parse($middleware->zoom_date)->addMinutes($middleware->period);
+                    if (now() <= $endAt) {
+                        return false; // الجلسة لم تنتهي بعد
+                    }
+                }
+            }
+
+            // فحص التوقيت للـ training sessions (للـ startup فقط)
+            if ($item->triggered_on == 'training' && $item->triggered_by == 'session') {
+                if ($middleware->type == 'sessions' && !empty($middleware->datetime) && !empty($middleware->duration)) {
+                    // 1. فحص أن الـ session تم بعد إنشاء الـ survey
+                    $sessionDate = Carbon::createFromTimestamp($middleware->datetime);
+                    if ($surveyCreatedAt && $sessionDate <= Carbon::parse($surveyCreatedAt)) {
+                        return false; // الـ session قديم وتم قبل إنشاء الـ survey
+                    }
+
+                    // 2. فحص أن الجلسة انتهت
+                    $endAt = $sessionDate->copy()->addMinutes($middleware->duration);
+                    if (now() <= $endAt) {
+                        return false; // الجلسة لم تنتهي بعد
+                    }
+                }
+            }
+
             return true;
         })->values();
 

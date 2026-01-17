@@ -305,20 +305,20 @@
           <div>{{ __('mentor.enrolled_programs') }}</div>
         </a>
       </li>
-      @php
+      {{-- @php
         $countRequest = 0;
         $countRequest = App\MentorshipRequest::where('mentor_id', auth()->id())
                       ->where('approved', 'Yes')
                       ->where('zoom_date', '>=', date('Y-m-d'))
                       ->count();
         
-      @endphp
+      @endphp --}}
       <li class="{{ Request::is('dashboard/mentor/sessions') ? 'active' : '' }} menu-item">
         <a href="/dashboard/mentor/sessions" class="menu-link">
           <i class="menu-icon tf-icons ti ti-calendar-event"></i>
           <div class="d-flex align-items-center justify-content-between w-100">
             <span>{{ __('admin.Mentorship Sessions') }}</span>
-            <span class="badge badge-center rounded-pill bg-danger ms-2">{{ $countRequest }}</span>
+            {{-- <span class="badge badge-center rounded-pill bg-danger ms-2">{{ $countRequest }}</span> --}}
           </div>
         </a>
       </li>
