@@ -307,7 +307,7 @@
       </li>
       @php
         $countRequest = 0;
-        $countRequest = App\MentorShipRequest::where('mentor_id', auth()->id())
+        $countRequest = App\MentorshipRequest::where('mentor_id', auth()->id())
                       ->where('approved', 'Yes')
                       ->where('zoom_date', '>=', date('Y-m-d'))
                       ->count();
