@@ -188,7 +188,7 @@ class SlotController extends Controller
 
 			if($item->session_type == 'Offline'){
 					$user = auth()->user();
-					$location = $user->company->cycledata->organization->google_map_url;
+					$location = $user->company?->cycledata?->organization?->google_map_url;
 				}
 
 			if ($isWeekly) {
