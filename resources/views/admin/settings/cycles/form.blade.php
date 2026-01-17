@@ -33,14 +33,14 @@
                   </div>
                 </div>
                 @endif
-
+                
                 @if($form && $form['build_data'] && count($form['build_data']) > 0)
                 <form method="post" action="/dashboard/cycles/save" enctype="multipart/form-data" class="mt-3">
                   @csrf
                   <input type="hidden" name="cycle" value="{{$c}}" />
                   <input type="hidden" name="id" value="{{$step->id}}" />
                   <input type="hidden" name="field_ids" value="{{ $field_ids }}" />
-
+                 
                    @foreach($form['build_data'] as $sectionIndex => $section)
                   <div class="section-wrapper mb-4" data-section-logic="{{ $section['logic'] ?? 'continue' }}" data-section-id="{{ $sectionIndex }}">
                     @if($section['title'] || $section['description'])
@@ -56,6 +56,7 @@
                     <div class="card border shadow-sm">
                       <div class="card-body p-4">
                         <div class="row g-4">
+                        
                           @foreach($section['questions'] as $question)
                           @php
                             $field_name = 'field_' . $question['id'];
@@ -201,7 +202,7 @@
                                     </div>
                                   @php endif; @endphp
                                   @break
-
+                                    
                                 @case('short_answer')
                                 @default
                                   <input 
@@ -226,7 +227,6 @@
                     </div>
                   </div>
                   @endforeach
-
                   <button type="submit" class="btn btn-primary btn-lg mt-4">
                     <i class="ti ti-send me-2"></i>{{ __('admin.submit') }}
                   </button>
