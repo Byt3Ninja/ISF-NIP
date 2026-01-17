@@ -31,7 +31,7 @@
 <!-- Content wrapper -->
 <div class="">
 	<div class="">
-		@if(Auth::user()->hasRole('Registered') || Auth::user()->hasRole('Mentor'))
+		@if(Auth::user()->hasRole('Registered'))
 			@if( isset($newhackathon) && $newhackathon )
 				{{-- @if(now()->diffInDays($newhackathon->created_at) < 300) --}}
 				@include('admin.includes.banner_header', ['newhackathon' => $newhackathon])
