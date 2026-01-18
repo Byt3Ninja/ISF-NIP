@@ -76,7 +76,7 @@ $surveys = $surveys->sortBy(function($survey) {
                     width="36"
                     alt="avatar" 
                   />
-                  <small class="text-dark">{{ $survey?->user?->first_name_en }} {{ $survey?->user?->last_name_en}}</small>
+                  <small class="text-dark">{{ $survey?->user?->name }}</small>
                 </a>
               </td>
               <td>

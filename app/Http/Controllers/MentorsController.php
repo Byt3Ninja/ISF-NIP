@@ -1244,7 +1244,7 @@ class MentorsController extends Controller
 				'period' => $session->period,
 				'status' => $session->zoom_date > now()
 				? 'Upcoming'            
-				: ($session->zoom_date->addMinutes($session->period) < now() ? 'Completed' : 'Ongoing'),
+				: ($session->zoom_date->addMinutes($session->period) < now() ? 'Completed' : 'In-progress'),
 
 
 				'session_type' => $session->session_type,
@@ -1299,6 +1299,7 @@ class MentorsController extends Controller
 			->with('survey_scope')
 			->orderBy('created_at', 'desc')
 			->get();
+			
 
 				$surveyQuestionsCount = SurveyQuestions::whereIn(
 				'survey_id',
@@ -1314,39 +1315,28 @@ class MentorsController extends Controller
 			->get();
 
 				//dd($mentorshipRequests[0], $availableSurveys[0], $surveyQuestionsCount);
-
 			$surveys = $availableSurveys->map(function ($survey) use (
 			$mentorshipRequests,
 			$surveyQuestionsCount
 		) {
-
 			$responses = json_decode($survey->responses, true) ?? [];
 			$totalQuestions = $surveyQuestionsCount[$survey->survey_id] ?? 0;
 			$completedQuestions = count($responses);
-
-			// أقرب جلسة قبل تاريخ إنشاء الـ survey
 			$mentorship = $mentorshipRequests
 				->where('zoom_date', '<=', $survey->created_at)
 				->first();
-
 			return (object) [
 				'id' => $survey->id,
 				'title' => ucfirst($survey->survey_scope->scope) . ' Survey',
-
 				'created_at' => $survey->created_at->format('Y-m-d H:i'),
 				'due_date' => $survey->created_at->copy()->addDays(7)->format('Y-m-d H:i'),
-
 				'status' => $completedQuestions === 0
 					? 'Pending'
 					: ($completedQuestions < $totalQuestions ? 'In_Progress' : 'Completed'),
-
 				'survey_type' => ucfirst($survey->triggered_on),
-
 				'total_questions' => $totalQuestions,
 				'completed_questions' => $completedQuestions,
-
 				'is_required' => (bool) $survey->survey->is_required,
-
 				'user' => $mentorship
 					? (object)[
 						'id' => $mentorship->user->id,
@@ -1367,7 +1357,6 @@ class MentorsController extends Controller
 						],
 					]
 					: null,
-
 				'session' => $mentorship
 					? (object)[
 						'id' => $mentorship->id,

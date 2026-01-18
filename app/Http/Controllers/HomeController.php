@@ -1676,6 +1676,9 @@ class HomeController extends Controller
                 }
             }
             if (!empty($surveysToAdd)) {
+                $surveysToAdd = collect($surveysToAdd)->unique(function ($item) {
+                    return $item['user_id'].'-'.$item['survey_id'].'-'.$item['triggered_on'].'-'.$item['triggered_at'].'-'.$item['triggered_by'];
+                })->values()->toArray();
                 // dd($surveysToAdd);
                 SurveyResponses::insert($surveysToAdd);
             }
