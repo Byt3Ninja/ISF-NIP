@@ -216,6 +216,8 @@ if (!isset($crumbs)) {
           // window.location.href = CONFIG.backHref;
           window.history.back();
           window.removeEventListener('beforeunload', beforeUnloadHandler);
+        } else {
+          window.addEventListener('beforeunload', beforeUnloadHandler);
         }
       });
     });
