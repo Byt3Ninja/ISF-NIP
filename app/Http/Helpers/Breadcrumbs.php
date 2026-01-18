@@ -29,7 +29,8 @@ if (! function_exists('breadcrumbs')) {
                             'child'  => $child['title'],
                             'child_group' => isset($child['group']) ? $child['group'] : null,
                             'route'  => $child['route'],
-                            'group_route' => isset($child['group_route']) ? $child['group_route'] : null
+                            'group_route' => isset($child['group_route']) ? $child['group_route'] : null,
+                            'hide_parent' => isset($child['hide_parent']) ? $child['hide_parent'] : false
                         ];
                     }
                 }

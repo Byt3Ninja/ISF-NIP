@@ -312,6 +312,8 @@ return [
 		'people_and_organizations' => 'People & Organizations',
 		'organization_types' => 'Organization Types',
 		'organizations' => 'Organizations',
+		'create_organization' => 'Create Organization',
+		'edit_organization' => 'Edit Organization',
 		'users' => 'Users',
 		'create_user' => 'Create User',
 		'edit_user' => 'Edit User',
@@ -383,6 +385,9 @@ return [
 		'license_key' => 'License Key',
 		'questions_assessment' => 'Questions Assessment',
 		'history_assessment' => 'Assessment History',
+		'my_profile' => 'My Profile',
+		'edit_profile' => 'Edit Profile',
+		'profile' => 'Profile',
 		
 		'unsaved_changes' => 'Unsaved Changes',
 		'unsaved_changes_message' => 'You have unsaved changes. Are you sure you want to leave?',

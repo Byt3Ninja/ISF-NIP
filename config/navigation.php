@@ -3,13 +3,26 @@ return function () {
   $user = auth()->user();
   $request = request();
   $company_id = isset(auth()->user()->company->id) ? auth()->user()->company->id : $request->id;
+  $user_id = $request->id;
 
+  if ($user && $user->hasRole('serviceProvider')) {
+    return [
+      ['title' => 'dashboard', 'url' => 'dashboard'],
+      ['title' => 'my_profile', 'url' => 'dashboard/show/myProfile', 'menuOnly' => false],
+      ['title' => 'edit_profile', 'url' => 'dashboard/myProfile', 'menuOnly' => false],
+      ['title' => 'profile', 'url' => 'dashboard/show/UserProfile/'.$user_id, 'menuOnly' => false],
+    ];
+  }
+  
   if ($user && $user->hasRole('Judger')) {
     return [
       ['title' => 'dashboard', 'url' => 'dashboard'],
       ['title' => 'screening', 'url' => 'dashboard/judger/screening'],
       ['title' => 'startup_profile', 'url' => 'dashboard/companyProfile/'.$company_id],
       ['title' => 'file_manager', 'url' => 'dashboard/myFiles'],
+      ['title' => 'my_profile', 'url' => 'dashboard/show/myProfile', 'menuOnly' => false],
+      ['title' => 'edit_profile', 'url' => 'dashboard/myProfile', 'menuOnly' => false],
+      ['title' => 'profile', 'url' => 'dashboard/show/UserProfile/'.$user_id, 'menuOnly' => false],
     ];
   }
 
@@ -23,6 +36,11 @@ return function () {
       ['title' => 'programs', 'url' => 'dashboard/program/show'],
       ['title' => 'mentorship_sessions', 'url' => 'dashboard/mentor/sessions'],
       ['title' => 'surveys', 'url' => 'dashboard/mentor/surveys'],
+      ['title' => 'my_profile', 'route' => 'user.profile_view', 'menuOnly' => false],
+      ['title' => 'edit_profile', 'route' => 'user.profile_Edit', 'menuOnly' => false],
+      ['title' => 'my_profile', 'url' => 'dashboard/show/myProfile', 'menuOnly' => false],
+      ['title' => 'edit_profile', 'url' => 'dashboard/myProfile', 'menuOnly' => false],
+      ['title' => 'profile', 'url' => 'dashboard/show/UserProfile/'.$user_id, 'menuOnly' => false],
     ];
   }
 
@@ -32,6 +50,9 @@ return function () {
         'title' => null,
         'children' => [
           ['title' => 'dashboard', 'route' => 'core.dashboard_view', 'menuOnly' => true],
+          ['title' => 'my_profile', 'route' => 'user.profile_view', 'hide_parent' => true, 'menuOnly' => false],
+          ['title' => 'edit_profile', 'route' => 'user.profile_Edit', 'hide_parent' => true, 'menuOnly' => false],
+          ['title' => 'profile', 'route' => 'mentors.profile_view', 'hide_parent' => true, 'menuOnly' => false],
         ]
       ],
       'startup' => [
@@ -88,6 +109,9 @@ return function () {
         ['title' => 'reports', 'route' => 'reports.list', 'menuOnly' => true],
         ['title' => 'activities', 'route' => 'activities.index', 'menuOnly' => true],
         ['title' => 'projects', 'route' => 'projects.index', 'menuOnly' => true],
+        ['title' => 'my_profile', 'route' => 'user.profile_view', 'hide_parent' => true, 'menuOnly' => false],
+        ['title' => 'edit_profile', 'route' => 'user.profile_Edit', 'hide_parent' => true, 'menuOnly' => false],
+        ['title' => 'profile', 'route' => 'mentors.profile_view', 'hide_parent' => true, 'menuOnly' => false],
       ],
     ],
   
@@ -131,6 +155,8 @@ return function () {
       'children' => [
         ['title' => 'organization_types', 'route' => 'organization-types.index', 'menuOnly' => true],
         ['title' => 'organizations', 'route' => 'organizations.index', 'menuOnly' => true],
+        ['title' => 'create_organization', 'route' => 'organization.wizard.create', 'menuOnly' => false],
+        ['title' => 'edit_organization', 'route' => 'organization.wizard.edit', 'menuOnly' => false],
         ['title' => 'users', 'route' => 'users.index', 'menuOnly' => true],
         ['title' => 'create_user', 'route' => 'users.create', 'group' => 'users', 'menuOnly' => false],
         ['title' => 'edit_user', 'route' => 'users.edit', 'group' => 'users', 'menuOnly' => false],
