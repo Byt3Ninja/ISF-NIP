@@ -1595,7 +1595,6 @@ class HomeController extends Controller
                     ->with(['myResponses'])
                     ->get();
             }
-
             foreach ($surveys as $survey_scope) {
                 $my_responses = $survey_scope->myResponses;
 

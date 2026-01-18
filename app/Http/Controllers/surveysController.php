@@ -134,7 +134,7 @@ class surveysController extends Controller
 		$survey->title = $request->title;
 		$survey->organization_id = $request->organization_id;
 		$survey->description = $request->description;
-		$survey->is_required = $request->is_required;
+		$survey->is_required = $request->is_required ? 1 : 0;
 		$survey->save();
 
 		$questions_ids = $request->input('selected_questions', []);
