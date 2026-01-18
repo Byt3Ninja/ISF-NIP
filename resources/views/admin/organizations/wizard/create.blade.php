@@ -147,7 +147,7 @@
               </div>
             </form>
 
-            <div class="px-8">
+            <div class="px-8 pb-6">
               @if(isset($organization) && $organization->is_draft)
                 <div class="alert alert-warning d-flex align-items-center mt-3" role="alert">
                   <i class="ti ti-alert-triangle me-2"></i>
