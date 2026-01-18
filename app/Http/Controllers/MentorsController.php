@@ -1242,9 +1242,10 @@ class MentorsController extends Controller
 				'id' => $session->id,
 				'zoom_date' => $session->zoom_date,
 				'period' => $session->period,
-				'status' => $session->done
-					? 'Completed'
-					: ($session->zoom_date > now() ? 'Pending' : 'In_Progress'),
+				'status' => $session->zoom_date > now()
+				? 'Upcoming'            
+				: ($session->zoom_date->addMinutes($session->period) < now() ? 'Completed' : 'Ongoing'),
+
 
 				'session_type' => $session->session_type,
 				'location' => $session->session_type === 'Offline' ? $session->location : null,
