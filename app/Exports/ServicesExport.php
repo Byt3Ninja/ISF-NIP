@@ -53,10 +53,10 @@ class ServicesExport implements FromCollection, WithHeadings, WithMapping
             $service->organizations->first()?->{'name_'.$this->locale} ?? '',
             $service->{'name_'.$this->locale} ?? '',
             $service->provider
-                ? $service->provider->first_name_ar . ' ' . $service->provider->last_name_ar
+                ? $service->provider->contact_name
                 : '',
             $service->price,
-            $service->{'description_'.$this->locale} ?? '',
+            strip_tags($service->{'description_'.$this->locale}) ?? '',
             $service->vendor_name ?? '',
             $service->vendor_email ?? '',
             $service->vendor_phone ?? '',
