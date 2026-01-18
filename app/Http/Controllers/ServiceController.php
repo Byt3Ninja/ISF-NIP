@@ -72,13 +72,13 @@ class ServiceController extends Controller
 
 			return view('admin/settings/services/index', compact('services', 'Setting'));
 	}
-	public function exportExcel()
-    {
-        return Excel::download(new ServicesExport, 'services'.date('Y-m-d H:i:s').'.xlsx');
+	public function exportExcel(Request $request)
+    {	
+        return Excel::download(new ServicesExport($request), 'services'.date('Y-m-d H:i:s').'.xlsx');
     }
-	public function exportCSV()
+	public function exportCSV(Request $request)
     {
-        return Excel::download(new ServicesExport, 'services'.date('Y-m-d H:i:s').'.csv');
+        return Excel::download(new ServicesExport($request), 'services'.date('Y-m-d H:i:s').'.csv');
     }
 
 	/**
