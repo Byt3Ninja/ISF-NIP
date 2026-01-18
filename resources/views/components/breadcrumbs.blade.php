@@ -37,7 +37,7 @@ if (!isset($crumbs)) {
 
       {{-- Parent --}}
       @if (!$_user->hasAnyRole('Judger|Mentor|serviceProvider'))
-        @if (isset($crumbs['parent']))
+        @if (isset($crumbs['parent']) && !$crumbs['hide_parent'])
           <li class="breadcrumb-item active">
             {{ __('settings.navigation.' . $crumbs['parent']) }}
           </li>

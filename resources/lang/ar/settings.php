@@ -315,6 +315,8 @@ return [
 		'people_and_organizations' => 'الأشخاص و المؤسسات',
 		'organization_types' => 'أنواع المؤسسات',
 		'organizations' => 'المؤسسات',
+		'create_organization' => 'إنشاء مؤسسه',
+		'edit_organization' => 'تعديل المؤسسه',
 		'users' => 'المستخدمين',
 		'create_user' => 'مستخدم جديد',
 		'edit_user' => 'تعديل المستخدم',
