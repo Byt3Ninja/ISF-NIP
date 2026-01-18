@@ -253,7 +253,7 @@
   <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-md">
       <div class="modal-content">
-        <form id="filterForm" method="GET" action="{{ url()->current() }}">
+        <form id="filterForm" method="GET" action="{{ url()->current() }}" data-ignore-dirty>
           <div class="modal-header">
             <h5 class="modal-title d-flex align-items-center" id="filterModalLabel">
               <i class="ti ti-filter me-2"></i> {{ __('cycles.Filter_Sessions') }}

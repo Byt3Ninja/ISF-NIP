@@ -45,7 +45,7 @@
       <!-- Filters Section -->
       <div class="card bg-light-subtle shadow-none rounded-0 border-bottom">
         <div class="card-body py-4">
-          <form id="filter-form" method="GET" action="/dashboard/screening">
+          <form id="filter-form" method="GET" action="/dashboard/screening" data-ignore-dirty>
             <div class="row g-3 align-items-center">
               <div class="col-md-6 col-lg-3">
                 <div class="input-group input-group-merge">

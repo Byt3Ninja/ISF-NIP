@@ -79,7 +79,7 @@ if (!isset($crumbs)) {
   const CONFIG = {
     backButtonSelector: '#back-button',
     backHref: "{{ session('_previous_url') ?? route('core.dashboard_view') }}",
-    watchSelectors: 'input, textarea, select',
+    watchSelectors: 'input:not([type="search"]), textarea, select',
     ignoreSelectors: '[data-ignore-dirty]',
     debug: false
   };
@@ -136,7 +136,8 @@ if (!isset($crumbs)) {
       if (
         el.disabled ||
         el.readOnly ||
-        el.matches(CONFIG.ignoreSelectors)
+        el.matches(CONFIG.ignoreSelectors) ||
+        el.closest(CONFIG.ignoreSelectors)
       ) return;
 
       // radio groups tracked once

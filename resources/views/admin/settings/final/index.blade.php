@@ -44,7 +44,7 @@
       <!-- Filters Section -->
       <div class="card bg-light-subtle shadow-none rounded-0 border-bottom">
         <div class="card-body py-4">
-          <form id="filter-form" method="GET" action="/dashboard/final">
+          <form id="filter-form" method="GET" action="/dashboard/final" data-ignore-dirty>
             <div class="row g-3 align-items-end">
               <div class="col-md-6 col-lg-3">
                 <input type="text" class="form-control bg-card" name="search" value="{{ request('search') }}" placeholder="{{ __('admin.screening.search_steps_placeholder') }}">

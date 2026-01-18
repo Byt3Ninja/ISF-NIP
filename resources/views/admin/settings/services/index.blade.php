@@ -57,7 +57,7 @@
       @if (!empty($services) && $services->count() > 0)
         <div class="card shadow-none rounded-0 border-bottom">
           <div class="card-body py-4">
-            <form method="GET" action="{{ route('services.index') }}" id="filter-form">
+            <form method="GET" action="{{ route('services.index') }}" id="filter-form" data-ignore-dirty>
               <div class="row g-3 align-items-end">
                 <div class="col-md-6 col-lg-3">
                   <div class="input-group input-group-merge">

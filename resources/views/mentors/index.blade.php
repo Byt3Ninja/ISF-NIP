@@ -58,33 +58,3 @@ $tabs = [
 
 @include('mentors.partials.filter-modal')
 @stop
-
-@section('pagescripts')
-<script>
-$(function () {
-  // Debounce helper
-  const debounce = (fn, delay = 1000) => {
-    let timer;
-    return (...args) => {
-      clearTimeout(timer);
-      timer = setTimeout(() => fn(...args), delay);
-    };
-  };
-
-  // Create debounced handler ONCE
-  const handleSearch = debounce((value) => {
-    const url = new URL(window.location);
-      value
-      ? url.searchParams.set('search', value)
-      : url.searchParams.delete('search');
-
-      window.location.href = url.href;
-    }, 1000);
-
-  // Bind event
-  $('#searchInput').on('keyup', function () {
-    handleSearch(this.value.toLowerCase());
-  });
-});
-</script>
-@stop

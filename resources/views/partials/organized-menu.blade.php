@@ -158,7 +158,7 @@ $getSetting = App\Settings::find(1);
         </div>
         <input 
           id="search-menu-input" 
-          type="text" 
+          type="search" 
           class="form-control" 
           placeholder="{{ __('settings.navigation.search_menu') }}" 
         />
