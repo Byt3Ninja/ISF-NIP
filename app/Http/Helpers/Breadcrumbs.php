@@ -10,7 +10,7 @@ if (! function_exists('breadcrumbs')) {
 
         foreach ($navigation as $item) {
             if (!isset($item['children']) || !is_array($item['children'])) {
-                if (request()->is($item['url'])) {
+                if (isset($item['url']) && request()?->is($item['url'])) {
                     return [
                         'parent' => null,
                         'child'  => $item['title'],
