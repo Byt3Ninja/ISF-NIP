@@ -88,6 +88,9 @@ return function () {
         ['title' => 'reports', 'route' => 'reports.list', 'menuOnly' => true],
         ['title' => 'activities', 'route' => 'activities.index', 'menuOnly' => true],
         ['title' => 'projects', 'route' => 'projects.index', 'menuOnly' => true],
+        ['title' => 'my_profile', 'route' => 'user.profile_view', 'hide_parent' => true, 'menuOnly' => false],
+        ['title' => 'edit_profile', 'route' => 'user.profile_Edit', 'hide_parent' => true, 'menuOnly' => false],
+        ['title' => 'profile', 'route' => 'mentors.profile_view', 'hide_parent' => true, 'menuOnly' => false],
       ],
     ],
   
@@ -131,6 +134,8 @@ return function () {
       'children' => [
         ['title' => 'organization_types', 'route' => 'organization-types.index', 'menuOnly' => true],
         ['title' => 'organizations', 'route' => 'organizations.index', 'menuOnly' => true],
+        ['title' => 'create_organization', 'route' => 'organization.wizard.create', 'menuOnly' => false],
+        ['title' => 'edit_organization', 'route' => 'organization.wizard.edit', 'menuOnly' => false],
         ['title' => 'users', 'route' => 'users.index', 'menuOnly' => true],
         ['title' => 'create_user', 'route' => 'users.create', 'group' => 'users', 'menuOnly' => false],
         ['title' => 'edit_user', 'route' => 'users.edit', 'group' => 'users', 'menuOnly' => false],
