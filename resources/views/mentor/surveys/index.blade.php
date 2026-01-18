@@ -43,7 +43,7 @@ $surveys = $surveys->sortBy(function($survey) {
                 <a 
                   class="d-flex align-items-center" style="width: 100px;"
                   @if ($_user->ableTo('company.profile_view', $permissions) && isset($survey->user?->company?->id))
-                    href="/dashboard/companyProfile/{{ $survey->user->company?->id }}" 
+                    href="/dashboard/companyProfile/{{ $survey->user?->company?->id }}" 
                   @else
                     href="javascript:void(0)"
                   @endif
@@ -62,8 +62,8 @@ $surveys = $surveys->sortBy(function($survey) {
               <td style="width: 100px;">
                 <a 
                   class="d-flex align-items-center" style="width: 100px;"
-                  @if ($_user->ableTo('users.edit', $permissions) && isset($survey->user->id ))
-                    href="/dashboard/users/{{ $survey->user->id }}/edit"
+                  @if ($_user->ableTo('users.edit', $permissions) && isset($survey->user?->id ))
+                    href="/dashboard/users/{{ $survey->user?->id }}/edit"
                   @else
                     href="javascript:void(0)"
                   @endif
@@ -76,7 +76,7 @@ $surveys = $surveys->sortBy(function($survey) {
                     width="36"
                     alt="avatar" 
                   />
-                  <small class="text-dark">{{ $survey->user->name }}</small>
+                  <small class="text-dark">{{ $survey?->user?->first_name_en }} {{ $survey?->user?->last_name_en}}</small>
                 </a>
               </td>
               <td>
