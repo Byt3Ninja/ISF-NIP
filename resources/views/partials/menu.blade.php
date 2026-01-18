@@ -331,7 +331,9 @@
           <i class="menu-icon tf-icons ti ti-notes"></i>
           <div class="d-flex align-items-center justify-content-between w-100">
             <span>{{ __('admin.surveys') }}</span>
-            <span class="badge badge-center rounded-pill bg-danger ms-2">{{ $countSurvey }}</span>
+            @if ($countSurvey > 0)
+              <span class="badge badge-center rounded-pill bg-danger ms-2">{{ $countSurvey }}</span>
+            @endif
           </div>
         </a>
       </li>
