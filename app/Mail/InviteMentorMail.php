@@ -8,6 +8,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
 
@@ -35,15 +36,29 @@ class InviteMentorMail extends Mailable implements ShouldQueue
 
         // Attach files if exist
         $attachments = $this->invitation->attachments;
-        if (is_string($attachments)) {
-            $attachments = json_decode($attachments, true) ?? [];
-        }
 
-        if (!empty($attachments) && is_array($attachments)) {
-            foreach ($attachments as $file) {
-                $mail->attach(storage_path('app/' . $file));
-            }
+if (is_string($attachments)) {
+    $attachments = json_decode($attachments, true) ?? [];
+}
+
+if (!empty($attachments) && is_array($attachments)) {
+
+    $disk = Storage::disk('UsersDiskInviteMentor');
+
+    foreach ($attachments as $file) {
+        // استخراج اسم الملف فقط من أي format (URL كامل أو relative path أو اسم الملف)
+        $file = basename($file);
+
+        if ($disk->exists($file)) {
+            $mail->attach($disk->path($file));
+        } else {
+            logger()->error('InviteMentor attachment not found on UsersDiskInviteMentor', [
+                'file' => $file,
+                'disk_root' => config('filesystems.disks.UsersDiskInviteMentor.root'),
+            ]);
         }
+    }
+}
 
         return $mail;
     }
