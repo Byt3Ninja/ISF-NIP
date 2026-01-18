@@ -35,6 +35,7 @@ class surveysController extends Controller
 				return $query->whereIn('organization_id', $orgIds);
 			})
 			->get();
+			
 		return view('admin.surveys.index', compact('surveys'));
 	}
 
@@ -232,23 +233,23 @@ class surveysController extends Controller
 				$is_responded = true;
 			}
 			foreach ($questions as $oneQuestion) {
-    $question_id = $oneQuestion->id;
-    $question = $oneQuestion->question;
-    $type = $oneQuestion->survey_type;
-    $answers = $oneQuestion->answers;
+				$question_id = $oneQuestion->id;
+				$question = $oneQuestion->question;
+				$type = $oneQuestion->survey_type;
+				$answers = $oneQuestion->answers;
 
-    // تحقق إذا السؤال موجود مسبقًا
-    $check = $my_responses->where('id', $question_id)->first();
-    if (empty($check)) {
-        $my_responses->push([
-            'id' => $question_id,
-            'question' => $question,
-            'type' => $type,
-            'answers' => $answers,
-            'answer' => ''
-        ]);
-    }
-}
+				// تحقق إذا السؤال موجود مسبقًا
+				$check = $my_responses->where('id', $question_id)->first();
+				if (empty($check)) {
+					$my_responses->push([
+						'id' => $question_id,
+						'question' => $question,
+						'type' => $type,
+						'answers' => $answers,
+						'answer' => ''
+					]);
+				}
+			}
 			return view('admin.clients.survey_taking', compact('responses', 'survey', 'my_responses', 'is_responded'));
 		}
 	}
