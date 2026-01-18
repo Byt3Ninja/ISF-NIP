@@ -42,21 +42,21 @@ $surveys = $surveys->sortBy(function($survey) {
               <td style="width: 100px;">
                 <a 
                   class="d-flex align-items-center" style="width: 100px;"
-                  @if ($_user->ableTo('company.profile_view', $permissions) && isset($survey->user->company->id))
-                    href="/dashboard/companyProfile/{{ $survey->user->company->id }}" 
+                  @if ($_user->ableTo('company.profile_view', $permissions) && isset($survey->user?->company?->id))
+                    href="/dashboard/companyProfile/{{ $survey->user->company?->id }}" 
                   @else
                     href="javascript:void(0)"
                   @endif
                 >
                   <img 
                     class="rounded-circle me-2 border bg-label-light flex-shrink-0"
-                    src="{{ $survey->user->company->logo_url }}"
+                    src="{{ $survey?->user?->company?->logo_url }}"
                     onerror="this.onerror=null;this.src='/images/logo-placeholder.png';"
                     height="36"
                     width="36"
                     alt="logo" 
                   />
-                  <small class="text-dark">{{ $survey->user->company->name }}</small>
+                  <small class="text-dark">{{ $survey->user?->company?->name }}</small>
                 </a>
               </td>
               <td style="width: 100px;">
@@ -70,7 +70,7 @@ $surveys = $surveys->sortBy(function($survey) {
                 >
                   <img 
                     class="rounded-circle me-2 border bg-label-light flex-shrink-0"
-                    src="{{ $survey->user->image_url }}"
+                    src="{{ $survey->user?->image_url }}"
                     onerror="this.onerror=null;this.src='/icons/avatar.svg';"
                     height="36"
                     width="36"
