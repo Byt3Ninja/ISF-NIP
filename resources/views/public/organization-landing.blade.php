@@ -724,12 +724,12 @@
                     </div>
                   </div>
                 </div>
-                <div class="col-md-6 col-lg-12 col-xl-6">
+                <div class="col-md-6 col-lg-12">
                   <div class="d-flex align-items-center">
                     <div class="badge bg-label-warning rounded p-1_5 me-3"><i class="ti ti-map-pin ti-lg"></i></div>
                     <div>
                       <p class="mb-0">{{ __('admin.Address') }}</p>
-                      <h6 class="mb-0">{{ $organization->address }}</h6>
+                      <h6 class="mb-0 line-clamp-2">{{ $organization->address }}</h6>
                     </div>
                   </div>
                 </div>
