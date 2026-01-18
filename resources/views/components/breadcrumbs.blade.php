@@ -78,7 +78,7 @@ if (!isset($crumbs)) {
 
   const CONFIG = {
     backButtonSelector: '#back-button',
-    backHref: "{{ session('_previous_url') ?? '/dashboard' }}",
+    backHref: "{{ session('_previous_url') ?? route('core.dashboard_view') }}",
     watchSelectors: 'input, textarea, select',
     ignoreSelectors: '[data-ignore-dirty]',
     debug: false
@@ -191,10 +191,13 @@ if (!isset($crumbs)) {
       e.preventDefault();
   
       if (!isPageDirty()) {
-        window.location.href = CONFIG.backHref;
+        // window.location.href = CONFIG.backHref;
+        window.history.back();
         return;
       }
   
+      window.removeEventListener('beforeunload', beforeUnloadHandler);
+
       Swal.fire({
         title: '{{ __('settings.navigation.unsaved_changes') }}',
         text: '{{ __('settings.navigation.unsaved_changes_message') }}',
@@ -210,21 +213,24 @@ if (!isset($crumbs)) {
         reverseButtons: true,
       }).then(r => {
         if (r.isConfirmed) {
-          window.location.href = CONFIG.backHref;
+          // window.location.href = CONFIG.backHref;
+          window.history.back();
+          window.removeEventListener('beforeunload', beforeUnloadHandler);
         }
       });
     });
   });
 
-
   /* ===============================
    * PAGE CLOSE / REFRESH
    * =============================== */
-  // window.addEventListener('beforeunload', function (e) {
-  //   if (!isPageDirty()) return;
-  //   e.preventDefault();
-  //   e.returnValue = '';
-  // });
+  const beforeUnloadHandler = function (e) {
+    if (!isPageDirty()) return;
+    e.preventDefault();
+    e.returnValue = '';
+  };
+
+  window.addEventListener('beforeunload', beforeUnloadHandler);
 })();
 </script>
 @endpush
