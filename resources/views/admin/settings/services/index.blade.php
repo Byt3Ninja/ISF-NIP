@@ -41,8 +41,8 @@
               <i class="ti ti-file-export me-2"></i>{{ __('admin.Export') }}
             </button>
             <ul class="dropdown-menu" aria-labelledby="exportDropdown">
-              <li><a class="dropdown-item" href="javascript:void(0)" id="exportExcel"><i class="ti ti-file-spreadsheet me-2"></i>Excel</a></li>
-              <li><a class="dropdown-item" href="javascript:void(0)" id="exportCsv"><i class="ti ti-file-text me-2"></i>CSV</a></li>
+              <li><a class="dropdown-item" href="{{ route('services.export_excel') }}" id="exportExcel"><i class="ti ti-file-spreadsheet me-2"></i>Excel</a></li>
+              <li><a class="dropdown-item" href="{{ route('services.export_csv') }}" id="exportCsv"><i class="ti ti-file-text me-2"></i>CSV</a></li>
             </ul>
           </div>
           @if( $_user->ableToAny(['services.create', 'services.store'], $permissions) )

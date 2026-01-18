@@ -1018,6 +1018,28 @@
                 "default_for": [
                     "admin"
                 ]
+            },
+            {
+                "name": "services.export_excel",
+                "description": " Export Services to Excel File",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "services.export_csv",
+                "description": " Export Services to CSV File ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
             }
         ]
     },
