@@ -227,8 +227,19 @@ if (!isset($crumbs)) {
   /* ===============================
    * PAGE CLOSE / REFRESH
    * =============================== */
+
+  let isSubmitting = false;
+  document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', () => {
+      isSubmitting = true;
+      window.removeEventListener('beforeunload', beforeUnloadHandler);
+    });
+  });
+
   const beforeUnloadHandler = function (e) {
+    if (isSubmitting) return; // skip if submitting
     if (!isPageDirty()) return;
+
     e.preventDefault();
     e.returnValue = '';
   };
