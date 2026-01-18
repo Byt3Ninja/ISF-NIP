@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Events\WebMessage;
 use Illuminate\Http\Request;
+use App\Exports\ServicesExport;
+use DB, Log, Exception, Session;
+use Illuminate\Support\Facades\Mail;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\{Auth, Notification};
 use App\Http\Requests\{StoreServiceRequest, UpdateServiceRequest};
 use App\Notifications\{TemplateEmail, ServiceRequestNotification};
 use App\{User, Settings, Currency, Service, Organization, ServiceCategory, serviceProviders, ServicesRequests};
-use Illuminate\Support\Facades\{Auth, Notification};
-use DB, Log, Exception, Session;
 
 class ServiceController extends Controller
 {
@@ -69,7 +72,14 @@ class ServiceController extends Controller
 
 			return view('admin/settings/services/index', compact('services', 'Setting'));
 	}
-
+	public function exportExcel()
+    {
+        return Excel::download(new ServicesExport, 'services'.date('Y-m-d H:i:s').'.xlsx');
+    }
+	public function exportCSV()
+    {
+        return Excel::download(new ServicesExport, 'services'.date('Y-m-d H:i:s').'.csv');
+    }
 
 	/**
 	 * Show the form for creating a new resource.
@@ -406,6 +416,7 @@ class ServiceController extends Controller
 		{
 			$user = auth()->user();
 			$service = Service::find( $request->id );
+			
 			if( empty( $service ) ) { return response()->json(['state' => false, 'title' => 'Not Found', 'message' => 'Service not found']); }
 
 			$serviceRequest = ServicesRequests::create([
@@ -420,9 +431,10 @@ class ServiceController extends Controller
 			if( $service && $service->vendor_email && !in_array(env('APP_ENV', 'local'), ['local']) )
 			{
 				// Create anonymous notifiable for vendor email
-				Notification::route('mail', $service->vendor_email)->notify(new ServiceRequestNotification($serviceRequest));
+				// Notification::route('mail', $service->vendor_email)->notify(new ServiceRequestNotification($serviceRequest));
+				Mail::to($service->vendor_email)->queue(new ServiceRequestNotification($serviceRequest));
 			}
-
+			
 			return response()->json(['state' => true, 'title' => 'Success', 'message' => __('admin.request sent')]);
 		}
 		return response()->json(['status' => false, 'title' => 'Failed', 'message' => 'This request cannot be processed right now'], 500);
