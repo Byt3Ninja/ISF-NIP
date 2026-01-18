@@ -50,7 +50,9 @@ class ServicesExport implements FromCollection, WithHeadings, WithMapping
     {
         return [
             $service->id,
-            $service->organizations->first()?->{'name_'.$this->locale} ?? '',
+            $service->organizations->pluck('name_'.$this->locale)
+                                    ->filter()
+                                    ->implode(' - ') ?? '',
             $service->{'name_'.$this->locale} ?? '',
             $service->provider
                 ? $service->provider->contact_name
