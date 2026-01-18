@@ -59,7 +59,7 @@
     </div>
 
     <div class="card p-4 p-md-8">
-      <form action="{{ route('cycles.modify') }}" method="POST" enctype="multipart/form-data" id="programForm">
+      <form action="{{ route('cycles.modify') }}" method="POST" enctype="multipart/form-data" id="programForm" data-ignore-dirty>
         @csrf 
         <input type="hidden" name="tab_id" value="1">
         <input type="hidden" name="typecreate" id="type" value="1">
