@@ -321,6 +321,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     //Services Manager routes
     
     Route::resource('services', 'ServiceController');
+    Route::get('/export-services-excel', 'ServiceController@exportExcel')->name('services.export_excel');
+    Route::get('/import-services-csv', 'ServiceController@exportCSV')->name('services.export_csv');
     // Services requests
     Route::get('requests/all', 'ServiceController@requests')->name('service_requests.list_all');
     Route::get('requests/old', 'ServiceController@oldrequests')->name('service_requests.list_archived');
