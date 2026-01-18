@@ -76,9 +76,6 @@ if (!isset($crumbs)) {
 (function () {
   'use strict';
 
-  /* ===============================
-   * CONFIG
-   * =============================== */
   const CONFIG = {
     backButtonSelector: '#back-button',
     backHref: "{{ session('_previous_url') ?? route('core.dashboard_view') }}",
@@ -93,11 +90,8 @@ if (!isset($crumbs)) {
   const initialState = new Map();
   const log = (...a) => CONFIG.debug && console.log('[DIRTY]', ...a);
 
-  let isSubmitting = false;
-  let beforeUnloadAttached = false;
-
   /* ===============================
-   * VALUE NORMALIZER
+   * VALUE NORMALIZER (CRITICAL)
    * =============================== */
   function normalize(value) {
     if (value === null || value === undefined) return '';
@@ -133,7 +127,7 @@ if (!isset($crumbs)) {
   }
 
   /* ===============================
-   * INITIAL STATE CAPTURE
+   * CAPTURE INITIAL FIELD STATE
    * =============================== */
   function captureInitialState() {
     initialState.clear();
@@ -146,6 +140,7 @@ if (!isset($crumbs)) {
         el.closest(CONFIG.ignoreSelectors)
       ) return;
 
+      // radio groups tracked once
       if (el.type === 'radio') {
         if (initialState.has(el.name)) return;
         initialState.set(el.name, getValue(el));
@@ -156,7 +151,6 @@ if (!isset($crumbs)) {
     });
 
     log('Initial state:', initialState);
-    updateUnloadProtection();
   }
 
   window.addEventListener('load', () => {
@@ -164,13 +158,14 @@ if (!isset($crumbs)) {
   });
 
   /* ===============================
-   * DIRTY CHECK
+   * DIRTY CHECK (NOW CORRECT)
    * =============================== */
   function isPageDirty() {
     for (const [key, initialValue] of initialState.entries()) {
       let currentValue;
 
       if (typeof key === 'string') {
+        // radio group
         currentValue = normalize(
           document.querySelector(
             `input[type="radio"][name="${key}"]:checked`
@@ -190,49 +185,19 @@ if (!isset($crumbs)) {
   }
 
   /* ===============================
-   * BEFOREUNLOAD CONTROL
-   * =============================== */
-  function attachBeforeUnload() {
-    if (beforeUnloadAttached) return;
-    window.addEventListener('beforeunload', beforeUnloadHandler);
-    beforeUnloadAttached = true;
-    log('beforeunload attached');
-  }
-
-  function detachBeforeUnload() {
-    if (!beforeUnloadAttached) return;
-    window.removeEventListener('beforeunload', beforeUnloadHandler);
-    beforeUnloadAttached = false;
-    log('beforeunload detached');
-  }
-
-  function updateUnloadProtection() {
-    if (isSubmitting) return;
-
-    if (isPageDirty()) {
-      attachBeforeUnload();
-    } else {
-      detachBeforeUnload();
-    }
-  }
-
-  document.addEventListener('input', updateUnloadProtection);
-  document.addEventListener('change', updateUnloadProtection);
-
-  /* ===============================
    * BACK BUTTON HANDLER
    * =============================== */
   backButtons.forEach(button => {
     button.addEventListener('click', function (e) {
       e.preventDefault();
-
+  
       if (!isPageDirty()) {
-        detachBeforeUnload();
+        // window.location.href = CONFIG.backHref;
         window.history.back();
         return;
       }
-
-      detachBeforeUnload();
+  
+      window.removeEventListener('beforeunload', beforeUnloadHandler);
 
       Swal.fire({
         title: '{{ __('settings.navigation.unsaved_changes') }}',
@@ -249,35 +214,37 @@ if (!isset($crumbs)) {
         reverseButtons: true,
       }).then(r => {
         if (r.isConfirmed) {
+          // window.location.href = CONFIG.backHref;
           window.history.back();
+          window.removeEventListener('beforeunload', beforeUnloadHandler);
         } else {
-          attachBeforeUnload();
+          window.addEventListener('beforeunload', beforeUnloadHandler);
         }
       });
     });
   });
 
   /* ===============================
-   * FORM SUBMIT
+   * PAGE CLOSE / REFRESH
    * =============================== */
+
+  let isSubmitting = false;
   document.querySelectorAll('form').forEach(form => {
     form.addEventListener('submit', () => {
       isSubmitting = true;
-      detachBeforeUnload();
+      window.removeEventListener('beforeunload', beforeUnloadHandler);
     });
   });
 
-  /* ===============================
-   * BEFOREUNLOAD HANDLER
-   * =============================== */
-  function beforeUnloadHandler(e) {
-    if (isSubmitting) return;
+  const beforeUnloadHandler = function (e) {
+    if (isSubmitting) return; // skip if submitting
     if (!isPageDirty()) return;
 
     e.preventDefault();
     e.returnValue = '';
-  }
+  };
 
+  window.addEventListener('beforeunload', beforeUnloadHandler);
 })();
 </script>
 @endpush
