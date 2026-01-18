@@ -45,7 +45,7 @@
               <div class="input-group input-group-merge search-form" style="width: 300px;">
                 <span class="input-group-text"><i class="ti ti-search text-muted"></i></span>
                 <input
-                  type="text" 
+                  type="search" 
                   id="search-programs" 
                   class="form-control"
                   placeholder="{{ __('admin.Search') }} {{ __('admin.Cycles') }}" 
