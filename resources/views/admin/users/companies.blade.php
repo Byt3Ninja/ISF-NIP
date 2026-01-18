@@ -55,8 +55,8 @@
                   class="input-group input-group-merge search-form" style="width: 300px;">
                   <span class="input-group-text"><i class="ti ti-search text-muted"></i></span>
                   <input 
-                    type="text" 
-                    id="searchInput" 
+                    type="search" 
+                    id="debounced-search" 
                     class="form-control"
                     placeholder="{{ __('admin.Search') }} {{ $l == 'en' ? 'Startups' : 'الشركات' }}" 
                     aria-label="Search companies"
@@ -333,7 +333,7 @@
 <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-md">
     <div class="modal-content">
-      <form method="GET" action="{{ route('users.view_companies') }}">
+      <form id="filter-form" method="GET" action="{{ route('users.view_companies') }}" data-ignore-dirty>
         <div class="modal-header">
           <h5 class="modal-title" id="filterModalLabel">
             <i class="ti ti-filter me-2"></i>
@@ -564,31 +564,6 @@
       
       return false;
     }
-
-
-    // Debounce helper
-    const debounce = (fn, delay = 1000) => {
-      let timer;
-      return (...args) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => fn(...args), delay);
-      };
-    };
-
-    // Create debounced handler ONCE
-    const handleSearch = debounce((value) => {
-      const url = new URL(window.location);
-        value
-        ? url.searchParams.set('search', value)
-        : url.searchParams.delete('search');
-
-        window.location.href = url.href;
-      }, 1000);
-
-    // Bind event
-    $('#searchInput').on('keyup', function () {
-      handleSearch(this.value.toLowerCase());
-    });
   });
 </script>
 @stop

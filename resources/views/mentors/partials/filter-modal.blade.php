@@ -2,7 +2,7 @@
 <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-md">
     <div class="modal-content">
-      <form method="GET" action="{{ route('mentors.list') }}">
+      <form id="filter-form" method="GET" action="{{ route('mentors.list') }}" data-ignore-dirty>
         <div class="modal-header">
           <h5 class="modal-title" id="filterModalLabel">
             <i class="ti ti-filter me-2"></i>

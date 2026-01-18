@@ -53,12 +53,12 @@ $colors = ['primary', 'info', 'danger', 'warning'];
               </div>
             </div>
             <div class="col-lg-9">
-              <form class="row gy-4 gx-3 justify-content-end align-items-center" id="status-form" method="GET" action="{{ route('organizations.index') }}">
+              <form class="row gy-4 gx-3 justify-content-end align-items-center" id="status-form" method="GET" action="{{ route('organizations.index') }}" data-ignore-dirty>
                 <div class="col-12 col-lg-4">
                   <!-- Search Input -->
                   <div class="input-group input-group-merge">
-                    <span class="input-group-text" id="searchInput"><i class="ti ti-search text-muted"></i></span>
-                    <input type="text" id="search-input" class="form-control h-px-40" name="search" value="{{ request('search') }}" placeholder="{{ __('admin.Search') }}..." aria-label="Search" aria-describedby="basic-addon-search31">
+                    <span class="input-group-text"><i class="ti ti-search text-muted"></i></span>
+                    <input type="search" id="debounced-search" class="form-control h-px-40" name="search" value="{{ request('search') }}" placeholder="{{ __('admin.Search') }}..." aria-label="Search" aria-describedby="basic-addon-search31">
                   </div>
                 </div>
                 <div class="col-6 col-lg-2">
@@ -247,44 +247,7 @@ $colors = ['primary', 'info', 'danger', 'warning'];
     $(document).on("change", "#visibility-select", function(e) {
       $("#status-form").submit();
     });
-
-    // Debounce helper
-    const debounce = (fn, delay = 1000) => {
-      let timer;
-      return (...args) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => fn(...args), delay);
-      };
-    };
-
-    // Create debounced search handler
-    const handleSearch = debounce((value) => {
-      // Show loading spinner
-      $('#searchInput i').removeClass('ti-search').addClass('ti-loader-2 ti-spin');
-
-      const url = new URL(window.location);
-      if (value.trim()) {
-        url.searchParams.set('search', value.trim());
-      } else {
-        url.searchParams.delete('search');
-      }
-      // Preserve other query parameters
-      const currentParams = new URLSearchParams(window.location.search);
-      ['status', 'visibility', 'page'].forEach(param => {
-        if (currentParams.has(param)) {
-          url.searchParams.set(param, currentParams.get(param));
-        }
-      });
-
-      window.location.href = url.href;
-    }, 800);
-
-    // Bind debounced search event to input
-    $('#search-input').on('input', function() {
-      handleSearch($(this).val());
-    });
   </script>
-
   
   @if ($_user->ableTo('organizations.destroy', $permissions))
     <script>

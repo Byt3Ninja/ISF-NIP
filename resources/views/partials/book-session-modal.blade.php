@@ -8,7 +8,7 @@
 <!-- Booking Modal -->
 <div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
-    <form id="bookingFormSubmit" method="post" action="/dashboard/mentorship/addwait" enctype="multipart/form-data" class="modal-content">
+    <form id="bookingFormSubmit" method="post" action="/dashboard/mentorship/addwait" enctype="multipart/form-data" class="modal-content" data-ignore-dirty>
       <div class="modal-header border-bottom py-4">
         <div>
           <h5 class="modal-title fw-semibold">
@@ -126,7 +126,7 @@
             <div class="fw-medium">{{ __('mentor.single_dropzone_description') }}</div>
             <div class="small text-muted mt-1">PDF, DOC, DOCX, PPT, XLS, PNG, JPEG up to 10MB</div>
           </div>
-          <input type="file" name="file_url" id="fileUpload" class="d-none" accept=".pdf,.doc,.docx,.ppt,.xls,.png,.jpeg,.jpg">
+          <input type="file" name="file_url" id="fileUpload" class="d-none">
           <div id="fileError" class="invalid-feedback mt-2" style="display: none;"></div>
           <div id="fileName" class="small mt-2" style="display: none;"></div>
         </div>
@@ -165,7 +165,8 @@ $(document).ready(function() {
     selectedDate: null,
     calendar: null,
     offlineDisabled: false,
-    blocked_intervals: []
+    blocked_intervals: [],
+    fileValid: true
   };
 
   const SESSION_TYPES = {
@@ -427,9 +428,9 @@ $(document).ready(function() {
 
     $('#sessionDetails').show();
     $('#slotError').hide();
-    
-    // Enable submit button when slot is selected
-    $('#submit-button').prop('disabled', false);
+
+    // Enable submit button when slot is selected and file is valid
+    $('#submit-button').prop('disabled', !state.fileValid);
   };
 
   // Event handlers for time selection
@@ -506,19 +507,20 @@ $(document).ready(function() {
   const resetForm = () => {
     state.selectedSlot = null;
     state.selectedDate = getToday();
-    
+    state.fileValid = true;
+
     $('#fileUpload, #additionalNotes').val('');
     $('#sessionStartTime, #sessionEndTime').empty().append('<option value="">{{ __('admin.Select') }}...</option>');
     $('#fileName, #fileError, #sessionDetails, #slotError').hide();
-    
+
     $('button[data-filter]').removeClass('active').first().addClass('active');
-    
+
     resetCalendar();
   };
 
   // File upload validation
   const validateFile = (file) => {
-    const allowed = ['pdf', 'doc', 'docx', 'ppt', 'xls', 'png', 'jpeg', 'jpg'];
+    const allowed = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'png', 'jpeg', 'jpg'];
     const ext = file.name.split('.').pop().toLowerCase();
     const maxSize = 10 * 1024 * 1024;
 
@@ -572,23 +574,35 @@ $(document).ready(function() {
 
   $('#fileUpload').on('change', function() {
     const file = this.files[0];
-    if (!file) return;
-
-    const result = validateFile(file);
-    if (!result.valid) {
-      $('#fileError').text(result.error).show();
-      $('#fileName').hide();
-      $(this).val('');
-    } else {
+    if (!file) {
+      state.fileValid = true;
       $('#fileError').hide();
-      $('#fileName').html(`<i class="ti ti-paperclip me-1"></i>${file.name}`).show();
+      $('#fileName').hide();
+    } else {
+      const result = validateFile(file);
+      state.fileValid = result.valid;
+      if (!result.valid) {
+        $('#fileError').text(result.error).show();
+        $('#fileName').hide();
+      } else {
+        $('#fileError').hide();
+        $('#fileName').html(`<i class="ti ti-paperclip me-1"></i>${file.name}`).show();
+      }
     }
+    // Update submit button based on slot and file validity
+    $('#submit-button').prop('disabled', !state.selectedSlot || !state.fileValid);
   });
 
   $('#bookingFormSubmit').on('submit', function(e) {
     if (!state.selectedSlot) {
       e.preventDefault();
       $('#slotError').text('{{ __('mentor.select_available_slot') }}').show();
+      return;
+    }
+
+    if (!state.fileValid) {
+      e.preventDefault();
+      $('#fileError').show();
       return;
     }
 

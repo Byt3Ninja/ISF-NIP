@@ -25,8 +25,8 @@
               <i class="ti ti-search text-muted"></i>
             </span>
             <input 
-              type="text" 
-              id="searchInput" 
+              type="search" 
+              id="debounced-search" 
               class="form-control"
               value="{{ request('search') }}"
               placeholder="{{ __('admin.Search') }} {{ __('dashboard.Mentors') }}" 

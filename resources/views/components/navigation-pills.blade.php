@@ -1,8 +1,8 @@
 <nav class="{{ $card ? 'card shadow-xs px-4 py-3 mb-4' : 'nav-align-top' }}">
     <ul class="nav nav-pills gap-1" role="tablist">
         @foreach ($tabs as $tab)
-            <li class="nav-item {{ isset($tab['route']) && $_user->ableTo($tab['route']) ? '' : 'd-none' }}" role="presentation">
-                <a
+            <li class="nav-item {{ isset($tab['url']) ? '' : (isset($tab['route']) && $_user->ableTo($tab['route']) ? '' : 'd-none') }}" role="presentation">
+                    <a
                     @if (isset($tab['route'])) 
                         href="{{ route($tab['route']) }}" 
                     @elseif (isset($tab['url']))

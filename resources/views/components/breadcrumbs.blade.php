@@ -78,8 +78,8 @@ if (!isset($crumbs)) {
 
   const CONFIG = {
     backButtonSelector: '#back-button',
-    backHref: "{{ session('_previous_url') ?? '/dashboard' }}",
-    watchSelectors: 'input, textarea, select',
+    backHref: "{{ session('_previous_url') ?? route('core.dashboard_view') }}",
+    watchSelectors: 'input:not([type="search"]), textarea, select',
     ignoreSelectors: '[data-ignore-dirty]',
     debug: false
   };
@@ -136,7 +136,8 @@ if (!isset($crumbs)) {
       if (
         el.disabled ||
         el.readOnly ||
-        el.matches(CONFIG.ignoreSelectors)
+        el.matches(CONFIG.ignoreSelectors) ||
+        el.closest(CONFIG.ignoreSelectors)
       ) return;
 
       // radio groups tracked once
@@ -191,10 +192,13 @@ if (!isset($crumbs)) {
       e.preventDefault();
   
       if (!isPageDirty()) {
-        window.location.href = CONFIG.backHref;
+        // window.location.href = CONFIG.backHref;
+        window.history.back();
         return;
       }
   
+      window.removeEventListener('beforeunload', beforeUnloadHandler);
+
       Swal.fire({
         title: '{{ __('settings.navigation.unsaved_changes') }}',
         text: '{{ __('settings.navigation.unsaved_changes_message') }}',
@@ -210,21 +214,37 @@ if (!isset($crumbs)) {
         reverseButtons: true,
       }).then(r => {
         if (r.isConfirmed) {
-          window.location.href = CONFIG.backHref;
+          // window.location.href = CONFIG.backHref;
+          window.history.back();
+          window.removeEventListener('beforeunload', beforeUnloadHandler);
+        } else {
+          window.addEventListener('beforeunload', beforeUnloadHandler);
         }
       });
     });
   });
 
-
   /* ===============================
    * PAGE CLOSE / REFRESH
    * =============================== */
-  // window.addEventListener('beforeunload', function (e) {
-  //   if (!isPageDirty()) return;
-  //   e.preventDefault();
-  //   e.returnValue = '';
-  // });
+
+  let isSubmitting = false;
+  document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', () => {
+      isSubmitting = true;
+      window.removeEventListener('beforeunload', beforeUnloadHandler);
+    });
+  });
+
+  const beforeUnloadHandler = function (e) {
+    if (isSubmitting) return; // skip if submitting
+    if (!isPageDirty()) return;
+
+    e.preventDefault();
+    e.returnValue = '';
+  };
+
+  window.addEventListener('beforeunload', beforeUnloadHandler);
 })();
 </script>
 @endpush
