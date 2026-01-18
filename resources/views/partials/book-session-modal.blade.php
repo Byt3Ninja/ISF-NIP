@@ -392,9 +392,16 @@ $(document).ready(function() {
                 </div>
                 <div class="d-flex align-items-center gap-2 small">
                   <i class="ti ti-hourglass-empty ti-16px"></i> ${duration} @lang('mentor.min')
-                  <div class="badge bg-light-subtle d-flex align-items-center gap-1 text-dark rounded px-2">
-                    ${icon} ${location}
-                  </div>
+                  <a href="https://www.google.com/maps/search/${encodeURIComponent(location)}" 
+                    target="_blank" 
+                    class="badge bg-light-subtle d-flex align-items-center gap-1 text-dark rounded px-2 text-decoration-none"
+                    title="${location}">
+                    ${icon} 
+                    <span>
+                      ${location.length > 20 ? location.slice(0, 20) + '...' : location}
+                    </span>
+                  </a>
+
                 </div>
               </div>
               <input type="radio" class="form-check-input" name="slot" value="${i}">
