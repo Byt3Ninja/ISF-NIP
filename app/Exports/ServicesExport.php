@@ -3,29 +3,72 @@
 namespace App\Exports;
 
 use App\Service;
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
+use Illuminate\Http\Request;
 use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\FromCollection;
 
 class ServicesExport implements FromCollection, WithHeadings, WithMapping
 {
     protected $user;
     protected $locale;
 
-    public function __construct()
+    public function __construct(Request $request)
     {
+        $this->request = $request;
         $this->user = auth()->user();
         $this->locale = app()->getLocale();
+        
     }
 
     public function collection()
     {
+        $request = $this->request;
+        $user = $this->user;
         return Service::with(['serviceCategory', 'provider', 'organizations'])
-            ->when($this->user->hasRole('serviceProvider'), function ($query) {
-                $provider_id = $this->user?->service_provider?->id ?? 0;
-                $query->where('service_provider_id', $provider_id);
-            })
-            ->get();
+        ->when($user->hasRole('serviceProvider'), function ($query) use ($user) {
+            $provider_id = $user?->service_provider?->id ?? 0;
+            $query->where('service_provider_id', $provider_id);
+        })
+
+        ->when($request->filled('search'), function ($query) use ($request) {
+            $query->where(function ($q) use ($request) {
+                $searchTerms = explode(' ', strtolower($request->search));
+
+                foreach ($searchTerms as $term) {
+                    $term = '%' . $term . '%';
+
+                    $q->where(function ($subQ) use ($term) {
+                        $subQ->whereRaw('LOWER(name_en) LIKE ?', [$term])
+                            ->orWhereRaw('LOWER(name_ar) LIKE ?', [$term])
+                            ->orWhereRaw('LOWER(description_en) LIKE ?', [$term])
+                            ->orWhereRaw('LOWER(description_ar) LIKE ?', [$term])
+                            ->orWhereRaw('LOWER(vendor_name) LIKE ?', [$term])
+                            ->orWhereHas('serviceCategory', function ($catQ) use ($term) {
+                                $catQ->whereRaw('LOWER(name_en) LIKE ?', [$term])
+                                    ->orWhereRaw('LOWER(name_ar) LIKE ?', [$term]);
+                            });
+                    });
+                }
+            });
+        })
+
+        ->when(
+            $request->filled('org-id') && $request->{'org-id'} !== 'all',
+            function ($query) use ($request) {
+                $query->whereHas('organizations', function ($q) use ($request) {
+                    $q->where('organizations.id', $request->{'org-id'});
+                });
+            }
+        )
+
+        ->when(
+            $request->filled('status') && $request->status !== 'all',
+            function ($query) use ($request) {
+                $query->where('status', $request->status);
+            }
+        )
+        ->get();
     }
 
     public function headings(): array
