@@ -210,6 +210,34 @@
 					<h3 class="card-title"> {{ __('dashboard.respondedAlready') }} </h3>
 				</div>
 			</div>
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title text-center">{{ $survey->title }}</h3>
+					<small class="text-muted">{{ $survey->description }}</small>
+				</div>
+				@foreach( $my_responses as $question_index => $response )
+				<div class="card my-4">
+					<div class="card-body">
+						<h5>{{ $question_index + 1 }}. {{ $response['question'] }}</h5>
+
+						@if( $response['type'] == 'stars' )
+							<p><strong>Answer:</strong> {{ $response['answer'] ?? 'No answer' }}</p>
+						@elseif( $response['type'] == 'radio' )
+							@foreach($response['answers'] as $index => $answer)
+								<p>
+									@if(isset($response['answer']) && $response['answer'] == $index)
+										<strong>Selected:</strong>
+									@endif
+									{{ $answer['text'] ?? 'No answer' }}
+								</p>
+							@endforeach
+						@elseif( $response['type'] == 'answers' )
+							<p>{{ $response['answer'] ?? 'No answer' }}</p>
+						@endif
+					</div>
+				</div>
+			@endforeach
+			</div>
 			@endif
 		</div>
 	</div>

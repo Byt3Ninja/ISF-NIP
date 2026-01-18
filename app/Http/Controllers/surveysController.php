@@ -218,6 +218,7 @@ class surveysController extends Controller
 		session(['previous_url' => $previousUrl]);
 
 		$responses = SurveyResponses::where('user_id', Auth::id())->with(['survey'])->find($id);
+		
 		if (empty($responses)) {
 			abort(404);
 		} else {
@@ -231,22 +232,23 @@ class surveysController extends Controller
 				$is_responded = true;
 			}
 			foreach ($questions as $oneQuestion) {
-				$question_id = $oneQuestion->id;
-				$question = $oneQuestion->question;
-				$type = $oneQuestion->survey_type;
-				$answers = $oneQuestion->answers;
+    $question_id = $oneQuestion->id;
+    $question = $oneQuestion->question;
+    $type = $oneQuestion->survey_type;
+    $answers = $oneQuestion->answers;
 
-				$check = $my_responses->where('id', $id)->first();
-				if (empty($check)) {
-					$my_responses->push([
-						'id' => $question_id,
-						'question' => $question,
-						'type' => $type,
-						'answers' => $answers,
-						'answer' => ''
-					]);
-				}
-			}
+    // تحقق إذا السؤال موجود مسبقًا
+    $check = $my_responses->where('id', $question_id)->first();
+    if (empty($check)) {
+        $my_responses->push([
+            'id' => $question_id,
+            'question' => $question,
+            'type' => $type,
+            'answers' => $answers,
+            'answer' => ''
+        ]);
+    }
+}
 			return view('admin.clients.survey_taking', compact('responses', 'survey', 'my_responses', 'is_responded'));
 		}
 	}
