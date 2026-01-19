@@ -62,8 +62,8 @@ $surveys = $surveys->sortBy(function($survey) {
               <td style="width: 100px;">
                 <a 
                   class="d-flex align-items-center" style="width: 100px;"
-                  @if ($_user->ableTo('users.edit', $permissions) && isset($survey->user?->id ))
-                    href="/dashboard/users/{{ $survey->user?->id }}/edit"
+                  @if ($_user->ableTo('mentors.profile_view', $permissions) && isset($survey->user?->id ))
+                    href="/dashboard/show/UserProfile/{{ $survey->user?->id }}"
                   @else
                     href="javascript:void(0)"
                   @endif
