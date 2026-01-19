@@ -12,6 +12,21 @@
           </select>
       </div>
 
+      <div class="form-group mb-4">
+        <label class="form-label" for="max_concurrent_sessions">
+          {{ __('settings.max_concurrent_sessions') }}
+        </label>
+        <input
+          id="max_concurrent_sessions"
+          type="number"
+          class="form-control"
+          name="max_concurrent_sessions"
+          value="{{ old('max_concurrent_sessions', $organization->max_concurrent_sessions) }}"
+          placeholder="{{ __('settings.max_concurrent_sessions_placeholder') }}"
+        />
+        <small class="text-muted">{{ __('settings.max_concurrent_sessions_description') }}</small>
+    </div>
+
       <div id="zoom_credentials" class="platform-credentials" style="display: none;">
           <div class="form-group mb-3">
               <label class="form-label mb-1" for="ZOOM_CLIENT_ID">{{ __('settings.ZOOM_CLIENT_ID') }}</label>
