@@ -19,15 +19,24 @@ class Settings extends Model
         'enable_pusher' => 'boolean',
     ];
 
-    public static function hasReachedMaxConcurrentSessions($startTime = null, $duration = null)
+    public static function hasReachedMaxConcurrentSessions($startTime = null, $duration = null, $organization_id = null)
     {
-        $settings = self::where('id', 1)->first();
-        if (!$settings || empty($settings->max_concurrent_sessions)) {
-            return false;
+        $maxLimit = 0;
+        if ($organization_id) {
+            $org = \DB::table('organizations')->where('id', $organization_id)->first();
+            if ($org && !empty($org->max_concurrent_sessions)) {
+                $maxLimit = (int) $org->max_concurrent_sessions;
+            }
         }
 
-        $maxLimit = (int) $settings->max_concurrent_sessions;
-        
+        if ($maxLimit === 0) {
+            $settings = self::where('id', 1)->first();
+            if (!$settings || empty($settings->max_concurrent_sessions)) {
+                return false;
+            }
+            $maxLimit = (int) $settings->max_concurrent_sessions;
+        }
+
         // If no time is provided, check the current time
         if ($startTime) {
             if (is_numeric($startTime)) {
@@ -45,34 +54,50 @@ class Settings extends Model
         $count = 0;
 
         // Count overlapping training sessions (stored as varchar timestamps)
-        $count += \DB::table('training_sessions')
-            ->whereNull('deleted_at')
-            ->whereNotNull('zoom_id')
+        $trainingQuery = \DB::table('training_sessions')
+            ->whereNull('training_sessions.deleted_at')
+            ->whereNotNull('training_sessions.zoom_id')
             ->where(function($query) use ($checkTime, $endTime) {
-                $query->where('datetime', '<', (string) $endTime->timestamp)
-                      ->where('enddatetime', '>', (string) $checkTime->timestamp);
-            })
-            ->count();
+                $query->where('training_sessions.datetime', '<', (string) $endTime->timestamp)
+                      ->where('training_sessions.enddatetime', '>', (string) $checkTime->timestamp);
+            });
+        
+        if ($organization_id) {
+            $trainingQuery->join('steps', 'training_sessions.step_id', '=', 'steps.id')
+                ->join('cycles', 'steps.cycle_id', '=', 'cycles.id')
+                ->where('cycles.organization_id', $organization_id);
+        }
+        $count += $trainingQuery->count();
 
         // Count overlapping final screenings (stored as datetime)
-        $count += \DB::table('finalscreenings')
-            ->whereNull('deleted_at')
-            ->whereNotNull('zoom_id')
+        $screeningQuery = \DB::table('finalscreenings')
+            ->whereNull('finalscreenings.deleted_at')
+            ->whereNotNull('finalscreenings.zoom_id')
             ->where(function($query) use ($checkTime, $endTime) {
-                $query->where('datetime', '<', $endTime->toDateTimeString())
-                      ->whereRaw('DATE_ADD(datetime, INTERVAL duration MINUTE) > ?', [$checkTime->toDateTimeString()]);
-            })
-            ->count();
+                $query->where('finalscreenings.datetime', '<', $endTime->toDateTimeString())
+                      ->whereRaw('DATE_ADD(finalscreenings.datetime, INTERVAL finalscreenings.duration MINUTE) > ?', [$checkTime->toDateTimeString()]);
+            });
+
+        if ($organization_id) {
+            $screeningQuery->join('steps', 'finalscreenings.step_id', '=', 'steps.id')
+                ->join('cycles', 'steps.cycle_id', '=', 'cycles.id')
+                ->where('cycles.organization_id', $organization_id);
+        }
+        $count += $screeningQuery->count();
 
         // Count overlapping mentorship requests (stored as datetime)
-        $count += \DB::table('mentorship_requests')
-            ->whereNull('deleted_at')
-            ->whereNotNull('zoom_id')
+        $mentorshipQuery = \DB::table('mentorship_requests')
+            ->whereNull('mentorship_requests.deleted_at')
+            ->whereNotNull('mentorship_requests.zoom_id')
             ->where(function($query) use ($checkTime, $endTime) {
-                $query->where('zoom_date', '<', $endTime->toDateTimeString())
-                      ->whereRaw('DATE_ADD(zoom_date, INTERVAL period MINUTE) > ?', [$checkTime->toDateTimeString()]);
-            })
-            ->count();
+                $query->where('mentorship_requests.zoom_date', '<', $endTime->toDateTimeString())
+                      ->whereRaw('DATE_ADD(mentorship_requests.zoom_date, INTERVAL mentorship_requests.period MINUTE) > ?', [$checkTime->toDateTimeString()]);
+            });
+
+        if ($organization_id) {
+            $mentorshipQuery->where('mentorship_requests.organization_id', $organization_id);
+        }
+        $count += $mentorshipQuery->count();
 
         return $count >= $maxLimit;
     }

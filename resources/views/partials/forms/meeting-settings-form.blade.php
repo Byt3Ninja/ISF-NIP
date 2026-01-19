@@ -52,9 +52,6 @@
           name="max_concurrent_sessions"
           value="{{ $Title->max_concurrent_sessions }}"
           placeholder="{{ __('settings.max_concurrent_sessions_placeholder') }}"
-          min="1"
-          max="99"
-          maxlength="2"
         />
         <small class="text-muted">{{ __('settings.max_concurrent_sessions_description') }}</small>
       </div>
@@ -512,11 +509,6 @@ $(document).ready(function () {
         validators: {
           integer: {
             message: settingsTranslations.validation_max_concurrent_sessions_integer
-          },
-          between: {
-            min: 1,
-            max: 99,
-            message: settingsTranslations.validation_max_concurrent_sessions_between
           }
         }
       },
