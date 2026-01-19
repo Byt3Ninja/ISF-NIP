@@ -973,10 +973,12 @@ class SettingsController extends Controller
             'MICROSOFT_CLIENT_SECRET_VALUE' => 'nullable|string',
             'MICROSOFT_TENANT_ID' => 'nullable|string',
             'MICROSOFT_REDIRECT_URI' => 'nullable|string',
+            'max_concurrent_sessions' => 'nullable|integer',
         ]);
 
         $organization = Organization::find($request->input('id'));
         $organization->meeting_platform = $request->input('meeting_platform');
+        $organization->max_concurrent_sessions = $request->input('max_concurrent_sessions');
 
         if ($request->input('meeting_platform') === 'zoom') {
             $organization->zoom_client_id = $request->input('ZOOM_CLIENT_ID');
