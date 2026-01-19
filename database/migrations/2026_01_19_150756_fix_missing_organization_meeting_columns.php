@@ -12,17 +12,39 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('organizations', function (Blueprint $table) {
-            $table->string('meeting_platform')->nullable();
-            $table->string('zoom_client_id')->nullable();
-            $table->string('zoom_client_secret')->nullable();
-            $table->string('zoom_account_id')->nullable();
-            $table->text('microsoft_client_id')->nullable();
-            $table->text('microsoft_client_secret_value')->nullable();
-            $table->text('microsoft_tenant_id')->nullable();
-            $table->text('microsoft_client_secret_id')->nullable();
-            $table->text('microsoft_app_email')->nullable();
-            $table->text('microsoft_redirect_uri')->nullable();
-            $table->string('time_zone')->nullable();
+            if (!Schema::hasColumn('organizations', 'meeting_platform')) {
+                $table->string('meeting_platform')->nullable();
+            }
+            if (!Schema::hasColumn('organizations', 'zoom_client_id')) {
+                $table->string('zoom_client_id')->nullable();
+            }
+            if (!Schema::hasColumn('organizations', 'zoom_client_secret')) {
+                $table->string('zoom_client_secret')->nullable();
+            }
+            if (!Schema::hasColumn('organizations', 'zoom_account_id')) {
+                $table->string('zoom_account_id')->nullable();
+            }
+            if (!Schema::hasColumn('organizations', 'microsoft_client_id')) {
+                $table->text('microsoft_client_id')->nullable();
+            }
+            if (!Schema::hasColumn('organizations', 'microsoft_client_secret_value')) {
+                $table->text('microsoft_client_secret_value')->nullable();
+            }
+            if (!Schema::hasColumn('organizations', 'microsoft_tenant_id')) {
+                $table->text('microsoft_tenant_id')->nullable();
+            }
+            if (!Schema::hasColumn('organizations', 'microsoft_client_secret_id')) {
+                $table->text('microsoft_client_secret_id')->nullable();
+            }
+            if (!Schema::hasColumn('organizations', 'microsoft_app_email')) {
+                $table->text('microsoft_app_email')->nullable();
+            }
+            if (!Schema::hasColumn('organizations', 'microsoft_redirect_uri')) {
+                $table->text('microsoft_redirect_uri')->nullable();
+            }
+            if (!Schema::hasColumn('organizations', 'time_zone')) {
+                $table->string('time_zone')->nullable();
+            }
         });
     }
 
