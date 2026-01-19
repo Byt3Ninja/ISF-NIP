@@ -208,7 +208,7 @@
         'isVisible' => $_user->hasRole("Registered"),
         'subItems' => [
             [
-                'label' => $l == 'en' ? 'My Services Requests' : 'طلبات خدماتي',
+                'label' => $l == 'en' ? 'Services Requests' : 'طلبات خدماتي',
                 'icon' => 'ti ti-briefcase',
                 'route' => '/dashboard/requests/mine',
                 'permission' => 'service_requests.list_mine',
@@ -226,7 +226,7 @@
 
     // Services Directory
     [
-        'label' => __('admin.Services'),
+        'label' => __('settings.navigation.services_directory'),
         'icon' => 'ti ti-search',
         'route' => 'users.directory_view',
         'permission' => 'users.directory_view',
