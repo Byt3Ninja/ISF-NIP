@@ -136,7 +136,7 @@ $programs = $programs
                 <option value="not_started"> {{ __('startup.not_started') }} </option>
                 <option value="in_progress">{{ __('startup.in_progress') }}</option>
                 <option value="completed">{{ __('startup.completed') }}</option>
-                <option value="pending">{{ __('startup.pending') }}</option>
+                <option value="on_hold">{{ __('startup.on_hold') }}</option>
               </select>
               <div class="invalid-feedback milestone-status-error"></div>
             </div>
@@ -276,7 +276,15 @@ document.addEventListener('DOMContentLoaded', function () {
     deleteError: "{{ __('startup.milestone_delete_failed') }}"
   };
 
-  const ALLOWED_FILE_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+  const ALLOWED_FILE_TYPES = [
+    'application/pdf', 
+    'image/jpeg', 
+    'image/png', 
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+    'application/vnd.ms-powerpoint', // .ppt
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation' // .pptx
+  ];
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
   function loadExistingMilestones() {
@@ -308,17 +316,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function getFileIcon(fileName) {
     const extension = fileName.split('.').pop().toLowerCase();
-    const iconMap = {
-      pdf: 'ti ti-file-type-pdf text-danger',
-      jpg: 'ti ti-photo text-info',
-      jpeg: 'ti ti-photo text-info',
-      png: 'ti ti-photo text-info',
-      docx: 'ti ti-file-type-docx text-primary',
-      doc: 'ti ti-file-type-docx text-primary',
-      xlsx: 'ti ti-file-type-xls text-success',
-      xls: 'ti ti-file-type-xls text-success'
-    };
-    return iconMap[extension] || 'ti ti-file';
+    // Note: The original instruction used 'fileType' which is not available here.
+    // We'll adapt to use 'fileName.endsWith' and 'extension' as appropriate.
+    if (fileName.endsWith('.pdf')) return '<i class="fa-solid fa-file-pdf text-danger fa-2xl"></i>';
+    if (fileName.endsWith('.docx') || fileName.endsWith('.doc')) return '<i class="fa-solid fa-file-word text-primary fa-2xl"></i>';
+    if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) return '<i class="fa-solid fa-file-excel text-success fa-2xl"></i>';
+    if (fileName.endsWith('.pptx') || fileName.endsWith('.ppt')) return '<i class="fa-solid fa-file-powerpoint text-warning fa-2xl"></i>';
+    if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(extension)) return '<i class="fa-solid fa-file-image text-info fa-2xl"></i>';
+    return '<i class="fa-solid fa-file text-secondary fa-2xl"></i>';
   }
 
   function populateMilestoneCard(card, milestone) {

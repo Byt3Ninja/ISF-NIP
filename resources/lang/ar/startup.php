@@ -79,7 +79,7 @@ return [
   'completion_percentage_range' => 'يجب أن تكون نسبة المرحلة الانتقالية بين 0 و 100',
 
   'document_invalid_file' => 'يجب أن يكون كل مستند ملفًا صالحًا',
-  'milestone_document_invalid_type' => 'يُسمح فقط بملفات PDF و JPG و PNG و DOCX و XLSX',
+  'milestone_document_invalid_type' => 'يُسمح فقط بملفات PDF و JPG و PNG و DOCX و XLSX و PPT و PPTX',
   'document_too_large' => 'الملف كبير جدًا. الحد الأقصى المسموح به هو 10 ميغابايت',
 
   'milestone_submit_success' => 'تم تقديم المرحلة الانتقالية بنجاح',

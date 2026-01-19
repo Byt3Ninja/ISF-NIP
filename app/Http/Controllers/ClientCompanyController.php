@@ -2362,7 +2362,7 @@ class ClientCompanyController extends Controller
                 'date' => 'required|date',
                 'visibility' => 'required',
                 'cohort' => 'nullable',
-                'documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,docx,xlsx|max:10240', // 10MB
+                'documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,docx,xlsx,ppt,pptx|max:10240', // 10MB
             ], [
                 'name.required' => __('startup.milestone_title_required'),
                 'name.max' => __('startup.milestone_title_max_length'),
@@ -2461,7 +2461,7 @@ class ClientCompanyController extends Controller
                 'date' => 'required|date',
                 'visibility' => 'required',
                 'cohort' => 'nullable',
-                'documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,docx,xlsx|max:10240', // 10MB
+                'documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,docx,xlsx,ppt,pptx|max:10240', // 10MB
                 'remove_documents' => 'nullable|string', // JSON string of indices to remove
             ], [
                 'id.required' => __('startup.milestone_id_required'),
