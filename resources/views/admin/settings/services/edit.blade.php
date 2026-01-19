@@ -80,7 +80,7 @@
                                                         for="basicInput">{{__('admin.Price')}}</label>
                                                     <input style="direction: ltr;" type="text"
                                                         class="form-control col-md-4 col-sm-12" id="price" name='price'
-                                                        required placeholder="{{__('admin.Price in EGP')}}"
+                                                        required placeholder="{{__('admin.Price')}}"
                                                         value="{{ $service->price}}">
                                                 </fieldset>
                                                 <fieldset class="form-group mt-3">

@@ -66,10 +66,9 @@
                         </fieldset>
 
                         <fieldset class="form-group mb-4">
-                          <label class="form-label" for="basicInput">{{ __('admin.Price') }}
-                            {{ $Setting->Currency }}</label>
+                          <label class="form-label" for="basicInput">{{ __('admin.Price') }}</label>
                           <input style="direction: ltr;" type="text" class="form-control col-md-3 col-sm-12" id="price"
-                            name='price' required placeholder="{{ __('admin.Price') }} {{ $Setting->Currency }}"
+                            name='price' required placeholder="{{ __('admin.Price') }}"
                             value="{{ old('price') }}">
                         </fieldset>
 

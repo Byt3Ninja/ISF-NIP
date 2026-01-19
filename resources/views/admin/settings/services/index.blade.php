@@ -146,7 +146,7 @@
                       @if($service->organizations && $service->organizations->count())
                         @foreach($service->organizations->take(3) as $organization)
                           <div class="badge bg-label-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $organization->{'name_' . $l } }}">
-                            {{ Str::limit($organization->{'name_' . $l}, 15) }}
+                            {{ Str::limit($organization->{'name_' . $l}, 14) }}
                           </div>
                         @endforeach
                         @if($service->organizations->count() > 3)
