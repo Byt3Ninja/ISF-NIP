@@ -80,7 +80,7 @@ if (!isset($crumbs)) {
     backButtonSelector: '#back-button',
     backHref: "{{ session('_previous_url') ?? route('core.dashboard_view') }}",
     watchSelectors: 'input:not([type="search"]), textarea, select',
-    ignoreSelectors: '[data-ignore-dirty]',
+    ignoreSelectors: '[data-ignore-dirty], .dt-filter, .card-datatable, .table-responsive, .organizations-list-wrapper',
     debug: false
   };
 
