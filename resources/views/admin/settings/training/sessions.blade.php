@@ -89,7 +89,7 @@
 
       <div class="card-body">
         <!-- Table Filter -->
-        <div class="row d-flex justify-content-end mb-2" id="tblTraining-filters">
+        <div class="row d-flex justify-content-end mb-2" id="tblTraining-filters" data-ignore-dirty>
           <div class="col-12 col-md-2">
             <div class="from-group mb-2 mb-md-0">
               <select class="form-select form-select-sm" id="type-filter">
