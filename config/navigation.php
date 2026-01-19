@@ -86,6 +86,7 @@ return function () {
         'title' => 'learning',
         'children' => [
           ['title' => 'my_courses', 'route'  => 'trainings.my_sessions_mine', 'menuOnly' => true],
+          ['title' => 'course_details', 'route'  => 'trainings.list_mine', 'group' => 'my_courses', 'menuOnly' => false],
           ['title' => 'quizzes', 'route'  => 'quizzes.dashboard_view', 'menuOnly' => true],
           ['title' => 'tasks', 'route'  => 'mentorships.sessions_list_detailed', 'menuOnly' => true],
           ['title' => 'all_tasks', 'route'  => 'mentorshipTasks.index', 'menuOnly' => false],

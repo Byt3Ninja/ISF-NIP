@@ -359,6 +359,7 @@ return [
 		'edit_service_category' => 'تعديل فئة الخدمة',
 		'mentorship_requests' => 'طلبات الإرشاد',
 		'my_courses' => 'دوراتي',
+		'course_details' => 'تفاصيل الدورة',
 		'file_manager' => 'مدير الملفات',
 		'resources' => 'الموارد',
 		'learning' => 'التلعيم',

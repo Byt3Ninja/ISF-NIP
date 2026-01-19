@@ -356,6 +356,7 @@ return [
 		'edit_service_category' => 'Edit Service Category',
 		'mentorship_requests' => 'Mentorship Requests',
 		'my_courses' => 'My Courses',
+		'course_details' => 'Course Details',
 		'file_manager' => 'File Manager',
 		'resources' => 'Resources',
 		'learning' => 'Learning',
