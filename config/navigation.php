@@ -86,6 +86,7 @@ return function () {
         'title' => 'learning',
         'children' => [
           ['title' => 'my_courses', 'route'  => 'trainings.my_sessions_mine', 'menuOnly' => true],
+          ['title' => 'course_details', 'route'  => 'trainings.list_mine', 'group' => 'my_courses', 'menuOnly' => false],
           ['title' => 'quizzes', 'route'  => 'quizzes.dashboard_view', 'menuOnly' => true],
           ['title' => 'tasks', 'route'  => 'mentorships.sessions_list_detailed', 'menuOnly' => true],
           ['title' => 'all_tasks', 'route'  => 'mentorshipTasks.index', 'menuOnly' => false],
@@ -132,6 +133,10 @@ return function () {
         ['title' => 'assessments', 'route' => 'assessments.index', 'menuOnly' => true],
         ['title' => 'trainings', 'route' => 'trainings.sessions_list', 'menuOnly' => true],
         ['title' => 'training_courses', 'route' => 'trainings.list', 'group' => 'trainings', 'group_route' => 'trainings.sessions_list', 'menuOnly' => false],
+        ['title' => 'course_details', 'route' => 'trainings.course_view', 'group' => 'training_courses', 'group_route' => 'trainings.list', 'menuOnly' => false],
+        ['title' => 'edit_course', 'route' => 'trainings.records_edit', 'group' => 'training_courses', 'group_route' => 'trainings.list', 'menuOnly' => false],
+        ['title' => 'add_content', 'route'  => 'trainings.content_create', 'group' => 'training_courses', 'group_route' => 'trainings.list', 'menuOnly' => false],
+        ['title' => 'edit_content', 'route'  => 'trainings.content_edit', 'group' => 'training_courses', 'group_route' => 'trainings.list', 'menuOnly' => false],
         ['title' => 'training_results', 'route' => 'trainings.results_view', 'group' => 'trainings', 'group_route' => 'trainings.sessions_list', 'menuOnly' => false],
         ['title' => 'mentorship', 'route' => 'mentorships.requests_view', 'menuOnly' => true],
         ['title' => 'manage_mentors', 'route' => 'mentorships.requests_list', 'group' => 'mentorship', 'group_route' => 'mentorships.requests_view', 'menuOnly' => false],
