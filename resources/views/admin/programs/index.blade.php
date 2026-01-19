@@ -46,12 +46,12 @@
                 <span class="input-group-text"><i class="ti ti-search text-muted"></i></span>
                 <input
                   type="search" 
-                  id="search-programs" 
+                  id="debounced-search" 
                   class="form-control"
                   placeholder="{{ __('admin.Search') }} {{ __('admin.Cycles') }}" 
                   aria-label="Search programs"
                   aria-describedby="search-programs"
-                  value="{{ request('search') }}"
+                  value="{{ request('search') ? request('search') : '' }}"
                 />
               </div>
               
@@ -454,29 +454,5 @@
 
     // Initialize Date Picker
     flatpickr(".datepicker", { dateFormat: "Y-m-d" });
-
-    // Debounce helper
-    const debounce = (fn, delay = 1000) => {
-      let timer;
-      return (...args) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => fn(...args), delay);
-      };
-    };
-
-    // Create debounced handler ONCE
-    const handleSearch = debounce((value) => {
-      const url = new URL(window.location);
-        value
-        ? url.searchParams.set('search', value)
-        : url.searchParams.delete('search');
-
-        window.location.href = url.href;
-      }, 1000);
-
-    // Bind event
-    $('#search-programs').on('keyup', function () {
-      handleSearch(this.value.toLowerCase());
-    });
   </script>
 @stop
