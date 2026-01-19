@@ -564,4 +564,29 @@ if (document.getElementById('layout-menu')) {
   }
 })();
 
+function resetSearchUI(input) {
+  const searchInputGroup = input.closest('.input-group');
+  if (!searchInputGroup) return;
 
+  const searchIcon = searchInputGroup.querySelector('i');
+  if (!searchIcon) return;
+
+  searchIcon.classList.remove('ti-loader-2', 'ti-spin');
+  searchIcon.classList.add('ti-search');
+}
+
+function syncSearchWithURL() {
+  const input = document.getElementById('debounced-search');
+  if (!input) return;
+
+  const url = new URL(window.location.href);
+  const searchParam = url.searchParams.get('search');
+
+  if (!searchParam) {
+    input.value = '';
+    resetSearchUI(input);
+  }
+}
+
+// 🔥 Handles normal load + browser back cache
+window.addEventListener('pageshow', syncSearchWithURL);

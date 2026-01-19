@@ -11,7 +11,7 @@
 <style>
 
   .daterangepicker {
-    margin-top: 8rem !important;
+    /* margin-top: 6rem !important; */
   }
 
   #mob {
@@ -269,7 +269,7 @@
 <!-- Modals -->
 <!--Cycle Modal -->
 <div class="modal fade" id="cycleForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-scrollable">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
       <form class="form" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data"
         autocomplete="off">
@@ -451,7 +451,7 @@
 <!--Modify custom form step Modal -->
 <div class="modal fade" id="ModifyStepForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33"
   aria-hidden="true">
-  <div class="modal-dialog modal-dialog-scrollable">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
       <form class="form" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data"
         autocomplete="off" id="editStepForm">
