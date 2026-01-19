@@ -29,9 +29,9 @@ $surveys = $surveys->sortBy(function($survey) {
             <th> {{ __('admin.Company') }} </th>
             <th> {{ __('admin.User') }} </th>
             <th> {{ __('admin.Title') }} </th>
-            <th> {{ __('admin.surveyType') }} </th>
+            {{-- <th> {{ __('admin.surveyType') }} </th> --}}
             <th> {{ __('admin.Due_Date') }} </th>
-            <th> {{ __('admin.Progress') }} </th>
+            {{-- <th> {{ __('admin.Progress') }} </th> --}}
             <th> {{ __('admin.Status') }} </th>
             <th> {{ __('admin.Priority') }} </th>
             <th> {{ __('dashboard.Actions') }} </th>
@@ -39,7 +39,7 @@ $surveys = $surveys->sortBy(function($survey) {
           <tbody>
             @foreach( $surveys as $key => $survey )
             <tr>
-              <td style="width: 100px;">
+              <td style="width: 150px;">
                 <a 
                   class="d-flex align-items-center" style="width: 100px;"
                   @if ($_user->ableTo('company.profile_view', $permissions) && isset($survey->user?->company?->id))
@@ -59,7 +59,7 @@ $surveys = $surveys->sortBy(function($survey) {
                   <small class="text-dark">{{ $survey->user?->company?->name }}</small>
                 </a>
               </td>
-              <td style="width: 100px;">
+              <td style="width: 150px;">
                 <a 
                   class="d-flex align-items-center" style="width: 100px;"
                   @if ($_user->ableTo('mentors.profile_view', $permissions) && isset($survey->user?->id ))
@@ -90,7 +90,7 @@ $surveys = $surveys->sortBy(function($survey) {
                   @endif
                 </div>
               </td>
-              <td>
+              {{-- <td>
                 @if ($survey->survey_type == 'Mentorship')
                   <span class="badge bg-label-info">{{ __('admin.Mentorship') }}</span>
                 @elseif ($survey->survey_type == 'Program')
@@ -104,7 +104,7 @@ $surveys = $surveys->sortBy(function($survey) {
                 @else
                   <span class="badge bg-label-dark">{{ __('admin.Check-in') }}</span>
                 @endif
-              </td>
+              </td> --}}
               <td> 
                 @php
                   $now = strtotime(date('Y-m-d H:i'));
@@ -124,7 +124,7 @@ $surveys = $surveys->sortBy(function($survey) {
                   @endif
                 </div>
               </td>
-              <td>
+              {{-- <td>
                 @php
                   $progress = $survey->total_questions > 0 
                     ? round(($survey->completed_questions / $survey->total_questions) * 100) 
@@ -146,7 +146,7 @@ $surveys = $surveys->sortBy(function($survey) {
                   </div>
                   <small class="text-muted">{{ $progress }}%</small>
                 </div>
-              </td>
+              </td> --}}
               <td> 
                 @if ($survey->status == 'Pending')
                   <div class="badge bg-label-warning">{{ __('admin.Pending') }}</div>
