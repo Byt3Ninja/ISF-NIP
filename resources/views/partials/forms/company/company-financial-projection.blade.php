@@ -169,7 +169,7 @@
         <thead class="table-light">
           <tr>
             <th class="col-label">
-							{{ __('startup.line_item') }} ( {{ __('admin.'.$getCurrancy) }} )
+							{{ __('startup.line_item') }} {{ isset($getCurrancy) ? ( __('admin.'.$getCurrancy) ) : '' }}
 						</th>
             <th class="" id="header-year-0">{{ __('startup.past_year') }}<br><small class="fw-normal text-secondary">-</small>
             </th>
