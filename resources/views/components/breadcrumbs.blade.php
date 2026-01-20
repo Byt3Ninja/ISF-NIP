@@ -1,4 +1,11 @@
-@if(isset($breadcrumbs) && count($breadcrumbs) > 1)
+@php
+    $hideBreadcrumbRoutes = ['core.dashboard_view'];
+    $hideBreadcrumbPaths = ['dashboard', 'dashboard/dashboard'];
+    $currentRoute = Route::currentRouteName();
+    $currentPath = request()->path();
+    $shouldHide = in_array($currentRoute, $hideBreadcrumbRoutes) || in_array($currentPath, $hideBreadcrumbPaths);
+@endphp
+@if(isset($breadcrumbs) && count($breadcrumbs) > 1 && !$shouldHide)
 <nav class="d-flex align-items-center mb-4 flex-wrap gap-2" aria-label="{{ __('breadcrumb.breadcrumb_navigation') ?? 'Breadcrumb' }}">
     {{-- Back Button --}}
     @if(isset($backUrl) && $backUrl)
