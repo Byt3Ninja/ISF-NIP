@@ -107,14 +107,21 @@
           @foreach ($services as $service)
             <div class="col-sm-6 col-lg-4 service-card" data-service-id="{{ $service->id }}" data-orgs="{{ $service->organizations ? $service->organizations->pluck('id')->join(',') : '' }}">
               <div class="card h-100 border overflow-hidden">
-                <div class="text-center position-relative w-100 h-px-200 flex-shrink-0">
-                  @if ($service->img_url)
-                    <img src="{{ Storage::disk('public_uploads')->url($service->img_url) }}" alt="{{ $service->name_en }}" class="w-100 h-100">
-                  @else
-                    <div class="d-flex align-items-center justify-content-center bg-light h-px-200">
-                      <i class="ti ti-photo-off text-muted" style="font-size: 3rem;"></i>
-                    </div>
+                <div class="bg-light text-center position-relative w-100 h-px-200 flex-shrink-0">
+                  @if (isset($service->img_url))
+                    <img 
+                      src="{{ Storage::disk('public_uploads')->url($service->img_url) }}" 
+                      alt="{{ $service->name_en }}" 
+                      class="w-100 h-100"
+                      onerror="this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none')"
+                    />
                   @endif
+
+                  <!-- Placeholder -->
+                  <div class="d-flex align-items-center justify-content-center h-100 w-100 {{ isset($service->img_url) ? 'd-none' : '' }}">
+                    <i class="ti ti-photo-off text-muted" style="font-size: 3rem;"></i>
+                  </div>
+             
                   <div class="d-flex align-items-center gap-2 position-absolute top-0 end-0 p-4">
                     @if($_user->ableToAny(['services.show', 'services.edit', 'services.update'], $permissions))
                       <a
@@ -125,7 +132,7 @@
                         <i class="ti ti-edit text-dark"></i>
                       </a>
                     @endif
-
+  
                     @if($_user->ableTo('services.destroy', $permissions))
                       <button
                         class="btn btn-sm btn-icon btn-label-secondary rounded-pill border shadow-xs delete-service-action"
@@ -138,6 +145,7 @@
                     @endif
                   </div>
                 </div>
+
 
                 <div class="card-body d-flex flex-column">
                   <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
