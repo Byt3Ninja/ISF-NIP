@@ -13,6 +13,7 @@ use App\Services\BroadcastConfigService;
 use Illuminate\Support\Facades\Broadcast;
 use App\Observers\WireChatMessageObserver;
 use Namu\WireChat\Models\Message;
+use App\Services\BreadcrumbService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -86,6 +87,22 @@ class AppServiceProvider extends ServiceProvider
                 }
             }
             $view->with(['l' => $l, 'organization_id' => $organization_id, 'organization_ids' => $organization_ids, '_user' => $_user, 'permissions' => $permissions, '_settings' => $settings]);
+        });
+
+        // Breadcrumb view composer
+        view()->composer('components.breadcrumbs', function ($view) {
+            if (auth()->check() && !request()->is('api/*') && !request()->expectsJson()) {
+                $breadcrumbService = app(BreadcrumbService::class);
+                $view->with([
+                    'breadcrumbs' => $breadcrumbService->getTrail(),
+                    'backUrl' => $breadcrumbService->getPreviousUrl(),
+                ]);
+            } else {
+                $view->with([
+                    'breadcrumbs' => [],
+                    'backUrl' => null,
+                ]);
+            }
         });
 
 
