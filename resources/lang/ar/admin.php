@@ -3201,4 +3201,5 @@ return [
 	'USD' => 'دولار امريكي',
 	'EUR' => 'يورو',
 	'pes' => 'بيسو مكسيكي',
+	'You can not add more than one currency per year' => ' لا يمكنك تعديل العملة في نفس السنة ',
 ];

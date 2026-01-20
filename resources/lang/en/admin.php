@@ -3146,4 +3146,5 @@ return [
 	'USD' => 'USD',
 	'pes' => 'pesos',
 	'EUR' => 'EUR',
+	'You can not add more than one currency per year' => 'You can not add more than one currency per year',
 ];
