@@ -377,9 +377,8 @@ $(document).ready(function() {
     const html = slots.map((slot, i) => {
       const duration = calcDuration(slot.start_time, slot.end_time);
       const icon = ICONS[slot.session_type] || ICONS.Both;
-      const location = slot.session_type === 'Offline' && slot.location 
-        ? slot.location 
-        : SESSION_TYPES[slot.session_type] || SESSION_TYPES.Both;
+      const sessionType = SESSION_TYPES[slot.session_type] || SESSION_TYPES.Both;
+      const location = slot?.location || '';
 
       return `
         <div class="card shadow-none mb-2 border slot-card" data-slot-index="${i}">
@@ -392,16 +391,19 @@ $(document).ready(function() {
                 </div>
                 <div class="d-flex align-items-center gap-2 small">
                   <i class="ti ti-hourglass-empty ti-16px"></i> ${duration} @lang('mentor.min')
-                  <a href="https://www.google.com/maps/search/${encodeURIComponent(location)}" 
+                  <div class="badge bg-light-subtle d-flex align-items-center gap-1 text-dark rounded px-2 text-decoration-none">
+                    ${icon} ${sessionType}
+                  </div>
+
+                  ${location && (sessionType === 'Offline' || sessionType === 'Both') ? ` <a href="https://www.google.com/maps/search/${encodeURIComponent(location)}" 
                     target="_blank" 
                     class="badge bg-light-subtle d-flex align-items-center gap-1 text-dark rounded px-2 text-decoration-none"
                     title="${location}">
-                    ${icon} 
+                    <i class="ti ti-map-pin ti-16px"></i>
                     <span>
                       ${location.length > 20 ? location.slice(0, 20) + '...' : location}
                     </span>
-                  </a>
-
+                  </a>` : ''}
                 </div>
               </div>
               <input type="radio" class="form-check-input" name="slot" value="${i}">
