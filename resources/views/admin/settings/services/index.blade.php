@@ -102,119 +102,119 @@
       @endif
 
       @if (!empty($services) && $services->count() > 0)
-        <div class="card-body">
-          <div class="row gy-6" id="services-container">
-            @foreach ($services as $service)
-              <div class="col-sm-6 col-lg-4 service-card" data-service-id="{{ $service->id }}" data-orgs="{{ $service->organizations ? $service->organizations->pluck('id')->join(',') : '' }}">
-                <div class="card shadow-none pt-2 px-2 h-100 border">
-                  <div class="rounded-2 text-center mb-4 position-relative w-100 h-px-150 flex-shrink-0">
-                    @if ($service->img_url)
-                      <img src="{{ Storage::disk('public_uploads')->url($service->img_url) }}" alt="{{ $service->name_en }}" class="rounded-2 border w-100 h-100">
-                    @else
-                      <div class="d-flex align-items-center justify-content-center bg-light h-px-150 rounded-2">
-                        <i class="ti ti-photo-off text-muted" style="font-size: 3rem;"></i>
-                      </div>
+      <div class="card-body">
+        <div class="row gy-6" id="services-container">
+          @foreach ($services as $service)
+            <div class="col-sm-6 col-lg-4 service-card" data-service-id="{{ $service->id }}" data-orgs="{{ $service->organizations ? $service->organizations->pluck('id')->join(',') : '' }}">
+              <div class="card h-100 border overflow-hidden">
+                <div class="text-center position-relative w-100 h-px-200 flex-shrink-0">
+                  @if ($service->img_url)
+                    <img src="{{ Storage::disk('public_uploads')->url($service->img_url) }}" alt="{{ $service->name_en }}" class="w-100 h-100">
+                  @else
+                    <div class="d-flex align-items-center justify-content-center bg-light h-px-200">
+                      <i class="ti ti-photo-off text-muted" style="font-size: 3rem;"></i>
+                    </div>
+                  @endif
+                  <div class="d-flex align-items-center gap-2 position-absolute top-0 end-0 p-4">
+                    @if($_user->ableToAny(['services.show', 'services.edit', 'services.update'], $permissions))
+                      <a
+                        href="{{ route('services.edit', ['service' => $service->id]) }}"
+                        class="btn btn-sm btn-icon btn-label-secondary rounded-pill border shadow-xs"
+                        title="{{ __('admin.Edit') }}"
+                      >
+                        <i class="ti ti-edit text-dark"></i>
+                      </a>
                     @endif
-                    <div class="position-absolute top-0 end-0 p-2">
-                      <span class="badge bg-{{ $service->status == 1 ? 'success' : 'danger' }} fw-semibold">
-                        {{ $service->status == 1 ? __('admin.Active') : __('admin.Inactive') }}
-                      </span>
+
+                    @if($_user->ableTo('services.destroy', $permissions))
+                      <button
+                        class="btn btn-sm btn-icon btn-label-secondary rounded-pill border shadow-xs delete-service-action"
+                        title="{{ __('admin.Delete') }}"
+                        data-id="{{ $service->id }}"
+                        data-url="{{ route('services.destroy', ['service' => $service->id]) }}"
+                      >
+                        <i class="ti ti-trash text-dark"></i>
+                      </button>
+                    @endif
+                  </div>
+                </div>
+
+                <div class="card-body d-flex flex-column">
+                  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+                    <h5 class="card-title mb-0">{{ $service->name }}</h5>
+                    <div class="d-flex align-items-center justify-content-center gap-2">
+                      <div class="badge bg-light-subtle text-dark py-1 px-2">
+                        <span class="text-warning">
+                          <i class="ti ti-star-filled ti-16px me-1"></i>
+                        </span>
+                        {{ number_format($service->rating ?? 0.0, 1) }} 
+                      </div>
+                      <span class="fw-normal">({{ $service->review_count ?? '0' }})</span>
                     </div>
                   </div>
-                  <div class="card-body p-4 pt-2">
-                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-                      @if ($service->vendor_name)
-                        <div class="d-flex align-items-center gap-1">
-                          <div>{{ __('admin.provided_by') }}:</div>
-                          <div class="badge bg-label-primary">{{ $service->vendor_name }}</div>
+
+                  @if ($service->vendor_name)
+                    <a 
+                      href="{{ isset($service->service_provider_id) ? '/dashboard/show/UserProfile/' . $service->service_provider_id : 'javascript:void(0)' }}"
+                      class="d-flex align-items-center gap-1 mb-4 text-dark"
+                    >
+                      <i class="ti ti-building"></i>
+                      {{ $service->vendor_name }}
+                      {{-- <div>{{ __('admin.provided_by') }}:</div> --}}
+                    </a>
+                  @else
+                    <div></div>
+                  @endif
+
+                  <p class="mt-1">{{ Str::limit($service->description ?? 'No description available', 100) }}</p>
+                  <div class="d-flex align-items-center gap-2 mb-4">
+                    <!-- Organizations Badges -->
+                    @if($service->organizations && $service->organizations->count())
+                      @foreach($service->organizations->take(2) as $organization)
+                        <div class="badge bg-label-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $organization->{'name_' . $l } }}">
+                          {{ Str::limit($organization->{'name_' . $l}, 25) }}
                         </div>
-                      @else
-                        <div></div>
+                      @endforeach
+                      @if($service->organizations->count() > 2)
+                        <div class="badge bg-label-secondary orgs-modal-trigger" style="cursor:pointer;" data-orgs='@json($service->organizations->map(function($o) use($l) { return ["id"=>$o->id, "name"=>$o->{"name_".$l}]; }))'>+{{ $service->organizations->count() - 3 }}</div>
                       @endif
-                    <p class="d-flex align-items-center justify-content-center fw-medium gap-1 mb-0">
-                        {{ number_format($service->rating ?? 0.0, 1) }} 
-                        <span class="text-warning">
-                          <i class="ti ti-star-filled ti-lg me-1"></i>
-                        </span>
-                        <span class="fw-normal">({{ $service->review_count ?? '0' }})</span>
-                      </p>
-                    </div>
-                    <h5 class="card-title mb-0">{{ $service->name }}</h5>
-                    <p class="mt-1">{{ Str::limit($service->description ?? 'No description available', 100) }}</p>
-                    <div class="d-flex align-items-center gap-2 mb-4">
-                      <!-- Organizations Badges -->
-                      @if($service->organizations && $service->organizations->count())
-                        @foreach($service->organizations->take(3) as $organization)
-                          <div class="badge bg-label-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $organization->{'name_' . $l } }}">
-                            {{ Str::limit($organization->{'name_' . $l}, 14) }}
-                          </div>
-                        @endforeach
-                        @if($service->organizations->count() > 3)
-                          <div class="badge bg-label-secondary orgs-modal-trigger" style="cursor:pointer;" data-orgs='@json($service->organizations->map(function($o) use($l) { return ["id"=>$o->id, "name"=>$o->{"name_".$l}]; }))'>+{{ $service->organizations->count() - 3 }}</div>
-                        @endif
-                      @else
-                        <div class="badge bg-label-secondary">{{ __('admin.No Organizations') }}</div>
-                      @endif
-                    </div>
+                    @else
+                      <div class="badge bg-label-secondary">{{ __('admin.No Organizations') }}</div>
+                    @endif
+                  </div>
 
-                    <!-- Service Price -->
+                  <!-- Service Price -->
+                  <div class="d-flex align-items-center gap-2 mb-4">
+                    <div>{{ __('admin.Price') }}:</div>
+                    @if($service->price)
+                      <span class="fw-medium">{{ $service->price }} {{ $service->currency }}</span>
+                    @else
+                      <span class="fw-medium text-muted">{{ __('admin.free') }}</span>
+                    @endif
+                  </div>
+
+                  <!-- Date & Status -->
+                  <div class="d-flex justify-content-between align-items-center mt-auto">
                     <div class="d-flex align-items-center gap-2">
-                      <div>{{ __('admin.Price') }}:</div>
-                      @if($service->price)
-                        <span class="fw-medium">{{ $service->price }} {{ $service->currency }}</span>
-                      @else
-                        <span class="fw-medium text-muted">{{ __('admin.free') }}</span>
-                      @endif
+                      <i class="ti ti-calendar ti-sm text-muted"></i>
+                      <span class="fw-medium text-muted">{{ $service->created_at->format('Y-m-d') }}</span>
                     </div>
 
-                    <hr>
-
-                    <div class="d-flex justify-content-between align-items-center">
-                      <div class="d-flex align-items-center gap-2">
-                        <span>
-                          <i class="ti ti-calendar ti-sm me-1"></i>
-                          {{ __('admin.Created At') }}
-                        </span>
-                        <span class="fw-medium text-muted">{{ $service->created_at->format('Y-m-d') }}</span>
-                      </div>
-
-                      @if($_user->ableToAny(['services.show', 'services.edit', 'services.update', 'services.destroy'], $permissions))
-                      <div class="dropdown">
-                        <button class="btn btn-text-secondary rounded-pill btn-icon btn-sm dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                          <i class="ti ti-dots-vertical"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                          @if($_user->ableToAny(['services.show', 'services.edit', 'services.update'], $permissions))
-                          <li>
-                            <a class="dropdown-item" href="{{ route('services.edit', ['service' => $service->id]) }}">
-                              <i class="ti ti-edit me-2"></i> {{ __('admin.Edit') }}
-                            </a>
-                          </li>
-                          @endif
-                          @if($_user->ableTo('services.destroy', $permissions))
-                          <li>
-                            <button
-                              class="dropdown-item text-danger d-flex align-items-center delete-service-action"
-                              data-id="{{ $service->id }}"
-                              data-url="{{ route('services.destroy', ['service' => $service->id]) }}">
-                              <i class="ti ti-trash me-2"></i> {{ __('admin.Delete') }}
-                            </button>
-                          </li>
-                          @endif
-                        </ul>
-                      </div>
-                      @endif
-                    </div>
+                    <span class="badge py-1 px-2 bg-label-secondary fw-semibold">
+                      <i class="ti ti-point-filled text-{{ $service->status == 1 ? 'success' : 'danger' }}"></i>
+                      {{ $service->status == 1 ? __('admin.Active') : __('admin.Inactive') }}
+                    </span>
                   </div>
                 </div>
               </div>
-            @endforeach
-
-            <div class="col-12 mt-12">
-              {{ $services->links('pagination::bootstrap-5') }}
             </div>
+          @endforeach
+
+          <div class="col-12 mt-12">
+            {{ $services->links('pagination::bootstrap-5') }}
           </div>
         </div>
+      </div>
       @else
         @include(
           'includes.no-result',
