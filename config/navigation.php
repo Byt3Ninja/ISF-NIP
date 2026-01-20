@@ -102,7 +102,7 @@ return function () {
     ];
   }
 
-  return [
+  $menu = [
     'dashboard' => [
       'title' => 'dashboard_and_analytics',
       'children' => [
@@ -192,7 +192,7 @@ return function () {
         ['title' => 'edit_service', 'route' => 'services.edit', 'group' => 'services', 'menuOnly' => false],
         ['title' => 'file_manager', 'route' => 'my_files.list', 'group' => 'services', 'menuOnly' => true],
         ['title' => 'rooms', 'route' => 'rooms.index', 'menuOnly' => true],
-        ['title' => 'timesheets', 'route' => 'TimeSheet.index', 'menuOnly' => true],
+        
       ],
     ],
   
@@ -231,4 +231,14 @@ return function () {
       ],
     ],
   ];
+  if (app()->environment(['local', 'dev', 'test'])) {
+        $menu['services']['children'][] = [
+            'title' => 'timesheets',
+            'route' => 'TimeSheet.index',
+            'menuOnly' => true,
+        ];
+    }
+
+    return $menu;
+  return $menu;
 };
