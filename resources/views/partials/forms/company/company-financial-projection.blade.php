@@ -130,11 +130,15 @@
 						<label for="valuationDate" class="form-label text-nowrap">
 						{{ __('startup.valuation_date') }} <span class="text-danger">*</span>
 						</label>
-						<input type="hidden" id="valuationDateHidden" name="valuation_date" value="{{ $currentDate ? $currentDate : '' }}">
+						<input type="hidden" id="valuationDateHidden" name="valuation_date" value="{{ $currentDate ? $currentDate : date('Y-m') }}">
 						{{-- Format date for display --}}
-						<input type="text" class="form-control" id="valuationDate" required>
+						<input type="text" class="form-control" id="valuationDate" value="{{ $currentDate ? $currentDate : date('Y-m') }}" name="valuation_date"required>
 					</div>
 				</div>
+				@php
+								$getCurrancy = $getCurrancy ? $getCurrancy : auth()->user()->currency;
+							@endphp
+							
 				<div class="col-lg-4">
 					<div class="d-flex align-items-center gap-2 mb-3 mb-md-0">
 						<label for="Currency" class="form-label text-nowrap">
