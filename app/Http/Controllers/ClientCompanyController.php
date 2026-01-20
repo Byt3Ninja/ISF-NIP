@@ -773,6 +773,8 @@ class ClientCompanyController extends Controller
                 $year = !empty($request->valuation_date)
                     ? Carbon::parse($request->valuation_date)->year
                     : (int) date('Y');
+
+                $valuation_dateSearch = $request->valuation_date ?? date('Y-m');
                     
                 $yearsRange = range($year - 1, $year + 2);
                 $financialprojectionArray = [];
@@ -780,8 +782,9 @@ class ClientCompanyController extends Controller
                     $financialprojectionArray[$_year] = [];
                 }
                $getCurrancy = '';
+              
                 $financialprojection = FinancialProjection::where('company_id', $id)
-                    ->whereBetween('year', [$year - 1, $year + 2])
+                    ->where('valuation_date', $valuation_dateSearch.'-01')
                     ->orderBy('year')
                     ->get();
                    
@@ -1875,12 +1878,12 @@ class ClientCompanyController extends Controller
             }
             if ($data['CompanyN'] == 15) {
                 
-               
+            //    dd($data);
                 if($data['valuation_date'] == null){
                     return redirect()->back()->with(['msg' => 'Please enter the valuation date', 'class' => 'danger']);
                 }
                 
-                
+                $valuation_date= Carbon::parse($data['valuation_date'])->format('Y-m-d');
                 $baseDate = Carbon::createFromFormat('Y-m', $data['valuation_date']);
 
                 // من سنة قبل لحد سنتين بعد
@@ -1893,14 +1896,20 @@ class ClientCompanyController extends Controller
                     $yearDate   = $baseDate->copy()->addYears($yearOffset);
 
                     $updateFinancial = FinancialProjection::where('company_id', $result->id)
-                        ->where('year', $yearDate->year)
-                        ->first();
-
+                        ->where('valuation_date', $valuation_date)
+                       ->where('year', $yearDate->year)
+                       ->first();
+    
+                       if($updateFinancial->currency != null && $updateFinancial->currency != $data['Currency']){
+                        return redirect()->back()->with(['msg' => 'You can not add more than one currency per year', 'class' => 'danger']);
+                       }
+                    dd($updateFinancial);
                     $addFinancial = $updateFinancial ?? new FinancialProjection();
 
+                    // $addFinancial = new FinancialProjection();
                     $addFinancial->company_id = $result->id;
                     $addFinancial->user_id = auth()->id();
-                    $addFinancial->valuation_date = $yearDate->format('Y-m-d');
+                    $addFinancial->valuation_date = $valuation_date;
                     $addFinancial->year = $yearDate->year;
                     $addFinancial->currency = $data['Currency'];
 
