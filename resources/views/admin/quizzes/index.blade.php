@@ -184,7 +184,7 @@ if ($user->hasRole('Admin')) {
         searching: true,
         lengthChange: true,
         pageLength: 10,
-				order: [[ 5, "desc" ]],
+				order: [[ 6, "desc" ]],
 				dom: '<"row"<"col-12 col-md-9 d-flex flex-wrap flex-md-nowrap align-items-center"l><"col-12 col-md-3 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6 d-flex justify-content-end"p>>',
 				  buttons: [
           {
