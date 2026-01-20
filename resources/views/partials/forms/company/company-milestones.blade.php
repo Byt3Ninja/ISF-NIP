@@ -378,7 +378,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function createMilestoneCard(isInitialCard = false, existingData = null) {
     const newCard = milestoneCardTemplate.content.cloneNode(true).querySelector('.milestone-card');
-    
+
     const currentMilestoneId = existingData ? existingData.id : `temp_${nextMilestoneId++}`;
     Object.assign(newCard.dataset, {
       milestoneId: currentMilestoneId,
@@ -394,7 +394,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const milestoneText = '{{ $l == 'ar' ? 'إنجاز' : 'Milestone' }}';
     const milestoneNumber = milestonesContainer.children.length + 1;
     const milestoneTitle = `${milestoneText} ${milestoneNumber}`;
-    
+
     newCard.querySelector('.milestone-number').textContent = milestoneNumber;
     newCard.querySelector('.milestone-title').placeholder = `{{ __('admin.Milestone_Name') }}`;
     newCard.querySelector('.milestone-title-display').textContent = milestoneTitle;
@@ -402,14 +402,24 @@ document.addEventListener('DOMContentLoaded', function () {
     // Button visibility
     const removeBtn = newCard.querySelector('.remove-unsaved-milestone-btn');
     const deleteBtn = newCard.querySelector('.delete-milestone-btn');
-    
+
     removeBtn.classList.toggle('d-none', isInitialCard);
     deleteBtn.classList.add('d-none');
+
+    // Make date input ID unique
+    const dateInput = newCard.querySelector('.milestone-date');
+    const dateLabel = newCard.querySelector('label[for="milestone-date-input"]');
+    if (dateInput && dateLabel) {
+      const uniqueId = `milestone-date-input-${currentMilestoneId}`;
+      dateInput.id = uniqueId;
+      dateLabel.setAttribute('for', uniqueId);
+    }
 
     milestonesContainer.appendChild(newCard);
     updateMilestoneNumbers();
     addValidationClearListeners(newCard);
-    
+    initializeDatePicker(newCard);
+
     return newCard;
   }
 
@@ -690,6 +700,17 @@ document.addEventListener('DOMContentLoaded', function () {
     restoreBtn.title = '';
   }
 
+  function initializeDatePicker(card) {
+    const dateInput = card.querySelector('.milestone-date');
+    if (dateInput) {
+      $(dateInput).flatpickr({
+        enableTime: false,
+        dateFormat: 'Y-m-d',
+        minDate: 'today',
+      });
+    }
+  }
+
   function handleEditMode(card) {
     // Toggle sections
     card.querySelector('.milestone-form-section').classList.remove('d-none');
@@ -707,6 +728,11 @@ document.addEventListener('DOMContentLoaded', function () {
     card.querySelector('.milestone-title').value = savedTitle;
     card.querySelector('.milestone-description').value = card.querySelector('.milestone-description-display').textContent;
     card.querySelector('.milestone-completion').value = parseInt(card.querySelector('.milestone-completion-display').textContent);
+    card.querySelector('.milestone-category').value = card.milestoneData.category || '';
+    card.querySelector('.milestone-status').value = card.milestoneData.status || '';
+    card.querySelector('.milestone-date').value = card.milestoneData.date || '';
+    card.querySelector('.milestone-visibility').value = card.milestoneData.visibility || '';
+    card.querySelector('.milestone-cohort').value = card.milestoneData.cohort || '';
 
     populateExistingDocumentsInForm(card);
     clearValidation(card);
@@ -942,12 +968,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  // Initialize Flatpickr for milestone date
-  $('#milestone-date-input').flatpickr({ 
-    enableTime: false,
-    dateFormat: 'Y-m-d',
-    minDate: 'today',
-  });
 });
 </script>
 @endpush
