@@ -34,7 +34,12 @@ class ServiceCategoryController extends Controller
 	 */
 	public function index()
 	{
-		$serviceCategories = ServiceCategory::all();
+		$user = auth()->user();
+		$orgIds = $user->organizations_ids;
+		$serviceCategories = ServiceCategory::with(['organization'])
+			->whereHas('organization', function ($q) use ($orgIds) {
+				$q->whereIn('organizations.id', $orgIds);
+			})->get();
 		return view('admin/settings/service_categories/index', compact('serviceCategories'));
 	}
 
