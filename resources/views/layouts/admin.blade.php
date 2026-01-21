@@ -529,10 +529,12 @@
         const updateMenuState = () => {
           if (window.Helpers.isCollapsed()) {
             if (html.classList.contains('layout-menu-hover')) {
-              console.log('layout-menu-hover');
+              // console.log('layout-menu-hover');
+              $('#menu-footer').show(); // Show menu footer
               $('#search-menu').show();
               $('#search-menu-icon').hide();
             } else {
+              $('#menu-footer').hide(); // hide menu footer
               $('#search-menu').hide();
               $('#search-menu-icon').show();
             }
