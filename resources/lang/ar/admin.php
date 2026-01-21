@@ -3202,4 +3202,6 @@ return [
 	'EUR' => 'يورو',
 	'pes' => 'بيسو مكسيكي',
 	'You can not add more than one currency per year' => ' لا يمكنك تعديل العملة في نفس السنة ',
+	'select_at_least_one_org' => 'يرجى اختيار مؤسسة واحدة على الأقل',
+	'UnauthorizedOrg' => 'غيرمصرح لك الوصول/اختيار هذه المؤسسة',
 ];

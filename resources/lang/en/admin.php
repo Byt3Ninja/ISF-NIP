@@ -3147,4 +3147,6 @@ return [
 	'pes' => 'pesos',
 	'EUR' => 'EUR',
 	'You can not add more than one currency per year' => 'You can not add more than one currency per year',
+	'select_at_least_one_org' => 'Select at least one organization',
+	'UnauthorizedOrg' => 'You are not authorized to access/select this organization',
 ];

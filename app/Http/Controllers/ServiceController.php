@@ -32,44 +32,45 @@ class ServiceController extends Controller
 	 */
 	public function index(Request $request)
 	{
-			$user = auth()->user();
-
-			$services = Service::with('serviceCategory')
-					->when($user->hasRole('serviceProvider'), function ($query) use ($user) {
-							$provider_id = $user?->service_provider?->id ?? 0;
-							$query->where('service_provider_id', $provider_id);
-					})
-					->when($request->has('search') && !empty($request->search), function ($query) use ($request) {
-							$query->where(function ($q) use ($request) {
-									$searchTerms = explode(' ', strtolower($request->search));
-									foreach ($searchTerms as $term) {
-											$term = '%' . $term . '%';
-											$q->where(function ($subQ) use ($term) {
-													$subQ->whereRaw('LOWER(name_en) LIKE ?', [$term])
-															->orWhereRaw('LOWER(name_ar) LIKE ?', [$term])
-															->orWhereRaw('LOWER(description_en) LIKE ?', [$term])
-															->orWhereRaw('LOWER(description_ar) LIKE ?', [$term])
-															->orWhereRaw('LOWER(vendor_name) LIKE ?', [$term])
-															->orWhereHas('serviceCategory', function ($catQ) use ($term) {
-																	$catQ->whereRaw('LOWER(name_en) LIKE ?', [$term])
-																			->orWhereRaw('LOWER(name_ar) LIKE ?', [$term]);
-															});
-											});
-									}
+		$user = auth()->user();
+		$orgIds = $user->organizations_ids;
+		$services = Service::with(['serviceCategory', 'organizations'])
+			->when($user->hasRole('serviceProvider'), function ($query) use ($user) {
+				$provider_id = $user?->service_provider?->id ?? 0;
+				$query->where('service_provider_id', $provider_id);
+			})
+			->whereHas('organizations', function ($q) use ($orgIds) {
+				$q->whereIn('organizations.id', $orgIds);
+			})
+			->when($request->has('search') && !empty($request->search), function ($query) use ($request) {
+				$query->where(function ($q) use ($request) {
+					$searchTerms = explode(' ', strtolower($request->search));
+					foreach( $searchTerms as $term)
+					{
+						$term = '%' . $term . '%';
+						$q->where(function ($subQ) use ($term) {
+							$subQ->whereRaw('LOWER(name_en) LIKE ?', [$term])
+							->orWhereRaw('LOWER(name_ar) LIKE ?', [$term])
+							->orWhereRaw('LOWER(description_en) LIKE ?', [$term])
+							->orWhereRaw('LOWER(description_ar) LIKE ?', [$term])
+							->orWhereRaw('LOWER(vendor_name) LIKE ?', [$term])
+							->orWhereHas('serviceCategory', function ($catQ) use ($term) {
+								$catQ->whereRaw('LOWER(name_en) LIKE ?', [$term])->orWhereRaw('LOWER(name_ar) LIKE ?', [$term]);
 							});
-					})
-					->when($request->has('org-id') && !empty($request->{'org-id'}) && $request->{'org-id'} !== 'all', function ($query) use ($request) {
-							$query->whereHas('organizations', function ($q) use ($request) {
-									$q->where('organizations.id', $request->{'org-id'});
-							});
-					})
-					->when($request->has('status') && $request->status !== 'all', function ($query) use ($request) {
-							$query->where('status', $request->status);
-					})
-					->paginate(9);
-
+						});
+					}
+				});
+			})
+			->when($request->has('org-id') && !empty($request->{'org-id'}) && $request->{'org-id'} !== 'all', function ($query) use ($request) {
+				$query->whereHas('organizations', function ($q) use ($request) {
+					$q->where('organizations.id', $request->{'org-id'});
+				});
+			})
+			->when($request->has('status') && $request->status !== 'all', function ($query) use ($request) {
+				$query->where('status', $request->status);
+			})
+			->paginate(9);
 			$Setting = Settings::where('id', 1)->first();
-
 			return view('admin/settings/services/index', compact('services', 'Setting'));
 	}
 	public function exportExcel(Request $request)
@@ -200,6 +201,24 @@ class ServiceController extends Controller
 	public function update(UpdateServiceRequest $request, Service $service)
 	{
 		$user = auth()->user();
+		if( $user->hasAnyRole(['organizationManager', 'subadmin']) && !$user->hasRole('admin') )
+		{
+			$orgIds = $user->organizations_ids;
+			if( $request->has('organization_ids') )
+			{
+				$organization_ids = collect( $request->organization_ids )->map( function( $id ) { return intval( $id ); } )->toArray();
+				
+				$diff = array_diff( $organization_ids, $orgIds );
+				if( count( $diff ) > 0 )
+				{
+					return back()->withInput()->with( ['msg' => 'UnauthorizedOrg'] );
+				}
+			}
+			else
+			{
+				return back()->withInput()->with( ['msg' => 'select_at_least_one_org'] );
+			}
+		}
 		$category = ServiceCategory::find($request->service_category_id);
 		if( empty( $category ) ) { return back()->withInput()->with( ['msg' => 'FailedStore'] );  }
 
@@ -256,7 +275,11 @@ class ServiceController extends Controller
 	public function requests(Request $request)
 	{
 		$user = auth()->user();
-		$received = ServicesRequests::whereNull('approved')->with('service');
+		$orgIds = $user->organizations_ids;
+		$received = ServicesRequests::whereNull('approved')->with(['service', 'service.organizations', 'user'])
+			->whereHas('service.organizations', function ($q) use ($orgIds) {
+				$q->whereIn('organizations.id', $orgIds);
+			});
 		$countold = ServicesRequests::whereNotNull('approved')->when($user->hasRole('serviceProvider'), function ($q) use ($user) {
 			$provider_id = $user->service_provider->id;
 			return $q->whereHas('service', function ($q2) use ($provider_id) {
