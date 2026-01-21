@@ -2665,7 +2665,7 @@ return [
 		'subheading' => 'Manage and monitor the evaluation process for all programs',
 		'final_subheading' => 'Manage and monitor the final evaluation process for all programs',
 		'search_steps' => 'Search Steps',
-		'search_steps_placeholder' => 'Search by title, program, or organization...',
+		'search_steps_placeholder' => 'Search title, program, org…',
 		'screening_type' => 'Screening Type',
 		'all_types' => 'All Types',
 		'onetoall' => 'One-to-All',
