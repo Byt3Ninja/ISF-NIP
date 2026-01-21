@@ -201,7 +201,7 @@ $getSetting = App\Settings::find(1);
     @endforeach
   </ul>
 
-  <div class="px-6 py-4 border-top">
+  <div id="menu-footer" class="px-6 py-4 border-top">
     <span style="direction: ltr">
         Incubator Pro
         {{ config('app.version') ? 'v' . config('app.version') : '' }}

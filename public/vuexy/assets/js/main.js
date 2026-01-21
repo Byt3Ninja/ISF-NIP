@@ -41,6 +41,7 @@ if (document.getElementById('layout-menu')) {
   let layoutMenuEl = document.querySelectorAll('#layout-menu');
   let searchMenuEl = document.querySelectorAll("#search-menu");
   let searchMenuIconEl = document.querySelectorAll("#search-menu-icon");
+  let menuFooterEl = document.querySelectorAll("#menu-footer");
 
   layoutMenuEl.forEach(function (element) {
     menu = new Menu(element, {
@@ -74,9 +75,12 @@ if (document.getElementById('layout-menu')) {
           );
 
           if (window.Helpers.isCollapsed()) {
+            // console.log('collapsed');
+            menuFooterEl[0].style.display = "none";
             searchMenuEl[0].style.display = "none";
             searchMenuIconEl[0].style.display = "block";
           } else {
+            menuFooterEl[0].style.display = "block";
             searchMenuEl[0].style.display = "block";
             searchMenuIconEl[0].style.display = "none";
           }
