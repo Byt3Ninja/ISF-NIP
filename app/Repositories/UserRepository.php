@@ -62,6 +62,10 @@ class UserRepository
             $query->whereHas('roles', fn($q) => $q->where('name', $filters['role']));
         }
 
+        if (!empty($filters['r'])) {
+            $query->whereHas('roles', fn($q) => $q->where('name', $filters['r']));
+        }
+
         if (!empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function (Builder $q) use ($search) {
