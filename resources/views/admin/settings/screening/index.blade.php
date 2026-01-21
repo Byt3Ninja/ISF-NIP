@@ -43,29 +43,19 @@
       </div>
 
       <!-- Filters Section -->
-      <div class="card bg-light-subtle shadow-none rounded-0 border-bottom">
+      <div class="card shadow-none rounded-0 border-bottom">
         <div class="card-body py-4">
           <form id="filter-form" method="GET" action="/dashboard/screening" data-ignore-dirty>
             <div class="row g-3 align-items-center">
               <div class="col-md-6 col-lg-3">
                 <div class="input-group input-group-merge">
-                  <span class="input-group-text" id="basic-addon-search31"><i class="ti ti-search"></i></span>
+                  <span class="input-group-text" id="basic-addon-search31"><i class="ti ti-search ti-sm text-muted"></i></span>
                   <input type="text" class="form-control bg-card" name="search" value="{{ request('search') }}" placeholder="{{ __('admin.screening.search_steps_placeholder') }}" aria-label="Search" aria-describedby="basic-addon-search31">
                 </div>
               </div>
 
-
               <div class="col-md-6 col-lg-2">
-                <select class="form-select select2 bg-card" name="status" data-placeholder="{{ __('admin.All_statuses') }}">
-                  <option value=""></option>
-                  <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>{{ __('admin.In_Progress') }}</option>
-                  <option value="upcoming" {{ request('status') == 'upcoming' ? 'selected' : '' }}>{{ __('admin.Upcoming') }}</option>
-                  <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>{{ __('admin.completed') }}</option>
-                </select>
-              </div>
-
-              <div class="col-md-6 col-lg-2">
-                <select class="form-select select2 bg-card" name="program" data-placeholder="{{ __('admin.All_Programs') }}">
+                <select class="form-select select2" name="program" data-placeholder="{{ __('admin.All_Programs') }}">
                   <option value=""></option>
                   @foreach($screeningSteps->pluck('program')->unique('id') as $program)
                     <option value="{{ $program->id }}" {{ request('program') == $program->id ? 'selected' : '' }}>{{ Str::limit($program->title, 25) }}</option>
@@ -73,15 +63,24 @@
                 </select>
               </div>
 
+              <div class="col-md-6 col-lg-2">
+                <select class="form-select select2" name="status" data-placeholder="{{ __('admin.All_statuses') }}">
+                  <option value=""></option>
+                  <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>{{ __('admin.In_Progress') }}</option>
+                  <option value="upcoming" {{ request('status') == 'upcoming' ? 'selected' : '' }}>{{ __('admin.Upcoming') }}</option>
+                  <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>{{ __('admin.completed') }}</option>
+                </select>
+              </div>
+
               <div class="col-md-6 col-lg-3">
                 <div class="d-flex gap-2">
-                  <select class="form-select select2 bg-card flex-grow-1" name="judge" data-placeholder="{{ __('cycles.All Judges') }}">
+                  <select class="form-select select2 flex-grow-1" name="judge" data-placeholder="{{ __('cycles.All Judges') }}">
                     <option value=""></option>
                     @foreach($screeningSteps->pluck('judges')->flatten()->unique('id') as $judge)
                       <option value="{{ $judge->id }}" {{ request('judge') == $judge->id ? 'selected' : '' }}>{{ $judge->name }}</option>
                     @endforeach
                   </select>
-                  <select class="form-select select2 bg-card flex-grow-1" name="startup" data-placeholder="{{ __('admin.all_startups') }}">
+                  <select class="form-select select2 flex-grow-1" name="startup" data-placeholder="{{ __('admin.all_startups') }}">
                     <option value=""></option>
                     @foreach($screeningSteps->pluck('companies')->flatten()->unique('id') as $company)
                       <option value="{{ $company->id }}" {{ request('startup') == $company->id ? 'selected' : '' }}>{{ Str::limit($company->name, 25) }}</option>
@@ -92,7 +91,7 @@
 
               <div class="col-lg-2">
                 <div class="d-flex justify-content-end gap-2">
-                  @if(request('search') || request('screening_type') || request('status') || request('program') || request('judge') || request('startup'))
+                  @if(request('search') || request('status') || request('program') || request('judge') || request('startup'))
                     <a href="/dashboard/screening" class="btn btn-label-secondary">
                       <i class="ti ti-refresh me-1"></i> {{ __('admin.Reset') }}
                     </a>
@@ -294,7 +293,7 @@
       $this.wrap('<div class="position-relative"></div>').select2({
         placeholder: $this.data('placeholder'),
         dropdownParent: $this.parent(),
-        allowClear: true
+        allowClear: true,
       });
     });
 
@@ -305,9 +304,10 @@
     });
   });
 
-  // No-op for button enabling as it is no longer disabled by default
-  // and we want filters to be easily reapplied/cleared.
-
+  // // Toggle submit button disable state on form change
+  // $('#filter-form select, #filter-form input').on('change input', function () {
+  //   $('#filter-form button[type="submit"]').prop('disabled', $(this).val() ? false : true);
+  // });
 
   $('.edit-step-btn').on('click', function () {
     const stepData = $(this).data('step');
