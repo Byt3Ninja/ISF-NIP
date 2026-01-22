@@ -205,7 +205,7 @@ return function () {
         ['title' => 'documentations', 'route' => 'documentation.index', 'menuOnly' => true],
         ['title' => 'create_documentation', 'route' => 'documentation.create', 'group' => 'documentation', 'menuOnly' => false],
         ['title' => 'edit_documentation', 'route' => 'documentation.edit', 'group' => 'documentation', 'menuOnly' => false],
-        ['title' => 'general', 'route' => $user->hasRole('Admin') ? 'settings.system_general_view' : 'settings.organization_manage', 'menuOnly' => false],
+
         ['title' => 'roles', 'route' => 'roles.index', 'menuOnly' => false],
         ['title' => 'create_role', 'route' => 'roles.create', 'group' => 'roles', 'menuOnly' => false],
         ['title' => 'edit_role', 'route' => 'roles.edit', 'group' => 'roles', 'menuOnly' => false],
@@ -239,7 +239,11 @@ return function () {
         ];
         $menu['dashboard']['children'][] = ['title' => 'reports', 'route' => 'reports.list', 'menuOnly' => true];
     }
-
-    return $menu;
+    if(auth()->check() && auth()->user()->hasRole('Admin')) {
+        $menu['admin']['children'][] = ['title' => 'general', 'route' => 'settings.system_general_view' , 'menuOnly' => false];
+    }else{
+        $menu['admin']['children'][] = ['title' => 'general', 'route' => 'settings.system_general_view', 'menuOnly' => false];
+    }
+    
   return $menu;
 };
