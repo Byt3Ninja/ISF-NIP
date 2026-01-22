@@ -1,10 +1,10 @@
 <div class="col-md-4">
   <div class="card shadow-sm" style="height: 300px; overflow-y: hidden;">
     <div class="py-4 px-8">
-      <h5 class="card-title mb-3">{{ __('admin.Founders') }} ( {{count($fonders)}} )</h5>
-      @if (count($fonders) > 0)
+      <h5 class="card-title mb-3">{{ __('admin.Founders') }} ( {{count($founders)}} )</h5>
+      @if (count($founders) > 0)
       <div class="row" style="position: relative; height: 90%;">
-        @if (count($fonders) > 2)
+        @if (count($founders) > 2)
         <button id="founder-prev-2" class="btn btn-sm btn-icon btn-white rounded-circle shadow border d-none"
           style="position: absolute; left: -1rem; top: 46%; transform: translateY(-50%); z-index: 1;">
           <i class="ti ti-chevron-left"></i>
@@ -15,7 +15,7 @@
         </button>
         @endif
 
-        @foreach ($fonders as $fonder)
+        @foreach ($founders as $fonder)
         <div class="founder-col-2 col-12 mb-2">
           <div class="p-3 shadow-sm border overflow-hidden">
             <div class="d-flex align-items-center">
