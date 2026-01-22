@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\InviteMentor;
+use App\Organization;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -31,7 +32,7 @@ class InviteMentorMail extends Mailable implements ShouldQueue
                          'name'        => $this->invitation->name,
                          'messageBody' => $this->invitation->message_content,
                          'scope'       => $this->invitation->scope,
-                         'organizations' => $this->invitation->organization_ids,
+                         'organizations' => Organization::whereIn('id', $this->invitation->organization_ids ?? [])->get()->map(fn($org) => ['id' => $org->id, 'name' => $org->name_en])->toArray(),
                      ]);
 
         // Attach files if exist

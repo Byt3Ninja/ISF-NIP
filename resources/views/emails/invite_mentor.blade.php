@@ -101,11 +101,11 @@
         <strong>Invitation Scope:</strong> {{ $scope }}
     </p>
 
-    @if($scope === 'organization' && !empty($organizations))
+    @if($scope == 'Organization')
         <p><strong>Organizations:</strong></p>
         <ul>
-            @foreach($organizations as $org)
-                <li>{{ $org['name'] }}</li>
+           @foreach($organizations as $org)
+                <p>{{ $org['name'] }}</p>
             @endforeach
         </ul>
     @endif
