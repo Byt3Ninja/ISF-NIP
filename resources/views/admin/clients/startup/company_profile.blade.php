@@ -648,12 +648,23 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
             const successMsg = type === 'publish' 
               ? '{{ __("admin.Evaluation published successfully") }}' 
               : '{{ __("admin.Evaluation saved successfully") }}';
-              
-            // You can use a toast or alert to show the success message
-            alert(successMsg);
-            // window.location.reload();
+
+            if (!response.status) {
+              releaseFailureAlert({
+                title: '{{ __("admin.Error") }}',
+                message: response.message || '{{ __("admin.unexpected_error") }}',
+              });
+              return;
+            }
+            
+            releaseSuccessAlert({
+              title: '{{ __("admin.Success") }}',
+              message: successMsg,
+            });
           },
-          error: function(error) { 
+          error: function(xhr, status, error) {
+            const errorMsg = xhr?.responseJSON?.message || error?.message || '{{ __("admin.unexpected_error") }}';
+
             // Reset buttons
             if (type === 'draft') {
               saveBtn.innerHTML = originalSaveBtnHtml;
@@ -662,9 +673,11 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
               publishBtn.innerHTML = originalPublishBtnHtml;
               publishBtn.disabled = false;
             }
-            
-            console.log("DB Error occurred, please try again");
-            alert("Error: " + (error.responseJSON?.message || "Failed to submit evaluation. Please try again."));
+
+            releaseFailureAlert({
+              title: '{{ __("admin.Error") }}',
+              message: errorMsg,
+            });
           },
         });
       }
