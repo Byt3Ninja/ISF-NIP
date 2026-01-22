@@ -107,7 +107,7 @@ return function () {
       'title' => 'dashboard_and_analytics',
       'children' => [
         ['title' => 'dashboard', 'route' => 'core.dashboard_view', 'menuOnly' => true],
-        ['title' => 'reports', 'route' => 'reports.list', 'menuOnly' => true],
+        
         ['title' => 'activities', 'route' => 'activities.index', 'menuOnly' => true],
         ['title' => 'projects', 'route' => 'projects.index', 'menuOnly' => true],
         ['title' => 'my_profile', 'route' => 'user.profile_view', 'hide_parent' => true, 'menuOnly' => false],
@@ -237,6 +237,7 @@ return function () {
             'route' => 'TimeSheet.index',
             'menuOnly' => true,
         ];
+        $menu['dashboard']['children'][] = ['title' => 'reports', 'route' => 'reports.list', 'menuOnly' => true];
     }
 
     return $menu;
