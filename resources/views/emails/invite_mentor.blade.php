@@ -111,7 +111,7 @@
     @endif
         <a href="{{ env('APP_URL') }}/register?id=MentorRole"
             style="display:inline-block;padding:12px 20px;background:#16a34a;color:#fff;text-decoration:none;border-radius:6px;">
-            Accept Invitation
+            {{ __('admin.Accept_Invation') }}
         </a>
     <br>
     <p>Best regards,<br>{{ config('app.name') }}</p>

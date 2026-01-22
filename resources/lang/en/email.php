@@ -56,5 +56,12 @@ return [
         'trouble_clicking' => 'If you’re having trouble clicking the "Activate Your Account" button, copy and paste the URL below into your web browser: :link ',
         'if_trouble' => 'If you have trouble clicking the button, please copy and paste the URL below into your web browser:',
     ],
+    'change_cycle_subject' => 'Change Cycle Notification',
+    'change_cycle_heading' => 'Change Cycle Notification',
+    'hello' => 'Hello',
+    'user' => 'User',
+    'cycle_changed' => 'Your startup cycle has changed from :from to :to',
+    'organization' => 'Organization',
+    'thank_you' => 'Thank You',
 
 ];
