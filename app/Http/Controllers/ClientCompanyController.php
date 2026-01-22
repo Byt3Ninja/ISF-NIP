@@ -73,12 +73,10 @@ class ClientCompanyController extends Controller
     }
     public function show($id)
     {
-        // dd($this->companyService->getCompanyRelation($id));
         // try {
         $user = auth()->user();
         $user_id = $user->id;
         $company = $this->companyService->getCompanyRelation($id);
-        // dd($company['type']);
         if($company['type'] == 'not_found'){
             return redirect()->back()->with('message2', 'Company Not Found');
         }
@@ -89,12 +87,11 @@ class ClientCompanyController extends Controller
             $icons = '';
         }
         $team = $this->companyService->getTeamMember($id);
-        $fonders = $team->where('TeamMember', 'founders');
-        $Shareholders = $team->where('TeamMember', 'shareholders');
-        $Investors = $team->where('TeamMember', 'investors');
+        $founders = $team->where('TeamMember', 'Founder');
+        $Shareholders = $team->where('TeamMember', 'Shareholder');
+        $Investors = $team->where('TeamMember', 'Investor');
 
         // Load all milestones for this company (new unified structure)
-        // dd($this->companyService->findMilestone($id));
         $milestones = $this->companyService->getAllMilestones($id);
 
         // For backward compatibility, create empty collections for old template variables
@@ -104,7 +101,6 @@ class ClientCompanyController extends Controller
 
         $company_relation_get = $this->companyService->findCompanyRelation($id);
         // Startup Technologies
-        // dd($company_relation_get);
         $technologies = $company_relation_get['technologies'];
         // Startup Sectors
         $sectors = $company_relation_get['sectors'];
@@ -218,7 +214,6 @@ class ClientCompanyController extends Controller
         $finalScreenAvg = collect();
         foreach ($almunies as $almuni) {
             $programsRaw = json_decode($almuni->program ?? '[]');
-            // dd($programsRaw);
             if (!is_array($programsRaw)) continue;
             foreach ($programsRaw as $p) {
                 if (is_array($p)) $p = (object)$p;
@@ -261,7 +256,6 @@ class ClientCompanyController extends Controller
                 $finalScreenAvg = collect(json_decode($almuni->final_screening, true));
             }
         }
-        // dd($finalScreenAvg);
         $programs = $programs->values()->all();
         $curentCycle = $company->cycledata?->mentorshipRequests?->where('user_id', $company->user->id)->sum('period');
         $totalMinutes = $mentorshipToSum->sum('duration') + $curentCycle;
@@ -450,8 +444,7 @@ class ClientCompanyController extends Controller
             $profile->business_model,
             $profile->business_model_description,
         ])->every(fn ($value) => !is_null($value));
-      
-        // dd($company->user->mentorship->whereNotNull('rating')->where('done', 1));
+
         $achievements = [
             'alumni' => [
                 'locked'  => $almunies->count() > 0 ? false : true,
@@ -481,7 +474,6 @@ class ClientCompanyController extends Controller
             ],
         ];
 
-            // dd($achievements);
         return view('admin/clients/startup/company_profile', compact('company',
         'formTitle',
         'formData',
@@ -491,7 +483,7 @@ class ClientCompanyController extends Controller
         'Achieved_Milestones', 
         'Planned_Milestones', 
         'icons', 
-        'fonders', 
+        'founders', 
         'Shareholders', 
         'Investors', 
         'fileExists', 
@@ -563,7 +555,7 @@ class ClientCompanyController extends Controller
                 if( $user->company )
                 {
                     $company_members = Team_Member::where('Company_id', $user->company->id)->get();
-                    $fonders = $company_members->where('TeamMember', 'Founder')->values();
+                    $founders = $company_members->where('TeamMember', 'Founder')->values();
                     $Shareholders = $company_members->where('TeamMember', 'Shareholder')->values();
                     $Investors = $company_members->where('TeamMember', 'Investor')->values();
                     // For backward compatibility, create empty collections
@@ -573,7 +565,7 @@ class ClientCompanyController extends Controller
                 }
                 else
                 {
-                    $fonders = 'NA';
+                    $founders = 'NA';
                     $Shareholders = 'NA';
                     $Investors = 'NA';
                     $milestones = collect();
@@ -652,22 +644,19 @@ class ClientCompanyController extends Controller
                 $sectors = Sector::whereNull('parent_id')->get();
                 $funding_rounds = $client->company ? $client->company->fundingRounds : [];
 
-                $teamMembers = Team_Member::all(); // جلب جميع الأعضاء
+                $teamMembers = Team_Member::where('Company_id', $client->company->id)->get();
 
                 if ($client->company) {
-                    $fonders = Team_Member::where('TeamMember', 'Founder')
-                        ->where('Company_id', $client->company->id)->get();
-                    $Shareholders = Team_Member::where('TeamMember', 'Shareholder')
-                        ->where('Company_id', $client->company->id)->get();
-                    $Investors = Team_Member::where('TeamMember', 'Investor')
-                        ->where('Company_id', $client->company->id)->get();
+                    $founders = $teamMembers->where('TeamMember', 'Founder')->values();
+                    $Shareholders = $teamMembers->where('TeamMember', 'Shareholder')->values();
+                    $Investors = $teamMembers->where('TeamMember', 'Investor')->values();
 
                     // For backward compatibility, create empty collections
                     $Achieveds = collect();
                     $Planneds = collect();
                     $Archiveds = collect();
                 } else {
-                    $fonders = 'NA';
+                    $founders = 'NA';
                     $Shareholders = 'NA';
                     $Investors = 'NA';
                     $milestones = collect();
@@ -807,14 +796,10 @@ class ClientCompanyController extends Controller
                     $financialprojection = $financialprojectionArray;
                 }
 
-          
-
-          
-            // dd($financialprojection);
             return view('admin/clients/company', compact(
                 'client',
                 '_countries',
-                'fonders',
+                'founders',
                 'Shareholders',
                 'Investors',
                 'Currencies',
@@ -822,7 +807,7 @@ class ClientCompanyController extends Controller
                 'Achieveds',
                 'Planneds',
                 'Archiveds',
-                'teamMembers',
+                // 'teamMembers',
                 'states',
                 'countries',
                 'sectors',
@@ -1878,8 +1863,7 @@ class ClientCompanyController extends Controller
                 }
             }
             if ($data['CompanyN'] == 15) {
-                
-            //    dd($data);
+
                 if($data['valuation_date'] == null){
                     return redirect()->back()->with(['msg' => 'Please enter the valuation date', 'class' => 'danger']);
                 }
@@ -2041,7 +2025,6 @@ class ClientCompanyController extends Controller
             else
                 return $this->unknownErrorHappenedMsg();
         } catch (Exception $e) {
-            // dd($e);
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);
@@ -2789,7 +2772,6 @@ class ClientCompanyController extends Controller
                 $filters['sectors'] = $sectors;
             }
         }
-        // dd($request->all());
         // Handle Alumni filter
         if ($request->filled('alumni')) {
             $alumni = $request->get('alumni');
@@ -2835,7 +2817,6 @@ class ClientCompanyController extends Controller
         $sectors     = $this->decodeAlumniJson($basicInfo['Sectors']);
         $industries  = $this->decodeAlumniJson($basicInfo['Industries']);
 
-        // dd($screening);
         $startup = [
             'name'           => $basicInfo['Startup_Name'] ?? null,
             'logo'           => $basicInfo['Logo'] ?? null,
@@ -3057,7 +3038,6 @@ class ClientCompanyController extends Controller
                 ->toArray();
 
 
-        //  dd($forms);
         return view('admin.clients.startup.company_alumni', compact('startup', 
         'teamData', 
         'ownershipData', 
@@ -3084,7 +3064,6 @@ class ClientCompanyController extends Controller
 
     public function addEmployee(Request $request, $id)
     {
-        // dd($request->all());
         try {
             if ($id) {
                 $companyId = $id;
@@ -3147,7 +3126,6 @@ class ClientCompanyController extends Controller
             }
 
             $employee->save();
-            // dd($employee);
             return response()->json([
                 'success' => true,
                 'employee' => $employee,
@@ -3620,7 +3598,6 @@ class ClientCompanyController extends Controller
             });
             $screeningData = $stepsData;
         // return or view
-        //  dd($screeningData);
                 $almuni->screening = json_encode($screeningData);
 
                     //Final Screening
@@ -3683,7 +3660,6 @@ class ClientCompanyController extends Controller
             });
                 $FinalscreeningData = $finalstepsData;
 
-                // dd($FinalscreeningData);
                 $almuni->final_screening = json_encode($FinalscreeningData);
 
 
@@ -3694,8 +3670,6 @@ class ClientCompanyController extends Controller
                     ->get();
 
                 $trainings = [];
-                // dd($startup_training[3]->attendance);
-                // dd($startup_training[3]->course->title);
                 foreach ($startup_training as $training) {
                     $trainings[] = [
                         'ID' => $training->id,
@@ -3719,8 +3693,6 @@ class ClientCompanyController extends Controller
                 ->get();
 
                 $mentorships = [];
-                // dd($startup_mentorship[3]->period);
-                // dd($startup_training[3]->course->title);
                 foreach ($startup_mentorship as $mentorship) {
                     $mentorships[] = [
                         'mentor_name' => $mentorship->mentor->first_name_en ." ". $mentorship->mentor->last_name_en,
@@ -3742,8 +3714,6 @@ class ClientCompanyController extends Controller
                     ->get();
 
                 $milestones = [];
-                // dd($startup_mentorship[3]);
-                // dd($startup_training[3]->course->title);
                 foreach ($startup_milestones as $milestone) {
                     $milestones[] = [
                         'Milestone_title' => $milestone->name,
@@ -3754,15 +3724,12 @@ class ClientCompanyController extends Controller
                         'download' => $milestone->documents,
                     ];
                 }
-                // dd($milestones);
                 $almuni->milestones = json_encode($milestones);
 
 
                 // Mentor Tasks
                 $startup_MentorTasks = MentorshipTask::where('company_id', $company->id)->get();
                 $MentorTasks = [];
-                // dd($startup_mentorship[3]);
-                // dd($startup_training[3]->course->title);
                 foreach ($startup_MentorTasks as $MentorTask) {
                     $MentorTasks[] = [
                         'Task_ID' => $MentorTask->id ?? '',
@@ -3780,8 +3747,6 @@ class ClientCompanyController extends Controller
 
                 $startup_quizzes= Quizzes::where('organization_id', $company->cycledata->organization_id)->get();
                 $quizzes = [];
-                // dd($startup_quizzes);
-                // dd($startup_training[3]->course->title);
                 foreach ($startup_quizzes as $quizze) {
 
                     $result = $quizze->results->first(); // ممكن يرجع null
@@ -3821,7 +3786,6 @@ class ClientCompanyController extends Controller
                         })
                         ->filter()
                         ->values();
-                        // dd($survey->responses[0]->updated_at->format('Y-m-d H:i'));
                     $surveys[] = [
                         'Survey_ID' => $survey->id ?? '',
                         'Survey_title' => $survey->title ?? '',
@@ -3927,7 +3891,6 @@ class ClientCompanyController extends Controller
                     })->groupBy('user_id')->values();
                     return $item;
                 })->values();
-                        // dd($data);
 
                         foreach ($data as $item) {
 
