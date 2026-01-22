@@ -556,6 +556,17 @@
       });
     </script>
 
+    {{-- Add nav=menu parameter to all menu links for breadcrumb tracking --}}
+    <script>
+      document.querySelectorAll('#layout-menu a.menu-link').forEach(function(link) {
+        if (link.href && !link.href.includes('javascript:') && !link.href.includes('#')) {
+          const url = new URL(link.href, window.location.origin);
+          url.searchParams.set('nav', 'menu');
+          link.href = url.toString();
+        }
+      });
+    </script>
+
     @stack('scripts')
     <!-- END: Page JS-->
   </body>
