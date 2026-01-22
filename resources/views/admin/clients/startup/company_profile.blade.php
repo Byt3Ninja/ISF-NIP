@@ -649,6 +649,14 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
               ? '{{ __("admin.Evaluation published successfully") }}' 
               : '{{ __("admin.Evaluation saved successfully") }}';
 
+            if (!response.status) {
+              releaseFailureAlert({
+                title: '{{ __("admin.Error") }}',
+                message: response.message || '{{ __("admin.unexpected_error") }}',
+              });
+              return;
+            }
+            
             releaseSuccessAlert({
               title: '{{ __("admin.Success") }}',
               message: successMsg,
