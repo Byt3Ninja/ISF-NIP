@@ -37,10 +37,10 @@
 
     <!-- Sustainable Development Icons -->
     @php
-     $Sustainables = json_decode($company->Sustainable_development);
+     $sustainable_array = json_decode($company->Sustainable_development ?? '[]');
     @endphp
 
-    @if (!empty($Sustainables) && count($Sustainables) > 0)
+    @if (!empty($sustainable_array) && count($sustainable_array) > 0)
     <div class="col-12">
       <div class="card shadow-sm pe-md-12">
         <div class="card-body">
@@ -48,7 +48,7 @@
             {{ $l == 'en' ? 'Sustainability Goals' : 'اهداف الاستدامة' }}
           </h5>
           <div class="row g-6 pe-md-12">
-            @foreach ($Sustainables as $Sustainable)
+            @foreach ($sustainable_array as $Sustainable)
             @php
             $icon = App\SustainableIcon::where('title', $Sustainable)->first();
             @endphp
