@@ -101,7 +101,7 @@
         <strong>Invitation Scope:</strong> {{ $scope }}
     </p>
 
-    @if($scope == 'Organization')
+    @if($scope == 'Organization' && !empty($organizations))
         <p><strong>Organizations:</strong></p>
         <ul>
            @foreach($organizations as $org)
