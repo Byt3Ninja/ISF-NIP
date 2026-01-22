@@ -254,7 +254,7 @@
                                           <div class="col-12">
                                             <div class="form-group mb-6">
                                               <label for="score_{{ $subCriteria->id }}" class="form-label">{{ __('admin.Score') }}</label>
-                                              <select class="form-select score-select mb-1" id="score_{{ $subCriteria->id }}" name="score_{{ $subCriteria->id }}" data-subcriteria-id="{{ $subCriteria->id }}">
+                                              <select class="form-select score-select mb-1 criteria-select" id="score_{{ $subCriteria->id }}" name="score_{{ $subCriteria->id }}" data-subcriteria-id="{{ $subCriteria->id }}">
                                                 <option value="">{{ __('admin.Select score') }}</option>
                                                 <option value="1" {{ $subCriteria?->result?->score == 1 ? 'selected' : '' }}>1 - {{ __('admin.score_1') }}</option>
                                                 <option value="2" {{ $subCriteria?->result?->score == 2 ? 'selected' : '' }}>2 - {{ __('admin.score_2') }}</option>
@@ -343,10 +343,10 @@
               <div class="row mb-6">
                 @foreach( $evaluationForm->categories as $key => $criteria )
                 <div class="col-6 col-md-3 pb-3">
-                  <div class="border border-dark rounded px-3 py-2">
+                  <div id="category-{{ $criteria->id }}" class="border border-dark rounded px-3 py-2">
                     <h6 class="mb-0 text-secondary fw-semibold">{{ $criteria->name }}</h6>
                     <div class="d-flex justify-content-between align-items-center mt-1">
-                      <span class="fs-5 fw-bold mb-0 text-dark">
+                      <span class="fs-5 fw-bold mb-0 text-dark percentage">
                         {{ number_format( ($criteria->subCriteria->sum(function($subCriteria) { return $subCriteria->result->score; }) / ($criteria->subCriteria->count() * 10)) * 100, 2) }}
                       </span>
                       <span class="fs-5 fw-bold text-primary mb-0">%</span>
@@ -366,7 +366,7 @@
                       <span class="badge bg-primary rounded-pill">{{ $index + 1 }}</span>
                       <span class="fs-5 mb-0 text-dark">{{ $subCriteria->name }}</span>
                     </div>
-                    <small class="text-light line-clamp-3 mt-2 w-75">{{ $subCriteria->result->comment }}</small>
+                    <small id="comment_summary_{{ $criteria->id }}_{{ $subCriteria->id }}" class="text-light line-clamp-3 mt-2 w-75">{{ $subCriteria->result->comment }}</small>
                   </div>
                   @endforeach
                 </div>
@@ -374,7 +374,7 @@
               </div>
               <div class="col-12">
                 <h5 class="text-primary fw-semibold mb-2">{{ __('admin.Final Comments')}}</h5>
-                <small class="text-light line-clamp-3 mt-2 w-75">{{ $evaluationForm->final_comment }}</small>
+                <small id="final_comments_summary" class="text-light line-clamp-3 mt-2 w-75">{{ $evaluationForm->final_comment }}</small>
               </div>
             </div>
           </div>
@@ -386,41 +386,54 @@
 @endif
 
 @push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Function to get Bootstrap badge class based on score
-  function getBadgeClass(score) {
-    if (score <= 3) return 'bg-label-danger';
-    if (score <= 5) return 'bg-label-warning';
-    if (score <= 7) return 'bg-label-info';
-    if (score <= 9) return 'bg-label-primary';
-    return 'bg-label-success';
-  }
-
-  // Handle score selection changes
-  document.querySelectorAll('.score-select').forEach(function(select) {
-    select.addEventListener('change', function() {
-      var score = this.value;
-      var subcriteriaId = this.getAttribute('data-subcriteria-id');
-      var badgeContainer = document.getElementById('badge_score_' + subcriteriaId);
-
-      if (score && score !== '') {
-        // Show the badge with selected score
-        var badgeClass = getBadgeClass(parseInt(score));
-        badgeContainer.innerHTML = '<span class="p-2 fw-semibold badge ' + badgeClass + '">' + this.options[this.selectedIndex].text + '</span>';
-        badgeContainer.style.display = 'block';
-      } else {
-        // Hide the badge if no score selected
-        badgeContainer.style.display = 'none';
-        badgeContainer.innerHTML = '';
-      }
+  <script>
+    var categories = @json( $evaluationForm->categories );
+    $(document).on('click', '#pills-view-evaluation-tab', function() {
+      $.each(categories, function(index, category) {
+        var totalScore = 0;
+        $.each(category.subCriteria, function(index, subCriteria) {
+          totalScore += parseInt( $("#score_" + subCriteria.id).val() );
+          $("#comment_summary_" + category.id + "_" + subCriteria.id).html( $("#comment_" + subCriteria.id).val() );
+        });
+        var percentage = (totalScore / (category.subCriteria.length * 10)) * 100;
+        $("#category-" + category.id ).find('.percentage').html( percentage.toFixed(2) );
+      });
+      $("#final_comments_summary").html( $("#final_comments").val() );
     });
+    document.addEventListener('DOMContentLoaded', function() {
+      // Function to get Bootstrap badge class based on score
+      function getBadgeClass(score) {
+        if (score <= 3) return 'bg-label-danger';
+        if (score <= 5) return 'bg-label-warning';
+        if (score <= 7) return 'bg-label-info';
+        if (score <= 9) return 'bg-label-primary';
+        return 'bg-label-success';
+      }
 
-    // Trigger change event on page load for pre-selected values
-    if (select.value && select.value !== '') {
-      select.dispatchEvent(new Event('change'));
-    }
-  });
-});
-</script>
+      // Handle score selection changes
+      document.querySelectorAll('.score-select').forEach(function(select) {
+        select.addEventListener('change', function() {
+          var score = this.value;
+          var subcriteriaId = this.getAttribute('data-subcriteria-id');
+          var badgeContainer = document.getElementById('badge_score_' + subcriteriaId);
+
+          if (score && score !== '') {
+            // Show the badge with selected score
+            var badgeClass = getBadgeClass(parseInt(score));
+            badgeContainer.innerHTML = '<span class="p-2 fw-semibold badge ' + badgeClass + '">' + this.options[this.selectedIndex].text + '</span>';
+            badgeContainer.style.display = 'block';
+          } else {
+            // Hide the badge if no score selected
+            badgeContainer.style.display = 'none';
+            badgeContainer.innerHTML = '';
+          }
+        });
+
+        // Trigger change event on page load for pre-selected values
+        if (select.value && select.value !== '') {
+          select.dispatchEvent(new Event('change'));
+        }
+      });
+    });
+  </script>
 @endpush

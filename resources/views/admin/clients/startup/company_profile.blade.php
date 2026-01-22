@@ -922,6 +922,7 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
 
       // Update final comments display in real-time
       function updateFinalCommentsDisplay() {
+        return;
         const finalCommentsTextarea = document.getElementById('final_comments');
         const finalCommentsDisplay = document.querySelector('#pills-view-evaluation .col-12:last-child .text-light.line-clamp-3');
         
