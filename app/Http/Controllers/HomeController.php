@@ -2619,7 +2619,7 @@ class HomeController extends Controller
                             FROM 
                             cycles
                             WHERE `type` = 'hackathon' ";
-                            if($cycle != null){
+                            if(isset($cycle) && $cycle != null){
                                 $newhackathon_q .= "AND id = ? ";
                                 $params[] = $cycle;
                                 $newhackathon_q .= "ORDER BY created_at DESC LIMIT 1";

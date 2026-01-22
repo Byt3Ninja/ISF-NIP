@@ -20,11 +20,20 @@ class BreadcrumbService
 
     /**
      * Get the breadcrumb trail for the current route
+     * Uses session-based trail for accurate navigation tracking
      *
      * @return array<array{url: string, label: string, active: bool}>
      */
     public function getTrail(): array
     {
+        // Get session-based breadcrumb trail
+        $sessionTrail = session('_breadcrumb_trail', []);
+
+        if (!empty($sessionTrail)) {
+            return $this->buildFromSessionTrail($sessionTrail);
+        }
+
+        // Fallback to config-based if no session trail
         $currentRoute = Route::currentRouteName();
 
         if (!$currentRoute) {
@@ -32,6 +41,29 @@ class BreadcrumbService
         }
 
         return $this->buildFromRoute($currentRoute);
+    }
+
+    /**
+     * Build breadcrumb from session trail
+     *
+     * @param array $sessionTrail
+     * @return array
+     */
+    protected function buildFromSessionTrail(array $sessionTrail): array
+    {
+        $breadcrumbs = [];
+
+        foreach ($sessionTrail as $index => $item) {
+            $isLast = ($index === count($sessionTrail) - 1);
+
+            $breadcrumbs[] = [
+                'url' => $item['url'],
+                'label' => $this->getLabel($item['title']),
+                'active' => $isLast,
+            ];
+        }
+
+        return $this->cleanTrail($breadcrumbs);
     }
 
     /**
