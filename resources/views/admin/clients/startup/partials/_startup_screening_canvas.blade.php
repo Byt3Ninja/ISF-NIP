@@ -31,7 +31,6 @@
   <img src="/icons/not-started.svg" />
 </div>
 
-
 <div class="offcanvas offcanvas-end {{ $showCanvas ? 'show' : '' }}" tabindex="-1" id="rightModalCanvas"
   aria-labelledby="rightModalCanvasLabel">
   <div class="offcanvas-body">
@@ -400,6 +399,7 @@
       });
       $("#final_comments_summary").html( $("#final_comments").val() );
     });
+    
     document.addEventListener('DOMContentLoaded', function() {
       // Function to get Bootstrap badge class based on score
       function getBadgeClass(score) {
