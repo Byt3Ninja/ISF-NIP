@@ -370,20 +370,21 @@ class ClientCompanyController extends Controller
             ->orderBy('valuation_date', 'desc')
             ->pluck('valuation_date')
             ->toArray();
-
+           
         $valuationDate = request('valuation_date');
         if (!$valuationDate || !in_array($valuationDate, $availableValuationDates)) {
-            $valuationDate = date('Y-m-d');
+            $valuationDate = date('Y-m-01');
         }
 
         $periods = [];
         $valuationYear = (int) date('Y', strtotime($valuationDate));
         
         $financials = FinancialProjection::where('company_id', $company->id)
-            ->whereBetween('year', [$valuationYear - 1, $valuationYear + 2])
+            ->where('valuation_date', $valuationDate)
             ->orderBy('year')
             ->get()
             ->keyBy('year');
+            
        
         $map = function ($fp) {
             return [
@@ -1899,11 +1900,11 @@ class ClientCompanyController extends Controller
                         ->where('valuation_date', $valuation_date)
                        ->where('year', $yearDate->year)
                        ->first();
-    
-                       if($updateFinancial->currency != null && $updateFinancial->currency != $data['Currency']){
+
+                       if($updateFinancial != null && $updateFinancial->currency != $data['Currency']){
                         return redirect()->back()->with(['msg' => 'You can not add more than one currency per year', 'class' => 'danger']);
                        }
-                    dd($updateFinancial);
+                   
                     $addFinancial = $updateFinancial ?? new FinancialProjection();
 
                     // $addFinancial = new FinancialProjection();
