@@ -106,7 +106,7 @@
       </form>
       @if($client->company)
       <div class="ShowTableFounders mt-4">
-        @foreach ($fonders as $fonder)
+        @foreach ($founders as $fonder)
         <div class="card shadow-sm mb-4 position-relative">
           <span 
             class="position-absolute cursor-pointer top-0 end-0 p-4" 
