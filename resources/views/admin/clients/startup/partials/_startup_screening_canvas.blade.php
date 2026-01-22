@@ -31,7 +31,6 @@
   <img src="/icons/not-started.svg" />
 </div>
 
-
 <div class="offcanvas offcanvas-end {{ $showCanvas ? 'show' : '' }}" tabindex="-1" id="rightModalCanvas"
   aria-labelledby="rightModalCanvasLabel">
   <div class="offcanvas-body">
@@ -343,9 +342,9 @@
               <div class="row mb-6">
                 @foreach( $evaluationForm->categories as $key => $criteria )
                 <div class="col-6 col-md-3 pb-3">
-                  <div id="category-{{ $criteria->id }}" class="border border-dark rounded px-3 py-2">
-                    <h6 class="mb-0 text-secondary fw-semibold">{{ $criteria->name }}</h6>
-                    <div class="d-flex justify-content-between align-items-center mt-1">
+                  <div id="category-{{ $criteria->id }}" class="d-flex flex-column h-100 border border-dark rounded px-3 py-2">
+                    <h6 class="mb-1 text-secondary fw-semibold">{{ $criteria->name }}</h6>
+                    <div class="d-flex justify-content-between align-items-center mt-auto">
                       <span class="fs-5 fw-bold mb-0 text-dark percentage">
                         {{ number_format( ($criteria->subCriteria->sum(function($subCriteria) { return $subCriteria->result->score; }) / ($criteria->subCriteria->count() * 10)) * 100, 2) }}
                       </span>
@@ -400,6 +399,7 @@
       });
       $("#final_comments_summary").html( $("#final_comments").val() );
     });
+    
     document.addEventListener('DOMContentLoaded', function() {
       // Function to get Bootstrap badge class based on score
       function getBadgeClass(score) {

@@ -30,7 +30,7 @@ $surveys = $surveys->sortBy(function($survey) {
             <th> {{ __('admin.User') }} </th>
             <th> {{ __('admin.Title') }} </th>
             {{-- <th> {{ __('admin.surveyType') }} </th> --}}
-            <th> {{ __('admin.Due_Date') }} </th>
+            {{-- <th> {{ __('admin.Due_Date') }} </th> --}}
             {{-- <th> {{ __('admin.Progress') }} </th> --}}
             <th> {{ __('admin.Status') }} </th>
             <th> {{ __('admin.Priority') }} </th>
@@ -105,7 +105,7 @@ $surveys = $surveys->sortBy(function($survey) {
                   <span class="badge bg-label-dark">{{ __('admin.Check-in') }}</span>
                 @endif
               </td> --}}
-              <td> 
+              {{-- <td> 
                 @php
                   $now = strtotime(date('Y-m-d H:i'));
                   $due = strtotime($survey->due_date);
@@ -123,7 +123,7 @@ $surveys = $surveys->sortBy(function($survey) {
                     <span class="badge bg-label-danger mt-1">{{ __('admin.overdue') }}</span>
                   @endif
                 </div>
-              </td>
+              </td> --}}
               {{-- <td>
                 @php
                   $progress = $survey->total_questions > 0 
@@ -289,22 +289,22 @@ $surveys = $surveys->sortBy(function($survey) {
           200
         );
     
-        // Survey Type Filter
-        addDropdownFilter(
-          3,
-          'surveyTypeFilter',
-          '{{ __("admin.All_Types") }}'
-        );
+        // // Survey Type Filter
+        // addDropdownFilter(
+        //   3,
+        //   'surveyTypeFilter',
+        //   '{{ __("admin.All_Types") }}'
+        // );
     
         // Status Filter
         addDropdownFilter(
-          6,
+          3,
           'statusFilter',
           '{{ __("cycles.All Status") }}'
         );
     
         // Priority (Mandatory/Optional) Filter
-        api.columns(7).every(function () {
+        api.columns(4).every(function () {
           const column = this;
     
           const select = $(`

@@ -171,9 +171,9 @@
                         </span>
                       @endif
                       @php
-                        $Sustainables = json_decode($company->Sustainable_development);
+                        $sustainable_array = json_decode($company->Sustainable_development ?? '[]');
                       @endphp
-                      @if (!empty($Sustainables) && count($Sustainables) > 0)
+                      @if (!empty($sustainable_array) && count($sustainable_array) > 0)
                         <a class="badge bg-label-secondary" href="#" data-bs-toggle="modal"
                           data-bs-target="#sustainabilityModal{{ $company->id }}"><i
                             class="ti ti-target-arrow text-primary ti-xs"></i></a>
@@ -188,7 +188,7 @@
                                   <h4 class="mb-3 fw-bold">
                                     {{ $l == 'en' ? 'Sustainability Goals' : 'اهداف الاستدامة' }}</h4>
                                   <div class="row justify-content-center">
-                                    @foreach ($Sustainables as $Sustainable)
+                                    @foreach ($sustainable_array as $Sustainable)
                                       @php
                                         $icon = $SustainableIcons->where('title', $Sustainable)->first();
                                       @endphp
