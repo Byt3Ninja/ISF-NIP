@@ -3150,4 +3150,5 @@ return [
 	'select_at_least_one_org' => 'Select at least one organization',
 	'UnauthorizedOrg' => 'You are not authorized to access/select this organization',
 	'Accept_Invation' => 'Accept Invation',
+	'please_correct_stage_or_category_or_subcategory_in_your_company' => 'Please correct stage or category or subcategory in your company',
 ];
