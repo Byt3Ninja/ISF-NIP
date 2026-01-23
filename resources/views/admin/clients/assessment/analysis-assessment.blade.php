@@ -113,9 +113,12 @@
                 </div>
                 <div class="w-100 d-flex flex-grow-1 justify-content-start justify-content-md-end align-items-center">
                   @if (!$assessment_user)
-                    <a href="{{ route('assessments.assign') }}" class="btn btn-sm btn-primary">
+                  <form action="{{ route('assessments.assign') }}" method="post">
+                    @csrf
+                    <button type="submit" class="btn btn-sm btn-primary">
                       {{ __('admin.Make_a_new_assessment') }}
-                    </a>
+                    </button>
+                  </form>
                   @endif
 
                   @if ($assessment && $assessment->end_date)

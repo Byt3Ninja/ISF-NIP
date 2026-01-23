@@ -85,7 +85,7 @@ class AssessmentController extends Controller
                 $companyid = $user->company_id;
                 $company = Company::find($companyid);
                 
-                $title = $company->{'name_'. $l } ." - ". now()->format('Y-m-d H:i:s');
+                $title = $company?->{'name_'. $l } ." - ". now()->format('Y-m-d H:i:s');
                
                 $assessment = Assessment::create([
                     'user_id' => $userid,
@@ -98,7 +98,7 @@ class AssessmentController extends Controller
                 
                 $questions = QuestionsBank::where('group', 'assessment')->get();
 
-                if( $company->stage == null )
+                if( $company?->stage == null )
                 {
                     $assessment = Assessment::find($assessmentId);
                     $assessment->delete();
@@ -108,7 +108,9 @@ class AssessmentController extends Controller
                 foreach( $questions as $question )
                 {
                     $weight = Weight::where('stage_id', $company->stage)->where('category_id', $question->ascategory_id)->where('subcategory_id', $question->subcategory_id)->first();
-                   
+                    if( $weight == null ){
+                        return redirect()->back()->with(['class'=>'danger', 'message'=>__('please_correct_stage_or_category_or_subcategory_in_your_company')]);
+                    }
                     UserScore::create([
                         'user_id' => $userid,
                         'category_id' => $question->ascategory_id,
@@ -330,6 +332,7 @@ class AssessmentController extends Controller
 
             // Prepare user scores
             foreach ($questions as $question) {
+                
                 $weight = Weight::where('stage_id', $company->stage)
                     ->where('category_id', $question->ascategory_id)
                     ->where('subcategory_id', $question->subcategory_id)
@@ -358,8 +361,9 @@ class AssessmentController extends Controller
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
-            }
-
+               
+                }
+                
             // Bulk insert user scores for better performance
             UserScore::insert($userScores);
             DB::commit();

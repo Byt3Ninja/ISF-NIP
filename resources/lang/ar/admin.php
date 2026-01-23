@@ -3205,4 +3205,6 @@ return [
 	'select_at_least_one_org' => 'يرجى اختيار مؤسسة واحدة على الأقل',
 	'UnauthorizedOrg' => 'غيرمصرح لك الوصول/اختيار هذه المؤسسة',
 	'Accept_Invation' => 'أقبل الدعوة',
+	'NotWeight' => 'لا يوجد وزن',
+	'please_correct_stage_or_category_or_subcategory_in_your_company' => 'يرجى تصحيح المرحلة او الفئة او الفئة الفرعية في شركتك',
 ];
