@@ -117,7 +117,7 @@
                   </div>
                   @endif
                   <div class="d-flex justify-content-end">
-                    <button type="button" class="btn btn-primary" onclick="document.getElementById('pills-form-data-tab').click()">
+                    <button type="button" class="btn btn-primary" id="continue-btn">
                       {{ __('admin.Continue') }} <i class="ti ti-arrow-right ms-2"></i>
                     </button>
                   </div>
@@ -303,7 +303,8 @@
                                 <i class="ti ti-arrow-{{ $l == 'en' ? 'left' : 'right' }} ti-xs me-sm-2 me-0"></i>
                                 <span class="align-middle d-sm-inline-block d-none">{{ __('admin.Previous') }}</span>
                               </button>
-                              <button type="button" class="btn btn-primary btn-next" {{ $loop->last ? 'disabled' : '' }}>
+
+                              <button type="button" class="btn btn-primary next-btn">
                                 <span class="align-middle d-sm-inline-block d-none me-sm-2">{{ __('admin.Next') }}</span>
                                 <i class="ti ti-arrow-right ti-xs"></i>
                               </button>
@@ -336,6 +337,11 @@
                   rows="16"
                   placeholder="{{ __('admin.Enter your comments here...')}}"
                   >{{ $evaluationForm->final_comment ?? '' }}</textarea>
+              </div>
+              <div class="d-flex justify-content-end mt-12">
+                <button type="button" class="btn btn-primary" onclick="document.getElementById('pills-view-evaluation-tab').click()">
+                  {{ __('admin.Continue') }} <i class="ti ti-arrow-right ms-2"></i>
+                </button>
               </div>
             </div>
             <div class="tab-pane fade" id="pills-view-evaluation" role="tabpanel" aria-labelledby="pills-view-evaluation-tab">
@@ -387,6 +393,7 @@
 @push('scripts')
   <script>
     var categories = @json( $evaluationForm->categories );
+
     $(document).on('click', '#pills-view-evaluation-tab', function() {
       $.each(categories, function(index, category) {
         var totalScore = 0;
@@ -435,5 +442,61 @@
         }
       });
     });
+
+   $('#continue-btn').on('click', function () {
+      $('.nav-pills .active')
+        .parent()
+        .next('li')
+        .find('button[data-bs-toggle="pill"]')
+        .trigger('click');
+    });
+
+    $('.next-btn').on('click', function () {
+      const $nextTab = $('.nav-tabs .active')
+        .parent()
+        .next('li')
+        .find('button[data-bs-toggle="tab"]');
+
+      // If this is the last tab, stop here
+      if (!$nextTab.length) {
+        console.log('Already on last tab');
+        moveToNextStep(); // Move to next stepper content
+        return;
+      }
+
+      $nextTab.trigger('click');
+    });
+
+    function moveToNextStep() {
+      const $currentStep = $('.bs-stepper-header .step.active');
+      const $nextStep = $currentStep.nextAll('.step').first();
+
+      if (!$nextStep.length) {
+        console.log('Already on last step');
+
+        // Show final comments tab
+        const $finalTab = $('#pills-final-comments-tab');
+        if ($finalTab.length) {
+          $finalTab.tab('show'); // Works reliably with Bootstrap tabs
+        }
+
+        return;
+      }
+
+      // Move stepper
+      $nextStep.find('.step-trigger').trigger('click');
+
+      // Get the related content pane
+      const target = $nextStep.data('target'); // e.g. "#_2"
+
+      setTimeout(() => {
+        const $content = $(target);
+        const $firstTab = $content.find('.nav-tabs .nav-link').first();
+
+        if ($firstTab.length) {
+          new bootstrap.Tab($firstTab[0]).show();
+        }
+      }, 0);
+    }
   </script>
 @endpush
