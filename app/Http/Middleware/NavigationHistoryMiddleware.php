@@ -71,10 +71,15 @@ class NavigationHistoryMiddleware
         $routeName = Route::currentRouteName();
         $title = $this->getTitleForRoute($routeName, $request);
 
+        // Skip if title should be ignored
+        if ($title === null) {
+            return;
+        }
+
         // Dashboard URL
         try {
             $dashboardUrl = route('core.dashboard_view');
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             $dashboardUrl = url('/dashboard');
         }
 
@@ -179,14 +184,34 @@ class NavigationHistoryMiddleware
 
     /**
      * Get title key for route from navigation config
+     * Returns null if title should be ignored
      */
-    private function getTitleForRoute(?string $routeName, Request $request): string
+    private function getTitleForRoute(?string $routeName, Request $request): ?string
     {
+        // List of exact titles to ignore in breadcrumb (all lowercase)
+        $ignoredTitles = [
+            'logo', 'login', 'logout', 'auth', 'register',
+            'password', 'reset', 'verify', 'sanctum',
+            'api', 'csrf', 'token', 'page',
+        ];
+
+        // List of words - if title contains any of these, ignore it (all lowercase)
+        $ignoredContains = [
+            'logo organization', 'logo',
+        ];
+
         if (!$routeName) {
             // Fallback: use last URL segment
             $segments = $request->segments();
             $lastSegment = end($segments) ?: 'page';
-            return $this->humanize($lastSegment);
+            $title = $this->humanize($lastSegment);
+
+            // Check if should be ignored
+            if ($this->shouldIgnoreTitle($title, $ignoredTitles, $ignoredContains)) {
+                return null;
+            }
+
+            return $title;
         }
 
         // Try to find title in navigation config
@@ -195,6 +220,10 @@ class NavigationHistoryMiddleware
             $navItems = $navConfig();
             $title = $this->findTitleInNav($navItems, $routeName);
             if ($title) {
+                // Check if should be ignored
+                if ($this->shouldIgnoreTitle($title, $ignoredTitles, $ignoredContains)) {
+                    return null;
+                }
                 return $title;
             }
         }
@@ -202,10 +231,46 @@ class NavigationHistoryMiddleware
         // Fallback: extract from route name (e.g., 'users.edit' -> 'edit_user')
         $parts = explode('.', $routeName);
         if (count($parts) >= 2) {
-            return $parts[1] . '_' . rtrim($parts[0], 's');
+            $title = $parts[1] . '_' . rtrim($parts[0], 's');
+
+            // Check if should be ignored
+            if ($this->shouldIgnoreTitle($title, $ignoredTitles, $ignoredContains)) {
+                return null;
+            }
+
+            return $title;
         }
 
-        return $this->humanize($routeName);
+        $title = $this->humanize($routeName);
+
+        // Check if should be ignored
+        if ($this->shouldIgnoreTitle($title, $ignoredTitles, $ignoredContains)) {
+            return null;
+        }
+
+        return $title;
+    }
+
+    /**
+     * Check if title should be ignored
+     */
+    private function shouldIgnoreTitle(string $title, array $ignoredTitles, array $ignoredContains): bool
+    {
+        $lowerTitle = strtolower(trim($title));
+
+        // Exact match check
+        if (in_array($lowerTitle, $ignoredTitles)) {
+            return true;
+        }
+
+        // Contains check (compare lowercase to lowercase)
+        foreach ($ignoredContains as $word) {
+            if (str_contains($lowerTitle, strtolower($word))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -251,6 +316,13 @@ class NavigationHistoryMiddleware
             'logout',
             '_debugbar/*',
             'livewire/*',
+            // Static files and images
+            '*/logo/*',
+            'organizations/logo/*',
+            'images/*',
+            'storage/*',
+            'uploads/*',
+            'assets/*',
         ];
 
         foreach ($ignoredPaths as $path) {
@@ -261,6 +333,13 @@ class NavigationHistoryMiddleware
 
         // Skip AJAX requests
         if ($request->ajax() || $request->expectsJson()) {
+            return true;
+        }
+
+        // Skip image/file requests
+        $extension = pathinfo($request->path(), PATHINFO_EXTENSION);
+        $ignoredExtensions = ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'ico', 'css', 'js', 'pdf', 'doc', 'docx', 'xls', 'xlsx'];
+        if (in_array(strtolower($extension), $ignoredExtensions)) {
             return true;
         }
 
