@@ -522,9 +522,9 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
   </script>
 
   <script>
-    $('#save-screening-btn').on('click', function() {
-      $('#warningModal').modal('show');
-    });
+    // $('#save-screening-btn').on('click', function() {
+    //   $('#warningModal').modal('show');
+    // });
   </script>
 
   @if( $_user->hasRole('Judger') && !is_null( $evaluationForm ) && !empty( $evaluationForm ) && $evaluationForm->isPublished == false )
@@ -591,6 +591,8 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
         if (type === 'publish') {
           let missingScores = false;
           const scoreSelects = document.querySelectorAll('.score-select');
+          const finalComments = document.getElementById('final_comments');
+
           scoreSelects.forEach(select => {
             if (!select.value || select.value === '') {
               missingScores = true;
@@ -601,9 +603,20 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
           });
 
           if (missingScores) {
-            alert('{{ __("admin.please_select_score") }}');
-            // Navigate to the criteria tab if not already there
+            releaseWarningAlert({
+              title: '{{ __("admin.required_evaluation_scores_message") }}',
+            });
+            // Navigate to the criteria tab 
             document.getElementById('pills-screening-criteria-tab').click();
+            return;
+          }
+
+          if (finalComments && finalComments.value.trim() === '') {
+            releaseWarningAlert({
+              title: '{{ __("admin.required_evaluation_comment_message") }}',
+            });
+            // Navigate to the final comments tab
+            document.getElementById('pills-final-comments-tab').click();
             return;
           }
         }
@@ -684,280 +697,280 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
     </script>
 
     <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        // Handle dropdown selection for sub-criteria
-        const subcriteriaSelects = document.querySelectorAll('.subcriteria-select');
-        subcriteriaSelects.forEach(select => {
-          select.addEventListener('change', function() {
-            const target = this.value;
-            const tabElement = document.querySelector(target);
-            const tabLink = document.querySelector(`[data-bs-target="${target}"]`);
+      // document.addEventListener('DOMContentLoaded', function() {
+      //   // Handle dropdown selection for sub-criteria
+      //   const subcriteriaSelects = document.querySelectorAll('.subcriteria-select');
+      //   subcriteriaSelects.forEach(select => {
+      //     select.addEventListener('change', function() {
+      //       const target = this.value;
+      //       const tabElement = document.querySelector(target);
+      //       const tabLink = document.querySelector(`[data-bs-target="${target}"]`);
             
-            if (tabElement && tabLink) {
-              // Deactivate all tabs
-              const allTabs = document.querySelectorAll(`.subcriteria-tabs .nav-link[data-bs-target^="#tab${select.dataset.criteriaKey}_"]`);
-              allTabs.forEach(tab => {
-                tab.classList.remove('active');
-                tab.setAttribute('aria-selected', 'false');
-              });
+      //       if (tabElement && tabLink) {
+      //         // Deactivate all tabs
+      //         const allTabs = document.querySelectorAll(`.subcriteria-tabs .nav-link[data-bs-target^="#tab${select.dataset.criteriaKey}_"]`);
+      //         allTabs.forEach(tab => {
+      //           tab.classList.remove('active');
+      //           tab.setAttribute('aria-selected', 'false');
+      //         });
               
-              // Deactivate all panes
-              const allPanes = document.querySelectorAll(`.tab-pane[id^="tab${select.dataset.criteriaKey}_"]`);
-              allPanes.forEach(pane => {
-                pane.classList.remove('show', 'active');
-              });
+      //         // Deactivate all panes
+      //         const allPanes = document.querySelectorAll(`.tab-pane[id^="tab${select.dataset.criteriaKey}_"]`);
+      //         allPanes.forEach(pane => {
+      //           pane.classList.remove('show', 'active');
+      //         });
               
-              // Activate the selected tab
-              tabLink.classList.add('active');
-              tabLink.setAttribute('aria-selected', 'true');
+      //         // Activate the selected tab
+      //         tabLink.classList.add('active');
+      //         tabLink.setAttribute('aria-selected', 'true');
               
-              // Activate the selected pane
-              tabElement.classList.add('show', 'active');
-            }
-          });
-        });
+      //         // Activate the selected pane
+      //         tabElement.classList.add('show', 'active');
+      //       }
+      //     });
+      //   });
         
-        // Auto-switch to dropdown mode when there are more than 4 sub-criteria
-        document.querySelectorAll('.subcriteria-container').forEach(container => {
-          const tabs = container.querySelectorAll('.nav-item');
-          if (tabs.length > 4) {
-            // Add class for many criteria to apply specific styles
-            container.classList.add('many-criteria');
+      //   // Auto-switch to dropdown mode when there are more than 4 sub-criteria
+      //   document.querySelectorAll('.subcriteria-container').forEach(container => {
+      //     const tabs = container.querySelectorAll('.nav-item');
+      //     if (tabs.length > 4) {
+      //       // Add class for many criteria to apply specific styles
+      //       container.classList.add('many-criteria');
             
-            const dropdownContainer = container.querySelector('.subcriteria-dropdown');
-            const tabsContainer = container.querySelector('.subcriteria-tabs');
+      //       const dropdownContainer = container.querySelector('.subcriteria-dropdown');
+      //       const tabsContainer = container.querySelector('.subcriteria-tabs');
             
-            // On mobile, show the dropdown (handled by CSS)
+      //       // On mobile, show the dropdown (handled by CSS)
             
-            // On desktop, make tabs scrollable
-            if (window.innerWidth > 992) {
-              // Add visual indicator if there are more tabs to scroll
-              const tabsNav = container.querySelector('.nav-tabs');
-              if (tabsNav) {
-                tabsNav.addEventListener('scroll', function() {
-                  checkScrollIndicators(tabsNav);
-                });
+      //       // On desktop, make tabs scrollable
+      //       if (window.innerWidth > 992) {
+      //         // Add visual indicator if there are more tabs to scroll
+      //         const tabsNav = container.querySelector('.nav-tabs');
+      //         if (tabsNav) {
+      //           tabsNav.addEventListener('scroll', function() {
+      //             checkScrollIndicators(tabsNav);
+      //           });
                 
-                // Initial check
-                setTimeout(() => checkScrollIndicators(tabsNav), 100);
-              }
-            }
-          }
-        });
+      //           // Initial check
+      //           setTimeout(() => checkScrollIndicators(tabsNav), 100);
+      //         }
+      //       }
+      //     }
+      //   });
         
-        // Helper function to check if scroll indicators are needed
-        function checkScrollIndicators(element) {
-          const isScrollable = element.scrollWidth > element.clientWidth;
-          const isScrolledToEnd = element.scrollLeft + element.clientWidth >= element.scrollWidth - 10;
-          const isScrolledToStart = element.scrollLeft <= 10;
+      //   // Helper function to check if scroll indicators are needed
+      //   function checkScrollIndicators(element) {
+      //     const isScrollable = element.scrollWidth > element.clientWidth;
+      //     const isScrolledToEnd = element.scrollLeft + element.clientWidth >= element.scrollWidth - 10;
+      //     const isScrolledToStart = element.scrollLeft <= 10;
           
-          element.classList.toggle('has-more-right', isScrollable && !isScrolledToEnd);
-          element.classList.toggle('has-more-left', isScrollable && !isScrolledToStart);
-        }
+      //     element.classList.toggle('has-more-right', isScrollable && !isScrolledToEnd);
+      //     element.classList.toggle('has-more-left', isScrollable && !isScrolledToStart);
+      //   }
         
-        // Sync tab changes with dropdown
-        document.querySelectorAll('.subcriteria-tabs .nav-link').forEach(tab => {
-          tab.addEventListener('shown.bs.tab', function(event) {
-            const targetId = event.target.dataset.bsTarget;
-            const criteriaKey = targetId.split('_')[0].replace('#tab', '');
-            const dropdown = document.getElementById('subcriteria-select-' + criteriaKey);
+      //   // Sync tab changes with dropdown
+      //   document.querySelectorAll('.subcriteria-tabs .nav-link').forEach(tab => {
+      //     tab.addEventListener('shown.bs.tab', function(event) {
+      //       const targetId = event.target.dataset.bsTarget;
+      //       const criteriaKey = targetId.split('_')[0].replace('#tab', '');
+      //       const dropdown = document.getElementById('subcriteria-select-' + criteriaKey);
             
-            if (dropdown) {
-              dropdown.value = targetId;
-            }
-          });
-        });
+      //       if (dropdown) {
+      //         dropdown.value = targetId;
+      //       }
+      //     });
+      //   });
 
-        // Initialize real-time evaluation tab update
-        initializeEvaluationUpdater();
-      });
+      //   // Initialize real-time evaluation tab update
+      //   initializeEvaluationUpdater();
+      // });
 
       // Initialize real-time evaluation update functionality
-      function initializeEvaluationUpdater() {
-        // Get all form elements that need to be monitored
-        const scoreSelects = document.querySelectorAll('.score-select');
-        const commentTextareas = document.querySelectorAll('textarea[id^="comment_"]');
-        const finalCommentsTextarea = document.getElementById('final_comments');
+      // function initializeEvaluationUpdater() {
+      //   // Get all form elements that need to be monitored
+      //   const scoreSelects = document.querySelectorAll('.score-select');
+      //   const commentTextareas = document.querySelectorAll('textarea[id^="comment_"]');
+      //   const finalCommentsTextarea = document.getElementById('final_comments');
 
-        // Add event listeners for real-time updates
-        scoreSelects.forEach(select => {
-          select.addEventListener('change', updateEvaluationTab);
-        });
+      //   // Add event listeners for real-time updates
+      //   scoreSelects.forEach(select => {
+      //     select.addEventListener('change', updateEvaluationTab);
+      //   });
 
-        commentTextareas.forEach(textarea => {
-          textarea.addEventListener('input', debounce(updateEvaluationTab, 500));
-          textarea.addEventListener('blur', updateEvaluationTab);
-        });
+      //   commentTextareas.forEach(textarea => {
+      //     textarea.addEventListener('input', debounce(updateEvaluationTab, 500));
+      //     textarea.addEventListener('blur', updateEvaluationTab);
+      //   });
 
-        if (finalCommentsTextarea) {
-          finalCommentsTextarea.addEventListener('input', debounce(updateEvaluationTab, 500));
-          finalCommentsTextarea.addEventListener('blur', updateEvaluationTab);
-        }
+      //   if (finalCommentsTextarea) {
+      //     finalCommentsTextarea.addEventListener('input', debounce(updateEvaluationTab, 500));
+      //     finalCommentsTextarea.addEventListener('blur', updateEvaluationTab);
+      //   }
 
-        // Initial update of evaluation tab
-        updateEvaluationTab();
-      }
+      //   // Initial update of evaluation tab
+      //   updateEvaluationTab();
+      // }
 
       // Debounce function to prevent excessive updates while typing
-      function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-          const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-          };
-          clearTimeout(timeout);
-          timeout = setTimeout(later, wait);
-        };
-      }
+      // function debounce(func, wait) {
+      //   let timeout;
+      //   return function executedFunction(...args) {
+      //     const later = () => {
+      //       clearTimeout(timeout);
+      //       func(...args);
+      //     };
+      //     clearTimeout(timeout);
+      //     timeout = setTimeout(later, wait);
+      //   };
+      // }
 
       // Main function to update the evaluation tab
-      function updateEvaluationTab() {
-        updateCategoryPercentages();
-        updateEvaluationComments();
-        updateFinalCommentsDisplay();
-      }
+      // function updateEvaluationTab() {
+      //   updateCategoryPercentages();
+      //   updateEvaluationComments();
+      //   updateFinalCommentsDisplay();
+      // }
 
       // Update category percentage scores in real-time
-      function updateCategoryPercentages() {
-        // Get all categories from the evaluation form
-        const evaluationCategories = document.querySelectorAll('#pills-view-evaluation .row.mb-6 .col-3');
+      // function updateCategoryPercentages() {
+      //   // Get all categories from the evaluation form
+      //   const evaluationCategories = document.querySelectorAll('#pills-view-evaluation .row.mb-6 .col-3');
         
-        evaluationCategories.forEach((categoryElement, categoryIndex) => {
-          const categoryTitle = categoryElement.querySelector('h6');
-          if (!categoryTitle) return;
+      //   evaluationCategories.forEach((categoryElement, categoryIndex) => {
+      //     const categoryTitle = categoryElement.querySelector('h6');
+      //     if (!categoryTitle) return;
           
-          const categoryName = categoryTitle.textContent.trim();
+      //     const categoryName = categoryTitle.textContent.trim();
           
-          // Find all score inputs for this category
-          let totalScore = 0;
-          let scoreCount = 0;
+      //     // Find all score inputs for this category
+      //     let totalScore = 0;
+      //     let scoreCount = 0;
           
-          // Get all criteria containers
-          const criteriaContainers = document.querySelectorAll('.content');
+      //     // Get all criteria containers
+      //     const criteriaContainers = document.querySelectorAll('.content');
           
-          criteriaContainers.forEach(container => {
-            const containerCategoryName = container.querySelector('.content-header h6');
-            if (containerCategoryName && containerCategoryName.textContent.trim() === categoryName) {
-              // Find all score selects within this criteria container
-              const scoreSelects = container.querySelectorAll('.score-select');
-              scoreSelects.forEach(select => {
-                if (select.value && select.value !== '') {
-                  totalScore += parseInt(select.value);
-                  scoreCount++;
-                }
-              });
-            }
-          });
+      //     criteriaContainers.forEach(container => {
+      //       const containerCategoryName = container.querySelector('.content-header h6');
+      //       if (containerCategoryName && containerCategoryName.textContent.trim() === categoryName) {
+      //         // Find all score selects within this criteria container
+      //         const scoreSelects = container.querySelectorAll('.score-select');
+      //         scoreSelects.forEach(select => {
+      //           if (select.value && select.value !== '') {
+      //             totalScore += parseInt(select.value);
+      //             scoreCount++;
+      //           }
+      //         });
+      //       }
+      //     });
           
-          // Calculate percentage
-          const percentage = scoreCount > 0 ? ((totalScore / (scoreCount * 5)) * 100) : 0;
+      //     // Calculate percentage
+      //     const percentage = scoreCount > 0 ? ((totalScore / (scoreCount * 5)) * 100) : 0;
           
-          // Update the display
-          const percentageDisplay = categoryElement.querySelector('.fs-5.fw-bold.text-dark');
-          if (percentageDisplay) {
-            percentageDisplay.textContent = percentage.toFixed(2);
-          }
-        });
-      }
+      //     // Update the display
+      //     const percentageDisplay = categoryElement.querySelector('.fs-5.fw-bold.text-dark');
+      //     if (percentageDisplay) {
+      //       percentageDisplay.textContent = percentage.toFixed(2);
+      //     }
+      //   });
+      // }
 
-      // Update evaluation comments section in real-time
-      function updateEvaluationComments() {
-        const commentSections = document.querySelectorAll('#pills-view-evaluation .col-12.mb-5.border-bottom');
+      // // Update evaluation comments section in real-time
+      // function updateEvaluationComments() {
+      //   const commentSections = document.querySelectorAll('#pills-view-evaluation .col-12.mb-5.border-bottom');
         
-        commentSections.forEach(section => {
-          const categoryHeader = section.querySelector('h5');
-          if (!categoryHeader) return;
+      //   commentSections.forEach(section => {
+      //     const categoryHeader = section.querySelector('h5');
+      //     if (!categoryHeader) return;
           
-          const categoryName = categoryHeader.textContent.replace(' {{ __("admin.Comments") }}', '').trim();
-          const commentItems = section.querySelectorAll('.d-flex.flex-column.mb-4');
+      //     const categoryName = categoryHeader.textContent.replace(' {{ __("admin.Comments") }}', '').trim();
+      //     const commentItems = section.querySelectorAll('.d-flex.flex-column.mb-4');
           
-          commentItems.forEach((item, index) => {
-            const subcriteriaNameElement = item.querySelector('.fs-5.mb-0.text-dark');
-            if (!subcriteriaNameElement) return;
+      //     commentItems.forEach((item, index) => {
+      //       const subcriteriaNameElement = item.querySelector('.fs-5.mb-0.text-dark');
+      //       if (!subcriteriaNameElement) return;
             
-            const subcriteriaName = subcriteriaNameElement.textContent.trim();
+      //       const subcriteriaName = subcriteriaNameElement.textContent.trim();
             
-            // Find the corresponding comment textarea
-            let matchingComment = '{{ __("admin.No comment provided") }}';
+      //       // Find the corresponding comment textarea
+      //       let matchingComment = '{{ __("admin.No comment provided") }}';
             
-            // Look through all criteria containers
-            const criteriaContainers = document.querySelectorAll('.content');
+      //       // Look through all criteria containers
+      //       const criteriaContainers = document.querySelectorAll('.content');
             
-            criteriaContainers.forEach(container => {
-              const containerCategoryName = container.querySelector('.content-header h6');
-              if (containerCategoryName && containerCategoryName.textContent.trim() === categoryName) {
-                // Find the subcriteria tabs
-                const subcriteriaButtons = container.querySelectorAll('.nav-link');
-                subcriteriaButtons.forEach(button => {
-                  const buttonText = button.textContent.trim();
-                  if (buttonText === subcriteriaName) {
-                    // Get the target tab ID
-                    const targetId = button.getAttribute('data-bs-target');
-                    if (targetId) {
-                      const targetTab = document.querySelector(targetId);
-                      if (targetTab) {
-                        const textarea = targetTab.querySelector('textarea[id^="comment_"]');
-                        if (textarea && textarea.value.trim()) {
-                          matchingComment = textarea.value.trim();
-                        }
-                      }
-                    }
-                  }
-                });
-              }
-            });
+      //       criteriaContainers.forEach(container => {
+      //         const containerCategoryName = container.querySelector('.content-header h6');
+      //         if (containerCategoryName && containerCategoryName.textContent.trim() === categoryName) {
+      //           // Find the subcriteria tabs
+      //           const subcriteriaButtons = container.querySelectorAll('.nav-link');
+      //           subcriteriaButtons.forEach(button => {
+      //             const buttonText = button.textContent.trim();
+      //             if (buttonText === subcriteriaName) {
+      //               // Get the target tab ID
+      //               const targetId = button.getAttribute('data-bs-target');
+      //               if (targetId) {
+      //                 const targetTab = document.querySelector(targetId);
+      //                 if (targetTab) {
+      //                   const textarea = targetTab.querySelector('textarea[id^="comment_"]');
+      //                   if (textarea && textarea.value.trim()) {
+      //                     matchingComment = textarea.value.trim();
+      //                   }
+      //                 }
+      //               }
+      //             }
+      //           });
+      //         }
+      //       });
             
-            // Update the comment display
-            const commentDisplay = item.querySelector('.text-light.line-clamp-3');
-            if (commentDisplay) {
-              commentDisplay.textContent = matchingComment;
-            }
-          });
-        });
-      }
+      //       // Update the comment display
+      //       const commentDisplay = item.querySelector('.text-light.line-clamp-3');
+      //       if (commentDisplay) {
+      //         commentDisplay.textContent = matchingComment;
+      //       }
+      //     });
+      //   });
+      // }
 
       // Update final comments display in real-time
-      function updateFinalCommentsDisplay() {
-        return;
-        const finalCommentsTextarea = document.getElementById('final_comments');
-        const finalCommentsDisplay = document.querySelector('#pills-view-evaluation .col-12:last-child .text-light.line-clamp-3');
+      // function updateFinalCommentsDisplay() {
+      //   return;
+      //   const finalCommentsTextarea = document.getElementById('final_comments');
+      //   const finalCommentsDisplay = document.querySelector('#pills-view-evaluation .col-12:last-child .text-light.line-clamp-3');
         
-        if (finalCommentsTextarea && finalCommentsDisplay) {
-          const finalCommentText = finalCommentsTextarea.value.trim() || '{{ __("admin.No final comments provided") }}';
-          finalCommentsDisplay.textContent = finalCommentText;
-        }
+      //   if (finalCommentsTextarea && finalCommentsDisplay) {
+      //     const finalCommentText = finalCommentsTextarea.value.trim() || '{{ __("admin.No final comments provided") }}';
+      //     finalCommentsDisplay.textContent = finalCommentText;
+      //   }
         
-        // Alternative selector in case the first one doesn't work
-        if (finalCommentsTextarea && !finalCommentsDisplay) {
-          const alternativeDisplay = document.querySelector('#pills-view-evaluation h5:contains("{{ __("admin.Final Comments")}}") + small');
-          if (alternativeDisplay) {
-            const finalCommentText = finalCommentsTextarea.value.trim() || '{{ __("admin.No final comments provided") }}';
-            alternativeDisplay.textContent = finalCommentText;
-          }
-        }
+      //   // Alternative selector in case the first one doesn't work
+      //   if (finalCommentsTextarea && !finalCommentsDisplay) {
+      //     const alternativeDisplay = document.querySelector('#pills-view-evaluation h5:contains("{{ __("admin.Final Comments")}}") + small');
+      //     if (alternativeDisplay) {
+      //       const finalCommentText = finalCommentsTextarea.value.trim() || '{{ __("admin.No final comments provided") }}';
+      //       alternativeDisplay.textContent = finalCommentText;
+      //     }
+      //   }
         
-        // Most reliable approach - find by the heading text
-        if (finalCommentsTextarea) {
-          const headings = document.querySelectorAll('#pills-view-evaluation h5');
-          headings.forEach(heading => {
-            if (heading.textContent.includes('{{ __("admin.Final Comments") }}')) {
-              const commentDisplay = heading.nextElementSibling;
-              if (commentDisplay && commentDisplay.tagName === 'SMALL') {
-                const finalCommentText = finalCommentsTextarea.value.trim() || '{{ __("admin.No final comments provided") }}';
-                commentDisplay.textContent = finalCommentText;
-              }
-            }
-          });
-        }
-      }
+      //   // Most reliable approach - find by the heading text
+      //   if (finalCommentsTextarea) {
+      //     const headings = document.querySelectorAll('#pills-view-evaluation h5');
+      //     headings.forEach(heading => {
+      //       if (heading.textContent.includes('{{ __("admin.Final Comments") }}')) {
+      //         const commentDisplay = heading.nextElementSibling;
+      //         if (commentDisplay && commentDisplay.tagName === 'SMALL') {
+      //           const finalCommentText = finalCommentsTextarea.value.trim() || '{{ __("admin.No final comments provided") }}';
+      //           commentDisplay.textContent = finalCommentText;
+      //         }
+      //       }
+      //     });
+      //   }
+      // }
     </script>
 
     <script>
-      function saveScreening() {
-        // Go back
-        window.history.back();
-      }
+      // function saveScreening() {
+      //   // Go back
+      //   window.history.back();
+      // }
     </script>
 
     {{-- <script>
