@@ -69,6 +69,7 @@ class ServiceController extends Controller
 			->when($request->has('status') && $request->status !== 'all', function ($query) use ($request) {
 				$query->where('status', $request->status);
 			})
+			->orderBy('created_at', 'desc')
 			->paginate(9);
 			$Setting = Settings::where('id', 1)->first();
 			return view('admin/settings/services/index', compact('services', 'Setting'));

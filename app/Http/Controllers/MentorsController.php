@@ -1325,9 +1325,10 @@ class MentorsController extends Controller
 			$mentorship = $mentorshipRequests
 				->where('zoom_date', '<=', $survey->created_at)
 				->first();
+				 
 			return (object) [
 				'id' => $survey->id,
-				'title' => ucfirst($survey->survey_scope->scope) . ' Survey',
+				'title' => ucfirst($survey->title) . ' Survey',
 				'created_at' => $survey->created_at->format('Y-m-d H:i'),
 				'due_date' => $survey->created_at->copy()->addDays(7)->format('Y-m-d H:i'),
 				'status' => $completedQuestions === 0
