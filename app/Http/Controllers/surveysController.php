@@ -10,7 +10,9 @@ use App\QuestionsBank;
 use App\SurveyQuestions;
 use App\SurveyResponses;
 use App\OrgQuestionsBank;
+use App\MentorshipRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 
@@ -29,13 +31,103 @@ class surveysController extends Controller
 	public function index()
 	{
 		$user = auth()->user();
+		if($user->hasAnyRole('admin|subadmin|organizationmanager')){
 		$orgIds = $user->organizations_ids;
 		$surveys = Surveys::with('organization')
 			->when(!$user->hasRole('admin') && !empty($orgIds), function ($query) use ($orgIds) {
 				return $query->whereIn('organization_id', $orgIds);
 			})
 			->get();
-			
+		}
+			if($user->hasAnyRole('Mentor|Registered')){
+				$availableSurveys = SurveyResponses::where('user_id', $user->id)
+					->where('triggered_on', 'mentorship')
+					->with('survey_scope')
+					->orderBy('created_at', 'desc')
+					->get();
+						$surveyQuestionsCount = SurveyQuestions::whereIn(
+						'survey_id',
+						$availableSurveys->pluck('survey_id')
+					)
+					->select('survey_id', DB::raw('count(*) as total'))
+					->groupBy('survey_id')
+					->pluck('total', 'survey_id');
+
+					if($user->hasRole('Mentor')){
+					$mentorshipRequests = MentorshipRequest::where('mentor_id', $user->id)
+					->with('user.company')
+					->orderBy('zoom_date', 'desc')
+					->get();
+					}else{
+						$mentorshipRequests = MentorshipRequest::where('user_id', $user->id)
+					->with('user.company')
+					->orderBy('zoom_date', 'desc')
+					->get();
+					}
+
+						//dd($mentorshipRequests[0], $availableSurveys[0], $surveyQuestionsCount);
+					$surveys = $availableSurveys->map(function ($survey) use (
+					$mentorshipRequests,
+					$surveyQuestionsCount
+				) {
+					$responses = json_decode($survey->responses, true) ?? [];
+					$totalQuestions = $surveyQuestionsCount[$survey->survey_id] ?? 0;
+					$completedQuestions = count($responses);
+					$mentorship = $mentorshipRequests
+						->where('zoom_date', '<=', $survey->created_at)
+						->first();
+						
+					return (object) [
+						'id' => $survey->id,
+						'title' => $survey->survey->title . ' Survey',
+						'created_at' => $survey->created_at->format('Y-m-d H:i'),
+						// 'due_date' => $survey->created_at->copy()->addDays(7)->format('Y-m-d H:i'),
+						'status' => $completedQuestions === 0
+							? 'Pending'
+							: ($completedQuestions < $totalQuestions ? 'Pending' : 'Completed'),
+						'survey_type' => ucfirst($survey->triggered_on),
+						'total_questions' => $totalQuestions,
+						'completed_questions' => $completedQuestions,
+						'is_required' => (bool) $survey->survey->is_required,
+						'user' => $mentorship
+							? (object)[
+								'id' => $mentorship->user->id,
+								'name' => trim(
+									$mentorship->user->first_name_en . ' ' .
+									$mentorship->user->last_name_en
+								),
+								'image_url' => $mentorship->user->img_url
+									? asset($mentorship->user->img_url)
+									: '/icons/avatar.svg',
+
+								'company' => (object)[
+									'id' => optional($mentorship->user->company)->id,
+									'name' => optional($mentorship->user->company)->name_en,
+									'logo_url' => optional($mentorship->user->company)->logo
+										? asset($mentorship->user->company->logo)
+										: '/images/logo-placeholder.png',
+								],
+							]
+							: null,
+						'session' => $mentorship
+							? (object)[
+								'id' => $mentorship->id,
+								'zoom_date' => $mentorship->zoom_date->format('Y-m-d H:i'),
+							]
+							: null,
+					];
+				});
+						
+				$surveys = $surveys->sortBy(function($survey) {
+					$statusPriority = [
+						'Pending' => 1,
+						'Completed' => 2,
+					];
+					return $statusPriority[$survey->status] ?? 999;
+				});
+
+				$surveys = collect($surveys)->sortByDesc('created_at')->values();
+			}
 		return view('admin.surveys.index', compact('surveys'));
 	}
 
