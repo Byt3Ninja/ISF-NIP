@@ -64,17 +64,15 @@
           <!-- Organization Filter -->
           <div id="org-filter-container" class="form-group mb-4" style="display: {{ request('scopeFilter') == 'organization' ? 'block' : 'none' }}">
             <label for="organization-select" class="form-label">{{ __('admin.Organization') }}</label>
-            <select name="organization[]" id="organization-select" class="form-select select2" data-placeholder="{{ __('admin.Select organization') }}">
+            <select name="organization" id="organization-select" class="form-select select2" data-placeholder="{{ __('admin.Select organization') }}">
               @php
-              $expertises = App\Expertise::whereNull('parent_id')->with('children')->get();
-              $selectedExpertises = request('expertises', []);
+              $organization = auth()->user()->hasRole('admin') ? App\Organization::all() : auth()->user()->organizations()->with('organization')->get()->pluck('organization'); //App\Organization::all();
               @endphp
-              @foreach ($expertises as $expertise_group)
-                @foreach ($expertise_group->children as $expertise)
-                  <option value="{{ $expertise->id }}" {{ in_array($expertise->id, $selectedExpertises) ? 'selected' : '' }}>
-                    {{ $expertise->title }}
-                  </option>
-                @endforeach
+              <option value="">{{ __('admin.All_Organizations') }}</option>
+              @foreach ($organization as $org)
+                <option value="{{ $org->id }}" {{ $org->id == request('organization') ? 'selected' : '' }}>
+                  {{ $org->name }}
+                </option>
               @endforeach
             </select>
           </div>
