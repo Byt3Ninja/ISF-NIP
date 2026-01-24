@@ -30,18 +30,48 @@
           @php 
             $scopeOptions = [
               ['key' => 'public', 'label' => __('admin.Public'), 'hint' => __('admin.public_scope_hint')],
-              ['key' => 'organization', 'label' => __('admin.Organization'), 'hint' => __('admin.organization_scope_hint')],
+              ['key' => 'organization', 'label' => __('admin.organization_based'), 'hint' => __('admin.organization_scope_hint')],
             ];
           @endphp
 
-          <!-- Scope Filter -->
           <div class="form-group mb-4">
             <label for="scopeFilter" class="form-label">{{ __('admin.Scope') }}</label>
-            <select name="scopeFilter" id="scopeFilter" class="form-select select2" data-placeholder="{{ __('admin.select_scope') }}">
+            <select
+              name="scopeFilter"
+              id="scopeFilter"
+              class="form-select select2"
+              data-placeholder="{{ __('admin.select_scope') }}"
+            >
               <option value="all">{{ __('admin.allMentors') }}</option>
               @foreach ($scopeOptions as $option)
                 <option value="{{ $option['key'] }}" {{ request('scopeFilter') == $option['key'] ? 'selected' : '' }}>
-                  {{ $option['label'] }}  ( {{ $option['hint'] }} )
+                  {{ $option['label'] }}
+                </option>
+              @endforeach
+            </select>
+
+            @foreach ($scopeOptions as $option)
+              <div
+                id="option-{{ $option['key'] }}"
+                class="small text-muted mt-1"
+                style="display: {{ request('scopeFilter') == $option['key'] ? 'block' : 'none' }};"
+              >
+                {{ $option['hint'] }}
+              </div>
+            @endforeach
+          </div>
+
+          <!-- Organization Filter -->
+          <div id="org-filter-container" class="form-group mb-4" style="display: {{ request('scopeFilter') == 'organization' ? 'block' : 'none' }}">
+            <label for="organization-select" class="form-label">{{ __('admin.Organization') }}</label>
+            <select name="organization" id="organization-select" class="form-select select2" data-placeholder="{{ __('admin.Select organization') }}">
+              @php
+              $organization = auth()->user()->hasRole('admin') ? App\Organization::all() : auth()->user()->organizations()->with('organization')->get()->pluck('organization'); //App\Organization::all();
+              @endphp
+              <option value="">{{ __('admin.All_Organizations') }}</option>
+              @foreach ($organization as $org)
+                <option value="{{ $org->id }}" {{ $org->id == request('organization') ? 'selected' : '' }}>
+                  {{ $org->name }}
                 </option>
               @endforeach
             </select>
@@ -155,3 +185,22 @@
     </div>
   </div>
 </div>
+
+@push('scripts')
+<script>
+  $('#scopeFilter').on('change', function() {
+    $('[id^=option-]').hide();
+    if (this.value !== 'all') {
+      const hint = $('#option-' + this.value);
+      if (hint.length) hint.show();
+    }
+
+    if (this.value === 'organization') {
+      $('#org-filter-container').show();
+      $('#organization-select').trigger('change.select2');
+    } else {
+      $('#org-filter-container').hide();
+    }
+  });
+</script>
+@endpush

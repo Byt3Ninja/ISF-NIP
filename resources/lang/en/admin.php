@@ -3153,4 +3153,5 @@ return [
 	'please_correct_stage_or_category_or_subcategory_in_your_company' => 'Please correct stage or category or subcategory in your company',
 	'required_evaluation_scores_message' => 'Please complete all evaluation criteria before publishing',
 	'required_evaluation_comment_message' => 'Please provide a final comments before publishing',
+	'organization_based' => 'Organization Based',
 ];

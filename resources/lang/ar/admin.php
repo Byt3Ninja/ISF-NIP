@@ -3209,4 +3209,5 @@ return [
 	'please_correct_stage_or_category_or_subcategory_in_your_company' => 'يرجى تصحيح المرحلة او الفئة او الفئة الفرعية في شركتك',
 	'required_evaluation_scores_message' => 'يرجى إكمال جميع معايير التقييم قبل النشر',
 	'required_evaluation_comment_message' => 'يرجى تقديم تعليقا نهائي قبل النشر',
+	'organization_based' => 'مؤسسة'
 ];
