@@ -1328,12 +1328,12 @@ class MentorsController extends Controller
 				 
 			return (object) [
 				'id' => $survey->id,
-				'title' => ucfirst($survey->title) . ' Survey',
+				'title' => $survey->survey->title . ' Survey',
 				'created_at' => $survey->created_at->format('Y-m-d H:i'),
 				'due_date' => $survey->created_at->copy()->addDays(7)->format('Y-m-d H:i'),
 				'status' => $completedQuestions === 0
 					? 'Pending'
-					: ($completedQuestions < $totalQuestions ? 'In_Progress' : 'Completed'),
+					: ($completedQuestions < $totalQuestions ? 'Pending' : 'Completed'),
 				'survey_type' => ucfirst($survey->triggered_on),
 				'total_questions' => $totalQuestions,
 				'completed_questions' => $completedQuestions,
@@ -1369,13 +1369,14 @@ class MentorsController extends Controller
 				
 		$surveys = $surveys->sortBy(function($survey) {
 			$statusPriority = [
-				'In_Progress' => 1,
-				'Pending' => 2,
-				'Completed' => 3,
+				'Pending' => 1,
+				'Completed' => 2,
 			];
 			return $statusPriority[$survey->status] ?? 999;
 		});
-	 //dd($surveys[120]);
+
+		$surveys = collect($surveys)->sortByDesc('created_at')->values();
+
 		return view('mentor.surveys.index', compact('surveys'));
 	}
 	function surveyStatus($survey, $totalQuestions) {
