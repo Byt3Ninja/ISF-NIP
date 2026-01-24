@@ -3509,7 +3509,9 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
-                    "subadmin"
+                    "subadmin",
+                    "registered",
+                    "mentor"
                 ]
             },
             {
