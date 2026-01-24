@@ -14,6 +14,7 @@ $navigationIcons = [
   'mentorship_requests' => 'user-check',
   'my_courses' => 'certificate-2',
   'quizzes' => 'help-octagon',
+  'surveys' => 'device-imac-search',
   'tasks' => 'layout-kanban',
   'file_manager' => 'file',
   'documentation' => 'file-description',
@@ -32,6 +33,9 @@ $navigationIcons = [
       : ($setting->Logo
         ? "/images/logo/$setting->Logo"
         : "/images/background/logo.png");
+  
+  $countSurvey = 0;
+  $countSurvey = App\SurveyResponses::where('user_id', auth()->id())->whereNull('responses')->count();
 @endphp
 
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
@@ -85,7 +89,12 @@ $navigationIcons = [
               href="{{ $child['route'] == 'company.profile_view' ? ($_user->company ? route('company.profile_view', $_user->company->id) : '#') : route($child['route']) }}" 
             >
               <i class="menu-icon tf-icons ti ti-{{ $navigationIcons[$child['title']] }}"></i>
-              <div>{{ __('settings.navigation.' . $child['title']) }}</div>
+              <div class="d-flex align-items-center justify-content-between w-100">
+                <div>{{ __('settings.navigation.' . $child['title']) }}</div>
+                @if ($countSurvey > 0 && $child['title'] == 'surveys')
+                  <span class="badge badge-center rounded-pill bg-danger ms-2">{{ $countSurvey }}</span>
+                @endif
+              </div>
             </a>
           </li>
         @endif

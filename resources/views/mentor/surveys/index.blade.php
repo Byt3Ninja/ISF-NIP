@@ -1,17 +1,16 @@
 @extends('layouts.admin')
 
 @php
-
-
 // Sort surveys by status priority: In_Progress > Pending > Completed
-$surveys = $surveys->sortBy(function($survey) {
-    $statusPriority = [
-        'In_Progress' => 1,
-        'Pending' => 2,
-        'Completed' => 3,
-    ];
-    return $statusPriority[$survey->status] ?? 999;
-});
+if ($_user->hasAnyRole('mentor|Registered')) {
+    $surveys = $surveys->sortBy(function($survey) {
+        $statusPriority = [
+            'Pending' => 1,
+            'Completed' => 2,
+        ];
+        return $statusPriority[$survey->status] ?? 999;
+    });
+}
 @endphp
 
 @section('content')
@@ -29,9 +28,6 @@ $surveys = $surveys->sortBy(function($survey) {
             <th> {{ __('admin.Company') }} </th>
             <th> {{ __('admin.User') }} </th>
             <th> {{ __('admin.Title') }} </th>
-            {{-- <th> {{ __('admin.surveyType') }} </th> --}}
-            {{-- <th> {{ __('admin.Due_Date') }} </th> --}}
-            {{-- <th> {{ __('admin.Progress') }} </th> --}}
             <th> {{ __('admin.Status') }} </th>
             <th> {{ __('admin.Priority') }} </th>
             <th> {{ __('dashboard.Actions') }} </th>
@@ -90,63 +86,6 @@ $surveys = $surveys->sortBy(function($survey) {
                   @endif
                 </div>
               </td>
-              {{-- <td>
-                @if ($survey->survey_type == 'Mentorship')
-                  <span class="badge bg-label-info">{{ __('admin.Mentorship') }}</span>
-                @elseif ($survey->survey_type == 'Program')
-                  <span class="badge bg-label-primary">{{ __('admin.Program') }}</span>
-                @elseif ($survey->survey_type == 'Assessment')
-                  <span class="badge bg-label-warning">{{ __('admin.Assessment') }}</span>
-                @elseif ($survey->survey_type == 'Workshop')
-                  <span class="badge bg-label-secondary">{{ __('admin.Workshop') }}</span>
-                @elseif ($survey->survey_type == 'Exit')
-                  <span class="badge bg-label-danger">{{ __('admin.Exit') }}</span>
-                @else
-                  <span class="badge bg-label-dark">{{ __('admin.Check-in') }}</span>
-                @endif
-              </td> --}}
-              {{-- <td> 
-                @php
-                  $now = strtotime(date('Y-m-d H:i'));
-                  $due = strtotime($survey->due_date);
-                  $isOverdue = $now > $due && $survey->status != 'Completed';
-                @endphp
-                <div class="text-muted">
-                  <span class="small text-nowrap {{ $isOverdue ? 'text-danger fw-bold' : '' }}">
-                    {{ FormatDate($survey->due_date, 'Y-m-d') }}
-                  </span>
-                  <span class="small text-nowrap {{ $isOverdue ? 'text-danger fw-bold' : '' }}">
-                    {{ FormatDate($survey->due_date, 'H:i A') }}
-                  </span>
-                  @if ($isOverdue)
-                    <br />
-                    <span class="badge bg-label-danger mt-1">{{ __('admin.overdue') }}</span>
-                  @endif
-                </div>
-              </td> --}}
-              {{-- <td>
-                @php
-                  $progress = $survey->total_questions > 0 
-                    ? round(($survey->completed_questions / $survey->total_questions) * 100) 
-                    : 0;
-                @endphp
-                <div class="d-flex flex-column gap-1">
-                  <small class="text-muted">
-                    {{ $survey->completed_questions }}/{{ $survey->total_questions }} {{ __('admin.Questions') }}
-                  </small>
-                  <div class="progress" style="height: 6px;">
-                    <div 
-                      class="progress-bar {{ $progress == 100 ? 'bg-success' : 'bg-primary' }}" 
-                      role="progressbar" 
-                      style="width: {{ $progress }}%;" 
-                      aria-valuenow="{{ $progress }}" 
-                      aria-valuemin="0" 
-                      aria-valuemax="100">
-                    </div>
-                  </div>
-                  <small class="text-muted">{{ $progress }}%</small>
-                </div>
-              </td> --}}
               <td> 
                 @if ($survey->status == 'Pending')
                   <div class="badge bg-label-warning">{{ __('admin.Pending') }}</div>
@@ -288,21 +227,14 @@ $surveys = $surveys->sortBy(function($survey) {
           '{{ __("cycles.All Startups") }}',
           200
         );
-    
-        // // Survey Type Filter
-        // addDropdownFilter(
-        //   3,
-        //   'surveyTypeFilter',
-        //   '{{ __("admin.All_Types") }}'
-        // );
-    
+
         // Status Filter
         addDropdownFilter(
           3,
           'statusFilter',
           '{{ __("cycles.All Status") }}'
         );
-    
+
         // Priority (Mandatory/Optional) Filter
         api.columns(4).every(function () {
           const column = this;
