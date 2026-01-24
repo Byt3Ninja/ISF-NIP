@@ -119,7 +119,10 @@ Auth::routes(['verify' => true]);
 Route::get('organizations/set-password/{invitationId}', 'SettingsController@showSetPasswordForm')->name('invitations.set_password_view_form');
 Route::post('organizations/settings/accept/{invitationId}', 'SettingsController@acceptInvitation')->name('invitations.accept');
 
+// InviteMentor attachments (public access)
+
 Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa']], function () {
+    Route::get('uploads/InviteMentor/{path}', 'InvitationController@showAttachment')->where('path', '.*')->name('invite_mentor.attachment');
     ####################### Overall System Admin Routes ###############
     // All Logged users
     Route::get('/', 'HomeController@index')->name('core.admin_access');
