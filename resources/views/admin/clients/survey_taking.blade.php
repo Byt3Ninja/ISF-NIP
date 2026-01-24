@@ -208,12 +208,15 @@
 				<div class="card">
 					<div class="card-header border-bottom mb-6">
 						<div class="d-flex justify-content-between align-items-center">
-							<h4 class="card-title mb-0">Survey program title</h4>
+							<h4 class="card-title mb-0">{{ $survey_Title }}</h4>
 
 							<div class="d-flex align-items-center gap-2">
+								@if( $survey_cohort != null )
 								<span class="badge bg-label-secondary">
-									{{ __('admin.Cohort') }} 150
+									{{ __('admin.Cohort') }} {{ $survey_cohort }}
 								</span>
+								@endif
+
 								<span class="badge bg-label-success">{{ __('admin.answered') }}</span>
 							</div>
 						</div>
