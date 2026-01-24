@@ -80,7 +80,7 @@ if (strpos(request()->getRequestUri(), '/questions-bank') !== false || strpos(re
 }
 
 // Special case: Make mentors active if URL contains '/invitations'
-if (strpos(request()->getRequestUri(), '/invitations') !== false) {
+if (strpos(request()->getRequestUri(), '/invitations') !== false || strpos(request()->getRequestUri(), '/mentors') !== false) {
   $activeGroup = 'people';
   $activeItem = 'mentors.list';
 }

@@ -153,7 +153,7 @@ return [
 
     // Engagement
     'engagement' => 'Engagement',
-    'services_directory' => 'Services Directory',
+    'services_directory' => 'Services',
     'hackathons' => 'Hackathons',
     'perks_and_discounts' => 'Perks & Discounts',
 

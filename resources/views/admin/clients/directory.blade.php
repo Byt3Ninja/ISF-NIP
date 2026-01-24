@@ -168,12 +168,12 @@
       buttons: [
         {
           extend: 'excel',
-          title: isArabic ? 'الخدمات' : 'Services directory',
+          title: isArabic ? 'الخدمات' : 'Services',
           exportOptions: { columns: [0, 1, 2, 3, 4, 5] }
         },
         {
           extend: 'csv',
-          title: isArabic ? 'الخدمات' : 'Services directory',
+          title: isArabic ? 'الخدمات' : 'Services',
           exportOptions: { columns: [0, 1, 2, 3, 4, 5] }
         },
       ],

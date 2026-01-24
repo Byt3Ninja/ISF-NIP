@@ -350,7 +350,7 @@ return [
 		'my_company' => 'شركتي / فكرة',
 		'analysis_and_assessment' => 'التحليل والتقييم',
 		'swot_analysis' => 'تحليل SWOT',
-		'services_directory' => 'دليل الخدمات',
+		'services_directory' => 'الخدمات',
 		'hackathons' => 'هاكاثون',
 		'perks_and_discounts' => 'المزايا والخصومات',
 		'services_requests' => 'طلبات الخدمات',
