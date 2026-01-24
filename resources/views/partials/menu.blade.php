@@ -326,7 +326,7 @@
         $countSurvey = 0;
         $countSurvey = App\SurveyResponses::where('user_id', auth()->id())->whereNull('responses')->count();
       @endphp
-      <li class="{{ Request::is('dashboard/mentor/surveys') ? 'active' : '' }} menu-item">
+      <li class="{{ Request::is('dashboard/mentor/surveys', 'dashboard/surveys/start/*') ? 'active' : '' }} menu-item">
         <a href="/dashboard/mentor/surveys" class="menu-link">
           <i class="menu-icon tf-icons ti ti-notes"></i>
           <div class="d-flex align-items-center justify-content-between w-100">
