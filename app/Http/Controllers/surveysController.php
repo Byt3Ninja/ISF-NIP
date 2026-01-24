@@ -214,11 +214,13 @@ class surveysController extends Controller
 
 	public function survey_taking($id)
 	{
+		
 		// Store the previous URL before displaying the survey
 		$previousUrl = url()->previous();
 		session(['previous_url' => $previousUrl]);
 
 		$responses = SurveyResponses::where('user_id', Auth::id())->with(['survey'])->find($id);
+		
 		
 		if (empty($responses)) {
 			abort(404);
@@ -250,7 +252,12 @@ class surveysController extends Controller
 					]);
 				}
 			}
-			return view('admin.clients.survey_taking', compact('responses', 'survey', 'my_responses', 'is_responded'));
+			
+			$my_responses = collect($my_responses)->unique('id')->values();
+			$survey_Title = $responses?->cycle?->title;
+			$survey_cohort = $responses?->cycle?->cohort;
+
+			return view('admin.clients.survey_taking', compact('responses', 'survey', 'my_responses', 'is_responded', 'survey_Title', 'survey_cohort'));
 		}
 	}
 
