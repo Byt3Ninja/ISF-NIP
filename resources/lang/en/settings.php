@@ -347,7 +347,7 @@ return [
 		'my_company' => 'My Startup / Idea',
 		'analysis_and_assessment' => 'Analysis & Assessment',
 		'swot_analysis' => 'SWOT Analysis',
-		'services_directory' => 'Services Directory',
+		'services_directory' => 'Services',
 		'hackathons' => 'Hackathons',
 		'perks_and_discounts' => 'Perks and Discounts',
 		'services_requests' => 'Services Requests',

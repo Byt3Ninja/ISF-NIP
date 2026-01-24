@@ -153,7 +153,7 @@ return [
 
     // Engagement
     'engagement' => 'المشاركة',
-    'services_directory' => 'دليل الخدمات',
+    'services_directory' => 'الخدمات',
     'hackathons' => 'الهاكاثونات',
     'perks_and_discounts' => 'المزايا والخصومات',
 

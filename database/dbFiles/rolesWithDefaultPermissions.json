@@ -8913,8 +8913,7 @@
                     "admin",
                     "organizationmanager"
                 ]
-            }
-            ,
+            },
             {
                 "name": "invitations.DeleteAttachment",
                 "description": " Delete invitation attachment ",
@@ -8923,6 +8922,17 @@
                 "default_for": [
                     "admin",
                     "organizationmanager"
+                ]
+            },
+            {
+                "name": "invite_mentor.attachment",
+                "description": " Show attachment for invitation ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]

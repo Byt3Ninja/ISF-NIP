@@ -129,7 +129,7 @@ class InvitationController extends Controller
                             ];
                         })->toArray();
         
-                     
+                    //  dd($invitations);
         return view('mentors.invitations.index', compact('invitations', 'organizations'));
     }
 
@@ -263,5 +263,16 @@ class InvitationController extends Controller
             'success' => true,
             'message' => 'File deleted successfully'
         ]);
+    }
+
+    public function showAttachment($path)
+    {
+        $filePath = storage_path('app/uploads/InviteMentor/' . $path);
+
+        if (!file_exists($filePath)) {
+            abort(404);
+        }
+
+        return response()->file($filePath);
     }
 }
