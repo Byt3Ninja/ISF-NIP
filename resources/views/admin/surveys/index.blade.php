@@ -51,7 +51,7 @@
         </div>
       </div>
     @endif
-
+      @if($_user->hasAnyRole('admin|subadmin|organizationManager'))
     <div class="card">
       <div class="card-header d-flex flex-wrap justify-content-between align-items-center border-bottom">
         <h5 class="card-title mb-3 mb-md-0">{{__('admin.surveys')}}</h5>
@@ -138,6 +138,11 @@
         </table>
       </div>
     </div>
+    @endif
+    @if($_user->hasAnyRole('mentor|Registered'))
+
+    @endif
+
   </div>
 </div>
 @stop
