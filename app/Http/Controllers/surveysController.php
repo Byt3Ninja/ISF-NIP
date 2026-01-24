@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class surveysController extends Controller
 {
@@ -68,7 +69,8 @@ class surveysController extends Controller
 						//dd($mentorshipRequests[0], $availableSurveys[0], $surveyQuestionsCount);
 					$surveys = $availableSurveys->map(function ($survey) use (
 					$mentorshipRequests,
-					$surveyQuestionsCount
+					$surveyQuestionsCount,
+					$user
 				) {
 					$responses = json_decode($survey->responses, true) ?? [];
 					$totalQuestions = $surveyQuestionsCount[$survey->survey_id] ?? 0;
@@ -76,6 +78,21 @@ class surveysController extends Controller
 					$mentorship = $mentorshipRequests
 						->where('zoom_date', '<=', $survey->created_at)
 						->first();
+						if($user->hasRole('Mentor')){
+							$mentorship_user_id = $mentorship->user->id;
+							$mentorship_user_name = trim( $mentorship->user->first_name_en . ' ' . $mentorship->user->last_name_en );
+							$mentorship_user_image = $mentorship->user->img_url ? asset($mentorship->user->img_url) : '/icons/avatar.svg';
+							$mentorship_user_company_id = optional($mentorship->user->company)->id;
+							$mentorship_user_company_name = optional($mentorship->user->company)->name_en;
+							$mentorship_user_company_logo = optional($mentorship->user->company)->logo ? asset($mentorship->user->company->logo) : '/images/logo-placeholder.png';
+						}else{
+							$mentorship_user_id = $mentorship->mentor->id;
+							$mentorship_user_name = trim( $mentorship->mentor->first_name_en . ' ' . $mentorship->mentor->last_name_en );
+							$mentorship_user_image = $mentorship->mentor->img_url ? asset($mentorship->mentor->img_url) : '/icons/avatar.svg';
+							$mentorship_user_company_id = null;
+							$mentorship_user_company_name = null;
+							$mentorship_user_company_logo = null;
+						}
 						
 					return (object) [
 						'id' => $survey->id,
@@ -91,21 +108,14 @@ class surveysController extends Controller
 						'is_required' => (bool) $survey->survey->is_required,
 						'user' => $mentorship
 							? (object)[
-								'id' => $mentorship->user->id,
-								'name' => trim(
-									$mentorship->user->first_name_en . ' ' .
-									$mentorship->user->last_name_en
-								),
-								'image_url' => $mentorship->user->img_url
-									? asset($mentorship->user->img_url)
-									: '/icons/avatar.svg',
+								'id' => $mentorship_user_id,
+								'name' => $mentorship_user_name,
+								'image_url' => $mentorship_user_image,
 
 								'company' => (object)[
-									'id' => optional($mentorship->user->company)->id,
-									'name' => optional($mentorship->user->company)->name_en,
-									'logo_url' => optional($mentorship->user->company)->logo
-										? asset($mentorship->user->company->logo)
-										: '/images/logo-placeholder.png',
+									'id' => $mentorship_user_company_id,
+									'name' => $mentorship_user_company_name,
+									'logo_url' => $mentorship_user_company_logo,
 								],
 							]
 							: null,
@@ -128,6 +138,7 @@ class surveysController extends Controller
 
 				$surveys = collect($surveys)->sortByDesc('created_at')->values();
 			}
+			
 		return view('admin.surveys.index', compact('surveys'));
 	}
 
@@ -344,8 +355,21 @@ class surveysController extends Controller
 					]);
 				}
 			}
-			
-			$my_responses = collect($my_responses)->unique('id')->values();
+			if($is_responded == true){
+			$collection = collect($my_responses)->unique('id')->values();
+			$page = request()->get('page', 1);
+			$perPage = 9;
+
+			$my_responses = new LengthAwarePaginator(
+				$collection->forPage($page, $perPage),
+				$collection->count(),
+				$perPage,
+				$page,
+				['path' => request()->url(), 'query' => request()->query()]
+			);
+			}else{
+				$my_responses = collect($my_responses)->unique('id')->values();
+			}
 			$survey_Title = $responses?->cycle?->title;
 			$survey_cohort = $responses?->cycle?->cohort;
 

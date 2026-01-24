@@ -276,6 +276,10 @@
 							</div>
 						@endforeach
 					</div>
+
+					<div class="card-footer mt-8">
+						{{ $my_responses->links('pagination::bootstrap-5') }}
+					</div>
 				</div>
 			@endif
 		</div>
