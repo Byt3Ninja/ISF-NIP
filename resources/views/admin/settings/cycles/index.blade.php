@@ -11,7 +11,7 @@
 <style>
 
   .daterangepicker {
-    /* margin-top: 6rem !important; */
+    margin-top: 1rem !important;
   }
 
   #mob {
