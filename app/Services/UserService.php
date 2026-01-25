@@ -101,13 +101,15 @@ class UserService
                     'mentor_id' => $result['data']->id,
                     'status'    => 'Accepted',
                 ]);
-                $mentorId = $result['data']->id;
-                $cycles = Cycle::whereIn(
-                    'organization_id',
-                    $update_invite_mentor->organization_ids
-                )->get();
-                foreach ($cycles as $cycle) {
-                    $cycle->mentors()->syncWithoutDetaching([$mentorId]);
+                if($update_invite_mentor->organization_ids != null){
+                    $mentorId = $result['data']->id;
+                    $cycles = Cycle::whereIn(
+                        'organization_id',
+                        $update_invite_mentor->organization_ids
+                    )->get();
+                    foreach ($cycles as $cycle) {
+                        $cycle->mentors()->syncWithoutDetaching([$mentorId]);
+                    }
                 }
             }
         $user=$result['data'];
