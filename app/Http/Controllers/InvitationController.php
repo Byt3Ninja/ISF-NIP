@@ -180,10 +180,13 @@ class InvitationController extends Controller
         $invitation->save();
 
         dispatch(new SendInviteMentorEmail($invitation));
-
+    if($data['invitation_scope'] == 'Organization'){
         $allOrganizations = Organization::whereIn('id', $data['organizations'])->get();
-       
         $organizationMap = collect($allOrganizations)->keyBy('id');
+        }else{
+            $organizationMap = [];
+        }
+       
         $invitation = InviteMentor::where('id', $invitation->id)->get()->map(function ($invite) use ($organizationMap) {
 
          $orgIds = [];
@@ -216,7 +219,7 @@ class InvitationController extends Controller
                 'organizations'    => $organizations,
             ];
         });
-        
+
         return response()->json(['success' => true,
          'message' => 'Invitation sent successfully.',
         'data' => $invitation], 200);
