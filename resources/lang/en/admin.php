@@ -3154,4 +3154,5 @@ return [
 	'required_evaluation_scores_message' => 'Please complete all evaluation criteria before publishing',
 	'required_evaluation_comment_message' => 'Please provide a final comments before publishing',
 	'organization_based' => 'Organization Based',
+	'uploading' => 'Uploading...',
 ];

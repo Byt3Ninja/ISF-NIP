@@ -19,7 +19,7 @@ $tabs = [
   content: "\f0c6";
   font-family: "Font Awesome 6 Free";
   font-weight: 900;
-  color: black;
+  color: #6c757d;
 }
 </style>
 @endsection
@@ -319,13 +319,11 @@ $(function () {
     sent: '{{ __("admin.sent") }}',
     view_details: '{{ __("admin.view_details") }}',
     no_replies_yet: '{{ __("admin.no_replies_yet") }}',
-    no_attachments: '{{ __("admin.no_attachments") }}'
+    no_attachments: '{{ __("admin.no_attachments") }}',
+    uploading: '{{ __("admin.uploading") }}',
   };
-  /* =======================
-   * Quill Editor
-   * ======================= */
-  
-  // Toolbar
+
+  // Toolbar configuration
   const toolbarOptions = [
     [{ header: [1, 2, 3, false] }],
     ['bold', 'italic', 'underline', 'strike'],
@@ -335,7 +333,7 @@ $(function () {
     ['clean']
   ];
 
-  // Init Quill
+  // Initialize Quill
   const quill = new Quill('#invitationMessageEditor', {
     theme: 'snow',
     placeholder: '{{ __('admin.compose_your_invitation_message') }}...',
@@ -350,177 +348,121 @@ $(function () {
     }
   });
 
-  // ==========================
-  // IMAGE HANDLER (MULTIPLE)
-  // ==========================
+  // Handle image
   function imageHandler() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.multiple = true;
-    input.click();
-
-    input.onchange = () => {
-      const files = Array.from(input.files);
-      const range = quill.getSelection(true);
-
-      const totalSize = files.reduce((total, file) => total + file.size, 0);
+    const input = $('<input type="file" accept="image/*" multiple>');
+    
+    input.on('change', function() {
+      const files = this.files;
+      const totalSize = Array.from(files).reduce((sum, file) => sum + file.size, 0);
       const maxSize = 10 * 1024 * 1024; // 10 MB
 
       if (totalSize > maxSize) {
-        alert('{{ __('admin.file_exceeds_limit') }}');
+        releaseFailureAlert({
+          title: "{{ __('admin.Error') }}!",
+          message: "{{ __('admin.file_exceeds_limit') }}"
+        });
         return;
       }
 
-      // Show loading indicator
-      const loadingText = '🖼️ Uploading images...';
-      quill.insertText(range.index, loadingText);
-      quill.insertText(range.index + loadingText.length, '\n');
+      const range = quill.getSelection(true);
+      const loadingText = `🖼️ ${translations.uploading}`;
+      quill.insertText(range.index, loadingText + '\n');
 
-      // Upload images sequentially
-      let uploadedCount = 0;
-      const uploadedImages = [];
-
-      files.forEach((file, index) => {
-        const formData = new FormData();
-        formData.append('file', file);
-
-        $.ajax({
-          url: '{{ route("invitations.upload") }}',
-          method: 'POST',
-          data: formData,
-          processData: false,
-          contentType: false,
-          headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-          },
-          success: function(response) {
-            if (response.success) {
-              uploadedImages.push({
-                name: file.name,
-                url: response.data.file_url
-              });
-              uploadedCount++;
-
-              // If all images uploaded, update the editor
-              if (uploadedCount === files.length) {
-                // Remove loading text
-                quill.deleteText(range.index, loadingText.length + 1);
-
-                // Insert uploaded image links
-                let insertIndex = range.index;
-                uploadedImages.forEach(image => {
-                  quill.insertText(insertIndex, `🖼️ ${image.name}`, { link: image.url });
-                  quill.insertText(insertIndex + image.name.length + 4, '\n');
-                  insertIndex += image.name.length + 5;
-                });
-
-                // Move cursor to end
-                quill.setSelection(insertIndex);
-
-                // Update the hidden attachments field
-                const currentAttachments = JSON.parse($('#uploadedAttachments').val() || '[]');
-                const newAttachments = [...currentAttachments, ...uploadedImages.map(i => i.url)];
-                $('#uploadedAttachments').val(JSON.stringify(newAttachments));
-              }
-            } else {
-              alert('{{ __("admin.upload_failed") }}: ' + (response.message || 'Unknown error'));
-            }
-          },
-          error: function(xhr) {
-            alert('{{ __("admin.upload_failed") }}: ' + (xhr.responseJSON?.message || 'Unknown error'));
-          }
-        });
-      });
-    };
+      uploadFiles(files, range, loadingText, '🖼️');
+    });
+    
+    input.click();
   }
 
-  // ==========================
-  // FILE HANDLER (PDF, DOCX, XLSX, PPTX)
-  // ==========================
+  // Handle file
   function fileHandler() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.multiple = true;
-    input.accept = '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx';
-    input.click();
-
-    input.onchange = () => {
-      const files = Array.from(input.files);
-      const totalSize = files.reduce((total, file) => total + file.size, 0);
+    const input = $('<input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" multiple>');
+    
+    input.on('change', function() {
+      const files = this.files;
+      const totalSize = Array.from(files).reduce((sum, file) => sum + file.size, 0);
       const maxSize = 10 * 1024 * 1024; // 10 MB
 
       if (totalSize > maxSize) {
-        alert('{{ __('admin.file_exceeds_limit') }}');
+        releaseFailureAlert({
+          title: "{{ __('admin.Error') }}!",
+          message: "{{ __('admin.file_exceeds_limit') }}"
+        });
         return;
       }
 
-      // Show loading indicator
       const range = quill.getSelection(true);
-      const loadingText = '📎 Uploading files...';
-      quill.insertText(range.index, loadingText);
-      quill.insertText(range.index + loadingText.length, '\n');
+      const loadingText = `📎 ${translations.uploading}`;
+      quill.insertText(range.index, loadingText + '\n');
 
-      // Upload files sequentially
-      let uploadedCount = 0;
-      const uploadedFiles = [];
+      uploadFiles(files, range, loadingText, '📎');
+    });
+    
+    input.click();
+  }
 
-      files.forEach((file, index) => {
-        const formData = new FormData();
-        formData.append('file', file);
+  // Handle files upload
+  function uploadFiles(files, range, loadingText, icon) {
+    let uploadedCount = 0;
+    const uploadedItems = [];
 
-        $.ajax({
-          url: '{{ route("invitations.upload") }}',
-          method: 'POST',
-          data: formData,
-          processData: false,
-          contentType: false,
-          headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-          },
-          success: function(response) {
-            if (response.success) {
-              uploadedFiles.push({
-                name: file.name,
-                url: response.data.file_url
-              });
-              uploadedCount++;
+    Array.from(files).forEach(file => {
+      const formData = new FormData();
+      formData.append('file', file);
 
-              // If all files uploaded, update the editor
-              if (uploadedCount === files.length) {
-                // Remove loading text
-                quill.deleteText(range.index, loadingText.length + 1);
+      $.ajax({
+        url: '{{ route("invitations.upload") }}',
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+        success: function(response) {
+          if (response.success) {
+            uploadedItems.push({ name: file.name, url: response.data.file_url });
+            uploadedCount++;
 
-                // Insert uploaded file links
-                let insertIndex = range.index;
-                uploadedFiles.forEach(file => {
-                  quill.insertText(
-                    insertIndex,
-                    `📎 ${file.name}`,
-                    { link: file.url }
-                  );
-                  quill.insertText(insertIndex + file.name.length + 4, '\n');
-                  insertIndex += file.name.length + 5;
-                });
-
-                // Move cursor to end
-                quill.setSelection(insertIndex);
-
-                // Update the hidden attachments field
-                const currentAttachments = JSON.parse($('#uploadedAttachments').val() || '[]');
-                const newAttachments = [...currentAttachments, ...uploadedFiles.map(f => f.url)];
-                $('#uploadedAttachments').val(JSON.stringify(newAttachments));
-              }
-            } else {
-              alert(response?.message ? response?.message : '{{ __("admin.File upload failed") }}');
+            if (uploadedCount === files.length) {
+              insertUploadedItems(range, loadingText, uploadedItems, icon);
             }
-          },
-          error: function(xhr) {
-            alert(xhr.responseJSON?.message ? xhr.responseJSON.message : '{{ __("admin.File upload failed") }}');
+          } else {
+            handleUploadError(range, loadingText, response.message);
           }
-        });
+        },
+        error: function(xhr) {
+          handleUploadError(range, loadingText, xhr.responseJSON?.message);
+        }
       });
-    };
+    });
+  }
+
+  // Insert uploaded items into editor
+  function insertUploadedItems(range, loadingText, items, icon) {
+    quill.deleteText(range.index, loadingText.length + 1);
+
+    let insertIndex = range.index;
+    items.forEach(item => {
+      quill.insertText(insertIndex, `${icon} ${item.name}`, { link: item.url });
+      quill.insertText(insertIndex + item.name.length + 4, '\n');
+      insertIndex += item.name.length + 5;
+    });
+
+    quill.setSelection(insertIndex);
+
+    // Update attachments
+    const currentAttachments = JSON.parse($('#uploadedAttachments').val() || '[]');
+    const newAttachments = [...currentAttachments, ...items.map(i => i.url)];
+    $('#uploadedAttachments').val(JSON.stringify(newAttachments));
+  }
+
+  // Handle upload errors
+  function handleUploadError(range, loadingText, message) {
+    quill.deleteText(range.index, loadingText.length + 1);
+    releaseFailureAlert({
+      title: "{{ __('admin.Error') }}!",
+      message: message || "{{ __('admin.unexpected_error') }}"
+    })
   }
 
   // Debounced detection for removed uploaded files

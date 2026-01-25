@@ -247,7 +247,7 @@ class InvitationController extends Controller
     public function updateFile(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|bail|mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx,pptx|max:10240',
+            'file' => 'required|file|bail|mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx,ppt,pptx|max:10240',
         ]);
 
         // استدعاء دالة الرفع
