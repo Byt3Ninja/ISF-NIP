@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Log;
 use App\User;
+use App\Cycle;
 use App\InviteMentor;
 use App\Mail\WelcomeUserMail;
 use Illuminate\Http\UploadedFile;
@@ -88,14 +89,26 @@ class UserService
     public function store(array $data): array
     {
         try{
-
-        $result_service_provider = $this->userRepository->registerServiceProvider($data);
-        $result = $this->userRepository->create($data);
+            
+            $result_service_provider = $this->userRepository->registerServiceProvider($data);
+            $result = $this->userRepository->create($data);
+            
          
         if($result['success'] ==true){
-            $update_invite_mentor = InviteMentor::where('email', $data['email'])->first();
+            $update_invite_mentor = InviteMentor::where('email', $data['email'])->orderBy('created_at', 'desc')->first();
             if($update_invite_mentor){
-                $update_invite_mentor->update(['mentor_id' => $result['data']->id, 'status' => 'Accepted']);
+                $update_invite_mentor->update([
+                    'mentor_id' => $result['data']->id,
+                    'status'    => 'Accepted',
+                ]);
+                $mentorId = $result['data']->id;
+                $cycles = Cycle::whereIn(
+                    'organization_id',
+                    $update_invite_mentor->organization_ids
+                )->get();
+                foreach ($cycles as $cycle) {
+                    $cycle->mentors()->syncWithoutDetaching([$mentorId]);
+                }
             }
         $user=$result['data'];
         Storage::disk('UsersLFM')->makeDirectory("$user->id");

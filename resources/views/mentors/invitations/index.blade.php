@@ -90,7 +90,7 @@ $tabs = [
                   <td>{{ $item['accepted_at'] }}</td>
                   <td>{{ $item['created_at'] }}</td>
                   <td>
-                    <button class="btn btn-sm btn-outline-primary text-nowrap view-details" data-bs-toggle="offcanvas" data-bs-target="#invitationOffcanvas" data-invitee-name="{{ $item['invitee_name'] }}" data-invitee-email="{{ $item['invitee_email'] }}" data-subject="{{ $item['subject'] }}" data-scope="{{ $item['scope'] }}" data-status="{{ $item['status'] }}" data-message="{{ $item['message_content'] }}" data-date="{{ $item['created_at'] }}" data-attachments="{{ implode(',', $item['attachments']) }}" data-response-message="{{ $item['response_message'] }}">
+                    <button class="btn btn-sm btn-outline-primary text-nowrap view-details" data-bs-toggle="offcanvas" data-bs-target="#invitationOffcanvas" data-invitee-name="{{ $item['invitee_name'] }}" data-invitee-email="{{ $item['invitee_email'] }}" data-subject="{{ $item['subject'] }}" data-scope="{{ $item['scope'] }}" data-status="{{ $item['status'] }}" data-message="{{ $item['message_content'] }}" data-date="{{ $item['created_at'] }}" data-attachments="{{ implode(',', $item['attachments']) }}" data-response-message="{{ $item['response_message'] }}" data-orgs="{{ json_encode($item['organizations']) }}">
                       <i class="ti ti-eye me-1"></i> {{ __('admin.view_details') }}
                     </button>
                   </td>
@@ -106,7 +106,7 @@ $tabs = [
     <!-- Invitation Details Offcanvas -->
     <div class="offcanvas offcanvas-end w-px-600" tabindex="-1" id="invitationOffcanvas" aria-labelledby="invitationOffcanvasLabel">
       <!-- Header: Mail Subject Style -->
-      <div class="offcanvas-header border-bottom">
+      <div class="offcanvas-header border-bottom pb-0">
         <div class="d-flex justify-content-between w-100">
           <div class="d-flex flex-column">
             <h5 class="offcanvas-title fw-bold mb-1" id="invitationTitle">
@@ -116,12 +116,19 @@ $tabs = [
               <i class="ti ti-calendar me-1"></i>
               @lang('admin.sent_on'): <span id="dateTimestamp"></span>
             </small>
-            <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center gap-2 mb-4">
               <div id="invitationScopeDisplay"></div>
               <div id="invitationStatus"></div>
             </div>
           </div>
           <button type="button" class="btn-close m-0 p-0" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+      </div>
+
+      <div class="d-flex flex-column gap-2 border-bottom px-8 pb-4 pt-3" id="invitationOrgsContainer" style="display: none;">
+        <h6 class="mb-0">{{ __('admin.Organizations') }}:</h6>
+        <div class="d-flex flex-wrap align-items-center gap-2" id="invitationOrgs">
+          <!-- JS injected -->
         </div>
       </div>
     
@@ -648,6 +655,18 @@ $(function () {
     $('#replyMessageContent').text(d.responseMessage || translations.no_replies_yet);
     $('#dateTimestamp').text(d.date);
 
+    $('#invitationOrgs').empty();
+
+    if (d.orgs && d.orgs.length) {
+      $('#invitationOrgsContainer').show();
+
+      d.orgs.forEach(org => {
+        $('#invitationOrgs').append(
+          `<span class="badge bg-label-secondary">${org.name}</span>`
+        );
+      });
+    }
+
     const scopeLabels = {
       Public: '@lang("admin.public")',
       Organization: '@lang("admin.organization")'
@@ -863,7 +882,7 @@ $(function () {
         <td>${invitation.accepted_at}</td>
         <td>${invitation.created_at}</td>
         <td>
-          <button class="btn btn-sm btn-outline-primary text-nowrap view-details" data-bs-toggle="offcanvas" data-bs-target="#invitationOffcanvas" data-invitee-name="${invitation.invitee_name}" data-invitee-email="${invitation.invitee_email}" data-subject="${invitation.subject}" data-scope="${invitation.scope}" data-status="${invitation.status}" data-message="${invitation.message_content}" data-date="${invitation.created_at}" data-attachments="${JSON.parse(invitation.attachments || '[]').join(',')}" data-response-message="${invitation.response_message || ''}">
+          <button class="btn btn-sm btn-outline-primary text-nowrap view-details" data-bs-toggle="offcanvas" data-bs-target="#invitationOffcanvas" data-invitee-name="${invitation.invitee_name}" data-invitee-email="${invitation.invitee_email}" data-subject="${invitation.subject}" data-scope="${invitation.scope}" data-status="${invitation.status}" data-message="${invitation.message_content}" data-date="${invitation.created_at}" data-attachments="${JSON.parse(invitation.attachments || '[]').join(',')}" data-response-message="${invitation.response_message || ''}" data-orgs='${JSON.stringify(invitation.organizations || [])}'>
             <i class="ti ti-eye me-1"></i> ${translations.view_details}
           </button>
         </td>
