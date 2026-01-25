@@ -181,7 +181,27 @@ class InvitationController extends Controller
 
         dispatch(new SendInviteMentorEmail($invitation));
 
-        $invitation = InviteMentor::where('id', $invitation->id)->get()->map(function ($invite) {
+        $allOrganizations = Organization::whereIn('id', $data['organizations'])->get();
+       
+        $organizationMap = collect($allOrganizations)->keyBy('id');
+        $invitation = InviteMentor::where('id', $invitation->id)->get()->map(function ($invite) use ($organizationMap) {
+
+         $orgIds = [];
+
+            if (is_string($invite->organization_ids)) {
+                $orgIds = json_decode($invite->organization_ids, true) ?? [];
+            } elseif (is_array($invite->organization_ids)) {
+                $orgIds = $invite->organization_ids;
+            }
+            
+            // جلب name لكل ID من الـ organizationMap
+            $organizations = collect($orgIds)->map(function ($id) use ($organizationMap) {
+                return $organizationMap->has($id) ? [
+                    'id' => $id,
+                    'name' => $organizationMap[$id]['name_en']
+                ] : null;
+            })->filter()->values()->toArray(); 
+
             return [
                 'invitee_name'     => $invite->name,
                 'invitee_email'    => $invite->email,
@@ -193,6 +213,7 @@ class InvitationController extends Controller
                 'created_at'       => $invite->created_at->format('Y-m-d H:i:s'),
                 'accepted_at'      => $invite->updated_at == $invite->created_at ? 'N/A' : $invite->updated_at->format('Y-m-d H:i:s'),
                 'attachments'      => $invite->attachments ?? [],
+                'organizations'    => $organizations,
             ];
         });
         
