@@ -599,7 +599,7 @@ $pills = [
            if (response.status) {
               releaseSuccessAlert({
                 title: '{{ __('admin.success') }}',
-                message: response.message ? response.message : 'Screening guidelines saved successfully',
+                message: response.message ? response.message : 'admin.Screening guidelines saved successfully',
               });
             } else {
               releaseFailureAlert({

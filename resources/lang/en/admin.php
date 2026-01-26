@@ -3156,4 +3156,5 @@ return [
 	'required_evaluation_comment_message' => 'Please provide a final comments before publishing',
 	'organization_based' => 'Organization Based',
 	'uploading' => 'Uploading...',
+	'Screening guidelines saved successfully' => 'Screening guidelines saved successfully',
 ];
