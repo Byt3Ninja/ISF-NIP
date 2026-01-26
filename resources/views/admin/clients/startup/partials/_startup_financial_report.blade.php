@@ -69,14 +69,21 @@
               {{ __('startup.financial.executive_summary') }}
               <span id="summary-period-label">({{ $periods ? reset($periods)['label'] : '' }})</span>
             </h5>
-            <!-- <div class="d-flex align-items-center gap-2 mt-2">
-              <span class="text-muted small">{{ __('startup.financial.valuation_date') }}:</span>
-              <select class="form-select form-select-sm w-auto" onchange="window.location.href='?valuation_date='+this.value">
-                @foreach($availableValuationDates as $date)
-                  <option value="{{ $date }}" {{ $valuationDate == $date ? 'selected' : '' }}>{{ $date }}</option>
-                @endforeach
-              </select>
-            </div> -->
+            @php
+              $valuationDate =  request()->get('valuation_date') ?? $valuation_date ?? $valuationDate;
+              $historicalDates = $historicalValuationDates ?? [];
+            @endphp
+
+            @if (count($historicalDates) > 0)
+              <div class="d-flex align-items-center gap-2 mt-2">
+                <span class="text-muted small">{{ __('startup.financial.valuation_date') }}:</span>
+                <select class="form-select form-select-sm w-auto" onchange="window.location.href='?valuation_date='+this.value">
+                  @foreach($historicalDates as $date)
+                    <option value="{{ $date }}" {{ $valuationDate == $date ? 'selected' : '' }}>{{ $date }}</option>
+                  @endforeach
+                </select>
+              </div> 
+            @endif
           </div>
 
           @if ($periods && count($periods) > 1)

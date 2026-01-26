@@ -3,14 +3,6 @@
 @section('style')
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
-
-  <style>
-    .custom-container { width: 100% }
-
-    @media screen and (min-width: 768px) {
-      .custom-container { width: 78%; }
-    }
-  </style>
 @stop
 
 @php
@@ -60,94 +52,93 @@
       </div>
       <!-- / Tabs (mobile) -->
 
-      <div class="d-flex justify-content-start w-100 mb-6">
-        <nav 
-          class="nav-align-left nav-tabs-shadow mb-6 px-4 py-2 bg-white position-fixed d-none d-md-block" 
-          style="height: auto; min-width: 15%; max-width: 15%;">
-          <!-- Tabs -->
-          <ul class="nav nav-tabs nav-fill border-none m-auto" role="tablist">
-            @foreach ($tabs as $key => $tab)
-            <li class="nav-item bg-label-light {{ $key == count($tabs) - 1 ? '' : 'mb-2' }} rounded overflow-x-hidden d-flex align-items-center">
-              <a 
-                  id="company-tab"
-                  href="#navs-left-{{ $tab['target'] }}"
-                  class="nav-link py-3 {{ $key == 0 ? 'active' : '' }}"
-                  data-bs-toggle="tab"
-                  role="tab"
-                >
-                  <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
-                  {{ $tab['label'] }}
-                </a>
-              </li>
-            @endforeach
-          </ul>
-          <!-- / Tabs -->
-        </nav>
-        <!-- Tab Content On Tab Click -->
-        <div 
-          id="company-tab-content"
-          class="tab-content p-0 overflow-y-auto custom-container mb-6" 
-          style="{{ $l == 'en' ? 'margin-left: auto' : 'margin-right: auto' }}"
-        >
-          <!-- Alert -->
-          @if (session()->has('msg'))
-            <x-alert 
-              type="{{ session()->get('class') ?? 'danger' }}"
-              message="{{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }}" 
-            />
-          @endif
-          <!-- Validation messages -->
-          @if (count($errors) > 0)
-            @foreach ($errors->all() as $error)
-              <x-alert type="danger" message="{{ $error }}" />
-            @endforeach
-          @endif
-          <!-- / Alert -->
-
-          @foreach ($tabs as $index => $tab)
-            <div class="tab-pane fade {{ $index == 0 ? 'show active' : '' }}" id="navs-left-{{ $tab['target'] }}">
-              @switch($tab['target'])
-                @case('company-info')
-                  @include('partials.forms.company.company-info-form',['heading' => $tab['label']])
-                @break
-                @case('industry-sectors')
-                  @include('partials.forms.company.classification_form', ['heading' => $tab['label']])
-                @break
-                @case('company-contact')
-                  @include('partials.forms.company.company-contact', ['heading' => $tab['label']])
-                @break
-                @case('company-desc')
-                  @include('partials.forms.company.company-desc', ['heading' => $tab['label']])
-                @break
-                @case('company-financial-info')
-                  @include('partials.forms.company.company-financial', ['heading' => $tab['label']])
-                @break
-                @case('company-financial-info')
-                  @include('partials.forms.company.company-financial', ['heading' => $tab['label']])
-                @break
-                @case('company-financial-projection')
-                  @include('partials.forms.company.company-financial-projection', ['heading' => $tab['label']])
-                @break
-                @case('team-info')
-                  @include('partials.forms.company.company-team-info', ['heading' => $tab['label']])
-                @break
-                @case('employees')
-                  @include('partials.forms.company.company-employees', ['heading' => $tab['label']])
-                @break
-                @case('pitch-deck')
-                  @include('partials.forms.company.company-pitch-deck', ['heading' => $tab['label']])
-                @break
-                @case('company-milestones')
-                  @include('partials.forms.company.company-milestones', ['heading' => $tab['label']])
-                @break
-                @case('business_model')
-                  @include('partials.forms.company.business_model', ['heading' => $tab['label']])
-                @break
-              @endswitch
-            </div>
-          @endforeach
+      <div class="row g-6">
+        <div class="col-12 col-lg-3">
+          <nav class="bg-card p-4 rounded shadow-sm d-none d-md-block">
+            <!-- Tabs -->
+            <ul class="nav nav-align-left nav-pills flex-column">
+              @foreach ($tabs as $key => $tab)
+              <li class="nav-item bg-label-light {{ $key == count($tabs) - 1 ? '' : 'mb-2' }} rounded overflow-x-hidden d-flex align-items-center">
+                <a 
+                    id="company-tab"
+                    href="#navs-left-{{ $tab['target'] }}"
+                    class="nav-link py-3 {{ $key == 0 ? 'active' : '' }}"
+                    data-bs-toggle="tab"
+                    role="tab"
+                  >
+                    <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
+                    {{ $tab['label'] }}
+                  </a>
+                </li>
+              @endforeach
+            </ul>
+            <!-- / Tabs -->
+          </nav>
         </div>
-        <!-- / Tab Content On Tab Click -->
+
+        <div class="col-12 col-lg-9">
+          <!-- Tab Content On Tab Click -->
+          <div id="company-tab-content" class="tab-content p-0 overflow-y-auto mb-6">
+            <!-- Alert -->
+            @if (session()->has('msg'))
+              <x-alert 
+                type="{{ session()->get('class') ?? 'danger' }}"
+                message="{{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }}" 
+              />
+            @endif
+            <!-- Validation messages -->
+            @if (count($errors) > 0)
+              @foreach ($errors->all() as $error)
+                <x-alert type="danger" message="{{ $error }}" />
+              @endforeach
+            @endif
+            <!-- / Alert -->
+  
+            @foreach ($tabs as $index => $tab)
+              <div class="tab-pane fade {{ $index == 0 ? 'show active' : '' }}" id="navs-left-{{ $tab['target'] }}">
+                @switch($tab['target'])
+                  @case('company-info')
+                    @include('partials.forms.company.company-info-form',['heading' => $tab['label']])
+                  @break
+                  @case('industry-sectors')
+                    @include('partials.forms.company.classification_form', ['heading' => $tab['label']])
+                  @break
+                  @case('company-contact')
+                    @include('partials.forms.company.company-contact', ['heading' => $tab['label']])
+                  @break
+                  @case('company-desc')
+                    @include('partials.forms.company.company-desc', ['heading' => $tab['label']])
+                  @break
+                  @case('company-financial-info')
+                    @include('partials.forms.company.company-financial', ['heading' => $tab['label']])
+                  @break
+                  @case('company-financial-info')
+                    @include('partials.forms.company.company-financial', ['heading' => $tab['label']])
+                  @break
+                  @case('company-financial-projection')
+                    @include('partials.forms.company.company-financial-projection', ['heading' => $tab['label']])
+                  @break
+                  @case('team-info')
+                    @include('partials.forms.company.company-team-info', ['heading' => $tab['label']])
+                  @break
+                  @case('employees')
+                    @include('partials.forms.company.company-employees', ['heading' => $tab['label']])
+                  @break
+                  @case('pitch-deck')
+                    @include('partials.forms.company.company-pitch-deck', ['heading' => $tab['label']])
+                  @break
+                  @case('company-milestones')
+                    @include('partials.forms.company.company-milestones', ['heading' => $tab['label']])
+                  @break
+                  @case('business_model')
+                    @include('partials.forms.company.business_model', ['heading' => $tab['label']])
+                  @break
+                @endswitch
+              </div>
+            @endforeach
+          </div>
+          <!-- / Tab Content On Tab Click -->
+        </div>
       </div>
     </div>
     <!-- / Content -->

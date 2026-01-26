@@ -336,7 +336,7 @@
       const country = countryData.find(country => `+${country.dialCode}` === dialCode);
 
       if (country) {
-        console.log("Country Code Found: " + country.iso2);
+        // console.log("Country Code Found: " + country.iso2);
         return country.iso2;
       }
       return "eg";
