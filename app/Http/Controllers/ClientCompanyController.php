@@ -773,11 +773,16 @@ class ClientCompanyController extends Controller
                 }
                $getCurrancy = '';
               
-                $financialprojection = FinancialProjection::where('company_id', $id)
-                    ->where('valuation_date', $valuation_dateSearch.'-01')
-                    ->orderBy('year')
+                $Historyfinancialprojection = FinancialProjection::where('company_id', $id)
+                    ->orderBy('valuation_date')
                     ->get();
-                   
+
+                    $historicalValuationProjections = $Historyfinancialprojection->pluck('valuation_date')->unique();
+                    $financialprojection = $Historyfinancialprojection->where('valuation_date', $valuation_dateSearch.'-01');
+                    $historicalValuationDates = $historicalValuationProjections->map(function ($date) {
+                        return Carbon::parse($date)->format('Y-m');
+                    });
+                  
                 foreach ($financialprojection as $projection) {
                     $financialprojectionArray[$projection->year] = $projection;
                 }
@@ -821,7 +826,8 @@ class ClientCompanyController extends Controller
                 'data',
                 'financialprojection',
                 'valuation_date',
-                'getCurrancy'
+                'getCurrancy',
+                'historicalValuationDates',
             ));
         } catch (Exception $e) {
             //log what happend
