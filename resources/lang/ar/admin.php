@@ -263,6 +263,7 @@ return [
 	'overall_status' => 'الحالة العامة',
 	'Due_Date' => 'تاريخ الاستحقاق',
 	'tags' => 'الأوسام',
+	'all_files_allowed' => 'جميع أنواع الملفات مسموح بها',
 	'startup_statuses' => 'حالات الشركات الناشئة',
 	'FileManagerRules' => 'يمكنك تحميل ملفات (pdf,doc,txt,xls,jpg,png) فقط، بحد أقصى 1 ميجا للصور، و 5 ميجا لملفات المستندات',
 	'EditType' => 'تحرير نوع الخدمات',
