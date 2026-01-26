@@ -3212,4 +3212,5 @@ return [
 	'required_evaluation_comment_message' => 'يرجى تقديم تعليقا نهائي قبل النشر',
 	'organization_based' => 'مؤسسة',
 	'uploading' => 'جاري التحميل...',
+	'Screening guidelines saved successfully' => 'تم حفظ الاهتمامات بنجاح',
 ];
