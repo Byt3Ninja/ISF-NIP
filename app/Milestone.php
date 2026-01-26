@@ -21,4 +21,9 @@ class Milestone extends Model
     {
         return $this->belongsTo(Company::class, 'company_id');
     }
+
+    public function scopePublic($query)
+    {
+        return $query->where('visibility', '!=', 'private');
+    }
 }
