@@ -426,12 +426,11 @@
 											<h4 class="primary">
 												<i class="bx bxs-bell"></i>
 												{{ $cycle->title }}
-											</h4>
-							
+											</h4>		
 											<div class="d-flex align-items-center mt-2">
 												<div class="media-left">
 													@if(!empty($cycle->organization->image_url))
-													<img src="{{ $cycle->organization->image_url }}" alt="{{ $cycle->organization->name }} avatar"
+													<img src="{{ route('organizations.logo', $cycle->organization->image_url ?? '') }}" alt="{{ $cycle->organization->name }} avatar"
 														class="rounded-circle" height="40" width="40">
 													@endif
 												</div>
