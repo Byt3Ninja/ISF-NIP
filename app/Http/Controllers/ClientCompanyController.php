@@ -362,20 +362,15 @@ class ClientCompanyController extends Controller
             ->select('valuation_date')
             ->distinct()
             ->orderBy('valuation_date', 'desc')
-            ->pluck('valuation_date')
-            ->toArray();
-
-            $historicalValuationDates = $availableValuationDates->map(function ($date) {
-                        return Carbon::parse($date)->format('Y-m');
-                    });
-
-            
-           
+            ->pluck('valuation_date');
+        $historicalValuationDates = $availableValuationDates->map(function ($date) {
+                    return Carbon::parse($date)->format('Y-m');
+                });
+        $availableValuationDates = $availableValuationDates->toArray();
         $valuationDate = request('valuation_date');
         if (!$valuationDate || !in_array($valuationDate, $availableValuationDates)) {
             $valuationDate = date('Y-m-01');
         }
-
         $periods = [];
         $valuationYear = (int) date('Y', strtotime($valuationDate));
         
