@@ -71,7 +71,7 @@ class ClientCompanyController extends Controller
         $this->middleware('auth');
         $this->companyService = $companyService;
     }
-    public function show($id)
+    public function show(Request $request, $id)
     {
         // try {
         $user = auth()->user();
@@ -362,25 +362,48 @@ class ClientCompanyController extends Controller
             ->select('valuation_date')
             ->distinct()
             ->orderBy('valuation_date', 'desc')
-            ->pluck('valuation_date');
-        $historicalValuationDates = $availableValuationDates->map(function ($date) {
-                    return Carbon::parse($date)->format('Y-m');
-                });
-        $availableValuationDates = $availableValuationDates->toArray();
-        $valuationDate = request('valuation_date');
-        if (!$valuationDate || !in_array($valuationDate, $availableValuationDates)) {
-            $valuationDate = date('Y-m-01');
-        }
-        $periods = [];
-        $valuationYear = (int) date('Y', strtotime($valuationDate));
+            ->pluck('valuation_date')
+            ->toArray();
         
-        $financials = FinancialProjection::where('company_id', $company->id)
-            ->where('valuation_date', $valuationDate)
-            ->orderBy('year')
-            ->get()
-            ->keyBy('year');
             
-       
+        
+        //$valuationDate = request('valuation_date');
+        //if (!$valuationDate || !in_array($valuationDate, $availableValuationDates)) {
+        //    $valuationDate = date('Y-m-01');
+        //}
+
+        
+        
+        
+        //$financials = FinancialProjection::where('company_id', $company->id)
+          //  ->where('valuation_date', $valuationDate)
+         //   ->orderBy('year')
+          //  ->get()
+          //  ->keyBy('year');
+
+        $periods = [];
+        $year = !empty($request->valuation_date)
+                    ? Carbon::parse($request->valuation_date)->year
+                    : (int) date('Y');
+
+                    
+        $valuation_dateSearch = $request->valuation_date ?? date('Y-m');
+        $valuationYear = (int) date('Y', strtotime($valuation_dateSearch));
+        $yearsRange = range($year - 1, $year + 2);
+        $financialprojectionArray = [];
+        foreach ($yearsRange as $_year) {
+            $financialprojectionArray[$_year] = [];
+        }
+        $Historyfinancialprojection = FinancialProjection::where('company_id', $id)
+            ->orderBy('valuation_date', 'desc')
+            ->get();
+            $availableValuationDates = $Historyfinancialprojection->pluck('valuation_date')->unique();
+            $financials = $Historyfinancialprojection->where('valuation_date', $valuation_dateSearch.'-01')->keyBy('year');
+            $historicalValuationDates = $availableValuationDates->map(function ($date) {
+                return Carbon::parse($date)->format('Y-m');
+            });
+            $valuationDate = $request->valuation_date ?? $valuation_dateSearch;
+ 
         $map = function ($fp) {
             return [
                 'revenue'        => (float) ($fp->revenues ?? 0),
