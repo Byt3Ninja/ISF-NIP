@@ -730,7 +730,7 @@ document.addEventListener('DOMContentLoaded', function () {
     card.querySelector('.milestone-completion').value = parseInt(card.querySelector('.milestone-completion-display').textContent);
     card.querySelector('.milestone-category').value = card.milestoneData.category || '';
     card.querySelector('.milestone-status').value = card.milestoneData.status || '';
-    card.querySelector('.milestone-date').value = card.milestoneData.date || '';
+    card.querySelector('.milestone-date').value = card.milestoneData.milestone_date || card.milestoneData.date || '';
     card.querySelector('.milestone-visibility').value = card.milestoneData.visibility || '';
     card.querySelector('.milestone-cohort').value = card.milestoneData.cohort || '';
 

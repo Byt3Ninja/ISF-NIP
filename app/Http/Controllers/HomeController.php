@@ -23,6 +23,7 @@ use App\BuilderForm;
 use App\Organization;
 use App\SurveyScopes;
 use App\ScreeningEvaluation;
+use App\Milestone;
 
 use App\Documentation;
 use App\Finalscreening;
@@ -1277,8 +1278,7 @@ class HomeController extends Controller
                 o.name_en AS `org_name_en`,
                 o.name_ar AS `org_name_ar`,
                 o.img_url AS `org_img_url`,
-                o.google_map_url AS `org_google_map_url`,
-                o.address AS `org_address`
+                o.google_map_url AS `org_google_map_url`
             FROM
                 mentorship_requests mr
             LEFT JOIN
@@ -1349,7 +1349,6 @@ class HomeController extends Controller
             $org->name = $_session->{'org_name_' . $l};
             $org->image_url = Organization::image_handler($_session->org_img_url);
             $org->google_map_url = $_session->org_google_map_url;
-            $org->address = $_session->org_address;
             $session->organization = $org;
             return $session;
         })->values();
@@ -2676,6 +2675,16 @@ class HomeController extends Controller
         $data['pollingNeeded'] = !$profileComplete || !$startupComplete;
         $settings = Settings::where('id', 1)->first();
 		$data['offline_allowed'] = $settings->allow_offline_sessions == 1 ? true : false;
+
+        // Fetch Startup Milestones
+        $milestones = collect();
+        if ($user->company_id) {
+            $milestones = Milestone::where('Company_id', $user->company_id)
+                ->orderBy('milestone_date', 'asc')
+                ->get();
+        }
+        $data['milestones'] = $milestones;
+
         return view('includes.dashboard', $data);
     }
     protected function adminDashboard()
