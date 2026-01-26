@@ -653,18 +653,12 @@ $('#task-upload').on('change', function () {
   const files = Array.from(this.files);
   if (!files.length) return;
 
-  const allowedExt = ['pdf', 'doc', 'docx', 'ppt', 'xls', 'png', 'jpeg', 'jpg'];
   const maxSize = 10 * 1024 * 1024; // 10MB
   const errors = [];
   const validFiles = [];
 
   files.forEach(file => {
     const ext = file.name.split('.').pop().toLowerCase();
-
-    if (!allowedExt.includes(ext)) {
-      errors.push(`{{ __('admin.invalid_file_format') }} (${file.name})`);
-      return;
-    }
 
     if (file.size > maxSize) {
       errors.push(`{{ __('admin.file_exceeds_limit') }} (${file.name})`);
