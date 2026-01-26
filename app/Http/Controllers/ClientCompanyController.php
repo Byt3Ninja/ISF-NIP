@@ -364,6 +364,12 @@ class ClientCompanyController extends Controller
             ->orderBy('valuation_date', 'desc')
             ->pluck('valuation_date')
             ->toArray();
+
+            $historicalValuationDates = $availableValuationDates->map(function ($date) {
+                        return Carbon::parse($date)->format('Y-m');
+                    });
+
+            
            
         $valuationDate = request('valuation_date');
         if (!$valuationDate || !in_array($valuationDate, $availableValuationDates)) {
@@ -500,7 +506,7 @@ class ClientCompanyController extends Controller
         'programsSummary',
         'periods',
         'valuationDate',
-        'availableValuationDates',
+        'historicalValuationDates',
         'achievements'));
         // } catch (Exception $e) {
         //     //log what happend
