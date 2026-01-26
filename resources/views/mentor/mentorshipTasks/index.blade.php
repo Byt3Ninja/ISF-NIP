@@ -587,15 +587,16 @@
 				'image/jpeg', 
 				'image/png', 
 				'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 
-				'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+				'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+				'application/vnd.openxmlformats-officedocument.presentationml.presentation'
 			];
 			const maxFileSize = 10 * 1024 * 1024; // 10 MB
 
 			for (const file of files) {
 				if (!allowedTypes.includes(file.type)) {
 					const errorMessage = lang === 'ar' 
-						? 'يسمح فقط بملفات PDF و DOCX و XLSX و JPG و JPEG و PNG.' 
-						: 'Only PDF, DOCX, XLSX, JPG, JPEG, and PNG files are allowed.';
+						? 'يسمح فقط بملفات PDF و DOCX و XLSX و PPTX و JPG و JPEG و PNG.' 
+						: 'Only PDF, DOCX, XLSX, PPTX, JPG, JPEG, and PNG files are allowed.';
 					releaseFailureAlert({ message: errorMessage });
 					return;
 				}
