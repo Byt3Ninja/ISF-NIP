@@ -2389,7 +2389,7 @@ class ClientCompanyController extends Controller
             $milestone->category = $request->category;
             $milestone->status = $request->status ?? 'Not Started';
             $milestone->completed = $request->status == 'Completed' ? 1 : 0;
-            $milestone->milestone_date = $request->milestone_date;
+            $milestone->milestone_date = $request->date;
             $milestone->visibility = $request->visibility;
             $milestone->cohort = $request->cohort;
             $milestone->Company_id = $id;
@@ -2422,6 +2422,7 @@ class ClientCompanyController extends Controller
                     'name' => $milestone->name,
                     'description' => $milestone->description,
                     'completion_percentage' => $milestone->completion_percentage,
+                    'milestone_date' => $milestone->milestone_date,
                     'documents' => $documents,
                 ],
             ]);
@@ -2500,7 +2501,7 @@ class ClientCompanyController extends Controller
             $milestone->category = $request->category;
             $milestone->status = $request->status ?? 'Not Started';
             $milestone->completed = $request->status == 'Completed' ? 1 : 0;
-            $milestone->milestone_date = $request->milestone_date;
+            $milestone->milestone_date = $request->date;
             $milestone->visibility = $request->visibility;
             $milestone->cohort = $request->cohort;
             $milestone->save();
@@ -2632,6 +2633,7 @@ class ClientCompanyController extends Controller
                     'name' => $milestone->name,
                     'description' => $milestone->description,
                     'completion_percentage' => $milestone->completion_percentage,
+                    'milestone_date' => $milestone->milestone_date,
                     'documents' => $finalDocuments,
                 ],
             ]);

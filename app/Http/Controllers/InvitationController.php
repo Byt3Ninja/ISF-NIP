@@ -180,8 +180,31 @@ class InvitationController extends Controller
         $invitation->save();
 
         dispatch(new SendInviteMentorEmail($invitation));
+    if($data['invitation_scope'] == 'Organization'){
+        $allOrganizations = Organization::whereIn('id', $data['organizations'])->get();
+        $organizationMap = collect($allOrganizations)->keyBy('id');
+        }else{
+            $organizationMap = [];
+        }
+       
+        $invitation = InviteMentor::where('id', $invitation->id)->get()->map(function ($invite) use ($organizationMap) {
 
-        $invitation = InviteMentor::where('id', $invitation->id)->get()->map(function ($invite) {
+         $orgIds = [];
+
+            if (is_string($invite->organization_ids)) {
+                $orgIds = json_decode($invite->organization_ids, true) ?? [];
+            } elseif (is_array($invite->organization_ids)) {
+                $orgIds = $invite->organization_ids;
+            }
+            
+            // جلب name لكل ID من الـ organizationMap
+            $organizations = collect($orgIds)->map(function ($id) use ($organizationMap) {
+                return $organizationMap->has($id) ? [
+                    'id' => $id,
+                    'name' => $organizationMap[$id]['name_en']
+                ] : null;
+            })->filter()->values()->toArray(); 
+
             return [
                 'invitee_name'     => $invite->name,
                 'invitee_email'    => $invite->email,
@@ -193,9 +216,10 @@ class InvitationController extends Controller
                 'created_at'       => $invite->created_at->format('Y-m-d H:i:s'),
                 'accepted_at'      => $invite->updated_at == $invite->created_at ? 'N/A' : $invite->updated_at->format('Y-m-d H:i:s'),
                 'attachments'      => $invite->attachments ?? [],
+                'organizations'    => $organizations,
             ];
         });
-        
+
         return response()->json(['success' => true,
          'message' => 'Invitation sent successfully.',
         'data' => $invitation], 200);
@@ -223,7 +247,7 @@ class InvitationController extends Controller
     public function updateFile(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|bail|mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx,pptx|max:10240',
+            'file' => 'required|file|bail|mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx,ppt,pptx|max:10240',
         ]);
 
         // استدعاء دالة الرفع

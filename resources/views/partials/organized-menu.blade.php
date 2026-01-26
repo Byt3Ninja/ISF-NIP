@@ -56,7 +56,7 @@ if (strpos(request()->getRequestUri(), 'mentorship/sessions') !== false) {
 }
 
 // Special case: Make startups active if URL contains '/companies'
-if (strpos(request()->getRequestUri(), '/companies') !== false) {
+if (strpos(request()->getRequestUri(), '/companies') !== false || strpos(request()->getRequestUri(), '/companyProfile') !== false) {
   $activeGroup = 'people';
   $activeItem = 'users.view_companies';
 }

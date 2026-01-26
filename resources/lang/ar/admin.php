@@ -263,6 +263,7 @@ return [
 	'overall_status' => 'الحالة العامة',
 	'Due_Date' => 'تاريخ الاستحقاق',
 	'tags' => 'الأوسام',
+	'all_files_allowed' => 'جميع أنواع الملفات مسموح بها',
 	'startup_statuses' => 'حالات الشركات الناشئة',
 	'FileManagerRules' => 'يمكنك تحميل ملفات (pdf,doc,txt,xls,jpg,png) فقط، بحد أقصى 1 ميجا للصور، و 5 ميجا لملفات المستندات',
 	'EditType' => 'تحرير نوع الخدمات',
@@ -3209,5 +3210,6 @@ return [
 	'please_correct_stage_or_category_or_subcategory_in_your_company' => 'يرجى تصحيح المرحلة او الفئة او الفئة الفرعية في شركتك',
 	'required_evaluation_scores_message' => 'يرجى إكمال جميع معايير التقييم قبل النشر',
 	'required_evaluation_comment_message' => 'يرجى تقديم تعليقا نهائي قبل النشر',
-	'organization_based' => 'مؤسسة'
+	'organization_based' => 'مؤسسة',
+	'uploading' => 'جاري التحميل...',
 ];

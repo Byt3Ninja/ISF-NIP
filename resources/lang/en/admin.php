@@ -268,6 +268,7 @@ return [
 	'overall_status' => 'Overall Status',
 	'Due_Date' => 'Due Date',
 	'tags' => 'Tags',
+	'all_files_allowed' => 'All file types allowed',
 	'startup_statuses' => 'Startup Statuses',
 	'FileManagerRules' => 'You can upload (pdf,doc,txt,xls,jpg,png) files only with maximum size 1M for images and 5M for pdf files',
 	'EditType' => 'Edit Type',
@@ -3154,4 +3155,5 @@ return [
 	'required_evaluation_scores_message' => 'Please complete all evaluation criteria before publishing',
 	'required_evaluation_comment_message' => 'Please provide a final comments before publishing',
 	'organization_based' => 'Organization Based',
+	'uploading' => 'Uploading...',
 ];

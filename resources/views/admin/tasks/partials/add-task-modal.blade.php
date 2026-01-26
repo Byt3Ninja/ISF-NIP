@@ -122,9 +122,9 @@
                 onclick="document.getElementById('task-upload').click()">
                 <i class="ti ti-cloud-upload mb-2"></i>
                 <div class="fw-medium">{{ __('mentor.single_dropzone_description') }}</div>
-                <div class="small text-muted mt-1">PDF, DOC, DOCX, PPT, XLS, PNG, JPEG up to 10MB</div>
+                <div class="small text-muted mt-1">{{ __('admin.all_files_allowed') }} up to 10MB</div>
               </div>
-              <input type="file" name="attachments" id="task-upload" class="d-none" accept=".pdf,.doc,.docx,.ppt,.xls,.png,.jpeg,.jpg" multiple>
+              <input type="file" name="attachments" id="task-upload" class="d-none" multiple>
               <div id="fileError" class="invalid-feedback mt-2" style="display: none;"></div>
               <div id="fileName" class="small mt-2" style="display: none;"></div>
             </div>

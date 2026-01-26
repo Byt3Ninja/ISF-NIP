@@ -129,7 +129,7 @@ class TasksController extends Controller
             'due_date' => 'nullable|date|after_or_equal:today',
             'tags' => 'nullable|array',
             'attachments' => 'nullable|array|max:10',
-            'attachments.*' => 'file|max:10240|mimes:pdf,docx,xlsx,png,jpg,jpeg',
+            'attachments.*' => 'file|max:10240',
         ]);
 
         if ($validator->fails()) {
@@ -152,19 +152,6 @@ class TasksController extends Controller
                             'message' => app()->getLocale() == 'ar' 
                                 ? 'يتجاوز حجم المرفق الحد المسموح به (10 ميجابايت)' 
                                 : 'Attachment size exceeds the allowed limit (10 MB).'
-                        ], 422);
-                    }
-
-                    // Validate file type
-                    $allowedExtensions = ['pdf', 'docx', 'xlsx', 'png', 'jpg', 'jpeg'];
-                    $extension = strtolower($file->getClientOriginalExtension());
-                    
-                    if (!in_array($extension, $allowedExtensions)) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => app()->getLocale() == 'ar'
-                                ? 'نوع الملف غير مدعوم. يرجى تحميل ملفات بصيغة PDF أو DOCX أو XLSX أو PNG أو JPG أو JPEG.'
-                                : 'Unsupported file type. Please upload files in PDF, DOCX, XLSX, PNG, JPG, or JPEG format.'
                         ], 422);
                     }
 
@@ -329,11 +316,6 @@ class TasksController extends Controller
                 foreach ($request->file('attachments') as $file) {
                     // Validate file size (10 MB)
                     if ($file->getSize() > 10485760) continue;
-
-                    // Validate file type
-                    $allowedExtensions = ['pdf', 'docx', 'xlsx', 'png', 'jpg', 'jpeg'];
-                    $extension = strtolower($file->getClientOriginalExtension());
-                    if (!in_array($extension, $allowedExtensions)) continue;
 
                     // Store the file
                     $path = $file->store('tasks/attachments', 'public');
