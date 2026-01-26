@@ -156,7 +156,7 @@ $pills = [
               
               @if (isset($form->id))
                 <div class="mb-3 px-3 py-2 bg-card rounded-2 border border-warning">
-                  <a href="{{ route('forms.render_view', $form->id) }}" class="d-flex align-items-start gap-3">
+                  <a href="{{ route('forms.render_view', $form->data) }}" class="d-flex align-items-start gap-3">
                   <div class="avatar">
                       <div class="avatar-initial rounded-circle bg-label-warning">
                         <i class="ti ti-file"></i>
