@@ -92,7 +92,7 @@
           </button>
         </div>
       </form>
-      @if($client->company)
+      @if($client->company && $client->company->shareholders)
       <div class="ShowTableShareholders mt-4">
         <div class="row">
           @foreach ($Shareholders as $Shareholder)
