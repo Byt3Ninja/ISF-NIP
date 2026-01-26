@@ -71,7 +71,7 @@ class ClientCompanyController extends Controller
         $this->middleware('auth');
         $this->companyService = $companyService;
     }
-    public function show($id)
+    public function show(Request $request, $id)
     {
         // try {
         $user = auth()->user();
@@ -364,22 +364,46 @@ class ClientCompanyController extends Controller
             ->orderBy('valuation_date', 'desc')
             ->pluck('valuation_date')
             ->toArray();
-           
-        $valuationDate = request('valuation_date');
-        if (!$valuationDate || !in_array($valuationDate, $availableValuationDates)) {
-            $valuationDate = date('Y-m-01');
-        }
+        
+            
+        
+        //$valuationDate = request('valuation_date');
+        //if (!$valuationDate || !in_array($valuationDate, $availableValuationDates)) {
+        //    $valuationDate = date('Y-m-01');
+        //}
+
+        
+        
+        
+        //$financials = FinancialProjection::where('company_id', $company->id)
+          //  ->where('valuation_date', $valuationDate)
+         //   ->orderBy('year')
+          //  ->get()
+          //  ->keyBy('year');
 
         $periods = [];
-        $valuationYear = (int) date('Y', strtotime($valuationDate));
-        
-        $financials = FinancialProjection::where('company_id', $company->id)
-            ->where('valuation_date', $valuationDate)
-            ->orderBy('year')
-            ->get()
-            ->keyBy('year');
-            
-       
+        $year = !empty($request->valuation_date)
+                    ? Carbon::parse($request->valuation_date)->year
+                    : (int) date('Y');
+
+                    
+        $valuation_dateSearch = $request->valuation_date ?? date('Y-m');
+        $valuationYear = (int) date('Y', strtotime($valuation_dateSearch));
+        $yearsRange = range($year - 1, $year + 2);
+        $financialprojectionArray = [];
+        foreach ($yearsRange as $_year) {
+            $financialprojectionArray[$_year] = [];
+        }
+        $Historyfinancialprojection = FinancialProjection::where('company_id', $id)
+            ->orderBy('valuation_date', 'desc')
+            ->get();
+            $availableValuationDates = $Historyfinancialprojection->pluck('valuation_date')->unique();
+            $financials = $Historyfinancialprojection->where('valuation_date', $valuation_dateSearch.'-01')->keyBy('year');
+            $historicalValuationDates = $availableValuationDates->map(function ($date) {
+                return Carbon::parse($date)->format('Y-m');
+            });
+            $valuationDate = $request->valuation_date ?? $valuation_dateSearch;
+ 
         $map = function ($fp) {
             return [
                 'revenue'        => (float) ($fp->revenues ?? 0),
@@ -500,7 +524,7 @@ class ClientCompanyController extends Controller
         'programsSummary',
         'periods',
         'valuationDate',
-        'availableValuationDates',
+        'historicalValuationDates',
         'achievements'));
         // } catch (Exception $e) {
         //     //log what happend
@@ -773,11 +797,16 @@ class ClientCompanyController extends Controller
                 }
                $getCurrancy = '';
               
-                $financialprojection = FinancialProjection::where('company_id', $id)
-                    ->where('valuation_date', $valuation_dateSearch.'-01')
-                    ->orderBy('year')
+                $Historyfinancialprojection = FinancialProjection::where('company_id', $id)
+                    ->orderBy('valuation_date', 'desc')
                     ->get();
-                   
+
+                    $historicalValuationProjections = $Historyfinancialprojection->pluck('valuation_date')->unique();
+                    $financialprojection = $Historyfinancialprojection->where('valuation_date', $valuation_dateSearch.'-01');
+                    $historicalValuationDates = $historicalValuationProjections->map(function ($date) {
+                        return Carbon::parse($date)->format('Y-m');
+                    });
+                  
                 foreach ($financialprojection as $projection) {
                     $financialprojectionArray[$projection->year] = $projection;
                 }
@@ -821,7 +850,8 @@ class ClientCompanyController extends Controller
                 'data',
                 'financialprojection',
                 'valuation_date',
-                'getCurrancy'
+                'getCurrancy',
+                'historicalValuationDates',
             ));
         } catch (Exception $e) {
             //log what happend

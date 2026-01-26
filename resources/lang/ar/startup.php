@@ -514,4 +514,10 @@ return [
   'please_select_valuation_date_before_saving' => 'يرجى اختيار تاريخ التقييم قبل حفظ النموذج',
   'valuation_date_changed' => 'تغير تاريخ التقييم',
   'valuation_date_changed_message' => 'تغيير تاريخ التقييم سوف يؤثر على المقاييس المالية.',
+
+  'click_calendar_to_enter_new_or_history_to_view_past' => 'انقر على التقويم لاضافة تاريخ جديد او استعراض التواريخ الماضية',
+  'previous_valuation_dates' => 'تواريخ التقييم السابقة',
+  'current' => 'الحالي',
+  'view_history' => 'عرض التاريخ',
+  'select_new_date' => 'حدد تاريخ جديد',
 ];

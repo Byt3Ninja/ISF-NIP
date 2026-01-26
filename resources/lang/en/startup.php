@@ -513,4 +513,10 @@ return [
   'please_select_valuation_date_before_saving' => 'Please select a valuation date before saving the form.',
   'valuation_date_changed' => 'valuation date changed',
   'valuation_date_changed_message' => 'Changing the valuation date will impact the financial metrics.',
+
+  'click_calendar_to_enter_new_or_history_to_view_past' => 'Click calendar to enter new or history to view past',
+  'previous_valuation_dates' => 'Previous Valuation Dates',
+  'current' => 'Current',
+  'view_history' => 'View History',
+  'select_new_date' => 'Select New Date',
 ];

@@ -204,19 +204,24 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
     </div>
 
     @include('admin.clients.startup.partials._startup_info')
+
+    @php
+      $activeKey = request()->has('valuation_date') ? 5 : 0;
+    @endphp
     
     <nav class="nav-align-top mb-8">
-      <ul class="nav nav-pills flex-column flex-md-row gap-2 gap-lg-0" role="tablist">
+      <ul class="nav nav-pills flex-column flex-lg-row flex-lg-nowrap overflow-x-auto gap-2 gap-lg-0" role="tablist">
         @foreach ($pills as $key => $pill)
           <li class="nav-item">
-            <a href="#{{ $pill }}" 
-              class="nav-link {{$key == 0 ? 'active' : ''}}" 
+            <a
+              href="#{{ $pill }}"
+              class="nav-link px-4 {{ $key === $activeKey ? 'active' : '' }}"
               data-bs-toggle="tab"
-              role="tab" 
-              aria-controls="{{ $pill }}" 
-              aria-selected="true" 
+              role="tab"
+              aria-controls="{{ $pill }}"
+              aria-selected="true"
             >
-              <i class="ti-sm ti ti-{{ $pillsIcons[$key] }} me-1_5"></i>
+              <i class="ti-sm ti ti-{{ $pillsIcons[$key] }} me-1"></i>
               {{ __('startup.' . $pill) }}
             </a>
           </li>
@@ -226,7 +231,7 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
 
     <div class="tab-content p-0 rounded mb-6">
       <!-- Overview Section -->
-      <section class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+      <section class="tab-pane fade {{ $activeKey == 0 ? 'show active' : '' }}" id="overview" role="tabpanel" aria-labelledby="overview-tab">
         @include('admin.clients.startup.partials._startup_overview')
         @include('admin.clients.startup.partials._startup_about')
       </section>
@@ -263,7 +268,7 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
       </section>
       
       <!-- Financial Section -->
-      <section class="tab-pane fade" id="financial_report" role="tabpanel" aria-labelledby="financial-report-tab">
+      <section class="tab-pane fade {{ $activeKey == 5 ? 'show active' : '' }}" id="financial_report" role="tabpanel" aria-labelledby="financial-report-tab">
         @include('admin.clients.startup.partials._startup_financial_report')
       </section>
     </div>

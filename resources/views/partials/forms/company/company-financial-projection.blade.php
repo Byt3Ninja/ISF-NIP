@@ -2,13 +2,21 @@
 	.flatpickr-monthSelect-month.selected {
 		background-color: var(--bs-primary) !important;
 	}
+	.valuation-history-dropdown {
+		max-height: 300px;
+		overflow-y: auto;
+	}
 </style>
 
-<div class="card">
+<div class="card" dir="{{ $l == 'en' ? 'ltr' : 'rtl' }}">
 	{{-- MERGE financialProjection VALUES INTO $sections --}}
 	@php
 			$requestDate = request()->get('valuation_date');
 			$currentDate = $requestDate ?? (isset($valuation_date) ? $valuation_date : null);
+			
+			// Get historical valuation dates
+			$historicalDates = $historicalValuationDates ?? [];
+			
 			// -----------------------
 			// DEFINE SECTIONS FIRST
 			// -----------------------
@@ -114,7 +122,6 @@
 			}
 	@endphp
 	{{-- END MERGE --}}
-
 	 <form  method="post" enctype="multipart/form-data" action="{{ route('company.profile_update_mine', isset($client) && $client->company ? $client->company->id : auth()->user()->id) }}">
     {!! csrf_field() !!}
 		<div class="card-header border-bottom">
@@ -124,31 +131,63 @@
 		
 		<input name="CompanyN" type="hidden" value="15">
 		<div class="card-body">
-			<div class="row">
-				<div class="col-lg-4">
-					<div class="d-flex align-items-center gap-2 mb-3 mb-md-0">
-						<label for="valuationDate" class="form-label text-nowrap">
-						{{ __('startup.valuation_date') }} <span class="text-danger">*</span>
+			<div class="row g-6">
+				<div class="col-lg-5">
+					<div class="mb-3 mb-md-0">
+						<label for="valuationDate" class="form-label">
+							{{ __('startup.valuation_date') }} <span class="text-danger">*</span>
 						</label>
-						<input type="hidden" id="valuationDateHidden" name="valuation_date" value="{{ $currentDate ? $currentDate : date('Y-m') }}">
-						{{-- Format date for display --}}
-						<input type="text" class="form-control" id="valuationDate" value="{{ $currentDate ? $currentDate : date('Y-m') }}" name="valuation_date"required>
+						<div class="input-group">
+							<input type="hidden" id="valuationDateHidden" name="valuation_date" value="{{ $currentDate ? $currentDate : date('Y-m') }}">
+							<input type="text" class="form-control rounded-start" id="valuationDate" value="{{ $currentDate ? $currentDate : date('Y-m') }}" name="valuation_date" required readonly>
+							
+							<button class="btn btn-outline-primary" type="button" id="openDatePicker" title="{{ __('startup.select_new_date') }}">
+								<i class="ti ti-calendar-plus"></i>
+							</button>
+							
+							@if(count($historicalDates) > 0)
+								<button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="{{ __('startup.view_history') }}">
+									<i class="ti ti-history"></i>
+								</button>
+								<ul class="dropdown-menu dropdown-menu-end valuation-history-dropdown">
+									<li class="dropdown-header">{{ __('startup.previous_valuation_dates') }}</li>
+									<li><hr class="dropdown-divider"></li>
+									@foreach($historicalDates as $histDate)
+										<li>
+											<a class="dropdown-item valuation-history-item d-flex justify-content-between align-items-center" 
+												 href="#" 
+												 data-date="{{ $histDate }}">
+												<span>
+													<i class="ti ti-calendar me-2"></i>
+													{{ \Carbon\Carbon::parse($histDate)->format('F Y') }}
+												</span>
+												@if($histDate === $currentDate)
+													<span class="badge bg-primary ms-2">{{ __('startup.current') }}</span>
+												@endif
+											</a>
+										</li>
+									@endforeach
+								</ul>
+							@endif
+						</div>
+						<small class="text-muted">
+							{{ __('startup.click_calendar_to_enter_new_or_history_to_view_past') }}
+						</small>
 					</div>
 				</div>
 				@php
-								$getCurrancy = $getCurrancy ? $getCurrancy : auth()->user()->currency;
-							@endphp
+					$getCurrancy = $getCurrancy ? $getCurrancy : auth()->user()->currency;
+				@endphp
 							
 				<div class="col-lg-4">
-					<div class="d-flex align-items-center gap-2 mb-3 mb-md-0">
-						<label for="Currency" class="form-label text-nowrap">
-						{{ __('settings.Currency') }} <span class="text-danger">*</span>
+					<div class="mb-3 mb-md-0">
+						<label for="Currency" class="form-label">
+							{{ __('settings.Currency') }} <span class="text-danger">*</span>
 						</label>
 						<select class="form-control form-select" name="Currency" id="Currency" required>
 							<option value="" disabled>{{ __('settings.Currency') }}</option>
 							
 							@foreach ($Currencies as $Currency)
-							
 								<option value="{{ $Currency->currency_code }}"
 									{{ $getCurrancy == $Currency->currency_code ? 'selected' : '' }}>
 									{{ __('admin.' . $Currency->currency_name) }}
@@ -157,8 +196,8 @@
 						</select>
 					</div>
 				</div>
-				<div class="col-lg-4">
-					<div class="d-flex justify-content-end align-items-center">
+				<div class="col-lg-3">
+					<div class="d-flex justify-content-end align-items-center h-100">
 						<button type="submit" class="btn btn-primary">
 							<i class="ti ti-device-floppy me-2"></i>
 							{{ __('admin.Save_Changes') }}
@@ -170,7 +209,7 @@
 
     <div class="card-datatable table-responsive">
       <table class="datatable-basic table mb-0" id="financialTable">
-        <thead class="table-light">
+        <thead class="bg-label-light">
           <tr>
             <th class="col-label">
 							{{ __('startup.line_item') }} {{ !empty($getCurrancy) ? ' ( ' . __('admin.' . $getCurrancy) . ' )' : '' }}
@@ -193,7 +232,7 @@
 
             @foreach ($section['rows'] as $row)
               @if (isset($row['calculated']) && $row['calculated'])
-                <tr class="row-calculated bg-light-subtle">
+                <tr class="row-calculated bg-label-light">
                   <td class="col-label">{{ __($row['label']) }}</td>
                   @for ($i = 0; $i < 4; $i++)
                     <td>
@@ -242,23 +281,27 @@
 // Financial Projection Form Logic
 document.addEventListener('DOMContentLoaded', function () {
 
-	let currentValuationDate = "{{ $currentDate ? $currentDate : '' }}"; // Track current valuation date
-	const oldValuationDate = "{{ isset($valuation_date) ? $valuation_date : '' }}"; // Injected from backend
+	let currentValuationDate = "{{ $currentDate ? $currentDate : '' }}";
+	const oldValuationDate = "{{ isset($valuation_date) ? $valuation_date : '' }}";
+	const historicalDates = @json($historicalDates ?? []);
+	
 	console.log('currentValuationDate', currentValuationDate);
 	console.log('oldValuationDate', oldValuationDate);
+	console.log('historicalDates', historicalDates);
 
 	const dateInput = document.getElementById('valuationDate');
-	const valudationDateHidden = document.getElementById('valuationDateHidden');
+	const valuationDateHidden = document.getElementById('valuationDateHidden');
 	const formInputs = document.querySelectorAll('.input-trigger');
+	const form = document.querySelector('form');
 
 	// Initialize Flatpickr for Valuation Date
-	flatpickr('#valuationDate', {
+	const flatpickrInstance = flatpickr('#valuationDate', {
 		defaultDate: currentValuationDate ? new Date(currentValuationDate) : oldValuationDate ? new Date(oldValuationDate) : null,
 		plugins: [
 			new monthSelectPlugin({
-				shorthand: true,      // Jan, Feb, Mar
-				dateFormat: "Y-m",    // value format
-				altFormat: "F Y",     // display format
+				shorthand: true,
+				dateFormat: "Y-m",
+				altFormat: "F Y",
 			})
 		],
 		onChange: function (selectedDates) {
@@ -266,25 +309,40 @@ document.addEventListener('DOMContentLoaded', function () {
 				const valDate = moment(selectedDates[0]);
 				const valDateStr = valDate.format("YYYY-MM");
 
-				// Redirect with valuation_date param
-				const url = new URL(window.location.href);
-				url.searchParams.set('valuation_date', valDateStr);
-				window.location.href = url.href;
-
-				updateHeaders();
 				currentValuationDate = valDateStr;
-				valudationDateHidden.value = valDateStr;
+				valuationDateHidden.value = valDateStr;
+				updateHeaders();
 
 				$(this.input).removeClass('is-invalid');
+
+				window.location.href='?valuation_date='+valDateStr;
 			}
 		}
 	});
 
+	// Handle "Open Date Picker" button click
+	document.getElementById('openDatePicker').addEventListener('click', function(e) {
+		e.preventDefault();
+		flatpickrInstance.open();
+	});
+
+	// Handle historical date selection
+	document.querySelectorAll('.valuation-history-item').forEach(item => {
+		item.addEventListener('click', function(e) {
+			e.preventDefault();
+			const selectedDate = this.getAttribute('data-date');
+			
+			// Redirect with the selected valuation date
+			const url = new URL(window.location.href);
+			url.searchParams.set('valuation_date', selectedDate);
+			window.location.href = url.href;
+		});
+	});
+
 	updateHeaders();
 
-	// 2. Input Change Listener (for all financial inputs)
+	// Input Change Listener (for all financial inputs)
 	formInputs.forEach(input => {
-		// Enforce max length of 15
 		input.addEventListener('input', function () {
 			if (this.value.length > 15) {
 				this.value = this.value.slice(0, 15);
@@ -300,24 +358,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
 		const valDate = moment(valDateStr);
 
-		// Definitions
-		// Past Year: 12 months before Val Date
 		const pastStart = moment(valDate).subtract(1, 'year');
 		const pastEnd = moment(valDate).subtract(1, 'day');
 
-		// Forecast Y1: 12 months starting Val Date
 		const fy1Start = moment(valDate);
 		const fy1End = moment(valDate).add(1, 'year').subtract(1, 'day');
 
-		// Year 2
 		const y2Start = moment(fy1End).add(1, 'day');
 		const y2End = moment(y2Start).add(1, 'year').subtract(1, 'day');
 
-		// Year 3
 		const y3Start = moment(y2End).add(1, 'day');
 		const y3End = moment(y3Start).add(1, 'year').subtract(1, 'day');
 
-		// Helper to format
 		const fmt = (s, e) => `${s.format('MM/YYYY')} – ${e.format('MM/YYYY')}`;
 
 		document.querySelector('#header-year-0 small').textContent = fmt(pastStart, pastEnd);
@@ -339,12 +391,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	// Main Calculation Logic
 	function calculateAll() {
-		// Loop through 4 years (0 to 3)
-		let prevWC = 0; // Previous year WC placeholder
-		let prevDebt = 0; // Previous year Debt placeholder
+		let prevWC = 0;
+		let prevDebt = 0;
 
 		for (let i = 0; i < 4; i++) {
-			// --- Inputs ---
 			const rev = getVal(`rev_${i}`);
 			const cogs = getVal(`cogs_${i}`);
 			const sal = getVal(`sal_${i}`);
@@ -361,35 +411,22 @@ document.addEventListener('DOMContentLoaded', function () {
 			const capex = getVal(`capex_${i}`);
 			const debt = getVal(`debt_${i}`);
 
-			// --- Formulas ---
-
-			// EBITDA = Revenues − COGS − Salaries − Other Operating Expenses
 			const ebitda = rev - cogs - sal - opex;
 			document.getElementById(`ebitda_${i}`).value = fmtNum(ebitda);
 
-			// EBIT = EBITDA − D&A
 			const ebit = ebitda - da;
 			document.getElementById(`ebit_${i}`).value = fmtNum(ebit);
 
-			// Net Profit = EBIT − Interest − Taxes
 			const netProfit = ebit - int - tax;
 			document.getElementById(`np_${i}`).value = fmtNum(netProfit);
 
-			// Working Capital = Receivables + Inventory − Payables
 			const wc = rec + inv - pay;
 			document.getElementById(`wc_${i}`).value = fmtNum(wc);
 
-			// Change in Working Capital & Debt Change
 			let deltaWC = 0;
 			let debtChange = 0;
 
-			// Logic: For Past Year (i=0), we don't have "Previous Year" data in this form.
-			// We assume 0 change or N/A. Here we calculate it as Current - 0 (which is just current)
-			// or treat it as 0 change for calculation safety. 
-			// Typically in financial modeling, Year 0 Delta is usually 0 if no Year -1 exists.
-
 			if (i === 0) {
-				// Start of model, assume no delta impact or strictly based on 0
 				deltaWC = 0;
 				debtChange = 0;
 				document.getElementById(`dwc_${i}`).value = "-";
@@ -401,49 +438,46 @@ document.addEventListener('DOMContentLoaded', function () {
 				document.getElementById(`ddebt_${i}`).value = fmtNum(debtChange);
 			}
 
-			// FCF = Net Profit + D&A − Capital Expenditures − Change in Working Capital
 			const fcf = netProfit + da - capex - deltaWC;
 			document.getElementById(`fcf_${i}`).value = fmtNum(fcf);
 
-			// Store current values as "Previous" for next iteration
 			prevWC = wc;
 			prevDebt = debt;
 		}
 	}
 
-	$('#financialForm').on('submit', function (e) {
-		e.preventDefault();
-
+	form.addEventListener('submit', function (e) {
 		if (!currentValuationDate) {
-			releaseWarningAlert({
-				title: '{{ __("startup.valuation_date_required") }}',
-				message: '{{ __("startup.please_select_valuation_date_before_saving") }}',
-			});
+			e.preventDefault();
+			
+			if (typeof releaseWarningAlert === 'function') {
+				releaseWarningAlert({
+					title: '{{ __("startup.valuation_date_required") }}',
+					message: '{{ __("startup.please_select_valuation_date_before_saving") }}',
+				});
+			}
 
 			$('#valuationDate').addClass('is-invalid');
-
-			return;
+			return false;
 		}
 
-		// Get valuation date
 		if (currentValuationDate !== oldValuationDate) {
-			// Valuation date changed, you can handle any specific logic here if needed
-			console.log('Valuation date has changed.');
-			releaseWarningAlert({
-				title: '{{ __("startup.valuation_date_changed") }}',
-				message: '{{ __("startup.valuation_date_changed_message") }}',
-				onConfirm: () => {
-					const url = new URL(window.location.href);
-					url.searchParams.set('valuation_date', currentValuationDate);
-					window.location.href = url.href;
-				}
-			});
-
-			return;
+			e.preventDefault();
+			
+			if (typeof releaseWarningAlert === 'function') {
+				releaseWarningAlert({
+					title: '{{ __("startup.valuation_date_changed") }}',
+					message: '{{ __("startup.valuation_date_changed_message") }}',
+					onConfirm: () => {
+						const url = new URL(window.location.href);
+						url.searchParams.set('valuation_date', currentValuationDate);
+						window.location.href = url.href;
+					}
+				});
+			}
+			
+			return false;
 		}
-
-		// Submit the form
-		this.submit();
 	});
 });
 </script>

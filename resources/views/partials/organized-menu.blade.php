@@ -184,7 +184,7 @@ $getSetting = App\Settings::find(1);
               <li 
                 class="menu-item 
                 {{ $_user->hasRole('Admin') && $child['title'] === 'reminder_logs' ? 'd-none' : '' }} 
-                {{ in_array(env('APP_ENV'), ['production', 'beta']) && ($child['title'] === 'timesheets' || $child['title'] === 'projects') ? 'd-none' : '' }} 
+                {{ app()->environment(['production', 'beta']) && ($child['title'] === 'timesheets' || $child['title'] === 'projects') ? 'd-none' : '' }} 
                 {{ $child['route'] === $activeItem ? 'active' : '' }}"
               >
                 <a 
