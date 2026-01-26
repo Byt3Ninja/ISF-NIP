@@ -1476,7 +1476,7 @@
 									<!-- Vertical line -->
 									<div class="bg-light ms-2" style="position:absolute; top:0; bottom:0; start:10px; width:2px;"></div>
 									@foreach ($milestones as $milestone)
-										<div class="d-{{ $milestone->visibility === 'private' ? 'none' : 'flex' }} mb-4 position-relative ps-8">
+										<div class="d-flex mb-4 position-relative ps-8">
 											<div class="position-absolute top-0 start-0 me-3">
 												<div class="rounded-circle w-px-20 h-px-20 d-flex justify-content-center align-items-center
 														{{
