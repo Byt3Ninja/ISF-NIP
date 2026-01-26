@@ -104,7 +104,7 @@
           </button>
         </div>
       </form>
-      @if($client->company)
+      @if($client->company && $client->company->founders)
       <div class="ShowTableFounders mt-4">
         @foreach ($founders as $fonder)
         <div class="card shadow-sm mb-4 position-relative">
