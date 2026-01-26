@@ -45,7 +45,13 @@ return function () {
   }
 
   if ($user && $user->hasRole('Registered')) {
-    return [
+    if($user->HaveCompany == 1){
+      $show = true;
+    }else{
+      $show = false;
+    }
+    
+    $menuReg = [
       'dashboard' => [
         'title' => null,
         'children' => [
@@ -58,7 +64,7 @@ return function () {
       'startup' => [
         'title' => 'startup_workspace',
         'children' => [
-          ['title' => 'my_company', 'route' => 'company.profile_view', 'menuOnly' => true],
+          ['title' => 'my_company', 'route' => 'company.profile_view', 'menuOnly' => $show],
           ['title' => 'analysis_and_assessment', 'route' => 'assessments.results_analysis_view', 'menuOnly' => true],
           ['title' => 'questions_assessment', 'route' => 'assessments.take', 'menuOnly' => false],
           ['title' => 'history_assessment', 'route' => 'assessments.results_history_view', 'menuOnly' => false],
@@ -101,6 +107,7 @@ return function () {
         ]
       ]
     ];
+    return $menuReg;
   }
 
   $menu = [
