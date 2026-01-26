@@ -973,7 +973,7 @@ class ScreeningController extends Controller
 				return response()->json([
 					'status' => true,
 					'title' => 'saved',
-					'message' => 'Screening guidelines saved successfully'
+					'message' => __('admin.Screening guidelines saved successfully')
 				]);
 			}
 		}
