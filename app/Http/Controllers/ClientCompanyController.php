@@ -774,7 +774,7 @@ class ClientCompanyController extends Controller
                $getCurrancy = '';
               
                 $Historyfinancialprojection = FinancialProjection::where('company_id', $id)
-                    ->orderBy('valuation_date')
+                    ->orderBy('valuation_date', 'desc')
                     ->get();
 
                     $historicalValuationProjections = $Historyfinancialprojection->pluck('valuation_date')->unique();
