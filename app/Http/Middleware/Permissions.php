@@ -33,6 +33,7 @@ class Permissions
         'organization.wizard.draft.update',
         'organization.wizard.publish',
         'provider-registration',
+        'hackathon.trackShare',
         'filemanager*',
         'dashboard',
         'dashboard/dashboard',

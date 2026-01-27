@@ -6,6 +6,8 @@ use App\User;
 use App\Cycle;
 use App\Almuni;
 use App\Country;
+use App\State;
+use App\City;
 use App\Activity;
 use App\Currency;
 use App\Schedule;
@@ -67,18 +69,22 @@ class ClientProfileController extends Controller
                 $country['flag'] = URL::to('app-assets/images/flags/' . strtolower($country['iso2']) . '.svg');
                 return $country;
             });
-            $countries = $countries->map(function ($country) use ($_countries) {
-                $getCountry = $_countries->where('iso3', $country->iso3)->first();
-                $flag = null;
-                $emoji = null;
-                if (!empty($getCountry)) {
-                    $flag = $getCountry['flag'];
-                    $emoji = $getCountry['emoji'];
-                }
-                $country->flag = $flag;
-                $country->emoji = $emoji;
-                return $country;
-            });
+            // $countries = $countries->map(function ($country) use ($_countries) {
+            //     $getCountry = $_countries->where('iso3', $country->iso3)->first();
+            //     $flag = null;
+            //     $emoji = null;
+            //     if (!empty($getCountry)) {
+            //         $flag = $getCountry['flag'];
+            //         $emoji = $getCountry['emoji'];
+            //     }
+            //     $country->flag = $flag;
+            //     $country->emoji = $emoji;
+            //     return $country;
+            // });
+
+            $countries = Country::all();
+            $states = collect();
+            $cities = collect();
 
 
             $google2fa_url = "";
@@ -106,7 +112,7 @@ class ClientProfileController extends Controller
         $activities = Activity::where('user_id', Auth::user()->id)
         ->orderBy('activity_time', 'desc')
         ->get();
-            return view('admin/clients/profile/editProfile', compact('client', 'Currencies', 'countries', 'expertises', 'data','activities', 'industries'));
+            return view('admin/clients/profile/editProfile', compact('client', 'Currencies', 'countries', 'states', 'cities', 'expertises', 'data','activities', 'industries'));
         } catch (Exception $e) {
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);

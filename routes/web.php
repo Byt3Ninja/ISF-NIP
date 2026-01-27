@@ -119,6 +119,10 @@ Auth::routes(['verify' => true]);
 Route::get('organizations/set-password/{invitationId}', 'SettingsController@showSetPasswordForm')->name('invitations.set_password_view_form');
 Route::post('organizations/settings/accept/{invitationId}', 'SettingsController@acceptInvitation')->name('invitations.accept');
 
+// Public share tracking routes (no authentication required)
+Route::post('hackathon/track-share', [App\Http\Controllers\HackathonController::class, 'trackShare'])->name('hackathon.trackShare');
+Route::post('hackathon/track-program-share', [App\Http\Controllers\HackathonController::class, 'trackProgramShare'])->name('hackathon.trackProgramShare');
+
 // InviteMentor attachments (public access)
 
 Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa']], function () {
@@ -203,6 +207,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     Route::get('hackathon/details/{id}', [HackathonController::class, 'show']);
     Route::post('hackathon/likeProject', [HackathonController::class, 'likeProject']);
+    Route::get('hackathon/{hackathonId}/solution/{solutionId}', [HackathonController::class, 'showSolution'])->name('hackathon.solution.show');
 
     // Service Providers
 
