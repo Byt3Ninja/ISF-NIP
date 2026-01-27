@@ -109,7 +109,7 @@ $pills = [
             <!-- Program / Organization -->
             <div class="col-md-6">
               <div class="mb-3 px-3 py-2 bg-card rounded-2 border border-primary">
-                <a href="{{ route('cycles.list', $cstep->cycle->id) }}" class="d-flex align-items-start gap-3">
+                <a href="{{ '/dashboard/programlist/'.$cstep->cycle->id }}" class="d-flex align-items-start gap-3">
                   <div class="avatar">
                     <div class="avatar-initial rounded-circle bg-label-primary">
                       <i class="ti ti-rocket"></i>
@@ -154,7 +154,7 @@ $pills = [
                 </div>
               </div>
               
-              @if (isset($form->id))
+              @if (isset($form->data))
                 <div class="mb-3 px-3 py-2 bg-card rounded-2 border border-warning">
                   <a href="{{ route('forms.render_view', $form->data) }}" class="d-flex align-items-start gap-3">
                   <div class="avatar">
