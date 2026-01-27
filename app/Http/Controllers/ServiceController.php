@@ -11,6 +11,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\{Auth, Notification};
 use App\Http\Requests\{StoreServiceRequest, UpdateServiceRequest};
 use App\Notifications\{TemplateEmail, ServiceRequestNotification};
+use Illuminate\Pagination\LengthAwarePaginator;
 use App\{User, Settings, Currency, Service, Organization, ServiceCategory, serviceProviders, ServicesRequests};
 
 class ServiceController extends Controller
@@ -34,13 +35,31 @@ class ServiceController extends Controller
 	{
 		$user = auth()->user();
 		$orgIds = $user->organizations_ids;
-		$services = Service::with(['serviceCategory', 'organizations'])
+		$Setting = Settings::where('id', 1)->first();
+		$services = Service::with(['serviceCategory', 'organizations', 'requests'])
 			->when($user->hasRole('serviceProvider'), function ($query) use ($user) {
 				$provider_id = $user?->service_provider?->id ?? 0;
 				$query->where('service_provider_id', $provider_id);
 			})
-			->whereHas('organizations', function ($q) use ($orgIds) {
-				$q->whereIn('organizations.id', $orgIds);
+			->when($user->hasRole('registered'), function ($query) {
+				$query->where('status', true);
+			})
+			->when(!$user->hasRole('serviceProvider'), function ($query) use ($orgIds, $user) {
+				if( $user->hasRole('registered') )
+				{
+					$query->whereHas('organizations', function ($q) use ($orgIds) {
+						$q->whereIn('organizations.id', $orgIds);
+					});
+				}
+				else
+				{
+					$query->where(function ($q) use ($orgIds) {
+						$q->whereHas('organizations', function ($subQ) use ($orgIds) {
+							$subQ->whereIn('organizations.id', $orgIds);
+						})
+						->orWhereDoesntHave('organizations');
+					});
+				}
 			})
 			->when($request->has('search') && !empty($request->search), function ($query) use ($request) {
 				$query->where(function ($q) use ($request) {
@@ -70,9 +89,23 @@ class ServiceController extends Controller
 				$query->where('status', $request->status);
 			})
 			->orderBy('created_at', 'desc')
-			->paginate(9);
-			$Setting = Settings::where('id', 1)->first();
-			return view('admin/settings/services/index', compact('services', 'Setting'));
+		->get();
+
+		$services = $services->map(function ($service) {
+			$rating = $service->requests->whereNotNull('rate')->where('approved', true)->avg('rate') ?? 0;
+			$service->rating = $rating;
+			return $service;
+		})
+		->when($request->has('rate') && $request != 'all' && is_numeric($request->rate), function ($query) use ($request) {
+			return $query->filter(function($service) use ($request) {
+				return $service->rating >= $request->rate && $service->rating <= $request->rate + 0.99;
+			})->values();
+		});
+		// custom pagination
+		$services = new LengthAwarePaginator($services, $services->count(), 9, 1, [
+			'path' => LengthAwarePaginator::resolveCurrentPath(),
+		]);
+		return view('admin/settings/services/index', compact('services', 'Setting'));
 	}
 	public function exportExcel(Request $request)
     {	
@@ -377,11 +410,21 @@ class ServiceController extends Controller
 
 	public function availableServices(Request $request)
 	{
+		$user = auth()->user();
+		$orgIds = $user->organizations_ids;
+
 		$t = $request->input('type');
 		$find = $request->input('find');
-		$services = Service::with('serviceCategory')
+		$services = Service::with(['serviceCategory', 'organizations'])
 			->where('status', true)
-			->whereHas('organizations')
+			->when($user->hasRole('serviceProvider'), function ($query) use ($user) {
+				$provider_id = $user?->service_provider?->id ?? 0;
+				$query->where('service_provider_id', $provider_id);
+			})
+			->whereHas('organizations', function ($q) use ($orgIds) {
+				$q->whereIn('organizations.id', $orgIds);
+			})
+		->orderBy('created_at', 'desc')
 		->get();
 
 		$services = $services->map(function ($service) {

@@ -90,6 +90,7 @@
                           </select>
                         </fieldset>
 
+                        @if( $organizations->count() > 0 )
                         <fieldset class="form-group mb-4">
                           <label class="form-label">{{ __('admin.Organizations') }}</label>
                           <div class="row">
@@ -107,6 +108,7 @@
                             @endforeach
                           </div>
                         </fieldset>
+                        @endif
 
                         @if( !$_user->hasRole('serviceProvider') )
                         <!-- Vendor Details -->
