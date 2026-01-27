@@ -113,8 +113,8 @@ class CompanyRepository
         }
 
         return $isApi
-            ? $query->paginate($filters['limit'] ?? 10)
-            : $query->paginate(9);
+            ? $query->paginate($filters['limit'] ?? 10)->withQueryString()
+            : $query->paginate(9)->withQueryString();
     }
 
      public function findWithRelations($id)
