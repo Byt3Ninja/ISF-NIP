@@ -74,11 +74,15 @@ class ScreeningEvaluationResults extends Model
 		if( $getStep?->stype == 5 )
 		{
 			$finals = Finalscreening::where('step_id', $step_id)->with(['company', 'company.users'])->get()->map(function( $f ) {
-				$f->judgers_ids = array_map(function( $i ) { return intval( $i ); }, $f->judges);
+				$judges = $f->judges;
+				if( !is_array( $judges ) ) { $judges = json_decode( $f->judges ); }
+				$f->judgers_ids = array_map(function( $i ) { return intval( $i ); }, $judges);
 				return $f;
 			});
 			$users_ids = $finals->map(function( $u ) {
-				return array_map(function( $i ) { return intval( $i ); }, $u->judges);
+				$judges = $u->judges;
+				if( !is_array( $judges ) ) { $judges = json_decode( $u->judges ); }
+				return array_map(function( $i ) { return intval( $i ); }, $judges);
 			})->flatten()->unique()->values();
 
 			$judges = User::whereIn('id', $users_ids)->get()->map(function( $user ) use ( $l ) {
@@ -310,7 +314,9 @@ class ScreeningEvaluationResults extends Model
 					->with(['company', 'company.users'])
 					->get()
 					->map(function ($f) {
-						$f->judgers_ids = array_map('intval', (array) $f->judges);
+						$judges = $f->judges;
+						if( !is_array( $judges ) ) { $judges = json_decode( $f->judges ); }
+						$f->judgers_ids = array_map('intval', (array) $judges);
 						return $f;
 					});
 
