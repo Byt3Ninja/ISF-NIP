@@ -12,8 +12,14 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Disable foreign key checks
+        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        
         // Truncate the program_tasks table
         DB::table('program_tasks')->truncate();
+        
+        // Re-enable foreign key checks
+        DB::statement('SET FOREIGN_KEY_CHECKS=1');
     }
 
     /**
