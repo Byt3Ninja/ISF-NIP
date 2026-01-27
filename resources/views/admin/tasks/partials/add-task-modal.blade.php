@@ -124,7 +124,7 @@
                 <div class="fw-medium">{{ __('mentor.single_dropzone_description') }}</div>
                 <div class="small text-muted mt-1">{{ __('admin.all_files_allowed') }} up to 10MB</div>
               </div>
-              <input type="file" name="attachments" id="task-upload" class="d-none" multiple>
+              <input type="file" name="attachments[]" id="task-upload" class="d-none" multiple>
               <div id="fileError" class="invalid-feedback mt-2" style="display: none;"></div>
               <div id="fileName" class="small mt-2" style="display: none;"></div>
             </div>

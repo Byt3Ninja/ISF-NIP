@@ -1498,27 +1498,27 @@
 											</div>
 
 											<div class="flex-grow-1">
-												<div class="d-flex justify-content-between">
-													<h6 class="fw-semibold mb-1">{{ $milestone->name }}</h6>
-													<span class="text-muted">{{ $milestone->milestone_date }}</span>
-												</div>
-				
+												<!-- Title -->
+												<h6 class="fw-semibold mb-2">{{ $milestone->name }}</h6>
+												
+												<!-- Category and Status -->
 												<div class="mb-2">
 													<span class="badge bg-label-secondary me-2">
-														{{ $milestone->category }}
+														{{ $milestone->category_name }}
 													</span>
 													<span class="badge bg-label-{{ $milestone->status === 'completed' ? 'success' : ( $milestone->status === 'in_progress' ? 'primary' : 'warning') }}">
-														@if ($milestone->status === 'completed')
-															{{ __('startup.completed') }}
-														@elseif ($milestone->status === 'in_progress')
-															{{ __('startup.in_progress') }}
-														@else
-															{{ __('startup.pending') }}
-														@endif
+														{{ $milestone->status_label }}
 													</span>
 												</div>
-												<div class="w-75">
-													<small class="text-muted line-clamp-2">{{ $milestone->description }}</small>
+												
+												<!-- Description excerpt -->
+												<div class="mb-2">
+													<small class="text-muted">{{ Str::limit($milestone->description, 100) }}</small>
+												</div>
+												
+												<!-- Milestone Date -->
+												<div class="text-muted">
+													<small><i class="ti ti-calendar me-1"></i>{{ $milestone->milestone_date }}</small>
 												</div>
 											</div>
 										</div>

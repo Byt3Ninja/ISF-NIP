@@ -3743,6 +3743,7 @@ class ClientCompanyController extends Controller
 
 
                 $startup_milestones = Milestone::where('company_id', $company->id)
+                    ->public()
                     ->get();
 
                 $milestones = [];
