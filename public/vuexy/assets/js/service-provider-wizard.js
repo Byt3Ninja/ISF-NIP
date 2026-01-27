@@ -9,14 +9,16 @@
   const translations = {
     en: {
       required: "This field is required",
-      logo: "Unsupported file type. Upload PNG, JPG, WEBP or SVG",
+      logo: "Unsupported. Upload PNG, JPG, JPEG, WEBP or SVG | Max size: 5MB",
+      logoSize: "Logo size should not exceed 5MB",
       phone: "Phone number should contain numbers only",
       invalidPhone: "Invalid phone number",
       email: "E-mail should be a valid email address",
     },
     ar: {
       required: "هذا الحقل مطلوب",
-      logo: "نوع الملف غير مدعوم. قم بتحميل PNG, JPG, WEBP أو SVG",
+      logo: "غير مدعوم. قم بتحميل PNG, JPG, JPEG, WEBP أو SVG | حجم الشعار لا يجب أن يتجاوز 5 MB",
+      logoSize: "حجم الشعار لا يجب أن يتجاوز 5 ميغابايت",
       phone: "رقم الهاتف يجب أن يحتوي على أرقام فقط",
       invalidPhone: "رقم الهاتف غير صالح",
       email: "البريد الإلكتروني يجب أن يكون عنوان بريد إلكتروني صالح",
@@ -65,11 +67,12 @@
             },
             file: {
               extension: 'png,jpg,jpeg,svg,webp',
-              maxSize: 5 * 1024 * 1024,
-              message: () => messages.fileType[currentLang()]
+              maxSize: 5 * 1024 * 1024, // 5MB
+              message: translations[lang].logo
             }
           }
         },
+
         company_name: {
           validators: {
             notEmpty: {
@@ -355,8 +358,11 @@
         }
       },
       plugins: {
-        trigger: new FormValidation.plugins.Trigger(),
-        bootstrap5: new FormValidation.plugins.Bootstrap5({
+trigger: new FormValidation.plugins.Trigger({
+  event: {
+    file: 'change'
+  }
+}),        bootstrap5: new FormValidation.plugins.Bootstrap5({
           // Use this for enabling/changing valid/invalid class
           // eleInvalidClass: '',
           eleValidClass: '',
@@ -377,19 +383,20 @@
       console.log('is valid');
       // Jump to the next step when all fields in the current step are valid
       validationStepper.next();
-    }).on('core.form.invalid', function (e) {
-      if (!$('input[name="company_logo"]').val()) {
-        $('.fv-logo-wrapper .invalid-feedback').removeClass('d-none').addClass('d-block');
-      } else {
-        $('.fv-logo-wrapper .invalid-feedback').removeClass('d-block').addClass('d-none');
-      }
-    });
+    })
 
-    $('input[name="company_logo"]').on('change', function (e) {
-      if ($(this).val()) {
-        $('.fv-logo-wrapper .invalid-feedback').removeClass('d-block').addClass('d-none');
-      }
-    });
+    FormValidation1.on('core.field.validating', e => {
+  if (e.field === 'company_logo') {
+    console.log('Validating file:', e.element.files[0]?.size);
+  }
+});
+
+
+    // $('input[name="company_logo"]').on('change', function (e) {
+    //   if ($(this).val()) {
+    //     $('.fv-logo-wrapper .invalid-feedback').removeClass('d-block').addClass('d-none');
+    //   }
+    // });
 
     // Personal info
     const FormValidation2 = FormValidation.formValidation(wizardValidationFormStep2, {

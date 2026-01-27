@@ -12,7 +12,7 @@
           class="w-100 h-100 rounded border shadow-sm {{ $client->img_url ? '' : 'd-none' }}"
           alt="logo"
           src="{{ $client && $client->img_url ? $client->imageUrl : '' }}"
-          onerror="this.onerror=null;this.src='/images/logo-placeholder.png'"
+          onerror="this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none')"
         />
 
         <!-- Placeholder -->
@@ -29,7 +29,7 @@
 
       <div class="button-wrapper">
         <div class="d-flex align-items-start align-items-center">
-          <label for="upload-company-logo" class="btn btn-primary text-nowrap me-3 mb-4" tabindex="0">
+          <label for="upload-company-logo" class="btn btn-primary text-nowrap me-3 mb-3" tabindex="0">
             <span class="d-none d-sm-block">{{ __('admin.upload_logo') }}</span>
             <i class="ti ti-cloud-upload d-block d-sm-none"></i>
             <input
@@ -48,12 +48,11 @@
             </button>
           </div>
         </div>
-        <div>
+        <small>
           PNG, JPG, JPEG, SVG, WEBP | {{ __('admin.Max size') }}: 5MB
-        </div>
+        </small>
       </div>
     </div>
-    <div class="invalid-feedback mt-2 d-none">{{ __('admin.Required_Field') }}</div>
   </div>
 
   <!-- Company Name -->
@@ -270,8 +269,23 @@
 
     $('#upload-company-logo').on('change', function (e) {
       const file = e.target.files[0];
+      const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg', 'image/svg+xml', 'image/webp'];
+
       if (!file) return;
 
+      if (!allowedTypes.includes(file.type)) {
+        // invalidFeedback.removeClass('d-none').text(messages.fileType[currentLang()]);
+        $(this).val('');
+        return;
+      }
+      
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        // invalidFeedback.removeClass('d-none').text(messages.fileType[currentLang()]);
+        $(this).val('');
+        return;
+      }
+      
       const reader = new FileReader();
       reader.onload = function (e) {
         $('#logo-preview-image')
