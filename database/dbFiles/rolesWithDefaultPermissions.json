@@ -8858,7 +8858,20 @@
                     "admin",
                     "organizationmanager"
                 ]
+            },
+
+            {
+                "name": "tasks.download_attachment",
+                "description": "Download task attachment",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
             }
+
+            
         ]
     },
     {
