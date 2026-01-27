@@ -17,6 +17,7 @@ use App\Conversation;
 use App\ProjectLikes;
 use App\CyclesMentors;
 use App\TeamFormation;
+use App\ShareEvent;
 use App\ScreeningEvaluation;
 use Illuminate\Http\Request;
 use App\Exports\WinnersExport;
@@ -2792,6 +2793,103 @@ class HackathonController extends Controller
             Log::error('Error sending message: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
+    }
+
+    public function showSolution($hackathonId, $solutionId)
+    {
+        $l = app()->getLocale();
+        $cycle = Cycle::getHackathon($hackathonId);
+
+        if (empty($cycle)) {
+            return abort(404);
+        }
+
+        // Check if winners are announced
+        if (!$cycle->winners_announcement) {
+            return abort(404);
+        }
+
+        // Check visibility - if private, require authentication
+        if ($cycle->winners_visibility === 'private' && !Auth::check()) {
+            return abort(403);
+        }
+
+        // Get teams and find the specific solution
+        $teams = TeamFormation::teams($hackathonId);
+        $team = $teams->where('id', $solutionId)->where('winner', 'selected')->first();
+
+        if (empty($team)) {
+            return abort(404);
+        }
+
+        // Map to winner format
+        $winner = new stdClass;
+        $winner->id = $team->id;
+        $winner->name = $team->company->name ?? $team->name;
+        $winner->logo = $team->img ? asset($team->img) : 'https://placehold.co/400x200?text=' . urlencode($team->name);
+        $winner->projectTitle = $team->project->name;
+        $winner->teamName = $team->name;
+        $winner->description = $team->project->description;
+        $leader = $team->members->where('isLeader', true)->first();
+        $winner->teamLeader = new stdClass;
+        $winner->teamLeader->name = $leader?->name;
+        $winner->teamLeader->role = $leader?->role;
+        $winner->teamLeader->image = $leader?->image;
+        $winner->teamMembers = $team->members->map(function ($team_member) {
+            $member = new stdClass;
+            $member->name = $team_member->name;
+            $member->role = $team_member->role;
+            $member->image = $team_member->image;
+            $member->isLeader = $team_member->isLeader == 1 ? true : false;
+            return $member;
+        });
+        $winner->likes = $team->likes;
+
+        // Prepare hackathon data
+        $hackathon = new stdClass;
+        $hackathon->id = $cycle->id;
+        $hackathon->title = $cycle->title;
+        $hackathon->description = $cycle->description;
+        $hackathon->organization = new stdClass;
+        $hackathon->organization->name = $cycle->{'organization_name_' . $l};
+
+        return view('public.hackathon.solution', compact('winner', 'hackathon', 'l'));
+    }
+
+    public function trackShare(Request $request)
+    {
+        $request->validate([
+            'solution_id' => 'required|integer|exists:team_formations,id',
+            'platform' => 'required|in:linkedin,twitter,facebook,copy_link'
+        ]);
+
+        ShareEvent::create([
+            'team_formation_id' => $request->solution_id,
+            'user_id' => Auth::id(),
+            'platform' => $request->platform,
+            'ip_address' => $request->ip(),
+            'user_agent' => Str::limit($request->userAgent(), 255)
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function trackProgramShare(Request $request)
+    {
+        $request->validate([
+            'cycle_id' => 'required|integer|exists:cycles,id',
+            'platform' => 'required|in:linkedin,twitter,facebook,copy_link'
+        ]);
+
+        ShareEvent::create([
+            'cycle_id' => $request->cycle_id,
+            'user_id' => Auth::id(),
+            'platform' => $request->platform,
+            'ip_address' => $request->ip(),
+            'user_agent' => Str::limit($request->userAgent(), 255)
+        ]);
+
+        return response()->json(['success' => true]);
     }
 
 }

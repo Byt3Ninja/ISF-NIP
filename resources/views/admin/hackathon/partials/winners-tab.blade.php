@@ -105,10 +105,28 @@
                   @endif
                 </div>
               </div>
-              <div class="card-footer text-center">
-                <button class="btn btn-sm btn-outline-secondary open-details-modal" data-id="{{ $winner->id }}">
-                  {{ $l == 'en' ? 'Solution Details' : 'تفاصيل الحل' }}
-                </button>
+              <div class="card-footer">
+                <div class="d-flex flex-wrap justify-content-center align-items-center gap-2">
+                  <button class="btn btn-sm btn-outline-secondary open-details-modal" data-id="{{ $winner->id }}">
+                    {{ $l == 'en' ? 'Solution Details' : 'تفاصيل الحل' }}
+                  </button>
+                  @if(isset($currentHackathon['visibility']) && $currentHackathon['visibility'] === 'public')
+                    <div class="share-buttons-card d-flex gap-1" data-winner-id="{{ $winner->id }}">
+                      <button type="button" class="btn btn-sm btn-linkedin card-share-btn" data-platform="linkedin" data-winner-id="{{ $winner->id }}" title="{{ $l == 'en' ? 'Share on LinkedIn' : 'شارك على لينكدان' }}">
+                        <i class="ti ti-brand-linkedin"></i>
+                      </button>
+                      <button type="button" class="btn btn-sm btn-twitter card-share-btn" data-platform="twitter" data-winner-id="{{ $winner->id }}" title="{{ $l == 'en' ? 'Share on X' : 'شارك على X' }}">
+                        <i class="ti ti-brand-twitter"></i>
+                      </button>
+                      <button type="button" class="btn btn-sm btn-facebook card-share-btn" data-platform="facebook" data-winner-id="{{ $winner->id }}" title="{{ $l == 'en' ? 'Share on Facebook' : 'شارك على فيسبوك' }}">
+                        <i class="ti ti-brand-facebook"></i>
+                      </button>
+                      <button type="button" class="btn btn-sm btn-secondary card-copy-link-btn" data-winner-id="{{ $winner->id }}" title="{{ $l == 'en' ? 'Copy Link' : 'نسخ الرابط' }}">
+                        <i class="ti ti-link"></i>
+                      </button>
+                    </div>
+                  @endif
+                </div>
               </div>
             </div>
           </div>
@@ -126,25 +144,7 @@
 </div>
 
 @push('scripts')
-  @include('includes.winnerModal', ['winners' => $winners])
-  <script>
-    $(document).ready(function() {
-      var winners = @json( $winners );
-      $(document).on('click', '.open-details-modal', function(e) {
-        e.preventDefault();
-        let id = $(this).data('id');
-        let winner = winners.find(winner => winner.id == id);
-        if( typeof( winner ) !== 'undefined' )
-        {
-          $("#td-team").html(winner.teamName);
-          $("#td-project").html(winner.projectTitle);
-          $("#td-description").html(winner.description);
-
-          $("#solutionDetailsModal").modal('show');
-        }
-      });
-    });
-  </script>
+  @include('includes.winnerModal', ['winners' => $winners, 'currentHackathon' => $currentHackathon, 'l' => $l])
 @endpush
 <div class="modal fade" id="solutionDetailsModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
@@ -170,6 +170,18 @@
               </tr>
             </tbody>
           </table>
+
+          @if(isset($currentHackathon['visibility']) && $currentHackathon['visibility'] === 'public')
+          <div class="mt-4 pt-3 border-top">
+            <h6 class="mb-3">
+              <i class="ti ti-share me-1"></i>
+              {{ $l == 'en' ? 'Share this Solution' : 'شارك هذا الحل' }}
+            </h6>
+            <div id="modal-share-buttons" class="share-buttons d-flex flex-wrap gap-2">
+              <!-- Share buttons will be dynamically inserted here -->
+            </div>
+          </div>
+          @endif
         </div>
       </div>
   </div>

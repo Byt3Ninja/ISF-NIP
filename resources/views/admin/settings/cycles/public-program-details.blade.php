@@ -330,36 +330,39 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 													<h6 class="mb-0 opacity-90 d-none d-md-flex">{{ $l == 'en' ? 'Share the Results via:' : 'شارك النتائج عبر:' }}</h6>
 													<div class="d-flex justify-content-center flex-wrap gap-3">
 														<!-- Facebook Share Button -->
-														<a 
-															class="btn d-flex align-items-center gap-2" 
+														<a
+															class="btn d-flex align-items-center gap-2 program-share-btn"
 															style="background-color: #3b5998; color: white;"
 															href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(url()->current()) }}"
-															target="_blank">
+															target="_blank"
+															data-platform="facebook">
 															<i class="ti ti-brand-facebook"></i>
 															{{ $l == 'en' ? 'Facebook' : 'فيسبوك' }}
 														</a>
-														
-														<a 
-															class="btn d-flex align-items-center gap-2" 
+
+														<a
+															class="btn d-flex align-items-center gap-2 program-share-btn"
 															style="background-color: #0077B5; color: white;"
 															href="https://www.linkedin.com/sharing/share-offsite/?url={{ urlencode(url()->current()) }}"
-															target="_blank">
+															target="_blank"
+															data-platform="linkedin">
 															<i class="ti ti-brand-linkedin"></i>
 															{{ $l == 'en' ? 'LinkedIn' : 'لينكد إن' }}
 														</a>
-														
-														<a 
-															class="btn btn-dark d-flex align-items-center gap-2" 
+
+														<a
+															class="btn btn-dark d-flex align-items-center gap-2 program-share-btn"
 															href="https://twitter.com/intent/tweet?text={{ urlencode($program->title . ' - Results Announced! ' . url()->current()) }}"
-															target="_blank">
+															target="_blank"
+															data-platform="twitter">
 															<i class="ti ti-brand-x"></i>
 															{{ $l == 'en' ? 'Tweet' : 'تغريدة' }}
 														</a>
 
-														<button 
-															class="btn btn-light d-flex align-items-center gap-2" 
-															type="button" 
-															onclick="copyLink('{{url()->current()}}')" 
+														<button
+															class="btn btn-light d-flex align-items-center gap-2"
+															type="button"
+															onclick="copyLink('{{url()->current()}}')"
 															id="copy-link-btn">
 															<i class="bi bi-link-45deg"></i>
 															{{ $l == 'en' ? 'Copy Link' : 'نسخ الرابط' }}
@@ -501,36 +504,98 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 			});
 		});
 		function copyLink(url) {
-			navigator.clipboard.writeText(url).then(() => {
-				// Enhanced feedback for copy action
-				const btn = document.getElementById('copy-link-btn');
-				const originalText = btn.innerHTML;
-				
-				// Show success feedback
-				btn.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>' + 
+			const btn = document.getElementById('copy-link-btn');
+			const originalText = btn.innerHTML;
+
+			// Show success feedback
+			function showSuccess() {
+				// Track successful copy
+				trackProgramShare('copy_link');
+
+				btn.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>' +
 					('{{ $l }}' === 'en' ? 'Copied!' : 'تم النسخ!');
 				btn.classList.add('btn-success');
 				btn.classList.remove('btn-light');
-				
+
 				// Reset after 2 seconds
 				setTimeout(() => {
 					btn.innerHTML = originalText;
 					btn.classList.remove('btn-success');
 					btn.classList.add('btn-light');
 				}, 2000);
-				
-			}).catch(() => {
-				// Fallback for older browsers
+			}
+
+			// Fallback copy method for HTTP or older browsers
+			function fallbackCopy() {
 				const textArea = document.createElement('textarea');
 				textArea.value = url;
+				textArea.style.position = 'fixed';
+				textArea.style.left = '-9999px';
 				document.body.appendChild(textArea);
 				textArea.select();
-				document.execCommand('copy');
+				try {
+					document.execCommand('copy');
+					showSuccess();
+				} catch (err) {
+					alert('{{ $l == "en" ? "Failed to copy link" : "فشل نسخ الرابط" }}');
+				}
 				document.body.removeChild(textArea);
-				
-				alert('{{ $l == "en" ? "Link copied!" : "تم نسخ الرابط!" }}');
+			}
+
+			// Check if clipboard API is available (requires HTTPS)
+			if (typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+				try {
+					navigator.clipboard.writeText(url).then(() => {
+						showSuccess();
+					}).catch(() => {
+						fallbackCopy();
+					});
+				} catch (e) {
+					fallbackCopy();
+				}
+			} else {
+				fallbackCopy();
+			}
+		}
+
+		// Track program share events (Google Analytics + Database)
+		function trackProgramShare(platform) {
+			// Google Analytics tracking
+			if (typeof gtag === 'function') {
+				gtag('event', 'share', {
+					method: platform,
+					content_type: 'program_results',
+					item_id: '{{ $program->id ?? "unknown" }}'
+				});
+			}
+
+			// Database tracking
+			fetch('{{ route("hackathon.trackProgramShare") }}', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRF-TOKEN': '{{ csrf_token() }}'
+				},
+				body: JSON.stringify({
+					cycle_id: {{ $program->id ?? 0 }},
+					platform: platform
+				})
+			}).catch(function(err) {
+				console.error('Failed to track program share:', err);
 			});
 		}
+
+		// Add click handlers for social share buttons
+		document.addEventListener('DOMContentLoaded', function() {
+			document.querySelectorAll('.program-share-btn').forEach(function(btn) {
+				btn.addEventListener('click', function() {
+					var platform = this.getAttribute('data-platform');
+					if (platform) {
+						trackProgramShare(platform);
+					}
+				});
+			});
+		});
 
 		// Update total winners count dynamically if needed
 		document.addEventListener('DOMContentLoaded', function() {
