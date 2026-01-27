@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         //update enum status 
-        Schema::table('tasks', function (Blueprint $table) {
+        Schema::table('program_tasks', function (Blueprint $table) {
             $table->enum('status', ['pending', 'completed','review','progress'])->default('pending')->change();
         });
 
@@ -24,7 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         //rollback enum status 
-        Schema::table('tasks', function (Blueprint $table) {
+        Schema::table('program_tasks', function (Blueprint $table) {
             $table->enum('status', ['pending', 'completed','review','progress'])->default('pending')->change();
         });
     }
