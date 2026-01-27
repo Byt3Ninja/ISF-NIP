@@ -57,10 +57,10 @@ $(function () {
     High: { title: '{{ __('admin.priorityHigh') }}', class: 'bg-label-danger' }
   };
   const statusObj = {
-    Pending: { title: '{{ __('admin.boardTitlePending') }}', class: 'bg-label-warning' },
-    'In Progress': { title: '{{ __('admin.boardTitleProgress') }}', class: 'bg-label-info' },
-    'In Review': { title: '{{ __('admin.boardTitleReview') }}', class: 'bg-label-primary' },
-    Completed: { title: '{{ __('admin.boardTitleCompleted') }}', class: 'bg-label-success' }
+    pending: { title: '{{ __('admin.boardTitlePending') }}', class: 'bg-label-warning' },
+    'progress': { title: '{{ __('admin.boardTitleProgress') }}', class: 'bg-label-info' },
+    'review': { title: '{{ __('admin.boardTitleReview') }}', class: 'bg-label-primary' },
+    completed: { title: '{{ __('admin.boardTitleCompleted') }}', class: 'bg-label-success' }
   };
   const roleObj = {
     admin: '{{ __('admin.Admin') }}',
@@ -143,8 +143,20 @@ $(function () {
             return html;
           }
         },
-        { targets: 5, render: (d, t, f) => `<span class="badge ${priorityObj[f.priority].class}" text-capitalized>${priorityObj[f.priority].title}</span>` },
-        { targets: 6, render: (d, t, f) => `<span class="badge ${statusObj[f.overallStatus].class}" text-capitalized>${statusObj[f.overallStatus].title}</span>` },
+        {
+          targets: 5,
+          render: (d, t, f) => {
+            const priorityInfo = priorityObj[f.priority] || { class: 'bg-label-secondary', title: 'Unknown' };
+            return `<span class="badge ${priorityInfo.class}" text-capitalized>${priorityInfo.title}</span>`;
+          }
+        },
+        {
+          targets: 6,
+          render: (d, t, f) => {
+            const statusInfo = statusObj[f.overallStatus.toLowerCase()] || { class: 'bg-label-secondary', title: 'Unknown' };
+            return `<span class="badge ${statusInfo.class}" text-capitalized>${statusInfo.title}</span>`;
+          }
+        },
         { targets: 7, render: (d, t, f) => `<span class="text-heading">${f.dueDate}</span>` },
         {
           targets: -1, searchable: false, orderable: false,
@@ -294,13 +306,22 @@ $(function () {
             <div><strong>${a.name}</strong><br><small class="text-muted">{{ __('admin.last_updated') }}: ${a.lastUpdated}</small></div>
           </div>
           <div class="d-flex align-items-center gap-3 text-end">
-            <div><span>Status:</span> <span class="badge ${statusObj[a.status].class}">${statusObj[a.status].title}</span></div>
+            <div><span>Status:</span> <span class="badge ${ (statusObj[data.overallStatus] || {class: 'bg-label-secondary'}).class }">${ (statusObj[data.overallStatus.toLowerCase()] || {title: 'Unknown'}).title }</span></div>
             <!-- <button class="btn btn-sm btn-outline-primary trigger-company" data-company="${a.name}" data-current-status="${a.status}"><i class="ti ti-send me-1"></i>{{ __('admin.trigger_update') }}</button> -->
           </div>
         </div>`;
     }).join('');
 
     const tagsHtml = data.tags?.length ? `<div class="col-12 mb-3"><strong>{{ __('admin.tags') }}</strong><div class="d-flex flex-wrap gap-2 mt-2">${data.tags.map(tag => `<span class="badge bg-label-info">${tag}</span>`).join('')}</div></div>` : '';
+
+    const attachmentsHtml = data.attachments?.length ?
+      `<div class="col-12 mb-3 mt-6"><strong>{{ __('admin.attachments') }}:</strong><div class="mt-2 d-flex flex-wrap gap-2">` +
+      data.attachments.map(file => `
+        <a href="/dashboard/tasks/${data.id}/download/${encodeURIComponent(file.name)}" class="btn btn-sm btn-outline-secondary waves-effect waves-light" download>
+          <i class="ti ti-download me-1"></i>${file.name}
+        </a>`).join('') +
+      `</div></div>`
+      : '';
 
     $('#task-details-content').html(`
       <div class="row">
@@ -309,10 +330,12 @@ $(function () {
         <div class="col-lg-6 mb-3"><strong>{{ __('admin.Creator_Role') }}:</strong> <span class="text-uppercase">${roleObj[data.creator.role] || data.creator.role}</span></div>
         <div class="col-lg-6 mb-3"><strong>{{ __('admin.Program') }}:</strong> ${data.program.title}</div>
         <div class="col-lg-6 mb-3"><strong>{{ __('admin.Priority') }}:</strong> <span class="badge ${priorityObj[data.priority].class} ms-2">${priorityObj[data.priority].title}</span></div>
-        <div class="col-lg-6 mb-3"><strong>{{ __('admin.overall_status') }}:</strong> <span class="badge ${statusObj[data.overallStatus].class} ms-2">${statusObj[data.overallStatus].title}</span></div>
+        <div class="col-lg-6 mb-3"><strong>{{ __('admin.overall_status') }}:</strong> <span class="badge ${ (statusObj[data.overallStatus.toLowerCase()] || {class: 'bg-label-secondary'}).class } ms-2">${ (statusObj[data.overallStatus.toLowerCase()] || {title: 'Unknown'}).title }</span></div>
         <div class="col-lg-6 mb-3"><strong>{{ __('admin.Due_Date') }}:</strong> ${data.dueDate}</div>
         <div class="col-12 mb-3 mt-6"><strong>{{ __('admin.startup_statuses') }}:</strong><div class="mt-2">${assigneesHtml}</div></div>
         ${tagsHtml}
+        ${attachmentsHtml}
+        <div class="col-12 mb-3 mt-6" id="attachments-container" style="display: none;"><strong>{{ __('admin.attachments') }}:</strong><div class="mt-2" id="attachments-list"></div></div>
       </div>
     `);
     // Store task ID in modal for trigger-company button
@@ -502,44 +525,54 @@ const tagifyInstance = new Tagify(tagifyInput, {
       
       const formData = new FormData(form);
 
-      // Get assignee IDs directly from the select element
+      // Append assignee IDs to formData
       const assigneeIds = $('#task-assignees').val() || [];
-      const selectedAssignees = assigneeIds.map(val => ({
-        company: $(`#task-assignees option[value="${val}"]`).text(),
-        status: 'Pending',
-        lastUpdated: new Date().toISOString().split('T')[0]
-      }));
-      
-      // Get tags from Tagify
-      const tags = tagifyInstance.value.map(tag => tag.value || tag);
-      
-      const taskPayload = {
-        title: formData.get('taskTitle'),
-        description: formData.get('taskDescription'),
-        program_id: formData.get('taskProgram') ? Number(formData.get('taskProgram')) : null,
-        assignees: assigneeIds.map(val => +val),
-        priority: formData.get('taskPriority'),
-        status: formData.get('taskStatus'),
-        due_date: formData.get('taskDueDate'),
-        tags: tags
-      };
+      assigneeIds.forEach(id => formData.append('assignees[]', id));
 
-      if (!window.dt_task) return Swal.fire('{{ __('admin.error') }}', '{{ __('admin.table_not_initialized') }}', 'error');
+      // Append tags from Tagify to formData
+      const tags = tagifyInstance.value.map(tag => tag.value || tag);
+      tags.forEach(tag => formData.append('tags[]', tag));
+
+      // Append other form fields to formData (already collected by new FormData(form) for basic inputs)
+      formData.set('title', formData.get('taskTitle'));
+      formData.set('description', formData.get('taskDescription'));
+      formData.set('program_id', formData.get('taskProgram') ? Number(formData.get('taskProgram')) : null);
+      formData.set('priority', formData.get('taskPriority'));
+      formData.set('status', formData.get('taskStatus'));
+      formData.set('due_date', formData.get('taskDueDate'));
+
+      // Remove original taskTitle, taskDescription, etc. fields if they exist to avoid duplication
+      formData.delete('taskTitle');
+      formData.delete('taskDescription');
+      formData.delete('taskProgram');
+      formData.delete('taskPriority');
+      formData.delete('taskStatus');
+      formData.delete('taskDueDate');
 
       const editRow = $(form).data('edit-row');
       const taskId = editRow ? window.dt_task.row(editRow).data().id : null;
-      const method = editRow ? 'PUT' : 'POST';
+      let method = editRow ? 'PUT' : 'POST';
+
+      if (!window.dt_task) return Swal.fire('{{ __('admin.error') }}', '{{ __('admin.table_not_initialized') }}', 'error');
+
+      // Handle the PUT method for FormData (Laravel doesn't recognize _method field if sent as JSON)
+      if (method === 'PUT') {
+        formData.append('_method', 'PUT');
+        method = 'POST'; // Change AJAX method to POST if _method is used
+      }
+
       const url = editRow ? `/dashboard/tasks/${taskId}` : '/dashboard/tasks';
 
       $.ajax({
         url: url,
-        method: method,
-        dataType: 'json',
-        contentType: 'application/json',
-        data: JSON.stringify(taskPayload),
-        headers: {
-          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        },
+          method: method,
+          dataType: 'json',
+          processData: false,
+          contentType: false,
+          data: formData,
+          headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+          },
         success: function(response) {
           console.log('response', response);
           
@@ -547,7 +580,7 @@ const tagifyInstance = new Tagify(tagifyInput, {
           const mappedAssignees = response.data.assignees.map(assignee => ({
             id: assignee.id,
             name: assignee.name || assignee.name_en || assignee.name_ar || 'Unknown',
-            status: assignee.pivot.status,
+            status: assignee.pivot.status.toLowerCase(),
             lastUpdated: assignee.pivot.last_updated.split(' ')[0] // Extract date part only
           }));
           
@@ -567,7 +600,8 @@ const tagifyInstance = new Tagify(tagifyInput, {
             priority: response.data.priority,
             overallStatus: response.data.status,
             dueDate: response.data.due_date ? moment(response.data.due_date).format('YYYY-MM-DD') : 'N/A',
-            tags: response.data.tags || []
+            tags: response.data.tags || [],
+            attachments: response.data.attachments || []
           };
           
           if (editRow) {

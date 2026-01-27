@@ -131,6 +131,7 @@ class TasksController extends Controller
             'attachments' => 'nullable|array|max:10',
             'attachments.*' => 'file|max:10240',
         ]);
+     
 
         if ($validator->fails()) {
             return response()->json([
@@ -435,6 +436,76 @@ class TasksController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Download task attachment.
+     */
+    public function downloadAttachment($taskId, $filename)
+    {
+        try {
+            $task = ProgramTask::find($taskId);
+            
+            if (!$task) {
+                return response()->json([
+                    'success' => false,
+                    'message' => app()->getLocale() == 'ar'
+                        ? 'المهمة غير موجودة'
+                        : 'Task not found.'
+                ], 404);
+            }
+
+            // Find the attachment in the task's attachments array
+            $attachment = null;
+            if ($task->attachments) {
+                foreach ($task->attachments as $att) {
+                    if ($att['name'] === $filename) {
+                        $attachment = $att;
+                        break;
+                    }
+                }
+            }
+
+            if (!$attachment) {
+                return response()->json([
+                    'success' => false,
+                    'message' => app()->getLocale() == 'ar'
+                        ? 'المرفق غير موجود'
+                        : 'Attachment not found.'
+                ], 404);
+            }
+
+            $filePath = $attachment['path'];
+            
+            // Check if file exists in storage
+            if (!Storage::disk('public')->exists($filePath)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => app()->getLocale() == 'ar'
+                        ? 'الملف غير موجود على الخادم'
+                        : 'File not found on server.'
+                ], 404);
+            }
+
+            // Get file information
+            $mimeType = $attachment['type'] ?? Storage::disk('public')->mimeType($filePath);
+            $originalName = $attachment['name'];
+
+            // Return file download response
+            return Storage::disk('public')->download($filePath, $originalName, [
+                'Content-Type' => $mimeType,
+                'Content-Disposition' => 'attachment; filename="' . $originalName . '"'
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error downloading attachment: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => app()->getLocale() == 'ar'
+                    ? 'حدث خطأ أثناء تحميل المرفق'
+                    : 'An error occurred while downloading the attachment.'
+            ], 500);
         }
     }
 }

@@ -264,6 +264,7 @@ public function findAllMilestones($companyId)
 {
      $milestone = DB::table('milestones')
         ->where('Company_id', $companyId)
+        ->where('visibility', '!=', 'private')
         ->orderBy('created_at')
         ->get();
         return $milestone;
