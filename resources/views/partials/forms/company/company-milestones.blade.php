@@ -117,7 +117,7 @@ $programs = $programs
                 ]
               @endphp
               <select class="form-select milestone-category" id="milestone-category-select" required data-placeholder="{{ __('admin.select_category') }}">
-                <option value="">{{ __('admin.select_category') }}</option>
+                <option value="" disabled selected>{{ __('admin.select_category') }}</option>
                 @foreach ($categories as $category)
                   <option value="{{ $category['id'] }}">
                     {{ $category['name'] }}
@@ -132,7 +132,7 @@ $programs = $programs
                 {{ __('admin.Status') }}
               </label>
               <select class="form-select milestone-status" id="milestone-status-select" required data-placeholder="{{ __('admin.Select Status') }}">
-                <option value="">{{ __('admin.Select Status') }}</option>
+                <option value="" disabled selected>{{ __('admin.Select Status') }}</option>
                 <option value="not_started"> {{ __('startup.not_started') }} </option>
                 <option value="in_progress">{{ __('startup.in_progress') }}</option>
                 <option value="completed">{{ __('startup.completed') }}</option>
@@ -154,7 +154,7 @@ $programs = $programs
                 {{ __('cycles.visibility') }}
               </label>
               <select class="form-select milestone-visibility" id="milestone-visibility-select" required>
-                <option value="">{{ __('startup.select_visibility') }}</option>
+                <option value="" disabled selected>{{ __('startup.select_visibility') }}</option>
                 <option value="public"> {{ __('startup.public') }} </option>
                 <option value="private">{{ __('startup.private') }}</option>
               </select>
@@ -166,7 +166,7 @@ $programs = $programs
                 {{ __('startup.program_cohort') }}
               </label>
               <select class="form-select milestone-cohort" id="milestone-cohort-select">
-                <option value="">{{ __('startup.select_program_cohort') }}</option>
+                <option value="" disabled selected>{{ __('startup.select_program_cohort') }}</option>
                 @foreach ($programs as $cycle)
                   <option value="{{ $cycle->id }}">{{ $cycle->name ." - ". $cycle->cohort }}</option>
                 @endforeach

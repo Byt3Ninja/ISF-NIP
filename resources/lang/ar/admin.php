@@ -3213,4 +3213,9 @@ return [
 	'organization_based' => 'مؤسسة',
 	'uploading' => 'جاري التحميل...',
 	'Screening guidelines saved successfully' => 'تم حفظ الاهتمامات بنجاح',
+	'profile_basics' => 'البيانات الاساسية',
+	'intro_booking' => 'مقدمة الحجز',
+	'key_stats' => 'الإحصائيات الرئيسية',
+	'portfolio' => 'الملف الشخصي',
+	'clients' => 'العملاء',
 ];
