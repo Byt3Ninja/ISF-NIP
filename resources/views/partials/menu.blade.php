@@ -524,10 +524,17 @@
 
     @if( !$_user->hasAnyRole('Mentor|Judger') )
       <li
-        class="{{ Request::is('*services*', '*serviceCategories*', 'dashboard/requests/all') ? 'active' : '' }} menu-item">
+        class="{{ Request::is('*services*', '*serviceCategories*') ? 'active' : '' }} menu-item">
         <a href="/dashboard/services" class="menu-link">
           <i class="menu-icon tf-icons ti ti-arrows-move"></i>
           <div>{{ __('admin.Services') }}</div>
+        </a>
+      </li>
+      <li
+        class="{{ Request::is('dashboard/requests/all') ? 'active' : '' }} menu-item">
+        <a href="/dashboard/requests/all" class="menu-link">
+          <i class="menu-icon tf-icons ti ti-briefcase"></i>
+          <div>{{ __('admin.Services Requests') }}</div>
         </a>
       </li>
       
