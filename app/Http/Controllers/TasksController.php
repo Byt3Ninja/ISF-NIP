@@ -171,8 +171,23 @@ class TasksController extends Controller
             // Process tags - create new ones if they don't exist
             $processedTags = [];
             if ($request->has('tags') && is_array($request->tags)) {
-                foreach ($request->tags as $tagName) {
+                foreach ($request->tags as $tagData) {
+                    // Handle escaped JSON strings and nested objects
+                    $tagName = $tagData;
+                    
+                    // If it's a JSON string, decode it first
+                    if (is_string($tagData) && strpos($tagData, '{') !== false) {
+                        $decoded = json_decode($tagData, true);
+                        if (isset($decoded['value'])) {
+                            $tagName = $decoded['value'];
+                        }
+                    }
+                    
+                    // Clean up escaped quotes and extra characters
+                    $tagName = stripslashes($tagName);
+                    $tagName = trim($tagName, '"');
                     $tagName = trim($tagName);
+                    
                     if (!empty($tagName)) {
                         // Check if tag exists, if not create it
                         $tag = Tags::firstOrCreate(['name' => $tagName]);
@@ -194,7 +209,7 @@ class TasksController extends Controller
                 'created_by' => auth()->id(),
             ]);
 
-            // Attach assignees (companies/startups)
+            // Attach assignees (companies/startups) - use sync to prevent duplicates
             $assigneeData = [];
             foreach ($request->taskAssignees as $companyId) {
                 $assigneeData[$companyId] = [
@@ -202,7 +217,7 @@ class TasksController extends Controller
                     'last_updated' => now(),
                 ];
             }
-            $task->assignees()->attach($assigneeData);
+            $task->assignees()->sync($assigneeData);
 
             return response()->json([
                 'success' => true,
