@@ -3162,4 +3162,8 @@ return [
 	'key_stats' => 'Key Stats',
 	'portfolio' => 'Portfolio',
 	'clients' => 'Clients',
+	'Enter zip code' => 'Enter zip code',
+	'about_placeholder' => 'Write a description about yourself',
+	'company_logo' => 'Company Logo',
+	'preferred_language' => 'Preferred Language',
 ];

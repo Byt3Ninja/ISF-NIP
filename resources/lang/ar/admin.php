@@ -3218,4 +3218,8 @@ return [
 	'key_stats' => 'الإحصائيات الرئيسية',
 	'portfolio' => 'الملف الشخصي',
 	'clients' => 'العملاء',
+	'Enter zip code' => 'ادخل كود البريد',
+	'about_placeholder' => 'اكتب وصفا عن نفسك',
+	'company_logo' => 'شعار الشركة',
+	'preferred_language' => 'اللغة المفضلة',
 ];

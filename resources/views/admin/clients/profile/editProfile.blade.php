@@ -3,12 +3,15 @@
 @section('subTitle', __('admin.Edit your profile information'))
 
 @section('vendorstyle')
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bs-stepper/bs-stepper.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/animate-css/animate.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+<style>
+  div[data-field="company_logo"] {
+    display: none;
+  }
+</style>
 @stop
 
 @section('style')
@@ -48,22 +51,26 @@
 $phone_codes = App\Country::all();
 
 $tabs = [
-['account', 'accountSection', 'users'],
-['security', 'securitySection', 'lock'],
-['notifications', 'notificationsSection', 'bell'],
+  ['account', 'accountSection', 'users'],
+  ['security', 'securitySection', 'lock'],
+  ['notifications', 'notificationsSection', 'bell'],
 ];
 
-// إضافة الشرط بشكل منفصل
+$serviceProviderSteps = [
+  ['id' => 'basics', 'title' => __('admin.profile_basics')],
+  ['id' => 'booking', 'title' => __('admin.intro_booking')],
+  ['id' => 'stats', 'title' => __('admin.key_stats')],
+  ['id' => 'portfolio', 'title' => __('admin.portfolio')],
+  ['id' => 'clients', 'title' => __('admin.clients')]
+];
+
 if (auth()->user()->hasRole('Mentor')) {
-array_splice($tabs, 2, 0, [['info_profile', 'InfoProfileSection', 'users']]);
+  array_splice($tabs, 2, 0, [['info_profile', 'InfoProfileSection', 'users']]);
 }
 
 $tabsList = collect($tabs)->map(function ($tab) {
-return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2]];
+  return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2]];
 })->toArray();
-
-// Debug: Log the tabs structure
-// dd($tabsList);
 @endphp
 
 @section('content')
@@ -99,22 +106,28 @@ return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2
 
         <!-- Alerts -->
         @if (session()->has('msg'))
-        <x-alert type="{{ session()->get('class') ?? 'danger' }}"
-          message="{{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }}" />
+          <x-alert 
+            type="{{ session()->get('class') ?? 'danger' }}"
+            message="{{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }}" 
+          />
         @endif
+        
         @if (count($errors) > 0)
-        @foreach ($errors->all() as $error)
-        <x-alert type="danger" message="{{ $error }}" />
-        @endforeach
+          @foreach ($errors->all() as $error)
+            <x-alert type="danger" message="{{ $error }}" />
+          @endforeach
         @endif
-
         <!-- /Alerts -->
 
         <!-- Tab Content -->
-        <div class="tab-content card rounded mb-6">
+        <div class="tab-content card rounded mb-6 {{ $_user->hasRole('serviceProvider') ? 'p-0 shadow-none' : '' }}">
           <!-- Account section -->
           <div class="tab-pane fade show active" id="accountSection">
-            @include('admin.clients.profile.partials._account_info_form')
+            @if ($_user->hasRole('serviceProvider'))
+              @include('admin.clients.profile.partials._service_provider_wizard')
+            @else
+              @include('admin.clients.profile.partials._account_info_form')
+            @endif
           </div>
           <!-- /Account section -->
 
@@ -147,10 +160,6 @@ return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2
                 {{ __('admin.Notification_Settings') }}
               </h5>
               @include('admin.clients.profile.partials._notification_settings_form')
-            </div>
-            <!-- Debug info -->
-            <div class="alert alert-info">
-              <strong>Debug:</strong> Notifications section loaded successfully
             </div>
           </div>
           <!-- /Notifications section -->
@@ -243,66 +252,24 @@ return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2
 
 @section('scripts')
 <!-- Vendors JS -->
+<script src="/vuexy/assets/vendor/libs/bs-stepper/bs-stepper.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
-<script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
-<script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
-<script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
-<script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
-<script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
 @stop
 
 @section('pagescripts')
+@if($_user->hasRole('serviceProvider'))
+<script src="/vuexy/assets/js/service-provider-wizard.js"></script>
+
+@else
 <script>
   const lang = '{{ $l }}';
-  
-  // Debug: Check if notifications tab is working
-  $(document).ready(function() {
-    console.log('Profile page loaded');
-    
-    // Check if notifications tab exists
-    if ($('#notificationsSection').length) {
-      console.log('Notifications section found');
-    } else {
-      console.log('Notifications section NOT found');
-    }
-    
-    // Check if notifications tab link exists
-    if ($('a[href="#notificationsSection"]').length) {
-      console.log('Notifications tab link found');
-    } else {
-      console.log('Notifications tab link NOT found');
-    }
-    
-    // Test tab switching
-    $('a[href="#notificationsSection"]').on('click', function(e) {
-      console.log('Notifications tab clicked');
-    });
-    
-    // Initialize Bootstrap tabs manually if needed
-    var triggerTabList = [].slice.call(document.querySelectorAll('#notificationsSection'))
-    triggerTabList.forEach(function (triggerEl) {
-      var tabTrigger = new bootstrap.Tab(triggerEl)
-    });
-    
-    // Alternative: Force tab activation
-    $('a[href="#notificationsSection"]').on('click', function(e) {
-      e.preventDefault();
-      var target = $(this).attr('href');
-      $('.tab-pane').removeClass('show active');
-      $(target).addClass('show active');
-      $('.nav-link').removeClass('active');
-      $(this).addClass('active');
-      console.log('Notifications tab manually activated');
-    });
-  });
 </script>
 
 <!-- Page JS -->
 <script src="/vuexy/assets/js/edit-profile.js"></script>
-<script src="/vuexy/assets/js/forms-selects.js"></script>
 <script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
 
 <script>
@@ -665,7 +632,6 @@ $(document).on('input', '.otp-input', function() {
     $(this).next('.otp-input').focus();
   }
 });
-
-
 </script>
+@endif
 @stop
