@@ -24,6 +24,11 @@ class Service extends Model
 		return $this->belongsTo(ServiceCategory::class,'service_category_id');
 	}
 
+	public function requests()
+	{
+		return $this->hasMany(ServicesRequests::class);
+	}
+
 	public function totalRate()
 	{
 		$rates = ServicesRequests::where('service_id', $this->id)->avg('rate');

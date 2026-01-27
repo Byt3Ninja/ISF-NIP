@@ -14,7 +14,9 @@
         ['title' => __('admin.Services Categories'), 'route' => 'serviceCategories.index', 'icon' => 'layout-grid'],
       ]
     @endphp
+    @if( !$_user->hasRole('registered') )
     <x-navigation-pills :tabs="$tabs" />
+    @endif
     
     @if (session()->has('msg'))
       <div class="row mb-6">

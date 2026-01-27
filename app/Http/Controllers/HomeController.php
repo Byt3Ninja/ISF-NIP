@@ -98,6 +98,7 @@ class HomeController extends Controller
         $l = App::getLocale();
         $permissions = [];
         $organizations_ids = $user->organizations_ids;
+        $orgIds = $organizations_ids;
         $has_org = !empty($organizations_ids);
         if (auth()->check()) {
             $permissions = $user->myPermissions();
@@ -216,7 +217,6 @@ class HomeController extends Controller
             if($user->hasRole('Registered')){
                 $services_requests_q .= " AND sr.user_id = " . $user->id;
             }
-            $orgIds = $user->organizations_ids;
             if ($has_org && !empty($orgIds) && !$user->hasRole('admin')) {
                 $services_requests_q .= " AND s.organization_id IN (" . implode(',', array_map('intval', $orgIds)) . ")";
             }
@@ -233,7 +233,6 @@ class HomeController extends Controller
                 WHERE
                     o.deleted_at IS NULL
             ";
-            $orgIds = $user->organizations_ids;
             if ($has_org && !empty($orgIds) && !$user->hasRole('admin')) {
                 $organizations_q .= " AND o.id IN (" . implode(',', array_map('intval', $orgIds)) . ")";
             }
@@ -258,7 +257,6 @@ class HomeController extends Controller
                 WHERE
                     c.deleted_at IS NULL
             ";
-            $orgIds = $user->organizations_ids;
             if ($has_org && !empty($orgIds) && !$user->hasRole('admin')) {
                 $cycles_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $orgIds)) . ")";
             }
@@ -361,26 +359,35 @@ class HomeController extends Controller
         }
 
         if (array_intersect(['dashboard.widgets_cards_services_view'], $permissions)) {
-            $services_q = "SELECT DISTINCT
-                    s.id,
-                    s.name_en,
-                    s.name_ar,
-                    s.price,
-                    s.description_en,
-                    s.description_ar,
-                    sc.id AS service_category_id,
-                    sc.name_en AS service_category_name_en,
-                    sc.name_ar AS service_category_name_ar
-                FROM
-                    services s
-                LEFT JOIN
-                    service_categories sc ON s.service_category_id = sc.id
-                INNER JOIN
-                     organization_service so ON s.id = so.service_id
-                WHERE
-                    s.deleted_at IS NULL
-            ";
-            $services = collect(DB::select($services_q))->map(function ($service) use ($l) {
+            $services = DB::table('services AS s')
+                ->select([
+                    's.id',
+                    's.name_en',
+                    's.name_ar',
+                    's.price',
+                    's.description_en',
+                    's.description_ar',
+                    'sc.id AS service_category_id',
+                    'sc.name_en AS service_category_name_en',
+                    'sc.name_ar AS service_category_name_ar',
+                ])
+                ->leftJoin('service_categories AS sc', 'sc.id', '=', 's.service_category_id')
+                ->join('organization_service AS so', 'so.service_id', '=', 's.id')
+                ->where('s.deleted_at', null)
+                // ->where('so.organization_id', $user->organization_id)
+                ->when($user->hasRole('serviceProvider'), function ($query) use ($user) {
+					$provider_id = $user?->service_provider?->id ?? 0;
+					$query->where('s.service_provider_id', $provider_id);
+				})
+				->when($user->hasRole('registered'), function ($query) {
+					$query->where('s.status', true);
+				})
+				->whereIn('so.organization_id', $orgIds)
+                ->orderBy('s.created_at', 'desc')
+        	    ->get();
+
+            $services = $services->groupBy('id')->map(function ($groupedService) use ($l) {
+                $service = $groupedService->first();
                 $output = new stdClass;
                 $output->id = $service->id;
                 $output->name = $service->{'name_' . $l};
@@ -391,7 +398,7 @@ class HomeController extends Controller
                 $service_category->name = $service->{'service_category_name_' . $l};
                 $output->service_category = $service_category;
                 return $output;
-            });
+            })->values();
         } else {
             $services = collect([]);
         }

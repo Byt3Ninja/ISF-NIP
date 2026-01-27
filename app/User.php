@@ -215,6 +215,9 @@ class User extends Authenticatable implements MustVerifyEmail
             $result = $this->organizations()->pluck('organizations.id')->toArray();
         } elseif ($this->organization_id) {
             $result = [$this->organization_id];
+        } elseif( $this->hasRole('registered') ) {
+            $orgId = $this->company?->cycledata?->organization_id ?? null;
+            $result = $orgId ? [$orgId] : [];
         } else {
             $result = [];
         }
