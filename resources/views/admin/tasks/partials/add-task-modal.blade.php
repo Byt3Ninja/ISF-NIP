@@ -46,10 +46,10 @@
               </label>
               <select id="task-status" class="form-select select2" name="taskStatus" data-placeholder="{{ __('admin.Select Status') }}">
                 <option value="">{{ __('admin.Select Status') }}</option>
-                <option value="Pending">{{ __('admin.boardTitlePending') }}</option>
-                <option value="In Progress">{{ __('admin.boardTitleProgress') }}</option>
-                <option value="In Review">{{ __('admin.boardTitleReview') }}</option>
-                <option value="Completed">{{ __('admin.boardTitleCompleted') }}</option>
+                <option value="pending">{{ __('admin.boardTitlePending') }}</option>
+                <option value="progress">{{ __('admin.boardTitleProgress') }}</option>
+                <option value="review">{{ __('admin.boardTitleReview') }}</option>
+                <option value="completed">{{ __('admin.boardTitleCompleted') }}</option>
               </select>
             </div>
             <div class="col-sm-4 col-12 mb-4">
