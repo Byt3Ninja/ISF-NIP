@@ -525,9 +525,8 @@ const tagifyInstance = new Tagify(tagifyInput, {
       
       const formData = new FormData(form);
 
-      // Append assignee IDs to formData
-      const assigneeIds = $('#task-assignees').val() || [];
-      assigneeIds.forEach(id => formData.append('assignees[]', id));
+      // Assignee IDs are automatically submitted via HTML form field name="taskAssignees[]"
+      // No need to manually append them to FormData
 
       // Append tags from Tagify to formData
       const tags = tagifyInstance.value.map(tag => tag.value || tag);
