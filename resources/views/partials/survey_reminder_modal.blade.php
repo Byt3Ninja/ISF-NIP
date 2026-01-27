@@ -116,7 +116,6 @@
   <script>
     // Survey reminder modal - show every 10 minutes
     function showSurveyReminder() {
-      return;
       // Skip reminder if user is currently on the surveys.take route
       if (window.location.pathname.includes('/dashboard/surveys/start/')) {
         return;
