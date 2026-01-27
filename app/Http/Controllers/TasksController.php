@@ -122,8 +122,8 @@ class TasksController extends Controller
             'title' => 'required|string|max:200',
             'description' => 'nullable|string|max:2000',
             'program_id' => 'required|exists:cycles,id',
-            'assignees' => 'required|array|min:1',
-            'assignees.*' => 'exists:companies,id',
+            'taskAssignees' => 'required|array|min:1',
+            'taskAssignees.*' => 'exists:companies,id',
             'priority' => 'required|in:Low,Medium,High',
             'status' => 'required|in:pending,progress,review,completed',
             'due_date' => 'nullable|date|after_or_equal:today',
@@ -196,7 +196,7 @@ class TasksController extends Controller
 
             // Attach assignees (companies/startups)
             $assigneeData = [];
-            foreach ($request->assignees as $companyId) {
+            foreach ($request->taskAssignees as $companyId) {
                 $assigneeData[$companyId] = [
                     'status' => 'pending',
                     'last_updated' => now(),
