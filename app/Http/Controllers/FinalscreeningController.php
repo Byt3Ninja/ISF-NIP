@@ -97,7 +97,7 @@ class FinalscreeningController extends Controller
                 });
         }
 
-        $steps = $stepsQuery->orderBy('from')->get();
+        $steps = $stepsQuery->orderBy('from', 'desc')->get();
 
         /** -------------------------
          * Preload all related data

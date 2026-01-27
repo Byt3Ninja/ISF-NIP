@@ -3157,4 +3157,9 @@ return [
 	'organization_based' => 'Organization Based',
 	'uploading' => 'Uploading...',
 	'Screening guidelines saved successfully' => 'Screening guidelines saved successfully',
+	'profile_basics' => 'Profile Basics',
+	'intro_booking' => 'Intro & Booking',
+	'key_stats' => 'Key Stats',
+	'portfolio' => 'Portfolio',
+	'clients' => 'Clients',
 ];

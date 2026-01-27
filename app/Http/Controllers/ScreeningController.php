@@ -107,7 +107,7 @@ class ScreeningController extends Controller
 					});
 			}
 
-			$steps = $stepsQuery->orderBy('from')->get();
+			$steps = $stepsQuery->orderBy('from', 'DESC')->get();
 
 			/** -------------------------
 			 * Preload all related data
