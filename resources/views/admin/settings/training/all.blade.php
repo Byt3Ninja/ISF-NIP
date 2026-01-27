@@ -28,7 +28,7 @@
           <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
             <h5 class="card-title mb-0">{{ __('cycles.all courses') }}</h5>
             <div class="d-flex align-items-center gap-3">
-              @if ($_user->hasAnyRole('organizationManager|Mentor|Admin'))
+              @if( $_user->hasAnyRole(['organizationmanager','mentor','admin', 'subadmin']) || $_user->ableToAny(['trainings.create', 'trainings.store']) )
                 <div class="dropdown">
                   <button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="ti ti-file-export me-2"></i>{{ __('admin.Export') }}
@@ -149,7 +149,7 @@
                   <td>
                     <span class="badge bg-label-primary">{{ $course->contents_count ?? $course->contents->count() }}</span>
                   </td>
-                  @if ($_user->hasAnyRole('organizationManager|Mentor|Admin'))
+                  @if( $_user->hasAnyRole(['organizationmanager','mentor','admin', 'subadmin']) || $_user->ableToAny(['trainings.edit', 'trainings.update']) )
                     <td>
                       <div class="d-flex align-items-center gap-2 justify-content-center">
                         <a title="Edit" href="/dashboard/training/EditTR/{{ $course->id }}"
