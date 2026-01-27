@@ -93,12 +93,12 @@ class TasksController extends Controller
         // Calculate real stats
         $stats = [
             'total_tasks' => $tasksData->count(),
-            'pending' => $tasksData->where('status', 'Pending')->count(),
+            'pending' => $tasksData->where('status', 'pending')->count(),
             'active' => [
-                'in_progress_count' => $tasksData->where('status', 'In Progress')->count(),
-                'in_review_count' => $tasksData->where('status', 'Review')->count(),
+                'in_progress_count' => $tasksData->where('status', 'progress')->count(),
+                'in_review_count' => $tasksData->where('status', 'review')->count(),
             ],
-            'completed' => $tasksData->where('status', 'Completed')->count(),
+            'completed' => $tasksData->where('status', 'completed')->count(),
         ];
 
         return view("admin.tasks.index", compact("programs", "startups", "tags", "stats", "tasks"));
@@ -125,7 +125,7 @@ class TasksController extends Controller
             'assignees' => 'required|array|min:1',
             'assignees.*' => 'exists:companies,id',
             'priority' => 'required|in:Low,Medium,High',
-            'status' => 'required|in:Pending,In Progress,Review,Completed',
+            'status' => 'required|in:pending,progress,review,completed',
             'due_date' => 'nullable|date|after_or_equal:today',
             'tags' => 'nullable|array',
             'attachments' => 'nullable|array|max:10',
@@ -197,7 +197,7 @@ class TasksController extends Controller
             $assigneeData = [];
             foreach ($request->assignees as $companyId) {
                 $assigneeData[$companyId] = [
-                    'status' => 'Pending',
+                    'status' => 'pending',
                     'last_updated' => now(),
                 ];
             }
@@ -262,7 +262,7 @@ class TasksController extends Controller
             'assignees' => 'sometimes|required|array|min:1',
             'assignees.*' => 'exists:companies,id',
             'priority' => 'sometimes|required|in:Low,Medium,High',
-            'status' => 'sometimes|required|in:Pending,In Progress,Review,Completed',
+            'status' => 'sometimes|required|in:pending,progress,review,completed',
             'due_date' => 'nullable|date',
             'tags' => 'nullable|array',
         ]);
@@ -303,7 +303,7 @@ class TasksController extends Controller
                 $assigneeData = [];
                 foreach ($request->assignees as $companyId) {
                     $assigneeData[$companyId] = [
-                        'status' => 'Pending',
+                        'status' => 'pending',
                         'last_updated' => now(),
                     ];
                 }
