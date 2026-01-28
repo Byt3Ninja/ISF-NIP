@@ -384,6 +384,11 @@ trigger: new FormValidation.plugins.Trigger({
       // Jump to the next step when all fields in the current step are valid
       validationStepper.next();
     })
+    .on('core.form.invalid', function (e) {
+      console.log('is valid');
+      // Jump to the next step when all fields in the current step are valid
+      validationStepper.next();
+    })
 
     FormValidation1.on('core.field.validating', e => {
   if (e.field === 'company_logo') {
