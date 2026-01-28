@@ -60,13 +60,14 @@
               </div>
             @endforeach
           </div>
-
+          {{-- @dd(App\Organization::where('id', auth()->user()->organization_id)->get(), auth()->user()->organization_id) --}}
           <!-- Organization Filter -->
           <div id="org-filter-container" class="form-group mb-4" style="display: {{ request('scopeFilter') == 'organization' ? 'block' : 'none' }}">
             <label for="organization-select" class="form-label">{{ __('admin.Organization') }}</label>
-            <select name="organization" id="organization-select" class="form-select select2" data-placeholder="{{ __('admin.Select organization') }}">
+            <select name="organization" id="organization-select" class="form-select select2" data-placeholder="{{ __('admin.Select_organization') }}">
               @php
-              $organization = auth()->user()->hasRole('admin') ? App\Organization::all() : auth()->user()->organizations()->with('organization')->get()->pluck('organization'); //App\Organization::all();
+              $organization_q = App\Organization::query();
+              $organization = auth()->user()->hasRole('admin') ? $organization_q->get() : $organization_q->where('id', auth()->user()->organization_id)->get(); //App\Organization::all();
               @endphp
               <option value="">{{ __('admin.All_Organizations') }}</option>
               @foreach ($organization as $org)
