@@ -3166,4 +3166,5 @@ return [
 	'about_placeholder' => 'Write a description about yourself',
 	'company_logo' => 'Company Logo',
 	'preferred_language' => 'Preferred Language',
+	'more' => 'More',
 ];
