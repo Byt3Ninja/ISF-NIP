@@ -19,7 +19,7 @@
     <div class="col-md-6" id="stat{{ $stat }}">
       <div class="card shadow-none border">
         <div class="card-header px-4 pb-2">
-          <h5 class="card-title mb-0">{{ __('admin.stat') }} {{ $stat }}</h5>
+          <h6 class="card-title mb-0">{{ __('admin.stat') }} {{ $stat }}</h6>
         </div>
         <div class="card-body px-4 pb-2">
           <div class="mb-4">

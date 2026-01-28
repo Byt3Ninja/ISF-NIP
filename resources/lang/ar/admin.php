@@ -3281,6 +3281,7 @@ return [
 	'stat' => 'الحالة',
 	'visibility_public_desc' => 'الإحصاءات حاليًا متاحة للجميع.',
 	'visibility_private_desc' => 'الإحصاءات خاصة ومرئية لك فقط.',
+	'one_item_required' => 'مطلوب عنصر واحد على الأقل',
 	'Mentor_Association' => 'المرشدين',
 	'Not_Associated' => 'غير مرتبط',
 	'list_of_organizations' => 'قائمة المؤسسات',
