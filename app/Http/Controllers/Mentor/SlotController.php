@@ -7,6 +7,7 @@ use Exception;
 use App\Schedule;
 use App\Settings;
 use Carbon\Carbon;
+use App\MentorshipRequest;
 use Illuminate\Http\Request;
 use App\Services\WhatsAppService;
 use Illuminate\Support\Facades\DB;
@@ -152,6 +153,7 @@ class SlotController extends Controller
 		
 		$settings = Settings::where('id', 1)->first();
 		$offline_allowed = $settings ? ($settings->allow_offline_sessions == 1 ? true : false) : false;
+		$mentorship_requests = MentorshipRequest::where('approved', 'Yes')->where('zoom_date', '>=', date("Y-m-d"))->get();
 
 		$schedules = Schedule::where('user_id', $id ?? auth()->id())
 						->where(function ($query) {$query
