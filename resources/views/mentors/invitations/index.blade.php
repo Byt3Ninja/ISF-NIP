@@ -638,7 +638,7 @@ $(function () {
             data-bs-toggle="modal"
             data-bs-target="#invitationOrgsModal"
             data-orgs='${JSON.stringify(hiddenOrgs)}'>
-            +${hiddenOrgs.length} more
+            +${hiddenOrgs.length} @lang("admin.more")
           </button>
         `);
       }
@@ -676,7 +676,7 @@ $(function () {
     $('#attachmentsSection').show();
     if (attachments.length > 0) {
       $('#attachmentsList').html(
-        attachments.map(a => `<a href="${a}" target="_blank" class="badge bg-card text-start text-primary border">${a.split('/').pop()}</a>`).join('')
+        attachments.map(a => `<a href="${a}" target="_blank" class="badge bg-card text-start text-primary border text-truncate">${a.split('/').pop()}</a>`).join('')
       );
     } else {
       $('#attachmentsList').html(`<span class="text-muted small">${translations.no_attachments}</span>`);
