@@ -3223,4 +3223,5 @@ return [
 	'company_logo' => 'شعار الشركة',
 	'preferred_language' => 'اللغة المفضلة',
 	'more' => 'اكثر',
+	'Select_organization' => 'حدد المؤسسة',
 ];

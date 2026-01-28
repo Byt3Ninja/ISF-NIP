@@ -576,9 +576,18 @@ class ClientProfileController extends Controller
 
                 if (!$user->hasRole('Admin') && !empty($orgIds)) {
                     $cycles = Cycle::whereIn('organization_id', $orgIds)->get();
+                    $mentors = User::whereHas('mentorCycles', function ($q) use ($orgIds) {
+                        $q->where(function ($qq) use ($orgIds) {
+                            foreach ($orgIds as $orgId) {
+                                $qq->orWhere('organization_id', $orgId);
+                            }
+                        });
+                    })->get();
                 } else {
                     $cycles = Cycle::all();
                 }
+                
+               
 			    $offline_allowed = $settings->allow_offline_sessions == 1 ? true : false;
 
                 // $mentors = User::role('mentor')->get();
