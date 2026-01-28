@@ -14,7 +14,7 @@
         ['title' => __('admin.Services Categories'), 'route' => 'serviceCategories.index', 'icon' => 'layout-grid'],
       ]
     @endphp
-    @if( !$_user->hasRole('registered') )
+    @if( !$_user->hasRole('registered') && !$_user->hasRole('serviceProvider') )
     <x-navigation-pills :tabs="$tabs" />
     @endif
     
