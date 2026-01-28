@@ -83,8 +83,19 @@ class ClientProfileController extends Controller
             // });
 
             $countries = Country::all();
-            $states = collect();
-            $cities = collect();
+            
+            // Populate states and cities for Service Provider if data exists
+            if ($client->hasRole('serviceProvider') && $client->service_provider) {
+                $states = $client->service_provider->country_id 
+                    ? State::where('country_id', $client->service_provider->country_id)->get() 
+                    : collect();
+                $cities = $client->service_provider->state_id 
+                    ? City::where('state_id', $client->service_provider->state_id)->get() 
+                    : collect();
+            } else {
+                $states = collect();
+                $cities = collect();
+            }
 
 
             $google2fa_url = "";

@@ -306,7 +306,7 @@ $(function () {
             <div><strong>${a.name}</strong><br><small class="text-muted">{{ __('admin.last_updated') }}: ${a.lastUpdated}</small></div>
           </div>
           <div class="d-flex align-items-center gap-3 text-end">
-            <div><span>Status:</span> <span class="badge ${ (statusObj[data.overallStatus] || {class: 'bg-label-secondary'}).class }">${ (statusObj[data.overallStatus.toLowerCase()] || {title: 'Unknown'}).title }</span></div>
+            <div><span>Status:</span> <span class="badge ${ (statusObj[a.status.toLowerCase()] || {class: 'bg-label-secondary'}).class }">${ (statusObj[a.status.toLowerCase()] || {title: 'Unknown'}).title }</span></div>
             <!-- <button class="btn btn-sm btn-outline-primary trigger-company" data-company="${a.name}" data-current-status="${a.status}"><i class="ti ti-send me-1"></i>{{ __('admin.trigger_update') }}</button> -->
           </div>
         </div>`;
@@ -317,8 +317,8 @@ $(function () {
     const attachmentsHtml = data.attachments?.length ?
       `<div class="col-12 mb-3 mt-6"><strong>{{ __('admin.attachments') }}:</strong><div class="mt-2 d-flex flex-wrap gap-2">` +
       data.attachments.map(file => `
-        <a href="/dashboard/tasks/${data.id}/download/${encodeURIComponent(file.name)}" class="btn btn-sm btn-outline-secondary waves-effect waves-light" download>
-          <i class="ti ti-download me-1"></i>${file.name}
+        <a href="/storage/${file.path}" target="_blank" class="btn btn-sm btn-outline-secondary waves-effect waves-light">
+          <i class="ti ti-file-text me-1"></i>${file.name}
         </a>`).join('') +
       `</div></div>`
       : '';
@@ -525,8 +525,9 @@ const tagifyInstance = new Tagify(tagifyInput, {
       
       const formData = new FormData(form);
 
-      // Assignee IDs are automatically submitted via HTML form field name="taskAssignees[]"
-      // No need to manually append them to FormData
+      // Append assignee IDs to formData
+      const assigneeIds = $('#task-assignees').val() || [];
+      assigneeIds.forEach(id => formData.append('assignees[]', id));
 
       // Append tags from Tagify to formData
       const tags = tagifyInstance.value.map(tag => tag.value || tag);
@@ -548,18 +549,17 @@ const tagifyInstance = new Tagify(tagifyInput, {
       formData.delete('taskStatus');
       formData.delete('taskDueDate');
 
-      const editRow = $(form).data('edit-row');
-      const taskId = editRow ? window.dt_task.row(editRow).data().id : null;
-      let method = editRow ? 'PUT' : 'POST';
-
-      if (!window.dt_task) return Swal.fire('{{ __('admin.error') }}', '{{ __('admin.table_not_initialized') }}', 'error');
-
       // Handle the PUT method for FormData (Laravel doesn't recognize _method field if sent as JSON)
       if (method === 'PUT') {
         formData.append('_method', 'PUT');
         method = 'POST'; // Change AJAX method to POST if _method is used
       }
 
+      if (!window.dt_task) return Swal.fire('{{ __('admin.error') }}', '{{ __('admin.table_not_initialized') }}', 'error');
+
+      const editRow = $(form).data('edit-row');
+      const taskId = editRow ? window.dt_task.row(editRow).data().id : null;
+      const method = editRow ? 'PUT' : 'POST';
       const url = editRow ? `/dashboard/tasks/${taskId}` : '/dashboard/tasks';
 
       $.ajax({
@@ -599,8 +599,7 @@ const tagifyInstance = new Tagify(tagifyInput, {
             priority: response.data.priority,
             overallStatus: response.data.status,
             dueDate: response.data.due_date ? moment(response.data.due_date).format('YYYY-MM-DD') : 'N/A',
-            tags: response.data.tags || [],
-            attachments: response.data.attachments || []
+            tags: response.data.tags || []
           };
           
           if (editRow) {

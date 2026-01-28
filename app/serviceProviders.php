@@ -23,6 +23,16 @@ class serviceProviders extends Model
 		'phone',
 		'status',
 		'user_id',
+		'whatsapp',
+		'country_code_w_a',
+		'preferred_language',
+		'country_id',
+		'state_id',
+		'city_id',
+		'address',
+		'zip_code',
+		'description',
+		'img_url',
 	];
 
 	protected $casts = [
@@ -33,6 +43,9 @@ class serviceProviders extends Model
 		'phone' => 'string',
 		'status' => 'boolean',
 		'user_id' => 'integer',
+		'country_id' => 'integer',
+		'state_id' => 'integer',
+		'city_id' => 'integer',
 	];
 
 	public function user()

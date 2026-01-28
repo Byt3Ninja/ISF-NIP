@@ -29,7 +29,7 @@
   </div>
 
   <div class="bs-stepper-content">
-    <form id="service-provider-form-wizard">
+    <form id="service-provider-form-wizard" data-route-step-1="{{ route('services_providers.step1.store') }}">
       @foreach ($serviceProviderSteps as $key => $step)
         <div id="{{ $step['id'] }}" class="content {{ $active_step == $key + 1 ? 'active' : '' }}">
           <div class="content-header mb-6">

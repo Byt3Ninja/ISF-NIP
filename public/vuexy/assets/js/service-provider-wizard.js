@@ -62,8 +62,20 @@
       fields: {
         company_logo: {
           validators: {
-            notEmpty: {
+            callback: {
               message: translations[lang].required,
+              callback: function (input) {
+                if (input.value) {
+                  return true;
+                }
+                // Check if an existing image is present
+                const preview = document.getElementById('logo-preview-image');
+                if (preview && preview.getAttribute('src') && !preview.classList.contains('d-none')) {
+                  return true;
+                }
+
+                return false;
+              }
             },
             file: {
               extension: 'png,jpg,jpeg,svg,webp',
@@ -124,8 +136,9 @@
 
                 // Get selected country
                 let selectedCountry = '';
-                if (iti && typeof iti.getSelectedCountryData === 'function') {
-                  const countryData = iti.getSelectedCountryData();
+                const itiInstance = input.element.iti || iti;
+                if (itiInstance && typeof itiInstance.getSelectedCountryData === 'function') {
+                  const countryData = itiInstance.getSelectedCountryData();
                   selectedCountry = countryData.iso2 || '';
                 }
 
@@ -158,13 +171,13 @@
                 }
 
                 // Validate using intl-tel-input for other countries
-                if (iti && typeof iti.isValidNumber === 'function') {
-                  const isValid = iti.isValidNumber();
+                if (itiInstance && typeof itiInstance.isValidNumber === 'function') {
+                  const isValid = itiInstance.isValidNumber();
 
                   if (!isValid) {
                     // Get the validation error
-                    if (typeof iti.getValidationError === 'function') {
-                      const error = iti.getValidationError();
+                    if (typeof itiInstance.getValidationError === 'function') {
+                      const error = itiInstance.getValidationError();
                       let message = translations[lang].invalidPhone;
 
                       // Check if intlTelInputUtils is available
@@ -242,8 +255,9 @@
 
                 // Get selected country
                 let selectedCountry = '';
-                if (iti && typeof iti.getSelectedCountryData === 'function') {
-                  const countryData = iti.getSelectedCountryData();
+                const itiInstance = input.element.iti || iti;
+                if (itiInstance && typeof itiInstance.getSelectedCountryData === 'function') {
+                  const countryData = itiInstance.getSelectedCountryData();
                   selectedCountry = countryData.iso2 || '';
                 }
 
@@ -276,13 +290,13 @@
                 }
 
                 // Validate using intl-tel-input for other countries
-                if (iti && typeof iti.isValidNumber === 'function') {
-                  const isValid = iti.isValidNumber();
+                if (itiInstance && typeof itiInstance.isValidNumber === 'function') {
+                  const isValid = itiInstance.isValidNumber();
 
                   if (!isValid) {
                     // Get the validation error
-                    if (typeof iti.getValidationError === 'function') {
-                      const error = iti.getValidationError();
+                    if (typeof itiInstance.getValidationError === 'function') {
+                      const error = itiInstance.getValidationError();
                       let message = translations[lang].invalidPhone;
 
                       // Check if intlTelInputUtils is available
@@ -358,11 +372,11 @@
         }
       },
       plugins: {
-trigger: new FormValidation.plugins.Trigger({
-  event: {
-    file: 'change'
-  }
-}),        bootstrap5: new FormValidation.plugins.Bootstrap5({
+        trigger: new FormValidation.plugins.Trigger({
+          event: {
+            file: 'change'
+          }
+        }), bootstrap5: new FormValidation.plugins.Bootstrap5({
           // Use this for enabling/changing valid/invalid class
           // eleInvalidClass: '',
           eleValidClass: '',
@@ -380,16 +394,82 @@ trigger: new FormValidation.plugins.Trigger({
         });
       }
     }).on('core.form.valid', function (e) {
-      console.log('is valid');
-      // Jump to the next step when all fields in the current step are valid
-      validationStepper.next();
+      console.log('Validating Step 1 and submitting via AJAX');
+
+      const form = wizardValidationForm;
+      const formData = new FormData(form);
+      const url = form.getAttribute('data-route-step-1');
+      const submitBtn = wizardValidationNext;
+
+      // Disable button and show spinner/text
+      const originalBtnText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Saving...';
+
+      // Clean up previous alerts
+      $('.alert-dismissible').remove();
+
+      $.ajax({
+        url: url,
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function (response) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnText;
+
+          if (response.success) {
+            // Show success message (toast or alert)
+            toastr.success(response.message, 'Success', {
+              closeButton: true,
+              progressBar: true,
+              tapToDismiss: false
+            });
+
+            // Move to next step
+            validationStepper.next();
+          } else {
+            toastr.error(response.message || 'An error occurred', 'Error');
+          }
+        },
+        error: function (xhr) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnText;
+
+          let errorMessage = 'An error occurred';
+          if (xhr.responseJSON) {
+            if (xhr.responseJSON.errors) {
+              // Validation errors
+              // We can try to map them back to fields or show a summary
+              let errorList = '<ul>';
+              $.each(xhr.responseJSON.errors, function (key, val) {
+                errorList += `<li>${val[0]}</li>`;
+                // Highlight field if possible, though FormValidation handles frontend mostly
+              });
+              errorList += '</ul>';
+              errorMessage = errorList;
+
+              toastr.error(errorMessage, 'Validation Error', { enableHtml: true });
+            } else {
+              errorMessage = xhr.responseJSON.message || errorMessage;
+              toastr.error(errorMessage, 'Error');
+            }
+          } else {
+            toastr.error(errorMessage, 'Error');
+          }
+        }
+      });
     })
 
     FormValidation1.on('core.field.validating', e => {
-  if (e.field === 'company_logo') {
-    console.log('Validating file:', e.element.files[0]?.size);
-  }
-});
+      if (e.field === 'company_logo') {
+        console.log('Validating file:', e.element.files[0]?.size);
+      }
+    });
 
 
     // $('input[name="company_logo"]').on('change', function (e) {
@@ -459,11 +539,12 @@ trigger: new FormValidation.plugins.Trigger({
     if (intlTelInput.length) {
       intlTelInput.each(function () {
         var $this = $(this);
+        var inputId = $this.attr('id');
 
         // $this.wrap('<div class="position-relative"></div>');
 
         if (typeof window.intlTelInput === 'function') {
-          window.intlTelInput($this[0], {
+          var itiInstance = window.intlTelInput($this[0], {
             initialCountry: 'eg',
             preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
             utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
@@ -474,6 +555,36 @@ trigger: new FormValidation.plugins.Trigger({
               return "e.g. " + selectedCountryPlaceholder;
             }
           });
+
+          // Store instance on the element for validation access
+          $this[0].iti = itiInstance;
+
+          // Assign to global iti if it's the phone input (legacy support for existing validation code)
+          if (inputId === 'phone') {
+            iti = itiInstance;
+          }
+
+          // Function to update hidden input
+          var updateHiddenInput = function () {
+            var countryData = itiInstance.getSelectedCountryData();
+            var dialCode = countryData.dialCode;
+
+            if (inputId === 'phone') {
+              $('#country_code').val(dialCode);
+            } else if (inputId === 'whatsapp') {
+              $('#country_code_w_a').val(dialCode);
+            }
+          };
+
+          // Update on init (if empty)
+          if (inputId === 'phone' && !$('#country_code').val()) {
+            updateHiddenInput();
+          } else if (inputId === 'whatsapp' && !$('#country_code_w_a').val()) {
+            updateHiddenInput();
+          }
+
+          // Update on change
+          $this.on('countrychange', updateHiddenInput);
         }
       });
     }
