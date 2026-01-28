@@ -3223,5 +3223,58 @@ return [
 	'company_logo' => 'شعار الشركة',
 	'preferred_language' => 'اللغة المفضلة',
 	'more' => 'اكثر',
+	
+	'hero_image' => [
+		'label' => 'الصورة الرئيسية *',
+		'description' => 'الصورة المميزة لقسم الخدمات.',
+		'upload' => 'اضغط للتحميل',
+		'formats' => 'PNG، JPG، JPEG، WEBP، SVG (الحد الأقصى 10 ميجابايت)',
+	],
+
+	'hero_description' => [
+		'label' => 'وصف العنوان الرئيسي *',
+		'description' => 'العنوان الرئيسي لقسم الخدمات.',
+		'placeholder' => 'مثال: خدمات احترافية مصممة لتناسب احتياجاتك',
+	],
+
+	'services_short_description' => [
+		'label' => 'وصف مختصر للخدمات *',
+		'description' => 'نبذة مختصرة عن الخدمات المقدمة (جملتان إلى ثلاث).',
+		'placeholder' => 'اشرح نطاق الخدمات التي تقدمها...',
+	],
+
+	'appointment_link' => [
+		'label' => 'رابط حجز المواعيد',
+		'description' => 'رابط مباشر لحجز المواعيد (Calendly، Cal.com، اوغيرها).',
+		'placeholder' => 'https://calendly.com/your-username',
+		'hint' => 'سيظهر هذا الرابط كزر "حجز موعد" في ملفك الشخصي.',
+	],
+
+	'operating_mode' => [
+		'label' => 'نمط العمل *',
+		'description' => 'الاختيار: عن بُعد / حضوري / عن بُعد + حضوري',
+		'placeholder' => 'اختر نمط العمل',
+		'options' => [
+			'online_remote' => 'عن بُعد',
+			'on_site' => 'حضوري',
+			'online_on_site' => 'عن بُعد + حضوري',
+		],
+	],
+
+	'operating_region' => [
+		'label' => 'نطاق العمل *',
+		'description' => 'الاختيار: عالمي / الشرق الأوسط وشمال أفريقيا / الخليج / أفريقيا / أوروبا / أمريكا الشمالية / آسيا',
+		'placeholder' => 'اختر نطاق العمل',
+		'options' => [
+			'global' => 'عالمي',
+			'mena' => 'الشرق الأوسط وشمال أفريقيا',
+			'gcc' => 'دول الخليج',
+			'africa' => 'أفريقيا',
+			'europe' => 'أوروبا',
+			'north_america' => 'أمريكا الشمالية',
+			'asia' => 'آسيا',
+		],
+	],
+	
 	'Select_organization' => 'حدد المؤسسة',
 ];

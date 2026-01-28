@@ -11,16 +11,20 @@
       required: "This field is required",
       logo: "Unsupported. Upload PNG, JPG, JPEG, WEBP or SVG | Max size: 5MB",
       logoSize: "Logo size should not exceed 5MB",
+      hero_image: "Unsupported. Upload PNG, JPG, JPEG, WEBP or SVG | Max size: 10MB",
       phone: "Phone number should contain numbers only",
       invalidPhone: "Invalid phone number",
+      invalid_url: "The URL is not valid",
       email: "E-mail should be a valid email address",
     },
     ar: {
       required: "هذا الحقل مطلوب",
       logo: "غير مدعوم. قم بتحميل PNG, JPG, JPEG, WEBP أو SVG | حجم الشعار لا يجب أن يتجاوز 5 MB",
       logoSize: "حجم الشعار لا يجب أن يتجاوز 5 ميغابايت",
+      hero_image: "غير مدعوم. قم بتحميل PNG, JPG, JPEG, WEBP أو SVG | حجم الصورة لا يجب أن يتجاوز 10 MB",
       phone: "رقم الهاتف يجب أن يحتوي على أرقام فقط",
       invalidPhone: "رقم الهاتف غير صالح",
+      invalid_url: "الرابط غير صالح",
       email: "البريد الإلكتروني يجب أن يكون عنوان بريد إلكتروني صالح",
     }
   };
@@ -358,11 +362,12 @@
         }
       },
       plugins: {
-trigger: new FormValidation.plugins.Trigger({
-  event: {
-    file: 'change'
-  }
-}),        bootstrap5: new FormValidation.plugins.Bootstrap5({
+        trigger: new FormValidation.plugins.Trigger({
+          event: {
+            file: 'change'
+          }
+        }),
+        bootstrap5: new FormValidation.plugins.Bootstrap5({
           // Use this for enabling/changing valid/invalid class
           // eleInvalidClass: '',
           eleValidClass: '',
@@ -384,64 +389,54 @@ trigger: new FormValidation.plugins.Trigger({
       // Jump to the next step when all fields in the current step are valid
       validationStepper.next();
     })
+    // Not importrant code
     .on('core.form.invalid', function (e) {
       console.log('is valid');
       // Jump to the next step when all fields in the current step are valid
       validationStepper.next();
     })
 
-    FormValidation1.on('core.field.validating', e => {
-  if (e.field === 'company_logo') {
-    console.log('Validating file:', e.element.files[0]?.size);
-  }
-});
-
-
-    // $('input[name="company_logo"]').on('change', function (e) {
-    //   if ($(this).val()) {
-    //     $('.fv-logo-wrapper .invalid-feedback').removeClass('d-block').addClass('d-none');
-    //   }
-    // });
-
-    // Personal info
+    // Intro & booking
     const FormValidation2 = FormValidation.formValidation(wizardValidationFormStep2, {
       fields: {
-        formValidationFirstName: {
+        hero_image: {
           validators: {
             notEmpty: {
-              message: 'The first name is required'
+              message: translations[lang].required,
+            },
+            file: {
+              extension: 'png,jpg,jpeg,svg,webp',
+              maxSize: 10 * 1024 * 1024, // 10MB
+              message: translations[lang].hero_image
             }
           }
         },
-        formValidationLastName: {
+        hero_description: {
           validators: {
             notEmpty: {
-              message: 'The last name is required'
+              message: translations[lang].required,
             }
           }
         },
-        formValidationCountry: {
+        appointment_link: {
           validators: {
-            notEmpty: {
-              message: 'The Country is required'
-            }
-          }
-        },
-        formValidationLanguage: {
-          validators: {
-            notEmpty: {
-              message: 'The Languages is required'
-            }
+            uri: {
+              message: translations[lang].invalid_url
+            },
           }
         }
       },
       plugins: {
-        trigger: new FormValidation.plugins.Trigger(),
+        trigger: new FormValidation.plugins.Trigger({
+          event: {
+            file: 'change'
+          }
+        }),
         bootstrap5: new FormValidation.plugins.Bootstrap5({
           // Use this for enabling/changing valid/invalid class
           // eleInvalidClass: '',
           eleValidClass: '',
-          rowSelector: '.col-sm-6'
+          rowSelector: '.mb-4'
         }),
         autoFocus: new FormValidation.plugins.AutoFocus(),
         submitButton: new FormValidation.plugins.SubmitButton()

@@ -3167,5 +3167,58 @@ return [
 	'company_logo' => 'Company Logo',
 	'preferred_language' => 'Preferred Language',
 	'more' => 'More',
+
+	'hero_image' => [
+		'label' => 'Hero Image *',
+		'description' => 'Featured image for services section.',
+		'upload' => 'Click to upload',
+		'formats' => 'PNG, JPG, JPEG, WEBP, SVG (max. 10MB)',
+	],
+
+	'hero_description' => [
+		'label' => 'Hero Description *',
+		'description' => 'Main headline for your services section.',
+		'placeholder' => 'e.g., Professional Services Tailored to Your Needs',
+	],
+
+	'services_short_description' => [
+		'label' => 'Services Short Description *',
+		'description' => 'Brief overview of what you offer. 2–3 sentences.',
+		'placeholder' => 'Describe the range of services you provide...',
+	],
+
+	'appointment_link' => [
+		'label' => 'Appointment Scheduling Link',
+		'description' => 'Direct link to book appointments (Calendly, Cal.com, etc.).',
+		'placeholder' => 'https://calendly.com/your-username',
+		'hint' => 'This link will appear as a “Book Appointment” button on your profile.',
+	],
+
+	'operating_mode' => [
+		'label' => 'Operating Mode *',
+		'description' => 'Selection: Online- Remote / On-site / Online + On-site',
+		'placeholder' => 'Select Operating Mode',
+		'options' => [
+			'online_remote' => 'Online - Remote',
+			'on_site' => 'On-site',
+			'online_on_site' => 'Online + On-site',
+		],
+	],
+
+	'operating_region' => [
+		'label' => 'Operating Region *',
+		'description' => 'Selection: Global / MENA / GCC / Africa / Europe / North America / Asia',
+		'placeholder' => 'Select Operating Region',
+		'options' => [
+				'global' => 'Global',
+				'mena' => 'MENA',
+				'gcc' => 'GCC',
+				'africa' => 'Africa',
+				'europe' => 'Europe',
+				'north_america' => 'North America',
+				'asia' => 'Asia',
+		],
+	],
+
 	'Select_organization' => 'Select organization',
 ];
