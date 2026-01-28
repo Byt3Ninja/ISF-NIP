@@ -294,6 +294,22 @@ $tabs = [
     </div>
   </div>
 </div>
+
+<!-- Modal for showing organizations of an invitation -->
+<div class="modal fade" id="invitationOrgsModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ __('admin.Organizations') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div id="invitationOrgsModalBody"></div>
+      </div>
+    </div>
+  </div>
+</div>
 @endsection
 
 @section('scripts')
@@ -599,14 +615,33 @@ $(function () {
 
     $('#invitationOrgs').empty();
 
+    const MAX_ORGS = 10;
+
     if (d.orgs && d.orgs.length) {
       $('#invitationOrgsContainer').show();
+      $('#invitationOrgs').empty();
 
-      d.orgs.forEach(org => {
+      d.orgs.slice(0, MAX_ORGS).forEach(org => {
         $('#invitationOrgs').append(
-          `<span class="badge bg-label-secondary">${org.name}</span>`
+          `<span class="badge bg-label-secondary me-1">${org.name}</span>`
         );
       });
+
+      if (d.orgs.length > MAX_ORGS) {
+        const remaining = d.orgs.length - MAX_ORGS;
+        const hiddenOrgs = d.orgs.slice(MAX_ORGS);
+
+        $('#invitationOrgs').append(`
+          <button
+            type="button"
+            class="badge bg-label-primary border-0"
+            data-bs-toggle="modal"
+            data-bs-target="#invitationOrgsModal"
+            data-orgs='${JSON.stringify(hiddenOrgs)}'>
+            +${hiddenOrgs.length} more
+          </button>
+        `);
+      }
     }
 
     const scopeLabels = {
@@ -894,6 +929,26 @@ $(function () {
     $('#uploadedAttachments').val('[]');
     quill.setContents([]);
   }
+
+  $('#invitationOrgsModal').on('show.bs.modal', function (event) {
+    const button = $(event.relatedTarget);
+    const orgs = button.data('orgs');
+
+    const $body = $('#invitationOrgsModalBody');
+    $body.empty();
+
+    if (orgs && orgs.length) {
+      orgs.forEach(org => {
+        $body.append(
+          `<span class="badge bg-label-secondary me-2 mb-2">
+            ${org.name}
+          </span>`
+        );
+      });
+    } else {
+      $body.text('No organizations found.');
+    }
+  });
 });
 </script>
 @endsection
