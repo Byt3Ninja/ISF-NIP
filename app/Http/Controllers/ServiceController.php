@@ -314,14 +314,14 @@ class ServiceController extends Controller
 			->whereHas('service.organizations', function ($q) use ($orgIds) {
 				$q->whereIn('organizations.id', $orgIds);
 			});
-		$countold = ServicesRequests::whereNotNull('approved')->when($user->hasRole('serviceProvider'), function ($q) use ($user) {
+		$countold = ServicesRequests::whereNotNull('approved')->when($user->hasRole('serviceProvider') && $user->service_provider, function ($q) use ($user) {
 			$provider_id = $user->service_provider->id;
 			return $q->whereHas('service', function ($q2) use ($provider_id) {
 				$q2->where('service_provider_id', $provider_id);
 			});
 		})->count();
 
-		$received = $received->when($user->hasRole('serviceProvider'), function ($q) use ($user) {
+		$received = $received->when($user->hasRole('serviceProvider') && $user->service_provider, function ($q) use ($user) {
 			$provider_id = $user->service_provider->id;
 			return $q->whereHas('service', function ($q2) use ($provider_id) {
 				$q2->where('service_provider_id', $provider_id);

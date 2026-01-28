@@ -530,13 +530,30 @@
           <div>{{ __('admin.Services') }}</div>
         </a>
       </li>
+      @php
+        $pendingRequestsCount = 0;
+        if($_user->hasRole('serviceProvider') && $_user->service_provider) {
+            $provider_id = $_user->service_provider->id;
+            $pendingRequestsCount = \App\ServicesRequests::whereNull('approved')
+                ->whereHas('service', function ($q) use ($provider_id) {
+                    $q->where('service_provider_id', $provider_id);
+                })->count();
+        }
+      @endphp
+      @if( $_user->ableToAny(['service_requests.list_all', 'service_requests.list_archived'], $permissions) )
       <li
         class="{{ Request::is('dashboard/requests/all') ? 'active' : '' }} menu-item">
         <a href="/dashboard/requests/all" class="menu-link">
           <i class="menu-icon tf-icons ti ti-briefcase"></i>
-          <div>{{ __('admin.Services Requests') }}</div>
+          <div class="d-flex align-items-center justify-content-between w-100">
+            <span>{{ __('admin.Services Requests') }}</span>
+             @if ($pendingRequestsCount > 0)
+              <span class="badge badge-center rounded-pill bg-danger ms-2">{{ $pendingRequestsCount }}</span>
+            @endif
+          </div>
         </a>
       </li>
+      @endif
       
       {{-- <li
         class="{{ Request::is('*services*', '*serviceCategories*', 'dashboard/requests/all', 'dashboard/services_providers*') ? 'sidebar-group-active open' : '' }} menu-item">
