@@ -193,15 +193,28 @@ $(function () {
         const addDropdownFilter = (colIndex, id, placeholder) => {
           this.api().columns(colIndex).every(function () {
             const column = this;
-            const select = $(`<select id="${id}" class="form-select text-capitalize" style="min-width: ${id === 'taskProgram' ? '200' : '150'}px;"><option value=""> ${placeholder} </option></select>`)
+            const seen = new Set();
+
+            const select = $(`
+              <select id="${id}" class="form-select text-capitalize"
+                style="min-width: ${id === 'taskProgram' ? '200' : '150'}px;">
+                <option value="">${placeholder}</option>
+              </select>
+            `)
               .appendTo(filterContainer)
               .on('change', function () {
                 const val = $.fn.dataTable.util.escapeRegex($(this).val());
                 column.search(val ? `^${val}$` : '', true, false).draw();
               });
-            
-            // Program is object, others strings
-            column.data().unique().sort().each(d => select.append(`<option value="${d.title || d}">${d.title || d}</option>`));
+
+            column.data().each(d => {
+              const value = d?.title ?? d; // object vs string
+
+              if (!value || seen.has(value)) return;
+
+              seen.add(value);
+              select.append(`<option value="${value}">${value}</option>`);
+            });
           });
         };
 
