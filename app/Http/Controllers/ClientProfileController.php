@@ -558,11 +558,16 @@ class ClientProfileController extends Controller
                         });
 
                     } else {
-                        $mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter, $request) {
-                            $query->where('scope', $scopeFilter)
-                                ->where('status', 'accepted');
-                            if ($request->organization != null) {
-                                $query->whereJsonContains('organization_ids', (string) $request->organization);
+                        // $mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter, $request) {
+                        //     $query->where('scope', $scopeFilter)
+                        //         ->where('status', 'accepted');
+                        //     if ($request->organization != null) {
+                        //         $query->whereJsonContains('organization_ids', (string) $request->organization);
+                        //     }
+                        // });
+                        $mentors = User::whereHas('mentorCycles', function ($q) use ($request) {
+                            if (!empty($request->organization)) {
+                                $q->where('organization_id', $request->organization);
                             }
                         });
                     }
