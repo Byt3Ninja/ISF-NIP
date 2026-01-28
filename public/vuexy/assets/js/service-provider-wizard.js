@@ -31,7 +31,6 @@
 
   let iti; // Declare iti in a scope accessible by custom validator
 
-
   const lang = $('html').attr('lang') || 'en';
 
   const select2 = $('.select2'),
@@ -389,12 +388,12 @@
       // Jump to the next step when all fields in the current step are valid
       validationStepper.next();
     })
-    // Not importrant code
-    .on('core.form.invalid', function (e) {
-      console.log('is valid');
-      // Jump to the next step when all fields in the current step are valid
-      validationStepper.next();
-    })
+      // Not importrant code
+      .on('core.form.invalid', function (e) {
+        console.log('is in valid');
+        // Jump to the next step when all fields in the current step are valid
+        validationStepper.next();
+      });
 
     // Intro & booking
     const FormValidation2 = FormValidation.formValidation(wizardValidationFormStep2, {
@@ -444,7 +443,13 @@
     }).on('core.form.valid', function () {
       // Jump to the next step when all fields in the current step are valid
       validationStepper.next();
-    });
+    })
+      // Not importrant code
+      .on('core.form.invalid', function (e) {
+        console.log('is in valid');
+        // Jump to the next step when all fields in the current step are valid
+        validationStepper.next();
+      });
 
     // Bootstrap Select (i.e Language select)
     // if (selectPicker.length) {
@@ -478,46 +483,114 @@
       });
     }
 
-    // Social links
+    // Key stats
     const FormValidation3 = FormValidation.formValidation(wizardValidationFormStep3, {
       fields: {
-        formValidationTwitter: {
+        value1: {
           validators: {
-            notEmpty: {
-              message: 'The Twitter URL is required'
-            },
-            uri: {
-              message: 'The URL is not proper'
+            callback: {
+              message: translations[lang].required,
+              callback: function (input) {
+                const label = document.getElementById('label1').value.trim();
+                // If label has value, then value is required
+                // If label is empty, value is optional
+                return {
+                  valid: !label || input.value.trim() !== ''
+                };
+              }
             }
           }
         },
-        formValidationFacebook: {
+        label1: {
           validators: {
-            notEmpty: {
-              message: 'The Facebook URL is required'
-            },
-            uri: {
-              message: 'The URL is not proper'
+            callback: {
+              message: translations[lang].required,
+              callback: function (input) {
+                const value = document.getElementById('value1').value.trim();
+                // If value has content, then label is required
+                // If value is empty, label is optional
+                return {
+                  valid: !value || input.value.trim() !== ''
+                };
+              }
             }
           }
         },
-        formValidationGoogle: {
+        value2: {
           validators: {
-            notEmpty: {
-              message: 'The Google URL is required'
-            },
-            uri: {
-              message: 'The URL is not proper'
+            callback: {
+              message: translations[lang].required,
+              callback: function (input) {
+                const label = document.getElementById('label2').value.trim();
+                return {
+                  valid: !label || input.value.trim() !== ''
+                };
+              }
             }
           }
         },
-        formValidationLinkedIn: {
+        label2: {
           validators: {
-            notEmpty: {
-              message: 'The LinkedIn URL is required'
-            },
-            uri: {
-              message: 'The URL is not proper'
+            callback: {
+              message: translations[lang].required,
+              callback: function (input) {
+                const value = document.getElementById('value2').value.trim();
+                return {
+                  valid: !value || input.value.trim() !== ''
+                };
+              }
+            }
+          }
+        },
+        value3: {
+          validators: {
+            callback: {
+              message: translations[lang].required,
+              callback: function (input) {
+                const label = document.getElementById('label3').value.trim();
+                return {
+                  valid: !label || input.value.trim() !== ''
+                };
+              }
+            }
+          }
+        },
+        label3: {
+          validators: {
+            callback: {
+              message: translations[lang].required,
+              callback: function (input) {
+                const value = document.getElementById('value3').value.trim();
+                return {
+                  valid: !value || input.value.trim() !== ''
+                };
+              }
+            }
+          }
+        },
+        value4: {
+          validators: {
+            callback: {
+              message: translations[lang].required,
+              callback: function (input) {
+                const label = document.getElementById('label4').value.trim();
+                return {
+                  valid: !label || input.value.trim() !== ''
+                };
+              }
+            }
+          }
+        },
+        label4: {
+          validators: {
+            callback: {
+              message: translations[lang].required,
+              callback: function (input) {
+                const value = document.getElementById('value4').value.trim();
+                return {
+                  valid: !value || input.value.trim() !== ''
+                };
+              }
             }
           }
         }
@@ -525,21 +598,53 @@
       plugins: {
         trigger: new FormValidation.plugins.Trigger(),
         bootstrap5: new FormValidation.plugins.Bootstrap5({
-          // Use this for enabling/changing valid/invalid class
-          // eleInvalidClass: '',
           eleValidClass: '',
-          rowSelector: '.col-sm-6'
+          rowSelector: '.mb-4'
         }),
         autoFocus: new FormValidation.plugins.AutoFocus(),
         submitButton: new FormValidation.plugins.SubmitButton()
       }
-    }).on('core.form.valid', function () {
-      // You can submit the form
-      // wizardValidationForm.submit()
-      // or send the form data to server via an Ajax request
-      // To make the demo simple, I just placed an alert
-      alert('Submitted..!!');
-    });
+    })
+      .on('core.form.valid', function () {
+        alert('Submitted..!!');
+      })
+      .on('core.validator.validated', function (e) {
+        // When a field is validated, revalidate its paired field
+        const fieldPairs = {
+          'value1': 'label1',
+          'label1': 'value1',
+          'value2': 'label2',
+          'label2': 'value2',
+          'value3': 'label3',
+          'label3': 'value3',
+          'value4': 'label4',
+          'label4': 'value4'
+        };
+
+        const pairedField = fieldPairs[e.field];
+        if (pairedField && !e.result.valid) {
+          // Only revalidate if current field became invalid
+          FormValidation3.revalidateField(pairedField);
+        }
+      });
+
+    // Add input event listeners to trigger cross-validation
+    for (let i = 1; i <= 4; i++) {
+      const valueField = document.getElementById(`value${i}`);
+      const labelField = document.getElementById(`label${i}`);
+
+      valueField.addEventListener('input', function () {
+        if (labelField.value.trim()) {
+          FormValidation3.revalidateField(`label${i}`);
+        }
+      });
+
+      labelField.addEventListener('input', function () {
+        if (valueField.value.trim()) {
+          FormValidation3.revalidateField(`value${i}`);
+        }
+      });
+    }
 
     const wizardValidationNextButton = wizardValidation.querySelector('.btn-next');
     wizardValidationNextButton.addEventListener('click', event => {

@@ -3221,4 +3221,11 @@ return [
 	],
 
 	'Select_organization' => 'Select organization',
+	'label' => 'Label',
+	'stat' => 'Stat',
+	'visibility_public_desc' => 'Stats are currently visible to everyone.',
+	'visibility_private_desc' => 'Stats are private and only visible to you.',
+	'Mentor_Association' => 'Mentor Association',
+	'Not_Associated' => 'Not Associated',
+	'list_of_organizations' => 'List of Organizations',
 ];
