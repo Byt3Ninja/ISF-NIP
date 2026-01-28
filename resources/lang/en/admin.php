@@ -3221,4 +3221,6 @@ return [
 	],
 
 	'Select_organization' => 'Select organization',
+	'label' => 'Label',
+	'stat' => 'Stat',
 ];

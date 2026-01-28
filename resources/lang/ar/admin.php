@@ -2454,7 +2454,7 @@ return [
 	'Conversation_Chat_not_found' => 'لم يتم العثور على المحادثة',
 	'Reminder' => 'تذكير',
 	'Hours_Reminder' => 'ساعات التذكير',
-	'Value' => 'قيمة',
+	'Value' => 'القيمة',
 	'Unit' => 'وحدة',
 	'Active' => 'نشط',
 	'Schedule' => 'جدول',
@@ -3214,7 +3214,7 @@ return [
 	'uploading' => 'جاري التحميل...',
 	'Screening guidelines saved successfully' => 'تم حفظ الاهتمامات بنجاح',
 	'profile_basics' => 'البيانات الاساسية',
-	'intro_booking' => 'مقدمة الحجز',
+	'intro_booking' => 'المقدمة والحجز',
 	'key_stats' => 'الإحصائيات الرئيسية',
 	'portfolio' => 'الملف الشخصي',
 	'clients' => 'العملاء',
@@ -3277,4 +3277,6 @@ return [
 	],
 	
 	'Select_organization' => 'حدد المؤسسة',
+	'label' => 'الوصف',
+	'stat' => 'الحالة',
 ];
