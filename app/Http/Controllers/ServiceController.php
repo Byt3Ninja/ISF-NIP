@@ -351,7 +351,7 @@ class ServiceController extends Controller
 	public function oldrequests()
 	{
 		$user = auth()->user();
-		$received = ServicesRequests::whereNotNull('approved')->when($user->hasRole('serviceProvider'), function ($q) use ($user) {
+		$received = ServicesRequests::whereNotNull('approved')->when($user->hasRole('serviceProvider') && $user->service_provider, function ($q) use ($user) {
 			$provider_id = $user->service_provider->id;
 			return $q->whereHas('service', function ($q2) use ($provider_id) {
 				$q2->where('service_provider_id', $provider_id);
@@ -371,7 +371,7 @@ class ServiceController extends Controller
 
 			$user = auth()->user();
 			$serviceRequest = ServicesRequests::where('id', $request->id);
-			$serviceRequest = $serviceRequest->when($user->hasRole('serviceProvider'), function ($q) use ($user) {
+			$serviceRequest = $serviceRequest->when($user->hasRole('serviceProvider') && $user->service_provider, function ($q) use ($user) {
 				$provider_id = $user->service_provider->id;
 				return $q->whereHas('service', function ($q2) use ($provider_id) {
 					$q2->where('service_provider_id', $provider_id);
@@ -417,7 +417,7 @@ class ServiceController extends Controller
 		$find = $request->input('find');
 		$services = Service::with(['serviceCategory', 'organizations'])
 			->where('status', true)
-			->when($user->hasRole('serviceProvider'), function ($query) use ($user) {
+			->when($user->hasRole('serviceProvider') && $user->service_provider, function ($query) use ($user) {
 				$provider_id = $user?->service_provider?->id ?? 0;
 				$query->where('service_provider_id', $provider_id);
 			})
