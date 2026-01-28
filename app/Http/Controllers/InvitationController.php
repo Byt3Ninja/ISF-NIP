@@ -24,12 +24,17 @@ class InvitationController extends Controller
             $allOrganizations = Organization::all();
         }elseif($user->hasAnyRole(['organizationManager', 'subadmin'])) {
             $orgIds = $user->organizations_ids;
-            $inviteMentors = InviteMentor::where('user_id', $user->id)->get();
+           
+            $inviteMentors = InviteMentor::where(function ($q) use ($orgIds) {
+                foreach ($orgIds as $id) {
+                    $q->orWhereJsonContains('organization_ids', (string) $id);
+                }
+            })->get();
             $allOrganizations = Organization::whereIn('id', $orgIds)->get();
         }
 
         $organizationMap = collect($allOrganizations)->keyBy('id');
-        
+
         $invitations = $inviteMentors->map(function ($invite) use ($organizationMap) {
             // $orgIds = is_string($invite->organization_ids) ? json_decode($invite->organization_ids, true) : ($invite->organization_ids ?? []);
             $orgIds = [];
@@ -153,7 +158,7 @@ class InvitationController extends Controller
         
         // Retrieve the data from the request
         $data = $request->all();
-    //    dd($data);
+        //    dd($data);
         $request->validate([
             'invitee_name' => 'required|string',
             'invitee_email' => 'required|email',
@@ -180,9 +185,9 @@ class InvitationController extends Controller
         $invitation->save();
 
         dispatch(new SendInviteMentorEmail($invitation));
-    if($data['invitation_scope'] == 'Organization'){
-        $allOrganizations = Organization::whereIn('id', $data['organizations'])->get();
-        $organizationMap = collect($allOrganizations)->keyBy('id');
+        if($data['invitation_scope'] == 'Organization'){
+            $allOrganizations = Organization::whereIn('id', $data['organizations'])->get();
+            $organizationMap = collect($allOrganizations)->keyBy('id');
         }else{
             $organizationMap = [];
         }
