@@ -3279,4 +3279,6 @@ return [
 	'Select_organization' => 'حدد المؤسسة',
 	'label' => 'الوصف',
 	'stat' => 'الحالة',
+	'visibility_public_desc' => 'الإحصاءات حاليًا متاحة للجميع.',
+	'visibility_private_desc' => 'الإحصاءات خاصة ومرئية لك فقط.'
 ];
