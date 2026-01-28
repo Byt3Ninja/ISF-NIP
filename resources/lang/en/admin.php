@@ -3167,4 +3167,5 @@ return [
 	'company_logo' => 'Company Logo',
 	'preferred_language' => 'Preferred Language',
 	'more' => 'More',
+	'Select_organization' => 'Select organization',
 ];
