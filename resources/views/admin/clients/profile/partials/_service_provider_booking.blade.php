@@ -22,8 +22,9 @@
       <div class="text-muted small">
         {{ __('admin.hero_image.formats') }}
       </div>
-      <input type="file" class="d-none" name="hero_image">
+      <input type="file" id="hero_image" class="d-none" name="hero_image" accept=".png,.jpg,.jpeg,.webp,.svg+xml">
     </label>
+    <div id="fileName" class="small mt-2" style="display: none;"></div>
   </div>
 
   <!-- Hero Description -->
@@ -160,3 +161,32 @@
   </div>
 
 </div>
+
+@push('scripts')
+<script>
+  $('#hero_image').on('change', function() {
+    const fileName = this.files[0] ? this.files[0].name : '';
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'image/svg+xml'];
+
+    if (!fileName) {
+      $('#fileName').hide();
+      return;
+    }
+
+    if (this.files[0].size > maxSize) {
+      this.value = '';
+      $('#fileName').hide();
+      return;
+    }
+
+    if (!allowedTypes.includes(this.files[0].type)) {
+      this.value = '';
+      $('#fileName').hide();
+      return;
+    }
+
+    $('#fileName').text(fileName).show();
+  });
+</script>
+@endpush

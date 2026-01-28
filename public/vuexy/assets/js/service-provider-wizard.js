@@ -16,6 +16,13 @@
       invalidPhone: "Invalid phone number",
       invalid_url: "The URL is not valid",
       email: "E-mail should be a valid email address",
+      media_required: "Media is required",
+      invalid_media: "Invalid file or size too large",
+      title_required: "Title is required",
+      title_max: "Title must be less than 50 chars",
+      desc_required: "Description is required",
+      desc_max: "Description must be less than 100 chars",
+      at_least_one_item: "Please add at least one complete work item"
     },
     ar: {
       required: "هذا الحقل مطلوب",
@@ -26,6 +33,13 @@
       invalidPhone: "رقم الهاتف غير صالح",
       invalid_url: "الرابط غير صالح",
       email: "البريد الإلكتروني يجب أن يكون عنوان بريد إلكتروني صالح",
+      media_required: "الملف مطلوب",
+      invalid_media: "ملف غير صالح أو حجم كبير جداً",
+      title_required: "العنوان مطلوب",
+      title_max: "العنوان يجب أن يكون أقل من 50 حرف",
+      desc_required: "الوصف مطلوب",
+      desc_max: "الوصف يجب أن يكون أقل من 100 حرف",
+      at_least_one_item: "يرجى إضافة عمل واحد على الأقل"
     }
   };
 
@@ -47,10 +61,8 @@
     const wizardValidationFormStep1 = wizardValidationForm.querySelector('#step-1-basics');
     const wizardValidationFormStep2 = wizardValidationForm.querySelector('#step-2-booking');
     const wizardValidationFormStep3 = wizardValidationForm.querySelector('#step-3-stats');
-    // const wizardValidationFormStep4 = wizardValidationForm.querySelector('#step-4-portofolio');
+    const wizardValidationFormStep4 = wizardValidationForm.querySelector('#step-4-portofolio');
     // const wizardValidationFormStep5 = wizardValidationForm.querySelector('#step-5-clients');
-
-    console.log('wizardValidationFormStep1', wizardValidationFormStep1);
 
     // Wizard next prev button
     const wizardValidationNext = wizardValidationForm.querySelector('.btn-next');
@@ -387,13 +399,7 @@
       console.log('is valid');
       // Jump to the next step when all fields in the current step are valid
       validationStepper.next();
-    })
-      // Not importrant code
-      .on('core.form.invalid', function (e) {
-        console.log('is in valid');
-        // Jump to the next step when all fields in the current step are valid
-        validationStepper.next();
-      });
+    });
 
     // Intro & booking
     const FormValidation2 = FormValidation.formValidation(wizardValidationFormStep2, {
@@ -443,13 +449,7 @@
     }).on('core.form.valid', function () {
       // Jump to the next step when all fields in the current step are valid
       validationStepper.next();
-    })
-      // Not importrant code
-      .on('core.form.invalid', function (e) {
-        console.log('is in valid');
-        // Jump to the next step when all fields in the current step are valid
-        validationStepper.next();
-      });
+    });
 
     // Bootstrap Select (i.e Language select)
     // if (selectPicker.length) {
@@ -606,7 +606,8 @@
       }
     })
       .on('core.form.valid', function () {
-        alert('Submitted..!!');
+        // Jump to the next step when all fields in the current step are valid
+        validationStepper.next();
       })
       .on('core.validator.validated', function (e) {
         // When a field is validated, revalidate its paired field
@@ -646,6 +647,151 @@
       });
     }
 
+    // Portfolio / Work Items - Step 4
+    let FormValidation4 = null;
+    function buildStep4Validation() {
+      // 1. SAFE DESTROY: Remove previous instance
+      if (FormValidation4) {
+        try {
+          FormValidation4.destroy();
+        } catch (e) {
+          console.warn("Cleanup suppressed");
+        }
+        FormValidation4 = null;
+      }
+
+      const fields = {};
+      const $cards = $('.work-item-card');
+
+      // 2. PREPARE FIELDS
+      $cards.each(function (index) {
+        const $card = $(this);
+        const names = {
+          media: `portfolio_media_${index}`,
+          title: `portfolio_title_${index}`,
+          desc: `portfolio_desc_${index}`
+        };
+
+        // Apply names to DOM so FormValidation can find them
+        $card.find('.media-input').attr('name', names.media);
+        $card.find('.title-input').attr('name', names.title);
+        $card.find('.desc-input').attr('name', names.desc);
+
+        const isFirst = (index === 0);
+
+        // Media Validation
+        fields[names.media] = {
+          validators: {
+            callback: {
+              message: translations[lang].media_required || "Media is required",
+              callback: function (input) {
+                const hasFile = input.element.files && input.element.files.length > 0;
+                // First item: mandatory. Other items: mandatory only if title/desc filled.
+                // if (isFirst) return hasFile;
+
+                const $item = $(input.element).closest('.work-item-card');
+                const hasText = $item.find('.title-input').val().trim() || $item.find('.desc-input').val().trim();
+                return hasText ? hasFile : true;
+              }
+            },
+            file: {
+              extension: 'png,jpg,jpeg,webp,mp4,mov,avi,mkv,wmv,flv,m4v',
+              maxSize: 10485760,
+              message: translations[lang].invalid_media || "Invalid file"
+            }
+          }
+        };
+
+        // Title Validation
+        fields[names.title] = {
+          validators: {
+            stringLength: { max: 50, message: translations[lang].title_max },
+            callback: {
+              message: translations[lang].title_required,
+              callback: function (input) {
+                const val = input.value.trim();
+                if (isFirst) return val !== '';
+
+                const $item = $(input.element).closest('.work-item-card');
+                const hasOther = $item.find('.desc-input').val().trim() || ($item.find('.media-input')[0].files.length > 0);
+                return (hasOther && !val) ? false : true;
+              }
+            }
+          }
+        };
+
+        // Description Validation
+        fields[names.desc] = {
+          validators: {
+            stringLength: { max: 100, message: translations[lang].desc_max },
+            callback: {
+              message: translations[lang].desc_required,
+              callback: function (input) {
+                const val = input.value.trim();
+                // if (isFirst) return val !== '';
+
+                const $item = $(input.element).closest('.work-item-card');
+                const hasOther = $item.find('.title-input').val().trim() || ($item.find('.media-input')[0].files.length > 0);
+                return (hasOther && !val) ? false : true;
+              }
+            }
+          }
+        };
+      });
+
+      // 3. GLOBAL ERROR CONTAINER (For "At least one item" message)
+      // Ensure this row is VISIBLE so the error message is seen
+      if ($('#_portfolio_at_least_one').length === 0) {
+        $('<div id="portfolio-error-container" class="mb-3"></div>')
+          .append($('<input type="hidden" id="_portfolio_at_least_one" name="_portfolio_at_least_one">'))
+          .appendTo('#itemsContainer'); // Append to the end of your list
+      }
+
+      fields['_portfolio_at_least_one'] = {
+        validators: {
+          callback: {
+            message: translations[lang].at_least_one_item,
+            callback: function () {
+              let isValid = false;
+              $('.work-item-card').each(function () {
+                if ($(this).find('.title-input').val().trim() && $(this).find('.media-input')[0].files.length > 0) {
+                  isValid = true; return false;
+                }
+              });
+              return isValid;
+            }
+          }
+        }
+      };
+
+      // 4. INITIALIZE
+      FormValidation4 = FormValidation.formValidation(wizardValidationFormStep4, {
+        fields: fields,
+        plugins: {
+          trigger: new FormValidation.plugins.Trigger(),
+          bootstrap5: new FormValidation.plugins.Bootstrap5({
+            eleValidClass: '',
+            rowSelector: function (field) {
+              if (field === '_portfolio_at_least_one') return '#portfolio-error-container';
+              return '.mb-4, .col-md-4, .col-md-8';
+            }
+          }),
+          autoFocus: new FormValidation.plugins.AutoFocus()
+        }
+      }).on('core.form.valid', function () {
+        validationStepper.next();
+      });
+    }
+
+    // Initialize step 4 validation on page load
+    // Wait for the portfolio items to be ready
+    setTimeout(function () {
+      buildStep4Validation();
+    }, 100);
+
+    // Expose function to rebuild validation when items are added/removed
+    window.rebuildPortfolioValidation = buildStep4Validation;
+
     const wizardValidationNextButton = wizardValidation.querySelector('.btn-next');
     wizardValidationNextButton.addEventListener('click', event => {
       // When click the Next button, we will validate the current step
@@ -660,6 +806,16 @@
 
         case 2:
           FormValidation3.validate();
+          break;
+
+        case 3: // Portfolio Step
+          if (FormValidation4) {
+            FormValidation4.validate();
+            // The UI will now show errors for the first item because our callback
+            // now returns 'false' if the first item is empty.
+          } else {
+            validationStepper.next();
+          }
           break;
 
         default:

@@ -3225,6 +3225,7 @@ return [
 	'stat' => 'Stat',
 	'visibility_public_desc' => 'Stats are currently visible to everyone.',
 	'visibility_private_desc' => 'Stats are private and only visible to you.',
+	'one_item_required' => 'At least one item is required.',
 	'Mentor_Association' => 'Mentor Association',
 	'Not_Associated' => 'Not Associated',
 	'list_of_organizations' => 'List of Organizations',
