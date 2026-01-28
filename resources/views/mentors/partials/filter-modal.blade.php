@@ -29,7 +29,7 @@
 
           @php 
             $scopeOptions = [
-              ['key' => 'public', 'label' => __('admin.Not_Associated '), 'hint' => __('admin.public_scope_hint')],
+              ['key' => 'public', 'label' => __('admin.Not_Associated'), 'hint' => __('admin.public_scope_hint')],
               ['key' => 'organization', 'label' => __('admin.list_of_organizations'), 'hint' => __('admin.organization_scope_hint')],
             ];
           @endphp
