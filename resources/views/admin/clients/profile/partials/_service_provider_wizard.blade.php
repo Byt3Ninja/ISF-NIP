@@ -46,7 +46,7 @@
       @endforeach
 
       <div class="d-flex justify-content-between align-items-center mt-6">
-        <button class="btn btn-label-secondary btn-prev waves-effect">
+        <button type="button" class="btn btn-label-secondary btn-prev waves-effect">
           <i class="ti ti-arrow-left ti-xs me-sm-2 me-0"></i>
           <span class="align-middle d-sm-inline-block d-none">{{ __('admin.Previous') }}</span>
         </button>

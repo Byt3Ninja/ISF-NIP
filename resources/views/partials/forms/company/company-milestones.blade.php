@@ -316,14 +316,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function getFileIcon(fileName) {
     const extension = fileName.split('.').pop().toLowerCase();
-    // Note: The original instruction used 'fileType' which is not available here.
-    // We'll adapt to use 'fileName.endsWith' and 'extension' as appropriate.
-    if (fileName.endsWith('.pdf')) return '<i class="fa-solid fa-file-pdf text-danger fa-2xl"></i>';
-    if (fileName.endsWith('.docx') || fileName.endsWith('.doc')) return '<i class="fa-solid fa-file-word text-primary fa-2xl"></i>';
-    if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) return '<i class="fa-solid fa-file-excel text-success fa-2xl"></i>';
-    if (fileName.endsWith('.pptx') || fileName.endsWith('.ppt')) return '<i class="fa-solid fa-file-powerpoint text-warning fa-2xl"></i>';
-    if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(extension)) return '<i class="fa-solid fa-file-image text-info fa-2xl"></i>';
-    return '<i class="fa-solid fa-file text-secondary fa-2xl"></i>';
+
+    if (extension === 'pdf') return 'fa-solid fa-file-pdf text-danger';
+    if (['doc', 'docx'].includes(extension)) return 'fa-solid fa-file-word text-primary';
+    if (['xls', 'xlsx'].includes(extension)) return 'fa-solid fa-file-excel text-success';
+    if (['ppt', 'pptx'].includes(extension)) return 'fa-solid fa-file-powerpoint text-warning';
+    if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(extension))
+      return 'fa-solid fa-file-image text-info';
+    return 'fa-solid fa-file text-secondary';
   }
 
   function populateMilestoneCard(card, milestone) {
