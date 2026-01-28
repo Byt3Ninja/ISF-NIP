@@ -101,6 +101,10 @@
                 padding: 14px 24px !important;
                 font-size: 15px !important;
             }
+
+            .org-grid {
+                grid-template-columns: 1fr !important;
+            }
         }
     </style>
 </head>
@@ -117,7 +121,7 @@
                     
                     <!-- Header with Brand Color -->
                     <tr>
-                        <td style="background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); padding: 40px 40px 30px; text-align: center;">
+                        <td style="background: linear-gradient(135deg, #7367f0 0%, #5e54d8 100%); padding: 40px 40px 30px; text-align: center;">
                             <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600; letter-spacing: -0.5px;">
                                 {{ config('app.name') }}
                             </h1>
@@ -139,10 +143,10 @@
                             </p>
 
                             <!-- Invitation Scope -->
-                            <div style="background-color: #f3f4f6; border-left: 4px solid #16a34a; padding: 16px 20px; margin: 0 0 24px; border-radius: 4px;">
+                            <div style="background-color: #f3f4f6; border-left: 4px solid #7367f0; padding: 16px 20px; margin: 0 0 24px; border-radius: 4px;">
                                 <p style="margin: 0; color: #374151; font-size: 15px; line-height: 1.5;">
                                     <strong style="color: #1f2937; font-weight: 600;">Invitation Scope:</strong> 
-                                    <span style="color: #16a34a; font-weight: 500;">{{ $scope }}</span>
+                                    <span style="color: #7367f0; font-weight: 500;">{{ $scope }}</span>
                                 </p>
                             </div>
 
@@ -152,13 +156,13 @@
                                     <p style="margin: 0 0 12px; color: #1f2937; font-size: 16px; font-weight: 600;">
                                         Organizations:
                                     </p>
-                                    <ul style="margin: 0; padding: 0; list-style: none;">
+                                    <div class="org-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0; ">
                                         @foreach($organizations as $org)
-                                            <li style="background-color: #f9fafb; border: 1px solid #e5e7eb; padding: 12px 16px; margin-bottom: 8px; border-radius: 6px; color: #374151; font-size: 15px;">
+                                            <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; padding: 10px 16px; border-radius: 6px; color: #374151; font-size: 14px; margin-bottom: 10px;">
                                                 {{ $org['name'] }}
-                                            </li>
+                                            </div>
                                         @endforeach
-                                    </ul>
+                                    </div>
                                 </div>
                             @endif
 
@@ -168,7 +172,7 @@
                                     <td align="center">
                                         <a href="{{ env('APP_URL') }}/register?id=MentorRole"
                                            class="cta-button"
-                                           style="display: inline-block; padding: 16px 32px; background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 6px rgba(22, 163, 74, 0.25); transition: all 0.3s ease;">
+                                           style="display: inline-block; padding: 16px 32px; background: linear-gradient(135deg, #7367f0 0%, #5e54d8 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 6px rgba(115, 103, 240, 0.25); transition: all 0.3s ease;">
                                             {{ __('admin.Accept_Invation') }}
                                         </a>
                                     </td>
