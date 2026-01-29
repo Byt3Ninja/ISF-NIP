@@ -187,69 +187,81 @@ class NavigationHistoryMiddleware
      * Returns null if title should be ignored
      */
     private function getTitleForRoute(?string $routeName, Request $request): ?string
-    {
-        // List of exact titles to ignore in breadcrumb (all lowercase)
-        $ignoredTitles = [
-            'logo', 'login', 'logout', 'auth', 'register',
-            'password', 'reset', 'verify', 'sanctum',
-            'api', 'csrf', 'token', 'page',
-        ];
+{
+    // List of exact titles to ignore in breadcrumb (all lowercase)
+    $ignoredTitles = [
+        'logo', 'login', 'logout', 'auth', 'register',
+        'password', 'reset', 'verify', 'sanctum',
+        'api', 'csrf', 'token', 'page',
+    ];
 
-        // List of words - if title contains any of these, ignore it (all lowercase)
-        $ignoredContains = [
-            'logo organization', 'logo',
-        ];
+    // List of words - if title contains any of these, ignore it (all lowercase)
+    $ignoredContains = [
+        'logo organization', 'logo', 'Stop'
+    ];
 
-        if (!$routeName) {
-            // Fallback: use last URL segment
-            $segments = $request->segments();
-            $lastSegment = end($segments) ?: 'page';
-            $title = $this->humanize($lastSegment);
+    $title = null;
 
-            // Check if should be ignored
-            if ($this->shouldIgnoreTitle($title, $ignoredTitles, $ignoredContains)) {
-                return null;
-            }
-
-            return $title;
-        }
-
-        // Try to find title in navigation config
-        $navConfig = config('navigation');
-        if (is_callable($navConfig)) {
-            $navItems = $navConfig();
-            $title = $this->findTitleInNav($navItems, $routeName);
-            if ($title) {
-                // Check if should be ignored
-                if ($this->shouldIgnoreTitle($title, $ignoredTitles, $ignoredContains)) {
-                    return null;
-                }
-                return $title;
-            }
-        }
-
-        // Fallback: extract from route name (e.g., 'users.edit' -> 'edit_user')
-        $parts = explode('.', $routeName);
-        if (count($parts) >= 2) {
-            $title = $parts[1] . '_' . rtrim($parts[0], 's');
-
-            // Check if should be ignored
-            if ($this->shouldIgnoreTitle($title, $ignoredTitles, $ignoredContains)) {
-                return null;
-            }
-
-            return $title;
-        }
-
-        $title = $this->humanize($routeName);
-
-        // Check if should be ignored
-        if ($this->shouldIgnoreTitle($title, $ignoredTitles, $ignoredContains)) {
-            return null;
-        }
-
-        return $title;
+    if (!$routeName) {
+        // Fallback: use last URL segment
+        $segments = $request->segments();
+        $lastSegment = end($segments) ?: 'page';
+        $title = $this->humanize($lastSegment);
+        
+        // Pass to finalizer
+        return $this->finalizeTitle($title, $ignoredTitles, $ignoredContains);
     }
+
+    // Try to find title in navigation config
+    $navConfig = config('navigation');
+    if (is_callable($navConfig)) {
+        $navItems = $navConfig();
+        $foundTitle = $this->findTitleInNav($navItems, $routeName);
+        if ($foundTitle) {
+            // Pass to finalizer
+            return $this->finalizeTitle($foundTitle, $ignoredTitles, $ignoredContains);
+        }
+    }
+
+    // Fallback: extract from route name (e.g., 'users.edit' -> 'edit_user')
+    $parts = explode('.', $routeName);
+    if (count($parts) >= 2) {
+        $title = $parts[1] . '_' . rtrim($parts[0], 's');
+        return $this->finalizeTitle($title, $ignoredTitles, $ignoredContains);
+    }
+
+    $title = $this->humanize($routeName);
+    return $this->finalizeTitle($title, $ignoredTitles, $ignoredContains);
+}
+
+/**
+ * دالة جديدة مسؤولة عن الاستبدال والتحقق
+ */
+private function finalizeTitle($title, $ignoredTitles, $ignoredContains): ?string
+{
+    if (!$title) {
+        return null;
+    }
+
+    $cleanTitle = strtolower(trim($title));
+
+
+    $customReplacements = [     
+        'index_slot'      => 'Slots',
+        'sessions_list_detailed_mentorship' => 'Tasks List',
+        'index_survey' => 'Surveys',
+        
+    ];
+    if (isset($customReplacements[$cleanTitle])) {
+
+        $title = $customReplacements[$cleanTitle];
+    }
+    if ($this->shouldIgnoreTitle($title, $ignoredTitles, $ignoredContains)) {
+        return null;
+    }
+
+    return $title;
+}
 
     /**
      * Check if title should be ignored
