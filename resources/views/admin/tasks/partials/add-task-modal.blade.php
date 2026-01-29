@@ -121,7 +121,7 @@
               <div class="border bg-light-subtle rounded p-3 text-center cursor-pointer"
                 onclick="document.getElementById('task-upload').click()">
                 <i class="ti ti-cloud-upload mb-2"></i>
-                <div class="fw-medium">{{ __('mentor.single_dropzone_description') }}</div>
+                <div class="fw-medium">{{ __('admin.click_to_upload') }}</div>
                 <div class="small text-muted mt-1">{{ __('admin.all_files_allowed') }} up to 10MB</div>
               </div>
               <input type="file" name="attachments[]" id="task-upload" class="d-none" multiple>

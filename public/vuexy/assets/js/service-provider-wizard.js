@@ -61,7 +61,7 @@
     const wizardValidationFormStep1 = wizardValidationForm.querySelector('#step-1-basics');
     const wizardValidationFormStep2 = wizardValidationForm.querySelector('#step-2-booking');
     const wizardValidationFormStep3 = wizardValidationForm.querySelector('#step-3-stats');
-    const wizardValidationFormStep4 = wizardValidationForm.querySelector('#step-4-portofolio');
+    const wizardValidationFormStep4 = wizardValidationForm.querySelector('#step-4-portfolio');
     // const wizardValidationFormStep5 = wizardValidationForm.querySelector('#step-5-clients');
 
     // Wizard next prev button
