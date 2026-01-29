@@ -376,7 +376,7 @@ $(function () {
       if (totalSize > maxSize) {
         releaseFailureAlert({
           title: "{{ __('admin.Error') }}!",
-          message: "{{ __('admin.file_exceeds_limit') }}"
+          message: "{{ __('admin.file_exceeds_10_limit') }}"
         });
         return;
       }
@@ -403,7 +403,7 @@ $(function () {
       if (totalSize > maxSize) {
         releaseFailureAlert({
           title: "{{ __('admin.Error') }}!",
-          message: "{{ __('admin.file_exceeds_limit') }}"
+          message: "{{ __('admin.file_exceeds_10_limit') }}"
         });
         return;
       }

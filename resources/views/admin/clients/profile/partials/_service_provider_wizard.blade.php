@@ -1,4 +1,3 @@
-{{-- {{ dd($serviceProviderSteps) }} --}}
 @php
   $max_steps = count($serviceProviderSteps);
   $active_step = request()->get('step', 1);
@@ -16,7 +15,7 @@
           <span class="bs-stepper-circle">{{ $key + 1 }}</span>
           <span class="bs-stepper-label">
             <span class="bs-stepper-title">{{ $step['title'] }}</span>
-            <span class="bs-stepper-subtitle">{{ __('admin.Add') }} {{ $step['title'] }}</span>
+            <span class="bs-stepper-subtitle">{{ __('admin.setup') }} {{ $step['title'] }}</span>
           </span>
         </button>
       </div>

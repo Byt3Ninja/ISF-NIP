@@ -707,7 +707,7 @@ $('#task-upload').on('change', function () {
     const ext = file.name.split('.').pop().toLowerCase();
 
     if (file.size > maxSize) {
-      errors.push(`{{ __('admin.file_exceeds_limit') }} (${file.name})`);
+      errors.push(`{{ __('admin.file_exceeds_10_limit') }} (${file.name})`);
       return;
     }
 

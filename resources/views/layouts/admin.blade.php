@@ -478,17 +478,17 @@
         });
       }
 
-      const releaseWarningAlert = ({title, message, onConfirm, onCancel}) => {
+      const releaseWarningAlert = ({title, message, onConfirm, onCancel, confirmText, confirmColor}) => {
         Swal.fire({
           icon: 'warning',
           title: title || '',
           html: message,
           showCancelButton: onConfirm ? true : false,
           showConfirmButton: true,
-          confirmButtonText: onConfirm ? "{{ __('admin.Confirm') }}" : "{{ __('admin.OK') }}",
+          confirmButtonText: onConfirm ? (confirmText || "{{ __('admin.Confirm') }}") : "{{ __('admin.OK') }}",
           cancelButtonText: onConfirm ? "{{ __('admin.Cancel') }}" : '',
           customClass: {
-            confirmButton: 'btn btn-primary ms-3',
+            confirmButton: `btn btn-${confirmColor || 'primary'} ms-3`,
             cancelButton: onConfirm ? 'btn btn-label-secondary' : '',
           },
           buttonsStyling: false,
