@@ -3285,4 +3285,5 @@ return [
 	'Mentor_Association' => 'المرشدين',
 	'Not_Associated' => 'غير مرتبط',
 	'list_of_organizations' => 'قائمة المؤسسات',
+	'Tasks_List' => 'قائمة المهام',
 ];
