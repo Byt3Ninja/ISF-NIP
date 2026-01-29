@@ -192,12 +192,12 @@ class NavigationHistoryMiddleware
     $ignoredTitles = [
         'logo', 'login', 'logout', 'auth', 'register',
         'password', 'reset', 'verify', 'sanctum',
-        'api', 'csrf', 'token', 'page',
+        'api', 'csrf', 'token', 'page', 'Mentorshiptask',
     ];
 
     // List of words - if title contains any of these, ignore it (all lowercase)
     $ignoredContains = [
-        'logo organization', 'logo', 'Stop'
+        'logo organization', 'logo', 'Stop', 'Mentorshiptask',
     ];
 
     $title = null;
@@ -245,11 +245,11 @@ private function finalizeTitle($title, $ignoredTitles, $ignoredContains): ?strin
 
     $cleanTitle = strtolower(trim($title));
 
-
     $customReplacements = [     
         'index_slot'      => 'Slots',
-        'sessions_list_detailed_mentorship' => 'Tasks List',
+        'sessions_list_detailed_mentorship' => 'Tasks_List',
         'index_survey' => 'Surveys',
+        'index_mentorshiptask' => 'Task',
         
     ];
     if (isset($customReplacements[$cleanTitle])) {
