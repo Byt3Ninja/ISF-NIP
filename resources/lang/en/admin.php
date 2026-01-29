@@ -3229,4 +3229,5 @@ return [
 	'Mentor_Association' => 'Mentor Association',
 	'Not_Associated' => 'Not Associated',
 	'list_of_organizations' => 'List of Organizations',
+	'Tasks_List' => 'Tasks List',
 ];
