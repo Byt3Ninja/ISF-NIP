@@ -21,7 +21,7 @@
 
       <div class="d-flex justify-content-between align-items-center mb-4">
         <button type="button" class="btn btn-outline-primary" id="addWorkItem">
-          <i class="ti ti-plus me-2"></i> Add Another Work Item
+          <i class="ti ti-plus me-2"></i> {{ __('admin.add_another_work_item') }}
         </button>
       </div>
 
@@ -34,7 +34,7 @@
       <div class="card-body">
 
         <div class="d-flex justify-content-between mb-3">
-          <h6 class="text-muted mb-0 work-item-title">Work Item 1</h6>
+          <h6 class="text-muted mb-0 work-item-title">{{ __('admin.work_item') }} 1</h6>
           <button type="button"
             class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill remove-item">
             <i class="ti ti-trash"></i>
@@ -45,17 +45,17 @@
 
           <!-- MEDIA -->
           <div class="col-md-4 mb-4">
-            <label class="form-label">Media (Image / Video)</label>
+            <label class="form-label">{{ __('admin.media_label') }}</label>
 
             <div class="upload-area border bg-light-subtle rounded p-6 text-center cursor-pointer">
               <i class="ti ti-cloud-upload mb-2"></i>
-              <div class="fw-medium">Click to upload</div>
+              <div class="fw-medium">{{ __('admin.click_to_upload') }}</div>
               <div class="small text-muted">PNG, JPG, WEBP, MP4 ≤ 10MB</div>
             </div>
 
             <div class="preview-box mt-2 d-flex align-items-center gap-2">
               <span class="file-name small text-muted text-truncate flex-grow-1">
-                No file selected
+                {{ __('admin.no_file_selected') }}
               </span>
               <button type="button" class="btn btn-sm btn-outline-secondary preview-btn d-none">
                 {{ __('admin.Preview') }}
@@ -113,7 +113,7 @@
 
   function updateItemOrder() {
     $('.work-item-card').each(function(index) {
-      $(this).find('.work-item-title').text(`Work Item ${index + 1}`);
+      $(this).find('.work-item-title').text(`{{ __('admin.work_item') }} ${index + 1}`);
     });
   }
 
@@ -173,14 +173,14 @@
       }
 
       if (file.size > 10 * 1024 * 1024) {
-        alert('Max file size is 10MB');
+        // alert('Max file size is 10MB');
         $(this).val('');
         resetPreview();
         return;
       }
 
       if (!allowedTypes.includes(file.type)) {
-        alert('Invalid file type. Please select a valid image or video file.');
+        // alert('Invalid file type. Please select a valid image or video file.');
         $(this).val('');
         resetPreview();
         return;

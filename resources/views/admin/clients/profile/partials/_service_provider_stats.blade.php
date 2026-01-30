@@ -24,11 +24,11 @@
         <div class="card-body px-4 pb-2">
           <div class="mb-4">
             <label for="value{{ $stat }}" class="form-label">{{ __('admin.Value') }}</label>
-            <input type="text" class="form-control" id="value{{ $stat }}" name="value{{ $stat }}" maxlength="20">
+            <input type="text" class="form-control" id="value{{ $stat }}" name="value{{ $stat }}" placeholder="{{ __('admin.Value') }}" maxlength="20">
           </div>
           <div class="mb-4">
             <label for="label{{ $stat }}" class="form-label">{{ __('admin.label') }}</label>
-            <input type="text" class="form-control" id="label{{ $stat }}" name="label{{ $stat }}" maxlength="50">
+            <input type="text" class="form-control" id="label{{ $stat }}" name="label{{ $stat }}" placeholder="{{ __('admin.label') }}" maxlength="50">
           </div>
         </div>
       </div>

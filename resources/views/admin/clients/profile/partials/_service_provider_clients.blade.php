@@ -147,13 +147,13 @@ $clients = [
 
           <div class="form-group mb-4">
             <label class="form-label">{{ __('admin.client_name') }}</label>
-            <input type="text" class="form-control" name="name" id="client-name" placeholder="{{ __('admin.client_name') }}">
+            <input type="text" class="form-control" name="client_name" id="client-name" placeholder="{{ __('admin.client_name') }}">
             <div class="invalid-feedback">{{ __('admin.Required_Field') }}</div>
           </div>
 
           <div class="form-group mb-4">
             <label class="form-label">{{ __('admin.external_link') }}</label>
-            <input type="url" class="form-control" name="url" id="client-url" placeholder="https://example.com">
+            <input type="url" class="form-control" name="client_url" id="client-url" placeholder="https://example.com">
             <div class="invalid-feedback">{{ __('admin.Please enter a valid URL') }}</div>
           </div>
 

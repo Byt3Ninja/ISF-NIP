@@ -3194,7 +3194,7 @@ return [
 	],
 
 	'operating_mode' => [
-		'label' => 'Operating Mode *',
+		'label' => 'Operating Mode',
 		'description' => 'Selection: Online- Remote / On-site / Online + On-site',
 		'placeholder' => 'Select Operating Mode',
 		'options' => [
@@ -3205,7 +3205,7 @@ return [
 	],
 
 	'operating_region' => [
-		'label' => 'Operating Region *',
+		'label' => 'Operating Region',
 		'description' => 'Selection: Global / MENA / GCC / Africa / Europe / North America / Asia',
 		'placeholder' => 'Select Operating Region',
 		'options' => [
@@ -3247,4 +3247,11 @@ return [
 	'click_to_upload' => 'Click to upload',
 	'file_exceeds_5_limit' => 'File must not exceed 5MB.',
 	'image_only_allowed' => 'Only image files are allowed (PNG, JPG, JPEG, WEBP, SVG).',
+	'no_file_selected' => 'No file selected',
+	'work_item' => 'Work Item',
+	'add_another_work_item' => 'Add another work item',
+	'media_label' => 'Media (Image / Video)',
+	'media_preview' => 'Media Preview',
+	'save_and_next' => 'Save & Next',
+	'save_and_finish' => 'Save & Finish',
 ];
