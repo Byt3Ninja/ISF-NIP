@@ -12,8 +12,8 @@
       logo: "Unsupported. Upload PNG, JPG, JPEG, WEBP or SVG | Max size: 5MB",
       logoSize: "Logo size should not exceed 5MB",
       hero_image: "Unsupported. Upload PNG, JPG, JPEG, WEBP or SVG | Max size: 10MB",
-      phone: "Phone number should contain numbers only",
-      invalidPhone: "Invalid phone number",
+      phone: "Should contain numbers only",
+      invalidPhone: "Should be a valid number",
       invalid_url: "The URL is not valid",
       email: "E-mail should be a valid email address",
       media_required: "Media is required",
@@ -22,15 +22,17 @@
       title_max: "Title must be less than 50 chars",
       desc_required: "Description is required",
       desc_max: "Description must be less than 100 chars",
-      at_least_one_item: "Please add at least one complete work item"
+      at_least_one_item: "Please add at least one complete work item",
+      save_and_next: "Save & Next",
+      submit: "Submit",
     },
     ar: {
       required: "هذا الحقل مطلوب",
       logo: "غير مدعوم. قم بتحميل PNG, JPG, JPEG, WEBP أو SVG | حجم الشعار لا يجب أن يتجاوز 5 MB",
       logoSize: "حجم الشعار لا يجب أن يتجاوز 5 ميغابايت",
       hero_image: "غير مدعوم. قم بتحميل PNG, JPG, JPEG, WEBP أو SVG | حجم الصورة لا يجب أن يتجاوز 10 MB",
-      phone: "رقم الهاتف يجب أن يحتوي على أرقام فقط",
-      invalidPhone: "رقم الهاتف غير صالح",
+      phone: "يجب أن يحتوي على أرقام فقط",
+      invalidPhone: "يجب أن يكون رقم صالح",
       invalid_url: "الرابط غير صالح",
       email: "البريد الإلكتروني يجب أن يكون عنوان بريد إلكتروني صالح",
       media_required: "الملف مطلوب",
@@ -39,7 +41,9 @@
       title_max: "العنوان يجب أن يكون أقل من 50 حرف",
       desc_required: "الوصف مطلوب",
       desc_max: "الوصف يجب أن يكون أقل من 100 حرف",
-      at_least_one_item: "يرجى إضافة عمل واحد على الأقل"
+      at_least_one_item: "يرجى إضافة عمل واحد على الأقل",
+      save_and_next: "حفظ & التالي",
+      submit: "إرسال",
     }
   };
 
@@ -128,8 +132,17 @@
                   return { valid: true };
                 }
 
-                // Check if contains only numbers and allowed phone characters
-                const numericRegex = /^[\d\s\+\-\(\)]+$/;
+                // **NEW: Prevent users from typing + or country codes**
+                // The country code should ONLY come from the dropdown
+                if (value.includes('+')) {
+                  return {
+                    valid: false,
+                    message: translations[lang].phone // "Phone number should contain numbers only"
+                  };
+                }
+
+                // Check if contains only numbers and allowed phone characters (NO PLUS)
+                const numericRegex = /^[\d\s\-\(\)]+$/;
                 if (!numericRegex.test(value)) {
                   return {
                     valid: false,
@@ -137,22 +150,27 @@
                   };
                 }
 
-                // Get selected country
-                let selectedCountry = '';
-                if (iti && typeof iti.getSelectedCountryData === 'function') {
-                  const countryData = iti.getSelectedCountryData();
-                  selectedCountry = countryData.iso2 || '';
+                // Get ITI instance from the element
+                const itiInstance = $(input.element).data('iti');
+
+                if (!itiInstance) {
+                  // Fallback if iti not available - just check format
+                  const phoneRegex = /^[\d\s\-\(\)]{8,}$/;
+                  return {
+                    valid: phoneRegex.test(value),
+                    message: translations[lang].invalidPhone
+                  };
                 }
+
+                // Get selected country
+                const countryData = itiInstance.getSelectedCountryData();
+                const selectedCountry = countryData.iso2 || '';
 
                 // For Egypt, allow numbers starting with 0
                 if (selectedCountry.toLowerCase() === 'eg') {
-                  // Egyptian phone number validation
-                  // Format: 0XXXXXXXXX (11 digits) or XXXXXXXXXX (10 digits)
                   const cleanNumber = value.replace(/[\s\-\(\)]/g, '');
 
-                  // Check if it's a valid Egyptian number
                   if (cleanNumber.startsWith('0')) {
-                    // Should be 11 digits total
                     if (cleanNumber.length === 11 && /^0(10|11|12|15|2)\d{8}$/.test(cleanNumber)) {
                       return { valid: true };
                     } else {
@@ -162,7 +180,6 @@
                       };
                     }
                   } else if (cleanNumber.length === 10 && /^(10|11|12|15|2)\d{8}$/.test(cleanNumber)) {
-                    // 10 digits without leading 0
                     return { valid: true };
                   } else {
                     return {
@@ -173,41 +190,10 @@
                 }
 
                 // Validate using intl-tel-input for other countries
-                if (iti && typeof iti.isValidNumber === 'function') {
-                  const isValid = iti.isValidNumber();
+                if (typeof itiInstance.isValidNumber === 'function') {
+                  const isValid = itiInstance.isValidNumber();
 
                   if (!isValid) {
-                    // Get the validation error
-                    if (typeof iti.getValidationError === 'function') {
-                      const error = iti.getValidationError();
-                      let message = translations[lang].invalidPhone;
-
-                      // Check if intlTelInputUtils is available
-                      if (window.intlTelInputUtils && window.intlTelInputUtils.validationError) {
-                        switch (error) {
-                          case window.intlTelInputUtils.validationError.INVALID_COUNTRY_CODE:
-                            message = translations[lang].invalidPhone;
-                            break;
-                          case window.intlTelInputUtils.validationError.TOO_SHORT:
-                            message = translations[lang].invalidPhone;
-                            break;
-                          case window.intlTelInputUtils.validationError.TOO_LONG:
-                            message = translations[lang].invalidPhone;
-                            break;
-                          case window.intlTelInputUtils.validationError.NOT_A_NUMBER:
-                            message = translations[lang].phone;
-                            break;
-                          default:
-                            message = translations[lang].invalidPhone;
-                        }
-                      }
-
-                      return {
-                        valid: false,
-                        message: message
-                      };
-                    }
-
                     return {
                       valid: false,
                       message: translations[lang].invalidPhone
@@ -217,16 +203,12 @@
                   return { valid: true };
                 }
 
-                // If iti is not available, do basic validation
-                const phoneRegex = /^\+?[\d\s\-\(\)]{8,}$/;
-                if (!phoneRegex.test(value)) {
-                  return {
-                    valid: false,
-                    message: translations[lang].invalidPhone
-                  };
-                }
-
-                return { valid: true };
+                // Basic fallback
+                const phoneRegex = /^[\d\s\-\(\)]{8,}$/;
+                return {
+                  valid: phoneRegex.test(value),
+                  message: translations[lang].invalidPhone
+                };
               }
             }
           }
@@ -246,8 +228,17 @@
                   return { valid: true };
                 }
 
-                // Check if contains only numbers and allowed phone characters
-                const numericRegex = /^[\d\s\+\-\(\)]+$/;
+                // **NEW: Prevent users from typing + or country codes**
+                // The country code should ONLY come from the dropdown
+                if (value.includes('+')) {
+                  return {
+                    valid: false,
+                    message: translations[lang].phone // "Phone number should contain numbers only"
+                  };
+                }
+
+                // Check if contains only numbers and allowed phone characters (NO PLUS)
+                const numericRegex = /^[\d\s\-\(\)]+$/;
                 if (!numericRegex.test(value)) {
                   return {
                     valid: false,
@@ -255,22 +246,27 @@
                   };
                 }
 
-                // Get selected country
-                let selectedCountry = '';
-                if (iti && typeof iti.getSelectedCountryData === 'function') {
-                  const countryData = iti.getSelectedCountryData();
-                  selectedCountry = countryData.iso2 || '';
+                // Get ITI instance from the element
+                const itiInstance = $(input.element).data('iti');
+
+                if (!itiInstance) {
+                  // Fallback if iti not available - just check format
+                  const phoneRegex = /^[\d\s\-\(\)]{8,}$/;
+                  return {
+                    valid: phoneRegex.test(value),
+                    message: translations[lang].invalidPhone
+                  };
                 }
+
+                // Get selected country
+                const countryData = itiInstance.getSelectedCountryData();
+                const selectedCountry = countryData.iso2 || '';
 
                 // For Egypt, allow numbers starting with 0
                 if (selectedCountry.toLowerCase() === 'eg') {
-                  // Egyptian phone number validation
-                  // Format: 0XXXXXXXXX (11 digits) or XXXXXXXXXX (10 digits)
                   const cleanNumber = value.replace(/[\s\-\(\)]/g, '');
 
-                  // Check if it's a valid Egyptian number
                   if (cleanNumber.startsWith('0')) {
-                    // Should be 11 digits total
                     if (cleanNumber.length === 11 && /^0(10|11|12|15|2)\d{8}$/.test(cleanNumber)) {
                       return { valid: true };
                     } else {
@@ -280,7 +276,6 @@
                       };
                     }
                   } else if (cleanNumber.length === 10 && /^(10|11|12|15|2)\d{8}$/.test(cleanNumber)) {
-                    // 10 digits without leading 0
                     return { valid: true };
                   } else {
                     return {
@@ -291,41 +286,10 @@
                 }
 
                 // Validate using intl-tel-input for other countries
-                if (iti && typeof iti.isValidNumber === 'function') {
-                  const isValid = iti.isValidNumber();
+                if (typeof itiInstance.isValidNumber === 'function') {
+                  const isValid = itiInstance.isValidNumber();
 
                   if (!isValid) {
-                    // Get the validation error
-                    if (typeof iti.getValidationError === 'function') {
-                      const error = iti.getValidationError();
-                      let message = translations[lang].invalidPhone;
-
-                      // Check if intlTelInputUtils is available
-                      if (window.intlTelInputUtils && window.intlTelInputUtils.validationError) {
-                        switch (error) {
-                          case window.intlTelInputUtils.validationError.INVALID_COUNTRY_CODE:
-                            message = translations[lang].invalidPhone;
-                            break;
-                          case window.intlTelInputUtils.validationError.TOO_SHORT:
-                            message = translations[lang].invalidPhone;
-                            break;
-                          case window.intlTelInputUtils.validationError.TOO_LONG:
-                            message = translations[lang].invalidPhone;
-                            break;
-                          case window.intlTelInputUtils.validationError.NOT_A_NUMBER:
-                            message = translations[lang].phone;
-                            break;
-                          default:
-                            message = translations[lang].invalidPhone;
-                        }
-                      }
-
-                      return {
-                        valid: false,
-                        message: message
-                      };
-                    }
-
                     return {
                       valid: false,
                       message: translations[lang].invalidPhone
@@ -335,16 +299,12 @@
                   return { valid: true };
                 }
 
-                // If iti is not available, do basic validation
-                const phoneRegex = /^\+?[\d\s\-\(\)]{8,}$/;
-                if (!phoneRegex.test(value)) {
-                  return {
-                    valid: false,
-                    message: translations[lang].invalidPhone
-                  };
-                }
-
-                return { valid: true };
+                // Basic fallback
+                const phoneRegex = /^[\d\s\-\(\)]{8,}$/;
+                return {
+                  valid: phoneRegex.test(value),
+                  message: translations[lang].invalidPhone
+                };
               }
             }
           }
@@ -401,6 +361,40 @@
       validationStepper.next();
     });
 
+    // Phone intl-tel-input
+    if (intlTelInput.length) {
+      intlTelInput.each(function () {
+        var $this = $(this);
+
+        // $this.wrap('<div class="position-relative"></div>');
+
+        if (typeof window.intlTelInput === 'function') {
+          window.intlTelInput($this[0], {
+            initialCountry: 'eg',
+            preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
+            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+            formatOnDisplay: false,
+            separateDialCode: true,
+            autoPlaceholder: "aggressive",
+            customPlaceholder: function (selectedCountryPlaceholder) {
+              return "e.g. " + selectedCountryPlaceholder;
+            }
+          });
+        }
+      });
+    }
+
+    select2.each(function () {
+      var $this = $(this);
+      $this.wrap('<div class="position-relative"></div>');
+      $this.select2({
+        dropdownParent: $this.parent()
+      });
+      $this.on('change', function () {
+        FormValidation1.revalidateField($this.attr('name'));
+      });
+    });
+
     // Intro & booking
     const FormValidation2 = FormValidation.formValidation(wizardValidationFormStep2, {
       fields: {
@@ -417,6 +411,13 @@
           }
         },
         hero_description: {
+          validators: {
+            notEmpty: {
+              message: translations[lang].required,
+            }
+          }
+        },
+        services_short_description: {
           validators: {
             notEmpty: {
               message: translations[lang].required,
@@ -450,38 +451,6 @@
       // Jump to the next step when all fields in the current step are valid
       validationStepper.next();
     });
-
-    // Bootstrap Select (i.e Language select)
-    // if (selectPicker.length) {
-    //   selectPicker.each(function () {
-    //     var $this = $(this);
-    //     $this.selectpicker().on('change', function () {
-    //       FormValidation2.revalidateField('formValidationLanguage');
-    //     });
-    //   });
-    // }
-
-    if (intlTelInput.length) {
-      intlTelInput.each(function () {
-        var $this = $(this);
-
-        // $this.wrap('<div class="position-relative"></div>');
-
-        if (typeof window.intlTelInput === 'function') {
-          window.intlTelInput($this[0], {
-            initialCountry: 'eg',
-            preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
-            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
-            formatOnDisplay: false,
-            separateDialCode: true,
-            autoPlaceholder: "aggressive",
-            customPlaceholder: function (selectedCountryPlaceholder) {
-              return "e.g. " + selectedCountryPlaceholder;
-            }
-          });
-        }
-      });
-    }
 
     // Key stats
     const FormValidation3 = FormValidation.formValidation(wizardValidationFormStep3, {
@@ -792,6 +761,34 @@
     // Expose function to rebuild validation when items are added/removed
     window.rebuildPortfolioValidation = buildStep4Validation;
 
+    validationStepper._element.addEventListener('shown.bs-stepper', function (event) {
+      const $nextBtn = $('.btn-next');
+      const $text = $nextBtn.find('span');
+      const $icon = $nextBtn.find('i');
+
+      const isFirstStep = event.detail.indexStep === 0;
+
+      // Disable Previous button on first step
+      $('.btn-prev').css('visibility', isFirstStep ? 'hidden' : 'visible');
+
+      const isLastStep = event.detail.indexStep === 4;
+      const newText = isLastStep
+        ? translations[lang].submit
+        : translations[lang].save_and_next;
+
+      // Change text only if needed
+      if ($text.text().trim() !== newText) {
+        $text.text(newText);
+      }
+
+      // Toggle button color only if needed
+      $nextBtn.toggleClass('btn-success', isLastStep);
+      $nextBtn.toggleClass('btn-primary', !isLastStep);
+
+      // Toggle icon visibility
+      $icon.toggle(!isLastStep);
+    });
+
     const wizardValidationNextButton = wizardValidation.querySelector('.btn-next');
     wizardValidationNextButton.addEventListener('click', event => {
       // When click the Next button, we will validate the current step
@@ -818,10 +815,92 @@
           }
           break;
 
+        case 4: // Final Step (Step 5) - Submit the form
+          submitFormData();
+          break;
+
         default:
           break;
       }
     });
+
+    // Add this function to handle the AJAX submission
+    function submitFormData() {
+      const form = document.getElementById('service-provider-form-wizard');
+      const formData = new FormData(form);
+
+      // Show loading state
+      const submitBtn = document.querySelector('.btn-next');
+      const originalText = submitBtn.querySelector('span').textContent;
+      const originalIcon = submitBtn.querySelector('i');
+
+      submitBtn.disabled = true;
+      submitBtn.querySelector('span').textContent = lang === 'ar' ? 'جاري الإرسال...' : 'Submitting...';
+      if (originalIcon) originalIcon.style.display = 'none';
+
+      // Add spinner
+      const spinner = document.createElement('span');
+      spinner.className = 'spinner-border spinner-border-sm me-2';
+      spinner.setAttribute('role', 'status');
+      submitBtn.prepend(spinner);
+
+      // Make AJAX request
+      $.ajax({
+        url: '/your-endpoint-url', // Replace with your actual endpoint
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (response) {
+          // Handle success
+          console.log('Success:', response);
+
+          // Remove spinner
+          spinner.remove();
+
+          releaseSuccessAlert({
+            title: lang === 'ar' ? 'نجح!' : 'Success!',
+            message: response.message || (lang === 'ar' ? 'تم إرسال النموذج بنجاح' : 'Form submitted successfully'),
+          });
+          
+          // Redirect or reset form
+          if (response.redirect) {
+            window.location.href = response.redirect;
+          } else {
+            window.location.href = '/success-page';
+          }
+        },
+        error: function (xhr, status, error) {
+          // Handle error
+          console.error('Error:', error);
+
+          // Remove spinner
+          spinner.remove();
+
+          let errorMessage = lang === 'ar' ? 'حدث خطأ أثناء الإرسال' : 'An error occurred during submission';
+
+          // Handle validation errors
+          if (xhr.status === 422 && xhr.responseJSON?.errors) {
+            const errors = xhr.responseJSON.errors;
+            const errorList = Object.values(errors).flat().join('<br>');
+            errorMessage = errorList;
+          } else if (xhr.responseJSON?.message) {
+            errorMessage = xhr.responseJSON.message;
+          }
+
+          // Show error message
+          releaseFailureAlert({
+            title: lang === 'ar' ? 'خطأ!' : 'Error!',
+            message: errorMessage,
+          });
+
+          // Re-enable button
+          submitBtn.disabled = false;
+          submitBtn.querySelector('span').textContent = originalText;
+          if (originalIcon) originalIcon.style.display = '';
+        }
+      });
+    }
 
     const wizardValidationPrevButton = wizardValidation.querySelector('.btn-prev');
     wizardValidationPrevButton.addEventListener('click', event => {
