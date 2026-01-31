@@ -12,6 +12,8 @@ use App\serviceProviderRegistration;
 use App\Mail\serviceProviderRejectMail;
 use App\Mail\serviceProviderApproveMail;
 use App\Mail\serviceProviderRegistrationMail;
+use App\Http\Requests\StoreServiceProviderStep1Request;
+use App\Services\ServiceProviderService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Hash;
@@ -22,6 +24,37 @@ use stdClass;
 
 class serviceProviderController extends Controller
 {
+    protected $serviceProviderService;
+
+    public function __construct(ServiceProviderService $serviceProviderService)
+    {
+        $this->serviceProviderService = $serviceProviderService;
+    }
+
+	public function storeStep1(StoreServiceProviderStep1Request $request)
+	{
+		try {
+			$this->serviceProviderService->updateStep1(
+				auth()->user(), 
+				$request->validated(), 
+				$request->file('company_logo')
+			);
+
+            if ($request->ajax()) {
+                return response()->json(['success' => true, 'message' => __('admin.ProfileSaved')]);
+            }
+
+			return redirect()->back()->with('success', __('admin.ProfileSaved'));
+		} catch (\Exception $e) {
+			Log::error('Store Step 1 Error: ' . $e->getMessage());
+            
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => __('admin.An unexpected error occurred, please try again later')], 500);
+            }
+
+			return redirect()->back()->with('error', __('admin.An unexpected error occurred, please try again later'));
+		}
+	}
 
 	public function get_media( $path = null )
 	{

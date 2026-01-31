@@ -88,6 +88,7 @@ return [
 	'Service' => 'Service',
 	'Target' => 'Target',
 	'Profile' => 'Profile',
+	'ProfileSaved' => 'Profile saved successfully',
 	'Edit your profile information' => 'Edit your profile information',
 	'First Name' => 'First Name',
 	'Arabic First Name' => 'Arabic First Name',
