@@ -26,6 +26,8 @@
       submit: "Submit",
       saving: "Saving...",
       submitting: "Submitting...",
+      stat_value_required: "Value is required when a label is provided",
+      stat_label_required: "Label is required when a value is provided",
     },
     ar: {
       required: "هذا الحقل مطلوب",
@@ -47,6 +49,8 @@
       submit: "إرسال",
       saving: "جاري الحفظ...",
       submitting: "جاري الإرسال...",
+      stat_value_required: "القيمة مطلوبه عند إدخال عنوان",
+      stat_label_required: "العنوان مطلوب عند إدخال قيمة",
     }
   };
 
@@ -626,11 +630,9 @@
         value1: {
           validators: {
             callback: {
-              message: translations[lang].required,
+              message: translations[lang].stat_value_required,
               callback: function (input) {
                 const label = document.getElementById('label1').value.trim();
-                // If label has value, then value is required
-                // If label is empty, value is optional
                 return {
                   valid: !label || input.value.trim() !== ''
                 };
@@ -641,11 +643,9 @@
         label1: {
           validators: {
             callback: {
-              message: translations[lang].required,
+              message: translations[lang].stat_label_required,
               callback: function (input) {
                 const value = document.getElementById('value1').value.trim();
-                // If value has content, then label is required
-                // If value is empty, label is optional
                 return {
                   valid: !value || input.value.trim() !== ''
                 };
@@ -656,7 +656,7 @@
         value2: {
           validators: {
             callback: {
-              message: translations[lang].required,
+              message: translations[lang].stat_value_required,
               callback: function (input) {
                 const label = document.getElementById('label2').value.trim();
                 return {
@@ -669,7 +669,7 @@
         label2: {
           validators: {
             callback: {
-              message: translations[lang].required,
+              message: translations[lang].stat_label_required,
               callback: function (input) {
                 const value = document.getElementById('value2').value.trim();
                 return {
@@ -682,7 +682,7 @@
         value3: {
           validators: {
             callback: {
-              message: translations[lang].required,
+              message: translations[lang].stat_value_required,
               callback: function (input) {
                 const label = document.getElementById('label3').value.trim();
                 return {
@@ -695,7 +695,7 @@
         label3: {
           validators: {
             callback: {
-              message: translations[lang].required,
+              message: translations[lang].stat_label_required,
               callback: function (input) {
                 const value = document.getElementById('value3').value.trim();
                 return {
@@ -708,7 +708,7 @@
         value4: {
           validators: {
             callback: {
-              message: translations[lang].required,
+              message: translations[lang].stat_value_required,
               callback: function (input) {
                 const label = document.getElementById('label4').value.trim();
                 return {
@@ -721,7 +721,7 @@
         label4: {
           validators: {
             callback: {
-              message: translations[lang].required,
+              message: translations[lang].stat_label_required,
               callback: function (input) {
                 const value = document.getElementById('value4').value.trim();
                 return {
@@ -743,8 +743,7 @@
       }
     })
       .on('core.form.valid', function () {
-        // Jump to the next step when all fields in the current step are valid
-        validationStepper.next();
+        saveStepData(2, FormValidation3);
       })
       .on('core.validator.validated', function (e) {
         // When a field is validated, revalidate its paired field

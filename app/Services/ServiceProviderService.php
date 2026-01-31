@@ -125,4 +125,31 @@ class ServiceProviderService
             return $provider;
         });
     }
+
+    public function updateStep3(User $user, array $data)
+    {
+        return DB::transaction(function () use ($user, $data) {
+            
+            $dbData = [
+                'show_stats' => $data['stats_visibility'] === 'on',
+            ];
+
+            for ($i = 1; $i <= 4; $i++) {
+                $dbData["stat{$i}_label"] = $data["label{$i}"] ?? null;
+                $dbData["stat{$i}_value"] = $data["value{$i}"] ?? null;
+            }
+
+            $provider = $user->service_provider;
+            if (!$provider) {
+                $provider = new serviceProviders();
+                $provider->user_id = $user->id;
+                $provider->status = true;
+            }
+
+            $provider->fill($dbData);
+            $provider->save();
+
+            return $provider;
+        });
+    }
 }

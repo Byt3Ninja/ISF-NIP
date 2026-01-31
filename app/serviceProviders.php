@@ -39,7 +39,12 @@ class serviceProviders extends Model
 		'appointment_link',
 		'operating_mode',
 		'operating_region',
-	];
+        'show_stats',
+        'stat1_label', 'stat1_value',
+        'stat2_label', 'stat2_value',
+        'stat3_label', 'stat3_value',
+        'stat4_label', 'stat4_value',
+    ];
 
 	protected $casts = [
 		'company_name' => 'string',
@@ -48,6 +53,7 @@ class serviceProviders extends Model
 		'country_code' => 'string',
 		'phone' => 'string',
 		'status' => 'boolean',
+        'show_stats' => 'boolean',
 		'user_id' => 'integer',
 		'country_id' => 'integer',
 		'state_id' => 'integer',
