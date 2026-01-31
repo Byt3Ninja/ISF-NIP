@@ -44,6 +44,8 @@ class serviceProviders extends Model
         'stat2_label', 'stat2_value',
         'stat3_label', 'stat3_value',
         'stat4_label', 'stat4_value',
+        'show_portfolio',
+        'portfolio_description',
     ];
 
 	protected $casts = [
@@ -54,6 +56,8 @@ class serviceProviders extends Model
 		'phone' => 'string',
 		'status' => 'boolean',
         'show_stats' => 'boolean',
+        'show_portfolio' => 'boolean',
+        'portfolio_description' => 'string',
 		'user_id' => 'integer',
 		'country_id' => 'integer',
 		'state_id' => 'integer',
@@ -67,4 +71,9 @@ class serviceProviders extends Model
 	{
 		return $this->belongsTo(User::class, 'user_id');
 	}
+
+    public function portfolios()
+    {
+        return $this->hasMany(ServiceProviderPortfolio::class, 'service_provider_id')->orderBy('order');
+    }
 }

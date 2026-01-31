@@ -152,4 +152,63 @@ class ServiceProviderService
             return $provider;
         });
     }
+
+    public function updateStep4(User $user, array $data)
+    {
+        return DB::transaction(function () use ($user, $data) {
+            $provider = $user->service_provider;
+            if (!$provider) {
+                $provider = new serviceProviders();
+                $provider->user_id = $user->id;
+                $provider->status = true;
+                $provider->save();
+            }
+
+            $provider->update([
+                'show_portfolio' => $data['portfolio_visibility'] === 'on',
+                'portfolio_description' => $data['portfolio_description'] ?? null,
+            ]);
+
+            $portfolioData = $data['portfolio'] ?? [];
+            $existingIds = [];
+
+            foreach ($portfolioData as $index => $item) {
+                if (isset($item['delete']) && $item['delete'] === 'true') {
+                    if (isset($item['id'])) {
+                        $provider->portfolios()->where('id', $item['id'])->delete();
+                    }
+                    continue;
+                }
+
+                // Prepare item data
+                $itemData = [
+                    'title' => $item['title'] ?? null,
+                    'description' => $item['description'] ?? null,
+                    'order' => $index,
+                ];
+
+                // Handle Media Upload
+                if (isset($item['media']) && $item['media'] instanceof \Illuminate\Http\UploadedFile) {
+                    $itemData['media_url'] = $item['media']->store('service_providers_portfolio', ['disk' => 'public_uploads']);
+                    $itemData['media_type'] = str_starts_with($item['media']->getMimeType(), 'video') ? 'video' : 'image';
+                }
+
+                if (!empty($item['id'])) {
+                    $portfolio = $provider->portfolios()->find($item['id']);
+                    if ($portfolio) {
+                        $portfolio->update($itemData);
+                        $existingIds[] = $portfolio->id;
+                    }
+                } else {
+                    // Only create if at least one field is provided (though validation should handle this)
+                    if ($itemData['title'] || $itemData['description'] || isset($itemData['media_url'])) {
+                        $portfolio = $provider->portfolios()->create($itemData);
+                        $existingIds[] = $portfolio->id;
+                    }
+                }
+            }
+
+            return $provider->load('portfolios');
+        });
+    }
 }
