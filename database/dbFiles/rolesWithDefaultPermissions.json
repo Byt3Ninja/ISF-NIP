@@ -975,6 +975,17 @@
                 ]
             },
             {
+                "name": "services_providers.step2.store",
+                "description": "Save New Service Provider Step 2",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider",
+                    "subadmin"
+                ]
+            },
+            {
                 "name": "services_providers.show",
                 "description": "Show Service Provider Details",
                 "guard_name": "web",

@@ -90,4 +90,39 @@ class ServiceProviderService
             return $provider;
         });
     }
+
+    public function updateStep2(User $user, array $data, $file = null)
+    {
+        return DB::transaction(function () use ($user, $data, $file) {
+            
+            // Handle Hero Image Upload
+            if ($file) {
+                $data['hero_image'] = $file->store('service_providers_hero', ['disk' => 'public_uploads']);
+            }
+
+            $dbData = [
+                'hero_description' => $data['hero_description'],
+                'services_short_description' => $data['services_short_description'],
+                'appointment_link' => $data['appointment_link'] ?? null,
+                'operating_mode' => $data['operating_mode'],
+                'operating_region' => $data['operating_region'],
+            ];
+
+            if(isset($data['hero_image'])) {
+                $dbData['hero_image'] = $data['hero_image'];
+            }
+
+            $provider = $user->service_provider;
+            if (!$provider) {
+                $provider = new serviceProviders();
+                $provider->user_id = $user->id;
+                $provider->status = true;
+            }
+
+            $provider->fill($dbData);
+            $provider->save();
+
+            return $provider;
+        });
+    }
 }

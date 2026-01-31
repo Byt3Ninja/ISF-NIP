@@ -28,7 +28,8 @@
   </div>
 
   <div class="bs-stepper-content">
-    <form id="service-provider-form-wizard" data-route-step-1="{{ route('services_providers.step1.store') }}">
+    <form id="service-provider-form-wizard" data-route-step-1="{{ route('services_providers.step1.store') }}" data-route-step-2="{{ route('services_providers.step2.store') }}">
+      @csrf
       @foreach ($serviceProviderSteps as $key => $step)
         <div id="{{ $step['id'] }}" class="content {{ $key == 0 ? 'active' : '' }}">
           <div class="content-header mb-6">
