@@ -1,3 +1,8 @@
+@php
+    $org = $client->service_provider ?? null;
+    $showPortfolio = $org ? $org->show_portfolio : true;
+    $portfolios = $org ? $org->portfolios : collect();
+@endphp
 <div id="step-4-portfolio">
   <div class="row g-6">
     <div class="col-12">
@@ -5,7 +10,7 @@
         <div class="p-3">
           <h5 class="card-title">{{ __('admin.Visibility') }}</h5>
           <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="portfolio_visibility" name="portfolio_visibility" checked>
+            <input class="form-check-input" type="checkbox" id="portfolio_visibility" name="portfolio_visibility" {{ $showPortfolio ? 'checked' : '' }}>
             <label class="form-check-label" for="portfolio_visibility">{{ __('admin.public') }}</label>
           </div>
           <small class="text-muted d-block mt-2" id="portfolio_visibility_desc">
@@ -15,16 +20,83 @@
       </div>
     </div>
     
-    <div class="col-md-12">
+    <div class="col-12">
+        <div class="mb-4">
+            <label for="portfolio_description" class="form-label">{{ __('admin.Section Short Description') }}</label>
+            <input type="text" class="form-control" id="portfolio_description" name="portfolio_description" value="{{ $org ? $org->portfolio_description : '' }}" maxlength="50" placeholder="{{ __('admin.short_desc_placeholder') ?? 'Briefly describe your work' }}">
+        </div>
+    </div>
 
-      <div id="itemsContainer"></div>
+    <div class="col-md-12">
+      <div id="itemsContainer">
+          @foreach($portfolios as $index => $item)
+            <div class="card mb-4 shadow-none border work-item-card" data-index="{{ $index }}">
+              <div class="card-body">
+                <input type="hidden" class="item-id" name="portfolio[{{ $index }}][id]" value="{{ $item->id }}">
+                <input type="hidden" name="portfolio[{{ $index }}][delete]" value="false" class="delete-flag">
+                
+                <div class="d-flex justify-content-between mb-3">
+                  <h6 class="text-muted mb-0 work-item-title">{{ __('admin.work_item') }} {{ $index + 1 }}</h6>
+                  <button type="button" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill remove-item">
+                    <i class="ti ti-trash"></i>
+                  </button>
+                </div>
+
+                <div class="row">
+                  <!-- MEDIA -->
+                  <div class="col-md-4 mb-4">
+                    <label class="form-label">{{ __('admin.media_label') }}</label>
+
+                    <div class="upload-area border bg-light-subtle rounded p-6 text-center cursor-pointer">
+                      @if($item->media_url)
+                        @if($item->media_type === 'video')
+                          <video src="/191014/{{ $item->media_url }}" class="img-fluid rounded" style="max-height: 100px;"></video>
+                        @else
+                          <img src="/191014/{{ $item->media_url }}" class="img-fluid rounded" style="max-height: 100px;">
+                        @endif
+                        <div class="small mt-1 text-primary">{{ __('admin.Change File') }}</div>
+                      @else
+                        <i class="ti ti-cloud-upload mb-2"></i>
+                        <div class="fw-medium">{{ __('admin.click_to_upload') }}</div>
+                        <div class="small text-muted">PNG, JPG, WEBP, MP4 ≤ 10MB</div>
+                      @endif
+                    </div>
+
+                    <div class="preview-box mt-2 d-flex align-items-center gap-2">
+                      <span class="file-name small text-muted text-truncate flex-grow-1">
+                        {{ $item->media_url ? basename($item->media_url) : __('admin.no_file_selected') }}
+                      </span>
+                      <button type="button" class="btn btn-sm btn-outline-secondary preview-btn {{ $item->media_url ? '' : 'd-none' }}">
+                        {{ __('admin.Preview') }}
+                      </button>
+                    </div>
+
+                    <input type="file" class="d-none media-input" name="portfolio[{{ $index }}][media]" accept=".png,.jpg,.jpeg,.webp,.mp4" />
+                  </div>
+
+                  <!-- TEXT -->
+                  <div class="col-md-8">
+                    <div class="mb-4">
+                      <label class="form-label">{{ __('admin.Title') }}</label>
+                      <input type="text" class="form-control title-input" name="portfolio[{{ $index }}][title]" value="{{ $item->title }}" placeholder="{{ __('admin.Title') }}" maxlength="50">
+                    </div>
+
+                    <div class="mb-4">
+                      <label class="form-label">{{ __('admin.Description') }}</label>
+                      <textarea class="form-control desc-input" name="portfolio[{{ $index }}][description]" rows="3" placeholder="{{ __('admin.Description') }}" maxlength="100">{{ $item->description }}</textarea>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          @endforeach
+      </div>
 
       <div class="d-flex justify-content-between align-items-center mb-4">
         <button type="button" class="btn btn-outline-primary" id="addWorkItem">
           <i class="ti ti-plus me-2"></i> {{ __('admin.add_another_work_item') }}
         </button>
       </div>
-
     </div>
   </div>
 
@@ -32,17 +104,17 @@
   <template id="workItemTemplate">
     <div class="card mb-4 shadow-none border work-item-card">
       <div class="card-body">
+        <input type="hidden" class="item-id" name="portfolio[INDEX][id]" value="">
+        <input type="hidden" class="delete-flag" name="portfolio[INDEX][delete]" value="false">
 
         <div class="d-flex justify-content-between mb-3">
-          <h6 class="text-muted mb-0 work-item-title">{{ __('admin.work_item') }} 1</h6>
-          <button type="button"
-            class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill remove-item">
+          <h6 class="text-muted mb-0 work-item-title">{{ __('admin.work_item') }} INDEX_PLUS_1</h6>
+          <button type="button" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill remove-item">
             <i class="ti ti-trash"></i>
           </button>
         </div>
 
         <div class="row">
-
           <!-- MEDIA -->
           <div class="col-md-4 mb-4">
             <label class="form-label">{{ __('admin.media_label') }}</label>
@@ -62,24 +134,21 @@
               </button>
             </div>
 
-            <input type="file" class="d-none media-input" name="media"
-              accept=".png,.jpg,.jpeg,.webp,.mp4,.mov,.avi,.mkv,.wmv,.flv,.m4v" />
+            <input type="file" class="d-none media-input" name="portfolio[INDEX][media]" accept=".png,.jpg,.jpeg,.webp,.mp4" />
           </div>
 
           <!-- TEXT -->
           <div class="col-md-8">
             <div class="mb-4">
               <label class="form-label">{{ __('admin.Title') }}</label>
-              <input type="text" class="form-control title-input" placeholder="{{ __('admin.Title') }}" maxlength="50">
+              <input type="text" class="form-control title-input" name="portfolio[INDEX][title]" placeholder="{{ __('admin.Title') }}" maxlength="50">
             </div>
 
             <div class="mb-4">
               <label class="form-label">{{ __('admin.Description') }}</label>
-              <textarea class="form-control desc-input" rows="3" placeholder="{{ __('admin.Description') }}"
-                maxlength="100"></textarea>
+              <textarea class="form-control desc-input" name="portfolio[INDEX][description]" rows="3" placeholder="{{ __('admin.Description') }}" maxlength="100"></textarea>
             </div>
           </div>
-
         </div>
       </div>
     </div>
@@ -102,135 +171,162 @@
 @push('scripts')
 <script>
   $(function() {
-  const $container = $('#itemsContainer');
-  const $addBtn = $('#addWorkItem');
-  const $template = $('#workItemTemplate');
+    const $container = $('#itemsContainer');
+    const $addBtn = $('#addWorkItem');
+    const $template = $('#workItemTemplate');
+    const MAX_ITEMS = 20;
 
-  // Initial call
-  addItem();
-
-  $addBtn.on('click', addItem);
-
-  function updateItemOrder() {
-    $('.work-item-card').each(function(index) {
-      $(this).find('.work-item-title').text(`{{ __('admin.work_item') }} ${index + 1}`);
-    });
-  }
-
-  function addItem() {
-    // Clone content from the template
-    const $clone = $($template.prop('content')).clone();
-    const $item = $clone.find('.work-item-card');
-    
-    $container.append($item);
-    bindItem($item);
-    updateItemOrder();
-
-    // Rebuild validation after adding item
-    if (typeof window.rebuildPortfolioValidation === 'function') {
-      window.rebuildPortfolioValidation();
+    // Initial item if none exists
+    if ($container.children().length === 0) {
+      addItem();
+    } else {
+      // Bind existing items
+      $container.find('.work-item-card').each(function() {
+        bindItem($(this));
+      });
     }
-  }
 
-  function bindItem($item) {
-    const $fileInput = $item.find('.media-input');
-    const $fileName = $item.find('.file-name');
-    const $previewBtn = $item.find('.preview-btn');
-
-    // Trigger file input on upload area click
-    $item.find('.upload-area').on('click', () => $fileInput.click());
-
-    // Remove item logic
-    $item.find('.remove-item').on('click', () => {
-      if ($container.children().length > 1) {
-        $item.remove();
-        updateItemOrder();
-
-        // Rebuild validation so the indexes (0, 1, 2) match the remaining DOM
-        if (typeof window.rebuildPortfolioValidation === 'function') {
-          window.rebuildPortfolioValidation();
+    $addBtn.on('click', function() {
+        if ($container.children(':visible').length < MAX_ITEMS) {
+            addItem();
+        } else {
+            // SweetAlert or similar could be used here
+            alert('Maximum ' + MAX_ITEMS + ' work items allowed.');
         }
-      } else {
-        releaseWarningAlert({
-          message: "{{ __('admin.one_item_required') }}"
-        });
-      }
     });
 
-    // File input change logic
-    $fileInput.on('change', function() {
-      const file = this.files[0];
-
-      const allowedTypes = [
-        'image/png', 'image/jpg', 'image/jpeg', 'image/webp',
-        'video/mp4', 'video/mov', 'video/avi', 'video/mkv',
-        'video/wmv', 'video/flv', 'video/m4v'
-      ];
-
-      if (!file) {
-        resetPreview();
-        return;
-      }
-
-      if (file.size > 10 * 1024 * 1024) {
-        // alert('Max file size is 10MB');
-        $(this).val('');
-        resetPreview();
-        return;
-      }
-
-      if (!allowedTypes.includes(file.type)) {
-        // alert('Invalid file type. Please select a valid image or video file.');
-        $(this).val('');
-        resetPreview();
-        return;
-      }
-
-      $fileName.text(file.name);
-      $previewBtn.removeClass('d-none');
-
-      // Use .off().on() to prevent multiple click bindings if change is triggered again
-      $previewBtn.off('click').on('click', () => showPreview(file));
-    });
-
-    function resetPreview() {
-      $fileName.text('No file selected');
-      $previewBtn.addClass('d-none');
+    function updateItemOrder() {
+      let visibleIndex = 1;
+      $container.find('.work-item-card:visible').each(function() {
+        $(this).find('.work-item-title').text(`{{ __('admin.work_item') }} ${visibleIndex++}`);
+      });
     }
-  }
 
-  function showPreview(file) {
-    const $modalContent = $('#modalPreviewContent').empty();
-    const reader = new FileReader();
+    function addItem() {
+      const index = $container.children().length;
+      let html = $template.html();
+      
+      // Replace placeholders
+      html = html.replace(/INDEX/g, index);
+      html = html.replace(/INDEX_PLUS_1/g, index + 1);
+      
+      const $item = $(html);
+      $container.append($item);
+      bindItem($item);
+      updateItemOrder();
+      
+      if (typeof window.rebuildPortfolioValidation === 'function') {
+        window.rebuildPortfolioValidation();
+      }
+    }
 
-    reader.onload = (e) => {
-      if (file.type.startsWith('image')) {
-        $('<img>', {
-          src: e.target.result,
-          class: 'img-fluid rounded'
-        }).appendTo($modalContent);
-      } else {
-        $('<video>', {
-          src: e.target.result,
-          controls: true,
-          class: 'w-100 rounded'
-        }).appendTo($modalContent);
+    function bindItem($item) {
+      const $fileInput = $item.find('.media-input');
+      const $fileName = $item.find('.file-name');
+      const $previewBtn = $item.find('.preview-btn');
+      const $uploadArea = $item.find('.upload-area');
+
+      $uploadArea.on('click', () => $fileInput.click());
+
+      $item.find('.remove-item').on('click', () => {
+        const $idField = $item.find('input[name*="[id]"]');
+        if ($idField.val()) {
+          // If it has an ID, hide it and mark for deletion
+          $item.hide().find('.delete-flag').val('true');
+          // Clear inputs to avoid validation errors if they were required
+          $item.find('input[type="text"], textarea').val('');
+        } else {
+          // If it's a new unsaved item, just remove it from DOM
+          $item.remove();
+        }
+        updateItemOrder();
+        
+        if (typeof window.rebuildPortfolioValidation === 'function') {
+           window.rebuildPortfolioValidation();
+        }
+      });
+
+      $fileInput.on('change', function() {
+        const file = this.files[0];
+        if (!file) {
+          resetPreview();
+          return;
+        }
+
+        if (file.size > 10 * 1024 * 1024) {
+          alert('{{ __("admin.file_size_too_large_portfolio") ?? "File size must be 10MB or less." }}');
+          $(this).val('');
+          resetPreview();
+          return;
+        }
+        
+        const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg', 'image/webp', 'video/mp4'];
+        if (!allowedTypes.includes(file.type)) {
+           alert('{{ __("admin.unsupported_file_type_portfolio") ?? "Unsupported file type. Upload PNG, JPG, WEBP, or MP4." }}');
+           $(this).val('');
+           resetPreview();
+           return;
+        }
+
+        $fileName.text(file.name);
+        $previewBtn.removeClass('d-none');
+        $previewBtn.off('click').on('click', () => showPreview(file));
+        
+        // Show local preview in the upload area
+        const reader = new FileReader();
+        reader.onload = (e) => {
+           $uploadArea.empty();
+           if (file.type.startsWith('image')) {
+             $('<img>', { src: e.target.result, class: 'img-fluid rounded', style: 'max-height: 100px;' }).appendTo($uploadArea);
+           } else {
+             $('<video>', { src: e.target.result, class: 'img-fluid rounded', style: 'max-height: 100px;' }).appendTo($uploadArea);
+           }
+           $uploadArea.append('<div class="small mt-1 text-primary">{{ __("admin.Change File") }}</div>');
+        };
+        reader.readAsDataURL(file);
+      });
+
+      function resetPreview() {
+        $fileName.text('{{ __("admin.no_file_selected") }}');
+        $previewBtn.addClass('d-none');
       }
       
-      // Keep vanilla Bootstrap modal trigger or use jQuery if preferred
+      // Handle existing media preview
+      const existingMedia = $uploadArea.find('img, video').attr('src');
+      if (existingMedia && !existingMedia.includes('ti-cloud-upload')) {
+          $previewBtn.off('click').on('click', () => {
+              const type = $uploadArea.find('video').length ? 'video' : 'image';
+              renderModalPreview(existingMedia, type);
+          });
+      }
+    }
+
+    function showPreview(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const type = file.type.startsWith('video') ? 'video' : 'image';
+        renderModalPreview(e.target.result, type);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function renderModalPreview(src, type) {
+      const $modalContent = $('#modalPreviewContent').empty();
+      if (type === 'image') {
+        $('<img>', { src: src, class: 'img-fluid rounded' }).appendTo($modalContent);
+      } else {
+        $('<video>', { src: src, controls: true, class: 'w-100 rounded' }).appendTo($modalContent);
+      }
       new bootstrap.Modal('#mediaPreviewModal').show();
-    };
+    }
+  });
 
-    reader.readAsDataURL(file);
-  }
-});
-
-$('#portfolio_visibility').change(function() {
-  $('#portfolio_visibility_desc').text(
-    $(this).is(':checked') 
-      ? '{{ __("admin.visibility_public_desc") ?? "Portfolio is currently visible to everyone." }}' 
-      : '{{ __("admin.visibility_private_desc") ?? "Portfolio is private and only visible to you." }}'
-  );
-}).trigger('change');
+  $('#portfolio_visibility').change(function() {
+    $('#portfolio_visibility_desc').text(
+      $(this).is(':checked') 
+        ? '{{ __("admin.visibility_public_desc") ?? "Portfolio is currently visible to everyone." }}' 
+        : '{{ __("admin.visibility_private_desc") ?? "Portfolio is private and only visible to you." }}'
+    );
+  }).trigger('change');
 </script>
 @endpush

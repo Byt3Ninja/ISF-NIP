@@ -28,6 +28,10 @@
       submitting: "Submitting...",
       stat_value_required: "Value is required when a label is provided",
       stat_label_required: "Label is required when a value is provided",
+      complete_work_item_details: "Complete the work item details.",
+      unsupported_file_type_portfolio: "Unsupported file type. Upload PNG, JPG, WEBP, or MP4.",
+      file_size_too_large_portfolio: "File size must be 10MB or less.",
+      change_file: "Change File",
     },
     ar: {
       required: "هذا الحقل مطلوب",
@@ -51,6 +55,10 @@
       submitting: "جاري الإرسال...",
       stat_value_required: "القيمة مطلوبه عند إدخال عنوان",
       stat_label_required: "العنوان مطلوب عند إدخال قيمة",
+      complete_work_item_details: "يرجى استكمال بيانات العمل",
+      unsupported_file_type_portfolio: "نوع الملف غير مدعوم. يرجى رفع PNG أو JPG أو WEBPأو MP4",
+      file_size_too_large_portfolio: "يجب ألا يزيد حجم الملف عن 10 ميجابايت",
+      change_file: "تغيير الملف",
     }
   };
 
@@ -803,37 +811,42 @@
       $cards.each(function (index) {
         const $card = $(this);
         const names = {
-          media: `portfolio_media_${index}`,
-          title: `portfolio_title_${index}`,
-          desc: `portfolio_desc_${index}`
+          id: `portfolio[${index}][id]`,
+          delete: `portfolio[${index}][delete]`,
+          media: `portfolio[${index}][media]`,
+          title: `portfolio[${index}][title]`,
+          desc: `portfolio[${index}][description]`
         };
 
-        // Apply names to DOM so FormValidation can find them
+        // Apply names to DOM so FormValidation can find them and backend gets correct array
+        $card.find('.item-id').attr('name', names.id);
+        $card.find('.delete-flag').attr('name', names.delete);
         $card.find('.media-input').attr('name', names.media);
         $card.find('.title-input').attr('name', names.title);
         $card.find('.desc-input').attr('name', names.desc);
-
-        const isFirst = (index === 0);
 
         // Media Validation
         fields[names.media] = {
           validators: {
             callback: {
-              message: translations[lang].media_required || "Media is required",
+              message: translations[lang].complete_work_item_details,
               callback: function (input) {
-                const hasFile = input.element.files && input.element.files.length > 0;
-                // First item: mandatory. Other items: mandatory only if title/desc filled.
-                // if (isFirst) return hasFile;
-
                 const $item = $(input.element).closest('.work-item-card');
-                const hasText = $item.find('.title-input').val().trim() || $item.find('.desc-input').val().trim();
-                return hasText ? hasFile : true;
+                const hasFile = input.element.files && input.element.files.length > 0;
+                const hasExisting = $item.find('.upload-area img, .upload-area video').length > 0;
+                const titleVal = $item.find('.title-input').val().trim();
+                const descVal = $item.find('.desc-input').val().trim();
+
+                if (titleVal || descVal) {
+                  return hasFile || hasExisting;
+                }
+                return true;
               }
             },
             file: {
-              extension: 'png,jpg,jpeg,webp,mp4,mov,avi,mkv,wmv,flv,m4v',
+              extension: 'png,jpg,jpeg,webp,mp4',
               maxSize: 10485760,
-              message: translations[lang].invalid_media || "Invalid file"
+              message: translations[lang].unsupported_file_type_portfolio
             }
           }
         };
@@ -843,14 +856,18 @@
           validators: {
             stringLength: { max: 50, message: translations[lang].title_max },
             callback: {
-              message: translations[lang].title_required,
+              message: translations[lang].complete_work_item_details,
               callback: function (input) {
                 const val = input.value.trim();
-                if (isFirst) return val !== '';
-
                 const $item = $(input.element).closest('.work-item-card');
-                const hasOther = $item.find('.desc-input').val().trim() || ($item.find('.media-input')[0].files.length > 0);
-                return (hasOther && !val) ? false : true;
+                const hasFile = $item.find('.media-input')[0].files.length > 0;
+                const hasExisting = $item.find('.upload-area img, .upload-area video').length > 0;
+                const descVal = $item.find('.desc-input').val().trim();
+
+                if (descVal || hasFile || hasExisting) {
+                  return val !== '';
+                }
+                return true;
               }
             }
           }
@@ -861,14 +878,18 @@
           validators: {
             stringLength: { max: 100, message: translations[lang].desc_max },
             callback: {
-              message: translations[lang].desc_required,
+              message: translations[lang].complete_work_item_details,
               callback: function (input) {
                 const val = input.value.trim();
-                // if (isFirst) return val !== '';
-
                 const $item = $(input.element).closest('.work-item-card');
-                const hasOther = $item.find('.title-input').val().trim() || ($item.find('.media-input')[0].files.length > 0);
-                return (hasOther && !val) ? false : true;
+                const hasFile = $item.find('.media-input')[0].files.length > 0;
+                const hasExisting = $item.find('.upload-area img, .upload-area video').length > 0;
+                const titleVal = $item.find('.title-input').val().trim();
+
+                if (titleVal || hasFile || hasExisting) {
+                  return val !== '';
+                }
+                return true;
               }
             }
           }
@@ -889,8 +910,10 @@
             message: translations[lang].at_least_one_item,
             callback: function () {
               let isValid = false;
-              $('.work-item-card').each(function () {
-                if ($(this).find('.title-input').val().trim() && $(this).find('.media-input')[0].files.length > 0) {
+              $('.work-item-card:visible').each(function () {
+                const hasTitle = $(this).find('.title-input').val().trim() !== '';
+                const hasMedia = $(this).find('.media-input')[0].files.length > 0 || $(this).find('.upload-area img, .upload-area video').length > 0;
+                if (hasTitle && hasMedia) {
                   isValid = true; return false;
                 }
               });
@@ -912,10 +935,11 @@
               return '.mb-4, .col-md-4, .col-md-8';
             }
           }),
-          autoFocus: new FormValidation.plugins.AutoFocus()
+          autoFocus: new FormValidation.plugins.AutoFocus(),
+          submitButton: new FormValidation.plugins.SubmitButton()
         }
       }).on('core.form.valid', function () {
-        validationStepper.next();
+        saveStepData(3, FormValidation4);
       });
     }
 
