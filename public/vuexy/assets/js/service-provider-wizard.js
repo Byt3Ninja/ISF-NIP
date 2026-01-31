@@ -25,6 +25,8 @@
       at_least_one_item: "Please add at least one complete work item",
       save_and_next: "Save & Next",
       submit: "Submit",
+      saving: "Saving...",
+      submitting: "Submitting...",
     },
     ar: {
       required: "هذا الحقل مطلوب",
@@ -44,6 +46,8 @@
       at_least_one_item: "يرجى إضافة عمل واحد على الأقل",
       save_and_next: "حفظ & التالي",
       submit: "إرسال",
+      saving: "جاري الحفظ...",
+      submitting: "جاري الإرسال...",
     }
   };
 
@@ -368,9 +372,7 @@
         });
       }
     }).on('core.form.valid', function (e) {
-      console.log('is valid');
-      // Jump to the next step when all fields in the current step are valid
-      validationStepper.next();
+      saveStepData(0, FormValidation1);
     });
 
     // Phone intl-tel-input
@@ -434,7 +436,9 @@
         dropdownParent: $this.parent()
       });
       $this.on('change', function () {
-        FormValidation1.revalidateField($this.attr('name'));
+        const stepIndex = validationStepper._currentIndex;
+        if (stepIndex === 0) FormValidation1.revalidateField($this.attr('name'));
+        if (stepIndex === 1) FormValidation2.revalidateField($this.attr('name'));
       });
     });
 
@@ -443,8 +447,13 @@
       fields: {
         hero_image: {
           validators: {
-            notEmpty: {
+            callback: {
               message: translations[lang].required,
+              callback: function (input) {
+                if (input.value) return true;
+                const preview = wizardValidationFormStep2.querySelector('img');
+                return (preview && preview.getAttribute('src')) ? true : false;
+              }
             },
             file: {
               extension: 'png,jpg,jpeg,svg,webp',
@@ -473,6 +482,20 @@
               message: translations[lang].invalid_url
             },
           }
+        },
+        operating_mode: {
+          validators: {
+            notEmpty: {
+              message: translations[lang].required,
+            }
+          }
+        },
+        operating_region: {
+          validators: {
+            notEmpty: {
+              message: translations[lang].required,
+            }
+          }
         }
       },
       plugins: {
@@ -491,8 +514,7 @@
         submitButton: new FormValidation.plugins.SubmitButton()
       }
     }).on('core.form.valid', function () {
-      // Jump to the next step when all fields in the current step are valid
-      validationStepper.next();
+      saveStepData(1, FormValidation2);
     });
 
     // Key stats
@@ -867,6 +889,76 @@
       }
     });
 
+    // Add this function to handle the AJAX submission for each step
+    function saveStepData(stepIndex, formValidationInstance) {
+      const form = document.getElementById('service-provider-form-wizard');
+      const formData = new FormData(form);
+      const route = form.getAttribute(`data-route-step-${stepIndex + 1}`);
+
+      if (!route) {
+        validationStepper.next();
+        return;
+      }
+
+      // Show loading state
+      const nextBtn = document.querySelector('.btn-next');
+      const originalText = nextBtn.querySelector('span').textContent;
+      const originalIcon = nextBtn.querySelector('i');
+
+      nextBtn.disabled = true;
+      nextBtn.querySelector('span').textContent = translations[lang].saving;
+      if (originalIcon) originalIcon.style.display = 'none';
+
+      // Add spinner
+      const spinner = document.createElement('span');
+      spinner.className = 'spinner-border spinner-border-sm me-2';
+      spinner.setAttribute('role', 'status');
+      nextBtn.prepend(spinner);
+
+      $.ajax({
+        url: route,
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        headers: {
+          'X-CSRF-TOKEN': $('input[name="_token"]').val()
+        },
+        success: function (response) {
+          spinner.remove();
+          nextBtn.disabled = false;
+          nextBtn.querySelector('span').textContent = originalText;
+          if (originalIcon) originalIcon.style.display = '';
+
+          if (response.success) {
+            validationStepper.next();
+          } else {
+            releaseFailureAlert({
+              title: lang === 'ar' ? 'خطأ!' : 'Error!',
+              message: response.message || (lang === 'ar' ? 'حدث خطأ' : 'An error occurred'),
+            });
+          }
+        },
+        error: function (xhr) {
+          spinner.remove();
+          nextBtn.disabled = false;
+          nextBtn.querySelector('span').textContent = originalText;
+          if (originalIcon) originalIcon.style.display = '';
+
+          let errorMessage = lang === 'ar' ? 'حدث خطأ أثناء الحفظ' : 'An error occurred while saving';
+          if (xhr.status === 422 && xhr.responseJSON?.errors) {
+            const errors = xhr.responseJSON.errors;
+            errorMessage = Object.values(errors).flat().join('<br>');
+          }
+
+          releaseFailureAlert({
+            title: lang === 'ar' ? 'خطأ!' : 'Error!',
+            message: errorMessage,
+          });
+        }
+      });
+    }
+
     // Add this function to handle the AJAX submission
     function submitFormData() {
       const form = document.getElementById('service-provider-form-wizard');
@@ -878,7 +970,7 @@
       const originalIcon = submitBtn.querySelector('i');
 
       submitBtn.disabled = true;
-      submitBtn.querySelector('span').textContent = lang === 'ar' ? 'جاري الإرسال...' : 'Submitting...';
+      submitBtn.querySelector('span').textContent = translations[lang].submitting;
       if (originalIcon) originalIcon.style.display = 'none';
 
       // Add spinner
@@ -889,11 +981,14 @@
 
       // Make AJAX request
       $.ajax({
-        url: '/your-endpoint-url', // Replace with your actual endpoint
+        url: form.getAttribute('action') || window.location.href, // Use form action or current URL
         type: 'POST',
         data: formData,
         processData: false,
         contentType: false,
+        headers: {
+          'X-CSRF-TOKEN': $('input[name="_token"]').val()
+        },
         success: function (response) {
           // Handle success
           console.log('Success:', response);
@@ -910,7 +1005,8 @@
           if (response.redirect) {
             window.location.href = response.redirect;
           } else {
-            window.location.href = '/success-page';
+            // Default redirect for profile
+            window.location.href = route('user.profile_view');
           }
         },
         error: function (xhr, status, error) {

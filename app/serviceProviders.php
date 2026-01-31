@@ -33,6 +33,12 @@ class serviceProviders extends Model
 		'zip_code',
 		'description',
 		'img_url',
+		'hero_image',
+		'hero_description',
+		'services_short_description',
+		'appointment_link',
+		'operating_mode',
+		'operating_region',
 	];
 
 	protected $casts = [
@@ -46,6 +52,9 @@ class serviceProviders extends Model
 		'country_id' => 'integer',
 		'state_id' => 'integer',
 		'city_id' => 'integer',
+		'hero_description' => 'string',
+		'services_short_description' => 'string',
+		'appointment_link' => 'string',
 	];
 
 	public function user()
