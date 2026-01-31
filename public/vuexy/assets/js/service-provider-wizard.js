@@ -4,7 +4,6 @@
 
 'use strict';
 
-
 (function () {
   const translations = {
     en: {
@@ -52,6 +51,8 @@
   };
 
   let iti; // Declare iti in a scope accessible by custom validator
+  let step1InitialData = null;
+  let step2InitialData = null;
 
   const lang = $('html').attr('lang') || 'en';
 
@@ -78,6 +79,13 @@
 
     const validationStepper = new Stepper(wizardValidation, {
       linear: true
+    });
+
+    // After page ready
+    document.addEventListener('DOMContentLoaded', function () {
+      console.log('page loaded - init wizard');
+      step1InitialData = getStep1Data();
+      step2InitialData = getStep2Data();
     });
 
     // Profile basics
@@ -372,8 +380,44 @@
         });
       }
     }).on('core.form.valid', function (e) {
+      const currentData = getStep1Data();
+
+      // If no changes → skip AJAX
+      if (step1InitialData === currentData) {
+        validationStepper.next();
+        return;
+      }
+
+      // Otherwise save
       saveStepData(0, FormValidation1);
     });
+
+    function getStep1Data() {
+      const form = document.getElementById('service-provider-form-wizard');
+      const formData = new FormData(form);
+
+      const data = {};
+
+      // Only include fields from step 1
+      [
+        'company_logo',
+        'company_name',
+        'contact_name',
+        'email',
+        'phone',
+        'whatsapp',
+        'country',
+        'state',
+        'city',
+        'about',
+        'zip',
+        'address',
+      ].forEach(name => {
+        data[name] = formData.get(name) || '';
+      });
+
+      return JSON.stringify(data);
+    }
 
     // Phone intl-tel-input
     if (intlTelInput.length) {
@@ -514,8 +558,40 @@
         submitButton: new FormValidation.plugins.SubmitButton()
       }
     }).on('core.form.valid', function () {
+      const currentData = getStep2Data();
+      console.log('current step 2 data', currentData);
+
+      // If no changes → skip AJAX
+      if (step2InitialData === currentData) {
+        validationStepper.next();
+        return;
+      }
+
       saveStepData(1, FormValidation2);
     });
+
+    function getStep2Data() {
+      const form = document.getElementById('service-provider-form-wizard');
+      const formData = new FormData(form);
+
+      const data = {};
+
+      console.log('getting step 2 data', data);
+
+      // Only include fields from step 2
+      [
+        'hero_image',
+        'hero_description',
+        'services_short_description',
+        'appointment_link',
+        'operating_mode',
+        'operating_region',
+      ].forEach(name => {
+        data[name] = formData.get(name) || '';
+      });
+
+      return JSON.stringify(data);
+    }
 
     // Key stats
     const FormValidation3 = FormValidation.formValidation(wizardValidationFormStep3, {
@@ -1044,6 +1120,8 @@
     const wizardValidationPrevButton = wizardValidation.querySelector('.btn-prev');
     wizardValidationPrevButton.addEventListener('click', event => {
       validationStepper.previous();
+      step1InitialData = getStep1Data();
+      step2InitialData = getStep2Data();
     });
   }
 })();

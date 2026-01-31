@@ -3311,4 +3311,9 @@ return [
 	'media_preview' => 'معاينة الوسائط',
 	'save_and_next' => 'حفظ والتالي',
 	'save_and_finish' => 'حفظ وانهاء',
+	'provider_basics_subtitle' => 'قم بإعداد التفاصيل الأساسية عن شركتك',
+	'provider_booking_subtitle' => 'حدّد خدماتك وتفضيلات الحجز الخاصة بك',
+	'provider_stats_subtitle' => 'أضف إحصاءاتك الرئيسية لتعزيز المصداقية',
+	'provider_portfolio_subtitle' => 'اعرض خبراتك العملية ومشاريعك',
+	'provider_clients_subtitle' => 'سلّط الضوء على عملائك البارزين وشراكاتك',
 ];

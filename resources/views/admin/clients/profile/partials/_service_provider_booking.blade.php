@@ -15,24 +15,24 @@
 
   <div class="col-md-7 mb-4">
     <div class="d-flex align-items-center gap-3 mb-3">
-        @if($org && $org->hero_image)
-            <div class="position-relative w-px-100 h-px-100">
-                <img src="/191014/{{ $org->hero_image }}" class="w-100 h-100 rounded border shadow-sm" alt="hero image">
-            </div>
-        @endif
-        <label
-          class="flex-grow-1 border border-dashed border-light bg-light-subtle rounded d-flex flex-column justify-content-center align-items-center text-center p-5 cursor-pointer">
-          <div class="mb-2">
-            <i class="ti ti-cloud-upload"></i>
-          </div>
-          <div class="fw-semibold mb-2">
-            {{ __('admin.hero_image.upload') }}
-          </div>
-          <div class="text-muted small">
-            {{ __('admin.hero_image.formats') }}
-          </div>
-          <input type="file" id="hero_image" class="d-none" name="hero_image" accept=".png,.jpg,.jpeg,.webp,.svg+xml">
-        </label>
+      @if($org && $org->hero_image)
+        <div class="position-relative w-px-100 h-px-100">
+          <img src="/191014/{{ $org->hero_image }}" class="w-100 h-100 rounded border shadow-sm" alt="hero image">
+        </div>
+      @endif
+      <label
+        class="flex-grow-1 border border-dashed border-light bg-light-subtle rounded d-flex flex-column justify-content-center align-items-center text-center p-5 cursor-pointer">
+        <div class="mb-2">
+          <i class="ti ti-cloud-upload"></i>
+        </div>
+        <div class="fw-semibold mb-2">
+          {{ __('admin.hero_image.upload') }}
+        </div>
+        <div class="text-muted small">
+          {{ __('admin.hero_image.formats') }}
+        </div>
+        <input type="file" id="hero_image" class="d-none" name="hero_image" accept=".png,.jpg,.jpeg,.webp,.svg+xml">
+      </label>
     </div>
     <div id="fileName" class="small mt-2" style="display: none;"></div>
   </div>

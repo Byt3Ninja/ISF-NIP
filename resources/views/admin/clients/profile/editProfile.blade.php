@@ -52,11 +52,11 @@ $tabs = [
 ];
 
 $serviceProviderSteps = [
-  ['id' => 'basics', 'title' => __('admin.profile_basics')],
-  ['id' => 'booking', 'title' => __('admin.intro_booking')],
-  ['id' => 'stats', 'title' => __('admin.key_stats')],
-  ['id' => 'portfolio', 'title' => __('admin.portfolio')],
-  ['id' => 'clients', 'title' => __('admin.clients')]
+  ['id' => 'basics', 'title' => __('admin.profile_basics'), 'subtitle' => __('admin.provider_basics_subtitle')],
+  ['id' => 'booking', 'title' => __('admin.intro_booking'), 'subtitle' => __('admin.provider_booking_subtitle')],
+  ['id' => 'stats', 'title' => __('admin.key_stats'), 'subtitle' => __('admin.provider_stats_subtitle')],
+  ['id' => 'portfolio', 'title' => __('admin.portfolio'), 'subtitle' => __('admin.provider_portfolio_subtitle')],
+  ['id' => 'clients', 'title' => __('admin.clients'), 'subtitle' => __('admin.provider_clients_subtitle')]
 ];
 
 if (auth()->user()->hasRole('Mentor')) {

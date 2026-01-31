@@ -15,7 +15,7 @@
           <span class="bs-stepper-circle">{{ $key + 1 }}</span>
           <span class="bs-stepper-label">
             <span class="bs-stepper-title">{{ $step['title'] }}</span>
-            <span class="bs-stepper-subtitle">{{ __('admin.setup') }} {{ $step['title'] }}</span>
+            <span class="bs-stepper-subtitle">{{ __('admin.Add') }} {{ $step['title'] }}</span>
           </span>
         </button>
       </div>
@@ -34,7 +34,7 @@
         <div id="{{ $step['id'] }}" class="content {{ $key == 0 ? 'active' : '' }}">
           <div class="content-header mb-6">
             <h5 class="mb-0">{{ $step['title'] }}</h5>
-            <small>{{ __('admin.setup') }} {{ $step['title'] }}</small>
+            <p>{{ $step['subtitle'] }}</p>
           </div>
           
           @include(

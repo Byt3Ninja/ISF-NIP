@@ -3255,4 +3255,9 @@ return [
 	'media_preview' => 'Media Preview',
 	'save_and_next' => 'Save & Next',
 	'save_and_finish' => 'Save & Finish',
+	'provider_basics_subtitle' =>  'Setup main details about your company',
+	'provider_booking_subtitle' =>  'Define your service and scheduling preferences',
+	'provider_stats_subtitle' =>  'Add your key statistics to build credibility',
+	'provider_portfolio_subtitle' =>  'Showcase your work experience and projects',
+	'provider_clients_subtitle' =>  'Highlight your notable clients and collaborations',
 ];
