@@ -29,20 +29,20 @@
 
           @php 
             $scopeOptions = [
-              ['key' => 'public', 'label' => __('admin.Public'), 'hint' => __('admin.public_scope_hint')],
-              ['key' => 'organization', 'label' => __('admin.organization_based'), 'hint' => __('admin.organization_scope_hint')],
+              ['key' => 'public', 'label' => __('admin.Not_Associated'), 'hint' => __('admin.public_scope_hint')],
+              ['key' => 'organization', 'label' => __('admin.list_of_organizations'), 'hint' => __('admin.organization_scope_hint')],
             ];
           @endphp
 
           <div class="form-group mb-4">
-            <label for="scopeFilter" class="form-label">{{ __('admin.Scope') }}</label>
+            <label for="scopeFilter" class="form-label">{{ __('admin.Mentor_Association') }}</label>
             <select
               name="scopeFilter"
               id="scopeFilter"
               class="form-select select2"
               data-placeholder="{{ __('admin.select_scope') }}"
             >
-              <option value="all">{{ __('admin.allMentors') }}</option>
+              <option value="all">{{ __('admin.All') }}</option>
               @foreach ($scopeOptions as $option)
                 <option value="{{ $option['key'] }}" {{ request('scopeFilter') == $option['key'] ? 'selected' : '' }}>
                   {{ $option['label'] }}
@@ -60,13 +60,14 @@
               </div>
             @endforeach
           </div>
-
+          
           <!-- Organization Filter -->
           <div id="org-filter-container" class="form-group mb-4" style="display: {{ request('scopeFilter') == 'organization' ? 'block' : 'none' }}">
             <label for="organization-select" class="form-label">{{ __('admin.Organization') }}</label>
-            <select name="organization" id="organization-select" class="form-select select2" data-placeholder="{{ __('admin.Select organization') }}">
+            <select name="organization" id="organization-select" class="form-select select2" data-placeholder="{{ __('admin.Select_organization') }}">
               @php
-              $organization = auth()->user()->hasRole('admin') ? App\Organization::all() : auth()->user()->organizations()->with('organization')->get()->pluck('organization'); //App\Organization::all();
+              $organization_q = App\Organization::query();
+              $organization = auth()->user()->hasRole('admin') ? $organization_q->get() : $organization_q->where('id', auth()->user()->organization_id)->get(); //App\Organization::all();
               @endphp
               <option value="">{{ __('admin.All_Organizations') }}</option>
               @foreach ($organization as $org)

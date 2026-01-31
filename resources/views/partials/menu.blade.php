@@ -547,9 +547,9 @@
           <i class="menu-icon tf-icons ti ti-briefcase"></i>
           <div class="d-flex align-items-center justify-content-between w-100">
             <span>{{ __('admin.Services Requests') }}</span>
-             @if ($pendingRequestsCount > 0)
+             {{-- @if ($pendingRequestsCount > 0)
               <span class="badge badge-center rounded-pill bg-danger ms-2">{{ $pendingRequestsCount }}</span>
-            @endif
+            @endif --}}
           </div>
         </a>
       </li>

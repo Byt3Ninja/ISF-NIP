@@ -569,13 +569,18 @@ class ClientProfileController extends Controller
                         });
 
                     } else {
-                        $mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter, $request) {
-                            $query->where('scope', $scopeFilter)
-                                ->where('status', 'accepted');
-                            if ($request->organization != null) {
-                                $query->whereJsonContains('organization_ids', (string) $request->organization);
-                            }
-                        });
+                         $mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter, $request) {
+                             $query->where('scope', $scopeFilter)
+                                 ->where('status', 'accepted');
+                             if ($request->organization != null) {
+                                 $query->whereJsonContains('organization_ids', (string) $request->organization);
+                             }
+                         });
+                        //$mentors = User::whereHas('mentorCycles', function ($q) use ($request) {
+                          //  if (!empty($request->organization)) {
+                            //    $q->where('organization_id', $request->organization);
+                           // }
+                       // });
                     }
                 }
 
@@ -587,9 +592,18 @@ class ClientProfileController extends Controller
 
                 if (!$user->hasRole('Admin') && !empty($orgIds)) {
                     $cycles = Cycle::whereIn('organization_id', $orgIds)->get();
+                    $mentors = User::whereHas('mentorCycles', function ($q) use ($orgIds) {
+                        $q->where(function ($qq) use ($orgIds) {
+                            foreach ($orgIds as $orgId) {
+                                $qq->orWhere('organization_id', $orgId);
+                            }
+                        });
+                    })->get();
                 } else {
                     $cycles = Cycle::all();
                 }
+                
+               
 			    $offline_allowed = $settings->allow_offline_sessions == 1 ? true : false;
 
                 // $mentors = User::role('mentor')->get();

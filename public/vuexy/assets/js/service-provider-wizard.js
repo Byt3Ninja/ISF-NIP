@@ -11,22 +11,43 @@
       required: "This field is required",
       logo: "Unsupported. Upload PNG, JPG, JPEG, WEBP or SVG | Max size: 5MB",
       logoSize: "Logo size should not exceed 5MB",
-      phone: "Phone number should contain numbers only",
-      invalidPhone: "Invalid phone number",
+      hero_image: "Unsupported. Upload PNG, JPG, JPEG, WEBP or SVG | Max size: 10MB",
+      phone: "Should contain numbers only",
+      invalidPhone: "Should be a valid number",
+      invalid_url: "The URL is not valid",
       email: "E-mail should be a valid email address",
+      media_required: "Media is required",
+      invalid_media: "Invalid file or size too large",
+      title_required: "Title is required",
+      title_max: "Title must be less than 50 chars",
+      desc_required: "Description is required",
+      desc_max: "Description must be less than 100 chars",
+      at_least_one_item: "Please add at least one complete work item",
+      save_and_next: "Save & Next",
+      submit: "Submit",
     },
     ar: {
       required: "هذا الحقل مطلوب",
       logo: "غير مدعوم. قم بتحميل PNG, JPG, JPEG, WEBP أو SVG | حجم الشعار لا يجب أن يتجاوز 5 MB",
       logoSize: "حجم الشعار لا يجب أن يتجاوز 5 ميغابايت",
-      phone: "رقم الهاتف يجب أن يحتوي على أرقام فقط",
-      invalidPhone: "رقم الهاتف غير صالح",
+      hero_image: "غير مدعوم. قم بتحميل PNG, JPG, JPEG, WEBP أو SVG | حجم الصورة لا يجب أن يتجاوز 10 MB",
+      phone: "يجب أن يحتوي على أرقام فقط",
+      invalidPhone: "يجب أن يكون رقم صالح",
+      invalid_url: "الرابط غير صالح",
       email: "البريد الإلكتروني يجب أن يكون عنوان بريد إلكتروني صالح",
+      media_required: "الملف مطلوب",
+      invalid_media: "ملف غير صالح أو حجم كبير جداً",
+      title_required: "العنوان مطلوب",
+      title_max: "العنوان يجب أن يكون أقل من 50 حرف",
+      desc_required: "الوصف مطلوب",
+      desc_max: "الوصف يجب أن يكون أقل من 100 حرف",
+      at_least_one_item: "يرجى إضافة عمل واحد على الأقل",
+      save_and_next: "حفظ & التالي",
+      submit: "إرسال",
     }
   };
 
   let iti; // Declare iti in a scope accessible by custom validator
-
 
   const lang = $('html').attr('lang') || 'en';
 
@@ -44,10 +65,8 @@
     const wizardValidationFormStep1 = wizardValidationForm.querySelector('#step-1-basics');
     const wizardValidationFormStep2 = wizardValidationForm.querySelector('#step-2-booking');
     const wizardValidationFormStep3 = wizardValidationForm.querySelector('#step-3-stats');
-    // const wizardValidationFormStep4 = wizardValidationForm.querySelector('#step-4-portofolio');
+    const wizardValidationFormStep4 = wizardValidationForm.querySelector('#step-4-portfolio');
     // const wizardValidationFormStep5 = wizardValidationForm.querySelector('#step-5-clients');
-
-    console.log('wizardValidationFormStep1', wizardValidationFormStep1);
 
     // Wizard next prev button
     const wizardValidationNext = wizardValidationForm.querySelector('.btn-next');
@@ -125,8 +144,17 @@
                   return { valid: true };
                 }
 
-                // Check if contains only numbers and allowed phone characters
-                const numericRegex = /^[\d\s\+\-\(\)]+$/;
+                // **NEW: Prevent users from typing + or country codes**
+                // The country code should ONLY come from the dropdown
+                if (value.includes('+')) {
+                  return {
+                    valid: false,
+                    message: translations[lang].phone // "Phone number should contain numbers only"
+                  };
+                }
+
+                // Check if contains only numbers and allowed phone characters (NO PLUS)
+                const numericRegex = /^[\d\s\-\(\)]+$/;
                 if (!numericRegex.test(value)) {
                   return {
                     valid: false,
@@ -134,23 +162,27 @@
                   };
                 }
 
-                // Get selected country
-                let selectedCountry = '';
-                const itiInstance = input.element.iti || iti;
-                if (itiInstance && typeof itiInstance.getSelectedCountryData === 'function') {
-                  const countryData = itiInstance.getSelectedCountryData();
-                  selectedCountry = countryData.iso2 || '';
+                // Get ITI instance from the element
+                const itiInstance = $(input.element).data('iti');
+
+                if (!itiInstance) {
+                  // Fallback if iti not available - just check format
+                  const phoneRegex = /^[\d\s\-\(\)]{8,}$/;
+                  return {
+                    valid: phoneRegex.test(value),
+                    message: translations[lang].invalidPhone
+                  };
                 }
+
+                // Get selected country
+                const countryData = itiInstance.getSelectedCountryData();
+                const selectedCountry = countryData.iso2 || '';
 
                 // For Egypt, allow numbers starting with 0
                 if (selectedCountry.toLowerCase() === 'eg') {
-                  // Egyptian phone number validation
-                  // Format: 0XXXXXXXXX (11 digits) or XXXXXXXXXX (10 digits)
                   const cleanNumber = value.replace(/[\s\-\(\)]/g, '');
 
-                  // Check if it's a valid Egyptian number
                   if (cleanNumber.startsWith('0')) {
-                    // Should be 11 digits total
                     if (cleanNumber.length === 11 && /^0(10|11|12|15|2)\d{8}$/.test(cleanNumber)) {
                       return { valid: true };
                     } else {
@@ -160,7 +192,6 @@
                       };
                     }
                   } else if (cleanNumber.length === 10 && /^(10|11|12|15|2)\d{8}$/.test(cleanNumber)) {
-                    // 10 digits without leading 0
                     return { valid: true };
                   } else {
                     return {
@@ -171,41 +202,10 @@
                 }
 
                 // Validate using intl-tel-input for other countries
-                if (itiInstance && typeof itiInstance.isValidNumber === 'function') {
+                if (typeof itiInstance.isValidNumber === 'function') {
                   const isValid = itiInstance.isValidNumber();
 
                   if (!isValid) {
-                    // Get the validation error
-                    if (typeof itiInstance.getValidationError === 'function') {
-                      const error = itiInstance.getValidationError();
-                      let message = translations[lang].invalidPhone;
-
-                      // Check if intlTelInputUtils is available
-                      if (window.intlTelInputUtils && window.intlTelInputUtils.validationError) {
-                        switch (error) {
-                          case window.intlTelInputUtils.validationError.INVALID_COUNTRY_CODE:
-                            message = translations[lang].invalidPhone;
-                            break;
-                          case window.intlTelInputUtils.validationError.TOO_SHORT:
-                            message = translations[lang].invalidPhone;
-                            break;
-                          case window.intlTelInputUtils.validationError.TOO_LONG:
-                            message = translations[lang].invalidPhone;
-                            break;
-                          case window.intlTelInputUtils.validationError.NOT_A_NUMBER:
-                            message = translations[lang].phone;
-                            break;
-                          default:
-                            message = translations[lang].invalidPhone;
-                        }
-                      }
-
-                      return {
-                        valid: false,
-                        message: message
-                      };
-                    }
-
                     return {
                       valid: false,
                       message: translations[lang].invalidPhone
@@ -215,16 +215,12 @@
                   return { valid: true };
                 }
 
-                // If iti is not available, do basic validation
-                const phoneRegex = /^\+?[\d\s\-\(\)]{8,}$/;
-                if (!phoneRegex.test(value)) {
-                  return {
-                    valid: false,
-                    message: translations[lang].invalidPhone
-                  };
-                }
-
-                return { valid: true };
+                // Basic fallback
+                const phoneRegex = /^[\d\s\-\(\)]{8,}$/;
+                return {
+                  valid: phoneRegex.test(value),
+                  message: translations[lang].invalidPhone
+                };
               }
             }
           }
@@ -244,8 +240,17 @@
                   return { valid: true };
                 }
 
-                // Check if contains only numbers and allowed phone characters
-                const numericRegex = /^[\d\s\+\-\(\)]+$/;
+                // **NEW: Prevent users from typing + or country codes**
+                // The country code should ONLY come from the dropdown
+                if (value.includes('+')) {
+                  return {
+                    valid: false,
+                    message: translations[lang].phone // "Phone number should contain numbers only"
+                  };
+                }
+
+                // Check if contains only numbers and allowed phone characters (NO PLUS)
+                const numericRegex = /^[\d\s\-\(\)]+$/;
                 if (!numericRegex.test(value)) {
                   return {
                     valid: false,
@@ -253,23 +258,27 @@
                   };
                 }
 
-                // Get selected country
-                let selectedCountry = '';
-                const itiInstance = input.element.iti || iti;
-                if (itiInstance && typeof itiInstance.getSelectedCountryData === 'function') {
-                  const countryData = itiInstance.getSelectedCountryData();
-                  selectedCountry = countryData.iso2 || '';
+                // Get ITI instance from the element
+                const itiInstance = $(input.element).data('iti');
+
+                if (!itiInstance) {
+                  // Fallback if iti not available - just check format
+                  const phoneRegex = /^[\d\s\-\(\)]{8,}$/;
+                  return {
+                    valid: phoneRegex.test(value),
+                    message: translations[lang].invalidPhone
+                  };
                 }
+
+                // Get selected country
+                const countryData = itiInstance.getSelectedCountryData();
+                const selectedCountry = countryData.iso2 || '';
 
                 // For Egypt, allow numbers starting with 0
                 if (selectedCountry.toLowerCase() === 'eg') {
-                  // Egyptian phone number validation
-                  // Format: 0XXXXXXXXX (11 digits) or XXXXXXXXXX (10 digits)
                   const cleanNumber = value.replace(/[\s\-\(\)]/g, '');
 
-                  // Check if it's a valid Egyptian number
                   if (cleanNumber.startsWith('0')) {
-                    // Should be 11 digits total
                     if (cleanNumber.length === 11 && /^0(10|11|12|15|2)\d{8}$/.test(cleanNumber)) {
                       return { valid: true };
                     } else {
@@ -279,7 +288,6 @@
                       };
                     }
                   } else if (cleanNumber.length === 10 && /^(10|11|12|15|2)\d{8}$/.test(cleanNumber)) {
-                    // 10 digits without leading 0
                     return { valid: true };
                   } else {
                     return {
@@ -290,41 +298,10 @@
                 }
 
                 // Validate using intl-tel-input for other countries
-                if (itiInstance && typeof itiInstance.isValidNumber === 'function') {
+                if (typeof itiInstance.isValidNumber === 'function') {
                   const isValid = itiInstance.isValidNumber();
 
                   if (!isValid) {
-                    // Get the validation error
-                    if (typeof itiInstance.getValidationError === 'function') {
-                      const error = itiInstance.getValidationError();
-                      let message = translations[lang].invalidPhone;
-
-                      // Check if intlTelInputUtils is available
-                      if (window.intlTelInputUtils && window.intlTelInputUtils.validationError) {
-                        switch (error) {
-                          case window.intlTelInputUtils.validationError.INVALID_COUNTRY_CODE:
-                            message = translations[lang].invalidPhone;
-                            break;
-                          case window.intlTelInputUtils.validationError.TOO_SHORT:
-                            message = translations[lang].invalidPhone;
-                            break;
-                          case window.intlTelInputUtils.validationError.TOO_LONG:
-                            message = translations[lang].invalidPhone;
-                            break;
-                          case window.intlTelInputUtils.validationError.NOT_A_NUMBER:
-                            message = translations[lang].phone;
-                            break;
-                          default:
-                            message = translations[lang].invalidPhone;
-                        }
-                      }
-
-                      return {
-                        valid: false,
-                        message: message
-                      };
-                    }
-
                     return {
                       valid: false,
                       message: translations[lang].invalidPhone
@@ -334,16 +311,12 @@
                   return { valid: true };
                 }
 
-                // If iti is not available, do basic validation
-                const phoneRegex = /^\+?[\d\s\-\(\)]{8,}$/;
-                if (!phoneRegex.test(value)) {
-                  return {
-                    valid: false,
-                    message: translations[lang].invalidPhone
-                  };
-                }
-
-                return { valid: true };
+                // Basic fallback
+                const phoneRegex = /^[\d\s\-\(\)]{8,}$/;
+                return {
+                  valid: phoneRegex.test(value),
+                  message: translations[lang].invalidPhone
+                };
               }
             }
           }
@@ -376,7 +349,8 @@
           event: {
             file: 'change'
           }
-        }), bootstrap5: new FormValidation.plugins.Bootstrap5({
+        }),
+        bootstrap5: new FormValidation.plugins.Bootstrap5({
           // Use this for enabling/changing valid/invalid class
           // eleInvalidClass: '',
           eleValidClass: '',
@@ -394,148 +368,12 @@
         });
       }
     }).on('core.form.valid', function (e) {
-      console.log('Validating Step 1 and submitting via AJAX');
-
-      const form = wizardValidationForm;
-      const formData = new FormData(form);
-      const url = form.getAttribute('data-route-step-1');
-      const submitBtn = wizardValidationNext;
-
-      // Disable button and show spinner/text
-      const originalBtnText = submitBtn.innerHTML;
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Saving...';
-
-      // Clean up previous alerts
-      $('.alert-dismissible').remove();
-
-      $.ajax({
-        url: url,
-        type: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        headers: {
-          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        },
-        success: function (response) {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = originalBtnText;
-
-          if (response.success) {
-            // Show success message (toast or alert)
-            toastr.success(response.message, 'Success', {
-              closeButton: true,
-              progressBar: true,
-              tapToDismiss: false
-            });
-
-            // Move to next step
-            validationStepper.next();
-          } else {
-            toastr.error(response.message || 'An error occurred', 'Error');
-          }
-        },
-        error: function (xhr) {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = originalBtnText;
-
-          let errorMessage = 'An error occurred';
-          if (xhr.responseJSON) {
-            if (xhr.responseJSON.errors) {
-              // Validation errors
-              // We can try to map them back to fields or show a summary
-              let errorList = '<ul>';
-              $.each(xhr.responseJSON.errors, function (key, val) {
-                errorList += `<li>${val[0]}</li>`;
-                // Highlight field if possible, though FormValidation handles frontend mostly
-              });
-              errorList += '</ul>';
-              errorMessage = errorList;
-
-              toastr.error(errorMessage, 'Validation Error', { enableHtml: true });
-            } else {
-              errorMessage = xhr.responseJSON.message || errorMessage;
-              toastr.error(errorMessage, 'Error');
-            }
-          } else {
-            toastr.error(errorMessage, 'Error');
-          }
-        }
-      });
-    })
-
-    FormValidation1.on('core.field.validating', e => {
-      if (e.field === 'company_logo') {
-        console.log('Validating file:', e.element.files[0]?.size);
-      }
-    });
-
-
-    // $('input[name="company_logo"]').on('change', function (e) {
-    //   if ($(this).val()) {
-    //     $('.fv-logo-wrapper .invalid-feedback').removeClass('d-block').addClass('d-none');
-    //   }
-    // });
-
-    // Personal info
-    const FormValidation2 = FormValidation.formValidation(wizardValidationFormStep2, {
-      fields: {
-        formValidationFirstName: {
-          validators: {
-            notEmpty: {
-              message: 'The first name is required'
-            }
-          }
-        },
-        formValidationLastName: {
-          validators: {
-            notEmpty: {
-              message: 'The last name is required'
-            }
-          }
-        },
-        formValidationCountry: {
-          validators: {
-            notEmpty: {
-              message: 'The Country is required'
-            }
-          }
-        },
-        formValidationLanguage: {
-          validators: {
-            notEmpty: {
-              message: 'The Languages is required'
-            }
-          }
-        }
-      },
-      plugins: {
-        trigger: new FormValidation.plugins.Trigger(),
-        bootstrap5: new FormValidation.plugins.Bootstrap5({
-          // Use this for enabling/changing valid/invalid class
-          // eleInvalidClass: '',
-          eleValidClass: '',
-          rowSelector: '.col-sm-6'
-        }),
-        autoFocus: new FormValidation.plugins.AutoFocus(),
-        submitButton: new FormValidation.plugins.SubmitButton()
-      }
-    }).on('core.form.valid', function () {
+      console.log('is valid');
       // Jump to the next step when all fields in the current step are valid
       validationStepper.next();
     });
 
-    // Bootstrap Select (i.e Language select)
-    // if (selectPicker.length) {
-    //   selectPicker.each(function () {
-    //     var $this = $(this);
-    //     $this.selectpicker().on('change', function () {
-    //       FormValidation2.revalidateField('formValidationLanguage');
-    //     });
-    //   });
-    // }
-
+    // Phone intl-tel-input
     if (intlTelInput.length) {
       intlTelInput.each(function () {
         var $this = $(this);
@@ -589,46 +427,182 @@
       });
     }
 
-    // Social links
+    select2.each(function () {
+      var $this = $(this);
+      $this.wrap('<div class="position-relative"></div>');
+      $this.select2({
+        dropdownParent: $this.parent()
+      });
+      $this.on('change', function () {
+        FormValidation1.revalidateField($this.attr('name'));
+      });
+    });
+
+    // Intro & booking
+    const FormValidation2 = FormValidation.formValidation(wizardValidationFormStep2, {
+      fields: {
+        hero_image: {
+          validators: {
+            notEmpty: {
+              message: translations[lang].required,
+            },
+            file: {
+              extension: 'png,jpg,jpeg,svg,webp',
+              maxSize: 10 * 1024 * 1024, // 10MB
+              message: translations[lang].hero_image
+            }
+          }
+        },
+        hero_description: {
+          validators: {
+            notEmpty: {
+              message: translations[lang].required,
+            }
+          }
+        },
+        services_short_description: {
+          validators: {
+            notEmpty: {
+              message: translations[lang].required,
+            }
+          }
+        },
+        appointment_link: {
+          validators: {
+            uri: {
+              message: translations[lang].invalid_url
+            },
+          }
+        }
+      },
+      plugins: {
+        trigger: new FormValidation.plugins.Trigger({
+          event: {
+            file: 'change'
+          }
+        }),
+        bootstrap5: new FormValidation.plugins.Bootstrap5({
+          // Use this for enabling/changing valid/invalid class
+          // eleInvalidClass: '',
+          eleValidClass: '',
+          rowSelector: '.mb-4'
+        }),
+        autoFocus: new FormValidation.plugins.AutoFocus(),
+        submitButton: new FormValidation.plugins.SubmitButton()
+      }
+    }).on('core.form.valid', function () {
+      // Jump to the next step when all fields in the current step are valid
+      validationStepper.next();
+    });
+
+    // Key stats
     const FormValidation3 = FormValidation.formValidation(wizardValidationFormStep3, {
       fields: {
-        formValidationTwitter: {
+        value1: {
           validators: {
-            notEmpty: {
-              message: 'The Twitter URL is required'
-            },
-            uri: {
-              message: 'The URL is not proper'
+            callback: {
+              message: translations[lang].required,
+              callback: function (input) {
+                const label = document.getElementById('label1').value.trim();
+                // If label has value, then value is required
+                // If label is empty, value is optional
+                return {
+                  valid: !label || input.value.trim() !== ''
+                };
+              }
             }
           }
         },
-        formValidationFacebook: {
+        label1: {
           validators: {
-            notEmpty: {
-              message: 'The Facebook URL is required'
-            },
-            uri: {
-              message: 'The URL is not proper'
+            callback: {
+              message: translations[lang].required,
+              callback: function (input) {
+                const value = document.getElementById('value1').value.trim();
+                // If value has content, then label is required
+                // If value is empty, label is optional
+                return {
+                  valid: !value || input.value.trim() !== ''
+                };
+              }
             }
           }
         },
-        formValidationGoogle: {
+        value2: {
           validators: {
-            notEmpty: {
-              message: 'The Google URL is required'
-            },
-            uri: {
-              message: 'The URL is not proper'
+            callback: {
+              message: translations[lang].required,
+              callback: function (input) {
+                const label = document.getElementById('label2').value.trim();
+                return {
+                  valid: !label || input.value.trim() !== ''
+                };
+              }
             }
           }
         },
-        formValidationLinkedIn: {
+        label2: {
           validators: {
-            notEmpty: {
-              message: 'The LinkedIn URL is required'
-            },
-            uri: {
-              message: 'The URL is not proper'
+            callback: {
+              message: translations[lang].required,
+              callback: function (input) {
+                const value = document.getElementById('value2').value.trim();
+                return {
+                  valid: !value || input.value.trim() !== ''
+                };
+              }
+            }
+          }
+        },
+        value3: {
+          validators: {
+            callback: {
+              message: translations[lang].required,
+              callback: function (input) {
+                const label = document.getElementById('label3').value.trim();
+                return {
+                  valid: !label || input.value.trim() !== ''
+                };
+              }
+            }
+          }
+        },
+        label3: {
+          validators: {
+            callback: {
+              message: translations[lang].required,
+              callback: function (input) {
+                const value = document.getElementById('value3').value.trim();
+                return {
+                  valid: !value || input.value.trim() !== ''
+                };
+              }
+            }
+          }
+        },
+        value4: {
+          validators: {
+            callback: {
+              message: translations[lang].required,
+              callback: function (input) {
+                const label = document.getElementById('label4').value.trim();
+                return {
+                  valid: !label || input.value.trim() !== ''
+                };
+              }
+            }
+          }
+        },
+        label4: {
+          validators: {
+            callback: {
+              message: translations[lang].required,
+              callback: function (input) {
+                const value = document.getElementById('value4').value.trim();
+                return {
+                  valid: !value || input.value.trim() !== ''
+                };
+              }
             }
           }
         }
@@ -636,20 +610,226 @@
       plugins: {
         trigger: new FormValidation.plugins.Trigger(),
         bootstrap5: new FormValidation.plugins.Bootstrap5({
-          // Use this for enabling/changing valid/invalid class
-          // eleInvalidClass: '',
           eleValidClass: '',
-          rowSelector: '.col-sm-6'
+          rowSelector: '.mb-4'
         }),
         autoFocus: new FormValidation.plugins.AutoFocus(),
         submitButton: new FormValidation.plugins.SubmitButton()
       }
-    }).on('core.form.valid', function () {
-      // You can submit the form
-      // wizardValidationForm.submit()
-      // or send the form data to server via an Ajax request
-      // To make the demo simple, I just placed an alert
-      alert('Submitted..!!');
+    })
+      .on('core.form.valid', function () {
+        // Jump to the next step when all fields in the current step are valid
+        validationStepper.next();
+      })
+      .on('core.validator.validated', function (e) {
+        // When a field is validated, revalidate its paired field
+        const fieldPairs = {
+          'value1': 'label1',
+          'label1': 'value1',
+          'value2': 'label2',
+          'label2': 'value2',
+          'value3': 'label3',
+          'label3': 'value3',
+          'value4': 'label4',
+          'label4': 'value4'
+        };
+
+        const pairedField = fieldPairs[e.field];
+        if (pairedField && !e.result.valid) {
+          // Only revalidate if current field became invalid
+          FormValidation3.revalidateField(pairedField);
+        }
+      });
+
+    // Add input event listeners to trigger cross-validation
+    for (let i = 1; i <= 4; i++) {
+      const valueField = document.getElementById(`value${i}`);
+      const labelField = document.getElementById(`label${i}`);
+
+      valueField.addEventListener('input', function () {
+        if (labelField.value.trim()) {
+          FormValidation3.revalidateField(`label${i}`);
+        }
+      });
+
+      labelField.addEventListener('input', function () {
+        if (valueField.value.trim()) {
+          FormValidation3.revalidateField(`value${i}`);
+        }
+      });
+    }
+
+    // Portfolio / Work Items - Step 4
+    let FormValidation4 = null;
+    function buildStep4Validation() {
+      // 1. SAFE DESTROY: Remove previous instance
+      if (FormValidation4) {
+        try {
+          FormValidation4.destroy();
+        } catch (e) {
+          console.warn("Cleanup suppressed");
+        }
+        FormValidation4 = null;
+      }
+
+      const fields = {};
+      const $cards = $('.work-item-card');
+
+      // 2. PREPARE FIELDS
+      $cards.each(function (index) {
+        const $card = $(this);
+        const names = {
+          media: `portfolio_media_${index}`,
+          title: `portfolio_title_${index}`,
+          desc: `portfolio_desc_${index}`
+        };
+
+        // Apply names to DOM so FormValidation can find them
+        $card.find('.media-input').attr('name', names.media);
+        $card.find('.title-input').attr('name', names.title);
+        $card.find('.desc-input').attr('name', names.desc);
+
+        const isFirst = (index === 0);
+
+        // Media Validation
+        fields[names.media] = {
+          validators: {
+            callback: {
+              message: translations[lang].media_required || "Media is required",
+              callback: function (input) {
+                const hasFile = input.element.files && input.element.files.length > 0;
+                // First item: mandatory. Other items: mandatory only if title/desc filled.
+                // if (isFirst) return hasFile;
+
+                const $item = $(input.element).closest('.work-item-card');
+                const hasText = $item.find('.title-input').val().trim() || $item.find('.desc-input').val().trim();
+                return hasText ? hasFile : true;
+              }
+            },
+            file: {
+              extension: 'png,jpg,jpeg,webp,mp4,mov,avi,mkv,wmv,flv,m4v',
+              maxSize: 10485760,
+              message: translations[lang].invalid_media || "Invalid file"
+            }
+          }
+        };
+
+        // Title Validation
+        fields[names.title] = {
+          validators: {
+            stringLength: { max: 50, message: translations[lang].title_max },
+            callback: {
+              message: translations[lang].title_required,
+              callback: function (input) {
+                const val = input.value.trim();
+                if (isFirst) return val !== '';
+
+                const $item = $(input.element).closest('.work-item-card');
+                const hasOther = $item.find('.desc-input').val().trim() || ($item.find('.media-input')[0].files.length > 0);
+                return (hasOther && !val) ? false : true;
+              }
+            }
+          }
+        };
+
+        // Description Validation
+        fields[names.desc] = {
+          validators: {
+            stringLength: { max: 100, message: translations[lang].desc_max },
+            callback: {
+              message: translations[lang].desc_required,
+              callback: function (input) {
+                const val = input.value.trim();
+                // if (isFirst) return val !== '';
+
+                const $item = $(input.element).closest('.work-item-card');
+                const hasOther = $item.find('.title-input').val().trim() || ($item.find('.media-input')[0].files.length > 0);
+                return (hasOther && !val) ? false : true;
+              }
+            }
+          }
+        };
+      });
+
+      // 3. GLOBAL ERROR CONTAINER (For "At least one item" message)
+      // Ensure this row is VISIBLE so the error message is seen
+      if ($('#_portfolio_at_least_one').length === 0) {
+        $('<div id="portfolio-error-container" class="mb-3"></div>')
+          .append($('<input type="hidden" id="_portfolio_at_least_one" name="_portfolio_at_least_one">'))
+          .appendTo('#itemsContainer'); // Append to the end of your list
+      }
+
+      fields['_portfolio_at_least_one'] = {
+        validators: {
+          callback: {
+            message: translations[lang].at_least_one_item,
+            callback: function () {
+              let isValid = false;
+              $('.work-item-card').each(function () {
+                if ($(this).find('.title-input').val().trim() && $(this).find('.media-input')[0].files.length > 0) {
+                  isValid = true; return false;
+                }
+              });
+              return isValid;
+            }
+          }
+        }
+      };
+
+      // 4. INITIALIZE
+      FormValidation4 = FormValidation.formValidation(wizardValidationFormStep4, {
+        fields: fields,
+        plugins: {
+          trigger: new FormValidation.plugins.Trigger(),
+          bootstrap5: new FormValidation.plugins.Bootstrap5({
+            eleValidClass: '',
+            rowSelector: function (field) {
+              if (field === '_portfolio_at_least_one') return '#portfolio-error-container';
+              return '.mb-4, .col-md-4, .col-md-8';
+            }
+          }),
+          autoFocus: new FormValidation.plugins.AutoFocus()
+        }
+      }).on('core.form.valid', function () {
+        validationStepper.next();
+      });
+    }
+
+    // Initialize step 4 validation on page load
+    // Wait for the portfolio items to be ready
+    setTimeout(function () {
+      buildStep4Validation();
+    }, 100);
+
+    // Expose function to rebuild validation when items are added/removed
+    window.rebuildPortfolioValidation = buildStep4Validation;
+
+    validationStepper._element.addEventListener('shown.bs-stepper', function (event) {
+      const $nextBtn = $('.btn-next');
+      const $text = $nextBtn.find('span');
+      const $icon = $nextBtn.find('i');
+
+      const isFirstStep = event.detail.indexStep === 0;
+
+      // Disable Previous button on first step
+      $('.btn-prev').css('visibility', isFirstStep ? 'hidden' : 'visible');
+
+      const isLastStep = event.detail.indexStep === 4;
+      const newText = isLastStep
+        ? translations[lang].submit
+        : translations[lang].save_and_next;
+
+      // Change text only if needed
+      if ($text.text().trim() !== newText) {
+        $text.text(newText);
+      }
+
+      // Toggle button color only if needed
+      $nextBtn.toggleClass('btn-success', isLastStep);
+      $nextBtn.toggleClass('btn-primary', !isLastStep);
+
+      // Toggle icon visibility
+      $icon.toggle(!isLastStep);
     });
 
     const wizardValidationNextButton = wizardValidation.querySelector('.btn-next');
@@ -668,10 +848,102 @@
           FormValidation3.validate();
           break;
 
+        case 3: // Portfolio Step
+          if (FormValidation4) {
+            FormValidation4.validate();
+            // The UI will now show errors for the first item because our callback
+            // now returns 'false' if the first item is empty.
+          } else {
+            validationStepper.next();
+          }
+          break;
+
+        case 4: // Final Step (Step 5) - Submit the form
+          submitFormData();
+          break;
+
         default:
           break;
       }
     });
+
+    // Add this function to handle the AJAX submission
+    function submitFormData() {
+      const form = document.getElementById('service-provider-form-wizard');
+      const formData = new FormData(form);
+
+      // Show loading state
+      const submitBtn = document.querySelector('.btn-next');
+      const originalText = submitBtn.querySelector('span').textContent;
+      const originalIcon = submitBtn.querySelector('i');
+
+      submitBtn.disabled = true;
+      submitBtn.querySelector('span').textContent = lang === 'ar' ? 'جاري الإرسال...' : 'Submitting...';
+      if (originalIcon) originalIcon.style.display = 'none';
+
+      // Add spinner
+      const spinner = document.createElement('span');
+      spinner.className = 'spinner-border spinner-border-sm me-2';
+      spinner.setAttribute('role', 'status');
+      submitBtn.prepend(spinner);
+
+      // Make AJAX request
+      $.ajax({
+        url: '/your-endpoint-url', // Replace with your actual endpoint
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (response) {
+          // Handle success
+          console.log('Success:', response);
+
+          // Remove spinner
+          spinner.remove();
+
+          releaseSuccessAlert({
+            title: lang === 'ar' ? 'نجح!' : 'Success!',
+            message: response.message || (lang === 'ar' ? 'تم إرسال النموذج بنجاح' : 'Form submitted successfully'),
+          });
+
+          // Redirect or reset form
+          if (response.redirect) {
+            window.location.href = response.redirect;
+          } else {
+            window.location.href = '/success-page';
+          }
+        },
+        error: function (xhr, status, error) {
+          // Handle error
+          console.error('Error:', error);
+
+          // Remove spinner
+          spinner.remove();
+
+          let errorMessage = lang === 'ar' ? 'حدث خطأ أثناء الإرسال' : 'An error occurred during submission';
+
+          // Handle validation errors
+          if (xhr.status === 422 && xhr.responseJSON?.errors) {
+            const errors = xhr.responseJSON.errors;
+            const errorList = Object.values(errors).flat().join('<br>');
+            errorMessage = errorList;
+          } else if (xhr.responseJSON?.message) {
+            errorMessage = xhr.responseJSON.message;
+          }
+
+          // Show error message
+          releaseFailureAlert({
+            title: lang === 'ar' ? 'خطأ!' : 'Error!',
+            message: errorMessage,
+          });
+
+          // Re-enable button
+          submitBtn.disabled = false;
+          submitBtn.querySelector('span').textContent = originalText;
+          if (originalIcon) originalIcon.style.display = '';
+        }
+      });
+    }
 
     const wizardValidationPrevButton = wizardValidation.querySelector('.btn-prev');
     wizardValidationPrevButton.addEventListener('click', event => {

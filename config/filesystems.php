@@ -100,7 +100,7 @@ return [
         'UsersDiskInviteMentor' => [
             'driver' => 'local',
             'root' => storage_path('app/uploads/InviteMentor'),
-            'url' => env('APP_URL') . 'dashboard/uploads/InviteMentor',
+            'url' => env('APP_URL') . '/dashboard/uploads/InviteMentor',
             'visibility' => 'public',
             'throw' => true,
             'permissions' => [
