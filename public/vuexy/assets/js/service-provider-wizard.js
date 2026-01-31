@@ -81,8 +81,20 @@
       fields: {
         company_logo: {
           validators: {
-            notEmpty: {
+            callback: {
               message: translations[lang].required,
+              callback: function (input) {
+                if (input.value) {
+                  return true;
+                }
+                // Check if an existing image is present
+                const preview = document.getElementById('logo-preview-image');
+                if (preview && preview.getAttribute('src') && !preview.classList.contains('d-none')) {
+                  return true;
+                }
+
+                return false;
+              }
             },
             file: {
               extension: 'png,jpg,jpeg,svg,webp',
@@ -365,11 +377,12 @@
     if (intlTelInput.length) {
       intlTelInput.each(function () {
         var $this = $(this);
+        var inputId = $this.attr('id');
 
         // $this.wrap('<div class="position-relative"></div>');
 
         if (typeof window.intlTelInput === 'function') {
-          window.intlTelInput($this[0], {
+          var itiInstance = window.intlTelInput($this[0], {
             initialCountry: 'eg',
             preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
             utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
@@ -380,6 +393,36 @@
               return "e.g. " + selectedCountryPlaceholder;
             }
           });
+
+          // Store instance on the element for validation access
+          $this[0].iti = itiInstance;
+
+          // Assign to global iti if it's the phone input (legacy support for existing validation code)
+          if (inputId === 'phone') {
+            iti = itiInstance;
+          }
+
+          // Function to update hidden input
+          var updateHiddenInput = function () {
+            var countryData = itiInstance.getSelectedCountryData();
+            var dialCode = countryData.dialCode;
+
+            if (inputId === 'phone') {
+              $('#country_code').val(dialCode);
+            } else if (inputId === 'whatsapp') {
+              $('#country_code_w_a').val(dialCode);
+            }
+          };
+
+          // Update on init (if empty)
+          if (inputId === 'phone' && !$('#country_code').val()) {
+            updateHiddenInput();
+          } else if (inputId === 'whatsapp' && !$('#country_code_w_a').val()) {
+            updateHiddenInput();
+          }
+
+          // Update on change
+          $this.on('countrychange', updateHiddenInput);
         }
       });
     }
@@ -862,7 +905,7 @@
             title: lang === 'ar' ? 'نجح!' : 'Success!',
             message: response.message || (lang === 'ar' ? 'تم إرسال النموذج بنجاح' : 'Form submitted successfully'),
           });
-          
+
           // Redirect or reset form
           if (response.redirect) {
             window.location.href = response.redirect;

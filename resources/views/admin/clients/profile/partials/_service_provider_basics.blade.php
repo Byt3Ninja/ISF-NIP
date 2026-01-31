@@ -1,4 +1,9 @@
 <!-- Step 1 Basics -->
+@php
+    $org = $client->service_provider;
+    $locale = app()->getLocale();
+    $l = $locale;
+@endphp
 <div class="row" id="step-1-basics">
 
   <!-- Company Logo -->
@@ -9,16 +14,16 @@
         <!-- Image preview -->
         <img
           id="logo-preview-image"
-          class="w-100 h-100 rounded border shadow-sm {{ $client->img_url ? '' : 'd-none' }}"
+          class="w-100 h-100 rounded border shadow-sm {{ $org && $org->img_url ? '' : 'd-none' }}"
           alt="logo"
-          src="{{ $client && $client->img_url ? $client->imageUrl : '' }}"
+          src="{{ $org && $org->img_url ? '/191014/' . $org->img_url : '' }}"
           onerror="this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none')"
         />
 
         <!-- Placeholder -->
         <div
           id="logo-preview-placeholder"
-          class="bg-light-subtle w-100 h-100 d-flex justify-content-center align-items-center rounded border-dashed border-light {{ $client->img_url ? 'd-none' : '' }}"
+          class="bg-light-subtle w-100 h-100 d-flex justify-content-center align-items-center rounded border-dashed border-light {{ $org && $org->img_url ? 'd-none' : '' }}"
         >
           <div class="d-flex flex-column gap-1 justify-content-center align-items-center">
             <i class="ti ti-cloud-upload text-muted fs-4"></i>
@@ -41,7 +46,7 @@
               accept="image/png, image/jpg, image/jpeg, image/webp, image/svg+xml"
             />
           </label>
-          <div class="reset-company-logo" style="{{ $client && $client->img_url ? '' : 'display: none;' }}">
+          <div class="reset-company-logo" style="{{ $org && $org->img_url ? '' : 'display: none;' }}">
             <button type="button" class="btn btn-label-secondary reset-company-logo-btn mb-4">
               <i class="ti ti-refresh-dot d-block d-sm-none"></i>
               <span class="d-none d-sm-block">{{ __('admin.Reset') }}</span>
@@ -58,19 +63,19 @@
   <!-- Company Name -->
   <div class="col-md-6 mb-4">
     <label class="form-label">{{ __('auth.companyName') }} *</label>
-    <input type="text" class="form-control" name="company_name" maxlength="50" placeholder="{{ __('auth.enterCompanyName') }}" />
+    <input type="text" class="form-control" name="company_name" value="{{ old('company_name', $org->company_name ?? '') }}" maxlength="50" placeholder="{{ __('auth.enterCompanyName') }}" />
   </div>
 
   <!-- Contact Name -->
   <div class="col-md-6 mb-4">
     <label class="form-label">{{ __('auth.contactName') }} *</label>
-    <input type="text" class="form-control" name="contact_name" maxlength="50" placeholder="{{ __('auth.enterContactName') }}" />
+    <input type="text" class="form-control" name="contact_name" value="{{ old('contact_name', $org->contact_name ?? '') }}" maxlength="50" placeholder="{{ __('auth.enterContactName') }}" />
   </div>
 
   <!-- Email -->
   <div class="col-md-6 mb-4">
     <label class="form-label">{{ __('admin.Email') }} *</label>
-    <input type="email" class="form-control" name="email" maxlength="50" placeholder="{{ __('admin.Enter email address') }}"/>
+    <input type="email" class="form-control" name="email" value="{{ old('email', $org->email ?? '') }}" maxlength="50" placeholder="{{ __('admin.Enter email address') }}"/>
   </div>
 
   <!-- Phone with Country Code (using intl-tel-input) -->
@@ -81,10 +86,10 @@
       class="form-control intl-tel-input w-100"
       id="phone"
       name="phone"
-      value="{{ old('phone', $client->phone ?? '') }}"
+      value="{{ old('phone', $org->phone ?? '') }}"
       placeholder="{{ __('admin.Phone') }}"
     />
-    <input type="hidden" name="country_code" id="country_code" value="{{ old('country_code', $client->country_code ?? '') }}">
+    <input type="hidden" name="country_code" id="country_code" value="{{ old('country_code', $org->country_code ?? '') }}">
   </div>
 
   <!-- WhatsApp with Country Code (using intl-tel-input) -->
@@ -95,10 +100,10 @@
       class="form-control intl-tel-input w-100"
       id="whatsapp"
       name="whatsapp"
-      value="{{ old('whatsapp', $client->whatsapp ?? '') }}"
+      value="{{ old('whatsapp', $org->whatsapp ?? '') }}"
       placeholder="{{ __('admin.Whatsapp') }}"
     />
-    <input type="hidden" name="country_code_w_a" id="country_code_w_a" value="{{ old('country_code_w_a', $client->country_code_w_a ?? '') }}">
+    <input type="hidden" name="country_code_w_a" id="country_code_w_a" value="{{ old('country_code_w_a', $org->country_code_w_a ?? '') }}">
   </div>
 
   <!-- Preferred Language -->
@@ -106,8 +111,8 @@
     <label class="form-label">{{ __('admin.preferred_language') }}</label>
     <select class="form-select select2" name="language" data-placeholder="{{ __('admin.Select Language') }}">
       <option value=""></option>
-      <option value="en">English</option>
-      <option value="ar">Arabic</option>
+      <option value="en" {{ old('language', $org->preferred_language ?? '') == 'en' ? 'selected' : '' }}>English</option>
+      <option value="ar" {{ old('language', $org->preferred_language ?? '') == 'ar' ? 'selected' : '' }}>Arabic</option>
     </select>
   </div>
 
@@ -182,19 +187,19 @@
   <!-- Address -->
   <div class="col-md-6 mb-4">
     <label class="form-label">{{ __('admin.Address') }}</label>
-    <input type="text" class="form-control" name="address" maxlength="50" placeholder="{{ __('admin.Enter full address') }}"/>
+    <input type="text" class="form-control" name="address" value="{{ old('address', $org->address ?? '') }}" maxlength="50" placeholder="{{ __('admin.Enter full address') }}"/>
   </div>
 
   <!-- Zip -->
   <div class="col-md-6 mb-4">
     <label class="form-label">{{ __('admin.Zip_Code') }}</label>
-    <input type="text" class="form-control" name="zip" maxlength="9" placeholder="{{ __('admin.Enter zip code') }}" />
+    <input type="text" class="form-control" name="zip" value="{{ old('zip', $org->zip_code ?? '') }}" maxlength="9" placeholder="{{ __('admin.Enter zip code') }}" />
   </div>
 
   <!-- About -->
   <div class="col-12 mb-4">
     <label class="form-label">{{ __('admin.description') }} *</label>
-    <textarea class="form-control" name="about" maxlength="500" rows="4" placeholder="{{ __('admin.about_placeholder') }}">{{ old('about', $org->about ?? '') }}</textarea></textarea>
+    <textarea class="form-control" name="about" maxlength="500" rows="4" placeholder="{{ __('admin.about_placeholder') }}">{{ old('about', $org->description ?? '') }}</textarea>
   </div>
 
 </div>

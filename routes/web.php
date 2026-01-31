@@ -214,6 +214,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::resource('services_providers', 'serviceProviderController');
     Route::get('services-providers/requests', 'serviceProviderController@requests')->name('services_providers.requests');
     Route::post('services-providers/requests/take-action', 'serviceProviderController@takeAction')->name('services_providers.takeAction');
+    Route::post('services-providers/profile/step1', 'serviceProviderController@storeStep1')->name('services_providers.step1.store');
 
     Route::get('calendar/{id}/edit', 'SettingsController@editcal')->name('calendar.events_edit');
     Route::post('calendar/{id}/update', 'SettingsController@updatecal')->name('calendar.events_update');
