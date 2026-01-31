@@ -15,7 +15,7 @@
           <span class="bs-stepper-circle">{{ $key + 1 }}</span>
           <span class="bs-stepper-label">
             <span class="bs-stepper-title">{{ $step['title'] }}</span>
-            <span class="bs-stepper-subtitle">{{ __('admin.setup') }} {{ $step['title'] }}</span>
+            <span class="bs-stepper-subtitle">{{ __('admin.Add') }} {{ $step['title'] }}</span>
           </span>
         </button>
       </div>
@@ -28,13 +28,13 @@
   </div>
 
   <div class="bs-stepper-content">
-    <form id="service-provider-form-wizard" data-route-step-1="{{ route('services_providers.step1.store') }}" data-route-step-2="{{ route('services_providers.step2.store') }}">
+    <form id="service-provider-form-wizard" data-route-step-1="{{ route('services_providers.step1.store') }}" data-route-step-2="{{ route('services_providers.step2.store') }}" data-route-step-3="{{ route('services_providers.step3.store') }}">
       @csrf
       @foreach ($serviceProviderSteps as $key => $step)
         <div id="{{ $step['id'] }}" class="content {{ $key == 0 ? 'active' : '' }}">
           <div class="content-header mb-6">
             <h5 class="mb-0">{{ $step['title'] }}</h5>
-            <small>{{ __('admin.setup') }} {{ $step['title'] }}</small>
+            <p>{{ $step['subtitle'] }}</p>
           </div>
           
           @include(

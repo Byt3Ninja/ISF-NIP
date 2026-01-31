@@ -4,7 +4,6 @@
 
 'use strict';
 
-
 (function () {
   const translations = {
     en: {
@@ -27,6 +26,8 @@
       submit: "Submit",
       saving: "Saving...",
       submitting: "Submitting...",
+      stat_value_required: "Value is required when a label is provided",
+      stat_label_required: "Label is required when a value is provided",
     },
     ar: {
       required: "هذا الحقل مطلوب",
@@ -48,10 +49,14 @@
       submit: "إرسال",
       saving: "جاري الحفظ...",
       submitting: "جاري الإرسال...",
+      stat_value_required: "القيمة مطلوبه عند إدخال عنوان",
+      stat_label_required: "العنوان مطلوب عند إدخال قيمة",
     }
   };
 
   let iti; // Declare iti in a scope accessible by custom validator
+  let step1InitialData = null;
+  let step2InitialData = null;
 
   const lang = $('html').attr('lang') || 'en';
 
@@ -78,6 +83,13 @@
 
     const validationStepper = new Stepper(wizardValidation, {
       linear: true
+    });
+
+    // After page ready
+    document.addEventListener('DOMContentLoaded', function () {
+      console.log('page loaded - init wizard');
+      step1InitialData = getStep1Data();
+      step2InitialData = getStep2Data();
     });
 
     // Profile basics
@@ -372,8 +384,57 @@
         });
       }
     }).on('core.form.valid', function (e) {
+      const currentData = getStep1Data();
+
+      // If no changes → skip AJAX
+      if (step1InitialData === currentData) {
+        validationStepper.next();
+        return;
+      }
+
+      // Otherwise save
       saveStepData(0, FormValidation1);
     });
+
+    function getStep1Data() {
+      const form = document.getElementById('service-provider-form-wizard');
+      const formData = new FormData(form);
+
+      const data = {};
+
+      const fields = [
+        'company_name',
+        'contact_name',
+        'email',
+        'phone',
+        'whatsapp',
+        'country',
+        'state',
+        'city',
+        'about',
+        'zip',
+        'address',
+      ];
+
+      fields.forEach(name => {
+        data[name] = formData.get(name) || '';
+      });
+
+      // Handle company_logo separately
+      const logoInput = form.querySelector('input[name="company_logo"]');
+      if (logoInput && logoInput.files && logoInput.files.length > 0) {
+        data.company_logo = logoInput.files[0].name; // compare by file name
+      } else {
+        // fallback to existing preview image (if editing existing record)
+        const preview = document.getElementById('logo-preview-image');
+        data.company_logo = preview && preview.getAttribute('src')
+          ? preview.getAttribute('src')
+          : '';
+      }
+
+      return JSON.stringify(data);
+    }
+
 
     // Phone intl-tel-input
     if (intlTelInput.length) {
@@ -514,8 +575,54 @@
         submitButton: new FormValidation.plugins.SubmitButton()
       }
     }).on('core.form.valid', function () {
+      const currentData = getStep2Data();
+      console.log('current step 2 data', currentData);
+
+      // If no changes → skip AJAX
+      if (step2InitialData === currentData) {
+        validationStepper.next();
+        return;
+      }
+
       saveStepData(1, FormValidation2);
     });
+
+    function getStep2Data() {
+      const form = document.getElementById('service-provider-form-wizard');
+      const formData = new FormData(form);
+
+      const data = {};
+
+      // Normal fields
+      [
+        'hero_description',
+        'services_short_description',
+        'appointment_link',
+        'operating_mode',
+        'operating_region',
+      ].forEach(name => {
+        data[name] = formData.get(name) || '';
+      });
+
+      // Handle hero_image separately
+      const heroInput = form.querySelector('input[name="hero_image"]');
+
+      if (heroInput && heroInput.files && heroInput.files.length > 0) {
+        const file = heroInput.files[0];
+
+        // More reliable than just name
+        data.hero_image = `${file.name}_${file.size}`;
+      } else {
+        // If editing and image already exists in DB
+        const existingImage = document.querySelector('#step-2-booking img');
+        data.hero_image = existingImage
+          ? existingImage.getAttribute('src')
+          : '';
+      }
+
+      return JSON.stringify(data);
+    }
+
 
     // Key stats
     const FormValidation3 = FormValidation.formValidation(wizardValidationFormStep3, {
@@ -523,11 +630,9 @@
         value1: {
           validators: {
             callback: {
-              message: translations[lang].required,
+              message: translations[lang].stat_value_required,
               callback: function (input) {
                 const label = document.getElementById('label1').value.trim();
-                // If label has value, then value is required
-                // If label is empty, value is optional
                 return {
                   valid: !label || input.value.trim() !== ''
                 };
@@ -538,11 +643,9 @@
         label1: {
           validators: {
             callback: {
-              message: translations[lang].required,
+              message: translations[lang].stat_label_required,
               callback: function (input) {
                 const value = document.getElementById('value1').value.trim();
-                // If value has content, then label is required
-                // If value is empty, label is optional
                 return {
                   valid: !value || input.value.trim() !== ''
                 };
@@ -553,7 +656,7 @@
         value2: {
           validators: {
             callback: {
-              message: translations[lang].required,
+              message: translations[lang].stat_value_required,
               callback: function (input) {
                 const label = document.getElementById('label2').value.trim();
                 return {
@@ -566,7 +669,7 @@
         label2: {
           validators: {
             callback: {
-              message: translations[lang].required,
+              message: translations[lang].stat_label_required,
               callback: function (input) {
                 const value = document.getElementById('value2').value.trim();
                 return {
@@ -579,7 +682,7 @@
         value3: {
           validators: {
             callback: {
-              message: translations[lang].required,
+              message: translations[lang].stat_value_required,
               callback: function (input) {
                 const label = document.getElementById('label3').value.trim();
                 return {
@@ -592,7 +695,7 @@
         label3: {
           validators: {
             callback: {
-              message: translations[lang].required,
+              message: translations[lang].stat_label_required,
               callback: function (input) {
                 const value = document.getElementById('value3').value.trim();
                 return {
@@ -605,7 +708,7 @@
         value4: {
           validators: {
             callback: {
-              message: translations[lang].required,
+              message: translations[lang].stat_value_required,
               callback: function (input) {
                 const label = document.getElementById('label4').value.trim();
                 return {
@@ -618,7 +721,7 @@
         label4: {
           validators: {
             callback: {
-              message: translations[lang].required,
+              message: translations[lang].stat_label_required,
               callback: function (input) {
                 const value = document.getElementById('value4').value.trim();
                 return {
@@ -640,8 +743,7 @@
       }
     })
       .on('core.form.valid', function () {
-        // Jump to the next step when all fields in the current step are valid
-        validationStepper.next();
+        saveStepData(2, FormValidation3);
       })
       .on('core.validator.validated', function (e) {
         // When a field is validated, revalidate its paired field
@@ -1044,6 +1146,8 @@
     const wizardValidationPrevButton = wizardValidation.querySelector('.btn-prev');
     wizardValidationPrevButton.addEventListener('click', event => {
       validationStepper.previous();
+      step1InitialData = getStep1Data();
+      step2InitialData = getStep2Data();
     });
   }
 })();
