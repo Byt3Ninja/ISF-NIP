@@ -398,9 +398,7 @@
 
       const data = {};
 
-      // Only include fields from step 1
-      [
-        'company_logo',
+      const fields = [
         'company_name',
         'contact_name',
         'email',
@@ -412,12 +410,27 @@
         'about',
         'zip',
         'address',
-      ].forEach(name => {
+      ];
+
+      fields.forEach(name => {
         data[name] = formData.get(name) || '';
       });
 
+      // Handle company_logo separately
+      const logoInput = form.querySelector('input[name="company_logo"]');
+      if (logoInput && logoInput.files && logoInput.files.length > 0) {
+        data.company_logo = logoInput.files[0].name; // compare by file name
+      } else {
+        // fallback to existing preview image (if editing existing record)
+        const preview = document.getElementById('logo-preview-image');
+        data.company_logo = preview && preview.getAttribute('src')
+          ? preview.getAttribute('src')
+          : '';
+      }
+
       return JSON.stringify(data);
     }
+
 
     // Phone intl-tel-input
     if (intlTelInput.length) {
@@ -576,11 +589,8 @@
 
       const data = {};
 
-      console.log('getting step 2 data', data);
-
-      // Only include fields from step 2
+      // Normal fields
       [
-        'hero_image',
         'hero_description',
         'services_short_description',
         'appointment_link',
@@ -590,8 +600,25 @@
         data[name] = formData.get(name) || '';
       });
 
+      // Handle hero_image separately
+      const heroInput = form.querySelector('input[name="hero_image"]');
+
+      if (heroInput && heroInput.files && heroInput.files.length > 0) {
+        const file = heroInput.files[0];
+
+        // More reliable than just name
+        data.hero_image = `${file.name}_${file.size}`;
+      } else {
+        // If editing and image already exists in DB
+        const existingImage = document.querySelector('#step-2-booking img');
+        data.hero_image = existingImage
+          ? existingImage.getAttribute('src')
+          : '';
+      }
+
       return JSON.stringify(data);
     }
+
 
     // Key stats
     const FormValidation3 = FormValidation.formValidation(wizardValidationFormStep3, {
