@@ -1,3 +1,6 @@
+@php
+    $org = $client->service_provider;
+@endphp
 <div class="row" id="step-2-booking">
 
   <!-- Hero Image -->
@@ -11,19 +14,26 @@
   </div>
 
   <div class="col-md-7 mb-4">
-    <label
-      class="w-100 border border-dashed border-light bg-light-subtle rounded d-flex flex-column justify-content-center align-items-center text-center p-5">
-      <div class="mb-2">
-        <i class="ti ti-cloud-upload"></i>
-      </div>
-      <div class="fw-semibold mb-2">
-        {{ __('admin.hero_image.upload') }}
-      </div>
-      <div class="text-muted small">
-        {{ __('admin.hero_image.formats') }}
-      </div>
-      <input type="file" id="hero_image" class="d-none" name="hero_image" accept=".png,.jpg,.jpeg,.webp,.svg+xml">
-    </label>
+    <div class="d-flex align-items-center gap-3 mb-3">
+        @if($org && $org->hero_image)
+            <div class="position-relative w-px-100 h-px-100">
+                <img src="/191014/{{ $org->hero_image }}" class="w-100 h-100 rounded border shadow-sm" alt="hero image">
+            </div>
+        @endif
+        <label
+          class="flex-grow-1 border border-dashed border-light bg-light-subtle rounded d-flex flex-column justify-content-center align-items-center text-center p-5 cursor-pointer">
+          <div class="mb-2">
+            <i class="ti ti-cloud-upload"></i>
+          </div>
+          <div class="fw-semibold mb-2">
+            {{ __('admin.hero_image.upload') }}
+          </div>
+          <div class="text-muted small">
+            {{ __('admin.hero_image.formats') }}
+          </div>
+          <input type="file" id="hero_image" class="d-none" name="hero_image" accept=".png,.jpg,.jpeg,.webp,.svg+xml">
+        </label>
+    </div>
     <div id="fileName" class="small mt-2" style="display: none;"></div>
   </div>
 
@@ -43,6 +53,7 @@
       class="form-control"
       name="hero_description"
       maxlength="100"
+      value="{{ old('hero_description', $org->hero_description ?? '') }}"
       placeholder="{{ __('admin.hero_description.placeholder') }}">
   </div>
 
@@ -62,7 +73,7 @@
       rows="3"
       name="services_short_description"
       maxlength="200"
-      placeholder="{{ __('admin.services_short_description.placeholder') }}"></textarea>
+      placeholder="{{ __('admin.services_short_description.placeholder') }}">{{ old('services_short_description', $org->services_short_description ?? '') }}</textarea>
   </div>
 
   <!-- Appointment Link -->
@@ -85,6 +96,7 @@
         class="form-control"
         name="appointment_link"
         maxlength="500"
+        value="{{ old('appointment_link', $org->appointment_link ?? '') }}"
         placeholder="{{ __('admin.appointment_link.placeholder') }}">
     </div>
     <small class="text-muted">
@@ -108,13 +120,13 @@
       name="operating_mode"
       data-placeholder="{{ __('admin.operating_mode.placeholder') }}">
       <option value=""></option>
-      <option value="online_remote">
+      <option value="online_remote" {{ (old('operating_mode', $org->operating_mode ?? '') == 'online_remote') ? 'selected' : '' }}>
         {{ __('admin.operating_mode.options.online_remote') }}
       </option>
-      <option value="on_site">
+      <option value="on_site" {{ (old('operating_mode', $org->operating_mode ?? '') == 'on_site') ? 'selected' : '' }}>
         {{ __('admin.operating_mode.options.on_site') }}
       </option>
-      <option value="online_on_site">
+      <option value="online_on_site" {{ (old('operating_mode', $org->operating_mode ?? '') == 'online_on_site') ? 'selected' : '' }}>
         {{ __('admin.operating_mode.options.online_on_site') }}
       </option>
     </select>
@@ -136,25 +148,25 @@
       name="operating_region"
       data-placeholder="{{ __('admin.operating_region.placeholder') }}">
       <option value=""></option>
-      <option value="global">
+      <option value="global" {{ (old('operating_region', $org->operating_region ?? '') == 'global') ? 'selected' : '' }}>
         {{ __('admin.operating_region.options.global') }}
       </option>
-      <option value="mena">
+      <option value="mena" {{ (old('operating_region', $org->operating_region ?? '') == 'mena') ? 'selected' : '' }}>
         {{ __('admin.operating_region.options.mena') }}
       </option>
-      <option value="gcc">
+      <option value="gcc" {{ (old('operating_region', $org->operating_region ?? '') == 'gcc') ? 'selected' : '' }}>
         {{ __('admin.operating_region.options.gcc') }}
       </option>
-      <option value="africa">
+      <option value="africa" {{ (old('operating_region', $org->operating_region ?? '') == 'africa') ? 'selected' : '' }}>
         {{ __('admin.operating_region.options.africa') }}
       </option>
-      <option value="europe">
+      <option value="europe" {{ (old('operating_region', $org->operating_region ?? '') == 'europe') ? 'selected' : '' }}>
         {{ __('admin.operating_region.options.europe') }}
       </option>
-      <option value="north_america">
+      <option value="north_america" {{ (old('operating_region', $org->operating_region ?? '') == 'north_america') ? 'selected' : '' }}>
         {{ __('admin.operating_region.options.north_america') }}
       </option>
-      <option value="asia">
+      <option value="asia" {{ (old('operating_region', $org->operating_region ?? '') == 'asia') ? 'selected' : '' }}>
         {{ __('admin.operating_region.options.asia') }}
       </option>
     </select>

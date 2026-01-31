@@ -13,6 +13,7 @@ use App\Mail\serviceProviderRejectMail;
 use App\Mail\serviceProviderApproveMail;
 use App\Mail\serviceProviderRegistrationMail;
 use App\Http\Requests\StoreServiceProviderStep1Request;
+use App\Http\Requests\UpdateServiceProviderStep2Request;
 use App\Services\ServiceProviderService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -47,6 +48,31 @@ class serviceProviderController extends Controller
 			return redirect()->back()->with('success', __('admin.ProfileSaved'));
 		} catch (\Exception $e) {
 			Log::error('Store Step 1 Error: ' . $e->getMessage());
+            
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => __('admin.An unexpected error occurred, please try again later')], 500);
+            }
+
+			return redirect()->back()->with('error', __('admin.An unexpected error occurred, please try again later'));
+		}
+	}
+
+	public function storeStep2(UpdateServiceProviderStep2Request $request)
+	{
+		try {
+			$this->serviceProviderService->updateStep2(
+				auth()->user(), 
+				$request->validated(), 
+				$request->file('hero_image')
+			);
+
+            if ($request->ajax()) {
+                return response()->json(['success' => true, 'message' => __('admin.ProfileSaved')]);
+            }
+
+			return redirect()->back()->with('success', __('admin.ProfileSaved'));
+		} catch (\Exception $e) {
+			Log::error('Store Step 2 Error: ' . $e->getMessage());
             
             if ($request->ajax()) {
                 return response()->json(['success' => false, 'message' => __('admin.An unexpected error occurred, please try again later')], 500);
