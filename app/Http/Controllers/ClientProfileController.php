@@ -156,6 +156,10 @@ class ClientProfileController extends Controller
             ->avg('rating');
 
         // $almuni = Almuni::where('user_id', $client->id)->get();
+
+        if ($client->hasRole('serviceProvider')) {
+            return view('admin/clients/provider-profile', compact('client', 'mentors', 'mentorshipTasks', 'mentrequests_count', 'mentrequests_period', 'average_rating'));
+        }
         
         return view('admin/clients/profile', compact('client', 'mentors', 'mentorshipTasks', 'mentrequests_count', 'mentrequests_period', 'average_rating'));
     }
