@@ -332,6 +332,39 @@ $portfolios = [
   </div>
 </section>
 
+<section id="clients" class="mb-6">
+  <div class="card">
+    <div class="card-header">
+      <h2 class="h5 mb-2">Clients</h2>
+      <div class="row">
+        <div class="col-12 col-md-6">
+          <p class="mb-0 text-secondary">
+            Trusted by leading startups and enterprises worldwide.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="row g-4">
+        @foreach([1,2,3,4,5,6] as $i)
+          <div class="col-xl-4 col-lg-6 col-md-6">
+            <div class="card border">
+              <div class="card-body text-center">
+                <div class="mx-auto my-6">
+                  <img src="/vuexy/assets/img/avatars/3.png" alt="Avatar Image" class="rounded-circle w-px-100">
+                </div>
+                <h5 class="mb-4 card-title">Mark Gilbert</h5>
+                <a href="javascript:;" class="btn btn-primary">
+                  <i class="me-1 ti ti-external-link me-2"></i>View Website
+                </a>
+              </div>
+            </div>
+          </div>
+        @endforeach
+      </div>
+    </div>
+  </div>
+
 <!-- Portfolio Preview Modal -->
 <div class="modal fade" id="portfolioPreviewModal" tabindex="-1">
   <div class="modal-dialog modal-lg modal-dialog-centered">
