@@ -42,70 +42,77 @@ class MentorshipTaskController extends Controller
 	 */
 	public function index(Request $request)
 	{
+		// Get mentorship_id from request or session
+		$mentorshipId = $request->get('mentorship_id') ?? session('last_mentorship_id');
 
-		if (!$request->has('mentorship_id')) {
-			abort(404);
-		} else {
-			$lang = app()->getLocale();
-			$condition = "mentorship_tasks.mentorship_request_id = ? ";
-			$tasks = $this->handleTask($lang, $condition, $request->mentorship_id, 'list');
-			$tasks = $tasks->sortBy('row_no')->values();
+		if (!$mentorshipId) {
+			// Redirect to sessions list if no mentorship_id available
+			return redirect()->route('mentorships.sessions_list_detailed');
+		}
 
-			$available_statuses = ['pending', 'progress', 'review', 'completed'];
-			$session = $this->getSession($lang, $request->mentorship_id);
-			$session_id = $session['id'];
-			$mentor = $session['mentor'];
-			$users = $session['startups'];
-			$company = $session['company'];
-			$labels = $session['labels'];
+		// Store for future use
+		session(['last_mentorship_id' => $mentorshipId]);
 
-			$_tasks = $tasks->groupBy('status');
-			foreach ($available_statuses as $status) {
-				if (!$_tasks->has($status)) {
-					$_tasks->put($status, collect([]));
-				}
+		$lang = app()->getLocale();
+		$condition = "mentorship_tasks.mentorship_request_id = ? ";
+		$tasks = $this->handleTask($lang, $condition, $mentorshipId, 'list');
+		$tasks = $tasks->sortBy('row_no')->values();
+
+		$available_statuses = ['pending', 'progress', 'review', 'completed'];
+		$session = $this->getSession($lang, $mentorshipId);
+		$session_id = $session['id'];
+		$mentor = $session['mentor'];
+		$users = $session['startups'];
+		$company = $session['company'];
+		$labels = $session['labels'];
+
+		$_tasks = $tasks->groupBy('status');
+		foreach ($available_statuses as $status) {
+			if (!$_tasks->has($status)) {
+				$_tasks->put($status, collect([]));
 			}
-			$kanban = [];
-			foreach ($available_statuses as $status) {
-				$kanban[] = [
-					'id' => $status . '-board',
-					'title' => __('admin.boardTitle' . ucfirst($status)),
-					'item' => $_tasks->get($status),
-				];
-			}
+		}
+		$kanban = [];
+		foreach ($available_statuses as $status) {
+			$kanban[] = [
+				'id' => $status . '-board',
+				'title' => __('admin.boardTitle' . ucfirst($status)),
+				'item' => $_tasks->get($status),
+			];
+		}
 
-			$startup = "SELECT MR.id,
-			MR.mentor_id as MT_mentor_id,
-			MR.user_id as MT_user_id,
-			MR.id as MT_mentorship_request_id,
-			C.id as MT_company_id,
-			C.name_en as C_name_en,
-			C.logo as C_logo,
-			C.step as C_step,
-			C.cycle as C_cycle,
-			U.id as U_id,
-			Cy.title as CY_title,
-			Cy.id as CY_id,
-			S.title as S_title,
-			S.id as S_id,
-			MR.zoom_date as MR_zoom_date
-			FROM
-			mentorship_requests as MR
-			LEFT JOIN users as U ON U.id = MR.user_id
-			LEFT JOIN companies as C ON C.id = U.company_id
-			LEFT JOIN steps as S ON S.id = C.step
-			LEFT JOIN cycles as Cy ON Cy.id = C.cycle
-			WHERE MR.id = ? ";
-			$startup = DB::select($startup, [$request->mentorship_id]);
-			$startup = collect($startup)->first();
-			$data = [];
-			$data['id'] = $startup->id ?? '';
-			$data['company_name'] = $startup->C_name_en ?? '';
-			$data['start_up_logo'] = $startup->C_logo ?? '';
-			$data['program_name'] = $startup->CY_title ?? '';
-			$data['step_name'] = $startup->S_title ?? '';
-			$data['mentor_session_id'] = $startup->MT_mentorship_request_id ?? '';
-			$data['mentor_zoom_date'] = $startup->MR_zoom_date ?? '';
+		$startup = "SELECT MR.id,
+		MR.mentor_id as MT_mentor_id,
+		MR.user_id as MT_user_id,
+		MR.id as MT_mentorship_request_id,
+		C.id as MT_company_id,
+		C.name_en as C_name_en,
+		C.logo as C_logo,
+		C.step as C_step,
+		C.cycle as C_cycle,
+		U.id as U_id,
+		Cy.title as CY_title,
+		Cy.id as CY_id,
+		S.title as S_title,
+		S.id as S_id,
+		MR.zoom_date as MR_zoom_date
+		FROM
+		mentorship_requests as MR
+		LEFT JOIN users as U ON U.id = MR.user_id
+		LEFT JOIN companies as C ON C.id = U.company_id
+		LEFT JOIN steps as S ON S.id = C.step
+		LEFT JOIN cycles as Cy ON Cy.id = C.cycle
+		WHERE MR.id = ? ";
+		$startup = DB::select($startup, [$mentorshipId]);
+		$startup = collect($startup)->first();
+		$data = [];
+		$data['id'] = $startup->id ?? '';
+		$data['company_name'] = $startup->C_name_en ?? '';
+		$data['start_up_logo'] = $startup->C_logo ?? '';
+		$data['program_name'] = $startup->CY_title ?? '';
+		$data['step_name'] = $startup->S_title ?? '';
+		$data['mentor_session_id'] = $startup->MT_mentorship_request_id ?? '';
+		$data['mentor_zoom_date'] = $startup->MR_zoom_date ?? '';
 
 			
 
@@ -113,8 +120,7 @@ class MentorshipTaskController extends Controller
 
 
 
-			return view('mentor.mentorshipTasks.index', compact('tasks', 'kanban', 'lang', 'session_id', 'mentor', 'users', 'company', 'labels', 'data'));
-		}
+		return view('mentor.mentorshipTasks.index', compact('tasks', 'kanban', 'lang', 'session_id', 'mentor', 'users', 'company', 'labels', 'data'));
 	}
 
 	/**
