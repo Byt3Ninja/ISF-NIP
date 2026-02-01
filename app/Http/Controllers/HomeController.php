@@ -1595,7 +1595,8 @@ class HomeController extends Controller
                               ->orWhereNull('type');
                     })
                     ->with(['myResponses'])
-                    ->get();
+                    ->get()
+                    ->unique('survey_id');
             } else{
                 $surveys = SurveyScopes::where('cycle_id', $cycle_id)
                     ->where(function($query) {
@@ -1603,7 +1604,8 @@ class HomeController extends Controller
                               ->orWhereNull('type');
                     })
                     ->with(['myResponses'])
-                    ->get();
+                    ->get()
+                    ->unique('survey_id');
             }
             foreach ($surveys as $survey_scope) {
                 $my_responses = $survey_scope->myResponses;
