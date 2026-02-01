@@ -205,8 +205,14 @@ class MentorsController extends Controller
 				$survey->engagementRate = $eligibleUsers > 0 ? (number_format(round(($engagedUsers / $eligibleUsers * 100), 2), 2)) : 0.00;
 				return $survey;
 			});
+			if(Auth::user()->hasAnyRole('organizationManager|subadmin')) {
+				$available_surveys = Surveys::where('organization_id', $organization_id)->get();
+			}
+			if(Auth::user()->hasRole('admin')) {
+				$available_surveys = Surveys::all();
+			}
+			
 
-			$available_surveys = Surveys::where('organization_id', $cycle->organization_id)->get();
 			return view('admin.settings.mentorship.surveys', compact('surveys', 'cycle', 'available_surveys'));
 		} else {
 			abort(404);
