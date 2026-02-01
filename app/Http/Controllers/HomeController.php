@@ -1468,6 +1468,7 @@ class HomeController extends Controller
                     WHERE
                         mr.user_id = $user->id
                         AND mr.approved = 'Yes'
+                        AND mr.rating IS NOT NULL
                         AND mr.cycle_id = $cycle_id
                 ";
             }
