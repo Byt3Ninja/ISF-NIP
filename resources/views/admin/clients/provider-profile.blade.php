@@ -6,6 +6,35 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/page-profile.css" />
 @stop
 
+@php
+$portfolios = [
+  [
+    'type' => 'video',
+    'src' => 'https://www.youtube.com/embed/fO4Ha_aMmDs',
+    'title' => 'TechFlow Growth Transformation',
+    'description' => 'How we helped TechFlow achieve 5x growth in 6 months with strategic product validation.'
+  ],
+  [
+    'type' => 'image',
+    'src' => 'https://t4.ftcdn.net/jpg/00/03/74/41/360_F_3744121_97lPGmfpiXN8e8y6rGOrP9F6BnhZ7787.jpg',
+    'title' => 'EcoTrace Product Roadmap',
+    'description' => 'Collaborative planning session to define product roadmap and priorities.'
+  ],
+  [
+    'type' => 'image',
+    'src' => 'https://i.pinimg.com/236x/61/5d/fe/615dfea87c69172663273d93ed1f9ee0.jpg',
+    'title' => 'HealthTech Market Entry',
+    'description' => 'Partnership to develop comprehensive go-to-market strategy for new product.'
+  ],
+  [
+    'type' => 'image',
+    'src' => 'https://i.pinimg.com/236x/61/5d/fe/615dfea87c69172663273d93ed1f9ee0.jpg',
+    'title' => 'Analytics Platform Success',
+    'description' => 'Implementing comprehensive analytics framework to drive business growth.'
+  ],
+];
+@endphp
+
 @section('content')
 <!-- Hero Section -->
 <section>
@@ -214,134 +243,151 @@
   </div>
 </section>
 
-<section class="py-5">
-  <div class="container">
-    <!-- Header -->
-    <div class="text-center mb-5">
-        <h1 class="display-5 fw-bold text-dark">Portfolio</h1>
-        <p class="lead text-secondary mx-auto" style="max-width: 800px;">
-            Explore our portfolio of successful projects and see how we've helped startups transform their ideas into thriving businesses.
-        </p>
+<section id="portfolio" class="mb-6">
+
+  <div class="card">
+    <div class="card-header">
+      <h2 class="h5 mb-2">Portfolio</h2>
+      <div class="row">
+        <div class="col-12 col-md-6">
+          <p class="mb-0 text-secondary">
+            Explore our portfolio of successful projects and see
+            how we've helped startups transform their ideas into thriving businesses.
+          </p>
+        </div>
+      </div>
     </div>
 
-      <!-- Carousel -->
-    <div id="portfolioCarousel" class="carousel carousel-dark slide" data-bs-ride="false">
-      <div class="carousel-inner px-md-5">
-          
-          <!-- Slide 1 -->
-          <div class="carousel-item active">
-              <div class="row g-4 justify-content-center">
-                  <!-- Project 1 -->
-                  <div class="col-lg-4 col-md-6">
-                      <div class="card bg-dark text-white border-0 shadow-sm h-100 text-center p-4" data-bs-toggle="modal" data-bs-target="#modal1" style="cursor: pointer;">
-                          <div class="rounded-circle bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 80px; height: 80px;">
-                              <i class="bi bi-play-circle-fill fs-1"></i>
-                          </div>
-                          <h3 class="h5">TechFlow Success Story</h3>
-                          <p class="small text-white-50">SaaS Platform Launch</p>
-                      </div>
-                      <div class="mt-3">
-                          <h4 class="h6 fw-bold">TechFlow Growth Transformation</h4>
-                          <p class="small text-muted">How we helped TechFlow achieve 5x growth in 6 months with strategic product validation.</p>
-                      </div>
-                  </div>
+    @php
+      $slides = collect($portfolios)->chunk(3);
+    @endphp
 
-                  <!-- Project 2 -->
-                  <div class="col-lg-4 col-md-6">
-                      <div class="card bg-secondary text-white border-0 shadow-sm h-100 text-center p-4" data-bs-toggle="modal" data-bs-target="#modal2" style="cursor: pointer;">
-                          <div class="rounded-circle bg-white bg-opacity-25 d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 80px; height: 80px;">
-                              <i class="bi bi-people-fill fs-1"></i>
-                          </div>
-                          <h3 class="h5">Strategy Workshop</h3>
-                          <p class="small text-white-50">Product Discovery Session</p>
-                      </div>
-                      <div class="mt-3">
-                          <h4 class="h6 fw-bold">EcoTrace Product Roadmap</h4>
-                          <p class="small text-muted">Collaborative planning session to define product roadmap and priorities.</p>
-                      </div>
-                  </div>
+    <div class="card-body">
+      <div id="portfolioCarousel" class="carousel carousel-dark slide" data-bs-ride="false">
 
-                  <!-- Project 3 -->
-                  <div class="col-lg-4 col-md-6">
-                      <div class="card bg-dark text-white border-0 shadow-sm h-100 text-center p-4" data-bs-toggle="modal" data-bs-target="#modal3" style="cursor: pointer;">
-                          <div class="rounded-circle bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 80px; height: 80px;">
-                              <i class="bi bi-hand-thumbs-up-fill fs-1"></i>
-                          </div>
-                          <h3 class="h5">Client Partnership</h3>
-                          <p class="small text-white-50">Market Entry Strategy</p>
-                      </div>
-                      <div class="mt-3">
-                          <h4 class="h6 fw-bold">HealthTech Market Entry</h4>
-                          <p class="small text-muted">Partnership to develop comprehensive go-to-market strategy for new product.</p>
-                      </div>
+        <div class="carousel-inner px-md-5">
+
+          @foreach($slides as $slideIndex => $slideItems)
+          <div class="carousel-item {{ $slideIndex === 0 ? 'active' : '' }}">
+            <div class="row g-4 justify-content-center">
+
+              @foreach($slideItems as $item)
+              <div class="col-lg-4 col-md-6">
+
+                <div class="card border-0 shadow-none h-px-250 text-center cursor-pointer preview-trigger position-relative overflow-hidden"
+                  data-type="{{ $item['type'] }}" data-src="{{ $item['src'] }}" data-title="{{ $item['title'] }}"
+                  data-bs-toggle="modal" data-bs-target="#portfolioPreviewModal">
+
+                  @if($item['type'] === 'video')
+                  {{-- Video Thumbnail --}}
+                  <img
+                    src="https://img.youtube.com/vi/{{ \Illuminate\Support\Str::afterLast($item['src'], '/') }}/hqdefault.jpg"
+                    class="rounded img-fluid object-fit-cover w-100 h-100" alt="{{ $item['title'] }}">
+                  @else
+                  <img src="{{ $item['src'] }}" class="rounded img-fluid object-fit-cover w-100 h-100"
+                    alt="{{ $item['title'] }}">
+                  @endif
+
+                  <div
+                    class="position-absolute top-50 start-50 translate-middle bg-dark bg-opacity-50 rounded-circle p-3">
+                    @if($item['type'] === 'video')
+                    <i class="ti ti-player-play text-white fs-3"></i>
+                    @else
+                    <i class="ti ti-eye text-white fs-3"></i>
+                    @endif
                   </div>
+                </div>
+
+                <div class="mt-3">
+                  <h5 class="mb-2">{{ $item['title'] }}</h5>
+                  <p class="small text-muted">{{ $item['description'] }}</p>
+                </div>
               </div>
+              @endforeach
+            </div>
           </div>
+          @endforeach
+        </div>
 
-          <!-- Slide 2 -->
-          <div class="carousel-item">
-              <div class="row g-4 justify-content-center">
-                  <!-- Project 4 -->
-                  <div class="col-lg-4 col-md-6">
-                      <div class="card bg-secondary text-white border-0 shadow-sm h-100 text-center p-4" data-bs-toggle="modal" data-bs-target="#modal4" style="cursor: pointer;">
-                          <div class="rounded-circle bg-white bg-opacity-25 d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 80px; height: 80px;">
-                              <i class="bi bi-graph-up-arrow fs-1"></i>
-                          </div>
-                          <h3 class="h5">Growth Analytics</h3>
-                          <p class="small text-white-50">Data-Driven Strategy</p>
-                      </div>
-                      <div class="mt-3">
-                          <h4 class="h6 fw-bold">Analytics Platform Success</h4>
-                          <p class="small text-muted">Implementing comprehensive analytics framework to drive business growth.</p>
-                      </div>
-                  </div>
-                  <!-- Add more items here if needed using the same structure -->
-              </div>
-          </div>
-      </div>
+        <!-- Controls -->
+        <button class="carousel-control-prev" type="button" data-bs-target="#portfolioCarousel" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon"></span>
+        </button>
 
-      <!-- Controls -->
-      <button class="carousel-control-prev" type="button" data-bs-target="#portfolioCarousel" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Previous</span>
-      </button>
-      <button class="carousel-control-next" type="button" data-bs-target="#portfolioCarousel" data-bs-slide="next">
-          <span class="carousel-control-next-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Next</span>
-      </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#portfolioCarousel" data-bs-slide="next">
+          <span class="carousel-control-next-icon"></span>
+        </button>
 
-      <!-- Indicators -->
-      <div class="carousel-indicators position-relative mt-4">
-          <button type="button" data-bs-target="#portfolioCarousel" data-bs-slide-to="0" class="active bg-dark"></button>
-          <button type="button" data-bs-target="#portfolioCarousel" data-bs-slide-to="1" class="bg-dark"></button>
+        <!-- Indicators -->
+        <div class="carousel-indicators position-relative mt-4">
+          @foreach($slides as $index => $slide)
+          <button type="button" data-bs-target="#portfolioCarousel" data-bs-slide-to="{{ $index }}"
+            class="{{ $index === 0 ? 'active bg-primary' : 'bg-primary' }}">
+          </button>
+          @endforeach
+        </div>
+
       </div>
     </div>
   </div>
 </section>
 
-<!-- Modal Template (Re-usable) -->
-<div class="modal fade" id="modal1" tabindex="-1" aria-hidden="true">
+<!-- Portfolio Preview Modal -->
+<div class="modal fade" id="portfolioPreviewModal" tabindex="-1">
   <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content border-0 shadow">
-      <div class="modal-header border-bottom-0">
-        <div>
-          <h5 class="modal-title fw-bold">TechFlow Success Story</h5>
-          <small class="text-muted">SaaS Platform Launch</small>
-        </div>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="previewModalTitle"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body p-4">
-        <div class="ratio ratio-16x9 mb-4">
-          <img src="https://via.placeholder.com/800x450/212529/ffffff?text=TechFlow+Project" class="rounded img-fluid object-fit-cover" alt="Project">
-        </div>
-        <h5 class="fw-bold">About This Project</h5>
-        <p class="text-secondary">We partnered with TechFlow to transform their innovative idea into a fully-functional SaaS platform. Through strategic product validation and iterative development.</p>
-        <ul class="text-secondary">
-          <li>5x revenue growth in 6 months</li>
-          <li>Acquired 1000+ active users</li>
-        </ul>
+
+      <div class="modal-body text-center" id="previewModalBody">
+        <!-- Dynamic Content Injected Here -->
       </div>
+
     </div>
   </div>
 </div>
+@stop
+
+@section('pagescripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const previewModal = document.getElementById('portfolioPreviewModal');
+  const modalTitle = document.getElementById('previewModalTitle');
+  const modalBody = document.getElementById('previewModalBody');
+
+  previewModal.addEventListener('show.bs.modal', function (event) {
+    const trigger = event.relatedTarget;
+
+    const type = trigger.getAttribute('data-type');
+    const src = trigger.getAttribute('data-src');
+    const title = trigger.getAttribute('data-title');
+
+    modalTitle.textContent = title;
+    modalBody.innerHTML = '';
+
+    if (type === 'video') {
+      modalBody.innerHTML = `
+        <div class="ratio ratio-16x9">
+          <iframe src="${src}?autoplay=1"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen>
+          </iframe>
+        </div>
+      `;
+    } else {
+      modalBody.innerHTML = `
+        <img src="${src}" class="img-fluid rounded" />
+      `;
+    }
+  });
+
+  previewModal.addEventListener('hidden.bs.modal', function () {
+    modalBody.innerHTML = '';
+  });
+});
+</script>
 @stop
