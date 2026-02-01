@@ -1231,9 +1231,8 @@ class MentorsController extends Controller
 
 		$surveys = SurveyResponses::where('user_id', $user->id)
 			->where('triggered_on', 'mentorship')
-			->get()
-			->keyBy('triggered_at'); 
-
+			->get();
+			
 			$mentorship_sessions = $mentorshipRequests->map(function ($session) use ($surveys) {
 
 			$survey = $surveys->get($session->id);
@@ -1283,7 +1282,7 @@ class MentorsController extends Controller
 			
 		});
 		
-	// dd($mentorship_sessions[]);
+	 //dd($mentorship_sessions);
 
 		return view('mentor.mentorship-sessions.index', compact('mentorship_sessions'));
 	}	
