@@ -43,7 +43,7 @@
                           @if( $session->type == 'sessions' )
                           {{ __('cycles.Duration') }}: {{ $session->duration }} {{ __('cycles.Minutes') }} :
                           @php
-                            $endTime = \Carbon\Carbon::parse($session->datetime)->addMinutes($session->duration);
+                            $endTime = \Carbon\Carbon::::createFromTimestamp($session->datetime)->addMinutes($session->duration);
                           @endphp
                           @if(now() > $endTime)
                             <span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
