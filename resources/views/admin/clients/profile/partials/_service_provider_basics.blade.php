@@ -198,7 +198,7 @@
 
   <!-- About -->
   <div class="col-12 mb-4">
-    <label class="form-label">{{ __('admin.description') }} *</label>
+    <label class="form-label">{{ __('admin.about_or_description') }} *</label>
     <textarea class="form-control" name="about" maxlength="500" rows="4" placeholder="{{ __('admin.about_placeholder') }}">{{ old('about', $org->description ?? '') }}</textarea>
   </div>
 
