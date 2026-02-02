@@ -75,7 +75,7 @@ return function () {
       'engagement' => [
         'title' => 'engagement',
         'children' => [
-          ['title' => 'services_directory', 'route' => 'users.directory_view', 'menuOnly' => true],
+          ['title' => 'services_directory', 'route' => 'services.index', 'menuOnly' => true],
           ['title' => 'mentors', 'route' => 'mentors.list', 'menuOnly' => true],
           ['title' => 'hackathons', 'route' => 'hackathon.view', 'menuOnly' => true],
           ['title' => 'perks_and_discounts', 'route' => 'company.perks_view', 'menuOnly' => true],

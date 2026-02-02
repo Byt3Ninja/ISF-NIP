@@ -101,11 +101,11 @@ $reviews = [
                 </p>
 
                 <!-- Services -->
-                <div class="mb-6">
-                  <span class="badge bg-label-secondary text-dark border me-2 py-2 px-3">Product & Business</span>
-                  <span class="badge bg-label-secondary text-dark border me-2 py-2 px-3">Platform Development</span>
-                  <span class="badge bg-label-secondary text-dark border me-2 py-2 px-3">Growth Strategy</span>
-                  <span class="badge bg-label-secondary text-dark border me-2 py-2 px-3">Market Validation</span>
+                <div class="mb-6 d-flex flex-wrap gap-2">
+                  <span class="badge bg-label-secondary text-dark border py-2 px-3">Product & Business</span>
+                  <span class="badge bg-label-secondary text-dark border py-2 px-3">Platform Development</span>
+                  <span class="badge bg-label-secondary text-dark border py-2 px-3">Growth Strategy</span>
+                  <span class="badge bg-label-secondary text-dark border py-2 px-3">Market Validation</span>
                 </div>
 
                 <!-- Meta Information -->
@@ -125,11 +125,12 @@ $reviews = [
                 </div>
               </div>
 
-              <!-- Book Now Button -->
-              <div class="col-md-4 text-end">
-                <button class="btn btn-primary px-4">
+              <!-- Schedule Meeting Button -->
+              <div class="col-md-4 mt-6 mt-md-0 d-flex justify-content-md-end">
+                <!-- Replace the href with actual scheduling or oppointment link -->
+                <a class="btn btn-primary" href="https://tabler.io/icons" target="_blank" rel="noopener noreferrer">
                   <i class="ti ti-calendar-check me-2"></i>{{ __('admin.schedule_meeting') }}
-                </button>
+                </a>
               </div>
             </div>
           </div>

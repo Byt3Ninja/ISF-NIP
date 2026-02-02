@@ -15,7 +15,7 @@
       ]
     @endphp
     @if( !$_user->hasRole('registered') && !$_user->hasRole('serviceProvider') )
-    <x-navigation-pills :tabs="$tabs" />
+      <x-navigation-pills :tabs="$tabs" />
     @endif
     
     @if (session()->has('msg'))
@@ -35,18 +35,22 @@
       <div class="card-header d-flex flex-wrap justify-content-between gap-4 border-bottom">
         <div class="card-title mb-0 me-1">
           <h5 class="mb-0">{{ __('admin.Services') }}</h5>
-          <p class="mb-0">{{ __('admin.services_subtitle') }}</p>
+          @if ($_user->ableToAny(['services.create', 'services.store', 'services.edit', 'services.update'], $permissions))
+            <p class="mb-0">{{ __('admin.services_subtitle') }}</p>
+          @endif
         </div>
         <div class="d-flex align-items-center gap-3">
-          <div class="dropdown">
-            <button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="ti ti-file-export me-2"></i>{{ __('admin.Export') }}
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="exportDropdown">
-              <li><a class="dropdown-item" href="{{ route('services.export_excel', request()->query()) }}" id="exportExcel"><i class="ti ti-file-spreadsheet me-2"></i>Excel</a></li>
-              <li><a class="dropdown-item" href="{{ route('services.export_csv', request()->query()) }}" id="exportCsv"><i class="ti ti-file-text me-2"></i>CSV</a></li>
-            </ul>
-          </div>
+          @if ($_user->ableToAny(['services.export_excel', 'services.export_csv'], $permissions))
+            <div class="dropdown">
+              <button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="ti ti-file-export me-2"></i>{{ __('admin.Export') }}
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                <li><a class="dropdown-item" href="{{ route('services.export_excel', request()->query()) }}" id="exportExcel"><i class="ti ti-file-spreadsheet me-2"></i>Excel</a></li>
+                <li><a class="dropdown-item" href="{{ route('services.export_csv', request()->query()) }}" id="exportCsv"><i class="ti ti-file-text me-2"></i>CSV</a></li>
+              </ul>
+            </div>
+          @endif
           @if( $_user->ableToAny(['services.create', 'services.store'], $permissions) )
             <a href="{{ route('services.create') }}" class="btn btn-primary text-nowrap">
               <i class="ti ti-plus me-2"></i> {{ __('cycles.Add New') }}
@@ -125,7 +129,7 @@
                   </div>
              
                   <div class="d-flex align-items-center gap-2 position-absolute top-0 end-0 p-4">
-                    @if($_user->ableToAny(['services.show', 'services.edit', 'services.update'], $permissions))
+                    @if ($_user->ableToAny(['services.edit', 'services.update'], $permissions))
                       <a
                         href="{{ route('services.edit', ['service' => $service->id]) }}"
                         class="btn btn-sm btn-icon btn-label-secondary rounded-pill border shadow-xs"
@@ -204,17 +208,32 @@
                   </div>
 
                   <!-- Date & Status -->
-                  <div class="d-flex justify-content-between align-items-center mt-auto">
-                    <div class="d-flex align-items-center gap-2">
-                      <i class="ti ti-calendar ti-sm text-muted"></i>
-                      <span class="fw-medium text-muted">{{ $service->created_at->format('Y-m-d') }}</span>
-                    </div>
+                  @if (!$_user->hasRole('registered'))
+                    <div class="d-flex justify-content-between align-items-center mt-auto">
+                      <div class="d-flex align-items-center gap-2">
+                        <i class="ti ti-calendar ti-sm text-muted"></i>
+                        <span class="fw-medium text-muted">{{ $service->created_at->format('Y-m-d') }}</span>
+                      </div>
 
-                    <span class="badge py-1 px-2 bg-label-secondary fw-semibold">
-                      <i class="ti ti-point-filled text-{{ $service->status == 1 ? 'success' : 'danger' }}"></i>
-                      {{ $service->status == 1 ? __('admin.Active') : __('admin.Inactive') }}
-                    </span>
-                  </div>
+                      <span class="badge py-1 px-2 bg-label-secondary fw-semibold">
+                        <i class="ti ti-point-filled text-{{ $service->status == 1 ? 'success' : 'danger' }}"></i>
+                        {{ $service->status == 1 ? __('admin.Active') : __('admin.Inactive') }}
+                      </span>
+                    </div>
+                  @endif
+
+                  <!-- Request Service Button -->
+                  @if ($_user->hasRole('registered'))
+                    <button 
+                      class="btn btn-primary w-100 mt-auto"
+                      data-service-id="{{ $service->id }}"
+                      data-bs-toggle="modal"
+                      data-bs-target="#requestServiceModal"
+                    >
+                      <i class="ti ti-affiliate me-2"></i>
+                      {{ __('admin.request_service') }}
+                    </button>
+                  @endif
                 </div>
               </div>
             </div>
@@ -234,6 +253,122 @@
     </div>
   </div>
 </div>
+
+@if ($_user->hasRole('registered'))
+<!-- Request Service Modal -->
+<div class="modal fade" id="requestServiceModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <!-- Header -->
+      <div class="modal-header">
+        <h5 class="modal-title">{{ __('admin.request_service') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body">
+
+        <!-- Service Info -->
+        <div class="mb-4">
+          <h5 id="modalServiceName" class="fw-semibold mb-1">{{ __('admin.Service_Name') }}</h5>
+          <p id="modalServiceDescription" class="text-muted mb-2">
+            Service description goes here...
+          </p>
+
+          <div class="d-flex flex-wrap gap-3 align-items-center small">
+            <span>
+              <strong>{{ __('admin.Price') }}:</strong>
+              <span id="modalServicePrice">$200</span>
+            </span>
+
+            <div class="d-flex align-items-center gap-2">
+              <i class="ti ti-star-filled text-warning"></i>
+              <div class="d-flex align-items-center gap-1">
+                <span id="modalRating" class="fw-semibold">4.8</span>
+                <span class="text-muted small ms-1">(<span id="modalReviewsCount">120</span> {{ __('admin.reviews') }})</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h6 class="mb-2 text-capitalize">{{ __('admin.provided_by') }}</h6>
+        <!-- Provider Card -->
+        <div class="card border shadow-none mb-4">
+          <div class="card-body py-4 d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-3">
+              @if (isset($user->image_url) && !empty($user->image_url))
+                <img 
+                  src="{{ $user->image_url }}" 
+                  alt="avatar"
+                  class="rounded-circle w-px-50 h-px-50 object-fit-cover"
+                  onerror="this.onerror=null; this.nextElementSibling.classList.remove('d-none'); this.nextElementSibling.classList.add('d-flex'); this.classList.add('d-none');"
+                />
+              @endif
+
+              <div class="bg-light rounded-circle d-{{ (isset($user->image_url) && !empty($user->image_url)) ? 'none' : 'flex' }} align-items-center justify-content-center w-px-50 h-px-50">
+                <i class="ti ti-user fs-5"></i>
+              </div>
+
+              <div>
+                <div class="fw-semibold" id="modalProviderName">
+                  Contact Name
+                </div>
+
+                <div class="text-muted small" id="modalProviderCompany">
+                  Company Name
+                </div>
+              </div>
+            </div>
+
+            <a href="#" id="modalViewProfile"
+              class="btn btn-sm btn-outline-primary">
+              {{ __('admin.View Profile') }}
+            </a>
+          </div>
+        </div>
+
+        <!-- Request Service Form -->
+        <form id="requestServiceForm">
+
+          <!-- Date and Time -->
+          <div class="form-group mb-3">
+            <label class="form-label">
+              {{ __('admin.request_date_and_time') }} <span class="text-danger">*</span>
+            </label>
+            <input class='form-control' type="text" name="datetime" id="dateTimePicker" placeholder="{{ __('admin.select_date_and_time') }}" value="" required />
+            <div class="invalid-feedback" id="dateError">
+              {{ __('admin.please_select_date_time') }}
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div class="mb-3">
+            <label class="form-label">{{ __('admin.Notes') }} ({{ __('admin.Optional') }})</label>
+            <textarea class="form-control"
+                      id="notes"
+                      rows="4"
+                      maxlength="2000"
+                      placeholder="{{ __('admin.Add your notes') }}"></textarea>
+            <div class="form-text">
+              <span id="notesCounter">0</span>/2000 {{ __('admin.characters') }}
+            </div>
+          </div>
+        </form>
+      </div>
+      <!-- Footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+          {{ __('admin.Cancel') }}
+        </button>
+
+        <button type="button" id="submitServiceRequestBtn" class="btn btn-primary">
+          {{ __('admin.submit_request') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+@endif
 
 <!-- Modal for all organizations -->
 <div class="modal fade" id="orgsModal" tabindex="-1" aria-labelledby="orgsModalLabel" aria-hidden="true">
@@ -319,4 +454,69 @@
     });
   });
 </script>
+
+
+@if ($_user->hasRole('registered'))
+<script>
+$(function () {
+  // Cache selectors for better performance
+  const $dateInput = $('#dateTimePicker');
+  const $submitBtn = $('#submitServiceRequestBtn');
+  const $notes = $('#notes');
+  const $notesCounter = $('#notesCounter');
+  const $dateError = $('#dateError');
+  const $modalEl = $('#bookServiceModal');
+
+  // Initialize Flatpickr
+  $dateInput.flatpickr({
+    enableTime: true,
+    dateFormat: "Y-m-d H:i",
+    minDate: "{{ date('Y-m-d H:i', strtotime('+1 hour')) }}",
+    maxDate: "{{ date('Y-m-d H:i', strtotime('+1 year')) }}",
+  });
+
+  // Toggle button state and validation on change
+  $dateInput.on('change', function () {
+    const hasValue = !!$(this).val();
+    $submitBtn.prop('disabled', !hasValue);
+    if (hasValue) $(this).removeClass('is-invalid');
+  });
+
+  // Notes character counter
+  $notes.on('input', function () {
+    $notesCounter.text($(this).val().length);
+  });
+
+  // Submit booking
+  $submitBtn.on('click', function () {
+    if (!$dateInput.val()) {
+      $dateInput.addClass('is-invalid');
+      $dateError.show();
+      return;
+    }
+
+    const success = true; // Simulate success/failure
+
+    if (!success) {
+      // show error alert
+      const errMsg = "{{ __('admin.unexpected_error') }}";
+      releaseFailureAlert({
+        title: "{{ __('admin.Error') }}!",
+        message: errMsg || "{{ __('admin.unexpected_error') }}",
+      });
+      return;
+    }
+
+    // Hide modal on successful submission
+    $('#requestServiceModal').modal('hide');
+
+    // Show success alert
+    releaseSuccessAlert({
+      title: "{{ __('admin.Success') }}!",
+      message: "{{ __('admin.request sent') }}",
+    });
+  });
+});
+</script>
+@endif
 @stop

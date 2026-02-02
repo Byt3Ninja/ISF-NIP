@@ -127,9 +127,9 @@
             <label class="form-check-label me-1" for="checkboxGlow1">{{ __('admin.Add comment') }}</label>
           </div>
           <fieldset class="form-label-group" style="display: none;" id="textarea">
-            <label class="form-label" for="mycomment">{{ __('admin.Add your note') }}</label>
+            <label class="form-label" for="mycomment">{{ __('admin.Add your notes') }}</label>
             <textarea id="mycomment" class="form-control" rows="3"
-              placeholder="{{ __('admin.Add your note') }}"></textarea>
+              placeholder="{{ __('admin.Add your notes') }}"></textarea>
           </fieldset>
         </div>
         <div class="content-right">
