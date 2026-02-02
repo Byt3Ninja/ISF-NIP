@@ -3237,7 +3237,7 @@ return [
 	],
 
 	'services_short_description' => [
-		'label' => 'وصف مختصر للخدمات *',
+		'label' => 'وصف مختصر للخدمات',
 		'description' => 'نبذة مختصرة عن الخدمات المقدمة (جملتان إلى ثلاث).',
 		'placeholder' => 'اشرح نطاق الخدمات التي تقدمها...',
 	],
@@ -3337,4 +3337,5 @@ return [
 	'characters' => 'حروف',
 	'submit_request' => 'إرسال الطلب',
 	'please_select_date_time' => 'الرجاء تحديد التاريخ والوقت',
+	'change_file' => 'تغيير الملف',
 ];

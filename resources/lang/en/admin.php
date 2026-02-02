@@ -3181,7 +3181,7 @@ return [
 	],
 
 	'services_short_description' => [
-		'label' => 'Services Short Description *',
+		'label' => 'Services Short Description',
 		'description' => 'Brief overview of what you offer. 2–3 sentences.',
 		'placeholder' => 'Describe the range of services you provide...',
 	],
@@ -3281,4 +3281,5 @@ return [
 	'characters' => 'characters',
 	'submit_request' => 'Submit Request',
 	'please_select_date_time' => 'Please select a date and time',
+	'change_file' => 'Change File',
 ];

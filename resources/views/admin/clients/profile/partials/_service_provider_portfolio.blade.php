@@ -21,10 +21,10 @@
     </div>
     
     <div class="col-12">
-        <div class="mb-4">
-            <label for="portfolio_description" class="form-label">{{ __('admin.Section Short Description') }}</label>
-            <input type="text" class="form-control" id="portfolio_description" name="portfolio_description" value="{{ $org ? $org->portfolio_description : '' }}" maxlength="50" placeholder="{{ __('admin.short_desc_placeholder') ?? 'Briefly describe your work' }}">
-        </div>
+      <div class="mb-4">
+        <label for="portfolio_description" class="form-label">{{ __('admin.services_short_description.label') }} *</label>
+        <input type="text" class="form-control" id="portfolio_description" name="portfolio_description" value="{{ $org ? $org->portfolio_description : '' }}" maxlength="50" placeholder="{{ __('admin.services_short_description.label') ?? 'Briefly describe your work' }}">
+      </div>
     </div>
 
     <div class="col-md-12">
@@ -54,7 +54,7 @@
                         @else
                           <img src="/191014/{{ $item->media_url }}" class="img-fluid rounded" style="max-height: 100px;">
                         @endif
-                        <div class="small mt-1 text-primary">{{ __('admin.Change File') }}</div>
+                        <div class="small mt-1 text-primary">{{ __('admin.change_file') }}</div>
                       @else
                         <i class="ti ti-cloud-upload mb-2"></i>
                         <div class="fw-medium">{{ __('admin.click_to_upload') }}</div>
@@ -281,7 +281,7 @@
            } else {
              $('<video>', { src: e.target.result, class: 'img-fluid rounded', style: 'max-height: 100px;' }).appendTo($uploadArea);
            }
-           $uploadArea.append('<div class="small mt-1 text-primary">{{ __("admin.Change File") }}</div>');
+           $uploadArea.append('<div class="small mt-1 text-primary">{{ __("admin.change_file") }}</div>');
         };
         reader.readAsDataURL(file);
       });
