@@ -274,19 +274,51 @@ $reviews = [
 
                     @for ($i = 1; $i <= 5; $i++) @if ($i <=$fullStars) <i class="ti ti-star-filled text-warning"></i>
                       @elseif ($i == $fullStars + 1 && $hasHalf)
-                      <i class="ti ti-star-half-filled text-warning"></i>
+                        <i class="ti ti-star-half-filled text-warning"></i>
                       @else
-                      <i class="ti ti-star text-warning"></i>
+                        <i class="ti ti-star text-warning"></i>
                       @endif
-                      @endfor
-                      <span class="text-muted ms-2 small">4.5 (127 {{ __('admin.reviews') }})</span>
+                    @endfor
+                    <span class="text-muted ms-2 small">4.5 (127 {{ __('admin.reviews') }})</span>
                   </div>
 
                   <p class="card-text line-clamp-3 mb-4">
                     Comprehensive market research and validation to ensure product-market fit before development begins.
                   </p>
 
-                  <button class="btn btn-primary w-100 mt-auto">{{ __('admin.request_service') }}</button>
+                  {{--  Static variable should be removed --}}
+                  @php
+                    $id = 1;
+                    $status = 1;
+                    $created_at = \Carbon\Carbon::now()->subDays(5);
+                  @endphp
+
+                  <!-- Date & Status -->
+                  @if (!$_user->hasRole('registered'))
+                    <div class="d-flex justify-content-between align-items-center mt-auto">
+                      <div class="d-flex align-items-center gap-2">
+                        <i class="ti ti-calendar ti-sm text-muted"></i>
+                        <span class="fw-medium text-muted">{{ $created_at->format('Y-m-d') }}</span>
+                      </div>
+                      <span class="badge py-1 px-2 bg-label-secondary fw-semibold">
+                        <i class="ti ti-point-filled text-{{ $status == 1 ? 'success' : 'danger' }}"></i>
+                        {{ $status == 1 ? __('admin.Active') : __('admin.Inactive') }}
+                      </span>
+                    </div>
+                  @endif
+
+                  <!-- Request Service Button -->
+                  @if ($_user->hasRole('registered'))
+                    <button 
+                      class="btn btn-primary w-100 mt-auto"
+                      data-service-id="{{ $id }}"
+                      data-bs-toggle="modal"
+                      data-bs-target="#requestServiceModal"
+                    >
+                      <i class="ti ti-affiliate me-2"></i>
+                      {{ __('admin.request_service') }}
+                    </button>
+                  @endif
                 </div>
               </div>
             </div>
@@ -574,6 +606,11 @@ $reviews = [
     </div>
   </div>
 </div>
+
+<!-- Request Service Modal -->
+@if ($_user->hasRole('registered'))
+  @include('partials.request-service-modal')
+@endif
 @stop
 
 @section('pagescripts')
