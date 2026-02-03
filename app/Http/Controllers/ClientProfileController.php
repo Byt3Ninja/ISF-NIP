@@ -570,7 +570,7 @@ class ClientProfileController extends Controller
                             ->orWhereHas('inviteMentors', function ($q2) {
                                 $q2->where('scope', 'Public'); // موجود و public
                                 $q2->where('status', 'accepted');
-                                $q2->where('scope', '!=', 'Organization');
+                                $q2->where('organization_ids', '[]');
                             });
                         });
 
