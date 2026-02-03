@@ -285,7 +285,7 @@ return [
 	'arspec' => 'Specialization in Arabic',
 	'enspec' => 'Specialization in English',
 	'Request Date/ Time' => 'Request Date/ Time',
-	'Add your note' => 'Add your note',
+	'Add your notes' => 'Add your note',
 	'Add comment' => 'Add comment',
 	'Make a request' => 'Make a service request',
 	'Close' => 'Close',

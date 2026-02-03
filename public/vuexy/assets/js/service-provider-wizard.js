@@ -65,6 +65,7 @@
   let iti; // Declare iti in a scope accessible by custom validator
   let step1InitialData = null;
   let step2InitialData = null;
+  let step3InitialData = null;
 
   const lang = $('html').attr('lang') || 'en';
 
@@ -98,6 +99,7 @@
       console.log('page loaded - init wizard');
       step1InitialData = getStep1Data();
       step2InitialData = getStep2Data();
+      step3InitialData = getStep3Data();
     });
 
     // Profile basics
@@ -584,7 +586,6 @@
       }
     }).on('core.form.valid', function () {
       const currentData = getStep2Data();
-      console.log('current step 2 data', currentData);
 
       // If no changes → skip AJAX
       if (step2InitialData === currentData) {
@@ -630,7 +631,6 @@
 
       return JSON.stringify(data);
     }
-
 
     // Key stats
     const FormValidation3 = FormValidation.formValidation(wizardValidationFormStep3, {
@@ -751,6 +751,15 @@
       }
     })
       .on('core.form.valid', function () {
+        const currentData = getStep3Data();
+
+        // If no changes → skip AJAX
+        if (step3InitialData === currentData) {
+          validationStepper.next();
+          return;
+        }
+
+        // Otherwise save
         saveStepData(2, FormValidation3);
       })
       .on('core.validator.validated', function (e) {
@@ -789,6 +798,28 @@
           FormValidation3.revalidateField(`value${i}`);
         }
       });
+    }
+
+     function getStep3Data() {
+      const form = document.getElementById('service-provider-form-wizard');
+      const formData = new FormData(form);
+
+      const data = {};
+
+      [
+        'value1',
+        'label1',
+        'value2',
+        'label2',
+        'value3',
+        'label3',
+        'value4',
+        'label4'
+      ].forEach(name => {
+        data[name] = formData.get(name) || '';
+      });
+
+      return JSON.stringify(data);
     }
 
     // Portfolio / Work Items - Step 4
@@ -1172,6 +1203,7 @@
       validationStepper.previous();
       step1InitialData = getStep1Data();
       step2InitialData = getStep2Data();
+      step3InitialData = getStep3Data();
     });
   }
 })();

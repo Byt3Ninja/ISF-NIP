@@ -367,7 +367,7 @@ return [
 	'arspec' => 'Specialization in Arabic',
 	'enspec' => 'Specialization',
 	'Request Date/ Time' => 'Request Date/ Time',
-	'Add your note' => 'Add your note',
+	'Add your notes' => 'Add your note',
 	'Add comment' => 'Add comment',
 	'Make a request' => 'Make a service request',
 	'Close' => 'Close',
@@ -1671,7 +1671,6 @@ return [
 	'company name' => 'Startup Name',
 	'Rating' => 'Rating',
 	'Progress' => 'Progress',
-	'Notes' => 'Notes',
 	'Filter Options (Performance)' => 'Filter Options (Performance)',
 	'From Date' => 'From Date',
 	'Hours' => 'Hours',
@@ -3182,7 +3181,7 @@ return [
 	],
 
 	'services_short_description' => [
-		'label' => 'Services Short Description *',
+		'label' => 'Services Short Description',
 		'description' => 'Brief overview of what you offer. 2–3 sentences.',
 		'placeholder' => 'Describe the range of services you provide...',
 	],
@@ -3277,4 +3276,10 @@ return [
 	'provider_portfolio_desc' => 'Explore our portfolio of successful projects and see how we have helped startups transform their ideas into thriving businesses.',
 	'provider_clients_desc' => 'Trusted by leading startups and enterprises.',
 	'provider_reviews_desc' => 'Read what our clients have to say about our services and their experiences working with us.',
+	'request_date_and_time' => 'Request date & time',
+	'select_date_and_time' => 'Select date and time',
+	'characters' => 'characters',
+	'submit_request' => 'Submit Request',
+	'please_select_date_time' => 'Please select a date and time',
+	'change_file' => 'Change File',
 ];

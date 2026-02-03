@@ -15,7 +15,7 @@
       ]
     @endphp
     @if( !$_user->hasRole('registered') && !$_user->hasRole('serviceProvider') )
-    <x-navigation-pills :tabs="$tabs" />
+      <x-navigation-pills :tabs="$tabs" />
     @endif
     
     @if (session()->has('msg'))
@@ -35,18 +35,22 @@
       <div class="card-header d-flex flex-wrap justify-content-between gap-4 border-bottom">
         <div class="card-title mb-0 me-1">
           <h5 class="mb-0">{{ __('admin.Services') }}</h5>
-          <p class="mb-0">{{ __('admin.services_subtitle') }}</p>
+          @if ($_user->ableToAny(['services.create', 'services.store', 'services.edit', 'services.update'], $permissions))
+            <p class="mb-0">{{ __('admin.services_subtitle') }}</p>
+          @endif
         </div>
         <div class="d-flex align-items-center gap-3">
-          <div class="dropdown">
-            <button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="ti ti-file-export me-2"></i>{{ __('admin.Export') }}
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="exportDropdown">
-              <li><a class="dropdown-item" href="{{ route('services.export_excel', request()->query()) }}" id="exportExcel"><i class="ti ti-file-spreadsheet me-2"></i>Excel</a></li>
-              <li><a class="dropdown-item" href="{{ route('services.export_csv', request()->query()) }}" id="exportCsv"><i class="ti ti-file-text me-2"></i>CSV</a></li>
-            </ul>
-          </div>
+          @if ($_user->ableToAny(['services.export_excel', 'services.export_csv'], $permissions))
+            <div class="dropdown">
+              <button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="ti ti-file-export me-2"></i>{{ __('admin.Export') }}
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                <li><a class="dropdown-item" href="{{ route('services.export_excel', request()->query()) }}" id="exportExcel"><i class="ti ti-file-spreadsheet me-2"></i>Excel</a></li>
+                <li><a class="dropdown-item" href="{{ route('services.export_csv', request()->query()) }}" id="exportCsv"><i class="ti ti-file-text me-2"></i>CSV</a></li>
+              </ul>
+            </div>
+          @endif
           @if( $_user->ableToAny(['services.create', 'services.store'], $permissions) )
             <a href="{{ route('services.create') }}" class="btn btn-primary text-nowrap">
               <i class="ti ti-plus me-2"></i> {{ __('cycles.Add New') }}
@@ -125,7 +129,7 @@
                   </div>
              
                   <div class="d-flex align-items-center gap-2 position-absolute top-0 end-0 p-4">
-                    @if($_user->ableToAny(['services.show', 'services.edit', 'services.update'], $permissions))
+                    @if ($_user->ableToAny(['services.edit', 'services.update'], $permissions))
                       <a
                         href="{{ route('services.edit', ['service' => $service->id]) }}"
                         class="btn btn-sm btn-icon btn-label-secondary rounded-pill border shadow-xs"
@@ -204,17 +208,32 @@
                   </div>
 
                   <!-- Date & Status -->
-                  <div class="d-flex justify-content-between align-items-center mt-auto">
-                    <div class="d-flex align-items-center gap-2">
-                      <i class="ti ti-calendar ti-sm text-muted"></i>
-                      <span class="fw-medium text-muted">{{ $service->created_at->format('Y-m-d') }}</span>
-                    </div>
+                  @if (!$_user->hasRole('registered'))
+                    <div class="d-flex justify-content-between align-items-center mt-auto">
+                      <div class="d-flex align-items-center gap-2">
+                        <i class="ti ti-calendar ti-sm text-muted"></i>
+                        <span class="fw-medium text-muted">{{ $service->created_at->format('Y-m-d') }}</span>
+                      </div>
 
-                    <span class="badge py-1 px-2 bg-label-secondary fw-semibold">
-                      <i class="ti ti-point-filled text-{{ $service->status == 1 ? 'success' : 'danger' }}"></i>
-                      {{ $service->status == 1 ? __('admin.Active') : __('admin.Inactive') }}
-                    </span>
-                  </div>
+                      <span class="badge py-1 px-2 bg-label-secondary fw-semibold">
+                        <i class="ti ti-point-filled text-{{ $service->status == 1 ? 'success' : 'danger' }}"></i>
+                        {{ $service->status == 1 ? __('admin.Active') : __('admin.Inactive') }}
+                      </span>
+                    </div>
+                  @endif
+
+                  <!-- Request Service Button -->
+                  @if ($_user->hasRole('registered'))
+                    <button 
+                      class="btn btn-primary w-100 mt-auto"
+                      data-service-id="{{ $service->id }}"
+                      data-bs-toggle="modal"
+                      data-bs-target="#requestServiceModal"
+                    >
+                      <i class="ti ti-affiliate me-2"></i>
+                      {{ __('admin.request_service') }}
+                    </button>
+                  @endif
                 </div>
               </div>
             </div>
@@ -234,6 +253,11 @@
     </div>
   </div>
 </div>
+
+<!-- Request Service Modal -->
+@if ($_user->hasRole('registered'))
+  @include('partials.request-service-modal')
+@endif
 
 <!-- Modal for all organizations -->
 <div class="modal fade" id="orgsModal" tabindex="-1" aria-labelledby="orgsModalLabel" aria-hidden="true">
