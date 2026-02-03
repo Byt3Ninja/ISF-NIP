@@ -568,7 +568,9 @@ class ClientProfileController extends Controller
                         $mentors->where(function ($q) {
                             $q->whereDoesntHave('inviteMentors') // مش موجود في invite
                             ->orWhereHas('inviteMentors', function ($q2) {
-                                $q2->where('scope', 'public'); // موجود و public
+                                $q2->where('scope', 'Public'); // موجود و public
+                                $q2->where('status', 'accepted');
+                                $q2->where('scope', '!=', 'Organization');
                             });
                         });
 
