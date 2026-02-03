@@ -20,6 +20,8 @@ $canRequestMentorship =
   
 if ($canRequestMentorship) {
   $cycle = auth()->user()->company->cycledata;
+}else{
+  $cycle = null;
 }
 
  $schedules = App\Schedule::where('user_id', $client->id ?? auth()->id())
