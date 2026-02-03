@@ -534,4 +534,6 @@ return [
   'start_year' => 'سنة البداية',
   'end_year' => 'سنة النهاية',
   'YoY growth' => 'النمو السنوي',
+  'Total customers is required and must be greater than 0' => 'عدد العملاء الكلي مطلوب ويجب أن يكون أكبر من 0',
+  'New customers is required and must be 0 or greater' => 'عدد العملاء في هذه الفترة مطلوب ويجب أن يكون 0 أو أكبر',
 ];

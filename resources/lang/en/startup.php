@@ -533,4 +533,6 @@ return [
   'start_year' => 'Start Year',
   'end_year' => 'End Year',
   'YoY growth' => 'YoY Growth',
+  'Total customers is required and must be greater than 0' => 'Total customers is required and must be greater than 0',
+  'New customers is required and must be 0 or greater' => 'New customers is required and must be 0 or greater',
 ];

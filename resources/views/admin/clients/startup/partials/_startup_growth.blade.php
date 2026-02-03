@@ -95,7 +95,7 @@
   </div>
 </div>
 
-<div class="card card-datatable table-responsive">
+{{-- <div class="card card-datatable table-responsive">
   <div class="card-header d-flex justify-content-between align-items-center">
     <h5 class="mb-0">{{ __('startup.Customers History') }}</h5>
     <button id="add-new-startup-growth-modal-btn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#startupGrowthModal">
@@ -186,7 +186,7 @@
 			</form>
 		</div>
 	</div>
-</div>
+</div> --}}
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -204,22 +204,22 @@
   ];
 
   $(document).ready(function(){
-    // Initialize DataTable
-    $('#growthTable').DataTable({
-      pageLength: 10,
-      responsive: true,
-      ordering: true,
-      searching: true,
-      @if (app()->getLocale() == 'ar')
-      language: {
-        search: 'ابحث:',
-        lengthMenu: 'أظهر _MENU_ مدخلات',
-        info: 'إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل',
-        paginate: { previous: 'السابق', next: 'التالي' },
-        emptyTable: 'لا توجد بيانات'
-      }
-      @endif
-    });
+    // // Initialize DataTable
+    // $('#growthTable').DataTable({
+    //   pageLength: 10,
+    //   responsive: true,
+    //   ordering: true,
+    //   searching: true,
+    //   @if (app()->getLocale() == 'ar')
+    //   language: {
+    //     search: 'ابحث:',
+    //     lengthMenu: 'أظهر _MENU_ مدخلات',
+    //     info: 'إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل',
+    //     paginate: { previous: 'السابق', next: 'التالي' },
+    //     emptyTable: 'لا توجد بيانات'
+    //   }
+    //   @endif
+    // });
 
     // Initialize chart
     initializeChart();

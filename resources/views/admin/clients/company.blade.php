@@ -19,6 +19,7 @@
       ['pitch-deck', 'ti-presentation', $l == 'en' ? 'Pitch Deck' : 'الوثائق'],
       ['company-milestones', 'ti-flag', $l == 'en' ? 'Milestones' : 'الإنجازات'],
       ['business_model', 'ti-presentation', $l == 'en' ? 'Business Model' : ' نموذج الاعمال '],
+      ['customer_growth', 'ti-trending-up', $l == 'en' ? 'Customer Growth' : 'نمو العملاء'],
   ])
       ->map(function ($tab) {
           return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
@@ -132,6 +133,9 @@
                   @break
                   @case('business_model')
                     @include('partials.forms.company.business_model', ['heading' => $tab['label']])
+                  @break
+                  @case('customer_growth')
+                    @include('partials.forms.company.company-customers', ['heading' => $tab['label']])
                   @break
                 @endswitch
               </div>
