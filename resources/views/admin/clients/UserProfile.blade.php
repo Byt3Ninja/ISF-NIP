@@ -139,7 +139,7 @@ if ($canRequestMentorship) {
                       <button
                         type="button" 
                         class="btn btn-primary" 
-                        onclick="if (typeof fetchSlots === 'function') { fetchSlots({{ $client->id }}, {{ $cycle?->id }}, {{ $cycle?->organization_id }}); }"
+                        onclick="if (typeof fetchSlots === 'function') { fetchSlots({{ $client->id }}, {{ $cycle?->id ?? 0 }}, {{ $cycle?->organization_id ?? 0 }}); }"
                       >
                       <i class="ti ti-calendar-plus me-2"></i>
                         {{ __('cycles.Request_Mentorship') }}
