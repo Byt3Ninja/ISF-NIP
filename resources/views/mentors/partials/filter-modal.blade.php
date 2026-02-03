@@ -54,7 +54,7 @@
               @endphp
               <option value="">{{ __('admin.All_Organizations') }}</option>
               @foreach ($organization as $org)
-                <option value="{{ $org->id }}" {{ $org->id == request('organization') ? 'selected' : '' }}>
+                <option value="{{ $org->id }}" {{ $org->id == request('scopeFilter') ? 'selected' : '' }}>
                   {{ $org->name }}
                 </option>
               @endforeach
@@ -73,7 +73,7 @@
           </div>
           
           <!-- Organization Filter -->
-          <div id="org-filter-container" class="form-group mb-4" style="display: {{ request('scopeFilter') == 'organization' ? 'block' : 'none' }}">
+           <div id="org-filter-container" class="form-group mb-4" style="display: {{ request('scopeFilter') == 'organization' ? 'block' : 'none' }}">
             <label for="organization-select" class="form-label">{{ __('admin.Organization') }}</label>
             <select name="organization" id="organization-select" class="form-select select2" data-placeholder="{{ __('admin.Select_organization') }}">
               @php
