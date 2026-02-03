@@ -566,21 +566,22 @@ class ClientProfileController extends Controller
                     if ($scopeFilter === 'public') {
 
                         $mentors->where(function ($q) {
-                            $q->whereDoesntHave('inviteMentors') // مش موجود في invite
-                            ->orWhereHas('inviteMentors', function ($q2) {
-                                $q2->where('scope', 'Public'); // موجود و public
-                                $q2->where('status', 'accepted');
-                                $q2->where('organization_ids', '[]');
+                            $q->whereDoesntHave('inviteMentors')
+                            ->orWhere(function ($q2) {
+                                $q2->whereHas('inviteMentors', function ($q3) {
+                                    $q3->where('scope', 'Public')
+                                        ->where('status', 'accepted');
+                                });
                             });
                         });
-
+                    
                     } else {
                          $mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter, $request) {
                              $query
                              //->where('scope', $scopeFilter)
                                  ->where('status', 'accepted');
-                             if ($request->organization != null) {
-                                 $query->whereJsonContains('organization_ids', (string) $request->organization);
+                             if ($request->scopeFilter != null) {
+                                 $query->whereJsonContains('organization_ids', (string) $request->scopeFilter);
                              }
                          });
                         //$mentors = User::whereHas('mentorCycles', function ($q) use ($request) {
@@ -593,10 +594,11 @@ class ClientProfileController extends Controller
 
                 $mentors = $mentors->with('mentorExpertises');
                 $mentors = $mentors->get();
+
+              
               
                 $user = Auth::user();
                 $orgIds = $user->organizations_ids;
-
                 if (!$user->hasRole('Admin') && !empty($orgIds)) {
                     $cycles = Cycle::whereIn('organization_id', $orgIds)->get();
                     $mentors = User::whereHas('mentorCycles', function ($q) use ($orgIds) {
@@ -606,11 +608,22 @@ class ClientProfileController extends Controller
                             }
                         });
                     })->get();
+                    if (!empty($scopeFilter) && $scopeFilter !== 'all') {
+                    if ($scopeFilter === 'public') {
+                    $cycles = Cycle::whereIn('organization_id', $orgIds)->get();
+                    $mentors = User::whereHas('mentorCycles', function ($q) use ($orgIds) {
+                        $q->whereIn('organization_id', $orgIds);
+                    })
+                    ->whereDoesntHave('inviteMentors', function ($q) {
+                        $q->whereIn('scope', ['organization', 'Organization']);
+                    })
+                    ->get();
+                    }
+                    }
                 } else {
                     $cycles = Cycle::all();
                 }
                 
-               
 			    $offline_allowed = $settings->allow_offline_sessions == 1 ? true : false;
 
                 // $mentors = User::role('mentor')->get();
@@ -693,9 +706,16 @@ class ClientProfileController extends Controller
                             });
                         });
                     } else {
-                        $mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter) {
-                            $query->where('scope', $scopeFilter);
-                        });
+                        $mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter, $request) {
+                             $query
+                             //->where('scope', $scopeFilter)
+                                 ->where('status', 'accepted');
+                                 $query->whereJsonContains('organization_ids', (string) $scopeFilter);
+                         });
+
+                        //$mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter) {
+                        //    $query->where('scope', $scopeFilter);
+                       // });
                     }
                 }
                 $mentors = $mentors->with('mentorExpertises');
