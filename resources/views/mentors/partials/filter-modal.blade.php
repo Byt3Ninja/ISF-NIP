@@ -29,8 +29,8 @@
 
           @php 
             $scopeOptions = [
-              ['key' => 'public', 'label' => __('admin.Not_Associated'), 'hint' => __('admin.public_scope_hint')],
-              ['key' => 'organization', 'label' => __('admin.list_of_organizations'), 'hint' => __('admin.organization_scope_hint')],
+              ['key' => 'public', 'label' => __('admin.Not_Associated') ." ( ".__('admin.Public')." )", 'hint' => __('admin.public_scope_hint')],
+              //['key' => 'organization', 'label' => __('admin.list_of_organizations'), 'hint' => __('admin.organization_scope_hint')],
             ];
           @endphp
 
@@ -48,6 +48,16 @@
                   {{ $option['label'] }}
                 </option>
               @endforeach
+              @php
+              $organization_q = App\Organization::query();
+              $organization = auth()->user()->hasRole('admin') ? $organization_q->get() : $organization_q->where('id', auth()->user()->organization_id)->get(); //App\Organization::all();
+              @endphp
+              <option value="">{{ __('admin.All_Organizations') }}</option>
+              @foreach ($organization as $org)
+                <option value="{{ $org->id }}" {{ $org->id == request('organization') ? 'selected' : '' }}>
+                  {{ $org->name }}
+                </option>
+              @endforeach
             </select>
 
             @foreach ($scopeOptions as $option)
@@ -59,6 +69,7 @@
                 {{ $option['hint'] }}
               </div>
             @endforeach
+            
           </div>
           
           <!-- Organization Filter -->
