@@ -626,4 +626,6 @@ return [
     'MaxConcurrentSessionsReached' => 'The maximum number of online training sessions allowed at this time has been reached. Please select a different time slot.',
     'Total Sub-criteria Weight' => 'Total Sub-criteria Weight',
     'Join_Cycle_First' => 'Please join the program first',
+    'Export Company Evaluation' => 'Export Company Evaluation',
+    'Export All Evaluations' => 'Export All Evaluations',
 ];

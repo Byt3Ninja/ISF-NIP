@@ -205,9 +205,14 @@
 										</div>
 										<div class="d-flex gap-2">
 											<div class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill">
-												<i class="ti ti-check-circle me-1"></i>
+												<i class="far fa-sm fa-fw fa-check-circle me-1"></i>
 												<span id="results-count">{{ $_companies->count() }}</span> {{ __('cycles.Results') }}
 											</div>
+											@if( $_companies->count() > 0 && $_user->ableTo('screening.export_results') )
+												<button class="btn btn-sm btn-outline-success export-screening-button">
+													<i class="fas fa-fw fa-file-excel"></i>
+												</button>
+											@endif
 										</div>
 									</div>
 
@@ -415,6 +420,10 @@
 												$scoped_judges = $judges->filter(function($judge) use ($company) {
 													return in_array($company->id, $judge->companies_ids);
 												})->values();
+
+												// here is the perfectly calculated data
+												$averageScore = round($company->results['total'] * 100, 1);
+												$scoped_judges = $company->results['judges'];
 											@endphp
 											
 											<div class="col-xl-4 col-lg-6 col-md-12 company-card" 
@@ -521,8 +530,10 @@
 															</h6>
 															<div class="judges-list">
 																@foreach ($scoped_judges->take(3) as $judge)
-																	@php($scoped_company = collect($judge->companies)->where('id', $company->id)->first())
-																	@if( in_array($company->id, $judge->startups->toArray()) )
+																	{{--  @php($scoped_company = collect($judge->companies)->where('id', $company->id)->first())  --}}
+																	@php( $scoped_company = $judge->evaluation )
+																	@php( $scoped_company->score = round($scoped_company->value * 100, 1) )
+																	{{--  @if( in_array($company->id, $judge->startups->toArray()) )  --}}
 																		<div class="judge-evaluation-item bg-transparent rounded-3 border px-2 py-1 mb-2">
 																			<div class="d-flex align-items-center justify-content-between">
 																				<div class="d-flex align-items-center">
@@ -547,7 +558,7 @@
 																				</div>
 																			</div>
 																		</div>
-																	@endif
+																	{{--  @endif  --}}
 																@endforeach
 																@if( $scoped_judges->count() > 3 )
 																	<div class="text-center">
@@ -561,14 +572,26 @@
 													<!-- Company Footer -->
 													<div class="card-footer bg-transparent border-0 pt-0">
 														<div class="d-grid gap-2">
-															<button
-																class="show-company-evaluation btn btn-primary btn-sm rounded-pill shadow-sm"
-																data-company="{{ $company->id }}"
-																data-step="{{ $cstep->id }}"
-															>
-																<i class="ti ti-eye me-2"></i>
-																{{ __('cycles.View Complete Evaluation') }}
-															</button>
+															<div class="d-flex gap-2">
+																<button
+																	class="show-company-evaluation btn btn-primary btn-sm rounded-pill shadow-sm flex-grow-1"
+																	data-company="{{ $company->id }}"
+																	data-step="{{ $cstep->id }}"
+																>
+																	<i class="ti ti-eye me-2"></i>
+																	{{ __('cycles.View Complete Evaluation') }}
+																</button>
+																@if( $_user->ableTo('screening.export_company_results') )
+																<button
+																	class="export-company-button btn btn-outline-success btn-sm rounded-pill shadow-sm"
+																	data-company="{{ $company->id }}"
+																	data-step="{{ $cstep->id }}"
+																	title="{{ __('cycles.Export Company Evaluation') }}"
+																>
+																	<i class="fas fa-fw fa-file-excel"></i>
+																</button>
+																@endif
+															</div>
 														</div>
 													</div>
 												</div>
@@ -1185,5 +1208,36 @@
 
 			$('#evaluationModalBody').html(modalContent);
 		}
+
+		// Export ALL companies (main button)
+		$(document).on('click', '.export-screening-button', function(e) {
+			e.preventDefault();
+			const stepId = {{ $id ?? 0 }};
+			const $btn = $(this);
+			const originalHtml = $btn.html();
+
+			$btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
+			window.location.href = '/dashboard/final/results/' + stepId + '/export';
+
+			setTimeout(() => {
+				$btn.prop('disabled', false).html(originalHtml);
+			}, 3000);
+		});
+
+		// Export SINGLE company (per-card button)
+		$(document).on('click', '.export-company-button', function(e) {
+			e.preventDefault();
+			const stepId = $(this).data('step');
+			const companyId = $(this).data('company');
+			const $btn = $(this);
+			const originalHtml = $btn.html();
+
+			$btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
+			window.location.href = '/dashboard/final/results/' + stepId + '/export/' + companyId;
+
+			setTimeout(() => {
+				$btn.prop('disabled', false).html(originalHtml);
+			}, 3000);
+		});
 	</script>
 @stop
