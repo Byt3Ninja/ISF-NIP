@@ -637,6 +637,10 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('screening/evaluation/publish', 'ScreeningController@publish_evaluation')->name('screening.evaluation_publish');
     Route::post('screening/evaluation/results', 'ScreeningController@get_results')->name('screening.evaluation_results');
 
+    // Screening Export Routes
+    Route::get('screening/results/{id}/export', 'ScreeningController@exportResults')->name('screening.export_results');
+    Route::get('screening/results/{id}/export/{company_id}', 'ScreeningController@exportCompanyResults')->name('screening.export_company_results');
+
     //ZOOM
     Route::get('zoom/all', 'MeetingController@showall');
     Route::get('zoom/{id}/get', 'MeetingController@show');
@@ -776,6 +780,11 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('final/{step_id}/{company_id}', 'FinalscreeningController@view')->name('screening.form_view');
     Route::get('final/get/{sid}/{pid}', 'FinalscreeningController@getusers')->name('screening.users_view_details');
     Route::post('final/delsession/{id}', 'FinalscreeningController@delsession')->name('screening.sessions_delete');
+
+    // Final Screening Export Routes
+    Route::get('final/results/{id}/export', 'FinalscreeningController@exportResults')->name('final.export_results');
+    Route::get('final/results/{id}/export/{company_id}', 'FinalscreeningController@exportCompanyResults')->name('final.export_company_results');
+
     Route::get('/send-whatsapp', 'CyclesController@testSend')->name('whatsapp.send');
 
     //Program List

@@ -619,4 +619,6 @@ return [
     'MaxConcurrentSessionsReached' => 'تم الوصول إلى الحد الأقصى للجلسات التدريبية عبر الإنترنت في هذا الوقت. يرجى اختيار وقت آخر',
     'Total Sub-criteria Weight' => 'مجموع وزن المعايير الفرعية',
     'Join_Cycle_First' => 'الرجاء الانضمام للبرنامج اولا',
+    'Export Company Evaluation' => 'تصدير تقييم الشركة',
+    'Export All Evaluations' => 'تصدير جميع التقييمات',
 ];
