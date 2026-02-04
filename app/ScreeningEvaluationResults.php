@@ -443,4 +443,197 @@ class ScreeningEvaluationResults extends Model
 		}
 		return $output;
 	}
+
+	public static function results( $step_id, $company_ids = null )
+	{
+		$company_ids = is_array( $company_ids ) ? $company_ids : ( $company_ids ? [ $company_ids ] : null );
+		$l = app()->getLocale();
+
+		$metadata = self::metadata( $step_id );
+		$evaluationForm = $metadata['evaluation'];
+		$allResults = $metadata['results'];
+		$allJudges = $metadata['judges'];
+
+		$targetCompanyIds = $company_ids ?? $metadata['companies']->pluck('id')->toArray();
+
+		$output = [];
+
+		foreach( $targetCompanyIds as $company_id )
+		{
+			$results = $allResults->where('company_id', $company_id)->values();
+			$judges = $allJudges->map(function( $item ) use ( $company_id ) {
+				$cloned = clone $item;
+				$cloned->companies = $item->companies->where('id', $company_id)->values();
+				return $cloned;
+			});
+
+			$criteria = $evaluationForm ? $evaluationForm->categories : collect();
+			$criteria = $criteria->map(function( $item ) use ( $results ) {
+				$clonedItem = clone $item;
+				$subs = $clonedItem->subCriteria->map(function( $sub ) use ( $results ) {
+					$clonedSub = clone $sub;
+					$weight = $clonedSub->weight;
+					$scoped_results = $results->where('criteria_id', $clonedSub->id)->values()->map(function( $oneResult ) use ( $weight ) {
+						$output = new stdClass;
+						$output->id = $oneResult->id;
+						$output->judger_id = $oneResult->user_id;
+						$output->judger = new stdClass;
+						$output->judger->id = $oneResult->user_id;
+						$output->judger->name = $oneResult->user->name;
+						$output->given_score = intval( $oneResult->score );
+						$output->max = 10;
+						$score = ( $oneResult->score / $output->max );
+						$output->score = $score * 100;
+						$output->comment = $oneResult->comment;
+						$output->status = $oneResult->status == true ? 'Published' : 'Draft';
+						$output->weight = $weight;
+						$output->weighted_score = ( $score * $weight ) * 100;
+						return $output;
+					});
+					$clonedSub->results = $scoped_results;
+					$clonedSub->total = $clonedSub->results->sum('given_score');
+					$clonedSub->max = $clonedSub->results->sum('max');
+					$clonedSub->count = $clonedSub->results->count();
+					$clonedSub->average = $clonedSub->max > 0 ? ( $clonedSub->total / $clonedSub->max ) : 0;
+					$clonedSub->weighted_total = ( round( $clonedSub->average * 100 ) / 100 ) * $clonedSub->weight;
+					return $clonedSub;
+				});
+				$clonedItem->total = $subs->sum('total');
+				$clonedItem->max = $subs->sum('max');
+				$clonedItem->weighted_total = round( $subs->sum('weighted_total') * 100 ) / 100;
+				$clonedItem->value = ( round( $clonedItem->weighted_total * 100 ) / 100 ) * $clonedItem->weight;
+				$clonedItem->subCriteria = $subs;
+				return $clonedItem;
+			});
+
+			$_criteria = $criteria->map(function( $item ) {
+				$output = new stdClass;
+				$output->id = $item->id;
+				$output->name = $item->name;
+				$output->weight = $item->weight;
+				$output->details = $item->subCriteria->map(function( $sub ) {
+					$output = new stdClass;
+					$output->id = $sub->id;
+					$output->name = $sub->name;
+					$output->weight = $sub->weight;
+					$output->total = $sub->total;
+					$output->max = $sub->max;
+					$output->count = $sub->count;
+					$output->average = $sub->average;
+					$output->value = round( $sub->weighted_total * 100 ) / 100;
+					$output->details = $sub->results->map(function( $result ) {
+						$output = new stdClass;
+						$output->judger = $result->judger;
+						$output->given_score = $result->given_score;
+						$output->max = $result->max;
+						$output->score = $result->score / 100;
+						$output->comment = $result->comment;
+						$output->status = $result->status;
+						$output->weight = $result->weight;
+						$output->value = $result->weighted_score / 100;
+						return $output;
+					});
+					return $output;
+				});
+				$output->score = ( round( $output->details->sum('value') * 100 ) / 100 );
+				$output->value = round( $output->score * $output->weight * 100 ) / 100;
+				return $output;
+			});
+
+			$customFields = collect(\DB::select("SELECT
+					cfv.id AS id,
+					cf.name AS field,
+					cfv.value AS value,
+					cfv.is_approved AS is_approved,
+					cfv.user_id AS judger_id,
+					u.first_name_en AS judger_first_name_en,
+					u.last_name_en AS judger_last_name_en,
+					u.first_name_ar AS judger_first_name_ar,
+					u.last_name_ar AS judger_last_name_ar
+				FROM
+					screening_evaluation_fields_values cfv
+				LEFT JOIN
+					screening_evaluation_custom_fields cf ON cf.id = cfv.custom_field_id
+				LEFT JOIN
+					users u ON u.id = cfv.user_id
+				WHERE
+					cfv.company_id = ?
+					AND cf.evaluation_id = ?
+			", [
+				$company_id,
+				$evaluationForm?->id
+			]))->map(function( $item ) use ( $l ) {
+				$output = new stdClass;
+				$output->id = $item->id;
+				$output->field = $item->field;
+				$output->value = $item->value;
+				$output->judger_id = $item->judger_id;
+				$output->approval = intval( $item->is_approved ) === 1 ? 'approved' : ( $item->is_approved === null || intval( $item->is_approved ) === 2 ? 'pending' : 'disapproved' );
+				$output->name = trim( str_replace(['   ', '  '], ' ', $item->{'judger_first_name_' . $l} . ' ' . $item->{'judger_last_name_' . $l}) );
+				return $output;
+			});
+
+			$processedJudges = $judges->map(function( $item ) use ( $customFields, $criteria ) {
+				$judger_id = $item->id;
+				$output = new stdClass;
+				$output->id = $item->id;
+				$output->name = $item->name;
+				$output->phone = $item->phone;
+				$output->email = $item->email;
+				$output->image_url = $item->image_url;
+				$companies = $item->companies->map(function( $company ) use ( $customFields, $judger_id, $criteria ) {
+					$comment = $customFields->where('judger_id', $judger_id)->where('field', 'final_comment')->first();
+					$company->comment = !empty( $comment ) ? $comment->value : '';
+					$company->approval = !empty( $comment ) ? $comment->approval : 'pending';
+					$details = $criteria->map(function( $item ) use ( $judger_id ) {
+						$details = $item->subCriteria->filter(function( $sub ) use ( $judger_id ) {
+							$results = $sub->results->where('judger_id', $judger_id)->values()->first();
+							return !empty( $results );
+						})->values()->map(function( $sub ) use ( $judger_id ) {
+							$results = $sub->results->where('judger_id', $judger_id)->values()->first();
+							$output = new stdClass;
+							$output->id = $sub->id;
+							$output->name = $sub->name;
+							$output->weight = $sub->weight;
+							$output->score = $results->given_score;
+							$output->max = $results->max;
+							$output->comment = $results->comment;
+							$output->status = $results->status;
+							$output->value = ( $results->given_score / $results->max ) * $sub->weight;
+							return $output;
+						});
+
+						$output = new stdClass;
+						$output->id = $item->id;
+						$output->name = $item->name;
+						$output->weight = $item->weight;
+						$output->score = round( $details->sum('value') * 100 ) / 100;
+						$output->value = ( round( ( $output->score * $output->weight ) * 100 ) / 100 );
+						$output->details = $details;
+						return $output;
+					});
+					$output = new stdClass;
+					$output->id = $company->id;
+					$output->status = $company->status;
+					$output->value = ( round( $details->sum('value') * 100 ) / 100 );
+					$output->comment = $company->comment;
+					$output->approval = $company->approval;
+					$output->details = $details;
+					return $output;
+				})->first();
+				$output->evaluation = $companies;
+				return $output;
+			})->filter(function( $item ) {
+				return !empty( $item->evaluation );
+			})->values();
+
+			$output[$company_id] = [
+				'total' => ( ( round( $_criteria->sum('value') * 100 ) ) / 100),
+				'criteria' => $_criteria,
+				'judges' => $processedJudges
+			];
+		}
+
+		return $output;
+	}
 }

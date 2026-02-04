@@ -21,6 +21,8 @@ use App\Factories\OnlineMeetingFactory;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use App\Notifications\WelcomeJudgerNotification;
+use App\Exports\ScreeningEvaluationExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class FinalscreeningController extends Controller
 {
@@ -560,6 +562,16 @@ class FinalscreeningController extends Controller
             $item->companies_ids = collect($item->companies)->pluck('id')->toArray();
             return $item;
         });
+        $evaluations_data = ScreeningEvaluationResults::results( $id, $_companies->pluck('id')->toArray() );
+        $_companies = $_companies->map(function( $company ) use ( $evaluations_data ) {
+           $_results =  $evaluations_data[$company->id] ?? [
+               'total' => 0,
+               'criteria' => collect(),
+               'judges' => collect()
+            ];
+            $company->results = $_results;
+            return $company;
+        });
         return view('admin.settings.final.results', compact('cstep', 'judges', 'steps', '_steps', 'id', '_companies', 'companies', 'evaluation', 'results', 'c', 'cj', ));
     }
 
@@ -578,5 +590,74 @@ class FinalscreeningController extends Controller
         } else {
             return response()->json(['state' => 'failed'], 500);
         }
+    }
+
+    /**
+     * Export all companies evaluation results to Excel
+     */
+    public function exportResults($id)
+    {
+        $metadata = ScreeningEvaluationResults::metadata($id);
+        $_companies = $metadata['_companies']->where('step', $id)->values();
+        $evaluation = $metadata['evaluation'];
+
+        if ($_companies->isEmpty()) {
+            return back()->with('message2', 'No companies found to export');
+        }
+
+        $evaluations_data = ScreeningEvaluationResults::results($id, $_companies->pluck('id')->toArray());
+
+        // Get criteria structure from first company's data
+        $firstCompanyData = $evaluations_data[$_companies->first()->id] ?? null;
+        $criteria = $firstCompanyData ? $firstCompanyData['criteria'] : collect();
+
+        if (empty($criteria) || (is_countable($criteria) && count($criteria) === 0)) {
+            return back()->with('message2', 'No evaluation criteria found');
+        }
+
+        $export = new ScreeningEvaluationExport(
+            $evaluations_data,
+            $_companies,
+            $criteria,
+            'final',
+            true // includeCompanyColumn
+        );
+
+        $stepName = preg_replace('/[^a-zA-Z0-9_-]/', '_', $evaluation->step->title ?? 'final_screening');
+        $filename = "final_screening_results_{$stepName}_" . now()->format('Y-m-d_His') . ".xlsx";
+
+        return Excel::download($export, $filename);
+    }
+
+    /**
+     * Export single company evaluation results to Excel
+     */
+    public function exportCompanyResults($id, $company_id)
+    {
+        $company = Company::find($company_id);
+
+        if (!$company) {
+            return back()->with('message2', 'Company not found');
+        }
+
+        $evaluations_data = ScreeningEvaluationResults::results($id, [$company_id]);
+        $companyData = $evaluations_data[$company_id] ?? null;
+
+        if (!$companyData) {
+            return back()->with('message2', 'No evaluation data found for this company');
+        }
+
+        $export = new ScreeningEvaluationExport(
+            [$company_id => $companyData],
+            collect([$company]),
+            $companyData['criteria'],
+            'final',
+            false // no company column for single export
+        );
+
+        $companyName = preg_replace('/[^a-zA-Z0-9_-]/', '_', $company->name);
+        $filename = "final_screening_{$companyName}_" . now()->format('Y-m-d_His') . ".xlsx";
+
+        return Excel::download($export, $filename);
     }
 }
