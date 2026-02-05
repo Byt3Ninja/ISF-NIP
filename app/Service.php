@@ -14,6 +14,11 @@ class Service extends Model
 		return $this->{"name_".app()->getLocale()} ;
 	}
 
+	public function getDescriptionAttribute()
+	{
+		return $this->{"description_".app()->getLocale()} ;
+	}
+
 	public function provider()
 	{
 		return $this->belongsTo(serviceProviders::class, 'service_provider_id');

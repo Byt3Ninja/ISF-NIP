@@ -180,7 +180,7 @@
                     <div></div>
                   @endif
 
-                  <p class="mt-1">{{ Str::limit($service->description ?? 'No description available', 100) }}</p>
+                  <p class="mt-1">{!! Str::limit($service->description ?? 'No description available', 100) !!}</p>
                   <div class="d-flex align-items-center gap-2 mb-4">
                     <!-- Organizations Badges -->
                     @if($service->organizations && $service->organizations->count())
