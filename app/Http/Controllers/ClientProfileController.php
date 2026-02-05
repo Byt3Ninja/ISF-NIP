@@ -601,23 +601,41 @@ class ClientProfileController extends Controller
                 $orgIds = $user->organizations_ids;
                 if (!$user->hasRole('Admin') && !empty($orgIds)) {
                     $cycles = Cycle::whereIn('organization_id', $orgIds)->get();
-                    $mentors = User::whereHas('mentorCycles', function ($q) use ($orgIds) {
+                    // $mentors = User::whereHas('mentorCycles', function ($q) use ($orgIds) {
+                    //     $q->where(function ($qq) use ($orgIds) {
+                    //         foreach ($orgIds as $orgId) {
+                    //             $qq->orWhere('organization_id', $orgId);
+                    //         }
+                    //     });
+                    // })->get();
+                    if (!empty($scopeFilter) && $scopeFilter !== 'all') {
+                    if ($scopeFilter === 'public') {
+                    // $cycles = Cycle::whereIn('organization_id', $orgIds)->get();
+                    // $mentors = User::whereHas('mentorCycles', function ($q) use ($orgIds) {
+                    //     $q->whereIn('organization_id', $orgIds);
+                    // })
+                    // ->whereDoesntHave('inviteMentors', function ($q) {
+                    //     $q->whereIn('scope', ['organization', 'Organization']);
+                    // })
+                    // ->get();
+                    
+                    $mentors->where(function ($q) {
+                            $q->whereDoesntHave('inviteMentors')
+                            ->orWhere(function ($q2) {
+                                $q2->whereHas('inviteMentors', function ($q3) {
+                                    $q3->where('scope', 'Public')
+                                        ->where('status', 'accepted');
+                                });
+                            });
+                        });
+                    }else{
+                         $mentors = User::whereHas('mentorCycles', function ($q) use ($orgIds) {
                         $q->where(function ($qq) use ($orgIds) {
                             foreach ($orgIds as $orgId) {
                                 $qq->orWhere('organization_id', $orgId);
                             }
                         });
                     })->get();
-                    if (!empty($scopeFilter) && $scopeFilter !== 'all') {
-                    if ($scopeFilter === 'public') {
-                    $cycles = Cycle::whereIn('organization_id', $orgIds)->get();
-                    $mentors = User::whereHas('mentorCycles', function ($q) use ($orgIds) {
-                        $q->whereIn('organization_id', $orgIds);
-                    })
-                    ->whereDoesntHave('inviteMentors', function ($q) {
-                        $q->whereIn('scope', ['organization', 'Organization']);
-                    })
-                    ->get();
                     }
                     }
                 } else {
