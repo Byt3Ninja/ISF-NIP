@@ -1566,7 +1566,9 @@ class HomeController extends Controller
                 $surveyEligible[] = [
                     'triggered_on' => 'mentorship',
                     'triggered_at' => $mentorship->id,
-                    'triggered_by' => 'session'
+                    'triggered_by' => 'session',
+                    'session_date' => $mentorship->zoom_date,
+                    'end_at' => $mentorship->end_at
                 ];
             }
             if( $user->hasAnyRole(['registered']) ){
@@ -1576,7 +1578,9 @@ class HomeController extends Controller
                 $surveyEligible[] = [
                     'triggered_on' => 'training',
                     'triggered_at' => $session->id,
-                    'triggered_by' => 'session'
+                    'triggered_by' => 'session',
+                    'session_date' => $session->datetime,
+                    'end_at' => $session->end_at
                 ];
             }
 
@@ -1633,7 +1637,19 @@ class HomeController extends Controller
                     } else {
                         $mentorshipFiltered = $mentorshipFiltered->whereIn('triggered_by', $triggers);
                     }
-                    $mentorshipFiltered = $mentorshipFiltered->values();
+                    // Filter sessions: must be after survey creation AND session must have ended
+                    $surveyCreatedAt = $survey_scope->created_at;
+                    $mentorshipFiltered = $mentorshipFiltered->filter(function ($item) use ($surveyCreatedAt) {
+                        // Session must be after survey scope creation
+                        if (!empty($item['session_date']) && Carbon::parse($item['session_date']) <= Carbon::parse($surveyCreatedAt)) {
+                            return false;
+                        }
+                        // Session must have ended
+                        if (!empty($item['end_at']) && now() <= Carbon::parse($item['end_at'])) {
+                            return false;
+                        }
+                        return true;
+                    })->values();
                     foreach ($mentorshipFiltered as $conditions) {
                         $checkResponse = $my_responses->where('triggered_on', $conditions['triggered_on'])->where('triggered_at', $conditions['triggered_at'])->where('triggered_by', $conditions['triggered_by'])->first();
                         if (empty($checkResponse)) {
@@ -1670,7 +1686,19 @@ class HomeController extends Controller
                     } else {
                         $trainingFiltered = $trainingFiltered->whereIn('triggered_by', $triggers);
                     }
-                    $trainingFiltered = $trainingFiltered->values();
+                    // Filter sessions: must be after survey creation AND session must have ended
+                    $surveyCreatedAt = $survey_scope->created_at;
+                    $trainingFiltered = $trainingFiltered->filter(function ($item) use ($surveyCreatedAt) {
+                        // Session must be after survey scope creation
+                        if (!empty($item['session_date']) && Carbon::parse($item['session_date']) <= Carbon::parse($surveyCreatedAt)) {
+                            return false;
+                        }
+                        // Session must have ended
+                        if (!empty($item['end_at']) && now() <= Carbon::parse($item['end_at'])) {
+                            return false;
+                        }
+                        return true;
+                    })->values();
                     foreach ($trainingFiltered as $conditions) {
                         $checkResponse = $my_responses->where('triggered_on', $conditions['triggered_on'])->where('triggered_at', $conditions['triggered_at'])->where('triggered_by', $conditions['triggered_by'])->first();
                         if (empty($checkResponse)) {
