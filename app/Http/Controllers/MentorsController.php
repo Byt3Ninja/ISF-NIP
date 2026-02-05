@@ -99,10 +99,60 @@ class MentorsController extends Controller
 			->select('users.*')
 			->with('inviteMentors')
 			->get();
+		// $mentors = User::role('mentor')->with('inviteMentors')->get();
+		
 		$cList = CyclesMentors::where('cycle_id', $id)->pluck('user_id')->toArray();
-		$cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
-			return $q->whereIn('organization_id', $orgIds);
-		})->get();
+
+
+		// $cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+		// 	return $q->whereIn('organization_id', $orgIds);
+		// })->get();
+
+		$scopeFilter = $request->scopeFilter;
+		
+		if (!$user->hasRole('Admin') && !empty($orgIds)) {
+			
+                    $cycles = Cycle::whereIn('organization_id', $orgIds)->get();
+                    // $mentors = User::whereHas('mentorCycles', function ($q) use ($orgIds) {
+                    //     $q->where(function ($qq) use ($orgIds) {
+                    //         foreach ($orgIds as $orgId) {
+                    //             $qq->orWhere('organization_id', $orgId);
+                    //         }
+                    //     });
+                    // })->get();
+                    if (!empty($scopeFilter) && $scopeFilter !== 'all') {
+                    if ($scopeFilter === 'public') {
+						
+                    // $cycles = Cycle::whereIn('organization_id', $orgIds)->get();
+                    // $mentors = User::whereHas('mentorCycles', function ($q) use ($orgIds) {
+                    //     $q->whereIn('organization_id', $orgIds);
+                    // })
+                    // ->whereDoesntHave('inviteMentors', function ($q) {
+                    //     $q->whereIn('scope', ['organization', 'Organization']);
+                    // })
+                    // ->get();
+					$mentorsWithoutInvites = $mentors->filter(function ($mentor) {
+						return $mentor->inviteMentors->isEmpty();
+					});
+                    $mentorsWithPublicInvites = $mentors->filter(function ($mentor) {
+						return $mentor->inviteMentors->contains(function($invite){
+							return $invite->scope === 'public';
+						});
+					});
+						$mentors =$mentorsWithoutInvites->merge($mentorsWithPublicInvites);
+                    }else{
+						
+						$mentors = User::whereHas('inviteMentors', function ($q) use ($request) {
+							$q->where('scope', 'Organization')
+							->where('status', 'accepted')
+							->whereJsonContains('organization_ids', (string) $request->scopeFilter);
+						})->get();							
+							
+                    }
+                    }
+                } else {
+                    $cycles = Cycle::all();
+                }
 
 		$selectedSpecialization = $request->specialization; // الحصول على قيمة التصفية من query string
 
@@ -123,19 +173,19 @@ class MentorsController extends Controller
 			});
 		}
 
-		$mentors = $mentors->map(function ($mentor) {
-			$scopes = $mentor->inviteMentors->pluck('scope')->unique()->values();
+		// $mentors = $mentors->map(function ($mentor) {
+		// 	$scopes = $mentor->inviteMentors->pluck('scope')->unique()->values();
 
-			if ($scopes->isEmpty()) {
-				$mentor->scope = null;
-			} elseif ($scopes->count() > 1) {
-				$mentor->scope = 'all';
-			} else {
-				$mentor->scope = $scopes->first(); // public أو organization
-			}
+		// 	if ($scopes->isEmpty()) {
+		// 		$mentor->scope = null;
+		// 	} elseif ($scopes->count() > 1) {
+		// 		$mentor->scope = 'all';
+		// 	} else {
+		// 		$mentor->scope = $scopes->first(); // public أو organization
+		// 	}
 
-			return $mentor;
-		});
+		// 	return $mentor;
+		// });
 
 		// تصفية حسب حالة الـ checked
 		if ($request->assigning != 0) {
@@ -143,12 +193,9 @@ class MentorsController extends Controller
 
 			$mentors = $mentors->filter(function ($mentor) use ($checkedStatus, $cList) {
 				$isChecked = in_array($mentor->id, $cList);
-
-				// إذا كان المستخدم اختار "checked"، نعيد فقط المدربين الموجودين في الدورة
 				if ($checkedStatus == 'checked') {
 					return $isChecked;
 				}
-				// إذا كان المستخدم اختار "unchecked"، نعيد فقط المدربين غير المسجلين
 				elseif ($checkedStatus == 'Notchecked') {
 					return !$isChecked;
 				}
