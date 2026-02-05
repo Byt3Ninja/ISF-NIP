@@ -62,6 +62,33 @@ class StartupCustomerGrowth extends Model
 			$previous = $record->total;
 		}
 
-		return $records;
+		$avgMonthlyGrowth = 0;
+        $growthSinceFirstRecord = 0;
+        $compoundAnnualGrowthRate = 0;
+        $years_count = $records->groupBy('year')->count();
+        if( $records->count() > 0 )
+        {
+            $count = $records->count();
+            $intervals = $count - 1;
+            $last = $records->last();
+            $first = $records->first();
+            $total = $first->total;
+
+            $growthSinceFirstRecord = $total > 0 ? ( (($last->total - $total) / $total) * 100 ) : 0;
+            $growthSinceFirstRecord = round($growthSinceFirstRecord) . '%';
+
+            $avgMonthlyGrowth = ( $total > 0 && $intervals > 0 ) ? ( pow(($last->total / $total), (1 / $intervals)) - 1 ) : 0;
+            $avgMonthlyGrowth = round($avgMonthlyGrowth * 100, 1) . '%';
+
+            $compoundAnnualGrowthRate = ( $total > 0 && $years_count > 0 ) ? ( pow(($last->total / $total), (1 / $years_count)) - 1 ) : 0;
+            $compoundAnnualGrowthRate = round($compoundAnnualGrowthRate * 100, 1) . '%';
+        }
+
+		return [
+			'records' => $records,
+			'avgMonthlyGrowth' => $avgMonthlyGrowth,
+			'growthSinceFirstRecord' => $growthSinceFirstRecord,
+			'compoundAnnualGrowthRate' => $compoundAnnualGrowthRate,
+		];
 	} 
 }
