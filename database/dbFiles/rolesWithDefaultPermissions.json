@@ -2397,7 +2397,9 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]
