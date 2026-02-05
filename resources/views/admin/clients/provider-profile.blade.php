@@ -126,7 +126,14 @@ $reviews = [
               </div>
 
               <!-- Schedule Meeting Button -->
-              <div class="col-md-4 mt-6 mt-md-0 d-flex justify-content-md-end">
+              <div class="col-md-4 mt-6 mt-md-0 d-flex align-items-center justify-content-md-end">
+                <!-- Edit Button -->
+                @if($_user->ableTo('user.profile_view', $permissions))
+                  <a href="/dashboard/myProfile" class="btn btn-label-primary me-2">
+                    <i class="ti ti-settings me-3 ti-md"></i>
+                    <span class="align-middle">{{ $l == 'ar' ? 'تعديل' : 'Edit' }}</span>
+                  </a>
+                @endif
                 <!-- Replace the href with actual scheduling or oppointment link -->
                 <a class="btn btn-primary" href="https://tabler.io/icons" target="_blank" rel="noopener noreferrer">
                   <i class="ti ti-calendar-check me-2"></i>{{ __('admin.schedule_meeting') }}

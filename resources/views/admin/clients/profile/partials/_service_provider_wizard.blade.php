@@ -9,6 +9,7 @@
         <button
           type="button"
           class="step-trigger"
+          style="cursor: default !important;"
           data-tab-index="{{ $key + 1 }}"
           {{ ($key + 1 > $max_steps) ? 'disabled' : '' }}
         >
