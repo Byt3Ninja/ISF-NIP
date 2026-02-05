@@ -3282,4 +3282,11 @@ return [
 	'submit_request' => 'Submit Request',
 	'please_select_date_time' => 'Please select a date and time',
 	'change_file' => 'Change File',
+	'name_english' => 'Name in English',
+	'name_arabic' => 'Name in Arabic',
+	'must contain Arabic letters only' => 'Must contain Arabic letters only',
+	'must contain English letters only' => 'Must contain English letters only',
+	'maximum_length_100' => 'Maximum length is 100 characters',
+	'CreatedSuccessfully' => 'Created Successfully',
+	'saving' => 'Saving',
 ];
