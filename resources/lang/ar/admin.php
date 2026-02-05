@@ -3338,4 +3338,11 @@ return [
 	'submit_request' => 'إرسال الطلب',
 	'please_select_date_time' => 'الرجاء تحديد التاريخ والوقت',
 	'change_file' => 'تغيير الملف',
+	'name_english' => 'الاسم باللغة الإنجليزية',
+	'name_arabic' => 'الاسم باللغة العربية',
+	'must contain Arabic letters only' => 'يجب أن يحتوي على أحرف عربية فقط.',
+	'must contain English letters only' => 'يجب أن يحتوي على أحرف إنجليزية فقط.',
+	'maximum_length_100' => 'يجب ألا يتجاوز 100 حرف',
+	'CreatedSuccessfully' => 'تم الانشاء بنجاح',
+	'saving' => 'جاري الحفظ',
 ];

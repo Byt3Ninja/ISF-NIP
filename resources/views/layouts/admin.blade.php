@@ -478,7 +478,7 @@
         });
       }
 
-      const releaseWarningAlert = ({title, message, onConfirm, onCancel, confirmText, confirmColor}) => {
+      const releaseWarningAlert = ({title, message, onConfirm, onCancel, confirmText, cancelText, confirmColor}) => {
         Swal.fire({
           icon: 'warning',
           title: title || '',
@@ -486,7 +486,7 @@
           showCancelButton: onConfirm ? true : false,
           showConfirmButton: true,
           confirmButtonText: onConfirm ? (confirmText || "{{ __('admin.Confirm') }}") : "{{ __('admin.OK') }}",
-          cancelButtonText: onConfirm ? "{{ __('admin.Cancel') }}" : '',
+          cancelButtonText: onConfirm ? cancelText || "{{ __('admin.Cancel') }}" : '',
           customClass: {
             confirmButton: `btn btn-${confirmColor || 'primary'} ms-3`,
             cancelButton: onConfirm ? 'btn btn-label-secondary' : '',
