@@ -168,28 +168,11 @@ class ClientCompanyController extends Controller
         }
         $current_year = date('Y');
         $years = array_merge(range($current_year - 10, $current_year), range($current_year + 1, $current_year + 10));
-        $growth_records = StartupCustomerGrowth::records( $company->id );
-        $avgMonthlyGrowth = 0;
-        $growthSinceFirstRecord = 0;
-        $compoundAnnualGrowthRate = 0;
-        $years_count = $growth_records->groupBy('year')->count();
-        if( $growth_records->count() > 0 )
-        {
-            $count = $growth_records->count();
-            $intervals = $count - 1;
-            $last = $growth_records->last();
-            $first = $growth_records->first();
-            $total = $first->total;
-
-            $growthSinceFirstRecord = $total > 0 ? ( (($last->total - $total) / $total) * 100 ) : 0;
-            $growthSinceFirstRecord = round($growthSinceFirstRecord) . '%';
-
-            $avgMonthlyGrowth = ( $total > 0 && $intervals > 0 ) ? ( pow(($last->total / $total), (1 / $intervals)) - 1 ) : 0;
-            $avgMonthlyGrowth = round($avgMonthlyGrowth * 100, 1) . '%';
-
-            $compoundAnnualGrowthRate = ( $total > 0 && $years_count > 0 ) ? ( pow(($last->total / $total), (1 / $years_count)) - 1 ) : 0;
-            $compoundAnnualGrowthRate = round($compoundAnnualGrowthRate * 100, 1) . '%';
-        }
+        $records_metadata = StartupCustomerGrowth::records( $company->id );
+        $growth_records = $records_metadata['records'];
+        $avgMonthlyGrowth = $records_metadata['avgMonthlyGrowth'];
+        $growthSinceFirstRecord = $records_metadata['growthSinceFirstRecord'];
+        $compoundAnnualGrowthRate = $records_metadata['compoundAnnualGrowthRate'];
 
         $programs = collect();
 
@@ -653,8 +636,6 @@ class ClientCompanyController extends Controller
                 }
                 $Company = Company::find($id);
 
-
-
                 $client = User::where('company_id', $Company->id)->with('company')
                     ->with('company.city')
                     ->first();
@@ -662,15 +643,17 @@ class ClientCompanyController extends Controller
                 if (empty($client)) {
                     return redirect()->route('user.profile_view')->with(['msg' => 'NoHaveCompany', 'class' => 'danger']);
                 }
+
+                $company_instance = $client->company;
                 $countries = Country::all();
                 $states = State::all();
                 $Setting = Settings::where('id', 1)->first();
                 $sectors = Sector::whereNull('parent_id')->get();
-                $funding_rounds = $client->company ? $client->company->fundingRounds : [];
+                $funding_rounds = $company_instance ? $company_instance->fundingRounds : [];
 
-                $teamMembers = Team_Member::where('Company_id', $client->company->id)->get();
+                $teamMembers = Team_Member::where('Company_id', $company_instance->id)->get();
 
-                if ($client->company) {
+                if ($company_instance) {
                     $founders = $teamMembers->where('TeamMember', 'Founder')->values();
                     $Shareholders = $teamMembers->where('TeamMember', 'Shareholder')->values();
                     $Investors = $teamMembers->where('TeamMember', 'Investor')->values();
@@ -713,8 +696,8 @@ class ClientCompanyController extends Controller
             }
 
             $l = app()->getLocale();
-            if ($client->company) {
-                $companyRelations = CompanyRelation::where('company_id', $client->company->id)->get();
+            if ($company_instance) {
+                $companyRelations = CompanyRelation::where('company_id', $company_instance->id)->get();
                 $selectedIndustryId = $companyRelations->pluck('industry_id')->filter()->first();
                 $selectedSectorIds = $companyRelations->pluck('sector_id')->filter()->toArray();
                 $selectedTechnologyIds = $companyRelations->pluck('technology_id')->filter()->toArray();
@@ -782,49 +765,59 @@ class ClientCompanyController extends Controller
             // Load all milestones for this company (new unified structure)
             $milestones = Milestone::where('company_id', $id)
                 ->orderBy('created_at')->get();
+
+            $year = !empty($request->valuation_date)
+                ? Carbon::parse($request->valuation_date)->year
+                : (int) date('Y');
+
+            $valuation_dateSearch = $request->valuation_date ?? date('Y-m');
                 
-             
-                $year = !empty($request->valuation_date)
-                    ? Carbon::parse($request->valuation_date)->year
-                    : (int) date('Y');
+            $yearsRange = range($year - 1, $year + 2);
+            $financialprojectionArray = [];
+            foreach ($yearsRange as $_year) {
+                $financialprojectionArray[$_year] = [];
+            }
+            $getCurrancy = '';
+            
+            $Historyfinancialprojection = FinancialProjection::where('company_id', $id)
+                ->orderBy('valuation_date', 'desc')
+                ->get();
 
-                $valuation_dateSearch = $request->valuation_date ?? date('Y-m');
-                    
-                $yearsRange = range($year - 1, $year + 2);
-                $financialprojectionArray = [];
-                foreach ($yearsRange as $_year) {
-                    $financialprojectionArray[$_year] = [];
-                }
-               $getCurrancy = '';
-              
-                $Historyfinancialprojection = FinancialProjection::where('company_id', $id)
-                    ->orderBy('valuation_date', 'desc')
-                    ->get();
-
-                    $historicalValuationProjections = $Historyfinancialprojection->pluck('valuation_date')->unique();
-                    $financialprojection = $Historyfinancialprojection->where('valuation_date', $valuation_dateSearch.'-01');
-                    $historicalValuationDates = $historicalValuationProjections->map(function ($date) {
-                        return Carbon::parse($date)->format('Y-m');
-                    });
-                  
-                foreach ($financialprojection as $projection) {
-                    $financialprojectionArray[$projection->year] = $projection;
-                }
-                if ($financialprojection->isEmpty()) {
-                    
-                    $valuation_date = null;
+                $historicalValuationProjections = $Historyfinancialprojection->pluck('valuation_date')->unique();
+                $financialprojection = $Historyfinancialprojection->where('valuation_date', $valuation_dateSearch.'-01');
+                $historicalValuationDates = $historicalValuationProjections->map(function ($date) {
+                    return Carbon::parse($date)->format('Y-m');
+                });
+                
+            foreach ($financialprojection as $projection) {
+                $financialprojectionArray[$projection->year] = $projection;
+            }
+            if ($financialprojection->isEmpty()) {
+                
+                $valuation_date = null;
+            } else {
+                if (isset($financialprojection[1]) && !empty($financialprojection[1]->valuation_date)) {
+                    $formtat_valuation_date = $financialprojection[1]->valuation_date;
+                    $valuation_date = Carbon::parse($formtat_valuation_date)->format('Y-m');
+                    $getCurrancy = $financialprojection[1]->currency;
                 } else {
-                    if (isset($financialprojection[1]) && !empty($financialprojection[1]->valuation_date)) {
-                        $formtat_valuation_date = $financialprojection[1]->valuation_date;
-                        $valuation_date = Carbon::parse($formtat_valuation_date)->format('Y-m');
-                        $getCurrancy = $financialprojection[1]->currency;
-                    } else {
-                        $valuation_date = null;
-                    }
-                    
-                    $financialprojection = $financialprojectionArray;
+                    $valuation_date = null;
                 }
 
+                $financialprojection = $financialprojectionArray;
+            }
+
+            $current_year = date('Y');
+            $years = array_merge(range($current_year - 10, $current_year), range($current_year + 1, $current_year + 10));
+            $records_metadata = StartupCustomerGrowth::records( $company_instance->id );
+            $growth_records = $records_metadata['records'];
+            $growthMetrics = [
+                'growth_since_first_record' => $records_metadata['growthSinceFirstRecord'],
+                'average_monthly_growth' => $records_metadata['avgMonthlyGrowth'],
+                'compound_annual_growth_rate' => $records_metadata['compoundAnnualGrowthRate']
+            ];
+
+            $company = $company_instance; // For backward compatibility in the view
             return view('admin/clients/company', compact(
                 'client',
                 '_countries',
@@ -852,6 +845,10 @@ class ClientCompanyController extends Controller
                 'valuation_date',
                 'getCurrancy',
                 'historicalValuationDates',
+                'growth_records',
+                'years',
+                'growthMetrics',
+                'company',
             ));
         } catch (Exception $e) {
             //log what happend
