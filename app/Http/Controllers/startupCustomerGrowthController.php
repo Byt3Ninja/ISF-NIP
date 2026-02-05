@@ -17,6 +17,7 @@ class startupCustomerGrowthController extends Controller
 {
 	public function addRecord(Request $request)
 	{
+		$user = auth()->user();
 		$current_year = date('Y');
 		$years = array_merge(range($current_year - 10, $current_year), range($current_year + 1, $current_year + 10));
 		$months = range(1, 12);
@@ -29,7 +30,15 @@ class startupCustomerGrowthController extends Controller
 			"add_growth_notes" => "sometimes|nullable",
 			"company_id" => "required|numeric|exists:companies,id"
 		]);
-		
+
+		if( $user->hasRole('registered') )
+		{
+			if( $user->company_id != $request->company_id )
+			{
+				return back()->with(['error' => 'NoHavePermission', 'class' => 'danger']);
+			}
+		}
+
 		$record = StartupCustomerGrowth::where('company_id', $request->company_id)->where('year', $request->add_growth_year)->where('month', $request->add_growth_month)->first();
 		if( $record ) { return back()->with(['error' => __('startup.customer_growth_already_exist')]); }
 		else

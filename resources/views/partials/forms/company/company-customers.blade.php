@@ -1,34 +1,7 @@
 
 @php
-  $growthSinceFirstRecord = 20;
-  $avgMonthlyGrowth = 10;
-  $compoundAnnualGrowthRate = 5;
-  $growthMetrics = ['growth_since_first_record' => $growthSinceFirstRecord, 'average_monthly_growth' => $avgMonthlyGrowth, 'compound_annual_growth_rate' => $compoundAnnualGrowthRate];
   $colors = ['success', 'primary', 'warning'];
   $icons = ['trending-up', 'presentation-analytics', 'circle-percentage'];
-
-  $growth_records = collect([
-    (object) [
-        'year' => 2023,
-        'month' => 1,
-        'total' => 120,
-        'newly' => 20,
-        'MoM' => '20%',
-        'segment' => 'b2c',
-    ],
-    (object) [
-        'year' => 2024,
-        'month' => 2,
-        'total' => 150,
-        'newly' => 30,
-        'MoM' => '25%',
-        'segment' => 'b2b',
-    ],
-  ]);
-
-  $years = ['2018', '2019', '2020'];
-
-  $company = auth()->user()->company;
 @endphp
 
 <div class="card card-datatable table-responsive">
