@@ -1016,7 +1016,7 @@
                     <div class="row g-3">`;
 
           subCriterion.details.forEach(judgeDetail => {
-            const judgeScore = (judgeDetail.score * 100).toFixed(1);
+            const judgeScore = (judgeDetail.value * 100).toFixed(1);
             const statusClass = judgeDetail.status === 'Published' ? 'success' : 
                                judgeDetail.status === 'Draft' ? 'warning' : 'danger';
             

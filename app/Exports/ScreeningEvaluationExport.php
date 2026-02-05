@@ -24,8 +24,10 @@ class ScreeningEvaluationExport implements FromArray, WithEvents, WithStyles, Sh
     protected $includeCompanyColumn;
     protected $mergeRanges = [];
     protected $companyRowRanges = [];
+    protected $totalColumnIndices = [];
+    protected $criteriaTotalIndices = [];
+    protected $totalColumnMerges = [];
     protected $totalColumns = 0;
-    protected $columnMap = [];
 
     public function __construct($evaluationsData, $companies, $criteria, $type = 'screening', $includeCompanyColumn = true)
     {
@@ -62,10 +64,19 @@ class ScreeningEvaluationExport implements FromArray, WithEvents, WithStyles, Sh
                 $currentRow++;
             }
 
+            $endRow = $currentRow - 1;
+
             // Track company merge range (if multiple judges and company column included)
             if ($this->includeCompanyColumn && $judgeCount > 1) {
-                $endRow = $currentRow - 1;
                 $this->companyRowRanges[] = "A{$startRow}:A{$endRow}";
+            }
+
+            // Track total column merges (if multiple judges)
+            if ($judgeCount > 1) {
+                foreach ($this->totalColumnIndices as $colIdx) {
+                    $col = Coordinate::stringFromColumnIndex($colIdx);
+                    $this->totalColumnMerges[] = "{$col}{$startRow}:{$col}{$endRow}";
+                }
             }
         }
 
@@ -90,7 +101,8 @@ class ScreeningEvaluationExport implements FromArray, WithEvents, WithStyles, Sh
         // Main criteria headers
         foreach ($this->criteria as $criterion) {
             $subCriteriaCount = is_array($criterion->details) ? count($criterion->details) : $criterion->details->count();
-            $columnsForCriteria = ($subCriteriaCount * 3) + 1; // 3 cols per sub-criteria + 1 total
+            // 4 cols per sub-criteria (comment, score, weighted, total) + 1 criteria total
+            $columnsForCriteria = ($subCriteriaCount * 4) + 1;
 
             $row[] = $criterion->name;
             $startCol = Coordinate::stringFromColumnIndex($colIndex);
@@ -104,17 +116,15 @@ class ScreeningEvaluationExport implements FromArray, WithEvents, WithStyles, Sh
             $colIndex += $columnsForCriteria;
         }
 
-        // Summary header (evaluation comment + score + Final Comments + Decision = 4 columns)
-        // Removed "weighted" column from evaluation
-        $row[] = 'summary';
+        // Summary header (Final Comments + Final Score + Final Decision = 3 columns)
+        $row[] = 'Summary';
         $startCol = Coordinate::stringFromColumnIndex($colIndex);
-        $endCol = Coordinate::stringFromColumnIndex($colIndex + 3);
+        $endCol = Coordinate::stringFromColumnIndex($colIndex + 2);
         $this->mergeRanges[] = "{$startCol}1:{$endCol}1";
         $row[] = '';
         $row[] = '';
-        $row[] = '';
 
-        $this->totalColumns = $colIndex + 3;
+        $this->totalColumns = $colIndex + 2;
 
         return $row;
     }
@@ -134,9 +144,10 @@ class ScreeningEvaluationExport implements FromArray, WithEvents, WithStyles, Sh
         $row[] = '';
         $colIndex++;
 
-        // Sub-criteria names and totals
+        // Sub-criteria names with totals
         foreach ($this->criteria as $criterion) {
             foreach ($criterion->details as $subCriterion) {
+                // Sub-criteria name merged across comment, score, weighted (3 cols)
                 $row[] = $subCriterion->name;
                 $startCol = Coordinate::stringFromColumnIndex($colIndex);
                 $endCol = Coordinate::stringFromColumnIndex($colIndex + 2);
@@ -144,30 +155,37 @@ class ScreeningEvaluationExport implements FromArray, WithEvents, WithStyles, Sh
                 $row[] = '';
                 $row[] = '';
                 $colIndex += 3;
+
+                // Sub-criteria total column (merged vertically with row 3)
+                $row[] = 'total';
+                $col = Coordinate::stringFromColumnIndex($colIndex);
+                $this->mergeRanges[] = "{$col}2:{$col}3";
+                $this->totalColumnIndices[] = $colIndex;
+                $colIndex++;
             }
-            // Total column for main criteria
+            // Main criteria total column (merged vertically with row 3)
             $row[] = 'total';
             $col = Coordinate::stringFromColumnIndex($colIndex);
-            $this->mergeRanges[] = "{$col}2:{$col}3"; // Merge total vertically
+            $this->mergeRanges[] = "{$col}2:{$col}3";
+            $this->totalColumnIndices[] = $colIndex;
+            $this->criteriaTotalIndices[] = $colIndex;
             $colIndex++;
         }
 
-        // Summary section row 2 (evaluation comment + score only, no weighted)
-        $row[] = 'evaluation';
-        $col = Coordinate::stringFromColumnIndex($colIndex);
-        $endCol = Coordinate::stringFromColumnIndex($colIndex + 1);
-        $this->mergeRanges[] = "{$col}2:{$endCol}2"; // Merge evaluation across 2 cols (comment + score)
-        $row[] = '';
-        $colIndex += 2;
-
+        // Summary: Final Comments, Final Score, Final Decision - each merged vertically with row 3
         $row[] = 'Final Comments';
         $col = Coordinate::stringFromColumnIndex($colIndex);
-        $this->mergeRanges[] = "{$col}2:{$col}3"; // Merge vertically
+        $this->mergeRanges[] = "{$col}2:{$col}3";
         $colIndex++;
 
-        $row[] = 'Decision';
+        $row[] = 'Final Score';
         $col = Coordinate::stringFromColumnIndex($colIndex);
-        $this->mergeRanges[] = "{$col}2:{$col}3"; // Merge vertically
+        $this->mergeRanges[] = "{$col}2:{$col}3";
+        $colIndex++;
+
+        $row[] = 'Final Decision';
+        $col = Coordinate::stringFromColumnIndex($colIndex);
+        $this->mergeRanges[] = "{$col}2:{$col}3";
 
         return $row;
     }
@@ -184,22 +202,21 @@ class ScreeningEvaluationExport implements FromArray, WithEvents, WithStyles, Sh
         // Judges column (empty in row 3 - merged with rows 1-2)
         $row[] = '';
 
-        // comment/score/weighted for each sub-criteria, empty for totals
+        // comment/score/weighted for each sub-criteria + empty for totals
         foreach ($this->criteria as $criterion) {
             foreach ($criterion->details as $subCriterion) {
                 $row[] = 'comment';
                 $row[] = 'score';
                 $row[] = 'weighted';
+                $row[] = ''; // sub-criteria total (merged with row 2)
             }
-            // Total column (merged with row 2, so empty here)
-            $row[] = '';
+            $row[] = ''; // criteria total (merged with row 2)
         }
 
-        // Summary section row 3 (comment + score only, no weighted)
-        $row[] = 'comment';
-        $row[] = 'score';
-        $row[] = ''; // Final Comments (merged with row 2)
-        $row[] = ''; // Decision (merged with row 2)
+        // Summary (all merged with row 2)
+        $row[] = ''; // Final Comments
+        $row[] = ''; // Final Score
+        $row[] = ''; // Final Decision
 
         return $row;
     }
@@ -235,18 +252,20 @@ class ScreeningEvaluationExport implements FromArray, WithEvents, WithStyles, Sh
 
                 $row[] = $judgeEval->comment ?? '';
                 $row[] = $judgeEval->given_score ?? '';
-                $row[] = $judgeEval ? round(($judgeEval->value ?? 0) * 100, 2) : '';
+                $row[] = $judgeEval ? round(($judgeEval->value ?? 0) * 100, 2) . '%' : '';
+
+                // Sub-criteria total (only first judge, merged for others)
+                $row[] = $isFirstJudge ? round(($subCriterion->value ?? 0) * 100, 2) . '%' : '';
             }
-            // Main criteria total
-            $row[] = round(($criterion->value ?? 0) * 100, 2);
+            // Main criteria total (only first judge, merged for others)
+            $row[] = $isFirstJudge ? round(($criterion->value ?? 0) * 100, 2) . '%' : '';
         }
 
-        // Summary section (comment + score only, no weighted)
+        // Summary: Final Comments, Final Score, Final Decision
         $evaluation = is_object($judge->evaluation) ? $judge->evaluation : (object) $judge->evaluation;
         $row[] = $evaluation->comment ?? '';
-        $row[] = round(($evaluation->value ?? 0) * 100, 2);
-        $row[] = $evaluation->comment ?? ''; // Final Comments
-        $row[] = ucfirst($evaluation->approval ?? 'pending'); // Decision
+        $row[] = round(($evaluation->value ?? 0) * 100, 2) . '%';
+        $row[] = ucfirst($evaluation->approval ?? 'pending');
 
         return $row;
     }
@@ -385,6 +404,18 @@ class ScreeningEvaluationExport implements FromArray, WithEvents, WithStyles, Sh
                     }
                 }
 
+                // Apply total column vertical merges in data rows
+                foreach ($this->totalColumnMerges as $range) {
+                    try {
+                        $sheet->mergeCells($range);
+                        $sheet->getStyle($range)->getAlignment()
+                            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                            ->setVertical(Alignment::VERTICAL_CENTER);
+                    } catch (\Exception $e) {
+                        // Skip invalid merge ranges
+                    }
+                }
+
                 // Apply borders to all cells
                 $highestRow = $sheet->getHighestRow();
                 $highestColumn = $sheet->getHighestColumn();
@@ -397,12 +428,24 @@ class ScreeningEvaluationExport implements FromArray, WithEvents, WithStyles, Sh
                     ],
                 ]);
 
-                // Center numeric columns (score, weighted, total, evaluation score)
+                // Center numeric columns (score, weighted, total, final score)
                 $numericColumns = $this->getNumericColumnIndices();
                 foreach ($numericColumns as $colIndex) {
                     $col = Coordinate::stringFromColumnIndex($colIndex);
                     $sheet->getStyle("{$col}4:{$col}{$highestRow}")->getAlignment()
                         ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                }
+
+                // Apply main criteria total header styling (#4472C4 background in rows 2-3)
+                foreach ($this->criteriaTotalIndices as $colIdx) {
+                    $col = Coordinate::stringFromColumnIndex($colIdx);
+                    $sheet->getStyle("{$col}2:{$col}3")->applyFromArray([
+                        'fill' => [
+                            'fillType' => Fill::FILL_SOLID,
+                            'startColor' => ['rgb' => '4472C4']
+                        ],
+                        'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                    ]);
                 }
 
                 // Set row heights for headers
@@ -414,7 +457,7 @@ class ScreeningEvaluationExport implements FromArray, WithEvents, WithStyles, Sh
     }
 
     /**
-     * Get column indices that contain numeric values (score, weighted, total)
+     * Get column indices that contain numeric values (score, weighted, totals, final score)
      */
     private function getNumericColumnIndices(): array
     {
@@ -429,20 +472,20 @@ class ScreeningEvaluationExport implements FromArray, WithEvents, WithStyles, Sh
         // Skip Judges column
         $colIndex++;
 
-        // For each criteria, track score, weighted, and total columns
+        // For each criteria, track score, weighted, sub-criteria total, and criteria total columns
         foreach ($this->criteria as $criterion) {
             foreach ($criterion->details as $subCriterion) {
                 $colIndex++; // comment (skip)
                 $numericColumns[] = $colIndex++; // score (numeric)
                 $numericColumns[] = $colIndex++; // weighted (numeric)
+                $numericColumns[] = $colIndex++; // sub-criteria total (numeric)
             }
-            $numericColumns[] = $colIndex++; // total (numeric)
+            $numericColumns[] = $colIndex++; // criteria total (numeric)
         }
 
-        // Summary section: evaluation score is numeric
-        $colIndex++; // comment (skip)
-        $numericColumns[] = $colIndex++; // score (numeric)
-        // Final Comments and Decision are not numeric
+        // Summary: Final Comments (skip), Final Score (numeric), Final Decision (skip)
+        $colIndex++; // Final Comments (skip)
+        $numericColumns[] = $colIndex++; // Final Score (numeric)
 
         return $numericColumns;
     }
