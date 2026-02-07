@@ -3347,4 +3347,7 @@ return [
 	'saving' => 'جاري الحفظ',
 	'index_slot' => 'سولتس',
 	'take_survey' => 'مشاهدة الاستبيان',
+	'sessions' => 'الجلسات',
+	'view_companies_user' => 'عرض الشركات',
+	'profile_view_mentor' => 'عرض البيانات الشخصية',
 ];
