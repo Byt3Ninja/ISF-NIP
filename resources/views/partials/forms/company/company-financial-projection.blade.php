@@ -176,7 +176,12 @@
 					</div>
 				</div>
 				@php
-					$getCurrancy = $getCurrancy ? $getCurrancy : auth()->user()->currency;
+				
+					if(auth()->user()->company->Currency != null) {
+						$getCurrancy = auth()->user()->company->Currency;
+					}else{
+						$getCurrancy = $getCurrancy ? $getCurrancy : auth()->user()->currency;
+					}
 				@endphp
 							
 				<div class="col-lg-4">
