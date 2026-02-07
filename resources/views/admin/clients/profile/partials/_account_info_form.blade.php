@@ -279,14 +279,21 @@
             @endforeach
           </select>
         </div>
+        
         <div class="mb-4 col-12 col-md-6">
           <label for="currency" class="form-label fs-6 fw-bold">{{ __('admin.Currency') }}</label>
           <select id="currency" name="currency" class="select2 form-select">
             <option value="">{{ __('admin.Select Currency') }}</option>
             @foreach ($Currencies as $Currency)
-            <option value="{{ $Currency->currency_code }}" {{ $client->currency && $client->currency == $Currency->currency_code ? 'selected' : '' }}>
-              {{ $Currency->currency_name }}
-            </option>
+              @if($client->company->Currency != null)
+                <option value="{{ $Currency->currency_code }}" {{ $client->company->Currency && $client->company->Currency == $Currency->currency_code ? 'selected' : '' }}>
+                  {{ $Currency->currency_name }}
+                </option>
+              @else
+                <option value="{{ $Currency->currency_code }}" {{ $client->currency && $client->currency == $Currency->currency_code ? 'selected' : '' }}>
+                  {{ $Currency->currency_name }}
+                </option>
+              @endif
             @endforeach
           </select>
         </div>
