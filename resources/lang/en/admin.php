@@ -3291,4 +3291,7 @@ return [
 	'saving' => 'Saving',
 	'Solts' => 'Solts',
 	'take_survey' => 'Take Survey',
+	'sessions' => 'Sessions',
+	'view_companies_user' => 'View Companies',
+	'profile_view_mentor' => 'View Profile',
 ];
