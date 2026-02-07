@@ -3289,4 +3289,6 @@ return [
 	'maximum_length_100' => 'Maximum length is 100 characters',
 	'CreatedSuccessfully' => 'Created Successfully',
 	'saving' => 'Saving',
+	'Solts' => 'Solts',
+	'take_survey' => 'Take Survey',
 ];

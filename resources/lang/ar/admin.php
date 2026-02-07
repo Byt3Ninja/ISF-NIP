@@ -3345,4 +3345,6 @@ return [
 	'maximum_length_100' => 'يجب ألا يتجاوز 100 حرف',
 	'CreatedSuccessfully' => 'تم الانشاء بنجاح',
 	'saving' => 'جاري الحفظ',
+	'index_slot' => 'سولتس',
+	'take_survey' => 'مشاهدة الاستبيان',
 ];
