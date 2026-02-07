@@ -244,7 +244,7 @@ private function finalizeTitle($title, $ignoredTitles, $ignoredContains): ?strin
     }
 
     $cleanTitle = strtolower(trim($title));
-    
+   
     $customReplacements = [     
         'index_slot'      => app()->getLocale() == 'en' ? 'Slots' : 'المواعيد',
         'sessions_list_detailed_mentorship' => 'Tasks_List',
