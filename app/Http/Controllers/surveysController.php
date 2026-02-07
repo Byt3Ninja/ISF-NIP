@@ -418,12 +418,14 @@ class surveysController extends Controller
 				$responses->responses = $answers;
 				$responses->save();
 
-				$previousUrl = session('previous_url', route('core.dashboard_view'));
+				//$previousUrl = session('previous_url', route('core.dashboard_view'));
+				$previousUrl = session('previous_url', route('surveys.index'));
 				// Redirect based on the previous URL
 				if (str_contains($previousUrl, 'dashboard/mentor/mentorshipSessions')) {
 					return redirect()->route('mentorships.sessions_list_detailed')->with(['msg' => 'surveySubmitSuccess', 'class' => 'success']);
 				} elseif (str_contains($previousUrl, 'dashboard')) {
-					return redirect()->route('core.dashboard_view')->with(['msg' => 'surveySubmitSuccess', 'class' => 'success']);
+					//return redirect()->route('core.dashboard_view')->with(['msg' => 'surveySubmitSuccess', 'class' => 'success']);
+					return redirect()->route('surveys.index')->with(['success' => 'surveySubmitSuccess', 'class' => 'success']);
 				}
 			}
 		}
