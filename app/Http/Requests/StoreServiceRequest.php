@@ -26,6 +26,7 @@ class StoreServiceRequest extends FormRequest
         $rules = [
             'name_en' => 'required',
             'description_en' => 'required',
+            'price' => 'required|numeric|min:0',
             'img_url' => 'nullable',
             'service_category_id' => 'required|exists:service_categories,id',
             'vendor_name' => 'nullable|string|max:50',
@@ -33,6 +34,7 @@ class StoreServiceRequest extends FormRequest
             'vendor_phone' => 'nullable|string|max:11',
             'organization_ids' => 'nullable|array',
             'organization_ids.*' => 'exists:organizations,id',
+            'img_url' => 'nullable|url|mimes:jpeg,png,jpg,webp|max:5120',
         ];
 
         if( auth()->check() )
