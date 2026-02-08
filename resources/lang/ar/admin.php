@@ -3353,4 +3353,5 @@ return [
 	'index_service' => 'الخدمات',
 	'list_all_service_request' => 'جميع طلبات الخدمة',
 	'index_documentation' => 'وثائق',
+	'profile_view_user' => 'عرض البيانات الشخصية',
 ];
