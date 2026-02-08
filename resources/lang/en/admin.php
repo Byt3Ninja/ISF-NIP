@@ -3294,4 +3294,7 @@ return [
 	'sessions' => 'Sessions',
 	'view_companies_user' => 'View Companies',
 	'profile_view_mentor' => 'View Profile',
+	'index_service' => 'Services',
+	'list_all_service_request' => 'List Service Requests',
+	'index_documentation' => 'Documentation',
 ];
