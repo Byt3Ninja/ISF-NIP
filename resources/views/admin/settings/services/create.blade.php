@@ -71,6 +71,23 @@
                             name='price' required placeholder="{{ __('admin.Price') }}"
                             value="{{ old('price') }}">
                         </fieldset>
+                       
+                        <fieldset class="form-group mb-4">
+                          <label class="form-label" for="Currency">{{ __('admin.Currency') }}</label>
+                          <select class="form-control form-select" name="Currency" id="Currency" required>
+                            <option value="" disabled>{{ __('settings.Currency') }}</option>
+                            
+                            @foreach ($currencies as $Currency)
+                              <option value="{{ $Currency->currency_code }}"
+                                {{ $_user->currency == $Currency->currency_code ? 'selected' : '' }}>
+                                {{ __('admin.' . $Currency->currency_name) }}
+                              </option>
+                            @endforeach
+                          </select>
+                        </fieldset>
+
+
+
 
                         <fieldset class="form-group mb-4">
                           <label class="form-label" for="basicInput">{{ __('admin.Description') }}</label>
@@ -79,18 +96,10 @@
                           <div id="quill-editor" style="height: 200px;">{!! old('description_en') !!}</div>
                         </fieldset>
 
-                        <fieldset class="form-group mb-4">
-                          <label class="form-label" for="basicInput">{{ __('admin.Services Categories') }}</label>
-                          <select class="select2 form-control" required id="service_category_id" name='service_category_id'>
-                            <option value="">{{ __('admin.Services Categories') }}</option>
-                            @foreach ($serviceCategories as $category)
-                            <option value="{{ $category->id }}" {{ old('service_category_id')==$category->id ? 'selected' : '' }}>
-                              {{ $category->{'name_' . $l} }}</option>
-                            @endforeach
-                          </select>
-                        </fieldset>
-
-                        @if( $organizations->count() > 0 )
+                        @if( $_user->hasRole('serviceProvider') )
+                        @php
+                          $organizations = App\Organization::all();   
+                        @endphp
                         <fieldset class="form-group mb-4">
                           <label class="form-label">{{ __('admin.Organizations') }}</label>
                           <div class="row">
@@ -109,6 +118,39 @@
                           </div>
                         </fieldset>
                         @endif
+
+                        <fieldset class="form-group mb-4">
+                          <label class="form-label" for="basicInput">{{ __('admin.Services Categories') }}</label>
+                          <select class="select2 form-control" required id="service_category_id" name='service_category_id'>
+                            <option value="">{{ __('admin.Services Categories') }}</option>
+                            @foreach ($serviceCategories as $category)
+                            <option value="{{ $category->id }}" {{ old('service_category_id')==$category->id ? 'selected' : '' }}>
+                              {{ $category->{'name_' . $l} }}</option>
+                            @endforeach
+                          </select>
+                        </fieldset>
+
+                        @if( $organizations->count() > 0 && !$_user->hasRole('serviceProvider') )
+                        <fieldset class="form-group mb-4">
+                          <label class="form-label">{{ __('admin.Organizations') }}</label>
+                          <div class="row">
+                            @foreach ($organizations as $organization)
+                            <div class="col-md-4">
+                              <div class="form-check">
+                                <input class="form-check-input" type="checkbox"
+                                  id="organization_{{ $organization->id }}" name="organization_ids[]"
+                                  value="{{ $organization->id }}">
+                                <label class="form-check-label" for="organization_{{ $organization->id }}">
+                                  {{ $organization->{'name_' . app()->getLocale()} }}
+                                </label>
+                              </div>
+                            </div>
+                            @endforeach
+                          </div>
+                        </fieldset>
+                        @endif
+
+                        
 
                         @if( !$_user->hasRole('serviceProvider') )
                         <!-- Vendor Details -->
