@@ -134,8 +134,9 @@ class ServiceController extends Controller
 		} else {
 			$organizations = collect();
 		}
+		$currencies = Currency::all();
 		$providers = serviceProviders::all();
-		return view('admin/settings/services/create', compact('serviceCategories','Setting','organizations', 'providers'));
+		return view('admin/settings/services/create', compact('serviceCategories','Setting','organizations', 'providers', 'currencies'));
 	}
 
 	/**
@@ -146,6 +147,7 @@ class ServiceController extends Controller
 	 */
 	public function store(StoreServiceRequest $request)
 	{
+		dd( $request->all() );
 		$user = auth()->user();
 		$category = ServiceCategory::find( $request->service_category_id );
 		if( empty( $category ) ) { return back()->withInput()->with( ['msg' => 'FailedStore'] ); }
