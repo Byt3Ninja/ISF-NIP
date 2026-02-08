@@ -782,7 +782,7 @@ class ClientCompanyController extends Controller
             $Historyfinancialprojection = FinancialProjection::where('company_id', $id)
                 ->orderBy('valuation_date', 'desc')
                 ->get();
-
+            
                 $historicalValuationProjections = $Historyfinancialprojection->pluck('valuation_date')->unique();
                 $financialprojection = $Historyfinancialprojection->where('valuation_date', $valuation_dateSearch.'-01');
                 $historicalValuationDates = $historicalValuationProjections->map(function ($date) {
@@ -796,10 +796,11 @@ class ClientCompanyController extends Controller
                 
                 $valuation_date = null;
             } else {
-                if (isset($financialprojection[1]) && !empty($financialprojection[1]->valuation_date)) {
-                    $formtat_valuation_date = $financialprojection[1]->valuation_date;
+                    $financialFirst = $financialprojection->first();
+                if (isset($financialFirst) && !empty($financialFirst->valuation_date)) {
+                    $formtat_valuation_date = $financialprojection->first()->valuation_date;
                     $valuation_date = Carbon::parse($formtat_valuation_date)->format('Y-m');
-                    $getCurrancy = $financialprojection[1]->currency;
+                    $getCurrancy = $financialprojection->first()->currency;
                 } else {
                     $valuation_date = null;
                 }
@@ -1890,7 +1891,7 @@ class ClientCompanyController extends Controller
                 }
             }
             if ($data['CompanyN'] == 15) {
-
+                
                 if($data['valuation_date'] == null){
                     return redirect()->back()->with(['msg' => 'Please enter the valuation date', 'class' => 'danger']);
                 }

@@ -176,12 +176,11 @@
 					</div>
 				</div>
 				@php
-				
-					if(auth()->user()->company->Currency != null) {
-						$getCurrancy = auth()->user()->company->Currency;
-					}else{
-						$getCurrancy = $getCurrancy ? $getCurrancy : auth()->user()->currency;
-					}
+						$getCurrancy = !empty($getCurrancy)
+										? $getCurrancy
+										: (!empty(auth()->user()->company?->Currency)
+											? auth()->user()->company->Currency
+											: auth()->user()->currency);
 				@endphp
 							
 				<div class="col-lg-4">
