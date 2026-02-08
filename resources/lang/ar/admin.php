@@ -3350,4 +3350,7 @@ return [
 	'sessions' => 'الجلسات',
 	'view_companies_user' => 'عرض الشركات',
 	'profile_view_mentor' => 'عرض البيانات الشخصية',
+	'index_service' => 'الخدمات',
+	'list_all_service_request' => 'جميع طلبات الخدمة',
+	'index_documentation' => 'وثائق',
 ];
