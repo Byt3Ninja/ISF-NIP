@@ -147,7 +147,7 @@ class ServiceController extends Controller
 	 */
 	public function store(StoreServiceRequest $request)
 	{
-		dd( $request->all() );
+		
 		$user = auth()->user();
 		$category = ServiceCategory::find( $request->service_category_id );
 		if( empty( $category ) ) { return back()->withInput()->with( ['msg' => 'FailedStore'] ); }
@@ -171,13 +171,14 @@ class ServiceController extends Controller
 			'vendor_email' => $provider->email,
 			'service_provider_id' => $provider->id,
 			'hide_price' => $request->has('hide_price') ? 1 : 0, 
+			'currency' => $request->input('currency', null),
 			'hide_vendor_info' => $request->has('hide_vendor_info') ? 1 : 0
 		];
 
 		$inputs['status'] = 1;
 		$inputs['name_ar'] = $inputs['name_en']; 
 		$inputs['description_ar'] = $inputs['description_en'];
-
+		
 		$service = Service::create($inputs);
 
 		// Assign organizations (if selected)
@@ -222,8 +223,9 @@ class ServiceController extends Controller
 		} else {
 			$organizations = collect();
 		}
+		$currencies = Currency::all();
 		$providers = serviceProviders::all();
-		return view('admin/settings/services/edit', compact('service', 'serviceCategories', 'organizations', 'providers'));
+		return view('admin/settings/services/edit', compact('service', 'serviceCategories', 'organizations', 'providers', 'currencies'));
 	}
 
 	/**
@@ -280,7 +282,8 @@ class ServiceController extends Controller
 		$inputs['description_ar'] = $inputs['description_en'];
 
 		$inputs['status'] = $request->input('status', 1);
-
+		$inputs['currency'] = $request->input('currency', null);
+		
 		$updated = $service->update($inputs);
 
 		if ($request->has('organization_ids')) {

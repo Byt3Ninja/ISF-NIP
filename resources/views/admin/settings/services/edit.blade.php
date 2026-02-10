@@ -84,6 +84,14 @@
                                                         value="{{ $service->price}}">
                                                 </fieldset>
                                                 <fieldset class="form-group mt-3">
+                                                    <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Currency')}}</label>
+                                                    <select class="select2 form-control" required id="currency" name='currency'>
+                                                        @foreach($currencies as $currency)
+                                                        <option value="{{$currency->currency_code}}" {{ old('currency', $service->currency) == $currency->currency_code ? 'selected' : ''}} >{{ __('admin.' . $currency->currency_name) }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </fieldset>
+                                                <fieldset class="form-group mt-3">
                                                     <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Description')
                                                         }}</label>
                                                     <input type="hidden" name="description_en" id="description_en"
