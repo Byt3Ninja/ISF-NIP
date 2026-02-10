@@ -49,7 +49,7 @@
                 </option>
               @endforeach
               @php
-              $organization_q = App\Organization::query();
+              $organization_q = App\Organization::where('is_draft', 0);
               $organization = auth()->user()->hasRole('admin') ? $organization_q->get() : $organization_q->where('id', auth()->user()->organization_id)->get(); //App\Organization::all();
               @endphp
               <option value="">{{ __('admin.All_Organizations') }}</option>
