@@ -125,4 +125,5 @@ return [
     'duration' => 'Duration',
     'session_start_time' => 'Session Start Time',
     'session_end_time' => 'Session End Time',
+    'please_select_session_times' => 'Please select session times',
 ];
