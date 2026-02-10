@@ -1913,6 +1913,10 @@ class ClientCompanyController extends Controller
                        ->where('year', $yearDate->year)
                        ->first();
 
+                    // if($user->company->currancy == $data['Currency']){
+                    //     $data['Currency'] = $user->company->currancy;
+                    // }
+
                        if($updateFinancial != null && $updateFinancial->currency != $data['Currency']){
                         return redirect()->back()->with(['msg' => 'You can not add more than one currency per year', 'class' => 'danger']);
                        }
@@ -3959,9 +3963,9 @@ class ClientCompanyController extends Controller
 
             $almuni->save();
 
-            // $company->step = null;
-            // $company->cycle = null;
-            // $company->save();
+            $company->step = null;
+            $company->cycle = null;
+            $company->save();
 
             // Check if AJAX request
             if ($request->ajax()) {
