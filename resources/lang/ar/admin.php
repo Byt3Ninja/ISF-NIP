@@ -3211,7 +3211,7 @@ return [
 	'required_evaluation_comment_message' => 'يرجى تقديم تعليقا نهائي قبل النشر',
 	'organization_based' => 'مؤسسة',
 	'uploading' => 'جاري التحميل...',
-	'Screening guidelines saved successfully' => 'تم حفظ الاهتمامات بنجاح',
+	'Screening guidelines saved successfully' => 'تم حفظ دليل التقييم بنجاح',
 	'profile_basics' => 'البيانات الاساسية',
 	'intro_booking' => 'المقدمة والحجز',
 	'key_stats' => 'الإحصائيات الرئيسية',
