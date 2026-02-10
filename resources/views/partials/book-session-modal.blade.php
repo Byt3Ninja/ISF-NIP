@@ -86,20 +86,24 @@
               </div>
             </div>
             
-            <!-- Session Start Time -->
             <div class="col-md-6">
-              <label class="form-label small mb-1">{{ __('mentor.session_start_time') }}</label>
-              <select class="form-select bg-card" id="sessionStartTime" required>
-                <option value="">{{ __('admin.Select') }}...</option>
-              </select>
+              <div class="d-flex gap-2">
+                <i class="ti ti-clock"></i>
+                <div>
+                  <div class="small">{{ __('mentor.session_start_time') }}</div>
+                  <div class="fw-medium" id="sessionStartTime">-</div>
+                </div>
+              </div>
             </div>
-            
-            <!-- Session End Time -->
+           
             <div class="col-md-6">
-              <label class="form-label small mb-1">{{ __('mentor.session_end_time') }}</label>
-              <select class="form-select bg-card" id="sessionEndTime" required>
-                <option value="">{{ __('admin.Select') }}...</option>
-              </select>
+              <div class="d-flex gap-2">
+                <i class="ti ti-clock"></i>
+                <div>
+                  <div class="small">{{ __('mentor.session_end_time') }}</div>
+                  <div class="fw-medium" id="sessionEndTime">-</div>
+                </div>
+              </div>
             </div>
             
             <div class="col-12">
@@ -230,49 +234,51 @@ $(document).ready(function() {
 
   // Populate start time dropdown
   const populateStartTimeOptions = (slot) => {
-    const $select = $('#sessionStartTime');
-    $select.empty().append('<option value="">{{ __('admin.Select') }}...</option>');
+    // const $select = $('#sessionStartTime');
+    // $select.empty().append('<option value="">{{ __('admin.Select') }}...</option>');
     
-    const options = generateTimeOptions(slot.start_time, slot.end_time);
+    // const options = generateTimeOptions(slot.start_time, slot.end_time);
     
-    // Remove the last option (end time) from start time options
-    options.slice(0, -1).forEach(opt => {
-      $select.append(`<option value="${opt.value}">${opt.value}</option>`);
-    });
+    // // Remove the last option (end time) from start time options
+    // options.slice(0, -1).forEach(opt => {
+    //   $select.append(`<option value="${opt.value}">${opt.value}</option>`);
+    // });
     
-    // Set default to slot start time
-    $select.val(slot.start_time);
+    // // Set default to slot start time
+    // $select.val(slot.start_time);
 
     // Update hidden input for start time
     $('#sessionStartTimeHidden').val(slot.start_time);
+    $('#sessionStartTime').val(slot.start_time);
   };
 
   // Populate end time dropdown based on selected start time
   const populateEndTimeOptions = (slot, selectedStartTime) => {
-    const $select = $('#sessionEndTime');
-    $select.empty().append('<option value="">{{ __('admin.Select') }}...</option>');
+    // const $select = $('#sessionEndTime');
+    // $select.empty().append('<option value="">{{ __('admin.Select') }}...</option>');
     
-    if (!selectedStartTime) return;
+    // if (!selectedStartTime) return;
     
-    const startMinutes = parseTime(selectedStartTime);
-    const slotEndMinutes = parseTime(slot.end_time);
+    // const startMinutes = parseTime(selectedStartTime);
+    // const slotEndMinutes = parseTime(slot.end_time);
     
-    // Generate options starting from 30 minutes after selected start time
-    for (let minutes = startMinutes + 30; minutes <= slotEndMinutes; minutes += 30) {
-      const timeStr = formatTime(minutes);
-      $select.append(`<option value="${timeStr}">${timeStr}</option>`);
-    }
+    // // Generate options starting from 30 minutes after selected start time
+    // for (let minutes = startMinutes + 30; minutes <= slotEndMinutes; minutes += 30) {
+    //   const timeStr = formatTime(minutes);
+    //   $select.append(`<option value="${timeStr}">${timeStr}</option>`);
+    // }
     
-    // Set default to 30 minutes after start time
-    const defaultEndTime = formatTime(startMinutes + 30);
-    if ($select.find(`option[value="${defaultEndTime}"]`).length) {
-      $select.val(defaultEndTime);
-    } else {
-      $select.val($select.find('option:not(:first)').first().val());
-    }
+    // // Set default to 30 minutes after start time
+    // const defaultEndTime = formatTime(startMinutes + 30);
+    // if ($select.find(`option[value="${defaultEndTime}"]`).length) {
+    //   $select.val(defaultEndTime);
+    // } else {
+    //   $select.val($select.find('option:not(:first)').first().val());
+    // }
 
     // Update hidden input for end time
     $('#sessionEndTimeHidden').val(defaultEndTime);
+    $('#sessionEndTime').val(slot.end_time);
   };
 
   // Update duration display
@@ -387,7 +393,7 @@ $(document).ready(function() {
               <div class="flex-grow-1">
                 <div class="fw-semibold mb-1 d-flex align-items-center gap-2">
                   <i class="ti ti-clock ti-16px"></i>
-                  ${slot.start_time} - ${slot.end_time}
+                  ${moment(slot.start_time, "HH:mm").format("hh:mm A")} - ${moment(slot.end_time, "HH:mm").format("hh:mm A")}
                 </div>
                 <div class="d-flex align-items-center gap-2 small">
                   <i class="ti ti-hourglass-empty ti-16px"></i> ${duration} @lang('mentor.min')
@@ -421,6 +427,7 @@ $(document).ready(function() {
   };
 
   const selectSlot = (slot, $card) => {
+    // console.log('selectSlot', slot, $card);
     $('.slot-card').removeClass('selected');
     $card.addClass('selected');
     state.selectedSlot = slot;
@@ -431,9 +438,14 @@ $(document).ready(function() {
     $('#selectedSessionType').val(slot.session_type);
 
     // Populate time dropdowns
-    populateStartTimeOptions(slot);
-    populateEndTimeOptions(slot, slot.start_time);
+    // populateStartTimeOptions(slot);
+    // populateEndTimeOptions(slot, slot.start_time);
     updateDurationDisplay();
+
+    $('#sessionStartTimeHidden').val(slot.start_time);
+    $('#sessionStartTime').text(moment(slot.start_time, "HH:mm").format("hh:mm A"));
+    $('#sessionEndTimeHidden').val(slot.end_time);
+    $('#sessionEndTime').text(moment(slot.end_time, "HH:mm").format("hh:mm A"));
 
     $('#sessionDetails').show();
     $('#slotError').hide();
