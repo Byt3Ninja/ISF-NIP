@@ -170,7 +170,7 @@ if ($_user->hasAnyRole('mentor|Registered')) {
               @if ($_user->hasRole('mentor'))
               <th> {{ __('admin.Company') }} </th>
               @endif
-              <th> {{ $_user->hasRole('mentor') ? __('admin.User') : __('admin.Mentor') }} </th>
+              <th> {{ $_user->hasRole('mentor') ? __('admin.Founder') : __('admin.Mentor') }} </th>
               <th> {{ __('admin.Title') }} </th>
               <th> {{ __('admin.Status') }} </th>
               <th> {{ __('admin.Priority') }} </th>
