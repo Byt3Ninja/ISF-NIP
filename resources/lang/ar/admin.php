@@ -3354,4 +3354,6 @@ return [
 	'list_all_service_request' => 'جميع طلبات الخدمة',
 	'index_documentation' => 'وثائق',
 	'profile_view_user' => 'عرض البيانات الشخصية',
+	'index_slot' => 'المواعيد',
+	'profile_view_company' => 'عرض البيانات الشخصية',
 ];
