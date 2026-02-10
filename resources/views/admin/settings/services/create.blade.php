@@ -74,7 +74,7 @@
                        
                         <fieldset class="form-group mb-4">
                           <label class="form-label" for="Currency">{{ __('admin.Currency') }}</label>
-                          <select class="form-control form-select" name="Currency" id="Currency" required>
+                          <select class="form-control form-select" name="currency" id="Currency" required>
                             <option value="" disabled>{{ __('settings.Currency') }}</option>
                             
                             @foreach ($currencies as $Currency)
