@@ -3298,4 +3298,6 @@ return [
 	'list_all_service_request' => 'List Service Requests',
 	'index_documentation' => 'Documentation',
 	'profile_view_user' => 'View Profile',
+	'index_slot' => 'Slots',
+	'profile_view_company' => 'View Profile',
 ];
