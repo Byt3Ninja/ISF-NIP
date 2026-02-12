@@ -17,6 +17,7 @@ use App\Services\OrganizationWizardService;
 use App\Services\OrganizationManagerService;
 use App\Services\OrganizationLandingPageService;
 use App\Services\OrganizationCustomSectionService;
+use App\Services\ProgramLandingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -26,7 +27,8 @@ class OrganizationWizardController extends Controller
         protected OrganizationWizardService $wizardService,
         protected OrganizationManagerService $managerService,
         protected OrganizationLandingPageService $landingPageService,
-        protected OrganizationCustomSectionService $customSectionService
+        protected OrganizationCustomSectionService $customSectionService,
+        protected ProgramLandingService $programLandingService
     ) {}
 
     /**
@@ -488,10 +490,19 @@ class OrganizationWizardController extends Controller
         $landingPage = $organization->landingPage;
         $customSections = $organization->customSections ?? collect();
 
+        $orgPrograms = $organization->cycles()
+            ->whereNull('deleted_at')
+            ->with(['focusAreas', 'benefits'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $focusAreaOptions = StaticCategory::all();
+
         return view('admin.organizations.landing-page.edit', compact(
             'organization',
             'landingPage',
-            'customSections'
+            'customSections',
+            'orgPrograms',
+            'focusAreaOptions'
         ));
     }
 
@@ -637,6 +648,65 @@ class OrganizationWizardController extends Controller
         }
 
         $result = $this->customSectionService->delete($id, $sectionId);
+
+        return response()->json([
+            'success' => $result['success'],
+            'message' => $result['message'],
+        ]);
+    }
+
+    /**
+     * Update a single program's landing page data via AJAX.
+     */
+    public function updateProgramLanding(Request $request, $id, $cycleId)
+    {
+        $_user = auth()->user();
+        if (!$_user->ableTo('organization.wizard.edit')) {
+            return abort(401);
+        }
+
+        // Validate the cycle belongs to this org
+        $cycle = \App\Cycle::where('id', $cycleId)
+            ->where('organization_id', $id)
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'landing_visible' => 'nullable|boolean',
+            'short_description' => 'nullable|string|max:500',
+            'location' => 'nullable|string|max:255',
+            'landing_sort_order' => 'nullable|integer',
+            'focus_area_ids' => 'nullable|array',
+            'focus_area_ids.*' => 'exists:static_categories,id',
+            'benefits' => 'nullable|array|max:8',
+            'benefits.*.label_en' => 'nullable|string|max:255',
+            'benefits.*.label_ar' => 'nullable|string|max:255',
+            'benefits.*.icon' => 'nullable|string|max:50',
+        ]);
+
+        $result = $this->programLandingService->updateProgramLanding($cycleId, $validated);
+
+        return response()->json([
+            'success' => $result['success'],
+            'message' => $result['message'],
+        ]);
+    }
+
+    /**
+     * Reorder programs for landing page via AJAX.
+     */
+    public function reorderPrograms(Request $request, $id)
+    {
+        $_user = auth()->user();
+        if (!$_user->ableTo('organization.wizard.edit')) {
+            return abort(401);
+        }
+
+        $request->validate([
+            'ordered_ids' => 'required|array',
+            'ordered_ids.*' => 'integer',
+        ]);
+
+        $result = $this->programLandingService->reorderPrograms($id, $request->ordered_ids);
 
         return response()->json([
             'success' => $result['success'],

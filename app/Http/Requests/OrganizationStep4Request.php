@@ -100,6 +100,17 @@ class OrganizationStep4Request extends FormRequest
             'partners_bg_color' => 'nullable|string|max:20',
             'partners_bg_gradient_start' => 'nullable|string|max:20',
             'partners_bg_gradient_end' => 'nullable|string|max:20',
+
+            // Programs Section
+            'programs_enabled' => 'nullable|boolean',
+            'programs_title' => 'nullable|string|max:255',
+            'programs_subtitle' => 'nullable|string|max:255',
+            'programs_description' => 'nullable|string|max:1000',
+            'programs_order_by' => 'nullable|in:newest,oldest,custom',
+            'programs_bg_type' => 'nullable|in:solid,gradient',
+            'programs_bg_color' => 'nullable|string|max:20',
+            'programs_bg_gradient_start' => 'nullable|string|max:20',
+            'programs_bg_gradient_end' => 'nullable|string|max:20',
         ];
     }
 
@@ -138,6 +149,8 @@ class OrganizationStep4Request extends FormRequest
                 'media_description.max' => 'الوصف يجب أن لا يتجاوز 1000 حرف',
                 'partners_description.max' => 'الوصف يجب أن لا يتجاوز 1000 حرف',
                 'landing_theme.in' => 'يرجى اختيار قالب صالح',
+                'programs_description.max' => 'الوصف يجب أن لا يتجاوز 1000 حرف',
+                'programs_order_by.in' => 'يرجى اختيار ترتيب صالح',
             ];
         }
 
@@ -168,6 +181,8 @@ class OrganizationStep4Request extends FormRequest
             'media_description.max' => 'Description must not exceed 1000 characters',
             'partners_description.max' => 'Description must not exceed 1000 characters',
             'landing_theme.in' => 'Please select a valid theme',
+            'programs_description.max' => 'Description must not exceed 1000 characters',
+            'programs_order_by.in' => 'Please select a valid ordering option',
         ];
     }
 
@@ -183,6 +198,7 @@ class OrganizationStep4Request extends FormRequest
             'achievements_enabled' => $this->has('achievements_enabled'),
             'media_enabled' => $this->has('media_enabled'),
             'partners_enabled' => $this->has('partners_enabled'),
+            'programs_enabled' => $this->has('programs_enabled'),
         ]);
     }
 }
