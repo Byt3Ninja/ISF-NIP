@@ -39,11 +39,6 @@ class OrganizationLandingPageService
                 $organization->slug = Organization::generateSlug($organization->name_en, $organization->id);
             }
 
-            // Update wizard step if moving forward
-            if ($organization->wizard_step < 5) {
-                $organization->wizard_step = 5;
-            }
-
             $organization->save();
 
             // Get or create landing page

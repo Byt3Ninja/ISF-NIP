@@ -13,7 +13,7 @@
 
 @php
   $isEdit = isset($organization);
-  $maxStep = $isEdit ? ($organization->wizard_step ?? 1) : 1;
+  $maxStep = $isEdit ? min($organization->wizard_step ?? 1, 3) : 1;
   $isDraft = $isEdit ? $organization->is_draft : true;
   $hasManagers = $isEdit ? $organization->assignedUsers()->count() > 0 : false;
   $canPublish = $isDraft && $hasManagers;
@@ -24,8 +24,6 @@
     ['id' => 'basics', 'title' => __('admin.Organization Basics'), 'step' => 1],
     ['id' => 'contact', 'title' => __('admin.Contact Info'), 'step' => 2],
     ['id' => 'managers', 'title' => __('admin.Organization Manager'), 'step' => 3],
-    ['id' => 'landing', 'title' => __('admin.Landing Page'), 'step' => 4],
-    ['id' => 'custom_sections', 'title' => __('admin.Custom Sections'), 'step' => 5],
   ];
 @endphp
 
@@ -132,10 +130,15 @@
                         <i class="ti ti-file me-2"></i>{{ __('admin.Save as Draft') }}
                       </button>
                     @endif
-                    @if($canPublish)
-                      <button type="button" class="btn btn-success" id="publishBtn">
-                        <i class="ti ti-world me-2"></i>{{ __('admin.Publish') }}
+                    @if($activeStep == 3)
+                      <button type="button" class="btn btn-primary" data-action="same">
+                        <i class="ti ti-device-floppy me-2"></i>{{ __('admin.Save') }}
                       </button>
+                      @if($canPublish)
+                        <button type="button" class="btn btn-success" id="publishBtn">
+                          <i class="ti ti-world me-2"></i>{{ __('admin.Publish') }}
+                        </button>
+                      @endif
                     @else
                       <button type="button" class="btn btn-primary btn-next">
                         <span class="align-middle d-sm-inline-block d-none me-sm-2">{{ __('admin.Save & Continue') }}</span>
@@ -160,7 +163,7 @@
             </div>
 
             @if($isEdit)
-              @foreach(range(2, 5) as $step)
+              @foreach(range(2, 3) as $step)
                 <form action="{{ route('organization.wizard.update.step' . $step, $organization->id) }}" method="POST" id="step{{ $step }}Form" style="display:none;" enctype="multipart/form-data">
                   @csrf @method('PUT')
                   <input type="hidden" name="redirect_to" value="next">
@@ -198,8 +201,6 @@
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
   <script src="/vuexy/assets/vendor/libs/toastr/toastr.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.10.2/tinymce.min.js" referrerpolicy="origin"></script>
 
   <script>
     (function() {
@@ -510,7 +511,7 @@
         const validator = validators[currentStep];
         
         if (action === 'draft') {
-          const selector = currentStep === 1 ? '#wizardForm' : `#${['basics', 'contact', 'managers', 'landing', 'custom_sections'][currentStep - 1]}`;
+          const selector = currentStep === 1 ? '#wizardForm' : `#${['basics', 'contact', 'managers'][currentStep - 1]}`;
           utils.copyFormDataToTarget(selector, '#draftForm', ['current_step', '_token', '_method']);
           $('#draftForm').find('[name="current_step"]').val(currentStep);
           $('#draftForm').submit();
@@ -540,27 +541,6 @@
           return;
         }
 
-        // For step 5, sync TinyMCE content before submitting
-        if (currentStep === 5) {
-          $('.custom-section-card.editing').each(function() {
-            const card = $(this);
-            const textarea = card.find('.rich-text-editor');
-            const editorId = textarea.attr('id');
-            if (editorId && typeof tinymce !== 'undefined') {
-              const editor = tinymce.get(editorId);
-              if (editor) {
-                editor.save();
-              }
-            }
-            // Sync to hidden inputs
-            const form = card.find('.section-form-container');
-            const hidden = card.find('.section-hidden-inputs');
-            hidden.find('.hidden-title').val(form.find('.section-title-input').val());
-            hidden.find('.hidden-content').val(form.find('.section-content-input').val());
-            hidden.find('.hidden-visibility').val(form.find('.visibility-radio:checked').val());
-          });
-        }
-
         if (!validator) {
           submitForm(action, currentStep);
           return;
@@ -582,7 +562,7 @@
           $('#wizardForm').submit();
         } else if (config.isEdit) {
           const $form = $(`#step${step}Form`);
-          const selector = `#${['basics', 'contact', 'managers', 'landing', 'custom_sections'][step - 1]}`;
+          const selector = `#${['basics', 'contact', 'managers'][step - 1]}`;
 
           utils.copyFormDataToTarget(selector, $form, ['redirect_to', '_token', '_method']);
           $form.find('[name="redirect_to"]').val(action === 'same' ? 'same' : 'next');
@@ -619,21 +599,21 @@
           handleFormSubmit('next', step);
         });
 
-        $('.save-changes-step1-btn, .save-changes-step2-btn', '.save-changes-step3-btn', '.save-changes-step4-btn', '.save-changes-step5-btn').on('click', function(e) {
+        $('.save-changes-step1-btn, .save-changes-step2-btn, .save-changes-step3-btn').on('click', function(e) {
           e.preventDefault();
-          const step = $(this).hasClass('save-changes-step1-btn') ? 1 : 2;
+          const step = $(this).hasClass('save-changes-step1-btn') ? 1 : $(this).hasClass('save-changes-step2-btn') ? 2 : 3;
           handleFormSubmit('same', step);
         });
 
-        $('.save-continue-step1-btn, .save-continue-step2-btn', '.save-continue-step3-btn', '.save-continue-step4-btn', '.save-continue-step5-btn').on('click', function(e) {
+        $('.save-continue-step1-btn, .save-continue-step2-btn, .save-continue-step3-btn').on('click', function(e) {
           e.preventDefault();
-          const step = $(this).hasClass('save-continue-step1-btn') ? 1 : 2;
+          const step = $(this).hasClass('save-continue-step1-btn') ? 1 : $(this).hasClass('save-continue-step2-btn') ? 2 : 3;
           handleFormSubmit('next', step);
         });
 
-        $('.save-draft-step1-btn, .save-draft-step2-btn', '.save-draft-step3-btn', '.save-draft-step4-btn', '.save-draft-step5-btn').on('click', function(e) {
+        $('.save-draft-step1-btn, .save-draft-step2-btn, .save-draft-step3-btn').on('click', function(e) {
           e.preventDefault();
-          const step = $(this).hasClass('save-draft-step1-btn') ? 1 : 2;
+          const step = $(this).hasClass('save-draft-step1-btn') ? 1 : $(this).hasClass('save-draft-step2-btn') ? 2 : 3;
           handleFormSubmit('draft', step);
         });
 
@@ -684,6 +664,12 @@
         iconsStepper.previous = function() {
           originalPrevious();
         };
+
+        // Update current_step when stepper changes step
+        wizardIcons.addEventListener('shown.bs-stepper', function(event) {
+          const newStep = (event.detail.indexStep !== undefined) ? event.detail.indexStep + 1 : config.activeStep;
+          $('#current_step').val(newStep);
+        });
 
         // Store reference for later use
         window.iconsStepper = iconsStepper;
