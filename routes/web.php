@@ -314,6 +314,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
         Route::put('/{id}/step3', 'OrganizationWizardController@updateStep3')->name('update.step3');
         Route::get('/{id}/managers', 'OrganizationWizardController@getManagers')->name('managers.list');
         Route::post('/{id}/managers', 'OrganizationWizardController@createManager')->name('managers.create');
+        // Standalone Landing Page Management
+        Route::get('/{id}/landing-page', 'OrganizationWizardController@editLandingPage')->name('landing');
         // Step 4: Landing Page
         Route::put('/{id}/step4', 'OrganizationWizardController@updateStep4')->name('update.step4');
         Route::get('/{id}/preview', 'OrganizationWizardController@previewLandingPage')->name('preview');

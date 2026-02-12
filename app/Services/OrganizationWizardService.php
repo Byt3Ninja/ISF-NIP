@@ -234,12 +234,19 @@ class OrganizationWizardService
                 $organization->wizard_step = 1;
             }
 
-            // Step 1 fields
-            if (!empty($data['name_en'])) {
-                $organization->name_en = $data['name_en'];
+            // Step 1 fields - auto-fill missing name from the other language
+            $nameEn = $data['name_en'] ?? null;
+            $nameAr = $data['name_ar'] ?? null;
+            if (!empty($nameEn) && empty($nameAr)) {
+                $nameAr = $nameEn;
+            } elseif (!empty($nameAr) && empty($nameEn)) {
+                $nameEn = $nameAr;
             }
-            if (!empty($data['name_ar'])) {
-                $organization->name_ar = $data['name_ar'];
+            if (!empty($nameEn)) {
+                $organization->name_en = $nameEn;
+            }
+            if (!empty($nameAr)) {
+                $organization->name_ar = $nameAr;
             }
             if (!empty($data['organization_type_id'])) {
                 $organization->organization_type_id = $data['organization_type_id'];
@@ -302,9 +309,9 @@ class OrganizationWizardService
                 $organization->img_url = $this->handleLogoUpload($organization, $data['img_url']);
             }
 
-            // Update wizard_step based on current step
+            // Update wizard_step based on current step (max 3 steps in wizard)
             if ($currentStep >= $organization->wizard_step) {
-                $organization->wizard_step = $currentStep + 1;
+                $organization->wizard_step = min($currentStep + 1, 3);
             }
 
             $organization->save();

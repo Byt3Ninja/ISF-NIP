@@ -54,7 +54,7 @@ class OrganizationWizardController extends Controller
      */
     public function edit($id)
     {
-        $organization = Organization::with(['organizationType', 'industries', 'country', 'state', 'city', 'assignedUsers', 'landingPage', 'customSections'])->findOrFail($id);
+        $organization = Organization::with(['organizationType', 'industries', 'country', 'state', 'city', 'assignedUsers'])->findOrFail($id);
         $organizationTypes = OrganizationTypes::all();
         $industries = StaticCategory::all();
         $countries = Country::all();
@@ -76,12 +76,6 @@ class OrganizationWizardController extends Controller
             ];
         });
 
-        // Get landing page data for step 4
-        $landingPage = $organization->landingPage;
-
-        // Get custom sections for step 5
-        $customSections = $organization->customSections;
-
         return view('admin.organizations.wizard.create', compact(
             'organization',
             'organizationTypes',
@@ -89,9 +83,7 @@ class OrganizationWizardController extends Controller
             'countries',
             'states',
             'cities',
-            'assignedManagers',
-            'landingPage',
-            'customSections'
+            'assignedManagers'
         ));
     }
 
@@ -247,11 +239,8 @@ class OrganizationWizardController extends Controller
         $result = $this->managerService->assignManagers($id, $request->manager_ids);
 
         if ($result['success']) {
-            $redirectTo = $request->input('redirect_to', 'next');
-            $step = $redirectTo === 'same' ? 3 : 4;
-
             return redirect()
-                ->route('organization.wizard.edit', ['id' => $result['data']->id, 'step' => $step])
+                ->route('organization.wizard.edit', ['id' => $result['data']->id, 'step' => 3])
                 ->with('success', $result['message']);
         }
 
@@ -299,7 +288,7 @@ class OrganizationWizardController extends Controller
         // Minimal validation for draft
         $rules = [
             // Step 1 fields
-            'name_en' => 'nullable|string|max:255',
+            'name_en' => 'required|string|max:255',
             'name_ar' => 'nullable|string|max:255',
             'organization_type_id' => 'nullable|exists:organization_types,id',
             'status' => 'nullable|boolean',
@@ -331,11 +320,13 @@ class OrganizationWizardController extends Controller
         $locale = app()->getLocale();
         $messages = $locale === 'ar'
             ? [
+                'name_en.required' => 'اسم المنظمة مطلوب',
                 'img_url.image' => 'نوع الملف غير صالح، يرجى رفع ملفات من نوع PNG أو JPG فقط',
                 'img_url.mimes' => 'نوع الملف غير صالح، يرجى رفع ملفات من نوع PNG أو JPG فقط',
                 'img_url.max' => 'الملف اكبر من الحد المسموح. الحد الأقصى المسموح به هو 5 ميجابايت',
             ]
             : [
+                'name_en.required' => 'Organization name is required.',
                 'img_url.image' => 'Invalid file format. Please upload PNG or JPG files only.',
                 'img_url.mimes' => 'Invalid file format. Please upload PNG or JPG files only.',
                 'img_url.max' => 'File too large. Maximum size allowed is 5MB.',
@@ -447,6 +438,15 @@ class OrganizationWizardController extends Controller
 
         if ($result['success']) {
             $redirectTo = $request->input('redirect_to', 'next');
+
+            // If coming from standalone landing page, redirect back there
+            if ($redirectTo === 'landing_page') {
+                $activeTab = $request->input('active_tab', 'howItWorks');
+                return redirect()
+                    ->route('organization.wizard.landing', ['id' => $id, 'tab' => $activeTab])
+                    ->with('success', $result['message']);
+            }
+
             $step = $redirectTo === 'same' ? 4 : 5;
 
             return redirect()
@@ -472,6 +472,27 @@ class OrganizationWizardController extends Controller
         }
 
         return $disk->response($path);
+    }
+
+    /**
+     * Show the standalone landing page management view.
+     */
+    public function editLandingPage($id)
+    {
+        $_user = auth()->user();
+        if (!$_user->ableTo('organization.wizard.edit')) {
+            return abort(401);
+        }
+
+        $organization = Organization::with(['landingPage', 'customSections'])->findOrFail($id);
+        $landingPage = $organization->landingPage;
+        $customSections = $organization->customSections ?? collect();
+
+        return view('admin.organizations.landing-page.edit', compact(
+            'organization',
+            'landingPage',
+            'customSections'
+        ));
     }
 
     /**
@@ -562,6 +583,16 @@ class OrganizationWizardController extends Controller
         }
 
         if ($result['success']) {
+            $redirectTo = $request->input('redirect_to', 'next');
+
+            // If coming from standalone landing page, redirect back there
+            if ($redirectTo === 'landing_page') {
+                $activeTab = $request->input('active_tab', 'customSections');
+                return redirect()
+                    ->route('organization.wizard.landing', ['id' => $id, 'tab' => $activeTab])
+                    ->with('success', $result['message']);
+            }
+
             return redirect()
                 ->route('organization.wizard.edit', ['id' => $id, 'step' => 5])
                 ->with('success', $result['message']);
