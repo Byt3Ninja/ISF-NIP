@@ -3048,6 +3048,7 @@ return [
 	'Add Your First Section' => 'Add Your First Section',
 	'No custom sections yet' => 'No custom sections yet',
 	'Add custom sections to enrich your landing page' => 'Add custom sections to enrich your landing page',
+	'Save Custom Sections' => 'Save Custom Sections',
 	'Section Title' => 'Section Title',
 	'Section Content' => 'Section Content',
 	'Enter section title' => 'Enter section title',

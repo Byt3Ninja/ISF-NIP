@@ -22,6 +22,7 @@ class Permissions
         'organization.wizard.update.step3',
         'organization.wizard.update.step4',
         'organization.wizard.update.step5',
+        'organization.wizard.landing',
         'organization.wizard.step5.reorder',
         'organization.wizard.step5.delete',
         'organization.wizard.preview',

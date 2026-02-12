@@ -3103,6 +3103,7 @@ return [
 	'Add Your First Section' => 'أضف قسمك الأول',
 	'No custom sections yet' => 'لا توجد أقسام مخصصة حتى الآن',
 	'Add custom sections to enrich your landing page' => 'أضف أقسام مخصصة لإثراء صفحتك الرئيسية',
+	'Save Custom Sections' => 'حفظ الأقسام المخصصة',
 	'Section Title' => 'عنوان القسم',
 	'Section Content' => 'محتوى القسم',
 	'Enter section title' => 'أدخل عنوان القسم',
