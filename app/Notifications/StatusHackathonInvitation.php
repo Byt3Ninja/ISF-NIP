@@ -129,9 +129,11 @@ class StatusHackathonInvitation extends Notification implements ShouldQueue
         
         // Get from address and name
         $from = $this->getFromAddress($smtpSettings);
+        $orgData = $this->buildEmailOrganizationData($org);
+
             return (new MailMessage)
             ->subject(__('admin.Status_Invitation'))
-            ->markdown('emails.acceptInviteHackathon', ['user' => $this->user, 'teams' => $this->teams, 'status' => $this->status]);
+            ->markdown('emails.acceptInviteHackathon', array_merge(['user' => $this->user, 'teams' => $this->teams, 'status' => $this->status], $orgData));
     }
 
     /**

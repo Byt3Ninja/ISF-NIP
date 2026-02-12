@@ -53,6 +53,7 @@ class Organization extends Model
 		'address',
 		'google_map_url',
 		// Step 2: Social Media
+		'website_url',
 		'linkedin_company_url',
 		'twitter_handle',
 		'facebook_page_url',

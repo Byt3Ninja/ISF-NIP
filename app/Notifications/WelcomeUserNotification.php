@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Broadcasting\WhatsAppChannel;
 use App\Services\WhatsAppService;
+use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -12,8 +13,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 class WelcomeUserNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
- 
+    use Queueable, ConfiguresSmtp;
+
     public $user;
     public $password;
 
@@ -65,14 +66,18 @@ class WelcomeUserNotification extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-       
-        return (new MailMessage)->subject(__('email.welcome_email.subject'))
-            ->view('emails.welcome-email',[
-                'user'     => $this->user,
-                'password' => $this->password,  
-            ]);
+        $org = $this->user->organization ?? $notifiable->organization;
+        $smtpSettings = $org?->organizationSettings;
 
-                    
+        $this->configureSmtp($smtpSettings);
+        $from = $this->getFromAddress($smtpSettings);
+        $orgData = $this->buildEmailOrganizationData($org);
+
+        return (new MailMessage)->subject(__('email.welcome_email.subject'))
+            ->view('emails.welcome-email', array_merge([
+                'user'     => $this->user,
+                'password' => $this->password,
+            ], $orgData));
     }
 
     /**
