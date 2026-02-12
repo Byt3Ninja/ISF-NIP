@@ -94,11 +94,13 @@ class ConfirmEmailUpdateNotification extends Notification implements ShouldQueue
         
         // Get from address and name
         $from = $this->getFromAddress($smtpSettings);
+        $orgData = $this->buildEmailOrganizationData($org);
+
         return (new MailMessage)
             ->subject(__('notifications.confirm_email_update.subject'))
-            ->view('admin.emails.updateEmail', [
+            ->view('admin.emails.updateEmail', array_merge([
                 'url' => $this->url,
-            ]);
+            ], $orgData));
     }
 
     public function toWhatsapp(object $notifiable): string

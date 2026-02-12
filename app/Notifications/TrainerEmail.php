@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -9,7 +10,8 @@ use Illuminate\Notifications\Notification;
 
 class TrainerEmail extends Notification
 {
-    use Queueable;
+    use Queueable, ConfiguresSmtp;
+
     public $data;
 
     /**
@@ -35,9 +37,16 @@ class TrainerEmail extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
+        $org = $notifiable->organization;
+        $smtpSettings = $org?->organizationSettings;
+
+        $this->configureSmtp($smtpSettings);
+        $from = $this->getFromAddress($smtpSettings);
+        $orgData = $this->buildEmailOrganizationData($org);
+
         return (new MailMessage)
             ->subject('New Training invitation')
-            ->markdown('emails.emailTrainer', $this->data);
+            ->markdown('emails.emailTrainer', array_merge($this->data, $orgData));
     }
 
     /**

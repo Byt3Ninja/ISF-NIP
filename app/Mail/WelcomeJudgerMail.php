@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -11,7 +12,7 @@ use Illuminate\Queue\SerializesModels;
 
 class WelcomeJudgerMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, ConfiguresSmtp;
 
     public $user;
     /**
@@ -25,8 +26,12 @@ class WelcomeJudgerMail extends Mailable
 
     public function build()
     {
+        $org = $this->user->organization ?? null;
+        $orgData = $this->buildEmailOrganizationData($org);
+
         return $this->subject('مرحبًا بك كـ Judger!')
-                    ->view('emails.welcome_judger');
+                    ->view('emails.welcome_judger')
+                    ->with($orgData);
     }
     
     /**

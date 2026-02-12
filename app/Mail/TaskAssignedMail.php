@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\TodoList;
+use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -12,7 +13,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 class TaskAssignedMail extends Mailable implements ShouldQueue
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, ConfiguresSmtp;
 
     public $task;
     public $assignedUser;
@@ -37,8 +38,11 @@ class TaskAssignedMail extends Mailable implements ShouldQueue
 
      public function build()
     {
+        $org = $this->assignedUser->organization ?? null;
+        $orgData = $this->buildEmailOrganizationData($org);
+
         return $this->subject('تم تعيين مهمة جديدة لك')
-                    ->view('emails.task_assigned', ['task' => $this->task, 'assignedUser' => $this->assignedUser]);
+                    ->view('emails.task_assigned', array_merge(['task' => $this->task, 'assignedUser' => $this->assignedUser], $orgData));
     }
 
     /**

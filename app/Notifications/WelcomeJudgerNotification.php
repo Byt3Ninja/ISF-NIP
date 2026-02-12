@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -12,7 +13,7 @@ use App\Broadcasting\WhatsAppChannel;
 
 class WelcomeJudgerNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, ConfiguresSmtp;
 
     public $data;
     /**
@@ -57,6 +58,13 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
+        $org = $notifiable->organization;
+        $smtpSettings = $org?->organizationSettings;
+
+        $this->configureSmtp($smtpSettings);
+        $from = $this->getFromAddress($smtpSettings);
+        $orgData = $this->buildEmailOrganizationData($org);
+
         $token = Password::getRepository()->create($notifiable);
 
         $resetUrl = url(route('password.reset', [
@@ -67,11 +75,11 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
             if ($this->data['role'] === 'Judger') {
                 return (new MailMessage)
                     ->subject(__('notifications.welcome_judger.subject'))
-                    ->markdown('emails.welcome_judger', ['data' => $this->data]);
+                    ->markdown('emails.welcome_judger', array_merge(['data' => $this->data], $orgData));
             } else {
                 return (new MailMessage)
                     ->subject(__('notifications.welcome.subject'))
-                    ->markdown('emails.welcome', ['data' => $this->data]);
+                    ->markdown('emails.welcome', array_merge(['data' => $this->data], $orgData));
             }
     }
 
