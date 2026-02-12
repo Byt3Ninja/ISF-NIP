@@ -25,6 +25,7 @@
     ['id' => 'achievements', 'icon' => 'trophy', 'label' => __('admin.Achievements & Impact')],
     ['id' => 'media', 'icon' => 'share', 'label' => __('admin.Media & Recognition')],
     ['id' => 'partners', 'icon' => 'users', 'label' => __('admin.Partners')],
+    ['id' => 'programs', 'icon' => 'rocket', 'label' => __('admin.Programs')],
   ];
 @endphp
 
@@ -286,8 +287,8 @@
     // Also collect fields from landing section tab panes (they're outside the form)
     const formData = new FormData($form[0]);
 
-    // Gather inputs from the 4 landing section tab panes
-    $('#lp-howItWorks, #lp-achievements, #lp-media, #lp-partners').find('input, select, textarea').each(function() {
+    // Gather inputs from the landing section tab panes
+    $('#lp-howItWorks, #lp-achievements, #lp-media, #lp-partners, #lp-programs').find('input, select, textarea').each(function() {
       const $el = $(this);
       const name = $el.attr('name');
       if (!name) return;
@@ -344,7 +345,7 @@
     });
 
     // Copy all fields from landing section tab panes
-    $('#lp-howItWorks, #lp-achievements, #lp-media, #lp-partners').find('input, select, textarea').each(function() {
+    $('#lp-howItWorks, #lp-achievements, #lp-media, #lp-partners, #lp-programs').find('input, select, textarea').each(function() {
       const $el = $(this);
       const name = $el.attr('name');
       if (!name) return;

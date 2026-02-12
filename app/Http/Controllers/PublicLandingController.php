@@ -5,15 +5,20 @@ namespace App\Http\Controllers;
 use App\Organization;
 use App\OrganizationLandingPage;
 use App\Services\OrganizationCustomSectionService;
+use App\Services\ProgramLandingService;
 use Illuminate\Http\Request;
 
 class PublicLandingController extends Controller
 {
     protected $customSectionService;
+    protected $programLandingService;
 
-    public function __construct(OrganizationCustomSectionService $customSectionService)
-    {
+    public function __construct(
+        OrganizationCustomSectionService $customSectionService,
+        ProgramLandingService $programLandingService
+    ) {
         $this->customSectionService = $customSectionService;
+        $this->programLandingService = $programLandingService;
     }
     /**
      * Display the public landing page for an organization.
@@ -94,12 +99,19 @@ class PublicLandingController extends Controller
         $currentUser = auth()->user();
         $customSections = $this->customSectionService->getVisibleSections($organization->id, $currentUser);
 
+        // Get landing programs
+        $orderBy = $landingPage->programs_order_by ?? 'newest';
+        $landingPrograms = $landingPage->programs_enabled
+            ? $this->programLandingService->getLandingPrograms($organization->id, $orderBy)
+            : collect();
+
         return view('public.organization-landing', [
             'organization' => $organization,
             'landingPage' => $landingPage,
             'articlesWithUrls' => $articlesWithUrls,
             'partnersWithUrls' => $partnersWithUrls,
             'customSections' => $customSections,
+            'landingPrograms' => $landingPrograms,
             'locale' => $locale,
             'l' => $locale,
             'isRtl' => $isRtl,

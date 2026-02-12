@@ -325,6 +325,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
         Route::put('/{id}/step5', 'OrganizationWizardController@updateStep5')->name('update.step5');
         Route::post('/{id}/step5/reorder', 'OrganizationWizardController@reorderStep5Sections')->name('step5.reorder');
         Route::delete('/{id}/step5/{sectionId}', 'OrganizationWizardController@deleteStep5Section')->name('step5.delete');
+        // Programs on Landing Page
+        Route::post('/{id}/programs/{cycleId}/landing', 'OrganizationWizardController@updateProgramLanding')->name('programs.landing.update');
+        Route::post('/{id}/programs/reorder', 'OrganizationWizardController@reorderPrograms')->name('programs.reorder');
         Route::post('/draft', 'OrganizationWizardController@saveDraft')->name('draft');
         Route::put('/{id}/draft', 'OrganizationWizardController@saveDraft')->name('draft.update');
         Route::post('/{id}/publish', 'OrganizationWizardController@publish')->name('publish');
