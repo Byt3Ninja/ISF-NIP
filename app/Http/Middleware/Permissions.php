@@ -30,6 +30,8 @@ class Permissions
         'organization.wizard.generate.slug',
         'organization.wizard.managers.list',
         'organization.wizard.managers.create',
+        'organization.wizard.programs.landing.update',
+        'organization.wizard.programs.reorder',
         'organization.wizard.draft',
         'organization.wizard.draft.update',
         'organization.wizard.publish',

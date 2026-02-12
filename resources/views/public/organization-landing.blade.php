@@ -86,6 +86,7 @@
 
 @php
  $sections = [
+   ['id' => 'programs', 'label' => __('admin.Programs'), 'visible' => $landingPage->programs_enabled && isset($landingPrograms) && $landingPrograms->count() > 0],
    ['id' => 'how-it-works', 'label' => __('admin.How It Works'), 'visible' => $landingPage->how_it_works_enabled && !empty($landingPage->process_steps)],
    ['id' => 'achievements', 'label' => __('admin.Achievements & Impact'), 'visible' => $landingPage->achievements_enabled && !empty($landingPage->metrics)],
    ['id' => 'media', 'label' => __('admin.Media & Recognition'), 'visible' => $landingPage->media_enabled && !empty($articlesWithUrls)],
@@ -296,9 +297,9 @@
 
             <!-- CTA + Social -->
             <div class="d-flex align-items-center flex-wrap">
-              <button class="btn btn-xl btn-primary mb-8 mb-md-4">
+              <a href="#programs" class="btn btn-xl btn-primary mb-8 mb-md-4">
                 {{ __('admin.explore_programs') }}
-              </button>
+              </a>
 
               @php
                 $socialLinks = [
@@ -362,6 +363,173 @@
     </div>
   </div>
   <!--/ Navigation Pills -->
+
+  <!-- Programs Section -->
+  @if($landingPage->programs_enabled && isset($landingPrograms) && $landingPrograms->count() > 0)
+  <section id="programs" class="section-py bg-body landing-reviews pb-0"
+    @php
+      $programsBg = '';
+      if (($landingPage->programs_bg_type ?? 'solid') === 'gradient' && $landingPage->programs_bg_gradient_start && $landingPage->programs_bg_gradient_end) {
+        $programsBg = "background: linear-gradient(135deg, {$landingPage->programs_bg_gradient_start}, {$landingPage->programs_bg_gradient_end});";
+      } elseif ($landingPage->programs_bg_color) {
+        $programsBg = "background-color: {$landingPage->programs_bg_color};";
+      }
+    @endphp
+    @if($programsBg) style="{{ $programsBg }}" @endif
+  >
+    <div class="container">
+      <div class="row align-items-center gx-0 gy-4 g-lg-5 mb-5 pb-md-5">
+        <div class="col-md-6 col-lg-5 col-xl-3">
+          @if($landingPage->programs_subtitle)
+            <div class="text-center mb-4">
+              <span class="badge bg-label-primary">{{ $landingPage->programs_subtitle }}</span>
+            </div>
+          @endif
+          @if($landingPage->programs_title)
+            <h4 class="text-center mb-1">
+              <span class="position-relative fw-extrabold z-1">
+                {{ $landingPage->programs_title }}
+                <img
+                  src="/vuexy/assets/img/front-pages/icons/section-title-icon.png"
+                  alt="section title"
+                  class="section-title-img position-absolute object-fit-contain bottom-0 z-n1" />
+              </span>
+            </h4>
+          @endif
+          @if($landingPage->programs_description)
+            <p class="text-center mb-12">
+              {{ $landingPage->programs_description }}
+            </p>
+          @endif
+
+          <div class="landing-reviews-btns" id="programs-nav-controls">
+            <button
+              id="programs-previous-btn"
+              class="btn btn-label-primary reviews-btn me-4 scaleX-n1-rtl"
+              type="button">
+              <i class="ti ti-chevron-left ti-md"></i>
+            </button>
+            <button id="programs-next-btn" class="btn btn-label-primary reviews-btn scaleX-n1-rtl" type="button">
+              <i class="ti ti-chevron-right ti-md"></i>
+            </button>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-7 col-xl-9">
+          <div class="swiper-programs-carousel overflow-hidden">
+            <style>
+              #swiper-programs .swiper-wrapper { align-items: stretch; }
+              #swiper-programs .swiper-slide { height: auto; }
+            </style>
+            <div class="swiper" id="swiper-programs">
+              <div class="swiper-wrapper">
+                @foreach($landingPrograms as $program)
+                  <div class="swiper-slide">
+                    <div class="card h-100 border shadow-none">
+                      <div class="card-body d-flex flex-column">
+                        {{-- Logo + Type badge --}}
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                          <img
+                            src="{{ $program->logo }}"
+                            alt="{{ $program->title }}"
+                            class="rounded"
+                            style="width: 48px; height: 48px; object-fit: contain;"
+                          />
+                          <span class="badge bg-label-{{ $program->type == 'Hackathon' ? 'warning' : 'primary' }}">
+                            {{ __('cycles.' . ($program->type ?? 'General_Program')) }}
+                          </span>
+                        </div>
+
+                        {{-- Program name --}}
+                        <h5 class="card-title mb-3">{{ $program->title }}</h5>
+
+                        {{-- Focus area tags --}}
+                        @if($program->focusAreas && $program->focusAreas->count() > 0)
+                          <div class="d-flex flex-wrap gap-1 mb-3">
+                            @foreach($program->focusAreas->take(3) as $area)
+                              <span class="badge bg-label-dark rounded-pill">
+                                {{ $isRtl ? $area->name_ar : $area->name_en }}
+                              </span>
+                            @endforeach
+                            @if($program->focusAreas->count() > 3)
+                              <span class="badge bg-label-secondary rounded-pill">
+                                +{{ $program->focusAreas->count() - 3 }}
+                              </span>
+                            @endif
+                          </div>
+                        @endif
+
+                        {{-- Short description --}}
+                        @if($program->short_description)
+                          <p class="card-text text-muted mb-3" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                            {{ $program->short_description }}
+                          </p>
+                        @endif
+
+                        {{-- Benefits --}}
+                        @if($program->benefits && $program->benefits->count() > 0)
+                          <div class="row g-2 mb-3">
+                            @foreach($program->benefits->take(4) as $benefit)
+                              <div class="col-6">
+                                <div class="d-flex align-items-center">
+                                  @if($benefit->icon)
+                                    <i class="ti {{ $benefit->icon }} me-2 text-primary"></i>
+                                  @else
+                                    <i class="ti ti-circle-check me-2 text-primary"></i>
+                                  @endif
+                                  <small class="text-truncate">{{ $isRtl ? ($benefit->label_ar ?: $benefit->label_en) : $benefit->label_en }}</small>
+                                </div>
+                              </div>
+                            @endforeach
+                          </div>
+                        @endif
+
+                        {{-- Spacer to push bottom content down --}}
+                        <div class="mt-auto">
+                          {{-- Date + Location --}}
+                          @if($program->start || $program->location)
+                            <div class="border rounded p-2 mb-3 d-flex flex-wrap gap-3">
+                              @if($program->start)
+                                <div class="d-flex align-items-center">
+                                  <i class="ti ti-calendar me-1 text-muted"></i>
+                                  <small class="text-muted">{{ $program->start->format('M d, Y') }}</small>
+                                </div>
+                              @endif
+                              @if($program->location)
+                                <div class="d-flex align-items-center">
+                                  <i class="ti ti-map-pin me-1 text-muted"></i>
+                                  <small class="text-muted">{{ $program->location }}</small>
+                                </div>
+                              @endif
+                            </div>
+                          @endif
+
+                          {{-- CTA Buttons (only if public URL is set) --}}
+                          @if($program->public_slug)
+                            <div class="d-flex gap-2">
+                              <a href="/{{ $organization->short_code }}/program/{{ $program->public_slug }}"
+                                class="btn btn-outline-primary flex-fill">
+                                {{ __('admin.View Program') }}
+                              </a>
+                              <a href="/{{ $organization->short_code }}/program/{{ $program->public_slug }}/apply"
+                                class="btn btn-primary flex-fill">
+                                {{ __('admin.Apply Now') }}
+                              </a>
+                            </div>
+                          @endif
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                @endforeach
+              </div>
+              <div class="swiper-pagination mt-4"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  @endif
 
   <!-- How It Works Section -->
   @if($landingPage->how_it_works_enabled && !empty($landingPage->process_steps))
@@ -896,10 +1064,52 @@
       const nav = document.querySelector('.layout-navbar'),
         animationImg = document.querySelectorAll('.hero-dashboard-img'),
         swiperLogos = document.getElementById('swiper-partners-logos'),
-        swiperPartners = document.getElementById('swiper-partners');
+        swiperPartners = document.getElementById('swiper-partners'),
+        swiperPrograms = document.getElementById('swiper-programs');
 
       // swiper carousel
       // Customers reviews
+      // -----------------------------------
+      // Programs carousel
+      // -----------------------------------
+      if (swiperPrograms) {
+        var programSlideCount = swiperPrograms.querySelectorAll('.swiper-slide').length;
+        new Swiper(swiperPrograms, {
+          slidesPerView: 1,
+          spaceBetween: 24,
+          grabCursor: true,
+          loop: programSlideCount > 3,
+          navigation: {
+            nextEl: '#programs-next-btn',
+            prevEl: '#programs-previous-btn'
+          },
+          pagination: {
+            el: swiperPrograms.querySelector('.swiper-pagination'),
+            clickable: true
+          },
+          breakpoints: {
+            1200: {
+              slidesPerView: 3
+            },
+            992: {
+              slidesPerView: 2
+            }
+          }
+        });
+
+        // Hide nav controls when all cards fit
+        function toggleProgramsNav() {
+          var controls = document.getElementById('programs-nav-controls');
+          if (!controls) return;
+          var w = window.innerWidth;
+          var visible = programSlideCount > (w >= 1200 ? 3 : (w >= 992 ? 2 : 1));
+          controls.style.display = visible ? '' : 'none';
+        }
+        toggleProgramsNav();
+        window.addEventListener('resize', toggleProgramsNav);
+      }
+
+      // Partners carousel
       // -----------------------------------
       if (swiperPartners) {
         new Swiper(swiperPartners, {

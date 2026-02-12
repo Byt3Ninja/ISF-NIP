@@ -14,7 +14,7 @@ class Cycle extends Model
 {
     use Auditable;
     public static $module = 'Program';
-    protected $casts = ['start'  => 'date:Y-m-d', 'end' => 'date:Y-m-d', 'is_public' => 'boolean',];
+    protected $casts = ['start'  => 'date:Y-m-d', 'end' => 'date:Y-m-d', 'is_public' => 'boolean', 'landing_visible' => 'boolean', 'landing_sort_order' => 'integer',];
     protected $guarded = [];
 
     // =============> Attributes <======================
@@ -97,6 +97,26 @@ class Cycle extends Model
     public function custom_pages()
     {
         return $this->hasMany(CycleCustomPages::class);
+    }
+
+    public function focusAreas()
+    {
+        return $this->belongsToMany(
+            StaticCategory::class,
+            'cycle_focus_areas',
+            'cycle_id',
+            'static_category_id'
+        )->withTimestamps();
+    }
+
+    public function benefits()
+    {
+        return $this->hasMany(CycleBenefit::class)->orderBy('sort_order');
+    }
+
+    public function scopeLandingVisible($query)
+    {
+        return $query->where('landing_visible', true);
     }
 
     public function getProgress()

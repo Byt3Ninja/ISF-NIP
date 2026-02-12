@@ -86,6 +86,13 @@ class OrganizationLandingPageService
                 $landingPage->partners_list ?? []
             );
 
+            // Programs Section
+            $landingPage->programs_enabled = $data['programs_enabled'] ?? false;
+            $landingPage->programs_title = $data['programs_title'] ?? null;
+            $landingPage->programs_subtitle = $data['programs_subtitle'] ?? null;
+            $landingPage->programs_description = $data['programs_description'] ?? null;
+            $landingPage->programs_order_by = $data['programs_order_by'] ?? 'newest';
+
             // Theme
             $landingPage->landing_theme = $data['landing_theme'] ?? 'gradient';
 
@@ -406,5 +413,11 @@ class OrganizationLandingPageService
         $landingPage->partners_bg_color = $data['partners_bg_color'] ?? null;
         $landingPage->partners_bg_gradient_start = $data['partners_bg_gradient_start'] ?? null;
         $landingPage->partners_bg_gradient_end = $data['partners_bg_gradient_end'] ?? null;
+
+        // Programs
+        $landingPage->programs_bg_type = $data['programs_bg_type'] ?? 'solid';
+        $landingPage->programs_bg_color = $data['programs_bg_color'] ?? null;
+        $landingPage->programs_bg_gradient_start = $data['programs_bg_gradient_start'] ?? null;
+        $landingPage->programs_bg_gradient_end = $data['programs_bg_gradient_end'] ?? null;
     }
 }
