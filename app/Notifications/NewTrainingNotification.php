@@ -105,9 +105,11 @@ class NewTrainingNotification extends Notification implements ShouldQueue
         
         // Get from address and name
         $from = $this->getFromAddress($smtpSettings);
+        $orgData = $this->buildEmailOrganizationData($org);
+
         return (new MailMessage)
             ->subject(__('admin.new_training_message'))
-            ->markdown('emails.new_training', ['data' => $this->data]);
+            ->markdown('emails.new_training', array_merge(['data' => $this->data], $orgData));
     }
 
     /**

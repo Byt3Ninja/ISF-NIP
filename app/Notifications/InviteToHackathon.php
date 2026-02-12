@@ -126,9 +126,11 @@ class InviteToHackathon extends Notification implements ShouldQueue
         //     ->action('Accept Invitation', url('/invitations/accept')) // عدّل الرابط حسب مشروعك
         //     ->line('Thank you for using our platform!');
 
+        $orgData = $this->buildEmailOrganizationData($org);
+
             return (new MailMessage)
             ->subject(__('admin.Invitation_to_Join_a_Hackathon_Team'))
-            ->markdown('emails.hackathon_inviteTeam', ['data' => $this->teamLeader, 'teamName' => $this->team_q, 'teamMember' => $this->teamMember]);
+            ->markdown('emails.hackathon_inviteTeam', array_merge(['data' => $this->teamLeader, 'teamName' => $this->team_q, 'teamMember' => $this->teamMember], $orgData));
     }
 
     /**

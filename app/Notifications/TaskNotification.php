@@ -104,13 +104,15 @@ class TaskNotification extends Notification implements ShouldQueue
         
         // Get from address and name
         $from = $this->getFromAddress($smtpSettings);
+        $orgData = $this->buildEmailOrganizationData($org);
+
         return (new MailMessage)
             ->subject(__('notifications.task.subject'))
-            ->markdown('emails.mentor-task', [
+            ->markdown('emails.mentor-task', array_merge([
                 'data' => $this->data,
                 'notifiable' => $notifiable,
                 'action' => $this->data['action']
-            ]);
+            ], $orgData));
     }
 
     /**

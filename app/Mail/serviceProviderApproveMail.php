@@ -14,7 +14,7 @@ use Throwable;
 
 class serviceProviderApproveMail extends Mailable implements ShouldQueue
 {
-	use Queueable, SerializesModels;
+	use Queueable, SerializesModels, ConfiguresSmtp;
 
 	public $contact_name;
 	public $email_address;
@@ -34,13 +34,15 @@ class serviceProviderApproveMail extends Mailable implements ShouldQueue
 
 	public function build()
 	{
+		$orgData = $this->buildEmailOrganizationData(null);
+
 		return $this->subject('Update on Your Request - تحديث بخصوص طلبكم')->view(
-			'emails.service-providers.approve', [
+			'emails.service-providers.approve', array_merge([
 				'contact_name' => $this->contact_name,
 				'email' => $this->email_address,
 				'password' => $this->temp_password,
 				'login_url' => $this->login_url
-			]
+			], $orgData)
 		);
 	}
 }

@@ -4,6 +4,7 @@ namespace App\Mail;
 
 use App\InviteMentor;
 use App\Organization;
+use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -15,7 +16,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 class InviteMentorMail extends Mailable implements ShouldQueue
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, ConfiguresSmtp;
 
    public InviteMentor $invitation;
 
@@ -26,14 +27,18 @@ class InviteMentorMail extends Mailable implements ShouldQueue
 
     public function build()
     {
+        $orgIds = $this->invitation->organization_ids ?? [];
+        $firstOrg = !empty($orgIds) ? Organization::find($orgIds[0]) : null;
+        $orgData = $this->buildEmailOrganizationData($firstOrg);
+
         $mail = $this->subject($this->invitation->subject)
                      ->view('emails.invite_mentor')
-                     ->with([
+                     ->with(array_merge([
                          'name'        => $this->invitation->name,
                          'messageBody' => $this->invitation->message_content,
                          'scope'       => $this->invitation->scope,
-                         'organizations' => Organization::whereIn('id', $this->invitation->organization_ids ?? [])->get()->map(fn($org) => ['id' => $org->id, 'name' => $org->name_en])->toArray(),
-                     ]);
+                         'organizations' => Organization::whereIn('id', $orgIds)->get()->map(fn($org) => ['id' => $org->id, 'name' => $org->name_en])->toArray(),
+                     ], $orgData));
 
         // Attach files if exist
         $attachments = $this->invitation->attachments;

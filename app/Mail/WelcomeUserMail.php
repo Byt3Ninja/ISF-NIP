@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\User;
+use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -12,7 +13,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 class WelcomeUserMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, ConfiguresSmtp;
 
     public $user;
     public $password;
@@ -27,12 +28,15 @@ class WelcomeUserMail extends Mailable
 
    public function build()
     {
+        $org = $this->user->organization ?? null;
+        $orgData = $this->buildEmailOrganizationData($org);
+
         return $this->subject('Welcome to the Platform')
                     ->view('emails.welcome-email')
-                    ->with([
+                    ->with(array_merge([
                         'user' => $this->user,
                         'password' => $this->password
-                    ]);
+                    ], $orgData));
     }
 
     

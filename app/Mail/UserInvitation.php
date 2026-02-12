@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Invitation;
+use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -12,7 +13,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 class UserInvitation extends Mailable implements ShouldQueue
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, ConfiguresSmtp;
 
     public $invitation;
 
@@ -27,8 +28,12 @@ class UserInvitation extends Mailable implements ShouldQueue
 
     public function build()
     {
+        $org = $this->invitation->organization ?? null;
+        $orgData = $this->buildEmailOrganizationData($org);
+
         return $this->subject('Invitation to Join Organization')
-                    ->view('emails.invitation');
+                    ->view('emails.invitation')
+                    ->with($orgData);
     }
 
 }
