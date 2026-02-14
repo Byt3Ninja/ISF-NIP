@@ -7,7 +7,6 @@ use Exception;
 use App\Schedule;
 use App\Settings;
 use Carbon\Carbon;
-use App\MentorshipRequest;
 use Illuminate\Http\Request;
 use App\Services\WhatsAppService;
 use Illuminate\Support\Facades\DB;
@@ -153,9 +152,9 @@ class SlotController extends Controller
 		
 		$settings = Settings::where('id', 1)->first();
 		$offline_allowed = $settings ? ($settings->allow_offline_sessions == 1 ? true : false) : false;
-		$mentorship_requests = MentorshipRequest::where('approved', 'Yes')->where('zoom_date', '>=', date("Y-m-d"))->get();
+		$mentorId = $id ?? auth()->id();
 
-		$schedules = Schedule::where('user_id', $id ?? auth()->id())
+		$query = Schedule::where('user_id', $mentorId)
 						->where(function ($query) {$query
 								->whereNull('date')
 								->orWhere('date', '>', date('Y-m-d'))
@@ -164,21 +163,36 @@ class SlotController extends Controller
 									->where('tto', '>', date('H:i:s'));
 								});
 						})
-						->get();
+						// اخفاء سلوتات الـ Period المحجوزة (approved أو pending)
+						->where(function ($outer) {
+							$outer->whereNull('date') // Weekly slots: ترجع دايماً
+								->orWhere(function ($periodQuery) {
+									$periodQuery->whereNotNull('date')
+										->whereNotExists(function ($sub) {
+											$sub->select(\DB::raw(1))
+												->from('mentorship_requests')
+												->where(function ($q) {
+													$q->where('approved', 'Yes')
+														->orWhereNull('approved');
+												})
+												->whereRaw('mentorship_requests.mentor_id = schedules.user_id')
+												->whereRaw('mentorship_requests.zoom_date >= CURDATE()')
+												->whereRaw("
+													DATE(mentorship_requests.zoom_date) = schedules.date
+													AND TIME(mentorship_requests.zoom_date)
+														BETWEEN schedules.tfrom AND schedules.tto
+												");
+										});
+								});
+						});
+
 		// Active-only filter
 		if ($request->has('active_only') && $request->active_only == 'true') {
-			$schedules = Schedule::where('user_id', $id ?? auth()->id())
-						->where(function ($query) {$query
-								->whereNull('date')
-								->orWhere('date', '>', date('Y-m-d'))
-								->orWhere(function ($q) {
-									$q->where('date', date('Y-m-d'))
-									->where('tto', '>', date('H:i:s'));
-								});
-						})
-						->get();
+			// placeholder for future active-state filtering
 		}
 
+		$schedules = $query->get();
+			
 		if($offline_allowed == false){
 			$schedules = $schedules->where('session_type', '!=','Offline');
 		}
@@ -225,10 +239,28 @@ class SlotController extends Controller
 			}
 			
 		}
-		// Calculate blocked intervals
+		// Calculate blocked intervals (max concurrent sessions)
 		$settings = Settings::where('id', 1)->first();
 		$maxLimit = $settings ? (int)$settings->max_concurrent_sessions : 0;
 		$blockedIntervals = $this->getBlockedIntervals($maxLimit);
+
+		// اضافة حجوزات المنتور كـ blocked intervals عشان الـ weekly slots تتفلتر per-date فى الـ frontend
+		$mentorBookings = \DB::table('mentorship_requests')
+			->where('mentor_id', $mentorId)
+			->where(function ($q) {
+				$q->where('approved', 'Yes')->orWhereNull('approved');
+			})
+			->where('zoom_date', '>=', now()->toDateString())
+			->get(['zoom_date', 'period']);
+
+		foreach ($mentorBookings as $booking) {
+			$start = Carbon::parse($booking->zoom_date);
+			$end = (clone $start)->addMinutes($booking->period ?: 60);
+			$blockedIntervals[] = [
+				'start' => $start->timestamp,
+				'end' => $end->timestamp,
+			];
+		}
 		
 
 		// If fetching for a mentor, include mentor info
@@ -252,6 +284,7 @@ class SlotController extends Controller
 
 	public function store(Request $request)
 	{
+		
 		$settings = Settings::where('id', 1)->first();
 			$validated = $request->validate([
 					'session_type' => 'required',

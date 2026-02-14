@@ -87,7 +87,7 @@
               @php
                 $scopeOptions = [
                   ['key' => 'public', 'label' => __('admin.Public'), 'hint' => __('admin.public_scope_hint')],
-                  ['key' => 'organization', 'label' => __('admin.Organization'), 'hint' => __('admin.organization_scope_hint')],
+                  // ['key' => 'organization', 'label' => __('admin.Organization'), 'hint' => __('admin.organization_scope_hint')],
                 ];
 
                 $specializations = [];
@@ -103,18 +103,35 @@
                 $specializations = array_unique($specializations);
               @endphp
               <!-- Filters Section -->
+             
               <div class="w-75">
                 <div class="row g-3 justify-content-lg-end">
-                  <div class="col-md-2">
-                    <select id="scopeFilter" class="form-select">
-                      <option value="">{{ __('admin.Scope') }} ({{ __('admin.All') }})</option>
-                      @foreach ($scopeOptions as $option)
-                        <option value="{{ $option['key'] }}" {{ request('scope') == $option['key'] ? 'selected' : '' }}>
-                          {{ $option['label'] }}  ( {{ $option['hint'] }} )
-                        </option>
-                      @endforeach
-                    </select>
-                  </div>
+                  <form method="GET" action="{{ route('mentorships.requests_list', ['id' => $id]) }}" >
+                    <div class="col-md-2">
+                      @php
+                        $organization_q = App\Organization::where('is_draft', 0);
+                        $organization = auth()->user()->hasRole('admin') ? $organization_q->get() : $organization_q->where('id', auth()->user()->organization_id)->get(); //App\Organization::all();
+                      @endphp
+                      <select class="form-select" name="scopeFilter">
+                        <option value="">{{ __('admin.Scope') }} ({{ __('admin.All') }})</option>
+                        @foreach ($scopeOptions as $option)
+                          <option value="{{ $option['key'] }}" {{ request('scopeFilter') == $option['key'] ? 'selected' : '' }}>
+                            {{ $option['label'] }}  ( {{ $option['hint'] }} )
+                          </option>
+                        @endforeach
+                        @foreach ($organization as $org)
+                          <option value="{{ $org->id }}" {{ $org->id == request('scopeFilter') ? 'selected' : '' }}>
+                            {{ $org->name }}
+                          </option>
+                        @endforeach
+                      </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                      <i class="ti ti-filter me-2"></i>
+                    </button>
+
+                  </form>
+
                   <div class="col-md-3">
                     <select id="specializationFilter" class="form-select">
                       <option value="">{{ __('cycles.Specialization') }} ({{ __('admin.All') }})</option>

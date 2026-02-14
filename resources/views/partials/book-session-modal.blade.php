@@ -627,14 +627,14 @@ $(document).ready(function() {
       return;
     }
 
-    const startTime = $('#sessionStartTime').val();
-    const endTime = $('#sessionEndTime').val();
+    // const startTime = $('#sessionStartTime').val();
+    // const endTime = $('#sessionEndTime').val();
 
-    if (!startTime || !endTime) {
-      e.preventDefault();
-      $('#slotError').text('{{ __('mentor.please_select_session_times') }}').show();
-      return;
-    }
+    // if (!startTime || !endTime) {
+    //   e.preventDefault();
+    //   $('#slotError').text('{{ __('mentor.please_select_session_times') }}').show();
+    //   return;
+    // }
 
     $('#slotError').hide();
     releaseSuccessAlert({
