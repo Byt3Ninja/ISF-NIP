@@ -285,7 +285,7 @@
           <select id="currency" name="currency" class="select2 form-select">
             <option value="">{{ __('admin.Select Currency') }}</option>
             @foreach ($Currencies as $Currency)
-              @if($client->company->Currency != null)
+              @if( $client->company && $client->company->Currency != null)
                 <option value="{{ $Currency->currency_code }}" {{ $client->company->Currency && $client->company->Currency == $Currency->currency_code ? 'selected' : '' }}>
                   {{ $Currency->currency_name }}
                 </option>

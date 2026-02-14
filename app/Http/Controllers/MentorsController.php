@@ -85,20 +85,17 @@ class MentorsController extends Controller
 	public function list(Request $request, $id = 0)
 	{
 		$l = app()->getLocale();
+		
 		$user = auth()->user();
 		$orgIds = $user->organizations_ids;
 		if ($id == 0) {
+			
 			$id = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
 				return $q->whereIn('organization_id', $orgIds);
 			})->orderBy('start', 'DESC')->pluck('id')->first();
 		}
 		// $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
-		$mentors = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
-			->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
-			->where('roles.default_for', 'mentor')
-			->select('users.*')
-			->with('inviteMentors')
-			->get();
+		$mentors = User::role('mentor');
 		// $mentors = User::role('mentor')->with('inviteMentors')->get();
 		
 		$cList = CyclesMentors::where('cycle_id', $id)->pluck('user_id')->toArray();
@@ -109,52 +106,56 @@ class MentorsController extends Controller
 		// })->get();
 
 		$scopeFilter = $request->scopeFilter;
-		
 		if (!$user->hasRole('Admin') && !empty($orgIds)) {
-			
                     $cycles = Cycle::whereIn('organization_id', $orgIds)->get();
-                    // $mentors = User::whereHas('mentorCycles', function ($q) use ($orgIds) {
-                    //     $q->where(function ($qq) use ($orgIds) {
-                    //         foreach ($orgIds as $orgId) {
-                    //             $qq->orWhere('organization_id', $orgId);
-                    //         }
-                    //     });
-                    // })->get();
                     if (!empty($scopeFilter) && $scopeFilter !== 'all') {
                     if ($scopeFilter === 'public') {
-						
-                    // $cycles = Cycle::whereIn('organization_id', $orgIds)->get();
-                    // $mentors = User::whereHas('mentorCycles', function ($q) use ($orgIds) {
-                    //     $q->whereIn('organization_id', $orgIds);
-                    // })
-                    // ->whereDoesntHave('inviteMentors', function ($q) {
-                    //     $q->whereIn('scope', ['organization', 'Organization']);
-                    // })
-                    // ->get();
-					$mentorsWithoutInvites = $mentors->filter(function ($mentor) {
-						return $mentor->inviteMentors->isEmpty();
-					});
-                    $mentorsWithPublicInvites = $mentors->filter(function ($mentor) {
-						return $mentor->inviteMentors->contains(function($invite){
-							return $invite->scope === 'public';
-						});
-					});
-						$mentors =$mentorsWithoutInvites->merge($mentorsWithPublicInvites);
-                    }else{
-						
-						$mentors = User::whereHas('inviteMentors', function ($q) use ($request) {
-							$q->where('scope', 'Organization')
-							->where('status', 'accepted')
-							->whereJsonContains('organization_ids', (string) $request->scopeFilter);
-						})->get();							
-							
+                        $mentors->where(function ($q) {
+                            $q->whereDoesntHave('inviteMentors')
+                            ->orWhere(function ($q2) {
+                                $q2->whereHas('inviteMentors', function ($q3) {
+                                    $q3->where('scope', 'Public')
+                                        ->where('status', 'accepted');
+                                });
+                            });
+                        });
+                   
+                    } else {
+                         $mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter, $request) {
+                             $query
+                                 ->where('status', 'accepted');
+                             if ($request->scopeFilter != null) {
+                                 $query->whereJsonContains('organization_ids', (string) $request->scopeFilter);
+                             }
+                         });
                     }
-                    }
+                }
                 } else {
                     $cycles = Cycle::all();
+					if (!empty($scopeFilter) && $scopeFilter !== 'all') {
+						if ($scopeFilter === 'public') {
+							$mentors->where(function ($q) {
+								$q->whereDoesntHave('inviteMentors')
+								->orWhere(function ($q2) {
+									$q2->whereHas('inviteMentors', function ($q3) {
+										$q3->where('scope', 'Public')
+											->where('status', 'accepted');
+									});
+								});
+							});
+						} else {
+							$mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter, $request) {
+								$query
+									->where('status', 'accepted');
+								if ($request->scopeFilter != null) {
+									$query->whereJsonContains('organization_ids', (string) $request->scopeFilter);
+								}
+							});
+						}
+                	}
                 }
-
-		$selectedSpecialization = $request->specialization; // الحصول على قيمة التصفية من query string
+			$mentors = $mentors->get();	
+		$selectedSpecialization = $request->specialization; 
 
 		if ($selectedSpecialization != 0) {
 			$mentors = $mentors->filter(function ($mentor) use ($selectedSpecialization, $l) {
@@ -545,17 +546,29 @@ class MentorsController extends Controller
 					$period = $request->period;
 				}
 				$dayName = Carbon::parse($request->date)->format('l');
-
-				$schedules_q = "SELECT * FROM schedules WHERE user_id = ? AND `days` LIKE ? AND tfrom <= ? AND tto >= ?";
+				
+				$schedules_q = "SELECT * FROM schedules WHERE user_id = ? AND `date` LIKE ? AND tfrom <= ? AND tto >= ?";
+				$schedules = DB::select($schedules_q, [
+					$request->mentorid,
+					'%' . $request->date . '%',
+					$request->session_start_time,
+					$request->session_end_time
+				]);
+				
+				if ($schedules == null) {
+					$schedules_q = "SELECT * FROM schedules WHERE user_id = ? AND `days` LIKE ? AND tfrom <= ? AND tto >= ?";
 				$schedules = DB::select($schedules_q, [
 					$request->mentorid,
 					'%' . $dayName . '%',
-					$request->timeFrom,
-					$request->timeTo
+					$request->session_start_time,
+					$request->session_end_time
 				]);
+					// return back()->with(['class' => 'danger','msg' => 'mentor_not_available_in_this_time']);
+				}
 				if ($schedules == null) {
 					return back()->with(['class' => 'danger','msg' => 'mentor_not_available_in_this_time']);
 				}
+				
 				if($request->session_type == 'Offline'){
 					
 					if($settings->allow_offline_sessions == 0){
