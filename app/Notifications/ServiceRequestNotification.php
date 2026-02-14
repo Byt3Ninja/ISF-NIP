@@ -46,21 +46,23 @@ class ServiceRequestNotification extends Mailable implements ShouldQueue
     {
         $service = $this->request->service;
         $requester = $this->request->user;
+        $org = $requester->organization;
+        $orgData = $this->buildEmailOrganizationData($org);
 
-        $adminEmail = User::role('Admin')->orderBy('id')->value('email'); 
-        $orgManagerEmail = User::role('organizationManager')->orderBy('id')->value('email'); 
+        $adminEmail = User::role('Admin')->orderBy('id')->value('email');
+        $orgManagerEmail = User::role('organizationManager')->orderBy('id')->value('email');
         $ccEmails = array_filter([$requester->email, $adminEmail, $orgManagerEmail]);
-        Log::info('CC Emails: ' . implode(', ', $ccEmails). 
-            ' | Requester Email: ' . $requester->email . 
-            ' | Admin Email: ' . $adminEmail . 
+        Log::info('CC Emails: ' . implode(', ', $ccEmails).
+            ' | Requester Email: ' . $requester->email .
+            ' | Admin Email: ' . $adminEmail .
             ' | Org Manager Email: ' . $orgManagerEmail);
         return $this->subject("[Service Request] New Request for {$service->name_en} from {$requester->first_name_en}")
                     ->cc($ccEmails)
-                    ->markdown('emails.service_request', [
+                    ->markdown('emails.service_request', array_merge([
                         'service' => $service,
                         'requester' => $requester,
                         'request' => $this->request,
-                    ]);
+                    ], $orgData));
     }
 
     /**

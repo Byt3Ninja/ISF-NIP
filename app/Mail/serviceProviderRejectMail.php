@@ -15,7 +15,7 @@ use Throwable;
 
 class serviceProviderRejectMail extends Mailable implements ShouldQueue
 {
-	use Queueable, SerializesModels;
+	use Queueable, SerializesModels, ConfiguresSmtp;
 
 	public $reason;
 	public $contact_name;
@@ -31,6 +31,8 @@ class serviceProviderRejectMail extends Mailable implements ShouldQueue
 
 	public function build()
 	{
-		return $this->subject('Update on Your Request - تحديث بخصوص طلبكم')->view('emails.service-providers.reject', ['contact_name' => $this->contact_name, 'reason' => $this->reason]);
+		$orgData = $this->buildEmailOrganizationData(null);
+
+		return $this->subject('Update on Your Request - تحديث بخصوص طلبكم')->view('emails.service-providers.reject', array_merge(['contact_name' => $this->contact_name, 'reason' => $this->reason], $orgData));
 	}
 }

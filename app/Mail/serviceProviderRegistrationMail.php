@@ -15,7 +15,7 @@ use Throwable;
 
 class serviceProviderRegistrationMail extends Mailable implements ShouldQueue
 {
-	use Queueable, SerializesModels;
+	use Queueable, SerializesModels, ConfiguresSmtp;
 
 	public $contact_name;
 	
@@ -29,6 +29,8 @@ class serviceProviderRegistrationMail extends Mailable implements ShouldQueue
 
 	public function build()
 	{
-		return $this->subject('Registration request received - تم استقبال طلب التسجيل')->view('emails.service-providers.registration', ['contact_name' => $this->contact_name]);
+		$orgData = $this->buildEmailOrganizationData(null);
+
+		return $this->subject('Registration request received - تم استقبال طلب التسجيل')->view('emails.service-providers.registration', array_merge(['contact_name' => $this->contact_name], $orgData));
 	}
 }

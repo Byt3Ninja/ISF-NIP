@@ -16,6 +16,7 @@
    ['id' => 'achievements', 'icon' => 'trophy', 'label' => __('admin.Achievements & Impact')],
    ['id' => 'media', 'icon' => 'share', 'label' => __('admin.Media & Recognition')],
    ['id' => 'partners', 'icon' => 'users', 'label' => __('admin.Partners')],
+   ['id' => 'programs', 'icon' => 'rocket', 'label' => __('admin.Programs')],
   ];
 @endphp
 

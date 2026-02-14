@@ -140,8 +140,8 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                           @endif
                           @if ($_user->ableTo('organization.wizard.edit', $permissions))
                           <li>
-                            <a class="dropdown-item" href="{{ route('organization.wizard.edit', $org->id) }}?step=4">
-                              <i class="ti ti-layout me-2"></i> {{ __('admin.Edit') }} {{ __('admin.Landing Page') }}
+                            <a class="dropdown-item" href="{{ route('organization.wizard.landing', $org->id) }}">
+                              <i class="ti ti-layout me-2"></i> {{ __('admin.Manage') }} {{ __('admin.Landing Page') }}
                             </a>
                           </li>
                           @endif

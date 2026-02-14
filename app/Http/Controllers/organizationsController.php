@@ -81,7 +81,7 @@ class organizationsController extends Controller
 			});
 		}
 
-		$organizations = $organizationsQuery->paginate(9);
+		$organizations = $organizationsQuery->paginate(9)->withQueryString();
 		foreach ($organizations as $organization) {
 			$organization->total_startups = Company::whereHas('cycle', function ($query) use ($organization) {
 				$query->where('organization_id', $organization->id);

@@ -122,6 +122,29 @@ trait ConfiguresSmtp
      * @param mixed $smtpSettings
      * @return array [fromAddress, fromName]
      */
+    /**
+     * Build the organization data array for email template branding.
+     * Returns an array of variables that email views can use for org identity.
+     *
+     * @param mixed $organization
+     * @return array
+     */
+    protected function buildEmailOrganizationData($organization): array
+    {
+        $defaultName = config('app.name', 'GrowthLabs');
+
+        return [
+            'org_name'      => $organization?->name ?? $defaultName,
+            'org_logo_url'  => $organization?->image_url ?? null,
+            'org_address'   => $organization?->address ?? null,
+            'org_website'   => $organization?->website_url ?? null,
+            'org_linkedin'  => $organization?->linkedin_company_url ?? null,
+            'org_twitter'   => $organization?->twitter_handle ?? null,
+            'org_facebook'  => $organization?->facebook_page_url ?? null,
+            'org_instagram' => $organization?->instagram_profile_url ?? null,
+        ];
+    }
+
     protected function getFromAddress($smtpSettings): array
     {
         // Default values from config
