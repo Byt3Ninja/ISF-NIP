@@ -213,7 +213,7 @@ if ($_user->hasAnyRole('mentor|Registered')) {
                     <img 
                       class="rounded-circle me-2 border bg-label-light flex-shrink-0"
                       src="{{ $survey->user?->image_url }}"
-                      onerror="this.onerror=null;this.src='/icons/avatar.svg';"
+                      onerror="this.onerror=null;this.src='/icons/account.svg';"
                       height="36"
                       width="36"
                       alt="avatar" 
@@ -227,7 +227,7 @@ if ($_user->hasAnyRole('mentor|Registered')) {
                     @if ($survey->session)
                       <small class="text-muted">
                         <i class="ti ti-calendar ti-xs"></i>
-                        Session: {{ FormatDate($survey->session->zoom_date, 'Y-m-d H:i') }}
+                        {{ __('admin.Session') }}: {{ FormatDate($survey->session->zoom_date, 'Y-m-d H:i') }}
                       </small>
                     @endif
                   </div>
@@ -508,13 +508,13 @@ if ($_user->hasAnyRole('mentor|Registered')) {
 
         // Status Filter
         addDropdownFilter(
-          3,
+          @if ($_user->hasRole('mentor')) 3 @else 2 @endif,
           'statusFilter',
           '{{ __("cycles.All Status") }}'
         );
 
         // Priority (Mandatory/Optional) Filter
-        api.columns(4).every(function () {
+        api.columns(@if ($_user->hasRole('mentor')) 4 @else 3 @endif).every(function () {
           const column = this;
     
           const select = $(`
