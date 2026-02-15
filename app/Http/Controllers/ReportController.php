@@ -27,10 +27,12 @@ use App\Exports\FinalScreeningReportExport;
 
 class ReportController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
         $orgIds = $user->organizations_ids;
+        $program_id = $request->get('program_id', null);
+
         $cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'),function ($q)use($orgIds){
             $q->whereIn('organization_id',$orgIds);
         })->get();
@@ -40,10 +42,21 @@ class ReportController extends Controller
             });
         })->get();
 
-        $data['mentorRequests'] =  MentorshipRequest::all();
-        $available_surveys = SurveyResponses::whereIn('user_id', $data['mentorRequests']->pluck('mentor_id'))->whereIn('triggered_at', $data['mentorRequests']->pluck('id'))->where('triggered_by', 'session')->get();
+        // Fetch all report data server-side
+        $mentorshipData     = $this->mentorshipReport($orgIds, $user, $program_id, $request);
+        $trainingData       = $this->trainingReport($orgIds, $user, $program_id);
+        $screeningData      = $this->screeningReport($orgIds, $user, $program_id);
+        $finalScreeningData = $this->finalScreeningReport($orgIds, $user, $program_id);
+        $cyclesData         = $this->cyclesReport($orgIds, $user, null, $program_id);
+        $mentorSurveyData   = $this->mentorSurveyReport($orgIds, $user, 'all');
+        $startupSurveyData  = $this->startupSurveysReport($orgIds, $user);
 
-        return view('admin.reports.index',compact('companies','cycles','available_surveys'));
+        return view('admin.reports.index', compact(
+            'companies', 'cycles', 'program_id',
+            'mentorshipData', 'trainingData', 'screeningData',
+            'finalScreeningData', 'cyclesData',
+            'mentorSurveyData', 'startupSurveyData'
+        ));
     }
     public function View($type,Request $request){
         $user = auth()->user();
@@ -535,9 +548,20 @@ class ReportController extends Controller
         $l = app()->getLocale();
         $steps_ids = $steps->pluck('id')->toArray();
         $metadata = collect([]);
-        // Only process metadata for the filtered steps
+        $resultsCompanyScores = [];
+        $resultsJudgeScores = [];
+        // Only process metadata for the filtered steps, and collect results() scores
         foreach($steps as $step) {
             $metadata->push(ScreeningEvaluationResults::metadata($step->id));
+            $stepResults = ScreeningEvaluationResults::results($step->id);
+            foreach($stepResults as $companyId => $resultData) {
+                $resultsCompanyScores[$companyId] = round($resultData['total'] * 100, 1);
+                foreach($resultData['judges'] as $judge) {
+                    if (!empty($judge->evaluation)) {
+                        $resultsJudgeScores[$companyId][$judge->id] = round($judge->evaluation->value * 100);
+                    }
+                }
+            }
         }
         $_allSteps = collect();
         $allJudges = collect();
@@ -560,18 +584,23 @@ class ReportController extends Controller
             }
         }
         // $_allCompanies = $_allCompanies->unique('id')->values();
-        $_allCompanies = $_allCompanies->map(function( $c ) use ($l) {
+        $_allCompanies = $_allCompanies->map(function( $c ) use ($l, $resultsCompanyScores, $resultsJudgeScores) {
             $c = clone $c;
             $id = $c->id;
             $output = new stdClass;
             $output->id = $c->id;
             $output->name = $c->{'name_' . $l};
-            $output->score = $c->average_score;
+            // Use results() score for consistency with evaluation modal
+            $output->score = $resultsCompanyScores[$c->id] ?? $c->average_score;
             $output->step_id = $c->company_step_id;
             $output->cycle_id = $c->company_cycle_id;
-            $output->judges = $c->judges->map(function($judge) use ($id) {
+            $output->judges = $c->judges->map(function($judge) use ($id, $resultsJudgeScores) {
                 $judge = clone $judge;
                 $oneResult = $judge->companies->where('id', $id)->first();
+                // Override per-judge score with results() score (modify in-place so $judge->companies also reflects this)
+                if ($oneResult && isset($resultsJudgeScores[$id][$judge->id])) {
+                    $oneResult->score = $resultsJudgeScores[$id][$judge->id];
+                }
                 $judge->result = $oneResult;
                 return $judge;
             });
@@ -613,19 +642,15 @@ class ReportController extends Controller
         ];
 
         // Process companies with their evaluation data
-        $startups = $_allCompanies->map(function ($company) use ($allJudges, $allResults, $allCompanies, $steps, $not_assigned_screenings) {
+        $startups = $_allCompanies->map(function ($company) use ($allJudges, $allResults, $allCompanies, $steps, $not_assigned_screenings, $resultsCompanyScores) {
             $scoped = $allCompanies->where('id', $company->id)->first();
             $c = clone $scoped;
-            
+
             // Get evaluations for this company
             $companyResults = $allResults->where('company_id', $c->id);
-            
-            // Calculate scores and status
-            $publishedResults = $companyResults->where('status', 1);
-            $averageScore = $publishedResults->count() > 0 ? $publishedResults->avg('score') : 0;
-            
-            // Attach calculated data to company
-            $c->average_score = round($averageScore, 1);
+
+            // Use results() score for consistency with evaluation modal
+            $c->average_score = $resultsCompanyScores[$c->id] ?? 0;
             $c->evaluation_results = $companyResults;
 
             $has_no_judgers = $not_assigned_screenings->where('id', $c->id)->count() > 0 ? true : false;
@@ -693,14 +718,25 @@ class ReportController extends Controller
 
         $steps = $stepsQuery->get();
         $metadata = collect([]);
-        
-        // Only process metadata for the filtered steps
+        $resultsCompanyScores = [];
+        $resultsJudgeScores = [];
+
+        // Only process metadata for the filtered steps, and collect results() scores
         foreach($steps as $step) {
             $metadata->push(ScreeningEvaluationResults::metadata($step->id));
+            $stepResults = ScreeningEvaluationResults::results($step->id);
+            foreach($stepResults as $companyId => $resultData) {
+                $resultsCompanyScores[$companyId] = round($resultData['total'] * 100, 1);
+                foreach($resultData['judges'] as $judge) {
+                    if (!empty($judge->evaluation)) {
+                        $resultsJudgeScores[$companyId][$judge->id] = round($judge->evaluation->value * 100);
+                    }
+                }
+            }
         }
 
         $l = app()->getLocale();
-        
+
         // Use the already filtered steps query and order them
         $steps = $stepsQuery->orderBy('from')->get();
 
@@ -733,18 +769,23 @@ class ReportController extends Controller
             }
         }
         // $_allCompanies = $_allCompanies->unique('id')->values();
-        $_allCompanies = $_allCompanies->map(function( $c ) use ($l) {
+        $_allCompanies = $_allCompanies->map(function( $c ) use ($l, $resultsCompanyScores, $resultsJudgeScores) {
             $c = clone $c;
             $id = $c->id;
             $output = new stdClass;
             $output->id = $c->id;
             $output->name = $c->{'name_' . $l};
-            $output->score = $c->average_score;
+            // Use results() score for consistency with evaluation modal
+            $output->score = $resultsCompanyScores[$c->id] ?? $c->average_score;
             $output->step_id = $c->company_step_id;
             $output->cycle_id = $c->company_cycle_id;
-            $output->judges = $c->judges->map(function($judge) use ($id) {
+            $output->judges = $c->judges->map(function($judge) use ($id, $resultsJudgeScores) {
                 $judge = clone $judge;
                 $oneResult = $judge->companies->where('id', $id)->first();
+                // Override per-judge score with results() score (modify in-place so $judge->companies also reflects this)
+                if ($oneResult && isset($resultsJudgeScores[$id][$judge->id])) {
+                    $oneResult->score = $resultsJudgeScores[$id][$judge->id];
+                }
                 $judge->result = $oneResult;
                 return $judge;
             });
@@ -787,19 +828,15 @@ class ReportController extends Controller
         ];
 
         // Process companies with their evaluation data
-        $startups = $_allCompanies->map(function ($company) use ($allJudges, $allResults, $allCompanies, $steps, $not_assigned_screenings) {
+        $startups = $_allCompanies->map(function ($company) use ($allJudges, $allResults, $allCompanies, $steps, $not_assigned_screenings, $resultsCompanyScores) {
             $scoped = $allCompanies->where('id', $company->id)->first();
             $c = clone $scoped;
-            
+
             // Get evaluations for this company
             $companyResults = $allResults->where('company_id', $c->id);
-            
-            // Calculate scores and status
-            $publishedResults = $companyResults->where('status', 1);
-            $averageScore = $publishedResults->count() > 0 ? $publishedResults->avg('score') : 0;
-            
-            // Attach calculated data to company
-            $c->average_score = round($averageScore, 1);
+
+            // Use results() score for consistency with evaluation modal
+            $c->average_score = $resultsCompanyScores[$c->id] ?? 0;
             $c->evaluation_results = $companyResults;
 
             $has_no_judgers = $not_assigned_screenings->where('id', $c->id)->count() > 0 ? true : false;
