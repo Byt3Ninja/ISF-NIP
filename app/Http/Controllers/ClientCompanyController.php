@@ -778,7 +778,7 @@ class ClientCompanyController extends Controller
                 $financialprojectionArray[$_year] = [];
             }
             $getCurrancy = '';
-            
+            $is_currency_disabled = false;
             $Historyfinancialprojection = FinancialProjection::where('company_id', $id)
                 ->orderBy('valuation_date', 'desc')
                 ->get();
@@ -801,6 +801,9 @@ class ClientCompanyController extends Controller
                     $formtat_valuation_date = $financialprojection->first()->valuation_date;
                     $valuation_date = Carbon::parse($formtat_valuation_date)->format('Y-m');
                     $getCurrancy = $financialprojection->first()->currency;
+                    if($getCurrancy != null){
+                        $is_currency_disabled = true;
+                    }
                 } else {
                     $valuation_date = null;
                 }
@@ -817,7 +820,7 @@ class ClientCompanyController extends Controller
                 'average_monthly_growth' => $records_metadata['avgMonthlyGrowth'],
                 'compound_annual_growth_rate' => $records_metadata['compoundAnnualGrowthRate']
             ];
-
+                
             $company = $company_instance; // For backward compatibility in the view
             return view('admin/clients/company', compact(
                 'client',
