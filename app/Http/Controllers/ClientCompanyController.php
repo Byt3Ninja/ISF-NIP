@@ -770,7 +770,7 @@ class ClientCompanyController extends Controller
                 ? Carbon::parse($request->valuation_date)->year
                 : (int) date('Y');
 
-            $valuation_dateSearch = $request->valuation_date ?? date('Y-m');
+            $valuation_dateSearch = $request->valuation_date;
                 
             $yearsRange = range($year - 1, $year + 2);
             $financialprojectionArray = [];
@@ -784,7 +784,11 @@ class ClientCompanyController extends Controller
                 ->get();
             
                 $historicalValuationProjections = $Historyfinancialprojection->pluck('valuation_date')->unique();
-                $financialprojection = $Historyfinancialprojection->where('valuation_date', $valuation_dateSearch.'-01');
+                if($valuation_dateSearch != null){
+                    $financialprojection = $Historyfinancialprojection->where('valuation_date', $valuation_dateSearch.'-01');
+                }else{
+                     $financialprojection = $Historyfinancialprojection;
+                }
                 $historicalValuationDates = $historicalValuationProjections->map(function ($date) {
                     return Carbon::parse($date)->format('Y-m');
                 });
