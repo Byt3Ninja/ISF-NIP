@@ -18,89 +18,77 @@
         </div>
       </div>
       @endif
-      <div class="content-body">
-        <section id="basic-datatable">
-          <div class="row">
-            <div class="col-12">
-              <div class="card">
-                <div class="card-header d-flex justify-content-between flex-wrap align-items-center border-bottom">
-                  <h5 class="card-title mb-0">{{ __('admin.Documentations') }}</h5>
-                  @if($_user->ableToAny(['documentation.create', 'documentation.store'], $permissions))
-                  <div class="invoice-create-btn">
-                    <a href="{{ route('documentation.create') }}" class="btn btn-primary glow">
-                      <i class="ti ti-plus me-2"></i> {{ __('admin.Add New') }}
-                    </a>
-                  </div>
-                  @endif
-                </div>
-                <div class="card-content">
-                  <div class="card-body">
-                    <div class="table-responsive">
-                      <table class="table zero-configuration" id="organizations-list-datatable" style="font-size: 0.92rem;">
-                        <thead class="table-light">
-                          <tr>
-                            <th>#</th>
-                            <th>{{ __('admin.Arabic Title') }}</th>
-                            <th>{{ __('admin.English Title') }}</th>
-                            <th>{{ __('admin.Rolefor') }}</th>
-                            @if( $_user->ableToAny(['documentation.show', 'documentation.edit', 'documentation.update', 'documentation.destroy'], $permissions) )
-                              <th class="text-center">{{ __('admin.Actions') }}</th>
-                            @endif
-                          </tr>
-                        </thead>
-                        <tbody>
-                          @foreach ($docs as $doc)
-                            <tr>
-                              <td>{{ $doc->arr }}</td>
-                              <td>{{ $doc->menu_ar }}</td>
-                              <td>{{ $doc->menu_en }}</td>
-                              <td>{{ __('admin.role'. ucFirst($doc->role)) }}</td>
-                              @if( $_user->ableToAny(['documentation.show', 'documentation.edit', 'documentation.update', 'documentation.destroy'], $permissions) )
-                              <td class="text-center">
-                                <div class="dropdown">
-                                  <button class="btn btn-label-secondary p-1 px-2" type="button"
-                                    id="actionsDropdown{{ $doc->id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="ti ti-dots-vertical"></i>
-                                  </button>
-                                  <ul class="dropdown-menu" aria-labelledby="actionsDropdown{{ $doc->id }}">
-                                    @if( $_user->ableTo('documentation.show', $permissions) )
-                                    <li>
-                                      <a class="dropdown-item d-flex align-items-center" title="View" href="/dashboard/documentation/{{ $doc->id }}">
-                                        <i class="ti ti-eye me-1"></i> {{ __('View') }}
-                                      </a>
-                                    </li>
-                                    @endif
-                                    @if( $_user->ableToAny(['documentation.edit', 'documentation.update'], $permissions) )
-                                    <li>
-                                      <a class="dropdown-item d-flex align-items-center" title="Edit" href="{{ route('documentation.edit', ['documentation' => $doc->id]) }}">
-                                        <i class="ti ti-pencil me-1"></i> {{ __('admin.Edit') }}
-                                      </a>
-                                    </li>
-                                    @endif
-                                    @if( $_user->ableTo('documentation.destroy', $permissions) )
-                                    <li>
-                                      <button class="dropdown-item text-danger d-flex align-items-center delete-doc-action"
-                                        data-id="{{ $doc->id }}"
-                                        data-url="{{ route('documentation.destroy', ['documentation' => $doc->id]) }}">
-                                        <i class="ti ti-trash me-1"></i> {{ __('Delete') }}
-                                      </button>
-                                    </li>
-                                    @endif
-                                  </ul>
-                                </div>
-                              </td>
-                              @endif
-                            </tr>
-                          @endforeach
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+      <div class="card">
+        <div class="card-header d-flex justify-content-between flex-wrap align-items-center border-bottom">
+          <h5 class="card-title mb-0">{{ __('admin.Documentations') }}</h5>
+          @if($_user->ableToAny(['documentation.create', 'documentation.store'], $permissions))
+          <div class="invoice-create-btn">
+            <a href="{{ route('documentation.create') }}" class="btn btn-primary glow">
+              <i class="ti ti-plus me-2"></i> {{ __('admin.Add New') }}
+            </a>
           </div>
-        </section>
+          @endif
+        </div>
+        <div class="card-datatable table-responsive">
+          <table class="table datatable-documentations">
+            <thead class="table-light">
+              <tr>
+                <th>#</th>
+                <th>{{ __('admin.Arabic Title') }}</th>
+                <th>{{ __('admin.English Title') }}</th>
+                <th>{{ __('admin.Rolefor') }}</th>
+                @if( $_user->ableToAny(['documentation.show', 'documentation.edit', 'documentation.update', 'documentation.destroy'], $permissions) )
+                  <th class="text-center">{{ __('admin.Actions') }}</th>
+                @endif
+              </tr>
+            </thead>
+            <tbody>
+              @foreach ($docs as $doc)
+                <tr>
+                  <td>{{ $doc->arr }}</td>
+                  <td>{{ $doc->menu_ar }}</td>
+                  <td>{{ $doc->menu_en }}</td>
+                  <td>{{ __('admin.role'. ucFirst($doc->role)) }}</td>
+                  @if( $_user->ableToAny(['documentation.show', 'documentation.edit', 'documentation.update', 'documentation.destroy'], $permissions) )
+                  <td class="text-center">
+                    <div class="dropdown">
+                      <button class="btn btn-label-secondary p-1 px-2" type="button"
+                        id="actionsDropdown{{ $doc->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="ti ti-dots-vertical"></i>
+                      </button>
+                      <ul class="dropdown-menu" aria-labelledby="actionsDropdown{{ $doc->id }}">
+                        @if( $_user->ableTo('documentation.show', $permissions) )
+                        <li>
+                          <a class="dropdown-item d-flex align-items-center" title="View" href="/dashboard/documentation/{{ $doc->id }}">
+                            <i class="ti ti-eye me-1"></i> {{ __('View') }}
+                          </a>
+                        </li>
+                        @endif
+                        @if( $_user->ableToAny(['documentation.edit', 'documentation.update'], $permissions) )
+                        <li>
+                          <a class="dropdown-item d-flex align-items-center" title="Edit" href="{{ route('documentation.edit', ['documentation' => $doc->id]) }}">
+                            <i class="ti ti-pencil me-1"></i> {{ __('admin.Edit') }}
+                          </a>
+                        </li>
+                        @endif
+                        @if( $_user->ableTo('documentation.destroy', $permissions) )
+                        <li>
+                          <button class="dropdown-item text-danger d-flex align-items-center delete-doc-action"
+                            data-id="{{ $doc->id }}"
+                            data-url="{{ route('documentation.destroy', ['documentation' => $doc->id]) }}">
+                            <i class="ti ti-trash me-1"></i> {{ __('Delete') }}
+                          </button>
+                        </li>
+                        @endif
+                      </ul>
+                    </div>
+                  </td>
+                  @endif
+                </tr>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -110,7 +98,7 @@
 <script type="text/javascript">
   $(document).ready(function() {
       // Initialize DataTable
-      $('#organizations-list-datatable').DataTable({
+      $('.datatable-documentations').DataTable({
         responsive: true,
         pageLength: 10,
         lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "{{ __('admin.All') }}"]],
@@ -137,6 +125,7 @@
         displayLength: 10,
         lengthMenu: [10, 25, 50, 75, 100],
         order: [[0, 'desc']],
+        @if( $_user->ableToAny(['documentation.show', 'documentation.edit', 'documentation.update', 'documentation.destroy'], $permissions) )
         columnDefs: [
           {
             targets: [4], // Actions column
@@ -144,6 +133,7 @@
             searchable: false
           }
         ]
+        @endif
       });
 
       // Handle delete action
