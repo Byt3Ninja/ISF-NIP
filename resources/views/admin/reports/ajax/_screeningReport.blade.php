@@ -60,13 +60,13 @@
               <div class="position-relative">
                 <input
                   type="text"
-                  id="company-search"
+                  id="screening-company-search"
                   class="form-control"
                   placeholder="{{ __('cycles.Search by company name, user name, or category...') }}"
                   style="padding-left: 2rem; padding-right: 2rem; min-width: 300px;"
                 >
                 <i class="ti ti-search ti-16px position-absolute top-50 translate-middle-y mx-2 text-muted" style="left: 0;"></i>
-                <button id="clear-search" class="btn btn-sm position-absolute top-50 translate-middle-y d-none" style="right: 5px; border: none; background: none; padding: 2px;">
+                <button id="screening-clear-search" class="btn btn-sm position-absolute top-50 translate-middle-y d-none" style="right: 5px; border: none; background: none; padding: 2px;">
                   <i class="ti ti-x ti-14px text-muted"></i>
                 </button>
               </div>
@@ -80,7 +80,7 @@
 							<ul class="dropdown-menu">
 								@foreach(['csv', 'excel'] as $key => $option)
 									<li>
-										<a class="dropdown-item text-uppercase cursor-pointer" id="export-{{$option}}">
+										<a class="dropdown-item text-uppercase cursor-pointer" id="screening-export-{{$option}}">
 											{{$option}}
 										</a>
 									</li>
@@ -148,7 +148,7 @@
 
 					<!-- Clear Filters Button -->
 					<div class="col-lg-2 col-md-4 col-sm-6">
-						<button id="clear-filters" class="btn btn-outline-secondary d-none">
+						<button id="screening-clear-filters" class="btn btn-outline-secondary d-none">
 							<i class="ti ti-x me-1"></i>
 							{{ __('cycles.Clear') }}
 						</button>
@@ -248,7 +248,7 @@
               $evaluationStatuses = array_filter($evaluationStatuses);
             @endphp
             
-            <div class="col-xl-4 col-lg-6 col-md-12 company-card" 
+            <div class="col-xl-4 col-lg-6 col-md-12 screening-company-card" 
                   data-company-name="{{ strtolower($company->name ?? '') }}"
                   data-user-name="{{ strtolower($company?->user?->name ?? '') }}"
                   data-category="{{ strtolower($categoryString ?? '') }}"
@@ -420,7 +420,7 @@
                 <div class="card-footer bg-transparent border-0 pt-0">
                   <div class="d-grid gap-2">
                     <button
-                      class="show-company-evaluation btn btn-primary btn-sm rounded-pill shadow-sm"
+                      class="screening-show-evaluation btn btn-primary btn-sm rounded-pill shadow-sm"
                       data-company="{{ $company->id }}"
                       data-step="{{ $company->company_step_id }}"
                     >
@@ -447,17 +447,17 @@
 </div>
 
 <!-- Evaluation Modal -->
-<div class="modal fade" id="evaluationModal" tabindex="-1" aria-labelledby="evaluationModalLabel" aria-hidden="true">
+<div class="modal fade" id="screeningEvaluationModal" tabindex="-1" aria-labelledby="screeningEvaluationModalLabel" aria-hidden="true">
 	<div class="modal-dialog modal-xl modal-dialog-scrollable">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title fw-bold" id="evaluationModalLabel">
+				<h5 class="modal-title fw-bold" id="screeningEvaluationModalLabel">
 					<i class="ti ti-clipboard-check me-2"></i>
 					{{ __('cycles.Company Evaluation Details') }}
 				</h5>
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
-			<div class="modal-body" id="evaluationModalBody">
+			<div class="modal-body" id="screeningEvaluationModalBody">
 				<!-- Content will be loaded dynamically -->
 			</div>
 			<div class="modal-footer">
@@ -491,7 +491,7 @@
 		// Only initialize if not already initialized
 		if (screeningCompanyCards.length === 0) {
 			// Initialize company cards array
-			screeningCompanyCards = $('.company-card').toArray();
+			screeningCompanyCards = $('.screening-company-card').toArray();
 			
 			// Initialize search and filter functionality
 			if (typeof initializeScreeningSearchAndFilters === 'function') {
@@ -526,7 +526,7 @@
 				console.log('=== Screening Filter Debug Info ===');
 				console.log('Total company cards:', screeningCompanyCards.length);
 				console.log('Current filters:', screeningCurrentFilters);
-				console.log('Visible cards:', $('.company-card:visible').length);
+				console.log('Visible cards:', $('.screening-company-card:visible').length);
 				
 				// Sample data from first few cards
 				screeningCompanyCards.slice(0, 5).forEach((card, index) => {
@@ -559,15 +559,15 @@
 		window.initializeScreeningSearchAndFilters = function() {
 			// Search input handler with debounce
 			let searchTimeout;
-			$('#company-search').on('input', function() {
+			$('#screening-company-search').on('input', function() {
 				clearTimeout(searchTimeout);
 				const searchValue = $(this).val().trim();
 				
 				// Show/hide clear search button
 				if (searchValue) {
-					$('#clear-search').removeClass('d-none');
+					$('#screening-clear-search').removeClass('d-none');
 				} else {
-					$('#clear-search').addClass('d-none');
+					$('#screening-clear-search').addClass('d-none');
 				}
 				
 				searchTimeout = setTimeout(() => {
@@ -585,7 +585,7 @@
 			});
 
 			// Clear filters button
-			$('#clear-filters, #clear-search').on('click', function() {
+			$('#screening-clear-filters, #screening-clear-search').on('click', function() {
 				clearAllScreeningFilters();
 			});
 		};
@@ -694,9 +694,9 @@
 			// Show/hide clear filters button and update filter indicators
 			const hasActiveFilters = screeningCurrentFilters.search || screeningCurrentFilters.cycle || screeningCurrentFilters.step || screeningCurrentFilters.judge || screeningCurrentFilters.score || screeningCurrentFilters.status;
 			if (hasActiveFilters) {
-				$('#clear-filters').removeClass('d-none');
+				$('#screening-clear-filters').removeClass('d-none');
 			} else {
-				$('#clear-filters').addClass('d-none');
+				$('#screening-clear-filters').addClass('d-none');
 			}
 			
 			// Update filter indicators
@@ -710,7 +710,7 @@
 			const $noResults = $('#screening-no-results-state');
 			
 			// Hide all cards first
-			$('.company-card').hide();
+			$('.screening-company-card').hide();
 			
 			if (filteredCards.length > 0) {
 				// Show filtered cards
@@ -751,7 +751,7 @@
 			});
 			
 			// Handle search input
-			const $search = $('#company-search');
+			const $search = $('#screening-company-search');
 			if (screeningCurrentFilters.search) {
 				$search.addClass('border-primary');
 			} else {
@@ -761,11 +761,11 @@
 	}	if (typeof clearAllScreeningFilters === 'undefined') {
 		window.clearAllScreeningFilters = function() {
 			// Reset form inputs
-			$('#company-search').val('');
+			$('#screening-company-search').val('');
 			$('#screening-cycle-filter, #screening-step-filter, #screening-judge-filter, #screening-score-filter, #screening-status-filter').val('');
 			
 			// Hide clear search button
-			$('#clear-search').addClass('d-none');
+			$('#screening-clear-search').addClass('d-none');
 			
 			// Reset current filters
 			screeningCurrentFilters = {
@@ -785,16 +785,16 @@
 	// Show Company Evaluation Modal (only bind if not already bound)
 	if (!$(document).data('screening-evaluation-handler-bound')) {
 		$(document).data('screening-evaluation-handler-bound', true);
-		$(document).on('click', '.show-company-evaluation', function(e) {
+		$(document).on('click', '.screening-show-evaluation', function(e) {
 		e.preventDefault();
 		const company = parseInt($(this).data('company'));
 		const step = parseInt($(this).data('step'));
 		
 		// Show modal
-		$('#evaluationModal').modal('show');
+		$('#screeningEvaluationModal').modal('show');
 		
 		// Reset modal body
-		$('#evaluationModalBody').html(`
+		$('#screeningEvaluationModalBody').html(`
 			<div class="text-center p-5">
 				<div class="spinner-border text-primary" role="status">
 					<span class="visually-hidden">Loading...</span>
@@ -812,10 +812,10 @@
 				step: step,
 			},
 			success: function(response) {
-				buildEvaluationModal(response);
+				buildScreeningEvaluationModal(response);
 			}, 
 			error: function (error) { 
-				$('#evaluationModalBody').html(`
+				$('#screeningEvaluationModalBody').html(`
 					<div class="alert alert-danger m-4">
 						<i class="ti ti-alert-circle me-2"></i>
 						Error loading evaluation details. Please try again.
@@ -826,8 +826,8 @@
 		});
 	}
 
-	if (typeof buildEvaluationModal === 'undefined') {
-		window.buildEvaluationModal = function(data) {
+	if (typeof buildScreeningEvaluationModal === 'undefined') {
+		window.buildScreeningEvaluationModal = function(data) {
 		const totalScore = (data.total * 100).toFixed(1);
 		
 		let modalContent = `
@@ -1075,7 +1075,7 @@
 				</div>
 			</div>`;
 
-		$('#evaluationModalBody').html(modalContent);
+		$('#screeningEvaluationModalBody').html(modalContent);
 		};
 	}
 
@@ -1136,8 +1136,8 @@
 	// Export functionality (only bind if not already bound)
 	if (!$(document).data('screening-export-handler-bound')) {
 		$(document).data('screening-export-handler-bound', true);
-		$('#export-csv, #export-excel').on('click', function() {
-			const format = $(this).attr('id') === 'export-csv' ? 'csv' : 'excel';
+		$('#screening-export-csv, #screening-export-excel').on('click', function() {
+			const format = $(this).attr('id') === 'screening-export-csv' ? 'csv' : 'excel';
 			const button = $(this);
 			const originalText = button.html();
 			

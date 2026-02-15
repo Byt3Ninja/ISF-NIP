@@ -376,6 +376,7 @@
 
     // Date range filter (column 4)
     $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+      if (settings.nTable.id !== 'tblTraining') return true;
       let startDate = $('#start-date-filter').val();
       let endDate   = $('#end-date-filter').val();
 
