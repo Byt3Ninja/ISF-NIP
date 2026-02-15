@@ -47,13 +47,13 @@
 							<div class="position-relative">
 								<input
 									type="text"
-									id="company-search"
+									id="final-screening-company-search"
 									class="form-control"
 									placeholder="{{ __('cycles.Search by company name, user name, or category...') }}"
 									style="padding-left: 2rem; padding-right: 2rem; min-width: 300px;"
 								>
 								<i class="ti ti-search ti-16px position-absolute top-50 translate-middle-y mx-2 text-muted" style="left: 0;"></i>
-								<button id="clear-search" class="btn btn-sm position-absolute top-50 translate-middle-y d-none" style="right: 5px; border: none; background: none; padding: 2px;">
+								<button id="final-screening-clear-search" class="btn btn-sm position-absolute top-50 translate-middle-y d-none" style="right: 5px; border: none; background: none; padding: 2px;">
 									<i class="ti ti-x ti-14px text-muted"></i>
 								</button>
 							</div>
@@ -67,7 +67,7 @@
 							<ul class="dropdown-menu">
 								@foreach(['csv', 'excel'] as $key => $option)
 									<li>
-										<a class="dropdown-item text-uppercase cursor-pointer" id="export-{{$option}}">
+										<a class="dropdown-item text-uppercase cursor-pointer" id="final-screening-export-{{$option}}">
 											{{$option}}
 										</a>
 									</li>
@@ -133,7 +133,7 @@
 
 					<!-- Clear Filters Button -->
 					<div class="col-lg-2 col-md-4 col-sm-6">
-						<button id="clear-filters" class="btn btn-outline-secondary d-none">
+						<button id="final-screening-clear-filters" class="btn btn-outline-secondary d-none">
 							<i class="ti ti-x me-1"></i>
 							{{ __('cycles.Clear') }}
 						</button>
@@ -231,7 +231,7 @@
               })->values();
             @endphp
             
-            <div class="col-xl-4 col-lg-6 col-md-12 company-card" 
+            <div class="col-xl-4 col-lg-6 col-md-12 final-screening-company-card" 
                   data-company-name="{{ strtolower($company->name ?? '') }}"
                   data-user-name="{{ strtolower($company?->user?->name ?? '') }}"
                   data-category="{{ strtolower($categoryString ?? '') }}"
@@ -403,7 +403,7 @@
                 <div class="card-footer bg-transparent border-0 pt-0">
                   <div class="d-grid gap-2">
                     <button
-                      class="show-company-evaluation btn btn-primary btn-sm rounded-pill shadow-sm"
+                      class="final-screening-show-evaluation btn btn-primary btn-sm rounded-pill shadow-sm"
                       data-company="{{ $company->id }}"
                       data-step="{{ $company->company_step_id }}"
                     >
@@ -430,17 +430,17 @@
 </div>
 
 <!-- Evaluation Modal -->
-<div class="modal fade" id="evaluationModal" tabindex="-1" aria-labelledby="evaluationModalLabel" aria-hidden="true">
+<div class="modal fade" id="finalScreeningEvaluationModal" tabindex="-1" aria-labelledby="finalScreeningEvaluationModalLabel" aria-hidden="true">
 	<div class="modal-dialog modal-xl modal-dialog-scrollable">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title fw-bold" id="evaluationModalLabel">
+				<h5 class="modal-title fw-bold" id="finalScreeningEvaluationModalLabel">
 					<i class="ti ti-clipboard-check me-2"></i>
 					{{ __('cycles.Company Evaluation Details') }}
 				</h5>
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
-			<div class="modal-body" id="evaluationModalBody">
+			<div class="modal-body" id="finalScreeningEvaluationModalBody">
 				<!-- Content will be loaded dynamically -->
 			</div>
 			<div class="modal-footer">
@@ -474,7 +474,7 @@
 		// Only initialize if not already initialized
 		if (finalScreeningCompanyCards.length === 0) {
 			// Initialize company cards array
-			finalScreeningCompanyCards = $('.company-card').toArray();
+			finalScreeningCompanyCards = $('.final-screening-company-card').toArray();
 			
 			// Initialize search and filter functionality
 			if (typeof initializeFinalScreeningSearchAndFilters === 'function') {
@@ -501,8 +501,8 @@
 				console.log('=== Final Screening Filters Debug ===');
 				console.log('Current Filters:', finalScreeningCurrentFilters);
 				console.log('Total Cards:', finalScreeningCompanyCards.length);
-				console.log('Visible Cards:', $('.company-card:visible').length);
-				console.log('Hidden Cards:', $('.company-card:hidden').length);
+				console.log('Visible Cards:', $('.final-screening-company-card:visible').length);
+				console.log('Hidden Cards:', $('.final-screening-company-card:hidden').length);
 				
 				// Test each filter
 				finalScreeningCompanyCards.forEach((card, index) => {
@@ -526,15 +526,15 @@
 		window.initializeFinalScreeningSearchAndFilters = function() {
 			// Search input handler with debounce
 			let searchTimeout;
-			$('#company-search').on('input', function() {
+			$('#final-screening-company-search').on('input', function() {
 				clearTimeout(searchTimeout);
 				const searchValue = $(this).val().trim();
 				
 				// Show/hide clear search button
 				if (searchValue) {
-					$('#clear-search').removeClass('d-none');
+					$('#final-screening-clear-search').removeClass('d-none');
 				} else {
-					$('#clear-search').addClass('d-none');
+					$('#final-screening-clear-search').addClass('d-none');
 				}
 				
 				searchTimeout = setTimeout(() => {
@@ -552,7 +552,7 @@
 			});
 
 			// Clear filters button
-			$('#clear-filters, #clear-search').on('click', function() {
+			$('#final-screening-clear-filters, #final-screening-clear-search').on('click', function() {
 				clearAllFinalScreeningFilters();
 			});
 		};
@@ -658,9 +658,9 @@
 		// Show/hide clear filters button and update filter indicators
 		const hasActiveFilters = finalScreeningCurrentFilters.search || finalScreeningCurrentFilters.cycle || finalScreeningCurrentFilters.step || finalScreeningCurrentFilters.judge || finalScreeningCurrentFilters.score || finalScreeningCurrentFilters.status;
 		if (hasActiveFilters) {
-			$('#clear-filters').removeClass('d-none');
+			$('#final-screening-clear-filters').removeClass('d-none');
 		} else {
-			$('#clear-filters').addClass('d-none');
+			$('#final-screening-clear-filters').addClass('d-none');
 		}
 		
 		// Update filter indicators
@@ -672,7 +672,7 @@
 		window.updateFinalScreeningDisplay = function(filteredCards) {
 			const $grid = $('#final-screening-companies-grid');
 			const $noResults = $('#final-screening-no-results-state');		// Hide all cards first
-		$('.company-card').hide();
+		$('.final-screening-company-card').hide();
 		
 		if (filteredCards.length > 0) {
 			// Show filtered cards
@@ -715,7 +715,7 @@
 			});
 			
 			// Handle search input
-			const $search = $('#company-search');
+			const $search = $('#final-screening-company-search');
 			if (finalScreeningCurrentFilters.search) {
 				$search.addClass('border-primary');
 			} else {
@@ -727,11 +727,11 @@
 	if (typeof clearAllFinalScreeningFilters === 'undefined') {
 		window.clearAllFinalScreeningFilters = function() {
 			// Reset form inputs
-			$('#company-search').val('');
+			$('#final-screening-company-search').val('');
 			$('#final-screening-cycle-filter, #final-screening-step-filter, #final-screening-judge-filter, #final-screening-score-filter, #final-screening-status-filter').val('');
 			
 			// Hide clear search button
-			$('#clear-search').addClass('d-none');
+			$('#final-screening-clear-search').addClass('d-none');
 			
 			// Reset current filters
 			finalScreeningCurrentFilters = {
@@ -751,16 +751,16 @@
 	// Show Company Evaluation Modal (only bind if not already bound)
 	if (!$(document).data('final-screening-evaluation-handler-bound')) {
 		$(document).data('final-screening-evaluation-handler-bound', true);
-		$(document).on('click', '.show-company-evaluation', function(e) {
+		$(document).on('click', '.final-screening-show-evaluation', function(e) {
 		e.preventDefault();
 		const company = parseInt($(this).data('company'));
 		const step = parseInt($(this).data('step'));
 		
 		// Show modal
-		$('#evaluationModal').modal('show');
+		$('#finalScreeningEvaluationModal').modal('show');
 		
 		// Reset modal body
-		$('#evaluationModalBody').html(`
+		$('#finalScreeningEvaluationModalBody').html(`
 			<div class="text-center p-5">
 				<div class="spinner-border text-primary" role="status">
 					<span class="visually-hidden">Loading...</span>
@@ -778,10 +778,10 @@
 				step: step,
 			},
 			success: function(response) {
-				buildEvaluationModal(response);
+				buildFinalScreeningEvaluationModal(response);
 			}, 
 			error: function (error) { 
-				$('#evaluationModalBody').html(`
+				$('#finalScreeningEvaluationModalBody').html(`
 					<div class="alert alert-danger m-4">
 						<i class="ti ti-alert-circle me-2"></i>
 						Error loading evaluation details. Please try again.
@@ -792,8 +792,8 @@
 		});
 	}
 
-	if (typeof buildEvaluationModal === 'undefined') {
-		window.buildEvaluationModal = function(data) {
+	if (typeof buildFinalScreeningEvaluationModal === 'undefined') {
+		window.buildFinalScreeningEvaluationModal = function(data) {
 		const totalScore = (data.total * 100).toFixed(1);
 		
 		let modalContent = `
@@ -1041,7 +1041,7 @@
 				</div>
 			</div>`;
 
-		$('#evaluationModalBody').html(modalContent);
+		$('#finalScreeningEvaluationModalBody').html(modalContent);
 		};
 	}
 
@@ -1059,8 +1059,8 @@
 				// Show all - filters are already cleared
 				break;
 			case 'not-assigned':
-				screeningCurrentFilters.status = 'not-assigned';
-				$('#screening-status-filter').val('not-assigned');
+				finalScreeningCurrentFilters.status = 'not-assigned';
+				$('#final-screening-status-filter').val('not-assigned');
 				break;
 			case 'not-evaluated':
 				finalScreeningCurrentFilters.status = 'not-evaluated';
@@ -1101,8 +1101,8 @@
 	// Export functionality (only bind if not already bound)
 	if (!$(document).data('final-screening-export-handler-bound')) {
 		$(document).data('final-screening-export-handler-bound', true);
-		$('#export-csv, #export-excel').on('click', function() {
-			const format = $(this).attr('id') === 'export-csv' ? 'csv' : 'excel';
+		$('#final-screening-export-csv, #final-screening-export-excel').on('click', function() {
+			const format = $(this).attr('id') === 'final-screening-export-csv' ? 'csv' : 'excel';
 			const button = $(this);
 			const originalText = button.html();
 			
