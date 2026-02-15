@@ -60,7 +60,7 @@
   const CONFIG = {
     backButtonSelector: '#back-button',
     backHref: "{{ $backUrl }}",
-    watchSelectors: 'input:not([type="search"]), textarea, select',
+    watchSelectors: 'input:not([type="search"]), input:not([type="file"]), textarea, select',
     ignoreSelectors: '[data-ignore-dirty], .dt-filter, .card-datatable, .table-responsive, .organizations-list-wrapper',
     debug: false
   };
@@ -173,12 +173,9 @@
       e.preventDefault();
   
       if (!isPageDirty()) {
-        // window.location.href = CONFIG.backHref;
         window.history.back();
         return;
       }
-  
-      window.removeEventListener('beforeunload', beforeUnloadHandler);
 
       Swal.fire({
         title: '{{ __('settings.navigation.unsaved_changes') }}',
@@ -195,38 +192,17 @@
         reverseButtons: true,
       }).then(r => {
         if (r.isConfirmed) {
-          // window.location.href = CONFIG.backHref;
           window.history.back();
-          window.removeEventListener('beforeunload', beforeUnloadHandler);
-        } else {
-          window.addEventListener('beforeunload', beforeUnloadHandler);
         }
       });
     });
   });
 
   /* ===============================
-   * PAGE CLOSE / REFRESH
+   * PAGE CLOSE / REFRESH (DISABLED)
    * =============================== */
-
-  let isSubmitting = false;
-  document.querySelectorAll('form').forEach(form => {
-    form.addEventListener('submit', () => {
-      isSubmitting = true;
-      window.removeEventListener('beforeunload', beforeUnloadHandler);
-    });
-  });
-
-  const beforeUnloadHandler = function (e) {
-    if (isSubmitting) return; // skip if submitting
-    if (!isPageDirty()) return;
-
-    e.preventDefault();
-    e.returnValue = '';
-  };
-
-  window.addEventListener('beforeunload', beforeUnloadHandler);
+  // Removed beforeunload handler entirely
+  // Form submissions now proceed without interruption
 })();
 </script>
 @endpush
-

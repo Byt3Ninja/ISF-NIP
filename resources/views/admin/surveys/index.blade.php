@@ -213,7 +213,7 @@ if ($_user->hasAnyRole('mentor|Registered')) {
                     <img 
                       class="rounded-circle me-2 border bg-label-light flex-shrink-0"
                       src="{{ $survey->user?->image_url }}"
-                      onerror="this.onerror=null;this.src='/icons/avatar.svg';"
+                      onerror="this.onerror=null;this.src='/icons/account.svg';"
                       height="36"
                       width="36"
                       alt="avatar" 
@@ -227,7 +227,7 @@ if ($_user->hasAnyRole('mentor|Registered')) {
                     @if ($survey->session)
                       <small class="text-muted">
                         <i class="ti ti-calendar ti-xs"></i>
-                        Session: {{ FormatDate($survey->session->zoom_date, 'Y-m-d H:i') }}
+                        {{ __('admin.Session') }}: {{ FormatDate($survey->session->zoom_date, 'Y-m-d H:i') }}
                       </small>
                     @endif
                   </div>

@@ -35,7 +35,7 @@ return function () {
       ['title' => 'all_tasks', 'url'  => 'dashboard/mentor/mentorshipTasks'],
       ['title' => 'programs', 'url' => 'dashboard/program/show'],
       ['title' => 'mentorship_sessions', 'url' => 'dashboard/mentor/sessions'],
-      ['title' => 'surveys', 'url' => 'dashboard/mentor/surveys'],
+      ['title' => 'surveys', 'url' => 'dashboard/surveys'],
       ['title' => 'my_profile', 'route' => 'user.profile_view', 'menuOnly' => false],
       ['title' => 'edit_profile', 'route' => 'user.profile_Edit', 'menuOnly' => false],
       ['title' => 'my_profile', 'url' => 'dashboard/show/myProfile', 'menuOnly' => false],

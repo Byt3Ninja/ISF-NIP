@@ -81,14 +81,14 @@ class surveysController extends Controller
 						if($user->hasRole('Mentor')){
 							$mentorship_user_id = $mentorship?->user?->id;
 							$mentorship_user_name = trim( $mentorship?->user?->first_name_en . ' ' . $mentorship?->user?->last_name_en );
-							$mentorship_user_image = $mentorship?->user?->image_url ? $mentorship?->user?->image_url : '/icons/avatar.svg';
+							$mentorship_user_image = $mentorship?->user?->image_url ? $mentorship?->user?->image_url : '/icons/account.svg';
 							$mentorship_user_company_id = optional($mentorship?->user?->company)->id;
 							$mentorship_user_company_name = optional($mentorship?->user?->company)->name_en;
 							$mentorship_user_company_logo = optional($mentorship?->user?->company)->logo ? asset($mentorship?->user?->company?->logo) : '/images/logo-placeholder.png';
 						}else{
 							$mentorship_user_id = $mentorship?->mentor?->id;
 							$mentorship_user_name = trim( $mentorship?->mentor?->first_name_en . ' ' . $mentorship?->mentor?->last_name_en );
-							$mentorship_user_image = $mentorship?->mentor?->image_url ? asset($mentorship?->mentor?->img_url) : '/icons/avatar.svg';
+							$mentorship_user_image = $mentorship?->mentor?->image_url ? $mentorship?->mentor?->image_url : '/icons/account.svg';
 							$mentorship_user_company_id = null;
 							$mentorship_user_company_name = null;
 							$mentorship_user_company_logo = null;
