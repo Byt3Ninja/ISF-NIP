@@ -1,3 +1,9 @@
+<style>
+  .hide-before::before {
+    display: none;
+  }
+</style>
+
 @php
     $hideBreadcrumbRoutes = ['core.dashboard_view'];
     $hideBreadcrumbPaths = ['dashboard', 'dashboard/dashboard'];
@@ -6,32 +12,37 @@
     $shouldHide = in_array($currentRoute, $hideBreadcrumbRoutes) || in_array($currentPath, $hideBreadcrumbPaths);
 @endphp
 @if(isset($breadcrumbs) && count($breadcrumbs) > 1 && !$shouldHide)
-<nav class="d-flex align-items-center mb-4 flex-wrap gap-2" aria-label="{{ __('breadcrumb.breadcrumb_navigation') ?? 'Breadcrumb' }}">
-    {{-- Back Button --}}
+<nav aria-label="{{ __('breadcrumb.breadcrumb_navigation') ?? 'Breadcrumb' }}">
+  
+  <ol class="breadcrumb align-items-center bg-card rounded p-2 shadow-xs">
     @if(isset($backUrl) && $backUrl)
-    <a href="{{ $backUrl }}"
-       class="btn btn-icon btn-outline-secondary rounded-circle flex-shrink-0 {{ $l == 'ar' ? 'ms-2' : 'me-2' }}"
-       title="{{ __('breadcrumb.back') }}"
-       aria-label="{{ __('breadcrumb.back') }}"
-       data-bs-toggle="tooltip"
-       data-bs-placement="{{ $l == 'ar' ? 'left' : 'right' }}">
+    {{-- Back Button --}}
+    <li class="breadcrumb-item active">
+      <a 
+        id="back-button"
+        href="{{ $backUrl }}"
+        class="btn btn-sm btn-icon btn-text-secondary rounded-pill waves-effect waves-light mb-0"
+        title="{{ __('breadcrumb.back') }}"
+        aria-label="{{ __('breadcrumb.back') }}"
+        data-bs-toggle="tooltip"
+        data-bs-placement="{{ $l == 'ar' ? 'left' : 'right' }}">
         <i class="ti ti-arrow-{{ $l == 'ar' ? 'right' : 'left' }} ti-md"></i>
-    </a>
+      </a>
+    </li>
     @endif
 
     {{-- Breadcrumb Trail --}}
-    <ol class="breadcrumb breadcrumb-style1 mb-0 flex-wrap">
         @foreach($breadcrumbs as $index => $crumb)
             @if($crumb['active'] ?? false)
-                <li class="breadcrumb-item active text-truncate" aria-current="page" style="max-width: 200px;">
+                <li class="breadcrumb-item active text-truncate {{ $index == 0 ? 'hide-before' : '' }}" aria-current="page" style="max-width: 200px;">
                     {{ $crumb['label'] }}
                 </li>
             @else
-                <li class="breadcrumb-item text-truncate" style="max-width: 200px;">
+                <li class="breadcrumb-item text-truncate {{ $index == 0 ? 'hide-before' : '' }}" style="max-width: 200px;">
                     <a href="{{ $crumb['url'] }}" class="text-decoration-none">
-                        @if($index === 0)
+                        {{-- @if($index === 0)
                             <i class="ti ti-home-2 {{ $l == 'ar' ? 'ms-1' : 'me-1' }}"></i>
-                        @endif
+                        @endif --}}
                         {{ $crumb['label'] }}
                     </a>
                 </li>
@@ -40,3 +51,182 @@
     </ol>
 </nav>
 @endif
+
+@push('scripts')
+<script>
+(function () {
+  'use strict';
+
+  const CONFIG = {
+    backButtonSelector: '#back-button',
+    backHref: "{{ $backUrl }}",
+    watchSelectors: 'input:not([type="search"]), textarea, select',
+    ignoreSelectors: '[data-ignore-dirty], .dt-filter, .card-datatable, .table-responsive, .organizations-list-wrapper',
+    debug: false
+  };
+
+  const backButtons = document.querySelectorAll(CONFIG.backButtonSelector);
+  if (!backButtons.length) return;
+
+  const initialState = new Map();
+  const log = (...a) => CONFIG.debug && console.log('[DIRTY]', ...a);
+
+  /* ===============================
+   * VALUE NORMALIZER (CRITICAL)
+   * =============================== */
+  function normalize(value) {
+    if (value === null || value === undefined) return '';
+    if (Array.isArray(value)) return value.sort().join('|');
+    return String(value).trim();
+  }
+
+  function getValue(el) {
+    if (el.type === 'checkbox') {
+      return normalize(el.checked);
+    }
+
+    if (el.type === 'radio') {
+      return normalize(
+        document.querySelector(`input[type="radio"][name="${el.name}"]:checked`)
+          ?.value
+      );
+    }
+
+    if (el.type === 'file') {
+      return normalize(
+        Array.from(el.files).map(f => f.name)
+      );
+    }
+
+    if (el.tagName === 'SELECT' && el.multiple) {
+      return normalize(
+        Array.from(el.selectedOptions).map(o => o.value)
+      );
+    }
+
+    return normalize(el.value);
+  }
+
+  /* ===============================
+   * CAPTURE INITIAL FIELD STATE
+   * =============================== */
+  function captureInitialState() {
+    initialState.clear();
+
+    document.querySelectorAll(CONFIG.watchSelectors).forEach(el => {
+      if (
+        el.disabled ||
+        el.readOnly ||
+        el.matches(CONFIG.ignoreSelectors) ||
+        el.closest(CONFIG.ignoreSelectors)
+      ) return;
+
+      // radio groups tracked once
+      if (el.type === 'radio') {
+        if (initialState.has(el.name)) return;
+        initialState.set(el.name, getValue(el));
+        return;
+      }
+
+      initialState.set(el, getValue(el));
+    });
+
+    log('Initial state:', initialState);
+  }
+
+  window.addEventListener('load', () => {
+    setTimeout(captureInitialState, 100);
+  });
+
+  /* ===============================
+   * DIRTY CHECK (NOW CORRECT)
+   * =============================== */
+  function isPageDirty() {
+    for (const [key, initialValue] of initialState.entries()) {
+      let currentValue;
+
+      if (typeof key === 'string') {
+        // radio group
+        currentValue = normalize(
+          document.querySelector(
+            `input[type="radio"][name="${key}"]:checked`
+          )?.value
+        );
+      } else {
+        if (!document.body.contains(key)) continue;
+        currentValue = getValue(key);
+      }
+
+      if (currentValue !== initialValue) {
+        log('Dirty field:', key, initialValue, currentValue);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /* ===============================
+   * BACK BUTTON HANDLER
+   * =============================== */
+  backButtons.forEach(button => {
+    button.addEventListener('click', function (e) {
+      e.preventDefault();
+  
+      if (!isPageDirty()) {
+        // window.location.href = CONFIG.backHref;
+        window.history.back();
+        return;
+      }
+  
+      window.removeEventListener('beforeunload', beforeUnloadHandler);
+
+      Swal.fire({
+        title: '{{ __('settings.navigation.unsaved_changes') }}',
+        text: '{{ __('settings.navigation.unsaved_changes_message') }}',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: '{{ __('settings.navigation.leaveanyway') }}',
+        cancelButtonText: '{{ __('settings.navigation.stay') }}',
+        customClass: {
+          confirmButton: 'btn btn-primary ms-3',
+          cancelButton: 'btn btn-label-secondary',
+        },
+        buttonsStyling: false,
+        reverseButtons: true,
+      }).then(r => {
+        if (r.isConfirmed) {
+          // window.location.href = CONFIG.backHref;
+          window.history.back();
+          window.removeEventListener('beforeunload', beforeUnloadHandler);
+        } else {
+          window.addEventListener('beforeunload', beforeUnloadHandler);
+        }
+      });
+    });
+  });
+
+  /* ===============================
+   * PAGE CLOSE / REFRESH
+   * =============================== */
+
+  let isSubmitting = false;
+  document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', () => {
+      isSubmitting = true;
+      window.removeEventListener('beforeunload', beforeUnloadHandler);
+    });
+  });
+
+  const beforeUnloadHandler = function (e) {
+    if (isSubmitting) return; // skip if submitting
+    if (!isPageDirty()) return;
+
+    e.preventDefault();
+    e.returnValue = '';
+  };
+
+  window.addEventListener('beforeunload', beforeUnloadHandler);
+})();
+</script>
+@endpush
+
