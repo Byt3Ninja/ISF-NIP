@@ -508,13 +508,13 @@ if ($_user->hasAnyRole('mentor|Registered')) {
 
         // Status Filter
         addDropdownFilter(
-          3,
+          @if ($_user->hasRole('mentor')) 3 @else 2 @endif,
           'statusFilter',
           '{{ __("cycles.All Status") }}'
         );
 
         // Priority (Mandatory/Optional) Filter
-        api.columns(4).every(function () {
+        api.columns(@if ($_user->hasRole('mentor')) 4 @else 3 @endif).every(function () {
           const column = this;
     
           const select = $(`
