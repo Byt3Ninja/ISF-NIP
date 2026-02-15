@@ -188,7 +188,7 @@
 						<label for="Currency" class="form-label">
 							{{ __('settings.Currency') }} <span class="text-danger">*</span>
 						</label>
-						<select class="form-control form-select" name="Currency" id="Currency" required>
+						<select class="form-control form-select" name="Currency" id="Currency" required @if($is_currency_disabled) disabled @endif>
 							<option value="" disabled>{{ __('settings.Currency') }}</option>
 							
 							@foreach ($Currencies as $Currency)
