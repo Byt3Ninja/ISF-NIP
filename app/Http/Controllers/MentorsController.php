@@ -873,24 +873,20 @@ class MentorsController extends Controller
 	public function modify(Request $request)
 	{
 		try {
-
+	
 			$type = $request->rtype;
 			if ($type == 6) {
-
 				$start = $join = null;
+				$mRequest = MentorshipRequest::findOrFail($request->id);
 				if ($request->stat == 'Yes') {
-
-					$mRequest = MentorshipRequest::findOrFail($request->id);
 					$topic = "Online mentorship meeting (M" . $mRequest->mentor_id . '- U' . $mRequest->user_id . ')';
 					$data = ['topic' => $topic, "start_time" => $mRequest->zoom_date, 'duration' => $mRequest->period, 'host_video' => 1, 'participant_video' => 1];
-					
 				}
-
-
-				MentorshipRequest::find($request->id)->update(['approved' => $request->stat]);
+				 MentorshipRequest::find($request->id)->update(['approved' => $request->stat]);
 				$locale = app()->getLocale() ?? 'en';
 				/// Notify Mentor
-				SendMentorshipRequestJob::dispatch($request->mentorid, $request->date, $request->period, auth()->id(), null, $request->id, $request->stat, 'modify');
+				// dd($request->all(), $mRequest->mentor_id, $mRequest->zoom_date->format('Y-m-d H:i:s'), $mRequest->period, auth()->id(), null, $request->id, $request->stat, 'modify');
+				SendMentorshipRequestJob::dispatch($mRequest->mentor_id, $mRequest->zoom_date->format('Y-m-d H:i:s'), $mRequest->period, auth()->id(), null, $request->id, $request->stat, 'modify');
 
 
 				return response()->json('success');
