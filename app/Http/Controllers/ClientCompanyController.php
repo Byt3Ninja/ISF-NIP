@@ -853,6 +853,7 @@ class ClientCompanyController extends Controller
                 'years',
                 'growthMetrics',
                 'company',
+                'is_currency_disabled',
             ));
         } catch (Exception $e) {
             //log what happend
