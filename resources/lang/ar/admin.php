@@ -3398,4 +3398,5 @@ return [
 	'please_select_image_file' => 'الرجاء تحديد ملف صورة',
 	'must_be_valid_number' => 'يجب ان يكون رقم صحيح',
 	'must_not_be_less_than_0' => 'يجب أن يكون أكبر من أو يساوي 0',
+	'Error, can\'t create Online meeting' => 'خطاء، لا يمكن انشاء جلسة اونلاين',
 ];
