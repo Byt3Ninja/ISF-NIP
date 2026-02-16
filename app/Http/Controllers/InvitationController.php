@@ -26,9 +26,12 @@ class InvitationController extends Controller
             $orgIds = $user->organizations_ids;
            
             $inviteMentors = InviteMentor::where(function ($q) use ($orgIds) {
-                foreach ($orgIds as $id) {
-                    $q->orWhereJsonContains('organization_ids', (string) $id);
-                }
+                $q->where('scope', 'Public');
+                $q->orWhere(function ($q2) use ($orgIds) {
+                    foreach ($orgIds as $id) {
+                        $q2->orWhereJsonContains('organization_ids', (string) $id);
+                    }
+                });
             })->get();
             $allOrganizations = Organization::whereIn('id', $orgIds)->get();
         }

@@ -49,8 +49,23 @@
                 </option>
               @endforeach
               @php
+              
               $organization_q = App\Organization::where('is_draft', 0);
-              $organization = auth()->user()->hasRole('admin') ? $organization_q->get() : $organization_q->where('id', auth()->user()->organization_id)->get(); //App\Organization::all();
+              //$organization = auth()->user()->hasRole('admin') ? $organization_q->get() : $organization_q->where('id', auth()->user()->organization_id)->get();
+              if ($_user->hasRole('admin')) {
+                  $organization = $organization_q->get();
+              } elseif ($_user->hasRole('subadmin')) {
+                  $organization = $organization_q
+                      ->whereIn('id', $_user->organizations_ids)
+                      ->get();
+              } elseif ($_user->hasRole('OrganizationManager')) {
+                  $organization = $organization_q
+                      ->where('id', $_user->organization_id)
+                      ->get();
+              } else {
+                  $organization = collect(); 
+              }
+              //$organization = auth()->user()->hasRole('admin') ? $organization_q->get() : $organization_q->where('id', auth()->user()->organization_id)->get(); //App\Organization::all();
               @endphp
               <option value="">{{ __('admin.All_Organizations') }}</option>
               @foreach ($organization as $org)
