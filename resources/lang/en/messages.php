@@ -62,4 +62,5 @@ return [
     'mentorship_session_action' => 'Mentorship Session with :name has been :action',
     'Approved' => 'Approved',
     'Rejected' => 'Rejected',
+    'New_mentorship_session' => 'New Mentorship Session',
 ];

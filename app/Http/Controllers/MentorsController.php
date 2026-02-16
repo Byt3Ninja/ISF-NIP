@@ -838,7 +838,7 @@ class MentorsController extends Controller
 	{
 
 		$request->date = \Carbon\Carbon::createFromFormat('Y-m-d h:i a', $request->date)->format('Y-m-d H:i:s');
-
+		
 		if ($request) {
 			
 			if (\App\Settings::hasReachedMaxConcurrentSessions(Carbon::parse($request->date)->timestamp, $request->period)) {
@@ -850,9 +850,11 @@ class MentorsController extends Controller
 				$approved = 'Yes';
 				$topic = "Online mentorship meeting (M" . $request->mentorid . '- U' . $request->userid . ')';
 				$data = ['topic' => $topic, "start_time" => $request->date, 'duration' => $request->period, 'host_video' => 1, 'participant_video' => 1];
+				
 				$onlineMeeting = $this->meetingService->createMeeting($data);
+				
 				if (!$onlineMeeting['success']) {
-					return back()->with(['message2' => "Error, can't create Online meeting."]);
+					return back()->with(['message2' => "Error, can't create Online meeting"]);
 				}
 				$start = $onlineMeeting['data']['start_url'];
 				$join = $onlineMeeting['data']['join_url'];
@@ -860,7 +862,7 @@ class MentorsController extends Controller
 				$passcode = $onlineMeeting['data']['passcode'] ?? null;
 			}
 			MentorshipRequest::find($request->id)->update(['period' => $request->period, 'zoom_date' => $request->date, 'admin_comment' => $request->notes, 'approved' => $approved, 'zoom_passcode' => $passcode, 'start_url' => $start, 'join_url' => $join, 'zoom_id' => $meetingId]);
-
+				
 			SendMentorshipRequestJob::dispatch($request->mentorid, $request->date, $request->period, auth()->id(), null, $request->id, null, 'modifySession');
 			/// Notify Mentor
 			/// End of mail send
@@ -873,24 +875,20 @@ class MentorsController extends Controller
 	public function modify(Request $request)
 	{
 		try {
-
+			
 			$type = $request->rtype;
 			if ($type == 6) {
-
 				$start = $join = null;
+				$mRequest = MentorshipRequest::findOrFail($request->id);
 				if ($request->stat == 'Yes') {
-
-					$mRequest = MentorshipRequest::findOrFail($request->id);
 					$topic = "Online mentorship meeting (M" . $mRequest->mentor_id . '- U' . $mRequest->user_id . ')';
 					$data = ['topic' => $topic, "start_time" => $mRequest->zoom_date, 'duration' => $mRequest->period, 'host_video' => 1, 'participant_video' => 1];
-					
 				}
-
-
-				MentorshipRequest::find($request->id)->update(['approved' => $request->stat]);
+				 MentorshipRequest::find($request->id)->update(['approved' => $request->stat]);
 				$locale = app()->getLocale() ?? 'en';
 				/// Notify Mentor
-				SendMentorshipRequestJob::dispatch($request->mentorid, $request->date, $request->period, auth()->id(), null, $request->id, $request->stat, 'modify');
+				// dd($request->all(), $mRequest->mentor_id, $mRequest->zoom_date->format('Y-m-d H:i:s'), $mRequest->period, auth()->id(), null, $request->id, $request->stat, 'modify');
+				SendMentorshipRequestJob::dispatch($mRequest->mentor_id, $mRequest->zoom_date->format('Y-m-d H:i:s'), $mRequest->period, auth()->id(), null, $request->id, $request->stat, 'modify');
 
 
 				return response()->json('success');

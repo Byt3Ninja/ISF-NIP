@@ -62,4 +62,5 @@ return [
     'mentorship_session_action' => 'تم :action طلب جلسة الارشاد مع :name',
     'Approved' => 'قبول',
     'Denied' => 'رفض',
+    'New_mentorship_session' => 'جلسة إرشادية جديدة',
 ];
