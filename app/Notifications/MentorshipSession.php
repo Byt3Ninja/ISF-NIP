@@ -36,7 +36,7 @@ class MentorshipSession extends Notification implements ShouldQueue
      *
      * @var array
      */
-    public $Message;
+    public $data;
 
     /**
      * Action text.
@@ -55,9 +55,9 @@ class MentorshipSession extends Notification implements ShouldQueue
     /**
      * Create a new notification instance.
      */
-   public function __construct(array $Message = [])
+   public function __construct(array $data = [])
     {
-        $this->Message = $Message;
+        $this->data = $data;
     }
 
     /**
@@ -112,22 +112,17 @@ class MentorshipSession extends Notification implements ShouldQueue
     /**
      * Get the mail representation of the notification.
      */
-    public function toMail($notifiable)
+     public function toMail($notifiable)
     {
         $org = $notifiable->organization;
         $smtpSettings = $org?->organizationSettings;
         
         // Get from address and name
         $from = $this->getFromAddress($smtpSettings);
-        $url = is_null($this->ActionUrl) ? url($this->Message[3]) : $this->ActionUrl;
+        $url = is_null($this->ActionUrl) ? $this->ActionUrl : '';
         return (new MailMessage)
-            ->subject($this->Message[0])
-            ->greeting($this->Message[1]) 
-            ->level('info')
-            ->line($this->Message[2])
-            ->action($this->ActionText, $url)
-            ->line('Thank you for using our system!')
-            ->salutation('Kind regards,');
+            ->subject($this->data['subject'])
+            ->view('emails.mentorship_request_status', ['data' => $this->data]);
     }
 
     /**
@@ -138,7 +133,8 @@ class MentorshipSession extends Notification implements ShouldQueue
     public function toDatabase(object $notifiable): array
     {
         return [
-            'message' =>$this->Message[4],
+            'message' => 'New mentorship session created with ' . $this->data['startupName'],
+            'details' => $this->data,
         ];
     }
 
@@ -149,8 +145,8 @@ class MentorshipSession extends Notification implements ShouldQueue
     {
         // Expecting $this->Message indices: [0]=subject/title, [1]=greeting, [2]=line, [3]=url, [4]=database message
         return __('notifications.mentorship_session.whatsapp', [
-            'greeting' => $this->Message[1] ?? '',
-            'line' => $this->Message[2] ?? '',
+            'greeting' => $this->data['title'] ?? '',
+            'line' => $this->data['sessionDate'] . ' / company name: ' . $this->data['startupName'] ?? '',
         ]);
     }
 
@@ -159,11 +155,20 @@ class MentorshipSession extends Notification implements ShouldQueue
      */
     public function toBroadcast(object $notifiable): BroadcastMessage
     {
+        //return new BroadcastMessage([
+         //   'subject' => $this->data['title'] ?? __('notifications.mentorship_session.broadcast', ['title' => '']),
+         //   'message' => __('notifications.mentorship_session.broadcast', ['title' => $this->data['title'] . ' - ' . $this->data['startupName'] ?? '']),
+         //   'time' => now()->toDateTimeString(),
+      //  ]);
         return new BroadcastMessage([
-            'subject' => $this->Message[0] ?? __('notifications.mentorship_session.broadcast', ['title' => '']),
-            'message' => __('notifications.mentorship_session.broadcast', ['title' => $this->Message[0] ?? '']),
+            'subject' => $this->data['title'] ?? 'New Mentorship Session',
+            'message' =>
+                'Startup: ' . ($this->data['startupName'] ?? 'N/A') .
+                ' | Date: ' . ($this->data['sessionDate'] ?? 'N/A'),
             'time' => now()->toDateTimeString(),
         ]);
+
+
     }
 
     /**
@@ -174,10 +179,10 @@ class MentorshipSession extends Notification implements ShouldQueue
      */
     public function failed(Throwable $exception): void
     {
-        Log::error('MentorshipSession notification failed after all retries', [
+        Log::error('MentorshipSessionMentor notification failed after all retries', [
             'error' => $exception->getMessage(),
             'trace' => $exception->getTraceAsString(),
-            'message' => $this->Message,
+            'message' => $this->data,
         ]);
     }
 }
