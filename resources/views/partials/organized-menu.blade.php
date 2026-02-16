@@ -55,6 +55,12 @@ if (strpos(request()->getRequestUri(), 'mentorship/sessions') !== false) {
   $activeItem = 'mentorships.sessions_list';
 }
 
+// Special case: Make mentorship management active if URL contains 'mentorship/view'
+if (strpos(request()->getRequestUri(), 'mentorship/view') !== false) {
+  $activeGroup = 'programs';
+  $activeItem = 'mentorships.requests_view';
+}
+
 // Special case: Make startups active if URL contains '/companies'
 if (strpos(request()->getRequestUri(), '/companies') !== false || strpos(request()->getRequestUri(), '/companyProfile') !== false) {
   $activeGroup = 'people';
@@ -79,8 +85,11 @@ if (strpos(request()->getRequestUri(), '/questions-bank') !== false || strpos(re
   $activeItem = 'questions-bank.index';
 }
 
-// Special case: Make mentors active if URL contains '/invitations'
-if (strpos(request()->getRequestUri(), '/invitations') !== false || strpos(request()->getRequestUri(), '/mentors') !== false) {
+if (
+  (request()->is('*invitations*') || request()->is('*mentors*'))
+  && !request()->is('*mentorship/view*')
+  && !request()->is('*mentorship/sessions*')
+) {
   $activeGroup = 'people';
   $activeItem = 'mentors.list';
 }

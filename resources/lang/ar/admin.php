@@ -3402,4 +3402,6 @@ return [
 	'all_ratings' => 'جميع التقييمات',
 	'up' => 'أعلى',
 	'star' => 'نجمة',
+	'manage_mentorship_description' => 'إدارة جلسات الارشاد بين المرشدين والشركات الناشئة',
+	'all_founders' => 'جميع المؤسسين',
 ];

@@ -8852,7 +8852,10 @@
                 "is_core": 0,
                 "default_for": [
                     "mentor",
-                    "registered"
+                    "registered",
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
