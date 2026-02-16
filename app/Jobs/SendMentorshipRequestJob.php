@@ -167,6 +167,8 @@ class SendMentorshipRequestJob implements ShouldQueue
                 'attachments' => $session->attachments ?? [],
                 'status' => $session->approved ?? '',
                 'action' => 'modifySession',
+                'user' => 'mentor',
+                'lang' => $locale,
             ];
             $MSGM = new MentorshipSessionMentor($mentorMessage);
             if (!in_array(env('APP_ENV', 'local'), ['local'])) {
@@ -189,16 +191,28 @@ class SendMentorshipRequestJob implements ShouldQueue
             $user->email = $rName_usr->email;
             $user->id = $rName_usr->id;
             $message = [
-                "New Mentorship session - VI portal",
-                "Dear " . $rFullName_usr . ",",
-                "Kindly note you have a new mentorship session with '" . $rFullName . "', Session will start:" . $this->date . ", Check your account to join the session ",
-                "/dashboard",
-                'Kindly note you have a new mentorship session with ' . $rFullName . ', Session will start: ' . $this->date,
+                'subject' => __('messages.New_mentorship_session', [], $locale) . $session->user->company->name_en,
+                'title' => __('messages.mentorship_session_subject:'.$session->user->company->name_en.'', [], $locale),
+                'mentorName' => $rFullName,
+                'startupOwnerName' => $rFullName_usr,
+                'startupName' => $session->user->company->name_en ?? '',
+                'sessionDate' => $session->zoom_date,
+                'duration' => $session->period ?? '60 min',
+                'sessionType' => $session->session_type ?? 'Online',
+                'meetingLink' => $session->start_url ?? '',
+                'meetingPass' => $session->zoom_passcode ?? '',
+                'location' => $session->orgnization->google_map_url ?? '',
+                'notes' => $session->notes ?? '',
+                'attachments' => $session->attachments ?? [],
+                'status' => $session->approved ?? '',
+                'action' => 'modifySession',
+                'user' => 'user',
+                'lang' => $locale,
             ];
-            $MSG = new TemplateEmail($message);
+            $MSG = new MentorshipSession($message);
             if (!in_array(env('APP_ENV', 'local'), ['local'])) {
                 try {
-                    $user->notify($MSG);
+                    $rName_usr->notify($MSG);
                 } catch (\Throwable $th) {
                     // throw $th;
                 }
@@ -239,6 +253,8 @@ class SendMentorshipRequestJob implements ShouldQueue
                 'attachments' => $session->attachments ?? [],
                 'status' => $session->approved ?? '',
                 'action' => 'modify',
+                'user' => 'mentor',
+                'lang' => $locale,
             ];
             $MSGM = new MentorshipSessionMentor($mentorMessage);
             $phoneNumber = $rName_usr->country_code_w_a . $rName_usr->whatsapp;
@@ -257,22 +273,30 @@ class SendMentorshipRequestJob implements ShouldQueue
             $user->email = $rName_usr->email;
             $user->id = $rName_usr->id;
             $userMessage = [
-                __("messages.mentorship_session_subject", [], $locale),
-                __("messages.dear", ['name' => $rFullName_usr], $locale),
-                $this->stat == 'Yes'
-                    ? __("messages.approved_message", ['other_party' => $rFullName], $locale)
-                    : __("messages.denied_message", ['other_party' => $rFullName], $locale),
-                "/dashboard",
-                $this->stat == 'Yes'
-                    ? __("messages.mentorship_session_action", ['action' => __('messages.Approved'), 'name' => $rFullName])
-                    : __("messages.mentorship_session_action", ['action' => __('messages.Rejected'), 'name' => $rFullName]),
+                'subject' => __('messages.New_mentorship_session', [], $locale) . $session->user->company->name_en,
+                'title' => __('messages.mentorship_session_subject:'.$session->user->company->name_en.'', [], $locale),
+                'mentorName' => $rFullName,
+                'startupOwnerName' => $rFullName_usr,
+                'startupName' => $session->user->company->name_en ?? '',
+                'sessionDate' => $session->zoom_date,
+                'duration' => $session->period ?? '60 min',
+                'sessionType' => $session->session_type ?? 'Online',
+                'meetingLink' => $session->start_url ?? '',
+                'meetingPass' => $session->zoom_passcode ?? '',
+                'location' => $session->orgnization->google_map_url ?? '',
+                'notes' => $session->notes ?? '',
+                'attachments' => $session->attachments ?? [],
+                'status' => $session->approved ?? '',
+                'action' => 'modify',
+                'user' => 'user',
+                'lang' => $locale,
             ];
             $MSG = new MentorshipSession($userMessage);
             $phoneNumber = $rName_usr->country_code_w_a . $rName_usr->whatsapp;
             $Massage = "Dear " . $rFullName_usr . ",you have a new mentorship session with '" . $rFullName . "',is Rejected Thanks from " . env('APP_NAME');
             if (!in_array(env('APP_ENV', 'local'), ['local'])) {
                 try {
-                    $user->notify($MSG);
+                    $rName_usr->notify($MSG);
                 } catch (\Throwable $th) {
                     // throw $th;
                 }
