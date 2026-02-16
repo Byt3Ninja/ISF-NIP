@@ -3345,5 +3345,7 @@ return [
 	'Error, can\'t create Online meeting' => 'Error, can\'t create Online meeting',
 	'all_ratings' => 'All Ratings',
 	'up' => 'Up',
-	'star' => 'Star'
+	'star' => 'Star',
+	'manage_mentorship_description' => 'Manage mentorship sessions between mentors and startups',
+	'all_founders' => 'All Founders',
 ];
