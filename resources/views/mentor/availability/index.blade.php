@@ -42,7 +42,7 @@
           <h4 class="mb-0">{{ __('mentor.weekly_availability_slots') }}</h4>
     
           <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#availabilityModal">
-            <i class="ti ti-plus me-1"></i> {{ __('mentor.add_availability') }}
+            <i class="ti ti-plus me-1"></i> {{ __('mentor.add_availability_slots') }}
           </button>
         </div>
       </div>
@@ -61,7 +61,7 @@
           <div class="modal-header border-bottom pb-6">
           <div class="d-flex justify-content-between align-items-center w-100">
             <h5 class="modal-title d-flex align-items-center mb-0">
-              <i class="ti ti-plus me-2"></i> {{ __('mentor.add_availability') }}
+              <i class="ti ti-plus me-2"></i> {{ __('mentor.add_availability_slots') }}
             </h5>
             <nav class="nav-align-end">
               <ul class="nav nav-tabs">
@@ -539,7 +539,8 @@
                                 .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok'))
                                 .then(result => {
                                     if(result.success) {
-                                        releaseSuccessAlert({
+                                        showToast({
+                                            type: 'success',
                                             'message': result?.message ? result.message : "{{ __('mentor.slot_removed_success') }}",
                                         });
                                         // Re-fetch data to update the calendar
@@ -634,7 +635,8 @@
                     .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok'))
                     .then(result => {
                         if(result.success) {
-                            releaseSuccessAlert({
+                            showToast({
+                                type: 'success',
                                 'message': result?.message ? result.message : "{{ __('mentor.slot_removed_success') }}",
                             });
                         } else {
@@ -732,14 +734,16 @@
               const message = "{{ __('mentor.slot_added_to_date', ['date' => ':date']) }}".replace(':date', moment(key).format('MMMM D, YYYY'));
               
               updateCalendarStyles();
-              releaseSuccessAlert({
+              showToast({
+                  type: 'success',
                 'title': '{{ __('mentor.slot_added_success') }}',
                 'message': message,
               });
             } else {
               const message = "{{ __('mentor.slot_added_to_all', ['day' => ':day']) }}".replace(':day', key + 's');
               updateCalendarStyles();
-              releaseSuccessAlert({
+              showToast({
+                  type: 'success',
                 'title': '{{ __('mentor.slot_added_success') }}',
                 'message': message,
               });
@@ -910,7 +914,7 @@
                 <div class="text-center py-5" id="empty-list-view">
                     <p class="text-muted mb-3">{{ __('mentor.no_availability_slots_added') }}</p>
                     <button type="button" class="btn btn-primary" id="show-add-slot-form-btn">
-                        <i class="ti ti-plus me-1"></i> {{ __('mentor.add_availability') }}
+                        <i class="ti ti-plus me-1"></i> {{ __('mentor.add_availability_slots') }}
                     </button>
                 </div>
             `;
@@ -996,7 +1000,8 @@
             $('#list-view-session-type').val('Online');
             $('#list-view-day-select').val('Sunday');
 
-            releaseSuccessAlert({
+            showToast({
+                type: 'success',
                 'title': '{{ __('mentor.slot_added_success') }}',
                 'message': result.message,
             });
@@ -1113,7 +1118,8 @@
           updateSlotsList();
           updateCalendarStyles();
 
-          releaseSuccessAlert({
+          showToast({
+              type: 'success',
             'title': '{{ __('mentor.slot_added_success') }}',
             'message': result.message,
           });
@@ -1190,7 +1196,8 @@
                     updateSlotsList();
                     updateCalendarStyles();
                     
-                    releaseSuccessAlert({
+                    showToast({
+                        type: 'success',
                         'message': result.message,
                     });
                 })

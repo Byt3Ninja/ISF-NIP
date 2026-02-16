@@ -126,4 +126,5 @@ return [
     'session_start_time' => 'وقت بدء الجلسة',
     'session_end_time' => 'وقت انتهاء الجلسة',
     'please_select_session_times' => 'يرجى اختيار وقت الجلسة',
+    'add_availability_slots' => 'إضافة فترات التواجد',
 ];
