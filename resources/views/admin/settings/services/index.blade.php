@@ -72,7 +72,7 @@
                   </div>
                 </div>
   
-                <div class="col-md-6 col-lg-3">
+                <div class="col-md-6 col-lg-2">
                   <select class="form-select select2" name="org-id" id="organization-filter" data-placeholder="{{ __('admin.All_Organizations') }}">
                     <option value="all">{{ __('admin.All_Organizations') }}</option>
                     @foreach($services->pluck('organizations')->flatten()->unique('id') as $org)
@@ -89,7 +89,20 @@
                   </select>
                 </div>
 
-                <div class="col-md-6 col-lg-4">
+                @if ($_user->hasRole('registered'))
+                  <div class="col-md-6 col-lg-3">
+                    <select class="form-select select2" name="rating" data-placeholder="{{ __('admin.all_ratings') }}">
+                      <option value="all">{{ __('admin.all_ratings') }}</option>
+                      <option value="5">★★★★★ (5 {{ __('admin.stars') }})</option>
+                      <option value="4">★★★★☆ (4 {{ __('admin.stars') }} & {{ __('admin.up') }})</option>
+                      <option value="3">★★★☆☆ (3 {{ __('admin.stars') }} & {{ __('admin.up') }})</option>
+                      <option value="2">★★☆☆☆ (2 {{ __('admin.stars') }} & {{ __('admin.up') }})</option>
+                      <option value="1">★☆☆☆☆ (1 {{ __('admin.star') }} & {{ __('admin.up') }})</option>
+                    </select>
+                  </div>
+                @endif
+
+                <div class="col-md-6 col-lg-2">
                   <div class="d-flex justify-content-lg-end gap-2">
                     @if(request('search') || request('status') || request('org-id'))
                       <a href="{{ route('services.index') }}" class="btn bg-card border btn-icon">

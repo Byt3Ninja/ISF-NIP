@@ -3343,4 +3343,7 @@ return [
 	'must_be_valid_number' => 'Must be a valid number',
 	'must_not_be_less_than_0' => 'Must be greater than or equal to 0',
 	'Error, can\'t create Online meeting' => 'Error, can\'t create Online meeting',
+	'all_ratings' => 'All Ratings',
+	'up' => 'Up',
+	'star' => 'Star'
 ];
