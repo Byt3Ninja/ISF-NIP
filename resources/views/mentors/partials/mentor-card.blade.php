@@ -70,7 +70,18 @@
       @endif
     </div>
     <!-- / Mentor Expertises -->
-
+    <!-- Badge Public / Private -->
+    <div class="mb-3">
+      <div class="d-flex align-items-center mb-2">
+        <i class="ti ti-lock ti-sm me-2"></i>
+        <p class="fs-6 fw-bold text-dark mb-0">{{ __('admin.Visibility') }}</p>
+      </div>
+      <div class="d-flex flex-wrap gap-1" style="max-height: 70px; overflow-y: auto;">
+        <span class="badge bg-label-info rounded-pill px-2 py-1 small">
+          {{ $mentor?->is_public ? __('admin.Public') : __('admin.Organization') }}
+        </span>
+      </div>
+    </div>
     <!-- Stats Section -->
     <div class="row g-2 mb-3">
       <div class="col-6">
