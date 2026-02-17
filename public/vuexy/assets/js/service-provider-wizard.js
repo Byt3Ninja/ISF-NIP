@@ -253,15 +253,12 @@
         },
         whatsapp: {
           validators: {
-            notEmpty: {
-              message: translations[lang].required,
-            },
             callback: {
               message: translations[lang].invalidPhone,
               callback: function (input) {
                 const value = input.value.trim();
 
-                // Skip validation if empty (handled by notEmpty validator)
+                // WhatsApp is optional - skip validation if empty
                 if (value === '') {
                   return { valid: true };
                 }
