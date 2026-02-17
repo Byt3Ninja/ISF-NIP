@@ -1,39 +1,41 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Otp;
-use App\User;
-use App\Cycle;
-use App\Almuni;
-use App\Country;
-use App\State;
-use App\City;
 use App\Activity;
+use App\Almuni;
+use App\City;
+use App\Country;
 use App\Currency;
-use App\Schedule;
-use App\Settings;
-use App\UsersBio;
-use App\Expertise;
-use Carbon\Carbon;
+use App\Cycle;
 use App\CyclesMentors;
-use App\MentorshipTask;
+use App\Expertise;
+use App\Http\Requests\UpdateClientProfilePasswordRequest;
+use App\Http\Requests\UpdateClientProfileRequest;
+use App\InviteMentor;
 use App\MentorshipRequest;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
+use App\MentorshipTask;
+use App\Notifications\ConfirmEmailUpdateNotification;
+use App\Otp;
+use App\Schedule;
+use App\Services\NotificationSettingsService;
 use App\Services\WhatsAppService;
-use PragmaRX\Google2FA\Google2FA;
+use App\Settings;
+use App\State;
+use App\StaticCategory;
+use App\User;
+use App\UsersBio;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
-use App\Services\NotificationSettingsService;
-use App\Http\Requests\UpdateClientProfileRequest;
-use Storage, Hash, Exception, Session, URL, File;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\In;
 use Intervention\Image\ImageManagerStatic as Image;
-use App\Notifications\ConfirmEmailUpdateNotification;
-use App\Http\Requests\UpdateClientProfilePasswordRequest;
-use App\StaticCategory;
+use PragmaRX\Google2FA\Google2FA;
+use Storage, Hash, Exception, Session, URL, File;
 
 class ClientProfileController extends Controller
 {
@@ -600,57 +602,52 @@ class ClientProfileController extends Controller
                 $user = Auth::user();
                 $orgIds = $user->organizations_ids;
                 if (!$user->hasRole('Admin') && !empty($orgIds)) {
-                    $cycles = Cycle::whereIn('organization_id', $orgIds)->get();
-                    // $mentors = User::whereHas('mentorCycles', function ($q) use ($orgIds) {
-                    //     $q->where(function ($qq) use ($orgIds) {
-                    //         foreach ($orgIds as $orgId) {
-                    //             $qq->orWhere('organization_id', $orgId);
-                    //         }
-                    //     });
-                    // })->get();
+                        $cycles = Cycle::whereIn('organization_id', $orgIds)->get();
                     if (!empty($scopeFilter) && $scopeFilter !== 'all') {
-                    if ($scopeFilter === 'public') {
-                    // $cycles = Cycle::whereIn('organization_id', $orgIds)->get();
-                    // $mentors = User::whereHas('mentorCycles', function ($q) use ($orgIds) {
-                    //     $q->whereIn('organization_id', $orgIds);
-                    // })
-                    // ->whereDoesntHave('inviteMentors', function ($q) {
-                    //     $q->whereIn('scope', ['organization', 'Organization']);
-                    // })
-                    // ->get();
+                        if ($scopeFilter === 'public') {
                     
-                    $mentors->where(function ($q) {
-                            $q->whereDoesntHave('inviteMentors')
-                            ->orWhere(function ($q2) {
-                                $q2->whereHas('inviteMentors', function ($q3) {
-                                    $q3->where('scope', 'Public')
-                                        ->where('status', 'accepted');
+                            $mentors->where(function ($q) {
+                                $q->whereDoesntHave('inviteMentors')
+                                ->orWhere(function ($q2) {
+                                    $q2->whereHas('inviteMentors', function ($q3) {
+                                        $q3->where('scope', 'Public')
+                                            ->where('status', 'accepted');
+                                    });
                                 });
                             });
-                        });
-                    }else{
-                         $mentors->filter(function ($mentor) use ($request) {
-                                return $mentor->inviteMentors->filter(function ($invite) use ($request) {
-                                    if ($invite->status !== 'accepted') {
-                                        return false;
-                                    }
+                        }else{
+                            $mentors->filter(function ($mentor) use ($request) {
+                                    return $mentor->inviteMentors->filter(function ($invite) use ($request) {
+                                        if ($invite->status !== 'accepted') {
+                                            return false;
+                                        }
 
-                                    if ($request->scopeFilter) {
-                                        $orgs = json_decode($invite->organization_ids, true) ?? [];
-                                        return in_array((string) $request->scopeFilter, $orgs);
-                                    }
+                                        if ($request->scopeFilter) {
+                                            $orgs = json_decode($invite->organization_ids, true) ?? [];
+                                            return in_array((string) $request->scopeFilter, $orgs);
+                                        }
 
-                                    return true;
-                                })->isNotEmpty();
-                            });
-                    }
+                                        return true;
+                                    })->isNotEmpty();
+                                });
+                        }
                     }
                 } else {
                     $cycles = Cycle::all();
                 }
                 
 			    $offline_allowed = $settings->allow_offline_sessions == 1 ? true : false;
+                $getOrganization = InviteMentor::where('status', 'accepted')
+                    ->where('scope', 'Organization')
+                    ->pluck('mentor_id')
+                    ->toArray();
 
+                $mentors = $mentors->map(function ($mentor) use ($getOrganization) {
+                    $mentor->is_public = !in_array($mentor->id, $getOrganization);
+                    return $mentor;
+                });
+                
+                    
                 // $mentors = User::role('mentor')->get();
                 return view('mentors.index', compact('mentors', 'cycles', 'offline_allowed'));
             }
@@ -758,6 +755,15 @@ class ClientProfileController extends Controller
 
                 $settings = Settings::where('id', 1)->first();
 			    $offline_allowed = $settings->allow_offline_sessions == 1 ? true : false;
+                $getOrganization = InviteMentor::where('status', 'accepted')
+                    ->where('scope', 'Organization')
+                    ->pluck('mentor_id')
+                    ->toArray();
+
+                $mentors = $mentors->map(function ($mentor) use ($getOrganization) {
+                    $mentor->is_public = !in_array($mentor->id, $getOrganization);
+                    return $mentor;
+                });
                 // $mentors = User::role('mentor')->get();
                 return view('mentors.index', compact('mentors', 'cycles', 'offline_allowed'));
             } else {
