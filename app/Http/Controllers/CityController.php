@@ -1,90 +1,74 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use App\City;
 use App\State;
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreCityRequest;
+use App\Http\Requests\UpdateCityRequest;
+
 class CityController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * API: Return cities as JSON for a given state_id (used by cascade dropdowns).
      */
     public function index()
     {
-      $cities = City::where('state_id', request()->input('state_id',0))->pluck(lang('name')." as neme",'id');
-      return response()->json($cities);
+        $cities = City::where('state_id', request()->input('state_id', 0))
+            ->pluck(lang('name') . " as name", 'id');
+        return response()->json($cities);
     }
+
+    /**
+     * API: Return states as JSON for a given country_id (used by cascade dropdowns).
+     */
     public function states()
     {
-      $states = State::where('country_id', request()->input('country_id',0))->pluck(lang('name')." as name",'id');
-      return response()->json($states);
+        $states = State::where('country_id', request()->input('country_id', 0))
+            ->pluck(lang('name') . " as name", 'id');
+        return response()->json($states);
     }
 
+    // ─── Admin CRUD ────────────────────────────────────────────
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    public function adminIndex(State $state)
     {
-        //
+        $state->load('country');
+        $cities = $state->cities;
+        return view('admin.cities.index', compact('state', 'cities'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function adminCreate(State $state)
     {
-        //
+        $state->load('country');
+        return view('admin.cities.create', compact('state'));
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\City  $city
-     * @return \Illuminate\Http\Response
-     */
-    public function show(City $city)
+    public function adminStore(StoreCityRequest $request, State $state)
     {
-        //
+        $state->cities()->create(array_merge(
+            $request->validated(),
+            ['country_id' => $state->country_id]
+        ));
+        return redirect()->route('city-management.index', $state->id)->with('msg', 'StoredSuccessfully');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\City  $city
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(City $city)
+    public function adminEdit(City $city)
     {
-        //
+        $city->load('state.country');
+        return view('admin.cities.edit', compact('city'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\City  $city
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, City $city)
+    public function adminUpdate(UpdateCityRequest $request, City $city)
     {
-        //
+        $city->update($request->validated());
+        return redirect()->route('city-management.index', $city->state_id)->with('msg', 'UpdatedSuccessfully');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\City  $city
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(City $city)
+    public function adminDestroy(City $city)
     {
-        //
+        $stateId = $city->state_id;
+        $city->delete();
+        return redirect()->route('city-management.index', $stateId)->with('msg', 'DeletedSuccessfully');
     }
 }

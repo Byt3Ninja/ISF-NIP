@@ -498,9 +498,31 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/companies', 'ClientCompanyController@companies')->name('users.view_companies');
     // Export startups (CSV / Excel) - preserves current filters passed as query params
     Route::get('/companies/export', 'CompanyExportController@export')->name('users.companies_export');
-    //Cities
+    // Cities (API for cascade dropdowns)
     Route::resource('cities', 'CityController');
     Route::get('get_states', 'CityController@states')->name('utils.locations_list_states_by_country');
+
+    // Location Management (Countries → States → Cities)
+    Route::get('/country-management', 'CountryManagementController@index')->name('country-management.index');
+    Route::get('/country-management/create', 'CountryManagementController@create')->name('country-management.create');
+    Route::post('/country-management', 'CountryManagementController@store')->name('country-management.store');
+    Route::get('/country-management/{country}/edit', 'CountryManagementController@edit')->name('country-management.edit');
+    Route::put('/country-management/{country}', 'CountryManagementController@update')->name('country-management.update');
+    Route::delete('/country-management/{country}', 'CountryManagementController@destroy')->name('country-management.destroy');
+
+    Route::get('/country-management/{country}/states', 'StateManagementController@index')->name('state-management.index');
+    Route::get('/country-management/{country}/states/create', 'StateManagementController@create')->name('state-management.create');
+    Route::post('/country-management/{country}/states', 'StateManagementController@store')->name('state-management.store');
+    Route::get('/state-management/{state}/edit', 'StateManagementController@edit')->name('state-management.edit');
+    Route::put('/state-management/{state}', 'StateManagementController@update')->name('state-management.update');
+    Route::delete('/state-management/{state}', 'StateManagementController@destroy')->name('state-management.destroy');
+
+    Route::get('/state-management/{state}/cities', 'CityController@adminIndex')->name('city-management.index');
+    Route::get('/state-management/{state}/cities/create', 'CityController@adminCreate')->name('city-management.create');
+    Route::post('/state-management/{state}/cities', 'CityController@adminStore')->name('city-management.store');
+    Route::get('/city-management/{city}/edit', 'CityController@adminEdit')->name('city-management.edit');
+    Route::put('/city-management/{city}', 'CityController@adminUpdate')->name('city-management.update');
+    Route::delete('/city-management/{city}', 'CityController@adminDestroy')->name('city-management.destroy');
 
     //FileManager
     Route::get('/myFiles', 'FilemanagerController@index')->name('my_files.list');

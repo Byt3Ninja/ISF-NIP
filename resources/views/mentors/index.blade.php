@@ -55,5 +55,6 @@ $tabs = [
     </div>
   </div>
 </div>
+
 @include('mentors.partials.filter-modal')
 @stop
