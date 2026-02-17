@@ -526,6 +526,16 @@ class ClientCompanyController extends Controller
        
         $user = auth()->user();
         try {
+
+            if( $id == null )
+            {
+                if( !$user->hasRole('registered') )
+                {
+                    return redirect()->route('user.profile_view')->with(['msg' => 'NoHaveCompany', 'class' => 'danger']);
+                }
+                $client = User::where('HaveCompany', 1)->with('company')->with('company.city')->find($user->id);
+                $id = $client?->company?->id ?? null;
+            }
             
             if( $id == null )
             {
@@ -861,6 +871,7 @@ class ClientCompanyController extends Controller
             ));
         } catch (Exception $e) {
             //log what happend
+            dd($e);
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);
         }

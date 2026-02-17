@@ -42,7 +42,7 @@ $programs = $programs
     <template id="milestone-card-template">
       <div class="card shadow-sm border mb-3 milestone-card">
         <div class="card-body">
-          <!-- Card Header - Using Bootstrap's flex utilities for alignment -->
+          <!-- Card Header - Using Bootstrap flex utilities for alignment -->
           <h6 class="border-bottom d-flex pb-2 align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-2 flex-grow-1 w-100">
               <div 
@@ -108,12 +108,12 @@ $programs = $programs
               </label>
               @php
                 $categories = [
-                  ['id' => 1, 'name' => 'Finance'],
-                  ['id' => 2, 'name' => 'Planning'],
-                  ['id' => 3, 'name' => 'Design'],
-                  ['id' => 4, 'name' => 'Development'],
-                  ['id' => 5, 'name' => 'Testing'],
-                  ['id' => 6, 'name' => 'Delivery'],
+                  ['id' => 1, 'name' => $l == 'ar' ? 'التمويل' : 'Finance'],
+                  ['id' => 2, 'name' => $l == 'ar' ? 'التخطيط' : 'Planning'],
+                  ['id' => 3, 'name' => $l == 'ar' ? 'التصميم' : 'Design'],
+                  ['id' => 4, 'name' => $l == 'ar' ? 'التطوير' : 'Development'],
+                  ['id' => 5, 'name' => $l == 'ar' ? 'الاختبار' : 'Testing'],
+                  ['id' => 6, 'name' => $l == 'ar' ? 'التسليم' : 'Delivery'],
                 ]
               @endphp
               <select class="form-select milestone-category" id="milestone-category-select" required data-placeholder="{{ __('admin.select_category') }}">
