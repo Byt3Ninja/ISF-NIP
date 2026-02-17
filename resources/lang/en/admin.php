@@ -3352,4 +3352,5 @@ return [
 	'Organization name must contain only Arabic letters' => 'Organization name must contain only Arabic letters',
 	'newest_first' => 'Newest First',
 	'oldest_first' => 'Oldest First',
+	'join_as' => 'Join as',
 ];

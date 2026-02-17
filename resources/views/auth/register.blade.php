@@ -472,12 +472,24 @@
                 </div>
               @endif
 
-            <p class="text-center">
+            <p class="text-center mb-n1">
               <span>{{ __('Already have account') }}{{ $l == 'ar' ? '؟' : '?' }}</span>
               <a href="{{ route('login') }}">
                 <span>{{ $l == 'en' ? 'Sign in instead' : 'سجل الدخول' }}</span>
               </a>
             </p>
+
+            <div class="divider my-6 mx-auto" style="width: 80%;">
+              <div class="divider-text">{{ __('auth.or') }}</div>
+            </div>
+
+            <p class="text-center mb-n1">
+              <span class="me-1">{{ __('admin.join_as') }}</span>
+              <a href="/provider-registration">
+                <span>{{ __('admin.serviceProvider') }}</span>
+              </a>
+            </p>
+
             <div id="socialLoginSection" style="display: block;">
               @if ((isset($setting) && ($setting->LINKEDIN_LOGIN ?? 'disabled') === 'enabled') ||(isset($setting) && ($setting->GOOGLE_LOGIN ?? 'disabled') === 'enabled'))
               <div class="divider my-6 mx-auto" style="width: 80%;">

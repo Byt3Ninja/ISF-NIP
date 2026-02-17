@@ -3408,4 +3408,5 @@ return [
 	'Organization name must contain only Arabic letters' => 'يجب أن يحتوي اسم المؤسسة على أحرف عربية فقط',
 	'newest_first' => 'الأحدث أولاً',
 	'oldest_first' => 'الأقدم أولاً',
+	'join_as' => 'انضم ك',
 ];
