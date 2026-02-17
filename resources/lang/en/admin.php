@@ -3359,4 +3359,8 @@ return [
 	'total_requests' => 'Total Requests',
 	'attachment' => 'Attachment',
 	'Created By' => 'Created By',
+
+	'Image uploaded successfully' => 'Image uploaded successfully.',
+	'Image upload failed' => 'Image upload failed.',
+	'Image not found' => 'Image not found.',
 ];

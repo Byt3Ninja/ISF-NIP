@@ -3415,4 +3415,8 @@ return [
 	'total_requests' => 'اجمالي الطلبات',
 	'attachment' => 'المرفق',
 	'Created By' => 'انشيء بواسطة',
+
+	'Image uploaded successfully' => 'تم رفع الصورة بنجاح',
+	'Image upload failed' => 'فشل رفع الصورة',
+	'Image not found' => 'الصورة غير موجودة',
 ];
