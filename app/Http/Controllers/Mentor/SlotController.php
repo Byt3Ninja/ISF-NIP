@@ -311,32 +311,42 @@ class SlotController extends Controller
 							], 422);
 					}
 				}
-			// Build base search query
-			$query = Schedule::where('user_id', auth()->id())
-					->where('type', $validated['type'])
-					->where('tfrom', $validated['tfrom'])
-					//->where('tto', $validated['tto'])
-					->where('session_type', $sessionType);
-
-			// Add type-specific conditions
-			if ($validated['type'] === 'Weekly') {
-					$query->where('days', $validated['days']);
-			} else {
-					$query->where('date', $validated['date']);
-			}
-
-			// Check if duplicate exists
-			$exists = $query->exists();
-
-			if ($exists) {
+				
+				if($validated['tfrom'] >= date('H:i:s')){
 					return response()->json([
 							'success' => false,
-							'message' => __('mentor.slot_already_exists'),
+							'message' => __('mentor.this_time_before_now'),
 					], 422);
-			}
-			$dayName = Carbon::parse($validated['date'])->format('l');
-			// Create slot
-			
+				}
+				// Build base search query
+				$query = Schedule::where('user_id', auth()->id())
+						->where('type', $validated['type'])
+						->where('tfrom', $validated['tfrom'])
+						//->where('tto', $validated['tto'])
+						->where('session_type', $sessionType);
+
+				// Add type-specific conditions
+				if ($validated['type'] === 'Weekly') {
+						$query->where('days', $validated['days']);
+				} else {
+						$query->where('date', $validated['date']);
+				}
+
+				// Check if duplicate exists
+				$getschedule = $query->orderBy('created_at', 'desc')->first();
+		
+				if ($getschedule != null) {
+					if ($getschedule->tfrom == $validated['tfrom'].':00' && $validated['tto'] >= $getschedule->tto) {
+						$getschedule->delete();
+					}else{
+						return response()->json([
+								'success' => false,
+								'message' => __('mentor.slot_already_exists'),
+						], 422);
+					}
+				}
+				$dayName = Carbon::parse($validated['date'])->format('l');
+				// Create slot
 				$slotData = [
 					'user_id' => auth()->id(),
 					'type' => $validated['type'],
@@ -348,6 +358,7 @@ class SlotController extends Controller
 				];
 
 				$schedules[] = Schedule::create($slotData);
+			
 			}
 			
 			return response()->json([
