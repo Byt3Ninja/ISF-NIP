@@ -111,8 +111,8 @@
     <label class="form-label">{{ __('admin.preferred_language') }}</label>
     <select class="form-select select2" name="language" data-placeholder="{{ __('admin.Select Language') }}">
       <option value=""></option>
-      <option value="en" {{ old('language', $org->preferred_language ?? '') == 'en' ? 'selected' : '' }}>English</option>
-      <option value="ar" {{ old('language', $org->preferred_language ?? '') == 'ar' ? 'selected' : '' }}>Arabic</option>
+      <option value="en" {{ old('language', $org->preferred_language ?? '') == 'en' ? 'selected' : '' }}>{{ __('admin.English') }}</option>
+      <option value="ar" {{ old('language', $org->preferred_language ?? '') == 'ar' ? 'selected' : '' }}>{{ __('admin.Arabic') }}</option>
     </select>
   </div>
 

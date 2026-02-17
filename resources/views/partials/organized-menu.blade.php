@@ -122,7 +122,10 @@ if (Route::is(
   'queue.*',
   'notification-templates.*',
   'notification-triggers.*',
-  'license.*'
+  'license.*',
+  'country-management.*',
+  'state-management.*',
+  'city-management.*'
 )) {
   $activeGroup = 'admin';
   $activeItem = 'settings.index';

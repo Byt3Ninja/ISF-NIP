@@ -401,5 +401,6 @@ return [
 		'unsaved_changes_message' => 'You have unsaved changes. Are you sure you want to leave?',
 		'leaveanyway' => 'Leave Anyway',
 		'stay' => 'Stay',
+		'countries' => 'Countries',
 	],
 ];

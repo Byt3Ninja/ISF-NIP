@@ -3363,4 +3363,20 @@ return [
 	'Image uploaded successfully' => 'Image uploaded successfully.',
 	'Image upload failed' => 'Image upload failed.',
 	'Image not found' => 'Image not found.',
+
+	// Location Management
+	'countries' => 'Countries',
+	'states' => 'States',
+	'cities' => 'Cities',
+	'add_country' => 'Add Country',
+	'edit_country' => 'Edit Country',
+	'add_state' => 'Add State',
+	'edit_state' => 'Edit State',
+	'add_city' => 'Add City',
+	'edit_city' => 'Edit City',
+	'name_en' => 'Name (English)',
+	'name_ar' => 'Name (Arabic)',
+	'iso3' => 'ISO3 Code',
+	'phone_code' => 'Phone Code',
+	'are_you_sure' => 'Are you sure?',
 ];

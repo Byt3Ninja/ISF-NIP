@@ -401,5 +401,6 @@ return [
 		'unsaved_changes_message' => 'لديك تغييرات غير محفوظة. هل أنت متأكد أنك تريد المغادرة؟',
 		'leaveanyway' => 'مغادرة',
 		'stay' => 'البقاء',
+		'countries' => 'الدول',
 	],
 ];
