@@ -3353,5 +3353,10 @@ return [
 	'newest_first' => 'Newest First',
 	'oldest_first' => 'Oldest First',
 	'join_as' => 'Join as',
+	'add_review' => 'Add Review',
+	'view_history' => 'View History',
+	'approved_rejected' => 'Approved / Rejected',
+	'total_requests' => 'Total Requests',
+	'attachment' => 'Attachment',
 	'Created By' => 'Created By',
 ];

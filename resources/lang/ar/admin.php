@@ -3409,5 +3409,10 @@ return [
 	'newest_first' => 'الأحدث أولاً',
 	'oldest_first' => 'الأقدم أولاً',
 	'join_as' => 'انضم ك',
+	'add_review' => 'اضافة تقييم',
+	'view_history' => 'عرض التاريخ',
+	'approved_rejected' => 'مقبول / مرفوض',
+	'total_requests' => 'اجمالي الطلبات',
+	'attachment' => 'المرفق',
 	'Created By' => 'انشيء بواسطة',
 ];
