@@ -3350,4 +3350,6 @@ return [
 	'all_founders' => 'All Founders',
 	'Organization name must contain only English letters' => 'Organization name must contain only English letters',
 	'Organization name must contain only Arabic letters' => 'Organization name must contain only Arabic letters',
+	'newest_first' => 'Newest First',
+	'oldest_first' => 'Oldest First',
 ];

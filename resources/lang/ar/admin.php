@@ -3406,4 +3406,6 @@ return [
 	'all_founders' => 'جميع المؤسسين',
 	'Organization name must contain only English letters' => 'يجب أن يحتوي اسم المؤسسة على أحرف إنجليزية فقط',
 	'Organization name must contain only Arabic letters' => 'يجب أن يحتوي اسم المؤسسة على أحرف عربية فقط',
+	'newest_first' => 'الأحدث أولاً',
+	'oldest_first' => 'الأقدم أولاً',
 ];
