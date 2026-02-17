@@ -127,4 +127,5 @@ return [
     'session_end_time' => 'وقت انتهاء الجلسة',
     'please_select_session_times' => 'يرجى اختيار وقت الجلسة',
     'add_availability_slots' => 'إضافة فترات التواجد',
+    'this_time_before_now' => 'هذا الوقت قبل الان',
 ];
