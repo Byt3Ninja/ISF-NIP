@@ -19,7 +19,7 @@ class StoreServiceProviderStep1Request extends FormRequest
         return [
             'company_name' => 'required|string|max:50',
             'contact_name' => 'required|string|max:50',
-            'email' => 'required|email|max:50',
+            'email' => 'required|email:rfc,dns|max:50',
             'phone' => 'required|string|max:30|regex:/^[\d\s\-\(\)]+$/',
             'country_code' => 'required|string',
 

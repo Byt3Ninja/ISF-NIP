@@ -149,8 +149,7 @@
             notEmpty: {
               message: translations[lang].required,
             },
-            regexp: {
-              regexp: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i,
+            emailAddress: {
               message: translations[lang].email,
             }
           }
