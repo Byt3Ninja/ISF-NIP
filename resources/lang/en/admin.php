@@ -3353,4 +3353,5 @@ return [
 	'newest_first' => 'Newest First',
 	'oldest_first' => 'Oldest First',
 	'join_as' => 'Join as',
+	'Created By' => 'Created By',
 ];
