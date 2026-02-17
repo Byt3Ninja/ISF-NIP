@@ -253,15 +253,12 @@
         },
         whatsapp: {
           validators: {
-            notEmpty: {
-              message: translations[lang].required,
-            },
             callback: {
               message: translations[lang].invalidPhone,
               callback: function (input) {
                 const value = input.value.trim();
 
-                // Skip validation if empty (handled by notEmpty validator)
+                // WhatsApp is optional - skip validation if empty
                 if (value === '') {
                   return { valid: true };
                 }
@@ -467,8 +464,8 @@
             }
           });
 
-          // Store instance on the element for validation access
-          $this[0].iti = itiInstance;
+          // Store instance via jQuery .data() for validation access
+          $this.data('iti', itiInstance);
 
           // Assign to global iti if it's the phone input (legacy support for existing validation code)
           if (inputId === 'phone') {
@@ -494,8 +491,15 @@
             updateHiddenInput();
           }
 
-          // Update on change
-          $this.on('countrychange', updateHiddenInput);
+          // Update on change and revalidate the field
+          $this.on('countrychange', function () {
+            updateHiddenInput();
+            if (inputId === 'phone') {
+              FormValidation1.revalidateField('phone');
+            } else if (inputId === 'whatsapp') {
+              FormValidation1.revalidateField('whatsapp');
+            }
+          });
         }
       });
     }

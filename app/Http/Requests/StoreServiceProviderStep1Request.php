@@ -20,10 +20,10 @@ class StoreServiceProviderStep1Request extends FormRequest
             'company_name' => 'required|string|max:50',
             'contact_name' => 'required|string|max:50',
             'email' => 'required|email|max:50',
-            'phone' => 'required|string',
+            'phone' => 'required|string|max:30|regex:/^[\d\s\-\(\)]+$/',
             'country_code' => 'required|string',
-            
-            'whatsapp' => 'nullable|string',
+
+            'whatsapp' => 'nullable|string|max:30|regex:/^[\d\s\-\(\)]+$/',
             'country_code_w_a' => 'nullable|string',
             'language' => 'nullable|string', // Frontend name is 'language' but DB is 'preferred_language'
 
