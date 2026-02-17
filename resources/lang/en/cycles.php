@@ -313,6 +313,7 @@ return [
     'Back to List' => 'Back to List',
     'Manage Custom Pages' => 'Manage Custom Pages',
     'custom_pages_permissions' => 'You are not authorized to manage custom pages',
+    'invalid_cycle_for_upload' => 'Invalid program for image upload',
     'External_Participation_Label' => 'Non-Company Participation Option',
     'Select_Organization' => 'Select Organization',
     'Valid_from_to' => 'Valid from - Valid to',

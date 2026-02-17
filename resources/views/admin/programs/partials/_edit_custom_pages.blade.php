@@ -184,15 +184,66 @@
                 },
             });
 
-            // Initialize Summernote editors for custom pages
+            // Initialize Summernote editors for custom pages with image upload
             $('#custom-page-content').summernote({
                 placeholder: '{{ $l == 'ar' ? 'أدخل محتوى الصفحة' : 'Enter page content' }}',
-                height: 200
+                height: 200,
+                callbacks: {
+                    onImageUpload: function(files) {
+                        uploadSummernoteImage(files[0], $('#custom-page-content'));
+                    }
+                }
             });
             $('#edit-custom-page-content').summernote({
                 placeholder: '{{ $l == 'ar' ? 'أدخل محتوى الصفحة' : 'Enter page content' }}',
-                height: 200
+                height: 200,
+                callbacks: {
+                    onImageUpload: function(files) {
+                        uploadSummernoteImage(files[0], $('#edit-custom-page-content'));
+                    }
+                }
             });
+
+            // Image upload handler function
+            function uploadSummernoteImage(file, editor) {
+                // Validate file size (5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    toastr.error('{{ $l == 'ar' ? 'حجم الصورة يجب أن لا يتجاوز 5 ميجابايت' : 'Image size must not exceed 5MB' }}');
+                    return;
+                }
+
+                // Validate file type
+                const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
+                if (!validTypes.includes(file.type)) {
+                    toastr.error('{{ $l == 'ar' ? 'يرجى اختيار صورة صالحة (jpeg, png, jpg, gif, webp)' : 'Please select a valid image (jpeg, png, jpg, gif, webp)' }}');
+                    return;
+                }
+
+                const data = new FormData();
+                data.append('image', file);
+                data.append('cycle_id', '{{ $ccycle->id }}');
+                data.append('_token', '{{ csrf_token() }}');
+
+                $.ajax({
+                    url: '{{ route('cycle.custom_pages.upload_image', ['id' => $ccycle->id]) }}',
+                    method: 'POST',
+                    data: data,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        if (response.status) {
+                            // Insert image into editor
+                            editor.summernote('insertImage', response.url);
+                        } else {
+                            toastr.error(response.message || '{{ $l == 'ar' ? 'فشل تحميل الصورة' : 'Image upload failed' }}');
+                        }
+                    },
+                    error: function(xhr) {
+                        const message = xhr.responseJSON?.message || '{{ $l == 'ar' ? 'حدث خطأ أثناء تحميل الصورة' : 'An error occurred while uploading the image' }}';
+                        toastr.error(message);
+                    }
+                });
+            }
 
             // For Summernote, remove invalid-feedback on content change
             $('#custom-page-content, #edit-custom-page-content').on('summernote.change', function() {

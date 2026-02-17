@@ -309,6 +309,7 @@ return [
     'Back to List' => 'العودة للقائمة',
     'Manage Custom Pages' => 'ادارة الصفحات المخصصة',
     'custom_pages_permissions' => 'ليس لديك الصلاحية لادارة الصفحات المخصصة',
+    'invalid_cycle_for_upload' => 'برنامج غير صالح لرفع الصور',
     'External_Participation_Label' => 'خيار المشاركة الخارجية',
     'Select_Organization' => 'اختر المنظمة',
     'Valid_from_to' => 'متاحة من / إلى',

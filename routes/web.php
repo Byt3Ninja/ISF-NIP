@@ -583,6 +583,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('cycles/{id}/toggle_status', 'CycleCustomPagesController@toggle_status');
     Route::post('cycles/{id}/toggle_visibility', 'CycleCustomPagesController@toggle_visibility');
     Route::post('cycles/{id}/delete_page', 'CycleCustomPagesController@delete');
+    Route::post('cycles/{id}/upload_image', 'CycleCustomPagesController@uploadImage')->name('cycle.custom_pages.upload_image');
+    Route::get('cycle-custom-pages/{cycle_id}/{filename}', 'CycleCustomPagesController@serveImage')->name('cycle.custom_pages.image');
 
     Route::post('cycles/modify', 'CyclesController@modify')->name('cycles.modify');
     Route::post('cycles/validate-url', 'CyclesController@validateURL');

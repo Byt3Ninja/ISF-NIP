@@ -142,6 +142,12 @@ return [
             'url' => env('APP_URL') . '/dashboard/uploads',
             'visibility' => 'private',
         ],
+        'cycle_custom_pages' => [
+            'driver' => 'local',
+            'root' => storage_path('app/cycle_custom_pages'),
+            'url' => env('APP_URL') . '/dashboard/cycle-custom-pages',
+            'visibility' => 'private',
+        ],
         'companies' => [
             'driver' => 'local',
             'root' => storage_path('app/uploads/companies'),
