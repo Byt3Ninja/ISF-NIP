@@ -3419,4 +3419,20 @@ return [
 	'Image uploaded successfully' => 'تم رفع الصورة بنجاح',
 	'Image upload failed' => 'فشل رفع الصورة',
 	'Image not found' => 'الصورة غير موجودة',
+
+	// Location Management
+	'countries' => 'الدول',
+	'states' => 'المناطق',
+	'cities' => 'المدن',
+	'add_country' => 'إضافة دولة',
+	'edit_country' => 'تعديل دولة',
+	'add_state' => 'إضافة منطقة',
+	'edit_state' => 'تعديل منطقة',
+	'add_city' => 'إضافة مدينة',
+	'edit_city' => 'تعديل مدينة',
+	'name_en' => 'الاسم (إنجليزي)',
+	'name_ar' => 'الاسم (عربي)',
+	'iso3' => 'رمز ISO3',
+	'phone_code' => 'رمز الهاتف',
+	'are_you_sure' => 'هل أنت متأكد؟',
 ];

@@ -768,6 +768,16 @@
         'subItems' => []
     ],
 
+    // Countries
+    [
+        'label' => $l == 'en' ? 'Countries' : 'الدول',
+        'icon' => 'ti ti-world',
+        'route' => 'country-management.index',
+        'permission' => 'country-management.index',
+        'isVisible' => $_user->ableTo("country-management.index", $permissions),
+        'subItems' => []
+    ],
+
     // Reports
     [
         'label' => $l == 'en' ? 'Reports' : 'التقارير',

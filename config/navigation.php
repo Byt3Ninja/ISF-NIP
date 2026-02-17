@@ -235,6 +235,7 @@ return function () {
         ['title' => 'expertise', 'route' => 'settings.expertise_view', 'menuOnly' => false],
         ['title' => 'notification_templates', 'route' => 'notification-templates.index', 'menuOnly' => false],
         ['title' => 'notification_triggers', 'route' => 'notification-triggers.index', 'menuOnly' => false],
+        ['title' => 'countries', 'route' => 'country-management.index', 'menuOnly' => true],
         ['title' => 'license_key', 'route' => 'license.activate_view_form']
       ],
     ],
