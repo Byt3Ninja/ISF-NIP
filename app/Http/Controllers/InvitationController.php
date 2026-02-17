@@ -187,8 +187,7 @@ class InvitationController extends Controller
         $invitation->message_content = trim(preg_replace('/📎[^\n]*/', '', strip_tags($data['invitation_message'])));
         $invitation->attachments = $data['attachments'] ?? [];
         $invitation->save();
-
-        dispatch(new SendInviteMentorEmail($invitation));
+        dispatch(new SendInviteMentorEmail($invitation, auth()->user()->email));
         if($data['invitation_scope'] == 'Organization'){
             $allOrganizations = Organization::whereIn('id', $data['organizations'])->get();
             $organizationMap = collect($allOrganizations)->keyBy('id');
