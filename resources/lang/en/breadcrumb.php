@@ -165,4 +165,6 @@ return [
 
     // Mentor specific
     'startup_hub' => 'Startup Hub',
+    'edit_profile' => 'Edit Profile',
+    'Edit Profile' => 'Edit Profile',
 ];

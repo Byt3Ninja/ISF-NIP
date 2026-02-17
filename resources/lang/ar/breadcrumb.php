@@ -165,4 +165,6 @@ return [
 
     // Mentor specific
     'startup_hub' => 'مركز الشركات الناشئة',
+    'edit_profile' => 'تعديل الملف الشخصي',
+    'Edit Profile' => 'تعديل الملف الشخصي',
 ];
