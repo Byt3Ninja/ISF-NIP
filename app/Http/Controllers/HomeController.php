@@ -1089,8 +1089,11 @@ class HomeController extends Controller
                 LIMIT 1";
             $myFinal = collect(DB::select($myFinal_q, [$user->id, $company->id, $company->step]))->first();
             if (!empty($myFinal)) {
-                $myFinal->judges = json_decode($myFinal->judges);
-                dd($myFinal->judges, json_decode($myFinal->judges, true));
+                $judges = json_decode($myFinal->judges, true) ?? [];
+                if (!is_array($judges)) {
+                    $judges = [];
+                }
+                $placeholders = implode(',', array_fill(0, count($judges), '?'));
                 $judgers_q = "SELECT
                         u.id,
                         u.first_name_en,
@@ -1100,7 +1103,7 @@ class HomeController extends Controller
                         u.img_url
                     FROM
                         users u
-                    WHERE u.id IN (" . implode(',', $myFinal->judges) . ")
+                    WHERE u.id IN ( . $placeholders . )
                 ";
 
                 $judgers = collect(DB::select($judgers_q))->map(function ($item) use ($l) {
