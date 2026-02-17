@@ -1093,47 +1093,56 @@ class HomeController extends Controller
                 if (!is_array($judges)) {
                     $judges = [];
                 }
-                $placeholders = implode(',', array_fill(0, count($judges), '?'));
-                $judgers_q = "SELECT
-                        u.id,
-                        u.first_name_en,
-                        u.first_name_ar,
-                        u.last_name_en,
-                        u.last_name_ar,
-                        u.img_url
-                    FROM
-                        users u
-                    WHERE u.id IN ( . $placeholders . )
-                ";
+                if (count($judges) > 0) {
+                    $placeholders = implode(',', array_fill(0, count($judges), '?'));
+                
+                        
+                    
+                    $judgers_q = "SELECT
+                            u.id,
+                            u.first_name_en,
+                            u.first_name_ar,
+                            u.last_name_en,
+                            u.last_name_ar,
+                            u.img_url
+                        FROM
+                            users u
+                        WHERE u.id IN ( . $placeholders . )
+                    ";
 
-                $judgers = collect(DB::select($judgers_q))->map(function ($item) use ($l) {
-                    $judger = new stdClass;
-                    $judger->id = $item->id;
-                    $judger->name = trim($item->{'first_name_' . $l} . ' ' . $item->{'last_name_' . $l});
-                    $judger->img_url = User::image_handler($item->img_url);
-                    return $judger;
-                });
+                    $judgers = collect(DB::select($judgers_q))->map(function ($item) use ($l) {
+                        $judger = new stdClass;
+                        $judger->id = $item->id;
+                        $judger->name = trim($item->{'first_name_' . $l} . ' ' . $item->{'last_name_' . $l});
+                        $judger->img_url = User::image_handler($item->img_url);
+                        return $judger;
+                    });
+                    
 
-                $myFinal->judges = $judgers;
-                $myFinal->company = new stdClass;
-                $myFinal->company->id = $company->id;
-                $myFinal->company->user = new stdClass;
-                $myFinal->company->user->id = $myFinal->user_id;
-                $myFinal->company->user->image_url = User::image_handler($myFinal->user_image_url);
-                $myFinal->company->user->first_name = $myFinal->{'user_first_name_' . $l};
-                $myFinal->company->user->last_name = $myFinal->{'user_last_name_' . $l};
-                $myFinal->company->user->name = trim($myFinal->company->user->first_name . ' ' . $myFinal->company->user->last_name);
-                $myFinal->company->user->title = $myFinal->{'user_title_' . $l};
+                    $myFinal->judges = $judgers;
+                    $myFinal->company = new stdClass;
+                    $myFinal->company->id = $company->id;
+                    $myFinal->company->user = new stdClass;
+                    $myFinal->company->user->id = $myFinal->user_id;
+                    $myFinal->company->user->image_url = User::image_handler($myFinal->user_image_url);
+                    $myFinal->company->user->first_name = $myFinal->{'user_first_name_' . $l};
+                    $myFinal->company->user->last_name = $myFinal->{'user_last_name_' . $l};
+                    $myFinal->company->user->name = trim($myFinal->company->user->first_name . ' ' . $myFinal->company->user->last_name);
+                    $myFinal->company->user->title = $myFinal->{'user_title_' . $l};
 
-                unset($myFinal->user_id);
-                unset($myFinal->user_image_url);
-                unset($myFinal->user_first_name_en);
-                unset($myFinal->user_first_name_ar);
-                unset($myFinal->user_last_name_en);
-                unset($myFinal->user_last_name_ar);
-                unset($myFinal->user_title_en);
-                unset($myFinal->user_title_ar);
-            }
+                    unset($myFinal->user_id);
+                    unset($myFinal->user_image_url);
+                    unset($myFinal->user_first_name_en);
+                    unset($myFinal->user_first_name_ar);
+                    unset($myFinal->user_last_name_en);
+                    unset($myFinal->user_last_name_ar);
+                    unset($myFinal->user_title_en);
+                    unset($myFinal->user_title_ar);
+                    } else {
+                        $judgers = collect();
+                    }
+                }
+
 
             $stepData = $company->stepdata;
             if (!empty($stepData)) {
