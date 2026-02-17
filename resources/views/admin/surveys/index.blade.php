@@ -524,11 +524,12 @@ if ($_user->hasAnyRole('mentor|Registered')) {
               <option value="">
                 {{ __("admin.All_Priorities") }}
               </option>
-              <option value="mandatory">
-                {{ __("admin.mandatory") }}
+              <option value="{{ __('admin.mandatory') }}">
+                {{ __('admin.mandatory') }}
               </option>
-              <option value="optional">
-                {{ __("admin.optional") }}
+
+              <option value="{{ __('admin.optional') }}">
+                {{ __('admin.optional') }}
               </option>
             </select>
           `)
