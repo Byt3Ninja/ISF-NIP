@@ -986,7 +986,7 @@
               <p class="d-block w-break-word text-break mt-2">{{ $organization->address }}</p>
             </div>
           </div>
-          <div class="col-lg-2 col-md-4 col-sm-6">
+          <div class="col-lg-3 col-md-4 col-sm-6">
             <h6 class="footer-title mb-6">{{ __('admin.quick_links') }}</h6>
             <ul class="navbar-nav list-unstyled">
               @foreach($sections as $section)
@@ -996,35 +996,39 @@
               @endforeach
             </ul>
           </div>
-          <div class="col-lg-2 col-md-4">
-            <h6 class="footer-title mb-6">{{ __('admin.Contact us') }}</h6>
-            <ul class="list-unstyled">
-              @if($organization->contact_email)
-                <li class="mb-2 text-nowrap">
-                  <i class="ti ti-mail me-1 text-white"></i>
-                  <a class="footer-link" href="mailto:{{ $organization->contact_email }}">{{ $organization->contact_email }}</a>
-                </li>
-              @endif
-              @if($organization->contact_phone)
-                <li class="mb-2 text-nowrap">
-                  <i class="ti ti-phone me12 text-white"></i>
-                  <a class="footer-link" href="tel:{{ $organization->country_code }}{{ $organization->contact_phone }}">
-                    {{ $organization->country_code }} {{ $organization->contact_phone }}
-                  </a>
-                </li>
-              @endif
-            </ul>
-          </div>
-          <div class="col-lg-3 col-md-4">
-            <h6 class="footer-title mb-6">{{ __('admin.follow_us') }}</h6>
+          <div class="col-lg-4 col-md-6">
+            <div class="d-flex flex-column">
+              <div class="mb-6">
+                <h6 class="footer-title mb-3">{{ __('admin.Contact us') }}</h6>
+                <ul class="list-unstyled">
+                  @if($organization->contact_email)
+                    <li class="mb-2 text-nowrap">
+                      <i class="ti ti-mail me-1 text-white"></i>
+                      <a class="footer-link" href="mailto:{{ $organization->contact_email }}">{{ $organization->contact_email }}</a>
+                    </li>
+                  @endif
+                  @if($organization->contact_phone)
+                    <li class="mb-2 text-nowrap">
+                      <i class="ti ti-phone me12 text-white"></i>
+                      <a class="footer-link" href="tel:{{ $organization->country_code }}{{ $organization->contact_phone }}">
+                        {{ $organization->country_code }} {{ $organization->contact_phone }}
+                      </a>
+                    </li>
+                  @endif
+                </ul>
+              </div>  
+            </div>
             <div>
-              @if(array_filter($socialLinks))
-                @foreach($socialLinks as $icon => $link)
-                  <a href="{{ $link }}" class="me-3 text-white" target="_blank">
-                    <i class="ti ti-brand-{{ $icon }} ti-lg"></i>
-                  </a>
-                @endforeach
-              @endif
+              <h6 class="footer-title mb-3">{{ __('admin.follow_us') }}</h6>
+              <div>
+                @if(array_filter($socialLinks))
+                  @foreach($socialLinks as $icon => $link)
+                    <a href="{{ $link }}" class="me-3 text-white" target="_blank">
+                      <i class="ti ti-brand-{{ $icon }} ti-lg"></i>
+                    </a>
+                  @endforeach
+                @endif
+              </div>
             </div>
           </div>
         </div>

@@ -3348,4 +3348,6 @@ return [
 	'star' => 'Star',
 	'manage_mentorship_description' => 'Manage mentorship sessions between mentors and startups',
 	'all_founders' => 'All Founders',
+	'Organization name must contain only English letters' => 'Organization name must contain only English letters',
+	'Organization name must contain only Arabic letters' => 'Organization name must contain only Arabic letters',
 ];

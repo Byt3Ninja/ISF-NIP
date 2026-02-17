@@ -3404,4 +3404,6 @@ return [
 	'star' => 'نجمة',
 	'manage_mentorship_description' => 'إدارة جلسات الارشاد بين المرشدين والشركات الناشئة',
 	'all_founders' => 'جميع المؤسسين',
+	'Organization name must contain only English letters' => 'يجب أن يحتوي اسم المؤسسة على أحرف إنجليزية فقط',
+	'Organization name must contain only Arabic letters' => 'يجب أن يحتوي اسم المؤسسة على أحرف عربية فقط',
 ];
