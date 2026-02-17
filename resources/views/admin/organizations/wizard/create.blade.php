@@ -286,13 +286,21 @@
             name_en: {
               validators: {
                 notEmpty: { message: '{{ __("admin.organization_name_required") }}' },
-                stringLength: { max: 255, message: '{{ __("admin.Organization name must not exceed 255 characters") }}' }
+                stringLength: { max: 255, message: '{{ __("admin.Organization name must not exceed 255 characters") }}' },
+                regexp: {
+                  regexp: /^[a-zA-Z]+$/,
+                  message: '{{ __("admin.Organization name must contain only English letters") }}'
+                }
               }
             },
             name_ar: {
               validators: {
                 notEmpty: { message: '{{ __("admin.organization_name_required") }}' },
-                stringLength: { max: 255, message: '{{ __("admin.Organization name must not exceed 255 characters") }}' }
+                stringLength: { max: 255, message: '{{ __("admin.Organization name must not exceed 255 characters") }}' },
+                regexp: {
+                  regexp: /^[\u0600-\u06FF]+$/,
+                  message: '{{ __("admin.Organization name must contain only Arabic letters") }}'
+                }
               }
             },
             organization_type_id: {

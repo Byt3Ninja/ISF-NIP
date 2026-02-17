@@ -594,6 +594,19 @@ $(function () {
       addFilter(2, 'scopeFilter', '@lang('admin.all_scopes')');
       addFilter(3, 'statusFilter', '@lang('admin.All_statuses')');
 
+      // Add sort order filter (newest/oldest first)
+      const sortSelect = $(`
+        <select id="sortOrderFilter" class="form-select" style="min-width:150px">
+          <option value="desc">@lang('admin.newest_first')</option>
+          <option value="asc">@lang('admin.oldest_first')</option>
+        </select>
+      `)
+        .appendTo(container)
+        .on('change', function () {
+          const order = $(this).val();
+          api.order([[5, order]]).draw();
+        });
+
       setTimeout(() => {
         $('.form-control-sm, .form-select-sm').removeClass('form-control-sm form-select-sm');
       }, 300);
@@ -911,13 +924,26 @@ $(function () {
     addFilter(2, 'scopeFilter', '@lang('admin.all_scopes')');
     addFilter(3, 'statusFilter', '@lang('admin.All_statuses')');
 
+    // Add sort order filter (newest/oldest first)
+    const sortSelect = $(`
+      <select id="sortOrderFilter" class="form-select" style="min-width:150px">
+        <option value="desc">@lang('admin.newest_first')</option>
+        <option value="asc">@lang('admin.oldest_first')</option>
+      </select>
+    `)
+      .appendTo(container)
+      .on('change', function () {
+        const order = $(this).val();
+        api.order([[5, order]]).draw();
+      });
+
     setTimeout(() => {
       $('.form-control-sm, .form-select-sm').removeClass('form-control-sm form-select-sm');
     }, 300);
   }
 
   /* =======================
-   * Reset
+   * View Details
    * ======================= */
   $('#newInvitationOffcanvas').on('hidden.bs.offcanvas', resetForm);
 
