@@ -108,7 +108,7 @@
       <div class="card-body">
         <!-- Steps Grid -->
         <div class="row g-4">
-          @forelse($finalScreeningSteps as $step)
+          @foreach($paginatedFinalSteps as $step)
             <div class="col-xl-4 col-lg-6 col-md-6">
               <div class="card shadow-sm border h-100" data-step-id="{{ $step->id }}">
                 <!-- Card Header with Status Indicator -->
@@ -224,9 +224,11 @@
                 </div>
               </div>
             </div>
-          @empty
+          @endforeach
+          {{ $paginatedFinalSteps->links('pagination::bootstrap-5') }}
+          @if(count($paginatedFinalSteps) == 0)
             @include('includes.no-result')
-          @endforelse
+          @endif
         </div>
       </div>
     </div>

@@ -2,26 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Step;
-use App\User;
 use App\Company;
+use App\Exports\ScreeningEvaluationExport;
+use App\Factories\OnlineMeetingFactory;
 use App\FinalData;
-use App\Formfield;
-use Carbon\Carbon;
 use App\Finalscreening;
+use App\Formfield;
+use App\Notifications\TemplateEmail;
+use App\Notifications\WelcomeJudgerNotification;
 use App\ScreeningEvaluation;
 use App\ScreeningEvaluationResults;
+use App\Step;
+use App\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\App;
-use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
-use App\Factories\OnlineMeetingFactory;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
-use App\Notifications\WelcomeJudgerNotification;
-use App\Exports\ScreeningEvaluationExport;
 use Maatwebsite\Excel\Facades\Excel;
 
 class FinalscreeningController extends Controller
@@ -195,7 +196,23 @@ class FinalscreeningController extends Controller
                 ];
         });
 
-        return view('admin.settings.final.index', compact('finalScreeningSteps'));
+            $currentPage = LengthAwarePaginator::resolveCurrentPage();
+			$perPage = 9;
+
+			$currentItems = $finalScreeningSteps->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+			$paginatedFinalSteps = new LengthAwarePaginator(
+				$currentItems,
+				$finalScreeningSteps->count(),
+				$perPage,
+				$currentPage,
+				[
+					'path' => request()->url(),
+					'query' => request()->query(),
+				]
+			);
+
+        return view('admin.settings.final.index', compact('finalScreeningSteps', 'paginatedFinalSteps'));
     }
 
     public function show($id = 0)

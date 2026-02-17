@@ -2,36 +2,37 @@
 
 namespace App\Http\Controllers;
 
-use App\Step;
-use App\User;
-use stdClass;
 use App\Company;
+use App\Events\ChangeStep;
+use App\Events\JudgeAssigned;
+use App\Exports\ScreeningEvaluationExport;
 use App\Formdata;
 use App\Formfield;
-use App\Screening;
-use App\Events\ChangeStep;
-use Illuminate\Support\Arr;
-use App\ScreeningEvaluation;
-use Illuminate\Http\Request;
-use App\Events\JudgeAssigned;
-use App\Jobs\ExportScreeneData;
 use App\Jobs\ExportResScreenData;
-use App\Services\WhatsAppService;
+use App\Jobs\ExportScreeneData;
+use App\Jobs\SendChangeCycleNotificationJob;
 use App\Notifications\ChangeCycle;
-use Illuminate\Support\Facades\DB;
-use App\ScreeningEvaluationResults;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Log;
 use App\Notifications\TemplateEmail;
+use App\Screening;
+use App\ScreeningEvaluation;
 use App\ScreeningEvaluationCriteria;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Input;
 use App\ScreeningEvaluationCustomFields;
 use App\ScreeningEvaluationFieldsValues;
+use App\ScreeningEvaluationResults;
+use App\Services\WhatsAppService;
+use App\Step;
+use App\User;
+use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
-use App\Jobs\SendChangeCycleNotificationJob;
-use App\Exports\ScreeningEvaluationExport;
 use Maatwebsite\Excel\Facades\Excel;
+use stdClass;
 
 class ScreeningController extends Controller
 {
@@ -205,7 +206,23 @@ class ScreeningController extends Controller
 					];
 			});
 
-			return view('admin.settings.screening.index', compact('screeningSteps'));
+			$currentPage = LengthAwarePaginator::resolveCurrentPage();
+			$perPage = 9;
+
+			$currentItems = $screeningSteps->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+			$paginatedSteps = new LengthAwarePaginator(
+				$currentItems,
+				$screeningSteps->count(),
+				$perPage,
+				$currentPage,
+				[
+					'path' => request()->url(),
+					'query' => request()->query(),
+				]
+			);
+
+			return view('admin.settings.screening.index', compact('paginatedSteps', 'steps', 'screeningSteps'));
 	}
 
 	public function show($id = 0)
