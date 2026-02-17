@@ -513,7 +513,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Update card state
     card.dataset.isNew = false;
     if (data.milestone?.id) card.dataset.milestoneId = data.milestone.id;
-    
+
     // Update milestone data for future edits
     if (data.milestone) {
       card.milestoneData = data.milestone;
@@ -527,19 +527,29 @@ document.addEventListener('DOMContentLoaded', function () {
     card.querySelector('.milestone-description-display').textContent = descriptionInput.value;
     const titleDisplayPreview = card.querySelector('.milestone-title-display-preview');
     if (titleDisplayPreview) titleDisplayPreview.textContent = titleInput.value;
-    
+
     const completionPercentage = parseInt(completionInput.value);
     card.querySelector('.milestone-completion-display').textContent = `${completionPercentage}%`;
+
+    // Clear file input and uploaded documents container
+    const documentsInput = card.querySelector('.milestone-documents');
+    if (documentsInput) {
+      documentsInput.value = '';
+    }
+    const uploadedDocumentsContainer = card.querySelector('.uploaded-documents');
+    if (uploadedDocumentsContainer) {
+      uploadedDocumentsContainer.innerHTML = '';
+    }
 
     // Update documents list
     const documents = data.milestone?.documents ? parseDocuments(data.milestone.documents) : [];
     const uploadedFilesList = card.querySelector('.uploaded-files-list');
     const documentsCount = card.querySelector('.milestone-documents-count');
     const noDocumentsDiv = card.querySelector('.milestone-no-documents');
-    
+
     uploadedFilesList.innerHTML = '';
     documentsCount.textContent = documents.length;
-    
+
     if (documents.length > 0) {
       noDocumentsDiv.classList.add('d-none');
       documents.forEach(doc => {
