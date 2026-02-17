@@ -18,12 +18,13 @@ class SendInviteMentorEmail implements ShouldQueue
     /**
      * Create a new job instance.
      */
-   public function __construct(public InviteMentor $invitation) {}
+   public function __construct(public InviteMentor $invitation, public ?string $ccEmail = null) {}
 
     public function handle()
     {
         
         Mail::to($this->invitation->email)
+            ->cc($this->ccEmail)
             ->send(new InviteMentorMail($this->invitation));
     }
 }
