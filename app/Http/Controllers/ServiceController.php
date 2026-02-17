@@ -126,7 +126,7 @@ class ServiceController extends Controller
 		$user = auth()->user();
 		$serviceCategories = ServiceCategory::all();
 		$Setting = Settings::where('id', 1)->first();
-		if ($user->hasRole('Admin')) {
+		if ($user->hasAnyRole('Admin|serviceProvider')) {
 			$organizations = Organization::all();
 		} elseif ($user->hasAnyRole(['organizationManager', 'subadmin'])) {
 			$orgIds = $user->organizations_ids;
@@ -215,7 +215,7 @@ class ServiceController extends Controller
 	{
 		$user = auth()->user();
 		$serviceCategories = ServiceCategory::all();
-		if ($user->hasRole('Admin')) {
+		if ($user->hasAnyRole('Admin|serviceProvider')) {
 			$organizations = Organization::all();
 		} elseif ($user->hasAnyRole(['organizationManager', 'subadmin'])) {
 			$orgIds = $user->organizations_ids;
