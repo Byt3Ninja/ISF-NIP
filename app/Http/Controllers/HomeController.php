@@ -914,6 +914,7 @@ class HomeController extends Controller
                 c.start,
                 c.organization_id,
                 c.type,
+                c.allow_non_company,
                 o.name_en AS `org_name_en`,
                 o.name_ar AS `org_name_ar`,
                 o.img_url AS `org_img_url`
@@ -936,67 +937,71 @@ class HomeController extends Controller
             $cycle->organization->name = $item->{'org_name_' . $l};
             $cycle->organization->image_url = Organization::image_handler($item->org_img_url);
             $cycle->type = $item->type;
+            $cycle->allow_non_company = $item->allow_non_company;
             $preRequests = [];
             $user = auth()->user();
         if (isset($cycle->type) && $cycle->type === 'General_Program' && $user) {
 
-            if (method_exists($user, 'hasCompletedProfile')) {
-                $profileComplete = $user->hasCompletedProfile();
-            } else {
-                $profileComplete = filled($user->phone)
-                    && filled($user->city_id)
-                    && filled($user->country_id)
-                    && filled($user->address)
-                    && filled($user->timezone);
-            }
-
-            if (! $profileComplete) {
-                if (function_exists('route_exists') && route_exists('user.profile_Edit')) {
-                    $profileUrl = route('user.profile_Edit');
-                } elseif (function_exists('route_exists') && route_exists('user.profile_Edit')) {
-                    $profileUrl = route('user.profile_Edit');
+            // Only require profile and startup if program doesn't allow non-company
+            if (empty($cycle->allow_non_company)) {
+                if (method_exists($user, 'hasCompletedProfile')) {
+                    $profileComplete = $user->hasCompletedProfile();
                 } else {
-                    $profileUrl = route('user.profile_Edit');
+                    $profileComplete = filled($user->phone)
+                        && filled($user->city_id)
+                        && filled($user->country_id)
+                        && filled($user->address)
+                        && filled($user->timezone);
                 }
 
-                $preRequests[] = [
-                    'key'   => 'profile',
-                    'label' => 'admin.Complete Profile',
-                    'url'   => $profileUrl,
-                    'id'    => 'pre-request-profile-' . $cycle->id,
-                ];
-            }
+                if (! $profileComplete) {
+                    if (function_exists('route_exists') && route_exists('user.profile_Edit')) {
+                        $profileUrl = route('user.profile_Edit');
+                    } elseif (function_exists('route_exists') && route_exists('user.profile_Edit')) {
+                        $profileUrl = route('user.profile_Edit');
+                    } else {
+                        $profileUrl = route('user.profile_Edit');
+                    }
 
-            if (method_exists($user, 'hasCompletedStartup')) {
-                $startupComplete = method_exists($user, 'hasCompletedStartup') ? $user->hasCompletedStartup() : $user->hasCompletedCompany();
-            } else {
-                $startupComplete = false;
-                if (method_exists($user, 'company') || isset($user->company)) {
-                    $company = $user->company ?? null;
-                    $startupComplete = $company
-                        && filled($company->name_en ?? '')
-                        && filled($company->est_date ?? '')
-                        && filled($company->address_en ?? '')
-                        && filled($company->stage ?? '');
-                } 
-            }
-
-            if (!$startupComplete) {
-                if (function_exists('route_exists') && route_exists('company.profile_view_mine')) {
-                    $startupUrl = route('company.profile_view_mine');
-                } elseif (function_exists('route_exists') && route_exists('company.profile_view_mine')) {
-                    $startupUrl = route('company.profile_view_mine');
-                } elseif (function_exists('route_exists') && route_exists('company.profile_view_mine')) {
-                    $startupUrl = route('company.profile_view_mine');
-                } else {
-                    $startupUrl = url('/dashboard/myCompany');
+                    $preRequests[] = [
+                        'key'   => 'profile',
+                        'label' => 'admin.Complete Profile',
+                        'url'   => $profileUrl,
+                        'id'    => 'pre-request-profile-' . $cycle->id,
+                    ];
                 }
-                $preRequests[] = [
-                    'key'   => 'startup',
-                    'label' => 'admin.Complete Startup/Idea',
-                    'url'   => $startupUrl,
-                    'id'    => 'pre-request-startup-' . $cycle->id,
-                ];
+
+                if (method_exists($user, 'hasCompletedStartup')) {
+                    $startupComplete = method_exists($user, 'hasCompletedStartup') ? $user->hasCompletedStartup() : $user->hasCompletedCompany();
+                } else {
+                    $startupComplete = false;
+                    if (method_exists($user, 'company') || isset($user->company)) {
+                        $company = $user->company ?? null;
+                        $startupComplete = $company
+                            && filled($company->name_en ?? '')
+                            && filled($company->est_date ?? '')
+                            && filled($company->address_en ?? '')
+                            && filled($company->stage ?? '');
+                    }
+                }
+
+                if (!$startupComplete) {
+                    if (function_exists('route_exists') && route_exists('company.profile_view_mine')) {
+                        $startupUrl = route('company.profile_view_mine');
+                    } elseif (function_exists('route_exists') && route_exists('company.profile_view_mine')) {
+                        $startupUrl = route('company.profile_view_mine');
+                    } elseif (function_exists('route_exists') && route_exists('company.profile_view_mine')) {
+                        $startupUrl = route('company.profile_view_mine');
+                    } else {
+                        $startupUrl = url('/dashboard/myCompany');
+                    }
+                    $preRequests[] = [
+                        'key'   => 'startup',
+                        'label' => 'admin.Complete Startup/Idea',
+                        'url'   => $startupUrl,
+                        'id'    => 'pre-request-startup-' . $cycle->id,
+                    ];
+                }
             }
         }
 
@@ -3368,18 +3373,33 @@ class HomeController extends Controller
         $profileComplete = false;
         $startupComplete = false;
 
-        if (method_exists($user, 'hasCompletedProfile')) {
-            $profileComplete = $user->hasCompletedProfile();
-        } else {
-            // fallback logic
-            $profileComplete = !empty($user->phone) && !empty($user->country_id) && !empty($user->address) && !empty($user->timezone);
-        }
+        // Check if user has access to any General_Program cycle that allows non-company
+        $hasAllowNonCompanyCycle = DB::table('cycles')
+            ->where('type', 'General_Program')
+            ->whereNull('private')
+            ->whereRaw('? BETWEEN start AND end', [now()->format('Y-m-d')])
+            ->where('allow_non_company', 1)
+            ->exists();
 
-        if (method_exists($user, 'hasCompletedStartup')) {
-            $startupComplete = $user->hasCompletedStartup();
+        // Only check profile and startup completion if NO active cycle allows non-company
+        if (!$hasAllowNonCompanyCycle) {
+            if (method_exists($user, 'hasCompletedProfile')) {
+                $profileComplete = $user->hasCompletedProfile();
+            } else {
+                // fallback logic
+                $profileComplete = !empty($user->phone) && !empty($user->country_id) && !empty($user->address) && !empty($user->timezone);
+            }
+
+            if (method_exists($user, 'hasCompletedStartup')) {
+                $startupComplete = $user->hasCompletedStartup();
+            } else {
+                // fallback logic for startup completion
+                $startupComplete = $user->company && !empty($user->company->name_en) && !empty($user->company->address_en) && !empty($user->company->sector) && !empty($user->company->stage);
+            }
         } else {
-            // fallback logic for startup completion
-            $startupComplete = $user->company && !empty($user->company->name_en) && !empty($user->company->address_en) && !empty($user->company->sector) && !empty($user->company->stage);
+            // If there's a cycle allowing non-company, skip both profile and startup checks
+            $profileComplete = true;
+            $startupComplete = true;
         }
 
         $preRequests = [];
