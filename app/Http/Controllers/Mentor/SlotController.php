@@ -315,7 +315,7 @@ class SlotController extends Controller
 			$query = Schedule::where('user_id', auth()->id())
 					->where('type', $validated['type'])
 					->where('tfrom', $validated['tfrom'])
-					->where('tto', $validated['tto'])
+					//->where('tto', $validated['tto'])
 					->where('session_type', $sessionType);
 
 			// Add type-specific conditions
