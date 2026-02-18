@@ -245,11 +245,11 @@ private function finalizeTitle($title, $ignoredTitles, $ignoredContains): ?strin
 
     $cleanTitle = strtolower(trim($title));
 //    dd($cleanTitle);
-    $customReplacements = [     
+    $customReplacements = [
         'index_slot'      => app()->getLocale() == 'en' ? 'Slots' : 'المواعيد',
         'sessions_list_detailed_mentorship' => 'Tasks_List',
         'index_survey' => 'Surveys',
-        'index_mentorshiptask' => 'Task',
+        'index_mentorshiptask' => app()->getLocale() == 'en' ? 'Task' : 'المهمة',
         'profile_edit_user' => app()->getLocale() == 'en' ? 'Edit Profile' : 'تعديل البيانات الشخصية',
         
     ];
