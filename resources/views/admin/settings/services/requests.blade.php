@@ -1,386 +1,960 @@
 @extends('layouts.admin')
 
+@section('style')
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+@stop
+
+@php
+  $stats = [
+    'total'     => 9,
+    'approved'  => 4,
+    'pending'   => 3,
+    'completed' => 3,
+    'rejected'  => 2,
+  ];
+
+  $requests = [
+    [
+      'id'          => 1,
+      'title'       => 'Web Development',
+      'date'        => 'Jan 15, 2025 • 09:30',
+      'description' => 'Need a comprehensive e-commerce platform with payment gateway integration and inventory management.',
+      'image_url'   => '/images/deck-video.svg',
+      'status'      => 'Completed',
+      'service_provider' => [
+        'id'        => 1,
+        'name'      => 'Tech Solutions Inc',
+        'image_url' => 'https://i.pravatar.cc/40?img=1',
+      ],
+    ],
+    [
+      'id'          => 2,
+      'title'       => 'App Development',
+      'date'        => 'Jan 12, 2025 • 14:00',
+      'description' => 'Cross-platform mobile application for iOS and Android with real-time sync and push notifications.',
+      'image_url'   => '/images/deck-video.svg',
+      'status'      => 'Completed',
+      'service_provider' => [
+        'id'        => 2,
+        'name'      => 'Digital Ventures Ltd',
+        'image_url' => 'https://i.pravatar.cc/40?img=2',
+      ],
+    ],
+    [
+      'id'          => 3,
+      'title'       => 'Business Consulting',
+      'date'        => 'Jan 18, 2025 • 11:00',
+      'description' => 'Comprehensive market analysis and competitive positioning strategy.',
+      'image_url'   => '/images/deck-video.svg',
+      'status'      => 'Pending',
+      'service_provider' => [
+        'id'        => 3,
+        'name'      => 'Growth Strategies Co',
+        'image_url' => 'https://i.pravatar.cc/40?img=3',
+      ],
+    ],
+    [
+      'id'          => 4,
+      'title'       => 'SEO Optimization',
+      'date'        => 'Jan 20, 2025 • 10:00',
+      'description' => 'Full on-page and off-page SEO audit with keyword strategy and link-building roadmap.',
+      'image_url'   => '/images/deck-video.svg',
+      'status'      => 'Rejected',
+      'service_provider' => [
+        'id'        => 4,
+        'name'      => 'Rank Masters LLC',
+        'image_url' => 'https://i.pravatar.cc/40?img=4',
+      ],
+    ],
+  ];
+
+  function badgeClass($status) {
+    return match($status) {
+      'Completed' => 'bg-label-success',
+      'Pending'   => 'bg-label-warning',
+      'Rejected'  => 'bg-label-danger',
+      'Approved'  => 'bg-label-primary',
+      default     => 'bg-warning text-dark',
+    };
+  };
+
+  $tabs = [
+    ['title' => __('admin.All Services'), 'route' => 'services.index', 'icon' => 'arrows-move'],
+    ['title' => __('admin.Services Requests'), 'route' => 'service_requests.list_all', 'icon' => 'ti ti-briefcase'],
+    ['title' => __('admin.Services Categories'), 'route' => 'serviceCategories.index', 'icon' => 'layout-grid'],
+  ];
+@endphp
+
 @section('content')
-  <div class="">
-    <div class="">
-      @php
-        $tabs = [
-          ['title' => __('admin.All Services'), 'route' => 'services.index', 'icon' => 'arrows-move'],
-          ['title' => __('admin.Services Requests'), 'route' => 'service_requests.list_all', 'icon' => 'ti ti-briefcase'],
-          ['title' => __('admin.Services Categories'), 'route' => 'serviceCategories.index', 'icon' => 'layout-grid'],
-        ]
-      @endphp
-      @if( !$_user->hasRole('serviceProvider') )
-      <x-navigation-pills :tabs="$tabs" />
-      @endif
-      
-      <div class="row">
-        @if( session()->has('success') )
-        <div class="col-md-12 mb-6">
-          <div role="alert" class="alert alert-success alert-dismissible">
-            {{ session()->get('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
-        </div>
-        @endif
-        @if( session()->has('error') )
-        <div class="col-md-12 mb-6">
-          <div role="alert" class="alert alert-danger alert-dismissible">
-            {{ session()->get('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
-        </div>
-        @endif
-      </div>
+@if (!$_user->hasRole('serviceProvider') )
+  <x-navigation-pills :tabs="$tabs" />
+@endif     
 
-      <div class="card">
-        <div class="card-header d-flex flex-wrap justify-content-between align-items-center border-bottom">
-          <h5 class="card-title text-capitalize mb-3 mb-md-0">{{ __('cycles.Services requests') }}</h5>
-          <div class="d-flex align-items-center gap-3">
-            <div class="dropdown">
-              <button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="ti ti-file-export me-2"></i>{{ __('admin.Export') }}
-              </button>
-              <ul class="dropdown-menu" aria-labelledby="exportDropdown">
-                <li><a class="dropdown-item" href="javascript:void(0)" id="exportExcel"><i class="ti ti-file-spreadsheet me-2"></i>Excel</a></li>
-                <li><a class="dropdown-item" href="javascript:void(0)" id="exportCsv"><i class="ti ti-file-text me-2"></i>CSV</a></li>
-              </ul>
+<div>
+
+ {{-- Stats Cards --}}
+  <div class="row g-3 mb-6">
+    @php
+    $config = [
+      'total'     => ['label' => 'total_requests',  'icon' => 'ti-clipboard-list', 'color' => 'primary'],
+      'pending'   => ['label' => 'Pending',          'icon' => 'ti-clock',          'color' => 'warning'],
+      'completed' => ['label' => 'Completed',         'icon' => 'ti-checks',         'color' => 'success'],
+      'decision'  => ['label' => 'approved_rejected', 'icon' => 'ti-checks',         'color' => 'info'],
+    ];
+    @endphp
+
+    @foreach($config as $key => $item)
+    <div class="col-sm-6 col-xl-3">
+      <div class="card h-100">
+        <div class="card-body pb-3">
+          <div class="d-flex align-items-start justify-content-between">
+            <div class="content-left">
+              <span class="text-heading">{{ __('admin.' . $item['label']) }}</span>
+
+              @if($key === 'decision')
+              <div class="d-flex align-items-center my-1">
+                <h4 class="mb-0 me-2">
+                  <span>{{ $stats['approved'] ?? 0 }}</span>
+                  <span class="small text-muted">{{ __('admin.Approved') }}</span>
+                  /
+                  <span>{{ $stats['rejected'] ?? 0 }}</span>
+                  <span class="small text-muted">{{ __('admin.Rejected') }}</span>
+                </h4>
+              </div>
+              @else
+              <div class="d-flex align-items-center my-1">
+                <h4 class="mb-0 me-2">{{ $stats[$key] ?? 0 }}</h4>
+              </div>
+              @endif
             </div>
-            @if( $_user->ableTo('service_requests.list_archived') || ( count($received) > 0 && $countold > 0 ) )
-              <a href="/dashboard/requests/old" class="btn btn-primary text-nowrap">
-                <i class="ti ti-eye me-1 me-md-2"></i>
-                {{ __('cycles.Show old records') }}
-              </a>
-            @endif
-          </div>
-        </div>
 
-        <div class="card-datatable table-responsive">
-          <table class="table services-requests-table">
-            <thead class="table-light">
-              <tr>
-                <th>#</th>
-                <th>{{ __('cycles.SenderName') }}</th>
-                <th>{{ __('cycles.Service') }}</th>
-                <th>{{ __('admin.Status') }}</th>
-                <th>{{ __('cycles.Comments') }}</th>
-                <th>{{ __('cycles.Date/Time') }}</th>
-                <th>{{ __('cycles.Actions') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              @foreach ($received as $n => $rec)
-                @php
-                  $user = $rec->user?->{'first_name_' . $l} . ' ' . $rec->user?->{'last_name_' . $l};
-                @endphp
-                <tr>
-                  <td>{{ $n + 1 }}</td>
-                  <td>
-                    @if (!empty($rec->user->company))
-                      <div class="d-flex align-items-center gap-2">
-                        <a href="/dashboard/companyProfile/{{ $rec->user->company->id }}">
-                          <img 
-                            src="/191014/{{ $rec->user->img_url ?? '/images/logo-placeholder.png' }}" 
-                            alt="avatar"
-                            class="rounded-circle border shadow-sm" 
-                            height="40" 
-                            width="40"
-                            onerror="this.onerror=null;this.src='/images/logo-placeholder.png';"  
-                          />
-                        </a>
-                        <a href="/dashboard/companyProfile/{{ $rec->user->company->id }}">
-                          <div class="media-body">
-                            <h6 class="media-heading mb-0">{{ $user }}</h6>
-                            <span class="font-small-2">{{ $rec->user->{'title_' . $l} }}
-                              @if ($rec->user->company)
-                                - {{ $rec->user->company->{'name_' . $l} }}
-                              @endif
-                            </span>
-                          </div>
-                        </a>
-                      </div>
-                    @else
-                      No Company
-                    @endif
-                  </td>
-                  <td>{{ $rec->service->{'name_' . $l} }}</td>
-                  <td>
-                    @if($rec->status == 'Pending')
-                      <span class="badge bg-label-warning">{{ __('admin.Pending') }}</span>
-                    @else
-                      <span class="badge bg-label-success">{{ __('admin.Done') }}</span>
-                    @endif
-                  </td>
-                  <td>{{ $rec->comment ?? '-' }}</td>
-                  <td>{{ $rec->date_time }}</td>
-                  <td>
-                    <button
-                      onclick="reply(
-                        {{ $rec->id }}, 
-                        '{{ addslashes($user) }}', 
-                        '{{ addslashes($rec->service->{'name_' . $l} ?? '-') }}',
-                        '{{ addslashes($rec->service->vendor_name ?? '-') }}',
-                        '{{ addslashes($rec->service->vendor_email ?? '-') }}',
-                        '{{ addslashes($rec->service->vendor_phone ?? '-') }}'
-                    );"
-                      type="button" class="btn btn-icon rounded-circle btn-label-info mr-1">
-                      <i class="ti ti-edit text-info"></i>
-                    </button>
-                    <button
-                      onclick="OpenModal({{ $rec->user_id }},'{{ $user }}','{{ $rec->service->{'name_' . $l} }}');"
-                      type="button" class="btn btn-icon rounded-circle btn-label-primary mr-1">
-                      <i class="ti ti-brand-telegram"></i></button>
-                  </td>
-                </tr>
-              @endforeach
-            </tbody>
-          </table>
+            <div class="avatar">
+              <span class="avatar-initial rounded bg-label-{{ $item['color'] }}">
+                <i class="ti {{ $item['icon'] }} ti-26px"></i>
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+    @endforeach
   </div>
 
-  <div class="modal fade text-left" id="MessageModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="myModalLabel33">
-            {{ __('messages.SendMessageTo') }} <span id="uname"></span>
-          </h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form method="post" action="/dashboard/send_message" enctype="multipart/form-data">
-            {!! csrf_field() !!}
-            <input type="hidden" name="sender" value="{{ Auth::user()->id }}">
-            <input type="hidden" name="receiver" id="rid" value="">
-            <div class="form-group mb-3">
-              <label for="subject" class="form-label">{{ __('messages.Subject') }}:</label>
-              <input id="subject" name="subject" type="text" placeholder="{{ __('messages.Subject') }}"
-                class="form-control" required>
+  {{--  Navigation Status Pills --}}
+  <nav class="nav-align-top">
+    <ul class="nav nav-pills flex-column flex-md-row mb-6 gap-2 gap-lg-0" role="tablist">
+
+      <li class="nav-item">
+        <a class="nav-link {{ request('request_status') == null ? 'active' : '' }}" href="{{ route('service_requests.list_all') }}">
+          {{ __('admin.all_requests') }}
+          <span class="badge badge-center rounded-pill bg-danger bg-glow ms-2">
+            {{ $stats['total'] ?? 0 }}
+          </span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link {{ request('request_status') == 'pending' ? 'active' : '' }}"
+          href="{{ route('service_requests.list_all', ['request_status' => 'pending']) }}">
+          {{ __('admin.pending') }}
+          <span class="badge badge-center rounded-pill bg-danger ms-2">
+            {{ $stats['pending'] ?? 0 }}
+          </span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link {{ request('request_status') == 'completed' ? 'active' : '' }}"
+          href="{{ route('service_requests.list_all', ['request_status' => 'completed']) }}">
+          {{ __('admin.completed') }}
+          <span class="badge badge-center rounded-pill bg-danger ms-2">
+            {{ $stats['completed'] ?? 0 }}
+          </span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link {{ request('request_status') == 'approved' ? 'active' : '' }}"
+          href="{{ route('service_requests.list_all', ['request_status' => 'approved']) }}">
+          {{ __('admin.Approved') }}
+          <span class="badge badge-center rounded-pill bg-danger ms-2">
+            {{ $stats['approved'] ?? 0 }}
+          </span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link {{ request('request_status') == 'rejected' ? 'active' : '' }}"
+          href="{{ route('service_requests.list_all', ['request_status' => 'rejected']) }}">
+          {{ __('admin.Rejected') }}
+          <span class="badge badge-center rounded-pill bg-danger ms-2">
+            {{ $stats['rejected'] ?? 0 }}
+          </span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  {{-- Requests Grid --}}
+  <div class="row g-4">
+    @foreach($requests as $request)
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+
+          {{-- Header --}}
+          <div class="d-flex justify-content-between align-items-start mb-4">
+            <div class="d-flex align-items-center gap-2">
+              <div class="avatar avatar-md rounded">
+                <img src="{{ $request['image_url'] }}" alt="Avatar" class="rounded object-fit-cover border">
+              </div>
+              <div>
+                <h6 class="mb-0">{{ $request['title'] }}</h6>
+                <small class="text-muted">{{ $request['date'] }}</small>
+              </div>
             </div>
-            <div class="form-group mb-3">
-              <label for="message" class="form-label">{{ __('messages.Message') }}: </label>
-              <textarea class="form-control" id="message" name='message' rows="8"
-                placeholder="{{ __('messages.Write your message') }}" required></textarea>
-            </div>
-            <div class="w-100 d-flex justify-content-end alitn-items-center gap-4 mt-4">
-              <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
-                {{ __('messages.Close') }}
+            <span class="badge {{ badgeClass($request['status']) }}">
+              {{ __('admin.' . $request['status']) }}
+            </span>
+          </div>
+
+          {{-- Description --}}
+          <p class="text-muted small flex-grow-1">{{ $request['description'] }}</p>
+
+          {{-- Service Provider --}}
+          <a href="#" class="d-flex align-items-center mb-4 text-decoration-none">
+            <img src="{{ $request['service_provider']['image_url'] }}" class="rounded-circle me-2"
+              width="40" height="40" alt="provider">
+            <div class="fw-semibold text-dark">{{ $request['service_provider']['name'] }}</div>
+          </a>
+
+          {{-- Actions --}}
+          <div class="d-flex gap-2 mt-auto">
+            @if($request['status'] === 'Pending')
+            <button class="btn btn-primary w-100"
+              data-bs-toggle="offcanvas" data-bs-target="#offcanvasRespond"
+              data-request-id="{{ $request['id'] }}"
+              data-request-title="{{ $request['title'] }}"
+              data-startup-name="{{ $request['startup_name'] ?? 'N/A' }}"
+              data-founder-name="{{ $request['founder_name'] ?? 'N/A' }}"
+              data-provider-name="{{ $request['service_provider']['name'] }}">
+              <i class="ti ti-mail-fast me-1"></i> {{ __('admin.respond_to_request') }}
+            </button>
+
+            @elseif($request['status'] === 'Completed')
+              <button class="btn btn-primary w-100"
+                data-bs-toggle="offcanvas" data-bs-target="#offcanvasHistory"
+                data-request-id="{{ $request['id'] }}"
+                data-request-title="{{ $request['title'] }}"
+                data-provider-name="{{ $request['service_provider']['name'] }}"
+                data-provider-img="{{ $request['service_provider']['image_url'] }}"
+                data-status="{{ $request['status'] }}">
+                <i class="ti ti-history me-1"></i> {{ __('admin.view_history') }}
               </button>
-              <button type="submit" class="btn btn-primary">
-                {{ __('messages.Send') }}
+
+            @else
+              <button class="btn btn-primary w-100"
+                data-bs-toggle="offcanvas" data-bs-target="#offcanvasMessage"
+                data-request-id="{{ $request['id'] }}"
+                data-request-title="{{ $request['title'] }}"
+                data-provider-name="{{ $request['service_provider']['name'] }}"
+                data-provider-img="{{ $request['service_provider']['image_url'] }}">
+                <i class="ti ti-send me-1"></i> {{ __('admin.Send_Message') }}
+              </button>
+            @endif
+
+            <button class="btn btn-outline-primary"
+              data-bs-toggle="offcanvas" data-bs-target="#offcanvasHistory"
+              data-request-id="{{ $request['id'] }}"
+              data-request-title="{{ $request['title'] }}"
+              data-provider-name="{{ $request['service_provider']['name'] }}"
+              data-provider-img="{{ $request['service_provider']['image_url'] }}"
+              data-status="{{ $request['status'] }}">
+              <i class="ti ti-history"></i>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    @endforeach
+  </div>
+</div>
+
+{{-- ═══════════════════════════════════════════
+     OFFCANVAS — Respond to Request
+═══════════════════════════════════════════ --}}
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRespond" aria-labelledby="offcanvasRespondLabel">
+  <div class="offcanvas-header border-bottom">
+    <div class="d-flex align-items-center gap-2">
+      <div class="avatar avatar-sm">
+        <div class="avatar-initial rounded-circle bg-label-primary">
+          <i class="ti ti-mail-opened ti-sm"></i>
+        </div>
+      </div>
+      <h5 class="offcanvas-title mb-0" id="offcanvasRespondLabel">{{ __('admin.respond_to_request') }}</h5>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+
+  <div class="offcanvas-body">
+    {{-- Request Summary --}}
+    <div class="mb-6 p-3 bg-light-subtle rounded border">
+      <h6 class="mb-3 text-uppercase small fw-bold text-dark">{{ __('admin.request_summary') }}</h6>
+      <div class="d-flex flex-column gap-2">
+        <div class="d-flex justify-content-between">
+          <span class="text-secondary small">{{ __('admin.Service_Name') }}:</span>
+          <span class="fw-semibold small" id="summaryServiceName">—</span>
+        </div>
+        <div class="d-flex justify-content-between">
+          <span class="text-secondary small">{{ __('admin.StartUp_name') }}:</span>
+          <span class="fw-semibold small" id="summaryStartupName">—</span>
+        </div>
+        <div class="d-flex justify-content-between">
+          <span class="text-secondary small">{{ __('admin.founder_name') }}:</span>
+          <span class="fw-semibold small" id="summaryFounderName">—</span>
+        </div>
+      </div>
+    </div>
+
+    <form id="formRespond" novalidate>
+      <input type="hidden" name="request_id" id="respondRequestId">
+
+      {{-- Decision --}}
+      <div class="mb-4">
+        <label class="form-label fw-bold">{{ __('admin.response_decision') }} <span class="text-danger">*</span></label>
+        <div class="row g-2">
+          <div class="col-6">
+            <input type="radio" class="btn-check" name="decision" id="decisionApprove" value="approve">
+            <label class="btn btn-outline-success w-100" for="decisionApprove">
+              <i class="ti ti-check me-1"></i> {{ __('admin.approve') }}
+            </label>
+          </div>
+          <div class="col-6">
+            <input type="radio" class="btn-check" name="decision" id="decisionReject" value="reject">
+            <label class="btn btn-outline-danger w-100" for="decisionReject">
+              <i class="ti ti-x me-1"></i> {{ __('admin.reject') }}
+            </label>
+          </div>
+        </div>
+        <div id="decisionError" class="fv-plugins-message-container invalid-feedback"></div>
+      </div>
+
+      {{-- Message --}}
+      <div class="mb-4">
+        <label for="respondMessage" class="form-label fw-bold">
+          {{ __('admin.response_message') }} 
+          <span id="messageRequiredStar" class="text-danger d-none">*</span>
+        </label>
+        <textarea class="form-control" id="respondMessage" name="message" rows="5" 
+          placeholder="{{ __('admin.respond_message_placeholder') }}" maxlength="500"></textarea>
+        <div class="d-flex justify-content-between mt-1">
+          <small class="text-muted"><span id="respondCharCount">0</span>/500</small>
+        </div>
+      </div>
+
+      <div class="d-flex gap-3 mt-4">
+        <button type="submit" class="btn btn-primary flex-fill">
+          <i class="ti ti-send me-1"></i> {{ __('admin.send_response') }}
+        </button>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">
+          {{ __('admin.Cancel') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{{-- ═══════════════════════════════════════════
+     OFFCANVAS 2 — Send Message
+═══════════════════════════════════════════ --}}
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasMessage" aria-labelledby="offcanvasMessageLabel">
+  <div class="offcanvas-header border-bottom">
+    <div class="d-flex align-items-center gap-2">
+      <div class="avatar avatar-sm">
+        <div class="avatar-initial rounded-circle bg-label-primary">
+          <i class="ti ti-send ti-sm"></i>
+        </div>
+      </div>
+      <h5 class="offcanvas-title mb-0" id="offcanvasMessageLabel">{{ __('admin.Send_Message') }}</h5>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+
+  <div class="offcanvas-body d-flex flex-column">
+
+    {{-- Provider info --}}
+    <div class="d-flex align-items-center gap-3 p-3 bg-light-subtle border rounded mb-4">
+      <img src="" alt="Provider" class="rounded-circle msg-provider-img" width="48" height="48">
+      <div>
+        <div class="fw-semibold msg-provider-name">—</div>
+        <small class="text-muted msg-request-title">—</small>
+      </div>
+    </div>
+
+    {{-- Simulated thread --}}
+    <div class="border rounded p-3 mb-4 overflow-auto" style="max-height:200px" id="msgThread">
+      <div class="d-flex flex-column gap-3">
+        <div>
+          <div class="d-flex justify-content-start">
+            <div class="bg-label-secondary border rounded-3 px-3 py-2 small" style="max-width:75%">
+              Hello! Looking forward to working on your project.
+            </div>
+          </div>
+          <small class="text-muted ps-1">Tech Solutions Inc · Jan 15, 09:35</small>
+        </div>
+        <div>
+          <div class="d-flex justify-content-end">
+            <div class="bg-primary text-white rounded-3 px-3 py-2 small" style="max-width:75%">
+              Great, please let us know the timeline.
+            </div>
+          </div>
+          <div class="text-end"><small class="text-muted pe-1">You · Jan 15, 09:38</small></div>
+        </div>
+      </div>
+    </div>
+
+    {{-- Compose form --}}
+    <form id="formMessage" novalidate>
+      <input type="hidden" name="request_id" id="msgRequestId">
+
+      <div class="mb-3">
+        <label for="msgBody" class="form-label fw-semibold">
+          {{ __('admin.message') }} <span class="text-danger">*</span>
+        </label>
+        <textarea class="form-control" id="msgBody" name="message" rows="4"
+          placeholder="{{ __('admin.message_body_placeholder') }}" maxlength="1000"></textarea>
+        <div class="d-flex justify-content-end mt-1">
+          <small class="text-muted"><span id="msgBodyCount">0</span>/1000</small>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label for="msgAttachment" class="form-label fw-semibold">
+          {{ __('admin.attachment') }}
+          <span class="text-muted fw-normal small">({{ __('admin.optional') }})</span>
+        </label>
+        <input type="file" class="form-control" id="msgAttachment" name="attachment"
+          accept=".pdf,.doc,.docx,.png,.jpg,.jpeg">
+        <div class="form-text">Max 10 MB — PDF, DOC, PNG, JPG</div>
+      </div>
+
+      <div class="d-flex gap-3">
+        <button type="submit" class="btn btn-primary flex-fill">
+          <i class="ti ti-send me-1"></i> {{ __('admin.Send_Message') }}
+        </button>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">
+          {{ __('admin.Cancel') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{{-- ═══════════════════════════════════════════
+     OFFCANVAS 3 — View History (3 tabs)
+═══════════════════════════════════════════ --}}
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasHistory" aria-labelledby="offcanvasHistoryLabel">
+  <div class="offcanvas-header border-bottom">
+    <div class="d-flex align-items-center gap-2">
+      <div class="avatar avatar-sm">
+        <div class="avatar-initial rounded-circle bg-label-info">
+          <i class="ti ti-history ti-sm"></i>
+        </div>
+      </div>
+      <h5 class="offcanvas-title mb-0" id="offcanvasHistoryLabel">{{ __('admin.view_history') }}</h5>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+
+  <div class="offcanvas-body p-0 d-flex flex-column">
+
+    {{-- Provider strip --}}
+    <div class="d-flex align-items-center gap-3 p-3 border-bottom">
+      <img src="" alt="Provider" class="rounded-circle hist-provider-img" width="44" height="44">
+      <div>
+        <div class="fw-semibold hist-provider-name">—</div>
+        <small class="text-muted hist-request-title">—</small>
+      </div>
+      <span class="badge ms-auto hist-status-badge">—</span>
+    </div>
+
+    {{-- Tabs nav --}}
+    <ul class="nav nav-tabs px-3 pt-2 border-bottom flex-shrink-0" id="historyTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="tab-timeline" data-bs-toggle="tab"
+          data-bs-target="#tabpane-timeline" type="button" role="tab">
+          <i class="ti ti-timeline me-1"></i>{{ __('admin.status_timeline') }}
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link position-relative" id="tab-messages" data-bs-toggle="tab"
+          data-bs-target="#tabpane-messages" type="button" role="tab">
+          <i class="ti ti-message me-1"></i>{{ __('admin.Messages') }}
+          <small 
+            class="position-absolute rounded-circle bg-danger text-white w-px-20 h-px-20 d-flex flex-shrink-0 align-items-center justify-content-center"
+            style="top: 0; right: 0;"
+          >
+            4
+          </small>
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-reviews" data-bs-toggle="tab"
+          data-bs-target="#tabpane-reviews" type="button" role="tab">
+          <i class="ti ti-star me-1"></i>{{ __('admin.reviews') }}
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content flex-grow-1 overflow-auto p-3" id="historyTabsContent">
+
+      {{-- ── TAB 1 · Status Timeline ── --}}
+      <div class="tab-pane fade show active" id="tabpane-timeline" role="tabpanel">
+        <ul class="list-unstyled mt-2 mb-0">
+
+          <li class="d-flex gap-3 pb-4">
+            <div class="d-flex flex-column align-items-center flex-shrink-0">
+              <span class="badge rounded-pill bg-success p-2"><i class="ti ti-check"></i></span>
+              <div class="border-start border-2 border-success opacity-25 flex-grow-1 mt-1"></div>
+            </div>
+            <div class="d-flex justify-content-between w-100 pt-1">
+              <div>
+                <div class="fw-semibold text-success small">Request Submitted</div>
+                <small class="text-muted">Client submitted the service request.</small>
+              </div>
+              <small class="text-muted text-nowrap ms-3">Jan 15, 09:00</small>
+            </div>
+          </li>
+
+          <li class="d-flex gap-3 pb-4">
+            <div class="d-flex flex-column align-items-center flex-shrink-0">
+              <span class="badge rounded-pill bg-primary p-2"><i class="ti ti-thumb-up"></i></span>
+              <div class="border-start border-2 border-primary opacity-25 flex-grow-1 mt-1"></div>
+            </div>
+            <div class="d-flex justify-content-between w-100 pt-1">
+              <div>
+                <div class="fw-semibold text-primary small">Approved</div>
+                <small class="text-muted">Request reviewed and approved by admin.</small>
+              </div>
+              <small class="text-muted text-nowrap ms-3">Jan 16, 10:15</small>
+            </div>
+          </li>
+
+          <li class="d-flex gap-3 pb-4">
+            <div class="d-flex flex-column align-items-center flex-shrink-0">
+              <span class="badge rounded-pill bg-info p-2"><i class="ti ti-loader"></i></span>
+              <div class="border-start border-2 border-info opacity-25 flex-grow-1 mt-1"></div>
+            </div>
+            <div class="d-flex justify-content-between w-100 pt-1">
+              <div>
+                <div class="fw-semibold text-info small">In Progress</div>
+                <small class="text-muted">Service provider started working on the project.</small>
+              </div>
+              <small class="text-muted text-nowrap ms-3">Jan 17, 08:30</small>
+            </div>
+          </li>
+
+          <li class="d-flex gap-3 pb-4">
+            <div class="d-flex flex-column align-items-center flex-shrink-0">
+              <span class="badge rounded-pill bg-warning p-2"><i class="ti ti-edit"></i></span>
+              <div class="border-start border-2 border-warning opacity-25 flex-grow-1 mt-1"></div>
+            </div>
+            <div class="d-flex justify-content-between w-100 pt-1">
+              <div>
+                <div class="fw-semibold text-warning small">Revision Requested</div>
+                <small class="text-muted">Client requested adjustments to the deliverable.</small>
+              </div>
+              <small class="text-muted text-nowrap ms-3">Jan 19, 13:00</small>
+            </div>
+          </li>
+
+          <li class="d-flex gap-3">
+            <div class="d-flex flex-column align-items-center flex-shrink-0">
+              <span class="badge rounded-pill bg-danger p-2"><i class="ti ti-x"></i></span>
+            </div>
+            <div class="d-flex justify-content-between w-100 pt-1">
+              <div>
+                <div class="fw-semibold text-danger small hist-final-status">Rejected</div>
+                <small class="text-muted hist-final-note">Request was closed after revision deadline passed.</small>
+              </div>
+              <small class="text-muted text-nowrap ms-3">Jan 20, 17:00</small>
+            </div>
+          </li>
+
+        </ul>
+      </div>
+
+      {{-- ── TAB 2 · Messages ── --}}
+      <div class="tab-pane fade" id="tabpane-messages" role="tabpanel">
+        <div class="d-flex flex-column gap-3 pt-2" id="histMsgThread">
+
+          <div>
+            <div class="d-flex justify-content-start">
+              <div class="bg-light border rounded-3 px-3 py-2 small" style="max-width:75%">
+                Hello! Looking forward to working on your project.
+              </div>
+            </div>
+            <small class="text-muted ps-1">Provider · Jan 15, 09:35</small>
+          </div>
+
+          <div>
+            <div class="d-flex justify-content-end">
+              <div class="bg-primary text-white rounded-3 px-3 py-2 small" style="max-width:75%">
+                Great, please share a draft timeline.
+              </div>
+            </div>
+            <div class="text-end"><small class="text-muted pe-1">You · Jan 15, 09:38</small></div>
+          </div>
+
+          <div>
+            <div class="d-flex justify-content-start">
+              <div class="bg-light border rounded-3 px-3 py-2 small" style="max-width:75%">
+                Sure! Here's a rough breakdown for the first 2 weeks.
+              </div>
+            </div>
+            <small class="text-muted ps-1">Provider · Jan 16, 08:10</small>
+          </div>
+
+          <div>
+            <div class="d-flex justify-content-end">
+              <div class="bg-primary text-white rounded-3 px-3 py-2 small" style="max-width:75%">
+                Please note we need the mobile layout to be responsive from day one.
+              </div>
+            </div>
+            <div class="text-end"><small class="text-muted pe-1">You · Jan 19, 12:50</small></div>
+          </div>
+
+          <div>
+            <div class="d-flex justify-content-start">
+              <div class="bg-light border rounded-3 px-3 py-2 small" style="max-width:75%">
+                Understood, however the deadline makes that difficult at this stage.
+              </div>
+            </div>
+            <small class="text-muted ps-1">Provider · Jan 19, 14:00</small>
+          </div>
+
+        </div>
+
+        {{-- Quick reply --}}
+        <div class="border-top mt-4 pt-3">
+          <form id="formHistoryReply" novalidate>
+            <input type="hidden" name="request_id" id="histReplyRequestId">
+            <div class="mb-2">
+              <textarea class="form-control" id="histReplyBody" name="reply" rows="3"
+                placeholder="{{ __('admin.reply_placeholder') }}" maxlength="500"></textarea>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <small class="text-muted"><span id="histReplyCount">0</span>/500</small>
+              <button type="submit" class="btn btn-sm btn-primary">
+                <i class="ti ti-send me-1"></i>{{ __('admin.reply') }}
               </button>
             </div>
           </form>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Send response -->
-  <div class="modal fade text-left" id="ReplyModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="myModalLabel33">
-            {{ __('cycles.Response to') }} <span id="rname"></span>
-          </h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <input type="hidden" name="sender" value="{{ Auth::user()->id }}">
-          <input type="hidden" name="receiver" id="resid" value="">
+      {{-- ── TAB 3 · Reviews ── --}}
+      <div class="tab-pane fade" id="tabpane-reviews" role="tabpanel">
+        <div class="d-flex flex-column gap-3 pt-2">
 
-          <div class="mb-3">
-            <label class="form-label">{{ __('admin.Vendor_Name') }}:</label>
-            <p id="vendor_name" class="form-control-plaintext">-</p>
+          <div class="border rounded p-3 bg-light-subtle">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <img src="https://i.pravatar.cc/32?img=10" class="rounded-circle" width="32" height="32" alt="reviewer">
+              <div>
+                <div class="fw-semibold small">Ahmed Al-Mansouri</div>
+                <div class="text-warning small">
+                  <i class="ti ti-star-filled"></i><i class="ti ti-star-filled"></i>
+                  <i class="ti ti-star-filled"></i><i class="ti ti-star-filled"></i>
+                  <i class="ti ti-star"></i>
+                </div>
+              </div>
+              <small class="text-muted ms-auto">Jan 18, 2025</small>
+            </div>
+            <p class="small fw-semibold mb-1">Great communication but delivery was late.</p>
+            <p class="small text-muted mb-0">The work quality was excellent, however the final handover missed the agreed deadline by two days. Would still recommend for quality-focused projects.</p>
           </div>
 
-          <div class="mb-3">
-            <label class="form-label">{{ __('admin.Vendor_Email') }}:</label>
-            <p id="vendor_email" class="form-control-plaintext">-</p>
+          <div class="border rounded p-3 bg-light-subtle">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <img src="https://i.pravatar.cc/32?img=20" class="rounded-circle" width="32" height="32" alt="reviewer">
+              <div>
+                <div class="fw-semibold small">Sara Khalid</div>
+                <div class="text-warning small">
+                  <i class="ti ti-star-filled"></i><i class="ti ti-star-filled"></i>
+                  <i class="ti ti-star-filled"></i><i class="ti ti-star-filled"></i>
+                  <i class="ti ti-star-filled"></i>
+                </div>
+              </div>
+              <small class="text-muted ms-auto">Jan 20, 2025</small>
+            </div>
+            <p class="small fw-semibold mb-1">Outstanding service, highly recommend!</p>
+            <p class="small text-muted mb-0">Exceeded all expectations. Professional team, clear communication, and delivered ahead of schedule. Will definitely work with them again.</p>
           </div>
 
-          <div class="mb-3">
-            <label class="form-label">{{ __('admin.Vendor_Phone') }}:</label>
-            <p id="vendor_phone" class="form-control-plaintext">-</p>
-          </div>
+          <p class="text-center text-muted small mb-0">Showing 2 of 2 reviews</p>
 
-          <div class="mb-3">
-            <label class="form-label">{{ __('cycles.Add a comment') }}:</label>
-            <textarea class="form-control" id="admin_comment" name='admin_comment' rows="4"
-              placeholder="{{ __('cycles.Write a response comment') }}"></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-label-primary" data-bs-dismiss="modal" onclick="serviceRequestAction('approve')">
-            <span class="d-none d-sm-block">{{ __('cycles.Approve') }}</span>
-          </button>
-          <button type="button" class="btn btn-label-danger ml-1" onclick="serviceRequestAction('reject')">
-            <span class="d-none d-sm-block">{{ __('cycles.Disapprove') }}</span>
-          </button>
         </div>
       </div>
-    </div>
-  </div>
+
+    </div>{{-- /tab-content --}}
+  </div>{{-- /offcanvas-body --}}
+</div>
 @stop
 
 @section('scripts')
+<script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
+<script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
+<script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+
 <script>
-  // --- DataTable Initialization ---
-  $(document).ready(function() {
-    const isArabic = "{{ $l }}" === "ar";
+const statuses = {
+  Completed : '{{ __('admin.completed') }}',
+  Pending   : '{{ __('admin.pending') }}',
+  Rejected  : '{{ __('admin.Rejected') }}',
+  Approved  : '{{ __('admin.Approved') }}',
+};
 
-    // Initialize DataTable
-    const table = $('.services-requests-table').DataTable({
-      responsive: true,
-      searching: true,
-      lengthChange: true,
-      pageLength: 10,
-      order: [[5, "desc"]],
-      dom: '<"row"<"col-12 col-md-9 d-flex flex-wrap flex-md-nowrap align-items-center"l>' +
-           '<"col-12 col-md-3 d-flex justify-content-center justify-content-md-end"f>>' +
-           't<"row"<"col-sm-12 col-md-6"i>' +
-           '<"col-sm-12 col-md-6 d-flex justify-content-end"p>>',
-      buttons: [
-        {
-          extend: 'excel',
-          title: isArabic ? 'طلبات الخدمات' : 'Services Requests',
-          exportOptions: { columns: [0, 1, 2, 3, 4, 5] }
-        },
-        {
-          extend: 'csv',
-          title: isArabic ? 'طلبات الخدمات' : 'Services Requests',
-          exportOptions: { columns: [0, 1, 2, 3, 4, 5] }
-        },
-      ],
-      columnDefs: [{ orderable: false, targets: [0, 6] }],
-      language: isArabic ? { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/ar.json' } : {},
-      initComplete: function() {
-        const api = this.api();
+document.addEventListener('DOMContentLoaded', function () {
 
-        // Create Service Filter
-        const serviceSelect = $('<select class="form-select form-select-sm ms-md-8 mb-2 mb-md-0" style="width:auto;min-width:170px;">' +
-          `<option value="">${isArabic ? 'جميع الخدمات' : 'All Services'}</option>` +
-        '</select>');
+  const $ = (sel, ctx = document) => ctx.querySelector(sel);
+  const FV = FormValidation;
 
-        const services = [...new Set(api.column(2).data().map(d => d.trim()).toArray())].sort();
-        services.forEach(service => serviceSelect.append(`<option value="${service}">${service}</option>`));
-        $('.dataTables_length').after(serviceSelect);
+  /* ── Char counter ── */
+  function charCounter(textarea, counterId) {
+    textarea.addEventListener('input', () =>
+      document.getElementById(counterId).textContent = textarea.value.length
+    );
+  }
 
-        // Create Status Filter
-        const statusSelect = $('<select class="form-select form-select-sm ms-md-2 mb-2 mb-md-0" style="width:auto;min-width:170px;">' +
-          `<option value="">${isArabic ? 'جميع الحالات' : 'All Statuses'}</option>` +
-          `<option value="{{ __("admin.Pending") }}">{{ __("admin.Pending") }}</option>` +
-          `<option value="{{ __("admin.Done") }}">{{ __("admin.Done") }}</option>` +
-        '</select>');
-        serviceSelect.after(statusSelect);
+  /* ── Badge class (mirrors PHP helper) ── */
+  function badgeClass(status) {
+    const map = {
+      Completed : 'bg-label-success',
+      Pending   : 'bg-label-warning',
+      Rejected  : 'bg-label-danger',
+      Approved  : 'bg-label-primary',
+    };
+    return map[status] ?? 'bg-warning text-dark';
+  }
 
-        // Create Date Filter (after Status Filter)
-        const dateInput = $('<input type="text" id="dateFilter" class="form-control form-control-sm ms-md-2" placeholder="' + 
-          (isArabic ? 'تصفية حسب التاريخ' : 'Filter by Date') + 
-        '" style="width:auto;min-width:160px;">');
-        statusSelect.after(dateInput);
+  /* ── XSS escape ── */
+  function esc(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+              .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
 
-        // Initialize Flatpickr for date filter
-        flatpickr('#dateFilter', {
-          dateFormat: "Y-m-d",
-           onReady: function (selectedDates, dateStr, instance) {
-            let btn = document.createElement("button");
-            btn.type = "button";
-            btn.innerHTML = "{{ __('admin.Clear') }}";
-            btn.classList.add("btn", "btn-sm", "btn-outline-secondary", "my-4");
-            btn.addEventListener("click", function () {
-              instance.clear(); // <-- clear flatpickr value
-              instance.close();
-              api.column(5).search('').draw();
-            });
-            instance.calendarContainer.appendChild(btn);
-          },
-          onChange: function(selectedDates, dateStr) {
-            api.column(5).search(dateStr).draw();
-          }
-        });
+  /* ══════════════════════════════════════
+   OFFCANVAS — Respond Logic
+══════════════════════════════════════ */
+const ocRespond = document.getElementById('offcanvasRespond');
+const formRespond = document.getElementById('formRespond');
 
-        // Filter logic
-        serviceSelect.on('change', function() {
-          api.column(2).search(this.value).draw();
-        });
-
-        statusSelect.on('change', function() {
-          api.column(3).search(this.value).draw();
-        });
-      }
-    });
-
-    // Export button handlers
-    $('#exportExcel').on('click', () => table.button('.buttons-excel').trigger());
-    $('#exportCsv').on('click', () => table.button('.buttons-csv').trigger());
+if (ocRespond) {
+  ocRespond.addEventListener('show.bs.offcanvas', e => {
+    const btn = e.relatedTarget;
+    $('#summaryServiceName').textContent = btn.dataset.requestTitle;
+    $('#summaryStartupName').textContent = btn.dataset.startupName;
+    $('#summaryFounderName').textContent = btn.dataset.founderName;
+    $('#respondRequestId').value = btn.dataset.requestId;
+    
+    formRespond.reset();
+    $('#respondCharCount').textContent = '0';
+    $('#messageRequiredStar').classList.add('d-none');
+    fvRespond.resetForm(true);
   });
 
-  // --- Modal and Approval Functions ---
-  function OpenModal(id, name, title) {
-    $('#uname').html(name);
-    $('#rid').val(id);
-    $('#subject').val('{{ __('cycles.Your request') }} - ' + title);
-    $('#MessageModal').modal('show');
-  }
+  // Toggle visual "required" star based on decision
+  formRespond.querySelectorAll('input[name="decision"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      if (e.target.value === 'reject') {
+        $('#messageRequiredStar').classList.remove('d-none');
+      } else {
+        $('#messageRequiredStar').classList.add('d-none');
+      }
+      fvRespond.revalidateField('message');
+    });
+  });
 
-  function reply(id, name, title, vendorName, vendorEmail, vendorPhone) {
-    $('#rname').html('"' + title + '" {{ __('cycles.Request from') }} ' + name);
-    $('#resid').val(id);
-    $('#vendor_name').text(vendorName || '-');
-    $('#vendor_email').text(vendorEmail || '-');
-    $('#vendor_phone').text(vendorPhone || '-');
-    $('#ReplyModal').modal('show');
-  }
+  charCounter($('#respondMessage'), 'respondCharCount');
 
-  function serviceRequestAction(stat) {
-    const comment = $('#admin_comment').val();
-    const id = $('#resid').val();
-    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
-    $.post('/dashboard/requests/take_action', { id, stat, comment })
-      .done((response) => {
-        if( response.status )
-        {
-					Swal.fire({
-						icon: 'success',
-						title: response.title || 'Success',
-						html: response.message || 'Service request ' + stat + 'd successfully',
-						timer: 2500,
-						timerProgressBar: true,
-						showCancelButton: false,
-						confirmButtonText: 'Close',
-						customClass: {
-							confirmButton: 'btn mx-1 bg-primary text-white',
-						}
-					}).then((result) => { location.reload(); });
+  const fvRespond = FormValidation.formValidation(formRespond, {
+    fields: {
+      decision: {
+        validators: {
+          notEmpty: { 
+            message: '{{ app()->getLocale() == "ar" ? "يرجى اختيار قرار الرد" : "Please select a response decision." }}' 
+          }
         }
-        else
-        {
-					Swal.fire({
-						icon: 'warning',
-						title: response.title || 'Failed',
-						html: response.message || 'Something went wrong',
-						timer: 2500,
-						timerProgressBar: true,
-						showCancelButton: false,
-						confirmButtonText: 'OK',
-						customClass: {
-							confirmButton: 'btn mx-1 bg-primary text-white',
-						}
-					});
+      },
+      message: {
+        validators: {
+          callback: {
+            message: '{{ app()->getLocale() == "ar" ? "يرجى إضافة رسالة لتوضيح سبب الرفض" : "Please add a message to explain the rejection." }}',
+            callback: function(input) {
+              const decision = formRespond.querySelector('input[name="decision"]:checked')?.value;
+              // If reject, message is mandatory
+              if (decision === 'reject' && input.value.trim() === '') {
+                return false;
+              }
+              return true;
+            }
+          },
+          stringLength: {
+            max: 500,
+            message: '{{ __('admin.reply_message_max_length') }}'
+          }
         }
-      })
-      .fail(err => {
-        var response = err.responseJSON;
-        releaseFailureAlert({
-          title: response.title || "{{ __('admin.Error') }}",
-          message: response.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
-        });
+      }
+    },
+    plugins: {
+      trigger: new FormValidation.plugins.Trigger(),
+      bootstrap5: new FormValidation.plugins.Bootstrap5({ 
+        rowSelector: '.mb-4',
+        eleInvalidClass: 'is-invalid',
+        eleValidClass: ''
+      }),
+      autoFocus: new FormValidation.plugins.AutoFocus(),
+      submitButton: new FormValidation.plugins.SubmitButton(),
+    }
+  }).on('core.form.valid', () => {
+    const decision = formRespond.querySelector('input[name="decision"]:checked').value;
+    
+    // Simulate Success Actions
+    if (decision === 'approve') {
+      showToast({ 
+        type: 'success', 
+        message: '{{ app()->getLocale() == "ar" ? ".الطلب الآن قيد التنفيذ" : "Request is now in progress." }}' 
       });
-  }
+    } else {
+      showToast({ 
+        type: 'error', 
+        message: '{{ app()->getLocale() == "ar" ? "تم رفض الطلب" : "Request has been rejected." }}' 
+      });
+    }
+
+    // Logic for Email/Notification (Handled by Backend in production)
+    console.log("Triggering Email to Founder...");
+    console.log("Triggering In-App Notification...");
+
+    bootstrap.Offcanvas.getInstance(ocRespond).hide();
+    
+    // In a real app, you would perform an AJAX request here and then:
+    // window.location.reload(); or remove the card from DOM
+  });
+}
+  /* ══════════════════════════════════════
+     OFFCANVAS 2 — Send Message
+  ══════════════════════════════════════ */
+  const ocMessage = document.getElementById('offcanvasMessage');
+
+  ocMessage.addEventListener('show.bs.offcanvas', e => {
+    const btn = e.relatedTarget;
+    if (!btn) return;
+    $('.msg-provider-img').src          = btn.dataset.providerImg  ?? '';
+    $('.msg-provider-name').textContent = btn.dataset.providerName ?? '—';
+    $('.msg-request-title').textContent = btn.dataset.requestTitle ?? '—';
+    $('#msgRequestId').value            = btn.dataset.requestId    ?? '';
+    formMessage.reset();
+    $('#msgBodyCount').textContent = '0';
+    fvMessage && fvMessage.resetForm(true);
+  });
+
+  charCounter($('#msgBody'), 'msgBodyCount');
+
+  const formMessage = $('#formMessage');
+  const fvMessage = FV.formValidation(formMessage, {
+    fields: {
+      message: {
+        validators: {
+          notEmpty:     { message: '{{ __('admin.message_required') }}' },
+          stringLength: { min: 10, max: 1000, message: '{{ __('admin.message_body_length') }}' },
+        },
+      },
+      attachment: {
+        validators: {
+          file: {
+            extension : 'pdf,doc,docx,png,jpg,jpeg,webp,svg,xls,xlsx,ppt,pptx',
+            type      : 'application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/png,image/jpeg',
+            maxSize   : 10 * 1024 * 1024, // 10 MB
+            message   : '{{ __('admin.message_attachment_validation') }}',
+          },
+        },
+      },
+    },
+    plugins: {
+      trigger:      new FV.plugins.Trigger(),
+      bootstrap5:   new FV.plugins.Bootstrap5({ rowSelector: '.mb-3, .mb-4' }),
+      autoFocus:    new FV.plugins.AutoFocus(),
+      submitButton: new FV.plugins.SubmitButton(),
+    },
+  }).on('core.form.valid', () => {
+    showToast({ type: 'success', message: '{{ __('admin.MessageSent') }}' });
+    bootstrap.Offcanvas.getInstance(ocMessage).hide();
+  });
+
+  /* ══════════════════════════════════════
+     OFFCANVAS 3 — View History
+  ══════════════════════════════════════ */
+  const ocHistory = document.getElementById('offcanvasHistory');
+
+  ocHistory.addEventListener('show.bs.offcanvas', e => {
+    const btn = e.relatedTarget;
+    if (!btn) return;
+    $('.hist-provider-img').src          = btn.dataset.providerImg  ?? '';
+    $('.hist-provider-name').textContent = btn.dataset.providerName ?? '—';
+    $('.hist-request-title').textContent = btn.dataset.requestTitle ?? '—';
+    $('#histReplyRequestId').value       = btn.dataset.requestId    ?? '';
+
+    const status      = btn.dataset.status ?? '';
+    const statusBadge = $('.hist-status-badge');
+    statusBadge.textContent = statuses[status] ?? '—';
+    statusBadge.className   = `badge ms-auto hist-status-badge ${badgeClass(status)}`;
+
+    bootstrap.Tab.getOrCreateInstance($('#tab-timeline')).show();
+    formHistoryReply.reset();
+    $('#histReplyCount').textContent = '0';
+    fvHistoryReply && fvHistoryReply.resetForm(true);
+  });
+
+  charCounter($('#histReplyBody'), 'histReplyCount');
+
+  const formHistoryReply = $('#formHistoryReply');
+  const fvHistoryReply = FV.formValidation(formHistoryReply, {
+    fields: {
+      reply: {
+        validators: {
+          notEmpty:     { message: 'Reply cannot be empty.' },
+          stringLength: { min: 2, max: 500, message: 'Reply must be 2–500 characters.' },
+        },
+      },
+    },
+    plugins: {
+      trigger:      new FV.plugins.Trigger(),
+      bootstrap5:   new FV.plugins.Bootstrap5({ rowSelector: '.mb-2' }),
+      autoFocus:    new FV.plugins.AutoFocus(),
+      submitButton: new FV.plugins.SubmitButton(),
+    },
+  }).on('core.form.valid', () => {
+    const now     = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = `
+      <div>
+        <div class="d-flex justify-content-end">
+          <div class="bg-primary text-white rounded-3 px-3 py-2 small" style="max-width:75%">
+            ${esc($('#histReplyBody').value)}
+          </div>
+        </div>
+        <div class="text-end"><small class="text-muted pe-1">You · ${now}</small></div>
+      </div>`;
+    $('#histMsgThread').appendChild(wrapper);
+    formHistoryReply.reset();
+    $('#histReplyCount').textContent = '0';
+    fvHistoryReply.resetForm(true);
+    showToast({ type: 'success', message: '{{ __('admin.reply_sent_successfully') }}' });
+  });
+
+});
 </script>
 @stop
 
