@@ -88,7 +88,7 @@
 					</div>
 				</div>
 				<div class="modal-footer">
-					<input type="hidden" name="company_id" id="company_id" value="{{ $company->id }}" />
+					<input type="hidden" name="company_id" id="company_id" value="{{ $company?->id }}" />
 					<button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('admin.Cancel') }}</button>
 					<button type="submit" class="btn btn-primary" id="add-new-startup-growth-btn">{{ __('admin.Save') }}</button>
 				</div>
