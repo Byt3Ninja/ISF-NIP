@@ -536,7 +536,7 @@ class ClientCompanyController extends Controller
                 $client = User::where('HaveCompany', 1)->with('company')->with('company.city')->find($user->id);
                 $id = $client?->company?->id ?? null;
             }
-            
+            $company_instance = null;
             if( $id == null )
             {
                 $client = User::where('HaveCompany', 1)->with('company')->with('company.city')->find($user->id);
@@ -827,7 +827,7 @@ class ClientCompanyController extends Controller
 
             $current_year = date('Y');
             $years = array_merge(range($current_year - 10, $current_year), range($current_year + 1, $current_year + 10));
-            $records_metadata = StartupCustomerGrowth::records( $company_instance->id );
+            $records_metadata = StartupCustomerGrowth::records( $company_instance?->id );
             $growth_records = $records_metadata['records'];
             $growthMetrics = [
                 'growth_since_first_record' => $records_metadata['growthSinceFirstRecord'],
