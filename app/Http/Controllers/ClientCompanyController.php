@@ -3398,6 +3398,14 @@ class ClientCompanyController extends Controller
             $user = Auth::user();
             $company = Company::findOrFail($id);
             $company_relations = CompanyRelation::where('company_id', $id)->where('user_id', $company->user->id)->get();
+            $step = Step::where('cycle_id', $company->cycle)->where('stype', '5')->first();
+            
+            if($company->step != $step->id){
+                return response()->json([
+                    'success' => false,
+                    'message' => 'The selected startups have not passed the final screening yet'
+                ], 422);
+            }
             $almuni = new Almuni();
             $almuni->user_id = $company->user->id;
             $almuni->cycle_id = $company->cycle;
