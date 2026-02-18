@@ -4,10 +4,7 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
 @stop
 
-@section('content')
-<div>
-  {{-- Static PHP Variables --}}
-  @php
+@php
   $stats = [
     'total'     => 9,
     'approved'  => 4,
@@ -80,8 +77,10 @@
       default     => 'bg-warning text-dark',
     };
   }
-  @endphp
+@endphp
 
+@section('content')
+<div>
   {{-- Stats Cards --}}
   <div class="row g-3 mb-6">
     @php
@@ -129,6 +128,61 @@
     </div>
     @endforeach
   </div>
+
+  {{--  Navigation Status Pills --}}
+  <nav class="nav-align-top">
+    <ul class="nav nav-pills flex-column flex-md-row mb-6 gap-2 gap-lg-0" role="tablist">
+
+      <li class="nav-item">
+        <a class="nav-link {{ request('request_status') == null ? 'active' : '' }}" href="{{ route('service_requests.list_all') }}">
+          {{ __('admin.all_requests') }}
+          <span class="badge badge-center rounded-pill bg-danger bg-glow ms-2">
+            {{ $stats['total'] ?? 0 }}
+          </span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link {{ request('request_status') == 'pending' ? 'active' : '' }}"
+          href="{{ route('service_requests.list_all', ['request_status' => 'pending']) }}">
+          {{ __('admin.pending') }}
+          <span class="badge badge-center rounded-pill bg-danger ms-2">
+            {{ $stats['pending'] ?? 0 }}
+          </span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link {{ request('request_status') == 'completed' ? 'active' : '' }}"
+          href="{{ route('service_requests.list_all', ['request_status' => 'completed']) }}">
+          {{ __('admin.completed') }}
+          <span class="badge badge-center rounded-pill bg-danger ms-2">
+            {{ $stats['completed'] ?? 0 }}
+          </span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link {{ request('request_status') == 'approved' ? 'active' : '' }}"
+          href="{{ route('service_requests.list_all', ['request_status' => 'approved']) }}">
+          {{ __('admin.Approved') }}
+          <span class="badge badge-center rounded-pill bg-danger ms-2">
+            {{ $stats['approved'] ?? 0 }}
+          </span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link {{ request('request_status') == 'rejected' ? 'active' : '' }}"
+          href="{{ route('service_requests.list_all', ['request_status' => 'rejected']) }}">
+          {{ __('admin.Rejected') }}
+          <span class="badge badge-center rounded-pill bg-danger ms-2">
+            {{ $stats['rejected'] ?? 0 }}
+          </span>
+        </a>
+      </li>
+    </ul>
+  </nav>
 
   {{-- Requests Grid --}}
   <div class="row g-4">
@@ -215,7 +269,6 @@
   </div>
 </div>
 
-
 {{-- ═══════════════════════════════════════════
      OFFCANVAS 1 — Add Review
 ═══════════════════════════════════════════ --}}
@@ -249,7 +302,7 @@
       {{-- Star Rating --}}
       <div class="mb-4">
         <label class="form-label fw-semibold">
-          {{ __('admin.Rating') ?? 'Rating' }} <span class="text-danger">*</span>
+          {{ __('admin.Rating') }} <span class="text-danger">*</span>
         </label>
         <div class="d-flex gap-1 fs-3" id="starBtnGroup">
           @for($s = 1; $s <= 5; $s++)
@@ -262,26 +315,26 @@
         {{-- Hidden field that FV validates --}}
         <input type="hidden" name="rating_value" id="ratingValueInput">
         <div id="starErrorMsg" class="text-danger small mt-1 d-none">
-          {{ __('admin.please_select_rating') ?? 'Please select a rating.' }}
+          {{ __('admin.please_select_rating') }}
         </div>
       </div>
 
       {{-- Title --}}
       <div class="mb-4">
         <label for="reviewTitle" class="form-label fw-semibold">
-          {{ __('admin.Review Title') ?? 'Review Title' }} <span class="text-danger">*</span>
+          {{ __('admin.review_title') }} <span class="text-danger">*</span>
         </label>
         <input type="text" class="form-control" id="reviewTitle" name="review_title"
-          placeholder="Summarise your experience…">
+          placeholder="{{ __('admin.review_title_placeholder') }}">
       </div>
 
       {{-- Review body --}}
       <div class="mb-4">
         <label for="reviewBody" class="form-label fw-semibold">
-          {{ __('admin.Your Review') ?? 'Your Review' }} <span class="text-danger">*</span>
+          {{ __('admin.your_review') }} <span class="text-danger">*</span>
         </label>
         <textarea class="form-control" id="reviewBody" name="review_body" rows="5"
-          placeholder="Share details about your experience…" maxlength="500"></textarea>
+          placeholder="{{ __('admin.your_review_placeholder') }}" maxlength="500"></textarea>
         <div class="d-flex justify-content-end mt-1">
           <small class="text-muted"><span id="reviewBodyCount">0</span>/500</small>
         </div>
@@ -292,23 +345,22 @@
         <div class="form-check form-switch">
           <input class="form-check-input" type="checkbox" id="recommendSwitch" name="recommend" value="1">
           <label class="form-check-label" for="recommendSwitch">
-            {{ __('admin.I would recommend this provider') ?? 'I would recommend this provider' }}
+            {{ __('admin.recommend_provider_label') }}
           </label>
         </div>
       </div>
 
       <div class="d-flex gap-3">
         <button type="submit" class="btn btn-primary flex-fill">
-          <i class="ti ti-send me-1"></i> {{ __('admin.Submit Review') ?? 'Submit Review' }}
+          <i class="ti ti-send me-1"></i> {{ __('admin.submit_review')}}
         </button>
         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">
-          {{ __('admin.Cancel') ?? 'Cancel' }}
+          {{ __('admin.Cancel') }}
         </button>
       </div>
     </form>
   </div>
 </div>
-
 
 {{-- ═══════════════════════════════════════════
      OFFCANVAS 2 — Send Message
@@ -342,7 +394,7 @@
       <div class="d-flex flex-column gap-3">
         <div>
           <div class="d-flex justify-content-start">
-            <div class="bg-light border rounded-3 px-3 py-2 small" style="max-width:75%">
+            <div class="bg-label-secondary border rounded-3 px-3 py-2 small" style="max-width:75%">
               Hello! Looking forward to working on your project.
             </div>
           </div>
@@ -364,19 +416,11 @@
       <input type="hidden" name="request_id" id="msgRequestId">
 
       <div class="mb-3">
-        <label for="msgSubject" class="form-label fw-semibold">
-          {{ __('admin.subject') ?? 'Subject' }} <span class="text-danger">*</span>
-        </label>
-        <input type="text" class="form-control" id="msgSubject" name="subject"
-          placeholder="Message subject…">
-      </div>
-
-      <div class="mb-3">
         <label for="msgBody" class="form-label fw-semibold">
-          {{ __('admin.message') ?? 'Message' }} <span class="text-danger">*</span>
+          {{ __('admin.message') }} <span class="text-danger">*</span>
         </label>
         <textarea class="form-control" id="msgBody" name="message" rows="4"
-          placeholder="Type your message…" maxlength="1000"></textarea>
+          placeholder="{{ __('admin.message_body_placeholder') }}" maxlength="1000"></textarea>
         <div class="d-flex justify-content-end mt-1">
           <small class="text-muted"><span id="msgBodyCount">0</span>/1000</small>
         </div>
@@ -384,12 +428,12 @@
 
       <div class="mb-4">
         <label for="msgAttachment" class="form-label fw-semibold">
-          {{ __('admin.attachment') ?? 'Attachment' }}
-          <span class="text-muted fw-normal small">({{ __('admin.optional') ?? 'optional' }})</span>
+          {{ __('admin.attachment') }}
+          <span class="text-muted fw-normal small">({{ __('admin.optional') }})</span>
         </label>
         <input type="file" class="form-control" id="msgAttachment" name="attachment"
           accept=".pdf,.doc,.docx,.png,.jpg,.jpeg">
-        <div class="form-text">Max 5 MB — PDF, DOC, PNG, JPG</div>
+        <div class="form-text">Max 10 MB — PDF, DOC, PNG, JPG</div>
       </div>
 
       <div class="d-flex gap-3">
@@ -397,13 +441,12 @@
           <i class="ti ti-send me-1"></i> {{ __('admin.Send_Message') }}
         </button>
         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">
-          {{ __('admin.Cancel') ?? 'Cancel' }}
+          {{ __('admin.Cancel') }}
         </button>
       </div>
     </form>
   </div>
 </div>
-
 
 {{-- ═══════════════════════════════════════════
      OFFCANVAS 3 — View History (3 tabs)
@@ -411,8 +454,10 @@
 <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasHistory" aria-labelledby="offcanvasHistoryLabel">
   <div class="offcanvas-header border-bottom">
     <div class="d-flex align-items-center gap-2">
-      <div class="avatar avatar-sm rounded-circle bg-label-info">
-        <i class="ti ti-history ti-sm"></i>
+      <div class="avatar avatar-sm">
+        <div class="avatar-initial rounded-circle bg-label-info">
+          <i class="ti ti-history ti-sm"></i>
+        </div>
       </div>
       <h5 class="offcanvas-title mb-0" id="offcanvasHistoryLabel">{{ __('admin.view_history') }}</h5>
     </div>
@@ -436,19 +481,25 @@
       <li class="nav-item" role="presentation">
         <button class="nav-link active" id="tab-timeline" data-bs-toggle="tab"
           data-bs-target="#tabpane-timeline" type="button" role="tab">
-          <i class="ti ti-timeline me-1"></i>{{ __('admin.Status Timeline') ?? 'Status Timeline' }}
+          <i class="ti ti-timeline me-1"></i>{{ __('admin.status_timeline') }}
         </button>
       </li>
       <li class="nav-item" role="presentation">
-        <button class="nav-link" id="tab-messages" data-bs-toggle="tab"
+        <button class="nav-link position-relative" id="tab-messages" data-bs-toggle="tab"
           data-bs-target="#tabpane-messages" type="button" role="tab">
-          <i class="ti ti-message me-1"></i>{{ __('admin.Messages') ?? 'Messages' }}
+          <i class="ti ti-message me-1"></i>{{ __('admin.Messages') }}
+          <small 
+            class="position-absolute rounded-circle bg-danger text-white w-px-20 h-px-20 d-flex flex-shrink-0 align-items-center justify-content-center"
+            style="top: 0; right: 0;"
+          >
+            4
+          </small>
         </button>
       </li>
       <li class="nav-item" role="presentation">
         <button class="nav-link" id="tab-reviews" data-bs-toggle="tab"
           data-bs-target="#tabpane-reviews" type="button" role="tab">
-          <i class="ti ti-star me-1"></i>{{ __('admin.Reviews') ?? 'Reviews' }}
+          <i class="ti ti-star me-1"></i>{{ __('admin.reviews') }}
         </button>
       </li>
     </ul>
@@ -588,12 +639,12 @@
             <input type="hidden" name="request_id" id="histReplyRequestId">
             <div class="mb-2">
               <textarea class="form-control" id="histReplyBody" name="reply" rows="3"
-                placeholder="Write a quick reply…" maxlength="500"></textarea>
+                placeholder="{{ __('admin.reply_placeholder') }}" maxlength="500"></textarea>
             </div>
             <div class="d-flex justify-content-between align-items-center">
               <small class="text-muted"><span id="histReplyCount">0</span>/500</small>
               <button type="submit" class="btn btn-sm btn-primary">
-                <i class="ti ti-send me-1"></i>{{ __('admin.Reply') ?? 'Reply' }}
+                <i class="ti ti-send me-1"></i>{{ __('admin.reply') }}
               </button>
             </div>
           </form>
@@ -604,7 +655,7 @@
       <div class="tab-pane fade" id="tabpane-reviews" role="tabpanel">
         <div class="d-flex flex-column gap-3 pt-2">
 
-          <div class="border rounded p-3 bg-light">
+          <div class="border rounded p-3 bg-light-subtle">
             <div class="d-flex align-items-center gap-2 mb-2">
               <img src="https://i.pravatar.cc/32?img=10" class="rounded-circle" width="32" height="32" alt="reviewer">
               <div>
@@ -621,7 +672,7 @@
             <p class="small text-muted mb-0">The work quality was excellent, however the final handover missed the agreed deadline by two days. Would still recommend for quality-focused projects.</p>
           </div>
 
-          <div class="border rounded p-3 bg-light">
+          <div class="border rounded p-3 bg-light-subtle">
             <div class="d-flex align-items-center gap-2 mb-2">
               <img src="https://i.pravatar.cc/32?img=20" class="rounded-circle" width="32" height="32" alt="reviewer">
               <div>
@@ -646,20 +697,6 @@
     </div>{{-- /tab-content --}}
   </div>{{-- /offcanvas-body --}}
 </div>
-
-
-{{-- Success Toast --}}
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index:1100">
-  <div id="toastSuccess" class="toast align-items-center text-bg-success border-0"
-    role="alert" aria-live="assertive" aria-atomic="true">
-    <div class="d-flex">
-      <div class="toast-body" id="toastMsg">Done!</div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto"
-        data-bs-dismiss="toast" aria-label="Close"></button>
-    </div>
-  </div>
-</div>
-
 @stop
 
 
@@ -669,16 +706,17 @@
 <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
 
 <script>
+const statuses = {
+  Completed : '{{ __('admin.completed') }}',
+  Pending   : '{{ __('admin.pending') }}',
+  Rejected  : '{{ __('admin.Rejected') }}',
+  Approved  : '{{ __('admin.Approved') }}',
+};
+
 document.addEventListener('DOMContentLoaded', function () {
 
   const $ = (sel, ctx = document) => ctx.querySelector(sel);
   const FV = FormValidation;
-
-  /* ── Toast ── */
-  function showToastMsg(msg) {
-    $('#toastMsg').textContent = msg;
-    bootstrap.Toast.getOrCreateInstance($('#toastSuccess')).show();
-  }
 
   /* ── Char counter ── */
   function charCounter(textarea, counterId) {
@@ -755,18 +793,18 @@ document.addEventListener('DOMContentLoaded', function () {
   const fvReview = FV.formValidation(formReview, {
     fields: {
       rating_value: {
-        validators: { notEmpty: { message: 'Please select a star rating.' } },
+        validators: { notEmpty: { message: '{{ __('admin.star_rating_required') }}' } },
       },
       review_title: {
         validators: {
-          notEmpty:     { message: 'Review title is required.' },
-          stringLength: { min: 5, max: 100, message: 'Title must be 5–100 characters.' },
+          notEmpty:     { message: '{{ __('admin.review_title_required') }}' },
+          stringLength: { min: 3, max: 50, message: '{{ __('admin.review_title_min_max') }}' },
         },
       },
       review_body: {
         validators: {
-          notEmpty:     { message: 'Please write your review.' },
-          stringLength: { min: 20, max: 500, message: 'Review must be 20–500 characters.' },
+          notEmpty:     { message: '{{ __('admin.review_body_required') }}' },
+          stringLength: { min: 3,max: 500, message: '{{ __('admin.review_body_min_max') }}' },
         },
       },
     },
@@ -781,7 +819,7 @@ document.addEventListener('DOMContentLoaded', function () {
       $('#starErrorMsg').classList.remove('d-none');
       return;
     }
-    showToastMsg('Review submitted successfully!');
+    showToast({ type: 'success', message: '{{ __('admin.review_submitted_successfully') }}' });
     bootstrap.Offcanvas.getInstance(ocReview).hide();
   });
 
@@ -807,25 +845,19 @@ document.addEventListener('DOMContentLoaded', function () {
   const formMessage = $('#formMessage');
   const fvMessage = FV.formValidation(formMessage, {
     fields: {
-      subject: {
-        validators: {
-          notEmpty:     { message: 'Subject is required.' },
-          stringLength: { min: 3, max: 150, message: 'Subject must be 3–150 characters.' },
-        },
-      },
       message: {
         validators: {
-          notEmpty:     { message: 'Message body is required.' },
-          stringLength: { min: 10, max: 1000, message: 'Message must be 10–1000 characters.' },
+          notEmpty:     { message: '{{ __('admin.message_required') }}' },
+          stringLength: { min: 10, max: 1000, message: '{{ __('admin.message_body_length') }}' },
         },
       },
       attachment: {
         validators: {
           file: {
-            extension : 'pdf,doc,docx,png,jpg,jpeg',
+            extension : 'pdf,doc,docx,png,jpg,jpeg,webp,svg,xls,xlsx,ppt,pptx',
             type      : 'application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/png,image/jpeg',
-            maxSize   : 5242880,
-            message   : 'Please upload a valid file (PDF/DOC/PNG/JPG, max 5 MB).',
+            maxSize   : 10 * 1024 * 1024, // 10 MB
+            message   : '{{ __('admin.message_attachment_validation') }}',
           },
         },
       },
@@ -837,7 +869,7 @@ document.addEventListener('DOMContentLoaded', function () {
       submitButton: new FV.plugins.SubmitButton(),
     },
   }).on('core.form.valid', () => {
-    showToastMsg('Message sent successfully!');
+    showToast({ type: 'success', message: '{{ __('admin.MessageSent') }}' });
     bootstrap.Offcanvas.getInstance(ocMessage).hide();
   });
 
@@ -856,7 +888,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const status      = btn.dataset.status ?? '';
     const statusBadge = $('.hist-status-badge');
-    statusBadge.textContent = status;
+    statusBadge.textContent = statuses[status] ?? '—';
     statusBadge.className   = `badge ms-auto hist-status-badge ${badgeClass(status)}`;
 
     bootstrap.Tab.getOrCreateInstance($('#tab-timeline')).show();
@@ -899,7 +931,7 @@ document.addEventListener('DOMContentLoaded', function () {
     formHistoryReply.reset();
     $('#histReplyCount').textContent = '0';
     fvHistoryReply.resetForm(true);
-    showToastMsg('Reply sent!');
+    showToast({ type: 'success', message: '{{ __('admin.reply_sent_successfully') }}' });
   });
 
 });
