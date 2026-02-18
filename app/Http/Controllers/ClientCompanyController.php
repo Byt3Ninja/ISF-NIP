@@ -3403,7 +3403,7 @@ class ClientCompanyController extends Controller
             if($company->step != $step->id){
                 return response()->json([
                     'success' => false,
-                    'message' => 'The selected startups have not passed the final screening yet'
+                    'message' => __('startup.The selected startups have not passed the final screening yet')
                 ], 422);
             }
             $almuni = new Almuni();
