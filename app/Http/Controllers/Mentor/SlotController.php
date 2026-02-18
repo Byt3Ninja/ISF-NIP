@@ -312,7 +312,7 @@ class SlotController extends Controller
 					}
 				}
 				
-				if($validated['tfrom'] >= date('H:i:s')){
+				if($validated['tfrom'] <= date('H:i:s')){
 					return response()->json([
 							'success' => false,
 							'message' => __('mentor.this_time_before_now'),
