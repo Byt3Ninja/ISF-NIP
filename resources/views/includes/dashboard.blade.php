@@ -344,7 +344,28 @@
 										<span class="mx-3 text-secondary">{{ $organization->name }}</span>
 									</div>
 								</div>
-								<div class="card-datatable table-responsive text-nowrap">
+								@if(!$_user->hasCompletedStartup())
+								<div class="alert alert-info alert-dismissible p-3 rounded m-4 mb-0 position-relative">
+									<ul class="list-unstyled mb-0 d-flex flex-wrap gap-2">
+										<li class="pre-request-item">
+											<a href="{{ route('company.profile_view_mine') }}?action=complete-profile"
+												class="btn btn-sm btn-outline-info d-flex align-items-center gap-2" role="button"
+												aria-label="{{ __('admin.Complete Startup/Idea') }}">
+												<i class="ti ti-external-link"></i>
+												<span>{{ __('admin.Complete Startup/Idea') }}</span>
+											</a>
+										</li>
+									</ul>
+									<p class="text-muted small mt-2 mb-0">
+										<i class="ti ti-lightbulb me-1"></i>
+										{{ __('dashboard.Setting up your profile properly will ensure you have access to all program features.') }}
+									</p>
+									<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"
+										style="position: absolute; top: 0; {{ $l == 'en' ? 'right' : 'left' }}: 0.15rem;">
+									</button>
+								</div>
+								@endif
+								<div class="card-datatable table-responsive text-nowrap mt-4">
 									<table class="table">
 										<thead class="table-light">
 											<tr>
@@ -1724,6 +1745,7 @@ document.addEventListener('DOMContentLoaded', function() {
 @endif
 <script>
 	let completionCheckInterval = null;
+	let activeCycleId = null;
 
 	// -------------------------------------------------------
 	// MAIN JOIN BUTTON HANDLER
@@ -1731,6 +1753,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	window.handleJoinClick = function(button) {
 		const hasPreRequests = button.getAttribute('data-has-pre');
 		const preRequests = JSON.parse(button.getAttribute('data-pre-requests') || '[]');
+		activeCycleId = button.getAttribute('data-cycle-id');
 
 		if (hasPreRequests === 'true') {
 			populatePrerequisiteModal(preRequests);
@@ -1788,7 +1811,11 @@ document.addEventListener('DOMContentLoaded', function() {
 	// SINGLE CHECKER FUNCTION
 	// -------------------------------------------------------
 	function checkCompletionStatus() {
-		return fetch('{{ route('cycles.completion_status_check') }}', {
+		let url = '{{ route('cycles.completion_status_check') }}';
+		if (activeCycleId) {
+			url += '?cycle_id=' + activeCycleId;
+		}
+		return fetch(url, {
 			method: 'GET',
 			headers: {
 				'X-Requested-With': 'XMLHttpRequest',
@@ -1817,43 +1844,48 @@ document.addEventListener('DOMContentLoaded', function() {
     const hasPreRequests = data.has_pre_requests;
     const preRequests = data.pre_requests || [];
 
-    // Update Join buttons
-    const joinButtons = document.querySelectorAll('button[onclick*="handleJoinClick"]');
-    joinButtons.forEach(joinButton => {
-        joinButton.className = 'btn btn-primary';
-        joinButton.innerHTML = '<span class="me-2">{{ __("dashboard.Join now") }}</span><i class="ti ti-arrows-join"></i>';
+    // Only update the active cycle's button, not all buttons
+    if (activeCycleId) {
+        const joinButton = document.querySelector('button[data-cycle-id="' + activeCycleId + '"]');
+        if (joinButton) {
+            joinButton.className = 'btn btn-primary';
+            joinButton.innerHTML = '<span class="me-2">{{ __("dashboard.Join now") }}</span><i class="ti ti-arrows-join"></i>';
 
-        joinButton.setAttribute('data-has-pre', hasPreRequests ? 'true' : 'false');
-        joinButton.setAttribute('data-pre-requests', JSON.stringify(preRequests.map(pr => ({
-            url: `${pr.url}?action=complete-profile`,
-            label: pr.label,
-        }))));
-    });
+            joinButton.setAttribute('data-has-pre', hasPreRequests ? 'true' : 'false');
+            joinButton.setAttribute('data-pre-requests', JSON.stringify(preRequests.map(pr => ({
+                url: `${pr.url}?action=complete-profile`,
+                label: pr.label,
+            }))));
 
-    // Update alert boxes
-    const alertDivs = document.querySelectorAll('.alert.alert-info');
-    alertDivs.forEach(alertDiv => {
-        if (hasPreRequests) {
-            const listElement = alertDiv.querySelector('.list-unstyled');
-            if (listElement) {
-                listElement.innerHTML = '';
-                preRequests.forEach(pr => {
-                    const li = document.createElement('li');
-                    li.className = 'pre-request-item';
-                    li.innerHTML = `
-                        <a href="${pr.url}?action=complete-profile"
-                           class="btn btn-sm btn-outline-info d-flex align-items-center gap-2">
-                           <i class="ti ti-external-link"></i>
-                           <span>${pr.label}</span>
-                        </a>`;
-                    listElement.appendChild(li);
-                });
+            // Update the alert box for this cycle's card only
+            const card = joinButton.closest('.card') || joinButton.closest('[class*="cycle"]') || joinButton.parentElement.parentElement;
+            if (card) {
+                const alertDiv = card.querySelector('.alert.alert-info');
+                if (alertDiv) {
+                    if (hasPreRequests) {
+                        const listElement = alertDiv.querySelector('.list-unstyled');
+                        if (listElement) {
+                            listElement.innerHTML = '';
+                            preRequests.forEach(pr => {
+                                const li = document.createElement('li');
+                                li.className = 'pre-request-item';
+                                li.innerHTML = `
+                                    <a href="${pr.url}?action=complete-profile"
+                                       class="btn btn-sm btn-outline-info d-flex align-items-center gap-2">
+                                       <i class="ti ti-external-link"></i>
+                                       <span>${pr.label}</span>
+                                    </a>`;
+                                listElement.appendChild(li);
+                            });
+                        }
+                        alertDiv.style.display = 'block';
+                    } else {
+                        alertDiv.style.display = 'none';
+                    }
+                }
             }
-            alertDiv.style.display = 'block';
-        } else {
-            alertDiv.style.display = 'none';
         }
-    });
+    }
 	}
 
 	// -------------------------------------------------------
