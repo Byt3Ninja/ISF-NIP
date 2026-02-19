@@ -2574,6 +2574,7 @@ return [
 	'settings_saved' => 'تم حفظ الإعدادات بنجاح',
 	'Complete Profile' => 'اكمل الملف الشخصي',
 	'Complete Startup/Idea' => 'اكمل الملف الشخصي للشركة',
+	'Complete Startup Profile to access all program features.' => 'أكمل الملف الشخصي لشركتك للوصول إلى جميع ميزات البرنامج.',
 	'Is_Required' => 'مطلوب',
 	'Is_Required_Survey_Description' => 'إذا تم تفعيل هذا الخيار، سيكون الاستبيان إلزاميًا للمستخدمين لإكماله.',
 	'Create_form' => 'انشاء نموذج',
