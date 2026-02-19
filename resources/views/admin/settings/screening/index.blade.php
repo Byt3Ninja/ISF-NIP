@@ -53,11 +53,10 @@
                   <input type="text" class="form-control bg-card" name="search" value="{{ request('search') }}" placeholder="{{ __('admin.screening.search_steps_placeholder') }}" aria-label="Search" aria-describedby="basic-addon-search31">
                 </div>
               </div>
-
               <div class="col-md-6 col-lg-2">
                 <select class="form-select select2" name="program" data-placeholder="{{ __('admin.All_Programs') }}">
                   <option value=""></option>
-                  @foreach($screeningSteps->pluck('program')->unique('id') as $program)
+                  @foreach($programs_in_screening->pluck('cycle')->unique('id') as $program)
                     <option value="{{ $program->id }}" {{ request('program') == $program->id ? 'selected' : '' }}>{{ Str::limit($program->title, 25) }}</option>
                   @endforeach
                 </select>
