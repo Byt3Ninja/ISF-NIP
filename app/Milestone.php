@@ -48,7 +48,10 @@ class Milestone extends Model
 
     public function scopePublic($query)
     {
-        return $query->where('visibility', '!=', 'private');
+        return $query->where(function ($q) {
+            $q->where('visibility', '!=', 'private')
+              ->orWhereNull('visibility');
+        });
     }
 
     /**

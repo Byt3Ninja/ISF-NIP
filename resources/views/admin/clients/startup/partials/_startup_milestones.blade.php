@@ -1,15 +1,15 @@
 <div class="mt-6">
   <div class="row">
     <div class="col-12">
-      @if($company->milestones && $company->milestones->count() > 0)
+      @if($milestones && $milestones->count() > 0)
         <div class="card">
           <div class="card-body">
             <div class="d-flex align-items-center justify-content-between">
               <div class="d-flex align-items-center">
                 <h5 class="mb-0">{{ __('startup.milestones') }}</h5>
-                <span class="badge bg-label-primary ms-3">{{ count($company->milestones) }}</span>
+                <span class="badge bg-label-primary ms-3">{{ count($milestones) }}</span>
               </div>
-              @if(count($company->milestones) > 3)
+              @if(count($milestones) > 3)
                 <div class="d-flex align-items-center gap-2">
                   <button id="milestonesPrev" class="btn btn-icon btn-outline-secondary shadow-xs rounded-circle" disabled>
                     <i class="ti ti-chevron-{{ $l == 'en' ? 'left' : 'right' }} ti-sm"></i>
@@ -24,7 +24,7 @@
             <div class="position-relative">
               <div id="milestonesCarousel" class="overflow-hidden">
                 <div id="milestonesContainer" class="d-flex transition-all my-2" style="transform: translateX(0px); transition: transform 0.3s ease;">
-                  @foreach($company->milestones as $index => $milestone)
+                  @foreach($milestones as $index => $milestone)
                   <div class="milestone-card flex-shrink-0 pe-4" style="width: 33.333%;">
                     <div class="card h-100 border shadow-xs">
                       <div class="card-body d-flex flex-column">

@@ -92,7 +92,14 @@ class ClientCompanyController extends Controller
         $Investors = $team->where('TeamMember', 'Investor');
 
         // Load all milestones for this company (new unified structure)
-        $milestones = Milestone::where('company_id', $id)->public()->get();
+        if( $user?->company?->id == $id )
+        {
+            $milestones = Milestone::where('company_id', $id)->get();
+        }
+        else
+        {
+            $milestones = Milestone::where('company_id', $id)->public()->get();
+        }
 
         // For backward compatibility, create empty collections for old template variables
         $Achieved_Milestones = collect();
