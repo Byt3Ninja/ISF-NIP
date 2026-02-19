@@ -15,11 +15,12 @@
 
   <div class="col-md-7 mb-4">
     <div class="d-flex align-items-center gap-3 mb-3">
-      @if($org && $org->hero_image)
-        <div class="position-relative w-px-100 h-px-100">
-          <img src="/191014/{{ $org->hero_image }}" class="w-100 h-100 rounded border shadow-sm" alt="hero image">
-        </div>
-      @endif
+      <div class="position-relative w-px-100 h-px-100">
+        <img id="hero-preview-image"
+          src="{{ $org && $org->hero_image ? '/191014/' . $org->hero_image : '' }}"
+          class="w-100 h-100 rounded border shadow-sm {{ $org && $org->hero_image ? '' : 'd-none' }}"
+          alt="hero image">
+      </div>
       <label
         class="flex-grow-1 border border-dashed border-light bg-light-subtle rounded d-flex flex-column justify-content-center align-items-center text-center p-5 cursor-pointer">
         <div class="mb-2">
@@ -199,6 +200,14 @@
     }
 
     $('#fileName').text(fileName).show();
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      $('#hero-preview-image')
+        .attr('src', e.target.result)
+        .removeClass('d-none');
+    };
+    reader.readAsDataURL(this.files[0]);
   });
 </script>
 @endpush
