@@ -56,7 +56,7 @@
               <div class="col-md-6 col-lg-2">
                 <select class="form-select select2" name="program" data-placeholder="{{ __('admin.All_Programs') }}">
                   <option value=""></option>
-                  @foreach($finalScreeningSteps->pluck('program')->unique('id') as $program)
+                  @foreach($programs_in_final_screening->pluck('cycle')->unique('id') as $program)
                     <option value="{{ $program->id }}" {{ request('program') == $program->id ? 'selected' : '' }}>{{ Str::limit($program->title, 25) }}</option>
                   @endforeach
                 </select>
