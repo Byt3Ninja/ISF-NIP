@@ -2522,6 +2522,7 @@ return [
 	'settings_saved' => 'Settings Saved Successfully',
 	'Complete Profile' => 'Complete Profile',
 	'Complete Startup/Idea' => 'Complete Startup Profile',
+	'Complete Startup Profile to access all program features.' => 'Complete your Startup Profile to access all program features.',
 	'please_complete_startup_info' => 'Please complete your Startup Information before proceeding',
 	'Is_Required' => 'Is Required',
 	'Is_Required_Survey_Description' => 'If checked, the survey will be mandatory for users to complete.',
