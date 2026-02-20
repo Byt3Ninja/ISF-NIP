@@ -286,7 +286,7 @@
             <select class="form-select" id="modalStepSelect">
               <option value="" selected disabled>{{ __('cycles.Select Step') }}</option>
               <option value="0">{{ __('cycles.Disapprove') }}</option>
-              @foreach ($steps as $step)
+              @foreach ($steps->where('stype', '!=', '7') as $step)
                 <option value="{{ $step->id }}">{{ $step->title }}</option>
               @endforeach
             </select>
