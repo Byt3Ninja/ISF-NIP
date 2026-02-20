@@ -3411,7 +3411,7 @@ class ClientCompanyController extends Controller
             if($step?->stype != 5){
                 return response()->json([
                     'success' => false,
-                    'message' => 'The selected startups have not passed the final screening yet'
+                    'message' => __('startup.The selected startups have not passed the final screening yet')
                 ], 422);
             }
             $almuni = new Almuni();
