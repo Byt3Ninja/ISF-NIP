@@ -1,6 +1,7 @@
 @include('emails.layout.header')
 
 @php
+    $setting = \App\Settings::find(1);
     $org_name = $org_name ?? config('app.name', 'GrowthLabs');
     $org_logo_url = $org_logo_url ?? null;
     $org_address = $org_address ?? null;
@@ -56,9 +57,9 @@
                                                 <tr>
                                                     <td class="pad" style="padding-left:40px;padding-right:40px;width:100%;">
                                                         <div align="center" class="alignment" style="line-height:10px">
-                                                            @if(!empty($org_logo_url))
+                                                            @if(!empty($setting->Logo))
                                                                 <div style="max-width: 280px; padding: 20px 0;">
-                                                                    <img alt="{{ $org_name }}" height="auto" src="{{ $org_logo_url }}" style="display: block; height: auto; border: 0; max-height: 80px; width: auto; margin: 0 auto;" title="{{ $org_name }}"/>
+                                                                    <img alt="{{ $setting->Logo }}" height="auto" src="{{ asset('/images/logo/' . $setting->Logo) }}" style="display: block; height: auto; border: 0; max-height: 80px; width: auto; margin: 0 auto;" title="{{ $org_name }}"/>
                                                                 </div>
                                                             @endif
                                                         </div>

@@ -102,9 +102,25 @@ class ServiceController extends Controller
 			})->values();
 		});
 		// custom pagination
-		$services = new LengthAwarePaginator($services, $services->count(), 9, 1, [
-			'path' => LengthAwarePaginator::resolveCurrentPath(),
-		]);
+		// $services = new LengthAwarePaginator($services, $services->count(), 9, 1, [
+		// 	'path' => LengthAwarePaginator::resolveCurrentPath(),
+		// ]);
+		$page = request()->get('page', 1);
+		$perPage = 9;
+
+		$servicesCollection = collect($services); // لو مش collection
+		$total = $servicesCollection->count();
+
+		$services = new LengthAwarePaginator(
+			$servicesCollection->forPage($page, $perPage),
+			$total,
+			$perPage,
+			$page,
+			[
+				'path' => LengthAwarePaginator::resolveCurrentPath(),
+				'query' => request()->query(),
+			]
+		);
 		return view('admin/settings/services/index', compact('services', 'Setting'));
 	}
 	public function exportExcel(Request $request)

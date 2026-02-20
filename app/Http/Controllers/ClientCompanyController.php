@@ -247,13 +247,13 @@ class ClientCompanyController extends Controller
             }
         }
         $programs = $programs->values()->all();
-        $curentCycle = $company->cycledata?->mentorshipRequests?->where('user_id', $company->user->id)->sum('period');
+        $curentCycle = $company->cycledata?->mentorshipRequests?->where('user_id', $company?->user?->id)->sum('period');
         $totalMinutes = $mentorshipToSum->sum('duration') + $curentCycle;
         $hours   = intdiv($totalMinutes, 60);
         $minutes = $totalMinutes % 60;
         $totalMentorshipHours = sprintf('%02d:%02d', $hours, $minutes);
         // Training
-        $curentCycleTraining = $company->cycledata?->trainingSessions?->where('user_id', $company->user->id)->sum('duration') ?? 0;
+        $curentCycleTraining = $company->cycledata?->trainingSessions?->where('user_id', $company?->user?->id)->sum('duration') ?? 0;
         $totalMinutesTraining = (collect($trainingToSum)->sum('duration') ?? 0) + $curentCycleTraining;
         $hoursTraining   = intdiv($totalMinutesTraining, 60);
         $minutesTraining = $totalMinutesTraining % 60;
@@ -309,7 +309,7 @@ class ClientCompanyController extends Controller
         $currentMentorships = collect();
         if ($company->cycledata) {
             $currentMentorships = $company->cycledata->mentorshipRequests()
-                ->where('user_id', $company->user->id)
+                ->where('user_id', $company?->user?->id)
                 ->get();
         }
 
@@ -3404,7 +3404,7 @@ class ClientCompanyController extends Controller
         try {
             $user = Auth::user();
             $company = Company::findOrFail($id);
-            $company_relations = CompanyRelation::where('company_id', $id)->where('user_id', $company->user->id)->get();
+            $company_relations = CompanyRelation::where('company_id', $id)->where('user_id', $company?->user?->id)->get();
             $step = Step::where('cycle_id', $company->cycle)->where('stype', '5')->first();
             
             if($company->step != $step->id){
@@ -3414,7 +3414,7 @@ class ClientCompanyController extends Controller
                 ], 422);
             }
             $almuni = new Almuni();
-            $almuni->user_id = $company->user->id;
+            $almuni->user_id = $company?->user?->id;
             $almuni->cycle_id = $company->cycle;
             $almuni->company_id = $id;
             $almuni->alumni = '1';
@@ -3496,7 +3496,7 @@ class ClientCompanyController extends Controller
                         'Full_Name' => $leader->Name,
                         'Country' => $company->country->name_en ?? '',
                         'Email' => $leader->Email,
-                        'Phone_Number' => $company->user->phone,
+                        'Phone_Number' => $company?->user?->phone,
                     ];
                 }
                 
@@ -3756,7 +3756,7 @@ class ClientCompanyController extends Controller
                         'duration' => $training->duration,
                         'step' => $training->step->title,
                         'step_ID' => $training->step->id,
-                        'attendance' => $training->attendance->where('user_id', $company->user->id)->first() ? 'Attended' : 'Not Attended',
+                        'attendance' => $training->attendance->where('user_id', $company?->user?->id)->first() ? 'Attended' : 'Not Attended',
                     ];
                 }
 
@@ -3765,7 +3765,7 @@ class ClientCompanyController extends Controller
                 // $steps = Step::where('cycle_id', $company->cycledata->id)->get();
                 $startup_mentorship = MentorshipRequest::where('cycle_id', $company->cycledata->id)
                 ->where('approved', 'Yes')
-                ->where('user_id', $company->user->id)
+                ->where('user_id', $company?->user?->id)
                 ->get();
 
                 $mentorships = [];
@@ -3874,7 +3874,7 @@ class ClientCompanyController extends Controller
 
                 $almuni->surveys = json_encode($surveys);
 
-                $startup_services= ServicesRequests::where('user_id', $company->user->id)->get();
+                $startup_services= ServicesRequests::where('user_id', $company?->user?->id)->get();
                 $services = [];
 
                 foreach ($startup_services as $service) {
@@ -3924,7 +3924,7 @@ class ClientCompanyController extends Controller
                 ->leftJoin('cycles as CYC', 'CYC.id', '=', 'S.cycle_id')
                 ->leftJoin('organizations as O', 'O.id', '=', 'CYC.organization_id')
                 ->whereNull('FD.deleted_at')
-                ->where('FD.user_id', $company->user->id)
+                ->where('FD.user_id', $company?->user?->id)
                 ->when($company->cycledata->organization_id != null, function ($query) use ($company) {
                     return $query->where('CYC.organization_id', $company->cycledata->organization_id);
                 })
