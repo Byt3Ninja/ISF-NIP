@@ -3312,6 +3312,7 @@ return [
 	'one_item_required' => 'مطلوب عنصر واحد على الأقل',
 	'Mentor_Association' => 'المرشدين',
 	'Not_Associated' => 'غير مرتبط',
+	'Associated' => 'مرتبط',
 	'list_of_organizations' => 'قائمة المؤسسات',
 	'Tasks_List' => 'قائمة المهام',
 	'add_client' => 'أضف عميل',
