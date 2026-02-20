@@ -238,7 +238,8 @@
         start: slot.start_time,
         end: slot.end_time,
         sessionType: slot.session_type,
-        duration: moment(slot.end_time, 'HH:mm').diff(moment(slot.start_time, 'HH:mm'), 'minutes')
+        duration: moment(slot.end_time, 'HH:mm').diff(moment(slot.start_time, 'HH:mm'), 'minutes'),
+        startsFrom: slot.starts_from || null
     });
 
     // UI update functions
@@ -359,8 +360,9 @@
         onDayCreate: (dObj, dStr, fp, dayElem) => {
             const dateStr = moment(dayElem.dateObj).format('YYYY-MM-DD');
             const weekday = moment(dayElem.dateObj).format('dddd');
-            const hasSlots = (availabilityData.specific[dateStr]?.length > 0) || (availabilityData.weekly[weekday]?.length > 0);
-            if (hasSlots) {
+            const hasSpecific = availabilityData.specific[dateStr]?.length > 0;
+            const hasWeekly = availabilityData.weekly[weekday]?.some(slot => !slot.startsFrom || dateStr >= slot.startsFrom);
+            if (hasSpecific || hasWeekly) {
                 dayElem.classList.add('has-slots');
             }
         },
@@ -387,7 +389,7 @@
         // Add weekly recurring slots to main calendar
         for (const weekday in availabilityData.weekly) {
             availabilityData.weekly[weekday].forEach(slot => {
-                events.push({
+                const event = {
                     title: `${slot.start} - ${slot.end} (${slot.sessionType})`,
                     daysOfWeek: [moment().day(weekday).weekday()], // Convert weekday name to 0-6 index
                     startTime: slot.start,
@@ -398,7 +400,12 @@
                         id: slot.id
                     },
                     display: 'list-item'
-                });
+                };
+                // If slot has a startsFrom date, only show from that date
+                if (slot.startsFrom) {
+                    event.startRecur = slot.startsFrom;
+                }
+                events.push(event);
             });
         }
 
@@ -830,12 +837,25 @@
                 </div>`;
         };
         
-        const renderGroup = (title, slots, type, key, emptyMsg) => `
+        const renderGroup = (title, slots, type, key, emptyMsg) => {
+            // For weekly slots on a specific date, filter out those not yet active
+            let filteredSlots = slots;
+            if (type === 'weekly' && currentSelectedDate && slots?.length) {
+                filteredSlots = slots.filter(slot => {
+                    if (!slot.startsFrom) return true;
+                    return currentSelectedDate >= slot.startsFrom;
+                });
+            }
+            return `
             <div class="mb-3 mt-3"><strong>${title}</strong></div>
-            ${(slots?.length)
-                ? slots.map((slot, index) => renderSlotHTML(slot, type, key, index)).join('')
+            ${(filteredSlots?.length)
+                ? filteredSlots.map((slot, index) => {
+                    const originalIndex = slots.indexOf(slot);
+                    return renderSlotHTML(slot, type, key, originalIndex);
+                }).join('')
                 : `<p class="text-muted">${emptyMsg}</p>`
             }`;
+        };
 
         const specificSlotsHtml = renderGroup('{{ __('mentor.specific_date_slots') }}:', availabilityData.specific[currentSelectedDate], 'specific', currentSelectedDate, '{{ __('mentor.no_slots_added') }}');
         const weeklySlotsHtml = renderGroup(`{{ __('mentor.weekly_recurring_slots') }} ({{ __('mentor.every') }} ${currentWeekday === 'Sunday' ? '{{ __('mentor.sunday') }}' : currentWeekday === 'Monday' ? '{{ __('mentor.monday') }}' : currentWeekday === 'Tuesday' ? '{{ __('mentor.tuesday') }}' : currentWeekday === 'Wednesday' ? '{{ __('mentor.wednesday') }}' : currentWeekday === 'Thursday' ? '{{ __('mentor.thursday') }}' : currentWeekday === 'Friday' ? '{{ __('mentor.friday') }}' : '{{ __('mentor.saturday') }}'}):`, availabilityData.weekly[currentWeekday], 'weekly', currentWeekday, `{{ __('mentor.no_slots_added') }}`);
