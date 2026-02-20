@@ -163,6 +163,10 @@ class ServiceController extends Controller
 	 */
 	public function store(StoreServiceRequest $request)
 	{
+	
+	$request->merge([
+			'is_active' => $request->has('is_active') ? 1 : 0
+		]);
 		
 		$user = auth()->user();
 		$category = ServiceCategory::find( $request->service_category_id );
@@ -191,7 +195,7 @@ class ServiceController extends Controller
 			'hide_vendor_info' => $request->has('hide_vendor_info') ? 1 : 0
 		];
 
-		$inputs['status'] = 1;
+		$inputs['status'] = $request->is_active;
 		$inputs['name_ar'] = $inputs['name_en']; 
 		$inputs['description_ar'] = $inputs['description_en'];
 		
