@@ -4005,9 +4005,9 @@ class ClientCompanyController extends Controller
 
             $almuni->save();
 
-            $company->step = null;
-            $company->cycle = null;
-            $company->save();
+            //$company->step = null;
+            //$company->cycle = null;
+            //$company->save();
 
             // Check if AJAX request
             if ($request->ajax()) {
