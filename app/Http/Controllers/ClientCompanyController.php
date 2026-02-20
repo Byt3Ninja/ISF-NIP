@@ -3404,13 +3404,14 @@ class ClientCompanyController extends Controller
         try {
             $user = Auth::user();
             $company = Company::findOrFail($id);
+           
             $company_relations = CompanyRelation::where('company_id', $id)->where('user_id', $company?->user?->id)->get();
-            $step = Step::where('cycle_id', $company->cycle)->where('stype', '5')->first();
-            
-            if($company->step != $step->id){
+            $step = Step::where('id', $company->step)->where('stype', '5')->first();
+           
+            if($step == null || $step?->id != 5){
                 return response()->json([
                     'success' => false,
-                    'message' => __('startup.The selected startups have not passed the final screening yet')
+                    'message' => 'The selected startups have not passed the final screening yet'
                 ], 422);
             }
             $almuni = new Almuni();
@@ -4005,9 +4006,9 @@ class ClientCompanyController extends Controller
 
             $almuni->save();
 
-            //$company->step = null;
-            //$company->cycle = null;
-            //$company->save();
+            $company->step = null;
+            $company->cycle = null;
+            $company->save();
 
             // Check if AJAX request
             if ($request->ajax()) {
