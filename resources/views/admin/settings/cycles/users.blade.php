@@ -787,7 +787,7 @@
               error: function(xhr, status, error) {
                 var errorMessage = "{{ __('startup.mark_alumni_error') }}";
                 if (xhr.responseJSON && xhr.responseJSON.message) {
-                  errorMessage += " ({{ __('startup.error') }}: " + xhr.responseJSON.message + ")";
+                  errorMessage += ": " + xhr.responseJSON.message;
                 }
                 releaseFailureAlert({
                   title: "{{ __('admin.Error') }}",
