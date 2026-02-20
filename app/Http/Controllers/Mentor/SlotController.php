@@ -154,9 +154,20 @@ class SlotController extends Controller
 		$offline_allowed = $settings ? ($settings->allow_offline_sessions == 1 ? true : false) : false;
 		$mentorId = $id ?? auth()->id();
 
+		$isOwner = $mentorId == auth()->id();
+
 		$query = Schedule::where('user_id', $mentorId)
-						->where(function ($query) {$query
-								->whereNull('date')
+						->where(function ($query) use ($isOwner) {$query
+								->where(function ($weekly) use ($isOwner) {
+									$weekly->whereNull('date');
+									// dfrom filter: only hide not-yet-active Weekly slots for non-owners (booking view)
+									if (!$isOwner) {
+										$weekly->where(function ($q) {
+											$q->whereNull('dfrom')
+											  ->orWhere('dfrom', '<=', date('Y-m-d'));
+										});
+									}
+								})
 								->orWhere('date', '>', date('Y-m-d'))
 								->orWhere(function ($q) {
 									$q->where('date', date('Y-m-d'))
@@ -221,6 +232,7 @@ class SlotController extends Controller
 						'session_type' => $item->session_type,
 						'weekly'       => true,
 						'location'     => $location ?? null,
+						'starts_from'  => $item->dfrom ? $item->dfrom->format('Y-m-d') : null,
 					]);
 				}
 			} else {
@@ -312,40 +324,95 @@ class SlotController extends Controller
 					}
 				}
 				
-				if($validated['tfrom'] <= date('H:i:s')){
+				if($validated['type'] == 'Period' && $validated['date'].' '.$validated['tfrom'] <= date('Y-m-d H:i')){
 					return response()->json([
 							'success' => false,
 							'message' => __('mentor.this_time_before_now'),
 					], 422);
 				}
-				// Build base search query
+				$dayName = $validated['type'] !== 'Weekly'
+					? Carbon::parse($validated['date'])->format('l')
+					: ($this->weekdayMap[$validated['days']] ?? $validated['days']);
+
+				// Build base search query with proper overlap detection
 				$query = Schedule::where('user_id', auth()->id())
 						->where('type', $validated['type'])
-						->where('tfrom', $validated['tfrom'])
-						//->where('tto', $validated['tto'])
+						->where('tfrom', '<=', $validated['tto'].':00')
+						->where('tto', '>=', $validated['tfrom'].':00')
 						->where('session_type', $sessionType);
 
 				// Add type-specific conditions
 				if ($validated['type'] === 'Weekly') {
-						$query->where('days', $validated['days']);
+						$query->where('days', $dayName);
 				} else {
 						$query->where('date', $validated['date']);
 				}
 
 				// Check if duplicate exists
 				$getschedule = $query->orderBy('created_at', 'desc')->first();
-		
+// dd($getschedule);
 				if ($getschedule != null) {
-					if ($getschedule->tfrom == $validated['tfrom'].':00' && $validated['tto'] >= $getschedule->tto) {
+					// If existing slot hasn't started yet (dfrom in future), replace it
+					if ($getschedule->dfrom && $getschedule->dfrom > now()) {
+						// dd($getschedule->dfrom, now());
+						return response()->json([
+								'success' => false,
+								'message' => __('mentor.slot_already_exists'),
+						], 422);
+						// $getschedule->delete();
+					} elseif ($getschedule->tfrom == $validated['tfrom'].':00' && $validated['tto'] >= $getschedule->tto) {
+						// dd($getschedule->tfrom, $validated['tfrom'].':00', $validated['tto'], $getschedule->tto);
 						$getschedule->delete();
-					}else{
+					} else {
 						return response()->json([
 								'success' => false,
 								'message' => __('mentor.slot_already_exists'),
 						], 422);
 					}
 				}
-				$dayName = Carbon::parse($validated['date'])->format('l');
+
+				// Cross-type check: Weekly blocks Period
+				if ($validated['type'] === 'Period') {
+					$weeklySlots = Schedule::where('user_id', auth()->id())
+						->where('type', 'Weekly')
+						->where('session_type', $sessionType)
+						->where('tfrom', '<', $validated['tto'].':00')
+						->where('tto', '>', $validated['tfrom'].':00')
+						->get();
+
+					foreach ($weeklySlots as $weekly) {
+						$weekdays = $this->cleanWeekday($weekly->days);
+						if (in_array($dayName, $weekdays)) {
+							return response()->json([
+								'success' => false,
+								'message' => __('mentor.slot_already_exists'),
+							], 422);
+						}
+					}
+				}
+
+				// Cross-type check: Period exists → Weekly starts after it
+				$dfrom = null;
+				if ($validated['type'] === 'Weekly') {
+					$conflictingPeriods = Schedule::where('user_id', auth()->id())
+						->where('type', 'Period')
+						->where('session_type', $sessionType)
+						->where('tfrom', '<', $validated['tto'].':00')
+						->where('tto', '>', $validated['tfrom'].':00')
+						->orderBy('date', 'desc')
+						->get();
+
+					foreach ($conflictingPeriods as $period) {
+						$periodDay = $this->cleanWeekday($period->days);
+						if (in_array($dayName, $periodDay)) {
+							$dfrom = Carbon::parse($period->date)
+								->addDay()
+								->toDateString();
+							break;
+						}
+					}
+				}
+
 				// Create slot
 				$slotData = [
 					'user_id' => auth()->id(),
@@ -353,8 +420,9 @@ class SlotController extends Controller
 					'session_type' => $sessionType,
 					'tfrom' => $validated['tfrom'],
 					'tto' => $validated['tto'],
-					'days' => $validated['type'] === 'Weekly' ? $validated['days'] : $dayName,
+					'days' => $dayName,
 					'date' => $validated['type'] !== 'Weekly' ? $validated['date'] : null,
+					'dfrom' => $dfrom,
 				];
 
 				$schedules[] = Schedule::create($slotData);
@@ -373,6 +441,7 @@ class SlotController extends Controller
 						'end_time' => substr($schedule->tto, 0, 5),
 						'session_type' => $schedule->session_type,
 						'weekly' => $schedule->type === 'Weekly',
+						'starts_from' => $schedule->dfrom ? $schedule->dfrom->format('Y-m-d') : null,
 					];
 				})
 			], 200);
