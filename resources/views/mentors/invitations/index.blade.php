@@ -251,8 +251,8 @@ $tabs = [
               <label for="invitationScope" class="form-label">@lang('admin.invitation_scope') <span class="text-danger">*</span></label>
               <select class="form-select" id="invitationScope" name="invitation_scope" required>
                 <option value="">@lang('admin.select_scope')</option>
-                <option value="Public">@lang('admin.public')</option>
-                <option value="Organization">@lang('admin.organization')</option>
+                <option value="Public">@lang('admin.Not_Associated') (@lang('admin.Public'))</option>
+                <option value="Organization">@lang('admin.Associated') (@lang('admin.organization'))</option>
               </select>
               <div class="invalid-feedback" id="invitationScopeError"></div>
             </div>

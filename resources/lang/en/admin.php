@@ -3256,6 +3256,7 @@ return [
 	'one_item_required' => 'At least one item is required.',
 	'Mentor_Association' => 'Mentor Association',
 	'Not_Associated' => 'Not Associated',
+	'Associated' => 'Associated',
 	'list_of_organizations' => 'List of Organizations',
 	'Tasks_List' => 'Tasks List',
 	'add_client' => 'Add Client',
