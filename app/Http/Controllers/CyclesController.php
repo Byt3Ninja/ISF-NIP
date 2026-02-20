@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Almuni;
 use App\Form;
 use App\Step;
 use App\User;
@@ -212,6 +213,10 @@ class CyclesController extends Controller
                 return $q->whereIn('organization_id', $orgIds);
             })->get();
         }
+        $alumniCompanyIds = Almuni::where('cycle_id', $id)
+        ->pluck('company_id');
+        
+
         $companies = Company::where('cycle', $id);
         $uniqueCycleIds = $companies->pluck('cycle')->unique();
         $steps = Step::whereIn('cycle_id', $uniqueCycleIds)->orderBy('arr')->get();
@@ -240,9 +245,17 @@ class CyclesController extends Controller
         if ($request->BType != 0) {
             $companies = $companies->where('business_type', $request->BType);
         }
-
-
         $companies = $companies->get();
+        $alumniCompanies = Company::whereIn('id', $alumniCompanyIds)->get();
+
+        $companies = $companies->merge($alumniCompanies);
+
+        $companies = $companies->map(function ($company) use ($alumniCompanyIds) {
+            $company->isAlumni = $alumniCompanyIds->contains($company->id);
+            return $company;
+        });
+
+        
         return view('admin.settings.cycles.users', compact('cycles', 'id', 'companies', 'steps'));
     }
 
