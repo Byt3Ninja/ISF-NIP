@@ -240,6 +240,7 @@
                     <td>
                       <div class="d-flex flex-nowrap align-items-center gap-2">
                         <!-- Change Step Button -->
+                        @if(!$company->isAlumni)
                         <button type="button" class="btn btn-sm btn-light text-nowrap change-step-single"
                           data-company-id="{{ $company->id }}"
                           data-company-name="{{ $company->{'name_' . $l} }}"
@@ -248,7 +249,7 @@
                           data-current-step-title="{{ \App\Step::where('cycle_id', $company->cycle)->orderBy('arr')->where('stype', '!=', '7')->get()->where('id', $company->step)->pluck('title')->implode(', ') }}">
                           <i class="ti ti-pencil ti-16px me-1"></i> {{ __('cycles.change_step') }}
                         </button>
-
+                        @endif
                         <!-- Mark Alumni Button -->
                         @php
                          $goAlumni = \App\Step::where('id', $company->step)->where('stype', '5')->first();   
