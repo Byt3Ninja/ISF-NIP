@@ -3406,9 +3406,9 @@ class ClientCompanyController extends Controller
             $company = Company::findOrFail($id);
            
             $company_relations = CompanyRelation::where('company_id', $id)->where('user_id', $company?->user?->id)->get();
-            $step = Step::where('id', $company->step)->where('stype', '5')->first();
+            $step = Step::where('id', $company->step)->first();
            
-            if($step == null || $step?->id != 5){
+            if($step?->stype != 5){
                 return response()->json([
                     'success' => false,
                     'message' => 'The selected startups have not passed the final screening yet'
