@@ -250,15 +250,13 @@
                         </button>
 
                         <!-- Mark Alumni Button -->
-                        @php
-                          $isAlumni = \App\Almuni::where('company_id', $company->id)->exists();
-                        @endphp
-                        <button type="button" class="btn btn-sm {{ $isAlumni ? 'btn-secondary' : 'btn-primary' }} text-nowrap mark-alumni-btn"
+                        
+                        <button type="button" class="btn btn-sm {{ $company->isAlumni ? 'btn-secondary' : 'btn-primary' }} text-nowrap mark-alumni-btn"
                           data-company-id="{{ $company->id }}"
                           data-company-name="{{ $company->{'name_' . $l} }}"
-                          {{ $isAlumni ? 'disabled' : '' }}>
+                          {{ $company->isAlumni ? 'disabled' : '' }}>
                           <i class="ti ti-pennant ti-16px me-1"></i>
-                          <span>{{ $isAlumni ? __('startup.already_alumni') : __('startup.mark_alumni') }}</span>
+                          <span>{{ $company->isAlumni ? __('startup.already_alumni') : __('startup.mark_alumni') }}</span>
                         </button>
                       </div>
                     </td>
