@@ -45,7 +45,7 @@ class ServiceController extends Controller
 				$query->where('status', true);
 			})
 			->when(!$user->hasRole('serviceProvider'), function ($query) use ($orgIds, $user) {
-				if( $user->hasRole('registered') )
+				if( $user->hasRole('registered') || $user->hasAnyRole(['subadmin', 'organizationManager']) )
 				{
 					$query->whereHas('organizations', function ($q) use ($orgIds) {
 						$q->whereIn('organizations.id', $orgIds);
@@ -121,7 +121,8 @@ class ServiceController extends Controller
 				'query' => request()->query(),
 			]
 		);
-		return view('admin/settings/services/index', compact('services', 'Setting'));
+		$organizations = $services->pluck('organizations')->flatten()->unique('id')->whereIn('id', $orgIds)->values();
+		return view('admin/settings/services/index', compact('services', 'Setting', 'organizations'));
 	}
 	public function exportExcel(Request $request)
     {	
