@@ -1094,11 +1094,10 @@ class HomeController extends Controller
                 if (!is_array($judges)) {
                     $judges = [];
                 }
-                if (count($judges) > 0) {
+                if (count($judges) > 0)
+                {
                     $placeholders = implode(',', array_fill(0, count($judges), '?'));
-                
-                        
-                    
+
                     $judgers_q = "SELECT
                             u.id,
                             u.first_name_en,
@@ -1108,10 +1107,10 @@ class HomeController extends Controller
                             u.img_url
                         FROM
                             users u
-                        WHERE u.id IN ( . $placeholders . )
+                        WHERE u.id IN ( $placeholders )
                     ";
 
-                    $judgers = collect(DB::select($judgers_q))->map(function ($item) use ($l) {
+                    $judgers = collect(DB::select($judgers_q, $judges))->map(function ($item) use ($l) {
                         $judger = new stdClass;
                         $judger->id = $item->id;
                         $judger->name = trim($item->{'first_name_' . $l} . ' ' . $item->{'last_name_' . $l});
