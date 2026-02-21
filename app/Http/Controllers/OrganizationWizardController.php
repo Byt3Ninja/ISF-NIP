@@ -289,8 +289,8 @@ class OrganizationWizardController extends Controller
 
         // Minimal validation for draft
         $rules = [
-            // Step 1 fields
-            'name_en' => 'required|string|max:255',
+            // Step 1 fields - name_en is only required when creating a new draft
+            'name_en' => ($id ? 'nullable' : 'required') . '|string|max:255',
             'name_ar' => 'nullable|string|max:255',
             'organization_type_id' => 'nullable|exists:organization_types,id',
             'status' => 'nullable|boolean',
