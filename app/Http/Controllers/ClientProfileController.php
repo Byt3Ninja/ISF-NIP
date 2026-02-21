@@ -265,7 +265,7 @@ class ClientProfileController extends Controller
                     $verificationUrl = route('user.profile_email_confirm', ['token' => encrypt($user->new_email)]);
 
                     Notification::route('mail', $user->new_email)
-                        ->notify(new ConfirmEmailUpdateNotification($verificationUrl));
+                        ->notify(new ConfirmEmailUpdateNotification($verificationUrl, $user));
                     return redirect()->route('user.profile_view')->with(['msg' => 'UpdateEmailSent', 'class' => 'success']);
                 }
 
@@ -293,7 +293,7 @@ class ClientProfileController extends Controller
                     $verificationUrl = route('user.profile_email_confirm', ['token' => encrypt($user->new_email)]);
 
                     Notification::route('mail', $user->new_email)
-                        ->notify(new ConfirmEmailUpdateNotification($verificationUrl));
+                        ->notify(new ConfirmEmailUpdateNotification($verificationUrl, $user));
                     return redirect()->route('user.profile_view')->with(['msg' => 'UpdateEmailSent', 'class' => 'success']);
                 }
             }
