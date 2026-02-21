@@ -42,7 +42,7 @@
       <div class="tab-pane fade show active" id="existing-manager-content">
         <div class="input-group input-group-lg mb-6">
           <span class="input-group-text bg-white"><i class="ti ti-search text-muted"></i></span>
-          <input type="text" class="form-control border-start-0" id="managerSearchInput" placeholder="{{ __('admin.Search by name, email, or role') }}...">
+          <input type="text" class="form-control border-start-0" id="managerSearchInput" autocomplete="off" placeholder="{{ __('admin.Search by name, email, or role') }}...">
         </div>
     
         <div id="managersList" class="list-group">
