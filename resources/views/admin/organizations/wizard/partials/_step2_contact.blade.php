@@ -310,12 +310,12 @@
 @push('scripts')
 <script>
   $(function () {
-    let iti = null;
+    window.contactPhoneIti = null;
 
     // Initialize intl-tel-input for phone number input
     function initPhoneInput() {
       const $phoneInput = $('#contact_phone');
-      if (!$phoneInput.length || iti) return;
+      if (!$phoneInput.length || window.contactPhoneIti) return;
 
       const dialCodeMap = {
         '20': 'eg', '971': 'ae', '966': 'sa', '212': 'ma', '213': 'dz',
@@ -330,7 +330,7 @@
         initialCountry = dialCodeMap[savedDialCode] || 'eg';
       @endif
 
-      iti = intlTelInput($phoneInput[0], {
+      window.contactPhoneIti = intlTelInput($phoneInput[0], {
         initialCountry,
         preferredCountries: ['eg', 'ae', 'sa', 'ma', 'dz', 'tn'],
         utilsScript: 'https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js',
@@ -339,11 +339,11 @@
       });
 
       $phoneInput.on('countrychange', function() {
-        $('#country_code').val(iti.getSelectedCountryData().dialCode);
+        $('#country_code').val(window.contactPhoneIti.getSelectedCountryData().dialCode);
       });
 
       setTimeout(() => {
-        const countryData = iti.getSelectedCountryData();
+        const countryData = window.contactPhoneIti.getSelectedCountryData();
         if (countryData.dialCode && !$('#country_code').val()) {
           $('#country_code').val(countryData.dialCode);
         }
