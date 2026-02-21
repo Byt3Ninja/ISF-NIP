@@ -26,7 +26,7 @@ class StoreServiceRequest extends FormRequest
         $rules = [
             'name_en' => 'required',
             'description_en' => 'required',
-            'price' => 'required|numeric|min:0',
+            'price' => 'nullable|numeric|min:0|max:9999999.99|regex:/^\d{1,7}(\.\d{1,2})?$/',
             'service_category_id' => 'required|exists:service_categories,id',
             'vendor_name' => 'nullable|string|max:50',
             'vendor_email' => 'nullable|string|max:50|unique:services,vendor_email,except,id',
