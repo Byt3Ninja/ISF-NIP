@@ -21,7 +21,7 @@ class OrganizationStep2Request extends FormRequest
     {
         return [
             // Contact Information
-            'contact_email' => 'required|email|max:255',
+            'contact_email' => 'required|email|max:255|regex:/^[a-zA-Z0-9._%+\-@]+$/',
             'country_code' => 'required_with:contact_phone|nullable|string|max:10',
             'contact_phone' => 'nullable|string|max:20|regex:/^[0-9\s\-\+\(\)]+$/',
             'country_id' => 'required|exists:countries,id',
