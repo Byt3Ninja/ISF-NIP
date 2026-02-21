@@ -372,7 +372,7 @@
                           <div class="card-header bg-transparent border-0 pb-2">
                             <div class="d-flex align-items-center justify-content-between">
                               <div class="d-flex align-items-center">
-                                <a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none">
+                                @if( $_user->ableTo('company.profile_view', $permissions) ) <a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none"> @endif
                                   <div class="company-avatar me-3">
                                     <img
                                       src="{{ $company->logo_url }}"
@@ -382,11 +382,11 @@
                                       width="50"
                                     />
                                   </div>
-                                </a>
+                                @if( $_user->ableTo('company.profile_view', $permissions) ) </a> @endif
                                 <div>
-                                  <a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none">
+                                  @if( $_user->ableTo('company.profile_view', $permissions) ) <a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none"> @endif
                                     <h6 class="mb-1 fw-bold text-dark">{{ Str::limit($company->name, 20) }}</h6>
-                                  </a>
+                                  @if( $_user->ableTo('company.profile_view', $permissions) ) </a> @endif
                                   <small class="text-muted line-clamp-1">
                                     @php
                                       $categories = is_string($company->business_categories) ? json_decode($company->business_categories, true) : $company->business_categories;
@@ -430,7 +430,7 @@
                             <!-- User Information -->
                             <div class="user-info bg-label-light border rounded-3 p-2 mb-4">
                               <div class="d-flex align-items-center">
-                                <a href="/dashboard/users/{{ $company->user->id }}/edit" class="text-decoration-none">
+                                @if( $_user->ableTo('users.edit', $permissions) ) <a href="/dashboard/users/{{ $company->user->id }}/edit" class="text-decoration-none"> @endif
                                   <img
                                     src="{{ $company->user->image_url ?? '/icons/account.svg' }}"
                                     alt="img"
@@ -438,12 +438,12 @@
                                     height="40"
                                     width="40"
                                   />
-                                </a>
+                                @if( $_user->ableTo('users.edit', $permissions) ) </a> @endif
                                 <div class="flex-grow-1">
-                                  <a href="/dashboard/users/{{ $company->user->id }}/edit" class="text-decoration-none">
+                                  @if( $_user->ableTo('users.edit', $permissions) ) <a href="/dashboard/users/{{ $company->user->id }}/edit" class="text-decoration-none"> @endif
                                     <h6 class="mb-0 fw-semibold text-dark">{{ $company->user->name }}</h6>
                                     <small class="text-muted">{{ $company->user->title ?: __('cycles.No title') }}</small>
-                                  </a>
+                                  @if( $_user->ableTo('users.edit', $permissions) ) </a> @endif
                                 </div>
                               </div>
                             </div>
