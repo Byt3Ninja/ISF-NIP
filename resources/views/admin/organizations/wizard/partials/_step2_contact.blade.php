@@ -198,6 +198,7 @@
             value="{{ old('linkedin_company_url', $org->linkedin_company_url ?? '') }}"
             placeholder="https://linkedin.com/organization/..."
             maxlength="255"
+            autocomplete="off"
           />
           <span class="input-group-text text-muted"><i class="ti ti-brand-linkedin"></i></span>
         </div>
@@ -218,6 +219,7 @@
             value="{{ old('twitter_handle', $org->twitter_handle ?? '') }}"
             placeholder="https://x.com/..."
             maxlength="255"
+            autocomplete="off"
           />
           <span class="input-group-text text-muted"><i class="ti ti-brand-x"></i></span>
         </div>
@@ -238,6 +240,7 @@
             value="{{ old('facebook_page_url', $org->facebook_page_url ?? '') }}"
             placeholder="https://facebook.com/..."
             maxlength="255"
+            autocomplete="off"
           />
           <span class="input-group-text text-muted"><i class="ti ti-brand-facebook"></i></span>
         </div>
@@ -258,6 +261,7 @@
             value="{{ old('instagram_profile_url', $org->instagram_profile_url ?? '') }}"
             placeholder="https://instagram.com/..."
             maxlength="255"
+            autocomplete="off"
           />
           <span class="input-group-text text-muted"><i class="ti ti-brand-instagram"></i></span>
         </div>
@@ -278,6 +282,7 @@
             value="{{ old('youtube_channel_url', $org->youtube_channel_url ?? '') }}"
             placeholder="https://youtube.com/..."
             maxlength="255"
+            autocomplete="off"
           />
           <span class="input-group-text text-muted"><i class="ti ti-brand-youtube"></i></span>
         </div>
@@ -298,6 +303,7 @@
             value="{{ old('tiktok_url', $org->tiktok_url ?? '') }}"
             placeholder="https://tiktok.com/..."
             maxlength="255"
+            autocomplete="off"
           />
           <span class="input-group-text text-muted"><i class="ti ti-brand-tiktok"></i></span>
         </div>
