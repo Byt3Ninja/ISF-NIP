@@ -1208,7 +1208,9 @@ class SettingsController extends Controller
 				}
 				return [
 					'id'       => $industry->id,
-					'industry' => $industry->{'name_'.$l} ?? 'N/A',
+					'industry' => $industry->{'name_'.$l} ?? $industry->name_en ?? 'N/A',
+					'name_en'  => $industry->name_en,
+					'name_ar'  => $industry->name_ar,
 					'created_at' => $industry->created_at,
 					'sectors'  => $sectorsList,
 				];

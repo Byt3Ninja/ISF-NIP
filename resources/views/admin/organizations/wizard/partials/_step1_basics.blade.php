@@ -160,7 +160,7 @@
           value="{{ $industry->id }}"
           {{ in_array($industry->id, $selectedIndustries) ? 'selected' : '' }}
         >
-          {{ app()->getLocale() == 'ar' ? $industry->name_ar : $industry->name_en }}
+          {{ app()->getLocale() == 'ar' ? ($industry->name_ar ?? $industry->name_en ) : $industry->name_en }}
         </option>
       @endforeach
     </select>
