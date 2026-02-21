@@ -44,12 +44,10 @@ return function () {
     ];
   }
 
-  if ($user && $user->hasRole('Registered')) {
-    if($user->HaveCompany == 1){
-      $show = true;
-    }else{
-      $show = false;
-    }
+  if( $user && $user->hasRole('Registered') )
+  {
+    // $show = $user->HaveCompany == 1 ? true : false;
+    $show = true;
     
     $menuReg = [
       'dashboard' => [
