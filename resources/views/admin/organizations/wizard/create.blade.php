@@ -326,6 +326,10 @@
             contact_email: {
               validators: {
                 notEmpty: { message: '{{ __("admin.Please enter the email address") }}' },
+                regexp: {
+                  regexp: /^[a-zA-Z0-9._%+\-@]+$/,
+                  message: '{{ __("admin.Please enter a valid email address") }}'
+                },
                 emailAddress: { message: '{{ __("admin.Please enter a valid email address") }}' }
               }
             },

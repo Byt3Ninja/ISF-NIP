@@ -299,7 +299,7 @@ class OrganizationWizardController extends Controller
             'industries.*' => 'exists:static_categories,id',
             'img_url' => 'nullable|image|mimes:png,jpg,jpeg|max:5120',
             // Step 2 fields (Contact Information)
-            'contact_email' => 'nullable|email|max:255',
+            'contact_email' => 'nullable|email|max:255|regex:/^[a-zA-Z0-9._%+\-@]+$/',
             'country_code' => 'nullable|string|max:10',
             'contact_phone' => 'nullable|string|max:20',
             'country_id' => 'nullable|exists:countries,id',
