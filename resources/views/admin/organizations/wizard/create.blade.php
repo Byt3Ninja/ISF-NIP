@@ -333,6 +333,17 @@
                 emailAddress: { message: '{{ __("admin.Please enter a valid email address") }}' }
               }
             },
+            contact_phone: {
+              validators: {
+                callback: {
+                  message: '{{ __("auth.Invalid_Phone_Number") }}',
+                  callback: function(input) {
+                    if (!input.value.trim()) return true;
+                    return window.contactPhoneIti && window.contactPhoneIti.isValidNumber();
+                  }
+                }
+              }
+            },
             country_id: {
               validators: {
                 notEmpty: { message: '{{ __("admin.Please select the country") }}' }
