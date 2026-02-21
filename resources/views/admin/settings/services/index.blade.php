@@ -75,7 +75,7 @@
                 <div class="col-md-6 col-lg-2">
                   <select class="form-select select2" name="org-id" id="organization-filter" data-placeholder="{{ __('admin.All_Organizations') }}">
                     <option value="all">{{ __('admin.All_Organizations') }}</option>
-                    @foreach($services->pluck('organizations')->flatten()->unique('id') as $org)
+                    @foreach($organizations as $org)
                       <option value="{{ $org->id }}" {{ request('org-id') == $org->id ? 'selected' : '' }}>{{ $org->{'name_' . $l} }}</option>
                     @endforeach
                   </select>
