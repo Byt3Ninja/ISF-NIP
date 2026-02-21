@@ -24,10 +24,11 @@ class UpdateServiceRequest extends FormRequest
      */
     public function rules()
     {
-       
+      
         $rules = [
             'name_en' => 'required',
             'description_en' => 'required',
+            'price' => 'nullable|numeric|min:0|max:9999999.99|regex:/^\d{1,7}(\.\d{1,2})?$/',
             'status' => 'nullable|boolean',
             'service_category_id' => 'required|exists:service_categories,id',
             'vendor_name' => 'nullable|string|max:50',
