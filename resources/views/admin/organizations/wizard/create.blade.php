@@ -65,7 +65,7 @@
                 >
                   <span class="bs-stepper-circle">{{ $tab['step'] }}</span>
                   <span class="bs-stepper-label">
-                    <span class="bs-stepper-title">{{ __('admin.' . $tab['title']) }}</span>
+                    <span class="bs-stepper-title">{{ $tab['title'] }}</span>
                     <span class="bs-stepper-subtitle">{{ __('admin.Add') }} {{ $tab['title'] }}</span>
                   </span>
                 </button>
