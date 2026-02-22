@@ -537,5 +537,16 @@ return [
   'Total customers is required and must be greater than 0' => 'عدد العملاء الكلي مطلوب ويجب أن يكون أكبر من 0',
   'New customers is required and must be 0 or greater' => 'عدد العملاء في هذه الفترة مطلوب ويجب أن يكون 0 أو أكبر',
   'The selected startups have not passed the final screening yet' => 'الشركة الناشئة لم تجتز التقييم النهائي.',
+  'no_shareholders' => 'لا يوجد مساهمون',
+  'no_investors' => 'لا يوجد مستثمرون',
+  'no_employees' => 'لا يوجد موظفين',
+  'no_founders' => 'لا يوجد مؤسسين',
+  'no_leader' => 'لا يوجد قائد',
+  'no_sdg' => 'لا يوجد أهداف استدامة',
+  'no_tasks' => 'لا توجد مهام',
+  'no_surveys' => 'لا توجد استبيانات',
+  'no_quizzes' => 'لا توجد اختبارات',
+  'no_services' => 'لا توجد خدمات',
+  'no_forms' => 'لا توجد نماذج',
   
 ];

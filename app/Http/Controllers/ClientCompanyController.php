@@ -2867,6 +2867,8 @@ class ClientCompanyController extends Controller
         $basicInfo   = $this->decodeAlumniJson($almuni?->basic_startup_information);
         $programInfo = $this->decodeAlumniJson($almuni?->program);
         $leaderInfo  = $this->decodeAlumniJson($almuni?->startup_leader_information);
+        $legal_information = $this->decodeAlumniJson($almuni?->legal_information);
+        $pitch_deck  = $this->decodeAlumniJson($almuni?->pitch_deck);
         $founders    = $this->decodeAlumniJson($almuni?->founders);
         $employees   = $this->decodeAlumniJson($almuni?->employees);
         $shareholders= $this->decodeAlumniJson($almuni?->shareholders);
@@ -2884,7 +2886,8 @@ class ClientCompanyController extends Controller
         $technologies = $this->decodeAlumniJson($basicInfo['Technologies']);
         $sectors     = $this->decodeAlumniJson($basicInfo['Sectors']);
         $industries  = $this->decodeAlumniJson($basicInfo['Industries']);
-
+        
+        
         $startup = [
             'name'           => $basicInfo['Startup_Name'] ?? null,
             'logo'           => $basicInfo['Logo'] ?? null,
@@ -2894,9 +2897,9 @@ class ClientCompanyController extends Controller
             'location'       => ($basicInfo['Country'] ?? '') . ' · ' . ($basicInfo['Location'] ?? ''),
             'established_at' => $almuni->established_date,
             'business_type'  => $basicInfo['Business_Type'] ?? null,
-            'development_stage' => __('admin.' . $basicInfo['development_stage']) ?? null,
+            'development_stage' => $basicInfo['development_stage'] ?? null,
             'funding_stage'  => $basicInfo['funding_stage'] ?? null,
-            'industry'       => __('admin.categories.' . $industries['name']) ?? null,
+            'industry'       =>  $industries['name'] ?? null,
             'sector'         => $sectors['name'] ?? null,
             'team_size'      => $basicInfo['team_size'] ?? null,
             'technologies'   => $technologies['name'] ?? null,
@@ -2920,11 +2923,11 @@ class ClientCompanyController extends Controller
             ],
         ];
         $leader = collect($leaderInfo)->first();
-
+       
         $leaderData = [
             'id'      => 'LD-' . ($leader['ID'] ?? ''),
             'name'    => $leader['Full_Name'] ?? null,
-            'country' => $leader['Country'], // لو مش موجودة في الداتا
+            'country' => $leader['Country'] ?? null, // لو مش موجودة في الداتا
             'email'   => $leader['Email'] ?? null,
             'phone'   => $leader['Phone_Number'] ?? null,
         ];
@@ -3002,7 +3005,7 @@ class ClientCompanyController extends Controller
                 'comments' => $mentorship['comments'] ?? null,
             ];
         })->values()->toArray();
-
+    
         $milestones = collect($milestones)->map(function ($milestone) {
             $download = $milestone['download'] ?? null;
 
@@ -3104,7 +3107,16 @@ class ClientCompanyController extends Controller
                 })
                 ->values()
                 ->toArray();
-
+            
+                $pitch_deck = collect($pitch_deck)->map(function ($deck) {
+                    return [
+                        'pitch_deck' => $deck['pitch_deck'] ?? null,
+                        'pitch_deck_video' => $deck['pitch_deck_video'] ?? null,
+                        'description' => $deck['pitch_deck_description'] ?? null,
+                        'summary' => $deck['pitch_deck_summary'] ?? null,
+                    ];
+                })->values()->toArray();
+    
 
         return view('admin.clients.startup.company_alumni', compact('startup', 
         'teamData', 
@@ -3115,7 +3127,9 @@ class ClientCompanyController extends Controller
         'quizzes', 
         'surveys', 
         'services', 
-        'forms'));
+        'forms',
+        'legal_information',
+        'pitch_deck'));
     }
 
     function decodeAlumniJson($value)
@@ -3428,13 +3442,21 @@ class ClientCompanyController extends Controller
                 $industry['id'] = $indusry_id->industry_id;
                 $industry['name'] = $indusry_id->industry->name_en;
             }
+            if(empty($industry)){
+                $industry['id'] = null;
+                $industry['name'] = null;
+            }
             $jIndustry = json_encode($industry);
-         
+            
             $sector_ids = $company_relations->where('sector_id', '!=', null);
             $sectors = [];
             foreach($sector_ids as $sector_id) {
                 $sectors['id'] = $sector_id->sector_id;
                 $sectors['name'] = $sector_id->sector->name_en;
+            }
+            if(empty($sectors)){
+                $sectors['id'] = null;
+                $sectors['name'] = null;
             }
             $jSectors = json_encode($sectors);
             $technology_ids = $company_relations->where('technology_id', '!=', null);
@@ -3442,6 +3464,10 @@ class ClientCompanyController extends Controller
             foreach($technology_ids as $technology_id) {
                 $technologies['id'] = $technology_id->technology_id;
                 $technologies['name'] = $technology_id->technology->name;
+            }
+            if(empty($technologies)){
+                $technologies['id'] = null;
+                $technologies['name'] = null;
             }
             $jTechnologies = json_encode($technologies);
             
@@ -3517,7 +3543,16 @@ class ClientCompanyController extends Controller
                         // 'LinkedIn_Profile' => $founder->LinkedIn
                     ];
                 }
-
+                if(empty($founders)){
+                    $founders[] = [
+                        'ID' => null,
+                        'Full_Name' => null,
+                        // 'Country' => null,
+                        'Email' => null,
+                        // 'Phone_Number' => null,
+                        // 'LinkedIn_Profile' => null
+                    ];
+                }
                 $almuni->founders = json_encode($founders);
                 
                 $getemployees = $team_leaders->where('TeamMember', 'Employee')->values();
@@ -3537,7 +3572,19 @@ class ClientCompanyController extends Controller
 
                     ];
                 }
-
+                if(empty($employees)){
+                    $employees[] = [
+                        'ID' => null,
+                        'Full_Name' => null,
+                        // 'Country' => null,
+                        'Email' => null,
+                        // 'Phone_Number' => null,
+                        'Job_Title' => null,
+                        'Gender' => null,
+                        'Employment_Type' => null,
+                        'Start Date' => null
+                    ];
+                }
                 $almuni->employees = json_encode($employees);
 
                 $getShareholders = $team_leaders->where('TeamMember', 'Shareholder')->values();
@@ -3552,6 +3599,17 @@ class ClientCompanyController extends Controller
                         // 'Phone_Number' => $shareholder->Phone,
                         'Role' => $shareholder->RoleShereholder,
                         'Ownership_Percentage' => $shareholder->PresentagShereholder
+                    ];
+                }
+                if(empty($shareholders)) {
+                    $shareholders[] = [
+                        'ID' => null,
+                        'Full_Name' => null,
+                        // 'Country' => null,
+                        'Email' => null,
+                        // 'Phone_Number' => null,
+                        'Role' => null,
+                        'Ownership_Percentage' => null
                     ];
                 }
 
@@ -3571,7 +3629,16 @@ class ClientCompanyController extends Controller
                         'Type' => $investor->investorType
                     ];
                 }
-
+                if(empty($investors)) {
+                    $investors[] = [
+                        'ID' => null,
+                        'Full_Name' => null,
+                       // 'Country' => null,
+                        'Email' => null,
+                      //  'Phone_Number' => null,
+                        'Type' => null
+                    ];
+                }
                 $almuni->investors = json_encode($investors);
 
                 $almuni->sustainability_goals = $company->Sustainable_development;
@@ -3583,6 +3650,14 @@ class ClientCompanyController extends Controller
                         'pitch_deck_description' => $company->pitch_deck_description ?? '',
                         'pitch_deck_summary' => $company->pitch_deck_summary ?? '',
                     ];
+                    if(empty($pitch_deck)) {
+                        $pitch_deck[] = [
+                            'pitch_deck' => null,
+                            'pitch_deck_video' => null,
+                            'pitch_deck_description' => null,
+                            'pitch_deck_summary' => null,
+                        ];
+                    }
                 $almuni->pitch_deck = json_encode($pitch_deck);
 
 
@@ -3592,6 +3667,14 @@ class ClientCompanyController extends Controller
                         'Tax_Card' => $company->Tax_Card ?? '',
                         'Country_Register_id' => $company->Country_Register_id ?? '',
                     ];
+                    if(empty($legal_information)) {
+                        $legal_information[] = [
+                            'Registered' => null,
+                            'Commercial_Register' => null,
+                            'Tax_Card' => null,
+                            'Country_Register_id' => null,
+                        ];
+                    }
                 $almuni->legal_information = json_encode($legal_information);
 
                     $cycle[] = [
@@ -3603,6 +3686,17 @@ class ClientCompanyController extends Controller
                         'Completion_Date' => $company->cycledata?->end?->format('Y-m-d H:i') ?? '',
                         'Type' => $company->cycledata->type ?? '',
                     ];
+                    if(empty($cycle)) {
+                        $cycle[] = [
+                            'Program_Name' => null,
+                            'ID' =>  null,
+                            'Organization' =>  null,
+                            'Cohort' =>  null,
+                            'Start_Date' => null,
+                            'Completion_Date' => null,
+                            'Type' => null,
+                        ];
+                    }
                 $almuni->program = json_encode($cycle);
 
 
@@ -3674,6 +3768,7 @@ class ClientCompanyController extends Controller
                 ];
             });
             $screeningData = $stepsData;
+
         // return or view
                 $almuni->screening = json_encode($screeningData);
 
@@ -3782,6 +3877,18 @@ class ClientCompanyController extends Controller
                         'comments' => $mentorship->rate_comment,
                     ];
                 }
+                if(empty($mentorships)) {
+                    $mentorships[] = [
+                        'mentor_name' => null,
+                        'mentor_ID' => null,
+                        'date' => null,
+                        'duration' => null,
+                        'attended' => null,
+                        'founder_name' => null,
+                        'rating' => null,
+                        'comments' => null,
+                    ];
+                }
 
                 $almuni->mentorship = json_encode($mentorships);
 
@@ -3802,6 +3909,16 @@ class ClientCompanyController extends Controller
                         'download' => $milestone->documents,
                     ];
                 }
+                if(empty($milestones)) {
+                    $milestones[] = [
+                        'Milestone_title' => null,
+                        'Description' => null,
+                        'Due_date' => null,
+                        'Completion_percentage' => null,
+                        // 'Linked_deliverables' => null,
+                        'download' => null,
+                    ];
+                }
                 $almuni->milestones = json_encode($milestones);
 
 
@@ -3819,6 +3936,19 @@ class ClientCompanyController extends Controller
                         'Completion_date' => $MentorTask->status == 'completed' ? $MentorTask->date : '',
                         'Assigned_mentor' => $MentorTask->mentor->first_name_en ." ". $MentorTask->mentor->last_name_en ?? '',
                         'Who_created_task' => $MentorTask->mentor->first_name_en ." ". $MentorTask->mentor->last_name_en ?? '',
+                    ];
+                }
+                if(empty($MentorTasks)) {
+                    $MentorTasks[] = [
+                        'Task_ID' => null,
+                        'Task_title' => null,
+                        'Session_ID' => null,
+                        'Description' => null,
+                        'Due_date' => null,
+                        'Status' => null,
+                        'Completion_date' => null,
+                        'Assigned_mentor' => null,
+                        'Who_created_task' => null,
                     ];
                 }
                 $almuni->tasks = json_encode($MentorTasks);
@@ -3843,7 +3973,16 @@ class ClientCompanyController extends Controller
                         'Status' => $result?->status ?? '',
                     ];
                 }
-
+                if(empty($quizzes)) {
+                    $quizzes[] = [
+                        'Quiz_ID' => null,
+                        'Quiz_title' => null,
+                        'Date_completed' => null,
+                        'founder_completed_quiz' => null,
+                        'Score' => null,
+                        'Status' => null,
+                    ];
+                }
 
                 $almuni->quizzes = json_encode($quizzes);
 
@@ -3872,6 +4011,15 @@ class ClientCompanyController extends Controller
                         'Survey_answers' => $answers ?? '',
                     ];
                 }
+                if(empty($surveys)) {
+                    $surveys[] = [
+                        'Survey_ID' => null,
+                        'Survey_title' => null,
+                        'program_step' => null,
+                        'Date_completed' => null,
+                        'Survey_answers' => null,
+                    ];
+                }
 
                 $almuni->surveys = json_encode($surveys);
 
@@ -3884,6 +4032,14 @@ class ClientCompanyController extends Controller
                         'Service_ID' => $service->service->id ?? '',
                         'Description' => $service->service->description_en ?? '',
                         'Price' => $service->service->price ?? '',
+                    ];
+                }
+                if(empty($services)) {
+                    $services[] = [
+                        'Service_name' => null,
+                        'Service_ID' => null,
+                        'Description' => null,
+                        'Price' => null,
                     ];
                 }
 
@@ -4001,14 +4157,35 @@ class ClientCompanyController extends Controller
                                 ];
                             }
                         }
+                        if(empty($formSubmissions)) {
+                            $formSubmissions[] = [
+                                'Form_Title'      => null,
+                                'ID'              => null,
+                                'step_title'      => null,
+                                'Step_ID'         => null,
+                                'Submission_Date' => null,
+
+                                'Field_Name'      => null,
+                                'Field_Type'      => null,
+                                'Submitted_Value' => null,
+                                'Attachment_Link' => null,
+
+                                'Form_Inputs' => [
+                                    'Field_Name'      => null,
+                                    'Field_Type'      => null,
+                                    'Submitted_Value' => null,
+                                    'Attachment_Link' => null,
+                                ],
+                            ];
+                        }
 
                 $almuni->submitted_forms = json_encode($formSubmissions);
 
             $almuni->save();
 
-            $company->step = null;
-            $company->cycle = null;
-            $company->save();
+            //$company->step = null;
+            //$company->cycle = null;
+            //$company->save();
 
             // Check if AJAX request
             if ($request->ajax()) {
