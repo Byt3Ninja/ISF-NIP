@@ -3413,4 +3413,8 @@ return [
 	'response_message' => 'Response Message',
 	'respond_message_placeholder' => 'Write your response here...',
 	'send_response' => 'Send Response',
+
+	// Book Service
+	'service_request_date_required' => 'Please select a date to continue.',
+	'service_request_submitted_successfully' => 'Your service request has been submitted successfully.',
 ];

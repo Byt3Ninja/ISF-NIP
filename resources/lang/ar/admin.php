@@ -3470,4 +3470,8 @@ return [
 	'respond_message_placeholder' => 'اكتب ردك هنا...',
 	'send_response' => 'إرسال الرد',
 	'reply_message_max_length' => 'لا يمكن أن يتجاوز محتوى الرسالة أكثر من 500 حرف',
+
+	// Book Service
+	'service_request_date_required' => 'يرجى اختيار التاريخ للمتابعة',
+	'service_request_submitted_successfully' => 'تم إرسال طلب الخدمة بنجاح',
 ];

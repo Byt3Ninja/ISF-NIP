@@ -5,69 +5,6 @@
 @stop
 
 @php
-  $stats = [
-    'total'     => 9,
-    'approved'  => 4,
-    'pending'   => 3,
-    'completed' => 3,
-    'rejected'  => 2,
-  ];
-
-  $requests = [
-    [
-      'id'          => 1,
-      'title'       => 'Web Development',
-      'date'        => 'Jan 15, 2025 • 09:30',
-      'description' => 'Need a comprehensive e-commerce platform with payment gateway integration and inventory management.',
-      'image_url'   => '/images/deck-video.svg',
-      'status'      => 'Completed',
-      'service_provider' => [
-        'id'        => 1,
-        'name'      => 'Tech Solutions Inc',
-        'image_url' => 'https://i.pravatar.cc/40?img=1',
-      ],
-    ],
-    [
-      'id'          => 2,
-      'title'       => 'App Development',
-      'date'        => 'Jan 12, 2025 • 14:00',
-      'description' => 'Cross-platform mobile application for iOS and Android with real-time sync and push notifications.',
-      'image_url'   => '/images/deck-video.svg',
-      'status'      => 'Completed',
-      'service_provider' => [
-        'id'        => 2,
-        'name'      => 'Digital Ventures Ltd',
-        'image_url' => 'https://i.pravatar.cc/40?img=2',
-      ],
-    ],
-    [
-      'id'          => 3,
-      'title'       => 'Business Consulting',
-      'date'        => 'Jan 18, 2025 • 11:00',
-      'description' => 'Comprehensive market analysis and competitive positioning strategy.',
-      'image_url'   => '/images/deck-video.svg',
-      'status'      => 'Pending',
-      'service_provider' => [
-        'id'        => 3,
-        'name'      => 'Growth Strategies Co',
-        'image_url' => 'https://i.pravatar.cc/40?img=3',
-      ],
-    ],
-    [
-      'id'          => 4,
-      'title'       => 'SEO Optimization',
-      'date'        => 'Jan 20, 2025 • 10:00',
-      'description' => 'Full on-page and off-page SEO audit with keyword strategy and link-building roadmap.',
-      'image_url'   => '/images/deck-video.svg',
-      'status'      => 'Rejected',
-      'service_provider' => [
-        'id'        => 4,
-        'name'      => 'Rank Masters LLC',
-        'image_url' => 'https://i.pravatar.cc/40?img=4',
-      ],
-    ],
-  ];
-
   function badgeClass($status) {
     return match($status) {
       'Completed' => 'bg-label-success',
@@ -134,7 +71,7 @@
     <ul class="nav nav-pills flex-column flex-md-row mb-6 gap-2 gap-lg-0" role="tablist">
 
       <li class="nav-item">
-        <a class="nav-link {{ request('request_status') == null ? 'active' : '' }}" href="{{ route('service_requests.list_all') }}">
+        <a class="nav-link {{ request('request_status') == null ? 'active' : '' }}" href="{{ route('service_requests.list_mine') }}">
           {{ __('admin.all_requests') }}
           <span class="badge badge-center rounded-pill bg-danger bg-glow ms-2">
             {{ $stats['total'] ?? 0 }}
@@ -144,7 +81,7 @@
 
       <li class="nav-item">
         <a class="nav-link {{ request('request_status') == 'pending' ? 'active' : '' }}"
-          href="{{ route('service_requests.list_all', ['request_status' => 'pending']) }}">
+          href="{{ route('service_requests.list_mine', ['request_status' => 'pending']) }}">
           {{ __('admin.pending') }}
           <span class="badge badge-center rounded-pill bg-danger ms-2">
             {{ $stats['pending'] ?? 0 }}
@@ -154,7 +91,7 @@
 
       <li class="nav-item">
         <a class="nav-link {{ request('request_status') == 'completed' ? 'active' : '' }}"
-          href="{{ route('service_requests.list_all', ['request_status' => 'completed']) }}">
+          href="{{ route('service_requests.list_mine', ['request_status' => 'completed']) }}">
           {{ __('admin.completed') }}
           <span class="badge badge-center rounded-pill bg-danger ms-2">
             {{ $stats['completed'] ?? 0 }}
@@ -164,7 +101,7 @@
 
       <li class="nav-item">
         <a class="nav-link {{ request('request_status') == 'approved' ? 'active' : '' }}"
-          href="{{ route('service_requests.list_all', ['request_status' => 'approved']) }}">
+          href="{{ route('service_requests.list_mine', ['request_status' => 'approved']) }}">
           {{ __('admin.Approved') }}
           <span class="badge badge-center rounded-pill bg-danger ms-2">
             {{ $stats['approved'] ?? 0 }}
@@ -174,7 +111,7 @@
 
       <li class="nav-item">
         <a class="nav-link {{ request('request_status') == 'rejected' ? 'active' : '' }}"
-          href="{{ route('service_requests.list_all', ['request_status' => 'rejected']) }}">
+          href="{{ route('service_requests.list_mine', ['request_status' => 'rejected']) }}">
           {{ __('admin.Rejected') }}
           <span class="badge badge-center rounded-pill bg-danger ms-2">
             {{ $stats['rejected'] ?? 0 }}
