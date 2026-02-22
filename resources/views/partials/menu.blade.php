@@ -4,6 +4,14 @@
   {
     $_user->organization = $_user->company->cycledata->organization;
   }
+
+  $spNotApproved = false;
+  if ($_user->hasRole('serviceProvider')) {
+      $spReg = \Illuminate\Support\Facades\DB::table('service_provider_registration')
+          ->where('user_id', $_user->id)
+          ->first(['status']);
+      $spNotApproved = ($spReg && $spReg->status != 1);
+  }
 @endphp
 <!-- Menu -->
 
@@ -61,6 +69,7 @@
       </a>
     </li>
 
+    @if(!$spNotApproved)
      @if($_user->hasRole('Judger'))
       <li class="{{ Request::is('dashboard/judger/screening*') ? 'active' : '' }} menu-item">
         <a href="/dashboard/judger/screening" class="menu-link">
@@ -888,6 +897,7 @@
         @endif
       @endif
     @endif
+    @endif {{-- end !$spNotApproved --}}
   </ul>
 </aside>
 <!-- / Menu -->

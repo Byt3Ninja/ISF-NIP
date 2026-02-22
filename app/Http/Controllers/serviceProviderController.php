@@ -34,6 +34,33 @@ class serviceProviderController extends Controller
         $this->serviceProviderService = $serviceProviderService;
     }
 
+    /**
+     * Generate a password that satisfies the platform validation:
+     * at least 1 uppercase, 1 lowercase, 1 digit, 1 special character, 8-20 chars.
+     */
+    private function generateCompliantPassword(int $length = 12): string
+    {
+        $upper   = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+        $lower   = 'abcdefghjkmnpqrstuvwxyz';
+        $digits  = '23456789';
+        $symbols = '!@#$%&*?';
+
+        // Guarantee one of each required type
+        $password  = $upper[random_int(0, strlen($upper) - 1)];
+        $password .= $lower[random_int(0, strlen($lower) - 1)];
+        $password .= $digits[random_int(0, strlen($digits) - 1)];
+        $password .= $symbols[random_int(0, strlen($symbols) - 1)];
+
+        // Fill remaining length from the combined pool
+        $pool = $upper . $lower . $digits . $symbols;
+        for ($i = 4; $i < $length; $i++) {
+            $password .= $pool[random_int(0, strlen($pool) - 1)];
+        }
+
+        // Shuffle to avoid predictable positions
+        return str_shuffle($password);
+    }
+
 	public function storeStep1(StoreServiceProviderStep1Request $request)
 	{
 		try {
@@ -191,34 +218,79 @@ class serviceProviderController extends Controller
 			'terms_agreement.in' => __('auth.validate_terms_agreement_in'),
 		]);
 
-		/* $upload_file = [];
-		if( $request->hasFile('img_url') )
-		{
-			$upload_file = uploader( 'serviceProvider', $request->file('img_url'), '', true );
-		} */
-
 		$contact_name = $request->contact_name;
-		$registration = new serviceProviderRegistration; 
-		$registration->company_name = $request->company_name;
-		$registration->contact_name = $request->contact_name;
-		$registration->email = $request->email;
-		$registration->country_code = $request->country_code;
-		$registration->phone = '+' . $request->country_code . $request->phone;
-		$registration->status = null;
-		$registration->user_id = null;
-		$registration->ip_address = $request->ip();
-		$registration->save();
+		$email = $request->email;
+		$phone = '+' . $request->country_code . $request->phone;
+		$company_name = $request->company_name;
+		$country_code = $request->country_code;
+		$locale = app()->getLocale();
 
-		// send confirmation email here
-		if( !in_array(env('APP_ENV', 'local'), ['local']) )
-		{
+		try {
+			DB::beginTransaction();
+
+			$registration = new serviceProviderRegistration;
+			$registration->company_name = $company_name;
+			$registration->contact_name = $contact_name;
+			$registration->email = $email;
+			$registration->country_code = $country_code;
+			$registration->phone = $phone;
+			$registration->status = null;
+			$registration->ip_address = $request->ip();
+			$registration->locale = $locale;
+			$registration->save();
+
+			$parse_name = explode(' ', $contact_name);
+			$first_name = $parse_name[0];
+			unset($parse_name[0]);
+			$last_name = implode(' ', array_values($parse_name));
+
+			$password = $this->generateCompliantPassword();
+			$provider_user = new User;
+			$provider_user->first_name_en = $first_name;
+			$provider_user->last_name_en = $last_name;
+			$provider_user->first_name_ar = $first_name;
+			$provider_user->last_name_ar = $last_name;
+			$provider_user->email = $email;
+			$provider_user->phone = $phone;
+			$provider_user->country_code = $country_code;
+			$provider_user->email_verified_at = now();
+			$provider_user->password = Hash::make($password);
+			$provider_user->save();
+			$provider_user->allotRole('serviceProvider');
+
+			$provider = new serviceProviders;
+			$provider->company_name = $company_name;
+			$provider->contact_name = $contact_name;
+			$provider->email = $email;
+			$provider->phone = $phone;
+			$provider->status = false;
+			$provider->user_id = $provider_user->id;
+			$provider->save();
+
+			$registration->user_id = $provider_user->id;
+			$registration->save();
+
+			DB::commit();
+
+			$login_url = route('login');
+			if( in_array(env('APP_ENV', 'local'), ['local']) )
+			{
+				return view('emails.service-providers.registration', compact('contact_name', 'email', 'password', 'login_url', 'locale'));
+			}
+
 			if( config('mail.driver') && config('mail.host') && config('mail.port') && config('mail.username') && config('mail.password') )
 			{
-				Mail::to($registration->email)->queue(new serviceProviderRegistrationMail( $contact_name ));
+				Mail::to($email)->queue(new serviceProviderRegistrationMail($contact_name, $email, $password, $login_url, $locale));
 			}
-		}
 
-		return redirect()->back()->with('success', __('auth.provider_registration_recorded'));
+			return redirect()->back()->with('success', __('auth.provider_registration_recorded'));
+		} catch (\Exception $e) {
+			DB::rollBack();
+			return redirect()->back()->with('error', $e->getMessage());
+		} catch (\Throwable $e) {
+			DB::rollBack();
+			return redirect()->back()->with('error', $e->getMessage());
+		}
 	}
 
 	public function requests()
@@ -265,28 +337,43 @@ class serviceProviderController extends Controller
 			'request_reason' => 'required_if:request_action,reject',
 		]);
 
-		$registration = serviceProviderRegistration::whereNull('status')->find( $request->request_id ); 
+		$registration = serviceProviderRegistration::whereNull('status')->find( $request->request_id );
 		if( !$registration ) { return redirect()->back()->with('error', __('admin.serviceProviderRequestNotFound')); }
-		else
+
+		$login_url = route('login');
+		$email = $registration->email;
+		$phone = $registration->phone;
+		$country_code = $registration->country_code;
+		$contact_name = $registration->contact_name;
+		$company_name = $registration->company_name;
+		$locale = $registration->locale ?? 'en';
+
+		if( $request->request_action == 'approve' )
 		{
-			$login_url = route('login');
-			$email = $registration->email;
-			$phone = $registration->phone;
-			$country_code = $registration->country_code;
-			$contact_name = $registration->contact_name;
-			$company_name = $registration->company_name;
-			if( $request->request_action == 'approve' )
-			{
-				try {
+			try {
+				DB::beginTransaction();
+
+				if( $registration->user_id )
+				{
+					// New flow: user already exists from registration (password was set at registration time)
+					$provider_user = User::find($registration->user_id);
+					$provider_user->email_verified_at = now();
+					$provider_user->save();
+
+					DB::table('service_providers')
+						->where('user_id', $provider_user->id)
+						->update(['status' => true]);
+				}
+				else
+				{
+					// Legacy flow: create user and service_providers record
+					$password = $this->generateCompliantPassword();
+
 					$parse_name = explode(' ', $contact_name);
 					$first_name = $parse_name[0];
-					$last_name = '';
 					unset($parse_name[0]);
-					$parse_name = array_values($parse_name);
-					$last_name = implode(' ', $parse_name);
+					$last_name = implode(' ', array_values($parse_name));
 
-					DB::beginTransaction();
-					$password = Str::password(10, symbols: true);
 					$provider_user = User::where('email', $email)->first();
 					if($provider_user == null){
 						$provider_user = new User;
@@ -298,16 +385,10 @@ class serviceProviderController extends Controller
 					$provider_user->email = $email;
 					$provider_user->phone = $phone;
 					$provider_user->country_code = $country_code;
-					$provider_user->email_verified_at = date('Y-m-d H:i:s');
-					$provider_user->password = Hash::make( $password );
+					$provider_user->email_verified_at = now();
+					$provider_user->password = Hash::make($password);
 					$provider_user->save();
 					$provider_user->allotRole('serviceProvider');
-
-					$registration->status = true;
-					$registration->action_by = $user->id;
-					$registration->action_at = now();
-					$registration->user_id = $provider_user->id;
-					$registration->save();
 
 					$provider = new serviceProviders;
 					$provider->company_name = $company_name;
@@ -317,46 +398,55 @@ class serviceProviderController extends Controller
 					$provider->status = true;
 					$provider->user_id = $provider_user->id;
 					$provider->save();
+				}
 
-					DB::commit();
-					if( !in_array(env('APP_ENV', 'local'), ['local']) )
-					{
-						if( config('mail.driver') && config('mail.host') && config('mail.port') && config('mail.username') && config('mail.password') )
-						{
-							Mail::to( $email )->queue(new serviceProviderApproveMail( $contact_name, $email, $password, $login_url ));
-						}
-					}
-					return redirect()->route('services_providers.requests')->with('success', __('admin.serviceProviderRequestApproved'));
-				}
-				catch (\Exception $e) {
-					DB::rollBack();
-					return redirect()->back()->with('error', $e->getMessage());
-				}
-				catch (\Throwable $e) {
-					DB::rollBack();
-					return redirect()->back()->with('error', $e->getMessage());
-				}
-			}
-			else
-			{
-				
-				$reason = $request->request_reason;
-
-				$registration->status = false;
+				$registration->status = true;
 				$registration->action_by = $user->id;
 				$registration->action_at = now();
-				$registration->reason = $reason;
+				$registration->user_id = $provider_user->id;
 				$registration->save();
 
-				if( !in_array(env('APP_ENV', 'local'), ['local']) )
+				DB::commit();
+				if( in_array(env('APP_ENV', 'local'), ['local']) )
 				{
-					if( config('mail.driver') && config('mail.host') && config('mail.port') && config('mail.username') && config('mail.password') )
-					{
-						Mail::to( $email )->queue(new serviceProviderRejectMail( $contact_name, $reason ));
-					}
+					return view('emails.service-providers.approve', compact('contact_name', 'login_url', 'locale'));
 				}
-				return redirect()->route('services_providers.requests')->with('success', __('admin.serviceProviderRequestRejected'));
+
+				if( config('mail.driver') && config('mail.host') && config('mail.port') && config('mail.username') && config('mail.password') )
+				{
+					Mail::to( $email )->queue(new serviceProviderApproveMail( $contact_name, $login_url, $locale ));
+				}
+				return redirect()->route('services_providers.requests')->with('success', __('admin.serviceProviderRequestApproved'));
 			}
+			catch (\Exception $e) {
+				DB::rollBack();
+				return redirect()->back()->with('error', $e->getMessage());
+			}
+			catch (\Throwable $e) {
+				DB::rollBack();
+				return redirect()->back()->with('error', $e->getMessage());
+			}
+		}
+		else
+		{
+			$reason = $request->request_reason;
+
+			$registration->status = false;
+			$registration->action_by = $user->id;
+			$registration->action_at = now();
+			$registration->reason = $reason;
+			$registration->save();
+
+			if( in_array(env('APP_ENV', 'local'), ['local']) )
+			{
+				return view('emails.service-providers.reject', compact('contact_name', 'reason', 'locale'));
+			}
+
+			if( config('mail.driver') && config('mail.host') && config('mail.port') && config('mail.username') && config('mail.password') )
+			{
+				Mail::to( $email )->queue(new serviceProviderRejectMail( $contact_name, $reason, $locale ));
+			}
+			return redirect()->route('services_providers.requests')->with('success', __('admin.serviceProviderRequestRejected'));
 		}
 	}
 

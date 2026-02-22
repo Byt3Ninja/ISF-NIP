@@ -14,7 +14,51 @@
     .status-badge-rejected { background-color: #f8d7da; color: #721c24; }
     #inbox-table tbody tr { transition: opacity 0.2s; }
     #inbox-table tbody tr.processing { opacity: 0.5; pointer-events: none; }
+    .sp-dashboard-disabled { pointer-events: none; opacity: 0.5; user-select: none; }
 </style>
+
+{{-- APPROVAL STATUS BANNER --}}
+@if($approvalStatus === 'pending')
+<div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
+    <div class="me-3">
+        <span class="avatar-initial rounded bg-label-warning">
+            <i class="ti ti-clock-hour-4 ti-md"></i>
+        </span>
+    </div>
+    <div>
+        <p class="mb-0 fw-semibold">{{ __('dashboard.sp_status_pending_message') }}</p>
+    </div>
+</div>
+{{--  @elseif($approvalStatus === 'accepted')
+<div class="alert alert-success d-flex align-items-center mb-4 alert-dismissible" role="alert">
+    <div class="me-3">
+        <span class="avatar-initial rounded bg-label-success">
+            <i class="ti ti-circle-check ti-md"></i>
+        </span>
+    </div>
+    <div>
+        <p class="mb-0 fw-semibold">{{ __('dashboard.sp_status_accepted_message') }}</p>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>  --}}
+@elseif($approvalStatus === 'rejected')
+<div class="alert alert-danger mb-4" role="alert">
+    <div class="d-flex align-items-center mb-2">
+        <span class="avatar-initial rounded bg-label-danger me-3">
+            <i class="ti ti-circle-x ti-md"></i>
+        </span>
+        <p class="mb-0 fw-semibold">{{ __('dashboard.sp_status_rejected_message') }}</p>
+    </div>
+    @if(!empty($rejectionReason))
+    <p class="mb-1"><strong>{{ __('dashboard.sp_status_rejected_reason_label') }}:</strong> {{ $rejectionReason }}</p>
+    @endif
+    @if(!empty($_settings->Platform_support_email))
+    <p class="mb-0">{{ __('dashboard.sp_status_rejected_support', ['email' => $_settings->Platform_support_email]) }}</p>
+    @endif
+</div>
+@endif
+
+<div class="{{ $approvalStatus !== 'accepted' ? 'sp-dashboard-disabled' : '' }}">
 
 {{-- SUMMARY WIDGET CARDS --}}
 <div class="row mb-4" id="summary-widgets">
@@ -220,12 +264,19 @@
     @endif
 </div>
 
+</div>{{-- end .sp-dashboard-disabled wrapper --}}
+
 @endsection
 
 @section('scripts')
 <script>
 (function() {
     'use strict';
+
+    const APPROVAL_STATUS = @json($approvalStatus ?? 'accepted');
+
+    // If not approved, do not initialize interactive features
+    if (APPROVAL_STATUS !== 'accepted') return;
 
     const CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
     const CAN_QUICK_ACTION = @json($canQuickAction);
@@ -563,7 +614,6 @@
 
     // Refresh button
     $('#btn-refresh').on('click', function() {
-        console.log('Refreshing...');
         doRefresh();
     });
 

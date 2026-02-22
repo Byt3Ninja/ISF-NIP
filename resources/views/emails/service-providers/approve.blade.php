@@ -1,6 +1,7 @@
 @extends('emails.layout.master')
 
 @section('content')
+@if(($locale ?? 'en') === 'en')
 												<table border="0" cellpadding="0" cellspacing="0" class="paragraph_block block-3" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
 													<tr>
 														<td class="pad" style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
@@ -28,27 +29,12 @@
 																<p style="margin: 0;"> </p>
 																<p style="margin: 0;">We are pleased to inform you that your request <strong>has been approved</strong>. After reviewing your details and capabilities, we believe that your services align well with our standards and operational needs.</p>
 																<p style="margin: 0;"> </p>
-																<p style="margin: 0;">You can now access your account using the credentials below:</p>
-																<p style="margin: 0;"> </p>
-																<p style="margin: 0;">
-																	<table border="0" cellpadding="0" cellspacing="0" class="paragraph_block block-3" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
-																		<tr>
-																			<td>Login Email</td>
-																			<td> {{ $email }} </td>
-																		</tr>
-																		<tr>
-																			<td>Temporary Password</td>
-																			<td> {{ $password }} </td>
-																		</tr>
-																	</table>
-																</p>
+																<p style="margin: 0;">You can now access your account using the credentials you received during registration.</p>
 																<p style="margin: 0;"> </p>
 																<p style="margin: 0;">
 																	You may log in through the following link: <br />
 																	<a href="{{ $login_url }}" target="_blank"> Log In to Your Dashboard </a>
 																</p>
-																<p style="margin: 0;"> </p>
-																<p style="margin: 0;">For security, we recommend updating your password immediately after your first login.</p>
 																<p style="margin: 0;"> </p>
 																<p style="margin: 0;">
 																	We look forward to building a successful and productive partnership with you. <br />
@@ -60,6 +46,7 @@
 														</td>
 													</tr>
 												</table>
+@else
 												<table border="0" cellpadding="0" cellspacing="0" class="paragraph_block block-3" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
 													<tr>
 														<td class="pad" style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
@@ -87,27 +74,12 @@
 																<p style="margin: 0;"> </p>
 																<p style="margin: 0;">يسعدنا إبلاغكم بأنه <strong>تم قبول طلبكم</strong>. بعد مراجعة معلوماتكم وقدراتكم، وجدنا أن خدماتكم تتوافق بشكل جيد مع معاييرنا واحتياجاتنا الحالية.</p>
 																<p style="margin: 0;"> </p>
-																<p style="margin: 0;">يمكنكم الآن الوصول إلى حسابكم باستخدام بيانات الدخول التالية:</p>
-																<p style="margin: 0;"> </p>
-																<p style="margin: 0;">
-																	<table border="0" cellpadding="0" cellspacing="0" class="paragraph_block block-3" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
-																		<tr>
-																			<td>البريد الإلكتروني للدخول:</td>
-																			<td> {{ $email }} </td>
-																		</tr>
-																		<tr>
-																			<td>كلمة المرور المؤقتة</td>
-																			<td> {{ $password }} </td>
-																		</tr>
-																	</table>
-																</p>
+																<p style="margin: 0;">يمكنكم الآن الوصول إلى حسابكم باستخدام بيانات الدخول التي تلقيتموها عند التسجيل.</p>
 																<p style="margin: 0;"> </p>
 																<p style="margin: 0;">
 																	يمكنكم تسجيل الدخول من خلال الرابط التالي: <br />
 																	<a href="{{ $login_url }}" target="_blank"> تسجيل الدخول إلى لوحة التحكم </a>
 																</p>
-																<p style="margin: 0;"> </p>
-																<p style="margin: 0;">لأغراض الأمان، نوصي بتحديث كلمة المرور بمجرد تسجيل الدخول لأول مرة.</p>
 																<p style="margin: 0;"> </p>
 																<p style="margin: 0;">
 																	نحن نتطلع إلى بناء علاقة عمل ناجحة ومثمرة معكم. <br />
@@ -119,4 +91,5 @@
 														</td>
 													</tr>
 												</table>
+@endif
 @endsection

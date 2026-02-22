@@ -19,6 +19,18 @@ class ServiceProviderDashboardController extends Controller
     }
 
     /**
+     * Check if the authenticated service provider's registration is approved.
+     */
+    private function isProviderApproved(): bool
+    {
+        $status = DB::table('service_provider_registration')
+            ->where('user_id', auth()->id())
+            ->value('status');
+
+        return $status === 1 || $status === true;
+    }
+
+    /**
      * Get service IDs belonging to the authenticated service provider.
      */
     private function getProviderServiceIds(): array
@@ -349,6 +361,23 @@ class ServiceProviderDashboardController extends Controller
         $user = auth()->user();
         $l = App::getLocale();
         $permissions = $user->myPermissions();
+
+        // Fetch approval status from registration record
+        $registration = DB::table('service_provider_registration')
+            ->where('user_id', $user->id)
+            ->select('status', 'reason')
+            ->first();
+
+        $approvalStatus = 'pending';
+        if ($registration) {
+            if ($registration->status === 1 || $registration->status === true) {
+                $approvalStatus = 'accepted';
+            } elseif ($registration->status === 0 || $registration->status === false) {
+                $approvalStatus = 'rejected';
+            }
+        }
+        $rejectionReason = $registration->reason ?? '';
+
         $serviceIds = $this->getProviderServiceIds();
 
         // Summary widget data
@@ -364,7 +393,7 @@ class ServiceProviderDashboardController extends Controller
 
         // Initial inbox (default filters: pending, 30 days, all services)
         $inboxRows = [];
-        if (in_array('dashboard.widgets_tables_service_provider_requests_inbox_view', $permissions) && !empty($serviceIds)) {
+        if ($approvalStatus === 'accepted' && in_array('dashboard.widgets_tables_service_provider_requests_inbox_view', $permissions) && !empty($serviceIds)) {
             $request = new Request(['status' => 'pending', 'period' => '30', 'service_id' => 0]);
             $rows = $this->buildInboxQuery($serviceIds, $request)->get();
             $inboxRows = $this->formatInboxRows($rows);
@@ -372,7 +401,7 @@ class ServiceProviderDashboardController extends Controller
 
         // Initial activity
         $activityEntries = [];
-        if (in_array('dashboard.widgets_tables_service_provider_recent_activity_view', $permissions)) {
+        if ($approvalStatus === 'accepted' && in_array('dashboard.widgets_tables_service_provider_recent_activity_view', $permissions)) {
             $activityEntries = $this->getRecentActivity($serviceIds);
         }
 
@@ -386,7 +415,9 @@ class ServiceProviderDashboardController extends Controller
             'inboxRows',
             'activityEntries',
             'canQuickAction',
-            'canBulkAction'
+            'canBulkAction',
+            'approvalStatus',
+            'rejectionReason'
         ));
     }
 
@@ -395,6 +426,10 @@ class ServiceProviderDashboardController extends Controller
      */
     public function requestsInbox(Request $request)
     {
+        if (!$this->isProviderApproved()) {
+            return response()->json(['status' => false, 'message' => 'Account not approved.'], 403);
+        }
+
         $user = auth()->user();
         $permissions = $user->myPermissions();
         $serviceIds = $this->getProviderServiceIds();
@@ -421,6 +456,10 @@ class ServiceProviderDashboardController extends Controller
      */
     public function quickAction(Request $request)
     {
+        if (!$this->isProviderApproved()) {
+            return response()->json(['status' => false, 'message' => 'Account not approved.'], 403);
+        }
+
         $this->validate($request, [
             'id' => 'required|integer|exists:services_requests,id',
             'action' => 'required|in:accept,reject',
@@ -472,6 +511,10 @@ class ServiceProviderDashboardController extends Controller
      */
     public function bulkAction(Request $request)
     {
+        if (!$this->isProviderApproved()) {
+            return response()->json(['status' => false, 'message' => 'Account not approved.'], 403);
+        }
+
         $this->validate($request, [
             'ids' => 'required|array|min:1',
             'ids.*' => 'integer|exists:services_requests,id',
@@ -531,6 +574,10 @@ class ServiceProviderDashboardController extends Controller
      */
     public function recentActivity()
     {
+        if (!$this->isProviderApproved()) {
+            return response()->json(['status' => false, 'message' => 'Account not approved.'], 403);
+        }
+
         $serviceIds = $this->getProviderServiceIds();
         $activity = $this->getRecentActivity($serviceIds);
 
@@ -544,6 +591,10 @@ class ServiceProviderDashboardController extends Controller
      */
     public function refresh(Request $request)
     {
+        if (!$this->isProviderApproved()) {
+            return response()->json(['status' => false, 'message' => 'Account not approved.'], 403);
+        }
+
         $user = auth()->user();
         $permissions = $user->myPermissions();
         $serviceIds = $this->getProviderServiceIds();

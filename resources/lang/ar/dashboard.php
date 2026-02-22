@@ -230,4 +230,11 @@ return [
     'sp_service_created' => 'تم إنشاء الخدمة ":name"',
     'sp_service_updated' => 'تم تحديث الخدمة ":name"',
     'sp_service_status_changed' => 'تم تغيير حالة الخدمة ":name"',
+
+    // بانر حالة الموافقة لمزود الخدمة
+    'sp_status_pending_message' => 'طلبك قيد المراجعة',
+    'sp_status_accepted_message' => 'تم قبول طلبك. مرحبًا بك في المنصة',
+    'sp_status_rejected_message' => 'تم رفض طلبك',
+    'sp_status_rejected_support' => 'إذا كنت تعتقد أن هذا القرار غير صحيح، يرجى التواصل معنا عبر :email',
+    'sp_status_rejected_reason_label' => 'السبب',
 ];

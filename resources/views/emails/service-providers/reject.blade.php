@@ -1,6 +1,7 @@
 @extends('emails.layout.master')
 
 @section('content')
+@if(($locale ?? 'en') === 'en')
 												<table border="0" cellpadding="0" cellspacing="0" class="paragraph_block block-3" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
 													<tr>
 														<td class="pad" style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
@@ -41,6 +42,7 @@
 														</td>
 													</tr>
 												</table>
+@else
 												<table border="0" cellpadding="0" cellspacing="0" class="paragraph_block block-3" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
 													<tr>
 														<td class="pad" style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
@@ -81,4 +83,5 @@
 														</td>
 													</tr>
 												</table>
+@endif
 @endsection

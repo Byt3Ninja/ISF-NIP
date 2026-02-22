@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 use Spatie\Permission\PermissionRegistrar;
@@ -91,6 +92,26 @@ class Permissions
         {
             $route = $request->route();
             $permission = $route->getName();
+
+            // Block unapproved service providers from accessing non-dashboard routes
+            if ($user->hasRole('serviceProvider') && $this->match($route)) {
+                $spRegistration = DB::table('service_provider_registration')
+                    ->where('user_id', $user->id)
+                    ->first(['status']);
+
+                if ($spRegistration && $spRegistration->status != 1) {
+                    $routeName = $permission ?? '';
+                    $allowedForUnapproved = Str::startsWith($routeName, 'service_provider_dashboard.')
+                        || Str::startsWith($routeName, 'service_provider_request.');
+
+                    if (!$allowedForUnapproved) {
+                        if ($request->expectsJson()) {
+                            return response()->json(['status' => false, 'message' => 'Not found'], 404);
+                        }
+                        abort(404);
+                    }
+                }
+            }
 
             if( !trim( $permission ) || in_array( $permission, ['web', 'admin', 'dashboard']) ) { return $next($request); }
             else
