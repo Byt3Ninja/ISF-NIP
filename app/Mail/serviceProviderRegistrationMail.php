@@ -18,19 +18,34 @@ class serviceProviderRegistrationMail extends Mailable implements ShouldQueue
 	use Queueable, SerializesModels, ConfiguresSmtp;
 
 	public $contact_name;
-	
+	public $email_address;
+	public $temp_password;
+	public $login_url;
+	public $locale;
+
 	/**
 	 * Create a new message instance.
 	 */
-	public function __construct($contact_name)
+	public function __construct($contact_name, $email_address, $temp_password, $login_url, $locale = 'en')
 	{
 		$this->contact_name = $contact_name;
+		$this->email_address = $email_address;
+		$this->temp_password = $temp_password;
+		$this->login_url = $login_url;
+		$this->locale = $locale;
 	}
 
 	public function build()
 	{
 		$orgData = $this->buildEmailOrganizationData(null);
+		$subject = $this->locale === 'ar' ? 'تم استقبال طلب التسجيل' : 'Registration request received';
 
-		return $this->subject('Registration request received - تم استقبال طلب التسجيل')->view('emails.service-providers.registration', array_merge(['contact_name' => $this->contact_name], $orgData));
+		return $this->subject($subject)->view('emails.service-providers.registration', array_merge([
+			'contact_name' => $this->contact_name,
+			'email' => $this->email_address,
+			'password' => $this->temp_password,
+			'login_url' => $this->login_url,
+			'locale' => $this->locale,
+		], $orgData));
 	}
 }
