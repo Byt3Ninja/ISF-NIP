@@ -3164,7 +3164,7 @@ return [
 	'view_all_sessions' => 'View all Sessions',
 	'view_surveys' => 'View Surveys',
 	'survey_reminder_message' => 'You have pending surveys that need completion.',
-	'Congratolation_You_Are_Waiting_Approvel_From_Admin' => 'Congratolation! You are waiting form admin approval.',
+	'Congratulation_You_Are_Waiting_Approval_From_Admin' => 'Congratulation! You are waiting form admin approval.',
 	'Success' => 'Success',
 	'Egyptian pound' => 'Egyptian pound',
 	'United Arab Emirates dirham' => 'United Arab Emirates dirham',

@@ -68,6 +68,9 @@ class HomeController extends Controller
             if ($user->hasAnyRole('Admin|Editor|Manager')) {
 
                 return $this->AdminDashboard();
+            } elseif ($user->hasRole('serviceProvider')) {
+
+                return redirect()->route('service_provider_dashboard.view');
             } elseif ($user->hasAnyRole('Registered|Page Manager|Pages Editor')) {
 
                 return view('admin.clients.dashboard');
@@ -95,6 +98,12 @@ class HomeController extends Controller
     protected function combinedDashboard()
     {
         $user = auth()->user();
+
+        // Service Provider gets its own dashboard
+        if ($user->hasRole('serviceProvider')) {
+            return app(ServiceProviderDashboardController::class)->index();
+        }
+
         $l = App::getLocale();
         $permissions = [];
         $organizations_ids = $user->organizations_ids;

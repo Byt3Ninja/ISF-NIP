@@ -2,13 +2,16 @@
 
 namespace App;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 
 class ServicesRequests extends Model
 {
+    use Auditable;
+
     protected $table = 'services_requests';
-    protected $fillable = ['organization_id', 'service_id','user_id','comment', 'approved', 'admin_comment','date_time','rate','rate_comment','done'];
-    protected $casts = ['date_time'  => 'date:Y-m-d H:i',];
+    protected $fillable = ['organization_id', 'service_id','user_id','comment', 'approved', 'admin_comment','date_time','rate','rate_comment','done','decided_at'];
+    protected $casts = ['date_time'  => 'date:Y-m-d H:i', 'decided_at' => 'datetime',];
 
     public function user()
     {

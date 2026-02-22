@@ -219,6 +219,13 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('services-providers/profile/step3', 'serviceProviderController@storeStep3')->name('services_providers.step3.store');
     Route::post('services-providers/profile/step4', 'serviceProviderController@storeStep4')->name('services_providers.step4.store');
 
+    // Service Provider Dashboard
+    Route::get('service-provider/requests-inbox', 'ServiceProviderDashboardController@requestsInbox')->name('service_provider_dashboard.requests_inbox');
+    Route::post('service-provider/quick-action', 'ServiceProviderDashboardController@quickAction')->name('service_provider_request.quick_action');
+    Route::post('service-provider/bulk-action', 'ServiceProviderDashboardController@bulkAction')->name('service_provider_request.bulk_action');
+    Route::get('service-provider/activity', 'ServiceProviderDashboardController@recentActivity')->name('service_provider_dashboard.activity');
+    Route::get('service-provider/refresh', 'ServiceProviderDashboardController@refresh')->name('service_provider_dashboard.refresh');
+
     Route::get('calendar/{id}/edit', 'SettingsController@editcal')->name('calendar.events_edit');
     Route::post('calendar/{id}/update', 'SettingsController@updatecal')->name('calendar.events_update');
     Route::get('calendar/{id}/delete', 'SettingsController@delcal')->name('calendar.events_delete');
