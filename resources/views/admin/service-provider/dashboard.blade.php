@@ -1,0 +1,579 @@
+@extends('layouts.admin')
+
+@section('title', __('dashboard.sp_dashboard'))
+@section('subTitle', __('dashboard.sp_my_dashboard'))
+
+@section('content')
+
+<style>
+    .activity-item { padding: 0.75rem 1.25rem; border-bottom: 1px solid #eee; }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+    .status-badge-pending { background-color: #fff3cd; color: #856404; }
+    .status-badge-accepted { background-color: #d4edda; color: #155724; }
+    .status-badge-rejected { background-color: #f8d7da; color: #721c24; }
+    #inbox-table tbody tr { transition: opacity 0.2s; }
+    #inbox-table tbody tr.processing { opacity: 0.5; pointer-events: none; }
+</style>
+
+{{-- SUMMARY WIDGET CARDS --}}
+<div class="row mb-4" id="summary-widgets">
+    @if($_user->ableTo('dashboard.widgets_cards_service_provider_total_services_view', $permissions))
+    <div class="col-lg col-sm-6 mb-3">
+        <div class="card card-border-shadow-primary h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="avatar me-2">
+                        <span class="avatar-initial rounded bg-label-primary">
+                            <i class="ti ti-briefcase ti-md"></i>
+                        </span>
+                    </div>
+                    <h4 class="ms-1 mb-0" id="widget-total-services">{{ $summary['totalServices'] }}</h4>
+                </div>
+                <p class="mb-0">{{ __('dashboard.sp_total_services') }}</p>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @if($_user->ableTo('dashboard.widgets_cards_service_provider_active_services_view', $permissions))
+    <div class="col-lg col-sm-6 mb-3">
+        <div class="card card-border-shadow-success h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="avatar me-2">
+                        <span class="avatar-initial rounded bg-label-success">
+                            <i class="ti ti-circle-check ti-md"></i>
+                        </span>
+                    </div>
+                    <h4 class="ms-1 mb-0" id="widget-active-services">{{ $summary['activeServices'] }}</h4>
+                </div>
+                <p class="mb-0">{{ __('dashboard.sp_active_services') }}</p>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @if($_user->ableTo('dashboard.widgets_cards_service_provider_requests_30_days_view', $permissions))
+    <div class="col-lg col-sm-6 mb-3">
+        <div class="card card-border-shadow-info h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="avatar me-2">
+                        <span class="avatar-initial rounded bg-label-info">
+                            <i class="ti ti-file-text ti-md"></i>
+                        </span>
+                    </div>
+                    <h4 class="ms-1 mb-0" id="widget-requests-30">{{ $summary['requests30Days'] }}</h4>
+                </div>
+                <p class="mb-0">{{ __('dashboard.sp_requests_30_days') }}</p>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @if($_user->ableTo('dashboard.widgets_cards_service_provider_pending_requests_view', $permissions))
+    <div class="col-lg col-sm-6 mb-3">
+        <div class="card card-border-shadow-warning h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="avatar me-2">
+                        <span class="avatar-initial rounded bg-label-warning">
+                            <i class="ti ti-clock-hour-4 ti-md"></i>
+                        </span>
+                    </div>
+                    <h4 class="ms-1 mb-0" id="widget-pending">{{ $summary['pendingRequests'] }}</h4>
+                </div>
+                <p class="mb-0">{{ __('dashboard.sp_pending_requests') }}</p>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @if($_user->ableTo('dashboard.widgets_cards_service_provider_median_response_time_view', $permissions))
+    <div class="col-lg col-sm-6 mb-3">
+        <div class="card card-border-shadow-secondary h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="avatar me-2">
+                        <span class="avatar-initial rounded bg-label-secondary">
+                            <i class="ti ti-chart-bar ti-md"></i>
+                        </span>
+                    </div>
+                    <h4 class="ms-1 mb-0" id="widget-median-time">
+                        {{ $summary['medianResponseTime'] !== null ? $summary['medianResponseTime'] . 'h' : '—' }}
+                    </h4>
+                </div>
+                <p class="mb-0">{{ __('dashboard.sp_median_response_time') }}</p>
+            </div>
+        </div>
+    </div>
+    @endif
+</div>
+
+{{-- REFRESH BUTTON --}}
+@if($_user->ableTo('service_provider_dashboard.refresh', $permissions))
+<div class="mb-3 text-end">
+    <button id="btn-refresh" class="btn btn-outline-primary btn-sm">
+        <i class="ti ti-refresh me-1"></i> {{ __('dashboard.sp_refresh') }}
+    </button>
+</div>
+@endif
+
+<div class="row">
+    {{-- REQUESTS INBOX TABLE --}}
+    @if($_user->ableTo('dashboard.widgets_tables_service_provider_requests_inbox_view', $permissions))
+    <div class="col-lg-8 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h5 class="mb-0">{{ __('dashboard.sp_requests_inbox') }}</h5>
+                @if($canBulkAction)
+                <div id="bulk-actions">
+                    <button id="btn-bulk-accept" class="btn btn-sm btn-success" disabled>
+                        <i class="ti ti-checks me-1"></i>{{ __('dashboard.sp_bulk_accept') }}
+                    </button>
+                    <button id="btn-bulk-reject" class="btn btn-sm btn-danger" disabled>
+                        <i class="ti ti-x me-1"></i>{{ __('dashboard.sp_bulk_reject') }}
+                    </button>
+                </div>
+                @endif
+            </div>
+            <div class="card-body">
+                {{-- Filter row --}}
+                <div class="row mb-3 g-2">
+                    <div class="col-md-4">
+                        <label class="form-label small text-muted">{{ __('dashboard.sp_status') }}</label>
+                        <select id="filter-status" class="form-select form-select-sm">
+                            <option value="pending" selected>{{ __('dashboard.sp_filter_pending') }}</option>
+                            <option value="accepted">{{ __('dashboard.sp_filter_accepted') }}</option>
+                            <option value="rejected">{{ __('dashboard.sp_filter_rejected') }}</option>
+                            <option value="all">{{ __('dashboard.sp_filter_all') }}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small text-muted">{{ __('dashboard.sp_service_name') }}</label>
+                        <select id="filter-service" class="form-select form-select-sm">
+                            <option value="0">{{ __('dashboard.sp_all_services') }}</option>
+                            @foreach($services as $service)
+                                <option value="{{ $service->id }}">{{ $service->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small text-muted">{{ __('dashboard.sp_period') }}</label>
+                        <select id="filter-period" class="form-select form-select-sm">
+                            <option value="7">{{ __('dashboard.sp_period_7_days') }}</option>
+                            <option value="30" selected>{{ __('dashboard.sp_period_30_days') }}</option>
+                            <option value="year">{{ __('dashboard.sp_period_this_year') }}</option>
+                        </select>
+                    </div>
+                </div>
+
+                {{-- Table --}}
+                <div class="table-responsive">
+                    <table class="table table-hover" id="inbox-table">
+                        <thead>
+                            <tr>
+                                @if($canBulkAction)
+                                <th style="width: 40px;"><input type="checkbox" id="select-all" class="form-check-input"></th>
+                                @endif
+                                <th>{{ __('dashboard.sp_startup_name') }}</th>
+                                <th>{{ __('dashboard.sp_note') }}</th>
+                                <th>{{ __('dashboard.sp_service_name') }}</th>
+                                <th>{{ __('dashboard.sp_submitted') }}</th>
+                                <th>{{ __('dashboard.sp_status') }}</th>
+                                @if($canQuickAction)
+                                <th>{{ __('dashboard.sp_actions') }}</th>
+                                @endif
+                            </tr>
+                        </thead>
+                        <tbody id="inbox-body"></tbody>
+                    </table>
+                </div>
+                <div id="inbox-empty" class="text-center text-muted py-4 d-none">
+                    <i class="ti ti-inbox-off ti-xl mb-2 d-block"></i>
+                    {{ __('dashboard.sp_no_requests') }}
+                </div>
+                <div id="inbox-loading" class="text-center py-4 d-none">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                    <span class="ms-2">{{ __('dashboard.sp_loading') }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    {{-- RECENT ACTIVITY PANEL --}}
+    @if($_user->ableTo('dashboard.widgets_tables_service_provider_recent_activity_view', $permissions))
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{{ __('dashboard.sp_recent_activity') }}</h5>
+            </div>
+            <div class="card-body p-0" id="activity-feed"></div>
+            <div id="activity-empty" class="text-center text-muted py-4 d-none">
+                <i class="ti ti-activity-heartbeat ti-xl mb-2 d-block"></i>
+                {{ __('dashboard.sp_no_activity') }}
+            </div>
+        </div>
+    </div>
+    @endif
+</div>
+
+@endsection
+
+@section('scripts')
+<script>
+(function() {
+    'use strict';
+
+    const CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+    const CAN_QUICK_ACTION = @json($canQuickAction);
+    const CAN_BULK_ACTION = @json($canBulkAction);
+    const ROUTES = {
+        inbox: "{{ route('service_provider_dashboard.requests_inbox') }}",
+        quickAction: "{{ route('service_provider_request.quick_action') }}",
+        bulkAction: "{{ route('service_provider_request.bulk_action') }}",
+        activity: "{{ route('service_provider_dashboard.activity') }}",
+        refresh: "{{ route('service_provider_dashboard.refresh') }}"
+    };
+    const LABELS = {
+        accept: @json(__('dashboard.sp_accept')),
+        reject: @json(__('dashboard.sp_reject')),
+        pending: @json(__('dashboard.sp_filter_pending')),
+        accepted: @json(__('dashboard.sp_filter_accepted')),
+        rejected: @json(__('dashboard.sp_filter_rejected')),
+        rejectTitle: @json(__('dashboard.sp_reject_reason')),
+        rejectRequired: @json(__('dashboard.sp_reject_reason_required')),
+        successTitle: @json(__('dashboard.sp_action_success')),
+        refreshError: @json(__('dashboard.sp_refresh_error'))
+    };
+
+    // Initial data from server
+    let currentInboxData = @json($inboxRows);
+    let currentActivityData = @json($activityEntries);
+
+    // ========================
+    // RENDER FUNCTIONS
+    // ========================
+
+    function renderInboxRows(rows) {
+        const $body = $('#inbox-body');
+        const $empty = $('#inbox-empty');
+        $body.empty();
+
+        if (!rows || rows.length === 0) {
+            $empty.removeClass('d-none');
+            return;
+        }
+        $empty.addClass('d-none');
+
+        rows.forEach(function(row) {
+            let statusBadge = '';
+            if (row.status === 'Pending') {
+                statusBadge = '<span class="badge status-badge-pending">'+LABELS.pending+'</span>';
+            } else if (row.status === 'Accepted') {
+                statusBadge = '<span class="badge status-badge-accepted">'+LABELS.accepted+'</span>';
+            } else if (row.status === 'Rejected') {
+                statusBadge = '<span class="badge status-badge-rejected">'+LABELS.rejected+'</span>';
+            }
+
+            let actions = '';
+            if (CAN_QUICK_ACTION && row.is_pending) {
+                actions = '<button class="btn btn-sm btn-success me-1 btn-accept" data-id="'+row.id+'">'+LABELS.accept+'</button>' +
+                          '<button class="btn btn-sm btn-danger btn-reject" data-id="'+row.id+'">'+LABELS.reject+'</button>';
+            }
+
+            let checkbox = '';
+            if (CAN_BULK_ACTION && row.is_pending) {
+                checkbox = '<td><input type="checkbox" class="form-check-input row-check" data-id="'+row.id+'"></td>';
+            } else if (CAN_BULK_ACTION) {
+                checkbox = '<td></td>';
+            }
+
+            let actionCell = CAN_QUICK_ACTION ? '<td>'+actions+'</td>' : '';
+
+            $body.append(
+                '<tr data-id="'+row.id+'">' +
+                    checkbox +
+                    '<td>'+escapeHtml(row.startup_name)+'</td>' +
+                    '<td><small class="text-muted">'+escapeHtml(row.comment)+'</small></td>' +
+                    '<td>'+escapeHtml(row.service_name)+'</td>' +
+                    '<td><small>'+escapeHtml(row.submitted)+'</small></td>' +
+                    '<td>'+statusBadge+'</td>' +
+                    actionCell +
+                '</tr>'
+            );
+        });
+    }
+
+    function renderActivityFeed(entries) {
+        const $feed = $('#activity-feed');
+        const $empty = $('#activity-empty');
+        $feed.empty();
+
+        if (!entries || entries.length === 0) {
+            $empty.removeClass('d-none');
+            return;
+        }
+        $empty.addClass('d-none');
+
+        entries.forEach(function(entry) {
+            $feed.append(
+                '<div class="activity-item d-flex align-items-start">' +
+                    '<div class="activity-icon bg-label-'+entry.color+' me-3 flex-shrink-0">' +
+                        '<i class="ti '+entry.icon+' ti-sm"></i>' +
+                    '</div>' +
+                    '<div class="flex-grow-1">' +
+                        '<p class="mb-0 small">'+escapeHtml(entry.text)+'</p>' +
+                        '<small class="text-muted">'+escapeHtml(entry.time_ago)+'</small>' +
+                    '</div>' +
+                '</div>'
+            );
+        });
+    }
+
+    function updateSummaryWidgets(summary) {
+        if (summary.totalServices !== undefined) $('#widget-total-services').text(summary.totalServices);
+        if (summary.activeServices !== undefined) $('#widget-active-services').text(summary.activeServices);
+        if (summary.requests30Days !== undefined) $('#widget-requests-30').text(summary.requests30Days);
+        if (summary.pendingRequests !== undefined) $('#widget-pending').text(summary.pendingRequests);
+        if (summary.medianResponseTime !== undefined) {
+            $('#widget-median-time').text(summary.medianResponseTime !== null ? summary.medianResponseTime + 'h' : '—');
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
+    function getFilterParams() {
+        return {
+            status: $('#filter-status').val(),
+            service_id: $('#filter-service').val(),
+            period: $('#filter-period').val()
+        };
+    }
+
+    function updateBulkButtons() {
+        var checked = $('.row-check:checked').length;
+        $('#btn-bulk-accept, #btn-bulk-reject').prop('disabled', checked === 0);
+    }
+
+    // ========================
+    // AJAX FUNCTIONS
+    // ========================
+
+    function fetchInbox() {
+        $('#inbox-loading').removeClass('d-none');
+        $('#inbox-body').empty();
+        $('#inbox-empty').addClass('d-none');
+
+        $.ajax({
+            url: ROUTES.inbox,
+            method: 'GET',
+            data: getFilterParams(),
+            headers: { 'X-CSRF-TOKEN': CSRF_TOKEN },
+            success: function(response) {
+                $('#inbox-loading').addClass('d-none');
+                currentInboxData = response.rows;
+                renderInboxRows(response.rows);
+                if (response.summary) updateSummaryWidgets(response.summary);
+            },
+            error: function() {
+                $('#inbox-loading').addClass('d-none');
+                Swal.fire({ icon: 'error', title: 'Error', text: LABELS.refreshError, timer: 3000 });
+            }
+        });
+    }
+
+    function doQuickAction(id, action, reason) {
+        var $row = $('tr[data-id="'+id+'"]');
+        $row.addClass('processing');
+
+        $.ajax({
+            url: ROUTES.quickAction,
+            method: 'POST',
+            data: { id: id, action: action, reason: reason, _token: CSRF_TOKEN },
+            success: function(response) {
+                $row.removeClass('processing');
+                if (response.status) {
+                    Swal.fire({ icon: 'success', title: response.title, text: response.message, timer: 2000, showConfirmButton: false });
+                    if (response.summary) updateSummaryWidgets(response.summary);
+                    fetchInbox();
+                    fetchActivity();
+                } else {
+                    Swal.fire({ icon: 'error', title: response.title || 'Error', text: response.message });
+                }
+            },
+            error: function(xhr) {
+                $row.removeClass('processing');
+                var msg = xhr.responseJSON ? xhr.responseJSON.message : 'An error occurred';
+                Swal.fire({ icon: 'error', title: 'Error', text: msg });
+            }
+        });
+    }
+
+    function doBulkAction(ids, action, reason) {
+        $('#btn-bulk-accept, #btn-bulk-reject').prop('disabled', true);
+
+        $.ajax({
+            url: ROUTES.bulkAction,
+            method: 'POST',
+            data: { ids: ids, action: action, reason: reason, _token: CSRF_TOKEN },
+            success: function(response) {
+                if (response.status) {
+                    Swal.fire({ icon: 'success', title: response.title, text: response.message, timer: 2000, showConfirmButton: false });
+                    if (response.summary) updateSummaryWidgets(response.summary);
+                    fetchInbox();
+                    fetchActivity();
+                } else {
+                    Swal.fire({ icon: 'error', title: response.title || 'Error', text: response.message });
+                }
+            },
+            error: function(xhr) {
+                var msg = xhr.responseJSON ? xhr.responseJSON.message : 'An error occurred';
+                Swal.fire({ icon: 'error', title: 'Error', text: msg });
+                updateBulkButtons();
+            }
+        });
+    }
+
+    function fetchActivity() {
+        $.ajax({
+            url: ROUTES.activity,
+            method: 'GET',
+            headers: { 'X-CSRF-TOKEN': CSRF_TOKEN },
+            success: function(response) {
+                currentActivityData = response.activity;
+                renderActivityFeed(response.activity);
+            }
+        });
+    }
+
+    function doRefresh() {
+        var $btn = $('#btn-refresh');
+        $btn.prop('disabled', true).find('i').addClass('ti-spin');
+
+        $.ajax({
+            url: ROUTES.refresh,
+            method: 'GET',
+            data: getFilterParams(),
+            headers: { 'X-CSRF-TOKEN': CSRF_TOKEN },
+            success: function(response) {
+                $btn.prop('disabled', false).find('i').removeClass('ti-spin');
+                if (response.summary) updateSummaryWidgets(response.summary);
+                if (response.inbox) {
+                    currentInboxData = response.inbox;
+                    renderInboxRows(response.inbox);
+                }
+                if (response.activity) {
+                    currentActivityData = response.activity;
+                    renderActivityFeed(response.activity);
+                }
+            },
+            error: function() {
+                $btn.prop('disabled', false).find('i').removeClass('ti-spin');
+                Swal.fire({ icon: 'error', title: 'Error', text: LABELS.refreshError, timer: 3000 });
+            }
+        });
+    }
+
+    // ========================
+    // EVENT HANDLERS
+    // ========================
+
+    // Filter changes
+    $('#filter-status, #filter-service, #filter-period').on('change', function() {
+        fetchInbox();
+    });
+
+    // Select all checkbox
+    $(document).on('change', '#select-all', function() {
+        $('.row-check').prop('checked', this.checked);
+        updateBulkButtons();
+    });
+
+    // Individual checkboxes
+    $(document).on('change', '.row-check', function() {
+        var total = $('.row-check').length;
+        var checked = $('.row-check:checked').length;
+        $('#select-all').prop('checked', total === checked && total > 0);
+        updateBulkButtons();
+    });
+
+    // Accept button
+    $(document).on('click', '.btn-accept', function() {
+        var id = $(this).data('id');
+        doQuickAction(id, 'accept', null);
+    });
+
+    // Reject button
+    $(document).on('click', '.btn-reject', function() {
+        var id = $(this).data('id');
+        Swal.fire({
+            title: LABELS.rejectTitle,
+            input: 'textarea',
+            inputLabel: LABELS.rejectRequired,
+            inputValidator: function(value) {
+                if (!value || !value.trim()) return LABELS.rejectRequired;
+            },
+            showCancelButton: true,
+            confirmButtonText: LABELS.reject,
+            confirmButtonColor: '#d33'
+        }).then(function(result) {
+            if (result.isConfirmed) {
+                doQuickAction(id, 'reject', result.value);
+            }
+        });
+    });
+
+    // Bulk accept
+    $('#btn-bulk-accept').on('click', function() {
+        var ids = [];
+        $('.row-check:checked').each(function() { ids.push($(this).data('id')); });
+        if (ids.length === 0) return;
+        doBulkAction(ids, 'accept', null);
+    });
+
+    // Bulk reject
+    $('#btn-bulk-reject').on('click', function() {
+        var ids = [];
+        $('.row-check:checked').each(function() { ids.push($(this).data('id')); });
+        if (ids.length === 0) return;
+        Swal.fire({
+            title: LABELS.rejectTitle,
+            input: 'textarea',
+            inputLabel: LABELS.rejectRequired,
+            inputValidator: function(value) {
+                if (!value || !value.trim()) return LABELS.rejectRequired;
+            },
+            showCancelButton: true,
+            confirmButtonText: LABELS.reject,
+            confirmButtonColor: '#d33'
+        }).then(function(result) {
+            if (result.isConfirmed) {
+                doBulkAction(ids, 'reject', result.value);
+            }
+        });
+    });
+
+    // Refresh button
+    $('#btn-refresh').on('click', function() {
+        console.log('Refreshing...');
+        doRefresh();
+    });
+
+    // ========================
+    // INITIAL RENDER
+    // ========================
+
+    renderInboxRows(currentInboxData);
+    renderActivityFeed(currentActivityData);
+
+})();
+</script>
+@endsection

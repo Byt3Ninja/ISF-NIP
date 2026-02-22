@@ -3219,7 +3219,7 @@ return [
 	'view_all_sessions' => 'عرض كل الجلسات',
 	'view_surveys' => 'عرض الاستبيانات',
 	'survey_reminder_message' => 'لديك استبيانات معلقة لإكمالها. يرجى تخصيص بعض الوقت لملئها.',
-	'Congratolation_You_Are_Waiting_Approvel_From_Admin' => 'تهانينا! تنتظر الموافقة من قبل المسئول.',
+	'Congratulation_You_Are_Waiting_Approval_From_Admin' => 'تهانينا! تنتظر الموافقة من قبل المسئول.',
 	'Success' => 'نجاح',
 	'Egyptian pound' => 'جنيه مصري',
 	'United Arab Emirates dirham' => 'درهم امارات',

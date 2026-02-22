@@ -41,7 +41,7 @@
 
 		@if (Auth::user()->hasRole('serviceProvider'))
 			<div class="alert alert-primary alert-dismissible fade show d-flex align-items-center" role="alert">
-				<p> {{ __('admin.Congratolation_You_Are_Waiting_Approvel_From_Admin') }} </p>
+				<p> {{ __('admin.Congratulation_You_Are_Waiting_Approval_From_Admin') }} </p>
 			</div>
 		@endif
 		@if (Auth::user()->hasRole('Mentor'))
