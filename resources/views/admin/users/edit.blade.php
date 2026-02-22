@@ -6,6 +6,8 @@
 @section('vendorstyle')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+<link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify.min.css">
+<link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify-bootstrap.min.css">
 @endsection
 
 @section('style')
@@ -432,10 +434,15 @@
 <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+<script src="/app-assets/plugins/alertify/alertify.min.js"></script>
 @endsection
 
 @section('pagescripts')
 <script>
+	alertify.defaults.transition = 'zoom';
+	alertify.defaults.theme.ok = 'btn btn-sm btn-danger';
+	alertify.defaults.theme.cancel = 'btn btn-sm btn-info';
+	alertify.defaults.theme.input = 'form-control';
   const translations = {!! json_encode(__('auth')) !!};
 
   // Initialize the phone input

@@ -5,69 +5,6 @@
 @stop
 
 @php
-  $stats = [
-    'total'     => 9,
-    'approved'  => 4,
-    'pending'   => 3,
-    'completed' => 3,
-    'rejected'  => 2,
-  ];
-
-  $requests = [
-    [
-      'id'          => 1,
-      'title'       => 'Web Development',
-      'date'        => 'Jan 15, 2025 • 09:30',
-      'description' => 'Need a comprehensive e-commerce platform with payment gateway integration and inventory management.',
-      'image_url'   => '/images/deck-video.svg',
-      'status'      => 'Completed',
-      'service_provider' => [
-        'id'        => 1,
-        'name'      => 'Tech Solutions Inc',
-        'image_url' => 'https://i.pravatar.cc/40?img=1',
-      ],
-    ],
-    [
-      'id'          => 2,
-      'title'       => 'App Development',
-      'date'        => 'Jan 12, 2025 • 14:00',
-      'description' => 'Cross-platform mobile application for iOS and Android with real-time sync and push notifications.',
-      'image_url'   => '/images/deck-video.svg',
-      'status'      => 'Completed',
-      'service_provider' => [
-        'id'        => 2,
-        'name'      => 'Digital Ventures Ltd',
-        'image_url' => 'https://i.pravatar.cc/40?img=2',
-      ],
-    ],
-    [
-      'id'          => 3,
-      'title'       => 'Business Consulting',
-      'date'        => 'Jan 18, 2025 • 11:00',
-      'description' => 'Comprehensive market analysis and competitive positioning strategy.',
-      'image_url'   => '/images/deck-video.svg',
-      'status'      => 'Pending',
-      'service_provider' => [
-        'id'        => 3,
-        'name'      => 'Growth Strategies Co',
-        'image_url' => 'https://i.pravatar.cc/40?img=3',
-      ],
-    ],
-    [
-      'id'          => 4,
-      'title'       => 'SEO Optimization',
-      'date'        => 'Jan 20, 2025 • 10:00',
-      'description' => 'Full on-page and off-page SEO audit with keyword strategy and link-building roadmap.',
-      'image_url'   => '/images/deck-video.svg',
-      'status'      => 'Rejected',
-      'service_provider' => [
-        'id'        => 4,
-        'name'      => 'Rank Masters LLC',
-        'image_url' => 'https://i.pravatar.cc/40?img=4',
-      ],
-    ],
-  ];
-
   function badgeClass($status) {
     return match($status) {
       'Completed' => 'bg-label-success',
@@ -76,7 +13,7 @@
       'Approved'  => 'bg-label-primary',
       default     => 'bg-warning text-dark',
     };
-  };
+  }
 
   $tabs = [
     ['title' => __('admin.All Services'), 'route' => 'services.index', 'icon' => 'arrows-move'],
@@ -818,29 +755,36 @@ if (ocRespond) {
       submitButton: new FormValidation.plugins.SubmitButton(),
     }
   }).on('core.form.valid', () => {
-    const decision = formRespond.querySelector('input[name="decision"]:checked').value;
-    
-    // Simulate Success Actions
-    if (decision === 'approve') {
-      showToast({ 
-        type: 'success', 
-        message: '{{ app()->getLocale() == "ar" ? ".الطلب الآن قيد التنفيذ" : "Request is now in progress." }}' 
-      });
-    } else {
-      showToast({ 
-        type: 'error', 
-        message: '{{ app()->getLocale() == "ar" ? "تم رفض الطلب" : "Request has been rejected." }}' 
-      });
-    }
+    const decision  = formRespond.querySelector('input[name="decision"]:checked').value;
+    const requestId = $('#respondRequestId').value;
+    const message   = $('#respondMessage').value;
 
-    // Logic for Email/Notification (Handled by Backend in production)
-    console.log("Triggering Email to Founder...");
-    console.log("Triggering In-App Notification...");
-
-    bootstrap.Offcanvas.getInstance(ocRespond).hide();
-    
-    // In a real app, you would perform an AJAX request here and then:
-    // window.location.reload(); or remove the card from DOM
+    fetch('{{ route("service_requests.take_action") }}', {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        id: requestId,
+        stat: decision,
+        comment: message || null,
+      }),
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status) {
+        showToast({ type: 'success', message: data.message });
+        bootstrap.Offcanvas.getInstance(ocRespond).hide();
+        window.location.reload();
+      } else {
+        showToast({ type: 'error', message: data.message || '{{ __("admin.unexpected_error") }}' });
+      }
+    })
+    .catch(() => {
+      showToast({ type: 'error', message: '{{ __("admin.unexpected_error") }}' });
+    });
   });
 }
   /* ══════════════════════════════════════

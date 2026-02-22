@@ -9,7 +9,7 @@ use DB, Log, Exception, Session;
 use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\{Auth, Notification};
-use App\Http\Requests\{StoreServiceRequest, UpdateServiceRequest};
+use App\Http\Requests\{BookServiceRequest, StoreServiceRequest, UpdateServiceRequest};
 use App\Notifications\{TemplateEmail, ServiceRequestNotification};
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\{User, Settings, Currency, Service, Organization, ServiceCategory, serviceProviders, ServicesRequests};
@@ -340,43 +340,119 @@ class ServiceController extends Controller
 	public function requests(Request $request)
 	{
 		$user = auth()->user();
-		$orgIds = $user->organizations_ids;
-		$received = ServicesRequests::whereNull('approved')->with(['service', 'service.organizations', 'user'])
-			->whereHas('service.organizations', function ($q) use ($orgIds) {
-				$q->whereIn('organizations.id', $orgIds);
-			});
-		$countold = ServicesRequests::whereNotNull('approved')->when($user->hasRole('serviceProvider') && $user->service_provider, function ($q) use ($user) {
-			$provider_id = $user->service_provider->id;
-			return $q->whereHas('service', function ($q2) use ($provider_id) {
-				$q2->where('service_provider_id', $provider_id);
-			});
-		})->count();
+		$locale = app()->getLocale();
+		$nameCol = 'name_' . $locale;
 
-		$received = $received->when($user->hasRole('serviceProvider') && $user->service_provider, function ($q) use ($user) {
-			$provider_id = $user->service_provider->id;
-			return $q->whereHas('service', function ($q2) use ($provider_id) {
-				$q2->where('service_provider_id', $provider_id);
+		// Base query builder with necessary joins
+		$baseQuery = DB::table('services_requests')
+			->join('services', 'services_requests.service_id', '=', 'services.id')
+			->leftJoin('service_providers', 'services.service_provider_id', '=', 'service_providers.id')
+			->join('users', 'services_requests.user_id', '=', 'users.id')
+			->leftJoin('companies', 'users.company_id', '=', 'companies.id')
+			->whereNull('services_requests.deleted_at')
+			->whereNull('services.deleted_at');
+
+		// Role-based filtering
+		if ($user->hasRole('serviceProvider') && $user->service_provider) {
+			$baseQuery->where('services.service_provider_id', $user->service_provider->id);
+		} else {
+			$orgIds = $user->organizations_ids;
+			$baseQuery->whereExists(function ($q) use ($orgIds) {
+				$q->select(DB::raw(1))
+					->from('organization_service')
+					->whereColumn('organization_service.service_id', 'services.id')
+					->whereIn('organization_service.organization_id', $orgIds);
 			});
+		}
+
+		// Compute stats (before applying status filter)
+		$statsRaw = (clone $baseQuery)
+			->selectRaw("
+				COUNT(*) as total,
+				SUM(CASE WHEN services_requests.approved IS NULL AND (services_requests.done IS NULL OR services_requests.done = 0) THEN 1 ELSE 0 END) as pending,
+				SUM(CASE WHEN services_requests.done = 1 THEN 1 ELSE 0 END) as completed,
+				SUM(CASE WHEN services_requests.approved = 'Yes' THEN 1 ELSE 0 END) as approved,
+				SUM(CASE WHEN services_requests.approved = 'No' THEN 1 ELSE 0 END) as rejected
+			")
+			->first();
+
+		$stats = [
+			'total'     => (int) ($statsRaw->total ?? 0),
+			'pending'   => (int) ($statsRaw->pending ?? 0),
+			'completed' => (int) ($statsRaw->completed ?? 0),
+			'approved'  => (int) ($statsRaw->approved ?? 0),
+			'rejected'  => (int) ($statsRaw->rejected ?? 0),
+		];
+
+		// Apply status filter
+		$statusFilter = $request->input('request_status');
+		if ($statusFilter) {
+			switch ($statusFilter) {
+				case 'pending':
+					$baseQuery->whereNull('services_requests.approved')
+						->where(function ($q) { $q->whereNull('services_requests.done')->orWhere('services_requests.done', 0); });
+					break;
+				case 'completed':
+					$baseQuery->where('services_requests.done', 1);
+					break;
+				case 'approved':
+					$baseQuery->where('services_requests.approved', 'Yes');
+					break;
+				case 'rejected':
+					$baseQuery->where('services_requests.approved', 'No');
+					break;
+			}
+		}
+
+		// Fetch requests
+		$rows = $baseQuery->select([
+				'services_requests.id',
+				"services.{$nameCol} as service_name",
+				'services_requests.date_time',
+				'services_requests.comment',
+				'services.img_url as service_img',
+				'services_requests.approved',
+				'services_requests.done',
+				'service_providers.id as provider_id',
+				'service_providers.company_name as provider_name',
+				'service_providers.img_url as provider_img',
+				DB::raw("CONCAT(users.first_name_en, ' ', users.last_name_en) as founder_name"),
+				"companies.{$nameCol} as startup_name",
+			])
+			->orderBy('services_requests.created_at', 'desc')
+			->get();
+
+		// Map to the structure the blade expects
+		$requests = $rows->map(function ($row) {
+			// Determine display status
+			if ($row->done == 1) {
+				$status = 'Completed';
+			} elseif ($row->approved === 'Yes') {
+				$status = 'Approved';
+			} elseif ($row->approved === 'No') {
+				$status = 'Rejected';
+			} else {
+				$status = 'Pending';
+			}
+
+			return [
+				'id'          => $row->id,
+				'title'       => $row->service_name,
+				'date'        => $row->date_time ? \Carbon\Carbon::parse($row->date_time)->format('M d, Y • H:i') : '—',
+				'description' => $row->comment ?? '—',
+				'image_url'   => $row->service_img ? '/191014/' . $row->service_img : '/images/deck-video.svg',
+				'status'      => $status,
+				'service_provider' => [
+					'id'        => $row->provider_id,
+					'name'      => $row->provider_name ?? '—',
+					'image_url' => $row->provider_img ? '/191014/' . $row->provider_img : '/images/deck-video.svg',
+				],
+				'founder_name'  => $row->founder_name ?? 'N/A',
+				'startup_name'  => $row->startup_name ?? 'N/A',
+			];
 		});
 
-		if($request->Service_id != 0){
-			$received = $received->whereNull('approved')->where('service_id', $request->Service_id)->with('service');
-		}
-		if($request->status != 0){
-			$request->status == 'Done' ? $status = 1 : $status = 0;
-			
-			$received = $received->whereNull('approved')->where('done', $status)->with('service');
-		}
-		if($request->start_date != 0){
-			$received = $received->whereNull('approved')->where('date_time', '>=', $request->start_date)->with('service');
-		}
-		if($request->end_date != 0){
-			$received = $received->whereNull('approved')->where('date_time', '<=', $request->end_date)->with('service');
-		}
-
-		$received = $received->orderBy('created_at', 'desc')->get();
-
-		return view('admin.settings.services.requests', compact('received','countold') );
+		return view('admin.settings.services.requests', compact('stats', 'requests'));
 	}
 
 	public function oldrequests()
@@ -474,11 +550,43 @@ class ServiceController extends Controller
 	{
 		if( $request && $id )
 		{
-			$service = Service::where('id', $id)->where('status', true)->first();
-			if( empty( $service ) ) { return response()->json(['status' => false, 'title' => 'Not Found', 'message' => 'Service not found']); }
+			$service = DB::table('services')
+				->leftJoin('service_providers', 'services.service_provider_id', '=', 'service_providers.id')
+				->leftJoin('users as provider_user', 'service_providers.user_id', '=', 'provider_user.id')
+				->where('services.id', $id)
+				->where('services.status', true)
+				->whereNull('services.deleted_at')
+				->select([
+					'services.*',
+					'service_providers.company_name as provider_company',
+					'service_providers.contact_name as provider_contact',
+					'service_providers.img_url as provider_img',
+					'provider_user.id as provider_user_id',
+				])
+				->first();
 
-			$rate = (int) $service->myRate();
-			$service->rate = $rate;
+			if( empty( $service ) ) { return response()->json(['status' => false, 'title' => 'Not Found', 'message' => __('admin.Service not found')]); }
+
+			// Rating & reviews count via query builder
+			$ratingData = DB::table('services_requests')
+				->where('service_id', $id)
+				->whereNotNull('rate')
+				->whereNull('deleted_at')
+				->selectRaw('COALESCE(AVG(rate), 0) as avg_rating, COUNT(*) as review_count')
+				->first();
+
+			$service->avg_rating   = round($ratingData->avg_rating ?? 0, 1);
+			$service->review_count = $ratingData->review_count ?? 0;
+
+			// User's own rating for this service
+			$myRate = DB::table('services_requests')
+				->where('service_id', $id)
+				->where('user_id', Auth::id())
+				->whereNotNull('rate')
+				->whereNull('deleted_at')
+				->value('rate');
+			$service->rate = (int) ($myRate ?? 0);
+
 			return response()->json(['status' => true, 'title' => 'Success', 'service' => $service]);
 		}
 		return response()->json(['status' => false, 'title' => 'Failed', 'message' => 'This request cannot be processed right now'], 500);
@@ -509,52 +617,126 @@ class ServiceController extends Controller
 		return redirect()->back()->with(['class' => 'danger', 'msg' => __('admin.An unexpected error occurred, please try again later')]);
 	}
 
-	public function book_service(Request $request)
+	public function book_service(BookServiceRequest $request)
 	{
-		if( $request )
+		$user    = auth()->user();
+		$service = Service::find($request->id);
+
+		if( empty( $service ) ) { return response()->json(['state' => false, 'title' => 'Not Found', 'message' => __('admin.Service not found')]); }
+
+		$serviceRequest = ServicesRequests::create([
+			'service_id' => $service->id,
+			'user_id'    => $user->id,
+			'comment'    => $request->input('comment'),
+			'date_time'  => $request->datetime,
+		]);
+
+		event(new WebMessage('NewServ', $user->first_name_en . ' ' . $user->last_name_en));
+
+		if( $service->vendor_email && !in_array(env('APP_ENV', 'local'), ['local']) )
 		{
-			$user = auth()->user();
-			$service = Service::find( $request->id );
-			
-			if( empty( $service ) ) { return response()->json(['state' => false, 'title' => 'Not Found', 'message' => 'Service not found']); }
-
-			$serviceRequest = ServicesRequests::create([
-				'service_id' => $service->id,
-				'user_id' => $user->id,
-				'comment' => $request->input('comment', null) ?? null,
-				'date_time' => $request->datetime
-			]);
-
-			event(new WebMessage('NewServ', $user->first_name_en . ' ' . $user->last_name_en));
-
-			if( $service && $service->vendor_email && !in_array(env('APP_ENV', 'local'), ['local']) )
-			{
-				// Create anonymous notifiable for vendor email
-				// Notification::route('mail', $service->vendor_email)->notify(new ServiceRequestNotification($serviceRequest));
-				Mail::to($service->vendor_email)->queue(new ServiceRequestNotification($serviceRequest));
-			}
-			
-			return response()->json(['state' => true, 'title' => 'Success', 'message' => __('admin.request sent')]);
+			Mail::to($service->vendor_email)->queue(new ServiceRequestNotification($serviceRequest));
 		}
-		return response()->json(['status' => false, 'title' => 'Failed', 'message' => 'This request cannot be processed right now'], 500);
+
+		return response()->json(['state' => true, 'title' => 'Success', 'message' => __('admin.service_request_submitted_successfully')]);
 	}
 
-	public function myRequests()
+	public function myRequests(Request $request)
 	{
-		$received = ServicesRequests::join('services','service_id','services.id')
-			->where('user_id', Auth::id())
-			->orderBy('services_requests.created_at','DESC')
-			->get([
-				'services_requests.id as id',
-				'services.id as sid',
-				'services.name_en as title_en',
-				'services.name_ar as title_ar',
-				'services_requests.comment',
-				'services_requests.approved',
-				'services_requests.admin_comment',
-				'services_requests.created_at'
-			]);
+		$userId = Auth::id();
+		$locale = app()->getLocale();
+		$nameCol = 'name_' . $locale;
 
-		return view('admin.clients.myrequests', compact('received') );
+		// Base query for the founder's own requests
+		$baseQuery = DB::table('services_requests')
+			->join('services', 'services_requests.service_id', '=', 'services.id')
+			->leftJoin('service_providers', 'services.service_provider_id', '=', 'service_providers.id')
+			->where('services_requests.user_id', $userId)
+			->whereNull('services_requests.deleted_at')
+			->whereNull('services.deleted_at');
+
+		// Compute stats
+		$statsRaw = (clone $baseQuery)
+			->selectRaw("
+				COUNT(*) as total,
+				SUM(CASE WHEN services_requests.approved IS NULL AND (services_requests.done IS NULL OR services_requests.done = 0) THEN 1 ELSE 0 END) as pending,
+				SUM(CASE WHEN services_requests.done = 1 THEN 1 ELSE 0 END) as completed,
+				SUM(CASE WHEN services_requests.approved = 'Yes' THEN 1 ELSE 0 END) as approved,
+				SUM(CASE WHEN services_requests.approved = 'No' THEN 1 ELSE 0 END) as rejected
+			")
+			->first();
+
+		$stats = [
+			'total'     => (int) ($statsRaw->total ?? 0),
+			'pending'   => (int) ($statsRaw->pending ?? 0),
+			'completed' => (int) ($statsRaw->completed ?? 0),
+			'approved'  => (int) ($statsRaw->approved ?? 0),
+			'rejected'  => (int) ($statsRaw->rejected ?? 0),
+		];
+
+		// Apply status filter
+		$statusFilter = $request->input('request_status');
+		if ($statusFilter) {
+			switch ($statusFilter) {
+				case 'pending':
+					$baseQuery->whereNull('services_requests.approved')
+						->where(function ($q) { $q->whereNull('services_requests.done')->orWhere('services_requests.done', 0); });
+					break;
+				case 'completed':
+					$baseQuery->where('services_requests.done', 1);
+					break;
+				case 'approved':
+					$baseQuery->where('services_requests.approved', 'Yes');
+					break;
+				case 'rejected':
+					$baseQuery->where('services_requests.approved', 'No');
+					break;
+			}
+		}
+
+		// Fetch requests
+		$rows = $baseQuery->select([
+				'services_requests.id',
+				"services.{$nameCol} as service_name",
+				'services_requests.date_time',
+				'services_requests.comment',
+				'services.img_url as service_img',
+				'services_requests.approved',
+				'services_requests.done',
+				'service_providers.id as provider_id',
+				'service_providers.company_name as provider_name',
+				'service_providers.img_url as provider_img',
+			])
+			->orderBy('services_requests.created_at', 'desc')
+			->get();
+
+		// Map to the structure the blade expects
+		$requests = $rows->map(function ($row) {
+			if ($row->done == 1) {
+				$status = 'Completed';
+			} elseif ($row->approved === 'Yes') {
+				$status = 'Approved';
+			} elseif ($row->approved === 'No') {
+				$status = 'Rejected';
+			} else {
+				$status = 'Pending';
+			}
+
+			return [
+				'id'          => $row->id,
+				'title'       => $row->service_name,
+				'date'        => $row->date_time ? \Carbon\Carbon::parse($row->date_time)->format('M d, Y • H:i') : '—',
+				'description' => $row->comment ?? '—',
+				'image_url'   => $row->service_img ? '/191014/' . $row->service_img : '/images/deck-video.svg',
+				'status'      => $status,
+				'service_provider' => [
+					'id'        => $row->provider_id,
+					'name'      => $row->provider_name ?? '—',
+					'image_url' => $row->provider_img ? '/191014/' . $row->provider_img : '/images/deck-video.svg',
+				],
+			];
+		});
+
+		return view('admin.clients.myrequests', compact('stats', 'requests'));
 	}
 }
