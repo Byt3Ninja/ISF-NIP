@@ -28,6 +28,7 @@ class serviceProviderRegistration extends Model
 		'action_at',
 		'reason',
 		'ip_address',
+		'locale',
 	];
 
 	protected $casts = [
@@ -42,6 +43,7 @@ class serviceProviderRegistration extends Model
 		'action_at' => 'datetime',
 		'reason' => 'string',
 		'ip_address' => 'string',
+		'locale' => 'string',
 	];
 
 	public function user()
