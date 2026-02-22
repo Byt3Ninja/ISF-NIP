@@ -415,6 +415,7 @@ class ServiceController extends Controller
 			$serviceRequest->approved = $stat == 'approve' ? 'Yes' : 'No';
 			$serviceRequest->admin_comment = $request->input('comment', null);
 			$serviceRequest->admin = $user->id;
+			$serviceRequest->decided_at = now();
 			$serviceRequest->save();
 
 			/// notify user via Mail

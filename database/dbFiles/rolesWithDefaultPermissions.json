@@ -4364,7 +4364,8 @@
                     "mentor",
                     "registered",
                     "organizationmanager",
-                    "subadmin"
+                    "subadmin",
+                    "serviceProvider"
                 ]
             },
             {
@@ -8127,6 +8128,132 @@
                 "is_core": 0,
                 "default_for": [
                     "mentor"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Dashboard (Service Provider)",
+        "description": "Dashboard (Service Provider)",
+        "permissions": [
+            {
+                "name": "dashboard.widgets_cards_service_provider_total_services_view",
+                "description": "Show Total Services Card (Service Provider)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_cards_service_provider_active_services_view",
+                "description": "Show Active Services Card (Service Provider)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_cards_service_provider_requests_30_days_view",
+                "description": "Show Requests (30 Days) Card (Service Provider)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_cards_service_provider_pending_requests_view",
+                "description": "Show Pending Requests Card (Service Provider)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_cards_service_provider_median_response_time_view",
+                "description": "Show Median Response Time Card (Service Provider)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_tables_service_provider_requests_inbox_view",
+                "description": "Show Requests Inbox Table (Service Provider)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_tables_service_provider_recent_activity_view",
+                "description": "Show Recent Activity Timeline (Service Provider)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "service_provider_request.quick_action",
+                "description": "Accept or Reject Request from Service Provider Dashboard",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "service_provider_request.bulk_action",
+                "description": "Bulk Accept or Reject Requests from Service Provider Dashboard",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "service_provider_dashboard.refresh",
+                "description": "Refresh Service Provider Dashboard Data",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "service_provider_dashboard.requests_inbox",
+                "description": "Access Requests Inbox API on Service Provider Dashboard",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "service_provider_dashboard.activity",
+                "description": "Access Recent Activity API on Service Provider Dashboard",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider"
                 ]
             }
         ]
