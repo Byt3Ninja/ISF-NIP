@@ -317,13 +317,22 @@ class surveysController extends Controller
 
 	public function survey_taking($id)
 	{
-		
+		$user = auth()->user();
 		// Store the previous URL before displaying the survey
 		$previousUrl = url()->previous();
 		session(['previous_url' => $previousUrl]);
-
-		$responses = SurveyResponses::where('user_id', Auth::id())->with(['survey'])->find($id);
-		
+		if($user->hasRole('admin')){
+			$responses = SurveyResponses::with(['survey'])->find($id);
+			
+		}elseif($user->hasAnyRole(['subadmin','organizationmanager'])){
+			$orgIds = $user->organizations_ids;
+			$responses = SurveyResponses::with(['survey'])->whereHas('survey', function ($query) use ($orgIds) {
+				$query->whereIn('organization_id', $orgIds);
+			})->find($id)->first();
+			
+		}else{
+			$responses = SurveyResponses::where('user_id', Auth::id())->with(['survey'])->find($id);
+		}
 		
 		if (empty($responses)) {
 			abort(404);
