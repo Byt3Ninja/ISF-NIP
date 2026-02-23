@@ -1084,6 +1084,21 @@
                     "organizationmanager",
                     "subadmin"
                 ]
+            },
+            {
+                "name": "service_provider.profile",
+                "description": "View Service Provider Profile",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "serviceProvider",
+                    "registered",
+                    "mentor",
+                    "judger"
+                ]
             }
         ]
     },

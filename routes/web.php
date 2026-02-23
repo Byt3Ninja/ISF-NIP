@@ -218,6 +218,11 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('services-providers/profile/step2', 'serviceProviderController@storeStep2')->name('services_providers.step2.store');
     Route::post('services-providers/profile/step3', 'serviceProviderController@storeStep3')->name('services_providers.step3.store');
     Route::post('services-providers/profile/step4', 'serviceProviderController@storeStep4')->name('services_providers.step4.store');
+    Route::get('services_providers/{id}/edit-profile', 'serviceProviderController@editProfile')->where('id', '[0-9]+')->name('services_providers.edit_profile');
+    Route::post('services-providers/{id}/clients', 'serviceProviderController@storeClient')->where('id', '[0-9]+')->name('services_providers.clients.store');
+    Route::post('services-providers/{id}/clients/{clientId}', 'serviceProviderController@updateClient')->where(['id' => '[0-9]+', 'clientId' => '[0-9]+'])->name('services_providers.clients.update');
+    Route::delete('services-providers/{id}/clients/{clientId}', 'serviceProviderController@destroyClient')->where(['id' => '[0-9]+', 'clientId' => '[0-9]+'])->name('services_providers.clients.destroy');
+    Route::post('services-providers/{id}/clients-visibility', 'serviceProviderController@updateClientsVisibility')->where('id', '[0-9]+')->name('services_providers.clients.visibility');
 
     // Service Provider Dashboard
     Route::get('service-provider/requests-inbox', 'ServiceProviderDashboardController@requestsInbox')->name('service_provider_dashboard.requests_inbox');
@@ -225,6 +230,10 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('service-provider/bulk-action', 'ServiceProviderDashboardController@bulkAction')->name('service_provider_request.bulk_action');
     Route::get('service-provider/activity', 'ServiceProviderDashboardController@recentActivity')->name('service_provider_dashboard.activity');
     Route::get('service-provider/refresh', 'ServiceProviderDashboardController@refresh')->name('service_provider_dashboard.refresh');
+
+    // Service Provider Public Profile
+    Route::get('service-provider/{id}/profile', 'ServiceProviderProfileController@show')->where('id', '[0-9]+')->name('service_provider.profile');
+    Route::get('service-provider/{id}/reviews', 'ServiceProviderProfileController@reviews')->where('id', '[0-9]+')->name('service_provider.reviews');
 
     Route::get('calendar/{id}/edit', 'SettingsController@editcal')->name('calendar.events_edit');
     Route::post('calendar/{id}/update', 'SettingsController@updatecal')->name('calendar.events_update');

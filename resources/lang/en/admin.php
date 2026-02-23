@@ -3446,4 +3446,16 @@ return [
 	'no_review_submitted_founder' => 'You have not submitted a review for this request yet.',
 	'you_have_new_review' => 'You have a new review.',
 	'new_review_email_subject' => 'You have a new review from :founder_name at :timestamp regarding :service_name.',
+
+	// Service Provider Profile
+	'no_services_available' => 'No services available at the moment.',
+	'no_reviews_found' => 'No reviews found.',
+	'view_website' => 'View Website',
+	'load_more' => 'Load More',
+	'lowest_rated' => 'Lowest Rated',
+	'book_now' => 'Book Now',
+	'no_portfolio_items' => 'No portfolio items available.',
+	'no_clients_found' => 'No clients added yet.',
+	'edit_service_provider' => 'Edit Service Provider',
+	'save_basics_first' => 'Please save the basic information first.',
 ];

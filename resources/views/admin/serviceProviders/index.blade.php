@@ -106,7 +106,18 @@
 										@if( $provider->status == 0 ) <span class="badge bg-label-danger">{{ __('admin.Not Active') }}</span> @endif
 									</td>
 									<td>
-										-
+										<div class="d-flex gap-1 justify-content-center">
+											@if($_user->ableTo('service_provider.profile', $permissions))
+											<a href="{{ route('service_provider.profile', $provider->id) }}" class="btn btn-icon btn-sm btn-text-secondary" data-toggle="tooltip" title="{{ __('admin.View') }}">
+												<i class="ti ti-eye"></i>
+											</a>
+											@endif
+											@if($_user->ableTo('services_providers.edit', $permissions))
+											<a href="{{ route('services_providers.edit_profile', $provider->id) }}" class="btn btn-icon btn-sm btn-text-secondary" data-toggle="tooltip" title="{{ __('admin.Edit') }}">
+												<i class="ti ti-edit"></i>
+											</a>
+											@endif
+										</div>
 									</td>
 								</tr>
 							@empty

@@ -21,6 +21,7 @@ class UpdateServiceProviderStep4Request extends FormRequest
     {
         return [
             'portfolio_visibility' => 'required|string|in:on,off',
+            'service_provider_id' => 'nullable|integer|exists:service_providers,id',
             'portfolio_description' => 'nullable|string|max:50',
             'portfolio' => 'nullable|array|max:20',
             'portfolio.*.id' => 'nullable|integer|exists:service_provider_portfolios,id',
