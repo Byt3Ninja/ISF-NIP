@@ -1,24 +1,8 @@
 @php
-$clients = [
-  [
-    'id' => 1,
-    'name' => 'TechFlow Inc.',
-    'url' => 'https://techflow.com',
-    'logo' => 'logos/techflow.png',
-  ],
-  [
-    'id' => 2,
-    'name' => 'Innovate Co.',
-    'url' => 'https://innovateco.com',
-    'logo' => 'logos/innovate.png',
-  ],
-  [
-    'id' => 3,
-    'name' => 'Quantum Leap',
-    'url' => null,
-    'logo' => null,
-  ],
-];
+  $org = $client->service_provider ?? null;
+  $spClients = $org ? $org->clients : collect();
+  $showClients = $org ? $org->show_clients : true;
+  $providerId = $org->id ?? null;
 @endphp
 
 <div class="row g-6" id="step-5-clients">
@@ -27,11 +11,11 @@ $clients = [
       <div class="p-3">
         <h5 class="card-title">{{ __('admin.Visibility') }}</h5>
         <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" id="clients_visibility" name="clients_visibility" checked>
+          <input class="form-check-input" type="checkbox" id="clients_visibility" name="clients_visibility" {{ $showClients ? 'checked' : '' }}>
           <label class="form-check-label" for="clients_visibility">{{ __('admin.public') }}</label>
         </div>
         <small class="text-muted d-block mt-2" id="clients_visibility_desc">
-          {{ __('admin.visibility_public_desc') ?? 'Clients is currently visible to everyone.' }}
+          {{ $showClients ? (__('admin.visibility_public_desc') ?? 'Clients is currently visible to everyone.') : (__('admin.visibility_private_desc') ?? 'Clients are private and only visible to you.') }}
         </small>
       </div>
     </div>
@@ -39,7 +23,6 @@ $clients = [
 
   {{-- Informational Note --}}
   <div class="col-12">
-    <!-- Informational Note -->
     <div class="alert alert-info alert-dismissible" role="alert" id="infoNote">
       <i class="ti ti-info-circle me-2"></i>
       <strong>{{ __('admin.note') }}:</strong> {{ __('admin.one_client_note') }}
@@ -54,10 +37,9 @@ $clients = [
     </button>
   </div>
 
-
   {{-- Clients List --}}
-  @if (empty($clients) || count($clients) === 0)
-    <div class="col-12">
+  @if ($spClients->isEmpty())
+    <div class="col-12" id="no-clients-placeholder">
       <div class="text-center py-5 border-2 border-dashed border-light rounded-3">
         <i class="ti ti-circle-off display-3 text-secondary opacity-25"></i>
         <p class="text-muted mt-3">{{ __('admin.no_clients_added_yet') }}</p>
@@ -67,18 +49,18 @@ $clients = [
       </div>
     </div>
   @else
-    <div class="col-12 mb-6">
-      <div class="row g-3">
-        @foreach ($clients as $client)
-        <div class="col-md-6" id="client-{{ $client['id'] }}">
+    <div class="col-12 mb-6" id="clients-list-container">
+      <div class="row g-3" id="clients-list">
+        @foreach ($spClients as $spClient)
+        <div class="col-md-6" id="client-{{ $spClient->id }}">
           <div class="border rounded-3 p-3 bg-white d-flex align-items-center justify-content-between">
 
             <div class="d-flex align-items-center gap-3">
               {{-- Logo --}}
               <div class="bg-secondary-subtle rounded-3 d-flex align-items-center justify-content-center overflow-hidden"
                 style="width:60px;height:60px;">
-                @if ($client['logo'])
-                <img src="{{ asset($client['logo']) }}" class="img-fluid" alt="{{ $client['name'] }}">
+                @if ($spClient->logo_url)
+                <img src="{{ asset($spClient->logo_url) }}" class="img-fluid" alt="{{ $spClient->name }}">
                 @else
                 <span class="text-secondary small">Logo</span>
                 @endif
@@ -86,12 +68,12 @@ $clients = [
 
               {{-- Info --}}
               <div class="d-flex flex-column w-px-300">
-                <h6 class="fw-semibold line-clamp-1 mb-1">{{ $client['name'] }}</h6>
+                <h6 class="fw-semibold line-clamp-1 mb-1">{{ $spClient->name }}</h6>
 
                 <div class="text-secondary small">
-                  @if ($client['url'])
-                    <a href="{{ $client['url'] }}" target="_blank" class="text-secondary line-clamp-1 text-decoration-none">
-                      {{ $client['url'] }}{{ $client['url'] }}{{ $client['url'] }}{{ $client['url'] }}{{ $client['url'] }}{{ $client['url'] }}{{ $client['url'] }}
+                  @if ($spClient->external_link)
+                    <a href="{{ $spClient->external_link }}" target="_blank" class="text-secondary line-clamp-1 text-decoration-none">
+                      {{ $spClient->external_link }}
                       <i class="ti ti-external-link ms-1"></i>
                     </a>
                   @else
@@ -103,15 +85,15 @@ $clients = [
 
             {{-- Actions --}}
             <div class="d-flex gap-1 text-secondary">
-              <button 
-                type="button" 
+              <button
+                type="button"
                 class="btn btn-icon btn-sm btn-text-secondary waves-effect waves-light rounded-pill"
                 data-bs-toggle="modal"
                 data-bs-target="#clientModal"
                 data-mode="edit"
-                data-id="{{ $client['id'] }}"
-                data-name="{{ $client['name'] }}"
-                data-url="{{ $client['url'] }}"
+                data-id="{{ $spClient->id }}"
+                data-name="{{ $spClient->name }}"
+                data-url="{{ $spClient->external_link }}"
               >
                 <i class="ti ti-edit"></i>
               </button>
@@ -119,7 +101,7 @@ $clients = [
               <button
                 type="button"
                 class="btn btn-icon btn-sm btn-text-secondary waves-effect waves-light rounded-pill"
-                onclick="confirmDelete({{ $client['id'] }}, '{{ $client['name'] }}')"
+                onclick="confirmDeleteClient({{ $spClient->id }}, '{{ addslashes($spClient->name) }}')"
               >
                 <i class="ti ti-trash"></i>
               </button>
@@ -179,22 +161,32 @@ $clients = [
 
 @push('scripts')
 <script>
+  const spClientProviderId = {{ $providerId ?? 'null' }};
+
   /* Clients Visibility */
   $('#clients_visibility').change(function() {
     $('#clients_visibility_desc').text(
-      $(this).is(':checked') 
-        ? '{{ __("admin.visibility_public_desc") ?? "Clients are currently visible to everyone." }}' 
+      $(this).is(':checked')
+        ? '{{ __("admin.visibility_public_desc") ?? "Clients are currently visible to everyone." }}'
         : '{{ __("admin.visibility_private_desc") ?? "Clients are private and only visible to you." }}'
     );
-  }).trigger('change');
-  
+
+    if (spClientProviderId) {
+      $.ajax({
+        url: `/dashboard/services-providers/${spClientProviderId}/clients-visibility`,
+        method: 'POST',
+        data: { show_clients: $(this).is(':checked') ? 1 : 0 },
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+      });
+    }
+  });
+
   /* Add / Edit Modal */
   $('#clientModal').on('show.bs.modal', function (e) {
     const $btn = $(e.relatedTarget);
     const mode = $btn.data('mode');
-  
     const $modal = $(this);
-  
+
     if (mode === 'edit') {
       $modal.find('#clientModalTitle').text("{{ __('admin.edit_client') }}");
       $modal.find('#client-id').val($btn.data('id'));
@@ -205,7 +197,7 @@ $clients = [
       $modal.find('input').val('');
     }
   });
-  
+
   /* Reset modal when closed */
   $('#clientModal').on('hidden.bs.modal', function () {
     $(this).find('form')[0].reset();
@@ -214,27 +206,31 @@ $clients = [
 
   /* Submit Client Form */
   function submitClientForm() {
-    console.log('SUBMIT HANDLER FIRED');
-    
+    if (!spClientProviderId) {
+      releaseFailureAlert({
+        title: '{{ __("admin.Error") }}',
+        message: '{{ __("admin.save_basics_first") }}'
+      });
+      return;
+    }
+
     const $form = $('#clientForm');
     const formData = new FormData($form[0]);
     const id = $('#client-id').val();
-    
-    // ------------------
+
     // Validation
-    // ------------------
     let isValid = true;
-    
+
     const name = $('#client-name').val().trim();
     const url  = $('#client-url').val().trim();
-    
+
     if (!name) {
       $('#client-name').addClass('is-invalid');
       isValid = false;
     } else {
       $('#client-name').removeClass('is-invalid');
     }
-    
+
     if (url) {
       try {
         new URL(url);
@@ -246,15 +242,16 @@ $clients = [
     } else {
       $('#client-url').removeClass('is-invalid');
     }
-    
+
     if (!isValid) return;
-    
-    // ------------------
-    // AJAX request
-    // ------------------
+
+    const ajaxUrl = id
+      ? `/dashboard/services-providers/${spClientProviderId}/clients/${id}`
+      : `/dashboard/services-providers/${spClientProviderId}/clients`;
+
     $.ajax({
-      url: id ? `/clients/${id}` : `/clients`,
-      method: id ? 'POST' : 'POST',
+      url: ajaxUrl,
+      method: 'POST',
       data: formData,
       processData: false,
       contentType: false,
@@ -262,12 +259,9 @@ $clients = [
         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
       },
       beforeSend() {
-        $form.find('button[type="button"][onclick*="submitClientForm"]').prop('disabled', true);
+        $form.find('button[onclick*="submitClientForm"]').prop('disabled', true);
       },
       success(response) {
-        // Example response expected:
-        // { id, name, url, logo }
-
         if (!response.success) {
           releaseFailureAlert({
             title: '{{ __("admin.Error") }}',
@@ -275,20 +269,19 @@ $clients = [
           });
           return;
         }
-    
+
         $('#clientModal').modal('hide');
         $form[0].reset();
         $('#client-id').val('');
-    
+
         releaseSuccessAlert({
           title: '{{ __("admin.Success") }}',
           message: id
             ? '{{ __("admin.client_updated_successfully") }}'
             : '{{ __("admin.client_added_successfully") }}'
         });
-    
-        // Reload the clients section
-        $('#step-5-clients').load(location.href + ' #step-5-clients > *');
+
+        location.reload();
       },
       error(xhr) {
         releaseFailureAlert({
@@ -297,7 +290,7 @@ $clients = [
         });
       },
       complete() {
-        $form.find('button[type="button"][onclick*="submitClientForm"]').prop('disabled', false);
+        $form.find('button[onclick*="submitClientForm"]').prop('disabled', false);
       }
     });
   }
@@ -309,54 +302,64 @@ $clients = [
   });
 
   $('#client-url').on('input', function () {
-    const value = $(this).val().trim()
-
+    const value = $(this).val().trim();
     if (!value) {
-      $(this).removeClass('is-invalid')
-      return
+      $(this).removeClass('is-invalid');
+      return;
     }
-
     try {
-      new URL(value)
-      $(this).removeClass('is-invalid')
+      new URL(value);
+      $(this).removeClass('is-invalid');
     } catch {
-      // still invalid → keep the class
+      // still invalid
     }
   });
-  
+
   /* Delete Confirmation */
-  function confirmDelete(id, name) {
+  function confirmDeleteClient(id, name) {
     releaseWarningAlert({
       title: '{{ __("admin.delete_client") }}?',
       message: `{{ __("admin.you_are_about_to_delete") }} "<strong>${name}</strong>"`,
       confirmText: '{{ __("admin.DYes") }}',
       confirmColor: 'danger',
       onConfirm: () => {
-        // Replace with real delete request
-        // console.log('Delete client ID:', id)
-        $('#client-' + id).fadeOut(300, () => $(this).remove());
-        releaseSuccessAlert({
-          title: '{{ __("admin.Deleted") }}',
-          message: `{{ __("admin.client_deleted_successfully") }}`
+        $.ajax({
+          url: `/dashboard/services-providers/${spClientProviderId}/clients/${id}`,
+          method: 'DELETE',
+          headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+          success(response) {
+            if (response.success) {
+              $('#client-' + id).fadeOut(300, function() { $(this).remove(); });
+              releaseSuccessAlert({
+                title: '{{ __("admin.Deleted") }}',
+                message: '{{ __("admin.client_deleted_successfully") }}'
+              });
+            }
+          },
+          error(xhr) {
+            releaseFailureAlert({
+              title: '{{ __("admin.Error") }}',
+              message: xhr.responseJSON?.message || "{{ __('admin.unexpected_error') }}"
+            });
+          }
         });
       }
     });
   }
 
-  /* Upload Logo */
+  /* Upload Logo validation */
   $('#client-logo').on('change', function() {
-    const fileName = this.files[0] ? this.files[0].name : '';
     const maxSize = 5 * 1024 * 1024; // 5MB
     const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'image/svg+xml'];
 
-    if (this.files[0].size > maxSize) {
+    if (this.files[0] && this.files[0].size > maxSize) {
       this.value = '';
       $(this).addClass('is-invalid');
       $(this).siblings('.invalid-feedback').text('{{ __("admin.file_exceeds_5_limit") }}').show();
       return;
     }
 
-    if (!allowedTypes.includes(this.files[0].type)) {
+    if (this.files[0] && !allowedTypes.includes(this.files[0].type)) {
       this.value = '';
       $(this).addClass('is-invalid');
       $(this).siblings('.invalid-feedback').text('{{ __("admin.image_only_allowed") }}').show();
