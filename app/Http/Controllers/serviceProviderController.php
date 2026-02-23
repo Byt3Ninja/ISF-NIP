@@ -17,6 +17,9 @@ use App\Http\Requests\UpdateServiceProviderStep2Request;
 use App\Http\Requests\UpdateServiceProviderStep3Request;
 use App\Http\Requests\UpdateServiceProviderStep4Request;
 use App\Services\ServiceProviderService;
+use App\Country;
+use App\State;
+use App\City;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Hash;
@@ -64,10 +67,19 @@ class serviceProviderController extends Controller
 	public function storeStep1(StoreServiceProviderStep1Request $request)
 	{
 		try {
+			$provider = null;
+			if ($request->filled('service_provider_id')) {
+				if (!auth()->user()->ableTo('services_providers.edit')) {
+					abort(403);
+				}
+				$provider = serviceProviders::findOrFail($request->service_provider_id);
+			}
+
 			$this->serviceProviderService->updateStep1(
-				auth()->user(), 
-				$request->validated(), 
-				$request->file('company_logo')
+				auth()->user(),
+				$request->validated(),
+				$request->file('company_logo'),
+				$provider
 			);
 
             if ($request->ajax()) {
@@ -89,10 +101,19 @@ class serviceProviderController extends Controller
 	public function storeStep2(UpdateServiceProviderStep2Request $request)
 	{
 		try {
+			$provider = null;
+			if ($request->filled('service_provider_id')) {
+				if (!auth()->user()->ableTo('services_providers.edit')) {
+					abort(403);
+				}
+				$provider = serviceProviders::findOrFail($request->service_provider_id);
+			}
+
 			$this->serviceProviderService->updateStep2(
-				auth()->user(), 
-				$request->validated(), 
-				$request->file('hero_image')
+				auth()->user(),
+				$request->validated(),
+				$request->file('hero_image'),
+				$provider
 			);
 
             if ($request->ajax()) {
@@ -114,9 +135,18 @@ class serviceProviderController extends Controller
 	public function storeStep3(UpdateServiceProviderStep3Request $request)
 	{
 		try {
+			$provider = null;
+			if ($request->filled('service_provider_id')) {
+				if (!auth()->user()->ableTo('services_providers.edit')) {
+					abort(403);
+				}
+				$provider = serviceProviders::findOrFail($request->service_provider_id);
+			}
+
 			$this->serviceProviderService->updateStep3(
-				auth()->user(), 
-				$request->validated()
+				auth()->user(),
+				$request->validated(),
+				$provider
 			);
 
             if ($request->ajax()) {
@@ -138,9 +168,18 @@ class serviceProviderController extends Controller
     public function storeStep4(UpdateServiceProviderStep4Request $request)
     {
         try {
+            $provider = null;
+            if ($request->filled('service_provider_id')) {
+                if (!auth()->user()->ableTo('services_providers.edit')) {
+                    abort(403);
+                }
+                $provider = serviceProviders::findOrFail($request->service_provider_id);
+            }
+
             $this->serviceProviderService->updateStep4(
                 auth()->user(),
-                $request->validated()
+                $request->validated(),
+                $provider
             );
 
             if ($request->ajax()) {
@@ -450,6 +489,29 @@ class serviceProviderController extends Controller
 		}
 	}
 
+	public function editProfile($id)
+	{
+		$user = auth()->user();
+		if (!$user->ableTo('services_providers.edit')) {
+			abort(403);
+		}
+
+		$provider = serviceProviders::findOrFail($id);
+		$client = $provider->user;
+
+		$countries = Country::all();
+		$states = $provider->country_id
+			? State::where('country_id', $provider->country_id)->get()
+			: collect();
+		$cities = $provider->state_id
+			? City::where('state_id', $provider->state_id)->get()
+			: collect();
+
+		return view('admin.serviceProviders.editProfile', compact(
+			'client', 'provider', 'countries', 'states', 'cities'
+		));
+	}
+
 	public function index()
 	{
 		$user = auth()->user();
@@ -492,5 +554,85 @@ class serviceProviderController extends Controller
 			return $output;
 		});
 		return view('admin.serviceProviders.index', compact('providers'));
+	}
+
+	// ─── Client CRUD ────────────────────────────────────────────────
+
+	private function authorizeClientAccess($providerId)
+	{
+		$user = auth()->user();
+		$provider = serviceProviders::findOrFail($providerId);
+
+		$isOwner = $provider->user_id === $user->id;
+		if (!$isOwner && !$user->ableTo('services_providers.edit')) {
+			abort(403);
+		}
+
+		return $provider;
+	}
+
+	public function storeClient(Request $request, $id)
+	{
+		$provider = $this->authorizeClientAccess($id);
+
+		$request->validate([
+			'client_name' => 'required|string|max:100',
+			'client_url' => 'nullable|url|max:500',
+			'client_logo' => 'nullable|image|mimes:jpeg,png,jpg,webp,svg|max:5120',
+		]);
+
+		$data = [
+			'name' => $request->client_name,
+			'external_link' => $request->client_url,
+			'order' => $provider->clients()->count(),
+		];
+
+		if ($request->hasFile('client_logo')) {
+			$data['logo_url'] = $request->file('client_logo')->store('service_providers_clients', ['disk' => 'public_uploads']);
+		}
+
+		$provider->clients()->create($data);
+
+		return response()->json(['success' => true, 'message' => __('admin.client_added_successfully')]);
+	}
+
+	public function updateClient(Request $request, $id, $clientId)
+	{
+		$provider = $this->authorizeClientAccess($id);
+
+		$request->validate([
+			'client_name' => 'required|string|max:100',
+			'client_url' => 'nullable|url|max:500',
+			'client_logo' => 'nullable|image|mimes:jpeg,png,jpg,webp,svg|max:5120',
+		]);
+
+		$client = $provider->clients()->findOrFail($clientId);
+
+		$client->name = $request->client_name;
+		$client->external_link = $request->client_url;
+
+		if ($request->hasFile('client_logo')) {
+			$client->logo_url = $request->file('client_logo')->store('service_providers_clients', ['disk' => 'public_uploads']);
+		}
+
+		$client->save();
+
+		return response()->json(['success' => true, 'message' => __('admin.client_updated_successfully')]);
+	}
+
+	public function destroyClient($id, $clientId)
+	{
+		$provider = $this->authorizeClientAccess($id);
+		$provider->clients()->findOrFail($clientId)->delete();
+
+		return response()->json(['success' => true, 'message' => __('admin.client_deleted_successfully')]);
+	}
+
+	public function updateClientsVisibility(Request $request, $id)
+	{
+		$provider = $this->authorizeClientAccess($id);
+		$provider->update(['show_clients' => (bool) $request->show_clients]);
+
+		return response()->json(['success' => true]);
 	}
 }

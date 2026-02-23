@@ -23,6 +23,7 @@ class UpdateServiceProviderStep2Request extends FormRequest
             'appointment_link' => 'nullable|url|max:500',
             'operating_mode' => 'required|string|in:online_remote,on_site,online_on_site',
             'operating_region' => 'required|string|in:global,mena,gcc,africa,europe,north_america,asia',
+            'service_provider_id' => 'nullable|integer|exists:service_providers,id',
         ];
     }
     

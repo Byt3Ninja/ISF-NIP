@@ -1119,86 +1119,22 @@
       });
     }
 
-    // Add this function to handle the AJAX submission
+    // Final step — Clients are managed via their own AJAX CRUD,
+    // so Submit just shows success and redirects.
     function submitFormData() {
-      const form = document.getElementById('service-provider-form-wizard');
-      const formData = new FormData(form);
-
-      // Show loading state
-      const submitBtn = document.querySelector('.btn-next');
-      const originalText = submitBtn.querySelector('span').textContent;
-      const originalIcon = submitBtn.querySelector('i');
-
-      submitBtn.disabled = true;
-      submitBtn.querySelector('span').textContent = translations[lang].submitting;
-      if (originalIcon) originalIcon.style.display = 'none';
-
-      // Add spinner
-      const spinner = document.createElement('span');
-      spinner.className = 'spinner-border spinner-border-sm me-2';
-      spinner.setAttribute('role', 'status');
-      submitBtn.prepend(spinner);
-
-      // Make AJAX request
-      $.ajax({
-        url: form.getAttribute('action') || window.location.href, // Use form action or current URL
-        type: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        headers: {
-          'X-CSRF-TOKEN': $('input[name="_token"]').val()
-        },
-        success: function (response) {
-          // Handle success
-          console.log('Success:', response);
-
-          // Remove spinner
-          spinner.remove();
-
-          releaseSuccessAlert({
-            title: lang === 'ar' ? 'نجح!' : 'Success!',
-            message: response.message || (lang === 'ar' ? 'تم إرسال النموذج بنجاح' : 'Form submitted successfully'),
-          });
-
-          // Redirect or reset form
-          if (response.redirect) {
-            window.location.href = response.redirect;
-          } else {
-            // Default redirect for profile
-            window.location.href = route('user.profile_view');
-          }
-        },
-        error: function (xhr, status, error) {
-          // Handle error
-          console.error('Error:', error);
-
-          // Remove spinner
-          spinner.remove();
-
-          let errorMessage = lang === 'ar' ? 'حدث خطأ أثناء الإرسال' : 'An error occurred during submission';
-
-          // Handle validation errors
-          if (xhr.status === 422 && xhr.responseJSON?.errors) {
-            const errors = xhr.responseJSON.errors;
-            const errorList = Object.values(errors).flat().join('<br>');
-            errorMessage = errorList;
-          } else if (xhr.responseJSON?.message) {
-            errorMessage = xhr.responseJSON.message;
-          }
-
-          // Show error message
-          releaseFailureAlert({
-            title: lang === 'ar' ? 'خطأ!' : 'Error!',
-            message: errorMessage,
-          });
-
-          // Re-enable button
-          submitBtn.disabled = false;
-          submitBtn.querySelector('span').textContent = originalText;
-          if (originalIcon) originalIcon.style.display = '';
-        }
+      releaseSuccessAlert({
+        title: lang === 'ar' ? 'تم!' : 'Done!',
+        message: lang === 'ar' ? 'تم حفظ الملف الشخصي بنجاح' : 'Profile saved successfully',
       });
+
+      // Redirect to the provider listing if admin edit, otherwise stay
+      const form = document.getElementById('service-provider-form-wizard');
+      const spId = form.querySelector('input[name="service_provider_id"]');
+      if (spId) {
+        setTimeout(() => {
+          window.location.href = '/dashboard/services_providers';
+        }, 1500);
+      }
     }
 
     const wizardValidationPrevButton = wizardValidation.querySelector('.btn-prev');

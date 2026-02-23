@@ -46,6 +46,9 @@ class serviceProviders extends Model
         'stat4_label', 'stat4_value',
         'show_portfolio',
         'portfolio_description',
+        'is_verified',
+        'tags',
+        'show_clients',
     ];
 
 	protected $casts = [
@@ -57,6 +60,8 @@ class serviceProviders extends Model
 		'status' => 'boolean',
         'show_stats' => 'boolean',
         'show_portfolio' => 'boolean',
+        'is_verified' => 'boolean',
+        'show_clients' => 'boolean',
         'portfolio_description' => 'string',
 		'user_id' => 'integer',
 		'country_id' => 'integer',
@@ -75,5 +80,20 @@ class serviceProviders extends Model
     public function portfolios()
     {
         return $this->hasMany(ServiceProviderPortfolio::class, 'service_provider_id')->orderBy('order');
+    }
+
+    public function services()
+    {
+        return $this->hasMany(Service::class, 'service_provider_id');
+    }
+
+    public function clients()
+    {
+        return $this->hasMany(ServiceProviderClient::class, 'service_provider_id')->orderBy('order');
+    }
+
+    public function country()
+    {
+        return $this->belongsTo(Country::class, 'country_id');
     }
 }

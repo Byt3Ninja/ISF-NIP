@@ -160,7 +160,10 @@ class ClientProfileController extends Controller
         // $almuni = Almuni::where('user_id', $client->id)->get();
 
         if ($client->hasRole('serviceProvider')) {
-            return view('admin/clients/provider-profile', compact('client', 'mentors', 'mentorshipTasks', 'mentrequests_count', 'mentrequests_period', 'average_rating'));
+            $provider = $client->service_provider;
+            if ($provider) {
+                return redirect()->route('service_provider.profile', $provider->id);
+            }
         }
         
         return view('admin/clients/profile', compact('client', 'mentors', 'mentorshipTasks', 'mentrequests_count', 'mentrequests_period', 'average_rating'));

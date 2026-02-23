@@ -3503,4 +3503,16 @@ return [
 	'no_review_submitted_founder' => 'لم تقم بإرسال تقييم لهذا الطلب بعد.',
 	'you_have_new_review' => 'لديك تقييم جديد.',
 	'new_review_email_subject' => 'لديك تقييم جديد من :founder_name في :timestamp بخصوص :service_name.',
+
+	// Service Provider Profile
+	'no_services_available' => 'لا توجد خدمات متاحة حالياً.',
+	'no_reviews_found' => 'لم يتم العثور على مراجعات.',
+	'view_website' => 'عرض الموقع',
+	'load_more' => 'تحميل المزيد',
+	'lowest_rated' => 'الأقل تقييماً',
+	'book_now' => 'احجز الآن',
+	'no_portfolio_items' => 'لا توجد أعمال في المعرض.',
+	'no_clients_found' => 'لم تتم إضافة عملاء بعد.',
+	'edit_service_provider' => 'تعديل مزود الخدمة',
+	'save_basics_first' => 'يرجى حفظ المعلومات الأساسية أولاً.',
 ];

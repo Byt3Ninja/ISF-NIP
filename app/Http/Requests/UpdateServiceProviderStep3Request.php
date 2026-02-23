@@ -18,6 +18,7 @@ class UpdateServiceProviderStep3Request extends FormRequest
     {
         $rules = [
             'stats_visibility' => 'required|string|in:on,off',
+            'service_provider_id' => 'nullable|integer|exists:service_providers,id',
         ];
 
         for ($i = 1; $i <= 4; $i++) {

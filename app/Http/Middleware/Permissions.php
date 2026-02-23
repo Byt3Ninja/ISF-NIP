@@ -61,6 +61,8 @@ class Permissions
         'users/search',
         'cycles.completion_status_check',
         'trainings.time_tracking',
+        'services_providers.edit_profile',
+        'services_providers.clients.*',
     ];
 
     public $exceptControllers = [
