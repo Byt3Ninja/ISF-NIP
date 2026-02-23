@@ -917,7 +917,7 @@
                         </div>
                         </div>
                         <div class="slot-actions btn-group">
-                            <button type="button" class="btn btn-sm btn-icon btn-label-primary add-slot-action" title="{{ __('mentor.add') }}"><i class="ti ti-plus"></i></button>
+                            <!-- <button type="button" class="btn btn-sm btn-icon btn-label-primary add-slot-action" title="{{ __('mentor.add') }}"><i class="ti ti-plus"></i></button> -->
                             <button type="button" class="btn btn-sm btn-icon btn-label-secondary copy-slot-action" title="{{ __('mentor.copy') }}"><i class="ti ti-copy"></i></button>
                             <button type="button" class="btn btn-label-danger btn-sm btn-icon delete-slot" title="{{ __('mentor.delete') }}" data-type="${slot.type}" data-key="${slot.key}" data-index="${originalIndex}" data-id="${slot.id}">
                                 <i class="ti ti-trash ti-16px"></i>
