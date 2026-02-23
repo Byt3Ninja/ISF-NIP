@@ -1177,6 +1177,16 @@
                 ]
             },
             {
+                "name": "service_review.submit",
+                "description": "Submit Service Review (Startups)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
                 "name": "services.request_service",
                 "description": "Request Service (Startups)",
                 "guard_name": "web",

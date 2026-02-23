@@ -357,6 +357,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('directory', 'ServiceController@availableServices')->name('users.directory_view');
     Route::post('directory/{id}', 'ServiceController@details');
     Route::post('directory/{id}/rate', 'ServiceController@rate');
+    Route::post('service-review/submit', 'ServiceController@submitReview')->name('service_review.submit');
     Route::post('service/request', 'ServiceController@book_service')->name('services.request_service');
 
     //Types Manager routes
