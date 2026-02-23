@@ -162,8 +162,11 @@
                 data-request-id="{{ $request['id'] }}"
                 data-request-title="{{ $request['title'] }}"
                 data-provider-name="{{ $request['service_provider']['name'] }}"
-                data-provider-img="{{ $request['service_provider']['image_url'] }}">
-                <i class="ti ti-star me-1"></i> {{ __('admin.add_review') }}
+                data-provider-img="{{ $request['service_provider']['image_url'] }}"
+                data-existing-rating="{{ $request['rating'] ?? '' }}"
+                data-existing-title="{{ $request['review_title'] ?? '' }}"
+                data-existing-body="{{ $request['review_body'] ?? '' }}">
+                <i class="ti ti-star me-1"></i> {{ $request['has_review'] ? __('admin.edit_review') : __('admin.add_review') }}
               </button>
 
             @elseif($request['status'] === 'Rejected')
@@ -173,7 +176,14 @@
                 data-request-title="{{ $request['title'] }}"
                 data-provider-name="{{ $request['service_provider']['name'] }}"
                 data-provider-img="{{ $request['service_provider']['image_url'] }}"
-                data-status="{{ $request['status'] }}">
+                data-status="{{ $request['status'] }}"
+                data-review-rating="{{ $request['rating'] ?? '' }}"
+                data-review-title="{{ $request['review_title'] ?? '' }}"
+                data-review-body="{{ $request['review_body'] ?? '' }}"
+                data-reviewed-at="{{ $request['reviewed_at'] ?? '' }}"
+                data-has-review="{{ $request['has_review'] ? '1' : '0' }}"
+                data-founder-name="{{ $request['founder_name'] ?? '' }}"
+                data-founder-img="{{ $request['founder_img'] ?? '' }}">
                 <i class="ti ti-history me-1"></i> {{ __('admin.view_history') }}
               </button>
 
@@ -194,7 +204,14 @@
               data-request-title="{{ $request['title'] }}"
               data-provider-name="{{ $request['service_provider']['name'] }}"
               data-provider-img="{{ $request['service_provider']['image_url'] }}"
-              data-status="{{ $request['status'] }}">
+              data-status="{{ $request['status'] }}"
+              data-review-rating="{{ $request['rating'] ?? '' }}"
+              data-review-title="{{ $request['review_title'] ?? '' }}"
+              data-review-body="{{ $request['review_body'] ?? '' }}"
+              data-reviewed-at="{{ $request['reviewed_at'] ?? '' }}"
+              data-has-review="{{ $request['has_review'] ? '1' : '0' }}"
+              data-founder-name="{{ $request['founder_name'] ?? '' }}"
+              data-founder-img="{{ $request['founder_img'] ?? '' }}">
               <i class="ti ti-history"></i>
             </button>
           </div>
@@ -259,7 +276,7 @@
       {{-- Title --}}
       <div class="mb-4">
         <label for="reviewTitle" class="form-label fw-semibold">
-          {{ __('admin.review_title') }} <span class="text-danger">*</span>
+          {{ __('admin.review_title') }}
         </label>
         <input type="text" class="form-control" id="reviewTitle" name="review_title"
           placeholder="{{ __('admin.review_title_placeholder') }}">
@@ -268,22 +285,12 @@
       {{-- Review body --}}
       <div class="mb-4">
         <label for="reviewBody" class="form-label fw-semibold">
-          {{ __('admin.your_review') }} <span class="text-danger">*</span>
+          {{ __('admin.your_review') }}
         </label>
         <textarea class="form-control" id="reviewBody" name="review_body" rows="5"
           placeholder="{{ __('admin.your_review_placeholder') }}" maxlength="500"></textarea>
         <div class="d-flex justify-content-end mt-1">
           <small class="text-muted"><span id="reviewBodyCount">0</span>/500</small>
-        </div>
-      </div>
-
-      {{-- Recommend --}}
-      <div class="mb-4">
-        <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" id="recommendSwitch" name="recommend" value="1">
-          <label class="form-check-label" for="recommendSwitch">
-            {{ __('admin.recommend_provider_label') }}
-          </label>
         </div>
       </div>
 
@@ -590,45 +597,7 @@
 
       {{-- ── TAB 3 · Reviews ── --}}
       <div class="tab-pane fade" id="tabpane-reviews" role="tabpanel">
-        <div class="d-flex flex-column gap-3 pt-2">
-
-          <div class="border rounded p-3 bg-light-subtle">
-            <div class="d-flex align-items-center gap-2 mb-2">
-              <img src="https://i.pravatar.cc/32?img=10" class="rounded-circle" width="32" height="32" alt="reviewer">
-              <div>
-                <div class="fw-semibold small">Ahmed Al-Mansouri</div>
-                <div class="text-warning small">
-                  <i class="ti ti-star-filled"></i><i class="ti ti-star-filled"></i>
-                  <i class="ti ti-star-filled"></i><i class="ti ti-star-filled"></i>
-                  <i class="ti ti-star"></i>
-                </div>
-              </div>
-              <small class="text-muted ms-auto">Jan 18, 2025</small>
-            </div>
-            <p class="small fw-semibold mb-1">Great communication but delivery was late.</p>
-            <p class="small text-muted mb-0">The work quality was excellent, however the final handover missed the agreed deadline by two days. Would still recommend for quality-focused projects.</p>
-          </div>
-
-          <div class="border rounded p-3 bg-light-subtle">
-            <div class="d-flex align-items-center gap-2 mb-2">
-              <img src="https://i.pravatar.cc/32?img=20" class="rounded-circle" width="32" height="32" alt="reviewer">
-              <div>
-                <div class="fw-semibold small">Sara Khalid</div>
-                <div class="text-warning small">
-                  <i class="ti ti-star-filled"></i><i class="ti ti-star-filled"></i>
-                  <i class="ti ti-star-filled"></i><i class="ti ti-star-filled"></i>
-                  <i class="ti ti-star-filled"></i>
-                </div>
-              </div>
-              <small class="text-muted ms-auto">Jan 20, 2025</small>
-            </div>
-            <p class="small fw-semibold mb-1">Outstanding service, highly recommend!</p>
-            <p class="small text-muted mb-0">Exceeded all expectations. Professional team, clear communication, and delivered ahead of schedule. Will definitely work with them again.</p>
-          </div>
-
-          <p class="text-center text-muted small mb-0">Showing 2 of 2 reviews</p>
-
-        </div>
+        <div id="reviewTabContent" class="pt-2"></div>
       </div>
 
     </div>{{-- /tab-content --}}
@@ -679,6 +648,81 @@ document.addEventListener('DOMContentLoaded', function () {
               .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }
 
+  /* ── Render star icons ── */
+  function renderStarIcons(rating) {
+    let html = '';
+    for (let i = 1; i <= 5; i++) {
+      html += i <= rating
+        ? '<i class="ti ti-star-filled"></i>'
+        : '<i class="ti ti-star"></i>';
+    }
+    return html;
+  }
+
+  /* ── Render Review Tab content (Founder view) ── */
+  let lastHistoryBtn = null;
+  function renderReviewTab(btn) {
+    const container = document.getElementById('reviewTabContent');
+    const hasReview = btn.dataset.hasReview === '1';
+    const requestStatus = btn.dataset.status ?? '';
+
+    if (!hasReview && requestStatus === 'Completed') {
+      container.innerHTML = `
+        <div class="text-center py-5">
+          <i class="ti ti-star-off ti-48px text-muted mb-3 d-block"></i>
+          <p class="text-muted mb-3">{{ __('admin.no_review_submitted_founder') }}</p>
+          <button class="btn btn-primary btn-sm review-cta-btn"
+            data-request-id="${esc(btn.dataset.requestId)}"
+            data-request-title="${esc(btn.dataset.requestTitle)}"
+            data-provider-name="${esc(btn.dataset.providerName)}"
+            data-provider-img="${esc(btn.dataset.providerImg)}">
+            <i class="ti ti-star me-1"></i> {{ __('admin.add_review') }}
+          </button>
+        </div>`;
+
+      container.querySelector('.review-cta-btn')?.addEventListener('click', function() {
+        bootstrap.Offcanvas.getInstance(ocHistory).hide();
+        const reviewBtn = document.querySelector(`[data-bs-target="#offcanvasReview"][data-request-id="${this.dataset.requestId}"]`);
+        if (reviewBtn) {
+          setTimeout(() => reviewBtn.click(), 300);
+        }
+      });
+      return;
+    }
+
+    if (!hasReview) {
+      container.innerHTML = `
+        <div class="text-center py-5">
+          <i class="ti ti-star-off ti-48px text-muted mb-3 d-block"></i>
+          <p class="text-muted mb-0">{{ __('admin.no_review_available_yet') }}</p>
+        </div>`;
+      return;
+    }
+
+    const rating      = parseInt(btn.dataset.reviewRating) || 0;
+    const title       = btn.dataset.reviewTitle || '';
+    const body        = btn.dataset.reviewBody || '';
+    const reviewedAt  = btn.dataset.reviewedAt || '';
+    const founderName = btn.dataset.founderName || '—';
+    const founderImg  = btn.dataset.founderImg || '/images/deck-video.svg';
+
+    container.innerHTML = `
+      <div class="d-flex flex-column gap-3">
+        <div class="border rounded p-3 bg-light-subtle">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <img src="${esc(founderImg)}" class="rounded-circle" width="32" height="32" alt="reviewer">
+            <div>
+              <div class="fw-semibold small">${esc(founderName)}</div>
+              <div class="text-warning small">${renderStarIcons(rating)}</div>
+            </div>
+            <small class="text-muted ms-auto">${esc(reviewedAt)}</small>
+          </div>
+          ${title ? `<p class="small fw-semibold mb-1">${esc(title)}</p>` : ''}
+          ${body ? `<p class="small text-muted mb-0">${esc(body)}</p>` : ''}
+        </div>
+      </div>`;
+  }
+
   /* ══════════════════════════════════════
      OFFCANVAS 1 — Add Review
   ══════════════════════════════════════ */
@@ -716,12 +760,23 @@ document.addEventListener('DOMContentLoaded', function () {
     $('.review-request-title').textContent = btn.dataset.requestTitle ?? '—';
     $('#reviewRequestId').value            = btn.dataset.requestId    ?? '';
     formReview.reset();
-    currentRating = 0;
-    renderStars(0);
-    $('#ratingValueInput').value = '';
-    $('#reviewBodyCount').textContent = '0';
     $('#starErrorMsg').classList.add('d-none');
     fvReview && fvReview.resetForm(true);
+
+    const existingRating = parseInt(btn.dataset.existingRating) || 0;
+    if (existingRating > 0) {
+      currentRating = existingRating;
+      $('#ratingValueInput').value = currentRating;
+      renderStars(currentRating);
+      $('#reviewTitle').value = btn.dataset.existingTitle || '';
+      $('#reviewBody').value  = btn.dataset.existingBody  || '';
+      $('#reviewBodyCount').textContent = ($('#reviewBody').value || '').length;
+    } else {
+      currentRating = 0;
+      renderStars(0);
+      $('#ratingValueInput').value = '';
+      $('#reviewBodyCount').textContent = '0';
+    }
   });
 
   charCounter($('#reviewBody'), 'reviewBodyCount');
@@ -734,14 +789,28 @@ document.addEventListener('DOMContentLoaded', function () {
       },
       review_title: {
         validators: {
-          notEmpty:     { message: '{{ __('admin.review_title_required') }}' },
-          stringLength: { min: 3, max: 50, message: '{{ __('admin.review_title_min_max') }}' },
+          callback: {
+            message: '{{ __('admin.review_title_required') }}',
+            callback: function(input) {
+              const body = $('#reviewBody').value.trim();
+              if (body.length > 0 && input.value.trim().length === 0) return false;
+              return true;
+            }
+          },
+          stringLength: { min: 1, max: 50, message: '{{ __('admin.review_title_min_max') }}' },
         },
       },
       review_body: {
         validators: {
-          notEmpty:     { message: '{{ __('admin.review_body_required') }}' },
-          stringLength: { min: 3,max: 500, message: '{{ __('admin.review_body_min_max') }}' },
+          callback: {
+            message: '{{ __('admin.review_body_required') }}',
+            callback: function(input) {
+              const title = $('#reviewTitle').value.trim();
+              if (title.length > 0 && input.value.trim().length === 0) return false;
+              return true;
+            }
+          },
+          stringLength: { min: 1, max: 500, message: '{{ __('admin.review_body_min_max') }}' },
         },
       },
     },
@@ -756,9 +825,47 @@ document.addEventListener('DOMContentLoaded', function () {
       $('#starErrorMsg').classList.remove('d-none');
       return;
     }
-    showToast({ type: 'success', message: '{{ __('admin.review_submitted_successfully') }}' });
-    bootstrap.Offcanvas.getInstance(ocReview).hide();
+
+    const submitBtn = formReview.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> {{ __("admin.submit_review") }}';
+
+    fetch('{{ route("service_review.submit") }}', {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        request_id:   $('#reviewRequestId').value,
+        rating:       parseInt($('#ratingValueInput').value),
+        review_title: $('#reviewTitle').value || null,
+        review_body:  $('#reviewBody').value || null,
+      }),
+    })
+    .then(res => res.json())
+    .then(data => {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="ti ti-send me-1"></i> {{ __("admin.submit_review") }}';
+
+      if (data.status) {
+        showToast({ type: 'success', message: data.message });
+        bootstrap.Offcanvas.getInstance(ocReview).hide();
+        window.location.reload();
+      } else {
+        showToast({ type: 'error', message: data.message || '{{ __("admin.unexpected_error") }}' });
+      }
+    })
+    .catch(() => {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="ti ti-send me-1"></i> {{ __("admin.submit_review") }}';
+      showToast({ type: 'error', message: '{{ __("admin.unexpected_error") }}' });
+    });
   });
+
+  $('#reviewTitle').addEventListener('input', () => fvReview.revalidateField('review_body'));
+  $('#reviewBody').addEventListener('input', () => fvReview.revalidateField('review_title'));
 
   /* ══════════════════════════════════════
      OFFCANVAS 2 — Send Message
@@ -828,6 +935,9 @@ document.addEventListener('DOMContentLoaded', function () {
     statusBadge.textContent = statuses[status] ?? '—';
     statusBadge.className   = `badge ms-auto hist-status-badge ${badgeClass(status)}`;
 
+    lastHistoryBtn = btn;
+    renderReviewTab(btn);
+
     bootstrap.Tab.getOrCreateInstance($('#tab-timeline')).show();
     formHistoryReply.reset();
     $('#histReplyCount').textContent = '0';
@@ -870,6 +980,26 @@ document.addEventListener('DOMContentLoaded', function () {
     fvHistoryReply.resetForm(true);
     showToast({ type: 'success', message: '{{ __('admin.reply_sent_successfully') }}' });
   });
+
+  /* ══════════════════════════════════════
+     Auto-open panel from notification URL
+  ══════════════════════════════════════ */
+  const urlParams = new URLSearchParams(window.location.search);
+  const openRequest = urlParams.get('open_request');
+  const activeTab   = urlParams.get('tab');
+
+  if (openRequest) {
+    const btn = document.querySelector(`[data-bs-target="#offcanvasHistory"][data-request-id="${openRequest}"]`);
+    if (btn) {
+      btn.click();
+      if (activeTab === 'review') {
+        ocHistory.addEventListener('shown.bs.offcanvas', function onceShown() {
+          bootstrap.Tab.getOrCreateInstance(document.getElementById('tab-reviews')).show();
+          ocHistory.removeEventListener('shown.bs.offcanvas', onceShown);
+        });
+      }
+    }
+  }
 
 });
 </script>
