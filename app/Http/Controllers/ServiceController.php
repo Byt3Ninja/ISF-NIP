@@ -9,7 +9,7 @@ use DB, Log, Exception, Session;
 use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\{Auth, Notification};
-use App\Http\Requests\{BookServiceRequest, StoreServiceRequest, UpdateServiceRequest};
+use App\Http\Requests\{BookServiceRequest, StoreServiceRequest, SubmitReviewRequest, UpdateServiceRequest};
 use App\Notifications\{TemplateEmail, ServiceRequestNotification};
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\{User, Settings, Currency, Service, Organization, ServiceCategory, serviceProviders, ServicesRequests};
@@ -413,10 +413,15 @@ class ServiceController extends Controller
 				'services.img_url as service_img',
 				'services_requests.approved',
 				'services_requests.done',
+				'services_requests.rate',
+				'services_requests.review_title',
+				'services_requests.review_body',
+				'services_requests.reviewed_at',
 				'service_providers.id as provider_id',
 				'service_providers.company_name as provider_name',
 				'service_providers.img_url as provider_img',
 				DB::raw("CONCAT(users.first_name_en, ' ', users.last_name_en) as founder_name"),
+				'users.img_url as founder_img',
 				"companies.{$nameCol} as startup_name",
 			])
 			->orderBy('services_requests.created_at', 'desc')
@@ -442,6 +447,12 @@ class ServiceController extends Controller
 				'description' => $row->comment ?? '—',
 				'image_url'   => $row->service_img ? '/191014/' . $row->service_img : '/images/deck-video.svg',
 				'status'      => $status,
+				'rating'        => $row->rate,
+				'review_title'  => $row->review_title,
+				'review_body'   => $row->review_body,
+				'reviewed_at'   => $row->reviewed_at ? \Carbon\Carbon::parse($row->reviewed_at)->format('M d, Y') : null,
+				'has_review'    => !is_null($row->rate),
+				'founder_img'   => $row->founder_img ? '/191014/' . $row->founder_img : '/images/deck-video.svg',
 				'service_provider' => [
 					'id'        => $row->provider_id,
 					'name'      => $row->provider_name ?? '—',
@@ -617,6 +628,126 @@ class ServiceController extends Controller
 		return redirect()->back()->with(['class' => 'danger', 'msg' => __('admin.An unexpected error occurred, please try again later')]);
 	}
 
+	public function submitReview(SubmitReviewRequest $request)
+	{
+		$userId    = Auth::id();
+		$requestId = $request->input('request_id');
+
+		$serviceRequest = DB::table('services_requests')
+			->where('id', $requestId)
+			->whereNull('deleted_at')
+			->first();
+
+		if (!$serviceRequest) {
+			return response()->json([
+				'status'  => false,
+				'message' => __('admin.Service request not found'),
+			], 404);
+		}
+
+		if ((int) $serviceRequest->user_id !== $userId) {
+			return response()->json([
+				'status'  => false,
+				'message' => __('admin.unauthorized_action'),
+			], 403);
+		}
+
+		if ((int) $serviceRequest->done !== 1) {
+			return response()->json([
+				'status'  => false,
+				'message' => __('admin.request_not_completed'),
+			], 422);
+		}
+
+		DB::table('services_requests')
+			->where('id', $requestId)
+			->update([
+				'rate'         => $request->input('rating'),
+				'review_title' => $request->input('review_title'),
+				'review_body'  => $request->input('review_body'),
+				'reviewed_at'  => now(),
+				'updated_at'   => now(),
+			]);
+
+		$serviceId = $serviceRequest->service_id;
+
+		$avgData = DB::table('services_requests')
+			->where('service_id', $serviceId)
+			->whereNotNull('rate')
+			->whereNull('deleted_at')
+			->selectRaw('COALESCE(AVG(rate), 0) as avg_rating')
+			->first();
+
+		DB::table('services')
+			->where('id', $serviceId)
+			->update([
+				'avg_rating'  => round($avgData->avg_rating ?? 0, 2),
+				'updated_at'  => now(),
+			]);
+
+		// Send notification to service provider
+		try {
+			$service = DB::table('services')->where('id', $serviceId)->first();
+
+			if ($service && $service->service_provider_id) {
+				$provider = DB::table('service_providers')
+					->where('id', $service->service_provider_id)
+					->first();
+
+				if ($provider && $provider->user_id) {
+					$providerUser = User::find($provider->user_id);
+					$founder      = User::find($userId);
+					$providerLang = $provider->preferred_language ?? 'en';
+
+					$founderName = trim(($founder->first_name_en ?? '') . ' ' . ($founder->last_name_en ?? ''));
+					$serviceName = $providerLang === 'ar'
+						? ($service->name_ar ?: $service->name_en)
+						: $service->name_en;
+
+					$params = [
+						'founder_name' => $founderName,
+						'service_name' => $serviceName,
+						'contact_name' => $provider->contact_name ?? '',
+						'rating'       => $request->input('rating'),
+						'timestamp'    => now()->format('Y-m-d H:i'),
+					];
+
+					$body = __('admin.review_notification_body', $params, $providerLang);
+
+					if ($request->input('review_title')) {
+						$body .= __('admin.review_notification_title_line', ['title' => $request->input('review_title')], $providerLang);
+					}
+					if ($request->input('review_body')) {
+						$body .= __('admin.review_notification_review_line', ['review' => $request->input('review_body')], $providerLang);
+					}
+
+					$notificationUrl = '/dashboard/requests/all?open_request=' . $requestId . '&tab=review';
+
+					$notification = new TemplateEmail([
+						__('admin.new_review_email_subject', $params, $providerLang),
+						__('admin.review_notification_greeting', $params, $providerLang),
+						$body,
+						$notificationUrl,
+						__('admin.you_have_new_review', [], $providerLang),
+					]);
+					$notification->ActionText = __('admin.review_notification_cta', [], $providerLang);
+
+					$providerUser->notify($notification);
+				}
+			}
+		} catch (\Throwable $th) {
+			Log::error('Failed to send review notification', [
+				'error'      => $th->getMessage(),
+				'request_id' => $requestId,
+			]);
+		}
+
+		return response()->json([
+			'status'  => true,
+			'message' => __('admin.review_submitted_successfully'),
+		]);
+	}
+
 	public function book_service(BookServiceRequest $request)
 	{
 		$user    = auth()->user();
@@ -651,6 +782,7 @@ class ServiceController extends Controller
 		$baseQuery = DB::table('services_requests')
 			->join('services', 'services_requests.service_id', '=', 'services.id')
 			->leftJoin('service_providers', 'services.service_provider_id', '=', 'service_providers.id')
+			->join('users', 'services_requests.user_id', '=', 'users.id')
 			->where('services_requests.user_id', $userId)
 			->whereNull('services_requests.deleted_at')
 			->whereNull('services.deleted_at');
@@ -703,9 +835,15 @@ class ServiceController extends Controller
 				'services.img_url as service_img',
 				'services_requests.approved',
 				'services_requests.done',
+				'services_requests.rate',
+				'services_requests.review_title',
+				'services_requests.review_body',
+				'services_requests.reviewed_at',
 				'service_providers.id as provider_id',
 				'service_providers.company_name as provider_name',
 				'service_providers.img_url as provider_img',
+				DB::raw("CONCAT(users.first_name_en, ' ', users.last_name_en) as founder_name"),
+				'users.img_url as founder_img',
 			])
 			->orderBy('services_requests.created_at', 'desc')
 			->get();
@@ -729,6 +867,13 @@ class ServiceController extends Controller
 				'description' => $row->comment ?? '—',
 				'image_url'   => $row->service_img ? '/191014/' . $row->service_img : '/images/deck-video.svg',
 				'status'      => $status,
+				'rating'       => $row->rate,
+				'review_title' => $row->review_title,
+				'review_body'  => $row->review_body,
+				'reviewed_at'  => $row->reviewed_at ? \Carbon\Carbon::parse($row->reviewed_at)->format('M d, Y') : null,
+				'has_review'   => !is_null($row->rate),
+				'founder_name' => $row->founder_name ?? 'N/A',
+				'founder_img'  => $row->founder_img ? '/191014/' . $row->founder_img : '/images/deck-video.svg',
 				'service_provider' => [
 					'id'        => $row->provider_id,
 					'name'      => $row->provider_name ?? '—',

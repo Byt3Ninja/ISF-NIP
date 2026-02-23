@@ -185,7 +185,14 @@
                 data-request-title="{{ $request['title'] }}"
                 data-provider-name="{{ $request['service_provider']['name'] }}"
                 data-provider-img="{{ $request['service_provider']['image_url'] }}"
-                data-status="{{ $request['status'] }}">
+                data-status="{{ $request['status'] }}"
+                data-review-rating="{{ $request['rating'] ?? '' }}"
+                data-review-title="{{ $request['review_title'] ?? '' }}"
+                data-review-body="{{ $request['review_body'] ?? '' }}"
+                data-reviewed-at="{{ $request['reviewed_at'] ?? '' }}"
+                data-has-review="{{ $request['has_review'] ? '1' : '0' }}"
+                data-founder-name="{{ $request['founder_name'] ?? '' }}"
+                data-founder-img="{{ $request['founder_img'] ?? '' }}">
                 <i class="ti ti-history me-1"></i> {{ __('admin.view_history') }}
               </button>
 
@@ -206,7 +213,14 @@
               data-request-title="{{ $request['title'] }}"
               data-provider-name="{{ $request['service_provider']['name'] }}"
               data-provider-img="{{ $request['service_provider']['image_url'] }}"
-              data-status="{{ $request['status'] }}">
+              data-status="{{ $request['status'] }}"
+              data-review-rating="{{ $request['rating'] ?? '' }}"
+              data-review-title="{{ $request['review_title'] ?? '' }}"
+              data-review-body="{{ $request['review_body'] ?? '' }}"
+              data-reviewed-at="{{ $request['reviewed_at'] ?? '' }}"
+              data-has-review="{{ $request['has_review'] ? '1' : '0' }}"
+              data-founder-name="{{ $request['founder_name'] ?? '' }}"
+              data-founder-img="{{ $request['founder_img'] ?? '' }}">
               <i class="ti ti-history"></i>
             </button>
           </div>
@@ -593,45 +607,7 @@
 
       {{-- ── TAB 3 · Reviews ── --}}
       <div class="tab-pane fade" id="tabpane-reviews" role="tabpanel">
-        <div class="d-flex flex-column gap-3 pt-2">
-
-          <div class="border rounded p-3 bg-light-subtle">
-            <div class="d-flex align-items-center gap-2 mb-2">
-              <img src="https://i.pravatar.cc/32?img=10" class="rounded-circle" width="32" height="32" alt="reviewer">
-              <div>
-                <div class="fw-semibold small">Ahmed Al-Mansouri</div>
-                <div class="text-warning small">
-                  <i class="ti ti-star-filled"></i><i class="ti ti-star-filled"></i>
-                  <i class="ti ti-star-filled"></i><i class="ti ti-star-filled"></i>
-                  <i class="ti ti-star"></i>
-                </div>
-              </div>
-              <small class="text-muted ms-auto">Jan 18, 2025</small>
-            </div>
-            <p class="small fw-semibold mb-1">Great communication but delivery was late.</p>
-            <p class="small text-muted mb-0">The work quality was excellent, however the final handover missed the agreed deadline by two days. Would still recommend for quality-focused projects.</p>
-          </div>
-
-          <div class="border rounded p-3 bg-light-subtle">
-            <div class="d-flex align-items-center gap-2 mb-2">
-              <img src="https://i.pravatar.cc/32?img=20" class="rounded-circle" width="32" height="32" alt="reviewer">
-              <div>
-                <div class="fw-semibold small">Sara Khalid</div>
-                <div class="text-warning small">
-                  <i class="ti ti-star-filled"></i><i class="ti ti-star-filled"></i>
-                  <i class="ti ti-star-filled"></i><i class="ti ti-star-filled"></i>
-                  <i class="ti ti-star-filled"></i>
-                </div>
-              </div>
-              <small class="text-muted ms-auto">Jan 20, 2025</small>
-            </div>
-            <p class="small fw-semibold mb-1">Outstanding service, highly recommend!</p>
-            <p class="small text-muted mb-0">Exceeded all expectations. Professional team, clear communication, and delivered ahead of schedule. Will definitely work with them again.</p>
-          </div>
-
-          <p class="text-center text-muted small mb-0">Showing 2 of 2 reviews</p>
-
-        </div>
+        <div id="reviewTabContent" class="pt-2"></div>
       </div>
 
     </div>{{-- /tab-content --}}
@@ -679,6 +655,60 @@ document.addEventListener('DOMContentLoaded', function () {
   function esc(str) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
               .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  const userRole = '{{ $_user->getRoleNames()->first() }}';
+  const emptyReviewMsg = userRole === 'serviceProvider'
+    ? '{{ __('admin.no_review_submitted_yet') }}'
+    : '{{ __('admin.no_review_available_yet') }}';
+
+  /* ── Render star icons ── */
+  function renderStarIcons(rating) {
+    let html = '';
+    for (let i = 1; i <= 5; i++) {
+      html += i <= rating
+        ? '<i class="ti ti-star-filled"></i>'
+        : '<i class="ti ti-star"></i>';
+    }
+    return html;
+  }
+
+  /* ── Render Review Tab content ── */
+  function renderReviewTab(btn) {
+    const container = document.getElementById('reviewTabContent');
+    const hasReview = btn.dataset.hasReview === '1';
+
+    if (!hasReview) {
+      container.innerHTML = `
+        <div class="text-center py-5">
+          <i class="ti ti-star-off ti-48px text-muted mb-3 d-block"></i>
+          <p class="text-muted mb-0">${esc(emptyReviewMsg)}</p>
+        </div>`;
+      return;
+    }
+
+    const rating      = parseInt(btn.dataset.reviewRating) || 0;
+    const title       = btn.dataset.reviewTitle || '';
+    const body        = btn.dataset.reviewBody || '';
+    const reviewedAt  = btn.dataset.reviewedAt || '';
+    const founderName = btn.dataset.founderName || '—';
+    const founderImg  = btn.dataset.founderImg || '/images/deck-video.svg';
+
+    container.innerHTML = `
+      <div class="d-flex flex-column gap-3">
+        <div class="border rounded p-3 bg-light-subtle">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <img src="${esc(founderImg)}" class="rounded-circle" width="32" height="32" alt="reviewer">
+            <div>
+              <div class="fw-semibold small">${esc(founderName)}</div>
+              <div class="text-warning small">${renderStarIcons(rating)}</div>
+            </div>
+            <small class="text-muted ms-auto">${esc(reviewedAt)}</small>
+          </div>
+          ${title ? `<p class="small fw-semibold mb-1">${esc(title)}</p>` : ''}
+          ${body ? `<p class="small text-muted mb-0">${esc(body)}</p>` : ''}
+        </div>
+      </div>`;
   }
 
   /* ══════════════════════════════════════
@@ -855,6 +885,8 @@ if (ocRespond) {
     statusBadge.textContent = statuses[status] ?? '—';
     statusBadge.className   = `badge ms-auto hist-status-badge ${badgeClass(status)}`;
 
+    renderReviewTab(btn);
+
     bootstrap.Tab.getOrCreateInstance($('#tab-timeline')).show();
     formHistoryReply.reset();
     $('#histReplyCount').textContent = '0';
@@ -897,6 +929,26 @@ if (ocRespond) {
     fvHistoryReply.resetForm(true);
     showToast({ type: 'success', message: '{{ __('admin.reply_sent_successfully') }}' });
   });
+
+  /* ══════════════════════════════════════
+     Auto-open panel from notification URL
+  ══════════════════════════════════════ */
+  const urlParams = new URLSearchParams(window.location.search);
+  const openRequest = urlParams.get('open_request');
+  const activeTab   = urlParams.get('tab');
+
+  if (openRequest) {
+    const btn = document.querySelector(`[data-bs-target="#offcanvasHistory"][data-request-id="${openRequest}"]`);
+    if (btn) {
+      btn.click();
+      if (activeTab === 'review') {
+        ocHistory.addEventListener('shown.bs.offcanvas', function onceShown() {
+          bootstrap.Tab.getOrCreateInstance(document.getElementById('tab-reviews')).show();
+          ocHistory.removeEventListener('shown.bs.offcanvas', onceShown);
+        });
+      }
+    }
+  }
 
 });
 </script>
