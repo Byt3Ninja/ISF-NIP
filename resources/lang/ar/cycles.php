@@ -622,4 +622,5 @@ return [
     'Join_Cycle_First' => 'الرجاء الانضمام للبرنامج اولا',
     'Export Company Evaluation' => 'تصدير تقييم الشركة',
     'Export All Evaluations' => 'تصدير جميع التقييمات',
+    'Expertise' => 'التخصص',
 ];
