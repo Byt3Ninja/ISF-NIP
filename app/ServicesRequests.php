@@ -28,4 +28,10 @@ class ServicesRequests extends Model
         return $this->hasMany(ServiceRequestStatusLog::class, 'service_request_id')
                     ->orderBy('occurred_at', 'asc');
     }
+
+    public function messages()
+    {
+        return $this->hasMany(ServiceRequestMessage::class, 'service_request_id')
+                    ->orderBy('created_at', 'asc');
+    }
 }

@@ -3550,4 +3550,18 @@ return [
 	'service_request_completed_body'             => 'تم وضع علامة مكتمل على طلب الخدمة ":service_name" بواسطة :provider_name. يمكنك عرض تفاصيل الطلب وسجلّه من لوحة التحكم. نرجو تخصيص لحظة لكتابة تقييم ومشاركة تجربتك.',
 	'service_request_completed_cta'              => 'إرسال تقييم',
 	'service_request_completed_inapp'            => 'تم إكمال ":service_name".',
+
+	// Service Request Messages
+	'You'                                        => 'أنت',
+	'no_messages_yet'                            => 'لا توجد رسائل بعد. ابدأ المحادثة!',
+	'message_sent_successfully'                  => 'تم إرسال الرسالة بنجاح!',
+	'message_body_min'                           => 'الرسالة قصيرة جدًا.',
+	'file_size_exceeds_limit'                    => 'يجب ألا يزيد حجم الملف عن 10 ميجابايت.',
+	'unsupported_file_type'                      => 'نوع الملف غير مدعوم. الملفات المسموحة: PNG, JPG, JPEG, WEBP, DOC, DOCX, XLS, XLSX, PPT, PPTX, ZIP, RAR.',
+	'message_thread_error'                       => 'فشل تحميل الرسائل. يرجى المحاولة مرة أخرى.',
+	'service_message_new_inapp'                  => 'لديك رسالة جديدة من :sender_name في :timestamp بخصوص :service_name.',
+	'service_message_email_subject'              => 'رسالة جديدة بخصوص :service_name',
+	'service_message_email_greeting'             => 'عزيزي :recipient_name،',
+	'service_message_email_body'                 => 'لديك رسالة جديدة من :sender_name في :timestamp بخصوص :service_name.',
+	'service_message_view_cta'                   => 'عرض الرسالة',
 ];
