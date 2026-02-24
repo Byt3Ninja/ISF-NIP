@@ -185,7 +185,7 @@
                   </div>
                   @if ($service->vendor_name)
                     <a 
-                      href="{{ isset($service->service_provider_id) ? '/dashboard/show/UserProfile/' . $service->provider->user_id : 'javascript:void(0)' }}"
+                      href="{{ isset($service->service_provider_id) ? '/dashboard/service-provider/' . $service->provider->id . '/profile' : 'javascript:void(0)' }}"
                       class="d-flex align-items-center gap-1 mb-4 text-dark"
                     >
                       <i class="ti ti-building"></i>
