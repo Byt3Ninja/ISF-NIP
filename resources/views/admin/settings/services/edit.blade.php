@@ -59,10 +59,15 @@
       <div class="mb-4">
         <label class="form-label mb-2">{{ __('admin.service_image') }}</label>
         <div class="border-dashed border-light bg-light-subtle rounded p-8 text-center cursor-pointer"
-          onclick="document.getElementById('img_url').click()">
-          <i class="ti ti-cloud-upload text-secondary fs-2 mb-2"></i>
-          <div class="fw-medium">{{ __('admin.click_to_upload') }}</div>
-          <div class="small text-muted mt-1">{{ __('admin.image_only_allowed') }} up to 5MB</div>
+          onclick="document.getElementById('img_url').click()" id="uploadArea">
+          <div id="imagePreviewContainer" style="display: none;">
+            <img id="imagePreview" src="" alt="Preview" class="img-fluid rounded mb-2" style="max-height: 200px; object-fit: contain;">
+          </div>
+          <div id="uploadPlaceholder">
+            <i class="ti ti-cloud-upload text-secondary fs-2 mb-2"></i>
+            <div class="fw-medium">{{ __('admin.click_to_upload') }}</div>
+            <div class="small text-muted mt-1">{{ __('admin.image_only_allowed') }} up to 5MB</div>
+          </div>
         </div>
         <input type="file" name="img_url" id="img_url" class="d-none" accept="image/*">
         <div id="fileError" class="invalid-feedback mt-2" style="display: none;"></div>
@@ -261,6 +266,8 @@
         if (file.size > 5 * 1024 * 1024) {
           $('#fileError').text('{{ __("admin.File size exceeds 5MB") }}').show();
           $('#fileName').hide();
+          $('#imagePreviewContainer').hide();
+          $('#uploadPlaceholder').show();
           $(this).val('');
           return;
         }
@@ -269,9 +276,20 @@
         if (!file.type.match('image.*')) {
           $('#fileError').text('{{ __("admin.Please select an image file") }}').show();
           $('#fileName').hide();
+          $('#imagePreviewContainer').hide();
+          $('#uploadPlaceholder').show();
           $(this).val('');
           return;
         }
+
+        // Display image preview
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          $('#imagePreview').attr('src', e.target.result);
+          $('#imagePreviewContainer').show();
+          $('#uploadPlaceholder').hide();
+        };
+        reader.readAsDataURL(file);
 
         $('#fileError').hide();
         $('#fileName').text(file.name).show();

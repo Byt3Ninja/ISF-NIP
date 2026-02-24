@@ -139,7 +139,6 @@
                           <p class="text-muted">{{ __('mentor.no_slots_added') }}</p>
                         </div>
                       </div>
-      
                     </div>
                   </div>
                 </div>
@@ -918,7 +917,7 @@
                         </div>
                         </div>
                         <div class="slot-actions btn-group">
-                            <button type="button" class="btn btn-sm btn-icon btn-label-primary add-slot-action" title="{{ __('mentor.add') }}"><i class="ti ti-plus"></i></button>
+                            <!-- <button type="button" class="btn btn-sm btn-icon btn-label-primary add-slot-action" title="{{ __('mentor.add') }}"><i class="ti ti-plus"></i></button> -->
                             <button type="button" class="btn btn-sm btn-icon btn-label-secondary copy-slot-action" title="{{ __('mentor.copy') }}"><i class="ti ti-copy"></i></button>
                             <button type="button" class="btn btn-label-danger btn-sm btn-icon delete-slot" title="{{ __('mentor.delete') }}" data-type="${slot.type}" data-key="${slot.key}" data-index="${originalIndex}" data-id="${slot.id}">
                                 <i class="ti ti-trash ti-16px"></i>
@@ -1154,30 +1153,70 @@
         });
     });
 
-    // Handle Copy action in list view
-    $(document).on('click', '.copy-slot-action', function(e) {
+     // Handle Copy action in list view
+    $(document).on('click', '.copy-slot-action', function (e) {
         e.stopPropagation();
+
         const button = this;
         const slotElement = $(button).closest('.d-flex');
         const { type, key, index } = slotElement.data();
-        const slotToCopy = { ...availabilityData[type][key][index] };
 
-        $('.copy-slot-action').not(button).popover('dispose');
-        
+        // Validate required data
+        if (!type || !key || index === undefined) {
+            console.error('Missing slot data attributes:', { type, key, index });
+            return;
+        }
+
+        // Safely access slot
+        const sourceSlot = availabilityData?.[type]?.[key]?.[index];
+
+        if (!sourceSlot) {
+            console.error('Slot not found in availabilityData:', { type, key, index });
+            return;
+        }
+
+        const slotToCopy = { ...sourceSlot };
+
+        // Close any existing popovers
+        $('.copy-slot-action').popover('dispose');
+        $(document).off('mousedown.copyPopover');
+
+        const dayValues = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const currentDayIndex = dayValues.indexOf(key);
+
+        const translatedDays = [
+            '{{ __('mentor.sunday') }}',
+            '{{ __('mentor.monday') }}',
+            '{{ __('mentor.tuesday') }}',
+            '{{ __('mentor.wednesday') }}',
+            '{{ __('mentor.thursday') }}',
+            '{{ __('mentor.friday') }}',
+            '{{ __('mentor.saturday') }}'
+        ];
+
         const popoverContent = `
             <div>
-                ${['{{ __('mentor.sunday') }}', '{{ __('mentor.monday') }}', '{{ __('mentor.tuesday') }}', '{{ __('mentor.wednesday') }}', '{{ __('mentor.thursday') }}', '{{ __('mentor.friday') }}', '{{ __('mentor.saturday') }}'].map((day, index) => {
-                    const dayValues = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-                    return `
+                ${translatedDays.map((day, i) => `
                     <div class="form-check">
-                      <input class="form-check-input" type="checkbox" value="${dayValues[index]}" id="day-copy-${dayValues[index]}">
-                      <label class="form-check-label" for="day-copy-${dayValues[index]}">${day}</label>
+                        <input 
+                            class="form-check-input"
+                            type="checkbox"
+                            value="${dayValues[i]}"
+                            id="day-copy-${dayValues[i]}"
+                            ${i === currentDayIndex ? 'disabled' : ''}
+                        >
+                        <label class="form-check-label" for="day-copy-${dayValues[i]}">
+                            ${day}
+                        </label>
                     </div>
-                `}).join('')}
+                `).join('')}
                 <div class="d-flex justify-content-end mt-3">
-                    <button class="btn btn-primary btn-sm apply-copy-action">{{ __('mentor.apply_to_all') }}</button>
+                    <button class="btn btn-primary btn-sm apply-copy-action">
+                        {{ __('mentor.apply_to_all') }}
+                    </button>
                 </div>
-            </div>`;
+            </div>
+        `;
 
         const popover = new bootstrap.Popover(button, {
             html: true,
@@ -1187,55 +1226,85 @@
             container: 'body',
             trigger: 'manual'
         });
-        
-        popover.show();
-        
-        const popoverTip = popover.tip; 
-        $(popoverTip).find('.apply-copy-action').on('click', () => {
-            const selectedDays = Array.from($(popoverTip).find('.form-check-input:checked')).map(cb => cb.value);
 
-            if (selectedDays.length > 0) {
-                fetch(`/dashboard/availability/slots/${slotToCopy.id}/copy`, {
-                    method: 'POST',
-                    headers: {
-                        "Accept": "application/json",
-                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content'),
-                        "Content-Type": 'application/json',
-                    },
-                    body: JSON.stringify({ selectedDays }),
-                })
-                .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok'))
-                .then(result => {
-                    result.data.forEach(slot => {
-                        const newSlot = createSlotObject(slot);
-                        const day = slot.weekday;
-                        availabilityData.weekly[day] = [...(availabilityData.weekly[day] || []), newSlot];
-                    });
-                    
-                    updateListView();
-                    updateSlotsList();
-                    updateCalendarStyles();
-                    
-                    showToast({
-                        type: 'success',
-                        'message': result.message,
-                    });
-                })
-                .catch(error => {
-                    releaseFailureAlert({
-                        'title': '{{ __('admin.Error') }}',
-                        'message': error?.message ? error.message : "{{ __('admin.unexpected_error') }}",
-                    });
+        popover.show();
+
+        const popoverTip = popover.tip;
+
+        // Close when clicking outside
+        setTimeout(() => {
+            $(document).on('mousedown.copyPopover', function (e) {
+                if (
+                    !$(button).is(e.target) &&
+                    $(button).has(e.target).length === 0 &&
+                    !$(e.target).closest('.popover').length
+                ) {
+                    popover.dispose();
+                    $(document).off('mousedown.copyPopover');
+                }
+            });
+        }, 0);
+
+        // Apply copy
+        $(popoverTip).find('.apply-copy-action').on('click', () => {
+
+            const selectedDays = Array.from(
+                $(popoverTip).find('.form-check-input:checked')
+            ).map(cb => cb.value);
+
+            if (!selectedDays.length) {
+                popover.dispose();
+                $(document).off('mousedown.copyPopover');
+                return;
+            }
+
+            fetch(`/dashboard/availability/slots/${slotToCopy.id}/copy`, {
+                method: 'POST',
+                headers: {
+                    "Accept": "application/json",
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content'),
+                    "Content-Type": 'application/json',
+                },
+                body: JSON.stringify({ selectedDays }),
+            })
+            .then(response =>
+                response.ok
+                    ? response.json()
+                    : Promise.reject('Network response was not ok')
+            )
+            .then(result => {
+
+                result.data.forEach(slot => {
+                    const newSlot = createSlotObject(slot);
+                    const day = slot.weekday;
+
+                    if (!availabilityData.weekly[day]) {
+                        availabilityData.weekly[day] = [];
+                    }
+
+                    availabilityData.weekly[day].push(newSlot);
                 });
-            }
+
+                updateListView();
+                updateSlotsList();
+                updateCalendarStyles();
+
+                showToast({
+                    type: 'success',
+                    message: result.message,
+                });
+            })
+            .catch(error => {
+                releaseFailureAlert({
+                    title: '{{ __('admin.Error') }}',
+                    message: error?.message
+                        ? error.message
+                        : "{{ __('admin.unexpected_error') }}",
+                });
+            });
+
             popover.dispose();
-        });
-        
-        $('body').on('click.popover', function(e) {
-            if (!$(button).is(e.target) && $(button).has(e.target).length === 0 && !$(e.target).closest('.popover').length) {
-                $('.copy-slot-action').popover('dispose');
-                $('body').off('click.popover');
-            }
+            $(document).off('mousedown.copyPopover');
         });
     });
 
