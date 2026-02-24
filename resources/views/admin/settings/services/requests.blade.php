@@ -522,78 +522,18 @@
 
       {{-- ── TAB 1 · Status Timeline ── --}}
       <div class="tab-pane fade show active" id="tabpane-timeline" role="tabpanel">
-        <ul class="list-unstyled mt-2 mb-0">
-
-          <li class="d-flex gap-3 pb-4">
-            <div class="d-flex flex-column align-items-center flex-shrink-0">
-              <span class="badge rounded-pill bg-success p-2"><i class="ti ti-check"></i></span>
-              <div class="border-start border-2 border-success opacity-25 flex-grow-1 mt-1"></div>
+        <div id="timelineContainer">
+          <div class="text-center py-5" id="timelineLoading">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
             </div>
-            <div class="d-flex justify-content-between w-100 pt-1">
-              <div>
-                <div class="fw-semibold text-success small">Request Submitted</div>
-                <small class="text-muted">Client submitted the service request.</small>
-              </div>
-              <small class="text-muted text-nowrap ms-3">Jan 15, 09:00</small>
-            </div>
-          </li>
-
-          <li class="d-flex gap-3 pb-4">
-            <div class="d-flex flex-column align-items-center flex-shrink-0">
-              <span class="badge rounded-pill bg-primary p-2"><i class="ti ti-thumb-up"></i></span>
-              <div class="border-start border-2 border-primary opacity-25 flex-grow-1 mt-1"></div>
-            </div>
-            <div class="d-flex justify-content-between w-100 pt-1">
-              <div>
-                <div class="fw-semibold text-primary small">Approved</div>
-                <small class="text-muted">Request reviewed and approved by admin.</small>
-              </div>
-              <small class="text-muted text-nowrap ms-3">Jan 16, 10:15</small>
-            </div>
-          </li>
-
-          <li class="d-flex gap-3 pb-4">
-            <div class="d-flex flex-column align-items-center flex-shrink-0">
-              <span class="badge rounded-pill bg-info p-2"><i class="ti ti-loader"></i></span>
-              <div class="border-start border-2 border-info opacity-25 flex-grow-1 mt-1"></div>
-            </div>
-            <div class="d-flex justify-content-between w-100 pt-1">
-              <div>
-                <div class="fw-semibold text-info small">In Progress</div>
-                <small class="text-muted">Service provider started working on the project.</small>
-              </div>
-              <small class="text-muted text-nowrap ms-3">Jan 17, 08:30</small>
-            </div>
-          </li>
-
-          <li class="d-flex gap-3 pb-4">
-            <div class="d-flex flex-column align-items-center flex-shrink-0">
-              <span class="badge rounded-pill bg-warning p-2"><i class="ti ti-edit"></i></span>
-              <div class="border-start border-2 border-warning opacity-25 flex-grow-1 mt-1"></div>
-            </div>
-            <div class="d-flex justify-content-between w-100 pt-1">
-              <div>
-                <div class="fw-semibold text-warning small">Revision Requested</div>
-                <small class="text-muted">Client requested adjustments to the deliverable.</small>
-              </div>
-              <small class="text-muted text-nowrap ms-3">Jan 19, 13:00</small>
-            </div>
-          </li>
-
-          <li class="d-flex gap-3">
-            <div class="d-flex flex-column align-items-center flex-shrink-0">
-              <span class="badge rounded-pill bg-danger p-2"><i class="ti ti-x"></i></span>
-            </div>
-            <div class="d-flex justify-content-between w-100 pt-1">
-              <div>
-                <div class="fw-semibold text-danger small hist-final-status">Rejected</div>
-                <small class="text-muted hist-final-note">Request was closed after revision deadline passed.</small>
-              </div>
-              <small class="text-muted text-nowrap ms-3">Jan 20, 17:00</small>
-            </div>
-          </li>
-
-        </ul>
+          </div>
+          <ul class="list-unstyled mt-2 mb-0" id="timelineList" style="display:none;"></ul>
+          <div class="text-center py-5" id="timelineEmpty" style="display:none;">
+            <i class="ti ti-timeline-event-x ti-48px text-muted mb-3 d-block"></i>
+            <p class="text-muted mb-0">{{ __('admin.no_timeline_entries') }}</p>
+          </div>
+        </div>
       </div>
 
       {{-- ── TAB 2 · Messages ── --}}
@@ -951,6 +891,63 @@ if (ocRespond) {
     formHistoryReply.reset();
     $('#histReplyCount').textContent = '0';
     fvHistoryReply && fvHistoryReply.resetForm(true);
+
+    // Fetch timeline via AJAX
+    const requestId = btn.dataset.requestId;
+    const timelineList = document.getElementById('timelineList');
+    const timelineLoading = document.getElementById('timelineLoading');
+    const timelineEmpty = document.getElementById('timelineEmpty');
+
+    timelineList.style.display = 'none';
+    timelineList.innerHTML = '';
+    timelineLoading.style.display = 'block';
+    timelineEmpty.style.display = 'none';
+
+    fetch(`/dashboard/requests/${requestId}/timeline`, {
+      headers: {
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+      },
+    })
+    .then(res => res.json())
+    .then(data => {
+      timelineLoading.style.display = 'none';
+
+      if (!data.status || !data.timeline || data.timeline.length === 0) {
+        timelineEmpty.style.display = 'block';
+        return;
+      }
+
+      let html = '';
+      data.timeline.forEach((item, index) => {
+        const isLast = index === data.timeline.length - 1;
+        const connector = !isLast
+          ? `<div class="border-start border-2 border-${esc(item.color)} opacity-25 flex-grow-1 mt-1"></div>`
+          : '';
+
+        html += `
+          <li class="d-flex gap-3 ${!isLast ? 'pb-4' : ''}">
+            <div class="d-flex flex-column align-items-center flex-shrink-0">
+              <span class="badge rounded-pill bg-${esc(item.color)} p-2"><i class="ti ${esc(item.icon)}"></i></span>
+              ${connector}
+            </div>
+            <div class="d-flex justify-content-between w-100 pt-1">
+              <div>
+                <div class="fw-semibold text-${esc(item.color)} small">${esc(item.label)}</div>
+                <small class="text-muted">${esc(item.description)}</small>
+              </div>
+              <small class="text-muted text-nowrap ms-3">${esc(item.occurred_at)}</small>
+            </div>
+          </li>`;
+      });
+
+      timelineList.innerHTML = html;
+      timelineList.style.display = 'block';
+    })
+    .catch(() => {
+      timelineLoading.style.display = 'none';
+      timelineEmpty.style.display = 'block';
+    });
   });
 
   charCounter($('#histReplyBody'), 'histReplyCount');

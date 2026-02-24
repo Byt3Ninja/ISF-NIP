@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Notifications\TemplateEmail;
+use App\Services\ServiceRequestStatusLogger;
 
 class ServiceProviderDashboardController extends Controller
 {
@@ -490,6 +491,13 @@ class ServiceProviderDashboardController extends Controller
         $serviceRequest->decided_at = now();
         $serviceRequest->save();
 
+        ServiceRequestStatusLogger::log(
+            $serviceRequest->id,
+            $action === 'accept' ? 'approved' : 'rejected',
+            $user->id,
+            $request->input('reason')
+        );
+
         // Send email notification
         $actionLabel = $action === 'accept' ? 'approved' : 'rejected';
         $this->sendActionNotification($serviceRequest, $actionLabel);
@@ -551,6 +559,13 @@ class ServiceProviderDashboardController extends Controller
                 $sr->admin = $user->id;
                 $sr->decided_at = now();
                 $sr->save(); // Triggers Auditable
+
+                ServiceRequestStatusLogger::log(
+                    $sr->id,
+                    $action === 'accept' ? 'approved' : 'rejected',
+                    $user->id,
+                    $request->input('reason')
+                );
 
                 $this->sendActionNotification($sr, $actionLabel);
                 $processedCount++;

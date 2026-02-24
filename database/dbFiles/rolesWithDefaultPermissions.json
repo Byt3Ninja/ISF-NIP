@@ -4445,6 +4445,19 @@
                 ]
             },
             {
+                "name": "service_requests.timeline",
+                "description": "View Service Request Timeline",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "registered",
+                    "serviceProvider"
+                ]
+            },
+            {
                 "name": "users.directory_view",
                 "description": "View User Directory",
                 "guard_name": "web",
