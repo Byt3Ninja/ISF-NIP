@@ -2,6 +2,9 @@
 
 @section('style')
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+<style>
+  #historyTabs .nav-item .nav-link { font-size: 12px; }
+</style>
 @stop
 
 @php
@@ -423,13 +426,13 @@
     {{-- Tabs nav --}}
     <ul class="nav nav-tabs px-3 pt-2 border-bottom flex-shrink-0" id="historyTabs" role="tablist">
       <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="tab-timeline" data-bs-toggle="tab"
+        <button class="nav-link active px-2" id="tab-timeline" data-bs-toggle="tab"
           data-bs-target="#tabpane-timeline" type="button" role="tab">
           <i class="ti ti-timeline me-1"></i>{{ __('admin.status_timeline') }}
         </button>
       </li>
       <li class="nav-item" role="presentation">
-        <button class="nav-link position-relative" id="tab-messages" data-bs-toggle="tab"
+        <button class="nav-link position-relative px-2" id="tab-messages" data-bs-toggle="tab"
           data-bs-target="#tabpane-messages" type="button" role="tab">
           <i class="ti ti-message me-1"></i>{{ __('admin.Messages') }}
           <small 
@@ -441,7 +444,7 @@
         </button>
       </li>
       <li class="nav-item" role="presentation">
-        <button class="nav-link" id="tab-reviews" data-bs-toggle="tab"
+        <button class="nav-link px-2" id="tab-reviews" data-bs-toggle="tab"
           data-bs-target="#tabpane-reviews" type="button" role="tab">
           <i class="ti ti-star me-1"></i>{{ __('admin.reviews') }}
         </button>
