@@ -184,14 +184,20 @@
                     </div>
                   </div>
                   @if ($service->vendor_name)
-                    <a 
-                      href="{{ isset($service->service_provider_id) ? '/dashboard/service-provider/' . $service->provider->id . '/profile' : 'javascript:void(0)' }}"
-                      class="d-flex align-items-center gap-1 mb-4 text-dark"
-                    >
-                      <i class="ti ti-building"></i>
-                      {{ $service->vendor_name }}
-                      {{-- <div>{{ __('admin.provided_by') }}:</div> --}}
-                    </a>
+                    @if($service->hide_vendor_info == 1)
+                      <div class="d-flex align-items-center gap-1 mb-4 text-dark">
+                        <span class="fw-medium text-muted">{{ __('admin.Hidden') }}</span>
+                      </div> 
+                    @else
+                      <a 
+                        href="{{ isset($service->service_provider_id) ? '/dashboard/show/UserProfile/' . $service->provider->user_id : 'javascript:void(0)' }}"
+                        class="d-flex align-items-center gap-1 mb-4 text-dark"
+                      >
+                        <i class="ti ti-building"></i>
+                        {{ $service->vendor_name }}
+                        {{-- <div>{{ __('admin.provided_by') }}:</div> --}}
+                      </a>
+                    @endif
                   @else
                     <div></div>
                   @endif
@@ -217,7 +223,11 @@
                   <div class="d-flex align-items-center gap-2 mb-4">
                     <div>{{ __('admin.Price') }}:</div>
                     @if($service->price)
-                      <span class="fw-medium">{{ $service->price }} {{ $service->currency }}</span>
+                      @if($service->hide_price == 1)
+                        <span class="fw-medium text-muted">{{ __('admin.Hidden') }}</span>
+                      @else
+                        <span class="fw-medium">{{ $service->price }} {{ $service->currency }}</span>
+                      @endif
                     @else
                       <span class="fw-medium text-muted">{{ __('admin.free') }}</span>
                     @endif

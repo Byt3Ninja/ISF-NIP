@@ -629,4 +629,5 @@ return [
     'Join_Cycle_First' => 'Please join the program first',
     'Export Company Evaluation' => 'Export Company Evaluation',
     'Export All Evaluations' => 'Export All Evaluations',
+    'Expertise' => 'Expertise',
 ];

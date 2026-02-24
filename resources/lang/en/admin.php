@@ -3469,4 +3469,5 @@ return [
 	'save_basics_first' => 'Please save the basic information first.',
 	'no_service_requests_yet' => 'No service requests yet.',
 	'request_a_service' => 'Request a Service',
+	'Hidden' => 'Hidden',
 ];
