@@ -323,7 +323,7 @@ class ServiceProviderDashboardController extends Controller
     }
 
     /**
-     * Send email notification for a service request action.
+     * Send bilingual email + in-app notification for a service request action.
      */
     private function sendActionNotification(ServicesRequests $serviceRequest, string $actionLabel): void
     {
@@ -332,19 +332,52 @@ class ServiceProviderDashboardController extends Controller
         }
 
         try {
-            $recipient = new User();
-            $recipient->email = $serviceRequest->user->email;
-            $recipient->id = $serviceRequest->user_id;
-            $fullname = $serviceRequest->user->first_name_en . ' ' . $serviceRequest->user->last_name_en;
+            $founder  = $serviceRequest->user;
+            $service  = $serviceRequest->service;
+            $provider = $service->provider;
 
-            $MSG = new TemplateEmail;
-            $MSG->Message = [
-                "Service request - VI portal",
-                "Dear " . $fullname . ",",
-                "Kindly note that your service request (" . $serviceRequest->service->name_en . ") has been " . $actionLabel . ", Check your account for more details.",
-                "/dashboard/requests/mine"
+            $founderLang  = $founder->language ?? 'en';
+            $founderName  = trim($founder->first_name_en . ' ' . $founder->last_name_en);
+            $serviceName  = $founderLang === 'ar' ? ($service->name_ar ?: $service->name_en) : $service->name_en;
+            $providerName = $provider->company_name ?? '';
+
+            $params = [
+                'founder_name'  => $founderName,
+                'service_name'  => $serviceName,
+                'provider_name' => $providerName,
             ];
-            $recipient->notify($MSG);
+
+            $providerMessage = $serviceRequest->admin_comment;
+
+            if ($actionLabel === 'approved') {
+                $subject  = __('admin.service_request_approved_subject', [], $founderLang);
+                $bodyKey  = $providerMessage ? 'service_request_approved_body_with_message' : 'service_request_approved_body';
+                $inAppKey = 'service_request_approved_inapp';
+            } else {
+                $subject  = __('admin.service_request_rejected_subject', [], $founderLang);
+                $bodyKey  = $providerMessage ? 'service_request_rejected_body_with_message' : 'service_request_rejected_body';
+                $inAppKey = 'service_request_rejected_inapp';
+            }
+
+            $bodyParams = $params;
+            if ($providerMessage) {
+                $bodyParams['provider_message'] = $providerMessage;
+            }
+
+            $greeting = __('admin.service_request_notification_greeting', $params, $founderLang);
+            $body     = __("admin.{$bodyKey}", $bodyParams, $founderLang);
+            $inApp    = __("admin.{$inAppKey}", $params, $founderLang);
+
+            $notification = new TemplateEmail([
+                $subject,
+                $greeting,
+                $body,
+                '/dashboard/requests/mine',
+                $inApp,
+            ]);
+            $notification->ActionText = __('admin.service_request_view_details', [], $founderLang);
+
+            $founder->notify($notification);
         } catch (\Throwable $th) {
             // Silently fail - matches existing pattern
         }
@@ -506,10 +539,14 @@ class ServiceProviderDashboardController extends Controller
         $permissions = $user->myPermissions();
         $summary = $this->getSummaryData($serviceIds, $permissions);
 
+        $successMessage = $actionLabel === 'approved'
+            ? __('admin.request_now_in_progress')
+            : __('admin.request_has_been_rejected');
+
         return response()->json([
             'status' => true,
             'title' => __('dashboard.sp_action_success'),
-            'message' => 'Service request ' . $actionLabel . ' successfully.',
+            'message' => $successMessage,
             'summary' => $summary,
         ]);
     }
@@ -575,10 +612,14 @@ class ServiceProviderDashboardController extends Controller
         $permissions = $user->myPermissions();
         $summary = $this->getSummaryData($serviceIds, $permissions);
 
+        $successMessage = $actionLabel === 'approved'
+            ? __('admin.request_now_in_progress')
+            : __('admin.request_has_been_rejected');
+
         return response()->json([
             'status' => true,
             'title' => __('dashboard.sp_action_success'),
-            'message' => $processedCount . ' request(s) ' . $actionLabel . ' successfully.',
+            'message' => $processedCount . ' ' . $successMessage,
             'count' => $processedCount,
             'summary' => $summary,
         ]);

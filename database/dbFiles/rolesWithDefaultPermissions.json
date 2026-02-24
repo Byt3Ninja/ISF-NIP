@@ -4458,6 +4458,18 @@
                 ]
             },
             {
+                "name": "service_requests.mark_complete",
+                "description": "Mark a Service Request as Completed",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "serviceProvider"
+                ]
+            },
+            {
                 "name": "users.directory_view",
                 "description": "View User Directory",
                 "guard_name": "web",

@@ -3527,4 +3527,27 @@ return [
 	'no_service_requests_yet' => 'لا توجد طلبات خدمات حتى الآن.',
 	'request_a_service' => 'طلب خدمة',
 	'Hidden' => 'مخفي',
+
+	// Service Request Actions — Respond (approve / reject)
+	'request_now_in_progress'                    => 'الطلب الآن قيد التنفيذ.',
+	'request_has_been_rejected'                  => 'تم رفض الطلب.',
+	'service_request_approved_subject'           => 'تمت الموافقة على طلب الخدمة الخاص بك',
+	'service_request_rejected_subject'           => 'لم تتم الموافقة على طلب الخدمة الخاص بك',
+	'service_request_notification_greeting'      => 'مرحباً :founder_name،',
+	'service_request_approved_body'              => 'تمت الموافقة على طلبك لخدمة ":service_name" بواسطة :provider_name. الطلب الآن قيد التنفيذ.',
+	'service_request_approved_body_with_message' => "تمت الموافقة على طلبك لخدمة \":service_name\" بواسطة :provider_name.\n\nرسالة مقدم الخدمة:\n:provider_message",
+	'service_request_rejected_body'              => 'لم تتم الموافقة على طلبك لخدمة ":service_name" بواسطة :provider_name.',
+	'service_request_rejected_body_with_message' => "لم تتم الموافقة على طلبك لخدمة \":service_name\" بواسطة :provider_name.\n\nرسالة مقدم الخدمة:\n:provider_message",
+	'service_request_approved_inapp'             => 'تمت الموافقة على ":service_name" والطلب الآن قيد التنفيذ.',
+	'service_request_rejected_inapp'             => 'لم تتم الموافقة على ":service_name".',
+	'service_request_view_details'               => 'عرض التفاصيل',
+
+	// Service Request Actions — Mark as Completed
+	'request_marked_as_completed'                => 'تم إكمال الطلب.',
+	'mark_as_completed'                          => 'وضع علامة مكتمل',
+	'mark_complete_confirm'                      => 'هل أنت متأكد أنك تريد وضع علامة مكتمل على هذا الطلب؟',
+	'service_request_completed_subject'          => 'تم إكمال طلب الخدمة الخاص بك',
+	'service_request_completed_body'             => 'تم وضع علامة مكتمل على طلب الخدمة ":service_name" بواسطة :provider_name. يمكنك عرض تفاصيل الطلب وسجلّه من لوحة التحكم. نرجو تخصيص لحظة لكتابة تقييم ومشاركة تجربتك.',
+	'service_request_completed_cta'              => 'إرسال تقييم',
+	'service_request_completed_inapp'            => 'تم إكمال ":service_name".',
 ];

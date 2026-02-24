@@ -64,65 +64,63 @@
       </div>
 
       <!-- Filters -->
-      @if (!empty($services) && $services->count() > 0)
-        <div class="card shadow-none rounded-0 border-bottom">
-          <div class="card-body py-4">
-            <form method="GET" action="{{ route('services.index') }}" id="filter-form" data-ignore-dirty>
-              <div class="row g-3 align-items-end">
-                <div class="col-md-6 col-lg-3">
-                  <div class="input-group input-group-merge">
-                    <span class="input-group-text"><i class="ti ti-search text-muted"></i></span>
-                    <input type="text" class="form-control" name="search" value="{{ request('search') }}" placeholder="{{ __('admin.Search') }}...">
-                  </div>
-                </div>
-  
-                <div class="col-md-6 col-lg-2">
-                  <select class="form-select select2" name="org-id" id="organization-filter" data-placeholder="{{ __('admin.All_Organizations') }}">
-                    <option value="all">{{ __('admin.All_Organizations') }}</option>
-                    @foreach($organizations as $org)
-                      <option value="{{ $org->id }}" {{ request('org-id') == $org->id ? 'selected' : '' }}>{{ $org->{'name_' . $l} }}</option>
-                    @endforeach
-                  </select>
-                </div>
-
-                <div class="col-md-6 col-lg-2">
-                  <select class="form-select select2" name="status" data-placeholder="{{ __('admin.All_statuses') }}">
-                    <option value="all">{{ __('admin.All_statuses') }}</option>
-                    <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>{{ __('admin.Active') }}</option>
-                    <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>{{ __('admin.Inactive') }}</option>
-                  </select>
-                </div>
-
-                @if ($_user->hasRole('registered'))
-                  <div class="col-md-6 col-lg-3">
-                    <select class="form-select select2" name="rating" data-placeholder="{{ __('admin.all_ratings') }}">
-                      <option value="all">{{ __('admin.all_ratings') }}</option>
-                      <option value="5">★★★★★ (5 {{ __('admin.stars') }})</option>
-                      <option value="4">★★★★☆ (4 {{ __('admin.stars') }} & {{ __('admin.up') }})</option>
-                      <option value="3">★★★☆☆ (3 {{ __('admin.stars') }} & {{ __('admin.up') }})</option>
-                      <option value="2">★★☆☆☆ (2 {{ __('admin.stars') }} & {{ __('admin.up') }})</option>
-                      <option value="1">★☆☆☆☆ (1 {{ __('admin.star') }} & {{ __('admin.up') }})</option>
-                    </select>
-                  </div>
-                @endif
-
-                <div class="col-md-6 col-lg-2">
-                  <div class="d-flex justify-content-lg-end gap-2">
-                    @if(request('search') || request('status') || request('org-id'))
-                      <a href="{{ route('services.index') }}" class="btn bg-card border btn-icon">
-                        <i class="ti ti-refresh"></i>
-                      </a>
-                    @endif
-                    <button type="submit" class="btn btn-primary btn-icon" disabled>
-                      <i class="ti ti-filter"></i>
-                    </button>
-                  </div>
+      <div class="card shadow-none rounded-0 border-bottom">
+        <div class="card-body py-4">
+          <form method="GET" action="{{ route('services.index') }}" id="filter-form" data-ignore-dirty>
+            <div class="row g-3 align-items-end">
+              <div class="col-md-6 col-lg-3">
+                <div class="input-group input-group-merge">
+                  <span class="input-group-text"><i class="ti ti-search text-muted"></i></span>
+                  <input type="text" class="form-control" name="search" value="{{ request('search') }}" placeholder="{{ __('admin.Search') }}...">
                 </div>
               </div>
-            </form>
-          </div>
+
+              <div class="col-md-6 col-lg-2">
+                <select class="form-select select2" name="org-id" id="organization-filter" data-placeholder="{{ __('admin.All_Organizations') }}">
+                  <option value="all">{{ __('admin.All_Organizations') }}</option>
+                  @foreach($organizations as $org)
+                    <option value="{{ $org->id }}" {{ request('org-id') == $org->id ? 'selected' : '' }}>{{ $org->{'name_' . $l} }}</option>
+                  @endforeach
+                </select>
+              </div>
+
+              <div class="col-md-6 col-lg-2">
+                <select class="form-select select2" name="status" data-placeholder="{{ __('admin.All_statuses') }}">
+                  <option value="all">{{ __('admin.All_statuses') }}</option>
+                  <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>{{ __('admin.Active') }}</option>
+                  <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>{{ __('admin.Inactive') }}</option>
+                </select>
+              </div>
+
+              @if ($_user->hasRole('registered'))
+                <div class="col-md-6 col-lg-3">
+                  <select class="form-select select2" name="rating" data-placeholder="{{ __('admin.all_ratings') }}">
+                    <option value="all">{{ __('admin.all_ratings') }}</option>
+                    <option value="5" {{ request('rating') == '5' ? 'selected' : '' }}>★★★★★ (5 {{ __('admin.stars') }})</option>
+                    <option value="4" {{ request('rating') == '4' ? 'selected' : '' }}>★★★★☆ (4 {{ __('admin.stars') }} & {{ __('admin.up') }})</option>
+                    <option value="3" {{ request('rating') == '3' ? 'selected' : '' }}>★★★☆☆ (3 {{ __('admin.stars') }} & {{ __('admin.up') }})</option>
+                    <option value="2" {{ request('rating') == '2' ? 'selected' : '' }}>★★☆☆☆ (2 {{ __('admin.stars') }} & {{ __('admin.up') }})</option>
+                    <option value="1" {{ request('rating') == '1' ? 'selected' : '' }}>★☆☆☆☆ (1 {{ __('admin.star') }} & {{ __('admin.up') }})</option>
+                  </select>
+                </div>
+              @endif
+
+              <div class="col-md-6 col-lg-2">
+                <div class="d-flex justify-content-lg-end gap-2">
+                  @if(request('search') || request('status') || request('org-id'))
+                    <a href="{{ route('services.index') }}" class="btn bg-card border btn-icon">
+                      <i class="ti ti-refresh"></i>
+                    </a>
+                  @endif
+                  <button type="submit" class="btn btn-primary btn-icon" disabled>
+                    <i class="ti ti-filter"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
         </div>
-      @endif
+      </div>
 
       @if (!empty($services) && $services->count() > 0)
       <div class="card-body">

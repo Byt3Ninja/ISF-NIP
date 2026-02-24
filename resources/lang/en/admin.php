@@ -3470,4 +3470,27 @@ return [
 	'no_service_requests_yet' => 'No service requests yet.',
 	'request_a_service' => 'Request a Service',
 	'Hidden' => 'Hidden',
+
+	// Service Request Actions — Respond (approve / reject)
+	'request_now_in_progress'                    => 'Request is now in progress.',
+	'request_has_been_rejected'                  => 'Request has been rejected.',
+	'service_request_approved_subject'           => 'Your service request has been approved',
+	'service_request_rejected_subject'           => 'Your service request was not approved.',
+	'service_request_notification_greeting'      => 'Dear :founder_name,',
+	'service_request_approved_body'              => 'Your request for ":service_name" has been approved by :provider_name. The request is now in progress.',
+	'service_request_approved_body_with_message' => "Your request for \":service_name\" has been approved by :provider_name. The request is now in progress.\n\nMessage from the service provider:\n:provider_message",
+	'service_request_rejected_body'              => 'Your request for ":service_name" was not approved by :provider_name.',
+	'service_request_rejected_body_with_message' => "Your request for \":service_name\" was not approved by :provider_name.\n\nService Provider Message:\n:provider_message",
+	'service_request_approved_inapp'             => '":service_name" was approved.',
+	'service_request_rejected_inapp'             => '":service_name" was not approved.',
+	'service_request_view_details'               => 'View Details',
+
+	// Service Request Actions — Mark as Completed
+	'request_marked_as_completed'                => 'Request marked as completed.',
+	'mark_as_completed'                          => 'Mark as Completed',
+	'mark_complete_confirm'                      => 'Are you sure you want to mark this request as completed?',
+	'service_request_completed_subject'          => 'Your service request has been completed.',
+	'service_request_completed_body'             => 'Your service request ":service_name" has been marked as completed by :provider_name. You can view the request details and history from your dashboard. Please take a moment to leave a review to share your experience.',
+	'service_request_completed_cta'              => 'Submit a review.',
+	'service_request_completed_inapp'            => '":service_name" is completed.',
 ];
