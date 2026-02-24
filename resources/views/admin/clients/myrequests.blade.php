@@ -25,38 +25,35 @@
   <div class="row g-3 mb-6">
     @php
     $config = [
-      'total'     => ['label' => 'total_requests',  'icon' => 'ti-clipboard-list', 'color' => 'primary'],
-      'pending'   => ['label' => 'Pending',          'icon' => 'ti-clock',          'color' => 'warning'],
-      'completed' => ['label' => 'Completed',         'icon' => 'ti-checks',         'color' => 'success'],
-      'decision'  => ['label' => 'approved_rejected', 'icon' => 'ti-checks',         'color' => 'info'],
+      'total'     => ['label' => 'total_requests',  'icon' => 'ti-clipboard-list', 'color' => 'primary', 'status' => null],
+      'pending'   => ['label' => 'Pending',          'icon' => 'ti-clock',          'color' => 'warning', 'status' => 'pending'],
+      'completed' => ['label' => 'Completed',         'icon' => 'ti-checks',         'color' => 'success', 'status' => 'completed'],
+      'decision'  => ['label' => 'approved_rejected', 'icon' => 'ti-checks',         'color' => 'info',    'status' => null],
     ];
     @endphp
 
     @foreach($config as $key => $item)
     <div class="col-sm-6 col-xl-3">
+      @if($key === 'decision')
       <div class="card h-100">
         <div class="card-body pb-3">
           <div class="d-flex align-items-start justify-content-between">
             <div class="content-left">
               <span class="text-heading">{{ __('admin.' . $item['label']) }}</span>
-
-              @if($key === 'decision')
               <div class="d-flex align-items-center my-1">
                 <h4 class="mb-0 me-2">
-                  <span>{{ $stats['approved'] ?? 0 }}</span>
-                  <span class="small text-muted">{{ __('admin.Approved') }}</span>
+                  <a href="{{ route('service_requests.list_mine', ['request_status' => 'approved']) }}" class="text-decoration-none" style="color: inherit;">
+                    <span>{{ $stats['approved'] ?? 0 }}</span>
+                    <span class="small text-muted">{{ __('admin.Approved') }}</span>
+                  </a>
                   /
-                  <span>{{ $stats['rejected'] ?? 0 }}</span>
-                  <span class="small text-muted">{{ __('admin.Rejected') }}</span>
+                  <a href="{{ route('service_requests.list_mine', ['request_status' => 'rejected']) }}" class="text-decoration-none" style="color: inherit;">
+                    <span>{{ $stats['rejected'] ?? 0 }}</span>
+                    <span class="small text-muted">{{ __('admin.Rejected') }}</span>
+                  </a>
                 </h4>
               </div>
-              @else
-              <div class="d-flex align-items-center my-1">
-                <h4 class="mb-0 me-2">{{ $stats[$key] ?? 0 }}</h4>
-              </div>
-              @endif
             </div>
-
             <div class="avatar">
               <span class="avatar-initial rounded bg-label-{{ $item['color'] }}">
                 <i class="ti {{ $item['icon'] }} ti-26px"></i>
@@ -65,6 +62,27 @@
           </div>
         </div>
       </div>
+      @else
+      <a href="{{ route('service_requests.list_mine', $item['status'] ? ['request_status' => $item['status']] : []) }}" class="text-decoration-none" style="color: inherit;">
+        <div class="card h-100" style="cursor: pointer;">
+          <div class="card-body pb-3">
+            <div class="d-flex align-items-start justify-content-between">
+              <div class="content-left">
+                <span class="text-heading">{{ __('admin.' . $item['label']) }}</span>
+                <div class="d-flex align-items-center my-1">
+                  <h4 class="mb-0 me-2">{{ $stats[$key] ?? 0 }}</h4>
+                </div>
+              </div>
+              <div class="avatar">
+                <span class="avatar-initial rounded bg-label-{{ $item['color'] }}">
+                  <i class="ti {{ $item['icon'] }} ti-26px"></i>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </a>
+      @endif
     </div>
     @endforeach
   </div>
