@@ -217,7 +217,11 @@
                   <div class="d-flex align-items-center gap-2 mb-4">
                     <div>{{ __('admin.Price') }}:</div>
                     @if($service->price)
-                      <span class="fw-medium">{{ $service->price }} {{ $service->currency }}</span>
+                      @if($service->hide_price == 1)
+                        <span class="fw-medium text-muted">{{ __('admin.Hidden') }}</span>
+                      @else
+                        <span class="fw-medium">{{ $service->price }} {{ $service->currency }}</span>
+                      @endif
                     @else
                       <span class="fw-medium text-muted">{{ __('admin.free') }}</span>
                     @endif
