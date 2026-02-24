@@ -126,7 +126,7 @@
 
   {{-- Requests Grid --}}
   <div class="row g-4">
-    @foreach($requests as $request)
+    @forelse($requests as $request)
     <div class="col-md-4">
       <div class="card h-100 shadow-sm">
         <div class="card-body d-flex flex-column">
@@ -150,12 +150,26 @@
           {{-- Description --}}
           <p class="text-muted small flex-grow-1">{{ $request['description'] }}</p>
 
+          {{-- Price --}}
+          @if($request['price'])
+          <div class="mb-3">
+            <span class="fw-semibold text-dark">{{ $request['price'] }} {{ $request['currency'] }}</span>
+          </div>
+          @endif
+
           {{-- Service Provider --}}
-          <a href="#" class="d-flex align-items-center mb-4 text-decoration-none">
+          @if(!$request['hide_vendor_info'])
+          <a href="{{ $request['service_provider']['profile_url'] ?? '#' }}" class="d-flex align-items-center mb-4 text-decoration-none">
             <img src="{{ $request['service_provider']['image_url'] }}" class="rounded-circle me-2"
               width="40" height="40" alt="provider">
             <div class="fw-semibold text-dark">{{ $request['service_provider']['name'] }}</div>
           </a>
+          @else
+          <div class="d-flex align-items-center mb-4">
+            <img src="/images/deck-video.svg" class="rounded-circle me-2"
+              width="40" height="40" alt="provider">
+          </div>
+          @endif
 
           {{-- Actions --}}
           <div class="d-flex gap-2 mt-auto">
@@ -222,8 +236,27 @@
         </div>
       </div>
     </div>
-    @endforeach
+    @empty
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body text-center py-5">
+          <i class="ti ti-clipboard-list ti-48px text-muted mb-3 d-block"></i>
+          <p class="text-muted mb-3">{{ __('admin.no_service_requests_yet') }}</p>
+          <a href="{{ route('users.directory_view') }}" class="btn btn-primary">
+            <i class="ti ti-plus me-1"></i> {{ __('admin.request_a_service') }}
+          </a>
+        </div>
+      </div>
+    </div>
+    @endforelse
   </div>
+
+  {{-- Pagination --}}
+  @if($requests->hasPages())
+  <div class="d-flex justify-content-end mt-4">
+    {{ $requests->links('pagination::bootstrap-5') }}
+  </div>
+  @endif
 </div>
 
 {{-- ═══════════════════════════════════════════

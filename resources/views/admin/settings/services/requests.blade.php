@@ -141,7 +141,7 @@
 
   {{-- Requests Grid --}}
   <div class="row g-4">
-    @foreach($requests as $request)
+    @forelse($requests as $request)
     <div class="col-md-4">
       <div class="card h-100 shadow-sm">
         <div class="card-body d-flex flex-column">
@@ -165,8 +165,27 @@
           {{-- Description --}}
           <p class="text-muted small flex-grow-1">{{ $request['description'] }}</p>
 
+          {{-- Price --}}
+          @if($request['price'])
+          <div class="mb-3">
+            <span class="fw-semibold text-dark">{{ $request['price'] }} {{ $request['currency'] }}</span>
+          </div>
+          @endif
+
+          {{-- Startup & Founder --}}
+          <div class="d-flex flex-column gap-1 mb-3">
+            <div class="small">
+              <span class="text-muted">{{ __('admin.StartUp_name') }}:</span>
+              <a href="{{ $request['startup_url'] ?? '#' }}" class="fw-semibold text-dark text-decoration-none">{{ $request['startup_name'] }}</a>
+            </div>
+            <div class="small">
+              <span class="text-muted">{{ __('admin.founder_name') }}:</span>
+              <a href="{{ $request['founder_url'] ?? '#' }}" class="fw-semibold text-dark text-decoration-none">{{ $request['founder_name'] }}</a>
+            </div>
+          </div>
+
           {{-- Service Provider --}}
-          <a href="#" class="d-flex align-items-center mb-4 text-decoration-none">
+          <a href="{{ $request['service_provider']['profile_url'] ?? '#' }}" class="d-flex align-items-center mb-4 text-decoration-none">
             <img src="{{ $request['service_provider']['image_url'] }}" class="rounded-circle me-2"
               width="40" height="40" alt="provider">
             <div class="fw-semibold text-dark">{{ $request['service_provider']['name'] }}</div>
@@ -235,8 +254,24 @@
         </div>
       </div>
     </div>
-    @endforeach
+    @empty
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body text-center py-5">
+          <i class="ti ti-clipboard-list ti-48px text-muted mb-3 d-block"></i>
+          <p class="text-muted mb-0">{{ __('admin.no_service_requests_yet') }}</p>
+        </div>
+      </div>
+    </div>
+    @endforelse
   </div>
+
+  {{-- Pagination --}}
+  @if($requests->hasPages())
+  <div class="d-flex justify-content-end mt-4">
+    {{ $requests->links('pagination::bootstrap-5') }}
+  </div>
+  @endif
 </div>
 
 {{-- ═══════════════════════════════════════════

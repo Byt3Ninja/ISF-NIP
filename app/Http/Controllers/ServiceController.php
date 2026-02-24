@@ -342,6 +342,7 @@ class ServiceController extends Controller
 		$user = auth()->user();
 		$locale = app()->getLocale();
 		$nameCol = 'name_' . $locale;
+		$descCol = 'description_' . $locale;
 
 		// Base query builder with necessary joins
 		$baseQuery = DB::table('services_requests')
@@ -408,9 +409,13 @@ class ServiceController extends Controller
 		$rows = $baseQuery->select([
 				'services_requests.id',
 				"services.{$nameCol} as service_name",
+				"services.{$descCol} as service_description",
 				'services_requests.date_time',
 				'services_requests.comment',
 				'services.img_url as service_img',
+				'services.price',
+				'services.currency',
+				'services.hide_price',
 				'services_requests.approved',
 				'services_requests.done',
 				'services_requests.rate',
@@ -420,9 +425,11 @@ class ServiceController extends Controller
 				'service_providers.id as provider_id',
 				'service_providers.company_name as provider_name',
 				'service_providers.img_url as provider_img',
+				'users.id as founder_user_id',
 				DB::raw("CONCAT(users.first_name_en, ' ', users.last_name_en) as founder_name"),
 				'users.img_url as founder_img',
 				"companies.{$nameCol} as startup_name",
+				'companies.id as startup_id',
 			])
 			->orderBy('services_requests.created_at', 'desc')
 			->get();
@@ -441,27 +448,48 @@ class ServiceController extends Controller
 			}
 
 			return [
-				'id'          => $row->id,
-				'title'       => $row->service_name,
-				'date'        => $row->date_time ? \Carbon\Carbon::parse($row->date_time)->format('M d, Y • H:i') : '—',
-				'description' => $row->comment ?? '—',
-				'image_url'   => $row->service_img ? '/191014/' . $row->service_img : '/images/deck-video.svg',
-				'status'      => $status,
-				'rating'        => $row->rate,
-				'review_title'  => $row->review_title,
-				'review_body'   => $row->review_body,
-				'reviewed_at'   => $row->reviewed_at ? \Carbon\Carbon::parse($row->reviewed_at)->format('M d, Y') : null,
-				'has_review'    => !is_null($row->rate),
-				'founder_img'   => $row->founder_img ? '/191014/' . $row->founder_img : '/images/deck-video.svg',
-				'service_provider' => [
-					'id'        => $row->provider_id,
-					'name'      => $row->provider_name ?? '—',
-					'image_url' => $row->provider_img ? '/191014/' . $row->provider_img : '/images/deck-video.svg',
+				'id'                  => $row->id,
+				'title'               => $row->service_name,
+				'date'                => $row->date_time ? \Carbon\Carbon::parse($row->date_time)->format('M d, Y • H:i') : '—',
+				'description'         => $row->comment ?? '—',
+				'service_description' => $row->service_description ?? '—',
+				'image_url'           => $row->service_img ? '/191014/' . $row->service_img : '/images/deck-video.svg',
+				'status'              => $status,
+				'price'               => !$row->hide_price && $row->price > 0 ? $row->price : null,
+				'currency'            => $row->currency,
+				'rating'              => $row->rate,
+				'review_title'        => $row->review_title,
+				'review_body'         => $row->review_body,
+				'reviewed_at'         => $row->reviewed_at ? \Carbon\Carbon::parse($row->reviewed_at)->format('M d, Y') : null,
+				'has_review'          => !is_null($row->rate),
+				'founder_img'         => $row->founder_img ? '/191014/' . $row->founder_img : '/images/deck-video.svg',
+				'founder_name'        => $row->founder_name ?? 'N/A',
+				'founder_url'         => $row->founder_user_id ? route('mentors.profile_view', $row->founder_user_id) : '#',
+				'startup_name'        => $row->startup_name ?? 'N/A',
+				'startup_url'         => $row->startup_id ? route('company.profile_view', $row->startup_id) : '#',
+				'service_provider'    => [
+					'id'          => $row->provider_id,
+					'name'        => $row->provider_name ?? '—',
+					'image_url'   => $row->provider_img ? '/191014/' . $row->provider_img : '/images/deck-video.svg',
+					'profile_url' => $row->provider_id ? route('service_provider.profile', $row->provider_id) : '#',
 				],
-				'founder_name'  => $row->founder_name ?? 'N/A',
-				'startup_name'  => $row->startup_name ?? 'N/A',
 			];
 		});
+
+		// Paginate (9 per page)
+		$page = $request->get('page', 1);
+		$perPage = 9;
+		$total = $requests->count();
+		$requests = new LengthAwarePaginator(
+			$requests->forPage($page, $perPage)->values(),
+			$total,
+			$perPage,
+			$page,
+			[
+				'path'  => LengthAwarePaginator::resolveCurrentPath(),
+				'query' => $request->query(),
+			]
+		);
 
 		return view('admin.settings.services.requests', compact('stats', 'requests'));
 	}
@@ -777,17 +805,19 @@ class ServiceController extends Controller
 		$userId = Auth::id();
 		$locale = app()->getLocale();
 		$nameCol = 'name_' . $locale;
+		$descCol = 'description_' . $locale;
 
 		// Base query for the founder's own requests
 		$baseQuery = DB::table('services_requests')
 			->join('services', 'services_requests.service_id', '=', 'services.id')
 			->leftJoin('service_providers', 'services.service_provider_id', '=', 'service_providers.id')
 			->join('users', 'services_requests.user_id', '=', 'users.id')
+			->leftJoin('companies', 'users.company_id', '=', 'companies.id')
 			->where('services_requests.user_id', $userId)
 			->whereNull('services_requests.deleted_at')
 			->whereNull('services.deleted_at');
 
-		// Compute stats
+		// Compute stats (before applying status filter)
 		$statsRaw = (clone $baseQuery)
 			->selectRaw("
 				COUNT(*) as total,
@@ -830,9 +860,14 @@ class ServiceController extends Controller
 		$rows = $baseQuery->select([
 				'services_requests.id',
 				"services.{$nameCol} as service_name",
+				"services.{$descCol} as service_description",
 				'services_requests.date_time',
 				'services_requests.comment',
 				'services.img_url as service_img',
+				'services.price',
+				'services.currency',
+				'services.hide_price',
+				'services.hide_vendor_info',
 				'services_requests.approved',
 				'services_requests.done',
 				'services_requests.rate',
@@ -842,8 +877,12 @@ class ServiceController extends Controller
 				'service_providers.id as provider_id',
 				'service_providers.company_name as provider_name',
 				'service_providers.img_url as provider_img',
+				'service_providers.user_id as provider_user_id',
+				'users.id as founder_user_id',
 				DB::raw("CONCAT(users.first_name_en, ' ', users.last_name_en) as founder_name"),
 				'users.img_url as founder_img',
+				"companies.{$nameCol} as startup_name",
+				'companies.id as startup_id',
 			])
 			->orderBy('services_requests.created_at', 'desc')
 			->get();
@@ -860,27 +899,52 @@ class ServiceController extends Controller
 				$status = 'Pending';
 			}
 
+			$hideVendor = (bool) $row->hide_vendor_info;
+
 			return [
-				'id'          => $row->id,
-				'title'       => $row->service_name,
-				'date'        => $row->date_time ? \Carbon\Carbon::parse($row->date_time)->format('M d, Y • H:i') : '—',
-				'description' => $row->comment ?? '—',
-				'image_url'   => $row->service_img ? '/191014/' . $row->service_img : '/images/deck-video.svg',
-				'status'      => $status,
-				'rating'       => $row->rate,
-				'review_title' => $row->review_title,
-				'review_body'  => $row->review_body,
-				'reviewed_at'  => $row->reviewed_at ? \Carbon\Carbon::parse($row->reviewed_at)->format('M d, Y') : null,
-				'has_review'   => !is_null($row->rate),
-				'founder_name' => $row->founder_name ?? 'N/A',
-				'founder_img'  => $row->founder_img ? '/191014/' . $row->founder_img : '/images/deck-video.svg',
-				'service_provider' => [
-					'id'        => $row->provider_id,
-					'name'      => $row->provider_name ?? '—',
-					'image_url' => $row->provider_img ? '/191014/' . $row->provider_img : '/images/deck-video.svg',
+				'id'                  => $row->id,
+				'title'               => $row->service_name,
+				'date'                => $row->date_time ? \Carbon\Carbon::parse($row->date_time)->format('M d, Y • H:i') : '—',
+				'description'         => $row->comment ?? '—',
+				'service_description' => $row->service_description ?? '—',
+				'image_url'           => $row->service_img ? '/191014/' . $row->service_img : '/images/deck-video.svg',
+				'status'              => $status,
+				'price'               => !$row->hide_price && $row->price > 0 ? $row->price : null,
+				'currency'            => $row->currency,
+				'hide_vendor_info'    => $hideVendor,
+				'rating'              => $row->rate,
+				'review_title'        => $row->review_title,
+				'review_body'         => $row->review_body,
+				'reviewed_at'         => $row->reviewed_at ? \Carbon\Carbon::parse($row->reviewed_at)->format('M d, Y') : null,
+				'has_review'          => !is_null($row->rate),
+				'founder_name'        => $row->founder_name ?? 'N/A',
+				'founder_img'         => $row->founder_img ? '/191014/' . $row->founder_img : '/images/deck-video.svg',
+				'founder_url'         => $row->founder_user_id ? route('mentors.profile_view', $row->founder_user_id) : '#',
+				'startup_name'        => $row->startup_name ?? 'N/A',
+				'startup_url'         => $row->startup_id ? route('company.profile_view', $row->startup_id) : '#',
+				'service_provider'    => [
+					'id'          => $row->provider_id,
+					'name'        => $row->provider_name ?? '—',
+					'image_url'   => $row->provider_img ? '/191014/' . $row->provider_img : '/images/deck-video.svg',
+					'profile_url' => !$hideVendor && $row->provider_id ? route('service_provider.profile', $row->provider_id) : null,
 				],
 			];
 		});
+
+		// Paginate (9 per page)
+		$page = $request->get('page', 1);
+		$perPage = 9;
+		$total = $requests->count();
+		$requests = new LengthAwarePaginator(
+			$requests->forPage($page, $perPage)->values(),
+			$total,
+			$perPage,
+			$page,
+			[
+				'path'  => LengthAwarePaginator::resolveCurrentPath(),
+				'query' => $request->query(),
+			]
+		);
 
 		return view('admin.clients.myrequests', compact('stats', 'requests'));
 	}

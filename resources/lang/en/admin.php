@@ -3458,4 +3458,6 @@ return [
 	'no_clients_found' => 'No clients added yet.',
 	'edit_service_provider' => 'Edit Service Provider',
 	'save_basics_first' => 'Please save the basic information first.',
+	'no_service_requests_yet' => 'No service requests yet.',
+	'request_a_service' => 'Request a Service',
 ];
