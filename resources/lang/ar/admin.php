@@ -3515,4 +3515,6 @@ return [
 	'no_clients_found' => 'لم تتم إضافة عملاء بعد.',
 	'edit_service_provider' => 'تعديل مزود الخدمة',
 	'save_basics_first' => 'يرجى حفظ المعلومات الأساسية أولاً.',
+	'no_service_requests_yet' => 'لا توجد طلبات خدمات حتى الآن.',
+	'request_a_service' => 'طلب خدمة',
 ];
