@@ -361,6 +361,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('requests/old', 'ServiceController@oldrequests')->name('service_requests.list_archived');
     Route::post('requests/take_action', 'ServiceController@serviceAction')->name('service_requests.take_action');
     Route::get('requests/mine', 'ServiceController@myRequests')->name('service_requests.list_mine');
+    Route::get('requests/{id}/timeline', 'ServiceController@timeline')->name('service_requests.timeline');
 
     // Services Directory
     Route::get('directory', 'ServiceController@availableServices')->name('users.directory_view');

@@ -13,6 +13,7 @@ use App\Http\Requests\{BookServiceRequest, StoreServiceRequest, SubmitReviewRequ
 use App\Notifications\{TemplateEmail, ServiceRequestNotification};
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\{User, Settings, Currency, Service, Organization, ServiceCategory, serviceProviders, ServicesRequests};
+use App\Services\ServiceRequestStatusLogger;
 
 class ServiceController extends Controller
 {
@@ -494,6 +495,91 @@ class ServiceController extends Controller
 		return view('admin.settings.services.requests', compact('stats', 'requests'));
 	}
 
+	/**
+	 * AJAX: Return the status timeline for a single service request.
+	 */
+	public function timeline(int $id)
+	{
+		$user = auth()->user();
+		$locale = app()->getLocale();
+
+		// Build base query with authorization scoping
+		$requestQuery = DB::table('services_requests')
+			->join('services', 'services_requests.service_id', '=', 'services.id')
+			->where('services_requests.id', $id)
+			->whereNull('services_requests.deleted_at')
+			->whereNull('services.deleted_at');
+
+		// Role-based access
+		if ($user->hasRole('registered')) {
+			$requestQuery->where('services_requests.user_id', $user->id);
+		} elseif ($user->hasRole('serviceProvider') && $user->service_provider) {
+			$requestQuery->where('services.service_provider_id', $user->service_provider->id);
+		} else {
+			$orgIds = $user->organizations_ids;
+			$requestQuery->whereExists(function ($q) use ($orgIds) {
+				$q->select(DB::raw(1))
+					->from('organization_service')
+					->whereColumn('organization_service.service_id', 'services.id')
+					->whereIn('organization_service.organization_id', $orgIds);
+			});
+		}
+
+		$exists = $requestQuery->select('services_requests.id')->first();
+		if (!$exists) {
+			return response()->json([
+				'status'  => false,
+				'message' => __('admin.Service request not found'),
+			], 404);
+		}
+
+		$nameFirst = "first_name_{$locale}";
+		$nameLast  = "last_name_{$locale}";
+
+		$logs = DB::table('service_request_status_logs as l')
+			->leftJoin('users as u', 'l.causer_id', '=', 'u.id')
+			->where('l.service_request_id', $id)
+			->orderBy('l.occurred_at', 'desc')
+			->select([
+				'l.status',
+				'l.comment',
+				'l.occurred_at',
+				DB::raw("CONCAT(COALESCE(u.{$nameFirst}, u.first_name_en), ' ', COALESCE(u.{$nameLast}, u.last_name_en)) as causer_name"),
+			])
+			->get();
+
+		$iconMap = [
+			'pending'   => 'ti-check',
+			'approved'  => 'ti-thumb-up',
+			'rejected'  => 'ti-x',
+			'completed' => 'ti-circle-check',
+		];
+
+		$colorMap = [
+			'pending'   => 'success',
+			'approved'  => 'primary',
+			'rejected'  => 'danger',
+			'completed' => 'info',
+		];
+
+		$timeline = $logs->map(function ($log) use ($iconMap, $colorMap) {
+			return [
+				'status'      => $log->status,
+				'label'       => __('admin.timeline_status_' . $log->status),
+				'description' => $log->comment ?: __('admin.timeline_desc_' . $log->status),
+				'causer_name' => trim($log->causer_name) ?: null,
+				'occurred_at' => \Carbon\Carbon::parse($log->occurred_at)->format('M d, H:i'),
+				'icon'        => $iconMap[$log->status] ?? 'ti-info-circle',
+				'color'       => $colorMap[$log->status] ?? 'info',
+			];
+		});
+
+		return response()->json([
+			'status'   => true,
+			'timeline' => $timeline,
+		]);
+	}
+
 	public function oldrequests()
 	{
 		$user = auth()->user();
@@ -532,6 +618,13 @@ class ServiceController extends Controller
 			$serviceRequest->admin = $user->id;
 			$serviceRequest->decided_at = now();
 			$serviceRequest->save();
+
+			ServiceRequestStatusLogger::log(
+				$serviceRequest->id,
+				$stat == 'approve' ? 'approved' : 'rejected',
+				$user->id,
+				$request->input('comment', null)
+			);
 
 			/// notify user via Mail
 			$stat .= 'ed';
@@ -650,7 +743,18 @@ class ServiceController extends Controller
 
 			$done = trim( strtolower( $is_done ) ) == 'yes' ? 1 : ( trim( strtolower( $is_done ) ) == 'no' ? 1 : null);
 
+			$wasDone = $serviceRequest->done;
 			ServicesRequests::updateOrInsert(['id' => $id], ['rate' => $rate, 'rate_comment' => $rate_comment, 'done' => $done]);
+
+			if ($done == 1 && $wasDone != 1) {
+				ServiceRequestStatusLogger::log(
+					$id,
+					'completed',
+					auth()->id(),
+					$rate_comment
+				);
+			}
+
 			return redirect()->back()->with(['class' => 'success', 'msg' => __('admin.Service request rated, thank you for your feedback')]);
 		}
 		return redirect()->back()->with(['class' => 'danger', 'msg' => __('admin.An unexpected error occurred, please try again later')]);
@@ -789,6 +893,13 @@ class ServiceController extends Controller
 			'comment'    => $request->input('comment'),
 			'date_time'  => $request->datetime,
 		]);
+
+		ServiceRequestStatusLogger::log(
+			$serviceRequest->id,
+			'pending',
+			$user->id,
+			$request->input('comment')
+		);
 
 		event(new WebMessage('NewServ', $user->first_name_en . ' ' . $user->last_name_en));
 

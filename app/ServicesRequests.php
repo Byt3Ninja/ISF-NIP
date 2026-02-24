@@ -23,4 +23,9 @@ class ServicesRequests extends Model
         return $this->belongsTo(Service::class,'service_id','id');
     }
 
+    public function statusLogs()
+    {
+        return $this->hasMany(ServiceRequestStatusLog::class, 'service_request_id')
+                    ->orderBy('occurred_at', 'asc');
+    }
 }
