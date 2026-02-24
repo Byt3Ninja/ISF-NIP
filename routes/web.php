@@ -363,6 +363,10 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('requests/mine', 'ServiceController@myRequests')->name('service_requests.list_mine');
     Route::get('requests/{id}/timeline', 'ServiceController@timeline')->name('service_requests.timeline');
     Route::post('requests/mark-complete', 'ServiceController@markComplete')->name('service_requests.mark_complete');
+    // Service Request Messages
+    Route::get('requests/{id}/messages', 'ServiceController@getMessages')->name('service_requests.messages');
+    Route::post('requests/send-message', 'ServiceController@sendMessage')->name('service_requests.send_message');
+    Route::get('requests/message/{messageId}/attachment', 'ServiceController@downloadMessageAttachment')->name('service_requests.download_attachment');
 
     // Services Directory
     Route::get('directory', 'ServiceController@availableServices')->name('users.directory_view');

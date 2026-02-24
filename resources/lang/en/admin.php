@@ -3493,4 +3493,18 @@ return [
 	'service_request_completed_body'             => 'Your service request ":service_name" has been marked as completed by :provider_name. You can view the request details and history from your dashboard. Please take a moment to leave a review to share your experience.',
 	'service_request_completed_cta'              => 'Submit a review.',
 	'service_request_completed_inapp'            => '":service_name" is completed.',
+
+	// Service Request Messages
+	'You'                                        => 'You',
+	'no_messages_yet'                            => 'No messages yet. Start the conversation!',
+	'message_sent_successfully'                  => 'Message sent successfully!',
+	'message_body_min'                           => 'Message is too short.',
+	'file_size_exceeds_limit'                    => 'File size must be 10MB or less.',
+	'unsupported_file_type'                      => 'Unsupported file type. Allowed files: PNG, JPG, JPEG, WEBP, DOC, DOCX, XLS, XLSX, PPT, PPTX, ZIP, RAR',
+	'message_thread_error'                       => 'Failed to load messages. Please try again.',
+	'service_message_new_inapp'                  => 'You have a new message from :sender_name at :timestamp regarding :service_name.',
+	'service_message_email_subject'              => 'New message regarding :service_name',
+	'service_message_email_greeting'             => 'Dear :recipient_name,',
+	'service_message_email_body'                 => 'You have a new message from :sender_name at :timestamp regarding :service_name.',
+	'service_message_view_cta'                   => 'View Message',
 ];

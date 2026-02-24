@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')->hourly();
         $schedule->command('mentorshipReminder')->everyFiveMinutes();
         $schedule->command('cycle:change-step')->hourly();
+        $schedule->command('service-messages:send-email-reminders')->everyFifteenMinutes();
     }
 
     /**
