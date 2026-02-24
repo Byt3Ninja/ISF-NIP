@@ -185,6 +185,12 @@ return [
             'url' => env('APP_URL') . '/organization-wizard',
             'visibility' => 'public',
         ],
+
+        'service_messages' => [
+            'driver' => 'local',
+            'root' => storage_path('app/service_messages'),
+            'visibility' => 'private',
+        ],
     ],
 
 ];

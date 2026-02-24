@@ -9,7 +9,7 @@ use DB, Log, Exception, Session;
 use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\{Auth, Notification};
-use App\Http\Requests\{BookServiceRequest, StoreServiceRequest, SubmitReviewRequest, UpdateServiceRequest};
+use App\Http\Requests\{BookServiceRequest, SendServiceRequestMessageRequest, StoreServiceRequest, SubmitReviewRequest, UpdateServiceRequest};
 use App\Notifications\{TemplateEmail, ServiceRequestNotification};
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\{User, Settings, Currency, Service, Organization, ServiceCategory, serviceProviders, ServicesRequests};
@@ -346,6 +346,7 @@ class ServiceController extends Controller
 	public function requests(Request $request)
 	{
 		$user = auth()->user();
+		$userId = $user->id;
 		$locale = app()->getLocale();
 		$nameCol = 'name_' . $locale;
 		$descCol = 'description_' . $locale;
@@ -436,6 +437,7 @@ class ServiceController extends Controller
 				'users.img_url as founder_img',
 				"companies.{$nameCol} as startup_name",
 				'companies.id as startup_id',
+				DB::raw("(SELECT COUNT(*) FROM service_request_messages WHERE service_request_messages.service_request_id = services_requests.id AND service_request_messages.sender_id != {$userId} AND service_request_messages.read_at IS NULL) as unread_messages_count"),
 			])
 			->orderBy('services_requests.created_at', 'desc')
 			->get();
@@ -473,6 +475,7 @@ class ServiceController extends Controller
 				'founder_url'         => $row->founder_user_id ? route('mentors.profile_view', $row->founder_user_id) : '#',
 				'startup_name'        => $row->startup_name ?? 'N/A',
 				'startup_url'         => $row->startup_id ? route('company.profile_view', $row->startup_id) : '#',
+				'unread_count'        => (int) ($row->unread_messages_count ?? 0),
 				'service_provider'    => [
 					'id'          => $row->provider_id,
 					'name'        => $row->provider_name ?? '—',
@@ -777,6 +780,272 @@ class ServiceController extends Controller
 				'error'      => $th->getMessage(),
 				'request_id' => $serviceRequest->id,
 				'action'     => $action,
+			]);
+		}
+	}
+
+	/**
+	 * Send a message within a service request thread.
+	 */
+	public function sendMessage(SendServiceRequestMessageRequest $request)
+	{
+		$user = auth()->user();
+		$requestId = $request->input('request_id');
+
+		$serviceRequest = DB::table('services_requests')
+			->join('services', 'services_requests.service_id', '=', 'services.id')
+			->leftJoin('service_providers', 'services.service_provider_id', '=', 'service_providers.id')
+			->where('services_requests.id', $requestId)
+			->whereNull('services_requests.deleted_at')
+			->whereNull('services.deleted_at')
+			->select([
+				'services_requests.id',
+				'services_requests.user_id as founder_id',
+				'services_requests.service_id',
+				'service_providers.user_id as provider_user_id',
+			])
+			->first();
+
+		if (!$serviceRequest) {
+			return response()->json([
+				'status'  => false,
+				'message' => __('admin.Service request not found'),
+			], 404);
+		}
+
+		$founderId      = (int) $serviceRequest->founder_id;
+		$providerUserId = (int) ($serviceRequest->provider_user_id ?? 0);
+
+		if ($user->id !== $founderId && $user->id !== $providerUserId) {
+			if (!$user->hasAnyRole(['admin', 'organizationManager', 'subadmin'])) {
+				return response()->json([
+					'status'  => false,
+					'message' => __('admin.unauthorized_action'),
+				], 403);
+			}
+		}
+
+		$attachmentPath = null;
+		$attachmentName = null;
+		if ($request->hasFile('attachment')) {
+			$file = $request->file('attachment');
+			$attachmentName = $file->getClientOriginalName();
+			$attachmentPath = $file->store('', ['disk' => 'service_messages']);
+		}
+
+		$now = now();
+		$messageId = DB::table('service_request_messages')->insertGetId([
+			'service_request_id' => $requestId,
+			'sender_id'          => $user->id,
+			'body'               => $request->input('message'),
+			'attachment_path'    => $attachmentPath,
+			'attachment_name'    => $attachmentName,
+			'read_at'            => null,
+			'created_at'         => $now,
+			'updated_at'         => $now,
+		]);
+
+		$recipientId = ($user->id === $founderId) ? $providerUserId : $founderId;
+
+		if ($recipientId) {
+			$this->sendMessageInAppNotification($serviceRequest, $user, $recipientId);
+		}
+
+		return response()->json([
+			'status'  => true,
+			'message' => __('admin.message_sent_successfully'),
+			'data'    => [
+				'id'              => $messageId,
+				'body'            => e($request->input('message')),
+				'sender_name'     => __('admin.You'),
+				'attachment_url'  => $attachmentPath ? route('service_requests.download_attachment', $messageId) : null,
+				'attachment_name' => $attachmentName,
+				'created_at'      => $now->format('M d, H:i'),
+				'is_mine'         => true,
+			],
+		]);
+	}
+
+	/**
+	 * Get all messages for a service request thread.
+	 */
+	public function getMessages(int $id)
+	{
+		$user   = auth()->user();
+		$locale = app()->getLocale();
+
+		$requestQuery = DB::table('services_requests')
+			->join('services', 'services_requests.service_id', '=', 'services.id')
+			->where('services_requests.id', $id)
+			->whereNull('services_requests.deleted_at')
+			->whereNull('services.deleted_at');
+
+		if ($user->hasRole('registered')) {
+			$requestQuery->where('services_requests.user_id', $user->id);
+		} elseif ($user->hasRole('serviceProvider') && $user->service_provider) {
+			$requestQuery->where('services.service_provider_id', $user->service_provider->id);
+		} else {
+			$orgIds = $user->organizations_ids;
+			$requestQuery->whereExists(function ($q) use ($orgIds) {
+				$q->select(DB::raw(1))
+					->from('organization_service')
+					->whereColumn('organization_service.service_id', 'services.id')
+					->whereIn('organization_service.organization_id', $orgIds);
+			});
+		}
+
+		$exists = $requestQuery->select('services_requests.id')->first();
+		if (!$exists) {
+			return response()->json([
+				'status'  => false,
+				'message' => __('admin.Service request not found'),
+			], 404);
+		}
+
+		$nameFirst = "first_name_{$locale}";
+		$nameLast  = "last_name_{$locale}";
+
+		$messages = DB::table('service_request_messages as m')
+			->join('users as u', 'm.sender_id', '=', 'u.id')
+			->where('m.service_request_id', $id)
+			->orderBy('m.created_at', 'asc')
+			->select([
+				'm.id',
+				'm.body',
+				'm.sender_id',
+				'm.attachment_path',
+				'm.attachment_name',
+				'm.read_at',
+				'm.created_at',
+				DB::raw("CONCAT(COALESCE(u.{$nameFirst}, u.first_name_en), ' ', COALESCE(u.{$nameLast}, u.last_name_en)) as sender_name"),
+				'u.img_url as sender_img',
+			])
+			->get()
+			->map(function ($msg) use ($user) {
+				$isMine = (int) $msg->sender_id === $user->id;
+				return [
+					'id'              => $msg->id,
+					'body'            => e($msg->body),
+					'sender_name'     => $isMine ? __('admin.You') : trim($msg->sender_name),
+					'sender_img'      => $msg->sender_img ? asset('191014/' . $msg->sender_img) : null,
+					'is_mine'         => $isMine,
+					'attachment_url'  => $msg->attachment_path ? route('service_requests.download_attachment', $msg->id) : null,
+					'attachment_name' => $msg->attachment_name,
+					'created_at'      => \Carbon\Carbon::parse($msg->created_at)->format('M d, H:i'),
+				];
+			});
+
+		DB::table('service_request_messages')
+			->where('service_request_id', $id)
+			->where('sender_id', '!=', $user->id)
+			->whereNull('read_at')
+			->update(['read_at' => now()]);
+
+		return response()->json([
+			'status'   => true,
+			'messages' => $messages,
+		]);
+	}
+
+	/**
+	 * Download a service request message attachment (authorized).
+	 */
+	public function downloadMessageAttachment(int $messageId)
+	{
+		$user = auth()->user();
+
+		$message = DB::table('service_request_messages as m')
+			->join('services_requests as sr', 'm.service_request_id', '=', 'sr.id')
+			->join('services as s', 'sr.service_id', '=', 's.id')
+			->leftJoin('service_providers as sp', 's.service_provider_id', '=', 'sp.id')
+			->where('m.id', $messageId)
+			->whereNotNull('m.attachment_path')
+			->whereNull('sr.deleted_at')
+			->whereNull('s.deleted_at')
+			->select([
+				'm.attachment_path',
+				'm.attachment_name',
+				'sr.user_id as founder_id',
+				'sp.user_id as provider_user_id',
+			])
+			->first();
+
+		if (!$message) {
+			abort(404);
+		}
+
+		$founderId      = (int) $message->founder_id;
+		$providerUserId = (int) ($message->provider_user_id ?? 0);
+
+		if ($user->id !== $founderId && $user->id !== $providerUserId) {
+			if (!$user->hasAnyRole(['admin', 'organizationManager', 'subadmin'])) {
+				abort(403);
+			}
+		}
+
+		$disk = \Illuminate\Support\Facades\Storage::disk('service_messages');
+
+		if (!$disk->exists($message->attachment_path)) {
+			abort(404);
+		}
+
+		return $disk->download($message->attachment_path, $message->attachment_name);
+	}
+
+	/**
+	 * Send an immediate in-app notification for a new service request message.
+	 */
+	private function sendMessageInAppNotification($serviceRequest, $sender, int $recipientId): void
+	{
+		try {
+			$recipient = User::find($recipientId);
+			if (!$recipient) return;
+
+			$recipientLang = $recipient->language ?? 'en';
+			$senderLocale  = $recipientLang;
+
+			$senderFirstName = $sender->{"first_name_{$senderLocale}"} ?? $sender->first_name_en;
+			$senderLastName  = $sender->{"last_name_{$senderLocale}"} ?? $sender->last_name_en;
+			$senderName      = trim($senderFirstName . ' ' . $senderLastName);
+
+			$service = DB::table('services')
+				->where('id', $serviceRequest->service_id)
+				->select(['name_en', 'name_ar'])
+				->first();
+
+			$serviceName = $recipientLang === 'ar'
+				? ($service->name_ar ?: $service->name_en)
+				: $service->name_en;
+
+			$timestamp = now()->format('M d, H:i');
+
+			$inAppMessage = __('admin.service_message_new_inapp', [
+				'sender_name'  => $senderName,
+				'timestamp'    => $timestamp,
+				'service_name' => $serviceName,
+			], $recipientLang);
+
+			$isFounderSending = ((int) $serviceRequest->founder_id === $sender->id);
+			$actionUrl = $isFounderSending
+				? '/dashboard/requests/all?open_request=' . $serviceRequest->id . '&tab=messages'
+				: '/dashboard/requests/mine?open_request=' . $serviceRequest->id . '&tab=messages';
+
+			DB::table('notifications')->insert([
+				'id'              => \Illuminate\Support\Str::uuid()->toString(),
+				'type'            => 'App\\Notifications\\TemplateEmail',
+				'notifiable_type' => 'App\\User',
+				'notifiable_id'   => $recipientId,
+				'data'            => json_encode([
+					'message'    => $inAppMessage,
+					'action_url' => $actionUrl,
+				]),
+				'created_at'      => now(),
+				'updated_at'      => now(),
+			]);
+		} catch (\Throwable $th) {
+			Log::error('Failed to send service message in-app notification', [
+				'error'      => $th->getMessage(),
+				'request_id' => $serviceRequest->id,
 			]);
 		}
 	}
@@ -1127,6 +1396,7 @@ class ServiceController extends Controller
 				'users.img_url as founder_img',
 				"companies.{$nameCol} as startup_name",
 				'companies.id as startup_id',
+				DB::raw("(SELECT COUNT(*) FROM service_request_messages WHERE service_request_messages.service_request_id = services_requests.id AND service_request_messages.sender_id != {$userId} AND service_request_messages.read_at IS NULL) as unread_messages_count"),
 			])
 			->orderBy('services_requests.created_at', 'desc')
 			->get();
@@ -1166,6 +1436,7 @@ class ServiceController extends Controller
 				'founder_url'         => $row->founder_user_id ? route('mentors.profile_view', $row->founder_user_id) : '#',
 				'startup_name'        => $row->startup_name ?? 'N/A',
 				'startup_url'         => $row->startup_id ? route('company.profile_view', $row->startup_id) : '#',
+				'unread_count'        => (int) ($row->unread_messages_count ?? 0),
 				'service_provider'    => [
 					'id'          => $row->provider_id,
 					'name'        => $row->provider_name ?? '—',

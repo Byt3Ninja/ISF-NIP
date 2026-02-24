@@ -218,7 +218,8 @@
                 data-reviewed-at="{{ $request['reviewed_at'] ?? '' }}"
                 data-has-review="{{ $request['has_review'] ? '1' : '0' }}"
                 data-founder-name="{{ $request['founder_name'] ?? '' }}"
-                data-founder-img="{{ $request['founder_img'] ?? '' }}">
+                data-founder-img="{{ $request['founder_img'] ?? '' }}"
+                data-unread-count="{{ $request['unread_count'] ?? 0 }}">
                 <i class="ti ti-history me-1"></i> {{ __('admin.view_history') }}
               </button>
 
@@ -246,7 +247,8 @@
               data-reviewed-at="{{ $request['reviewed_at'] ?? '' }}"
               data-has-review="{{ $request['has_review'] ? '1' : '0' }}"
               data-founder-name="{{ $request['founder_name'] ?? '' }}"
-              data-founder-img="{{ $request['founder_img'] ?? '' }}">
+              data-founder-img="{{ $request['founder_img'] ?? '' }}"
+              data-unread-count="{{ $request['unread_count'] ?? 0 }}">
               <i class="ti ti-history"></i>
             </button>
           </div>
@@ -387,25 +389,10 @@
       </div>
     </div>
 
-    {{-- Simulated thread --}}
+    {{-- Message thread (loaded via AJAX) --}}
     <div class="border rounded p-3 mb-4 overflow-auto" style="max-height:200px" id="msgThread">
-      <div class="d-flex flex-column gap-3">
-        <div>
-          <div class="d-flex justify-content-start">
-            <div class="bg-label-secondary border rounded-3 px-3 py-2 small" style="max-width:75%">
-              Hello! Looking forward to working on your project.
-            </div>
-          </div>
-          <small class="text-muted ps-1">Tech Solutions Inc · Jan 15, 09:35</small>
-        </div>
-        <div>
-          <div class="d-flex justify-content-end">
-            <div class="bg-primary text-white rounded-3 px-3 py-2 small" style="max-width:75%">
-              Great, please let us know the timeline.
-            </div>
-          </div>
-          <div class="text-end"><small class="text-muted pe-1">You · Jan 15, 09:38</small></div>
-        </div>
+      <div class="text-center py-5" id="msgThreadLoading">
+        <div class="spinner-border spinner-border-sm text-primary"></div>
       </div>
     </div>
 
@@ -486,11 +473,11 @@
         <button class="nav-link position-relative px-2" id="tab-messages" data-bs-toggle="tab"
           data-bs-target="#tabpane-messages" type="button" role="tab">
           <i class="ti ti-message me-1"></i>{{ __('admin.Messages') }}
-          <small 
+          <small id="msgUnreadBadge"
             class="position-absolute rounded-circle bg-danger text-white w-px-20 h-px-20 d-flex flex-shrink-0 align-items-center justify-content-center"
-            style="top: 0; right: 0;"
+            style="top: 0; right: 0; display: none;"
           >
-            4
+            0
           </small>
         </button>
       </li>
@@ -523,52 +510,9 @@
       {{-- ── TAB 2 · Messages ── --}}
       <div class="tab-pane fade" id="tabpane-messages" role="tabpanel">
         <div class="d-flex flex-column gap-3 pt-2" id="histMsgThread">
-
-          <div>
-            <div class="d-flex justify-content-start">
-              <div class="bg-light border rounded-3 px-3 py-2 small" style="max-width:75%">
-                Hello! Looking forward to working on your project.
-              </div>
-            </div>
-            <small class="text-muted ps-1">Provider · Jan 15, 09:35</small>
+          <div class="text-center py-5" id="histMsgLoading">
+            <div class="spinner-border spinner-border-sm text-primary"></div>
           </div>
-
-          <div>
-            <div class="d-flex justify-content-end">
-              <div class="bg-primary text-white rounded-3 px-3 py-2 small" style="max-width:75%">
-                Great, please share a draft timeline.
-              </div>
-            </div>
-            <div class="text-end"><small class="text-muted pe-1">You · Jan 15, 09:38</small></div>
-          </div>
-
-          <div>
-            <div class="d-flex justify-content-start">
-              <div class="bg-light border rounded-3 px-3 py-2 small" style="max-width:75%">
-                Sure! Here's a rough breakdown for the first 2 weeks.
-              </div>
-            </div>
-            <small class="text-muted ps-1">Provider · Jan 16, 08:10</small>
-          </div>
-
-          <div>
-            <div class="d-flex justify-content-end">
-              <div class="bg-primary text-white rounded-3 px-3 py-2 small" style="max-width:75%">
-                Please note we need the mobile layout to be responsive from day one.
-              </div>
-            </div>
-            <div class="text-end"><small class="text-muted pe-1">You · Jan 19, 12:50</small></div>
-          </div>
-
-          <div>
-            <div class="d-flex justify-content-start">
-              <div class="bg-light border rounded-3 px-3 py-2 small" style="max-width:75%">
-                Understood, however the deadline makes that difficult at this stage.
-              </div>
-            </div>
-            <small class="text-muted ps-1">Provider · Jan 19, 14:00</small>
-          </div>
-
         </div>
 
         {{-- Quick reply --}}
@@ -876,6 +820,54 @@ document.addEventListener('DOMContentLoaded', function () {
     formMessage.reset();
     $('#msgBodyCount').textContent = '0';
     fvMessage && fvMessage.resetForm(true);
+
+    // Load existing messages via AJAX
+    const requestId = btn.dataset.requestId;
+    const msgThread = document.getElementById('msgThread');
+    msgThread.innerHTML = '<div class="text-center py-5"><div class="spinner-border spinner-border-sm text-primary"></div></div>';
+
+    fetch(`/dashboard/requests/${requestId}/messages`, {
+      headers: {
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+      },
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (!data.status || !data.messages || data.messages.length === 0) {
+        msgThread.innerHTML = `
+          <div class="text-center py-5">
+            <i class="ti ti-message-off ti-48px text-muted mb-3 d-block"></i>
+            <p class="text-muted mb-0">{{ __('admin.no_messages_yet') }}</p>
+          </div>`;
+        return;
+      }
+      let html = '';
+      data.messages.forEach(msg => {
+        const align = msg.is_mine ? 'end' : 'start';
+        const bgClass = msg.is_mine ? 'bg-primary text-white' : 'bg-label-secondary border';
+        const nameAlign = msg.is_mine ? 'text-end' : '';
+        const namepad = msg.is_mine ? 'pe-1' : 'ps-1';
+        let attachHtml = '';
+        if (msg.attachment_url) {
+          attachHtml = `<div class="mt-1"><a href="${esc(msg.attachment_url)}" target="_blank" class="${msg.is_mine ? 'text-white' : 'text-primary'}"><i class="ti ti-paperclip"></i> ${esc(msg.attachment_name)}</a></div>`;
+        }
+        html += `
+          <div>
+            <div class="d-flex justify-content-${align}">
+              <div class="${bgClass} rounded-3 px-3 py-2 small" style="max-width:75%">
+                ${esc(msg.body)}${attachHtml}
+              </div>
+            </div>
+            <div class="${nameAlign}"><small class="text-muted ${namepad}">${esc(msg.sender_name)} · ${esc(msg.created_at)}</small></div>
+          </div>`;
+      });
+      msgThread.innerHTML = html;
+      msgThread.scrollTop = msgThread.scrollHeight;
+    })
+    .catch(() => {
+      msgThread.innerHTML = `<p class="text-muted text-center py-3">{{ __('admin.message_thread_error') }}</p>`;
+    });
   });
 
   charCounter($('#msgBody'), 'msgBodyCount');
@@ -907,8 +899,59 @@ document.addEventListener('DOMContentLoaded', function () {
       submitButton: new FV.plugins.SubmitButton(),
     },
   }).on('core.form.valid', () => {
-    showToast({ type: 'success', message: '{{ __('admin.MessageSent') }}' });
-    bootstrap.Offcanvas.getInstance(ocMessage).hide();
+    const submitBtn = formMessage.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> {{ __("admin.Send_Message") }}';
+
+    const formData = new FormData(formMessage);
+
+    fetch('{{ route("service_requests.send_message") }}', {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        'Accept': 'application/json',
+      },
+      body: formData,
+    })
+    .then(res => res.json())
+    .then(data => {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="ti ti-send me-1"></i> {{ __("admin.Send_Message") }}';
+      if (data.status) {
+        const d = data.data;
+        let attachHtml = '';
+        if (d.attachment_url) {
+          attachHtml = `<div class="mt-1"><a href="${esc(d.attachment_url)}" target="_blank" class="text-white"><i class="ti ti-paperclip"></i> ${esc(d.attachment_name)}</a></div>`;
+        }
+        const msgThread = document.getElementById('msgThread');
+        // Remove "no messages" placeholder if present
+        const placeholder = msgThread.querySelector('.ti-message-off');
+        if (placeholder) msgThread.innerHTML = '';
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = `
+          <div>
+            <div class="d-flex justify-content-end">
+              <div class="bg-primary text-white rounded-3 px-3 py-2 small" style="max-width:75%">
+                ${esc(d.body)}${attachHtml}
+              </div>
+            </div>
+            <div class="text-end"><small class="text-muted pe-1">${esc(d.sender_name)} · ${esc(d.created_at)}</small></div>
+          </div>`;
+        msgThread.appendChild(wrapper);
+        msgThread.scrollTop = msgThread.scrollHeight;
+        formMessage.reset();
+        $('#msgBodyCount').textContent = '0';
+        fvMessage.resetForm(true);
+        showToast({ type: 'success', message: data.message });
+      } else {
+        showToast({ type: 'error', message: data.message || '{{ __("admin.unexpected_error") }}' });
+      }
+    })
+    .catch(() => {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="ti ti-send me-1"></i> {{ __("admin.Send_Message") }}';
+      showToast({ type: 'error', message: '{{ __("admin.unexpected_error") }}' });
+    });
   });
 
   /* ══════════════════════════════════════
@@ -936,6 +979,18 @@ document.addEventListener('DOMContentLoaded', function () {
     formHistoryReply.reset();
     $('#histReplyCount').textContent = '0';
     fvHistoryReply && fvHistoryReply.resetForm(true);
+
+    // Update unread badge
+    const unreadCount = parseInt(btn.dataset.unreadCount) || 0;
+    const msgBadge = document.getElementById('msgUnreadBadge');
+    if (msgBadge) {
+      if (unreadCount > 0) {
+        msgBadge.textContent = unreadCount;
+        msgBadge.style.display = 'flex';
+      } else {
+        msgBadge.style.display = 'none';
+      }
+    }
 
     // Fetch timeline via AJAX
     const requestId = btn.dataset.requestId;
@@ -993,6 +1048,58 @@ document.addEventListener('DOMContentLoaded', function () {
       timelineLoading.style.display = 'none';
       timelineEmpty.style.display = 'block';
     });
+
+    // Fetch messages via AJAX
+    const histMsgThread = document.getElementById('histMsgThread');
+    histMsgThread.innerHTML = '<div class="text-center py-5"><div class="spinner-border spinner-border-sm text-primary"></div></div>';
+
+    fetch(`/dashboard/requests/${requestId}/messages`, {
+      headers: {
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+      },
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (!data.status || !data.messages || data.messages.length === 0) {
+        histMsgThread.innerHTML = `
+          <div class="text-center py-5">
+            <i class="ti ti-message-off ti-48px text-muted mb-3 d-block"></i>
+            <p class="text-muted mb-0">{{ __('admin.no_messages_yet') }}</p>
+          </div>`;
+        return;
+      }
+      let html = '';
+      data.messages.forEach(msg => {
+        const align = msg.is_mine ? 'end' : 'start';
+        const bgClass = msg.is_mine ? 'bg-primary text-white' : 'bg-light border';
+        const nameAlign = msg.is_mine ? 'text-end' : '';
+        const namepad = msg.is_mine ? 'pe-1' : 'ps-1';
+        let attachHtml = '';
+        if (msg.attachment_url) {
+          const linkClass = msg.is_mine ? 'text-white' : 'text-primary';
+          attachHtml = `<div class="mt-1"><a href="${esc(msg.attachment_url)}" target="_blank" class="${linkClass} text-decoration-underline small"><i class="ti ti-paperclip me-1"></i>${esc(msg.attachment_name)}</a></div>`;
+        }
+        html += `
+          <div>
+            <div class="d-flex justify-content-${align}">
+              <div class="${bgClass} rounded-3 px-3 py-2 small" style="max-width:75%">
+                ${esc(msg.body)}${attachHtml}
+              </div>
+            </div>
+            <div class="${nameAlign}"><small class="text-muted ${namepad}">${esc(msg.sender_name)} · ${esc(msg.created_at)}</small></div>
+          </div>`;
+      });
+      histMsgThread.innerHTML = html;
+      histMsgThread.scrollTop = histMsgThread.scrollHeight;
+
+      // Hide unread badge since messages are now read
+      const msgBadge = document.getElementById('msgUnreadBadge');
+      if (msgBadge) msgBadge.style.display = 'none';
+    })
+    .catch(() => {
+      histMsgThread.innerHTML = `<p class="text-muted text-center py-3">{{ __('admin.message_thread_error') }}</p>`;
+    });
   });
 
   charCounter($('#histReplyBody'), 'histReplyCount');
@@ -1014,22 +1121,55 @@ document.addEventListener('DOMContentLoaded', function () {
       submitButton: new FV.plugins.SubmitButton(),
     },
   }).on('core.form.valid', () => {
-    const now     = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
-    const wrapper = document.createElement('div');
-    wrapper.innerHTML = `
-      <div>
-        <div class="d-flex justify-content-end">
-          <div class="bg-primary text-white rounded-3 px-3 py-2 small" style="max-width:75%">
-            ${esc($('#histReplyBody').value)}
-          </div>
-        </div>
-        <div class="text-end"><small class="text-muted pe-1">You · ${now}</small></div>
-      </div>`;
-    $('#histMsgThread').appendChild(wrapper);
-    formHistoryReply.reset();
-    $('#histReplyCount').textContent = '0';
-    fvHistoryReply.resetForm(true);
-    showToast({ type: 'success', message: '{{ __('admin.reply_sent_successfully') }}' });
+    const submitBtn = formHistoryReply.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+
+    fetch('{{ route("service_requests.send_message") }}', {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        request_id: $('#histReplyRequestId').value,
+        message: $('#histReplyBody').value,
+      }),
+    })
+    .then(res => res.json())
+    .then(data => {
+      submitBtn.disabled = false;
+      if (data.status) {
+        const d = data.data;
+        const wrapper = document.createElement('div');
+        let attachHtml = '';
+        if (d.attachment_url) {
+          attachHtml = `<div class="mt-1"><a href="${esc(d.attachment_url)}" target="_blank" class="text-white text-decoration-underline small"><i class="ti ti-paperclip me-1"></i>${esc(d.attachment_name)}</a></div>`;
+        }
+        wrapper.innerHTML = `
+          <div>
+            <div class="d-flex justify-content-end">
+              <div class="bg-primary text-white rounded-3 px-3 py-2 small" style="max-width:75%">
+                ${esc(d.body)}${attachHtml}
+              </div>
+            </div>
+            <div class="text-end"><small class="text-muted pe-1">${esc(d.sender_name)} · ${esc(d.created_at)}</small></div>
+          </div>`;
+        document.getElementById('histMsgThread').appendChild(wrapper);
+        const thread = document.getElementById('histMsgThread');
+        thread.scrollTop = thread.scrollHeight;
+        formHistoryReply.reset();
+        $('#histReplyCount').textContent = '0';
+        fvHistoryReply.resetForm(true);
+        showToast({ type: 'success', message: '{{ __("admin.message_sent_successfully") }}' });
+      } else {
+        showToast({ type: 'error', message: data.message || '{{ __("admin.unexpected_error") }}' });
+      }
+    })
+    .catch(() => {
+      submitBtn.disabled = false;
+      showToast({ type: 'error', message: '{{ __("admin.unexpected_error") }}' });
+    });
   });
 
   /* ══════════════════════════════════════
@@ -1043,9 +1183,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const btn = document.querySelector(`[data-bs-target="#offcanvasHistory"][data-request-id="${openRequest}"]`);
     if (btn) {
       btn.click();
-      if (activeTab === 'review') {
+      if (activeTab === 'review' || activeTab === 'messages') {
         ocHistory.addEventListener('shown.bs.offcanvas', function onceShown() {
-          bootstrap.Tab.getOrCreateInstance(document.getElementById('tab-reviews')).show();
+          const tabId = activeTab === 'messages' ? 'tab-messages' : 'tab-reviews';
+          bootstrap.Tab.getOrCreateInstance(document.getElementById(tabId)).show();
           ocHistory.removeEventListener('shown.bs.offcanvas', onceShown);
         });
       }
