@@ -240,6 +240,13 @@
                 <i class="ti ti-history me-1"></i> {{ __('admin.view_history') }}
               </button>
 
+            @elseif($request['status'] === 'Approved')
+              <button class="btn btn-success w-100 btn-mark-complete"
+                data-request-id="{{ $request['id'] }}"
+                data-request-title="{{ $request['title'] }}">
+                <i class="ti ti-circle-check me-1"></i> {{ __('admin.mark_as_completed') }}
+              </button>
+
             @else
               <button class="btn btn-primary w-100"
                 data-bs-toggle="offcanvas" data-bs-target="#offcanvasMessage"
@@ -613,6 +620,29 @@
     </div>{{-- /tab-content --}}
   </div>{{-- /offcanvas-body --}}
 </div>
+
+{{-- ═══════════════════════════════════════════
+     MODAL — Confirm Mark as Completed
+═══════════════════════════════════════════ --}}
+<div class="modal fade" id="modalMarkComplete" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ __('admin.mark_as_completed') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0">{{ __('admin.mark_complete_confirm') }}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ __('admin.Cancel') }}</button>
+        <button type="button" class="btn btn-success" id="confirmMarkCompleteBtn">
+          <i class="ti ti-circle-check me-1"></i> {{ __('admin.mark_as_completed') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 @stop
 
 @section('scripts')
@@ -985,6 +1015,51 @@ if (ocRespond) {
     $('#histReplyCount').textContent = '0';
     fvHistoryReply.resetForm(true);
     showToast({ type: 'success', message: '{{ __('admin.reply_sent_successfully') }}' });
+  });
+
+  /* ══════════════════════════════════════
+     Mark as Completed
+  ══════════════════════════════════════ */
+  let markCompleteRequestId = null;
+  const modalMarkComplete = document.getElementById('modalMarkComplete');
+
+  document.querySelectorAll('.btn-mark-complete').forEach(btn => {
+    btn.addEventListener('click', () => {
+      markCompleteRequestId = btn.dataset.requestId;
+      new bootstrap.Modal(modalMarkComplete).show();
+    });
+  });
+
+  document.getElementById('confirmMarkCompleteBtn')?.addEventListener('click', function () {
+    if (!markCompleteRequestId) return;
+
+    this.disabled = true;
+
+    fetch('{{ route("service_requests.mark_complete") }}', {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({ id: markCompleteRequestId }),
+    })
+    .then(res => res.json())
+    .then(data => {
+      this.disabled = false;
+      bootstrap.Modal.getInstance(modalMarkComplete).hide();
+      if (data.status) {
+        showToast({ type: 'success', message: data.message });
+        window.location.reload();
+      } else {
+        showToast({ type: 'error', message: data.message || '{{ __("admin.unexpected_error") }}' });
+      }
+    })
+    .catch(() => {
+      this.disabled = false;
+      bootstrap.Modal.getInstance(modalMarkComplete).hide();
+      showToast({ type: 'error', message: '{{ __("admin.unexpected_error") }}' });
+    });
   });
 
   /* ══════════════════════════════════════

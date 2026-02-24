@@ -269,6 +269,7 @@
   {"name": "service_requests.list_all", "description": "View All Service Requests", "permission_group_id": "General / Core", "guard_name": "web"},
   {"name": "service_requests.list_archived", "description": "View Old Service Requests", "permission_group_id": "General / Core", "guard_name": "web"},
   {"name": "service_requests.list_mine", "description": "View My Service Requests", "permission_group_id": "General / Core", "guard_name": "web"},
+  {"name": "service_requests.mark_complete", "description": "Mark a Service Request as Completed", "permission_group_id": "General / Core", "guard_name": "web"},
   {"name": "users.directory_view", "description": "View User Directory", "permission_group_id": "General / Core", "guard_name": "web"},
   {"name": "user.profile_Edit", "description": "Edit Own Profile Page", "permission_group_id": "User Profile", "guard_name": "web"},
   {"name": "user.profile_view", "description": "Show Own Profile Data", "permission_group_id": "User Profile", "guard_name": "web"},

@@ -89,8 +89,13 @@ class ServiceController extends Controller
 			->when($request->has('status') && $request->status !== 'all', function ($query) use ($request) {
 				$query->where('status', $request->status);
 			})
+			->when($request->has('rating') && $request->rating !== 'all', function ($query) use ($request) {
+				$rating = intval($request->rating);
+				$query->where('avg_rating', '>=', $request->rating)->where('avg_rating', '<', $rating + 1);
+			})
 			->orderBy('created_at', 'desc')
 		->get();
+		// dd($services);
 
 		$services = $services->map(function ($service) {
 			$rating = $service->requests->whereNotNull('rate')->where('approved', true)->avg('rate') ?? 0;
@@ -626,26 +631,154 @@ class ServiceController extends Controller
 				$request->input('comment', null)
 			);
 
-			/// notify user via Mail
-			$stat .= 'ed';
-			$user = new User();
-			$user->email = $serviceRequest->user->email;
-			$user->id = $serviceRequest->user_id;
-			$rFullname = $serviceRequest->user->first_name_en ." ". $serviceRequest->user->last_name_en;
-			$MSG = new TemplateEmail;
-			$MSG->Message=["Service request - VI portal","Dear ".$rFullname.",", "Kindly note that your service request (".$serviceRequest->service->name_en . ") has been ".$stat.", Check your account for more details.","/dashboard/requests/mine"];
-			if( !in_array(env('APP_ENV', 'local'), ['local']) )
-			{
-				try {
-					$user->notify($MSG);
-				} catch (\Throwable $th) {
-					// throw $th;
-				}
-			}
-			/// End of mail send
-			return response()->json(['status' => true, 'title' => 'Success', 'message' => 'Service request ' . $stat . ' successfully']);
+			$this->sendServiceRequestNotification(
+				$serviceRequest,
+				$stat == 'approve' ? 'approved' : 'rejected',
+				$request->input('comment', null)
+			);
+
+			$successMessage = $stat == 'approve'
+				? __('admin.request_now_in_progress')
+				: __('admin.request_has_been_rejected');
+
+			return response()->json(['status' => true, 'title' => 'Success', 'message' => $successMessage]);
 		}
 		return response()->json(['status' => false, 'title' => 'Failed', 'message' => 'This request cannot be processed right now'], 500);
+	}
+
+	/**
+	 * Mark an approved service request as completed.
+	 */
+	public function markComplete(Request $request)
+	{
+		$this->validate($request, [
+			'id' => 'required|exists:services_requests,id',
+		]);
+
+		$user = auth()->user();
+		$serviceRequest = ServicesRequests::where('id', $request->id)
+			->where('approved', 'Yes')
+			->where(function ($q) {
+				$q->whereNull('done')->orWhere('done', '!=', 1);
+			})
+			->when($user->hasRole('serviceProvider') && $user->service_provider, function ($q) use ($user) {
+				$providerId = $user->service_provider->id;
+				return $q->whereHas('service', function ($q2) use ($providerId) {
+					$q2->where('service_provider_id', $providerId);
+				});
+			})
+			->first();
+
+		if (empty($serviceRequest)) {
+			return response()->json([
+				'status'  => false,
+				'title'   => 'Not Found',
+				'message' => __('admin.Service request not found'),
+			], 404);
+		}
+
+		$serviceRequest->done = 1;
+		$serviceRequest->save();
+
+		ServiceRequestStatusLogger::log(
+			$serviceRequest->id,
+			'completed',
+			$user->id
+		);
+
+		$this->sendServiceRequestNotification($serviceRequest, 'completed');
+
+		return response()->json([
+			'status'  => true,
+			'title'   => 'Success',
+			'message' => __('admin.request_marked_as_completed'),
+		]);
+	}
+
+	/**
+	 * Send a bilingual email + in-app notification to the founder for a service request action.
+	 *
+	 * @param ServicesRequests $serviceRequest  The Eloquent service request
+	 * @param string           $action          One of: 'approved', 'rejected', 'completed'
+	 * @param string|null      $providerMessage Optional message from the service provider
+	 */
+	private function sendServiceRequestNotification(ServicesRequests $serviceRequest, string $action, ?string $providerMessage = null): void
+	{
+		if (in_array(env('APP_ENV', 'local'), ['local'])) {
+			return;
+		}
+
+		try {
+			$founder  = $serviceRequest->user;
+			$service  = $serviceRequest->service;
+			$provider = $service->provider;
+
+			$founderLang  = $founder->language ?? 'en';
+			$founderName  = trim($founder->first_name_en . ' ' . $founder->last_name_en);
+			$serviceName  = $founderLang === 'ar' ? ($service->name_ar ?: $service->name_en) : $service->name_en;
+			$providerName = $provider->company_name ?? '';
+
+			$params = [
+				'founder_name'  => $founderName,
+				'service_name'  => $serviceName,
+				'provider_name' => $providerName,
+			];
+
+			switch ($action) {
+				case 'approved':
+					$subject   = __('admin.service_request_approved_subject', [], $founderLang);
+					$bodyKey   = $providerMessage ? 'service_request_approved_body_with_message' : 'service_request_approved_body';
+					$inAppKey  = 'service_request_approved_inapp';
+					$actionUrl = '/dashboard/requests/mine';
+					$ctaText   = __('admin.service_request_view_details', [], $founderLang);
+					break;
+
+				case 'rejected':
+					$subject   = __('admin.service_request_rejected_subject', [], $founderLang);
+					$bodyKey   = $providerMessage ? 'service_request_rejected_body_with_message' : 'service_request_rejected_body';
+					$inAppKey  = 'service_request_rejected_inapp';
+					$actionUrl = '/dashboard/requests/mine';
+					$ctaText   = __('admin.service_request_view_details', [], $founderLang);
+					break;
+
+				case 'completed':
+					$subject   = __('admin.service_request_completed_subject', [], $founderLang);
+					$bodyKey   = 'service_request_completed_body';
+					$inAppKey  = 'service_request_completed_inapp';
+					$actionUrl = '/dashboard/requests/mine?open_request=' . $serviceRequest->id . '&tab=review';
+					$ctaText   = __('admin.service_request_completed_cta', [], $founderLang);
+					break;
+
+				default:
+					return;
+			}
+
+			$bodyParams = $params;
+			if ($providerMessage) {
+				$bodyParams['provider_message'] = $providerMessage;
+			}
+
+			$greeting = __('admin.service_request_notification_greeting', $params, $founderLang);
+			$body     = __("admin.{$bodyKey}", $bodyParams, $founderLang);
+			$inApp    = __("admin.{$inAppKey}", $params, $founderLang);
+
+			$notification = new TemplateEmail([
+				$subject,
+				$greeting,
+				$body,
+				$actionUrl,
+				$inApp,
+			]);
+			$notification->ActionText = $ctaText;
+
+			$founder->notify($notification);
+		} catch (\Throwable $th) {
+			Log::error('Failed to send service request notification', [
+				'error'      => $th->getMessage(),
+				'request_id' => $serviceRequest->id,
+				'action'     => $action,
+			]);
+		}
 	}
 
 	public function availableServices(Request $request)
