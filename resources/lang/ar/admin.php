@@ -3526,4 +3526,5 @@ return [
 	'save_basics_first' => 'يرجى حفظ المعلومات الأساسية أولاً.',
 	'no_service_requests_yet' => 'لا توجد طلبات خدمات حتى الآن.',
 	'request_a_service' => 'طلب خدمة',
+	'Hidden' => 'مخفي',
 ];
