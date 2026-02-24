@@ -362,6 +362,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('requests/take_action', 'ServiceController@serviceAction')->name('service_requests.take_action');
     Route::get('requests/mine', 'ServiceController@myRequests')->name('service_requests.list_mine');
     Route::get('requests/{id}/timeline', 'ServiceController@timeline')->name('service_requests.timeline');
+    Route::post('requests/mark-complete', 'ServiceController@markComplete')->name('service_requests.mark_complete');
 
     // Services Directory
     Route::get('directory', 'ServiceController@availableServices')->name('users.directory_view');
