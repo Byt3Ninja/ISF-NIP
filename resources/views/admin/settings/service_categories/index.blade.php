@@ -9,11 +9,14 @@
   $tabs = [
     ['title' => __('admin.All Services'), 'route' => 'services.index', 'icon' => 'arrows-move'],
     ['title' => __('admin.Services Requests'), 'route' => 'service_requests.list_all', 'icon' => 'ti ti-briefcase'],
-    ['title' => __('admin.Services Categories'), 'route' => 'serviceCategories.index', 'icon' => 'layout-grid'],
+    // ['title' => __('admin.Services Categories'), 'route' => 'serviceCategories.index', 'icon' => 'layout-grid'],
   ];
-  $user = auth()->user();
-  $isOrgMan = $user->hasRole('organizationManager');
-  $org_id = $user->organization_id ?? 0;
+  $isOrgMan = $_user->hasRole('organizationManager');
+  $org_id = $_user->organization_id ?? 0;
+  if( $_user->ableTo('serviceCategories.index', $permissions) )
+  {
+    $tabs[] = ['title' => __('admin.Services Categories'), 'route' => 'serviceCategories.index', 'icon' => 'layout-grid'];
+  }
 @endphp
 
 <div>
