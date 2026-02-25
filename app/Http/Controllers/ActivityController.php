@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\User;
 use App\Activity;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -10,73 +11,92 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 
-class ActivityControlller extends Controller
+class ActivityController extends Controller
 {
     public function index(Request $request)
     {
-     $query = Activity::with('user');
+        $authUser = auth()->user();
+        $isAdmin = $authUser->hasRole('admin');
 
-     if ($request->user) {
-        $query->whereHas('user', function ($q) use ($request) {
-            $q->whereRaw('lower(first_name_en) like ?', [strtolower("%{$request->user}%")])
-              ->orWhereRaw('lower(last_name_en) like ?', [strtolower("%{$request->user}%")]);
-        });
-     }
+        // For non-admin users, restrict activities to their accessible organizations
+        $orgUserIds = null;
+        if (!$isAdmin) {
+            $orgIds = $authUser->organizations_ids;
+            $orgUserIds = User::whereIn('organization_id', $orgIds)->pluck('id');
+        }
 
-    if ($request->date_from && $request->date_to) {
-        $query->whereBetween('activity_time', [$request->date_from, $request->date_to]);
-    }
+        $query = Activity::with('user');
 
-    if ($request->device) {
-        $query->where('device', 'like', "%{$request->device}%");
-    }
+        if ($orgUserIds !== null) {
+            $query->whereIn('user_id', $orgUserIds);
+        }
 
-    if ($request->location) {
-        $query->where('location', 'like', "%{$request->location}%");
-    }
+        if ($request->user) {
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->whereRaw('lower(first_name_en) like ?', [strtolower("%{$request->user}%")])
+                    ->orWhereRaw('lower(last_name_en) like ?', [strtolower("%{$request->user}%")]);
+            });
+        }
 
-    if ($request->ip) {
-        $query->where('ip_address', 'like', "%{$request->ip}%");
-    }
+        if ($request->date_from && $request->date_to) {
+            $query->whereBetween('activity_time', [$request->date_from, $request->date_to]);
+        }
+
+        if ($request->device) {
+            $query->where('device', 'like', "%{$request->device}%");
+        }
+
+        if ($request->location) {
+            $query->where('location', 'like', "%{$request->location}%");
+        }
+
+        if ($request->ip) {
+            $query->where('ip_address', 'like', "%{$request->ip}%");
+        }
 
         $activities = $query->orderBy('activity_time', 'desc')->get();
-       
+
         // Dashboard Statistics
         $today = Carbon::today();
         $thisWeek = Carbon::now()->startOfWeek();
         $thisMonth = Carbon::now()->startOfMonth();
 
-        $totalLoginsToday = Activity::whereDate('activity_time', $today)->count();
-        $totalLoginsWeek = Activity::whereBetween('activity_time', [$thisWeek, Carbon::now()])->count();
-        $totalLoginsMonth = Activity::whereBetween('activity_time', [$thisMonth, Carbon::now()])->count();
+        $statsQuery = Activity::query();
+        if ($orgUserIds !== null) {
+            $statsQuery->whereIn('user_id', $orgUserIds);
+        }
 
-        $topDevices = Activity::select('device', DB::raw('count(*) as count'))
+        $totalLoginsToday = (clone $statsQuery)->whereDate('activity_time', $today)->count();
+        $totalLoginsWeek = (clone $statsQuery)->whereBetween('activity_time', [$thisWeek, Carbon::now()])->count();
+        $totalLoginsMonth = (clone $statsQuery)->whereBetween('activity_time', [$thisMonth, Carbon::now()])->count();
+
+        $topDevices = (clone $statsQuery)->select('device', DB::raw('count(*) as count'))
             ->groupBy('device')
             ->orderByDesc('count')
             ->limit(5)
             ->get();
 
-        $topBrowsers = Activity::select('browser', DB::raw('count(*) as count'))
+        $topBrowsers = (clone $statsQuery)->select('browser', DB::raw('count(*) as count'))
             ->groupBy('browser')
             ->orderByDesc('count')
             ->limit(5)
             ->get();
 
-        $loginsByCountry = Activity::select('location', DB::raw('count(*) as count'))
+        $loginsByCountry = (clone $statsQuery)->select('location', DB::raw('count(*) as count'))
             ->groupBy('location')
             ->orderByDesc('count')
             ->limit(5)
             ->get();
 
-        $peakHours = Activity::select(DB::raw('HOUR(activity_time) as hour'), DB::raw('count(*) as count'))
+        $peakHours = (clone $statsQuery)->select(DB::raw('HOUR(activity_time) as hour'), DB::raw('count(*) as count'))
             ->groupBy('hour')
             ->orderByDesc('count')
             ->limit(5)
             ->get();
 
-        $suspiciousLogins = Activity::select(
-                'user_id', 
-                DB::raw('COUNT(*) as login_count'), 
+        $suspiciousQuery = Activity::select(
+                'user_id',
+                DB::raw('COUNT(*) as login_count'),
                 DB::raw('GROUP_CONCAT(DISTINCT location SEPARATOR ", ") as locations'),
                 DB::raw('COUNT(DISTINCT location) as location_count'),
                 DB::raw('MAX(activity_time) as last_login'),
@@ -84,17 +104,23 @@ class ActivityControlller extends Controller
                 DB::raw('GROUP_CONCAT(DISTINCT browser SEPARATOR ", ") as browsers'),
                 DB::raw('GROUP_CONCAT(DISTINCT device SEPARATOR ", ") as devices')
             )
-            ->with(['user'])
+            ->with(['user']);
+
+        if ($orgUserIds !== null) {
+            $suspiciousQuery->whereIn('user_id', $orgUserIds);
+        }
+
+        $suspiciousLogins = $suspiciousQuery
             ->groupBy('user_id')
             ->havingRaw('login_count > 5 OR COUNT(DISTINCT location) > 1')
             ->orderByDesc('login_count')
             ->get()
-            ->map(function ($activity) {
+            ->map(function ($activity) use ($orgUserIds) {
                 $locations = array_filter(explode(', ', $activity->locations));
                 $uniqueLocations = array_unique($locations);
                 $loginCount = $activity->login_count;
                 $locationCount = count($uniqueLocations);
-                
+
                 // Calculate risk level
                 $riskLevel = 'low';
                 if ($loginCount > 50 || $locationCount > 3) {
@@ -102,19 +128,19 @@ class ActivityControlller extends Controller
                 } elseif ($loginCount > 20 || $locationCount > 1) {
                     $riskLevel = 'medium';
                 }
-                
+
                 $activity->risk_level = $riskLevel;
                 $activity->unique_locations = $uniqueLocations;
-                
+
                 // Get actual location counts for this user
                 $locationCounts = Activity::where('user_id', $activity->user_id)
                     ->select('location', DB::raw('COUNT(*) as count'))
                     ->groupBy('location')
                     ->pluck('count', 'location')
                     ->toArray();
-                
+
                 $activity->location_counts = $locationCounts;
-                
+
                 return $activity;
             })
             ->filter(function ($activity) {
@@ -133,7 +159,6 @@ class ActivityControlller extends Controller
 
        return view('admin.activities.index', compact('activities', 'totalLoginsToday', 'totalLoginsWeek', 'totalLoginsMonth', 'topDevices', 'topBrowsers', 'loginsByCountry', 'peakHours', 'suspiciousLogins'));
     }
-
 
     public function destroy($id)
     {
