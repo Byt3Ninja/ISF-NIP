@@ -991,7 +991,7 @@ class CyclesController extends Controller
         $c = $private->id;
         if( $private->allow_non_company == 1 )
         {
-            if( !$user->HaveCompany )
+            if( !$user->company )
             {
                 $result = new Company();
                 $result->name_en = $user->first_name_en . " " . $user->last_name_en;
