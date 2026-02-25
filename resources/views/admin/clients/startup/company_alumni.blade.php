@@ -140,8 +140,12 @@ $screeningData = [
 //];
 
 $deliverableIcons = [
+  'png' => 'ti-image',
   'pdf' => 'ti-file-pdf',
   'video' => 'ti-video',
+  'docx' => 'ti-file-word',
+  'xlsx' => 'ti-file-spreadsheet',
+  'pptx' => 'ti-file-present',
 ];
 
 // $tasks = [
