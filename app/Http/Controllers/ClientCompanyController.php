@@ -3007,18 +3007,26 @@ class ClientCompanyController extends Controller
         })->values()->toArray();
     
         $milestones = collect($milestones)->map(function ($milestone) {
-            $download = $milestone['download'] ?? null;
 
-            $deliverables = null;
+            $downloadsJson = $milestone['download'] ?? null;
+            $deliverables = [];
 
-            if (!empty($download)) {
-                $pathInfo = pathinfo($download);
+            if (!empty($downloadsJson)) {
 
-                $deliverables = [
-                    'name' => $pathInfo['filename'],           // Technical-architecture
-                    'type' => $pathInfo['extension'] ?? null,  // pdf / mp4
-                    'link' => $download,                        // نفس اللينك
-                ];
+                // decode تاني للـ download
+                $downloads = is_string($downloadsJson)
+                    ? json_decode($downloadsJson, true)
+                    : $downloadsJson;
+
+                if (is_array($downloads)) {
+                    foreach ($downloads as $file) {
+                        $deliverables[] = [
+                            'name' => $file['name'] ?? null,
+                            'type' => pathinfo($file['name'], PATHINFO_EXTENSION),
+                            'link'  => $file['url'] ?? null,
+                        ];
+                    }
+                }
             }
             return [
                 'title' => $milestone['Milestone_title'] ?? null,
