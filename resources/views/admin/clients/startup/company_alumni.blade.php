@@ -836,9 +836,8 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                   <i class="ti ti-users me-1"></i>{{ __('startup.count_label', ['value' => count($teamData['employees'])]) }}
                 </span>
               </div>
-              @if($teamData->count() == 0)
-                 <div class="col-12 text-center text-muted">{{ __('startup.no_team_data') }}</div>
-              @else
+              @if(count($teamData['employees']) > 0)
+                 
                 @if(empty($teamData['employees'][0]['name']))
                   <div class="col-12 text-center text-muted">{{ __('startup.no_employees') }}</div>
                 @else
@@ -905,7 +904,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                   <h6 class="mb-3 fw-bold d-flex align-items-center gap-2">
                     <i class="ti ti-users text-primary"></i>{{ __('startup.shareholders') }}
                   </h6>
-                  @if($ownershipData['shareholders']->count() == 0)
+                  @if(count($ownershipData['shareholders']) > 0)
                     @if($ownershipData['shareholders'][0]['name'] == null)
                       <div class="col-12 text-center text-muted">{{ __('startup.no_shareholders') }}</div>
                     @else
@@ -943,7 +942,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                   <h6 class="mb-3 fw-bold d-flex align-items-center gap-2">
                     <i class="ti ti-coin text-warning"></i>{{ __('startup.investors') }}
                   </h6>
-                  @if($ownershipData['investors']->count() == 0)
+                  @if(count($ownershipData['investors']) > 0)
                     @if(empty($ownershipData['investors'][0]['name']))
                       <div class="col-12 text-center text-muted">{{ __('startup.no_investors') }}</div>
                     @else
@@ -1018,7 +1017,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                   <h6 class="mt-4 mb-3 fw-bold d-flex align-items-center gap-2">
                     <i class="ti ti-checklist text-success"></i>{{ __('startup.criteria') }}
                   </h6>
-                  @if($screeningData['initial']['criteria']->count() == 0)
+                  @if(count($screeningData['initial']['criteria']) > 0)
                     @if(empty($screeningData['initial']['criteria'][0]['name']))
                       <div class="col-12 text-center text-muted">{{ __('startup.no_criteria') }}</div>
                     @else
@@ -1047,7 +1046,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                   <h6 class="mt-4 mb-3 fw-bold d-flex align-items-center gap-2">
                     <i class="ti ti-user-check text-warning"></i>{{ __('startup.judges_evaluations') }}
                   </h6>
-                  @if($screeningData['initial']['judges']->count() == 0)
+                  @if(count($screeningData['initial']['judges']) > 0)
                     @if(empty($screeningData['initial']['judges'][0]['name']))
                       <div class="col-12 text-center text-muted">{{ __('startup.no_judges') }}</div>
                     @else
@@ -1132,7 +1131,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                   <h6 class="mt-4 mb-3 fw-bold d-flex align-items-center gap-2">
                     <i class="ti ti-user-check text-warning"></i>{{ __('startup.judges_evaluations') }}
                   </h6>
-                  @if($screeningData['final']['judges']->count() == 0)
+                  @if(count($screeningData['final']['judges']) > 0)
                     @if(empty($screeningData['final']['judges'][0]['name']))
                       <div class="col-12 text-center text-muted">{{ __('startup.no_judges') }}</div>
                     @else
