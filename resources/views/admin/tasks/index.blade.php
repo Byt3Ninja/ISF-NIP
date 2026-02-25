@@ -562,18 +562,18 @@ const tagifyInstance = new Tagify(tagifyInput, {
       formData.delete('taskStatus');
       formData.delete('taskDueDate');
 
+      if (!window.dt_task) return Swal.fire('{{ __('admin.error') }}', '{{ __('admin.table_not_initialized') }}', 'error');
+
+      const editRow = $(form).data('edit-row');
+      const taskId = editRow ? window.dt_task.row(editRow).data().id : null;
+      let method = editRow ? 'PUT' : 'POST';
+      const url = editRow ? `/dashboard/tasks/${taskId}` : '/dashboard/tasks';
+
       // Handle the PUT method for FormData (Laravel doesn't recognize _method field if sent as JSON)
       if (method === 'PUT') {
         formData.append('_method', 'PUT');
         method = 'POST'; // Change AJAX method to POST if _method is used
       }
-
-      if (!window.dt_task) return Swal.fire('{{ __('admin.error') }}', '{{ __('admin.table_not_initialized') }}', 'error');
-
-      const editRow = $(form).data('edit-row');
-      const taskId = editRow ? window.dt_task.row(editRow).data().id : null;
-      const method = editRow ? 'PUT' : 'POST';
-      const url = editRow ? `/dashboard/tasks/${taskId}` : '/dashboard/tasks';
 
       $.ajax({
         url: url,
