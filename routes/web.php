@@ -758,7 +758,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('training/EditTR/{id}', 'TrainingController@editTR')->name('trainings.records_edit');
     Route::get('training/viewCourse/{id}', 'TrainingController@showCourse')->name('trainings.course_view');
     Route::get('quizResults', 'quizzesController@quizResults')->name('quizzes.quiz_Results_view');
-    Route::get('quizResults/{id}', 'quizzesController@quizResultsdetails')->name('quizzes.quiz_results_view_details');
+    Route::get('quizResults/{id}', 'quizzesController@quizResultsDetails')->name('quizzes.quiz_results_view_details');
     Route::post('/track-duration', 'TrainingController@timeTracking')->name('trainings.time_tracking');
 
 
