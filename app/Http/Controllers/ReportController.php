@@ -896,12 +896,17 @@ class ReportController extends Controller
         // Keep the passed cycle (for backward-compatible views), but do not filter by it
         $cycle = Cycle::find($cycle_id);
 
-        $ongoingCycles = Cycle::where('start', '<=', now())
-            ->where('end', '>=', now())
-            ->get();
+        // All cycles within the organization
+        $cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+            $q->whereIn('organization_id', $orgIds);
+        })->get();
 
-        $completedCycles = Cycle::where('end', '<', now())
-            ->get();
+        $ongoingCycles = $cycles->where('start', '<=', now())
+            ->where('end', '>=', now())
+            ->values();
+
+        $completedCycles = $cycles->where('end', '<', now())->values();
+        $notStartedCycles = $cycles->where('start', '>', now())->values();
 
         // OVERALL (all cycles) KPIs within the organization (no cycle filter)
         $data['mentors_count'] = User::whereHas('mentorSessions', function ($q) use ($orgIds, $user, $program_id) {
@@ -967,11 +972,6 @@ class ReportController extends Controller
                 $query->where('id', $program_id);
             });
         })->where('stype', 4)->get();
-
-        // All cycles within the organization
-        $cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
-            $q->whereIn('organization_id', $orgIds);
-        })->get();
 
         // Per-cycle KPI data
         $cycles_kpis = [];
@@ -1137,10 +1137,12 @@ class ReportController extends Controller
         $data['final_screening_count'] = $final_screenings;
         $data['ongoingCycles'] = $ongoingCycles;
         $data['completed_programs'] = $completedCycles;
+        $data['not_started_programs'] = $notStartedCycles;
 
         // Group overall KPIs for Blade looping
         $data['kpiData'] = [
             [ 'value' => $data['cycles']->count() ?? 0, 'label' => 'total_programs', 'icon' => 'components', 'color' => 'info' ],
+            [ 'value' => $data['not_started_programs']->count() ?? 0, 'label' => 'not_started_programs', 'icon' => 'progress-alert', 'color' => 'warning' ],
             [ 'value' => $data['ongoingCycles']->count() ?? 0, 'label' => 'ongoing_programs', 'icon' => 'progress-bolt', 'color' => 'primary' ],
             [ 'value' => $data['completed_programs']->count() ?? 0, 'label' => 'completed_programs', 'icon' => 'progress-check', 'color' => 'success' ],
         ];

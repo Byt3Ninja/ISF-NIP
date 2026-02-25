@@ -287,8 +287,8 @@
                 // Chart 1: Sector Distribution (Chart at the start, legend at the end)
                 const ctxPerfSector = document.getElementById('perfSectorDistributionChart')?.getContext('2d');
                 if(ctxPerfSector) {
-                  // Calculate total startups
-                  const totalStartups = @json($sectorCounts).reduce((sum, val) => sum + parseInt(val), 0);
+                  // Use actual startup count (not sum of slices, since a company can belong to multiple sectors)
+                  const totalStartups = @json($totalStartups);
 
                   // Custom plugin to show total in center
                   const centerTextPlugin = {

@@ -8,6 +8,7 @@ use App\Cycle;
 use App\Stage;
 use App\Sector;
 use App\Company;
+use App\CompanyRelation;
 use App\UserScore;
 use App\Organization;
 use App\Finalscreening;
@@ -474,7 +475,65 @@ class ProgramController extends Controller
 
         $companies = $companyQuery->get();
         $sectorsLabel = Sector::select('id', 'name_en', 'name_ar')->get();
-        $sectorsCount = Sector::withCount('companies')->get();
+
+        // Build sector distribution from the cycle's actual companies
+        // A company can belong to multiple sectors via company_relations
+        $cycleCompanies = $cycle->companies()->get();
+        $companyIds = $cycleCompanies->pluck('id')->toArray();
+
+        // Get all sector assignments from company_relations (newer system, supports multiple sectors)
+        $relationSectors = CompanyRelation::whereIn('company_id', $companyIds)
+            ->whereNotNull('sector_id')
+            ->select('company_id', 'sector_id')
+            ->distinct()
+            ->get()
+            ->groupBy('company_id');
+
+        // Count each company once per sector it belongs to; "Other" for companies with no valid sector
+        $sectorDistribution = [];
+        foreach ($cycleCompanies as $company) {
+            $assignedSectors = [];
+
+            // Source 1: company_relations table (multiple sectors possible)
+            if ($relationSectors->has($company->id)) {
+                foreach ($relationSectors->get($company->id) as $rel) {
+                    if ($sectorsLabel->firstWhere('id', $rel->sector_id)) {
+                        $assignedSectors[] = $rel->sector_id;
+                    }
+                }
+            }
+
+            // Source 2: direct companies.sector column (legacy fallback)
+            if (empty($assignedSectors) && $company->sector && $sectorsLabel->firstWhere('id', $company->sector)) {
+                $assignedSectors[] = $company->sector;
+            }
+
+            if (empty($assignedSectors)) {
+                $sectorDistribution['unassigned'] = ($sectorDistribution['unassigned'] ?? 0) + 1;
+            } else {
+                foreach ($assignedSectors as $sid) {
+                    $sectorDistribution[$sid] = ($sectorDistribution[$sid] ?? 0) + 1;
+                }
+            }
+        }
+
+        $sectorsCount = collect();
+        foreach ($sectorDistribution as $sectorId => $count) {
+            if ($sectorId === 'unassigned') {
+                $sectorsCount->push((object) [
+                    'name_en' => 'Not Assigned',
+                    'name_ar' => 'غير محدد',
+                    'companies_count' => $count,
+                ]);
+            } else {
+                $sector = $sectorsLabel->firstWhere('id', $sectorId);
+                $sectorsCount->push((object) [
+                    'name_en' => $sector->name_en,
+                    'name_ar' => $sector->name_ar,
+                    'companies_count' => $count,
+                ]);
+            }
+        }
 
         $stages = Stage::select('id', 'name_en', 'name_ar')->get();
         $progress = $cycle->getProgress();
