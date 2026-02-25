@@ -315,6 +315,7 @@ class CyclesController extends Controller
                 'public_slug.required_if' => __('cycles.Public URL required'),
                 'public_slug.unique' => __('cycles.Public URL already exist'),
                 'public_slug.regex' => __('cycles.Public URL must be alphanumeric'),
+                'program_step_type.required' => __('cycles.please_select_program_step_type'),
             ]);
 
             $cycle = Cycle::find($id);
@@ -761,6 +762,7 @@ class CyclesController extends Controller
                 'public_slug.required_if' => __('cycles.Public URL required'),
                 'public_slug.unique' => __('cycles.Public URL already exist'),
                 'public_slug.regex' => __('cycles.Public URL must be alphanumeric'),
+                'program_step_type.required' => __('cycles.please_select_program_step_type'),
             ]);
 
             $cycles = Cycle::where('organization_id', $request->organization_id2)->get();
