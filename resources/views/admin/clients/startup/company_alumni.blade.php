@@ -1349,7 +1349,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
             <small class="text-muted">{{ __('startup.planned_progress_note') }}</small>
           </div>
           <div class="card-body">
-            @dd($milestones)
+            
             @if (count($milestones) > 0)
               <div class="table-responsive">
                 <table class="table table-sm mb-0 align-middle">
@@ -1368,6 +1368,9 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                   </thead>
                   <tbody>
                     @foreach ($milestones as $m)
+                    @php
+                    $m['deliverables'] = json_decode($m['deliverables'], true);
+                    @endphp
                     <tr class="border-top">
                       <td class="fw-medium">{{ $m['title'] }}</td>
                       <td class="small">{{ $m['description'] }}</td>
@@ -1386,7 +1389,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                           @if(!empty($m['deliverables']))
                           @foreach ($m['deliverables'] as $d)
                           <li>
-                            <a href="{{ $d['link'] }}" class="fw-medium text-primary">
+                            <a href="{{ $d['link']['url'] }}" class="fw-medium text-primary">
                               <i class="ti {{ $deliverableIcons[$d['type']] }} me-1"></i>{{ $d['name'] }}
                             </a>
                           </li>
