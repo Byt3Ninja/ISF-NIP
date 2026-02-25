@@ -17,9 +17,10 @@ class MentorshipController extends Controller
 
         $mentorRequests =  MentorshipRequest::all();
         $available_surveys = SurveyResponses::whereIn('user_id', $mentorRequests->pluck('mentor_id'))->whereIn('triggered_at', $mentorRequests->pluck('id'))->where('triggered_by', 'session')->get();
-        
+
+        $sessions = collect([]);
         if(auth()->user() && auth()->user()->hasRole('Mentor')) {
-        $sessions = auth()->user()->mentorSessions()->whereDate('zoom_date','<',now()->format('Y-m-d H:i'))->where('approved','Yes')->orderBy('zoom_date','DESC')->get();
+            $sessions = auth()->user()->mentorSessions()->whereDate('zoom_date','<',now()->format('Y-m-d H:i'))->where('approved','Yes')->orderBy('zoom_date','DESC')->get();
         }
         if(auth()->user() && auth()->user()->hasRole('Registered')) {
             $company_id = auth()->user()->company_id;
@@ -34,8 +35,6 @@ class MentorshipController extends Controller
             $company_id = Company::all();
             $usersCompany = User::whereIn('company_id', $company_id->pluck('id'))->get();
             $sessions = MentorshipRequest::whereIn('user_id', $usersCompany->pluck('id'))->whereDate('zoom_date','<',now()->format('Y-m-d H:i'))->where('approved','Yes')->orderBy('zoom_date','DESC')->get();
-
-
         }
         
         return view('mentor.mentorshipSessions.index',compact('sessions','available_surveys'));
