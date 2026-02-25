@@ -116,15 +116,16 @@ class ScreeningEvaluationExport implements FromArray, WithEvents, WithStyles, Sh
             $colIndex += $columnsForCriteria;
         }
 
-        // Summary header (Final Comments + Final Score + Final Decision = 3 columns)
+        // Summary header (Final Comments + Final Score + Final Decision + total = 4 columns)
         $row[] = 'Summary';
         $startCol = Coordinate::stringFromColumnIndex($colIndex);
-        $endCol = Coordinate::stringFromColumnIndex($colIndex + 2);
+        $endCol = Coordinate::stringFromColumnIndex($colIndex + 3);
         $this->mergeRanges[] = "{$startCol}1:{$endCol}1";
         $row[] = '';
         $row[] = '';
+        $row[] = '';
 
-        $this->totalColumns = $colIndex + 2;
+        $this->totalColumns = $colIndex + 3;
 
         return $row;
     }
@@ -186,6 +187,14 @@ class ScreeningEvaluationExport implements FromArray, WithEvents, WithStyles, Sh
         $row[] = 'Final Decision';
         $col = Coordinate::stringFromColumnIndex($colIndex);
         $this->mergeRanges[] = "{$col}2:{$col}3";
+        $colIndex++;
+
+        // Summary total column (merged vertically with row 3)
+        $row[] = 'total';
+        $col = Coordinate::stringFromColumnIndex($colIndex);
+        $this->mergeRanges[] = "{$col}2:{$col}3";
+        $this->totalColumnIndices[] = $colIndex;
+        $this->criteriaTotalIndices[] = $colIndex;
 
         return $row;
     }
@@ -217,6 +226,7 @@ class ScreeningEvaluationExport implements FromArray, WithEvents, WithStyles, Sh
         $row[] = ''; // Final Comments
         $row[] = ''; // Final Score
         $row[] = ''; // Final Decision
+        $row[] = ''; // Summary total (merged with row 2)
 
         return $row;
     }
@@ -261,11 +271,14 @@ class ScreeningEvaluationExport implements FromArray, WithEvents, WithStyles, Sh
             $row[] = $isFirstJudge ? round(($criterion->value ?? 0) * 100, 2) . '%' : '';
         }
 
-        // Summary: Final Comments, Final Score, Final Decision
+        // Summary: Final Comments, Final Score, Final Decision, Total
         $evaluation = is_object($judge->evaluation) ? $judge->evaluation : (object) $judge->evaluation;
         $row[] = $evaluation->comment ?? '';
         $row[] = round(($evaluation->value ?? 0) * 100, 2) . '%';
         $row[] = ucfirst($evaluation->approval ?? 'pending');
+
+        // Summary total (only first judge, merged for others)
+        $row[] = $isFirstJudge ? round(($companyData['total'] ?? 0) * 100, 2) . '%' : '';
 
         return $row;
     }
@@ -483,9 +496,11 @@ class ScreeningEvaluationExport implements FromArray, WithEvents, WithStyles, Sh
             $numericColumns[] = $colIndex++; // criteria total (numeric)
         }
 
-        // Summary: Final Comments (skip), Final Score (numeric), Final Decision (skip)
+        // Summary: Final Comments (skip), Final Score (numeric), Final Decision (skip), Total (numeric)
         $colIndex++; // Final Comments (skip)
         $numericColumns[] = $colIndex++; // Final Score (numeric)
+        $colIndex++; // Final Decision (skip)
+        $numericColumns[] = $colIndex++; // Summary total (numeric)
 
         return $numericColumns;
     }
