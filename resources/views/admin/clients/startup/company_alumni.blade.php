@@ -1349,6 +1349,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
             <small class="text-muted">{{ __('startup.planned_progress_note') }}</small>
           </div>
           <div class="card-body">
+            @dd($milestones)
             @if (count($milestones) > 0)
               <div class="table-responsive">
                 <table class="table table-sm mb-0 align-middle">
@@ -1418,7 +1419,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
             <small class="text-muted">{{ __('startup.tasks_assigned_note') }}</small>
           </div>
           <div class="card-body">
-            @if($tasks->count() == 0)
+            @if(count($tasks) > 0)
               @if(empty($tasks[0]['title']))
                 <div class="col-12 text-center text-muted">{{ __('startup.no_tasks') }}</div>
               @else
@@ -1483,7 +1484,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
             <small class="text-muted">{{ __('startup.knowledge_checks_note') }}</small>
           </div>
           <div class="card-body">
-            @if($quizzes->count() == 0)
+            @if(count($quizzes) > 0)
               @if(empty($quizzes[0]['title']))
                 <div class="col-12 text-center text-muted">{{ __('startup.no_quizzes') }}</div>
               @else
@@ -1536,7 +1537,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
             <small class="text-muted">{{ __('startup.feedback_note') }}</small>
           </div>
           <div class="card-body">
-            @if($surveys->count() == 0)
+            @if(count($surveys) > 0)
               @if(empty($surveys[0]['survey_id']))
                 <div class="col-12 text-center text-muted">{{ __('startup.no_surveys') }}</div>
               @else
@@ -1590,7 +1591,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
             <small class="text-muted">{{ __('startup.perks_note') }}</small>
           </div>
           <div class="card-body">
-            @if($services->count() == 0)
+            @if(count($services) > 0)
               @if(empty($services[0]['name']))
                 <div class="col-12 text-center text-muted">{{ __('startup.no_services') }}</div>
               @else
@@ -1634,7 +1635,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
             </div>
           </div>
           <div class="card-body">
-            @if($forms->count() == 0)
+            @if(count($forms) > 0)
               @if(empty($forms[0]['title']))
                 <div class="col-12 text-center text-muted">{{ __('startup.no_forms') }}</div>
               @else
