@@ -459,7 +459,7 @@ class ProgramController extends Controller
         }])->findOrFail($id);
 
         $totalWorkshops = $cycle->trainingSessions()->count();
-        $companyQuery = $cycle->companies()->with(['sectoR', 'stagE']);
+        $companyQuery = $cycle->companies()->with(['sectoR', 'stagE', 'companyRelations', 'companyRelations.sector']);
 
         if( $request->filled('sector') ) {
             $companyQuery->whereHas('sectoR', function ($q) use ($request) {
