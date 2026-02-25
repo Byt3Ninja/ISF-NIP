@@ -2628,6 +2628,7 @@ return [
 	'Service request rated, thank you for your feedback' => 'تم تقييم طلب الخدمة, شكرا لتعليقك',
 	'ongoing_programs' => 'البرامج الجارية',
 	'completed_programs' => 'البرامج المكتملة',
+	'not_started_programs' => 'البرامج التي لم تبدأ',
 	'view_hackathon' => 'عرض الهاكاثون',
 	'Login as User' => 'تسجيل الدخول كمستخدم',
 	'Impersonate this user' => 'الدخول نيابةً عن المستخدم',

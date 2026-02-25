@@ -2576,6 +2576,7 @@ return [
 	'Service request rated, thank you for your feedback' => 'Service request rated, thank you for your feedback',
 	'ongoing_programs' => 'Ongoing Programs',
 	'completed_programs' => 'Completed Programs',
+	'not_started_programs' => 'Not Started Programs',
 	'view_hackathon' => 'View Hackathon',
 	'Login as User' => 'Login as User',
 	'Impersonate this user' => 'Log in on behalf of this user',

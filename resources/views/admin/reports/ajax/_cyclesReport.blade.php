@@ -54,6 +54,7 @@
               <th>{{ __('admin.Organization') }}</th>
               <th>{{ __('admin.Start_Date') }}</th>
               <th>{{ __('admin.End_Date') }}</th>
+              <th>{{ __('admin.Status') }}</th>
               <th>{{ __('admin.Subscribed_Startups') }}</th>
               <th>{{ __('admin.Enrolled_Mentors') }}</th>
               <th>{{ __('admin.Actions') }}</th>
@@ -68,6 +69,23 @@
                   <td>{{ $_cycle->organization->name ?? '-' }}</td>
                   <td>{{ $_cycle->start_format ?? '' }}</td>
                   <td>{{ $_cycle->end_format ?? '' }}</td>
+                  <td>
+                    @if( $_cycle->start <= now() && now() <= $_cycle->end )
+                      <span class="badge bg-label-primary w-100  ms-2">
+                        {{ __('admin.On going') }}
+                      </span>
+                    @elseif( $_cycle->start > now() )
+                      <span class="badge bg-label-warning w-100  ms-2">
+                        {{ __('admin.Not started') }}
+                      </span>
+                    @elseif( $_cycle->end < now() )
+                      <span class="badge bg-label-success w-100  ms-2">
+                        {{ __('admin.completed') }}
+                      </span>
+                    @else
+                    ----
+                    @endif
+                  </td>
                   <td>{{ $kpi['startups'] }}</td>
                   <td>{{ $kpi['mentors_count'] }}</td>
                   <td>
@@ -154,6 +172,7 @@
       // Get ongoing and completed program IDs from controller
       const ongoingIds = @json($ongoingCycles->pluck('id')->toArray() ?? []);
       const completedIds = @json($completed_programs->pluck('id')->toArray() ?? []);
+      const notStartedIds = @json($not_started_programs->pluck('id')->toArray() ?? []);
 
       // Remove previous KPI filter
       $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(function(fn) {
@@ -173,6 +192,13 @@
           const row = cyclesKpiTable.row(dataIndex).node();
           const cycleId = $(row).data('cycle-id');
           return completedIds.includes(cycleId); // KPI_FILTER
+        });
+      } else if ( filterType === 'not_started_programs' ) {
+        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+          if (settings.nTable.id !== 'tblCycleKPIs') return true;
+          const row = cyclesKpiTable.row(dataIndex).node();
+          const cycleId = $(row).data('cycle-id');
+          return notStartedIds.includes(cycleId); // KPI_FILTER
         });
       }
       // If filterType is 'total_programs' or null, show all (no custom filter)
