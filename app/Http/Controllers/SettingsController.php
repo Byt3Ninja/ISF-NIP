@@ -883,18 +883,23 @@ class SettingsController extends Controller
 		// $delete = ReminderLog::truncate();
 		$user = auth()->user();
 		$orgIds = $user->organizations_ids;
-							if(auth()->user()->hasAnyRole(['organizationManager', 'subadmin'])) {
-                                $cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
-                                    return $q->whereIn('organization_id', $orgIds);
-                                })->get();
-                                $ReminderLogs = ReminderLog::whereIn('cycle_id', $cycles->pluck('id'));
-                            }elseif(auth()->user()->hasRole('Admin')) {
-                                $ReminderLogs = ReminderLog::all();
-                            }else{
-                                $ReminderLogs = [];
-                            }
+		if(auth()->user()->hasAnyRole(['organizationManager', 'subadmin']))
+		{
+			$cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->whereIn('organization_id', $orgIds);
+			})->get();
+			$ReminderLogs = ReminderLog::whereIn('cycle_id', $cycles->pluck('id'));
+		}
+		elseif(auth()->user()->hasRole('Admin'))
+		{
+			$ReminderLogs = ReminderLog::all();
+		}
+		else
+		{
+			$ReminderLogs = collect([]);
+		}
 
-							 $query = $ReminderLogs;
+		$query = $ReminderLogs;
 
         if ($request->filled('program')) {
             $query->where('cycle_id', $request->program);
@@ -918,8 +923,7 @@ class SettingsController extends Controller
             $query->whereBetween('created_at', [$from, $to]);
         }
 
-		$ReminderLogs = $query->get();
-    
+		$ReminderLogs = $query->values();
 
 		return view('admin.organizations.reminder_logs', compact('ReminderLogs'));
 	}
