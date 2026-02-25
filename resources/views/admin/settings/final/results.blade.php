@@ -960,8 +960,23 @@
 
 		function buildEvaluationModal(data) {
 			const totalScore = (data.total * 100).toFixed(1);
-			
+
 			let modalContent = `
+				<style>
+					.judge-card-ribbon { position: relative; overflow: hidden; }
+					.approval-ribbon {
+						position: absolute; top: 2px; right: -8px;
+						width: 180px; padding: 6px 0;
+						transform: translate(50px, 18px) rotate(45deg);
+						font-size: 10px; font-weight: 600;
+						text-align: center; white-space: nowrap;
+						text-transform: uppercase; letter-spacing: 0.5px;
+						z-index: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+					}
+					.approval-ribbon.ribbon-approved { background: #28a745; color: #fff; }
+					.approval-ribbon.ribbon-disapproved { background: #dc3545; color: #fff; }
+					.approval-ribbon.ribbon-pending { background: #ffc107; color: #212529; }
+				</style>
 				<div class="px-4 py-3">
 					<!-- Overall Score Header -->
 					<div class="row mb-5">
@@ -1002,9 +1017,14 @@
 					const judgeScore = (judge.evaluation.value * 100).toFixed(1);
 					const statusClass = judge.evaluation.status === 'Published' ? 'success' : judge.evaluation.status === 'Draft' ? 'warning' : 'danger';
 					const statusIcon = judge.evaluation.status === 'Published' ? 'circle-check' : judge.evaluation.status === 'Draft' ? 'clock' : 'circle-x';
-					
+					const approvalLabel = judge.evaluation.approval === 'approved' ? '{{ __("cycles.Approved") }}' :
+										judge.evaluation.approval === 'disapproved' ? '{{ __("cycles.Disapproved") }}' : '{{ __("cycles.Pending") }}';
+					const ribbonClass = judge.evaluation.approval === 'approved' ? 'ribbon-approved' :
+										judge.evaluation.approval === 'disapproved' ? 'ribbon-disapproved' : 'ribbon-pending';
+
 					modalContent += `<div class="col-md-4">
-						<div class="card border shadow-sm h-100">
+						<div class="card border shadow-sm h-100 judge-card-ribbon">
+							<span class="approval-ribbon ${ribbonClass}">${approvalLabel}</span>
 							<div class="card-body text-center py-4">
 								<img src="${judge.image_url}" alt="${judge.name}" class="rounded-circle mb-3" width="60" height="60">
 								<h6 class="fw-semibold mb-2">${judge.name}</h6>
@@ -1053,20 +1073,20 @@
 											<h6 class="mb-0 fw-semibold text-dark">${subCriterion.name}</h6>
 											<span class="fw-bold text-primary fs-6">${subScore} %</span>
 										</div>
-										
+
 										<!-- Judge Details for this sub-criterion -->
 										<div class="row g-3">`;
 
 					subCriterion.details.forEach(judgeDetail => {
 						const judgeScore = (judgeDetail.value * 100).toFixed(1);
 						const statusClass = judgeDetail.status === 'Published' ? 'success' : judgeDetail.status === 'Draft' ? 'warning' : 'danger';
-						
+
 						modalContent += `<div class="col-md-6">
 							<div class="card border-0 bg-white shadow-sm">
 								<div class="card-body p-4">
 									<div class="d-flex align-items-center justify-content-between mb-3">
 										<div class="d-flex align-items-center">
-											<img src="${data.judges.find(j => j.id === judgeDetail.judger.id)?.image_url || '/icons/account.svg'}" 
+											<img src="${data.judges.find(j => j.id === judgeDetail.judger.id)?.image_url || '/icons/account.svg'}"
 														alt="${judgeDetail.judger.name}" class="rounded-circle me-3" width="32" height="32">
 											<div>
 												<div class="fw-medium text-dark">${judgeDetail.judger.name}</div>
@@ -1111,17 +1131,26 @@
 			data.judges.forEach((judge, index) => {
 				const judgeScore = (judge.evaluation.value * 100).toFixed(1);
 				const statusClass = judge.evaluation.status === 'Published' ? 'success' : judge.evaluation.status === 'Draft' ? 'warning' : 'danger';
-				
+				const approvalBadgeClass = judge.evaluation.approval === 'approved' ? 'success' :
+								judge.evaluation.approval === 'disapproved' ? 'danger' : 'warning';
+				const approvalBadgeIcon = judge.evaluation.approval === 'approved' ? 'circle-check' :
+								judge.evaluation.approval === 'disapproved' ? 'times-circle' : 'clock';
+				const approvalLabel = judge.evaluation.approval === 'approved' ? '{{ __("cycles.Approved") }}' :
+								judge.evaluation.approval === 'disapproved' ? '{{ __("cycles.Disapproved") }}' : '{{ __("cycles.Pending") }}';
+
 				modalContent += `
 								<div class="accordion-item border shadow-sm mb-3">
 									<h2 class="accordion-header" id="heading${judge.id}">
-										<button class="accordion-button ${index === 0 ? '' : 'collapsed'} py-4" type="button" data-bs-toggle="collapse" 
+										<button class="accordion-button ${index === 0 ? '' : 'collapsed'} py-4" type="button" data-bs-toggle="collapse"
 														data-bs-target="#collapse${judge.id}" aria-expanded="${index === 0 ? 'true' : 'false'}" aria-controls="collapse${judge.id}">
 											<div class="d-flex align-items-center w-100">
 												<img src="${judge.image_url}" alt="${judge.name}" class="rounded-circle me-4" width="40" height="40">
 												<div class="flex-grow-1">
 													<div class="fw-bold text-dark">${judge.name}</div>
 													<div class="small text-muted mt-1">${judge.email}</div>
+												</div>
+												<div class="me-2">
+													<span class="badge bg-${approvalBadgeClass} bg-opacity-10 text-${approvalBadgeClass} px-3 py-2"><i class="far fa-fw fa-sm fa-${approvalBadgeIcon} me-1"></i>${approvalLabel}</span>
 												</div>
 												<div class="me-4">
 													<span class="badge bg-${statusClass} bg-opacity-10 text-${statusClass} px-3 py-2">${judge.evaluation.status}</span>
@@ -1132,7 +1161,7 @@
 											</div>
 										</button>
 									</h2>
-									<div id="collapse${judge.id}" class="accordion-collapse collapse ${index === 0 ? 'show' : ''}" 
+									<div id="collapse${judge.id}" class="accordion-collapse collapse ${index === 0 ? 'show' : ''}"
 											 aria-labelledby="heading${judge.id}" data-bs-parent="#judgeAccordion">
 										<div class="accordion-body p-4">`;
 
@@ -1189,6 +1218,27 @@
 												<h6 class="fw-bold mb-3">{{ __('cycles.Overall Comment') }}</h6>
 												<div class="bg-light rounded-3 p-4">
 													<p class="mb-0 text-dark fst-italic">"${judge.evaluation.comment}"</p>
+												</div>
+											</div>`;
+					}
+
+					// Form submission comments
+					if (judge.form_comments && judge.form_comments.length > 0) {
+						modalContent += `
+											<div class="mt-5 pt-4 border-top">
+												<h6 class="fw-bold mb-3">
+													<i class="ti ti-message-dots text-primary me-2"></i>
+													{{ __('cycles.Submission Comments') }}
+												</h6>
+												<div class="list-group list-group-flush">`;
+						judge.form_comments.forEach(fc => {
+							modalContent += `
+												<div class="list-group-item border-start border-primary border-3 mb-2 rounded bg-light">
+													<div class="fw-semibold text-dark mb-1">${fc.question}</div>
+													<div class="text-muted fst-italic">"${fc.comment}"</div>
+												</div>`;
+						});
+						modalContent += `
 												</div>
 											</div>`;
 					}

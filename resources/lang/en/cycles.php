@@ -439,6 +439,7 @@ return [
     'Detailed Criteria Breakdown' => 'Detailed Criteria Breakdown',
     'Individual Judge Evaluations' => 'Individual Judge Evaluations',
     'Overall Comment' => 'Overall Comment',
+    'Submission Comments' => 'Submission Comments',
     'This judge has not evaluated this company yet.' => 'This judge has not evaluated this company yet.',
     'Based on all judge evaluations' => 'Based on all judge evaluations',
     'Judge' => 'Judge',

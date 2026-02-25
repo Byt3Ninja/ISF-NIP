@@ -434,6 +434,7 @@ return [
     'Detailed Criteria Breakdown' => 'تفصيل المعايير',
     'Individual Judge Evaluations' => 'تقييمات المحكمين الفردية',
     'Overall Comment' => 'التعليقات العامة',
+    'Submission Comments' => 'تعليقات على الطلب',
     'This judge has not evaluated this company yet.' => 'لم يقم هذا المحكم بتقييم هذه الشركة بعد.',
     'Based on all judge evaluations' => 'استنادًا إلى جميع تقييمات المحكمين',
     'Judge' => 'محكم',

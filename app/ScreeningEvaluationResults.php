@@ -3,6 +3,7 @@
 namespace App;
 
 use stdClass;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -626,6 +627,35 @@ class ScreeningEvaluationResults extends Model
 			})->filter(function( $item ) {
 				return !empty( $item->evaluation );
 			})->values();
+
+			// Fetch form submission comments for this company
+			$formCommentsByJudge = collect();
+			$formDataRows = DB::table('form_data')->where('company_id', $company_id)->get();
+			if( $formDataRows->isNotEmpty() )
+			{
+				$formDataIds = $formDataRows->pluck('id')->toArray();
+				$rawComments = DB::table('form_data_judges_comments AS fc')
+					->join('form_data AS fd', 'fd.id', '=', 'fc.form_data_id')
+					->join('users AS u', 'u.id', '=', 'fc.user_id')
+					->whereIn('fc.form_data_id', $formDataIds)
+					->select([
+						'fc.user_id',
+						'fd.question',
+						'fc.comment',
+					])
+					->get();
+				$formCommentsByJudge = $rawComments->groupBy('user_id');
+			}
+
+			$processedJudges = $processedJudges->map(function( $judge ) use ( $formCommentsByJudge ) {
+				$judge->form_comments = $formCommentsByJudge->get($judge->id, collect())->map(function( $c ) {
+					return (object)[
+						'question' => $c->question,
+						'comment' => $c->comment,
+					];
+				})->values();
+				return $judge;
+			});
 
 			$output[$company_id] = [
 				'total' => ( ( round( $_criteria->sum('value') * 100 ) ) / 100),
