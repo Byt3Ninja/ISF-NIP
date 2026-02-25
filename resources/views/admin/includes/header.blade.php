@@ -10,7 +10,7 @@
   $all = $msgs + $unread_messages;
   $companyid = $_user->company?->id ?? null;
 
-  $menuItems = [
+$menuItems = [
     // Main Dashboard
     [
         'label' => $l == 'en' ? 'Dashboard' : 'لوحة القيادة',
@@ -137,7 +137,7 @@
         'icon' => 'ti ti-calendar-cog ti-md me-2 me-lg-4 ti-lg',
         'route' => 'slots.index',
         'permission' => 'slots.index',
-        'isVisible' => $_user->hasRole("Mentor"),
+        'isVisible' => $_user->hasRole("Mentor") || $_user->ableTo('tasks.index', $permissions),
         'subItems' => []
     ],
 
@@ -145,9 +145,19 @@
     [
         'label' => $l == 'en' ? 'Tasks' : 'المهام',
         'icon' => 'ti ti-layout-kanban ti-md me-2 me-lg-4 ti-lg',
-        'route' => 'mentorships.sessions_list_detailed',
-        'permission' => 'mentorships.sessions_list_detailed',
-        'isVisible' => $_user->hasAnyRole("Mentor|Registered"),
+        'route' => 'tasks.index',
+        'permission' => 'tasks.index',
+        'isVisible' => $_user->hasAnyRole("Mentor|Registered") || $_user->ableTo('tasks.index', $permissions),
+        'subItems' => []
+    ],
+
+    // Service Providers
+    [
+        'label' => $l == 'en' ? 'Services Providers' : 'مقدمي الخدمات',
+        'icon' => 'ti ti-users ti-md me-2 me-lg-4 ti-lg',
+        'route' => 'services_providers.index',
+        'permission' => 'services_providers.index',
+        'isVisible' => $_user->ableTo('services_providers.index', $permissions),
         'subItems' => []
     ],
  
@@ -228,9 +238,9 @@
     [
         'label' => __('settings.navigation.services_directory'),
         'icon' => 'ti ti-search',
-        'route' => 'users.directory_view',
-        'permission' => 'users.directory_view',
-        'isVisible' => $_user->hasAnyRole("Registered|Mentor"),
+        'route' => 'services.index',
+        'permission' => 'services.index',
+        'isVisible' => $_user->hasAnyRole("Registered|Mentor") || $_user->ableTo('services.index', $permissions),
         'subItems' => []
     ],
 
@@ -648,9 +658,16 @@
         'label' => $l == 'en' ? 'Services' : 'الخدمات',
         'icon' => 'ti ti-arrows-move',
         'route' => 'services.index',
-        'permission' => ['service_requests.list_all', 'services.create', 'services.index', 'serviceCategories.index'],
-        'isVisible' => !$_user->hasAnyRole("Mentor|Judger") && $_user->ableToAny(["service_requests.list_all", "services.create", "services.index", "serviceCategories.index"], $permissions),
+        'permission' => ['services.index', 'service_requests.list_all', 'services.create', 'services.index', 'serviceCategories.index'],
+        'isVisible' => !$_user->hasAnyRole("Mentor|Judger") && $_user->ableToAny(['services.index', "service_requests.list_all", "services.create", "services.index", "serviceCategories.index"], $permissions),
         'subItems' => [
+            [
+                'label' => $l == 'en' ? 'Services' : 'الخدمات',
+                'icon' => 'ti ti-grid',
+                'route' => 'services.index',
+                'permission' => 'services.index',
+                'isVisible' => $_user->ableTo('services.index', $permissions)
+            ],
             [
                 'label' => $l == 'en' ? 'Services Requests' : 'طلبات الخدمات',
                 'icon' => 'ti ti-mail-opened',
@@ -735,6 +752,16 @@
         'route' => 'rooms.index',
         'permission' => 'rooms.index',
         'isVisible' => $_user->hasAnyRole("organizationManager|Admin"),
+        'subItems' => []
+    ],
+
+    // Application Settings
+    [
+        'label' => $l == 'en' ? 'Application Settings' : 'إعدادات التطبيق',
+        'icon' => 'ti ti-settings',
+        'route' => 'settings.index',
+        'permission' => 'settings.index',
+        'isVisible' => $_user->ableTo('settings.index', $permissions),
         'subItems' => []
     ],
 
