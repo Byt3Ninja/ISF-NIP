@@ -836,43 +836,45 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                   <i class="ti ti-users me-1"></i>{{ __('startup.count_label', ['value' => count($teamData['employees'])]) }}
                 </span>
               </div>
-              @if(empty($teamData['employees'][0]['name']))
-                <div class="col-12 text-center text-muted">{{ __('startup.no_employees') }}</div>
-              @else
-                <div class="table-responsive">
-                  <table class="table table-sm mb-0">
-                    <thead class="table-light">
-                      <tr>
-                        <th class="text-center text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.full_name') }}</th>
-                        <th class="text-center text-nowrap"><i class="ti ti-briefcase me-1"></i>{{ __('startup.job_title') }}
-                        </th>
-                        <th class="text-center text-nowrap"><i class="ti ti-gender-male me-1"></i>{{ __('startup.gender') }}
-                        </th>
-                        <th class="text-center text-nowrap"><i class="ti ti-clock me-1"></i>{{ __('startup.employment_type') }}
-                        </th>
-                        <th class="text-center text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.start_date_label')
-                          }}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      @foreach ($teamData['employees'] as $employee)
-                      <tr class="border-top">
-                        <td class="fw-medium">{{ $employee['name'] }}</td>
-                        <td>{{ $employee['job'] }}</td>
-                        <td>
-                          <span class="badge bg-label-{{ strtolower($employee['gender']) === 'male' ? 'info' : 'warning' }}">
-                            {{ $employee['gender'] }}
-                          </span>
-                        </td>
-                        <td>
-                          <span class="badge bg-label-success">{{ $employee['employment'] }}</span>
-                        </td>
-                        <td>{{ $employee['start_date'] }}</td>
-                      </tr>
-                      @endforeach
-                    </tbody>
-                  </table>
-                </div>
+              @if($teamData['employees']->count() > 0)
+                @if(empty($teamData['employees'][0]['name']))
+                  <div class="col-12 text-center text-muted">{{ __('startup.no_employees') }}</div>
+                @else
+                  <div class="table-responsive">
+                    <table class="table table-sm mb-0">
+                      <thead class="table-light">
+                        <tr>
+                          <th class="text-center text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.full_name') }}</th>
+                          <th class="text-center text-nowrap"><i class="ti ti-briefcase me-1"></i>{{ __('startup.job_title') }}
+                          </th>
+                          <th class="text-center text-nowrap"><i class="ti ti-gender-male me-1"></i>{{ __('startup.gender') }}
+                          </th>
+                          <th class="text-center text-nowrap"><i class="ti ti-clock me-1"></i>{{ __('startup.employment_type') }}
+                          </th>
+                          <th class="text-center text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.start_date_label')
+                            }}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @foreach ($teamData['employees'] as $employee)
+                        <tr class="border-top">
+                          <td class="fw-medium">{{ $employee['name'] }}</td>
+                          <td>{{ $employee['job'] }}</td>
+                          <td>
+                            <span class="badge bg-label-{{ strtolower($employee['gender']) === 'male' ? 'info' : 'warning' }}">
+                              {{ $employee['gender'] }}
+                            </span>
+                          </td>
+                          <td>
+                            <span class="badge bg-label-success">{{ $employee['employment'] }}</span>
+                          </td>
+                          <td>{{ $employee['start_date'] }}</td>
+                        </tr>
+                        @endforeach
+                      </tbody>
+                    </table>
+                  </div>
+                @endif
               @endif
             </div>
           </div>
@@ -901,33 +903,34 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                   <h6 class="mb-3 fw-bold d-flex align-items-center gap-2">
                     <i class="ti ti-users text-primary"></i>{{ __('startup.shareholders') }}
                   </h6>
-                  @if($ownershipData['shareholders'][0]['name'] == null)
-                    <div class="col-12 text-center text-muted">{{ __('startup.no_shareholders') }}</div>
-                     
-                  @else
-                    <div class="table-responsive">
-                      <table class="table table-sm mb-0 align-middle">
-                        <thead class="table-light">
-                          <tr>
-                            <th class="text-center text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.name') }}</th>
-                            <th class="text-center text-nowrap"><i class="ti ti-briefcase me-1"></i>{{ __('startup.role') }}
-                            </th>
-                            <th class="text-end"><i class="ti ti-percent me-1"></i>{{ __('startup.ownership') }}</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          @foreach ($ownershipData['shareholders'] as $key => $shareholder)
-                          <tr class="border-top">
-                            <td class="fw-medium">{{ $shareholder['name'] }}</td>
-                            <td><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary' }}">{{ __('startup.' .
-                                $shareholder['role']) }}</span></td>
-                            <td class="text-end fw-bold text-{{ $shareholder['text_class'] }}">{{ $shareholder['ownership'] }}
-                            </td>
-                          </tr>
-                          @endforeach
-                        </tbody>
-                      </table>
-                    </div>
+                  @if($ownershipData['shareholders']->count() == 0)
+                    @if($ownershipData['shareholders'][0]['name'] == null)
+                      <div class="col-12 text-center text-muted">{{ __('startup.no_shareholders') }}</div>
+                    @else
+                      <div class="table-responsive">
+                        <table class="table table-sm mb-0 align-middle">
+                          <thead class="table-light">
+                            <tr>
+                              <th class="text-center text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.name') }}</th>
+                              <th class="text-center text-nowrap"><i class="ti ti-briefcase me-1"></i>{{ __('startup.role') }}
+                              </th>
+                              <th class="text-end"><i class="ti ti-percent me-1"></i>{{ __('startup.ownership') }}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @foreach ($ownershipData['shareholders'] as $key => $shareholder)
+                            <tr class="border-top">
+                              <td class="fw-medium">{{ $shareholder['name'] }}</td>
+                              <td><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary' }}">{{ __('startup.' .
+                                  $shareholder['role']) }}</span></td>
+                              <td class="text-end fw-bold text-{{ $shareholder['text_class'] }}">{{ $shareholder['ownership'] }}
+                              </td>
+                            </tr>
+                            @endforeach
+                          </tbody>
+                        </table>
+                      </div>
+                    @endif
                   @endif
                 </div>
               </div>
@@ -938,28 +941,30 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                   <h6 class="mb-3 fw-bold d-flex align-items-center gap-2">
                     <i class="ti ti-coin text-warning"></i>{{ __('startup.investors') }}
                   </h6>
-                  @if(empty($ownershipData['investors'][0]['name']))
-                    <div class="col-12 text-center text-muted">{{ __('startup.no_investors') }}</div>
-                  @else
-                    <div class="table-responsive">
-                      <table class="table table-sm mb-0 align-middle">
-                        <thead class="table-light">
-                          <tr>
-                            <th class="text-center text-nowrap"><i class="ti ti-building me-1"></i>{{ __('startup.name') }}</th>
-                            <th class="text-end"><i class="ti ti-tag me-1"></i>{{ __('startup.type') }}</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          @foreach ($ownershipData['investors'] as $key => $investor)
-                          <tr class="border-top">
-                            <td class="fw-medium">{{ $investor['name'] }}</td>
-                            <td class="text-end"><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary'}}">{{ __('admin.' .
-                                $investor['type']) }}</span></td>
-                          </tr>
-                          @endforeach
-                        </tbody>
-                      </table>
-                    </div>
+                  @if($ownershipData['investors']->count() == 0)
+                    @if(empty($ownershipData['investors'][0]['name']))
+                      <div class="col-12 text-center text-muted">{{ __('startup.no_investors') }}</div>
+                    @else
+                      <div class="table-responsive">
+                        <table class="table table-sm mb-0 align-middle">
+                          <thead class="table-light">
+                            <tr>
+                              <th class="text-center text-nowrap"><i class="ti ti-building me-1"></i>{{ __('startup.name') }}</th>
+                              <th class="text-end"><i class="ti ti-tag me-1"></i>{{ __('startup.type') }}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @foreach ($ownershipData['investors'] as $key => $investor)
+                            <tr class="border-top">
+                              <td class="fw-medium">{{ $investor['name'] }}</td>
+                              <td class="text-end"><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary'}}">{{ __('admin.' .
+                                  $investor['type']) }}</span></td>
+                            </tr>
+                            @endforeach
+                          </tbody>
+                        </table>
+                      </div>
+                    @endif
                   @endif
                 </div>
               </div>
@@ -1011,58 +1016,62 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                   <h6 class="mt-4 mb-3 fw-bold d-flex align-items-center gap-2">
                     <i class="ti ti-checklist text-success"></i>{{ __('startup.criteria') }}
                   </h6>
-                  @if(empty($screeningData['initial']['criteria'][0]['name']))
-                    <div class="col-12 text-center text-muted">{{ __('startup.no_criteria') }}</div>
-                  @else
-                    <div class="table-responsive">
-                      <table class="table table-sm mb-0 align-middle">
-                        <thead class="table-light">
-                          <tr>
-                            <th class="text-center text-nowrap"><i class="ti ti-ruler-measure me-1"></i>{{ __('startup.criterion') }}</th>
-                            <th class="text-center text-nowrap"><i class="ti ti-weight me-1"></i>{{ __('startup.weight') }}</th>
-                            <th class="text-end"><i class="ti ti-star me-1"></i>{{ __('startup.score') }}</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          @foreach ($screeningData['initial']['criteria'] as $criterion)
-                          <tr class="border-top">
-                            <td class="fw-medium">{{ $criterion['name'] }}</td>
-                            <td class="text-center"><span class="badge bg-label-primary">{{ $criterion['weight'] }}%</span></td>
-                            <td class="text-end"><span class="badge bg-label-success">{{ $criterion['score'] }}</span></td>
-                          </tr>
-                          @endforeach
-                        </tbody>
-                      </table>
-                    </div>
+                  @if($screeningData['initial']['criteria']->count() == 0)
+                    @if(empty($screeningData['initial']['criteria'][0]['name']))
+                      <div class="col-12 text-center text-muted">{{ __('startup.no_criteria') }}</div>
+                    @else
+                      <div class="table-responsive">
+                        <table class="table table-sm mb-0 align-middle">
+                          <thead class="table-light">
+                            <tr>
+                              <th class="text-center text-nowrap"><i class="ti ti-ruler-measure me-1"></i>{{ __('startup.criterion') }}</th>
+                              <th class="text-center text-nowrap"><i class="ti ti-weight me-1"></i>{{ __('startup.weight') }}</th>
+                              <th class="text-end"><i class="ti ti-star me-1"></i>{{ __('startup.score') }}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @foreach ($screeningData['initial']['criteria'] as $criterion)
+                            <tr class="border-top">
+                              <td class="fw-medium">{{ $criterion['name'] }}</td>
+                              <td class="text-center"><span class="badge bg-label-primary">{{ $criterion['weight'] }}%</span></td>
+                              <td class="text-end"><span class="badge bg-label-success">{{ $criterion['score'] }}</span></td>
+                            </tr>
+                            @endforeach
+                          </tbody>
+                        </table>
+                      </div>
+                    @endif
                   @endif
                   <h6 class="mt-4 mb-3 fw-bold d-flex align-items-center gap-2">
                     <i class="ti ti-user-check text-warning"></i>{{ __('startup.judges_evaluations') }}
                   </h6>
-                  @if(empty($screeningData['initial']['judges'][0]['name']))
-                    <div class="col-12 text-center text-muted">{{ __('startup.no_judges') }}</div>
-                  @else
-                    <div class="table-responsive">
-                      <table class="table table-sm mb-0 align-middle">
-                        <thead class="table-light">
-                          <tr>
-                            <th class="text-center text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.judge') }}</th>
-                            <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.id') }}</th>
-                            <th class="text-center text-nowrap"><i class="ti ti-star me-1"></i>{{ __('startup.score') }}</th>
-                            <th class="text-center text-nowrap"><i class="ti ti-message me-1"></i>{{ __('startup.comments') }}</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          @foreach ($screeningData['initial']['judges'] as $judge)
-                            <tr class="border-top">
-                              <td class="fw-medium">{{ $judge['name'] }}</td>
-                              <td>{{ $judge['id'] }}</td>
-                              <td class="text-center"><span class="badge bg-label-info">{{ $judge['score'] }}</span></td>
-                              <td class="small">{{ $judge['comments'] }}</td>
+                  @if($screeningData['initial']['judges']->count() == 0)
+                    @if(empty($screeningData['initial']['judges'][0]['name']))
+                      <div class="col-12 text-center text-muted">{{ __('startup.no_judges') }}</div>
+                    @else
+                      <div class="table-responsive">
+                        <table class="table table-sm mb-0 align-middle">
+                          <thead class="table-light">
+                            <tr>
+                              <th class="text-center text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.judge') }}</th>
+                              <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.id') }}</th>
+                              <th class="text-center text-nowrap"><i class="ti ti-star me-1"></i>{{ __('startup.score') }}</th>
+                              <th class="text-center text-nowrap"><i class="ti ti-message me-1"></i>{{ __('startup.comments') }}</th>
                             </tr>
-                          @endforeach
-                        </tbody>
-                      </table>
-                    </div>
+                          </thead>
+                          <tbody>
+                            @foreach ($screeningData['initial']['judges'] as $judge)
+                              <tr class="border-top">
+                                <td class="fw-medium">{{ $judge['name'] }}</td>
+                                <td>{{ $judge['id'] }}</td>
+                                <td class="text-center"><span class="badge bg-label-info">{{ $judge['score'] }}</span></td>
+                                <td class="small">{{ $judge['comments'] }}</td>
+                              </tr>
+                            @endforeach
+                          </tbody>
+                        </table>
+                      </div>
+                    @endif
                   @endif
                 </div>
               </div>
@@ -1121,31 +1130,33 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                   <h6 class="mt-4 mb-3 fw-bold d-flex align-items-center gap-2">
                     <i class="ti ti-user-check text-warning"></i>{{ __('startup.judges_evaluations') }}
                   </h6>
-                  @if(empty($screeningData['final']['judges'][0]['name']))
-                    <div class="col-12 text-center text-muted">{{ __('startup.no_judges') }}</div>
-                  @else
-                    <div class="table-responsive">
-                      <table class="table table-sm mb-0 align-middle">
-                        <thead class="table-light">
-                          <tr>
-                            <th class="text-center text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.judge') }}</th>
-                            <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.id') }}</th>
-                            <th class="text-center text-nowrap"><i class="ti ti-star me-1"></i>{{ __('startup.score') }}</th>
-                            <th class="text-center text-nowrap"><i class="ti ti-message me-1"></i>{{ __('startup.comments') }}</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          @foreach ($screeningData['final']['judges'] as $judge)
-                            <tr class="border-top">
-                              <td class="fw-medium">{{ $judge['name'] }}</td>
-                              <td>{{ $judge['id'] }}</td>
-                              <td class="text-center"><span class="badge bg-label-success">{{ $judge['score'] }}</span></td>
-                              <td class="small">{{ $judge['comments'] }}</td>
+                  @if($screeningData['final']['judges']->count() == 0)
+                    @if(empty($screeningData['final']['judges'][0]['name']))
+                      <div class="col-12 text-center text-muted">{{ __('startup.no_judges') }}</div>
+                    @else
+                      <div class="table-responsive">
+                        <table class="table table-sm mb-0 align-middle">
+                          <thead class="table-light">
+                            <tr>
+                              <th class="text-center text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.judge') }}</th>
+                              <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.id') }}</th>
+                              <th class="text-center text-nowrap"><i class="ti ti-star me-1"></i>{{ __('startup.score') }}</th>
+                              <th class="text-center text-nowrap"><i class="ti ti-message me-1"></i>{{ __('startup.comments') }}</th>
                             </tr>
-                          @endforeach
-                        </tbody>
-                      </table>
-                    </div>
+                          </thead>
+                          <tbody>
+                            @foreach ($screeningData['final']['judges'] as $judge)
+                              <tr class="border-top">
+                                <td class="fw-medium">{{ $judge['name'] }}</td>
+                                <td>{{ $judge['id'] }}</td>
+                                <td class="text-center"><span class="badge bg-label-success">{{ $judge['score'] }}</span></td>
+                                <td class="small">{{ $judge['comments'] }}</td>
+                              </tr>
+                            @endforeach
+                          </tbody>
+                        </table>
+                      </div>
+                    @endif
                   @endif
                 </div>
               </div>
@@ -1402,53 +1413,55 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
             <small class="text-muted">{{ __('startup.tasks_assigned_note') }}</small>
           </div>
           <div class="card-body">
-            @if(empty($tasks[0]['title']))
-              <div class="col-12 text-center text-muted">{{ __('startup.no_tasks') }}</div>
-            @else
-              <div class="table-responsive">
-                <table class="table table-sm mb-0 align-middle">
-                  <thead class="table-light">
-                    <tr>
-                      <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.task_title') }}
-                      </th>
-                      <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.task_id') }}</th>
-                      <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.session_id') }}</th>
-                      <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.session_title') }}
-                      </th>
-                      <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.description') }}
-                      </th>
-                      <th class="text-center text-nowrap"><i class="ti ti-calendar-due me-1"></i>{{ __('startup.due_date_label')
-                        }}</th>
-                      <th class="text-center text-nowrap"><i class="ti ti-calendar-check me-1"></i>{{
-                        __('startup.completion_date_label') }}</th>
-                      <th class="text-center text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.mentor') }}</th>
-                      <th class="text-center text-nowrap"><i class="ti ti-user-circle me-1"></i>{{ __('startup.created_by') }}
-                      </th>
-                      <th class="text-center text-nowrap"><i class="ti ti-badge me-1"></i>{{ __('startup.status') }}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @foreach ($tasks as $key => $task)
-                    <tr class="border-top">
-                      <td class="fw-medium">{{ $task['title'] }}</td>
-                      <td><span class="badge bg-label-{{isset($badgeColors[$key]) ? $badgeColors[$key] : 'secondary' }}">{{ $task['task_id'] }}</span></td>
-                      <td>{{ $task['session_id'] }}</td>
-                      <td>{{ $task['session_title'] }}</td>
-                      <td class="small">{{ $task['description'] }}</td>
-                      <td>{{ $task['due_date'] }}</td>
-                      <td>{{ $task['completion_date'] }}</td>
-                      <td>{{ $task['mentor'] }}</td>
-                      <td>{{ $task['created_by'] }}</td>
-                      <td class="text-center">
-                        <span class="badge bg-label-{{ isset($badgeColors[$key]) ? $badgeColors[$key] : 'secondary' }}">
-                          {{ $task['status'] }}
-                        </span>
-                      </td>
-                    </tr>
-                    @endforeach
-                  </tbody>
-                </table>
-              </div>
+            @if($tasks->count() == 0)
+              @if(empty($tasks[0]['title']))
+                <div class="col-12 text-center text-muted">{{ __('startup.no_tasks') }}</div>
+              @else
+                <div class="table-responsive">
+                  <table class="table table-sm mb-0 align-middle">
+                    <thead class="table-light">
+                      <tr>
+                        <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.task_title') }}
+                        </th>
+                        <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.task_id') }}</th>
+                        <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.session_id') }}</th>
+                        <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.session_title') }}
+                        </th>
+                        <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.description') }}
+                        </th>
+                        <th class="text-center text-nowrap"><i class="ti ti-calendar-due me-1"></i>{{ __('startup.due_date_label')
+                          }}</th>
+                        <th class="text-center text-nowrap"><i class="ti ti-calendar-check me-1"></i>{{
+                          __('startup.completion_date_label') }}</th>
+                        <th class="text-center text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.mentor') }}</th>
+                        <th class="text-center text-nowrap"><i class="ti ti-user-circle me-1"></i>{{ __('startup.created_by') }}
+                        </th>
+                        <th class="text-center text-nowrap"><i class="ti ti-badge me-1"></i>{{ __('startup.status') }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @foreach ($tasks as $key => $task)
+                      <tr class="border-top">
+                        <td class="fw-medium">{{ $task['title'] }}</td>
+                        <td><span class="badge bg-label-{{isset($badgeColors[$key]) ? $badgeColors[$key] : 'secondary' }}">{{ $task['task_id'] }}</span></td>
+                        <td>{{ $task['session_id'] }}</td>
+                        <td>{{ $task['session_title'] }}</td>
+                        <td class="small">{{ $task['description'] }}</td>
+                        <td>{{ $task['due_date'] }}</td>
+                        <td>{{ $task['completion_date'] }}</td>
+                        <td>{{ $task['mentor'] }}</td>
+                        <td>{{ $task['created_by'] }}</td>
+                        <td class="text-center">
+                          <span class="badge bg-label-{{ isset($badgeColors[$key]) ? $badgeColors[$key] : 'secondary' }}">
+                            {{ $task['status'] }}
+                          </span>
+                        </td>
+                      </tr>
+                      @endforeach
+                    </tbody>
+                  </table>
+                </div>
+              @endif
             @endif
           </div>
         </div>
@@ -1465,41 +1478,43 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
             <small class="text-muted">{{ __('startup.knowledge_checks_note') }}</small>
           </div>
           <div class="card-body">
-            @if(empty($quizzes[0]['title']))
-              <div class="col-12 text-center text-muted">{{ __('startup.no_quizzes') }}</div>
-            @else
-              <div class="table-responsive">
-                <table class="table table-sm mb-0 align-middle">
-                  <thead class="table-light">
-                    <tr>
-                      <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.quiz_id') }}</th>
-                      <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.quiz_title') }}
-                      </th>
-                      <th class="text-center text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.date_completed') }}
-                      </th>
-                      <th class="text-center text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.founder') }}</th>
-                      <th class="text-center text-nowrap"><i class="ti ti-percent me-1"></i>{{ __('startup.score') }}</th>
-                      <th class="text-center text-nowrap"><i class="ti ti-badge me-1"></i>{{ __('startup.status') }}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @foreach ($quizzes as $key => $q)
-                    <tr class="border-top">
-                      <td><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary' }}">{{ $q['quiz_id'] }}</span></td>
-                      <td class="fw-medium">{{ $q['title'] }}</td>
-                      <td>{{ $q['date_completed'] }}</td>
-                      <td>{{ $q['founder'] }}</td>
-                      <td class="text-center"><span class="badge bg-label-{{ $q['score_badge'] }}">{{ $q['score'] }}</span></td>
-                      <td class="text-center">
-                        <span class="badge bg-label-{{ isset($badgeColors[$key]) ? $badgeColors[$key] : 'secondary' }}">
-                          {{ $q['status'] }}
-                        </span>
-                      </td>
-                    </tr>
-                    @endforeach
-                  </tbody>
-                </table>
-              </div>
+            @if($quizzes->count() == 0)
+              @if(empty($quizzes[0]['title']))
+                <div class="col-12 text-center text-muted">{{ __('startup.no_quizzes') }}</div>
+              @else
+                <div class="table-responsive">
+                  <table class="table table-sm mb-0 align-middle">
+                    <thead class="table-light">
+                      <tr>
+                        <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.quiz_id') }}</th>
+                        <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.quiz_title') }}
+                        </th>
+                        <th class="text-center text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.date_completed') }}
+                        </th>
+                        <th class="text-center text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.founder') }}</th>
+                        <th class="text-center text-nowrap"><i class="ti ti-percent me-1"></i>{{ __('startup.score') }}</th>
+                        <th class="text-center text-nowrap"><i class="ti ti-badge me-1"></i>{{ __('startup.status') }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @foreach ($quizzes as $key => $q)
+                      <tr class="border-top">
+                        <td><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary' }}">{{ $q['quiz_id'] }}</span></td>
+                        <td class="fw-medium">{{ $q['title'] }}</td>
+                        <td>{{ $q['date_completed'] }}</td>
+                        <td>{{ $q['founder'] }}</td>
+                        <td class="text-center"><span class="badge bg-label-{{ $q['score_badge'] }}">{{ $q['score'] }}</span></td>
+                        <td class="text-center">
+                          <span class="badge bg-label-{{ isset($badgeColors[$key]) ? $badgeColors[$key] : 'secondary' }}">
+                            {{ $q['status'] }}
+                          </span>
+                        </td>
+                      </tr>
+                      @endforeach
+                    </tbody>
+                  </table>
+                </div>
+              @endif
             @endif
           </div>
         </div>
@@ -1516,42 +1531,44 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
             <small class="text-muted">{{ __('startup.feedback_note') }}</small>
           </div>
           <div class="card-body">
-            @if(empty($surveys[0]['survey_id']))
-              <div class="col-12 text-center text-muted">{{ __('startup.no_surveys') }}</div>
-            @else
-              <div class="table-responsive">
-                <table class="table table-sm mb-0 align-middle">
-                  <thead class="table-light">
-                    <tr>
-                      <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.survey_id') }}</th>
-                      <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.survey_title') }}
-                      </th>
-                      <th class="text-center text-nowrap"><i class="ti ti-flag me-1"></i>{{ __('startup.program_step') }}</th>
-                      <th class="text-center text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.date_completed') }}
-                      </th>
-                      <th class="text-center text-nowrap"><i class="ti ti-file me-1"></i>{{ __('startup.answers') }}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @foreach ($surveys as $key => $s)
-                    <tr class="border-top">
-                      <td><span class="badge bg-label-{{ isset($badgeColors[$key]) ? $badgeColors[$key] : 'secondary' }}">{{ $s['survey_id'] }}</span></td>
-                      <td class="fw-medium">{{ $s['title'] }}</td>
-                      <td>{{ $s['program_step'] }}</td>
-                      <td>{{ $s['date_completed'] }}</td>
-                      <td class="text-center">
-                        @php
-                          $surveyId = str_replace('SV-', '', $s['survey_id']);    
-                        @endphp
-                        <a href="/dashboard/surveys/start/{{ $surveyId }}" class="btn btn-sm btn-primary">
-                          <i class="ti ti-eye me-1"></i>{{ __('admin.View') }}
-                        </a>
-                      </td>
-                    </tr>
-                    @endforeach
-                  </tbody>
-                </table>
-              </div>
+            @if($surveys->count() == 0)
+              @if(empty($surveys[0]['survey_id']))
+                <div class="col-12 text-center text-muted">{{ __('startup.no_surveys') }}</div>
+              @else
+                <div class="table-responsive">
+                  <table class="table table-sm mb-0 align-middle">
+                    <thead class="table-light">
+                      <tr>
+                        <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.survey_id') }}</th>
+                        <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.survey_title') }}
+                        </th>
+                        <th class="text-center text-nowrap"><i class="ti ti-flag me-1"></i>{{ __('startup.program_step') }}</th>
+                        <th class="text-center text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.date_completed') }}
+                        </th>
+                        <th class="text-center text-nowrap"><i class="ti ti-file me-1"></i>{{ __('startup.answers') }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @foreach ($surveys as $key => $s)
+                      <tr class="border-top">
+                        <td><span class="badge bg-label-{{ isset($badgeColors[$key]) ? $badgeColors[$key] : 'secondary' }}">{{ $s['survey_id'] }}</span></td>
+                        <td class="fw-medium">{{ $s['title'] }}</td>
+                        <td>{{ $s['program_step'] }}</td>
+                        <td>{{ $s['date_completed'] }}</td>
+                        <td class="text-center">
+                          @php
+                            $surveyId = str_replace('SV-', '', $s['survey_id']);    
+                          @endphp
+                          <a href="/dashboard/surveys/start/{{ $surveyId }}" class="btn btn-sm btn-primary">
+                            <i class="ti ti-eye me-1"></i>{{ __('admin.View') }}
+                          </a>
+                        </td>
+                      </tr>
+                      @endforeach
+                    </tbody>
+                  </table>
+                </div>
+              @endif
             @endif
           </div>
         </div>
@@ -1568,30 +1585,32 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
             <small class="text-muted">{{ __('startup.perks_note') }}</small>
           </div>
           <div class="card-body">
-            @if(empty($services[0]['name']))
-              <div class="col-12 text-center text-muted">{{ __('startup.no_services') }}</div>
-            @else
-              <div class="table-responsive">
-                <table class="table table-sm mb-0 align-middle">
-                  <thead class="table-light">
-                    <tr>
-                      <th class="text-center text-nowrap"><i class="ti ti-gift me-1"></i>{{ __('startup.service_name') }}</th>
-                      <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.service_id') }}</th>
-                      <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.description') }}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @foreach ($services as $key => $s)
-                    <tr class="border-top">
-                      <td class="fw-medium">{{ $s['name'] }}</td>
-                      <td><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary' }}">{{ $s['service_id'] }}</span></td>
-                      <td class="small">{{ $s['description'] }}</td>
-                    </tr>
-                    @endforeach
-                  </tbody>
-                </table>
-              </div>
+            @if($services->count() == 0)
+              @if(empty($services[0]['name']))
+                <div class="col-12 text-center text-muted">{{ __('startup.no_services') }}</div>
+              @else
+                <div class="table-responsive">
+                  <table class="table table-sm mb-0 align-middle">
+                    <thead class="table-light">
+                      <tr>
+                        <th class="text-center text-nowrap"><i class="ti ti-gift me-1"></i>{{ __('startup.service_name') }}</th>
+                        <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.service_id') }}</th>
+                        <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.description') }}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @foreach ($services as $key => $s)
+                      <tr class="border-top">
+                        <td class="fw-medium">{{ $s['name'] }}</td>
+                        <td><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary' }}">{{ $s['service_id'] }}</span></td>
+                        <td class="small">{{ $s['description'] }}</td>
+                      </tr>
+                      @endforeach
+                    </tbody>
+                  </table>
+                </div>
+              @endif
             @endif
           </div>
         </div>
@@ -1610,43 +1629,45 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
             </div>
           </div>
           <div class="card-body">
-            @if(empty($forms[0]['title']))
-              <div class="col-12 text-center text-muted">{{ __('startup.no_forms') }}</div>
-            @else
-              <div class="table-responsive">
-                <table class="table table-sm mb-0 align-middle">
-                  <thead class="table-light">
-                    <tr>
-                      <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.form_title') }}
-                      </th>
-                      <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.form_id') }}</th>
-                      <th class="text-center text-nowrap"><i class="ti ti-flag me-1"></i>{{ __('startup.custom_form_step') }}
-                      </th>
-                      <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.step_id') }}</th>
-                      <th class="text-center text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.submission_date') }}
-                      </th>
-                      <th class="text-center text-nowrap"><i class="ti ti-file me-1"></i>{{ __('startup.details') }}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @foreach ($forms as $key => $f)
-                    <tr class="border-top">
-                      <td class="fw-medium">{{ $f['title'] }}</td>
-                      <td><span class="badge bg-label-{{ isset($badgeColors[$key]) ? $badgeColors[$key] : 'secondary' }}">{{ $f['form_id'] }}</span></td>
-                      <td>{{ $f['step_name'] }}</td>
-                      <td>{{ $f['step_id'] }}</td>
-                      <td>{{ $f['submission_date'] }}</td>
-                      <td class="text-center">
-                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
-                          data-bs-target="#formDetailsModal-{{ $f['modal_id'] }}">
-                          <i class="ti ti-eye me-1"></i>{{ __('startup.view_inputs') }}
-                        </button>
-                      </td>
-                    </tr>
-                    @endforeach
-                  </tbody>
-                </table>
-              </div>
+            @if($forms->count() == 0)
+              @if(empty($forms[0]['title']))
+                <div class="col-12 text-center text-muted">{{ __('startup.no_forms') }}</div>
+              @else
+                <div class="table-responsive">
+                  <table class="table table-sm mb-0 align-middle">
+                    <thead class="table-light">
+                      <tr>
+                        <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.form_title') }}
+                        </th>
+                        <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.form_id') }}</th>
+                        <th class="text-center text-nowrap"><i class="ti ti-flag me-1"></i>{{ __('startup.custom_form_step') }}
+                        </th>
+                        <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.step_id') }}</th>
+                        <th class="text-center text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.submission_date') }}
+                        </th>
+                        <th class="text-center text-nowrap"><i class="ti ti-file me-1"></i>{{ __('startup.details') }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @foreach ($forms as $key => $f)
+                      <tr class="border-top">
+                        <td class="fw-medium">{{ $f['title'] }}</td>
+                        <td><span class="badge bg-label-{{ isset($badgeColors[$key]) ? $badgeColors[$key] : 'secondary' }}">{{ $f['form_id'] }}</span></td>
+                        <td>{{ $f['step_name'] }}</td>
+                        <td>{{ $f['step_id'] }}</td>
+                        <td>{{ $f['submission_date'] }}</td>
+                        <td class="text-center">
+                          <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#formDetailsModal-{{ $f['modal_id'] }}">
+                            <i class="ti ti-eye me-1"></i>{{ __('startup.view_inputs') }}
+                          </button>
+                        </td>
+                      </tr>
+                      @endforeach
+                    </tbody>
+                  </table>
+                </div>
+              @endif
             @endif
           </div>
         </div>
