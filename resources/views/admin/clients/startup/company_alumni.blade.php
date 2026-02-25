@@ -836,7 +836,9 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                   <i class="ti ti-users me-1"></i>{{ __('startup.count_label', ['value' => count($teamData['employees'])]) }}
                 </span>
               </div>
-              @if($teamData['employees']->count() > 0)
+              @if($teamData->count() == 0)
+                 <div class="col-12 text-center text-muted">{{ __('startup.no_team_data') }}</div>
+              @else
                 @if(empty($teamData['employees'][0]['name']))
                   <div class="col-12 text-center text-muted">{{ __('startup.no_employees') }}</div>
                 @else
