@@ -1349,56 +1349,60 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
             <small class="text-muted">{{ __('startup.planned_progress_note') }}</small>
           </div>
           <div class="card-body">
-            <div class="table-responsive">
-              <table class="table table-sm mb-0 align-middle">
-                <thead class="table-light">
-                  <tr>
-                    <th class="text-center text-nowrap"><i class="ti ti-flag me-1"></i>{{ __('startup.milestone_title_label')
-                      }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.description') }}
-                    </th>
-                    <th class="text-center text-nowrap"><i class="ti ti-calendar-due me-1"></i>{{ __('startup.due_date') }}
-                    </th>
-                    <th class="text-center text-nowrap"><i class="ti ti-progress me-1"></i>{{ __('startup.completion') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-paperclip me-1"></i>{{ __('startup.deliverables') }}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @foreach ($milestones as $m)
-                  <tr class="border-top">
-                    <td class="fw-medium">{{ $m['title'] }}</td>
-                    <td class="small">{{ $m['description'] }}</td>
-                    <td><span class="badge bg-label-info">{{ $m['due_date'] }}</span></td>
-                    <td class="w-25">
-                      <div class="d-flex align-items-center gap-2">
-                        <span class="fw-semibold">{{ $m['completion'] }}%</span>
-                        <div class="progress grow" style="height: 6px">
-                          <div class="progress-bar bg-success" role="progressbar" style="width: {{ $m['completion'] }}%">
+            @if (count($milestones) > 0)
+              <div class="table-responsive">
+                <table class="table table-sm mb-0 align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th class="text-center text-nowrap"><i class="ti ti-flag me-1"></i>{{ __('startup.milestone_title_label')
+                        }}</th>
+                      <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.description') }}
+                      </th>
+                      <th class="text-center text-nowrap"><i class="ti ti-calendar-due me-1"></i>{{ __('startup.due_date') }}
+                      </th>
+                      <th class="text-center text-nowrap"><i class="ti ti-progress me-1"></i>{{ __('startup.completion') }}</th>
+                      <th class="text-center text-nowrap"><i class="ti ti-paperclip me-1"></i>{{ __('startup.deliverables') }}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @foreach ($milestones as $m)
+                    <tr class="border-top">
+                      <td class="fw-medium">{{ $m['title'] }}</td>
+                      <td class="small">{{ $m['description'] }}</td>
+                      <td><span class="badge bg-label-info">{{ $m['due_date'] }}</span></td>
+                      <td class="w-25">
+                        <div class="d-flex align-items-center gap-2">
+                          <span class="fw-semibold">{{ $m['completion'] }}%</span>
+                          <div class="progress grow" style="height: 6px">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ $m['completion'] }}%">
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </td>
-                    <td>
-                      <ul class="list-unstyled mb-0 small">
-                        @if(!empty($m['deliverables']))
-                        @foreach ($m['deliverables'] as $d)
-                        <li>
-                          <a href="{{ $d['link'] }}" class="fw-medium text-primary">
-                            <i class="ti {{ $deliverableIcons[$d['type']] }} me-1"></i>{{ $d['name'] }}
-                          </a>
-                        </li>
-                        @endforeach
-                        @else
-                        <li class="text-muted">{{ __('startup.no_deliverables') }}</li>
-                        @endif
-                      </ul>
-                    </td>
-                  </tr>
-                  @endforeach
-                </tbody>
-              </table>
-            </div>
+                      </td>
+                      <td>
+                        <ul class="list-unstyled mb-0 small">
+                          @if(!empty($m['deliverables']))
+                          @foreach ($m['deliverables'] as $d)
+                          <li>
+                            <a href="{{ $d['link'] }}" class="fw-medium text-primary">
+                              <i class="ti {{ $deliverableIcons[$d['type']] }} me-1"></i>{{ $d['name'] }}
+                            </a>
+                          </li>
+                          @endforeach
+                          @else
+                          <li class="text-muted">{{ __('startup.no_deliverables') }}</li>
+                          @endif
+                        </ul>
+                      </td>
+                    </tr>
+                    @endforeach
+                  </tbody>
+                </table>
+              </div>
+            @else
+              <div class="col-12 text-center text-muted">{{ __('startup.no_milestones') }}</div>
+            @endif
           </div>
         </div>
       </div>

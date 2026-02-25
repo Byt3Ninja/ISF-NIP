@@ -3564,4 +3564,5 @@ return [
 	'service_message_email_greeting'             => 'عزيزي :recipient_name،',
 	'service_message_email_body'                 => 'لديك رسالة جديدة من :sender_name في :timestamp بخصوص :service_name.',
 	'service_message_view_cta'                   => 'عرض الرسالة',
+	'no_milestones' => 'لا توجد مراحل محددة بعد.',
 ];

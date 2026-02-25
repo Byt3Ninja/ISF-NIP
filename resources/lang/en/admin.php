@@ -3507,4 +3507,5 @@ return [
 	'service_message_email_greeting'             => 'Dear :recipient_name,',
 	'service_message_email_body'                 => 'You have a new message from :sender_name at :timestamp regarding :service_name.',
 	'service_message_view_cta'                   => 'View Message',
+	'no_milestones' => 'No milestones added yet.',
 ];
