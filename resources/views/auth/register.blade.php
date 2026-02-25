@@ -575,7 +575,6 @@ const personalDetailFields = personalDetailsWrapper ? personalDetailsWrapper.que
 
 // Update role-specific fields visibility
 function updateRoleFieldsVisibility(selectedRole) {
-  console.log('Selected role:', selectedRole);
   const config = ROLE_CONFIG[selectedRole];
   
   // Handle profile photo
@@ -641,18 +640,28 @@ document.addEventListener('DOMContentLoaded', function() {
   const urlParams = new URLSearchParams(window.location.search);
   const type = urlParams.get('type');
   const data = urlParams.get('data');
+  const hash = window.location.hash.toLowerCase().replace('#', '');
 
+  const founderRadio = document.getElementById('FounderRole');
   const mentorRadio = document.getElementById('MentorRole');
   const serviceProviderRadio = document.getElementById('Service ProviderRole');
 
-  if ((type === 'mentor' || data === '2520') && mentorRadio) {
+  // Check hash first (#mentor or #founder)
+  if (hash === 'mentor' && mentorRadio) {
+    mentorRadio.checked = true;
+    mentorRadio.dispatchEvent(new Event('change'));
+    updateRoleFieldsVisibility('Mentor');
+  } else if (hash === 'founder' && founderRadio) {
+    founderRadio.checked = true;
+    founderRadio.dispatchEvent(new Event('change'));
+    updateRoleFieldsVisibility('Founder');
+  } else if ((type === 'mentor' || data === '2520') && mentorRadio) {
     mentorRadio.checked = true;
     mentorRadio.dispatchEvent(new Event('change'));
   } else if ((type === 'service_provider' || data === '2522') && serviceProviderRadio) {
     serviceProviderRadio.checked = true;
     serviceProviderRadio.dispatchEvent(new Event('change'));
   } else {
-    console.log('here')
     // Manually trigger for the default case
     const checkedRole = document.querySelector('input[name="role"]:checked');
     if (checkedRole) {
