@@ -196,7 +196,13 @@ $(document).ready(function() {
   const formatTime = (minutes) => {
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
+    // Return 24-hour string for internal use (hidden inputs, calculations)
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  };
+
+  // Convert a 24-hour "HH:mm" string to 12-hour "hh:mm AM/PM" for display
+  const formatTime12 = (time24) => {
+    return moment(time24, "HH:mm").format("hh:mm A");
   };
 
   const formatDate = (dateStr) => {
@@ -283,8 +289,8 @@ $(document).ready(function() {
 
   // Update duration display
   const updateDurationDisplay = () => {
-    const startTime = $('#sessionStartTime').val();
-    const endTime = $('#sessionEndTime').val();
+    const startTime = $('#sessionStartTimeHidden').val();
+    const endTime = $('#sessionEndTimeHidden').val();
     
     if (startTime && endTime) {
       const duration = calcDuration(startTime, endTime);
@@ -393,7 +399,7 @@ $(document).ready(function() {
               <div class="flex-grow-1">
                 <div class="fw-semibold mb-1 d-flex align-items-center gap-2">
                   <i class="ti ti-clock ti-16px"></i>
-                  ${moment(slot.start_time, "HH:mm").format("hh:mm A")} - ${moment(slot.end_time, "HH:mm").format("hh:mm A")}
+                  ${formatTime12(slot.start_time)} - ${formatTime12(slot.end_time)}
                 </div>
                 <div class="d-flex align-items-center gap-2 small">
                   <i class="ti ti-hourglass-empty ti-16px"></i> ${duration} @lang('mentor.min')
@@ -443,9 +449,9 @@ $(document).ready(function() {
     updateDurationDisplay();
 
     $('#sessionStartTimeHidden').val(slot.start_time);
-    $('#sessionStartTime').text(moment(slot.start_time, "HH:mm").format("hh:mm A"));
+    $('#sessionStartTime').text(formatTime12(slot.start_time));
     $('#sessionEndTimeHidden').val(slot.end_time);
-    $('#sessionEndTime').text(moment(slot.end_time, "HH:mm").format("hh:mm A"));
+    $('#sessionEndTime').text(formatTime12(slot.end_time));
 
     $('#sessionDetails').show();
     $('#slotError').hide();
