@@ -49,6 +49,7 @@ return [
     'slot_added_success' => 'تم اضافة الفترة بنجاح',
     'slot_copied_success' => 'تم نسخ الفترة بنجاح',
     'slot_already_exists' => 'فترة التواجد هذه موجودة بالفعل',
+    'between' => 'بين :from و :to',
     'weekly_availability_slots' => 'فترات التواجد الأسبوعية',
     'add_availability' => 'إضافة تواجد',
     'calendar_view' => 'عرض التقويم',
