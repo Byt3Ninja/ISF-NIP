@@ -129,4 +129,5 @@ return [
     'please_select_session_times' => 'يرجى اختيار وقت الجلسة',
     'add_availability_slots' => 'إضافة فترات التواجد',
     'this_time_before_now' => 'هذا الوقت قبل الان',
+    'slots_merged' => 'تم اضافة الفترة تم دمجها',
 ];
