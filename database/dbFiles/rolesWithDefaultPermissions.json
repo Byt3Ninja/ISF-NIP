@@ -6516,6 +6516,15 @@
                 ]
             },
             {
+                "name": "trainings.set_public",
+                "description": "Set Training Course as Public",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
                 "name": "trainings.surveys_list",
                 "description": "List Training Surveys",
                 "guard_name": "web",

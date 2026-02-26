@@ -140,7 +140,7 @@ class quizzesController extends Controller
 			$organizations = $organizations->whereIn('id', $orgIds);
 		}
 		$organizations = $organizations->get();
-		$trainings = Training::get();
+		$trainings = Training::visibleToUser()->get();
 		return view('admin.quizzes.create', compact('organizations', 'trainings'));
 	}
 
@@ -202,7 +202,7 @@ class quizzesController extends Controller
 				$organizations = $organizations->whereIn('id', $orgIds);
 			}
 			$organizations = $organizations->get();
-			$trainings = Training::get();
+			$trainings = Training::visibleToUser()->get();
 			return view('admin.quizzes.edit', compact('quiz', 'organizations', 'trainings'));
 		}
 	}
