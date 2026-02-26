@@ -58,6 +58,7 @@
                 <th class="text-nowrap">{{ __('cycles.Created at') }}</th>
                 <th class="text-nowrap">{{ __('cycles.Added By') }}</th>
                 <th class="text-nowrap">{{ __('admin.quizStatus') }}</th>
+                <th class="text-nowrap">{{ $l == 'ar' ? 'النطاق' : 'Scope' }}</th>
                 <th class="text-nowrap">{{ __('cycles.Tags') }}</th>
                 <th class="text-nowrap">{{ $l == 'ar' ? 'الفئات' : 'Categories' }}</th>
                 <th class="text-nowrap">{{ __('admin.CountProgram') }}</th>
@@ -86,6 +87,15 @@
                       <span class="badge bg-label-warning">{{ __('admin.Draft') }}</span>
                     @else
                       <span class="badge bg-label-success">{{ __('admin.Published') }}</span>
+                    @endif
+                  </td>
+                  <td>
+                    @if($course->is_public)
+                      <span class="badge bg-label-success">{{ $l == 'ar' ? 'عام' : 'Public' }}</span>
+                    @elseif($course->organization)
+                      <span class="badge bg-label-primary">{{ $course->organization->{"name_{$l}"} }}</span>
+                    @else
+                      <span class="badge bg-label-secondary">{{ $l == 'ar' ? 'غير مخصص' : 'Unassigned' }}</span>
                     @endif
                   </td>
                   <td>
@@ -180,7 +190,7 @@
                 </tr>
               @empty
                 <tr>
-                  <td colspan="9" class="text-center py-5">
+                  <td colspan="10" class="text-center py-5">
                     <i class="ti ti-file-off ti-lg text-muted d-block mb-2"></i>
                     <p class="text-muted mb-0">{{ $l == 'en' ? 'No courses found.' : 'لا توجد دورات.' }}</p>
                   </td>
@@ -279,25 +289,29 @@
             className: 'btn btn-label-success d-none',
             title: '{{ $l == "en" ? "Courses List" : "قائمة الدورات" }}',
             exportOptions: {
-              columns: [0, 1, 2, 3, 4, 5, 6, 7],
+              columns: [0, 1, 2, 3, 4, 5, 6, 7, 8],
               format: {
                 body: function(data, row, column, node) {
                   // Handle status column
                   if (column === 4) {
                     return $(node).attr('data-status') === 'draft' ? '{{ __("admin.Draft") }}' : '{{ __("admin.Published") }}';
                   }
-                  // Handle tags column
+                  // Handle scope column
                   if (column === 5) {
+                    return $(node).find('.badge').text().trim() || '-';
+                  }
+                  // Handle tags column
+                  if (column === 6) {
                     const exportData = $(node).find('[data-export]').attr('data-export');
                     return exportData || '-';
                   }
                   // Handle categories column
-                  if (column === 6) {
+                  if (column === 7) {
                     const categories = $(node).find('[data-categories]').attr('data-categories');
                     return categories || '-';
                   }
                   // Handle content count column
-                  if (column === 7) {
+                  if (column === 8) {
                     return $(node).find('.badge').text();
                   }
                   // Strip HTML for other columns
@@ -312,21 +326,24 @@
             className: 'btn btn-label-info d-none',
             title: '{{ $l == "en" ? "Courses List" : "قائمة الدورات" }}',
             exportOptions: {
-              columns: [0, 1, 2, 3, 4, 5, 6, 7],
+              columns: [0, 1, 2, 3, 4, 5, 6, 7, 8],
               format: {
                 body: function(data, row, column, node) {
                   if (column === 4) {
                     return $(node).attr('data-status') === 'draft' ? '{{ __("admin.Draft") }}' : '{{ __("admin.Published") }}';
                   }
                   if (column === 5) {
+                    return $(node).find('.badge').text().trim() || '-';
+                  }
+                  if (column === 6) {
                     const exportData = $(node).find('[data-export]').attr('data-export');
                     return exportData || '-';
                   }
-                  if (column === 6) {
+                  if (column === 7) {
                     const categories = $(node).attr('data-categories');
                     return categories || '-';
                   }
-                  if (column === 7) {
+                  if (column === 8) {
                     return $(node).find('.badge').text();
                   }
                   return $('<div>').html(data).text().trim();
@@ -336,7 +353,7 @@
           },
         ],
         columnDefs: [
-          { orderable: false, targets: [5, 6, 8] }
+          { orderable: false, targets: [5, 6, 7, 9] }
         ],
         @if ($l === 'ar')
         language: {
@@ -354,7 +371,7 @@
             .insertAfter('.dataTables_length label')
             .on('change', function() {
               const value = $(this).val();
-              coursesTable.column(6).search(value).draw();
+              coursesTable.column(7).search(value).draw();
             });
 
           // Create and insert Status Filter

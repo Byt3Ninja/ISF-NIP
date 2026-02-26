@@ -208,7 +208,7 @@ class TrainingController extends Controller
 	public function all(Request $request, $id = 0)
 	{
 		try {
-			$courses = Training::orderBy('created_at', 'DESC');
+			$courses = Training::visibleToUser()->with('organization')->orderBy('created_at', 'DESC');
 			if( $request->catTr_id )
 			{
 				$courses = $courses->whereHas('categories', function ($query) use ($request) {
@@ -233,13 +233,40 @@ class TrainingController extends Controller
 
 	public function edit($id)
 	{
-		$courses = Training::findOrFail($id);
+		$courses = Training::visibleToUser()->findOrFail($id);
 		return response()->json($courses);
 	}
 
 	public function store(Request $request)
 	{
 		try {
+			$user = Auth::user();
+
+			// Determine organization_id
+			$organizationId = null;
+			if ($user->ableTo('trainings.set_public')) {
+				$organizationId = $request->organization_id ?: null;
+			} elseif ($user->organization_id) {
+				$organizationId = $user->organization_id;
+			} elseif (!empty($user->organizations_ids)) {
+				$organizationId = $user->organizations_ids[0];
+			}
+
+			// Determine is_public (only users with permission can set it)
+			$isPublic = false;
+			if ($user->ableTo('trainings.set_public')) {
+				$isPublic = $request->has('is_public') ? true : false;
+			}
+
+			// On update: non-privileged users cannot change organization_id
+			if ($request->id) {
+				$existing = Training::find($request->id);
+				if ($existing && !$user->ableTo('trainings.set_public')) {
+					$organizationId = $existing->organization_id;
+					$isPublic = $existing->is_public;
+				}
+			}
+
 			if ($request->hasFile('image')) {
 				$img_url = $request->file('image');
 				$img_url = $img_url->store('training', ['disk' => 'public_uploads']);
@@ -260,7 +287,9 @@ class TrainingController extends Controller
 						'end_date' => $request->end_date,
 						'Status' => $request->Status,
 						'user_id' => Auth::id(),
-						'image' => $img_url
+						'image' => $img_url,
+						'organization_id' => $organizationId,
+						'is_public' => $isPublic,
 					]
 				);
 
@@ -305,8 +334,9 @@ class TrainingController extends Controller
 						'CoursLevel' => $request->CoursLevel,
 						'Quizs' => $request->Quizs,
 						'Status' => $request->Status,
-						'user_id' => Auth::id()
-
+						'user_id' => Auth::id(),
+						'organization_id' => $organizationId,
+						'is_public' => $isPublic,
 					]
 				);
 				$expertises = [];
@@ -356,7 +386,11 @@ class TrainingController extends Controller
 	{
 		try {
 			if ($request) {
-				Training::where('id', $id)->delete();
+				$training = Training::visibleToUser()->where('id', $id)->first();
+				if (!$training) {
+					return response()->json(['state' => 'forbidden'], 403);
+				}
+				$training->delete();
 				TrainingContent::where('training_id', $id)->delete();
 				DB::table('tag_training')->where('training_id', $id)->delete();
 				DB::table('categories_training')->where('training_id', $id)->delete();
@@ -620,7 +654,7 @@ class TrainingController extends Controller
 
 			$cycles = TrainingSession::with('step.cycle')->get()->pluck('step.cycle')->unique('id');
 			
-			$online = Training::get();
+			$online = Training::visibleToUser()->get();
 			// if ($request->type != 0) {
 			// 	$sessions = $sessions->where('type', $request->type);
 			// }
@@ -1299,7 +1333,7 @@ class TrainingController extends Controller
 	public function create($id = 0)
 	{
 		try {
-			$courses = Training::orderBy('created_at', 'DESC')->get();
+			$courses = Training::visibleToUser()->orderBy('created_at', 'DESC')->get();
 			if ($id == 0 && count($courses)) {
 				$id = $courses->pluck('id')[0];
 			}
@@ -1317,7 +1351,10 @@ class TrainingController extends Controller
 			// 	$query->where('name', 'Mentor');
 			// })->get();
 
-			return view('admin/settings/training/newCours', compact('randomNumber', 'Tags', 'expertises', 'client', 'Quizzes'));
+			$user = Auth::user();
+			$organizations = $user->ableTo('trainings.set_public') ? \App\Organization::all() : collect();
+
+			return view('admin/settings/training/newCours', compact('randomNumber', 'Tags', 'expertises', 'client', 'Quizzes', 'organizations'));
 		} catch (\Throwable $e) {
 			Log::error('Error in TrainingController@create: ' . $e->getMessage());
 		}
@@ -1326,9 +1363,9 @@ class TrainingController extends Controller
 	public function editTR($id)
 	{
 		try {
-			$course = Training::where('id', $id)->orderBy('created_at', 'DESC')->first();
-			if ($id == 0 && count($course)) {
-				$id = $course->pluck('id')[0];
+			$course = Training::visibleToUser()->where('id', $id)->orderBy('created_at', 'DESC')->first();
+			if (!$course) {
+				abort(403);
 			}
 			$contents = TrainingContent::where('training_id', $id)->orderBy('arr', 'ASC')->get();
 
@@ -1341,7 +1378,11 @@ class TrainingController extends Controller
 			$training = Training::find($id);
 
 			$tags = $training->tags;
-			return view('admin/settings/training/editCours', compact('course', 'id', 'contents', 'expertises', 'Quizzes', 'instructors', 'tags'));
+
+			$user = auth()->user();
+			$organizations = $user->ableTo('trainings.set_public') ? \App\Organization::all() : collect();
+
+			return view('admin/settings/training/editCours', compact('course', 'id', 'contents', 'expertises', 'Quizzes', 'instructors', 'tags', 'organizations'));
 		} catch (\Throwable $e) {
 			Log::error('Error in TrainingController@editTR: ' . $e->getMessage());
 		}
@@ -1350,9 +1391,9 @@ class TrainingController extends Controller
 	public function showCourse($id)
 	{
 		try {
-			$course = Training::where('id', $id)->orderBy('created_at', 'DESC')->first();
-			if ($id == 0 && count($course)) {
-				$id = $course->pluck('id')[0];
+			$course = Training::visibleToUser()->where('id', $id)->orderBy('created_at', 'DESC')->first();
+			if (!$course) {
+				abort(403);
 			}
 			$contents = TrainingContent::where('training_id', $id)->orderBy('arr', 'ASC')->get();
 
@@ -1442,7 +1483,7 @@ class TrainingController extends Controller
 				});
 			})->where('stype', 4)->get();
 			$sessions = TrainingSession::with('reports')->orderBy('datetime', 'ASC');
-			$online = Training::get();
+			$online = Training::visibleToUser()->get();
 			if ($request->type != 0) {
 				$sessions = $sessions->where('type', $request->type);
 			}
