@@ -387,7 +387,7 @@
                     </div>
 
                     <!-- Second Row for Sort -->
-                    {{-- <div class="row g-3 mt-2">
+                    <div class="row g-3 mt-2">
                       <!-- Sort Options -->
                       <div class="col-lg-3 col-md-6">
                         <label class="form-label fw-semibold mb-2 text-dark">
@@ -399,9 +399,11 @@
                           <option value="name-desc">{{ __('cycles.Name Z-A') }}</option>
                           <option value="score-desc">{{ __('cycles.Score High-Low') }}</option>
                           <option value="score-asc">{{ __('cycles.Score Low-High') }}</option>
+                          <option value="approval-desc">{{ __('cycles.Approval % High-Low') }}</option>
+                          <option value="approval-asc">{{ __('cycles.Approval % Low-High') }}</option>
                         </select>
                       </div>
-                    </div> --}}
+                    </div>
 
                     <!-- Filter Actions -->
                     <div class="filter-actions mt-3 d-flex flex-wrap gap-2 align-items-center">
@@ -450,7 +452,16 @@
                             } else { $companyApprovals[] = 'pending'; }
                           }
                         }
-                        $companyApprovals = collect($companyApprovals)->unique()->values();
+                        // Approval statistics
+                        $approvalStatsCollection = collect($companyApprovals);
+                        $totalJudges = $approvalStatsCollection->count();
+                        $approvedCount = $approvalStatsCollection->filter(fn($a) => $a === 'approved')->count();
+                        $disapprovedCount = $approvalStatsCollection->filter(fn($a) => $a === 'disapproved')->count();
+                        $totalDecisions = $approvalStatsCollection->filter(fn($a) => $a !== 'pending')->count();
+                        $approvalPct = $totalDecisions > 0 ? round(($approvedCount / $totalDecisions) * 100) : 0;
+                        $disapprovalPct = $totalDecisions > 0 ? round(($disapprovedCount / $totalDecisions) * 100) : 0;
+
+                        $companyApprovals = $approvalStatsCollection->unique()->values();
                         $companyApprovalStatus = $companyApprovals->count() > 1 ? 'mixed' : $companyApprovals->first();
                         $approvalIcon = $statusIcons[$companyApprovalStatus] ?? 'question-circle text-muted';
 
@@ -529,7 +540,8 @@
                            data-score="{{ $filterScore }}"
                            data-status="{{ $primaryStatus }}"
                            data-evaluation-statuses="{{ implode(',', $evaluationStatuses) }}"
-                           data-judge-ids="{{ implode(',', $companyJudgeIds) }}">
+                           data-judge-ids="{{ implode(',', $companyJudgeIds) }}"
+                           data-approval-pct="{{ $approvalPct }}">
                         <div class="card border rounded-3 h-100">
                           <!-- Company Header -->
                           <div class="card-header bg-transparent border-0 pb-2">
@@ -626,8 +638,25 @@
                                     <small class="text-muted">{{ $company->resolveUser()?->title ?: __('cycles.No title') }}</small>
                                   @if( $_user->ableTo('users.edit', $permissions) ) </a> @endif
                                 </div>
-                                <div class="flex-grow-1 text-end">
-                                  <i title="{{ ucFirst( $companyApprovalStatus ) }}" class="ti ti-{{ $approvalIcon }} ti-sm"></i> 
+                              </div>
+                            </div>
+
+                            <!-- Approval Statistics -->
+                            <div class="approval-stats d-flex align-items-center gap-2 mb-4 px-1">
+                              <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                  <small class="fw-semibold text-success"><i class="ti ti-circle-check me-1"></i>{{ __('cycles.Approved') }}</small>
+                                  <small class="fw-bold text-success">{{ $approvedCount }}/{{ $totalJudges }} ({{ $approvalPct }}%)</small>
+                                </div>
+                                <div class="progress mb-2" style="height: 6px;">
+                                  <div class="progress-bar bg-success" style="width: {{ $approvalPct }}%"></div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                  <small class="fw-semibold text-danger"><i class="ti ti-circle-x me-1"></i>{{ __('cycles.Disapproved') }}</small>
+                                  <small class="fw-bold text-danger">{{ $disapprovedCount }}/{{ $totalJudges }} ({{ $disapprovalPct }}%)</small>
+                                </div>
+                                <div class="progress" style="height: 6px;">
+                                  <div class="progress-bar bg-danger" style="width: {{ $disapprovalPct }}%"></div>
                                 </div>
                               </div>
                             </div>
@@ -955,6 +984,10 @@
               return (parseFloat($cardB.data('score')) || 0) - (parseFloat($cardA.data('score')) || 0);
             case 'score-asc':
               return (parseFloat($cardA.data('score')) || 0) - (parseFloat($cardB.data('score')) || 0);
+            case 'approval-desc':
+              return (parseFloat($cardB.data('approval-pct')) || 0) - (parseFloat($cardA.data('approval-pct')) || 0);
+            case 'approval-asc':
+              return (parseFloat($cardA.data('approval-pct')) || 0) - (parseFloat($cardB.data('approval-pct')) || 0);
             default:
               return 0;
           }

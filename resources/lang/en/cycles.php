@@ -424,6 +424,8 @@ return [
     'Name Z-A' => 'Name Z-A',
     'Score High-Low' => 'Score High-Low',
     'Score Low-High' => 'Score Low-High',
+    'Approval % High-Low' => 'Approval % High-Low',
+    'Approval % Low-High' => 'Approval % Low-High',
     'Sort By' => 'Sort By',
     'Evaluation Status' => 'Evaluation Status',
     'Score Range' => 'Score Range',
