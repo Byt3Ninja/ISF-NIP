@@ -350,23 +350,21 @@ class SlotController extends Controller
 
 				// Check if duplicate exists
 				$getschedule = $query->orderBy('created_at', 'desc')->first();
-// dd($getschedule);
 				if ($getschedule != null) {
 					// If existing slot hasn't started yet (dfrom in future), replace it
 					if ($getschedule->dfrom && $getschedule->dfrom > now()) {
-						// dd($getschedule->dfrom, now());
 						return response()->json([
 								'success' => false,
-								'message' => __('mentor.slot_already_exists'),
+								// message includes between time and date of existing slot for better UX
+								'message' => __('mentor.slot_already_exists') . ' ' . __('mentor.between', ['from' => $getschedule->tfrom, 'to' => $getschedule->tto]),
 						], 422);
 						// $getschedule->delete();
 					} elseif ($getschedule->tfrom == $validated['tfrom'].':00' && $validated['tto'] >= $getschedule->tto) {
-						// dd($getschedule->tfrom, $validated['tfrom'].':00', $validated['tto'], $getschedule->tto);
 						$getschedule->delete();
 					} else {
 						return response()->json([
 								'success' => false,
-								'message' => __('mentor.slot_already_exists'),
+								'message' => __('mentor.slot_already_exists') . ' ' . __('mentor.between', ['from' => $getschedule->tfrom, 'to' => $getschedule->tto]),
 						], 422);
 					}
 				}
@@ -385,7 +383,7 @@ class SlotController extends Controller
 						if (in_array($dayName, $weekdays)) {
 							return response()->json([
 								'success' => false,
-								'message' => __('mentor.slot_already_exists'),
+								'message' => __('mentor.slot_already_exists') . ' ' . __('mentor.between', ['from' => $weekly->tfrom, 'to' => $weekly->tto]),
 							], 422);
 						}
 					}
