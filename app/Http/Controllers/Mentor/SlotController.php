@@ -168,7 +168,7 @@ class SlotController extends Controller
 										});
 									}
 								})
-								->orWhere('date', '>', date('Y-m-d'))
+								//->orWhere('date', '>=', date('Y-m-d'))
 								->orWhere(function ($q) {
 									$q->where('date', date('Y-m-d'))
 									->where('tto', '>', date('H:i:s'));
