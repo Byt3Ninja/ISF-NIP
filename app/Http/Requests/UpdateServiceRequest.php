@@ -39,7 +39,7 @@ class UpdateServiceRequest extends FormRequest
                 Rule::unique('services', 'vendor_email')->ignore($this->route('service')),
             ],
             'vendor_phone' => 'nullable|string|max:11',
-            'organization_ids' => 'nullable|array',
+            'organization_ids' => 'required|array',
             'organization_ids.*' => 'exists:organizations,id',
         ];
         if( auth()->check() )
