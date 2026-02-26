@@ -129,4 +129,5 @@ return [
     'please_select_session_times' => 'Please select session times',
     'add_availability_slots' => 'Add Availability Slots',
     'this_time_before_now' => 'This time is before now',
+    'slots_merged' => 'Slot created successfully and Merged',
 ];
