@@ -22,6 +22,7 @@ class AssessmentController extends Controller
      */
     public function index(Request $request)
     {
+        $_user = Auth::user();
         $assessments = Assessment::with('user');
 
         // فلترة حسب startup_id
@@ -48,7 +49,21 @@ class AssessmentController extends Controller
     // الحصول على النتائج بعد التصفية
     $assessments = $assessments->get();
 
-        $users = User::role('Registered')->get();
+        $users = User::role('Registered');
+        if( $_user->hasRole('organizationManager') )
+        {
+            $OrgIds = $_user->organizations_ids;
+            $users = $users->whereHas('company.cycledata', function ($q) use ($OrgIds) {
+                $q->where('organization_id', $OrgIds);
+            });
+        }elseif( $_user->hasRole('subadmin') )
+        {
+            $OrgIds = $_user->organizations_ids;
+            $users = $users->whereHas('company.cycledata', function ($q) use ($OrgIds) {
+                $q->whereIn('organization_id', $OrgIds);
+            });
+        }
+            $users = $users->get();
         return view('admin.Assessment.assessment', compact('assessments', 'users'));
     }
 
