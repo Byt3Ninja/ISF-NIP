@@ -47,21 +47,21 @@ $menuItems = [
         'icon' => 'ti-building me-3',
         'route' => 'company.profile_view_mine',
         'permission' => ['company.profile_view', 'assessments.results_analysis_view', 'swot.view'],
-        'isVisible' => $_user->HaveCompany == 1 && !$_user->company,
+        'isVisible' => ( $_user->HaveCompany == 1 && !$_user->company ) || $_user->ableTo('swot.view', $permissions),
         'subItems' => [
             [
                 'label' => $l == 'en' ? 'Analysis & Assessment' : 'التحليل والتقييم',
                 'icon' => 'ti ti-report-analytics',
                 'route' => '/dashboard/analysis-assessment',
                 'permission' => 'assessments.results_analysis_view',
-                'isVisible' => $_setting->assessment == 1
+                'isVisible' => $_setting->assessment == 1 || $_user->ableTo('assessments.results_analysis_view', $permissions)
             ],
             [
                 'label' => $l == 'en' ? 'SWOT Analysis' : 'تحليل SWOT',
                 'icon' => 'ti ti-target-arrow',
                 'route' => 'swot.view',
                 'permission' => 'swot.view',
-                'isVisible' => "in_array(env('APP_ENV', 'local'), ['dev', 'local'])"
+                'isVisible' => $_user->ableTo('swot.view', $permissions)
             ]
         ]
     ],
@@ -88,6 +88,13 @@ $menuItems = [
                 'permission' => 'assessments.results_analysis_view',
                 'isVisible' => $_setting->assessment == 1
             ],
+            [
+                'label' => $l == 'en' ? 'SWOT Analysis' : 'تحليل SWOT',
+                'icon' => 'ti ti-target-arrow',
+                'route' => 'swot.view',
+                'permission' => 'swot.view',
+                'isVisible' => $_user->ableTo('swot.view', $permissions)
+            ]
         ]
     ],
 
@@ -127,6 +134,16 @@ $menuItems = [
         'icon' => 'ti ti-users ti-md me-2 me-lg-4 ti-lg',
         'route' => '/dashboard/mentors',
         'permission' => 'mentors.list',
+        'isVisible' => $_user->hasAnyRole("Registered|Mentor|organizationManager"),
+        'subItems' => []
+    ],
+
+    // Tasks
+    [
+        'label' => $l == 'en' ? 'Tasks' : 'المهام',
+        'icon' => 'ti ti-layout-kanban ti-md me-2 me-lg-4 ti-lg',
+        'route' => '/dashboard/mentor/mentorshipSessions',
+        'permission' => true,
         'isVisible' => $_user->hasAnyRole("Registered|Mentor|organizationManager"),
         'subItems' => []
     ],
@@ -189,6 +206,16 @@ $menuItems = [
         'subItems' => []
     ],
 
+
+    // Surveys (for Mentors)
+    [
+        'label' => __('admin.Surveys'),
+        'icon' => 'ti ti-notes ti-md me-2 me-lg-4 ti-lg',
+        'route' => '/dashboard/mentor/surveys',
+        'permission' => null,
+        'isVisible' => $_user->hasRole("Mentor"),
+        'subItems' => []
+    ],
     // Hackathon
     [
         'label' => $l == 'en' ? 'Hackathon' : 'هاكاثون',
