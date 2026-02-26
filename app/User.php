@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Settings;
 use Illuminate\Support\Str;
 use App\Http\Middleware\Permissions;
 use App\Traits\Auditable;
@@ -60,20 +61,38 @@ class User extends Authenticatable implements MustVerifyEmail
 	}
     public function sendEmailVerificationNotification()
     {
-        if( !in_array(env('APP_ENV', 'local'), ['local']) )
+        $skip_validation = false;
+        $app_settings = Settings::find(1);
+        if( !empty( $app_settings ) )
         {
-            try {
-                $this->notify(new Notifications\VerifyEmailQueued($this->first_name_en.' ' .$this->last_name_en));
-            } catch (\Throwable $th) {
-                // throw $th;
-            }
+            $VFEmail = $app_settings?->VFEmail ?? 1;
+            if( intval( $VFEmail ) != 1 ) { $skip_validation = true; }
         }
-        else
+        if( $skip_validation == true )
         {
             if( empty( $this->email_verified_at ) )
             {
                 $this->email_verified_at = now();
                 $this->save();
+            }
+        }
+        else
+        {
+            if( !in_array(env('APP_ENV', 'local'), ['local']) )
+            {
+                try {
+                    $this->notify(new Notifications\VerifyEmailQueued($this->first_name_en.' ' .$this->last_name_en));
+                } catch (\Throwable $th) {
+                    // throw $th;
+                }
+            }
+            else
+            {
+                if( empty( $this->email_verified_at ) )
+                {
+                    $this->email_verified_at = now();
+                    $this->save();
+                }
             }
         }
 	}
