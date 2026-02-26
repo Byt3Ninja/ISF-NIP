@@ -252,12 +252,13 @@
                         @endif
                         <!-- Mark Alumni Button -->
                         @php
-                         $goAlumni = \App\Step::where('id', $company->step)->where('stype', '5')->first();   
+                         $goAlumni = \App\Step::where('cycle_id', $company->cycle)->where('stype', '!=', '7')->orderBy('arr', 'desc')->first();   
                         @endphp
+                        {{-- @dd($goAlumni, $company->step, $goAlumni->id); --}}
                         <button type="button" class="btn btn-sm {{ $company->isAlumni ? 'btn-secondary' : 'btn-primary' }} text-nowrap mark-alumni-btn"
                           data-company-id="{{ $company->id }}"
                           data-company-name="{{ $company->{'name_' . $l} }}"
-                          {{ $company->isAlumni ? 'disabled' : '' }} @if(!$goAlumni || $company->step != $goAlumni->id) disabled @endif>
+                          {{ $company->isAlumni ? 'disabled' : '' }} @if($company->step != $goAlumni?->id) disabled @endif>
                           <i class="ti ti-pennant ti-16px me-1"></i>
                           <span>{{ $company->isAlumni ? __('startup.already_alumni') : __('startup.mark_alumni') }}</span>
                         </button>

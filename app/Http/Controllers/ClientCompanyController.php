@@ -3430,12 +3430,7 @@ class ClientCompanyController extends Controller
             $company_relations = CompanyRelation::where('company_id', $id)->where('user_id', $company?->user?->id)->get();
             $step = Step::where('id', $company->step)->first();
            
-            if($step?->stype != 5){
-                return response()->json([
-                    'success' => false,
-                    'message' => __('startup.The selected startups have not passed the final screening yet')
-                ], 422);
-            }
+            
             $almuni = new Almuni();
             $almuni->user_id = $company?->user?->id;
             $almuni->cycle_id = $company->cycle;
