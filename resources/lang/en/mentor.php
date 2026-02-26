@@ -49,6 +49,7 @@ return [
     'slot_added_success' => 'Slot Added Successfully',
     'slot_copied_success' => 'Slot Copied Successfully',
     'slot_already_exists' => 'This availability slot already exists',
+    'between' => 'between :from and :to',
     'weekly_availability_slots' => 'Weekly Availability Slots',
     'add_availability' => 'Add Availability',
     'calendar_view' => 'Calendar View',
