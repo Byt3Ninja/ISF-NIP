@@ -104,12 +104,12 @@
                         <div class="row mb-2">
                           <div class="col-md-4 mb-3">
                             <label class="form-label">{{ __('mentor.start_time') }}</label>
-                            <input type="text" id="slot-start-time" class="form-control bg-white border" placeholder="09:00">
+                            <input type="text" id="slot-start-time" class="form-control bg-white border" placeholder="09:00 AM">
                           </div>
 
                           <div class="col-md-4 mb-3">
                             <label class="form-label">{{ __('mentor.end_time') }}</label>
-                            <input type="text" id="slot-end-time" class="form-control bg-white border" placeholder="17:00">
+                            <input type="text" id="slot-end-time" class="form-control bg-white border" placeholder="05:00 PM">
                           </div>
 
                           <div class="col-md-4 mb-3">
@@ -164,11 +164,11 @@
                         </div>
                         <div class="col-md-6 col-lg-3 mb-3">
                           <label class="form-label">{{ __('mentor.start_time') }}</label>
-                          <input type="text" id="list-view-start-time" class="form-control" placeholder="09:00">
+                          <input type="text" id="list-view-start-time" class="form-control" placeholder="09:00 AM">
                         </div>
                         <div class="col-md-6 col-lg-3 mb-3">
                           <label class="form-label">{{ __('mentor.end_time') }}</label>
-                          <input type="text" id="list-view-end-time" class="form-control" placeholder="17:00">
+                          <input type="text" id="list-view-end-time" class="form-control" placeholder="05:00 PM">
                         </div>
                         <div class="col-md-6 col-lg-2 mb-3">
                           <label class="form-label">{{ __('mentor.session_type') }}</label>
@@ -220,6 +220,25 @@
 
   // Translation data
   const translations = {!! json_encode(__('mentor')) !!};
+
+  // ─── 12-hour time helper ───────────────────────────────────────────────────
+  /**
+   * Convert a "HH:mm" (24-hour) string to "h:mm AM/PM" (12-hour) string.
+   * Returns the original value unchanged if it cannot be parsed.
+   */
+  function to12Hour(time) {
+      if (!time) return time;
+      const parts = time.split(':');
+      if (parts.length < 2) return time;
+      let hours = parseInt(parts[0], 10);
+      const minutes = parts[1];
+      if (isNaN(hours)) return time;
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      if (hours === 0) hours = 12;
+      return `${hours}:${minutes} ${ampm}`;
+  }
+  // ──────────────────────────────────────────────────────────────────────────
 
   // Global variables
     let calendarInstance;
@@ -319,7 +338,6 @@
           })
             .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok'))
             .then(result => {
-              // console.log('Fetched slots:', result?.data ? result.data : []);
                 processSlots(result?.data ? result.data : []);
                 updateCalendarStyles();
                 initializeMainCalendar(); // Initialize the main calendar here
@@ -330,17 +348,19 @@
             });
 
         // Initialize time pickers after DOM is ready
+        // Flatpickr stores/returns values in 24-hour format internally for reliable
+        // validation and API submission; to12Hour() is used only for display.
         startTimePicker = flatpickr("#slot-start-time", {
             enableTime: true,
             noCalendar: true,
             dateFormat: "H:i",
-            time_24hr: true,
+            time_24hr: false,
         });
         endTimePicker = flatpickr("#slot-end-time", {
             enableTime: true,
             noCalendar: true,
             dateFormat: "H:i",
-            time_24hr: true,
+            time_24hr: false,
         });
 
         // Initialize session type select
@@ -389,7 +409,7 @@
         for (const weekday in availabilityData.weekly) {
             availabilityData.weekly[weekday].forEach(slot => {
                 const event = {
-                    title: `${slot.start} - ${slot.end} (${slot.sessionType})`,
+                    title: `${to12Hour(slot.start)} - ${to12Hour(slot.end)} (${slot.sessionType})`,
                     daysOfWeek: [moment().day(weekday).weekday()], // Convert weekday name to 0-6 index
                     startTime: slot.start,
                     endTime: slot.end,
@@ -412,7 +432,7 @@
         for (const date in availabilityData.specific) {
             availabilityData.specific[date].forEach(slot => {
                 events.push({
-                    title: `${slot.start} - ${slot.end} (${slot.sessionType})`,
+                    title: `${to12Hour(slot.start)} - ${to12Hour(slot.end)} (${slot.sessionType})`,
                     start: date + 'T' + slot.start,
                     end: date + 'T' + slot.end,
                     allDay: false,
@@ -489,7 +509,6 @@
                 // Create popover on the clicked event element
                 const popover = new bootstrap.Popover(arg.el, {
                     html: true,
-                    // title: `<small style="margin-bottom: 1rem;">{{ __("mentor.slot_details") }}</small>`,
                     content: popoverContent,
                     sanitize: false,
                     container: 'body',
@@ -610,7 +629,7 @@
         // Show SweetAlert confirmation before deletion
         Swal.fire({
             title: "{{__('mentor.delete_slot_confirm')}}",
-				    text: "{{__('admin.Recover')}}",
+			    text: "{{__('admin.Recover')}}",
             icon: 'warning',
            	showCancelButton: true,
             confirmButtonText: "{{ __('admin.DYes') }}",
@@ -787,11 +806,11 @@
               </div>
               <div class="col-md-6 col-lg-3 mb-3">
                 <label class="form-label">{{ __('mentor.start_time') }}</label>
-                <input type="text" id="list-view-start-time" class="form-control" placeholder="09:00">
+                <input type="text" id="list-view-start-time" class="form-control" placeholder="09:00 AM">
               </div>
               <div class="col-md-6 col-lg-3 mb-3">
                 <label class="form-label">{{ __('mentor.end_time') }}</label>
-                <input type="text" id="list-view-end-time" class="form-control" placeholder="17:00">
+                <input type="text" id="list-view-end-time" class="form-control" placeholder="05:00 PM">
               </div>
               <div class="col-md-6 col-lg-2 mb-3">
                 <label class="form-label">{{ __('mentor.session_type') }}</label>
@@ -827,7 +846,7 @@
             return `
                 <div class="${bgColor} border rounded p-3 mb-2 d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="fw-bold text-dark mb-1">${slot.start} - ${slot.end}</div>
+                        <div class="fw-bold text-dark mb-1">${to12Hour(slot.start)} - ${to12Hour(slot.end)}</div>
                         <div class="small text-muted">${slot.duration} {{ __('mentor.min') }} • ${translations[slot.sessionType.toLowerCase()]}${repeatsText}</div>
                     </div>
                     <button type="button" class="btn btn-label-danger btn-sm btn-icon delete-slot" data-type="${type}" data-key="${key}" data-index="${index}" data-id="${slot.id}">
@@ -910,7 +929,7 @@
                     <div class="${bgColor} border rounded p-3 mb-2 d-flex justify-content-between align-items-center" data-type="${slot.type}" data-key="${slot.key}" data-index="${originalIndex}" data-id="${slot.id}">
                         <div class="slot-details">
                             <div class="fw-bold text-dark mb-1">
-                                <span class="slot-start">${slot.start}</span> - <span class="slot-end">${slot.end}</span>
+                                <span class="slot-start">${to12Hour(slot.start)}</span> - <span class="slot-end">${to12Hour(slot.end)}</span>
                             </div>
                         <div class="small text-muted">
                             ${slot.duration} {{ __('mentor.min') }} • <span class="slot-session-type">${translations[slot.sessionType.toLowerCase()]}</span>${repeatsText}
@@ -1071,7 +1090,7 @@
             enableTime: true,
             noCalendar: true,
             dateFormat: "H:i",
-            time_24hr: true
+            time_24hr: false,
         });
     });
 
@@ -1311,10 +1330,6 @@
     // Reset modal
     $('#availabilityModal').on('hidden.bs.modal', function () {
         $('.copy-slot-action').popover('dispose'); // Clean up popovers when modal closes
-        // calendarInstance.clear();
-        // currentSelectedDate = null;
-        // currentWeekday = null;
-        // Re-fetch data on close to discard any unstaged changes
         fetch('/dashboard/availability/slots', {
           headers: {
             "Accept": "application/json"
@@ -1346,7 +1361,7 @@
           enableTime: true,
           noCalendar: true,
           dateFormat: "H:i",
-          time_24hr: true,
+          time_24hr: false,
         });
       }
       if ($('#list-view-end-time').length && !$('#list-view-end-time')[0]._flatpickr) {
@@ -1354,7 +1369,7 @@
           enableTime: true,
           noCalendar: true,
           dateFormat: "H:i",
-          time_24hr: true,
+          time_24hr: false,
         });
       }
     });
