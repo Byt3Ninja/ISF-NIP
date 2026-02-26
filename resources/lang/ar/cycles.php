@@ -419,6 +419,8 @@ return [
     'Name Z-A' => 'الاسم Z-A',
     'Score High-Low' => 'التقييم من الأعلى إلى الأدنى',
     'Score Low-High' => 'التقييم من الأدنى إلى الأعلى',
+    'Approval % High-Low' => 'نسبة الموافقة من الأعلى إلى الأدنى',
+    'Approval % Low-High' => 'نسبة الموافقة من الأدنى إلى الأعلى',
     'Sort By' => 'ترتيب حسب',
     'Evaluation Status' => 'حالة التقييم',
     'Score Range' => 'نطاق الدرجات',
