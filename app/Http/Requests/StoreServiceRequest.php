@@ -31,7 +31,7 @@ class StoreServiceRequest extends FormRequest
             'vendor_name' => 'nullable|string|max:50',
             'vendor_email' => 'nullable|string|max:50|unique:services,vendor_email,except,id',
             'vendor_phone' => 'nullable|string|max:11',
-            'organization_ids' => 'nullable|array',
+            'organization_ids' => 'required|array',
             'organization_ids.*' => 'exists:organizations,id',
             'img_url' => 'nullable|mimes:jpeg,png,jpg,webp|max:5120',
         ];
