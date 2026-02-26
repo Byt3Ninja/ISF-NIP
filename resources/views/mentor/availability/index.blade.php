@@ -238,6 +238,18 @@
       if (hours === 0) hours = 12;
       return `${hours}:${minutes} ${ampm}`;
   }
+
+  /**
+   * Parse a 12-hour time string like "2:30 PM" into a "HH:mm" (24-hour) string
+   * suitable for API submission. Falls back to the raw value if parsing fails.
+   */
+  function parse12HourToHHmm(timeStr) {
+      if (!timeStr) return timeStr;
+      const parsed = moment(timeStr, 'h:mm A', true);
+      if (parsed.isValid()) return parsed.format('HH:mm');
+      // Already HH:mm? Return as-is
+      return timeStr;
+  }
   // ──────────────────────────────────────────────────────────────────────────
 
   // Global variables
@@ -347,19 +359,19 @@
                 alert('{{ __('mentor.could_not_load_availability_slots') }}');
             });
 
-        // Initialize time pickers after DOM is ready
-        // Flatpickr stores/returns values in 24-hour format internally for reliable
-        // validation and API submission; to12Hour() is used only for display.
+        // ── Calendar-view time pickers (12-hour display, stores "h:mm A") ──
+        // dateFormat "h:i K" → flatpickr shows & returns "2:30 PM" style values.
+        // parse12HourToHHmm() converts back to "HH:mm" before any API call.
         startTimePicker = flatpickr("#slot-start-time", {
             enableTime: true,
             noCalendar: true,
-            dateFormat: "H:i",
+            dateFormat: "h:i K",
             time_24hr: false,
         });
         endTimePicker = flatpickr("#slot-end-time", {
             enableTime: true,
             noCalendar: true,
-            dateFormat: "H:i",
+            dateFormat: "h:i K",
             time_24hr: false,
         });
 
@@ -629,7 +641,7 @@
         // Show SweetAlert confirmation before deletion
         Swal.fire({
             title: "{{__('mentor.delete_slot_confirm')}}",
-			    text: "{{__('admin.Recover')}}",
+		    text: "{{__('admin.Recover')}}",
             icon: 'warning',
            	showCancelButton: true,
             confirmButtonText: "{{ __('admin.DYes') }}",
@@ -689,24 +701,30 @@
     
 
     // Get slot from form
+    // Flatpickr is configured with dateFormat "h:i K" so input values are like "2:30 PM".
+    // parse12HourToHHmm() converts them to "HH:mm" for API submission.
     function getSlotFromForm() {
-        const start = startTimePicker.input.value;
-        const end = endTimePicker.input.value;
+        const startRaw = startTimePicker.input.value;
+        const endRaw   = endTimePicker.input.value;
         const sessionType = $('#slot-session-type').val();
 
-        if (!start || !end) {
+        if (!startRaw || !endRaw) {
             alert('{{ __('mentor.please_select_start_and_end_time') }}');
             return null;
         }
 
-        const startTime = moment(start, 'HH:mm');
-        const endTime = moment(end, 'HH:mm');
+        const startTime = moment(startRaw, 'h:mm A', true);
+        const endTime   = moment(endRaw,   'h:mm A', true);
 
         if (!startTime.isValid() || !endTime.isValid() || endTime.isSameOrBefore(startTime)) {
             alert('{{ __('mentor.end_time_must_be_after_start_time') }}');
             return null;
         }
-        
+
+        // Convert to HH:mm for API
+        const start = startTime.format('HH:mm');
+        const end   = endTime.format('HH:mm');
+
         return { start, end, sessionType, duration: endTime.diff(startTime, 'minutes') };
     }
 
@@ -978,25 +996,28 @@
     });
 
     // Save slot from list view
+    // Input values are "h:mm A" (12-hour) from flatpickr; parse to HH:mm before sending to API.
     $(document).on('click', '#save-list-view-slot', function() {
         const day = $('#list-view-day-select').val();
-        const start = $('#list-view-start-time').val();
-        const end = $('#list-view-end-time').val();
+        const startRaw = $('#list-view-start-time').val();
+        const endRaw   = $('#list-view-end-time').val();
         const sessionType = $('#list-view-session-type').val();
 
-        if (!start || !end) {
+        if (!startRaw || !endRaw) {
             alert('{{ __('mentor.please_select_start_and_end_time') }}');
             return;
         }
 
-        const startTime = moment(start, 'HH:mm');
-        const endTime = moment(end, 'HH:mm');
+        const startTime = moment(startRaw, 'h:mm A', true);
+        const endTime   = moment(endRaw,   'h:mm A', true);
 
         if (!startTime.isValid() || !endTime.isValid() || endTime.isSameOrBefore(startTime)) {
             alert('{{ __('mentor.end_time_must_be_after_start_time') }}');
             return;
         }
 
+        const start    = startTime.format('HH:mm');
+        const end      = endTime.format('HH:mm');
         const duration = endTime.diff(startTime, 'minutes');
 
         fetch('/dashboard/availability/slots/store', {
@@ -1063,11 +1084,11 @@
                 <div class="row g-2 mb-2">
                     <div class="col-md-3">
                         <label class="form-label">@lang('mentor.start_time')</label>
-                        <input type="text" class="form-control form-control-sm start-time-input" value="${originalSlot.start}">
+                        <input type="text" class="form-control form-control-sm start-time-input" value="${to12Hour(originalSlot.start)}">
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">@lang('mentor.end_time')</label>
-                        <input type="text" class="form-control form-control-sm end-time-input" value="${originalSlot.end}">
+                        <input type="text" class="form-control form-control-sm end-time-input" value="${to12Hour(originalSlot.end)}">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">@lang('mentor.session_type')</label>
@@ -1086,10 +1107,11 @@
         slotElement.after(newSlotFormHtml);
         
         const newForm = slotElement.next('.editable-slot-form');
+        // Use 12-hour format for inline editable pickers too
         newForm.find('.start-time-input, .end-time-input').flatpickr({
             enableTime: true,
             noCalendar: true,
-            dateFormat: "H:i",
+            dateFormat: "h:i K",
             time_24hr: false,
         });
     });
@@ -1099,20 +1121,24 @@
         $(this).closest('.editable-slot-form').remove();
     });
 
-    // Handle saving a new slot
+    // Handle saving a new slot (clone form)
+    // Values come from 12-hour flatpickr → parse to HH:mm for API.
     $(document).on('click', '.save-new-slot-action', function() {
         const form = $(this).closest('.editable-slot-form');
-        const start = form.find('.start-time-input').val();
-        const end = form.find('.end-time-input').val();
+        const startRaw = form.find('.start-time-input').val();
+        const endRaw   = form.find('.end-time-input').val();
         const sessionType = form.find('.session-type-select').val();
 
-        const startTime = moment(start, 'HH:mm');
-        const endTime = moment(end, 'HH:mm');
+        const startTime = moment(startRaw, 'h:mm A', true);
+        const endTime   = moment(endRaw,   'h:mm A', true);
+
         if (!startTime.isValid() || !endTime.isValid() || endTime.isSameOrBefore(startTime)) {
             alert('{{ __('mentor.end_time_must_be_after_start_time') }}');
             return;
         }
 
+        const start = startTime.format('HH:mm');
+        const end   = endTime.format('HH:mm');
         const newSlot = { start, end, sessionType, duration: endTime.diff(startTime, 'minutes') };
         
         const { originalType, originalKey } = $(this).data();
@@ -1143,7 +1169,7 @@
           {
             $.each(result.data, function(index, slot) {
               var newSlot = createSlotObject(slot);
-              availabilityData[type][key] = [...(availabilityData[type][key] || []), newSlot];
+              availabilityData[originalType][originalKey] = [...(availabilityData[originalType][originalKey] || []), newSlot];
             });
           }
           else
@@ -1355,12 +1381,12 @@
 
     $('button[data-bs-toggle="tab"][data-bs-target="#list-tab"]').on('shown.bs.tab', function (e) {
       updateListView();
-      // Initialize flatpickr for list view time pickers if not already initialized
+      // Initialize 12-hour flatpickr for list-view time pickers if not already initialized
       if ($('#list-view-start-time').length && !$('#list-view-start-time')[0]._flatpickr) {
         flatpickr("#list-view-start-time", {
           enableTime: true,
           noCalendar: true,
-          dateFormat: "H:i",
+          dateFormat: "h:i K",
           time_24hr: false,
         });
       }
@@ -1368,7 +1394,7 @@
         flatpickr("#list-view-end-time", {
           enableTime: true,
           noCalendar: true,
-          dateFormat: "H:i",
+          dateFormat: "h:i K",
           time_24hr: false,
         });
       }
