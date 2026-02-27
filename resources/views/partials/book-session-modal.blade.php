@@ -196,7 +196,6 @@ $(document).ready(function() {
   const formatTime = (minutes) => {
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
-    // Return 24-hour string for internal use (hidden inputs, calculations)
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
   };
 
@@ -222,71 +221,6 @@ $(document).ready(function() {
     return utcDate.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
   };
 
-  // Generate time options in 30-minute intervals
-  const generateTimeOptions = (startTime, endTime) => {
-    const options = [];
-    const startMinutes = parseTime(startTime);
-    const endMinutes = parseTime(endTime);
-    
-    for (let minutes = startMinutes; minutes <= endMinutes; minutes += 30) {
-      options.push({
-        value: formatTime(minutes),
-        minutes: minutes
-      });
-    }
-    
-    return options;
-  };
-
-  // Populate start time dropdown
-  const populateStartTimeOptions = (slot) => {
-    // const $select = $('#sessionStartTime');
-    // $select.empty().append('<option value="">{{ __('admin.Select') }}...</option>');
-    
-    // const options = generateTimeOptions(slot.start_time, slot.end_time);
-    
-    // // Remove the last option (end time) from start time options
-    // options.slice(0, -1).forEach(opt => {
-    //   $select.append(`<option value="${opt.value}">${opt.value}</option>`);
-    // });
-    
-    // // Set default to slot start time
-    // $select.val(slot.start_time);
-
-    // Update hidden input for start time
-    $('#sessionStartTimeHidden').val(slot.start_time);
-    $('#sessionStartTime').val(slot.start_time);
-  };
-
-  // Populate end time dropdown based on selected start time
-  const populateEndTimeOptions = (slot, selectedStartTime) => {
-    // const $select = $('#sessionEndTime');
-    // $select.empty().append('<option value="">{{ __('admin.Select') }}...</option>');
-    
-    // if (!selectedStartTime) return;
-    
-    // const startMinutes = parseTime(selectedStartTime);
-    // const slotEndMinutes = parseTime(slot.end_time);
-    
-    // // Generate options starting from 30 minutes after selected start time
-    // for (let minutes = startMinutes + 30; minutes <= slotEndMinutes; minutes += 30) {
-    //   const timeStr = formatTime(minutes);
-    //   $select.append(`<option value="${timeStr}">${timeStr}</option>`);
-    // }
-    
-    // // Set default to 30 minutes after start time
-    // const defaultEndTime = formatTime(startMinutes + 30);
-    // if ($select.find(`option[value="${defaultEndTime}"]`).length) {
-    //   $select.val(defaultEndTime);
-    // } else {
-    //   $select.val($select.find('option:not(:first)').first().val());
-    // }
-
-    // Update hidden input for end time
-    $('#sessionEndTimeHidden').val(defaultEndTime);
-    $('#sessionEndTime').val(slot.end_time);
-  };
-
   // Update duration display
   const updateDurationDisplay = () => {
     const startTime = $('#sessionStartTimeHidden').val();
@@ -302,6 +236,28 @@ $(document).ready(function() {
     } else {
       $('#detailDuration').text('-');
     }
+  };
+
+  // Populate start time hidden input
+  const populateStartTimeOptions = (slot) => {
+    $('#sessionStartTimeHidden').val(slot.start_time);
+    $('#sessionStartTime').text(formatTime12(slot.start_time));
+  };
+
+  // Populate end time hidden input
+  const populateEndTimeOptions = (slot, selectedStartTime) => {
+    if (!selectedStartTime) return;
+
+    const startMinutes = parseTime(selectedStartTime);
+    const slotEndMinutes = parseTime(slot.end_time);
+    const defaultEndMinutes = startMinutes + 30;
+
+    // Use default end time (start + 30 min) if within slot bounds, otherwise use slot end time
+    const endMinutes = defaultEndMinutes <= slotEndMinutes ? defaultEndMinutes : slotEndMinutes;
+    const defaultEndTime = formatTime(endMinutes);
+
+    $('#sessionEndTimeHidden').val(defaultEndTime);
+    $('#sessionEndTime').text(formatTime12(slot.end_time));
   };
 
   // Slot filtering and retrieval
@@ -433,7 +389,6 @@ $(document).ready(function() {
   };
 
   const selectSlot = (slot, $card) => {
-    // console.log('selectSlot', slot, $card);
     $('.slot-card').removeClass('selected');
     $card.addClass('selected');
     state.selectedSlot = slot;
@@ -443,15 +398,14 @@ $(document).ready(function() {
     $('#selectedDateValue').val(state.selectedDate);
     $('#selectedSessionType').val(slot.session_type);
 
-    // Populate time dropdowns
-    // populateStartTimeOptions(slot);
-    // populateEndTimeOptions(slot, slot.start_time);
-    updateDurationDisplay();
+    // Set start time first
+    populateStartTimeOptions(slot);
 
-    $('#sessionStartTimeHidden').val(slot.start_time);
-    $('#sessionStartTime').text(formatTime12(slot.start_time));
-    $('#sessionEndTimeHidden').val(slot.end_time);
-    $('#sessionEndTime').text(formatTime12(slot.end_time));
+    // Set end time based on start time
+    populateEndTimeOptions(slot, slot.start_time);
+
+    // Now update duration display (both hidden inputs are set)
+    updateDurationDisplay();
 
     $('#sessionDetails').show();
     $('#slotError').hide();
@@ -459,25 +413,6 @@ $(document).ready(function() {
     // Enable submit button when slot is selected and file is valid
     $('#submit-button').prop('disabled', !state.fileValid);
   };
-
-  // Event handlers for time selection
-  $('#sessionStartTime').on('change', function() {
-    const selectedStartTime = $(this).val();
-    if (state.selectedSlot && selectedStartTime) {
-      populateEndTimeOptions(state.selectedSlot, selectedStartTime);
-      updateDurationDisplay();
-
-      // Update hidden input for start time
-      $('#sessionStartTimeHidden').val(selectedStartTime);
-    }
-  });
-
-  $('#sessionEndTime').on('change', function() {
-    updateDurationDisplay();
-
-    // Update hidden input for end time
-    $('#sessionEndTimeHidden').val($(this).val());
-  });
 
   const initCalendar = () => {
     const dates = getAvailableDates();
@@ -537,10 +472,10 @@ $(document).ready(function() {
     state.fileValid = true;
 
     $('#fileUpload, #additionalNotes').val('');
-    $('#sessionStartTime, #sessionEndTime').empty().append('<option value="">{{ __('admin.Select') }}...</option>');
     $('#fileName, #fileError, #sessionDetails, #slotError').hide();
 
-    $('button[data-filter]').removeClass('active').first().addClass('active');
+    $('button[data-filter]').removeClass('active btn-primary').addClass('border border-light');
+    $('button[data-filter="all"]').addClass('active btn-primary').removeClass('border border-light');
 
     resetCalendar();
   };
@@ -633,19 +568,7 @@ $(document).ready(function() {
       return;
     }
 
-    // const startTime = $('#sessionStartTime').val();
-    // const endTime = $('#sessionEndTime').val();
-
-    // if (!startTime || !endTime) {
-    //   e.preventDefault();
-    //   $('#slotError').text('{{ __('mentor.please_select_session_times') }}').show();
-    //   return;
-    // }
-
     $('#slotError').hide();
-    
-    // Let the form submit naturally - just hide modal and reset after validation passes
-    // The actual form submission will happen automatically
   });
 
   $('#bookingModal').on('hidden.bs.modal', resetForm);
