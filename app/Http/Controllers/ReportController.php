@@ -539,11 +539,8 @@ class ReportController extends Controller
             return $company;
         });
 
-        $final_screening_count = $_companies->count();
-        $final_pending_screening_count = $_companies->where('status', 'not_evaluated')->values();
-        $final_done_screening_count = $_companies->where('status', 'published')->values();
-        $draft_screenings_count = $_companies->where('status', 'draft')->values();
-        $Judges = $judges->count();
+        // Status counts from $_companies are no longer needed here;
+        // KPI is now derived from $startups below for accuracy.
 
         $l = app()->getLocale();
         $steps_ids = $steps->pluck('id')->toArray();
@@ -616,33 +613,8 @@ class ReportController extends Controller
 
         $allJudges = $allJudges->unique('id')->values();
 
-        // Calculate KPI data for screening
-        $screening_count = $_allCompanies->count();
-        $pending_screenings = $_allCompanies->filter(function($company) use ($allResults) {
-            return $allResults->where('company_id', $company->id)->isEmpty();
-        })->values();
-        $not_assigned_screenings = $_allCompanies->filter(function($company) {
-            return $company->judges->count() === 0;
-        })->values();
-        $non_pending_companies = $_allCompanies->filter(function($company) use ($allResults) {
-            return !$allResults->where('company_id', $company->id)->isEmpty();
-        })->values();
-        $draft_screenings = $non_pending_companies->where('status', 'Draft')->count();
-        $published_screenings = $non_pending_companies->where('status', 'Published')->count();
-        $not_evaluated_screenings = $non_pending_companies->where('status', 'Not Evaluated')->count();
-
-        // Kpi Cards Data (Dont' remove)
-        $kpiData = [
-            [ 'value' => $allJudges?->count() ?? 0, 'label' => 'Judgers', 'icon' => 'user', 'color' => 'info'],
-            [ 'value' => $_allCompanies?->count() ?? 0, 'label' => 'Total', 'icon' => 'gavel', 'color' => 'primary'],
-            [ 'value' => $not_assigned_screenings->count(), 'label' => 'Not Assigned', 'icon' => 'clock', 'color' => 'warning' ],
-            [ 'value' => $pending_screenings->count() + $not_evaluated_screenings, 'label' => 'Not Evaluated', 'icon' => 'trending-up-2', 'color' => 'danger'],
-            [ 'value' => $draft_screenings, 'label' => 'In Progress', 'icon' => 'pencil-check', 'color' => 'secondary'],
-            [ 'value' => $published_screenings, 'label' => 'Published', 'icon' => 'progress-check', 'color' => 'success'],
-        ];
-
         // Process companies with their evaluation data
-        $startups = $_allCompanies->map(function ($company) use ($allJudges, $allResults, $allCompanies, $steps, $not_assigned_screenings, $resultsCompanyScores) {
+        $startups = $_allCompanies->map(function ($company) use ($allJudges, $allResults, $allCompanies, $steps, $resultsCompanyScores) {
             $scoped = $allCompanies->where('id', $company->id)->first();
             $c = clone $scoped;
 
@@ -653,22 +625,50 @@ class ReportController extends Controller
             $c->average_score = $resultsCompanyScores[$c->id] ?? 0;
             $c->evaluation_results = $companyResults;
 
-            $has_no_judgers = $not_assigned_screenings->where('id', $c->id)->count() > 0 ? true : false;
-
             $c->company_step_id = $company->step_id;
             $c->company_cycle_id = $company->cycle_id;
             $c->score = $company->score;
             $_judges = $company->judges;
-            $c->status = $has_no_judgers ? 'Not Assigned' : $company->status;
             $c->stepInfo = $steps->where('id', $company->step_id)->first();
+
+            // Filter judges to only those actually assigned to this company
             $judges = clone $_judges;
             $companyId = $c->id;
             $judges = $judges->filter(function($judge) use ($companyId) {
                 return in_array($companyId, $judge->companies->pluck('id')->unique()->values()->toArray());
             })->values();
             $c->judges = $judges;
+
+            // Determine status from filtered judges (not from polluted $_allCompanies status)
+            if ($c->judges->count() === 0) {
+                $c->status = 'Not Assigned';
+            } else {
+                $statuses = $c->judges->map(function($judge) use ($companyId) {
+                    $result = $judge->companies->where('id', $companyId)->first();
+                    return $result ? $result->status : null;
+                })->filter()->unique()->values();
+
+                if ($statuses->isEmpty()) {
+                    $c->status = 'Not Evaluated';
+                } elseif ($statuses->count() === 1) {
+                    $c->status = $statuses->first();
+                } else {
+                    $c->status = 'Draft';
+                }
+            }
+
             return $c;
         })->values();
+
+        // KPI cards derived from $startups (same source as displayed cards)
+        $kpiData = [
+            [ 'value' => $allJudges?->count() ?? 0, 'label' => 'Judgers', 'icon' => 'user', 'color' => 'info'],
+            [ 'value' => $startups->count(), 'label' => 'Total', 'icon' => 'gavel', 'color' => 'primary'],
+            [ 'value' => $startups->where('status', 'Not Assigned')->count(), 'label' => 'Not Assigned', 'icon' => 'clock', 'color' => 'warning' ],
+            [ 'value' => $startups->where('status', 'Not Evaluated')->count(), 'label' => 'Not Evaluated', 'icon' => 'trending-up-2', 'color' => 'danger'],
+            [ 'value' => $startups->where('status', 'Draft')->count(), 'label' => 'In Progress', 'icon' => 'pencil-check', 'color' => 'secondary'],
+            [ 'value' => $startups->where('status', 'Published')->count(), 'label' => 'Published', 'icon' => 'progress-check', 'color' => 'success'],
+        ];
 
         // Process judges with their evaluation data
         $judges = $allJudges->map(function ($judge) use ($allResults, $allCompanies) {
@@ -800,35 +800,8 @@ class ReportController extends Controller
         })->values();
         $allJudges = $allJudges->unique('id')->values();
 
-        // Calculate KPI data for screening
-        $screening_count = $_allCompanies->count();
-        $pending_screenings = $_allCompanies->filter(function($company) use ($allResults) {
-            return $allResults->where('company_id', $company->id)->isEmpty();
-        })->values();
-        $not_assigned_screenings = $_allCompanies->filter(function($company) {
-            return $company->judges->count() === 0;
-        })->values();
-        $non_pending_companies = $_allCompanies->filter(function($company) use ($allResults) {
-            return !$allResults->where('company_id', $company->id)->isEmpty();
-        })->values();
-        $draft_screenings = $non_pending_companies->where('status', 'Draft')->count();
-        $published_screenings = $non_pending_companies->where('status', 'Published')->count();
-        $not_evaluated_screenings = $non_pending_companies->where('status', 'Not Evaluated')->count();
-        
-        $judgers_count = $allJudges->count();
-
-        // KPI Cards Data
-        $kpiData = [
-            [ 'value' => $judgers_count, 'label' => 'Judgers', 'icon' => 'user', 'color' => 'info'],
-            [ 'value' => $screening_count, 'label' => 'Total', 'icon' => 'gavel', 'color' => 'primary'],
-            [ 'value' => $not_assigned_screenings->count(), 'label' => 'Not Assigned', 'icon' => 'clock', 'color' => 'warning' ],
-            [ 'value' => $pending_screenings->count() + $not_evaluated_screenings, 'label' => 'Not Evaluated', 'icon' => 'trending-up-2', 'color' => 'danger'],
-            [ 'value' => $draft_screenings, 'label' => 'In Progress', 'icon' => 'pencil-check', 'color' => 'secondary'],
-            [ 'value' => $published_screenings, 'label' => 'Published', 'icon' => 'progress-check', 'color' => 'success'],
-        ];
-
         // Process companies with their evaluation data
-        $startups = $_allCompanies->map(function ($company) use ($allJudges, $allResults, $allCompanies, $steps, $not_assigned_screenings, $resultsCompanyScores) {
+        $startups = $_allCompanies->map(function ($company) use ($allJudges, $allResults, $allCompanies, $steps, $resultsCompanyScores) {
             $scoped = $allCompanies->where('id', $company->id)->first();
             $c = clone $scoped;
 
@@ -839,22 +812,50 @@ class ReportController extends Controller
             $c->average_score = $resultsCompanyScores[$c->id] ?? 0;
             $c->evaluation_results = $companyResults;
 
-            $has_no_judgers = $not_assigned_screenings->where('id', $c->id)->count() > 0 ? true : false;
-
             $c->company_step_id = $company->step_id;
             $c->company_cycle_id = $company->cycle_id;
             $c->score = $company->score;
             $_judges = $company->judges;
-            $c->status = $has_no_judgers ? 'Not Assigned' : $company->status;
             $c->stepInfo = $steps->where('id', $c->company_step_id)->first();
+
+            // Filter judges to only those actually assigned to this company
             $judges = clone $_judges;
             $companyId = $c->id;
             $judges = $judges->filter(function($judge) use ($companyId) {
                 return in_array($companyId, $judge->companies->pluck('id')->unique()->values()->toArray());
             })->values();
             $c->judges = $judges;
+
+            // Determine status from filtered judges (not from polluted $_allCompanies status)
+            if ($c->judges->count() === 0) {
+                $c->status = 'Not Assigned';
+            } else {
+                $statuses = $c->judges->map(function($judge) use ($companyId) {
+                    $result = $judge->companies->where('id', $companyId)->first();
+                    return $result ? $result->status : null;
+                })->filter()->unique()->values();
+
+                if ($statuses->isEmpty()) {
+                    $c->status = 'Not Evaluated';
+                } elseif ($statuses->count() === 1) {
+                    $c->status = $statuses->first();
+                } else {
+                    $c->status = 'Draft';
+                }
+            }
+
             return $c;
         })->values();
+
+        // KPI cards derived from $startups (same source as displayed cards)
+        $kpiData = [
+            [ 'value' => $allJudges?->count() ?? 0, 'label' => 'Judgers', 'icon' => 'user', 'color' => 'info'],
+            [ 'value' => $startups->count(), 'label' => 'Total', 'icon' => 'gavel', 'color' => 'primary'],
+            [ 'value' => $startups->where('status', 'Not Assigned')->count(), 'label' => 'Not Assigned', 'icon' => 'clock', 'color' => 'warning' ],
+            [ 'value' => $startups->where('status', 'Not Evaluated')->count(), 'label' => 'Not Evaluated', 'icon' => 'trending-up-2', 'color' => 'danger'],
+            [ 'value' => $startups->where('status', 'Draft')->count(), 'label' => 'In Progress', 'icon' => 'pencil-check', 'color' => 'secondary'],
+            [ 'value' => $startups->where('status', 'Published')->count(), 'label' => 'Published', 'icon' => 'progress-check', 'color' => 'success'],
+        ];
 
         // Process judges with their evaluation data
         $judges = $allJudges->map(function ($judge) use ($allResults, $allCompanies) {
