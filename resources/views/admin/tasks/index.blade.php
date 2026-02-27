@@ -58,8 +58,8 @@ $(function () {
   };
   const statusObj = {
     pending: { title: '{{ __('admin.boardTitlePending') }}', class: 'bg-label-warning' },
-    'progress': { title: '{{ __('admin.boardTitleProgress') }}', class: 'bg-label-info' },
-    'review': { title: '{{ __('admin.boardTitleReview') }}', class: 'bg-label-primary' },
+    progress: { title: '{{ __('admin.boardTitleProgress') }}', class: 'bg-label-info' },
+    review: { title: '{{ __('admin.boardTitleReview') }}', class: 'bg-label-primary' },
     completed: { title: '{{ __('admin.boardTitleCompleted') }}', class: 'bg-label-success' }
   };
   const roleObj = {
@@ -218,9 +218,31 @@ $(function () {
           });
         };
 
+        const addMappedDropdownFilter = (colIndex, id, placeholder, obj) => {
+          this.api().columns(colIndex).every(function () {
+            const column = this;
+
+            const select = $(`
+              <select id="${id}" class="form-select text-capitalize"
+                style="min-width: 150px;">
+                <option value="">${placeholder}</option>
+              </select>
+            `)
+              .appendTo(filterContainer)
+              .on('change', function () {
+                const val = $.fn.dataTable.util.escapeRegex($(this).val());
+                column.search(val ? `^${val}$` : '', true, false).draw();
+              });
+
+            Object.values(obj).forEach(item => {
+              select.append(`<option value="${item.title}">${item.title}</option>`);
+            });
+          });
+        };
+
         addDropdownFilter(3, 'taskProgram', '{{ __('admin.All_Programs') }}');
-        addDropdownFilter(5, 'taskPriority', '{{ __('admin.All_Priorities') }}');
-        addDropdownFilter(6, 'taskStatus', '{{ __('admin.All_statuses') }}');
+        addMappedDropdownFilter(5, 'taskPriority', '{{ __('admin.All_Priorities') }}', priorityObj);
+        addMappedDropdownFilter(6, 'taskStatus', '{{ __('admin.All_statuses') }}', statusObj);
 
         // Styles fix
         setTimeout(() => {
