@@ -643,15 +643,9 @@ $(document).ready(function() {
     // }
 
     $('#slotError').hide();
-    releaseSuccessAlert({
-      title: '{{ __('mentor.success') }}',
-      message: '{{ __('mentor.session_request_success') }}'
-    });
-
-    $('#bookingModal').modal('hide');
-    resetForm();
-
-    this.submit();
+    
+    // Let the form submit naturally - just hide modal and reset after validation passes
+    // The actual form submission will happen automatically
   });
 
   $('#bookingModal').on('hidden.bs.modal', resetForm);
