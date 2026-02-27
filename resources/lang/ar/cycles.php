@@ -627,4 +627,5 @@ return [
     'Export Company Evaluation' => 'تصدير تقييم الشركة',
     'Export All Evaluations' => 'تصدير جميع التقييمات',
     'Expertise' => 'التخصص',
+    'Comment' => 'التعليق',
 ];

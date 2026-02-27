@@ -88,6 +88,7 @@
                       <th>{{ __('cycles.Approved') }}</th>
                       <th>{{ __('cycles.Done') }}</th>
                       <th>{{ __('cycles.Date/Time') }}</th>
+                      <th>{{ __('cycles.Comment') }}</th>
                       <th class="text-nowrap">{{ __('cycles.Created At') }}</th>
                       <th>{{ __('cycles.Actions') }}</th>
                     </tr>
@@ -189,6 +190,13 @@
                         <td class="text-nowrap" style="min-width: 150px;">
                           <small>{{ $session->zoom_date ? $session->zoom_date->format('d-m-Y') : '' }}</small>
                           <small class="d-block">{{ $session->zoom_date ? $session->zoom_date->format('H:i:s') : '' }} ({{ $session->period ?? '' }}M)</small>
+                        </td>
+                        <td class="text-nowrap" style="min-width: 150px;">
+                          @if($session->comment)
+                            <p class="small text-muted mb-0">{!! $session->comment !!}</p>
+                          @else
+                            <small class="text-muted">{{ __('admin.No comment provided') }}</small>
+                          @endif
                         </td>
                         <td class="text-nowrap" style="width: 100px;">
                           <small>{{ $session->created_at ? $session->created_at->format('d-m-Y') : '' }}</small>
