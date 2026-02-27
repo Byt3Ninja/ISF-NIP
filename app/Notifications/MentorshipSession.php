@@ -114,15 +114,40 @@ class MentorshipSession extends Notification implements ShouldQueue
      */
      public function toMail($notifiable)
     {
-        $org = $notifiable->organization;
-        $smtpSettings = $org?->organizationSettings;
+        // $org = $notifiable->organization;
+        // $smtpSettings = $org?->organizationSettings;
         
-        // Get from address and name
-        $from = $this->getFromAddress($smtpSettings);
-        $url = is_null($this->ActionUrl) ? $this->ActionUrl : '';
-        return (new MailMessage)
-            ->subject($this->data['subject'])
-            ->view('emails.mentorship_request_status', ['data' => $this->data]);
+        // // Get from address and name
+        // $from = $this->getFromAddress($smtpSettings);
+        // $url = is_null($this->ActionUrl) ? $this->ActionUrl : '';
+        // return (new MailMessage)
+        //     ->subject($this->data['subject'])
+        //     ->view('emails.mentorship_request_status', ['data' => $this->data]);
+
+           
+
+            $mail = (new MailMessage)
+                ->subject($this->data['subject'])
+                ->view('emails.mentorship_request_status', [
+                    'data' => $this->data
+                ]);
+
+
+foreach ($this->data['attachments'] ?? [] as $attachment) {
+        $filePath = $attachment['path'] ?? null;
+        if (empty($filePath)) continue;
+        $fullPath = storage_path('app/users/' . $filePath);
+        if (file_exists($fullPath)) {
+            $mail->attach($fullPath, [
+                'as' => $attachment['name'] ?? basename($filePath),
+            ]);
+        } else {
+            \Log::error('Attachment not found at: ' . $fullPath);
+        }
+    }
+
+    return $mail;
+
     }
 
     /**
