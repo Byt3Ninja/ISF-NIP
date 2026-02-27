@@ -553,11 +553,18 @@ const tagifyInstance = new Tagify(tagifyInput, {
   };
 
   // Submit Handler
+  let isSubmitting = false;
   $('.data-submit').on('click', function (e) {
     e.preventDefault();
+    if (isSubmitting) return;
     fv.validate().then(status => {
       if (status !== 'Valid') return;
-      
+
+      // Disable button to prevent double submission
+      const $btn = $('.data-submit');
+      isSubmitting = true;
+      $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>{{ __('admin.submit') }}');
+
       const formData = new FormData(form);
 
       // Append assignee IDs to formData
@@ -653,7 +660,6 @@ const tagifyInstance = new Tagify(tagifyInput, {
             });
           }
 
-          $('.data-submit').prop('disabled', true);
           $('#addTaskModal').modal('hide');
           resetForm();
         },
@@ -661,6 +667,11 @@ const tagifyInstance = new Tagify(tagifyInput, {
           console.error('Failed to save task:', xhr);
           const errorMsg = xhr.responseJSON?.message;
           releaseFailureAlert({title: '{{ __('admin.Error') }}', message: errorMsg ? errorMsg : '{{ __('admin.unexpected_error') }}'});
+        },
+        complete: function() {
+          isSubmitting = false;
+          const $btn = $('.data-submit');
+          $btn.prop('disabled', false).text('{{ __('admin.submit') }}');
         }
       });
     });
