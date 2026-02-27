@@ -7,6 +7,7 @@ use App\Company;
 use App\Tags;
 use App\ProgramTask;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -139,6 +140,17 @@ class TasksController extends Controller
                 'message' => $validator->errors()->first(),
                 'errors' => $validator->errors()
             ], 422);
+        }
+
+        // Prevent duplicate submissions using a cache lock
+        $lockKey = 'task_store_' . auth()->id() . '_' . md5($request->input('title') . $request->input('program_id'));
+        if (!Cache::lock($lockKey, 5)->get()) {
+            return response()->json([
+                'success' => false,
+                'message' => app()->getLocale() == 'ar'
+                    ? 'يتم معالجة طلبك بالفعل، يرجى الانتظار.'
+                    : 'Your request is already being processed, please wait.'
+            ], 429);
         }
 
         try {
