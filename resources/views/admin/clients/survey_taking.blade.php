@@ -224,6 +224,11 @@
 					
 					<div class="card-body">
 
+						<div class="text-center mb-4">
+							<h4 class="mb-1">{{ __('admin.already_responded') }}</h4>
+							<p class="text-muted mb-0">{{ __('admin.thank_you_for_submission') }}</p>
+						</div>
+
 						<h5 class="card-title mb-1">{{ $survey->title }}</h5>
 						<p class="text-muted">{{ $survey->description }}</p>
 

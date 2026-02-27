@@ -3509,4 +3509,6 @@ return [
 	'service_message_email_body'                 => 'You have a new message from :sender_name at :timestamp regarding :service_name.',
 	'service_message_view_cta'                   => 'View Message',
 	'no_milestones' => 'No milestones added yet.',
+	'thank_you_for_submission' => 'Thank you for your submission. Here are the responses you provided.',
+	'already_responded' => 'You have already responded to this survey.',
 ];
