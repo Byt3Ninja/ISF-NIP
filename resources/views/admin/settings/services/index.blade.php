@@ -182,12 +182,10 @@
                     </div>
                   </div>
                   @if ($service->vendor_name)
-                    @if($service->hide_vendor_info == 1)
-                      <div class="d-flex align-items-center gap-1 mb-4 text-dark">
-                        <span class="fw-medium text-muted">{{ __('admin.Hidden') }}</span>
-                      </div> 
+                    @if($service->hide_vendor_info == 1 && !$_user->hasAnyRole(['admin', 'organizationManager', 'subadmin']))
+                      <div></div>
                     @else
-                      <a 
+                      <a
                         href="{{ isset($service->service_provider_id) ? '/dashboard/service-provider/' . $service->provider->id . '/profile' : 'javascript:void(0)' }}"
                         class="d-flex align-items-center gap-1 mb-4 text-dark"
                       >
@@ -218,18 +216,18 @@
                   </div>
 
                   <!-- Service Price -->
-                  <div class="d-flex align-items-center gap-2 mb-4">
-                    <div>{{ __('admin.Price') }}:</div>
-                    @if($service->price)
-                      @if($service->hide_price == 1)
-                        <span class="fw-medium text-muted">{{ __('admin.Hidden') }}</span>
-                      @else
+                  @if($service->price && $service->hide_price == 1 && !$_user->hasAnyRole(['admin', 'organizationManager', 'subadmin']))
+                    {{-- Price hidden from non-management roles --}}
+                  @else
+                    <div class="d-flex align-items-center gap-2 mb-4">
+                      <div>{{ __('admin.Price') }}:</div>
+                      @if($service->price)
                         <span class="fw-medium">{{ $service->price }} {{ $service->currency }}</span>
+                      @else
+                        <span class="fw-medium text-muted">{{ __('admin.free') }}</span>
                       @endif
-                    @else
-                      <span class="fw-medium text-muted">{{ __('admin.free') }}</span>
-                    @endif
-                  </div>
+                    </div>
+                  @endif
 
                   <!-- Date & Status -->
                   @if (!$_user->hasRole('registered'))
