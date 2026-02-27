@@ -141,23 +141,18 @@ class MentorshipSession extends Notification implements ShouldQueue
             ? $this->data['startupName']
             : $this->data['mentorName'];
 
-        if ($status === 'Yes') {
-            $message = "Your mentorship session is approved with {$name} | Date: {$date}";
-        } elseif ($status === 'No') {
-            $message = "Your mentorship session is rejected with {$name} | Date: {$date}";
-        } else {
-
-            if ($action === 'modifySession') {
-                $message = "Mentorship session modified with {$name} | Date: {$date}";
-            } else {
-
-                if ($userType === 'mentor') {
+            
                     $message = "New mentorship session created with {$name} | Date: {$date}";
-                } else { // registered
-                    $message = "You have a new mentorship session request from {$name} | Date: {$date}";
+                if ($status === 'Yes') {
+                    $message = "Your mentorship session is approved with {$name} | Date: {$date}";
+                } elseif ($status === 'No') {
+                    $message = "Your mentorship session is rejected with {$name} | Date: {$date}";
                 }
-            }
-        }
+                if ($action === 'modifySession') {
+                    $message = "Mentorship session Rescheduled with {$name} | Date: {$date}";
+                }
+           
+
         return [
             'message' => $message,
             'details' => $this->data,
