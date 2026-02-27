@@ -456,7 +456,7 @@ class SlotController extends Controller
 			$original = Schedule::findOrFail($id);
 
 			$createdSlots = [];
-
+		
 			foreach ($validated['selectedDays'] as $day) {
 
 					// 2. Build new schedule data
@@ -478,12 +478,12 @@ class SlotController extends Controller
 					$newSchedule = Schedule::create($slotData);
 
 					$isWeekly = $newSchedule->type === 'Weekly';
-
+					
 					// 5. Format response slot
 					$createdSlots[] = [
 							'id'           => $newSchedule->id,
 							'weekday'      => $isWeekly ? $newSchedule->days : null,
-							'date'         => $isWeekly ? null : ($newSchedule->date ?? $newSchedule->dto),
+							'date'         => $isWeekly ? null : ($newSchedule->date ?? $newSchedule->tto),
 							'start_time'   => substr($newSchedule->tfrom, 0, 5),
 							'end_time'     => substr($newSchedule->tto, 0, 5),
 							'session_type' => $newSchedule->session_type,
