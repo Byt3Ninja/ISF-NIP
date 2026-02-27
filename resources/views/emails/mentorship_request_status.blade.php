@@ -15,7 +15,7 @@
             $text_en = 'Approved';
             $title_en = 'Session Approved';
             if ($data['action'] == 'modifySession') {
-                $text_en .= ' and Rescheduled';
+                $text_en = ' Rescheduled';
                 $title_en = 'Session Rescheduled';
             }
         }
@@ -27,7 +27,7 @@
             $text_ar = 'الموافقة';
             $title_ar = 'تمت الموافقة';
             if ($data['action'] == 'modifySession') {
-                $text_ar .= ' وتعديل';
+                $text_ar = ' تعديل';
                 $title_ar = 'تم تعديل الموعد';
             }
         }
