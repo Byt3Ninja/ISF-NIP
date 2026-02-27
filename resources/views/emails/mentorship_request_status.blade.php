@@ -111,7 +111,7 @@
                                 </table>
 
                                 {{-- Notes & Attachments --}}
-                                @if(!empty($data['notes']) || !empty($data['attachments']))
+                                @if(!empty($data['notes']))
                                     <div style="margin-top: 25px; border-top: 1px solid #E5E7EB; padding-top: 20px;">
                                         @if(!empty($data['notes']))
                                             <p style="font-size: 14px; color: #374151; margin-bottom: 10px;">
