@@ -634,4 +634,5 @@ return [
     'Export Company Evaluation' => 'Export Company Evaluation',
     'Export All Evaluations' => 'Export All Evaluations',
     'Expertise' => 'Expertise',
+    'Comment' => 'Comment',
 ];

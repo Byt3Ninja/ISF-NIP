@@ -820,7 +820,7 @@ class MentorsController extends Controller
 		} else {
 			$cycles = \App\Cycle::all();
 		}
-
+			
 		return view('admin.settings.mentorship.sessions', compact('sessions', 'cycles'));
 	}
 
