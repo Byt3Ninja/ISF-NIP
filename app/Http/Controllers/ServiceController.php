@@ -174,7 +174,6 @@ class ServiceController extends Controller
 	 */
 	public function store(StoreServiceRequest $request)
 	{
-		DB::beginTransaction();
 		$request->merge([
 			'is_active' => $request->has('is_active') ? 1 : 0
 		]);
@@ -184,7 +183,20 @@ class ServiceController extends Controller
 		if( empty( $category ) ) { return back()->withInput()->with( ['msg' => 'FailedStore'] ); }
 
 		$provider = !$user->hasRole('serviceProvider') ? serviceProviders::find( $request->service_provider_id ) : $user?->service_provider;
-		if( empty( $provider ) ) { return back()->withInput()->with( ['msg' => 'FailedStore'] );  }
+		if( empty( $provider ) )
+		{
+			if( $user->hasRole('serviceProvider') )
+			{
+				$provider = new serviceProviders;
+				$provider->company_name = $user->name;
+				$provider->contact_name = $user->name;
+				$provider->email = $user->email;
+				$provider->phone = $user->phone;
+				$provider->status = true;
+				$provider->user_id = $user->id;
+				$provider->save();
+			} else { return back()->withInput()->with( ['msg' => 'FailedStore'] ); }
+		}
 
 		if( $request->hasFile('img_url') ){
 			//store the image
@@ -297,7 +309,20 @@ class ServiceController extends Controller
 		if( empty( $category ) ) { return back()->withInput()->with( ['msg' => 'FailedStore'] );  }
 
 		$provider = !$user->hasRole('serviceProvider') ? serviceProviders::find( $request->service_provider_id ) : $user?->service_provider;
-		if( empty( $provider ) ) { return back()->withInput()->with( ['msg' => 'FailedStore'] );  }
+		if( empty( $provider ) )
+		{
+			if( $user->hasRole('serviceProvider') )
+			{
+				$provider = new serviceProviders;
+				$provider->company_name = $user->name;
+				$provider->contact_name = $user->name;
+				$provider->email = $user->email;
+				$provider->phone = $user->phone;
+				$provider->status = true;
+				$provider->user_id = $user->id;
+				$provider->save();
+			} else { return back()->withInput()->with( ['msg' => 'FailedStore'] );  }
+		}
 
 		$inputs = $request->except(['img_url']);
 
