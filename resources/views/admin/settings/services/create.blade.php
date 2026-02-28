@@ -168,6 +168,21 @@
       @endif
   
       <!-- Vendor Information -->
+      {{-- Service Provider: show only "Hide My Details" toggle --}}
+      @if( $_user->hasRole('serviceProvider') )
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="card-title mb-1">{{ __('admin.my_details') }}</h5>
+        <div class="form-check form-switch">
+          <input type="hidden" name="hide_vendor_info" value="0">
+          <input class="form-check-input" type="checkbox" id="hide_vendor_info" name="hide_vendor_info" value="1" {{ old('hide_vendor_info') ? 'checked' : '' }}>
+          <label class="form-check-label" for="hide_vendor_info">
+            {{ __('admin.hide_my_details') }}
+          </label>
+        </div>
+      </div>
+      @endif
+
+      {{-- Admin / Org Manager / Sub Admin: full vendor section --}}
       @if( !$_user->hasRole('serviceProvider') )
       <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
@@ -181,7 +196,7 @@
           </label>
         </div>
       </div>
-  
+
       <div class="mb-4">
         <label class="form-label">{{ __('admin.Service Provider') }} *</label>
         <select class="form-select select2" name="service_provider_id" id="service_provider_id" data-placeholder="{{ __('admin.select_provider') }}">
@@ -200,15 +215,29 @@
           <label class="form-label">{{ __('admin.Vendor_Name') }}</label>
           <input type="text" class="form-control" id="vendor_name" name="vendor_name" value="{{ old('vendor_name') }}" readonly disabled>
         </div>
-
         <div class="col-md-4 mb-4">
           <label class="form-label">{{ __('admin.Vendor_Email') }}</label>
           <input type="email" class="form-control" id="vendor_email" name="vendor_email" value="{{ old('vendor_email') }}" readonly disabled>
         </div>
-
         <div class="col-md-4 mb-4">
           <label class="form-label">{{ __('admin.Vendor_Phone') }}</label>
           <input type="text" class="form-control" id="vendor_phone" name="vendor_phone" value="{{ old('vendor_phone') }}" readonly disabled>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4 mb-4">
+          <label class="form-label">{{ __('admin.vendor_rating') }}</label>
+          <input type="text" class="form-control" id="vendor_rating" readonly disabled>
+        </div>
+        <div class="col-md-4 mb-4">
+          <label class="form-label">{{ __('admin.vendor_response_time') }}</label>
+          <input type="text" class="form-control" id="vendor_response_time" readonly disabled>
+        </div>
+        <div class="col-md-4 mb-4 d-flex align-items-end">
+          <a href="#" id="view_full_profile_link" class="btn btn-outline-primary btn-sm d-none" target="_blank">
+            {{ __('admin.view_full_profile') }} &rarr;
+          </a>
         </div>
       </div>
       @endif
@@ -218,7 +247,7 @@
     @if( $_user->ableToAny(['services.create', 'services.store'], $permissions) )
     <div class="card-footer d-flex justify-content-end">
       <button type="submit" class="btn btn-primary me-3">{{ __('admin.Save') }}</button>
-      <button type="reset" class="btn btn-outline-secondary">{{ __('admin.Cancel') }}</button>
+      <a href="{{ route('services.index') }}" class="btn btn-outline-secondary">{{ __('admin.Cancel') }}</a>
     </div>
     @endif
   </div>
@@ -235,6 +264,8 @@
 @parent
 <script>
   var providers = @json($providers);
+  var providerStats = @json($providerStats ?? []);
+  var profileBaseUrl = "{{ url('dashboard/service-provider') }}";
 
   $(document).ready(function() {
 
@@ -289,17 +320,34 @@
     // Service Provider Change Handler
     $(document).on('change', '#service_provider_id', function() {
       var provider_id = $(this).val();
-      var provider = providers.find(function(provider) {
-        return provider.id == provider_id;
+      var provider = providers.find(function(p) {
+        return p.id == provider_id;
       });
       if (typeof provider !== 'undefined') {
         $('#vendor_name').val(provider.company_name);
         $('#vendor_email').val(provider.email);
         $('#vendor_phone').val(provider.phone);
+
+        // Rating and Response Time
+        var stats = providerStats[provider.id] || {};
+        $('#vendor_rating').val(stats.rating > 0
+          ? stats.rating + ' / 5 (' + stats.review_count + ' {{ __("admin.reviews") }})'
+          : '{{ __("admin.no_ratings_yet") }}');
+        $('#vendor_response_time').val(stats.response_time !== null && stats.response_time !== undefined
+          ? stats.response_time + 'h'
+          : '{{ __("admin.no_data") }}');
+
+        // View Full Profile link
+        $('#view_full_profile_link')
+          .attr('href', profileBaseUrl + '/' + provider.id + '/profile')
+          .removeClass('d-none');
       } else {
         $('#vendor_name').val('');
         $('#vendor_email').val('');
         $('#vendor_phone').val('');
+        $('#vendor_rating').val('');
+        $('#vendor_response_time').val('');
+        $('#view_full_profile_link').addClass('d-none');
       }
     });
 
