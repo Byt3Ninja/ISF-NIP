@@ -136,9 +136,16 @@
                   <div class="col-md-3">
                     <select id="specializationFilter" class="form-select">
                       <option value="">{{ __('cycles.Expertise') }} ({{ __('admin.All') }})</option>
-                      @foreach ($specializations as $spec)
-                        <option value="{{ $spec }}">{{ $spec }}</option>
-                      @endforeach
+                        @php
+                          $expertises = App\Expertise::where('parent_id', null)->get();
+                        @endphp
+                        @foreach ($expertises as $expertise_group)
+                          <optgroup label="{{ $expertise_group->title }}">
+                            @foreach ($expertise_group->children as $expertise)
+                              <option value="{{ $expertise->id }}"> {{ $expertise->title }} </option>
+                            @endforeach
+                          </optgroup>
+                        @endforeach
                     </select>
                   </div>
                   <div class="col-md-2">
