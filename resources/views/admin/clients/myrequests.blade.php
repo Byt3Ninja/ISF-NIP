@@ -262,7 +262,7 @@
         <div class="card-body text-center py-5">
           <i class="ti ti-clipboard-list ti-48px text-muted mb-3 d-block"></i>
           <p class="text-muted mb-3">{{ __('admin.no_service_requests_yet') }}</p>
-          <a href="{{ route('users.directory_view') }}" class="btn btn-primary">
+          <a href="{{ route('services.index') }}" class="btn btn-primary">
             <i class="ti ti-plus me-1"></i> {{ __('admin.request_a_service') }}
           </a>
         </div>
