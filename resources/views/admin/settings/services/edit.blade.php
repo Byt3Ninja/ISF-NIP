@@ -103,7 +103,7 @@
           </select>
         </div>
         <div class="col-md-4">
-          <label class="form-label">{{ __('admin.Price') }} *</label>
+          <label class="form-label">{{ __('admin.Price') }}</label>
           <input type="number" class="form-control" name="price" id="price" min="0" step="0.01" placeholder="0.00" value="{{ old('price', $service->price) }}">
         </div>
         <div class="col-md-2 d-flex align-items-end pb-2">
@@ -361,9 +361,6 @@
           },
           price: {
             validators: {
-              notEmpty: {
-                message: '{{ __('admin.Required_Field') }}'
-              },
               numeric: {
                 message: '{{ __('admin.must_be_valid_number') }}'
               },
