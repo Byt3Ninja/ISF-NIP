@@ -177,11 +177,11 @@ class MentorsController extends Controller
 
 				// إضافة الخصائص للـ mentor
 				$mentor->scope = $mentorScope;
-				$mentor->scope_org_ids = $mentorOrgIds;
+				$mentor->scope_org_ids = json_encode(collect($mentorOrgIds)->map(function($id) { return intval($id); }));
 				
 				return $mentor;
 			});
-
+			
 		$selectedSpecialization = $request->specialization; 
 
 		if ($selectedSpecialization != 0) {
