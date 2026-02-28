@@ -174,8 +174,8 @@ class ServiceController extends Controller
 	 */
 	public function store(StoreServiceRequest $request)
 	{
-	
-	$request->merge([
+		DB::beginTransaction();
+		$request->merge([
 			'is_active' => $request->has('is_active') ? 1 : 0
 		]);
 		
