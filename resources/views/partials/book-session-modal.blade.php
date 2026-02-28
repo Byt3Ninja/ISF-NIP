@@ -587,13 +587,21 @@ $(document).ready(function () {
       const result = parseFlashFromHtml(html);
 
       if (result.success) {
-        showSuccess(result.message);
+        // showSuccess(result.message);
+        releaseSuccessAlert({
+          title: "{{ __('admin.Success') }}",
+          message: result.message || 'Request Sent Successfully',
+        });
         setTimeout(() => {
           $('#bookingModal').modal('hide');
           window.location.reload();
         }, 1500);
       } else {
         showError(result.message);
+        // releaseFailureAlert({
+        //   title: "{{ __('admin.Error') }}",
+        //   message: result.message || '{{ __('admin.unexpected_error') }}',
+        // });
         $btn.prop('disabled', false)
             .html('<i class="ti ti-send me-2"></i>{{ __('admin.Submit') }}');
       }
