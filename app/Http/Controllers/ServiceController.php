@@ -14,6 +14,7 @@ use App\Notifications\{TemplateEmail, ServiceRequestNotification};
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\{User, Settings, Currency, Service, Organization, ServiceCategory, serviceProviders, ServicesRequests};
 use App\Services\ServiceRequestStatusLogger;
+use Carbon\Carbon;
 
 class ServiceController extends Controller
 {
@@ -162,7 +163,8 @@ class ServiceController extends Controller
 		}
 		$currencies = Currency::all();
 		$providers = serviceProviders::all();
-		return view('admin/settings/services/create', compact('serviceCategories','Setting','organizations', 'providers', 'currencies'));
+		$providerStats = $this->getProviderStats($providers);
+		return view('admin/settings/services/create', compact('serviceCategories','Setting','organizations', 'providers', 'currencies', 'providerStats'));
 	}
 
 	/**
@@ -265,8 +267,9 @@ class ServiceController extends Controller
 		}
 		$currencies = Currency::all();
 		$providers = serviceProviders::all();
+		$providerStats = $this->getProviderStats($providers);
 		if( $service->price == 0 ) { $service->price = null; }
-		return view('admin/settings/services/edit', compact('service', 'serviceCategories', 'organizations', 'providers', 'currencies'));
+		return view('admin/settings/services/edit', compact('service', 'serviceCategories', 'organizations', 'providers', 'currencies', 'providerStats'));
 	}
 
 	/**
@@ -1490,5 +1493,66 @@ class ServiceController extends Controller
 		);
 
 		return view('admin.clients.myrequests', compact('stats', 'requests'));
+	}
+
+	/**
+	 * Compute rating and response time stats for each service provider.
+	 */
+	private function getProviderStats($providers)
+	{
+		$providerIds = $providers->pluck('id')->toArray();
+		if (empty($providerIds)) return [];
+
+		$servicesByProvider = DB::table('services')
+			->whereIn('service_provider_id', $providerIds)
+			->select('id', 'service_provider_id')
+			->get()
+			->groupBy('service_provider_id');
+
+		$allServiceIds = $servicesByProvider->flatten()->pluck('id')->toArray();
+
+		$requests = collect();
+		if (!empty($allServiceIds)) {
+			$requests = DB::table('services_requests')
+				->whereIn('service_id', $allServiceIds)
+				->whereNull('deleted_at')
+				->select('service_id', 'rate', 'approved', 'decided_at', 'created_at')
+				->get();
+		}
+
+		$stats = [];
+		foreach ($providers as $provider) {
+			$providerServiceIds = ($servicesByProvider[$provider->id] ?? collect())->pluck('id')->toArray();
+			$providerRequests = $requests->whereIn('service_id', $providerServiceIds);
+
+			// Rating
+			$rated = $providerRequests->whereNotNull('rate');
+			$avgRating = $rated->isNotEmpty() ? round($rated->avg('rate'), 1) : 0;
+			$reviewCount = $rated->count();
+
+			// Response time (median hours)
+			$responseMinutes = $providerRequests
+				->whereNotNull('approved')
+				->whereNotNull('decided_at')
+				->map(fn($r) => Carbon::parse($r->created_at)->diffInMinutes(Carbon::parse($r->decided_at)))
+				->sort()->values();
+
+			$medianHours = null;
+			if ($responseMinutes->isNotEmpty()) {
+				$count = $responseMinutes->count();
+				$mid = intdiv($count, 2);
+				$median = $count % 2 === 0
+					? ($responseMinutes[$mid - 1] + $responseMinutes[$mid]) / 2
+					: $responseMinutes[$mid];
+				$medianHours = round($median / 60, 1);
+			}
+
+			$stats[$provider->id] = [
+				'rating' => $avgRating,
+				'review_count' => $reviewCount,
+				'response_time' => $medianHours,
+			];
+		}
+		return $stats;
 	}
 }
