@@ -199,24 +199,31 @@
                   @endif
 
                   <p class="mt-1">{!! Str::limit($service->description ?? 'No description available', 100) !!}</p>
+                  @if($_user->hasAnyRole(['admin', 'serviceProvider', 'organizationManager', 'subadmin']))
+                  @php
+                    $visibleOrgs = $_user->hasAnyRole(['admin', 'serviceProvider'])
+                      ? $service->organizations
+                      : $service->organizations->whereIn('id', $_user->organizations_ids);
+                  @endphp
                   <div class="d-flex align-items-center gap-2 mb-4">
                     <!-- Organizations Badges -->
-                    @if($service->organizations && $service->organizations->count())
-                      @foreach($service->organizations->take(2) as $organization)
+                    @if($visibleOrgs->count())
+                      @foreach($visibleOrgs->take(2) as $organization)
                         <div class="badge bg-label-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $organization->{'name_' . $l } }}">
                           {{ Str::limit($organization->{'name_' . $l}, 25) }}
                         </div>
                       @endforeach
-                      @if($service->organizations->count() > 2)
-                        <div class="badge bg-label-secondary orgs-modal-trigger" style="cursor:pointer;" data-orgs='@json($service->organizations->map(function($o) use($l) { return ["id"=>$o->id, "name"=>$o->{"name_".$l}]; }))'>+{{ $service->organizations->count() - 3 }}</div>
+                      @if($visibleOrgs->count() > 2)
+                        <div class="badge bg-label-secondary orgs-modal-trigger" style="cursor:pointer;" data-orgs='@json($visibleOrgs->map(function($o) use($l) { return ["id"=>$o->id, "name"=>$o->{"name_".$l}]; }))'>+{{ $visibleOrgs->count() - 2 }}</div>
                       @endif
                     @else
                       <div class="badge bg-label-secondary">{{ __('admin.No Organizations') }}</div>
                     @endif
                   </div>
+                  @endif
 
                   <!-- Service Price -->
-                  @if($service->price && $service->hide_price == 1 && !$_user->hasAnyRole(['admin', 'organizationManager', 'subadmin']))
+                  @if($service->price && $service->hide_price == 1 && !$_user->hasAnyRole(['admin', 'organizationManager', 'subadmin', 'serviceProvider']))
                     {{-- Price hidden from non-management roles --}}
                   @else
                     <div class="d-flex align-items-center gap-2 mb-4">

@@ -38,7 +38,7 @@ class ServiceController extends Controller
 		$orgIds = $user->organizations_ids;
 		$Setting = Settings::where('id', 1)->first();
 		$services = Service::with(['serviceCategory', 'organizations' => function($query) use ($orgIds, $user) {
-				if (!$user->hasRole('admin')) {
+				if (!$user->hasAnyRole(['admin', 'serviceProvider'])) {
 					$query->whereIn('organizations.id', $orgIds);
 				}
 			}, 'requests'])
@@ -99,7 +99,6 @@ class ServiceController extends Controller
 			})
 			->orderBy('created_at', 'desc')
 		->get();
-		// dd($services);
 
 		$services = $services->map(function ($service) {
 			$rating = $service->requests->whereNotNull('rate')->where('approved', true)->avg('rate') ?? 0;
