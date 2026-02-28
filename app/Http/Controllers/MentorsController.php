@@ -97,8 +97,7 @@ class MentorsController extends Controller
 			})->orderBy('start', 'DESC')->pluck('id')->first();
 		}
 		// $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
-		$mentors = User::role('mentor');
-		// $mentors = User::role('mentor')->with('inviteMentors')->get();
+		$mentors = User::role('mentor')->with('inviteMentors');
 		
 		$cList = CyclesMentors::where('cycle_id', $id)->pluck('user_id')->toArray();
 
@@ -156,7 +155,33 @@ class MentorsController extends Controller
 						}
                 	}
                 }
-			$mentors = $mentors->get();	
+			$mentors = $mentors->get()->map(function ($mentor) {
+				// افتراضيًا public لو مفيش invites
+				$mentorScope = 'public';
+				$mentorOrgIds = [];
+
+			if ($mentor->inviteMentors && $mentor->inviteMentors->count() > 0) {
+					// هنجيب كل invites المقبولة
+					$acceptedInvites = $mentor->inviteMentors->filter(fn($i) => strtolower($i->status) === 'accepted');
+					
+					// لو فيه invite scopes مختلفة، ممكن تختار الأولى أو حسب منطقك
+					if ($acceptedInvites->count() > 0) {
+						$mentorOrgIds = $acceptedInvites
+							->flatMap(fn($invite) => $invite->organization_ids ?? [])
+							->unique()
+							->values()
+							->toArray();
+						$mentorScope = count($mentorOrgIds) > 0 ? 'Organization' : $acceptedInvites->first()->scope;
+					}
+				}
+
+				// إضافة الخصائص للـ mentor
+				$mentor->scope = $mentorScope;
+				$mentor->scope_org_ids = $mentorOrgIds;
+				
+				return $mentor;
+			});
+
 		$selectedSpecialization = $request->specialization; 
 
 		if ($selectedSpecialization != 0) {
