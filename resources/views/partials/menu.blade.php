@@ -10,7 +10,7 @@
       $spReg = \Illuminate\Support\Facades\DB::table('service_provider_registration')
           ->where('user_id', $_user->id)
           ->first(['status']);
-      $spNotApproved = ($spReg && $spReg->status != 1);
+      $spNotApproved = ( !$spReg || ( $spReg && $spReg->status != 1 ) );
   }
 @endphp
 <!-- Menu -->
