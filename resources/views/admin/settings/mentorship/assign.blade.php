@@ -114,8 +114,12 @@
                           $organization = $organization_q
                               ->where('id', $_user->organization_id)
                               ->get();
-                      } else {
+                      }else {
                           $organization = collect(); 
+                      }
+                      if($id > 0) {
+                          $cycle = App\Cycle::find($id);
+                          $organization = $cycle->organization()->where('is_draft', 0)->get();
                       }
                     @endphp
                     <select id="scopeFilter" class="form-select">
