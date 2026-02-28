@@ -101,7 +101,7 @@ class Permissions
                     ->where('user_id', $user->id)
                     ->first(['status']);
 
-                if ($spRegistration && $spRegistration->status != 1) {
+                if ( /*!$spRegistration ||*/ ( $spRegistration && $spRegistration->status != 1 )) {
                     $routeName = $permission ?? '';
                     $allowedForUnapproved = Str::startsWith($routeName, 'service_provider_dashboard.')
                         || Str::startsWith($routeName, 'service_provider_request.');

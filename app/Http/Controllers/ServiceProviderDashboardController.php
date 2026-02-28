@@ -28,7 +28,11 @@ class ServiceProviderDashboardController extends Controller
             ->where('user_id', auth()->id())
             ->value('status');
 
-        return $status === 1 || $status === true;
+        if( $status === null ) { return true; }
+        else
+        {
+            return  $status === 1 || $status === true;
+        }
     }
 
     /**
@@ -409,6 +413,10 @@ class ServiceProviderDashboardController extends Controller
             } elseif ($registration->status === 0 || $registration->status === false) {
                 $approvalStatus = 'rejected';
             }
+        }
+        else
+        {
+            if( empty( $registration ) ) { $approvalStatus = 'accepted'; }
         }
         $rejectionReason = $registration->reason ?? '';
 
