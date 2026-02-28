@@ -2,35 +2,37 @@
 
 namespace App\Http\Controllers;
 
-use App\User;
-use App\Cycle;
-use Exception;
 use App\Company;
-use App\Surveys;
-use App\Schedule;
-use App\Settings;
-use Carbon\Carbon;
-use App\SurveyScopes;
+use App\Cycle;
 use App\CyclesMentors;
+use App\Events\MentorshipSessionUpdated;
+use App\Events\RequestMentorship;
+use App\Events\WebMessage;
+use App\Factories\OnlineMeetingFactory;
+use App\Http\Resources\MentorResource;
+use App\Jobs\ExportMentorsData;
+use App\Jobs\SendMentorshipNotification;
+use App\Jobs\SendMentorshipRequestJob;
+use App\MentorshipRequest;
+use App\Notifications\MentorshipRequestNotification;
+use App\Notifications\MentorshipSession;
+use App\Notifications\TemplateEmail;
+use App\Schedule;
+use App\Services\WhatsAppService;
+use App\Settings;
 use App\SurveyQuestions;
 use App\SurveyResponses;
-use App\Events\WebMessage;
-use App\MentorshipRequest;
+use App\Surveys;
+use App\SurveyScopes;
+use App\User;
+use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
-use App\Jobs\ExportMentorsData;
-use App\Events\RequestMentorship;
-use App\Services\WhatsAppService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Notifications\TemplateEmail;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Resources\MentorResource;
-use App\Jobs\SendMentorshipRequestJob;
-use App\Factories\OnlineMeetingFactory;
-use App\Events\MentorshipSessionUpdated;
-use App\Jobs\SendMentorshipNotification;
-use App\Notifications\MentorshipSession;
-use App\Notifications\MentorshipRequestNotification;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class MentorsController extends Controller
 {
@@ -479,9 +481,16 @@ class MentorsController extends Controller
 
 				$fileName = '';
 				if ($request->hasFile('file_url')) {
-					$fileName = $request->file('file_url')->store($request->user_id, ['disk' => 'PrivateDisk']);
+					$file = $request->file('file_url');
+					$fileName = $file->store($request->user_id, ['disk' => 'UsersDiskInviteMentor']);
+					$extension = $file->guessExtension();
+					$originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+					$safeName = Str::slug($originalName);
+					$date = now()->format('Y-m-d_H-i-s');
+					$fileName = $safeName . '_' . $date . '.' . $extension;
+					Storage::disk('UsersDiskInviteMentor')->putFileAs('', $file, $fileName);
 				}
-
+				
 				$cycle = Cycle::find($request->cycle_id);
 				
 				$autoApprove = $cycle->auto_approve_mentorship_requests;
@@ -587,10 +596,20 @@ class MentorsController extends Controller
 						return back()->with(['msg' => 'cannot_schedule_past_meeting']);
 					}
 					$fileName = '';
+					// if ($request->hasFile('file_url')) {
+					// 	$fileName = $request->file('file_url');
+					// 	$fileName = $fileName->store(Auth::id(), ['disk' => 'PrivateDisk']);
+					// }
 					if ($request->hasFile('file_url')) {
-						$fileName = $request->file('file_url');
-						$fileName = $fileName->store(Auth::id(), ['disk' => 'PrivateDisk']);
-					}
+					$file = $request->file('file_url');
+					$fileName = $file->store($request->user_id, ['disk' => 'UsersDiskInviteMentor']);
+					$extension = $file->guessExtension();
+					$originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+					$safeName = Str::slug($originalName);
+					$date = now()->format('Y-m-d_H-i-s');
+					$fileName = $safeName . '_' . $date . '.' . $extension;
+					Storage::disk('UsersDiskInviteMentor')->putFileAs('', $file, $fileName);
+				}
 
 					$cycle = Cycle::find($request->cycle_id);
 					$autoApprove = $cycle->auto_approve_mentorship_requests;

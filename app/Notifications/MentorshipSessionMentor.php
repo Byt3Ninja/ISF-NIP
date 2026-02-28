@@ -2,15 +2,16 @@
 
 namespace App\Notifications;
 
-use App\Traits\ConfiguresSmtp;
-use Illuminate\Bus\Queueable;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Notifications\Notification;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Messages\BroadcastMessage;
 use App\Broadcasting\WhatsAppChannel;
 use App\Services\GlobalNotificationSettingsService;
+use App\Traits\ConfiguresSmtp;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\BroadcastMessage;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 class MentorshipSessionMentor extends Notification implements ShouldQueue
@@ -131,19 +132,28 @@ class MentorshipSessionMentor extends Notification implements ShouldQueue
                     'data' => $this->data
                 ]);
 
-foreach ($this->data['attachments'] ?? [] as $attachment) {
-        $filePath = $attachment['path'] ?? null;
-        if (empty($filePath)) continue;
-        $fullPath = storage_path('app/users/' . $filePath);
-        if (file_exists($fullPath)) {
-            $mail->attach($fullPath, [
-                'as' => $attachment['name'] ?? basename($filePath),
-                'mime' => \Illuminate\Support\Facades\File::mimeType($fullPath),
-            ]);
+ $attachments = $this->data['attachments'] ?? [];
+ \Log::info($attachments);
+
+
+if (!empty($attachments)) {
+
+    $disk = Storage::disk('UsersDiskInviteMentor');
+
+    foreach ($attachments as $file) {
+        $filePath = is_array($file) ? $file['path'] : $file;
+        $fileName = basename($filePath);
+
+        if ($disk->exists($filePath)) {
+            $mail->attach($disk->path($filePath));
         } else {
-            \Log::error('Attachment not found: ' . $fullPath);
+            logger()->error('InviteMentor attachment not found on UsersDiskInviteMentor', [
+                'file' => $filePath,
+                'disk_root' => config('filesystems.disks.UsersDiskInviteMentor.root'),
+            ]);
         }
     }
+}
 
     return $mail;
 
