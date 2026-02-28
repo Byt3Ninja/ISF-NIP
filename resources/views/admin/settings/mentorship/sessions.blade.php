@@ -235,7 +235,7 @@
                               @endif
                             @endif
                             @if ($session->fileurl)
-                              <a href="/dashboard/private/{{ $session->fileurl }}" target="_blank" class="btn-icon rounded-circle btn btn-sm btn-light" title="Download attached">
+                              <a href="/dashboard/uploads/InviteMentor/{{ $session->fileurl }}" target="_blank" class="btn-icon rounded-circle btn btn-sm btn-light" title="Download attached">
                                 <i class="ti ti-download"></i>
                               </a>
                             @endif
