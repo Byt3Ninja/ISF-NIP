@@ -204,24 +204,22 @@ class ServiceController extends Controller
 			//get the path of the stores image
 			$img_url = $img_url->store('services', ['disk' => 'public_uploads']);
 		} else { $img_url = '';  }
-		$inputs = $request->except(['img_url']);
-		$inputs['img_url'] = $img_url;
-
 		$inputs = $request->except(['img_url']) + [
 			'img_url' => $img_url,
 			'vendor_name' => $provider->company_name,
 			'vendor_phone' => $provider->phone,
 			'vendor_email' => $provider->email,
 			'service_provider_id' => $provider->id,
-			'hide_price' => $request->has('hide_price') ? 1 : 0, 
+			'hide_price' => $request->has('hide_price') ? 1 : 0,
 			'currency' => $request->input('currency', null),
 			'hide_vendor_info' => $request->has('hide_vendor_info') ? 1 : 0
 		];
 
+		$inputs['price'] = $request->input('price') ?? 0;
 		$inputs['status'] = $request->is_active;
-		$inputs['name_ar'] = $inputs['name_en']; 
+		$inputs['name_ar'] = $inputs['name_en'];
 		$inputs['description_ar'] = $inputs['description_en'];
-		
+
 		$service = Service::create($inputs);
 
 		// Assign organizations (if selected)
@@ -268,6 +266,7 @@ class ServiceController extends Controller
 		}
 		$currencies = Currency::all();
 		$providers = serviceProviders::all();
+		if( $service->price == 0 ) { $service->price = null; }
 		return view('admin/settings/services/edit', compact('service', 'serviceCategories', 'organizations', 'providers', 'currencies'));
 	}
 
@@ -337,14 +336,15 @@ class ServiceController extends Controller
 		$inputs['vendor_phone'] = $provider->phone;
 		$inputs['vendor_email'] = $provider->email;
 
+		$inputs['price'] = $request->input('price') ?? 0;
 		$inputs['hide_price'] = $request->input('hide_price', 0);
 		$inputs['hide_vendor_info'] = $request->input('hide_vendor_info', 0);
-		$inputs['name_ar'] = $inputs['name_en']; 
+		$inputs['name_ar'] = $inputs['name_en'];
 		$inputs['description_ar'] = $inputs['description_en'];
 
 		$inputs['status'] = $request->input('status', 1);
 		$inputs['currency'] = $request->input('currency', null);
-		
+
 		$updated = $service->update($inputs);
 
 		if ($request->has('organization_ids')) {
