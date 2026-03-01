@@ -3576,4 +3576,8 @@ return [
 	'thank_you_for_submission' => 'شكراً لك على مشاركتك. إليك الردود التي قدمتها.',
 	'already_responded' => 'لقد أجبت بالفعل على هذا الاستطلاع.',
 	'name_is_required' => 'اسم مطلوب.',
+	'First name must contain only English letters' => 'يجب أن يحتوي الاسم الأول على أحرف إنجليزية فقط',
+	'Last name must contain only English letters' => 'يجب أن يحتوي اسم العائلة على أحرف إنجليزية فقط',
+	'First name must contain only Arabic letters' => 'يجب أن يحتوي الاسم الأول على أحرف عربية فقط',
+	'Last name must contain only Arabic letters' => 'يجب أن يحتوي اسم العائلة على أحرف عربية فقط',
 ];
