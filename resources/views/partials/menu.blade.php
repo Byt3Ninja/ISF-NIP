@@ -314,14 +314,7 @@
           <div>{{ __('mentor.enrolled_programs') }}</div>
         </a>
       </li>
-      {{-- @php
-        $countRequest = 0;
-        $countRequest = App\MentorshipRequest::where('mentor_id', auth()->id())
-                      ->where('approved', 'Yes')
-                      ->where('zoom_date', '>=', date('Y-m-d'))
-                      ->count();
-        
-      @endphp --}}
+      @if( $_user->ableTo('mentorships.sessions') )
       <li class="{{ Request::is('dashboard/mentor/sessions') ? 'active' : '' }} menu-item">
         <a href="/dashboard/mentor/sessions" class="menu-link">
           <i class="menu-icon tf-icons ti ti-calendar-event"></i>
@@ -331,6 +324,7 @@
           </div>
         </a>
       </li>
+      @endif
       @php
         $countSurvey = 0;
         $countSurvey = App\SurveyResponses::where('user_id', auth()->id())->whereNull('responses')->count();

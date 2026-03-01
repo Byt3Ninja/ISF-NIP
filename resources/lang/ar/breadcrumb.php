@@ -59,6 +59,7 @@ return [
     'mentorship_requests' => 'طلبات الإرشاد',
     'mentors' => 'المرشدون',
     'availability' => 'التوافر',
+    'users_manage_cycle' => 'إدارة الشركات الناشئة',
 
     // Tasks
     'tasks' => 'المهام',
