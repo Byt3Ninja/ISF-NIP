@@ -342,16 +342,18 @@ class AssessmentController extends Controller
             ]);
 
             // Get all assessment questions
-            $questions = QuestionsBank::where('group', 'assessment')->get();
             $userScores = [];
+            $company_weights = Weight::where('stage_id', $company->stage)->get();
+            $questions = QuestionsBank::where('group', 'assessment')->whereIn('ascategory_id', $company_weights->pluck('category_id'))->get();
 
             // Prepare user scores
             foreach ($questions as $question) {
                 
-                $weight = Weight::where('stage_id', $company->stage)
+                $weight = $company_weights
                     ->where('category_id', $question->ascategory_id)
                     ->where('subcategory_id', $question->subcategory_id)
                     ->first();
+
 
                 if (!$weight) {
                     DB::rollBack();
@@ -377,7 +379,7 @@ class AssessmentController extends Controller
                     'updated_at' => now(),
                 ];
                
-                }
+            }
                 
             // Bulk insert user scores for better performance
             UserScore::insert($userScores);
