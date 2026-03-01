@@ -3518,4 +3518,5 @@ return [
 	'no_milestones' => 'No milestones added yet.',
 	'thank_you_for_submission' => 'Thank you for your submission. Here are the responses you provided.',
 	'already_responded' => 'You have already responded to this survey.',
+	'name_is_required' => 'Name is required.',
 ];
