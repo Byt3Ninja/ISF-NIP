@@ -59,6 +59,7 @@ return [
     'mentorship_requests' => 'Mentorship Requests',
     'mentors' => 'Mentors',
     'availability' => 'Availability',
+    'users_manage_cycle' => 'Manage Startups',
 
     // Tasks
     'tasks' => 'Tasks',

@@ -96,7 +96,10 @@ class MessengerController extends Controller
             } else {
                 $orgIds = $user->organizations_ids;
                 $cycles = Cycle::whereIn('organization_id', $orgIds)->select('id', 'title')->get();
-                $users = Company::whereIn('organization_id', $orgIds)->get();
+                $users = Company::with(['user'])->whereHas('user', function ($query) use ($orgIds) {
+                    $query->whereIn('organization_id', $orgIds);
+                })
+                ->get();
                 $organizations = Organization::whereIn('id', $orgIds)->get();
             }
             // $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();

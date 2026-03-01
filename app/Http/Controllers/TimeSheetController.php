@@ -33,13 +33,15 @@ class TimeSheetController extends Controller
 				$user = auth()->user();
 				$orgIds = $user->organizations_ids;
 				$cycles = Cycle::whereIn('organization_id', $orgIds)->get();
-				$users = User::whereIn('organization_id', $orgIds)->role(['manager', 'coordinator'])->get();
+				$users = User::whereIn('organization_id', $orgIds)->get();
+				$users = $users->filter(function($user) { return $user->hasAnyRole(['manager', 'coordinator']); })->values();
 			}
 			elseif( auth()->user()->hasRole('manager') )
 			{
 				$organization = Organization::where('user_id', '=', auth()->user()->id)->first();
 				$cycles = Cycle::where('organization_id', '=', $organization->id)->get();
-				$users = User::where('organization_id','=', $organization->id)->role('coordinator')->get();
+				$users = User::where('organization_id','=', $organization->id)->get();
+				$users = $users->filter(function($user) { return $user->hasAnyRole(['coordinator']); })->values();
 			}
 			elseif( auth()->user()->hasRole('coordinator') )
 			{
@@ -176,7 +178,8 @@ class TimeSheetController extends Controller
 			$orgIds = $authUser->organizations_ids;
 			$organization = Organization::whereIn('id', $orgIds)->get();
 			$cycles = Cycle::whereIn('organization_id', $orgIds)->get();
-			$users = User::whereIn('organization_id', $orgIds)->role(['manager', 'coordinator'])->get();
+			$users = User::whereIn('organization_id', $orgIds)->get();
+			$users = $users->filter(function($user) { return $user->hasAnyRole(['manager', 'coordinator']); })->values();
 			$timeSheets = TimeSheet::whereIn('user_id', $users->pluck('id'))->get();
 		}
 		else
@@ -188,7 +191,8 @@ class TimeSheetController extends Controller
 				if( $org )
 				{
 					$cycles = Cycle::where('organization_id', $org->id)->get();
-					$users = User::where('organization_id', $org->id)->role('coordinator')->get();
+					$users = User::where('organization_id', $org->id)->get();
+					$users = $users->filter(function($user) { return $user->hasAnyRole(['coordinator']); })->values();
 					$organization = Organization::where('id', $org->id)->get();
 				}
 			}
@@ -262,7 +266,8 @@ class TimeSheetController extends Controller
 			$orgIds = $authUser->organizations_ids;
 			$organization = Organization::whereIn('id', $orgIds)->get();
 			$cycles = Cycle::whereIn('organization_id', $orgIds)->get();
-			$users = User::whereIn('organization_id', $orgIds)->role(['manager', 'coordinator'])->get();
+			$users = User::whereIn('organization_id', $orgIds)->get();
+			$users = $users->filter(function($user) { return $user->hasAnyRole(['manager', 'coordinator']); })->values();
 			$timeSheets = TimeSheet::whereIn('user_id', $users->pluck('id'))->get();
 		}
 		else
@@ -275,7 +280,8 @@ class TimeSheetController extends Controller
 				if( $org )
 				{
 					$cycles = Cycle::where('organization_id', $org->id)->get();
-					$users = User::where('organization_id', $org->id)->role('coordinator')->get();
+					$users = User::where('organization_id', $org->id)->get();
+					$users = $users->filter(function($user) { return $user->hasAnyRole(['coordinator']); })->values();
 					$organization = Organization::where('id', $org->id)->get();
 				}
 			}

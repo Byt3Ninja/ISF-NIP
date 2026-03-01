@@ -883,14 +883,14 @@ class SettingsController extends Controller
 		// $delete = ReminderLog::truncate();
 		$user = auth()->user();
 		$orgIds = $user->organizations_ids;
-		if(auth()->user()->hasAnyRole(['organizationManager', 'subadmin']))
+		if($user->hasAnyRole(['organizationManager', 'subadmin']))
 		{
 			$cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
 				return $q->whereIn('organization_id', $orgIds);
 			})->get();
-			$ReminderLogs = ReminderLog::whereIn('cycle_id', $cycles->pluck('id'));
+			$ReminderLogs = ReminderLog::whereIn('cycle_id', $cycles->pluck('id'))->get();
 		}
-		elseif(auth()->user()->hasRole('Admin'))
+		elseif($user->hasRole('Admin'))
 		{
 			$ReminderLogs = ReminderLog::all();
 		}
