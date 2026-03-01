@@ -376,8 +376,11 @@ class ClientCompanyController extends Controller
                     ? Carbon::parse($request->valuation_date)->year
                     : (int) date('Y');
 
-                    
-        $valuation_dateSearch = $request->valuation_date ?? date('Y-m');
+                    $desc_valuation = FinancialProjection::where('company_id', $id)
+            ->orderBy('valuation_date', 'desc')
+            ->first();
+        $valuation_dateSearch = $request->valuation_date ?? Carbon::parse($desc_valuation->valuation_date)->format('Y-m') ?? date('Y-m');
+       
         $valuationYear = (int) date('Y', strtotime($valuation_dateSearch));
         $yearsRange = range($year - 1, $year + 2);
         $financialprojectionArray = [];
@@ -788,49 +791,40 @@ class ClientCompanyController extends Controller
                 : (int) date('Y');
 
             $valuation_dateSearch = $request->valuation_date;
-                
-            $yearsRange = range($year - 1, $year + 2);
-            $financialprojectionArray = [];
-            foreach ($yearsRange as $_year) {
-                $financialprojectionArray[$_year] = [];
-            }
+
             $getCurrancy = '';
             $is_currency_disabled = false;
             $Historyfinancialprojection = FinancialProjection::where('company_id', $id)
+                ->whereNotNull('valuation_date')
                 ->orderBy('valuation_date', 'desc')
                 ->get();
-            
-                $historicalValuationProjections = $Historyfinancialprojection->pluck('valuation_date')->unique();
-                if($valuation_dateSearch != null){
-                    $financialprojection = $Historyfinancialprojection->where('valuation_date', $valuation_dateSearch.'-01');
-                }else{
-                     $financialprojection = $Historyfinancialprojection;
-                }
-                $historicalValuationDates = $historicalValuationProjections->map(function ($date) {
-                    return Carbon::parse($date)->format('Y-m');
-                });
-                
-            foreach ($financialprojection as $projection) {
-                $financialprojectionArray[$projection->year] = $projection;
-            }
-            if ($financialprojection->isEmpty()) {
-                
+
+            if ($Historyfinancialprojection->isEmpty()) {
+                $financialprojection = [];
                 $valuation_date = null;
             } else {
-                    $financialFirst = $financialprojection->first();
-                if (isset($financialFirst) && !empty($financialFirst->valuation_date)) {
-                    $formtat_valuation_date = $financialprojection->first()->valuation_date;
-                    $valuation_date = Carbon::parse($formtat_valuation_date)->format('Y-m');
-                    $getCurrancy = $financialprojection->first()->currency;
-                    if($getCurrancy != null){
-                        $is_currency_disabled = true;
-                    }
+                if ($valuation_dateSearch) {
+                    $valuation_date_full = $valuation_dateSearch . '-01';
                 } else {
-                    $valuation_date = null;
+                    $valuation_date_full = $Historyfinancialprojection->first()->valuation_date;
                 }
+                $filtered = $Historyfinancialprojection
+                    ->where('valuation_date', $valuation_date_full)
+                    ->values();
 
-                $financialprojection = $financialprojectionArray;
+            
+                $financialprojection = $filtered->keyBy('year')->toArray();
+
+                $valuation_date = Carbon::parse($valuation_date_full)->format('Y-m');
+
+                $getCurrancy = $filtered->first()?->currency;
+                $is_currency_disabled = !is_null($getCurrancy);
             }
+
+            $historicalValuationDates = $Historyfinancialprojection
+                ->pluck('valuation_date')
+                ->unique()
+                ->map(fn($date) => Carbon::parse($date)->format('Y-m'));
 
             $current_year = date('Y');
             $years = array_merge(range($current_year - 10, $current_year), range($current_year + 1, $current_year + 10));
@@ -841,7 +835,7 @@ class ClientCompanyController extends Controller
                 'average_monthly_growth' => $records_metadata['avgMonthlyGrowth'],
                 'compound_annual_growth_rate' => $records_metadata['compoundAnnualGrowthRate']
             ];
-                
+                // dd($financialprojection);
             $company = $company_instance; // For backward compatibility in the view
             return view('admin/clients/company', compact(
                 'client',
@@ -957,7 +951,7 @@ class ClientCompanyController extends Controller
                 $result = new Company();
                 $msgtype = 'AddComp';
             }
-
+    
             if ($data['CompanyN'] == 1) {
 
                 $l = $request->input('locale', app()->getLocale());
@@ -1435,6 +1429,9 @@ class ClientCompanyController extends Controller
                 $result->other_business_model = $data['other_business_model'];
                 $result->business_model_description = $data['business_model_description'];
                 $result->business_plan = $uploadedFile;
+            }
+            if($result->name_en == null){
+                return redirect()->back()->with(['msg' => 'name_is_required', 'class' => 'danger']);
             }
             $result->save();
 
@@ -1917,7 +1914,7 @@ class ClientCompanyController extends Controller
                 }
             }
             if ($data['CompanyN'] == 15) {
-                
+               
                 if($data['valuation_date'] == null){
                     return redirect()->back()->with(['msg' => 'Please enter the valuation date', 'class' => 'danger']);
                 }

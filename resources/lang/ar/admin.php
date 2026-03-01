@@ -3575,4 +3575,5 @@ return [
 	'no_milestones' => 'لا توجد مراحل محددة بعد.',
 	'thank_you_for_submission' => 'شكراً لك على مشاركتك. إليك الردود التي قدمتها.',
 	'already_responded' => 'لقد أجبت بالفعل على هذا الاستطلاع.',
+	'name_is_required' => 'اسم مطلوب.',
 ];
