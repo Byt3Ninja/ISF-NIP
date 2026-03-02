@@ -537,13 +537,27 @@ $(function () {
   }
 
   /* =======================
+   * Custom Status Sorting
+   * ======================= */
+  $.fn.dataTable.ext.type.order['status-priority-pre'] = function (data) {
+    const status = data.toLowerCase();
+    if (status.includes('accepted')) return 1;
+    if (status.includes('pending') || status.includes('sent')) return 2;
+    if (status.includes('declined') || status.includes('rejected') || status.includes('cancelled') || status.includes('notsent')) return 3;
+    return 4; // Default for any other status
+  };
+
+  /* =======================
    * DataTable
    * ======================= */
   const table = $('#invitationsTable').DataTable({
     responsive: true,
     processing: true,
     pageLength: 10,
-    order: [[5, 'desc']],
+    order: [[3, 'asc'], [5, 'desc']], // Sort by status first, then by date
+    columnDefs: [
+      { targets: 3, type: 'status-priority' } // Apply custom sorting to status column
+    ],
     dom:
       '<"row"' +
       '<"col-12 col-lg-9 d-flex flex-wrap align-items-center ps-0 ps-lg-6"l>' +
