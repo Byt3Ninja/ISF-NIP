@@ -141,28 +141,26 @@
   
       <!-- Organization Assignment -->
       @if( $organizations->count() > 0 )
-      <div class="card shadow-none border mb-5">
-        <div class="card-header pb-4 d-flex justify-content-between align-items-center">
+      <div class="card card-body shadow-none border mb-4">
+        <div class="pb-4 d-flex justify-content-between align-items-center">
           <span>{{ __('admin.organizations_assignment') }}</span>
           <div>
             <button type="button" class="btn btn-sm btn-text-primary me-2" id="selectAllOrgs">{{ __('admin.select_all') }}</button>
             <button type="button" class="btn btn-sm btn-text-secondary" id="deselectAllOrgs">{{ __('admin.deselect_all') }}</button>
           </div>
         </div>
-        <div class="card-body">
-          <select class="form-select select2" name="organization_ids[]" id="organization_ids" data-placeholder="{{ __('admin.Select Organizations') }}" multiple>
-            <option value="">{{ __('admin.Select Organizations') }}</option>
-            @foreach ($organizations as $organization)
-              <option value="{{ $organization->id }}" {{ in_array($organization->id, old('organization_ids', [])) ? 'selected' : '' }}>
-                {{ $organization->{'name_' . app()->getLocale()} }}
-              </option>
-            @endforeach
-          </select>
-  
-          <div class="mt-4 d-flex justify-content-between">
-            <small class="text-muted" id="orgCounter">0 {{ __('admin.Of') }} {{ $organizations->count() }} {{ $l == 'en' ? 'Organization' : 'مؤسسة' }} {{ __('admin.Selected') }}</small>
-            <small class="text-muted">{{ __('admin.service_accessibility_description') }}</small>
-          </div>
+        <select class="form-select select2" name="organization_ids[]" id="organization_ids" data-placeholder="{{ __('admin.Select Organizations') }}" multiple>
+          <option value="">{{ __('admin.Select Organizations') }}</option>
+          @foreach ($organizations as $organization)
+            <option value="{{ $organization->id }}" {{ in_array($organization->id, old('organization_ids', [])) ? 'selected' : '' }}>
+              {{ $organization->{'name_' . app()->getLocale()} }}
+            </option>
+          @endforeach
+        </select>
+
+        <div class="mt-4 d-flex justify-content-between">
+          <small class="text-muted" id="orgCounter">0 {{ __('admin.Of') }} {{ $organizations->count() }} {{ $l == 'en' ? 'Organization' : 'مؤسسة' }} {{ __('admin.Selected') }}</small>
+          <small class="text-muted">{{ __('admin.service_accessibility_description') }}</small>
         </div>
       </div>
       @endif
@@ -398,6 +396,13 @@
               greaterThan: {
                 min: 0,
                 message: '{{ __('admin.must_not_be_less_than_0') }}'
+              }
+            }
+          },
+          "organization_ids[]": {
+            validators: {
+              notEmpty: {
+                message: '{{ __('admin.organizations_select_required') }}'
               }
             }
           },
