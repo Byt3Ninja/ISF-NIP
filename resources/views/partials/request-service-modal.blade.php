@@ -207,7 +207,7 @@ $(function () {
 
           // View Profile link
           if (s.provider_user_id) {
-            $('#modalViewProfile').attr('href', '/dashboard/show/UserProfile/' + s.provider_user_id).show();
+            $('#modalViewProfile').attr('href', '/dashboard/service-provider/' + s.service_provider_id + '/profile').show();
           } else {
             $('#modalViewProfile').hide();
           }
