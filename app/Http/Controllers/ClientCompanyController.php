@@ -1935,7 +1935,9 @@ class ClientCompanyController extends Controller
                         ->where('valuation_date', $valuation_date)
                        ->where('year', $yearDate->year)
                        ->first();
-
+                    if($updateFinancial != null){
+                        $data['Currency'] = $updateFinancial->currency;
+                    }
                     // if($user->company->currancy == $data['Currency']){
                     //     $data['Currency'] = $user->company->currancy;
                     // }
