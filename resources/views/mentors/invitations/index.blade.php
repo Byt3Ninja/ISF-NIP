@@ -858,7 +858,7 @@ $(function () {
 
     const newRow = `
       <tr data-scope="${invitation.scope}" data-status="${invitation.status}">
-        <td>${invitation.invitee_name}<br><small>${invitation.invitee_email}</small></td>
+        <td><h6 class="mb-0 fw-semibold">${invitation.invitee_name}</h6> <small>${invitation.invitee_email}</small></td>
         <td>${invitation.subject}</td>
         <td>
           <span class="badge bg-label-${scopeBadgeClass}">
@@ -873,6 +873,7 @@ $(function () {
         </td>
         <td>${invitation.accepted_at}</td>
         <td>${invitation.created_at}</td>
+        <td>${invitation.inviter_name}</td>
         <td>
           <button class="btn btn-sm btn-outline-primary text-nowrap view-details" data-bs-toggle="offcanvas" data-bs-target="#invitationOffcanvas" data-invitee-name="${invitation.invitee_name}" data-invitee-email="${invitation.invitee_email}" data-subject="${invitation.subject}" data-scope="${invitation.scope}" data-status="${invitation.status}" data-message="${invitation.message_content}" data-date="${invitation.created_at}" data-attachments="${JSON.parse(invitation.attachments || '[]').join(',')}" data-response-message="${invitation.response_message || ''}" data-orgs='${JSON.stringify(invitation.organizations || [])}'>
             <i class="ti ti-eye me-1"></i> ${translations.view_details}
