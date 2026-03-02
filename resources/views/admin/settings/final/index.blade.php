@@ -55,7 +55,7 @@
 
               <div class="col-md-6 col-lg-2">
                 <select class="form-select select2" name="program" data-placeholder="{{ __('admin.All_Programs') }}">
-                  <option value=""></option>
+                  <option value="all">{{ __('admin.All_Programs') }}</option>
                   @foreach($programs_in_final_screening->pluck('cycle')->unique('id') as $program)
                     <option value="{{ $program->id }}" {{ request('program') == $program->id ? 'selected' : '' }}>{{ Str::limit($program->title, 25) }}</option>
                   @endforeach
@@ -64,7 +64,7 @@
 
               <div class="col-md-6 col-lg-2">
                 <select class="form-select select2" name="status" data-placeholder="{{ __('admin.All_statuses') }}">
-                  <option value=""></option>
+                  <option value="all">{{ __('admin.All_statuses') }}</option>
                   <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>{{ __('admin.In_Progress') }}</option>
                   <option value="upcoming" {{ request('status') == 'upcoming' ? 'selected' : '' }}>{{ __('admin.Upcoming') }}</option>
                   <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>{{ __('admin.completed') }}</option>
@@ -74,13 +74,13 @@
               <div class="col-md-6 col-lg-3">
                 <div class="d-flex gap-2">
                   <select class="form-select select2 flex-grow-1" name="judge" data-placeholder="{{ __('cycles.All Judges') }}">
-                    <option value=""></option>
+                    <option value="all">{{ __('cycles.All Judges') }}</option>
                     @foreach($finalScreeningSteps->pluck('judges')->flatten()->unique('id') as $judge)
                       <option value="{{ $judge->id }}" {{ request('judge') == $judge->id ? 'selected' : '' }}>{{ $judge->name }}</option>
                     @endforeach
                   </select>
                   <select class="form-select select2 flex-grow-1" name="startup" data-placeholder="{{ __('admin.all_startups') }}">
-                    <option value=""></option>
+                    <option value="all">{{ __('admin.all_startups') }}</option>
                     @foreach($finalScreeningSteps->pluck('companies')->flatten()->unique('id') as $company)
                       <option value="{{ $company->id }}" {{ request('startup') == $company->id ? 'selected' : '' }}>{{ Str::limit($company->name, 25) }}</option>
                     @endforeach
@@ -294,7 +294,7 @@
       $this.wrap('<div class="position-relative"></div>').select2({
         placeholder: $this.data('placeholder'),
         dropdownParent: $this.parent(),
-        allowClear: true
+        // allowClear: true
       });
     });
     // Initialize date pickers

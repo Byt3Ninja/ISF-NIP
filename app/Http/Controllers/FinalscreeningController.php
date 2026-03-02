@@ -58,7 +58,7 @@ class FinalscreeningController extends Controller
 			});
 		}
 
-		if( $request->filled('status') )
+		if( $request->filled('status') && $request->input('status', 'all') != 'all')
 		{
 			$today = now()->toDateString();
 			switch ($request->status)
@@ -75,11 +75,11 @@ class FinalscreeningController extends Controller
 			}
 		}
 
-		if ($request->filled('program')) {
+		if ($request->filled('program') && $request->input('program', 'all') != 'all') {
 			$stepsQuery->whereHas('cycle', function ($c) use ($request) { $c->where('id', $request->program); });
 		}
 
-		if ($request->filled('judge'))
+		if ($request->filled('judge') && $request->input('judge', 'all') != 'all')
 		{
 			$stepsQuery->where(function ($q) use ($request) {
 				// Check if judge is in the JSON list field
@@ -89,7 +89,7 @@ class FinalscreeningController extends Controller
 			});
 		}
 
-		if ($request->filled('startup')) {
+		if ($request->filled('startup') && $request->input('startup', 'all') != 'all') {
 			$stepsQuery->whereHas('companies', function ($c) use ($request) { $c->where('id', $request->startup); });
 		}
 
