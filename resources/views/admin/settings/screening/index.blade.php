@@ -297,7 +297,7 @@
       $this.wrap('<div class="position-relative"></div>').select2({
         placeholder: $this.data('placeholder'),
         dropdownParent: $this.parent(),
-        allowClear: true,
+        // allowClear: true,
       });
     });
 
