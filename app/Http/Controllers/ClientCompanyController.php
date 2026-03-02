@@ -379,7 +379,11 @@ class ClientCompanyController extends Controller
                     $desc_valuation = FinancialProjection::where('company_id', $id)
             ->orderBy('valuation_date', 'desc')
             ->first();
-        $valuation_dateSearch = $request->valuation_date ?? Carbon::parse($desc_valuation->valuation_date)->format('Y-m') ?? date('Y-m');
+        $valuation_dateSearch = date('Y-m');
+        if( !empty( $desc_valuation?->valuation_date ) )
+        {
+            $valuation_dateSearch = $request->valuation_date ?? Carbon::parse($desc_valuation->valuation_date)->format('Y-m') ?? date('Y-m');
+        }
        
         $valuationYear = (int) date('Y', strtotime($valuation_dateSearch));
         $yearsRange = range($year - 1, $year + 2);
