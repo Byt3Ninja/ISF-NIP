@@ -74,7 +74,7 @@ class ScreeningController extends Controller
 			$stepsQuery->where('data', $screeningType);
 		}
 
-		if( $request->filled('status') )
+		if( $request->filled('status') && $request->input('status', 'all') != 'all')
 		{
 			$today = now()->toDateString();
 			switch ($request->status)
@@ -91,18 +91,18 @@ class ScreeningController extends Controller
 			}
 		}
 
-		if ($request->filled('program')) {
+		if ($request->filled('program') && $request->input('program', 'all') != 'all') {
 			$stepsQuery->where('cycle_id', $request->program);
 		}
 
-		if ($request->filled('judge')) {
+		if ($request->filled('judge') && $request->input('judge', 'all') != 'all') {
 			$judgeId = $request->judge;
 			$stepsQuery->whereHas('screenings', function ($q) use ($judgeId) {
 				$q->where('user_id', $judgeId);
 			});
 		}	
 
-		if ($request->filled('startup'))
+		if ($request->filled('startup') && $request->input('startup', 'all') != 'all')
 		{
 			$stepsQuery->whereHas('companies', function ($c) use ($request) { $c->where('id', $request->startup); });
 		}
