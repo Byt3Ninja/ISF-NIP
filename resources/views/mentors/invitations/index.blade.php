@@ -537,13 +537,27 @@ $(function () {
   }
 
   /* =======================
+   * Custom Status Sorting
+   * ======================= */
+  $.fn.dataTable.ext.type.order['status-priority-pre'] = function (data) {
+    const status = data.toLowerCase();
+    if (status.includes('accepted')) return 1;
+    if (status.includes('pending') || status.includes('sent')) return 2;
+    if (status.includes('declined') || status.includes('rejected') || status.includes('cancelled') || status.includes('notsent')) return 3;
+    return 4; // Default for any other status
+  };
+
+  /* =======================
    * DataTable
    * ======================= */
   const table = $('#invitationsTable').DataTable({
     responsive: true,
     processing: true,
     pageLength: 10,
-    order: [[5, 'desc']],
+    order: [[3, 'asc'], [5, 'desc']], // Sort by status first, then by date
+    columnDefs: [
+      { targets: 3, type: 'status-priority' } // Apply custom sorting to status column
+    ],
     dom:
       '<"row"' +
       '<"col-12 col-lg-9 d-flex flex-wrap align-items-center ps-0 ps-lg-6"l>' +
@@ -858,7 +872,7 @@ $(function () {
 
     const newRow = `
       <tr data-scope="${invitation.scope}" data-status="${invitation.status}">
-        <td>${invitation.invitee_name}<br><small>${invitation.invitee_email}</small></td>
+        <td><h6 class="mb-0 fw-semibold">${invitation.invitee_name}</h6> <small>${invitation.invitee_email}</small></td>
         <td>${invitation.subject}</td>
         <td>
           <span class="badge bg-label-${scopeBadgeClass}">
@@ -873,6 +887,7 @@ $(function () {
         </td>
         <td>${invitation.accepted_at}</td>
         <td>${invitation.created_at}</td>
+        <td>${invitation.inviter_name}</td>
         <td>
           <button class="btn btn-sm btn-outline-primary text-nowrap view-details" data-bs-toggle="offcanvas" data-bs-target="#invitationOffcanvas" data-invitee-name="${invitation.invitee_name}" data-invitee-email="${invitation.invitee_email}" data-subject="${invitation.subject}" data-scope="${invitation.scope}" data-status="${invitation.status}" data-message="${invitation.message_content}" data-date="${invitation.created_at}" data-attachments="${JSON.parse(invitation.attachments || '[]').join(',')}" data-response-message="${invitation.response_message || ''}" data-orgs='${JSON.stringify(invitation.organizations || [])}'>
             <i class="ti ti-eye me-1"></i> ${translations.view_details}
