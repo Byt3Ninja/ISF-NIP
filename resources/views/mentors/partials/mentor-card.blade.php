@@ -2,13 +2,18 @@
 @if(isset($mentor) && $mentor)
 <div class="col-md-4 rounded mb-6">
   <div class="position-relative">
-    <img 
-      src="{{ $mentor?->image_url ?? '/images/placeholder.jpg' }}" 
-      onerror="this.onerror=null;this.src='/images/placeholder.jpg';"
-      alt="Mentor Image" 
-      class="img-fluid rounded mb-2" 
-      style="height: 293px; width: 100%; object-fit: cover;"
-    >
+      <img 
+        src="{{ $mentor?->image_url ?? '/images/placeholder.jpg' }}" 
+        onerror="this.onerror=null;this.src='/images/placeholder.jpg';"
+        alt="Mentor Image" 
+        class="img-fluid rounded mb-2" 
+        style="height: 293px; width: 100%; object-fit: cover;"
+      >
+
+      <!-- Absolute Badge -->
+      <span class="position-absolute top-0 start-0 m-2 badge bg-label-{{ $mentor?->is_public ? 'primary' : 'info' }}">
+        {{ $mentor?->is_public ? __('admin.Public') : __('admin.Organization') }}
+      </span>
   </div>
   <div class="card card-body mx-2 p-4"
     style="height: 380px; z-index: 1; margin-top: -25px; border-radius: 15px;">
@@ -71,7 +76,7 @@
     </div>
     <!-- / Mentor Expertises -->
     <!-- Badge Public / Private -->
-    <div class="mb-3">
+    {{-- <div class="mb-3">
       <div class="d-flex align-items-center mb-2">
         <i class="ti ti-lock ti-sm me-2"></i>
         <p class="fs-6 fw-bold text-dark mb-0">{{ __('admin.Visibility') }}</p>
@@ -81,7 +86,7 @@
           {{ $mentor?->is_public ? __('admin.Public') : __('admin.Organization') }}
         </span>
       </div>
-    </div>
+    </div> --}}
     <!-- Stats Section -->
     <div class="row g-2 mb-3">
       <div class="col-6">
