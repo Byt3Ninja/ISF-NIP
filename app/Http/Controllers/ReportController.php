@@ -381,7 +381,6 @@ class ReportController extends Controller
         $final_screening_steps = $steps->pluck('id');
         $evaluation_ids = ScreeningEvaluation::whereIn('step_id', $final_screening_steps)->pluck('id');
 
-   
         $finals = DB::table('finalscreenings AS fs')
             ->select([
                 'fs.id',
@@ -410,10 +409,9 @@ class ReportController extends Controller
             ->leftJoin('screening_evaluation_criteria AS sec', 'sec.evaluation_id', 'se.id')
             ->leftJoin('screening_evaluation_criteria AS sec_child', 'sec_child.parent_id', 'sec.id')
             ->leftJoin('screening_evaluation_results AS ser', 'ser.evaluation_id', 'se.id')
+            ->leftJoin('steps AS s', 's.id', 'fs.step_id')
             ->when(!is_null($program_id), function ($q) use ($program_id) {
-                $q->whereHas('step.cycle', function ($query) use ($program_id) {
-                    $query->where('id', $program_id);
-                });
+                $q->where('s.id', $program_id);
             })
             ->get();
 
