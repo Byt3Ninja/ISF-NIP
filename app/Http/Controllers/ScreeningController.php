@@ -660,6 +660,11 @@ class ScreeningController extends Controller
 			$data = [];
 			$company = Company::where('id', $companyId)->first();
 
+			// can't chage step if company not have step before
+			if (empty($company->step)) {
+				continue;
+			}
+
 			if (!$company) {
 				continue; // Skip if company not found
 			}
