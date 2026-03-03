@@ -776,6 +776,7 @@
               type: "POST",
               url: "/dashboard/AddCompanyalumni/" + companyId,
               success: function(response) {
+                location.reload();
                 releaseSuccessAlert({
                   title: "{{ __('admin.success') }}",
                   message: "{{ __('startup.mark_alumni_success') }}",
