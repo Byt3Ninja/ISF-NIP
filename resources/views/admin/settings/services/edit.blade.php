@@ -177,7 +177,7 @@
   
       <!-- Vendor Information -->
       {{-- Service Provider: show only "Hide My Details" toggle --}}
-      @if( $_user->hasRole('serviceProvider') )
+      @if( $_user->hasRole('serviceProvider') && 1 != 1 )
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="card-title mb-1">{{ __('admin.my_details') }}</h5>
         <div class="form-check form-switch">
