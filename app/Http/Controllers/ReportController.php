@@ -32,6 +32,7 @@ class ReportController extends Controller
         $user = auth()->user();
         $orgIds = $user->organizations_ids;
         $program_id = $request->get('program_id', null);
+        if( trim( strtolower( $program_id ) ) == 'all' ) { $program_id = null; }
 
         $cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'),function ($q)use($orgIds){
             $q->whereIn('organization_id',$orgIds);
@@ -353,7 +354,8 @@ class ReportController extends Controller
         return $data;
     }
 
-    protected function finalScreeningReport($orgIds, $user, $program_id = null){
+    protected function finalScreeningReport($orgIds, $user, $program_id = null)
+    {
         // $data['judgers_count'] = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->count();
 		$data['judgers_count'] = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
 			->join('roles', 'model_has_roles.role_id', '=', 'roles.id')

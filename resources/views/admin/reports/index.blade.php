@@ -64,7 +64,8 @@
             <label for="programSelect" class="form-label fs-6 fw-semibold">{{ __('admin.Select Program') }}:</label>
             <select class="form-select select2" id="programSelect" style="width: 100%;"
               data-placeholder="{{ __('admin.Select Program') }}">
-              <option value="" {{ empty($program_id) ? 'selected' : '' }}>{{ __('admin.Select Program') }}</option>
+              {{--  <option value="" {{ empty($program_id) ? 'selected' : '' }}>{{ __('admin.Select Program') }}</option>  --}}
+              <option value="all" {{ empty($program_id) || $program_id == 'all' || trim($program_id) == '' ? 'selected' : '' }}>{{ __('admin.All_Programs') }}</option>
               @foreach ($cycles as $cycle)
                 <option value="{{ $cycle->id }}" data-title="{{ $cycle->title }}" {{ $program_id == $cycle->id ? 'selected' : '' }}>{{ $cycle->title }}</option>
               @endforeach

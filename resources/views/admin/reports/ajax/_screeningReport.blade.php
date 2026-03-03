@@ -41,7 +41,7 @@
 					<div>
 						<h5 class="card-title mb-1">
 						{{ __('cycles.Screening results') }}
-						@if(request('program_id'))
+						@if(request('program_id') && trim( strtolower( request('program_id') ) ) != 'all')
 							<span class="badge bg-label-primary ms-2">
 							@php
 								$selectedProgram = $cycles->firstWhere('id', request('program_id'));
