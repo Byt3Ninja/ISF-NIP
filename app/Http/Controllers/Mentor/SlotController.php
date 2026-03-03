@@ -170,8 +170,11 @@ class SlotController extends Controller
 								})
 								//->orWhere('date', '>=', date('Y-m-d'))
 								->orWhere(function ($q) {
-									$q->where('date', date('Y-m-d'))
-									->where('tto', '>', date('H:i:s'));
+									$q->where('date', '>', date('Y-m-d'))
+									  ->orWhere(function ($q2) {
+										$q2->where('date', date('Y-m-d'))
+										   ->where('tto', '>', date('H:i:s'));
+									  });
 								});
 						})
 						// اخفاء سلوتات الـ Period المحجوزة (approved أو pending)
@@ -451,10 +454,9 @@ class SlotController extends Controller
 			$validated = $request->validate([
 					'selectedDays' => 'required|array',
 			]);
-
+		
 			// 1. Find original schedule slot
 			$original = Schedule::findOrFail($id);
-
 			$createdSlots = [];
 		
 			foreach ($validated['selectedDays'] as $day) {
@@ -467,17 +469,31 @@ class SlotController extends Controller
 					// 3. Apply day/date depending on type
 					if ($original->type === 'Weekly') {
 							$slotData['days'] = $day; // single weekday (0–6)
+							
 							unset($slotData['date']); // remove date if exists
 					} else {
 							// date‐specific slot
-							$slotData['date'] = $day; // here $day must be a date (Y-m-d)
+							$slotData['date'] = Carbon::parse($day)->toDateString(); // here $day must be a date (Y-m-d)
+							$slotData['dfrom'] = Carbon::parse($day)->toDateString(); // set dfrom same as date to prevent immediate availability of copied Weekly slots
+							$slotData['days'] = $day;
 							unset($slotData['days']); // remove weekday if exists
 					}
-
+					// if the original slot equals new slot, skip creation to prevent duplicates
+					if(isset($slotData['date'])) {
+						$found = Schedule::where('date', $slotData['date'])->where('days', $slotData['days'])->first();
+					} else {
+						$found = null;
+					}
+					if ($found && $found->tfrom == $slotData['tfrom'] && $found->tto == $slotData['tto'] && $found->session_type == $slotData['session_type']) {
+						return response()->json([
+								'success' => false,
+								'message' => __('mentor.slot_already_exists') . ' ' . __('mentor.between', ['from' => $found->tfrom, 'to' => $found->tto]),
+						], 422);
+					}
 					// 4. Create new duplicated schedule
 					$newSchedule = Schedule::create($slotData);
-
-					$isWeekly = $newSchedule->type === 'Weekly';
+	
+					$isWeekly = $newSchedule->type === 'Weekly' ?? 'period';
 					
 					// 5. Format response slot
 					$createdSlots[] = [
