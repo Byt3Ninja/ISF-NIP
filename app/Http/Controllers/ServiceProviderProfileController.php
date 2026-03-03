@@ -20,6 +20,8 @@ class ServiceProviderProfileController extends Controller
     {
         $l = app()->getLocale();
         $user = auth()->user();
+        $request = request();
+        $service_id = $request->query('service_id', null);
 
         // 1. Fetch service provider with country and user data
         $provider = DB::table('service_providers as sp')
@@ -43,6 +45,9 @@ class ServiceProviderProfileController extends Controller
         $serviceIds = DB::table('services')
             ->where('service_provider_id', $id)
             ->whereNull('deleted_at')
+            ->when(!empty( $service_id ), function ($query) use ($service_id) {
+                $query->where('id', $service_id);
+            })
             ->pluck('id')
             ->toArray();
 
