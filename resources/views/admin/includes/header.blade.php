@@ -137,7 +137,7 @@ $menuItems = [
         'isVisible' => $_user->ableToAny(['mentors.list', 'invitations.index'], $permissions),
         'subItems' => [
             [
-            'label' => __('admin.allMentors'),
+            'label' => __('admin.Mentors'),
             'icon' => 'ti ti-users',
             'route' => '/dashboard/mentors',
             'permission' => $_user->ableTo('mentors.list', $permissions),
@@ -154,14 +154,14 @@ $menuItems = [
     ],
 
     // Tasks
-    /* [
+    [
         'label' => $l == 'en' ? 'Tasks' : 'المهام',
         'icon' => 'ti ti-layout-kanban ti-md me-2 me-lg-4 ti-lg',
         'route' => '/dashboard/mentor/mentorshipSessions',
-        'permission' => true,
-        'isVisible' => $_user->hasAnyRole("Registered|Mentor|organizationManager"),
+        'permission' => $_user->hasRole('registered') && $_user->ableTo('mentorships.sessions_list_detailed', $permissions),
+        'isVisible' => $_user->hasRole('registered') && $_user->ableTo('mentorships.sessions_list_detailed', $permissions),
         'subItems' => []
-    ], */
+    ],
 
     // Mentorship Tasks (for Mentors)
     [
@@ -285,7 +285,7 @@ $menuItems = [
         'isVisible' => $_user->hasAnyRole("Registered|Mentor") || $_user->ableToAny(['services.index', 'service_requests.list_all', 'serviceCategories.index'], $permissions),
         'subItems' => [
           [
-            'label' => __('admin.All Services'),
+            'label' => __('admin.Services'),
             'icon' => 'ti ti-arrows-move',
             'route' => '/dashboard/services',
             'permission' => $_user->ableTo('services.index', $permissions),
@@ -320,7 +320,7 @@ $menuItems = [
 
     // My Quizzes
     [
-        'label' => $l == 'en' ? 'My Quizzes' : 'اختباراتي',
+        'label' => $l == 'en' ? 'Quizzes' : 'الاختبارات',
         'icon' => 'ti ti-question-mark',
         'route' => '/dashboard/quizzes/my',
         'permission' => 'quizzes.dashboard_view',
