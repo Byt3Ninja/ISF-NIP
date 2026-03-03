@@ -173,10 +173,15 @@
                     <h5 class="card-title mb-0">{{ $service->name }}</h5>
                     <div class="d-flex align-items-center justify-content-center gap-2">
                       <div class="badge bg-light-subtle text-dark py-1 px-2">
+                        <a
+                          href="{{ isset($service->service_provider_id) ? '/dashboard/service-provider/' . $service->provider->id . '/profile?tab=reviews' : 'javascript:void(0)' }}"
+                          target="_blank"
+                        >
                         <span class="text-warning">
                           <i class="ti ti-star-filled ti-16px me-1"></i>
                         </span>
                         {{ number_format($service->rating ?? 0.0, 1) }} 
+                        </a>
                       </div>
                       <span class="fw-normal">({{ $service->review_count ?? '0' }})</span>
                     </div>

@@ -529,6 +529,27 @@ $(function () {
   const providerId = {{ $provider->id }};
   const csrfToken = $('meta[name="csrf-token"]').attr('content');
 
+  // Activate tab from URL query parameter (?tab=services)
+  const urlTab = new URLSearchParams(window.location.search).get('tab');
+  if (urlTab) {
+    const $targetBtn = $('button[data-bs-target="#' + urlTab + '"]');
+    if ($targetBtn.length) {
+      new bootstrap.Tab($targetBtn[0]).show();
+    }
+  }
+
+  // Update URL when tab changes
+  $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function () {
+    const tabId = $(this).attr('data-bs-target').replace('#', '');
+    const url = new URL(window.location);
+    if (tabId === 'overview') {
+      url.searchParams.delete('tab');
+    } else {
+      url.searchParams.set('tab', tabId);
+    }
+    window.history.replaceState({}, '', url);
+  });
+
   const filterState = { rating: 'all', service_id: 'all', sort: 'recent', page: 1 };
 
   // Rating Buttons
