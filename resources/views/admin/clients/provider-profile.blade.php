@@ -469,7 +469,7 @@
                   <select class="form-select select2 w-100" id="serviceFilter">
                     <option value="all">{{ __('admin.All Services') }}</option>
                     @foreach($serviceFilterOptions as $svcOption)
-                      <option value="{{ $svcOption->id }}">{{ $svcOption->name ?: $svcOption->name_en }}</option>
+                      <option value="{{ $svcOption->id }}" {{ request('service_id') && intval( request('service_id') ) == $svcOption->id ? 'selected' : '' }} >{{ $svcOption->name ?: $svcOption->name_en }}</option>
                     @endforeach
                   </select>
                 </div>
