@@ -1188,7 +1188,8 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
-                    "subadmin"
+                    "subadmin",
+                    "serviceProvider"
                 ]
             },
             {
