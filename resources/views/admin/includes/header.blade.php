@@ -289,21 +289,21 @@ $menuItems = [
             'icon' => 'ti ti-arrows-move',
             'route' => '/dashboard/services',
             'permission' => $_user->ableTo('services.index', $permissions),
-            'isVisible' => true
+            'isVisible' => $_user->ableTo('services.index', $permissions)
           ],
           [
             'label' => __('admin.Services Requests'),
             'icon' => 'ti ti-briefcase',
             'route' => __('service_requests.list_all'),
             'permission' => $_user->ableTo('service_requests.list_all', $permissions),
-            'isVisible' => true
+            'isVisible' => $_user->ableTo('service_requests.list_all', $permissions)
           ],
           [
             'label' => __('admin.Services Categories'),
             'icon' => 'ti ti-layout-grid',
             'route' => '/dashboard/serviceCategories',
             'permission' => $_user->ableTo('serviceCategories.index', $permissions),
-            'isVisible' => true
+            'isVisible' => $_user->ableTo('serviceCategories.index', $permissions)
           ],
         ]
     ],
