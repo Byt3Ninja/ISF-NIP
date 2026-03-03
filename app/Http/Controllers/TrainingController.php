@@ -240,7 +240,7 @@ class TrainingController extends Controller
 	public function store(Request $request)
 	{
 		try {
-			$user = Auth::user();
+			$user = auth()->user();
 
 			// Determine organization_id
 			$organizationId = null;
@@ -267,113 +267,71 @@ class TrainingController extends Controller
 				}
 			}
 
-			if ($request->hasFile('image')) {
+			$img_url = null;
+			if ($request->hasFile('image'))
+			{
 				$img_url = $request->file('image');
 				$img_url = $img_url->store('training', ['disk' => 'public_uploads']);
 				Image::make(Storage::disk('public_uploads')->path($img_url))->resize(null, 350, function ($con) {
 					$con->aspectRatio();
 				})->save();
+			}
 
-				$training = Training::updateOrCreate(
-					['id' => $request->id],
-					[
-						'title' => $request->title,
-						'dsc' => $request->dsc,
-						'code' => $request->code,
-						'CoursLevel' => $request->CoursLevel,
-						'Quizs' => $request->Quizs,
-						'Instractor' => $request->Instractor,
-						'start_date' => $request->start_date,
-						'end_date' => $request->end_date,
-						'Status' => $request->Status,
-						'user_id' => Auth::id(),
-						'image' => $img_url,
-						'organization_id' => $organizationId,
-						'is_public' => $isPublic,
-					]
-				);
+			$training = Training::updateOrCreate(
+				['id' => $request->id],
+				[
+					'title' => $request->title,
+					'dsc' => $request->dsc,
+					'code' => $request->code,
+					'CoursLevel' => $request->CoursLevel,
+					'Quizs' => $request->Quizs,
+					'Instractor' => $request->Instractor,
+					'start_date' => $request->start_date,
+					'end_date' => $request->end_date,
+					'Status' => $request->Status,
+					'user_id' => $user->id,
+					'image' => $img_url,
+					'organization_id' => $organizationId,
+					'is_public' => $isPublic,
+				]
+			);
 
-				$expertises = [];
-				foreach ($request->CoursCategories as $expertiseId) {
+			$expertises = [];
+			if( !empty($request->CoursCategories) )
+			{
+				foreach( $request->CoursCategories as $expertiseId )
+				{
 					$expertises[] = [
 						'categories_id' => $expertiseId,
 						'training_id' => $training->id
 					];
 				}
+			}
 
-				DB::table('categories_training')->where('training_id', $training->id)->delete();
-				// إدراج الخبرات دفعة واحدة
-				DB::table('categories_training')->insert($expertises);
+			DB::table('categories_training')->where('training_id', $training->id)->delete();
+			// إدراج الخبرات دفعة واحدة
+			DB::table('categories_training')->insert($expertises);
 
-				if (!empty(array_filter($request->Tags))) {
-					$tags = [];
-					foreach ($request->Tags as $tagName) {
-						// تحقق مما إذا كان الـ tag موجود بالفعل في الجدول
-						$tag = Tags::where('name', $tagName)->first();
-						// إذا لم يكن موجودًا، قم بإنشائه
-						if (!$tag) {
-							$tag = Tags::create(['name' => $tagName]);
-						}
-						// قم بإضافة الـ tag_id و training_id إلى القائمة لإدراجها في الجدول الوسيط
-						$tags[] = [
-							'tag_id' => $tag->id,
-							'training_id' => $training->id
-						];
+			if( !empty( array_filter( $request->Tags ) ) )
+			{
+				$tags = [];
+				foreach( $request->Tags as $tagName )
+				{
+					// تحقق مما إذا كان الـ tag موجود بالفعل في الجدول
+					$tag = Tags::where('name', $tagName)->first();
+					// إذا لم يكن موجودًا، قم بإنشائه
+					if (!$tag) {
+						$tag = Tags::create(['name' => $tagName]);
 					}
-					DB::table('tag_training')->where('training_id', $training->id)->delete();
-					// إدراج الـ tags المرتبطة بالتدريب دفعة واحدة في الجدول الوسيط
-					DB::table('tag_training')->insert($tags);
-				}
-			} else {
-				$training = Training::updateOrCreate(
-					['id' => $request->id],
-					[
-						'title' => $request->title,
-						'dsc' => $request->dsc,
-						'code' => $request->code,
-						'CoursLevel' => $request->CoursLevel,
-						'Quizs' => $request->Quizs,
-						'Status' => $request->Status,
-						'user_id' => Auth::id(),
-						'organization_id' => $organizationId,
-						'is_public' => $isPublic,
-					]
-				);
-				$expertises = [];
-				foreach ($request->CoursCategories as $expertiseId) {
-					$expertises[] = [
-						'categories_id' => $expertiseId,
+					// قم بإضافة الـ tag_id و training_id إلى القائمة لإدراجها في الجدول الوسيط
+					$tags[] = [
+						'tag_id' => $tag->id,
 						'training_id' => $training->id
 					];
 				}
-
-				DB::table('categories_training')->where('training_id', $training->id)->delete();
-
-				// إدراج الخبرات دفعة واحدة
-				DB::table('categories_training')->insert($expertises);
-
-				if (!empty(array_filter($request->Tags))) {
-					$tags = [];
-					foreach ($request->Tags as $tagName) {
-						// تحقق مما إذا كان الـ tag موجود بالفعل في الجدول
-						$tag = Tags::where('name', $tagName)->first();
-						// إذا لم يكن موجودًا، قم بإنشائه
-						if (!$tag) {
-							$tag = Tags::create(['name' => $tagName]);
-						}
-						// قم بإضافة الـ tag_id و training_id إلى القائمة لإدراجها في الجدول الوسيط
-						$tags[] = [
-							'tag_id' => $tag->id,
-							'training_id' => $training->id
-						];
-					}
-
-					DB::table('tag_training')
-						->where('training_id', $training->id)
-						->delete();
-					// إدراج الـ tags المرتبطة بالتدريب دفعة واحدة في الجدول الوسيط
-					DB::table('tag_training')->insert($tags);
-				}
+				DB::table('tag_training')->where('training_id', $training->id)->delete();
+				// إدراج الـ tags المرتبطة بالتدريب دفعة واحدة في الجدول الوسيط
+				DB::table('tag_training')->insert($tags);
 			}
 
 			return redirect('/dashboard/training/all/')->with(['class' => 'success', 'message' => 'Saved']);
