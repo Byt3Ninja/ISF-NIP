@@ -61,7 +61,7 @@
                   @if($provider->country_name || $operatingModeLabel)
                     <div class="small d-flex align-items-center gap-2">
                       <i class="ti ti-map-pin"></i>
-                      <span>{{ $provider->country_name }}{{ $provider->country_name && $operatingModeLabel ? ', ' : '' }}{{ $operatingModeLabel }}</span>
+                      <span>{{ $provider->country_name }}{{ $provider->country_name && $operatingModeLabel ? ', ' : '' }}{{ __('admin.operating_mode.options.' . $operatingModeLabel) }}</span>
                     </div>
                   @endif
                   @if($provider->review_count > 0)
