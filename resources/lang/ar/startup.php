@@ -460,6 +460,9 @@ return [
     'interest' => 'الفائدة',
     'taxes' => 'الضرايب',
     'capital_expenditures' => 'النفقات الرأسية',
+    'operating_profit' => 'الربح التشغيلي',
+    'net_profit' => 'الربح الصافي',
+    'total_expenses' => 'النفقات الكلية',
   ],
 
   'badges' => [

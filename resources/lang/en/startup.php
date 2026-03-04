@@ -459,6 +459,9 @@ return [
     'interest' => 'Interest',
     'taxes' => 'Taxes',
     'capital_expenditures' => 'Capital Expenditures',
+    'operating_profit' => 'Operating Profit',
+    'net_profit' => 'Net Profit',
+    'total_expenses' => 'Total Expenses',
   ],
   'badges' => [
     'badges_recognition' => 'Badges & Recognition',
