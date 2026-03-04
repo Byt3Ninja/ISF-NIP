@@ -3523,4 +3523,5 @@ return [
 	'Last name must contain only English letters' => 'Last name must contain only English letters',
 	'First name must contain only Arabic letters' => 'First name must contain only Arabic letters',
 	'Last name must contain only Arabic letters' => 'Last name must contain only Arabic letters',
+	'price_max_two_decimal_places' => 'The price must have at most 2 decimal places.',
 ];
