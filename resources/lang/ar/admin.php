@@ -3580,4 +3580,5 @@ return [
 	'Last name must contain only English letters' => 'يجب أن يحتوي اسم العائلة على أحرف إنجليزية فقط',
 	'First name must contain only Arabic letters' => 'يجب أن يحتوي الاسم الأول على أحرف عربية فقط',
 	'Last name must contain only Arabic letters' => 'يجب أن يحتوي اسم العائلة على أحرف عربية فقط',
+	'price_max_two_decimal_places' => 'يجب ألا يحتوي السعر على أكثر من خانتين عشريتين.',
 ];

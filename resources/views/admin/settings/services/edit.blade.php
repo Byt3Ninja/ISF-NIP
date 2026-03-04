@@ -91,25 +91,25 @@
   
       <!-- Currency and Price -->
       <div class="row mb-4">
-        <div class="col-md-6">
+        <div class="col-md-6 mb-3 mb-md-0">
           <label class="form-label" for="currency">{{ __('admin.Currency') }} *</label>
           <select class="form-select select2" name="currency" id="currency" data-placeholder="{{ __('admin.Select Currency') }}">
             <option value="">{{ __('admin.Select Currency') }}</option>
             @foreach ($currencies as $Currency)
-              <option value="{{ $Currency->currency_code }}" {{ old('currency', $service->currency) == $Currency->currency_code ? 'selected' : '' }}>
+              <option value="{{ $Currency->currency_code }}" {{ old('currency', $_user->currency) == $Currency->currency_code ? 'selected' : '' }}>
                 {{ __('admin.' . $Currency->currency_name) }}
               </option>
             @endforeach
           </select>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4 mb-3 mb-md-0">
           <label class="form-label">{{ __('admin.Price') }}</label>
-          <input type="number" class="form-control" name="price" id="price" min="0" step="0.01" placeholder="0.00" value="{{ old('price', $service->price) }}">
+          <input type="number" class="form-control" name="price" id="price" min="0" step="0.01" placeholder="0.00" value="{{ old('price') }}">
         </div>
-        <div class="col-md-2 d-flex align-items-end pb-2">
+        <div class="col-md-2 d-flex align-items-center pt-4 mt-2">
           <div class="form-check form-switch">
             <input type="hidden" name="hide_price" value="0">
-            <input class="form-check-input" type="checkbox" id="hide_price" name="hide_price" value="1" {{ old('hide_price', $service->hide_price) == 1 ? 'checked' : '' }}>
+            <input class="form-check-input" type="checkbox" id="hide_price" name="hide_price" value="1" {{ old('hide_price') ? 'checked' : '' }}>
             <label class="form-check-label" for="hide_price">{{ __('admin.Hide_Price') }}</label>
           </div>
         </div>
@@ -414,12 +414,19 @@
           },
           price: {
             validators: {
+              // notEmpty: {
+              //   message: '{{ __('admin.Required_Field') }}'
+              // },
               numeric: {
                 message: '{{ __('admin.must_be_valid_number') }}'
               },
               greaterThan: {
                 min: 0,
                 message: '{{ __('admin.must_not_be_less_than_0') }}'
+              },
+              regexp: {
+                regexp: /^\d+(\.\d{1,2})?$/,
+                message: '{{ __('admin.price_max_two_decimal_places') }}'
               }
             }
           },
