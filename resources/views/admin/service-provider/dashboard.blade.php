@@ -5,18 +5,6 @@
 
 @section('content')
 
-<style>
-    .activity-item { padding: 0.75rem 1.25rem; border-bottom: 1px solid #eee; }
-    .activity-item:last-child { border-bottom: none; }
-    .activity-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
-    .status-badge-pending { background-color: #fff3cd; color: #856404; }
-    .status-badge-accepted { background-color: #d4edda; color: #155724; }
-    .status-badge-rejected { background-color: #f8d7da; color: #721c24; }
-    #inbox-table tbody tr { transition: opacity 0.2s; }
-    #inbox-table tbody tr.processing { opacity: 0.5; pointer-events: none; }
-    .sp-dashboard-disabled { pointer-events: none; opacity: 0.5; user-select: none; }
-</style>
-
 {{-- APPROVAL STATUS BANNER --}}
 @if($approvalStatus === 'pending')
 <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
@@ -58,97 +46,117 @@
 </div>
 @endif
 
-<div class="{{ $approvalStatus !== 'accepted' ? 'sp-dashboard-disabled' : '' }}">
+<div class="{{ $approvalStatus !== 'accepted' ? 'pe-none opacity-50 user-select-none' : '' }}">
 
 {{-- SUMMARY WIDGET CARDS --}}
-<div class="row mb-4" id="summary-widgets">
+<div class="row mb-4 justify-content-center" id="summary-widgets">
     @if($_user->ableTo('dashboard.widgets_cards_service_provider_total_services_view', $permissions))
-    <div class="col-lg col-sm-6 mb-3">
-        <div class="card card-border-shadow-primary h-100">
-            <div class="card-body">
-                <div class="d-flex align-items-center mb-2">
-                    <div class="avatar me-2">
+    <div class="col-lg-4 col-md-6 col-sm-12 mb-3">
+        <div class="card h-100 card-border-shadow-primary" style="cursor: pointer;">
+            <div class="card-body pb-3">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="content-left">
+                        <span class="text-heading">{{ __('dashboard.sp_total_services') }}</span>
+                        <div class="d-flex align-items-center my-1">
+                            <h4 class="mb-0 me-2" id="widget-total-services">{{ $summary['totalServices'] }}</h4>
+                        </div>
+                    </div>
+                    <div class="avatar">
                         <span class="avatar-initial rounded bg-label-primary">
-                            <i class="ti ti-briefcase ti-md"></i>
+                            <i class="ti ti-briefcase ti-26px"></i>
                         </span>
                     </div>
-                    <h4 class="ms-1 mb-0" id="widget-total-services">{{ $summary['totalServices'] }}</h4>
                 </div>
-                <p class="mb-0">{{ __('dashboard.sp_total_services') }}</p>
             </div>
         </div>
     </div>
     @endif
 
     @if($_user->ableTo('dashboard.widgets_cards_service_provider_active_services_view', $permissions))
-    <div class="col-lg col-sm-6 mb-3">
-        <div class="card card-border-shadow-success h-100">
-            <div class="card-body">
-                <div class="d-flex align-items-center mb-2">
-                    <div class="avatar me-2">
+    <div class="col-lg-4 col-md-6 col-sm-12 mb-3">
+        <div class="card h-100 card-border-shadow-success" style="cursor: pointer;">
+            <div class="card-body pb-3">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="content-left">
+                        <span class="text-heading">{{ __('dashboard.sp_active_services') }}</span>
+                        <div class="d-flex align-items-center my-1">
+                            <h4 class="mb-0 me-2" id="widget-active-services">{{ $summary['activeServices'] }}</h4>
+                        </div>
+                    </div>
+                    <div class="avatar">
                         <span class="avatar-initial rounded bg-label-success">
-                            <i class="ti ti-circle-check ti-md"></i>
+                            <i class="ti ti-circle-check ti-26px"></i>
                         </span>
                     </div>
-                    <h4 class="ms-1 mb-0" id="widget-active-services">{{ $summary['activeServices'] }}</h4>
                 </div>
-                <p class="mb-0">{{ __('dashboard.sp_active_services') }}</p>
             </div>
         </div>
     </div>
     @endif
 
     @if($_user->ableTo('dashboard.widgets_cards_service_provider_requests_30_days_view', $permissions))
-    <div class="col-lg col-sm-6 mb-3">
-        <div class="card card-border-shadow-info h-100">
-            <div class="card-body">
-                <div class="d-flex align-items-center mb-2">
-                    <div class="avatar me-2">
+    <div class="col-lg-4 col-md-6 col-sm-12 mb-3">
+        <div class="card h-100 card-border-shadow-info" style="cursor: pointer;">
+            <div class="card-body pb-3">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="content-left">
+                        <span class="text-heading">{{ __('dashboard.sp_requests_30_days') }}</span>
+                        <div class="d-flex align-items-center my-1">
+                            <h4 class="mb-0 me-2" id="widget-requests-30">{{ $summary['requests30Days'] }}</h4>
+                        </div>
+                    </div>
+                    <div class="avatar">
                         <span class="avatar-initial rounded bg-label-info">
-                            <i class="ti ti-file-text ti-md"></i>
+                            <i class="ti ti-file-text ti-26px"></i>
                         </span>
                     </div>
-                    <h4 class="ms-1 mb-0" id="widget-requests-30">{{ $summary['requests30Days'] }}</h4>
                 </div>
-                <p class="mb-0">{{ __('dashboard.sp_requests_30_days') }}</p>
             </div>
         </div>
     </div>
     @endif
 
     @if($_user->ableTo('dashboard.widgets_cards_service_provider_pending_requests_view', $permissions))
-    <div class="col-lg col-sm-6 mb-3">
-        <div class="card card-border-shadow-warning h-100">
-            <div class="card-body">
-                <div class="d-flex align-items-center mb-2">
-                    <div class="avatar me-2">
+    <div class="col-lg-4 col-md-6 col-sm-12 mb-3">
+        <div class="card h-100 card-border-shadow-warning" style="cursor: pointer;">
+            <div class="card-body pb-3">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="content-left">
+                        <span class="text-heading">{{ __('dashboard.sp_pending_requests') }}</span>
+                        <div class="d-flex align-items-center my-1">
+                            <h4 class="mb-0 me-2" id="widget-pending">{{ $summary['pendingRequests'] }}</h4>
+                        </div>
+                    </div>
+                    <div class="avatar">
                         <span class="avatar-initial rounded bg-label-warning">
-                            <i class="ti ti-clock-hour-4 ti-md"></i>
+                            <i class="ti ti-clock-hour-4 ti-26px"></i>
                         </span>
                     </div>
-                    <h4 class="ms-1 mb-0" id="widget-pending">{{ $summary['pendingRequests'] }}</h4>
                 </div>
-                <p class="mb-0">{{ __('dashboard.sp_pending_requests') }}</p>
             </div>
         </div>
     </div>
     @endif
 
     @if($_user->ableTo('dashboard.widgets_cards_service_provider_median_response_time_view', $permissions))
-    <div class="col-lg col-sm-6 mb-3">
-        <div class="card card-border-shadow-secondary h-100">
-            <div class="card-body">
-                <div class="d-flex align-items-center mb-2">
-                    <div class="avatar me-2">
+    <div class="col-lg-4 col-md-6 col-sm-12 mb-3">
+        <div class="card h-100 card-border-shadow-secondary" style="cursor: pointer;">
+            <div class="card-body pb-3">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="content-left">
+                        <span class="text-heading">{{ __('dashboard.sp_median_response_time') }}</span>
+                        <div class="d-flex align-items-center my-1">
+                            <h4 class="mb-0 me-2" id="widget-median-time">
+                                {{ $summary['medianResponseTime'] !== null ? $summary['medianResponseTime'] . 'h' : '—' }}
+                            </h4>
+                        </div>
+                    </div>
+                    <div class="avatar">
                         <span class="avatar-initial rounded bg-label-secondary">
-                            <i class="ti ti-chart-bar ti-md"></i>
+                            <i class="ti ti-chart-bar ti-26px"></i>
                         </span>
                     </div>
-                    <h4 class="ms-1 mb-0" id="widget-median-time">
-                        {{ $summary['medianResponseTime'] !== null ? $summary['medianResponseTime'] . 'h' : '—' }}
-                    </h4>
                 </div>
-                <p class="mb-0">{{ __('dashboard.sp_median_response_time') }}</p>
             </div>
         </div>
     </div>
@@ -157,8 +165,8 @@
 
 {{-- REFRESH BUTTON --}}
 @if($_user->ableTo('service_provider_dashboard.refresh', $permissions))
-<div class="mb-3 text-end">
-    <button id="btn-refresh" class="btn btn-outline-primary btn-sm">
+<div class="mb-6 text-end">
+    <button id="btn-refresh" class="btn btn-outline-primary">
         <i class="ti ti-refresh me-1"></i> {{ __('dashboard.sp_refresh') }}
     </button>
 </div>
@@ -168,15 +176,15 @@
     {{-- REQUESTS INBOX TABLE --}}
     @if($_user->ableTo('dashboard.widgets_tables_service_provider_requests_inbox_view', $permissions))
     <div class="col-lg-8 mb-4">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <h5 class="mb-0">{{ __('dashboard.sp_requests_inbox') }}</h5>
+        <div class="card card-border-shadow">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2 border-bottom mb-6">
+                <h5 class="card-title mb-0">{{ __('dashboard.sp_requests_inbox') }}</h5>
                 @if($canBulkAction)
-                <div id="bulk-actions">
-                    <button id="btn-bulk-accept" class="btn btn-sm btn-success" disabled>
+                <div class="d-flex align-items-center gap-3" id="bulk-actions">
+                    <button id="btn-bulk-accept" class="btn btn-primary" disabled>
                         <i class="ti ti-checks me-1"></i>{{ __('dashboard.sp_bulk_accept') }}
                     </button>
-                    <button id="btn-bulk-reject" class="btn btn-sm btn-danger" disabled>
+                    <button id="btn-bulk-reject" class="btn btn-label-secondary" disabled>
                         <i class="ti ti-x me-1"></i>{{ __('dashboard.sp_bulk_reject') }}
                     </button>
                 </div>
@@ -186,8 +194,7 @@
                 {{-- Filter row --}}
                 <div class="row mb-3 g-2">
                     <div class="col-md-4">
-                        <label class="form-label small text-muted">{{ __('dashboard.sp_status') }}</label>
-                        <select id="filter-status" class="form-select form-select-sm">
+                        <select id="filter-status" class="form-select">
                             <option value="pending" selected>{{ __('dashboard.sp_filter_pending') }}</option>
                             <option value="accepted">{{ __('dashboard.sp_filter_accepted') }}</option>
                             <option value="rejected">{{ __('dashboard.sp_filter_rejected') }}</option>
@@ -195,8 +202,7 @@
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label small text-muted">{{ __('dashboard.sp_service_name') }}</label>
-                        <select id="filter-service" class="form-select form-select-sm">
+                        <select id="filter-service" class="form-select">
                             <option value="0">{{ __('dashboard.sp_all_services') }}</option>
                             @foreach($services as $service)
                                 <option value="{{ $service->id }}">{{ $service->name }}</option>
@@ -204,8 +210,7 @@
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label small text-muted">{{ __('dashboard.sp_period') }}</label>
-                        <select id="filter-period" class="form-select form-select-sm">
+                        <select id="filter-period" class="form-select">
                             <option value="7">{{ __('dashboard.sp_period_7_days') }}</option>
                             <option value="30" selected>{{ __('dashboard.sp_period_30_days') }}</option>
                             <option value="year">{{ __('dashboard.sp_period_this_year') }}</option>
@@ -213,35 +218,31 @@
                     </div>
                 </div>
 
-                {{-- Table --}}
-                <div class="table-responsive">
-                    <table class="table table-hover" id="inbox-table">
-                        <thead>
-                            <tr>
-                                @if($canBulkAction)
-                                <th style="width: 40px;"><input type="checkbox" id="select-all" class="form-check-input"></th>
-                                @endif
-                                <th>{{ __('dashboard.sp_startup_name') }}</th>
-                                <th>{{ __('dashboard.sp_note') }}</th>
-                                <th>{{ __('dashboard.sp_service_name') }}</th>
-                                <th>{{ __('dashboard.sp_submitted') }}</th>
-                                <th>{{ __('dashboard.sp_status') }}</th>
-                                @if($canQuickAction)
-                                <th>{{ __('dashboard.sp_actions') }}</th>
-                                @endif
-                            </tr>
-                        </thead>
-                        <tbody id="inbox-body"></tbody>
-                    </table>
-                </div>
-                <div id="inbox-empty" class="text-center text-muted py-4 d-none">
-                    <i class="ti ti-inbox-off ti-xl mb-2 d-block"></i>
-                    {{ __('dashboard.sp_no_requests') }}
-                </div>
-                <div id="inbox-loading" class="text-center py-4 d-none">
-                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                    <span class="ms-2">{{ __('dashboard.sp_loading') }}</span>
-                </div>
+            </div>
+            {{-- Table --}}
+            <div class="table-responsive card-datatable">
+                <table class="table" id="inbox-table">
+                    <thead class="table-light">
+                        <tr>
+                            @if($canBulkAction)
+                            <th style="width: 40px;"><input type="checkbox" id="select-all" class="form-check-input"></th>
+                            @endif
+                            <th>{{ __('dashboard.sp_startup_name') }}</th>
+                            <th>{{ __('dashboard.sp_note') }}</th>
+                            <th>{{ __('dashboard.sp_service_name') }}</th>
+                            <th>{{ __('dashboard.sp_submitted') }}</th>
+                            <th>{{ __('dashboard.sp_status') }}</th>
+                            @if($canQuickAction)
+                            <th>{{ __('dashboard.sp_actions') }}</th>
+                            @endif
+                        </tr>
+                    </thead>
+                    <tbody id="inbox-body"></tbody>
+                </table>
+            </div>
+            <div id="inbox-loading" class="text-center py-4 d-none">
+                <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                <span class="ms-2">{{ __('dashboard.sp_loading') }}</span>
             </div>
         </div>
     </div>
@@ -250,12 +251,12 @@
     {{-- RECENT ACTIVITY PANEL --}}
     @if($_user->ableTo('dashboard.widgets_tables_service_provider_recent_activity_view', $permissions))
     <div class="col-lg-4 mb-4">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">{{ __('dashboard.sp_recent_activity') }}</h5>
+        <div class="card card-border-shadow">
+            <div class="card-header border-bottom mb-6">
+                <h5 class="card-title mb-0">{{ __('dashboard.sp_recent_activity') }}</h5>
             </div>
             <div class="card-body p-0" id="activity-feed"></div>
-            <div id="activity-empty" class="text-center text-muted py-4 d-none">
+            <div id="activity-empty" class="text-center text-muted d-none py-4">
                 <i class="ti ti-activity-heartbeat ti-xl mb-2 d-block"></i>
                 {{ __('dashboard.sp_no_activity') }}
             </div>
@@ -322,11 +323,11 @@
         rows.forEach(function(row) {
             let statusBadge = '';
             if (row.status === 'Pending') {
-                statusBadge = '<span class="badge status-badge-pending">'+LABELS.pending+'</span>';
+                statusBadge = '<span class="badge bg-label-warning text-warning">'+LABELS.pending+'</span>';
             } else if (row.status === 'Accepted') {
-                statusBadge = '<span class="badge status-badge-accepted">'+LABELS.accepted+'</span>';
+                statusBadge = '<span class="badge bg-label-success text-success">'+LABELS.accepted+'</span>';
             } else if (row.status === 'Rejected') {
-                statusBadge = '<span class="badge status-badge-rejected">'+LABELS.rejected+'</span>';
+                statusBadge = '<span class="badge bg-label-danger text-danger">'+LABELS.rejected+'</span>';
             }
 
             let actions = '';
@@ -371,8 +372,8 @@
 
         entries.forEach(function(entry) {
             $feed.append(
-                '<div class="activity-item d-flex align-items-start">' +
-                    '<div class="activity-icon bg-label-'+entry.color+' me-3 flex-shrink-0">' +
+                '<div class="d-flex align-items-start py-3 px-4 border-bottom border-light">' +
+                    '<div class="w-8 h-8 d-flex align-items-center justify-content-center rounded-circle bg-label-'+entry.color+' me-3 flex-shrink-0">' +
                         '<i class="ti '+entry.icon+' ti-sm"></i>' +
                     '</div>' +
                     '<div class="flex-grow-1">' +
@@ -443,14 +444,14 @@
 
     function doQuickAction(id, action, reason) {
         var $row = $('tr[data-id="'+id+'"]');
-        $row.addClass('processing');
+        $row.addClass('opacity-50 pe-none');
 
         $.ajax({
             url: ROUTES.quickAction,
             method: 'POST',
             data: { id: id, action: action, reason: reason, _token: CSRF_TOKEN },
             success: function(response) {
-                $row.removeClass('processing');
+                $row.removeClass('opacity-50 pe-none');
                 if (response.status) {
                     Swal.fire({ icon: 'success', title: response.title, text: response.message, timer: 2000, showConfirmButton: false });
                     if (response.summary) updateSummaryWidgets(response.summary);
@@ -461,7 +462,7 @@
                 }
             },
             error: function(xhr) {
-                $row.removeClass('processing');
+                $row.removeClass('opacity-50 pe-none');
                 var msg = xhr.responseJSON ? xhr.responseJSON.message : 'An error occurred';
                 Swal.fire({ icon: 'error', title: 'Error', text: msg });
             }
@@ -574,7 +575,7 @@
             },
             showCancelButton: true,
             confirmButtonText: LABELS.reject,
-            confirmButtonColor: '#d33'
+            confirmButtonColor: 'btn btn-danger'
         }).then(function(result) {
             if (result.isConfirmed) {
                 doQuickAction(id, 'reject', result.value);
@@ -604,7 +605,7 @@
             },
             showCancelButton: true,
             confirmButtonText: LABELS.reject,
-            confirmButtonColor: '#d33'
+            confirmButtonColor: 'btn btn-danger'
         }).then(function(result) {
             if (result.isConfirmed) {
                 doBulkAction(ids, 'reject', result.value);
@@ -623,6 +624,18 @@
 
     renderInboxRows(currentInboxData);
     renderActivityFeed(currentActivityData);
+
+    // Initialize DataTable
+    $('#inbox-table').DataTable({
+        destroy: true,
+        paging: false,
+        searching: false,
+        info: false,
+        ordering: true,
+        columnDefs: [
+            { orderable: false, targets: [0, 5] } // checkbox and actions columns
+        ]
+    });
 
 })();
 </script>
