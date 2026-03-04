@@ -492,7 +492,7 @@ class ServiceController extends Controller
 				'date'                => $row->date_time ? \Carbon\Carbon::parse($row->date_time)->format('M d, Y • H:i') : '—',
 				'description'         => $row->comment ?? '—',
 				'service_description' => $row->service_description ?? '—',
-				'image_url'           => $row->service_img ? '/191014/' . $row->service_img : '/images/deck-video.svg',
+				'image_url'           => $row->service_img ? '/191014/' . $row->service_img : '/icons/account.svg',
 				'status'              => $status,
 				'price'               => !$row->hide_price && $row->price > 0 ? $row->price : null,
 				'currency'            => $row->currency,
@@ -501,7 +501,7 @@ class ServiceController extends Controller
 				'review_body'         => $row->review_body,
 				'reviewed_at'         => $row->reviewed_at ? \Carbon\Carbon::parse($row->reviewed_at)->format('M d, Y') : null,
 				'has_review'          => !is_null($row->rate),
-				'founder_img'         => $row->founder_img ? '/191014/' . $row->founder_img : '/images/deck-video.svg',
+				'founder_img'         => $row->founder_img ? '/191014/' . $row->founder_img : '/icons/account.svg',
 				'founder_name'        => $row->founder_name ?? 'N/A',
 				'founder_url'         => $row->founder_user_id ? route('mentors.profile_view', $row->founder_user_id) : '#',
 				'startup_name'        => $row->startup_name ?? 'N/A',
@@ -510,7 +510,7 @@ class ServiceController extends Controller
 				'service_provider'    => [
 					'id'          => $row->provider_id,
 					'name'        => $row->provider_name ?? '—',
-					'image_url'   => $row->provider_img ? '/191014/' . $row->provider_img : '/images/deck-video.svg',
+					'image_url'   => $row->provider_img ? '/191014/' . $row->provider_img : '/icons/account.svg',
 					'profile_url' => $row->provider_id ? route('service_provider.profile', $row->provider_id) : '#',
 				],
 			];
@@ -1452,7 +1452,7 @@ class ServiceController extends Controller
 				'date'                => $row->date_time ? \Carbon\Carbon::parse($row->date_time)->format('M d, Y • H:i') : '—',
 				'description'         => $row->comment ?? '—',
 				'service_description' => $row->service_description ?? '—',
-				'image_url'           => $row->service_img ? '/191014/' . $row->service_img : '/images/deck-video.svg',
+				'image_url'           => $row->service_img ? '/191014/' . $row->service_img : '/icons/account.svg',
 				'status'              => $status,
 				'price'               => !$row->hide_price && $row->price > 0 ? $row->price : null,
 				'currency'            => $row->currency,
@@ -1463,7 +1463,7 @@ class ServiceController extends Controller
 				'reviewed_at'         => $row->reviewed_at ? \Carbon\Carbon::parse($row->reviewed_at)->format('M d, Y') : null,
 				'has_review'          => !is_null($row->rate),
 				'founder_name'        => $row->founder_name ?? 'N/A',
-				'founder_img'         => $row->founder_img ? '/191014/' . $row->founder_img : '/images/deck-video.svg',
+				'founder_img'         => $row->founder_img ? '/191014/' . $row->founder_img : '/icons/account.svg',
 				'founder_url'         => $row->founder_user_id ? route('mentors.profile_view', $row->founder_user_id) : '#',
 				'startup_name'        => $row->startup_name ?? 'N/A',
 				'startup_url'         => $row->startup_id ? route('company.profile_view', $row->startup_id) : '#',
@@ -1471,7 +1471,7 @@ class ServiceController extends Controller
 				'service_provider'    => [
 					'id'          => $row->provider_id,
 					'name'        => $row->provider_name ?? '—',
-					'image_url'   => $row->provider_img ? '/191014/' . $row->provider_img : '/images/deck-video.svg',
+					'image_url'   => $row->provider_img ? '/191014/' . $row->provider_img : '/icons/account.svg',
 					'profile_url' => !$hideVendor && $row->provider_id ? route('service_provider.profile', $row->provider_id) : null,
 				],
 			];

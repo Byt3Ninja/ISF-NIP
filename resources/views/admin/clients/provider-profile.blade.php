@@ -203,12 +203,12 @@
                   @php
                     $serviceImg = $service->img_url
                       ? (str_starts_with($service->img_url, 'https://') ? $service->img_url : '/191014/' . $service->img_url)
-                      : '/images/deck-video.svg';
+                      : '/icons/account.svg';
                   @endphp
                   <img
                     src="{{ $serviceImg }}"
                     alt="{{ $service->name ?: $service->name_en }}" class="rounded mb-4 img-fluid w-100 h-px-150 object-fit-cover"
-                    onerror="this.onerror=null; this.src='/images/deck-video.svg';" />
+                    onerror="this.onerror=null; this.src='/icons/account.svg';" />
 
                   <h3 class="card-title h5 mb-3">{{ $service->name ?: $service->name_en }}</h3>
 
