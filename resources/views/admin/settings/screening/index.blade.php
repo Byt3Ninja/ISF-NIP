@@ -121,7 +121,7 @@
                   <div class="d-flex align-items-center gap-1">
                     @php
                       $today = date('Y-m-d');
-                      $status = ($step->end_date < $today) ? 'completed' : (($step->start_date > $today) ? 'upcoming' : 'in progress');
+                      $status = ($step->end_date < $today) ? 'completed' : (($step->start_date > $today) ? 'upcoming' : 'in_progress');
                       $statusColor = ($status == 'completed') ? 'success' : (($status == 'upcoming') ? 'warning' : 'primary');
                     @endphp
                     <span class="badge bg-label-{{ $statusColor }} text-capitalize">
