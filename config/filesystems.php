@@ -145,7 +145,7 @@ return [
         'cycle_custom_pages' => [
             'driver' => 'local',
             'root' => storage_path('app/cycle_custom_pages'),
-            'url' => env('APP_URL') . '/dashboard/cycle-custom-pages',
+            'url' => env('APP_URL') . '/cycle-custom-pages',
             'visibility' => 'private',
         ],
         'companies' => [
