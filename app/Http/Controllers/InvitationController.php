@@ -57,7 +57,11 @@ class InvitationController extends Controller
             })->filter()->values()->toArray(); 
             
             return [
-                'inviter_name'     => $invite->user->name,
+                'inviter' => [
+                    'id'   => $invite->user->id,
+                    'name' => $invite->user->name,
+                    'img_url' => $invite->user->img_url,
+                ],
                 'invitee_name'     => $invite->name,
                 'invitee_email'    => $invite->email,
                 'subject'          => $invite->subject,
