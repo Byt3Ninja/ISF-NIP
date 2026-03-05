@@ -29,6 +29,7 @@ $tabs = [
 	</div>
 
 	{{-- Tabs Navigation --}}
+	<br />
 	<x-navigation-pills :tabs="$tabs" />
 
 	<div class="card">
