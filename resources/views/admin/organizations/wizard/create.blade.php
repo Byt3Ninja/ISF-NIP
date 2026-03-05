@@ -288,7 +288,7 @@
                 notEmpty: { message: '{{ __("admin.organization_name_required") }}' },
                 stringLength: { max: 255, message: '{{ __("admin.Organization name must not exceed 255 characters") }}' },
                 regexp: {
-                  regexp: /^[a-zA-Z]+$/,
+                  regexp: /^[a-zA-Z ]+$/,
                   message: '{{ __("admin.Organization name must contain only English letters") }}'
                 }
               }
@@ -298,7 +298,7 @@
                 notEmpty: { message: '{{ __("admin.organization_name_required") }}' },
                 stringLength: { max: 255, message: '{{ __("admin.Organization name must not exceed 255 characters") }}' },
                 regexp: {
-                  regexp: /^[\u0600-\u06FF]+$/,
+                  regexp: /^[\u0600-\u06FF ]+$/,
                   message: '{{ __("admin.Organization name must contain only Arabic letters") }}'
                 }
               }
