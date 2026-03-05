@@ -419,9 +419,21 @@ class AssessmentController extends Controller
         if (Auth::user()->hasRole('Registered')) {
             $l = app()->getLocale();
             $userid = auth()->user()->id;
-            $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();
+            $previous_assessment = null;
+            // $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();
+            $user_assessments = Assessment::where('user_id', $userid)->orderBy('id', 'desc')->get()->take(2);
 
-            if ($assessment_user != null) {
+            if( $user_assessments->count() == 1 ) { $assessment_user = $user_assessments->first(); }
+            elseif( $user_assessments->count() == 0 ) { $assessment_user = null; }
+            else
+            {
+                $assessment_user = $user_assessments->first();
+                $previous_assessment = $user_assessments->last();
+            }
+
+
+            if( $assessment_user != null )
+            {
                 $categories = Category::where('category_type', 'Assesment')
                     ->with([
                         'subcategory',
@@ -475,13 +487,71 @@ class AssessmentController extends Controller
                     });
                 });
 
-                return view('admin/clients/assessment/analysis-assessment', compact('user_scores', 'categories', 'Analysis_user_scores', 'weightedSubCategories'));
+                $weightedPreviousSubCategories = [];
+                if( $previous_assessment != null )
+                {
+                    $prev_categories = Category::where('category_type', 'Assesment')
+                        ->with([
+                            'subcategory',
+                            'question' => function ($query) use ($previous_assessment) {
+                                $query->where('assessment_id', $previous_assessment->id);
+                            }
+                        ])
+                        ->get();
+
+                    $user_scores = UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
+                        ->where('user_id', $userid)
+                        ->where('assessment_id', $previous_assessment->id)
+                        ->get();
+
+                    $Analysis_user_scores = $prev_categories->map(function ($category) {
+                        $questions = $category->question;
+                        return $category->subcategory->map(function ($subcategory) use ($questions) {
+                            $subcategory_questions = $questions->where('subcategory_id', $subcategory->id);
+                            $total_questions = $subcategory_questions->count();
+                            $answered_questions = $subcategory_questions->where('score', '!=', 0)->count();
+                            return (object) [
+                                'name_ar' => $subcategory->name_ar,
+                                'name_en' => $subcategory->name_en,
+                                'total' => $total_questions,
+                                'totalAnswered' => $answered_questions,
+                            ];
+                        });
+                    })->flatten()->toArray();
+
+                    $weightedPreviousSubCategories = $prev_categories->flatMap(function ($category) use ($userid, $previous_assessment) {
+                        return $category->subcategory->map(function ($subcategory) use ($userid, $previous_assessment) {
+                            $scoresTotalsub = UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
+                                ->where('user_id', $userid)
+                                ->where('assessment_id', $previous_assessment->id)
+                                ->where('subcategory_id', $subcategory->id)
+                                ->get();
+    
+                            $scoresTotalssub = $scoresTotalsub->sum('weighted_score');
+                            $countanswered = $scoresTotalsub->whereNotNull('Result_assessment')->count();
+                            $countNotanswered = $scoresTotalsub->whereNull('Result_assessment')->count();
+                            $totalQuestions = $countanswered + $countNotanswered;
+                            $progress = $totalQuestions > 0 ? ($countanswered / $totalQuestions) * 100 : 0;
+    
+                            return (object) [
+                                'subcategory_id' => $subcategory->id,
+                                'subcategory_name_ar' => $subcategory->name_ar,
+                                'subcategory_name_en' => $subcategory->name_en,
+                                'weighted_score' => $scoresTotalssub,
+                                'progress' => $progress,
+                            ];
+                        });
+                    });
+                }
+
+                return view('admin/clients/assessment/analysis-assessment', compact('user_scores', 'categories', 'Analysis_user_scores', 'weightedSubCategories', 'weightedPreviousSubCategories'));
             } else {
                 $Analysis_user_scores = [];
                 $user_scores = [];
                 $categories = Category::where('category_type', 'Assesment')->with('subcategory')->get();
                 $weightedSubCategories = [];
-                return view('admin/clients/assessment/analysis-assessment', compact('user_scores', 'categories', 'Analysis_user_scores', 'weightedSubCategories'));
+                $weightedPreviousSubCategories = [];
+                return view('admin/clients/assessment/analysis-assessment', compact('user_scores', 'categories', 'Analysis_user_scores', 'weightedSubCategories', 'weightedPreviousSubCategories'));
             }
         } else {
             return redirect()->route('core.dashboard_view')->with(['class' => 'danger', 'success' => __('YouHaveNotCompany')]);
@@ -625,120 +695,120 @@ class AssessmentController extends Controller
         } else { return redirect()->route('core.dashboard_view')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]); }
     }
 
-//     public function generatePDF()
-// {
-//     $l = app()->getLocale();
-//             $userid = auth()->user()->id;
-//             $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();
+    /* public function generatePDF()
+    {
+        $l = app()->getLocale();
+                $userid = auth()->user()->id;
+                $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();
 
-//             if( $assessment_user != null )
-//             {
-//                 $categories = Category::where('category_type', 'Assesment')->with(['subcategory', 'question'])->get();
-               
-//                 $user_scores = $categories->map(function ($category) use ($assessment_user) {
-//                     $questions = $category->question->where('assessment_id', $assessment_user->id);
-//                     $subcategories = $category->subcategory;
-//                     $subcategories = $subcategories->map(function ($subcategory) use ($questions, $assessment_user) {
-//                         $subcategory->questions = $questions->where('subcategory_id', $subcategory->id)->where('assessment_id', $assessment_user->id);
-//                         return $subcategory;
-//                     });
-//                     $category->subcategories = $subcategories;
-//                     return $category;
-//                 });
+                if( $assessment_user != null )
+                {
+                    $categories = Category::where('category_type', 'Assesment')->with(['subcategory', 'question'])->get();
                 
-//                 // استخراج الإجابات
-//                 $answers = $user_scores->pluck('Answers')->map(function ($answer) {
-//                     return json_decode($answer, true);
-//                 })->filter()->toArray();
+                    $user_scores = $categories->map(function ($category) use ($assessment_user) {
+                        $questions = $category->question->where('assessment_id', $assessment_user->id);
+                        $subcategories = $category->subcategory;
+                        $subcategories = $subcategories->map(function ($subcategory) use ($questions, $assessment_user) {
+                            $subcategory->questions = $questions->where('subcategory_id', $subcategory->id)->where('assessment_id', $assessment_user->id);
+                            return $subcategory;
+                        });
+                        $category->subcategories = $subcategories;
+                        return $category;
+                    });
+                    
+                    // استخراج الإجابات
+                    $answers = $user_scores->pluck('Answers')->map(function ($answer) {
+                        return json_decode($answer, true);
+                    })->filter()->toArray();
 
-//                 $countanswered = $user_scores->whereNotNull('Result_assessment')->count();
-//                 $countNotanswered = $user_scores->whereNull('Result_assessment')->count();
-//                 $totalQuestions = $countanswered + $countNotanswered;
+                    $countanswered = $user_scores->whereNotNull('Result_assessment')->count();
+                    $countNotanswered = $user_scores->whereNull('Result_assessment')->count();
+                    $totalQuestions = $countanswered + $countNotanswered;
 
-//                 $progress = $totalQuestions > 0 ? ($countanswered / $totalQuestions) * 100 : 0;
-//             } else
-//             {
-//                 $assessment_user = Assessment::where('user_id', $userid)->latest();
-//                 $categories = Category::where('category_type', 'Assesment')->with(['subcategory', 'question'])->get();
-               
-//                 $user_scores = $categories->map(function ($category) use ($assessment_user) {
-//                     $questions = $category->question->where('assessment_id', $assessment_user->id);
-//                     $subcategories = $category->subcategory;
-//                     $subcategories = $subcategories->map(function ($subcategory) use ($questions, $assessment_user) {
-//                         $subcategory->questions = $questions->where('subcategory_id', $subcategory->id)->where('assessment_id', $assessment_user->id);
-//                         return $subcategory;
-//                     });
-//                     $category->subcategories = $subcategories;
-//                     return $category;
-//                 });
+                    $progress = $totalQuestions > 0 ? ($countanswered / $totalQuestions) * 100 : 0;
+                } else
+                {
+                    $assessment_user = Assessment::where('user_id', $userid)->latest();
+                    $categories = Category::where('category_type', 'Assesment')->with(['subcategory', 'question'])->get();
                 
-//             }
-//              // تحميل الـ View وتحويله إلى PDF
-//     $pdf = Pdf::loadView('admin.clients.assessment.assessment_pdf', ['user_scores' => $user_scores, 'answers' => $answers, 'assessment_user' => $assessment_user]);
+                    $user_scores = $categories->map(function ($category) use ($assessment_user) {
+                        $questions = $category->question->where('assessment_id', $assessment_user->id);
+                        $subcategories = $category->subcategory;
+                        $subcategories = $subcategories->map(function ($subcategory) use ($questions, $assessment_user) {
+                            $subcategory->questions = $questions->where('subcategory_id', $subcategory->id)->where('assessment_id', $assessment_user->id);
+                            return $subcategory;
+                        });
+                        $category->subcategories = $subcategories;
+                        return $category;
+                    });
+                    
+                }
+                // تحميل الـ View وتحويله إلى PDF
+        $pdf = Pdf::loadView('admin.clients.assessment.assessment_pdf', ['user_scores' => $user_scores, 'answers' => $answers, 'assessment_user' => $assessment_user]);
 
-//     // إرجاع ملف الـ PDF للتحميل
-//     return $pdf->download('assessment_questions.pdf');
-//             // return view('admin/clients/assessment/assessment_pdf',compact('user_scores','answers', 'assessment_user'));
+        // إرجاع ملف الـ PDF للتحميل
+        return $pdf->download('assessment_questions.pdf');
+                // return view('admin/clients/assessment/assessment_pdf',compact('user_scores','answers', 'assessment_user'));
 
-   
-// }
-
-public function generatePDF()
-{
-    $userid = auth()->user()->id;
     
-    $assessment_user = Assessment::where('user_id', $userid)->whereNotNull('end_date')->latest()->first();
+    } */
 
-    if (!$assessment_user) {
-        return redirect()->back()->with('error', 'No completed Assessment Found.');
-    }
+    public function generatePDF()
+    {
+        $userid = auth()->user()->id;
 
-    $categories = Category::where('category_type', 'Assesment')
-                          ->with(['subcategory', 'question'])
-                          ->get();
+        $assessment_user = Assessment::where('user_id', $userid)->latest()->first();
 
-    $user_scores = $categories->map(function ($category) use ($assessment_user) {
-        $questions = $category->question->where('assessment_id', $assessment_user->id);
-        $subcategories = $category->subcategory;
-        $subcategories = $subcategories->map(function ($subcategory) use ($questions, $assessment_user) {
-            $subcategory->questions = $questions->where('subcategory_id', $subcategory->id)
-                                                ->where('assessment_id', $assessment_user->id);
-            return $subcategory;
+        if (!$assessment_user) {
+            return redirect()->back()->with('error', 'No completed Assessment Found.');
+        }
+
+        $categories = Category::where('category_type', 'Assesment')
+                            ->with(['subcategory', 'question'])
+                            ->get();
+
+        $user_scores = $categories->map(function ($category) use ($assessment_user) {
+            $questions = $category->question->where('assessment_id', $assessment_user->id);
+            $subcategories = $category->subcategory;
+            $subcategories = $subcategories->map(function ($subcategory) use ($questions, $assessment_user) {
+                $subcategory->questions = $questions->where('subcategory_id', $subcategory->id)
+                                                    ->where('assessment_id', $assessment_user->id);
+                return $subcategory;
+            });
+            $category->subcategories = $subcategories;
+            return $category;
         });
-        $category->subcategories = $subcategories;
-        return $category;
-    });
 
-    $answers = $user_scores->pluck('Answers')->map(function ($answer) {
-        return json_decode($answer, true);
-    })->filter()->toArray();
+        $answers = $user_scores->pluck('Answers')->map(function ($answer) {
+            return json_decode($answer, true);
+        })->filter()->toArray();
 
-     // Get total weighted score
-    $scoresTotal = UserScore::where('user_id', $userid)
-    ->where('assessment_id', $assessment_user->id)
-    ->get();
-    $scoresTotals = $scoresTotal->sum('weighted_score');
+        // Get total weighted score
+        $scoresTotal = UserScore::where('user_id', $userid)
+        ->where('assessment_id', $assessment_user->id)
+        ->get();
+        $scoresTotals = $scoresTotal->sum('weighted_score');
 
-    $start_date = $assessment_user->start_date;
-    $end_date = $assessment_user->end_date;
+        $start_date = $assessment_user->start_date;
+        $end_date = $assessment_user->end_date;
 
-    $user = auth()->user();
-    $companyName = $user->company->name_en;
+        $user = auth()->user();
+        $companyName = $user->company->name_en;
 
-    // Generate PDF
-    $pdf = Pdf::loadView('admin.clients.assessment.assessment_pdf', [
-        'user_scores' => $user_scores,
-        'answers' => $answers,
-        'assessment_user' => $assessment_user,
-        'scoresTotals' => $scoresTotals,
-        'start_date' => $start_date,
-        'end_date' => $end_date,
-        'companyName' => $companyName
-    ]);
+        $view_data = [
+            'user_scores' => $user_scores,
+            'answers' => $answers,
+            'assessment_user' => $assessment_user,
+            'scoresTotals' => $scoresTotals,
+            'start_date' => $start_date,
+            'end_date' => $end_date,
+            'companyName' => $companyName
+        ];
 
-    return $pdf->download('completed_assessment.pdf');
-}
+        return view('admin.clients.assessment.assessment_pdf', $view_data);
+        // Generate PDF
+        $pdf = Pdf::loadView('admin.clients.assessment.assessment_pdf', $view_data);
 
-
-
+        return $pdf->download('completed_assessment.pdf');
+    }
 }
