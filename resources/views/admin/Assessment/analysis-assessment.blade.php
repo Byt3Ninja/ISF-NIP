@@ -103,6 +103,11 @@ $userid = $assessment_user->user_id;
                   
                 </div>
               </div>
+              @if( !empty($assessment->end_date) )
+              <a href="{{ route('assessments.results_export_pdf') }}?assessment_id={{ $assessment->id }}" class="btn btn-sm btn-primary ms-3">
+                {{ __('admin.Export_assessment_pdf') }}
+              </a>
+              @endif
               
             </div>
             <div class="d-flex flex-grow-1 align-items-center gap-3">
