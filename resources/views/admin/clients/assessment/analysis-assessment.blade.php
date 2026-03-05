@@ -230,11 +230,12 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const analysisUserScores = @json($weightedSubCategories) || [];
-      console.log('analysisUserScores', analysisUserScores);
+      const analysisPreviousUserScores = @json($weightedPreviousSubCategories) || [];
 
       // Ensure we have data or create default structure
       const hasData = analysisUserScores && analysisUserScores.length > 0;
-      
+      const hasPreviousData = analysisPreviousUserScores && analysisPreviousUserScores.length > 0;
+
       const chartIndicatorData = hasData ? 
         analysisUserScores.map(item => ({
           name: document.documentElement.lang == 'ar' ? item?.subcategory_name_ar : item?.subcategory_name_en,
@@ -246,6 +247,9 @@
         analysisUserScores.map(item => parseFloat(item?.weighted_score) || 0) : 
         [0];
 
+      const previousChartData = hasPreviousData ? 
+        analysisPreviousUserScores.map(item => parseFloat(item?.weighted_score) || 0) : 
+        [0];
 
       var chart = echarts.init(document.getElementById('chart'));
       // Chart configuration
@@ -280,8 +284,8 @@
           name: '{{$l}}' == 'en' ? 'Current Status' : 'الحالة الحالية',
         },
         {
-          value: Array(chartData?.length || 1).fill(10),
-          name: 'Goal',
+          value: hasPreviousData == false ? Array(chartData?.length || 1).fill(10) : previousChartData,
+          name: '{{$l}}' == 'en' ? 'Goal' : 'الهدف',
         },
       ],
         }, ],
