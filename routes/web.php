@@ -212,7 +212,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     // Service Providers
 
     Route::resource('services_providers', 'serviceProviderController');
-    Route::get('services-providers/requests', 'serviceProviderController@requests')->name('services_providers.requests');
+    Route::get('services-providers/requests/{status?}', 'serviceProviderController@requests')->name('services_providers.requests');
     Route::post('services-providers/requests/take-action', 'serviceProviderController@takeAction')->name('services_providers.takeAction');
     Route::post('services-providers/profile/step1', 'serviceProviderController@storeStep1')->name('services_providers.step1.store');
     Route::post('services-providers/profile/step2', 'serviceProviderController@storeStep2')->name('services_providers.step2.store');

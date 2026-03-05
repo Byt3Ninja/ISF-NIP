@@ -4,7 +4,7 @@
             <li class="nav-item {{ isset($tab['url']) ? '' : (isset($tab['route']) && $_user->ableTo($tab['route']) ? '' : 'd-none') }}" role="presentation">
                     <a
                     @if (isset($tab['route'])) 
-                        href="{{ route($tab['route']) }}" 
+                        href="{{ route($tab['route'], $tab['params'] ?? []) }}" 
                     @elseif (isset($tab['url']))
                         href="/{{ $tab['url'] }}"
                     @else 
@@ -13,7 +13,7 @@
                     @endif
 
                     @if (isset($tab['route']))
-                        class="nav-link {{ Route::is($tab['route']) ? 'active' : '' }}"
+                        class="nav-link {{ isset($tab['params']) ? (Route::is($tab['route']) && request()->route('status') == $tab['params'] ? 'active' : '') : (Route::is($tab['route']) ? 'active' : '') }}"
                     @elseif (isset($tab['url']) && !isset($tab['show']))
                         class="nav-link {{ Request::is($tab['url'] . '*') ? 'active' : '' }}"
                     @elseif (isset($tab['show']))
@@ -24,6 +24,10 @@
                         <i class="ti ti-{{ $tab['icon'] }} me-2"></i>
                     @endisset
                     {{ $tab['title'] }}
+                    
+                    @if ($tab['count'] ?? 0 > 0)
+                        <small class="w-px-20 h-px-20 d-flex align-items-center justify-content-center bg-danger rounded-circle ms-3 text-white">{{ $tab['count'] ?? 0 }}</small>
+                    @endif
                 </a>
             </li>
         @endforeach
