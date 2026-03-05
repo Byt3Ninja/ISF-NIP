@@ -455,7 +455,9 @@ class serviceProviderController extends Controller
 				{
 					Mail::to( $email )->queue(new serviceProviderApproveMail( $contact_name, $login_url, $locale ));
 				}
-				return redirect()->route('services_providers.requests')->with('success', __('admin.serviceProviderRequestApproved'));
+				return redirect()
+						->route('services_providers.requests', ['status' => 'history'])
+						->with('success', __('admin.serviceProviderRequestApproved'));			
 			}
 			catch (\Exception $e) {
 				DB::rollBack();
@@ -485,7 +487,7 @@ class serviceProviderController extends Controller
 			{
 				Mail::to( $email )->queue(new serviceProviderRejectMail( $contact_name, $reason, $locale ));
 			}
-			return redirect()->route('services_providers.requests')->with('success', __('admin.serviceProviderRequestRejected'));
+			return redirect()->route('services_providers.requests', ['status' => 'history'])->with('success', __('admin.serviceProviderRequestRejected'));
 		}
 	}
 

@@ -206,9 +206,9 @@
       const index = $container.children().length;
       let html = $template.html();
       
-      // Replace placeholders
-      html = html.replace(/INDEX/g, index);
+      // Replace placeholders - do specific replacements first before general INDEX replacements
       html = html.replace(/INDEX_PLUS_1/g, index + 1);
+      html = html.replace(/INDEX/g, index);
       
       const $item = $(html);
       $container.append($item);

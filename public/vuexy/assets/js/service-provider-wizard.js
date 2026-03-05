@@ -66,6 +66,7 @@
   let step1InitialData = null;
   let step2InitialData = null;
   let step3InitialData = null;
+  let completedSteps = new Set([0]); // Track completed steps, start with step 0 completed
 
   const lang = $('html').attr('lang') || 'en';
 
@@ -91,16 +92,100 @@
     const wizardValidationPrev = wizardValidationForm.querySelector('.btn-prev');
 
     const validationStepper = new Stepper(wizardValidation, {
-      linear: true
+      linear: false
     });
 
-    // After page ready
+    // Function to update step button states
+    function updateStepButtons() {
+      const currentStep = validationStepper._currentIndex;
+      document.querySelectorAll('.step-trigger').forEach((btn, index) => {
+        // Enable all steps up to and including current step, plus any future completed steps
+        const isAccessible = index <= currentStep || completedSteps.has(index);
+        
+        if (isAccessible) {
+          btn.disabled = false;
+          btn.style.cursor = 'pointer';
+          btn.parentElement.style.cursor = 'pointer';
+        } else {
+          btn.disabled = true;
+          btn.style.cursor = 'default';
+          btn.parentElement.style.cursor = 'default';
+        }
+      });
+    }
+
+    // Handle step button clicks
+    document.querySelectorAll('.step-trigger').forEach((btn, index) => {
+      btn.addEventListener('click', function (e) {
+        const currentStep = validationStepper._currentIndex;
+        const isAccessible = index <= currentStep || completedSteps.has(index);
+        
+        if (isAccessible) {
+          validationStepper.to(index + 1);
+        }
+      });
+    });
+
+    // Initialize step buttons
+    setTimeout(() => updateStepButtons(), 100);
+
+    // Initialize data after DOM is ready
     document.addEventListener('DOMContentLoaded', function () {
       console.log('page loaded - init wizard');
       step1InitialData = getStep1Data();
       step2InitialData = getStep2Data();
       step3InitialData = getStep3Data();
+      
+      // Load completion status from existing data
+      loadCompletedSteps();
+      updateStepButtons();
     });
+
+    // Function to detect which steps are already completed based on initial data
+    function loadCompletedSteps() {
+      // Check if step 1 has data
+      const step1Data = JSON.parse(step1InitialData);
+      const hasStep1Data = Object.values(step1Data).some(val => val !== '');
+      if (hasStep1Data) {
+        completedSteps.add(0);
+        completedSteps.add(1);
+      }
+
+      // Check if step 2 has data
+      const step2Data = JSON.parse(step2InitialData);
+      const hasStep2Data = Object.values(step2Data).some(val => val !== '');
+      if (hasStep2Data) {
+        completedSteps.add(1);
+        completedSteps.add(2);
+      }
+
+      // Check if step 3 has data
+      const step3Data = JSON.parse(step3InitialData);
+      const hasStep3Data = Object.values(step3Data).some(val => val !== '');
+      if (hasStep3Data) {
+        completedSteps.add(2);
+        completedSteps.add(3);
+      }
+
+      // Check if step 4 (portfolio) has items
+      const $portfolioItems = $('.work-item-card:visible');
+      if ($portfolioItems.length > 0) {
+        let hasCompleteItems = false;
+        $portfolioItems.each(function () {
+          const hasTitle = $(this).find('.title-input').val().trim() !== '';
+          const hasMedia = $(this).find('.media-input')[0].files.length > 0 || 
+                          $(this).find('.upload-area img, .upload-area video').length > 0;
+          if (hasTitle && hasMedia) {
+            hasCompleteItems = true;
+            return false;
+          }
+        });
+        if (hasCompleteItems) {
+          completedSteps.add(3);
+          completedSteps.add(4);
+        }
+      }
+    }
 
     // Profile basics
     const FormValidation1 = FormValidation.formValidation(wizardValidationFormStep1, {
@@ -394,6 +479,9 @@
 
       // If no changes → skip AJAX
       if (step1InitialData === currentData) {
+        completedSteps.add(0);
+        completedSteps.add(1);
+        updateStepButtons();
         validationStepper.next();
         return;
       }
@@ -592,6 +680,9 @@
 
       // If no changes → skip AJAX
       if (step2InitialData === currentData) {
+        completedSteps.add(1);
+        completedSteps.add(2);
+        updateStepButtons();
         validationStepper.next();
         return;
       }
@@ -758,6 +849,9 @@
 
         // If no changes → skip AJAX
         if (step3InitialData === currentData) {
+          completedSteps.add(2);
+          completedSteps.add(3);
+          updateStepButtons();
           validationStepper.next();
           return;
         }
@@ -1012,6 +1106,9 @@
 
       // Toggle icon visibility
       $icon.toggle(!isLastStep);
+
+      // Update step button states when stepper changes
+      updateStepButtons();
     });
 
     const wizardValidationNextButton = wizardValidation.querySelector('.btn-next');
@@ -1091,6 +1188,13 @@
           if (originalIcon) originalIcon.style.display = '';
 
           if (response.success) {
+            // Mark current step as completed
+            completedSteps.add(stepIndex);
+            // Enable next step button
+            if (stepIndex + 1 < 5) {
+              completedSteps.add(stepIndex + 1);
+            }
+            updateStepButtons();
             validationStepper.next();
           } else {
             releaseFailureAlert({
