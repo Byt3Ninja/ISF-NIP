@@ -3583,4 +3583,5 @@ return [
 	'price_max_two_decimal_places' => 'يجب ألا يحتوي السعر على أكثر من خانتين عشريتين.',
 	'all_companies' => 'جميع الشركات',
 	'all_contacts' => 'جميع جهات الاتصال',
+	'Not Verified' => 'غير مفعل',
 ];
