@@ -610,24 +610,30 @@ class AssessmentController extends Controller
 
     public function generatePDF()
     {
-        $userid = auth()->user()->id;
-
-        $assessment_user = Assessment::where('user_id', $userid)->latest()->first();
+        $request = request();
+        $user = auth()->user();
+        $userid = $user->id;
+        if( $request->has('assessment_id') && $request->assessment_id != null )
+        {
+            $assessment_user = Assessment::where('id', $request->assessment_id)->with(['user'])->first();
+        }
+        else
+        {
+            $assessment_user = Assessment::where('user_id', $userid)->with(['user'])->latest()->first();
+        }
 
         if (!$assessment_user) {
             return redirect()->back()->with('error', 'No completed Assessment Found.');
         }
 
-        $categories = Category::where('category_type', 'Assesment')
-                            ->with(['subcategory', 'question'])
-                            ->get();
+        $user = $assessment_user->user;
+        $categories = Category::where('category_type', 'Assesment')->with(['subcategory', 'question'])->get();
 
         $user_scores = $categories->map(function ($category) use ($assessment_user) {
             $questions = $category->question->where('assessment_id', $assessment_user->id);
             $subcategories = $category->subcategory;
             $subcategories = $subcategories->map(function ($subcategory) use ($questions, $assessment_user) {
-                $subcategory->questions = $questions->where('subcategory_id', $subcategory->id)
-                                                    ->where('assessment_id', $assessment_user->id);
+                $subcategory->questions = $questions->where('subcategory_id', $subcategory->id)->where('assessment_id', $assessment_user->id);
                 return $subcategory;
             });
             $category->subcategories = $subcategories;
@@ -639,15 +645,12 @@ class AssessmentController extends Controller
         })->filter()->toArray();
 
         // Get total weighted score
-        $scoresTotal = UserScore::where('user_id', $userid)
-        ->where('assessment_id', $assessment_user->id)
-        ->get();
+        $scoresTotal = UserScore::where('user_id', $userid)->where('assessment_id', $assessment_user->id)->get();
         $scoresTotals = $scoresTotal->sum('weighted_score');
 
         $start_date = $assessment_user->start_date;
         $end_date = $assessment_user->end_date;
 
-        $user = auth()->user();
         $companyName = $user->company->name_en;
 
         $view_data = [
