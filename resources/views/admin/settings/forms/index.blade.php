@@ -8,6 +8,8 @@
     ['id' => 'submissions', 'label' => __('forms.submissions_tab'), 'icon' => 'send'],
   ];
 
+  $activeTab = request('tab', 'overview');
+
   $kpis = [
     ['label' => __('forms.total_forms'), 'value' => $analytics['total_forms']],
     ['label' => __('forms.total_submissions'), 'value' => $analytics['total_submissions']],
@@ -39,7 +41,7 @@
       <ul class="nav nav-pills gap-2" id="formsSubmissionsTab" role="tablist">
         @foreach($pills as $key => $pill)
           <li class="nav-item" role="presentation">
-            <button class="nav-link {{ $pill['id'] == 'overview' ? 'active' : '' }}" id="{{ $pill['id'] }}-tab" data-bs-toggle="pill" data-bs-target="#{{ $pill['id'] }}-pane" type="button" role="tab">
+            <button class="nav-link {{ $pill['id'] == $activeTab ? 'active' : '' }}" id="{{ $pill['id'] }}-tab" data-bs-toggle="pill" data-bs-target="#{{ $pill['id'] }}-pane" type="button" role="tab">
               <i class="ti ti-{{ $pill['icon'] }} me-2"></i>
               {{ $pill['label'] }}
             </button>
@@ -49,9 +51,9 @@
     </div>
 
     <div class="tab-content p-0 shadow-none" id="formsSubmissionsTabContent">
-      @include('admin.settings.forms.partials.overview-tab')
-      @include('admin.settings.forms.partials.forms-tab')
-      @include('admin.settings.forms.partials.submissions-tab')
+      @include('admin.settings.forms.partials.overview-tab', ['activeTab' => $activeTab])
+      @include('admin.settings.forms.partials.forms-tab', ['activeTab' => $activeTab])
+      @include('admin.settings.forms.partials.submissions-tab', ['activeTab' => $activeTab])
     </div>
   </div>
 
@@ -415,6 +417,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Initialize charts on page load
   initializeCharts();
+
+  // Handle tab clicks to update URL
+  $('#formsSubmissionsTab .nav-link').on('click', function() {
+    const tabId = $(this).attr('id').replace('-tab', '');
+    const url = new URL(window.location);
+    url.searchParams.set('tab', tabId);
+    window.history.pushState({}, '', url);
+  });
 });
 </script>
 @stop
