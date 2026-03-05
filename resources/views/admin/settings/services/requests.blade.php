@@ -666,7 +666,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const body        = btn.dataset.reviewBody || '';
     const reviewedAt  = btn.dataset.reviewedAt || '';
     const founderName = btn.dataset.founderName || '—';
-    const founderImg  = btn.dataset.founderImg || '/images/deck-video.svg';
+    const founderImg  = btn.dataset.founderImg || '/icons/account.svg';
 
     container.innerHTML = `
       <div class="d-flex flex-column gap-3">

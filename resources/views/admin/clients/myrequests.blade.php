@@ -184,7 +184,7 @@
           </a>
           @else
           <div class="d-flex align-items-center mb-4">
-            <img src="/images/deck-video.svg" class="rounded-circle me-2"
+            <img src="/icons/account.svg" class="rounded-circle me-2"
               width="40" height="40" alt="provider">
           </div>
           @endif
@@ -642,7 +642,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const body        = btn.dataset.reviewBody || '';
     const reviewedAt  = btn.dataset.reviewedAt || '';
     const founderName = btn.dataset.founderName || '—';
-    const founderImg  = btn.dataset.founderImg || '/images/deck-video.svg';
+    const founderImg  = btn.dataset.founderImg || '/icons/account.svg';
 
     container.innerHTML = `
       <div class="d-flex flex-column gap-3">
