@@ -1,5 +1,5 @@
 <!-- Submissions Table -->
-<div class="tab-pane fade" id="submissions-pane" role="tabpanel">
+<div class="tab-pane fade {{ $activeTab == 'submissions' ? 'show active' : '' }}" id="submissions-pane" role="tabpanel">
   <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center border-bottom">
       <h5 class="card-title mb-0">{{ __('forms.submissions_list') }}</h5>

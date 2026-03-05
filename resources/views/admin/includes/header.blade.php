@@ -399,7 +399,7 @@ $menuItems = [
             [
                 'label' => __('admin.Forms'),
                 'icon' => 'ti ti-list',
-                'route' => '/dashboard/forms',
+                'route' => '/dashboard/forms?tab=forms',
                 'permission' => 'forms.index',
                 'isVisible' => true
             ],
@@ -413,7 +413,7 @@ $menuItems = [
             [
                 'label' => $l == 'en' ? 'Forms Submissions' : 'إرسالات النماذج',
                 'icon' => 'ti ti-send',
-                'route' => '/dashboard/forms-submissions',
+                'route' => '/dashboard/forms?tab=submissions',
                 'permission' => 'forms_submissions.index',
                 'isVisible' => true
             ]

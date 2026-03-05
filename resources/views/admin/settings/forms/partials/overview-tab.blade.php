@@ -1,5 +1,5 @@
 <!-- Overview Pane -->
-<div class="tab-pane fade show active" id="overview-pane" role="tabpanel">
+<div class="tab-pane fade {{ $activeTab == 'overview' ? 'show active' : '' }}" id="overview-pane" role="tabpanel">
 
   <!-- KPI Cards -->
   <div class="row mb-4">
