@@ -153,22 +153,20 @@ class AssessmentController extends Controller
      */
     public function show(string $id)
     {
-       if (Auth::user()->hasAnyRole(['Admin', 'organizationManager', 'subadmin']))
+        if (Auth::user()->hasAnyRole(['Admin', 'organizationManager', 'subadmin']))
         {
             $l = app()->getLocale();
-            $assessment_user = Assessment::where('id', $id)->first();
-            if( $assessment_user != null )
-            {
-                $categories = Category::where('category_type', 'Assesment')->with('subcategory')->get();
-                $user_scores = UserScore::with(['category', 'subcategory', 'stage', 'assessment'])->where('user_id', $assessment_user->user_id)->where('assessment_id', $assessment_user->id)->get();
-                return view('admin/Assessment/analysis-assessment', compact('user_scores','categories','assessment_user'));
-            }
-            else
-            {
-                $user_scores = [];
-                $categories = Category::where('category_type', 'Assesment')->with('subcategory')->get();
-                return view('admin/clients/assessment/analysis-assessment', compact('user_scores','categories'));
-            }
+            $get_assessment = Assessment::where('id', $id)->first();
+            $assessment_user = $get_assessment;
+            $assessment_data = $this->loadAssessmentData( $get_assessment?->user_id ?? null, $id );
+
+            $user_scores = $assessment_data['user_scores'];
+            $categories = $assessment_data['categories'];
+            $Analysis_user_scores = $assessment_data['Analysis_user_scores'];
+            $weightedSubCategories = $assessment_data['weightedSubCategories'];
+            $weightedPreviousSubCategories = $assessment_data['weightedPreviousSubCategories'];
+
+            return view('admin/Assessment/analysis-assessment', compact('assessment_user', 'user_scores', 'categories', 'Analysis_user_scores', 'weightedSubCategories', 'weightedPreviousSubCategories'));
         } else { return redirect()->route('core.dashboard_view')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]); }
     }
 
@@ -419,140 +417,15 @@ class AssessmentController extends Controller
         if (Auth::user()->hasRole('Registered')) {
             $l = app()->getLocale();
             $userid = auth()->user()->id;
-            $previous_assessment = null;
-            // $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();
-            $user_assessments = Assessment::where('user_id', $userid)->orderBy('id', 'desc')->get()->take(2);
 
-            if( $user_assessments->count() == 1 ) { $assessment_user = $user_assessments->first(); }
-            elseif( $user_assessments->count() == 0 ) { $assessment_user = null; }
-            else
-            {
-                $assessment_user = $user_assessments->first();
-                $previous_assessment = $user_assessments->last();
-            }
+            $assessment_data = $this->loadAssessmentData( $userid );
+            $user_scores = $assessment_data['user_scores'];
+            $categories = $assessment_data['categories'];
+            $Analysis_user_scores = $assessment_data['Analysis_user_scores'];
+            $weightedSubCategories = $assessment_data['weightedSubCategories'];
+            $weightedPreviousSubCategories = $assessment_data['weightedPreviousSubCategories'];
 
-
-            if( $assessment_user != null )
-            {
-                $categories = Category::where('category_type', 'Assesment')
-                    ->with([
-                        'subcategory',
-                        'question' => function ($query) use ($assessment_user) {
-                            $query->where('assessment_id', $assessment_user->id);
-                        }
-                    ])
-                    ->get();
-
-                $user_scores = UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
-                    ->where('user_id', $userid)
-                    ->where('assessment_id', $assessment_user->id)
-                    ->get();
-
-                $Analysis_user_scores = $categories->map(function ($category) {
-                    $questions = $category->question;
-                    return $category->subcategory->map(function ($subcategory) use ($questions) {
-                        $subcategory_questions = $questions->where('subcategory_id', $subcategory->id);
-                        $total_questions = $subcategory_questions->count();
-                        $answered_questions = $subcategory_questions->where('score', '!=', 0)->count();
-                        return (object) [
-                            'name_ar' => $subcategory->name_ar,
-                            'name_en' => $subcategory->name_en,
-                            'total' => $total_questions,
-                            'totalAnswered' => $answered_questions,
-                        ];
-                    });
-                })->flatten()->toArray();
-
-                $weightedSubCategories = $categories->flatMap(function ($category) use ($userid, $assessment_user) {
-                    return $category->subcategory->map(function ($subcategory) use ($userid, $assessment_user) {
-                        $scoresTotalsub = UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
-                            ->where('user_id', $userid)
-                            ->where('assessment_id', $assessment_user->id)
-                            ->where('subcategory_id', $subcategory->id)
-                            ->get();
-
-                        $scoresTotalssub = $scoresTotalsub->sum('weighted_score');
-                        $countanswered = $scoresTotalsub->whereNotNull('Result_assessment')->count();
-                        $countNotanswered = $scoresTotalsub->whereNull('Result_assessment')->count();
-                        $totalQuestions = $countanswered + $countNotanswered;
-                        $progress = $totalQuestions > 0 ? ($countanswered / $totalQuestions) * 100 : 0;
-
-                        return (object) [
-                            'subcategory_id' => $subcategory->id,
-                            'subcategory_name_ar' => $subcategory->name_ar,
-                            'subcategory_name_en' => $subcategory->name_en,
-                            'weighted_score' => $scoresTotalssub,
-                            'progress' => $progress,
-                        ];
-                    });
-                });
-
-                $weightedPreviousSubCategories = [];
-                if( $previous_assessment != null )
-                {
-                    $prev_categories = Category::where('category_type', 'Assesment')
-                        ->with([
-                            'subcategory',
-                            'question' => function ($query) use ($previous_assessment) {
-                                $query->where('assessment_id', $previous_assessment->id);
-                            }
-                        ])
-                        ->get();
-
-                    $user_scores = UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
-                        ->where('user_id', $userid)
-                        ->where('assessment_id', $previous_assessment->id)
-                        ->get();
-
-                    $Analysis_user_scores = $prev_categories->map(function ($category) {
-                        $questions = $category->question;
-                        return $category->subcategory->map(function ($subcategory) use ($questions) {
-                            $subcategory_questions = $questions->where('subcategory_id', $subcategory->id);
-                            $total_questions = $subcategory_questions->count();
-                            $answered_questions = $subcategory_questions->where('score', '!=', 0)->count();
-                            return (object) [
-                                'name_ar' => $subcategory->name_ar,
-                                'name_en' => $subcategory->name_en,
-                                'total' => $total_questions,
-                                'totalAnswered' => $answered_questions,
-                            ];
-                        });
-                    })->flatten()->toArray();
-
-                    $weightedPreviousSubCategories = $prev_categories->flatMap(function ($category) use ($userid, $previous_assessment) {
-                        return $category->subcategory->map(function ($subcategory) use ($userid, $previous_assessment) {
-                            $scoresTotalsub = UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
-                                ->where('user_id', $userid)
-                                ->where('assessment_id', $previous_assessment->id)
-                                ->where('subcategory_id', $subcategory->id)
-                                ->get();
-    
-                            $scoresTotalssub = $scoresTotalsub->sum('weighted_score');
-                            $countanswered = $scoresTotalsub->whereNotNull('Result_assessment')->count();
-                            $countNotanswered = $scoresTotalsub->whereNull('Result_assessment')->count();
-                            $totalQuestions = $countanswered + $countNotanswered;
-                            $progress = $totalQuestions > 0 ? ($countanswered / $totalQuestions) * 100 : 0;
-    
-                            return (object) [
-                                'subcategory_id' => $subcategory->id,
-                                'subcategory_name_ar' => $subcategory->name_ar,
-                                'subcategory_name_en' => $subcategory->name_en,
-                                'weighted_score' => $scoresTotalssub,
-                                'progress' => $progress,
-                            ];
-                        });
-                    });
-                }
-
-                return view('admin/clients/assessment/analysis-assessment', compact('user_scores', 'categories', 'Analysis_user_scores', 'weightedSubCategories', 'weightedPreviousSubCategories'));
-            } else {
-                $Analysis_user_scores = [];
-                $user_scores = [];
-                $categories = Category::where('category_type', 'Assesment')->with('subcategory')->get();
-                $weightedSubCategories = [];
-                $weightedPreviousSubCategories = [];
-                return view('admin/clients/assessment/analysis-assessment', compact('user_scores', 'categories', 'Analysis_user_scores', 'weightedSubCategories', 'weightedPreviousSubCategories'));
-            }
+            return view('admin/clients/assessment/analysis-assessment', compact('user_scores', 'categories', 'Analysis_user_scores', 'weightedSubCategories', 'weightedPreviousSubCategories'));
         } else {
             return redirect()->route('core.dashboard_view')->with(['class' => 'danger', 'success' => __('YouHaveNotCompany')]);
         }
@@ -810,5 +683,149 @@ class AssessmentController extends Controller
         $pdf = Pdf::loadView('admin.clients.assessment.assessment_pdf', $view_data);
 
         return $pdf->download('completed_assessment.pdf');
+    }
+
+    private function loadAssessmentData( $userid, $id = null )
+    {
+        $user_scores = [];
+        $Analysis_user_scores = [];
+        $weightedSubCategories = [];
+        $weightedPreviousSubCategories = [];
+        $categories = Category::where('category_type', 'Assesment')->with('subcategory')->get();
+
+        $previous_assessment = null;
+        $user_assessments = Assessment::where('user_id', $userid)
+        ->when($id, function ($query) use ($id) {
+            return $query->where('id', '>=',  $id);
+        })
+        ->orderBy('id', 'desc')->get()->take(2);
+
+        if( $user_assessments->count() == 1 ) { $assessment_user = $user_assessments->first(); }
+        elseif( $user_assessments->count() == 0 ) { $assessment_user = null; }
+        else
+        {
+            $assessment_user = $user_assessments->first();
+            $previous_assessment = $user_assessments->last();
+        }
+
+        if( $assessment_user != null )
+        {
+            $categories = Category::where('category_type', 'Assesment')
+                ->with([
+                    'subcategory',
+                    'question' => function ($query) use ($assessment_user) {
+                        $query->where('assessment_id', $assessment_user->id);
+                    }
+                ])
+                ->get();
+
+            $user_scores = UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
+                ->where('user_id', $userid)
+                ->where('assessment_id', $assessment_user->id)
+                ->get();
+
+            $Analysis_user_scores = $categories->map(function ($category) {
+                $questions = $category->question;
+                return $category->subcategory->map(function ($subcategory) use ($questions) {
+                    $subcategory_questions = $questions->where('subcategory_id', $subcategory->id);
+                    $total_questions = $subcategory_questions->count();
+                    $answered_questions = $subcategory_questions->where('score', '!=', 0)->count();
+                    return (object) [
+                        'name_ar' => $subcategory->name_ar,
+                        'name_en' => $subcategory->name_en,
+                        'total' => $total_questions,
+                        'totalAnswered' => $answered_questions,
+                    ];
+                });
+            })->flatten()->toArray();
+
+            $weightedSubCategories = $categories->flatMap(function ($category) use ($userid, $assessment_user) {
+                return $category->subcategory->map(function ($subcategory) use ($userid, $assessment_user) {
+                    $scoresTotalsub = UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
+                        ->where('user_id', $userid)
+                        ->where('assessment_id', $assessment_user->id)
+                        ->where('subcategory_id', $subcategory->id)
+                        ->get();
+
+                    $scoresTotalssub = $scoresTotalsub->sum('weighted_score');
+                    $countanswered = $scoresTotalsub->whereNotNull('Result_assessment')->count();
+                    $countNotanswered = $scoresTotalsub->whereNull('Result_assessment')->count();
+                    $totalQuestions = $countanswered + $countNotanswered;
+                    $progress = $totalQuestions > 0 ? ($countanswered / $totalQuestions) * 100 : 0;
+
+                    return (object) [
+                        'subcategory_id' => $subcategory->id,
+                        'subcategory_name_ar' => $subcategory->name_ar,
+                        'subcategory_name_en' => $subcategory->name_en,
+                        'weighted_score' => $scoresTotalssub,
+                        'progress' => $progress,
+                    ];
+                });
+            });
+
+            if( $previous_assessment != null )
+            {
+                $prev_categories = Category::where('category_type', 'Assesment')
+                    ->with([
+                        'subcategory',
+                        'question' => function ($query) use ($previous_assessment) {
+                            $query->where('assessment_id', $previous_assessment->id);
+                        }
+                    ])
+                    ->get();
+
+                $user_scores = UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
+                    ->where('user_id', $userid)
+                    ->where('assessment_id', $previous_assessment->id)
+                    ->get();
+
+                $Analysis_user_scores = $prev_categories->map(function ($category) {
+                    $questions = $category->question;
+                    return $category->subcategory->map(function ($subcategory) use ($questions) {
+                        $subcategory_questions = $questions->where('subcategory_id', $subcategory->id);
+                        $total_questions = $subcategory_questions->count();
+                        $answered_questions = $subcategory_questions->where('score', '!=', 0)->count();
+                        return (object) [
+                            'name_ar' => $subcategory->name_ar,
+                            'name_en' => $subcategory->name_en,
+                            'total' => $total_questions,
+                            'totalAnswered' => $answered_questions,
+                        ];
+                    });
+                })->flatten()->toArray();
+
+                $weightedPreviousSubCategories = $prev_categories->flatMap(function ($category) use ($userid, $previous_assessment) {
+                    return $category->subcategory->map(function ($subcategory) use ($userid, $previous_assessment) {
+                        $scoresTotalsub = UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
+                            ->where('user_id', $userid)
+                            ->where('assessment_id', $previous_assessment->id)
+                            ->where('subcategory_id', $subcategory->id)
+                            ->get();
+
+                        $scoresTotalssub = $scoresTotalsub->sum('weighted_score');
+                        $countanswered = $scoresTotalsub->whereNotNull('Result_assessment')->count();
+                        $countNotanswered = $scoresTotalsub->whereNull('Result_assessment')->count();
+                        $totalQuestions = $countanswered + $countNotanswered;
+                        $progress = $totalQuestions > 0 ? ($countanswered / $totalQuestions) * 100 : 0;
+
+                        return (object) [
+                            'subcategory_id' => $subcategory->id,
+                            'subcategory_name_ar' => $subcategory->name_ar,
+                            'subcategory_name_en' => $subcategory->name_en,
+                            'weighted_score' => $scoresTotalssub,
+                            'progress' => $progress,
+                        ];
+                    });
+                });
+            }
+        }
+
+        return [
+            'user_scores' => $user_scores,
+            'categories' => $categories,
+            'Analysis_user_scores' => $Analysis_user_scores,
+            'weightedSubCategories' => $weightedSubCategories,
+            'weightedPreviousSubCategories' => $weightedPreviousSubCategories
+        ];
     }
 }
