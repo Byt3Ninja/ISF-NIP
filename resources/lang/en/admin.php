@@ -3526,4 +3526,5 @@ return [
 	'price_max_two_decimal_places' => 'The price must have at most 2 decimal places.',
 	'all_companies' => 'All Companies',
 	'all_contacts' => 'All Contacts',
+	'Not Verified' => 'Not Verified',
 ];

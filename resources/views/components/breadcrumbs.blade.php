@@ -12,7 +12,7 @@
     $shouldHide = in_array($currentRoute, $hideBreadcrumbRoutes) || in_array($currentPath, $hideBreadcrumbPaths);
 @endphp
 @if(isset($breadcrumbs) && count($breadcrumbs) > 1 && !$shouldHide)
-<nav aria-label="{{ __('breadcrumb.breadcrumb_navigation') ?? 'Breadcrumb' }}" class="mb-8">
+<nav aria-label="{{ __('breadcrumb.breadcrumb_navigation') ?? 'Breadcrumb' }}">
   
   <ol class="breadcrumb align-items-center bg-card rounded p-2 shadow-xs">
     @if(isset($backUrl) && $backUrl)

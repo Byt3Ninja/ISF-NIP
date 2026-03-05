@@ -25,6 +25,8 @@ $tabs = [
 		@endif
 	</div>
 
+	<br />
+
 	{{-- Tabs Navigation --}}
 	<x-navigation-pills :tabs="$tabs" />
 
