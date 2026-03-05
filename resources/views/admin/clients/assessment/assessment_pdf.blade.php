@@ -5,16 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Assessment Questions</title>
     <style>
-        @font-face {
-            font-family: 'Cairo-ExtraLight';
-            font-style: normal;
-            font-weight: normal;
-            src: url("{{ public_path('fonts/cairo/Cairo-ExtraLight.ttf') }}") format('truetype');
-        }
-
         body {
             font-family: 'Cairo-ExtraLight', sans-serif;
-            direction: rtl;
+            direction: ltr;
             text-align: left;
         }
         
@@ -56,7 +49,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($subcategory['questions'] as $key => $question)
+                    @foreach ($subcategory['questions']->values() as $key => $question)
                         <tr>
                             <td>{{ $key + 1 }}</td>
                             <td>{{ $question['QuestionBank'] }}</td>
@@ -68,4 +61,9 @@
         @endforeach
     @endforeach
 </body>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        setTimeout(function(){ window.print(); }, 250);
+    });
+</script>
 </html>
