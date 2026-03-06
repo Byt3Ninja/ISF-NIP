@@ -199,10 +199,19 @@
   });
 
   /* ===============================
-   * PAGE CLOSE / REFRESH (DISABLED)
+   * PAGE CLOSE / REFRESH
    * =============================== */
-  // Removed beforeunload handler entirely
-  // Form submissions now proceed without interruption
+  // Re-enabling beforeunload handler to catch all page exits if dirty
+  window.addEventListener('beforeunload', function (e) {
+    if (isPageDirty()) {
+      // Cancel the event and return a string to trigger the browser's confirmation dialog
+      e.preventDefault();
+      // Most browsers no longer display the custom string, but returning a string is still required
+      return '{{ __('settings.navigation.unsaved_changes_message') }}';
+    }
+    // If not dirty, allow the page to unload normally
+    return undefined;
+  });
 })();
 </script>
 @endpush
