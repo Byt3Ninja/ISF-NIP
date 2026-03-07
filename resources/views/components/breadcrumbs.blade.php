@@ -69,6 +69,7 @@
   if (!backButtons.length) return;
 
   const initialState = new Map();
+  let formSubmitting = false; // Track form submission state
   const log = (...a) => CONFIG.debug && console.log('[DIRTY]', ...a);
 
   /* ===============================
@@ -199,17 +200,28 @@
   });
 
   /* ===============================
+   * FORM SUBMIT HANDLER
+   * =============================== */
+  document.addEventListener('submit', function (e) {
+    // Set flag to disable beforeunload warning
+    formSubmitting = true;
+    log('Form submitting, beforeunload disabled');
+  });
+
+  /* ===============================
    * PAGE CLOSE / REFRESH
    * =============================== */
-  // Re-enabling beforeunload handler to catch all page exits if dirty
   window.addEventListener('beforeunload', function (e) {
+    // Skip warning if form is being submitted
+    if (formSubmitting) {
+      return undefined;
+    }
+
     if (isPageDirty()) {
-      // Cancel the event and return a string to trigger the browser's confirmation dialog
       e.preventDefault();
-      // Most browsers no longer display the custom string, but returning a string is still required
       return '{{ __('settings.navigation.unsaved_changes_message') }}';
     }
-    // If not dirty, allow the page to unload normally
+    
     return undefined;
   });
 })();
