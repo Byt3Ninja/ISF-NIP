@@ -69,6 +69,7 @@
   if (!backButtons.length) return;
 
   const initialState = new Map();
+  let formSubmitting = false; // Track form submission state
   const log = (...a) => CONFIG.debug && console.log('[DIRTY]', ...a);
 
   /* ===============================
@@ -199,10 +200,30 @@
   });
 
   /* ===============================
-   * PAGE CLOSE / REFRESH (DISABLED)
+   * FORM SUBMIT HANDLER
    * =============================== */
-  // Removed beforeunload handler entirely
-  // Form submissions now proceed without interruption
+  document.addEventListener('submit', function (e) {
+    // Set flag to disable beforeunload warning
+    formSubmitting = true;
+    log('Form submitting, beforeunload disabled');
+  });
+
+  /* ===============================
+   * PAGE CLOSE / REFRESH
+   * =============================== */
+  window.addEventListener('beforeunload', function (e) {
+    // Skip warning if form is being submitted
+    if (formSubmitting) {
+      return undefined;
+    }
+
+    if (isPageDirty()) {
+      e.preventDefault();
+      return '{{ __('settings.navigation.unsaved_changes_message') }}';
+    }
+    
+    return undefined;
+  });
 })();
 </script>
 @endpush

@@ -71,7 +71,16 @@
               <div class="col-md-6 col-lg-3">
                 <div class="input-group input-group-merge">
                   <span class="input-group-text"><i class="ti ti-search text-muted"></i></span>
-                  <input type="text" class="form-control" name="search" value="{{ request('search') }}" placeholder="{{ __('admin.Search') }}...">
+                  <input
+                    type="search"
+                    id="debounced-search"
+                    class="form-control"
+                    placeholder="{{ __('admin.Search') }}..."
+                    name="search"
+                    aria-label="Search services"
+                    aria-describedby="search-services"
+                    value="{{ request('search') ? request('search') : '' }}"
+                  />
                 </div>
               </div>
 
