@@ -5,6 +5,12 @@
     .remove-tag:hover {
       color: #ff3e1d;
     }
+    .cursor-pointer {
+      cursor: pointer;
+    }
+    .cursor-pointer:hover {
+      opacity: 0.85;
+    }
   </style>
 @stop
 
@@ -216,11 +222,37 @@
               <!-- MENTORS CARD GRID -->
               <div class="row g-4 mb-4" id="mentors-grid">
                 @foreach ($mentors as $mentor)
+                  @php
+                    // Get mentor's expertise IDs from bio
+                    $mentorExpertiseIds = [];
+                    if (isset($mentor->bio->expertise_ids)) {
+                        $mentorExpertiseIds = is_array($mentor->bio->expertise_ids) 
+                            ? $mentor->bio->expertise_ids 
+                            : json_decode($mentor->bio->expertise_ids, true) ?? [];
+                    }
+                    
+                    // Get organization names for this mentor
+                    $mentorOrgs = [];
+                    if ($mentor->scope === 'organization' && !empty($mentor->scope_org_ids)) {
+                        $orgIds = json_decode($mentor->scope_org_ids, true) ?? [];
+                        if (!empty($orgIds)) {
+                            $organizations = App\Organization::whereIn('id', $orgIds)
+                                ->where('is_draft', 0)
+                                ->get();
+                            
+                            foreach ($organizations as $org) {
+                                // Try localized name first, fallback to non-localized
+                                $mentorOrgs[] = $org->{'name_' . $l} ?? $org->name ?? '';
+                            }
+                        }
+                    }
+                  @endphp
                   <div class="col-lg-4 col-md-6 mentor-item-col"
                         data-name="{{ strtolower($mentor->name) }} {{ strtolower($mentor->title) }}"
                         data-specialization="{{ $mentor->bio->{'specialization_' . $l} ?? '' }}"
-                        data-scope="{{ $mentor->scope }}"
-                        data-scope-org-ids="{{ json_encode($mentor->scope_org_ids ?? []) }}"
+                        data-expertise-ids="{{ json_encode($mentorExpertiseIds) }}"
+                        data-scope="{{ strtolower($mentor->scope) }}"
+                        data-scope-org-ids="{{ $mentor->scope_org_ids }}"
                         data-rating="{{ number_format($mentor->mrating(), 1) }}"
                     >
                         
@@ -274,21 +306,77 @@
                                 </p>
 
                                 <!-- Footer -->
-                                <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mt-auto flex-wrap gap-2">
                                     <!-- Left side: Specialization badge -->
                                     @if (isset($mentor->bio->{'specialization_' . $l}))
                                       <span class="badge bg-label-secondary">{{ $mentor->bio->{'specialization_' . $l} ?? '' }}</span>
                                     @endif
 
-                                    <!-- Right side: Rating badge -->
-                                    <span class="badge bg-light-subtle border d-flex align-items-center gap-2">
-                                        <i class="ti ti-star-filled ti-16px text-warning"></i>
-                                        <span class="text-dark fw-semibold">{{ number_format($mentor->mrating(), 1) }}</span>
-                                    </span>
+                                    <!-- Right side: Rating badge and Organization/Public badges -->
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <span class="badge bg-light-subtle border d-flex align-items-center gap-2">
+                                            <i class="ti ti-star-filled ti-16px text-warning"></i>
+                                            <span class="text-dark fw-semibold">{{ number_format($mentor->mrating(), 1) }}</span>
+                                        </span>
+                                        
+                                        @if (!empty($mentorOrgs))
+                                            @php
+                                                $visibleOrgs = array_slice($mentorOrgs, 0, 2);
+                                                $remainingCount = count($mentorOrgs) - 2;
+                                            @endphp
+                                            
+                                            @foreach ($visibleOrgs as $orgName)
+                                                <span class="badge bg-label-info badge-sm">
+                                                    <i class="ti ti-building ti-xs me-1"></i>{{ $orgName }}
+                                                </span>
+                                            @endforeach
+                                            
+                                            @if ($remainingCount > 0)
+                                                <span class="badge bg-label-info badge-sm cursor-pointer" 
+                                                      data-bs-toggle="modal" 
+                                                      data-bs-target="#orgsModal{{ $mentor->id }}">
+                                                    <i class="ti ti-dots ti-xs me-1"></i>+{{ $remainingCount }} {{ __('admin.more') }}
+                                                </span>
+                                            @endif
+                                        @elseif ($mentor->scope === 'public')
+                                            <span class="badge bg-label-success badge-sm">
+                                                <i class="ti ti-world ti-xs me-1"></i>{{ __('admin.Public') }}
+                                            </span>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                             
                         </div>
+                        
+                        <!-- Organizations Modal -->
+                        @if (!empty($mentorOrgs) && count($mentorOrgs) > 2)
+                            <div class="modal fade" id="orgsModal{{ $mentor->id }}" tabindex="-1" aria-labelledby="orgsModalLabel{{ $mentor->id }}" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="orgsModalLabel{{ $mentor->id }}">
+                                                <i class="ti ti-building me-2"></i>{{ __('admin.Organizations') }} - {{ $mentor->name }}
+                                            </h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <ul class="list-group list-group-flush">
+                                                @foreach ($mentorOrgs as $orgName)
+                                                    <li class="list-group-item d-flex align-items-center">
+                                                        <i class="ti ti-building text-info me-2"></i>
+                                                        <span>{{ $orgName }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('admin.Close') }}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                       </div>
                     @endforeach
                     
@@ -555,32 +643,48 @@
         function applyFilters() {
             const searchTerm = searchInput.value.toLowerCase().trim();
             const selectedSpecialization = specializationFilter.value;
-            const selectedRating = parseFloat(ratingFilter.value);
+            const selectedRating = parseInt(ratingFilter.value);
             const selectedScope = scopeFilter.value; // '', 'public', or org ID string
 
             visibleItems = allMentorCols.filter(col => {
                 // Search: name + title
                 const matchesSearch = !searchTerm || col.dataset.name.includes(searchTerm);
 
-                // Specialization
-                const matchesSpecialization = !selectedSpecialization ||
-                    col.dataset.specialization === selectedSpecialization;
+                // Specialization - now check by expertise IDs
+                let matchesSpecialization = true;
+                if (selectedSpecialization) {
+                    try {
+                        const expertiseIds = JSON.parse(col.dataset.expertiseIds || '[]');
+                        // Convert both to strings for comparison
+                        matchesSpecialization = expertiseIds.map(String).includes(String(selectedSpecialization));
+                    } catch (e) {
+                        matchesSpecialization = false;
+                    }
+                }
 
-                // Rating: matches within ±0.5 of selected integer
-                const mentorRating = parseFloat(col.dataset.rating);
-                const matchesRating = selectedRating === 0 ||
-                    (mentorRating >= selectedRating - 0.5 && mentorRating < selectedRating + 0.5);
+                // Rating: use Math.round to match display
+                let matchesRating = true;
+                if (selectedRating > 0) {
+                    const mentorRating = parseFloat(col.dataset.rating);
+                    matchesRating = Math.round(mentorRating) === selectedRating;
+                }
 
-                // Scope
+                // Scope - fixed to use lowercase and proper comparison
                 let matchesScope = true;
                 if (selectedScope) {
-                    const mentorScope = col.dataset.scope;
+                    const mentorScope = col.dataset.scope; // already lowercase from backend
                     if (selectedScope === 'public') {
                         matchesScope = mentorScope === 'public';
                     } else {
                         // selectedScope is an org ID — check if mentor's org_ids includes it
-                        const orgIds = JSON.parse(col.dataset.scopeOrgIds || '[]');
-                        matchesScope = mentorScope === 'org' && orgIds.includes(selectedScope);
+                        try {
+                            const orgIds = JSON.parse(col.dataset.scopeOrgIds || '[]');
+                            // Convert both to integers for comparison
+                            matchesScope = (mentorScope === 'organization') && 
+                                          orgIds.map(Number).includes(Number(selectedScope));
+                        } catch (e) {
+                            matchesScope = false;
+                        }
                     }
                 }
 
