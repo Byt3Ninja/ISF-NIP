@@ -66,6 +66,7 @@ class ActivityController extends Controller
             $statsQuery->whereIn('user_id', $orgUserIds);
         }
 
+        $totalLogins = $statsQuery->count();
         $totalLoginsToday = (clone $statsQuery)->whereDate('activity_time', $today)->count();
         $totalLoginsWeek = (clone $statsQuery)->whereBetween('activity_time', [$thisWeek, Carbon::now()])->count();
         $totalLoginsMonth = (clone $statsQuery)->whereBetween('activity_time', [$thisMonth, Carbon::now()])->count();
@@ -157,7 +158,7 @@ class ActivityController extends Controller
            $suspiciousLogin->total_activities_count = $totalActivitiesCount;
        });
 
-       return view('admin.activities.index', compact('activities', 'totalLoginsToday', 'totalLoginsWeek', 'totalLoginsMonth', 'topDevices', 'topBrowsers', 'loginsByCountry', 'peakHours', 'suspiciousLogins'));
+       return view('admin.activities.index', compact('activities', 'totalLogins', 'totalLoginsToday', 'totalLoginsWeek', 'totalLoginsMonth', 'topDevices', 'topBrowsers', 'loginsByCountry', 'peakHours', 'suspiciousLogins'));
     }
 
     public function destroy($id)

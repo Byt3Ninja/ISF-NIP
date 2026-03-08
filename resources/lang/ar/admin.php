@@ -2179,6 +2179,7 @@ return [
 	'Login_Time' => 'وقت الدخول',
 	'platform' => 'المنصة',
 	'Activities_Dashboard' => 'لوحة تحكم الأنشطة',
+	'Total_Logins' => 'جميع الجلسات',
 	'Total_Logins_Today' => 'إجمالي الجلسات اليوم',
 	'Total_Logins_Week' => 'إجمالي الجلسات هذا الأسبوع',
 	'Total_Logins_Month' => 'إجمالي الجلسات هذا الشهر',
