@@ -61,7 +61,7 @@
     backButtonSelector: '#back-button',
     backHref: "{{ $backUrl }}",
     watchSelectors: 'input:not([type="search"]), input:not([type="file"]), textarea, select',
-    ignoreSelectors: '[data-ignore-dirty], .dt-filter, .card-datatable, .table-responsive, .organizations-list-wrapper',
+    ignoreSelectors: '[data-ignore-dirty], input[type="search"], input[name="search"] .dt-filter, .card-datatable, .table-responsive, .organizations-list-wrapper',
     debug: false
   };
 
@@ -208,21 +208,32 @@
     log('Form submitting, beforeunload disabled');
   });
 
-  /* ===============================
-   * PAGE CLOSE / REFRESH
-   * =============================== */
+ let isRefreshing = false;
+
+  /* Detect refresh via keyboard */
+  window.addEventListener('keydown', function (e) {
+    if (
+      e.key === 'F5' ||
+      (e.ctrlKey && e.key === 'r') ||
+      (e.metaKey && e.key === 'r')
+    ) {
+      isRefreshing = true;
+    }
+  });
+
+  /* Detect refresh via browser reload button */
   window.addEventListener('beforeunload', function (e) {
+
     // Skip warning if form is being submitted
-    if (formSubmitting) {
-      return undefined;
+    if (formSubmitting || isRefreshing) {
+      return;
     }
 
     if (isPageDirty()) {
       e.preventDefault();
-      return '{{ __('settings.navigation.unsaved_changes_message') }}';
+      e.returnValue = '{{ __('settings.navigation.unsaved_changes_message') }}';
+      return e.returnValue;
     }
-    
-    return undefined;
   });
 })();
 </script>
