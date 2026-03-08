@@ -86,154 +86,163 @@ class MentorsController extends Controller
 
 	public function list(Request $request, $id = 0)
 	{
-		$l = app()->getLocale();
-		
-		$user = auth()->user();
-		$orgIds = $user->organizations_ids;
-		if ($id == 0) {
+			$l = app()->getLocale();
 			
-			$id = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
-				return $q->whereIn('organization_id', $orgIds);
-			})->orderBy('start', 'DESC')->pluck('id')->first();
-		}
-		// $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
-		$mentors = User::role('mentor')->with('inviteMentors');
-		
-		$cList = CyclesMentors::where('cycle_id', $id)->pluck('user_id')->toArray();
-
-
-		// $cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
-		// 	return $q->whereIn('organization_id', $orgIds);
-		// })->get();
-
-		$scopeFilter = $request->scopeFilter;
-		if (!$user->hasRole('Admin') && !empty($orgIds)) {
-                    $cycles = Cycle::whereIn('organization_id', $orgIds)->get();
-                    if (!empty($scopeFilter) && $scopeFilter !== 'all') {
-                    if ($scopeFilter === 'public') {
-                        $mentors->where(function ($q) {
-                            $q->whereDoesntHave('inviteMentors')
-                            ->orWhere(function ($q2) {
-                                $q2->whereHas('inviteMentors', function ($q3) {
-                                    $q3->where('scope', 'Public')
-                                        ->where('status', 'accepted');
-                                });
-                            });
-                        });
-                   
-                    } else {
-                         $mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter, $request) {
-                             $query
-                                 ->where('status', 'accepted');
-                             if ($request->scopeFilter != null) {
-                                 $query->whereJsonContains('organization_ids', (string) $request->scopeFilter);
-                             }
-                         });
-                    }
-                }
-                } else {
-                    $cycles = Cycle::all();
-					if (!empty($scopeFilter) && $scopeFilter !== 'all') {
-						if ($scopeFilter === 'public') {
-							$mentors->where(function ($q) {
-								$q->whereDoesntHave('inviteMentors')
-								->orWhere(function ($q2) {
-									$q2->whereHas('inviteMentors', function ($q3) {
-										$q3->where('scope', 'Public')
-											->where('status', 'accepted');
-									});
-								});
-							});
-						} else {
-							$mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter, $request) {
-								$query
-									->where('status', 'accepted');
-								if ($request->scopeFilter != null) {
-									$query->whereJsonContains('organization_ids', (string) $request->scopeFilter);
-								}
-							});
-						}
-                	}
-                }
-			$mentors = $mentors->get()->map(function ($mentor) {
-				// افتراضيًا public لو مفيش invites
-				$mentorScope = 'public';
-				$mentorOrgIds = [];
-
-			if ($mentor->inviteMentors && $mentor->inviteMentors->count() > 0) {
-					// هنجيب كل invites المقبولة
-					$acceptedInvites = $mentor->inviteMentors->filter(fn($i) => strtolower($i->status) === 'accepted');
+			$user = auth()->user();
+			$orgIds = $user->organizations_ids;
+			if ($id == 0) {
 					
-					// لو فيه invite scopes مختلفة، ممكن تختار الأولى أو حسب منطقك
-					if ($acceptedInvites->count() > 0) {
-						$mentorOrgIds = $acceptedInvites
-							->flatMap(fn($invite) => $invite->organization_ids ?? [])
-							->unique()
-							->values()
-							->toArray();
-						$mentorScope = count($mentorOrgIds) > 0 ? 'Organization' : $acceptedInvites->first()->scope;
-					}
-				}
-
-				// إضافة الخصائص للـ mentor
-				$mentor->scope = $mentorScope;
-				$mentor->scope_org_ids = json_encode(collect($mentorOrgIds)->map(function($id) { return intval($id); }));
-				
-				return $mentor;
-			});
+					$id = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+							return $q->whereIn('organization_id', $orgIds);
+					})->orderBy('start', 'DESC')->pluck('id')->first();
+			}
+			// $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
+			$mentors = User::role('mentor')->with('inviteMentors');
 			
-		$selectedSpecialization = $request->specialization; 
+			$cList = CyclesMentors::where('cycle_id', $id)->pluck('user_id')->toArray();
 
-		if ($selectedSpecialization != 0) {
-			$mentors = $mentors->filter(function ($mentor) use ($selectedSpecialization, $l) {
-				$mentorSpecialization = $mentor->bio->{'specialization_' . $l} ?? null;
 
-				return !is_null($mentorSpecialization) && $mentorSpecialization == $selectedSpecialization;
+			// $cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+			// 	return $q->whereIn('organization_id', $orgIds);
+			// })->get();
+
+			$scopeFilter = $request->scopeFilter;
+			if (!$user->hasRole('Admin') && !empty($orgIds)) {
+					$cycles = Cycle::whereIn('organization_id', $orgIds)->get();
+					if (!empty($scopeFilter) && $scopeFilter !== 'all') {
+							if ($scopeFilter === 'public') {
+									$mentors->where(function ($q) {
+											$q->whereDoesntHave('inviteMentors')
+											->orWhere(function ($q2) {
+													$q2->whereHas('inviteMentors', function ($q3) {
+															$q3->where('scope', 'Public')
+																	->where('status', 'accepted');
+													});
+											});
+									});
+						
+							} else {
+									$mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter, $request) {
+											$query
+													->where('status', 'accepted');
+											if ($request->scopeFilter != null) {
+													$query->whereJsonContains('organization_ids', (string) $request->scopeFilter);
+											}
+									});
+							}
+					}
+			} else {
+					$cycles = Cycle::all();
+					if (!empty($scopeFilter) && $scopeFilter !== 'all') {
+							if ($scopeFilter === 'public') {
+									$mentors->where(function ($q) {
+											$q->whereDoesntHave('inviteMentors')
+											->orWhere(function ($q2) {
+													$q2->whereHas('inviteMentors', function ($q3) {
+															$q3->where('scope', 'Public')
+																	->where('status', 'accepted');
+													});
+											});
+									});
+							} else {
+									$mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter, $request) {
+											$query
+													->where('status', 'accepted');
+											if ($request->scopeFilter != null) {
+													$query->whereJsonContains('organization_ids', (string) $request->scopeFilter);
+											}
+									});
+							}
+					}
+			}
+			
+			$mentors = $mentors->get()->map(function ($mentor) {
+					// افتراضيًا public لو مفيش invites
+					$mentorScope = 'public';
+					$mentorOrgIds = [];
+
+					if ($mentor->inviteMentors && $mentor->inviteMentors->count() > 0) {
+							// هنجيب كل invites المقبولة
+							$acceptedInvites = $mentor->inviteMentors->filter(fn($i) => strtolower($i->status) === 'accepted');
+							
+							// لو فيه invite scopes مختلفة، ممكن تختار الأولى أو حسب منطقك
+							if ($acceptedInvites->count() > 0) {
+									$mentorOrgIds = $acceptedInvites
+											->flatMap(fn($invite) => $invite->organization_ids ?? [])
+											->unique()
+											->values()
+											->toArray();
+									
+									// FIX: Use lowercase 'organization' to match frontend
+									$mentorScope = count($mentorOrgIds) > 0 ? 'organization' : strtolower($acceptedInvites->first()->scope);
+							}
+					}
+
+					// إضافة الخصائص للـ mentor
+					// FIX: Return lowercase scope to match frontend expectations
+					$mentor->scope = strtolower($mentorScope);
+					
+					// FIX: Ensure org IDs are stored as integers in JSON
+					$mentor->scope_org_ids = json_encode(
+							collect($mentorOrgIds)->map(fn($id) => intval($id))->values()->toArray()
+					);
+					
+					return $mentor;
 			});
-		}
+					
+			$selectedSpecialization = $request->specialization; 
+
+			if ($selectedSpecialization != 0) {
+					$mentors = $mentors->filter(function ($mentor) use ($selectedSpecialization, $l) {
+							$mentorSpecialization = $mentor->bio->{'specialization_' . $l} ?? null;
+
+							return !is_null($mentorSpecialization) && $mentorSpecialization == $selectedSpecialization;
+					});
+			}
 
 
-		if ($request->rate != 0) {
-			$rating = $request->rate;
-			$mentors = $mentors->filter(function ($mentor) use ($rating) {
-				$averageRating = $mentor->mrating() ?? 0; // حساب متوسط التقييم للمدرب
-				return round($averageRating) == $rating; // مقارنة التقييم مع القيمة المختارة
-			});
-		}
+			if ($request->rate != 0) {
+					$rating = $request->rate;
+					$mentors = $mentors->filter(function ($mentor) use ($rating) {
+							$averageRating = $mentor->mrating() ?? 0; // حساب متوسط التقييم للمدرب
+							return round($averageRating) == $rating; // مقارنة التقييم مع القيمة المختارة
+					});
+			}
 
-		// $mentors = $mentors->map(function ($mentor) {
-		// 	$scopes = $mentor->inviteMentors->pluck('scope')->unique()->values();
+			// $mentors = $mentors->map(function ($mentor) {
+			// 	$scopes = $mentor->inviteMentors->pluck('scope')->unique()->values();
 
-		// 	if ($scopes->isEmpty()) {
-		// 		$mentor->scope = null;
-		// 	} elseif ($scopes->count() > 1) {
-		// 		$mentor->scope = 'all';
-		// 	} else {
-		// 		$mentor->scope = $scopes->first(); // public أو organization
-		// 	}
+			// 	if ($scopes->isEmpty()) {
+			// 		$mentor->scope = null;
+			// 	} elseif ($scopes->count() > 1) {
+			// 		$mentor->scope = 'all';
+			// 	} else {
+			// 		$mentor->scope = $scopes->first(); // public أو organization
+			// 	}
 
-		// 	return $mentor;
-		// });
+			// 	return $mentor;
+			// });
 
-		// تصفية حسب حالة الـ checked
-		if ($request->assigning != 0) {
-			$checkedStatus = $request->assigning; // القيمة ستكون "checked" أو "unchecked"
+			// تصفية حسب حالة الـ checked
+			if ($request->assigning != 0) {
+					$checkedStatus = $request->assigning; // القيمة ستكون "checked" أو "unchecked"
 
-			$mentors = $mentors->filter(function ($mentor) use ($checkedStatus, $cList) {
-				$isChecked = in_array($mentor->id, $cList);
-				if ($checkedStatus == 'checked') {
-					return $isChecked;
-				}
-				elseif ($checkedStatus == 'Notchecked') {
-					return !$isChecked;
-				}
-				return true; // في حالة عدم تحديد أي فلتر
-			});
-		}
+					$mentors = $mentors->filter(function ($mentor) use ($checkedStatus, $cList) {
+							$isChecked = in_array($mentor->id, $cList);
+							if ($checkedStatus == 'checked') {
+									return $isChecked;
+							}
+							elseif ($checkedStatus == 'Notchecked') {
+									return !$isChecked;
+							}
+							return true; // في حالة عدم تحديد أي فلتر
+					});
+			}
+			
 			$settings = Settings::where('id', 1)->first();
 			$offline_allowed = $settings->allow_offline_sessions == 1 ? true : false;
-		
-		return view('admin.settings.mentorship.assign', compact('mentors', 'id', 'cList', 'cycles', 'offline_allowed'));
+
+			return view('admin.settings.mentorship.assign', compact('mentors', 'id', 'cList', 'cycles', 'offline_allowed'));
 	}
 
 	public function assign($id, Request $request)

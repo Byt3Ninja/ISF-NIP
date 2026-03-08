@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 
 class ActivityController extends Controller
 {
-    public function index(Request $request)
+   public function index(Request $request)
     {
         $authUser = auth()->user();
         $isAdmin = $authUser->hasRole('admin');
@@ -111,7 +111,7 @@ class ActivityController extends Controller
             $suspiciousQuery->whereIn('user_id', $orgUserIds);
         }
 
-        $suspiciousLogins = $suspiciousQuery
+        $suspiciousCollection = $suspiciousQuery
             ->groupBy('user_id')
             ->havingRaw('login_count > 5 OR COUNT(DISTINCT location) > 1')
             ->orderByDesc('login_count')
@@ -147,18 +147,30 @@ class ActivityController extends Controller
             ->filter(function ($activity) {
                 return count($activity->unique_locations) > 1 || $activity->login_count > 10;
             });
-       // Add detailed activities for each suspicious user
-       $suspiciousLogins->each(function ($suspiciousLogin) {
-           $totalActivitiesCount = Activity::where('user_id', $suspiciousLogin->user_id)->count();
-           $suspiciousLogin->recent_activities = Activity::where('user_id', $suspiciousLogin->user_id)
-               ->orderBy('activity_time', 'desc')
-               ->limit(10)
-               ->get();
-           $suspiciousLogin->has_more_activities = $totalActivitiesCount > 10;
-           $suspiciousLogin->total_activities_count = $totalActivitiesCount;
-       });
 
-       return view('admin.activities.index', compact('activities', 'totalLogins', 'totalLoginsToday', 'totalLoginsWeek', 'totalLoginsMonth', 'topDevices', 'topBrowsers', 'loginsByCountry', 'peakHours', 'suspiciousLogins'));
+        // Add detailed activities for each suspicious user
+        $suspiciousCollection->each(function ($suspiciousLogin) {
+            $totalActivitiesCount = Activity::where('user_id', $suspiciousLogin->user_id)->count();
+            $suspiciousLogin->recent_activities = Activity::where('user_id', $suspiciousLogin->user_id)
+                ->orderBy('activity_time', 'desc')
+                ->limit(10)
+                ->get();
+            $suspiciousLogin->has_more_activities = $totalActivitiesCount > 10;
+            $suspiciousLogin->total_activities_count = $totalActivitiesCount;
+        });
+
+        // Paginate the collection manually
+        $perPage = 10;
+        $currentPage = $request->input('page', 1);
+        $suspiciousLogins = new \Illuminate\Pagination\LengthAwarePaginator(
+            $suspiciousCollection->forPage($currentPage, $perPage),
+            $suspiciousCollection->count(),
+            $perPage,
+            $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        return view('admin.activities.index', compact('activities', 'totalLogins', 'totalLoginsToday', 'totalLoginsWeek', 'totalLoginsMonth', 'topDevices', 'topBrowsers', 'loginsByCountry', 'peakHours', 'suspiciousLogins'));
     }
 
     public function destroy($id)
