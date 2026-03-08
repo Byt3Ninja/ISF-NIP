@@ -1,16 +1,11 @@
-<style>
-  .hide-before::before {
-    display: none;
-  }
-</style>
-
 @php
-    $hideBreadcrumbRoutes = ['core.dashboard_view'];
-    $hideBreadcrumbPaths = ['dashboard', 'dashboard/dashboard'];
-    $currentRoute = Route::currentRouteName();
-    $currentPath = request()->path();
-    $shouldHide = in_array($currentRoute, $hideBreadcrumbRoutes) || in_array($currentPath, $hideBreadcrumbPaths);
+  $hideBreadcrumbRoutes = ['core.dashboard_view'];
+  $hideBreadcrumbPaths = ['dashboard', 'dashboard/dashboard'];
+  $currentRoute = Route::currentRouteName();
+  $currentPath = request()->path();
+  $shouldHide = in_array($currentRoute, $hideBreadcrumbRoutes) || in_array($currentPath, $hideBreadcrumbPaths);
 @endphp
+
 @if(isset($breadcrumbs) && count($breadcrumbs) > 1 && !$shouldHide)
 <nav aria-label="{{ __('breadcrumb.breadcrumb_navigation') ?? 'Breadcrumb' }}">
   
@@ -52,7 +47,7 @@
 </nav>
 @endif
 
-@push('scripts')
+{{-- @push('scripts')
 <script>
 (function () {
   'use strict';
@@ -69,7 +64,8 @@
   if (!backButtons.length) return;
 
   const initialState = new Map();
-  let formSubmitting = false; // Track form submission state
+  let formSubmitting = false;
+  let navigationAllowed = false;
   const log = (...a) => CONFIG.debug && console.log('[DIRTY]', ...a);
 
   /* ===============================
@@ -167,6 +163,15 @@
   }
 
   /* ===============================
+   * TRACK FORM SUBMISSIONS
+   * =============================== */
+  document.addEventListener('submit', function (e) {
+    formSubmitting = true;
+    navigationAllowed = true;
+    log('Form submitted - allowing navigation');
+  });
+
+  /* ===============================
    * BACK BUTTON HANDLER
    * =============================== */
   backButtons.forEach(button => {
@@ -193,6 +198,7 @@
         reverseButtons: true,
       }).then(r => {
         if (r.isConfirmed) {
+          navigationAllowed = true;
           window.history.back();
         }
       });
@@ -200,17 +206,61 @@
   });
 
   /* ===============================
-   * FORM SUBMIT HANDLER
+   * INTERCEPT ALL NAVIGATION ATTEMPTS
    * =============================== */
-  document.addEventListener('submit', function (e) {
-    // Set flag to disable beforeunload warning
-    formSubmitting = true;
-    log('Form submitting, beforeunload disabled');
-  });
+  
+  // Intercept all link clicks
+  document.addEventListener('click', function(e) {
+    const link = e.target.closest('a');
+    
+    // Ignore if no link, or it's the back button, or external link, or javascript void
+    if (!link || 
+        link.id === 'back-button' || 
+        link.target === '_blank' || 
+        link.href.startsWith('javascript:') ||
+        link.href.startsWith('#') ||
+        navigationAllowed ||
+        formSubmitting) {
+      return;
+    }
 
- let isRefreshing = false;
+    // Check if navigation away from current page
+    const currentUrl = window.location.href.split('#')[0];
+    const linkUrl = link.href.split('#')[0];
+    
+    if (currentUrl === linkUrl) return; // Same page navigation (hash change)
 
-  /* Detect refresh via keyboard */
+    if (isPageDirty()) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      Swal.fire({
+        title: '{{ __('settings.navigation.unsaved_changes') }}',
+        text: '{{ __('settings.navigation.unsaved_changes_message') }}',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: '{{ __('settings.navigation.leaveanyway') }}',
+        cancelButtonText: '{{ __('settings.navigation.stay') }}',
+        customClass: {
+          confirmButton: 'btn btn-primary ms-3',
+          cancelButton: 'btn btn-label-secondary',
+        },
+        buttonsStyling: false,
+        reverseButtons: true,
+      }).then(r => {
+        if (r.isConfirmed) {
+          navigationAllowed = true;
+          window.location.href = link.href;
+        }
+      });
+    }
+  }, true); // Use capture phase
+
+  /* ===============================
+   * HANDLE PAGE REFRESH
+   * =============================== */
+  let isRefreshing = false;
+
   window.addEventListener('keydown', function (e) {
     if (
       e.key === 'F5' ||
@@ -218,23 +268,53 @@
       (e.metaKey && e.key === 'r')
     ) {
       isRefreshing = true;
+      
+      if (isPageDirty() && !formSubmitting && !navigationAllowed) {
+        e.preventDefault();
+        
+        Swal.fire({
+          title: '{{ __('settings.navigation.unsaved_changes') }}',
+          text: '{{ __('settings.navigation.unsaved_changes_message') }}',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: '{{ __('settings.navigation.leaveanyway') }}',
+          cancelButtonText: '{{ __('settings.navigation.stay') }}',
+          customClass: {
+            confirmButton: 'btn btn-primary ms-3',
+            cancelButton: 'btn btn-label-secondary',
+          },
+          buttonsStyling: false,
+          reverseButtons: true,
+        }).then(r => {
+          if (r.isConfirmed) {
+            navigationAllowed = true;
+            window.location.reload();
+          } else {
+            isRefreshing = false;
+          }
+        });
+      }
     }
   });
 
-  /* Detect refresh via browser reload button */
+  /* ===============================
+   * FALLBACK: Browser native beforeunload
+   * (Only for browser back/forward/close tab)
+   * =============================== */
   window.addEventListener('beforeunload', function (e) {
-
-    // Skip warning if form is being submitted
-    if (formSubmitting || isRefreshing) {
-      return;
+    // Allow navigation if form submitted or explicitly allowed
+    if (formSubmitting || navigationAllowed || isRefreshing) {
+      return undefined;
     }
 
+    // Show native browser warning only for unhandled navigation (close tab, browser back/forward)
     if (isPageDirty()) {
+      const message = '{{ __('settings.navigation.unsaved_changes_message') }}';
       e.preventDefault();
-      e.returnValue = '{{ __('settings.navigation.unsaved_changes_message') }}';
-      return e.returnValue;
+      e.returnValue = message;
+      return message;
     }
   });
 })();
 </script>
-@endpush
+@endpush --}}

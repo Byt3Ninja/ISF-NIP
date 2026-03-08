@@ -93,8 +93,8 @@
       <div class="row mb-4">
         <div class="col-md-6 mb-3 mb-md-0">
           <label class="form-label" for="currency">{{ __('admin.Currency') }} *</label>
-          <select class="form-select select2" name="currency" id="currency" data-placeholder="{{ __('admin.Select Currency') }}">
-            <option value="">{{ __('admin.Select Currency') }}</option>
+          <select class="form-select select2" name="currency" id="currency" data-placeholder="{{ __('admin.Select Currency') }}" data-allow-clear="true">
+            <option value=""></option>
             @foreach ($currencies as $Currency)
               <option value="{{ $Currency->currency_code }}" {{ old('currency', $_user->currency) == $Currency->currency_code ? 'selected' : '' }}>
                 {{ __('admin.' . $Currency->currency_name) }}
@@ -139,8 +139,8 @@
       <!-- Category -->
       <div class="mb-4">
         <label class="form-label">{{ __('admin.select_category') }} *</label>
-        <select class="form-select select2" name="service_category_id" id="service_category_id" data-placeholder="{{ __('admin.select_category') }}">
-          <option value="">{{ __('admin.select_category') }}</option>
+        <select class="form-select select2" name="service_category_id" id="service_category_id" data-placeholder="{{ __('admin.select_category') }}" data-allow-clear="true">
+          <option value=""></option>
           @foreach ($serviceCategories as $category)
             <option value="{{ $category->id }}" {{ old('service_category_id', $service->service_category_id) == $category->id ? 'selected' : '' }}>
               {{ $category->{'name_' . $l} }}

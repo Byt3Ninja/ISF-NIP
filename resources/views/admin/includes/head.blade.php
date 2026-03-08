@@ -86,6 +86,11 @@
 
 <!-- BEGIN: Page CSS-->
 @yield('style')
+<style>
+  .hide-before::before {
+    display: none;
+  }
+</style>
 <!-- END: Page CSS-->
 
 <!-- BEGIN: Custom CSS-->

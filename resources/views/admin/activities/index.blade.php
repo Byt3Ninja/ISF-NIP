@@ -36,40 +36,48 @@
       </div>
     @endif
 
-    <h4 class="fw-bold mb-4">@lang('admin.Activities_Dashboard')</h4>
+    <h4 class="mb-4">@lang('admin.Activities_Dashboard')</h4>
 
     {{-- Enhanced Statistics Cards --}}
-    <div class="row g-3 mb-4">
+    <div class="row mb-4">
       @foreach ([
+        [
+            'label' => 'Total_Logins',
+            'value' => $totalLogins,
+            'color' => 'primary',
+            'icon' => 'user'
+        ],
         [
             'label' => 'Total_Logins_Today', 
             'value' => $totalLoginsToday, 
-            'color' => '#7367f0', // Blue
-            'icon' => 'ti-calendar-event'
+            'color' => 'success',
+            'icon' => 'calendar-event'
         ],
         [
             'label' => 'Total_Logins_Week', 
             'value' => $totalLoginsWeek, 
-            'color' => '#10b981', // Green
-            'icon' => 'ti-calendar-time'
+            'color' => 'info',
+            'icon' => 'calendar-time'
         ],
         [
             'label' => 'Total_Logins_Month', 
             'value' => $totalLoginsMonth, 
-            'color' => '#f59e0b', // Amber
-            'icon' => 'ti-calendar'
+            'color' => 'warning',
+            'icon' => 'calendar'
         ],
       ] as $stat)
-      <div class="col-md-4">
-        <div class="card shadow-sm stat-card-border-top" style="border-color: {{ $stat['color'] }};">
+      <div class="col-xl-3">
+        <div class="card card-border-shadow-{{ $stat['color'] }}">
           <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center justify-content-between">
               <div>
-                <h5 class="fw-bold mb-0">@lang('admin.' . $stat['label'])</h5>
-                <div class="display-4 fw-bold" style="color: {{ $stat['color'] }};">{{ $stat['value'] }}</div>
+                <h6 class="mb-0">@lang('admin.' . $stat['label'])</h6>
+                <h4 class="mb-0">{{ $stat['value'] ?? 0 }}</h4>
               </div>
-              <div class="avatar avatar-lg d-flex align-items-center justify-content-center rounded" style="background-color: {{ $stat['color'] }}1a;">
-                <i class="ti {{ $stat['icon'] }} fs-2" style="color: {{ $stat['color'] }};"></i>
+              <div class="avatar">
+                <span class="avatar-initial rounded bg-label-{{ $stat['color'] }}">
+                  <i class="ti ti-{{  $stat['icon'] }} ti-lg"></i>
+                </span>
               </div>
             </div>
           </div>
@@ -156,7 +164,7 @@
                             >
                                 <div class="avatar avatar-lg">
                                     @if($login->user->img_url ?? false)
-                                        <img src="{{ asset("191014/{$login->user->img_url}") }}" alt="avatar" class="rounded-circle border shadow-xs" onerror="this.onerror=null; this.src='/icons/account.svg';">
+                                        <img src="{{ asset('191014/' . $login->user->img_url) }}" alt="avatar" class="rounded-circle border shadow-xs" onerror="this.onerror=null; this.src='/icons/account.svg';">
                                     @else
                                         <div class="avatar avatar-lg avatar-initial rounded-circle bg-label-primary">
                                             {{ strtoupper(substr($login->user->first_name_en ?? 'U', 0, 1)) }}{{ strtoupper(substr($login->user->last_name_en ?? 'U', 0, 1)) }}
@@ -327,7 +335,7 @@
                   <div class="d-flex align-items-center">
                     <div class="avatar avatar-sm me-3">
                       @if($activity->user->img_url ?? false)
-                        <img src="{{ asset("191014/{$activity->user->img_url}") }}" alt="{{ $activity->user->first_name_en }}" class="rounded-circle border shadow-xs" onerror="this.onerror=null; this.src='/icons/account.svg';">
+                        <img src="{{ asset('191014/' . $activity->user->img_url) }}" alt="{{ $activity->user->first_name_en }}" class="rounded-circle border shadow-xs" onerror="this.onerror=null; this.src='/icons/account.svg';">
                       @else
                         <div class="avatar avatar-sm avatar-initial rounded-circle bg-label-primary">
                           {{ strtoupper(substr($activity->user->first_name_en ?? 'U', 0, 1)) }}{{ strtoupper(substr($activity->user->last_name_en ?? 'U', 0, 1)) }}
