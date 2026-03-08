@@ -25,6 +25,7 @@
               <i class="ti ti-search text-muted"></i>
             </span>
             <input 
+              name="search"
               type="search" 
               id="debounced-search" 
               class="form-control"

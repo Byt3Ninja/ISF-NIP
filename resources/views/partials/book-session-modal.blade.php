@@ -508,6 +508,10 @@ $(document).ready(function () {
       $('#bookingModal').modal('show');
       resetCalendar();
 
+      if (state.offlineDisabled && $('#filter-buttons button[data-filter="all"]').length) {
+        $('#filter-buttons button[data-filter="all"]').remove();
+      }
+
       if (!state.offlineDisabled && !$('#filter-buttons button[data-filter="offline"]').length) {
         $('#filter-buttons').append(`
           <button type="button" class="btn btn-xs rounded border border-light" data-filter="offline">
