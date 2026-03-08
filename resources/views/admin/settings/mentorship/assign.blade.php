@@ -157,7 +157,7 @@
                     </select>
                   </div>
                   <div class="col-md-3">
-                      <input type="text" id="clientSearchInput" class="form-control" placeholder="{{ __('admin.Search') }}...">
+                      <input type="search" id="clientSearchInput" class="form-control" placeholder="{{ __('admin.Search') }}...">
                   </div>
                 </div>
               </div>
