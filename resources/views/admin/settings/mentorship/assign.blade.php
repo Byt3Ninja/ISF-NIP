@@ -61,13 +61,13 @@
                   </select>
                 </div>
                 <div class="d-flex flex-wrap flex-lg-nowrap align-items-center gap-3">
-                  <a class="btn btn-label-primary" href="/dashboard/cycles/{{ $id }}">
+                  <a class="btn btn-primary" href="/dashboard/cycles/{{ $id }}">
                     <i class="ti ti-components me-2"></i> {{ __('cycles.Manage Cycle') }}
                   </a>
-                  <a class="btn btn-primary" href="/dashboard/mentorship/view/{{ $id }}">
+                  <a class="btn btn-label-primary" href="/dashboard/mentorship/view/{{ $id }}">
                     <i class="ti ti-settings me-2"></i> {{ __('cycles.Manage sessions') }}
                   </a>
-                  <a class="btn btn-label-secondary" href="/dashboard/mentorship/{{ $id }}/surveys">
+                  <a class="btn btn-outline-primary" href="/dashboard/mentorship/{{ $id }}/surveys">
                     <i class="ti ti-question-mark me-2"></i> {{ __('cycles.Manage Surveys') }}
                   </a>
                 </div>
