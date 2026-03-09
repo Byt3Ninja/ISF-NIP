@@ -520,6 +520,63 @@
           buttonsStyling: false,
         });
       }
+
+      const getSharedDataTableConfig = ({ pageLength, descIndex, actionsIndex, withoutFilter = false }) => {
+        const config = {
+          responsive: true,
+          pageLength: pageLength ?? 10,
+          order: descIndex ? [[descIndex, 'desc']] : [],
+          rowId: row => 'row_' + row.id,
+          language: {
+            url:
+              document.dir === 'rtl'
+                ? 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json'
+                : 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json',
+            sLengthMenu: '_MENU_',
+            search: '',
+            searchPlaceholder: '{{ __('admin.Search') }}...',
+          },
+          dom: '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-1"l><"col-sm-12 col-md-7 filters"><"col-sm-12 col-md-3"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+          ...(actionsIndex && {
+            columnDefs: [
+              {
+                targets: [actionsIndex], // Actions column
+                orderable: false,
+                searchable: false
+              }
+            ],
+            buttons: [
+              {
+                extend: 'csv',
+                text: 'CSV',
+                className: 'd-none', // Hide default button, trigger via custom dropdown
+                exportOptions: {
+                  columns: Array.from({ length: actionsIndex }, (_, index) => index), // Export these columns
+                }
+              },
+              {
+                extend: 'excel',
+                text: 'Excel',
+                className: 'd-none', // Hide default button, trigger via custom dropdown
+                exportOptions: {
+                  columns: Array.from({ length: actionsIndex }, (_, index) => index), // Export these columns
+                }
+              }
+            ]
+          }),
+        };
+
+        if (withoutFilter) {
+          config.initComplete = function () {
+            setTimeout(() => {
+              $('.dataTables_filter .form-control').removeClass('form-control-sm');
+              $('.dataTables_length .form-select').removeClass('form-select-sm');
+            }, 300);
+          };
+        }
+
+        return config;
+      };
     </script>
 
     <script>

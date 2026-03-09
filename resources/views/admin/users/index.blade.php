@@ -140,7 +140,7 @@
                     data-user-id="{{ $user->id }}"
                     data-user-name="{{ $user->{'first_name_' . $l} }} {{ $user->{'last_name_' . $l} }}"
                   >
-                    <i class="ti ti-message"></i>
+                    <i class="ti ti-message ti-md"></i>
                   </button>
                   @if($_user->ableTo('users.destroy', $permissions))
                     <button
@@ -150,7 +150,7 @@
                       type="button"
                       class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill"
                     >
-                      <i class="ti ti-trash"></i>
+                      <i class="ti ti-trash ti-md"></i>
                     </button>
                   @endif
                 </div>

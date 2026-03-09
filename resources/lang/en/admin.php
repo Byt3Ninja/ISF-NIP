@@ -2699,7 +2699,7 @@ return [
 	'training_courses' => 'Training Courses',
 	'training_results' => 'Training Results',
 	'Organization Types' => 'Organization Types',
-	'Organization Types`s List' => 'Organization Types`s List',
+	'Organization Types`s List' => 'Organizations Types',
 	'Add new Organization Type' => 'Add new Organization Type',
 	'English Organization Type Name' => 'English Organization Type Name',
 	'Arabic Organization Type Name' => 'Arabic Organization Type Name',
@@ -3529,4 +3529,7 @@ return [
 	'all_contacts' => 'All Contacts',
 	'Not Verified' => 'Not Verified',
 	'All_user_activities_appear_normal' => 'All user activities appear normal.',
+	'name_en_placeholder' => 'Enter name in english',
+	'name_ar_placeholder' => 'Enter name in arabic',
+	'max_255_chars' => 'The maximum length is 255 characters.',
 ];

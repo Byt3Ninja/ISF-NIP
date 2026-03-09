@@ -2751,7 +2751,7 @@ return [
 	'training_courses' => 'دورات التدريب',
 	'training_results' => 'نتائج التدريب',
 	'Organization Types' => 'نوع المؤسسات',
-	'Organization Types`s List' => 'قائمة نوع المؤسسات',
+	'Organization Types`s List' => 'أنواع المؤسسات',
 	'Add new Organization Type' => 'اضافة نوع مؤسسة جديدة',
 	'English Organization Type Name' => 'اسم نوع المؤسسة بالانجليزية',
 	'Arabic Organization Type Name' => 'اسم نوع المؤسسة بالعربية',
@@ -3586,4 +3586,7 @@ return [
 	'all_contacts' => 'جميع جهات الاتصال',
 	'Not Verified' => 'غير مفعل',
 	'All_user_activities_appear_normal' => 'جميع أنشطة المستخدمين تبدو طبيعية.',
+	'name_en_placeholder' => 'ادخل الاسم بالانجليزية',
+	'name_ar_placeholder' => 'ادخل الاسم بالعربية',
+	'max_255_chars' => 'الحد الأقصى هو 255 حرفًا.',
 ];
