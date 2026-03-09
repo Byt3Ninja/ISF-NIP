@@ -3585,4 +3585,5 @@ return [
 	'all_companies' => 'جميع الشركات',
 	'all_contacts' => 'جميع جهات الاتصال',
 	'Not Verified' => 'غير مفعل',
+	'All_user_activities_appear_normal' => 'جميع أنشطة المستخدمين تبدو طبيعية.',
 ];

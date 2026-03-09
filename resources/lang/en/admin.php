@@ -3528,4 +3528,5 @@ return [
 	'all_companies' => 'All Companies',
 	'all_contacts' => 'All Contacts',
 	'Not Verified' => 'Not Verified',
+	'All_user_activities_appear_normal' => 'All user activities appear normal.',
 ];
