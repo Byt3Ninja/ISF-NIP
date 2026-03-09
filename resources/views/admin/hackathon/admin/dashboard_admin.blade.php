@@ -8,10 +8,10 @@
 $idParam = request()->route('id');
 
 $metrics = collect([
-  ['icon' => 'bi-calendar3-event', 'color' => 'primary', 'title' => __('admin.Teams'), 'value' => $data['count_teams']],
-  ['icon' => 'bi-person-check-fill', 'color' => 'success', 'title' => __('admin.Submitted_Projects'), 'value' => $data['Count_submitted_projects']],
-  ['icon' => 'bi-people-fill', 'color' => 'info', 'title' => __('admin.Founders'), 'value' => $data['count_members']],
-  ['icon' => 'bi-person-video3', 'color' => 'secondary', 'title' => __('admin.mentorship_management'), 'value' => $data['CountNextSessions'], 'is_mentorship' => true],
+  ['icon' => 'users', 'color' => 'primary', 'title' => __('admin.Teams'), 'value' => $data['count_teams']],
+  ['icon' => 'user-check', 'color' => 'success', 'title' => __('admin.Submitted_Projects'), 'value' => $data['Count_submitted_projects']],
+  ['icon' => 'user-dollar', 'color' => 'info', 'title' => __('admin.Founders'), 'value' => $data['count_members']],
+  ['icon' => 'user-screen', 'color' => 'secondary', 'title' => __('admin.mentorship_management'), 'value' => $data['CountNextSessions'], 'is_mentorship' => true],
 ])->map(function ($metric) {
   return [
     'icon' => $metric['icon'],
@@ -47,34 +47,49 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
 @section('content')
 <div class="">
   <div class="">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
-      <h1 class="fw-bold">{{ __('admin.Hackathon_Dashboard') }}</h1>
-      <a class="btn btn-primary btn-lg" href="/dashboard/hackathon/dashboard/winners/{{ $idParam }}" role="button">
-        <i class="bi-trophy-fill me-2"></i> {{ $l == 'en' ? 'Results & winners' : 'النتائج والفائزون' }}
-      </a>
+    <div class="p-6 bg-card rounded shadow-sm mb-6">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+          <i class="ti ti-dashboard ti-28px"></i>
+          <h4 class="mb-0">@lang('admin.Hackathon_Dashboard')</h4>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <a class="btn btn-primary" href="/dashboard/hackathon/dashboard/winners/{{ $idParam }}" role="button">
+            <i class="ti ti-trophy me-2"></i> {{ __('admin.View') }} {{ $l == 'en' ? 'Results & winners' : 'النتائج والفائزون' }}
+          </a>
+          <button class="btn btn-label-primary" data-bs-toggle="modal" data-bs-target="#manageMentorsModal">
+            <i class="ti ti-user-cog me-2"></i> 
+            {{ __('admin.manage_mentors') }}
+          </button>
+          <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#viewMentorshipRequestsModal">
+            <i class="ti ti-pointer-question me-2"></i>
+             {{ __('admin.mentorship_requests') }}
+            </button>
+        </div>
+      </div>
     </div>
 
     <!-- Stats Cards -->
-    <div class="row mb-4 g-3 row-cols-1 row-cols-sm-2 row-cols-lg-4">
+    <div class="row g-6 mb-6">
       @foreach ($metrics as $metric)
-        <div class="col">
-          <div class="card text-center border-{{ $metric['color'] }} shadow-sm h-100">
-            <div class="card-body{{ !empty($metric['is_mentorship']) ? ' d-flex flex-column' : '' }}">
-              <i class="bi {{ $metric['icon'] }} display-4 text-{{ $metric['color'] }} mb-2"></i>
-              <h5 class="card-title">{{ $metric['title'] }}</h5>
-              @if (!empty($metric['is_mentorship']))
-                <p class="mb-2">{{ __('admin.new_requests') }}: <span class="badge bg-danger rounded-pill">{{ $metric['value'] }}</span></p>
-                <div class="mt-auto">
-                  <button class="btn btn-sm btn-outline-secondary mt-1" data-bs-toggle="modal"
-                    data-bs-target="#manageMentorsModal"><i class="bi bi-person-badge-fill me-1"></i> {{
-                    __('admin.manage_mentors') }}</button>
-                  <button class="btn btn-sm btn-outline-secondary mt-1" data-bs-toggle="modal"
-                    data-bs-target="#viewMentorshipRequestsModal"><i class="bi bi-card-list me-1"></i> {{
-                    __('admin.mentorship_requests') }}</button>
+        <div class="col-sm-6 col-xl-3">
+          <div class="card h-100">
+            <div class="card-body">
+              <div class="d-flex align-items-start justify-content-between">
+                <div class="content-left">
+                  <span class="text-heading">{{ $metric['title'] }}</span>
+                  @if (!empty($metric['is_mentorship']))
+                    <h6 class="mt-4 mb-n1">{{ __('admin.new_requests') }}: <span class="badge badge-center bg-danger rounded-pill bg-glow ms-2">{{ $metric['value'] }}</span></h6>
+                  @else
+                    <h4 class="mt-2 me-2 mb-n1">{{ $metric['value'] ?? 0 }}</h4>
+                  @endif
                 </div>
-              @else
-                <p class="card-text display-4 fw-bold">{{ $metric['value'] }}</p>
-              @endif
+                <div class="avatar">
+                  <span class="avatar-initial rounded bg-label-{{ $metric['color'] }}">
+                    <i class="ti ti-{{ $metric['icon'] }} ti-26px"></i>
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -82,7 +97,7 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
     </div>
 
     <!-- Charts Section (Content is dynamic) -->
-    <div class="row mb-4 g-3">
+    <div class="row mb-6 g-6">
       @foreach ($chartIds as $index => $chartId)
       <div class="{{ $index == 0 ? 'col-12' : 'col-12 col-md-6' }}">
         <div class="position-relative mx-auto bg-white p-3 rounded shadow-sm" style="height: 350px; width: 100%;">
@@ -1086,7 +1101,7 @@ $teamsJson = $data['all_teams']->map(function($team) {
                         datasets: [{
                             label: '{{ $l == 'ar' ? 'المسجلون الجدد شهرياً' : 'New Registrations Monthly' }}',
                             data: @json($registrationCounts),
-                            borderColor: 'rgb(75, 192, 192)',
+                            borderColor: '#7367f0',
                             tension: 0.1,
                             fill: false,
                         }, ],
@@ -1110,7 +1125,7 @@ $teamsJson = $data['all_teams']->map(function($team) {
                         labels: @json($submissionLabels),
                         datasets: [{
                             data: @json($submissionCounts),
-                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+                            backgroundColor: ['#7367f0', '#99e3ed', '#ffb7b9'],
                         }, ],
                     },
                     options: {
@@ -1135,8 +1150,8 @@ $teamsJson = $data['all_teams']->map(function($team) {
                             label: '{{ $l == 'ar' ? 'حالة الفرق' : 'Teams Status' }}',
                             data: @json($teamsStatusPieData),
                             backgroundColor: [
-                                'rgba(75, 192, 192, 0.7)',
-                                'rgba(255, 159, 64, 0.7)',
+                                '#28c76f',
+                                '#ff9f43',
                             ],
                         }, ],
                     },
