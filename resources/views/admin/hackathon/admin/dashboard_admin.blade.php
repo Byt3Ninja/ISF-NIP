@@ -1150,8 +1150,8 @@ $teamsJson = $data['all_teams']->map(function($team) {
                             label: '{{ $l == 'ar' ? 'حالة الفرق' : 'Teams Status' }}',
                             data: @json($teamsStatusPieData),
                             backgroundColor: [
-                                '#28c76f',
-                                '#ff9f43',
+                                '#dfdfe3',
+                                '#7367f0',
                             ],
                         }, ],
                     },
