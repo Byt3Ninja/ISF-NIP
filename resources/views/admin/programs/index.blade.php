@@ -179,21 +179,21 @@
                       @if ($_user->ableTo('cycles.list', $permissions))
                         <li>
                           <a class="dropdown-item" href="/dashboard/cycles/{{ $cycle->id }}">
-                            <i class="ti ti-settings me-1"></i> {{ __('admin.manage_steps') }}
+                            <i class="ti ti-adjustments-cog me-1"></i> {{ __('admin.manage_steps') }}
                           </a>
                         </li>
                       @endif
                       @if ($_user->ableTo('cycles.users_manage', $permissions))
                         <li>
                           <a class="dropdown-item" href="/dashboard/cycles/{{ $cycle->id }}/registered">
-                            <i class="ti ti-settings me-1"></i> {{ __('admin.manage_startups') }}
+                            <i class="ti ti-settings-cog me-1"></i> {{ __('admin.manage_startups') }}
                           </a>
                         </li>
                       @endif
                       @if ($_user->ableTo('mentorships.requests_list', $permissions))
                       <li>
                         <a class="dropdown-item" href="{{ route('mentorships.requests_list', $cycle->id) }}">
-                          <i class="ti ti-settings me-1"></i>  {{ __('admin.manage_mentors') }}
+                          <i class="ti ti-user-cog me-1"></i>  {{ __('admin.manage_mentors') }}
                         </a>
                       </li>
                       @endif
