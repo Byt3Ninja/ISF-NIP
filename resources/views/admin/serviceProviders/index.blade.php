@@ -95,12 +95,12 @@ $tabs = [
 								<div class="d-flex gap-1 justify-content-center">
 									@if($_user->ableTo('service_provider.profile', $permissions))
 									<a href="{{ route('service_provider.profile', $provider->id) }}" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill" data-toggle="tooltip" title="{{ __('admin.View') }}">
-										<i class="ti ti-eye"></i>
+										<i class="ti ti-eye ti-md"></i>
 									</a>
 									@endif
 									@if($_user->ableTo('services_providers.edit', $permissions))
 									<a href="{{ route('services_providers.edit_profile', $provider->id) }}" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill" data-toggle="tooltip" title="{{ __('admin.Edit') }}">
-										<i class="ti ti-edit"></i>
+										<i class="ti ti-pencil ti-md"></i>
 									</a>
 									@endif
 								</div>

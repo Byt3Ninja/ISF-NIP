@@ -2,6 +2,12 @@
 
 @section('title', __('admin.Activities'))
 
+@section('style')
+<style>
+  .dataTables_paginate, .dataTables_info { padding: 0 2rem; }
+</style>
+@endsection
+
 @php
   $stats = [
     ['key' => 'Total_Logins', 'value' => $totalLogins],
