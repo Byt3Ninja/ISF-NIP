@@ -366,8 +366,16 @@ class ExternalCyclesController extends Controller
 		if( !empty( $program ) )
 		{
 			$l = app()->getLocale();
+			$start = $program->start;
+			$end = $program->end;
+			$form_step = DB::table('steps')->where('cycle_id', $program->id)->orderBy('arr', 'ASC')->where('stype', 1)->first();
+			if( !empty( $form_step ) )
+			{
+				if( !empty( $form_step->from ) ) { $start = $form_step->from; }
+				if( !empty( $form_step->to ) ) { $end = $form_step->to; }
+			}
 			$program->org = $l == 'ar' ? $program->ar_org_name : $program->en_org_name;
-			$program->ranges = date_ranges( $program->start, $program->end );
+			$program->ranges = date_ranges( $start, $end );
 		}
 		return $program;
 	}
