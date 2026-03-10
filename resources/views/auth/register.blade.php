@@ -89,7 +89,7 @@
 <body>
   @php
   $setting = App\Settings::first();
-  $logo =setting('Logo','images/background/logo.png');
+  $logo = $setting ? asset('images/logo/' . $setting->Logo) : asset('images/background/logo.png');
   $accountRoles = [
     ['label' => 'Founder', 'icon' => 'ti ti-businessplan'],
     ['label' => 'Mentor', 'icon' => 'ti ti-user'],
