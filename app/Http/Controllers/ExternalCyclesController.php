@@ -283,7 +283,7 @@ class ExternalCyclesController extends Controller
                 			'form_id' => $step->id,
                 			'step_id' => $step->id,
                 			'question' => $field_options->label,
-                			'answer' => $request->{$field_name},
+                			'answer' => is_array($request->{$field_name}) ? implode(',', $request->{$field_name}) : $request->{$field_name},
                 			'screening' => '{}',
                 			'comments' => '{}',
                 			'created_at' => now(),

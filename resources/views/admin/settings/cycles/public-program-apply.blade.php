@@ -482,73 +482,130 @@ $endDateForCountdown = trim($month . ' ' . $endDatePart);
 									stepper.next();
 								} else if (response.step == 'register') {
 									$("#register-email").val(email);
-									var fields = '';
+									var fieldsHtml = '';
+									const reqText = '{{ $l == "ar" ? "مطلوب" : "required" }}';
+									const chooseText = '{{ $l == "ar" ? "اختر" : "Choose" }}';
+									const otherText = '{{ $l == "ar" ? "أخرى" : "Other" }}';
+
+									// Group fields by section
+									var sections = {};
 									$.each(response.fields, function(key, value) {
-										fields += `<div class="col-md-6 mb-3">`;
-										switch (value.type) {
-											case 'select':
-												{
-													fields += `<div class="form-group">`;
-													if (value.options.label) {
-														fields += `<label for="${value.id_for}" class="form-label fw-bold">${value.options.label}</label>`;
-													}
-													fields += `<select class="form-select" id="${value.id_for}" name='${value.field_name}' ${value.options.validation && value.options.validation.required == 1 ? 'required' : ''}>`;
-													fields += `<option value="">{{$l=='ar'?'اختر':'Choose'}}...</option>`;
-													$.each(value.options.values.split(','), function(key, option) {
-														fields += `<option value="${option}">${option}</option>`;
-													});
-													fields += `</select>`;
-													const requiredText = '{{ $l == "ar" ? "مطلوب" : "required" }}';
-													fields += `<div class="invalid-feedback">${value.options.label} ${requiredText}</div>`;
-													fields += `</div>`;
-													break;
-												}
-											case 'textarea':
-												{
-													fields += `<div class="form-group">`;
-													if (value.options.label) {
-														fields += `<label for="${value.id_for}" class="form-label fw-bold">${value.options.label}</label>`;
-													}
-													fields += `<textarea class="form-control" id="${value.id_for}" name="${value.field_name}" rows="${value.options.rows}" ${value.options.validation && value.options.validation.required == 1 ? 'required' : ''}></textarea>`;
-													const requiredText = '{{ $l == "ar" ? "مطلوب" : "required" }}';
-													fields += `<div class="invalid-feedback">${value.options.label} ${requiredText}</div>`;
-													fields += `</div>`;
-													break;
-												}
-											case 'file':
-												{
-													fields += `<div class="form-group">`;
-													if (value.options.label) {
-														fields += `<label for="${value.id_for}" class="form-label fw-bold">${value.options.label}</label>`;
-													}
-													fields += `<div class="d-flex flex-column">`;
-													fields += `<input type="file" class="form-control" id="${value.id_for}" name="${value.field_name}" accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" ${value.options.validation && value.options.validation.required == 1 ? 'required' : ''}>`;
-													const requiredText = '{{ $l == "ar" ? "مطلوب" : "required" }}';
-													fields += `<div class="invalid-feedback">${value.options.label} ${requiredText}</div>`;
-													fields += `</div>`;
-													fields += `</div>`;
-													break;
-												}
-											default:
-												{
-													fields += `<div class="form-group">`;
-													if (value.options.label) {
-														fields += `<label for="${value.id_for}" class="form-label fw-bold">${value.options.label}</label>`;
-													}
-													fields += `<input type="${ value.options.type == 'date' ? 'text': value.options.type }"
-																class="form-control ${value.options.type == 'date' ? 'datepicker' : ''}"
-																id="${value.id_for}"
-																name="${value.field_name}"
-																value="" ${value.options.validation && value.options.validation.required == 1 ? 'required' : ''} />`;
-													const requiredText = '{{ $l == "ar" ? "مطلوب" : "required" }}';
-													fields += `<div class="invalid-feedback">${value.options.label} ${requiredText}</div>`;
-													fields += `</div>`;
-												}
+										var sectionName = (value.options && value.options.section) ? value.options.section : '';
+										if (!sections[sectionName]) {
+											sections[sectionName] = {
+												title: sectionName,
+												description: (value.options && value.options.description) ? value.options.description : '',
+												fields: []
+											};
 										}
-										fields += `</div>`;
+										sections[sectionName].fields.push(value);
 									});
-									
-									$("#register-fields").html(fields);
+
+									// Render each section
+									$.each(sections, function(sectionName, section) {
+										fieldsHtml += `<div class="section-wrapper mb-4">`;
+										if (section.title || section.description) {
+											fieldsHtml += `<div class="section-header mb-3">`;
+											if (section.title) {
+												fieldsHtml += `<h5 class="section-title text-primary mb-1">${section.title}</h5>`;
+											}
+											if (section.description) {
+												fieldsHtml += `<p class="section-description text-muted mb-0">${section.description}</p>`;
+											}
+											fieldsHtml += `</div>`;
+										}
+										fieldsHtml += `<div class="card border shadow-sm"><div class="card-body p-4"><div class="row g-4">`;
+
+										$.each(section.fields, function(key, value) {
+											var builderType = (value.options && value.options.type) ? value.options.type : 'short_answer';
+											var isRequired = value.options && value.options.validation && value.options.validation.required == 1;
+											var requiredAttr = isRequired ? 'required' : '';
+											var requiredStar = isRequired ? '<span class="text-danger ms-1">*</span>' : '';
+											var label = (value.options && value.options.label) ? value.options.label : '';
+											var valuesStr = (value.options && value.options.values) ? value.options.values : '';
+											var optionsList = valuesStr ? valuesStr.split(',') : [];
+
+											fieldsHtml += `<div class="col-12"><div class="form-group">`;
+											if (label) {
+												fieldsHtml += `<label for="${value.id_for}" class="form-label fw-semibold mb-2">${label} ${requiredStar}</label>`;
+											}
+
+											switch (builderType) {
+												case 'dropdown':
+													fieldsHtml += `<select class="form-select" id="${value.id_for}" name="${value.field_name}" ${requiredAttr}>`;
+													fieldsHtml += `<option value="">${chooseText}...</option>`;
+													$.each(optionsList, function(i, option) {
+														var optLabel = option === '__OTHER__' ? otherText : option;
+														fieldsHtml += `<option value="${option}">${optLabel}</option>`;
+													});
+													fieldsHtml += `</select>`;
+													break;
+
+												case 'paragraph':
+													var rows = (value.options && value.options.rows) ? value.options.rows : 3;
+													fieldsHtml += `<textarea class="form-control" id="${value.id_for}" name="${value.field_name}" rows="${rows}" placeholder="${label}" ${requiredAttr}></textarea>`;
+													break;
+
+												case 'multiple_choice':
+													fieldsHtml += `<div class="options-group">`;
+													$.each(optionsList, function(i, option) {
+														var optLabel = option === '__OTHER__' ? otherText : option;
+														fieldsHtml += `<div class="form-check mb-2">`;
+														fieldsHtml += `<input class="form-check-input" type="radio" name="${value.field_name}" id="${value.id_for}_${i}" value="${option}" ${requiredAttr} />`;
+														fieldsHtml += `<label class="form-check-label" for="${value.id_for}_${i}">${optLabel}</label>`;
+														fieldsHtml += `</div>`;
+													});
+													fieldsHtml += `</div>`;
+													break;
+
+												case 'checkboxes':
+													fieldsHtml += `<div class="options-group">`;
+													$.each(optionsList, function(i, option) {
+														var optLabel = option === '__OTHER__' ? otherText : option;
+														fieldsHtml += `<div class="form-check mb-2">`;
+														fieldsHtml += `<input class="form-check-input" type="checkbox" name="${value.field_name}[]" id="${value.id_for}_${i}" value="${option}" />`;
+														fieldsHtml += `<label class="form-check-label" for="${value.id_for}_${i}">${optLabel}</label>`;
+														fieldsHtml += `</div>`;
+													});
+													fieldsHtml += `</div>`;
+													break;
+
+												case 'linear_scale':
+													fieldsHtml += `<select class="form-select" id="${value.id_for}" name="${value.field_name}" ${requiredAttr}>`;
+													fieldsHtml += `<option value="">${chooseText}...</option>`;
+													for (var i = 1; i <= 5; i++) {
+														fieldsHtml += `<option value="${i}">${i}</option>`;
+													}
+													fieldsHtml += `</select>`;
+													break;
+
+												case 'date':
+													fieldsHtml += `<input type="text" class="form-control datepicker" id="${value.id_for}" name="${value.field_name}" placeholder="${label}" ${requiredAttr} />`;
+													break;
+
+												case 'time':
+													fieldsHtml += `<input type="text" class="form-control timepicker" id="${value.id_for}" name="${value.field_name}" placeholder="${label}" ${requiredAttr} />`;
+													break;
+
+												case 'file':
+													fieldsHtml += `<input type="file" class="form-control" id="${value.id_for}" name="${value.field_name}" accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" ${requiredAttr} />`;
+													break;
+
+												case 'short_answer':
+												default:
+													fieldsHtml += `<input type="text" class="form-control" id="${value.id_for}" name="${value.field_name}" placeholder="${label}" ${requiredAttr} />`;
+													break;
+											}
+
+											fieldsHtml += `<div class="invalid-feedback">${label} ${reqText}</div>`;
+											fieldsHtml += `</div></div>`;
+										});
+
+										fieldsHtml += `</div></div></div>`;
+										fieldsHtml += `</div>`;
+									});
+
+									$("#register-fields").html(fieldsHtml);
 									let registerNavButtons = `
 										<div class="col-12 mt-8 d-flex justify-content-between">
 											<button type="button" class="btn btn-secondary" onclick="stepper.to(1)">
