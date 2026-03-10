@@ -91,7 +91,7 @@
 <body>
   @php
   $setting = App\Settings::first();
-  $logo =setting('Logo','images/background/logo.png');
+  $logo = $setting ? asset('images/logo/' . $setting->Logo) : asset('images/background/logo.png');
   $accountRoles = ['Founder', 'Mentor'];
   $termsUrl = setting('terms_url','#') ;
   $privacyUrl = setting('privacy_url','#');
