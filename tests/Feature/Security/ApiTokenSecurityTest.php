@@ -5,12 +5,12 @@ namespace Tests\Feature\Security;
 use Tests\TestCase;
 use App\User;
 use App\Company;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\PersonalAccessToken;
 
 class ApiTokenSecurityTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     /** @test */
     public function sanctum_token_has_correct_format()
@@ -30,15 +30,22 @@ class ApiTokenSecurityTest extends TestCase
 
         $plainToken = $user->createToken('registration')->plainTextToken;
 
-        $tokenRecord = PersonalAccessToken::first();
+        // Extract the plain part and find the matching token by its hash
+        $plainPart = explode('|', $plainToken)[1];
+        $expectedHash = hash('sha256', $plainPart);
+
+        $tokenRecord = PersonalAccessToken::where('tokenable_id', $user->id)
+            ->where('tokenable_type', get_class($user))
+            ->latest()
+            ->first();
+
         $this->assertNotNull($tokenRecord);
         // The stored token should be a SHA-256 hash, not the plain token
         $this->assertNotEquals($plainToken, $tokenRecord->token, 'Token should be hashed in DB');
-        // The plain token part (after |) should NOT match the stored hash
-        $plainPart = explode('|', $plainToken)[1];
+        // The plain token part should NOT match the stored hash
         $this->assertNotEquals($plainPart, $tokenRecord->token, 'Plain token part should not match stored hash');
         // Verify the hash matches
-        $this->assertEquals(hash('sha256', $plainPart), $tokenRecord->token, 'Stored token should be SHA-256 hash');
+        $this->assertEquals($expectedHash, $tokenRecord->token, 'Stored token should be SHA-256 hash');
     }
 
     /** @test */
