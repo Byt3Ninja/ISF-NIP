@@ -2649,6 +2649,15 @@ class HackathonController extends Controller
 
     public function exportHackathonWinners( $id )
     {
+        $user = auth()->user();
+        if (!$user->hasRole('Admin')) {
+            $orgIds = $user->organizations_ids;
+            $cycleCheck = \App\Cycle::find($id);
+            if (!$cycleCheck || !in_array($cycleCheck->organization_id, $orgIds)) {
+                abort(403, 'Unauthorized access to this hackathon.');
+            }
+        }
+
         $tail = 'xlsx';
         $request = request();
         $type = $request->has('type') ? ( in_array( $request->input('type', 'excel'), ['csv', 'excel'] ) ? $request->input('type', 'excel') : 'excel' ) : 'excel';

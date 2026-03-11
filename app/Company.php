@@ -8,9 +8,11 @@ use App\Step;
 use App\Traits\Auditable;
 use Illuminate\Support\Facades\App;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Company extends Model
 {
+    use HasFactory;
     // use Auditable;
     public static $module = 'Company';
     

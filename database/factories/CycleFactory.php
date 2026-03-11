@@ -18,8 +18,6 @@ class CycleFactory extends Factory
 
         return [
             'organization_id' => Organization::factory(),
-            'name_en' => $this->faker->sentence(3),
-            'name_ar' => $this->faker->sentence(3),
             'title' => $this->faker->sentence(3),
             'description' => $this->faker->paragraph,
             'type' => $this->faker->randomElement(['General_Program', 'Hackathon']),
