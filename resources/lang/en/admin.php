@@ -3532,4 +3532,5 @@ return [
 	'name_en_placeholder' => 'Enter name in english',
 	'name_ar_placeholder' => 'Enter name in arabic',
 	'max_255_chars' => 'The maximum length is 255 characters.',
+	'sessions_mentorship' => 'Mentorship Sessions',
 ];
