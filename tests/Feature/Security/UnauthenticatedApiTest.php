@@ -3,11 +3,11 @@
 namespace Tests\Feature\Security;
 
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class UnauthenticatedApiTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     /** @test */
     public function unauthenticated_post_expertise_returns_401()

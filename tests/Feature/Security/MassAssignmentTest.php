@@ -5,11 +5,11 @@ namespace Tests\Feature\Security;
 use Tests\TestCase;
 use App\User;
 use App\Role;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class MassAssignmentTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     /** @test */
     public function non_admin_cannot_change_role_via_api_update()

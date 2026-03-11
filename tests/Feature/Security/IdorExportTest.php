@@ -10,11 +10,11 @@ use App\Step;
 use App\Organization;
 use App\Http\Middleware\LoginSecurityMiddleware;
 use Illuminate\Auth\Middleware\EnsureEmailIsVerified;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class IdorExportTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     protected function setUp(): void
     {

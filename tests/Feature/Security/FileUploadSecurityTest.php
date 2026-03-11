@@ -5,17 +5,17 @@ namespace Tests\Feature\Security;
 use Tests\TestCase;
 use App\Role;
 use App\Settings;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Storage;
 
 class FileUploadSecurityTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     private function setupRegistration(): void
     {
-        Settings::factory()->create(['id' => 1, 'VFEmail' => 0]);
-        Role::factory()->create(['name' => 'Registered', 'default_for' => 'Registered']);
+        Settings::updateOrCreate(['id' => 1], ['VFEmail' => 0]);
+        Role::firstOrCreate(['name' => 'Registered'], ['default_for' => 'Registered']);
     }
 
     /** @test */

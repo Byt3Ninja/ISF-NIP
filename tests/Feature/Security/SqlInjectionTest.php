@@ -5,11 +5,11 @@ namespace Tests\Feature\Security;
 use Tests\TestCase;
 use App\User;
 use App\Role;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class SqlInjectionTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     /** @test */
     public function upcoming_sessions_rejects_sql_injection_in_user_id()

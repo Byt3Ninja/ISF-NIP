@@ -6,11 +6,11 @@ use Tests\TestCase;
 use App\User;
 use App\Role;
 use App\Permission;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class PathTraversalTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     private function actingAsAuthenticatedUser(): User
     {
