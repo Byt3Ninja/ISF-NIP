@@ -303,12 +303,17 @@ class InvitationController extends Controller
 
     public function showAttachment($path)
     {
-        $filePath = storage_path('app/uploads/InviteMentor/' . $path);
+        $safeName = basename($path);
+        $basePath = storage_path('app/uploads/InviteMentor');
+        $filePath = $basePath . DIRECTORY_SEPARATOR . $safeName;
 
-        if (!file_exists($filePath)) {
+        $realBase = realpath($basePath);
+        $realFile = realpath($filePath);
+
+        if (!$realBase || !$realFile || !str_starts_with($realFile, $realBase)) {
             abort(404);
         }
 
-        return response()->file($filePath);
+        return response()->file($realFile);
     }
 }

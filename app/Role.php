@@ -3,11 +3,12 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\Auditable;
 
 class Role extends Model
 {
-	use Auditable;
+	use HasFactory, Auditable;
 	protected $fillable = [
 		'name',
 		'default_for',

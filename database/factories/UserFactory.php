@@ -24,10 +24,8 @@ class UserFactory extends Factory
             'phone' => $this->faker->phoneNumber,
             'gender' => $this->faker->randomElement(['male', 'female']),
             'country_code' => $this->faker->countryCode,
-            'organization_id' => null,
             'company_id' => null,
             'HaveCompany' => false,
-            'api_token' => Str::random(60),
         ];
     }
 

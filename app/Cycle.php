@@ -8,11 +8,12 @@ use Carbon\Carbon;
 use App\Traits\Auditable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use stdClass;
 
 class Cycle extends Model
 {
-    use Auditable;
+    use HasFactory, Auditable;
     public static $module = 'Program';
     protected $casts = ['start'  => 'date:Y-m-d', 'end' => 'date:Y-m-d', 'is_public' => 'boolean', 'landing_visible' => 'boolean', 'landing_sort_order' => 'integer',];
     protected $guarded = [];

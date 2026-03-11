@@ -39,10 +39,10 @@ class RegistrationController extends Controller
 				$images = $request->input('company.product_photo', []);
 				foreach( $images as $image )
 				{
-					$extension = explode('/', explode(':', substr($image, 0, strpos($image, ';')))[1])[1];
-					$filename = Str::random(20) . '.' . $extension;
-					$decodedImage = base64_decode(preg_replace('/^data:image\/\w+;base64,/', '', $image));
-					Storage::disk('companies')->put($filename, $decodedImage);
+					$filename = $this->decodeAndStoreBase64Image($image, 'companies');
+					if ($filename === null) {
+						continue;
+					}
 					$product_photo[] = URL::to('/api/uploads/companies/' . $filename);
 					$product_photos[] = $filename;
 				}
@@ -75,7 +75,6 @@ class RegistrationController extends Controller
 						}
 					}
 					$password = Str::random(6);
-					$request_token = Str::random(48);
 					$user = new User();
 					$user->fill([
 						'email' => $request->input('personal.email'),
@@ -93,9 +92,9 @@ class RegistrationController extends Controller
 						'company_id' => null,
 						'HaveCompany' => false,
 						'password' => Hash::make( $password ),
-						'api_token' => $request_token
 					]);
 					$user->save();
+					$sanctumToken = $user->createToken('registration')->plainTextToken;
 					$user->allotRole('Registered');
 					$company = new Company();
 					$company->fill([
@@ -162,7 +161,7 @@ class RegistrationController extends Controller
 								'video_link' => $company->product_video,
 								'hear_about_us' => $company->hear_about_us
 							],
-							'request_token' => $request_token
+							'request_token' => $sanctumToken
 						]
 					], 200);
 				} catch (Exception $e) {
@@ -178,7 +177,13 @@ class RegistrationController extends Controller
 	public function getCompany( Request $request )
 	{
 		$token = $request->input('request_token', null);
-		$user = !empty( $token ) ? User::where('api_token', $token)->first() : auth('api')->user();
+		$user = null;
+		if (!empty($token)) {
+			$accessToken = \Laravel\Sanctum\PersonalAccessToken::findToken($token);
+			$user = $accessToken?->tokenable;
+		} else {
+			$user = auth('api')->user();
+		}
 
 		if( empty( $user ) ) { return response()->json(['status' => false, 'code' => 404, 'message' => 'User not found'], 404); }
 		else
@@ -238,6 +243,33 @@ class RegistrationController extends Controller
 				]
 			], 200);
 		}
+	}
+
+	private function decodeAndStoreBase64Image(string $dataUri, string $disk): ?string
+	{
+		$decoded = base64_decode(preg_replace('/^data:[\w+\/.-]+;base64,/', '', $dataUri), true);
+		if ($decoded === false) {
+			return null;
+		}
+
+		$finfo = new \finfo(FILEINFO_MIME_TYPE);
+		$mime = $finfo->buffer($decoded);
+
+		$allowed = [
+			'image/jpeg' => 'jpg',
+			'image/png'  => 'png',
+			'image/gif'  => 'gif',
+			'image/webp' => 'webp',
+		];
+
+		if (!isset($allowed[$mime])) {
+			return null;
+		}
+
+		$filename = Str::random(20) . '.' . $allowed[$mime];
+		Storage::disk($disk)->put($filename, $decoded);
+
+		return $filename;
 	}
 
 	public function showImage( $path )

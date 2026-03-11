@@ -160,7 +160,9 @@ class OrganizationServiceTest extends TestCase
     public function it_can_update_organization()
     {
         $organization = Organization::factory()->create();
-        $user = User::factory()->create(['organization_id' => $organization->id]);
+        $user = User::factory()->create();
+        $user->organization_id = $organization->id;
+        $user->save();
         $organization->update(['user_id' => $user->id]);
 
         $updateData = [
@@ -183,9 +185,11 @@ class OrganizationServiceTest extends TestCase
     public function it_can_update_organization_with_new_image()
     {
         Storage::fake('public');
-        
+
         $organization = Organization::factory()->create(['img_url' => 'old-logo.jpg']);
-        $user = User::factory()->create(['organization_id' => $organization->id]);
+        $user = User::factory()->create();
+        $user->organization_id = $organization->id;
+        $user->save();
         $organization->update(['user_id' => $user->id]);
         
         $file = UploadedFile::fake()->image('new-logo.jpg');
