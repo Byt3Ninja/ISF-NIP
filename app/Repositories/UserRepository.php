@@ -287,6 +287,11 @@ class UserRepository
                 $user->save();
 
                 if (isset($data['role'])) {
+                    $currentUser = auth()->user();
+                    if (!$currentUser || !$currentUser->hasRole('Admin')) {
+                        throw new \Illuminate\Auth\Access\AuthorizationException('Unauthorized role change.');
+                    }
+
                     DB::table('model_has_roles')
                         ->where('model_type', User::class)
                         ->where('model_id', $user->id)

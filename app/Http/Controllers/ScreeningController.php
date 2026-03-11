@@ -730,6 +730,15 @@ class ScreeningController extends Controller
 	 */
 	public function exportResults($id)
 	{
+		$user = auth()->user();
+		if (!$user->hasRole('Admin')) {
+			$orgIds = $user->organizations_ids;
+			$step = \App\Step::with('cycle')->find($id);
+			if (!$step || !$step->cycle || !in_array($step->cycle->organization_id, $orgIds)) {
+				abort(403, 'Unauthorized access to this evaluation.');
+			}
+		}
+
 		$metadata = ScreeningEvaluationResults::metadata($id);
 		$_companies = $metadata['_companies'];
 		$evaluation = $metadata['evaluation'];
@@ -767,6 +776,15 @@ class ScreeningController extends Controller
 	 */
 	public function exportCompanyResults($id, $company_id)
 	{
+		$user = auth()->user();
+		if (!$user->hasRole('Admin')) {
+			$orgIds = $user->organizations_ids;
+			$step = \App\Step::with('cycle')->find($id);
+			if (!$step || !$step->cycle || !in_array($step->cycle->organization_id, $orgIds)) {
+				abort(403, 'Unauthorized access to this evaluation.');
+			}
+		}
+
 		$company = Company::find($company_id);
 
 		if (!$company) {

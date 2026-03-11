@@ -6,13 +6,14 @@ use App\Like;
 
 use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Organization extends Model
 {
-	use Auditable,SoftDeletes;
+	use HasFactory, Auditable, SoftDeletes;
 	public static $module = 'Organizations';
 	protected $fillable = [
 		'name_ar',

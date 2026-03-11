@@ -3,11 +3,13 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\Auditable;
 use Carbon\Carbon;
 
 class Settings extends Model
 {
+    use HasFactory;
     // use Auditable;
     public static $module = 'App Settings';
     protected $guarded = ['id', 'created_at', 'updated_at', 'deleted_at'];

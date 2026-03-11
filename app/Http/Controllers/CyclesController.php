@@ -55,14 +55,17 @@ class CyclesController extends Controller
 
     public function exportcyclesComp(Request $request)
     {
-        // تحقق من أن البريد الإلكتروني موجود
-
-        // $data2 = [
-        //     'step' => $request->input('step'),
-        //     'userEmail' => auth()->user()->email
-        // ];
-
+        $user = auth()->user();
         $cycle = $request->cycle;
+
+        if (!$user->hasRole('Admin')) {
+            $orgIds = $user->organizations_ids;
+            $cycleModel = \App\Cycle::find($cycle);
+            if (!$cycleModel || !in_array($cycleModel->organization_id, $orgIds)) {
+                abort(403, 'Unauthorized access to this cycle.');
+            }
+        }
+
         $companies = Company::where('cycle', $cycle)->get();
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
