@@ -3589,4 +3589,5 @@ return [
 	'name_en_placeholder' => 'ادخل الاسم بالانجليزية',
 	'name_ar_placeholder' => 'ادخل الاسم بالعربية',
 	'max_255_chars' => 'الحد الأقصى هو 255 حرفًا.',
+	'sessions_mentorship' => 'جلسات التدريب',
 ];
