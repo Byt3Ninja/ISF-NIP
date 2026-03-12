@@ -784,7 +784,7 @@
 															@if($now <= $end_time)
 																
 																<span class="warning">
-																	<a class="btn btn-sm btn-label-primary" href="{{ $session->join_url }}" target="_blank">
+																	<a class="btn btn-sm btn-label-primary" href="{{ route('mentorship.join', $session->id) }}" target="_blank">
 																		<i class="ti ti-brand-zoom me-2"></i>
 																		{{ __('dashboard.Join now') }}
 																	</a>
@@ -1040,7 +1040,7 @@
 												@if( $now >= $start_time )
 													@if( $now <= $end_time )
 													
-														<a href="{{ $session->start_url }}" target="_blank">
+														<a href="{{ route('mentorship.join', $session->id) }}" target="_blank">
 															<button title="Start Meeting" type="button" data-value="{{ $session->id }}" type="button" class="btn btn-label-primary rounded">
 																<i class="ti ti-link"></i> {{ __('admin.Join Meeting') }}
 															</button>

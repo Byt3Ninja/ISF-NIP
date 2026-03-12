@@ -174,7 +174,7 @@
                           @if(now() > $endTime)
                             <span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
                           @else
-                          <a class="btn btn-sm btn-label-primary" href="{{ $session->join_url }}" target="_blank">
+                          <a class="btn btn-sm btn-label-primary" href="{{ route('mentorship.join', $session->id) }}" target="_blank">
                             <i class="ti ti-brand-zoom me-2"></i>
                             {{ __('dashboard.Join now') }}
                           </a>
