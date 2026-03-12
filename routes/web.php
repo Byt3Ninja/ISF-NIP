@@ -766,6 +766,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('training/sessions/{id?}', 'TrainingController@sessions')->name('trainings.sessions_list');
     Route::get('training/sessionsReport', 'TrainingController@sessionsReport')->name('trainings.sessions_report');
     Route::get('/sessions/join/{session}', 'TrainingController@join')->name('trainings.sessions_join');
+    Route::get('/mentorship/join/{id}', 'MentorsController@joinSession')->name('mentorship.join');
 
 
     Route::post('training/addsession', 'TrainingController@addsession')->name('trainings.sessions_create');
