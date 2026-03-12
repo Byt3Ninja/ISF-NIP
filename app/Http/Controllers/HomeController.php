@@ -1481,6 +1481,10 @@ class HomeController extends Controller
                             mr.zoom_date,
                             mr.created_at
                         FROM mentorship_requests mr
+                        INNER JOIN attendance_training_offline ato
+                            ON ato.mentorship_request_id = mr.id
+                            AND ato.user_id = {$user->id}
+                            AND ato.attendance = 1
                         WHERE
                             mr.mentor_id = {$user->id}
                             AND mr.approved = 'Yes'
@@ -1494,8 +1498,12 @@ class HomeController extends Controller
                         mr.created_at
                     FROM
                         mentorship_requests mr
+                    INNER JOIN attendance_training_offline ato
+                        ON ato.mentorship_request_id = mr.id
+                        AND ato.user_id = {$user->id}
+                        AND ato.attendance = 1
                     WHERE
-                        mr.user_id = $user->id
+                        mr.user_id = {$user->id}
                         AND mr.approved = 'Yes'
                         AND mr.rating IS NOT NULL
                         AND mr.cycle_id = $cycle_id
@@ -1521,6 +1529,10 @@ class HomeController extends Controller
                     training_sessions ts
                 INNER JOIN
                     steps s ON ts.step_id = s.id
+                INNER JOIN
+                    attendance_training_offline ato ON ato.training_session_id = ts.id
+                        AND ato.user_id = {$user->id}
+                        AND ato.attendance = 1
                 WHERE
                     s.cycle_id = $cycle_id;
             ";
