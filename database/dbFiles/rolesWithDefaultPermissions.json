@@ -6285,7 +6285,20 @@
                     "organizationmanager",
                     "subadmin"
                 ]
-            }
+            },
+            {
+                "name": "mentorship.join",
+                "description": "Join Mentorship",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "organizationmanager",
+                    "subadmin",
+                    "registered"
+                ]
+             }
         ]
     },
     {

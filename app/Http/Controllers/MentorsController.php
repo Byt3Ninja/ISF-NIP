@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\AttendanceTrainingOffline;
 use App\Company;
 use App\Cycle;
 use App\CyclesMentors;
@@ -1501,5 +1502,43 @@ class MentorsController extends Controller
 		if ($answered === 0) return 'Pending';
 		if ($answered < $totalQuestions) return 'In_Progress';
 		return 'Completed';
+	}
+
+	public function joinSession($id)
+	{
+		$session = MentorshipRequest::findOrFail($id);
+		$user = Auth::user();
+		if($user->hasRole('mentor')){
+			$getDataFromMentor = $user->mentorSessions->where('id', $session->id)->first()->user->company;
+		}elseif($user->hasRole('registered')){
+			$getDataFromMentor = $user->company;
+		}else{
+			$getDataFromMentor = null;
+		}
+		$companyId = $getDataFromMentor ? $getDataFromMentor->id : $user->company_id;
+		$companyCycle = $getDataFromMentor ? $getDataFromMentor->cycle : $user->company->cycle;
+		$companyStep = $getDataFromMentor ? $getDataFromMentor->step : $user->company->step;
+		$data = [
+			'mentorship_request_id' => $session->id,
+			'user_id'               => $user->id,
+			'attendance'            => true,
+			'location'              => 'online',
+			'company_id'            => $companyId,
+			'cycle_id'              => $companyCycle,
+			'step_id'               => $companyStep
+			];
+
+		AttendanceTrainingOffline::updateOrCreate(
+			$data,
+			[
+				'attendance' => true,
+				'location'   => 'online',
+			]
+		);
+		if($user->hasRole('mentor')){
+			return redirect()->away($session->start_url);
+		}else{
+			return redirect()->away($session->join_url);
+		}
 	}
 }
