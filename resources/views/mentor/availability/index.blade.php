@@ -1376,16 +1376,23 @@
           )
           .then(result => {
 
-              result.data.forEach(slot => {
-                  const newSlot = createSlotObject(slot);
-                  const day = slot.weekday;
+            result.data.forEach(slot => {
+                const newSlot = createSlotObject(slot);
 
-                  if (!availabilityData.weekly[day]) {
-                      availabilityData.weekly[day] = [];
-                  }
-
-                  availabilityData.weekly[day].push(newSlot);
-              });
+                if (slot.weekly) {
+                    const day = slot.weekday;
+                    if (!availabilityData.weekly[day]) {
+                        availabilityData.weekly[day] = [];
+                    }
+                    availabilityData.weekly[day].push(newSlot);
+                } else {
+                    const date = slot.date;
+                    if (!availabilityData.specific[date]) {
+                        availabilityData.specific[date] = [];
+                    }
+                    availabilityData.specific[date].push(newSlot);
+                }
+            });
 
               updateListView();
               updateSlotsList();

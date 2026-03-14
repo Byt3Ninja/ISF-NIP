@@ -479,10 +479,17 @@ class SlotController extends Controller
 							unset($slotData['days']); // remove weekday if exists
 					}
 					// if the original slot equals new slot, skip creation to prevent duplicates
-					if(isset($slotData['date'])) {
-						$found = Schedule::where('date', $slotData['date'])->where('days', $slotData['days'])->first();
+					// if the original slot equals new slot, skip creation to prevent duplicates
+					if (isset($slotData['date'])) {
+							$query = Schedule::where('date', $slotData['date']);
+							
+							if (isset($slotData['days'])) {
+									$query->where('days', $slotData['days']);
+							}
+							
+							$found = $query->first();
 					} else {
-						$found = null;
+							$found = null;
 					}
 					if ($found && $found->tfrom == $slotData['tfrom'] && $found->tto == $slotData['tto'] && $found->session_type == $slotData['session_type']) {
 						return response()->json([
