@@ -65,25 +65,116 @@
     <div class="card">
       <!-- Heading & Actions -->
       <div class="card-header d-md-flex justify-content-between border-bottom pb-3 mb-6">
-        <h5 class="card-title mb-0">{{ __('admin.Training sessions') }}</h5>
-        <div class="d-flex align-items-center gap-3">
-          <div class="btn-group">
-            <button type="button" class="btn btn-label-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="ti ti-file-export me-2"></i>{{ __('settings.Export') }}
-            </button>
-            <ul class="dropdown-menu">
-              @foreach(['csv', 'excel'] as $key => $option)
-                <li>
-                  <a class="dropdown-item text-uppercase" href="javascript:void(0)" onclick="exportTraining('{{$option}}')">
-                    {{$option}}
-                  </a>
-                </li>
-              @endforeach
-            </ul>
+        <!-- Enhanced Page Header -->
+        <div class="row mb-4 w-100">
+          <div class="col-12">
+            <div class="card border-0 shadow-none">
+              <div class="card-body p-0">
+                <!-- Main Header Section -->
+                <div class="d-flex flex-wrap align-items-start justify-content-between gap-4 mb-4">
+                  <div class="page-title-wrapper flex-grow-1">
+                    <div class="d-flex align-items-center mb-3">
+                      <div
+                        class="icon-wrapper bg-label-primary bg-opacity-10 rounded-3 p-3 me-4 d-flex align-items-center justify-content-center"
+                        style="width: 60px; height: 60px"
+                      >
+                        <i class="ti ti-clipboard-check text-primary fs-3"></i>
+                      </div>
+                      <div>
+                        <h4 class="page-title mb-1 fw-bold text-dark d-flex align-items-center">
+                          {{ __('admin.Training sessions') }}
+                        </h4>
+                        <p class="page-subtitle mb-0 text-muted line-clamp-1 fs-6" style="max-width: 600px;">
+                          {{ __('cycles.Manage and review training sessions for') }} {{ $current_step->title }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Action Buttons -->
+                  <div class="page-actions d-flex flex-wrap gap-2">
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-light rounded-pill px-4 py-2 shadow-sm d-flex align-items-center dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="ti ti-file-export me-2"></i>{{ __('settings.Export') }}
+                      </button>
+                      <ul class="dropdown-menu">
+                        @foreach(['csv', 'excel'] as $key => $option)
+                          <li>
+                            <a class="dropdown-item text-uppercase" href="javascript:void(0)" onclick="exportTraining('{{$option}}')">
+                              {{$option}}
+                            </a>
+                          </li>
+                        @endforeach
+                      </ul>
+                    </div>
+
+                    <a
+                      class="btn btn-outline-primary rounded-pill px-4 py-2 shadow-sm d-flex align-items-center"
+                      href="/dashboard/cycles/{{ $current_step->cycle_id }}"
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="top"
+                      title="{{ __('cycles.Edit cycle') }}"
+                    >
+                      <i class="ti ti-pencil me-2"></i>
+                      <span class="d-none d-sm-inline">{{ __('cycles.Cycle') }}</span>
+                    </a>
+
+                    <button
+                      class="btn btn-primary rounded-pill px-4 py-2 shadow-sm d-flex align-items-center"
+                      data-bs-toggle="modal"
+                      data-bs-target="#addsession"
+                      type="button"
+                    >
+                      <i class="ti ti-plus me-2"></i>{{ __('admin.Add_New') }}
+                    </button>
+
+                  </div>
+                </div>
+
+                <!-- Enhanced Screening Selection Section -->
+                <div class="row g-4">
+                  <div class="col-lg-12">
+                    <div class="selection-wrapper bg-light bg-opacity-50 rounded-3 p-4 border-primary border-opacity-10">
+                      <div class="form-group mb-0">
+                        <label class="form-label fw-bold mb-3 d-flex align-items-center text-dark">
+                          <div class="label-icon bg-label-primary bg-opacity-10 rounded-circle p-2 me-3 border border-primary">
+                            <i class="ti ti-list text-primary"></i>
+                          </div>
+                          <span>{{ __('cycles.Select training step') }}</span>
+                          <span class="badge bg-info bg-opacity-10 text-info ms-2 px-2 py-1 rounded-pill">
+                            {{ count($program_steps) }} {{ __('cycles.Available') }}
+                          </span>
+                        </label>
+
+                        <select
+                          id="cstep"
+                          class="form-select form-select-lg rounded-3 border-2 shadow-sm bg-white"
+                          onchange="window.open('/dashboard/training/sessions/'+this.options[this.selectedIndex].value,'_self');"
+                          style="border-color: rgba(105, 108, 255, 0.2); min-height: 50px"
+                        >
+                          @foreach ($program_steps as $step)
+                            <option
+                              value="{{ $step->id }}"
+                              {{ $step->id == $id ? 'selected' : '' }}
+                              data-cycle="{{ $step->cycle->title }}"
+                              data-organization="{{ optional(optional($step->cycle)->organization)->name }}"
+                            >
+                              🎯 {{ $step->title }}
+                              • {{ __('cycles.Cycle') }}: "{{ $step->cycle->title }}"
+                              • {{ __('cycles.Start') }}: {{ $step->from->format('d M Y') ?? '-' }}
+                              @if (optional(optional($step->cycle)->organization)->name)
+                                • {{ optional(optional($step->cycle)->organization)->name }}
+                              @endif
+                            </option>
+                          @endforeach
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addsession" type="button">
-            <i class="ti ti-plus me-2"></i>{{ __('admin.Add_New') }}
-          </button>
         </div>
       </div>
 

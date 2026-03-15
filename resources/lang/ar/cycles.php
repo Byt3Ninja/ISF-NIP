@@ -446,8 +446,10 @@ return [
     'Active filters' => 'الفلاتر النشطة',
     'Status' => 'الحالة',
     'Score' => 'الدرجة',
-        'General_Program' => 'برنامج عام',
+    'General_Program' => 'برنامج عام',
     'Hackathon' => 'هاكاثون',
+    'Select training step' => 'اختر خطة التدريب',
+    'Manage and review training sessions for' => 'إدارة ومراجعة جلسات التدريب لـ',
     
     // Final Screening specific translations
     'Judge Assignment' => 'تعيين المحكمين',
