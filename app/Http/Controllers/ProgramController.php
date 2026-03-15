@@ -88,7 +88,7 @@ class ProgramController extends Controller
         }
 
         // 📌 Use paginate instead of get()
-        $cycles = $cycles->orderBy('id', 'desc')
+        $cycles = $cycles->with(['steps', 'companies', 'mentors'])->orderBy('id', 'desc')
             ->with('organization')
             ->paginate(9)                      // ← paginate 9 per page
             ->through(function ($cycle) {      // ← apply mapping AFTER pagination

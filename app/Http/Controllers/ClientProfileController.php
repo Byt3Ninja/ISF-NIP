@@ -458,21 +458,34 @@ class ClientProfileController extends Controller
         }
     }
 
-    public function showMintors(Request $request)
+    public function showMentors(Request $request)
     {
-        $setting = Settings::where('id', 1)->first();
+        $settings = Settings::where('id', 1)->first();
         $search = $request->input('search');
         $rateSearch = $request->input('rateSearch');
         $expertisesSearch = $request->input('expertises', []);
         $linkedin = $request->input('linkedin');
         $programFilter = $request->input('programFilter');
         $enrolledInProgramFilter = $request->input('enrolledInProgramFilter');
-        if ($setting->mentor_list == 1) {
+        if ($settings->mentor_list == 1) {
             if (Auth::user()->hasAnyRole('Mentor|Registered|Admin|OrganizationManager|subadmin')) {
                 $l = app()->getLocale();
                 $firstNameColumn = $l == 'ar' ? 'first_name_en' : 'first_name_en';
                 $lastNameColumn = $l == 'ar' ? 'first_name_en' : 'last_name_en';
                 $mentors = User::role('mentor')
+                    ->with(['bio', 'mentorExpertises', 'mentorCycles', 'schedule' => function ($q) {
+                        $q->where(function ($query) {
+                            $query->whereNull('date')
+                                ->orWhere('date', '>', date('Y-m-d'))
+                                ->orWhere(function ($q2) {
+                                    $q2->where('date', date('Y-m-d'))
+                                       ->where('tto', '>', date('H:i:s'));
+                                });
+                        });
+                    }])
+                    ->withAvg(['mentorshipRequests as avg_rating' => function ($q) {
+                        $q->where('approved', 'Yes');
+                    }], 'rating')
                     ->whereRaw("CONCAT($firstNameColumn, ' ', $lastNameColumn) LIKE ?", ["%{$search}%"]);
                 if ($rateSearch > 0) {
                     $mentors = $mentors->whereHas('mentorshipRequests', function ($q) use ($rateSearch) {
@@ -526,7 +539,27 @@ class ClientProfileController extends Controller
                         ->toArray();
                     $mentors = $mentors->whereIn('id', $mentorIds);
                 }
+                if (!empty($scopeFilter) && $scopeFilter !== 'all') {
 
+                    if ($scopeFilter === 'public') {
+
+                        $mentors->where(function ($q) {
+                            $q->whereDoesntHave('inviteMentors') // مش موجود في invite
+                            ->orWhereHas('inviteMentors', function ($q2) {
+                                $q2->where('scope', 'public'); // موجود و public
+                            });
+                        });
+
+                    } else {
+
+                        $mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter) {
+                            $query->where('scope', $scopeFilter);
+                        });
+
+                    }
+                }
+
+                $mentors = $mentors->with('mentorExpertises');
                 $mentors = $mentors->get();
 
                 $user = Auth::user();
@@ -537,9 +570,8 @@ class ClientProfileController extends Controller
                 } else {
                     $cycles = Cycle::all();
                 }
-             $settings = Settings::where('id', 1)->first();
-			$offline_allowed = $settings->allow_offline_sessions == 1 ? true : false;
-           
+			    $offline_allowed = $settings->allow_offline_sessions == 1 ? true : false;
+
                 // $mentors = User::role('mentor')->get();
                 return view('mentors.index', compact('mentors', 'cycles', 'offline_allowed'));
             }
@@ -550,6 +582,19 @@ class ClientProfileController extends Controller
                 $firstNameColumn = $l == 'ar' ? 'first_name_en' : 'first_name_en';
                 $lastNameColumn = $l == 'ar' ? 'first_name_en' : 'last_name_en';
                 $mentors = User::role('mentor')
+                    ->with(['bio', 'mentorExpertises', 'mentorCycles', 'schedule' => function ($q) {
+                        $q->where(function ($query) {
+                            $query->whereNull('date')
+                                ->orWhere('date', '>', date('Y-m-d'))
+                                ->orWhere(function ($q2) {
+                                    $q2->where('date', date('Y-m-d'))
+                                       ->where('tto', '>', date('H:i:s'));
+                                });
+                        });
+                    }])
+                    ->withAvg(['mentorshipRequests as avg_rating' => function ($q) {
+                        $q->where('approved', 'Yes');
+                    }], 'rating')
                     ->whereRaw("CONCAT($firstNameColumn, ' ', $lastNameColumn) LIKE ?", ["%{$search}%"]);
                 if ($rateSearch > 0) {
                     $mentors = $mentors->whereHas('mentorshipRequests', function ($q) use ($rateSearch) {
@@ -598,6 +643,21 @@ class ClientProfileController extends Controller
                     }
                     // If enrolledInProgramFilter is empty string (''), show all (no filter applied)
                 }
+                if (!empty($scopeFilter) && $scopeFilter !== 'all') {
+                    if ($scopeFilter === 'public') {
+                        $mentors->where(function ($q) {
+                            $q->whereDoesntHave('inviteMentors')
+                            ->orWhereHas('inviteMentors', function ($q2) {
+                                $q2->where('scope', 'public'); 
+                            });
+                        });
+                    } else {
+                        $mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter) {
+                            $query->where('scope', $scopeFilter);
+                        });
+                    }
+                }
+                $mentors = $mentors->with('mentorExpertises');
                 $mentors = $mentors->get();
 
                 $user = Auth::user();

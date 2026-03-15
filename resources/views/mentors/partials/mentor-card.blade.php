@@ -86,12 +86,7 @@
           <div class="d-flex align-items-center text-dark">
             <i class="ti ti-star ti-sm text-dark me-1"></i>
             <small class="fw-semibold me-2">{{ __('admin.Rating') }}</small>
-            @php
-            $rateMentorAVG = \App\MentorshipRequest::where('mentor_id', $mentor->id)
-            ->where('approved', 'Yes')
-            ->avg('rating');
-            @endphp
-            <span class="fw-bold text-dark">{{ number_format($rateMentorAVG ?: 0, 1) }}</span>
+            <span class="fw-bold text-dark">{{ number_format($mentor->avg_rating ?: 0, 1) }}</span>
           </div>
         </div>
       </div>
@@ -101,19 +96,7 @@
     <!-- Action Button -->
     <div class="row px-4 mt-auto">
       @if ($canRequestMentorship && auth()->user()->company->id && $mentor->id)
-        @php
-        $schedules = App\Schedule::where('user_id', $mentor->id ?? auth()->id())
-						->where(function ($query) {$query
-								->whereNull('date')
-								->orWhere('date', '>', date('Y-m-d'))
-								->orWhere(function ($q) {
-									$q->where('date', date('Y-m-d'))
-									->where('tto', '>', date('H:i:s'));
-								});
-						})
-						->get();
-        @endphp
-        @if($schedules->isNotEmpty())
+        @if($mentor->schedule->isNotEmpty())
           <button 
             type="button" 
             class="btn btn-primary" 
