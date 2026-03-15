@@ -586,7 +586,7 @@ class TrainingController extends Controller
 				return $q->whereHas('cycle', function ($query) use ($orgIds) {
 					$query->whereIn('organization_id', $orgIds);
 				});
-			})->where('stype', 4)->get();
+			})->where('stype', 4)->with(['cycle', 'cycle.organization'])->get();
 
 			if ($id == 0) {
 				$id = $steps->pluck('id')->first();
@@ -598,6 +598,7 @@ class TrainingController extends Controller
 			}
 			
 			// $sessions = TrainingSession::where('step_id', $id)->with('reports')->orderBy('datetime', 'ASC');
+			$current_step = $steps->where('id', $id)->first();
 			$sessions = TrainingSession::with('reports')->orderBy('datetime', 'ASC');
 			if( $request->company_id != 0 )
 			{ 
@@ -625,7 +626,8 @@ class TrainingController extends Controller
 			// }
 
 			// dd($sessions->toArray());
-			return view('admin/settings/training/sessions', compact('steps', 'id', 'sessions', 'cycles', 'online'));
+			$program_steps = $steps->where('cycle_id', $current_step->cycle->id)->values();
+			return view('admin/settings/training/sessions', compact('steps', 'program_steps', 'id', 'sessions', 'cycles', 'online', 'current_step'));
 		} catch (\Throwable $e) {
 			Log::error('Error in TrainingController@sessions: ' . $e->getMessage());
 		}

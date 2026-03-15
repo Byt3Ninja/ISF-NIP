@@ -454,6 +454,8 @@ return [
     'General_Program' => 'General Program',
     'Hackathon' => 'Hackathon',
     'Display course contents' => 'Display course contents',
+    'Select training step' => 'Select training step',
+    'Manage and review training sessions for' => 'Manage and review training sessions for',
     
     // Final Screening specific translations
     'Judge Assignment' => 'Judge Assignment',
