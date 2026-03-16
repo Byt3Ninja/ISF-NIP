@@ -34,6 +34,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use stdClass;
 
 class MentorsController extends Controller
 {
@@ -1342,67 +1343,62 @@ class MentorsController extends Controller
 	{
 		$user = auth()->user();
 
-		$mentorshipRequests = MentorshipRequest::where('mentor_id', $user->id)
-			->with('user.company')
-			->orderBy('created_at', 'DESC')
-			->get();
-
-		$surveys = SurveyResponses::where('user_id', $user->id)
-			->where('triggered_on', 'mentorship')
-			->get();
+		$mentorshipRequests = MentorshipRequest::when($user->hasRole('mentor'), function($query) use ($user) {
+			$query->where('mentor_id', $user->id);
+		})->with(['mentor', 'user', 'user.company'])->orderBy('created_at', 'DESC')->get();
+		$surveys = SurveyResponses::where('user_id', $user->id)->where('triggered_on', 'mentorship')->get();
 			
-			$mentorship_sessions = $mentorshipRequests->map(function ($session) use ($surveys) {
-
+		$now = date('Y-m-d H:i');
+		$mentorship_sessions = $mentorshipRequests->map(function ($session) use ( $surveys ) {
 			$survey = $surveys->get($session->id);
-				// dd($survey);
-			return (object) [
-				'id' => $session->id,
-				'zoom_date' => $session->zoom_date,
-				'period' => $session->period,
-				'status' => $session->zoom_date > now()
-				? 'Upcoming'            
-				: ($session->zoom_date->addMinutes($session->period) < now() ? 'Completed' : 'In-progress'),
+			$_sesssion = new stdClass;
+			$_sesssion->id = $session->id;
+			$_sesssion->zoom_date = $session->zoom_date;
+			$_sesssion->period = $session->period;
+			$_sesssion->status = $session->zoom_date > now() ? 'Upcoming' : ($session->zoom_date->addMinutes($session->period) < now() ? 'Completed' : 'In-progress');
+			$_sesssion->session_type = $session->session_type;
+			$_sesssion->location = $session->session_type === 'Offline' ? $session->location : null;
+			$_sesssion->start_url = $session->start_url;
+			$_sesssion->passcode = $session->zoom_passcode;
+			$_sesssion->comment = $session->comment;
+			$_sesssion->start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
+            $_sesssion->end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+' . $session->period .' minutes'));
 
+			$_sesssion->mentor = new stdClass;
+			$_sesssion->mentor->id = $session->mentor->id;
+			$_sesssion->mentor->name = trim( $session->mentor->first_name_en . ' ' . $session->mentor->last_name_en );
+			$_sesssion->mentor->image_url = $session->mentor->img_url ? asset($session->mentor->img_url) : '/icons/avatar.svg';
 
-				'session_type' => $session->session_type,
-				'location' => $session->session_type === 'Offline' ? $session->location : null,
-				'start_url' => $session->start_url,
-				'passcode' => $session->zoom_passcode,
-				'comment' => $session->comment,
+			$_sesssion->user = new stdClass;
+			$_sesssion->user->id = $session->user->id;
+			$_sesssion->user->name = trim( $session->user->first_name_en . ' ' . $session->user->last_name_en );
+			$_sesssion->user->image_url = $session->user->img_url ? asset($session->user->img_url) : '/icons/avatar.svg';
+			$_sesssion->user->company = new stdClass;
+			$_sesssion->user->company->id = optional($session->user->company)->id;
+			$_sesssion->user->company->name = optional($session->user->company)->name_en;
+			$_sesssion->user->company->logo_url = optional($session->user->company)->logo ? asset($session->user->company->logo) : '/images/logo-placeholder.png';
+			$_sesssion->survey = null;
+			if( isset($survey->id) )
+			{
+				$_sesssion->survey = new stdClass;
+				$_sesssion->survey->id = optional($survey)->id;
+				$_sesssion->survey->status = $survey->responses != null ? 'Completed' : 'Pending';
+				$_sesssion->survey->is_required = optional($survey)->survey->is_required ?? false;
+			}
 
-				'user' => (object) [
-					'id' => $session->user->id,
-					'name' => trim(
-						$session->user->first_name_en . ' ' . $session->user->last_name_en
-					),
-					'image_url' => $session->user->img_url
-						? asset($session->user->img_url)
-						: '/icons/avatar.svg',
-
-					'company' => (object) [
-						'id' => optional($session->user->company)->id,
-						'name' => optional($session->user->company)->name_en,
-						'logo_url' => optional($session->user->company)->logo
-							? asset($session->user->company->logo)
-							: '/images/logo-placeholder.png',
-					],
-				],
-				
-				'survey' => isset($survey->id) ? (object) [
-					'id' => optional($survey)->id,
-					'status' => $survey->responses != null
-						? 'Completed'
-						: 'Pending',
-
-					'is_required' => optional($survey)->survey->is_required ?? false,
-				] : null,
-			];
-			
+			return $_sesssion;
 		});
-		
-	 //dd($mentorship_sessions);
 
-		return view('mentor.mentorship-sessions.index', compact('mentorship_sessions'));
+		$mentorship_sessions = $mentorship_sessions->sortBy(function($session) {
+			$statusPriority = [
+				'In_Progress' => 1,
+				'Pending' => 2,
+				'Completed' => 3,
+			];
+			return $statusPriority[$session->status] ?? 999;
+		});
+
+		return view('mentor.mentorship-sessions.index', compact('mentorship_sessions', 'now'));
 	}	
 	
 	public function surveys() 
