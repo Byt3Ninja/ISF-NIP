@@ -92,6 +92,7 @@ class ProgramController extends Controller
         $cycles = $cycles->with(['steps', 'companies', 'mentors'])->orderBy('id', 'desc')
             ->with('organization')
             ->paginate(9)                      // ← paginate 9 per page
+            ->withQueryString()
             ->through(function ($cycle) {      // ← apply mapping AFTER pagination
                 $cycle->join_url = null;
 
