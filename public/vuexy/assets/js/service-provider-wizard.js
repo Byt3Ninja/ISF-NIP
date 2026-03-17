@@ -441,9 +441,7 @@
           }
         },
         city: {
-          validators: {
-            notEmpty: { message: translations[lang].required, }
-          }
+          validators: {}
         },
         about: {
           validators: {

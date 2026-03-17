@@ -163,12 +163,12 @@
    <!-- City -->
   <div class="col-md-6 mb-4">
     <div class="form-group">
-      <label class="form-label" for="city_id">{{ __('admin.City') }} *</label>
+      <label class="form-label" for="city_id">{{ __('admin.District') }}</label>
       <select
         class="form-select select2"
         id="city_id"
         name="city"
-        data-placeholder="{{ __('admin.Select City') }}"
+        data-placeholder="{{ __('admin.Select District') }}"
         data-allow-clear="true"
       >
         <option value=""></option>
@@ -218,7 +218,7 @@
           allowClear: true
         });
         $city.html('<option value=""></option>').select2('destroy').select2({
-          placeholder: '{{ __("admin.Select City") }}',
+          placeholder: '{{ __("admin.Select District") }}',
           allowClear: true
         });
 
@@ -247,7 +247,7 @@
         const $city = $('#city_id');
 
         $city.html('<option value=""></option>').select2('destroy').select2({
-          placeholder: '{{ __("admin.Select City") }}',
+          placeholder: '{{ __("admin.Select District") }}',
           allowClear: true
         });
 
@@ -258,13 +258,13 @@
             let html = '<option value=""></option>';
             $.each(data, (id, name) => html += `<option value="${id}">${name}</option>`);
             $city.html(html).select2('destroy').select2({
-              placeholder: '{{ __("admin.Select City") }}',
+              placeholder: '{{ __("admin.Select District") }}',
               allowClear: true
             });
           })
           .fail(function(xhr, status, error) {
             $('#city_id').html('<option value=""></option>').select2('destroy').select2({
-              placeholder: '{{ __("admin.Select City") }}',
+              placeholder: '{{ __("admin.Select District") }}',
               allowClear: true
             });
             $('#city_id').find('.select2-selection').html('<span class="select2-selection__rendered select2-selection__placeholder">{{ __("admin.Error loading cities") }}</span>');
