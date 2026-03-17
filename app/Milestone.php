@@ -59,13 +59,14 @@ class Milestone extends Model
      */
     public function getCategoryNameAttribute()
     {
+        $l = app()->getLocale();
         $categories = [
-            1 => 'Finance',
-            2 => 'Planning', 
-            3 => 'Design',
-            4 => 'Development',
-            5 => 'Testing',
-            6 => 'Delivery'
+            1 => $l == 'en' ? 'Finance' : 'تمويل',
+            2 => $l == 'en' ? 'Planning' : 'تخطيط', 
+            3 => $l == 'en' ? 'Design' : 'تصميم',
+            4 => $l == 'en' ? 'Development' : 'تطوير',
+            5 => $l == 'en' ? 'Testing' : 'اختبار',
+            6 => $l == 'en' ? 'Delivery' : 'تسليم'
         ];
         
         return $categories[$this->category] ?? $this->category;
