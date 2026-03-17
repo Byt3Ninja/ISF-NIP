@@ -319,7 +319,7 @@
 								<!-- User Information -->
 									<div class="user-info bg-label-light border rounded-3 p-2 mb-4">
 										<div class="d-flex align-items-center">
-											@if( $_user->ableTo('users.edit', $permissions) ) <a href="/dashboard/users/{{ $company?->user?->id }}/edit" class="text-decoration-none"> @endif
+											@if( $_user->ableTo('company.profile_view', $permissions) ) <a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none"> @endif
 												<img
 													src="{{ $company?->user?->image_url ?? '/icons/account.svg' }}"
 													alt="img"
@@ -327,12 +327,12 @@
 													height="40"
 													width="40"
 												/>
-											@if( $_user->ableTo('users.edit', $permissions) )</a> @endif
+											@if( $_user->ableTo('company.profile_view', $permissions) )</a> @endif
 											<div class="flex-grow-1">
-												@if( $_user->ableTo('users.edit', $permissions) ) <a href="/dashboard/users/{{ $company?->user?->id }}/edit" class="text-decoration-none"> @endif
+												@if( $_user->ableTo('company.profile_view', $permissions) ) <a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none"> @endif
 													<h6 class="mb-0 fw-semibold text-dark">{{ $company?->user?->name }}</h6>
 													<small class="text-muted">{{ $company?->user?->title ?: __('cycles.No title') }}</small>
-												@if( $_user->ableTo('users.edit', $permissions) ) </a> @endif
+												@if( $_user->ableTo('company.profile_view', $permissions) ) </a> @endif
 											</div>
 										</div>
 									</div>
