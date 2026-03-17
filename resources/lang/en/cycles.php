@@ -37,6 +37,7 @@ return [
     'Description' => 'Description',
     'Close' => 'Close',
     'Submit' => 'Submit',
+    'Submitting' => 'Submitting',
     'New step data' => 'New step data',
     'Screening type'=> 'Screening type',
     'Choose screening type' => 'Choose screening type',

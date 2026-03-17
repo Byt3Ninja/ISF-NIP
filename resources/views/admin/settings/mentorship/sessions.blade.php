@@ -547,7 +547,7 @@
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
       <div class="modal-content">
-        <form method="post" action="/dashboard/mentorship/modify" enctype="multipart/form-data">
+        <form id="ModifyRequestForm" method="post" action="/dashboard/mentorship/modify" enctype="multipart/form-data">
           <div class="modal-header">
             <h4 class="modal-title">{{ __('cycles.Modify mentorship session') }} </h4>
           </div>
@@ -588,7 +588,7 @@
               {{-- <i class="ti ti-check"></i> --}}
               <span class="">{{ __('cycles.Close') }}</span>
             </div>
-            <button type="submit" class="btn btn-primary ml-1">
+            <button type="submit" class="btn btn-primary ml-1" id="submitModifyRequest">
               {{-- <i class="ti ti-check"></i> --}}
               <span class="">{{ __('cycles.Submit') }}</span>
             </button>
@@ -605,6 +605,7 @@
 
 @section('pagescripts')
   <script>
+    var is_submitting = false;
     $(document).on('click', '.show-passcode', function(e) {
       e.preventDefault();
       let passcode = $(this).data('passcode');
@@ -614,6 +615,17 @@
       alertify.defaults.theme.input = 'form-control';
 
       alertify.alert('Meeting Passcode', `The passcode for this meeting is: <strong>${passcode}</strong>`, function() {});
+    });
+
+    $(document).on('click', '#submitModifyRequest', function(e) {
+      e.preventDefault();
+      if (is_submitting) { return; }
+      else
+      {
+        is_submitting = true;
+        $(this).prop('disabled', true).html('<i class="fas fa-fw fa-sm fa-spinner fa-spin"></i> {{ __("cycles.Submitting") }}...');
+        $('#ModifyRequestForm').submit();
+      }
     });
 
     // Helper function to copy text to clipboard
