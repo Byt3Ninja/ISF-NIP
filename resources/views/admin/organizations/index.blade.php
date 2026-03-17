@@ -83,7 +83,17 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                     </option>
                   </select>
                 </div>
-                <div class="col-lg-2 d-flex justify-content-end">
+                <div class="col-6 col-lg-2">
+                  <select class="form-select" id="sort-select" name="sort">
+                    <option value="newest" {{ request('sort', 'newest') == 'newest' ? 'selected' : '' }}>
+                      {{ __('admin.Newest First') }}
+                    </option>
+                    <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>
+                      {{ __('admin.Oldest First') }}
+                    </option>
+                  </select>
+                </div>
+                <div class="col-lg-auto d-flex justify-content-end">
                   @if ($_user->ableToAny(['organization.wizard.create', 'organization.wizard.store'], $permissions))
                     <a href="{{ route('organization.wizard.create') }}" class="btn btn-primary text-nowrap">
                       <i class="ti ti-plus me-2"></i> {{ __('admin.Add_New') }}
@@ -245,6 +255,9 @@ $colors = ['primary', 'info', 'danger', 'warning'];
       $("#status-form").submit();
     });
     $(document).on("change", "#visibility-select", function(e) {
+      $("#status-form").submit();
+    });
+    $(document).on("change", "#sort-select", function(e) {
       $("#status-form").submit();
     });
   </script>
