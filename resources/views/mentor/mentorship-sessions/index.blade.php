@@ -50,8 +50,8 @@
               <td style="width: 100px;">
                 <a 
                   class="d-flex align-items-center" style="width: 100px;"
-                  @if ($_user->ableTo('users.edit', $permissions) && isset($session->user->id ))
-                    href="/dashboard/users/{{ $session->user->id }}/edit"
+                  @if ($_user->ableTo('company.profile_view', $permissions) && isset($session->user->company->id ))
+                    href="/dashboard/companyProfile/{{ $session->user->company->id }}"
                   @else
                     href="javascript:void(0)"
                   @endif
