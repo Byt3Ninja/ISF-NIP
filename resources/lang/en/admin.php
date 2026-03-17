@@ -3537,4 +3537,6 @@ return [
 	'submitted' => 'Submitted',
 	'no_members_found' => 'No members found.',
 	'sessions_mentorship' => 'Mentorship Sessions',
+	'File size exceeds 5MB' => 'File size exceeds 5MB',
+	'Please select an image file' => 'Please select an image file',
 ];

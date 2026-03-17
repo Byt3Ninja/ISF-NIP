@@ -3594,4 +3594,6 @@ return [
 	'submitted' => 'تم التقديم',
 	'no_members_found' => 'لا يوجد عضوين محددين.',
 	'sessions_mentorship' => 'جلسات التدريب',
+	'File size exceeds 5MB' => 'حجم الملف يتجاوز 5 ميجابايت',
+	'Please select an image file' => 'يرجى اختيار ملف صورة',
 ];
