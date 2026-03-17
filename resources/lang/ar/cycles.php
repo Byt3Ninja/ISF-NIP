@@ -37,6 +37,7 @@ return [
     'Description' => 'الوصف',
     'Close' => 'إغلاق',
     'Submit' => 'حفظ',
+    'Submitting' => 'جاري الحفظ',
     'New step data' => 'معلومات مرحلة جديدة',
     'Screening type'=> 'طريقة اختيار المحكمين',
     'Choose screening type' => 'إختر طريقة المراجعة',
