@@ -238,6 +238,17 @@ class User extends Authenticatable implements MustVerifyEmail
         } elseif( $this->hasRole('registered') ) {
             $orgId = $this->company?->cycledata?->organization_id ?? null;
             $result = $orgId ? [$orgId] : [];
+        } elseif( $this->hasRole('serviceProvider') ) {
+            $serviceProviderId = $this->service_provider?->id;
+            $result = $serviceProviderId
+                ? DB::table('organization_service')
+                    ->join('services', 'services.id', '=', 'organization_service.service_id')
+                    ->where('services.service_provider_id', $serviceProviderId)
+                    ->pluck('organization_service.organization_id')
+                    ->unique()
+                    ->values()
+                    ->toArray()
+                : [];
         } else {
             $result = [];
         }
