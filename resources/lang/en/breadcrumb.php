@@ -168,4 +168,6 @@ return [
     'startup_hub' => 'Startup Hub',
     'edit_profile' => 'Edit Profile',
     'Edit Profile' => 'Edit Profile',
+    'profile_view_user' => 'View Profile',
+    'profile_service_provider' => 'Service Provider Profile',
 ];
