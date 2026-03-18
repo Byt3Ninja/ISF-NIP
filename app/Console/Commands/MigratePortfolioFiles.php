@@ -14,10 +14,17 @@ class MigratePortfolioFiles extends Command
 
     public function handle()
     {
+        // Ensure target directory exists with proper permissions
+        $targetDir = storage_path('app/public/service_providers_portfolio');
+        if (!File::isDirectory($targetDir)) {
+            File::makeDirectory($targetDir, 0775, true);
+        }
+
         $sourcePath = public_path('191014');
         $portfolios = DB::table('service_provider_portfolios')
             ->whereNotNull('media_url')
             ->where('media_url', '!=', '')
+            ->where('media_url', '!=', '0')
             ->get();
 
         if ($portfolios->isEmpty()) {
