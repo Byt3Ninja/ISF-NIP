@@ -951,6 +951,12 @@
         $card.find('.title-input').attr('name', names.title);
         $card.find('.desc-input').attr('name', names.desc);
 
+        // Skip validation for deleted/hidden cards — they still need correct field names
+        // for the backend to process the delete flag, but must not block form submission
+        if ($card.find('.delete-flag').val() === 'true' || !$card.is(':visible')) {
+          return; // continue to next card
+        }
+
         // Media Validation
         fields[names.media] = {
           validators: {

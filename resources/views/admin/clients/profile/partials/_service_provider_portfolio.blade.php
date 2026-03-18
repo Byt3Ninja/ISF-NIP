@@ -50,9 +50,9 @@
                     <div class="upload-area border bg-light-subtle rounded p-6 text-center cursor-pointer">
                       @if($item->media_url)
                         @if($item->media_type === 'video')
-                          <video src="/191014/{{ $item->media_url }}" class="img-fluid rounded" style="max-height: 100px;"></video>
+                          <video src="{{ $item->media_full_url }}" class="img-fluid rounded" style="max-height: 100px;"></video>
                         @else
-                          <img src="/191014/{{ $item->media_url }}" class="img-fluid rounded" style="max-height: 100px;">
+                          <img src="{{ $item->media_full_url }}" class="img-fluid rounded" style="max-height: 100px;">
                         @endif
                         <div class="small mt-1 text-primary">{{ __('admin.change_file') }}</div>
                       @else
@@ -232,15 +232,17 @@
         const $idField = $item.find('input[name*="[id]"]');
         if ($idField.val()) {
           // If it has an ID, hide it and mark for deletion
-          $item.hide().find('.delete-flag').val('true');
-          // Clear inputs to avoid validation errors if they were required
+          $item.find('.delete-flag').val('true');
           $item.find('input[type="text"], textarea').val('');
+          $item.find('.media-input').val('');
+          $item.find('.upload-area').empty();
+          $item.hide();
         } else {
           // If it's a new unsaved item, just remove it from DOM
           $item.remove();
         }
         updateItemOrder();
-        
+
         if (typeof window.rebuildPortfolioValidation === 'function') {
            window.rebuildPortfolioValidation();
         }
