@@ -3538,6 +3538,9 @@ return [
 	'no_service_requests_yet' => 'لا توجد طلبات خدمات حتى الآن.',
 	'request_a_service' => 'طلب خدمة',
 	'Hidden' => 'مخفي',
+	'complete_work_item_details' => 'أكمل تفاصيل عنصر العمل.',
+	'unsupported_file_type_portfolio' => 'نوع ملف غير مدعوم. قم بتحميل PNG، JPG، WEBP، او فيديو MP4.',
+	'file_size_too_large_portfolio' => 'حجم الملف يجب ان يكون 10MB او اقل.',
 
 	// Service Request Actions — Respond (approve / reject)
 	'request_now_in_progress'                    => 'الطلب الآن قيد التنفيذ.',

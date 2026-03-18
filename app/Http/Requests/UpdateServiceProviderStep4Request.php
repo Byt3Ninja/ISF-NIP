@@ -65,6 +65,23 @@ class UpdateServiceProviderStep4Request extends FormRequest
                 'mimes:png,jpg,jpeg,webp,mp4',
                 'max:10240', // 10MB
                 function ($attribute, $value, $fail) {
+                    if (!$value instanceof \Illuminate\Http\UploadedFile) return;
+
+                    // Block dangerous file extensions
+                    $dangerous = ['php','php3','php4','php5','phtml','cgi','sh','bash','bin','pl','htaccess','htpasswd','ksh'];
+                    $ext = strtolower($value->getClientOriginalExtension());
+                    if (in_array($ext, $dangerous)) {
+                        $fail(__('admin.unsupported_file_type_portfolio'));
+                        return;
+                    }
+
+                    // Verify actual MIME type (prevents renamed malicious files)
+                    $allowedMimes = ['image/png', 'image/jpeg', 'image/webp', 'video/mp4'];
+                    if (!in_array($value->getMimeType(), $allowedMimes)) {
+                        $fail(__('admin.unsupported_file_type_portfolio'));
+                    }
+                },
+                function ($attribute, $value, $fail) {
                     $index = explode('.', $attribute)[1];
                     $item = $this->input("portfolio.{$index}");
                     if (($item['delete'] ?? 'false') === 'true') return;

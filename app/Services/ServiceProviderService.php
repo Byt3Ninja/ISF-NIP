@@ -173,7 +173,7 @@ class ServiceProviderService
 
                 // Handle Media Upload
                 if (isset($item['media']) && $item['media'] instanceof \Illuminate\Http\UploadedFile) {
-                    $itemData['media_url'] = $item['media']->store('service_providers_portfolio', ['disk' => 'public_uploads']);
+                    $itemData['media_url'] = $item['media']->store('service_providers_portfolio', 'public');
                     $itemData['media_type'] = str_starts_with($item['media']->getMimeType(), 'video') ? 'video' : 'image';
                 }
 
