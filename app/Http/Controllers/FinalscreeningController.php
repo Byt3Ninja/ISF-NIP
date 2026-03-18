@@ -215,11 +215,17 @@ class FinalscreeningController extends Controller
 			abort(404);
 		}
 
-		$form = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
-			return $q->whereHas('cycle', function ($query) use ($orgIds) {
-				$query->whereIn('organization_id', $orgIds);
-			});
-		})->where('cycle_id', $cstep->cycle_id)->where('stype', 1)->where('arr', $cstep->arr - 1)->first();
+		// Determine the selected form: use form_id if set, else fall back to position-based lookup
+		if ($cstep->form_id) {
+			$form = \App\BuilderForm::find($cstep->form_id);
+		} else {
+			$formStep = Step::where('cycle_id', $cstep->cycle_id)->where('stype', 1)->where('arr', $cstep->arr - 1)->first();
+			$form = $formStep && $formStep->data ? \App\BuilderForm::find($formStep->data) : null;
+		}
+
+		// Get all available forms for the organization (for the form selection dropdown)
+		$forms = \App\BuilderForm::where('organization_id', $cstep->cycle->organization_id)->get();
+
 		$judgers_count = 0;
 		$cList = collect(json_decode($cstep?->list, true) ?? []);
 		if( in_array( $cstep?->data, ['onetoall', 'grouptoall']) ) { $judgers_count = $cList->count(); }
@@ -271,11 +277,21 @@ class FinalscreeningController extends Controller
 		$judgingPanels = [];
 		if ($cstep && isset($judgers_list) && count($judgers_list) > 0) {
 			foreach ($judgers_list as $panelId => $panelData) {
+				$screening = \App\Screening::where('step_id', $cstep->id)->where('panel', $panelId)->first();
 				$panelEntry = [
 					'judges' => (array) ($panelData['judgers'] ?? []),
 					'companies' => (array) ($panelData['companies'] ?? []),
 					'session' => []
 				];
+				if ($screening && $screening->session_date) {
+					$panelEntry['session'] = [
+						'date' => $screening->session_date,
+						'start_time' => $screening->start_time ? substr($screening->start_time, 0, 5) : '',
+						'end_time' => $screening->end_time ? substr($screening->end_time, 0, 5) : '',
+						'meeting_link' => $screening->meeting_link,
+						'meeting_password' => $screening->meeting_password,
+					];
+				}
 				$judgingPanels[] = $panelEntry;
 			}
 		}
@@ -284,7 +300,7 @@ class FinalscreeningController extends Controller
 			$judgingPanels = [['judges' => [], 'companies' => [], 'session' => []]];
 		}
 
-		return view('admin.settings.final.show', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'steps', 'id', 'svgs', 'evaluationForm', 'judgingPanels'));
+		return view('admin.settings.final.show', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'forms', 'steps', 'id', 'svgs', 'evaluationForm', 'judgingPanels'));
 	}
 
 	public function update(Request $request)

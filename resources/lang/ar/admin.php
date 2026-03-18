@@ -3599,4 +3599,13 @@ return [
 	'sessions_mentorship' => 'جلسات التدريب',
 	'File size exceeds 5MB' => 'حجم الملف يتجاوز 5 ميجابايت',
 	'Please select an image file' => 'يرجى اختيار ملف صورة',
+
+	// Screening - Form Selection & Meeting
+	'select_form' => 'اختر النموذج',
+	'form_updated_successfully' => 'تم تحديث النموذج بنجاح',
+	'meeting_password' => 'كلمة مرور الاجتماع',
+	'auto_generated' => 'يتم إنشاؤه تلقائيًا',
+	'copy_meeting_link' => 'نسخ رابط الاجتماع',
+	'copy_meeting_password' => 'نسخ كلمة مرور الاجتماع',
+	'copied_to_clipboard' => 'تم النسخ',
 ];
