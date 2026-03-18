@@ -86,29 +86,35 @@ class AppServiceProvider extends ServiceProvider
                     $organization_ids = $organization_id ? [$organization_id] : [];
                 }
             }
+            $view->with(['l' => $l, 'organization_id' => $organization_id, 'organization_ids' => $organization_ids, '_user' => $_user, 'permissions' => $permissions, '_settings' => $settings]);
+        });
+
+        view()->composer('partials.menu', function ($view) {
             $pendingRequestsCount = 0;
-            if (auth()->check() && $_user->hasRole('serviceProvider')) {
-                if ($_user->service_provider) {
-                    $provider_id = $_user->service_provider->id;
-                    $pendingRequestsCount = \App\ServicesRequests::whereNull('approved')
-                        ->whereHas('service', function ($q) use ($provider_id) {
-                            $q->where('service_provider_id', $provider_id);
-                        })->count();
-                } else {
-                    $orgIds = $_user->organizations_ids;
-                    $pendingRequestsCount = \App\ServicesRequests::whereNull('approved')
-                        ->whereHas('service', function ($q) use ($orgIds) {
-                            $q->whereExists(function ($sub) use ($orgIds) {
-                                $sub->select(\DB::raw(1))
-                                    ->from('organization_service')
-                                    ->whereColumn('organization_service.service_id', 'services.id')
-                                    ->whereIn('organization_service.organization_id', $orgIds);
-                            });
-                        })->count();
+            if (auth()->check()) {
+                $_user = auth()->user();
+                if ($_user->hasRole('serviceProvider')) {
+                    if ($_user->service_provider) {
+                        $provider_id = $_user->service_provider->id;
+                        $pendingRequestsCount = \App\ServicesRequests::whereNull('approved')
+                            ->whereHas('service', function ($q) use ($provider_id) {
+                                $q->where('service_provider_id', $provider_id);
+                            })->count();
+                    } else {
+                        $orgIds = $_user->organizations_ids;
+                        $pendingRequestsCount = \App\ServicesRequests::whereNull('approved')
+                            ->whereHas('service', function ($q) use ($orgIds) {
+                                $q->whereExists(function ($sub) use ($orgIds) {
+                                    $sub->select(\DB::raw(1))
+                                        ->from('organization_service')
+                                        ->whereColumn('organization_service.service_id', 'services.id')
+                                        ->whereIn('organization_service.organization_id', $orgIds);
+                                });
+                            })->count();
+                    }
                 }
             }
-
-            $view->with(['l' => $l, 'organization_id' => $organization_id, 'organization_ids' => $organization_ids, '_user' => $_user, 'permissions' => $permissions, '_settings' => $settings, 'pendingRequestsCount' => $pendingRequestsCount]);
+            $view->with('pendingRequestsCount', $pendingRequestsCount);
         });
 
         // Breadcrumb view composer
