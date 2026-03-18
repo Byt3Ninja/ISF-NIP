@@ -306,9 +306,6 @@
                   @foreach($slideItems as $item)
                   @php
                     $mediaSrc = $item->media_url;
-                    if ($item->media_type !== 'video' && !str_starts_with($mediaSrc, 'http')) {
-                      $mediaSrc = '/191014/' . $mediaSrc;
-                    }
                   @endphp
                   <div class="col-lg-4 col-md-6">
 
