@@ -84,6 +84,7 @@
                 </div>
               </div>
 
+              @if (!$_user->hasRole('registered'))
               <div class="col-md-6 col-lg-2">
                 <select class="form-select select2" name="org-id" id="organization-filter" data-placeholder="{{ __('admin.All_Organizations') }}">
                   <option value="all">{{ __('admin.All_Organizations') }}</option>
@@ -100,6 +101,7 @@
                   <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>{{ __('admin.Inactive') }}</option>
                 </select>
               </div>
+              @endif
 
               @if ($_user->hasRole('registered'))
                 <div class="col-md-6 col-lg-3">
@@ -116,7 +118,7 @@
 
               <div class="col-md-6 col-lg-2">
                 <div class="d-flex justify-content-lg-end gap-2">
-                  @if(request('search') || request('status') || request('org-id'))
+                  @if(request('search') || request('rating') || request('status') || request('org-id'))
                     <a href="{{ route('services.index') }}" class="btn bg-card border btn-icon">
                       <i class="ti ti-refresh"></i>
                     </a>
@@ -297,7 +299,7 @@
       @else
         @include(
           'includes.no-result',
-          ['message' => request('search') || request('status') || request('org-id') ? __('admin.noResultsMatch') :__('admin.No_Data_Found')]
+          ['message' => request('search') || request('rating') || request('status') || request('org-id') ? __('admin.noResultsMatch') :__('admin.No_Data_Found')]
         )
       @endif
     </div>
