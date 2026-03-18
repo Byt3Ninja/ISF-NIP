@@ -533,16 +533,6 @@
           <div>{{ __('admin.Services') }}</div>
         </a>
       </li>
-      @php
-        $pendingRequestsCount = 0;
-        if($_user->hasRole('serviceProvider') && $_user->service_provider) {
-            $provider_id = $_user->service_provider->id;
-            $pendingRequestsCount = \App\ServicesRequests::whereNull('approved')
-                ->whereHas('service', function ($q) use ($provider_id) {
-                    $q->where('service_provider_id', $provider_id);
-                })->count();
-        }
-      @endphp
       @if( $_user->ableToAny(['service_requests.list_all', 'service_requests.list_archived'], $permissions) )
       <li
         class="{{ Request::is('dashboard/requests/all') ? 'active' : '' }} menu-item">
