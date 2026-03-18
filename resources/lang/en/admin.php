@@ -3542,4 +3542,13 @@ return [
 	'sessions_mentorship' => 'Mentorship Sessions',
 	'File size exceeds 5MB' => 'File size exceeds 5MB',
 	'Please select an image file' => 'Please select an image file',
+
+	// Screening - Form Selection & Meeting
+	'select_form' => 'Select Form',
+	'form_updated_successfully' => 'Form updated successfully',
+	'meeting_password' => 'Meeting Password',
+	'auto_generated' => 'Auto-generated',
+	'copy_meeting_link' => 'Copy Meeting Link',
+	'copy_meeting_password' => 'Copy Meeting Password',
+	'copied_to_clipboard' => 'Copied to clipboard',
 ];

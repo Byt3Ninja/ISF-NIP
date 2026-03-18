@@ -80,11 +80,6 @@
                     <div class="invalid-feedback error-session_date"></div>
                   </div>
                   <div class="col-md-6 mb-3">
-                    <label class="form-label">{{ __('admin.Meeting Link') }}</label>
-                    <input type="url" class="form-control" name="panels[{{ $index }}][meeting_link]" value="{{ $panel['session']['meeting_link'] ?? '' }}" placeholder="https://meet.google.com/...">
-                    <div class="invalid-feedback error-meeting_link"></div>
-                  </div>
-                  <div class="col-md-6 mb-3">
                     <label class="form-label">{{ __('admin.Start Time') }}</label>
                     <input type="text" class="form-control session-time" name="panels[{{ $index }}][start_time]" value="{{ $panel['session']['start_time'] ?? '' }}" placeholder="HH:MM">
                     <div class="invalid-feedback error-start_time"></div>
@@ -93,6 +88,24 @@
                     <label class="form-label">{{ __('admin.End Time') }}</label>
                     <input type="text" class="form-control session-time" name="panels[{{ $index }}][end_time]" value="{{ $panel['session']['end_time'] ?? '' }}" placeholder="HH:MM">
                     <div class="invalid-feedback error-end_time"></div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">{{ __('admin.Meeting Link') }}</label>
+                    <div class="input-group">
+                      <input type="url" class="form-control meeting-link-input" value="{{ $panel['session']['meeting_link'] ?? '' }}" placeholder="{{ __('admin.auto_generated') }}" readonly>
+                      <button type="button" class="btn btn-outline-secondary copy-meeting-link" title="{{ __('admin.copy_meeting_link') }}" style="{{ empty($panel['session']['meeting_link']) ? 'display:none' : '' }}">
+                        <i class="ti ti-copy"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">{{ __('admin.meeting_password') }}</label>
+                    <div class="input-group">
+                      <input type="text" class="form-control meeting-password-input" value="{{ $panel['session']['meeting_password'] ?? '' }}" placeholder="{{ __('admin.auto_generated') }}" readonly>
+                      <button type="button" class="btn btn-outline-secondary copy-meeting-password" title="{{ __('admin.copy_meeting_password') }}" style="{{ empty($panel['session']['meeting_password']) ? 'display:none' : '' }}">
+                        <i class="ti ti-copy"></i>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -198,6 +211,8 @@ $(function () {
     $clone.find('.accordion-collapse').removeClass('show').attr('id', `panel-${idx}`);
     $clone.find('.session-toggle').prop('checked', false).attr('id', `session-toggle-${idx}`);
     $clone.find('.session-inputs').hide();
+    $clone.find('.meeting-link-input, .meeting-password-input').val('');
+    $clone.find('.copy-meeting-link, .copy-meeting-password').hide();
     
     if (!$clone.find('.remove-panel').length) {
       $clone.find('.accordion-header').append('<button type="button" class="btn btn-icon btn-sm btn-outline-danger ms-2 me-4 remove-panel"><i class="ti ti-trash"></i></button>');
@@ -270,7 +285,6 @@ $(function () {
       
       const fields = {
         session_date: { msg: '{{ __('admin.date_required') }}' },
-        meeting_link: { msg: '{{ __('admin.meeting_link_required') }}', url: true },
         start_time: { msg: '{{ __('admin.start_time_required') }}' },
         end_time: { msg: '{{ __('admin.end_time_required') }}' }
       };
@@ -330,75 +344,129 @@ $(function () {
   
       if (d.data) {
         updateStepAssignees(d.data || []);
+
+        // Update meeting link/password fields from auto-generated data
+        (d.data || []).forEach((panel, idx) => {
+          const $panel = $('.accordion-item').eq(idx);
+          if (panel.meeting_link) {
+            $panel.find('.meeting-link-input').val(panel.meeting_link);
+            $panel.find('.copy-meeting-link').show();
+          }
+          if (panel.meeting_password) {
+            $panel.find('.meeting-password-input').val(panel.meeting_password);
+            $panel.find('.copy-meeting-password').show();
+          }
+        });
       }
     })
     .catch(e => releaseFailureAlert({ title: '{{ __('admin.error') }}', message: e?.message || '{{ __('admin.unexpected_error') }}' }));
   });
   
+  const maxVisible = 10;
+  const locale = '{{ $l ?? "en" }}';
+
+  const renderBadge = (id, name, imgUrl, href, iconClass) => `
+    <a href="${href}" class="badge text-dark bg-card border px-3 py-2 rounded-pill d-flex align-items-center">
+      <div class="avatar avatar-xs me-2">
+        ${imgUrl
+          ? `<img src="${imgUrl}" class="rounded-circle object-fit-cover">`
+          : `<div class="avatar-initial rounded-circle bg-label-secondary"><i class="${iconClass} ti-xs"></i></div>`
+        }
+      </div>
+      ${name}
+    </a>`;
+
+  const renderOverflowBadge = (hiddenNames, count) => {
+    const tooltip = hiddenNames.join('\n');
+    return `<span class="badge bg-label-primary px-3 py-2 rounded-pill fw-semibold" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-wide" title="${tooltip}">+${count}</span>`;
+  };
+
   const updateStepAssignees = (newAssignees) => {
     const assignedJudgesContainer = $('#assigned-judges');
     const assignedCompaniesContainer = $('#assigned-companies');
-  
+
     assignedJudgesContainer.empty();
     assignedCompaniesContainer.empty();
-  
-    const allJudgeIds = new Set();
-    const allCompanyIds = new Set();
-  
+
+    const allJudgeIds = [...new Set()];
+    const allCompanyIds = [...new Set()];
+
     newAssignees.forEach(panel => {
-      (panel.judges || []).forEach(j => allJudgeIds.add(Number(j)));
-      (panel.companies || []).forEach(c => allCompanyIds.add(Number(c)));
+      (panel.judges || []).forEach(j => { const id = Number(j); if (!allJudgeIds.includes(id)) allJudgeIds.push(id); });
+      (panel.companies || []).forEach(c => { const id = Number(c); if (!allCompanyIds.includes(id)) allCompanyIds.push(id); });
     });
-  
-    // Judges
-    allJudgeIds.forEach(judgeId => {
+
+    // Judges: show up to maxVisible, then +n
+    const visibleJudges = allJudgeIds.slice(0, maxVisible);
+    const hiddenJudges = allJudgeIds.slice(maxVisible);
+
+    visibleJudges.forEach(judgeId => {
       const judge = judgesMap[judgeId];
       if (!judge) return;
-  
-      assignedJudgesContainer.append(`
-        <a href="/dashboard/users/${judge.id}/edit"
-           class="badge text-dark bg-card border px-3 py-2 rounded-pill d-flex align-items-center">
-          <div class="avatar avatar-xs me-2">
-            ${
-              judge.img_url
-                ? `<img src="${judge.img_url}" class="rounded-circle object-fit-cover">`
-                : `<div class="avatar-initial rounded-circle bg-label-secondary">
-                     <i class="ti ti-user ti-xs"></i>
-                   </div>`
-            }
-          </div>
-          ${judge.first_name_en} ${judge.last_name_en}
-        </a>
-      `);
+      const name = (judge['first_name_' + locale] || judge.first_name_en) + ' ' + (judge['last_name_' + locale] || judge.last_name_en);
+      assignedJudgesContainer.append(renderBadge(judge.id, name, judge.img_url, `/dashboard/users/${judge.id}/edit`, 'ti ti-user'));
     });
-  
-    // Companies
-    allCompanyIds.forEach(companyId => {
+
+    if (hiddenJudges.length > 0) {
+      const names = hiddenJudges.map(id => {
+        const j = judgesMap[id];
+        return j ? ((j['first_name_' + locale] || j.first_name_en) + ' ' + (j['last_name_' + locale] || j.last_name_en)) : '';
+      }).filter(Boolean);
+      assignedJudgesContainer.append(renderOverflowBadge(names, hiddenJudges.length));
+    }
+
+    // Companies: show up to maxVisible, then +n
+    const visibleCompanies = allCompanyIds.slice(0, maxVisible);
+    const hiddenCompanies = allCompanyIds.slice(maxVisible);
+
+    visibleCompanies.forEach(companyId => {
       const company = companiesMap[companyId];
       if (!company) return;
-  
-      assignedCompaniesContainer.append(`
-        <a href="/dashboard/companyProfile/${company.id}"
-           class="badge text-dark bg-card border px-3 py-2 rounded-pill d-flex align-items-center">
-          <div class="avatar avatar-xs me-2">
-            ${
-              company.logo
-                ? `<img src="${company.logo}" class="rounded-circle object-fit-cover">`
-                : `<div class="avatar-initial rounded-circle bg-label-secondary">
-                     <i class="ti ti-building-skyscraper ti-xs"></i>
-                   </div>`
-            }
-          </div>
-          ${company.name_en}
-        </a>
-      `);
+      const name = company['name_' + locale] || company.name_en;
+      assignedCompaniesContainer.append(renderBadge(company.id, name, company.logo, `/dashboard/companyProfile/${company.id}`, 'ti ti-building-skyscraper'));
     });
+
+    if (hiddenCompanies.length > 0) {
+      const names = hiddenCompanies.map(id => {
+        const c = companiesMap[id];
+        return c ? (c['name_' + locale] || c.name_en) : '';
+      }).filter(Boolean);
+      assignedCompaniesContainer.append(renderOverflowBadge(names, hiddenCompanies.length));
+    }
+
+    // Reinitialize tooltips for dynamically added elements
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
   };
   
   $(document).on('input', '.session-inputs input', function() {
     $(this).removeClass('is-invalid');
-    const field = $(this).attr('name').match(/\[([^\]]+)\]$/)[1];
-    $(this).closest('.accordion-item').find(`.error-${field}`).text('');
+    const nameAttr = $(this).attr('name');
+    if (nameAttr) {
+      const match = nameAttr.match(/\[([^\]]+)\]$/);
+      if (match) {
+        $(this).closest('.accordion-item').find(`.error-${match[1]}`).text('');
+      }
+    }
+  });
+
+  // Copy Meeting Link
+  $(document).on('click', '.copy-meeting-link', function() {
+    const text = $(this).closest('.input-group').find('.meeting-link-input').val();
+    if (text) {
+      navigator.clipboard.writeText(text).then(() => {
+        releaseSuccessAlert({ title: '{{ __("admin.success") }}', message: '{{ __("admin.copied_to_clipboard") }}' });
+      });
+    }
+  });
+
+  // Copy Meeting Password
+  $(document).on('click', '.copy-meeting-password', function() {
+    const text = $(this).closest('.input-group').find('.meeting-password-input').val();
+    if (text) {
+      navigator.clipboard.writeText(text).then(() => {
+        releaseSuccessAlert({ title: '{{ __("admin.success") }}', message: '{{ __("admin.copied_to_clipboard") }}' });
+      });
+    }
   });
 });
 </script>

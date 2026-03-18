@@ -61,6 +61,7 @@ class Permissions
         'users/search',
         'cycles.completion_status_check',
         'trainings.time_tracking',
+        'screening.update_step_form',
         'services_providers.edit_profile',
         'services_providers.clients.*',
     ];

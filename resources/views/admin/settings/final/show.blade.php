@@ -155,23 +155,26 @@ $pills = [
                 </div>
               </div>
 
-              @if (isset($form->id))
-                <div class="mb-3 px-3 py-2 bg-card rounded-2 border border-warning">
-                  <a href="{{ route('forms.render_view', $form->id) }}" class="d-flex align-items-start gap-3">
+              <div class="mb-3 px-3 py-2 bg-card rounded-2 border border-warning">
+                <div class="d-flex align-items-start gap-3">
                   <div class="avatar">
-                      <div class="avatar-initial rounded-circle bg-label-warning">
-                        <i class="ti ti-file"></i>
-                      </div>
+                    <div class="avatar-initial rounded-circle bg-label-warning">
+                      <i class="ti ti-file"></i>
                     </div>
-                    <div class="flex-grow-1">
-                      <div class="text-secondary small mb-1">{{ __('builder.Form') }}</div>
-                      <div class="text-warning fw-semibold">
-                        {!! $form->title ?? __('cycles.NoForm') !!}
-                      </div>
-                    </div>
-                  </a>
+                  </div>
+                  <div class="flex-grow-1">
+                    <div class="text-secondary small mb-1">{{ __('builder.Form') }}</div>
+                    <select id="step-form-select" class="form-select" data-step-id="{{ $cstep->id }}">
+                      <option value="">{{ __('admin.select_form') }}</option>
+                      @foreach($forms as $f)
+                        <option value="{{ $f->id }}" @selected($form && $form->id == $f->id)>
+                          {{ $f->form_name }}
+                        </option>
+                      @endforeach
+                    </select>
+                  </div>
                 </div>
-              @endif
+              </div>
             </div>
 
             <!-- Judges -->
@@ -184,20 +187,23 @@ $pills = [
               <div class="p-3 bg-light-subtle rounded-2 border">
                 <div id="assigned-judges" class="d-flex flex-wrap gap-2">
                   @php
+                    $maxVisible = 10;
                     $allJudges = collect($judgers_list ?? [])
                         ->pluck('judgers')
                         ->flatten()
                         ->merge($judgersList ?? [])
                         ->unique()
                         ->filter();
+                    $visibleJudges = $allJudges->take($maxVisible);
+                    $hiddenJudges = $allJudges->slice($maxVisible);
                   @endphp
 
-                  @forelse ($allJudges as $judgeId)
+                  @forelse ($visibleJudges as $judgeId)
                     @php $judge = $judges->find($judgeId); @endphp
-                    
+
                     @if ($judge)
-                      <a 
-                        href="/dashboard/users/{{ $judge->id }}/edit" 
+                      <a
+                        href="/dashboard/users/{{ $judge->id }}/edit"
                         class="badge text-dark bg-card border px-3 py-2 rounded-pill d-flex align-items-center"
                       >
                         <div class="avatar avatar-xs me-2">
@@ -218,6 +224,22 @@ $pills = [
                       {{ __('admin.no_judges_assigned') }}
                     </span>
                   @endforelse
+
+                  @if ($hiddenJudges->count() > 0)
+                    @php
+                      $hiddenJudgeNames = $hiddenJudges->map(fn($jid) => $judges->find($jid))
+                        ->filter()
+                        ->map(fn($j) => $j->{'first_name_'.$l} . ' ' . $j->{'last_name_'.$l})
+                        ->implode("\n");
+                    @endphp
+                    <span
+                      class="badge bg-label-primary px-3 py-2 rounded-pill fw-semibold"
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="top"
+                      data-bs-custom-class="tooltip-wide"
+                      title="{{ $hiddenJudgeNames }}"
+                    >+{{ $hiddenJudges->count() }}</span>
+                  @endif
                 </div>
               </div>
             </div>
@@ -243,14 +265,16 @@ $pills = [
                         ->filter();
 
                     $companiesById = $companies->keyBy('id');
+                    $visibleCompanies = $allCompanies->take($maxVisible);
+                    $hiddenCompanies = $allCompanies->slice($maxVisible);
                   @endphp
 
-                  @forelse ($allCompanies as $companyId)
+                  @forelse ($visibleCompanies as $companyId)
                     @php $company = $companiesById[$companyId] ?? null; @endphp
 
                     @if ($company)
-                      <a 
-                        href="/dashboard/companyProfile/{{ $company->id }}" 
+                      <a
+                        href="/dashboard/companyProfile/{{ $company->id }}"
                         class="badge text-dark bg-card border px-3 py-2 rounded-pill d-flex align-items-center"
                       >
                         <div class="avatar avatar-xs me-2">
@@ -271,6 +295,22 @@ $pills = [
                       {{ __('admin.no_startups_assigned') }}
                     </span>
                   @endforelse
+
+                  @if ($hiddenCompanies->count() > 0)
+                    @php
+                      $hiddenCompanyNames = $hiddenCompanies->map(fn($cid) => $companiesById[$cid] ?? null)
+                        ->filter()
+                        ->map(fn($c) => $c->{'name_'.$l})
+                        ->implode("\n");
+                    @endphp
+                    <span
+                      class="badge bg-label-primary px-3 py-2 rounded-pill fw-semibold"
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="top"
+                      data-bs-custom-class="tooltip-wide"
+                      title="{{ $hiddenCompanyNames }}"
+                    >+{{ $hiddenCompanies->count() }}</span>
+                  @endif
                 </div>
               </div>
             </div>
@@ -617,6 +657,28 @@ $pills = [
           }
         });
       });
+      // Form selection change handler
+      $('#step-form-select').on('change', function() {
+        const stepId = $(this).data('step-id');
+        const formId = $(this).val();
+        $.ajax({
+          url: '{{ route("screening.update_step_form") }}',
+          type: 'POST',
+          headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+          data: { step_id: stepId, form_id: formId || null },
+          success: function(response) {
+            if (response.success) {
+              releaseSuccessAlert({ title: '{{ __("admin.success") }}', message: response.message });
+            }
+          },
+          error: function(xhr) {
+            releaseFailureAlert({ title: '{{ __("admin.Error") }}', message: xhr.responseJSON?.message || '{{ __("admin.unexpected_error") }}' });
+          }
+        });
+      });
+
+      // Initialize tooltips
+      document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
     });
   </script>
 @stop

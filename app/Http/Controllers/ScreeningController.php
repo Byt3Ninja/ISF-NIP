@@ -19,6 +19,7 @@ use App\ScreeningEvaluationCriteria;
 use App\ScreeningEvaluationCustomFields;
 use App\ScreeningEvaluationFieldsValues;
 use App\ScreeningEvaluationResults;
+use App\Factories\OnlineMeetingFactory;
 use App\Services\WhatsAppService;
 use App\Step;
 use App\User;
@@ -234,11 +235,17 @@ class ScreeningController extends Controller
 			abort(404);
 		}
 
-		$form = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
-			return $q->whereHas('cycle', function ($query) use ($orgIds) {
-				$query->whereIn('organization_id', $orgIds);
-			});
-		})->where('cycle_id', $cstep->cycle_id)->where('stype', 1)->where('arr', $cstep->arr - 1)->first();
+		// Determine the selected form: use form_id if set, else fall back to position-based lookup
+		if ($cstep->form_id) {
+			$form = \App\BuilderForm::find($cstep->form_id);
+		} else {
+			$formStep = Step::where('cycle_id', $cstep->cycle_id)->where('stype', 1)->where('arr', $cstep->arr - 1)->first();
+			$form = $formStep && $formStep->data ? \App\BuilderForm::find($formStep->data) : null;
+		}
+
+		// Get all available forms for the organization (for the form selection dropdown)
+		$forms = \App\BuilderForm::where('organization_id', $cstep->cycle->organization_id)->get();
+
 		$judgers_count = 0;
 		$cList = collect(json_decode($cstep?->list, true) ?? []);
 		if( in_array( $cstep?->data, ['onetoall', 'grouptoall']) ) { $judgers_count = $cList->count(); }
@@ -291,7 +298,8 @@ class ScreeningController extends Controller
                         'date' => $screening->session_date,
                         'start_time' => $screening->start_time ? substr($screening->start_time, 0, 5) : '',
                         'end_time' => $screening->end_time ? substr($screening->end_time, 0, 5) : '',
-                        'meeting_link' => $screening->meeting_link
+                        'meeting_link' => $screening->meeting_link,
+                        'meeting_password' => $screening->meeting_password,
                     ];
                 }
                 $judgingPanels[] = $panelEntry;
@@ -302,7 +310,22 @@ class ScreeningController extends Controller
             $judgingPanels = [['judges' => [], 'companies' => [], 'session' => []]];
         }
 
-		return view('admin.settings.screening.show', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'steps', 'id', 'svgs', 'evaluationForm', 'judgingPanels'));
+		return view('admin.settings.screening.show', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'forms', 'steps', 'id', 'svgs', 'evaluationForm', 'judgingPanels'));
+	}
+
+	public function updateStepForm(Request $request)
+	{
+		$request->validate([
+			'step_id' => 'required|exists:steps,id',
+			'form_id' => 'nullable|exists:builder_forms,id',
+		]);
+
+		Step::where('id', $request->step_id)->update(['form_id' => $request->form_id]);
+
+		return response()->json([
+			'success' => true,
+			'message' => __('admin.form_updated_successfully'),
+		]);
 	}
 
 	public function update(Request $request)
@@ -446,13 +469,13 @@ class ScreeningController extends Controller
 			'panels.*.judges' => 'required|array',
 			'panels.*.companies' => 'required|array',
 			'panels.*.session_date' => 'nullable|date',
-			'panels.*.meeting_link' => 'nullable|url',
 			'panels.*.start_time' => 'nullable',
 			'panels.*.end_time' => 'nullable',
 		]);
 
 		$stepId = $request->step;
 		$panels = $request->panels ?? [];
+		$step = Step::with('cycle.organization')->find($stepId);
 
 		// Update Step list (judges mapping)
 		$stepList = [];
@@ -470,6 +493,42 @@ class ScreeningController extends Controller
 			$judgeIds = array_unique(array_map('intval', $panel['judges']));
 			$companyIds = array_unique(array_map('intval', $panel['companies']));
 
+			// Auto-generate meeting link if session is scheduled
+			$meetingLink = null;
+			$meetingPassword = null;
+			$zoomId = null;
+			$startUrl = null;
+
+			if (!empty($panel['session_date']) && !empty($panel['start_time'])) {
+				try {
+					$startDateTime = $panel['session_date'] . ' ' . $panel['start_time'];
+					$duration = 60;
+					if (!empty($panel['end_time'])) {
+						$start = \Carbon\Carbon::parse($startDateTime);
+						$end = \Carbon\Carbon::parse($panel['session_date'] . ' ' . $panel['end_time']);
+						$duration = max($start->diffInMinutes($end), 30);
+					}
+
+					$meetingService = OnlineMeetingFactory::create();
+					$meetingResult = $meetingService->createMeeting([
+						'topic' => 'Screening Panel #' . $panelNumber . ' - ' . ($step->title ?? 'Screening'),
+						'start_time' => $startDateTime,
+						'duration' => $duration,
+						'host_video' => 1,
+						'participant_video' => 1,
+					]);
+
+					if (!empty($meetingResult['success']) && !empty($meetingResult['data'])) {
+						$meetingLink = $meetingResult['data']['join_url'] ?? null;
+						$meetingPassword = $meetingResult['data']['passcode'] ?? null;
+						$zoomId = $meetingResult['data']['id'] ?? null;
+						$startUrl = $meetingResult['data']['start_url'] ?? null;
+					}
+				} catch (\Exception $e) {
+					Log::warning("Failed to auto-generate meeting for panel {$panelNumber}, step {$stepId}: " . $e->getMessage());
+				}
+			}
+
 			foreach ($judgeIds as $judgeId) {
 				Screening::create([
 					'step_id' => $stepId,
@@ -477,14 +536,20 @@ class ScreeningController extends Controller
 					'panel' => $panelNumber,
 					'users' => $companyIds,
 					'session_date' => $panel['session_date'] ?? null,
-					'meeting_link' => $panel['meeting_link'] ?? null,
+					'meeting_link' => $meetingLink,
+					'meeting_password' => $meetingPassword,
+					'zoom_id' => $zoomId,
+					'start_url' => $startUrl,
 					'start_time' => $panel['start_time'] ?? null,
 					'end_time' => $panel['end_time'] ?? null,
 				]);
 			}
 
+			// Add meeting data to panels response
+			$panels[$index]['meeting_link'] = $meetingLink;
+			$panels[$index]['meeting_password'] = $meetingPassword;
+
 			// Sync to Finalscreening table if step type is 5 (Final Screening)
-			$step = Step::find($stepId);
 			if ($step && $step->stype == 5) {
 				foreach ($companyIds as $companyId) {
 					// We use updateOrCreate to ensure judges are updated if they changed
