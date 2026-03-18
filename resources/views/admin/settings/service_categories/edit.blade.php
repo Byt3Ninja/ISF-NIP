@@ -51,9 +51,10 @@
                                     @endphp
                                     <div class="mb-3 {{ $isSingleOrg ? 'd-none' : '' }}">
                                         <label for="organization_id" class="form-label fw-bold">{{ __('cycles.Select_Organization')}}</label>
-                                        <select required class="form-select" id="organization_id" name="organization_id" data-placeholder="{{ __('cycles.Select_Organization') }}">
+                                        <select {{ $authUser->hasRole('Admin') ? '' : 'required' }} class="form-select" id="organization_id" name="organization_id" data-placeholder="{{ __('cycles.Select_Organization') }}">
                                             @if( $showOrgDropdown ) <option disabled value="">{{ __('cycles.Select_Organization') }}</option> @endif
                                             @if($authUser->hasRole('Admin'))
+                                                <option {{ is_null($serviceCategory->organization_id) ? 'selected' : '' }} value="all">{{ __('admin.All_Organizations') }}</option>
                                                 @foreach( \App\Organization::all() as $org )
                                                     <option {{ $org->id == $serviceCategory->organization_id ? 'selected' : '' }} value="{{ $org->id }}">{{ $org->{'name_' . app()->getLocale()} }}</option>
                                                 @endforeach

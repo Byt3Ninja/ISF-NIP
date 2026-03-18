@@ -91,9 +91,13 @@
               <td>{{ $key + 1 }}</td>
 
               <td class="text-center">
-                <a href="{{ url('dashboard/organizations/'.$category->organization_id.'/edit') }}">
-                  {{ optional($category->organization)->{'name_'.$l} ?? '-' }}
-                </a>
+                @if($category->organization_id)
+                  <a href="{{ url('dashboard/organizations/'.$category->organization_id.'/edit') }}">
+                    {{ optional($category->organization)->{'name_'.$l} ?? '-' }}
+                  </a>
+                @else
+                  <span class="badge bg-label-primary">{{ __('admin.All_Organizations') }}</span>
+                @endif
               </td>
 
               <td class="text-center">{{ $category->name_en }}</td>
@@ -106,7 +110,7 @@
                     <button 
                       class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill category-edit"
                       data-id="{{ $category->id }}"
-                      data-organization-id="{{ $category->organization_id }}"
+                      data-organization-id="{{ $category->organization_id ?? '' }}"
                       data-name-en="{{ $category->name_en }}"
                       data-name-ar="{{ $category->name_ar }}"
                     >
@@ -153,9 +157,10 @@
           
           <div class="mb-3 {{ $isSingleOrg ? 'd-none' : '' }}" id="organizationWrapper">
             <label for="organization_id" class="form-label">{{ __('cycles.Select_Organization')}} <span class="text-danger">*</span></label>
-            <select {{ !$isSingleOrg ? 'required' : '' }} class="form-select" id="organization_id" name="organization_id" data-placeholder="{{ __('cycles.Select_Organization') }}">
+            <select {{ !$isSingleOrg && !$authUser->hasRole('Admin') ? 'required' : '' }} class="form-select" id="organization_id" name="organization_id" data-placeholder="{{ __('cycles.Select_Organization') }}">
               @if( $showOrgDropdown ) <option disabled value="">{{ __('cycles.Select_Organization') }}</option> @endif
               @if($authUser->hasRole('Admin'))
+                <option value="all">{{ __('admin.All_Organizations') }}</option>
                 @foreach( \App\Organization::all() as $org )
                   <option value="{{ $org->id }}">{{ $org->{'name_' . app()->getLocale()} }}</option>
                 @endforeach
@@ -273,6 +278,7 @@ $(function() {
   const modalTitle = $('#categoryModalLabel');
   const submitBtn = $('#submitBtn');
   const isSingleOrg = {{ $isSingleOrg ? 'true' : 'false' }};
+  const isAdmin = {{ $authUser->hasRole('Admin') ? 'true' : 'false' }};
 
   // Custom validation patterns
   const englishPattern = /^[A-Za-z\s]+$/;
@@ -311,7 +317,7 @@ $(function() {
 
   $('#organization_id').on('change', function() {
     const input = $(this);
-    if (!isSingleOrg && !input.val()) {
+    if (!isSingleOrg && !isAdmin && !input.val()) {
       input.addClass('is-invalid');
     } else {
       input.removeClass('is-invalid');
@@ -348,7 +354,7 @@ $(function() {
     modalTitle.text('{{ __("admin.Edit") }}');
     submitBtn.text('{{ __("admin.Update") }}');
     
-    $('#organization_id').val(organizationId);
+    $('#organization_id').val(organizationId || 'all');
     $('#name_en').val(nameEn);
     $('#name_ar').val(nameAr);
     
@@ -364,8 +370,8 @@ $(function() {
     
     let isValid = true;
     
-    // Validate organization if not single org
-    if (!isSingleOrg) {
+    // Validate organization if not single org and not admin
+    if (!isSingleOrg && !isAdmin) {
       const orgSelect = $('#organization_id');
       if (!orgSelect.val()) {
         orgSelect.addClass('is-invalid');
