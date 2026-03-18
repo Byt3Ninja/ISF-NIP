@@ -115,6 +115,12 @@ class ServiceProviderProfileController extends Controller
                 ->where('description', '!=', '')
                 ->orderBy('order')
                 ->get();
+
+            $portfolios = $portfolios->map(function ($item) {
+                $item->media_url = !str_starts_with($item->media_url, '/191014/') ? '/191014/' . $item->media_url : $item->media_url;
+                $item->media_url = str_replace('/191014//', '/191014/', $item->media_url);
+                return $item;
+            });
         }
 
         // 6. Fetch clients (only if section enabled)
