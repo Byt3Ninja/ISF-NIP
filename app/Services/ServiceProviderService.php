@@ -173,8 +173,16 @@ class ServiceProviderService
 
                 // Handle Media Upload
                 if (isset($item['media']) && $item['media'] instanceof \Illuminate\Http\UploadedFile) {
-                    $itemData['media_url'] = $item['media']->store('service_providers_portfolio', 'public');
-                    $itemData['media_type'] = str_starts_with($item['media']->getMimeType(), 'video') ? 'video' : 'image';
+                    $storedPath = $item['media']->store('service_providers_portfolio', 'public');
+                    if ($storedPath) {
+                        $itemData['media_url'] = $storedPath;
+                        $itemData['media_type'] = str_starts_with($item['media']->getMimeType(), 'video') ? 'video' : 'image';
+                    } else {
+                        Log::error('Portfolio media upload failed', [
+                            'provider_id' => $provider->id,
+                            'original_name' => $item['media']->getClientOriginalName(),
+                        ]);
+                    }
                 }
 
                 if (!empty($item['id'])) {
