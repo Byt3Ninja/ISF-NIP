@@ -8551,7 +8551,7 @@
             },
             {
                 "name": "settings.organization.smtp_update",
-                "description": "List Notification Templates",
+                "description": "Update Email Configuration",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
