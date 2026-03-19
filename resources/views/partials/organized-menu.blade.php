@@ -106,6 +106,12 @@ if (strpos(request()->getRequestUri(), 'programlist') !== false || strpos(reques
   $activeItem = 'programlist.index';
 }
 
+// Special case: Make reminder logs active under admin group
+if (Route::is('organization.ReminderLogs', 'organization.destroyReminderLogs')) {
+  $activeGroup = 'admin';
+  $activeItem = 'organization.ReminderLogs';
+}
+
 // Special case: Make settings active if route matches specified patterns
 if (Route::is(
   'settings.*',
