@@ -334,37 +334,7 @@ class serviceProviderController extends Controller
 
 	public function requests()
 	{
-		$l = app()->getLocale();
-		Carbon::setLocale($l);
-		$requests = DB::table('service_provider_registration AS spr')
-			->select([
-				'spr.id',
-				'spr.company_name',
-				'spr.contact_name',
-				'spr.email',
-				'spr.phone',
-				'spr.status',
-				'spr.user_id',
-				'spr.action_by',
-				DB::raw("CONCAT(TRIM(COALESCE(U.first_name_en, '')), IFNULL(CONCAT(' ', TRIM(U.last_name_en)), '')) as full_name_en"),
-				DB::raw("CONCAT(TRIM(COALESCE(U.first_name_ar, '')), IFNULL(CONCAT(' ', TRIM(U.last_name_ar)), '')) as full_name_ar"),
-				'spr.action_at',
-				'spr.reason',
-				'spr.ip_address',
-				'spr.created_at',
-				'spr.updated_at',
-			])
-			->leftJoin('users as U', 'U.id', '=', 'spr.action_by')
-			->get();
-
-		$requests = $requests->map(function( $request ) use ( $l ) {
-			$submitted_at = Carbon::parse($request->created_at);
-			$request->submitted_at = $submitted_at->diffForHumans();
-			$request->action_since = $request->action_at ? Carbon::parse($request->action_at)->diffForHumans() : '';
-			$request->action_by = $request->{'full_name_'. $l} ?? '';
-			return $request;
-		});
-		return view('admin.serviceProviders.requests', compact('requests'));
+		return redirect()->route('services_providers.index');
 	}
 
 	public function takeAction(Request $request)
@@ -456,8 +426,8 @@ class serviceProviderController extends Controller
 					Mail::to( $email )->queue(new serviceProviderApproveMail( $contact_name, $login_url, $locale ));
 				}
 				return redirect()
-						->route('services_providers.requests', ['status' => 'history'])
-						->with('success', __('admin.serviceProviderRequestApproved'));			
+						->route('services_providers.index')
+						->with('success', __('admin.serviceProviderRequestApproved'));
 			}
 			catch (\Exception $e) {
 				DB::rollBack();
@@ -487,7 +457,7 @@ class serviceProviderController extends Controller
 			{
 				Mail::to( $email )->queue(new serviceProviderRejectMail( $contact_name, $reason, $locale ));
 			}
-			return redirect()->route('services_providers.requests', ['status' => 'history'])->with('success', __('admin.serviceProviderRequestRejected'));
+			return redirect()->route('services_providers.index')->with('success', __('admin.serviceProviderRequestRejected'));
 		}
 	}
 
@@ -518,6 +488,9 @@ class serviceProviderController extends Controller
 	{
 		$user = auth()->user();
 		$l = app()->getLocale();
+		Carbon::setLocale($l);
+
+		// ─── Enrolled Service Providers ─────────────────────────────
 		$providers = DB::table('service_providers AS sp')
 			->select([
 				'sp.id',
@@ -555,7 +528,45 @@ class serviceProviderController extends Controller
 			$output->user = $_user;
 			return $output;
 		});
-		return view('admin.serviceProviders.index', compact('providers'));
+
+		// ─── Registration Requests (all) ────────────────────────────
+		$allRequests = DB::table('service_provider_registration AS spr')
+			->select([
+				'spr.id',
+				'spr.company_name',
+				'spr.contact_name',
+				'spr.email',
+				'spr.phone',
+				'spr.status',
+				'spr.user_id',
+				'spr.action_by',
+				DB::raw("CONCAT(TRIM(COALESCE(U.first_name_en, '')), IFNULL(CONCAT(' ', TRIM(U.last_name_en)), '')) as full_name_en"),
+				DB::raw("CONCAT(TRIM(COALESCE(U.first_name_ar, '')), IFNULL(CONCAT(' ', TRIM(U.last_name_ar)), '')) as full_name_ar"),
+				'spr.action_at',
+				'spr.reason',
+				'spr.ip_address',
+				'spr.created_at',
+				'spr.updated_at',
+			])
+			->leftJoin('users as U', 'U.id', '=', 'spr.action_by')
+			->orderByDesc('spr.created_at')
+			->get();
+
+		$allRequests = $allRequests->map(function( $request ) use ( $l ) {
+			$submitted_at = Carbon::parse($request->created_at);
+			$request->submitted_at = $submitted_at->diffForHumans();
+			$request->action_since = $request->action_at ? Carbon::parse($request->action_at)->diffForHumans() : '';
+			$request->action_by = $request->{'full_name_'. $l} ?? '';
+			return $request;
+		});
+
+		// ─── Split into pending vs history ──────────────────────────
+		$pendingRequests = $allRequests->filter(fn($r) => is_null($r->status))->values();
+		$pending_requests_count = $pendingRequests->count();
+
+		return view('admin.serviceProviders.index', compact(
+			'providers', 'pendingRequests', 'allRequests', 'pending_requests_count'
+		));
 	}
 
 	// ─── Client CRUD ────────────────────────────────────────────────
