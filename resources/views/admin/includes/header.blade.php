@@ -158,9 +158,17 @@ $menuItems = [
         'label' => $l == 'en' ? 'Tasks' : 'المهام',
         'icon' => 'ti ti-layout-kanban ti-md me-2 me-lg-4 ti-lg',
         'route' => '/dashboard/mentor/mentorshipSessions',
-        'permission' => $_user->hasRole('registered') && $_user->ableTo('mentorships.sessions_list_detailed', $permissions),
-        'isVisible' => $_user->hasRole('registered') && $_user->ableTo('mentorships.sessions_list_detailed', $permissions),
-        'subItems' => []
+        'permission' => $_user->ableTo('mentorships.sessions_list_detailed', $permissions),
+        'isVisible' => $_user->ableTo('mentorships.sessions_list_detailed', $permissions),
+        'subItems' => [
+          [
+            'label' => $l == 'en' ? 'Tasks' : 'المهام',
+            'icon' => 'ti ti-layout-kanban',
+            'route' => '/dashboard/mentor/mentorshipSessions',
+            'permission' => $_user->ableTo('mentorships.sessions_list_detailed', $permissions),
+            'isVisible' => $_user->ableTo('mentorships.sessions_list_detailed', $permissions)
+          ]
+        ]
     ],
 
     // Mentorship Tasks (for Mentors)
