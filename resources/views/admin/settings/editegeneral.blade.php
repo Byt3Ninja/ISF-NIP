@@ -20,7 +20,7 @@ $title = $l == 'en' ? 'Settings' : 'الإعدادات';
 $tabs = collect([
   ['general', 'ti-settings', __('settings.General Settings')],
   ['analysis', 'ti-graph', __('settings.Analysis Settings')],
-  ['SMTP', 'ti-mail', __('settings.SMTP Configuration')],
+  ['SMTP', 'ti-mail', __('settings.Email Configuration')],
   ['app-identity', 'ti-id-badge', __('settings.Application Identity')],
   ['Notification', 'ti-bell', __('settings.Push Notification Settings')],
   ['NotificationChannels', 'ti-bell-ringing', __('settings.Notification Channels')],

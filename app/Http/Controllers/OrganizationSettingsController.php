@@ -24,6 +24,35 @@ class OrganizationSettingsController extends Controller
     {
         $this->authorizeAccess();
 
+        $emailProvider = $request->input('email_provider', 'smtp');
+
+        if ($emailProvider === 'resend') {
+            $request->validate([
+                'resend_api_key' => ['required', 'string', 'max:64'],
+            ], [
+                'resend_api_key.required' => __('settings.api_key_required'),
+            ]);
+
+            if (!\App\Services\ResendApiKeyValidator::validate($request->input('resend_api_key'))) {
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => __('settings.invalid_api_key')], 422);
+                }
+                return back()->with('message2', __('settings.invalid_api_key'));
+            }
+
+            $settings = $this->orgSettings();
+            $settings->fill([
+                'email_provider' => 'resend',
+                'resend_api_key' => $request->input('resend_api_key'),
+            ])->save();
+
+            if ($request->expectsJson()) {
+                return response()->json(['message' => __('settings.email_config_saved')]);
+            }
+            return back()->with('message', 'Settings Updated Successfully');
+        }
+
+        // SMTP provider (existing logic)
         $data = $request->validate([
             'smtp_host' => ['nullable', 'string', 'max:191'],
             'smtp_port' => ['nullable', 'integer'],
@@ -38,6 +67,8 @@ class OrganizationSettingsController extends Controller
         if (($data['smtp_encryption'] ?? null) === 'null') {
             $data['smtp_encryption'] = null;
         }
+
+        $data['email_provider'] = 'smtp';
 
         $settings = $this->orgSettings();
         $settings->fill($data)->save();

@@ -13,6 +13,8 @@ class OrganizationSettings extends Model
 
     protected $fillable = [
         'organization_id',
+        'email_provider',
+        'resend_api_key',
         'smtp_host',
         'smtp_port',
         'smtp_encryption',
@@ -44,7 +46,17 @@ class OrganizationSettings extends Model
      */
     public function toMailConfigArray(): array
     {
+        if ($this->email_provider === 'resend') {
+            return [
+                'transport' => 'resend',
+                'api_key' => $this->resend_api_key,
+                'from_address' => $this->smtp_from_address,
+                'from_name' => $this->smtp_from_name,
+            ];
+        }
+
         return [
+            'transport' => 'smtp',
             'host' => $this->smtp_host,
             'port' => $this->smtp_port,
             'username' => $this->smtp_username,
