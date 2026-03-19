@@ -54,7 +54,7 @@ $menuItems = [
                 'icon' => 'ti ti-report-analytics',
                 'route' => '/dashboard/analysis-assessment',
                 'permission' => 'assessments.results_analysis_view',
-                'isVisible' => $_setting->assessment == 1 || $_user->ableTo('assessments.results_analysis_view', $permissions)
+                'isVisible' => $_setting->assessment == 1 && $_user->ableTo('assessments.results_analysis_view', $permissions) && !$_user->hasRole("organizationManager")
             ],
             [
                 'label' => $l == 'en' ? 'SWOT Analysis' : 'تحليل SWOT',
@@ -86,7 +86,7 @@ $menuItems = [
                 'icon' => 'ti ti-report-analytics',
                 'route' => '/dashboard/analysis-assessment',
                 'permission' => 'assessments.results_analysis_view',
-                'isVisible' => $_setting->assessment == 1
+                'isVisible' => $_setting->assessment == 1 && $_user->ableTo('assessments.results_analysis_view', $permissions) && !$_user->hasRole("organizationManager")
             ],
             [
                 'label' => $l == 'en' ? 'SWOT Analysis' : 'تحليل SWOT',
@@ -471,15 +471,15 @@ $menuItems = [
                 'label' => $l == 'en' ? 'Financial Report' : 'التقرير المالي',
                 'icon' => 'ti ti-report-money',
                 'route' => 'time_sheets.reports.finance.view',
-                'permission' => $_user->ableTo('time_sheets.reports.finance.view', $permissions) && app()->environment(['local', 'dev', 'test']),
-                'isVisible' => $_user->ableTo('time_sheets.reports.finance.view', $permissions) && app()->environment(['local', 'dev', 'test'])
+                'permission' => $_user->ableTo('time_sheets.reports.finance.view', $permissions) && app()->environment(['local', 'dev', 'test']) && !$_user->hasRole("organizationManager"),
+                'isVisible' => $_user->ableTo('time_sheets.reports.finance.view', $permissions) && app()->environment(['local', 'dev', 'test']) && !$_user->hasRole("organizationManager")
             ],
             [
                 'label' => $l == 'en' ? 'Users TimeSheets' : 'الجدول الزمني للمستخدمين',
                 'icon' => 'ti ti-user-check',
                 'route' => 'time_sheets.view.mine',
-                'permission' => $_user->ableTo('time_sheets.view.mine', $permissions) && app()->environment(['local', 'dev', 'test']),
-                'isVisible' => $_user->ableTo('time_sheets.view.mine', $permissions) && app()->environment(['local', 'dev', 'test'])
+                'permission' => $_user->ableTo('time_sheets.view.mine', $permissions) && app()->environment(['local', 'dev', 'test']) && !$_user->hasRole("organizationManager"),
+                'isVisible' => $_user->ableTo('time_sheets.view.mine', $permissions) && app()->environment(['local', 'dev', 'test']) && !$_user->hasRole("organizationManager")
             ]
         ]
     ],
