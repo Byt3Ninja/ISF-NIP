@@ -521,7 +521,7 @@
         });
       }
 
-      const getSharedDataTableConfig = ({ pageLength, descIndex, actionsIndex, withoutFilter = false }) => {
+      const getSharedDataTableConfig = ({ title, pageLength, descIndex, actionsIndex, withoutFilter = false }) => {
         const config = {
           responsive: true,
           pageLength: pageLength ?? 10,
@@ -550,6 +550,7 @@
                 extend: 'csv',
                 text: 'CSV',
                 className: 'd-none', // Hide default button, trigger via custom dropdown
+                title: title ? title + '_Export_' + new Date().toISOString().slice(0, 10) : '',
                 exportOptions: {
                   columns: Array.from({ length: actionsIndex }, (_, index) => index), // Export these columns
                 }
@@ -558,6 +559,7 @@
                 extend: 'excel',
                 text: 'Excel',
                 className: 'd-none', // Hide default button, trigger via custom dropdown
+                title: title ? title + '_Export_' + new Date().toISOString().slice(0, 10) : '',
                 exportOptions: {
                   columns: Array.from({ length: actionsIndex }, (_, index) => index), // Export these columns
                 }
