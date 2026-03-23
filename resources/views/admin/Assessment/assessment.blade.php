@@ -253,7 +253,7 @@ $(function () {
   // Routes passed from Laravel
   const ROUTES = {
     store:  '{{ route('assessments.store') }}',
-    update: (id) => '{{ url('assessments') }}/' + id,
+    update: (id) => '{{ route('assessments.update', '') }}/' + id,
   };
 
   // ── Flatpickr factory ────────────────────────────────────
