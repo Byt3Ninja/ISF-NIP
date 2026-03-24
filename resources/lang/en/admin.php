@@ -3551,4 +3551,13 @@ return [
 	'copy_meeting_link' => 'Copy Meeting Link',
 	'copy_meeting_password' => 'Copy Meeting Password',
 	'copied_to_clipboard' => 'Copied to clipboard',
+	'invalid_date' => 'Invlaid Date',
+	'Generate_QR' => 'Generate QR',
+	'online_course' => 'Online Course',
+	'select_date_range' => 'Select date range',
+	'training_type' => 'Training Type',
+	'select_course' => 'Select course',
+	'Unassigned' => 'Unassigned',
+	'Disapprove' => 'Disapprove',
+	'mutiple_selection' => 'Multiple Selection',
 ];

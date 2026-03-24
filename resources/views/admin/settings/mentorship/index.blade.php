@@ -63,7 +63,7 @@
           <div class="row g-2 justify-content-lg-end">
             <div class="col-12 col-sm-auto">
               <a class="btn btn-primary w-100" href="/dashboard/cycles/{{ $id }}">
-                <i class="ti ti-pencil me-1"></i>
+                <i class="ti ti-adjustments me-1"></i>
                 {{ __('cycles.Manage Cycle') }}
               </a>
             </div>

@@ -21,38 +21,11 @@
         <div class="d-flex justify-content-between align-items-center">
           <h5 class="card-title mb-0">{{ __('admin.Users`s List') }}</h5>
           <div class="d-flex align-items-center gap-3">
+            <x-export-dropdown />
 
-            {{-- Export Dropdown --}}
-            <div class="dropdown">
-              <button
-                class="btn btn-label-secondary dropdown-toggle"
-                type="button"
-                id="exportDropdown"
-                data-bs-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false"
-              >
-                <i class="ti ti-file-export me-2"></i>{{ __('admin.Export') }}
-              </button>
-              <ul class="dropdown-menu" aria-labelledby="exportDropdown">
-                <li>
-                  <a class="dropdown-item" href="javascript:void(0)" id="exportExcel">
-                    <i class="ti ti-file-spreadsheet me-2"></i>Excel
-                  </a>
-                </li>
-                <li>
-                  <a class="dropdown-item" href="javascript:void(0)" id="exportCsv">
-                    <i class="ti ti-file-text me-2"></i>CSV
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {{-- Add New --}}
             <a href="{{ route('users.create') }}" class="btn btn-primary">
               <i class="ti ti-plus me-1"></i>{{ __('admin.Add New') }}
             </a>
-
           </div>
         </div>
       </div>
@@ -236,10 +209,7 @@ $(function () {
    * DataTable init
    * ============================================================== */
   const table = $('#usersTable').DataTable({
-    responsive:  true,
-    processing:  true,
-    pageLength:  10,
-    order: [[7, 'desc']],
+    ...getSharedDataTableConfig({ title: 'Users', descIndex: 7, actionsIndex: 8 }),
     columnDefs: [
       {
         // Read sort/filter value from data-search attribute for
@@ -270,28 +240,6 @@ $(function () {
       '<"col-12 col-lg-9 d-flex flex-wrap align-items-center ps-0 ps-lg-6"l>' +
       '<"col-12 col-lg-3 dt-action-buttons d-flex justify-content-lg-end pe-0 pe-lg-6"f>' +
       '>t<"row px-6"<"col-lg-6"i><"col-lg-6 d-flex justify-content-end"p>>',
-    language: {
-      url: '{{ app()->getLocale() }}' === 'ar'
-        ? 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json'
-        : 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json',
-      sLengthMenu:       '_MENU_',
-      search:            '',
-      searchPlaceholder: '{{ __("admin.Search") }}...'
-    },
-    buttons: [
-      {
-        extend:  'csv',
-        text:    'CSV',
-        className: 'd-none',
-        exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7] }
-      },
-      {
-        extend:  'excel',
-        text:    'Excel',
-        className: 'd-none',
-        exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7] }
-      }
-    ],
     initComplete() {
       buildTableFilters(this.api());
       setTimeout(
