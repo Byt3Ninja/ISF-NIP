@@ -78,7 +78,7 @@ $pills = [
                 <i class="ti ti-file-text me-2"></i> {{ __('admin.view_results') }}
               </a>
               <a class="btn btn-label-primary" href="/dashboard/cycles/{{ $cstep->cycle_id }}">
-                <i class="ti ti-components me-2"></i> {{ __('cycles.Manage Cycle') }}
+                <i class="ti ti-adjustments me-2"></i> {{ __('cycles.Manage Cycle') }}
               </a>
               <a class="btn btn-primary" href="/dashboard/show-builder{{ $cstep->cycle->organization->id ? '?' . 'org_id=' . $cstep->cycle->organization->id : '' }}">
                 <i class="ti ti-plus me-2"></i> {{ __('builder.Add_New_Form') }}

@@ -631,4 +631,10 @@ return [
     'Export All Evaluations' => 'تصدير جميع التقييمات',
     'Expertise' => 'التخصص',
     'Comment' => 'التعليق',
+    'No saved training courses' => 'لا يوجد دورات تدريبية محفوظة',
+    'Passcode' => 'كود الدخول',
+    'Meeting_Passcode' => 'كود الجلسة',
+    'The passcode for this meeting is' => 'كود الجلسة هو',
+    'select_new_step' => 'اختر المرحلة الجديدة',
+    'change_training_step' => 'تغيير مرحلة التدريب',
 ];

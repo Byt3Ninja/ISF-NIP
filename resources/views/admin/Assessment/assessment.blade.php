@@ -19,22 +19,10 @@
 			<div class="card">
 				@if( $_user->ableToAny(['assessments.create', 'assessments.store'], $permissions) )
 				<div class="card-header d-flex flex-column flex-md-row align-items-md-center justify-content-between border-bottom">
-					<h5 class="card-title mb-3 mb-lg-0">{{ $l == 'en' ? 'Assessments' : 'التقييمات' }}</h5>
+					<h5 class="card-title mb-3 mb-lg-0">{{ __('admin.Assessments') }}</h5>
 					<div class="d-flex align-items-center gap-2">
-						<div class="dropdown">
-							<button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-								<i class="ti ti-file-export me-2"></i>
-								<span>{{ __('admin.Export') }}</span>
-							</button>
-							<ul class="dropdown-menu" aria-labelledby="exportDropdown">
-								<li><a class="dropdown-item" href="javascript:void(0)" id="export-csv">
-									<i class="ti ti-file-text me-2"></i>CSV
-								</a></li>
-								<li><a class="dropdown-item" href="javascript:void(0)" id="export-excel">
-									<i class="ti ti-file-spreadsheet me-2"></i>Excel
-								</a></li>
-							</ul>
-						</div>
+            <x-export-dropdown />
+
 						<button
 							class="btn btn-primary"
 							data-bs-toggle="modal"
@@ -404,8 +392,8 @@ $(function () {
 
   // ── Export buttons ───────────────────────────────────────
 
-  $('#export-csv').on('click',   e => { e.preventDefault(); table.button('.buttons-csv').trigger(); });
-  $('#export-excel').on('click', e => { e.preventDefault(); table.button('.buttons-excel').trigger(); });
+  $('#exportCsv').on('click',   e => { e.preventDefault(); table.button('.buttons-csv').trigger(); });
+  $('#exportExcel').on('click', e => { e.preventDefault(); table.button('.buttons-excel').trigger(); });
 
   // ── Unified Assessment Modal ─────────────────────────────
 

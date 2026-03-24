@@ -3608,4 +3608,13 @@ return [
 	'copy_meeting_link' => 'نسخ رابط الاجتماع',
 	'copy_meeting_password' => 'نسخ كلمة مرور الاجتماع',
 	'copied_to_clipboard' => 'تم النسخ',
+	'invalid_date' => 'التاريخ غير صالح',
+	'Generate_QR' => 'توليد QR',
+	'online_course' => 'كورس على الانترنت',
+	'select_date_range' => 'حدد نطاق التاريخ',
+	'training_type' => 'نوع التدريب',
+	'select_course' => 'اختر الكورس',
+	'Unassigned' => 'غير مخصص',
+	'Disapprove' => 'الرفض',
+	'mutiple_selection' => 'اختيار متعدد',
 ];
