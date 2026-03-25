@@ -15,10 +15,10 @@
 
   <div class="col-md-7 mb-4">
     <div class="d-flex align-items-center gap-3 mb-3">
-      <div class="position-relative w-px-100 h-px-100">
+      <div id="hero-preview-container" class="position-relative w-px-100 h-px-100 {{ $org && $org->hero_image ? '' : 'd-none' }}">
         <img id="hero-preview-image"
           src="{{ $org && $org->hero_image ? '/191014/' . $org->hero_image : '' }}"
-          class="w-100 h-100 rounded border shadow-sm {{ $org && $org->hero_image ? '' : 'd-none' }}"
+          class="w-100 h-100 rounded border shadow-sm"
           alt="hero image">
       </div>
       <label
@@ -183,6 +183,7 @@
     const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'image/svg+xml'];
 
     if (!fileName) {
+      $('#hero-preview-container').addClass('d-none');
       $('#fileName').hide();
       return;
     }
@@ -203,9 +204,8 @@
 
     const reader = new FileReader();
     reader.onload = function (e) {
-      $('#hero-preview-image')
-        .attr('src', e.target.result)
-        .removeClass('d-none');
+      $('#hero-preview-container').removeClass('d-none');
+      $('#hero-preview-image').attr('src', e.target.result);
     };
     reader.readAsDataURL(this.files[0]);
   });
