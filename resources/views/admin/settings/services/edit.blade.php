@@ -96,7 +96,7 @@
           <select class="form-select select2" name="currency" id="currency" data-placeholder="{{ __('admin.Select Currency') }}" data-allow-clear="true">
             <option value=""></option>
             @foreach ($currencies as $Currency)
-              <option value="{{ $Currency->currency_code }}" {{ old('currency', $_user->currency) == $Currency->currency_code ? 'selected' : '' }}>
+              <option value="{{ $Currency->currency_code }}" {{ old('currency', $service->currency) == $Currency->currency_code ? 'selected' : '' }}>
                 {{ __('admin.' . $Currency->currency_name) }}
               </option>
             @endforeach
@@ -104,12 +104,12 @@
         </div>
         <div class="col-md-4 mb-3 mb-md-0">
           <label class="form-label">{{ __('admin.Price') }}</label>
-          <input type="number" class="form-control" name="price" id="price" min="0" step="0.01" placeholder="0.00" value="{{ old('price') }}">
+          <input type="number" class="form-control" name="price" id="price" min="0" step="0.01" placeholder="0.00" value="{{ old('price', $service->price) }}">
         </div>
         <div class="col-md-2 d-flex align-items-center pt-4 mt-2">
           <div class="form-check form-switch">
             <input type="hidden" name="hide_price" value="0">
-            <input class="form-check-input" type="checkbox" id="hide_price" name="hide_price" value="1" {{ old('hide_price') ? 'checked' : '' }}>
+            <input class="form-check-input" type="checkbox" id="hide_price" name="hide_price" value="1" {{ old('hide_price', $service->hide_price) ? 'checked' : '' }}>
             <label class="form-check-label" for="hide_price">{{ __('admin.Hide_Price') }}</label>
           </div>
         </div>

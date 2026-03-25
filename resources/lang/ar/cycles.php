@@ -37,6 +37,7 @@ return [
     'Description' => 'الوصف',
     'Close' => 'إغلاق',
     'Submit' => 'حفظ',
+    'Submitting' => 'جاري الحفظ',
     'New step data' => 'معلومات مرحلة جديدة',
     'Screening type'=> 'طريقة اختيار المحكمين',
     'Choose screening type' => 'إختر طريقة المراجعة',
@@ -630,4 +631,10 @@ return [
     'Export All Evaluations' => 'تصدير جميع التقييمات',
     'Expertise' => 'التخصص',
     'Comment' => 'التعليق',
+    'No saved training courses' => 'لا يوجد دورات تدريبية محفوظة',
+    'Passcode' => 'كود الدخول',
+    'Meeting_Passcode' => 'كود الجلسة',
+    'The passcode for this meeting is' => 'كود الجلسة هو',
+    'select_new_step' => 'اختر المرحلة الجديدة',
+    'change_training_step' => 'تغيير مرحلة التدريب',
 ];

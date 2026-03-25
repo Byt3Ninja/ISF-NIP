@@ -81,6 +81,10 @@ class organizationsController extends Controller
 			});
 		}
 
+		// Sorting
+		$sortOrder = $request->sort === 'oldest' ? 'asc' : 'desc';
+		$organizationsQuery->orderBy('created_at', $sortOrder);
+
 		$organizations = $organizationsQuery->paginate(9)->withQueryString();
 		foreach ($organizations as $organization) {
 			$organization->total_startups = Company::whereHas('cycle', function ($query) use ($organization) {

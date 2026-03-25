@@ -403,4 +403,14 @@ return [
 		'stay' => 'Stay',
 		'countries' => 'Countries',
 	],
+
+	'Email Configuration' => 'Email Configuration',
+	'email_provider' => 'Email Provider',
+	'resend_api_key' => 'API Key',
+	'connect_and_save' => 'Connect & Save',
+	'api_key_required' => 'API key is required.',
+	'invalid_api_key' => 'Invalid API key.',
+	'email_config_saved' => 'Email configuration saved successfully.',
+	'email_config_failed' => 'Failed to save email configuration. Please try again.',
+	'org_using_platform_email' => 'This organization is using the platform email configuration. Fill in your own email provider settings to set a custom configuration for this organization.',
 ];

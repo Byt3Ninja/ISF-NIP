@@ -22,7 +22,7 @@
     ['SocialMediaLinks', 'ti-share', __('settings.SocialMediaLinks')],
     ['teamMembers', 'ti-users', __('settings.teamMembers')],
     ['WhatsApp', 'ti-brand-whatsapp', __('admin.WhatsApp')],
-    ['smtp', 'ti-mail', 'SMTP'],
+    ['smtp', 'ti-mail', __('settings.Email Configuration')],
     ['notifications', 'ti-bell', __('admin.notifications')],
     // ['Schedule', 'ti-calendar-bolt', __('admin.Schedule')],
   ])->map(function ($tab) {

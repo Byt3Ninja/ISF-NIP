@@ -403,4 +403,14 @@ return [
 		'stay' => 'البقاء',
 		'countries' => 'الدول',
 	],
+
+	'Email Configuration' => 'إعدادات البريد الإلكتروني',
+	'email_provider' => 'مزود البريد الإلكتروني',
+	'resend_api_key' => 'API Key',
+	'connect_and_save' => 'اتصال وحفظ',
+	'api_key_required' => 'API Key مطلوب',
+	'invalid_api_key' => 'API Key غير صالح',
+	'email_config_saved' => 'تم حفظ إعدادات البريد الإلكتروني بنجاح',
+	'email_config_failed' => 'تعذر حفظ إعدادات البريد الإلكتروني. يرجى المحاولة مرة أخرى',
+	'org_using_platform_email' => 'هذه الجهة تستخدم إعدادات البريد الإلكتروني الخاصة بالمنصة. أدخل إعدادات مزود البريد الإلكتروني الخاصة بك لتعيين إعدادات مخصصة لهذه الجهة',
 ];

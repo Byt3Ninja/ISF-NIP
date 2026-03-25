@@ -116,7 +116,7 @@
                     {{ $cycle->type == 'Hackathon' ? __('cycles.' . $cycle->type) : __('cycles.general') }}
                   </span>
                   <div class="dropdown">
-                    <button type="button" class="btn btn-sm btn-icon rounded-circle shadow-xs border dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                    <button type="button" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
                       <i class="ti ti-dots-vertical"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">

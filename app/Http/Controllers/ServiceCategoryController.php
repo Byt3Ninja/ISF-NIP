@@ -37,8 +37,11 @@ class ServiceCategoryController extends Controller
 		$user = auth()->user();
 		$orgIds = $user->organizations_ids;
 		$serviceCategories = ServiceCategory::with(['organization'])
-			->whereHas('organization', function ($q) use ($orgIds) {
-				$q->whereIn('organizations.id', $orgIds);
+			->where(function ($q) use ($orgIds) {
+				$q->whereNull('organization_id')
+				  ->orWhereHas('organization', function ($q) use ($orgIds) {
+					$q->whereIn('organizations.id', $orgIds);
+				});
 			})->get();
 		return view('admin/settings/service_categories/index', compact('serviceCategories'));
 	}
@@ -61,7 +64,9 @@ class ServiceCategoryController extends Controller
 	 */
 	public function store(StoreServiceCategoryRequest $request)
 	{
-		$result = ServiceCategory::create($request->all());
+		$data = $request->all();
+		$data['organization_id'] = (!empty($data['organization_id']) && $data['organization_id'] !== 'all') ? $data['organization_id'] : null;
+		$result = ServiceCategory::create($data);
 		if($result) { return redirect()->route('serviceCategories.index')->with( ['msg' => 'StoredSuccessfully'] ); }
 		else { return back()->withInput()->with( ['msg' => 'FailedStore'] ); }
 	}
@@ -97,7 +102,9 @@ class ServiceCategoryController extends Controller
 	 */
 	public function update(UpdateServiceCategoryRequest $request, ServiceCategory $serviceCategory)
 	{
-		$result = $serviceCategory->update($request->all());
+		$data = $request->all();
+		$data['organization_id'] = (!empty($data['organization_id']) && $data['organization_id'] !== 'all') ? $data['organization_id'] : null;
+		$result = $serviceCategory->update($data);
 		if( $result ) { return redirect()->route('serviceCategories.index')->with( ['msg' => 'StoredSuccessfully'] ); }
 		else { return back()->withInput()->with( ['msg' => 'FailedStore'] ); }
 	}

@@ -84,6 +84,7 @@
                 </div>
               </div>
 
+              @if (!$_user->hasRole('registered'))
               <div class="col-md-6 col-lg-2">
                 <select class="form-select select2" name="org-id" id="organization-filter" data-placeholder="{{ __('admin.All_Organizations') }}">
                   <option value="all">{{ __('admin.All_Organizations') }}</option>
@@ -100,6 +101,7 @@
                   <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>{{ __('admin.Inactive') }}</option>
                 </select>
               </div>
+              @endif
 
               @if ($_user->hasRole('registered'))
                 <div class="col-md-6 col-lg-3">
@@ -116,7 +118,7 @@
 
               <div class="col-md-6 col-lg-2">
                 <div class="d-flex justify-content-lg-end gap-2">
-                  @if(request('search') || request('status') || request('org-id'))
+                  @if(request('search') || request('rating') || request('status') || request('org-id'))
                     <a href="{{ route('services.index') }}" class="btn bg-card border btn-icon">
                       <i class="ti ti-refresh"></i>
                     </a>
@@ -182,6 +184,12 @@
                     <h5 class="card-title mb-0">{{ $service->name }}</h5>
                     <div class="d-flex align-items-center justify-content-center gap-2">
                       <div class="badge bg-light-subtle text-dark py-1 px-2">
+                        @if($service->hide_vendor_info == 1 && !$_user->hasAnyRole(['admin', 'organizationManager', 'subadmin', 'serviceProvider']))
+                        <span class="text-warning">
+                          <i class="ti ti-star-filled ti-16px me-1"></i>
+                        </span>
+                        {{ number_format($service->rating ?? 0.0, 1) }}
+                        @else
                         <a
                           href="{{ isset($service->service_provider_id) ? '/dashboard/service-provider/' . $service->provider->id . '/profile?tab=reviews&service_id=' . $service->id : 'javascript:void(0)' }}"
                           target="_blank"
@@ -189,8 +197,9 @@
                         <span class="text-warning">
                           <i class="ti ti-star-filled ti-16px me-1"></i>
                         </span>
-                        {{ number_format($service->rating ?? 0.0, 1) }} 
+                        {{ number_format($service->rating ?? 0.0, 1) }}
                         </a>
+                        @endif
                       </div>
                       <span class="fw-normal">({{ $service->review_count ?? '0' }})</span>
                     </div>
@@ -290,7 +299,7 @@
       @else
         @include(
           'includes.no-result',
-          ['message' => request('search') || request('status') || request('org-id') ? __('admin.noResultsMatch') :__('admin.No_Data_Found')]
+          ['message' => request('search') || request('rating') || request('status') || request('org-id') ? __('admin.noResultsMatch') :__('admin.No_Data_Found')]
         )
       @endif
     </div>

@@ -50,9 +50,9 @@
                     <div class="upload-area border bg-light-subtle rounded p-6 text-center cursor-pointer">
                       @if($item->media_url)
                         @if($item->media_type === 'video')
-                          <video src="/191014/{{ $item->media_url }}" class="img-fluid rounded" style="max-height: 100px;"></video>
+                          <video src="{{ $item->media_full_url }}" class="img-fluid rounded" style="max-height: 100px;"></video>
                         @else
-                          <img src="/191014/{{ $item->media_url }}" class="img-fluid rounded" style="max-height: 100px;">
+                          <img src="{{ $item->media_full_url }}" class="img-fluid rounded" style="max-height: 100px;">
                         @endif
                         <div class="small mt-1 text-primary">{{ __('admin.change_file') }}</div>
                       @else
@@ -70,8 +70,11 @@
                         {{ __('admin.Preview') }}
                       </button>
                     </div>
+                    <div class="invalid-feedback d-none file-error text-danger small"></div>
 
-                    <input type="file" class="d-none media-input" name="portfolio[{{ $index }}][media]" accept=".png,.jpg,.jpeg,.webp,.mp4" />
+                    <input type="file" class="d-none media-input is-invalid-on-error" name="portfolio[{{ $index }}][media]" 
+                      accept=".png,.jpg,.jpeg,.webp,.mp4"
+                    />
                   </div>
 
                   <!-- TEXT -->
@@ -108,7 +111,7 @@
         <input type="hidden" class="delete-flag" name="portfolio[INDEX][delete]" value="false">
 
         <div class="d-flex justify-content-between mb-3">
-          <h6 class="text-muted mb-0 work-item-title">{{ __('admin.work_item') }} INDEX_PLUS_1</h6>
+          <h6 class="text-muted mb-0 work-item-title">{{ __('admin.work_item') }} 1</h6>
           <button type="button" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill remove-item">
             <i class="ti ti-trash"></i>
           </button>
@@ -133,8 +136,9 @@
                 {{ __('admin.Preview') }}
               </button>
             </div>
-
-            <input type="file" class="d-none media-input" name="portfolio[INDEX][media]" accept=".png,.jpg,.jpeg,.webp,.mp4" />
+            
+            <input type="file" class="form-control d-none media-input is-invalid-on-error" name="portfolio[INDEX][media]" accept=".png,.jpg,.jpeg,.webp,.mp4" />
+            <div class="invalid-feedback file-error text-danger small"></div>
           </div>
 
           <!-- TEXT -->
@@ -184,6 +188,14 @@
       $container.find('.work-item-card').each(function() {
         bindItem($(this));
       });
+
+      // Initialize existing upload areas to prevent JS interference with server-rendered media
+      $container.find('.upload-area').off('click').on('click', function(e) {
+        e.stopPropagation();
+        const $item = $(this).closest('.work-item-card');
+        const $fileInput = $item.find('.media-input');
+        $fileInput.click();
+      });
     }
 
     $addBtn.on('click', function() {
@@ -226,21 +238,26 @@
       const $previewBtn = $item.find('.preview-btn');
       const $uploadArea = $item.find('.upload-area');
 
-      $uploadArea.on('click', () => $fileInput.click());
+      // Only bind upload click if no existing media (prevents overwriting server media)
+      if ($uploadArea.find('img, video').length === 0) {
+        $uploadArea.on('click', () => $fileInput.click());
+      }
 
       $item.find('.remove-item').on('click', () => {
         const $idField = $item.find('input[name*="[id]"]');
         if ($idField.val()) {
           // If it has an ID, hide it and mark for deletion
-          $item.hide().find('.delete-flag').val('true');
-          // Clear inputs to avoid validation errors if they were required
+          $item.find('.delete-flag').val('true');
           $item.find('input[type="text"], textarea').val('');
+          $item.find('.media-input').val('');
+          $item.find('.upload-area').empty();
+          $item.hide();
         } else {
           // If it's a new unsaved item, just remove it from DOM
           $item.remove();
         }
         updateItemOrder();
-        
+
         if (typeof window.rebuildPortfolioValidation === 'function') {
            window.rebuildPortfolioValidation();
         }
@@ -253,19 +270,28 @@
           return;
         }
 
+        const $errorEl = $fileInput.siblings('.file-error');
+        const $parent = $fileInput.closest('.col-md-4');
+
+        // Clear previous errors
+        $errorEl.hide().addClass('d-none').empty();
+        $parent.removeClass('is-invalid');
+
         if (file.size > 10 * 1024 * 1024) {
-          alert('{{ __("admin.file_size_too_large_portfolio") ?? "File size must be 10MB or less." }}');
+          console.log('Portfolio file size validation failed');
+          $errorEl.html('{{ __("admin.file_size_too_large_portfolio") ?? "File size must be 10MB or less." }}').removeClass('d-none').show();
+          $parent.addClass('is-invalid');
           $(this).val('');
-          resetPreview();
           return;
         }
         
         const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg', 'image/webp', 'video/mp4'];
         if (!allowedTypes.includes(file.type)) {
-           alert('{{ __("admin.unsupported_file_type_portfolio") ?? "Unsupported file type. Upload PNG, JPG, WEBP, or MP4." }}');
+           console.log('Portfolio file type validation failed');
+           $errorEl.html('{{ __("admin.unsupported_file_type_portfolio") ?? "Unsupported file type. Upload PNG, JPG, WEBP, or MP4." }}').removeClass('d-none').show();
+           $parent.addClass('is-invalid');
            $(this).val('');
-           resetPreview();
-           return;
+          return;
         }
 
         $fileName.text(file.name);
@@ -289,15 +315,21 @@
       function resetPreview() {
         $fileName.text('{{ __("admin.no_file_selected") }}');
         $previewBtn.addClass('d-none');
+        const $parent = $fileInput.closest('.col-md-4');
+        $parent.removeClass('is-invalid');
+        const $errorEl = $fileInput.siblings('.file-error');
+        if ($errorEl.length) $errorEl.hide().addClass('d-none').empty();
       }
       
-      // Handle existing media preview
-      const existingMedia = $uploadArea.find('img, video').attr('src');
-      if (existingMedia && !existingMedia.includes('ti-cloud-upload')) {
-          $previewBtn.off('click').on('click', () => {
-              const type = $uploadArea.find('video').length ? 'video' : 'image';
-              renderModalPreview(existingMedia, type);
-          });
+      // Handle existing media preview - always bind if media present
+      if ($uploadArea.find('img, video').length > 0) {
+        $previewBtn.removeClass('d-none');
+        $previewBtn.off('click.preview').on('click.preview', function() {
+          const $mediaEl = $uploadArea.find('img, video');
+          const type = $mediaEl.is('video') ? 'video' : 'image';
+          const src = $mediaEl.attr('src');
+          renderModalPreview(src, type);
+        });
       }
     }
 

@@ -44,7 +44,7 @@ class StoreServiceProviderStep1Request extends FormRequest
 
             'country' => 'required|exists:countries,id',
             'state' => 'required|exists:states,id',
-            'city' => 'required|exists:cities,id',
+            'city' => 'nullable|exists:cities,id',
             
             'address' => 'nullable|string|max:50',
             'zip' => 'nullable|string|max:9',

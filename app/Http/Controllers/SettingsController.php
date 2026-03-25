@@ -503,18 +503,40 @@ class SettingsController extends Controller
 	public function update_settingsmail(Request $request)
 	{
 		$id = $request->input('id');
-		$host = $request->input('host');
-		$Mail = $request->input('Mail');
-		$Mailpassword = $request->input('Mailpassword');
-		$Port = $request->input('Port');
-		$encryption = $request->input('Encryption');
-
+		$emailProvider = $request->input('email_provider', 'smtp');
 		$updateSittings = Settings::where('id', $id)->first();
-		$updateSittings->host = $host;
-		$updateSittings->Mail = $Mail;
-		$updateSittings->Mailpassword = $Mailpassword;
-		$updateSittings->Port = $Port;
-		$updateSittings->encryption = $encryption;
+
+		if ($emailProvider === 'resend') {
+			$request->validate([
+				'resend_api_key' => ['required', 'string', 'max:64'],
+			], [
+				'resend_api_key.required' => __('settings.api_key_required'),
+			]);
+
+			if (!\App\Services\ResendApiKeyValidator::validate($request->input('resend_api_key'))) {
+				if ($request->expectsJson()) {
+					return response()->json(['message' => __('settings.invalid_api_key')], 422);
+				}
+				return redirect()->back()->with('message2', __('settings.invalid_api_key'));
+			}
+
+			$updateSittings->email_provider = 'resend';
+			$updateSittings->resend_api_key = $request->input('resend_api_key');
+			$updateSittings->save();
+
+			if ($request->expectsJson()) {
+				return response()->json(['message' => __('settings.email_config_saved')]);
+			}
+			return redirect()->back()->with('message', 'StoredSuccessfully');
+		}
+
+		// SMTP provider (existing logic)
+		$updateSittings->email_provider = 'smtp';
+		$updateSittings->host = $request->input('host');
+		$updateSittings->Mail = $request->input('Mail');
+		$updateSittings->Mailpassword = $request->input('Mailpassword');
+		$updateSittings->Port = $request->input('Port');
+		$updateSittings->encryption = $request->input('Encryption');
 		$updateSittings->save();
 
 		return redirect()->back()->with('message', 'StoredSuccessfully');

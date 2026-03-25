@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
 class ServiceProviderProfileController extends Controller
@@ -115,6 +116,17 @@ class ServiceProviderProfileController extends Controller
                 ->where('description', '!=', '')
                 ->orderBy('order')
                 ->get();
+
+            $portfolios = $portfolios->map(function ($item) {
+                if ($item->media_url && !str_starts_with($item->media_url, 'http')) {
+                    if (Storage::disk('public')->exists($item->media_url)) {
+                        $item->media_url = Storage::disk('public')->url($item->media_url);
+                    } else {
+                        $item->media_url = '/191014/' . ltrim($item->media_url, '/');
+                    }
+                }
+                return $item;
+            });
         }
 
         // 6. Fetch clients (only if section enabled)

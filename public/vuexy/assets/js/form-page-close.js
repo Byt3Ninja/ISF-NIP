@@ -1,12 +1,12 @@
 "use strict";
 
 document.addEventListener("DOMContentLoaded", function () {
-  console.log("Form Page Close - Initialized");
+  // console.log("Form Page Close - Initialized");
 
   const forms = document.querySelectorAll("form");
 
   if (!forms.length) {
-    console.log("No forms found");
+    // console.log("No forms found");
     return;
   }
 
@@ -22,12 +22,12 @@ document.addEventListener("DOMContentLoaded", function () {
   */
 
   function initializeFieldTracking() {
-    console.log("Initializing field tracking...");
+    // console.log("Initializing field tracking...");
     initialValues.clear(); // Clear previous values
     
     forms.forEach(form => {
       const fields = form.querySelectorAll("input, textarea, select");
-      console.log(`Found ${fields.length} fields in form`);
+      // console.log(`Found ${fields.length} fields in form`);
       
       fields.forEach(field => {
         if (field.name && field.name !== "_token") {
@@ -35,17 +35,17 @@ document.addEventListener("DOMContentLoaded", function () {
           if ($(field).data('select2') || $(field).hasClass('select2-hidden-accessible')) {
             const val = $(field).val();
             initialValues.set(field, val);
-            console.log(`✓ Select2 field: ${field.name}, initial value:`, val);
+            // console.log(`✓ Select2 field: ${field.name}, initial value:`, val);
           } else {
             initialValues.set(field, field.value);
-            console.log(`✓ Regular field: ${field.name}, initial value:`, field.value);
+            // console.log(`✓ Regular field: ${field.name}, initial value:`, field.value);
           }
         }
       });
     });
 
     select2InitComplete = true;
-    console.log("Field tracking initialized with", initialValues.size, "fields");
+    // console.log("Field tracking initialized with", initialValues.size, "fields");
   }
 
   /*
@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function recalcDirtyState() {
     if (!select2InitComplete) {
-      console.log("Skipping dirty check - Select2 not ready");
+      // console.log("Skipping dirty check - Select2 not ready");
       return;
     }
 
@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function () {
           if (current.length !== initial.length || 
               !current.every((val, index) => val === initial[index])) {
             isDirty = true;
-            console.log(`✗ Select2 field ${field.name} is dirty:`, {initial, current});
+            // console.log(`✗ Select2 field ${field.name} is dirty:`, {initial, current});
           }
         } else {
           // Single select comparison (including null/empty)
@@ -88,19 +88,19 @@ document.addEventListener("DOMContentLoaded", function () {
           
           if (current !== initial) {
             isDirty = true;
-            console.log(`✗ Select2 field ${field.name} is dirty:`, {initial: initialValue, current: currentValue});
+            // console.log(`✗ Select2 field ${field.name} is dirty:`, {initial: initialValue, current: currentValue});
           }
         }
       } else {
         // Regular field comparison
         if (field.value !== initialValue) {
           isDirty = true;
-          console.log(`✗ Field ${field.name} is dirty:`, {initial: initialValue, current: field.value});
+          // console.log(`✗ Field ${field.name} is dirty:`, {initial: initialValue, current: field.value});
         }
       }
     });
 
-    console.log("Dirty state:", isDirty);
+    // console.log("Dirty state:", isDirty);
   }
 
   /*
@@ -110,41 +110,41 @@ document.addEventListener("DOMContentLoaded", function () {
   */
 
   function attachFieldListeners() {
-    console.log("Attaching field listeners...");
+    // console.log("Attaching field listeners...");
     
     document.querySelectorAll("input, textarea, select").forEach(field => {
       // Check if it's a Select2 field
       const isSelect2 = $(field).data('select2') || $(field).hasClass('select2-hidden-accessible');
       
       if (isSelect2) {
-        console.log(`Attaching Select2 events to ${field.name}`);
+        // console.log(`Attaching Select2 events to ${field.name}`);
         
         // Remove any existing listeners first
         $(field).off('select2:select.dirtycheck select2:unselect.dirtycheck select2:clear.dirtycheck change.dirtycheck');
         
         // Attach Select2 events with namespace
         $(field).on('select2:select.dirtycheck select2:unselect.dirtycheck select2:clear.dirtycheck', function(e) {
-          console.log(`Select2 event: ${e.type} on ${field.name}`);
+          // console.log(`Select2 event: ${e.type} on ${field.name}`);
           recalcDirtyState();
           activateHistoryGuard();
         });
 
         // Also listen to regular change event as fallback
         $(field).on('change.dirtycheck', function(e) {
-          console.log(`Change event on Select2 ${field.name}`);
+          // console.log(`Change event on Select2 ${field.name}`);
           recalcDirtyState();
           activateHistoryGuard();
         });
       } else {
         // Regular fields
         field.addEventListener("input", function() {
-          console.log(`Input event on ${field.name}`);
+          // console.log(`Input event on ${field.name}`);
           recalcDirtyState();
           activateHistoryGuard();
         });
         
         field.addEventListener("change", function() {
-          console.log(`Change event on ${field.name}`);
+          // console.log(`Change event on ${field.name}`);
           recalcDirtyState();
           activateHistoryGuard();
         });
@@ -159,7 +159,7 @@ document.addEventListener("DOMContentLoaded", function () {
   */
 
   function waitForSelect2() {
-    console.log("Waiting for Select2 initialization...");
+    // console.log("Waiting for Select2 initialization...");
     
     // Check if any select has Select2 initialized
     const checkSelect2Ready = setInterval(function() {
@@ -169,7 +169,7 @@ document.addEventListener("DOMContentLoaded", function () {
       );
 
       if (hasSelect2 || document.querySelectorAll('.select2-container').length > 0) {
-        console.log("✓ Select2 detected, initializing tracking...");
+        // console.log("✓ Select2 detected, initializing tracking...");
         clearInterval(checkSelect2Ready);
         
         // Wait a bit more to ensure all Select2 instances are ready
@@ -183,7 +183,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Fallback: if no Select2 after 5 seconds, initialize anyway
     setTimeout(function() {
       if (!select2InitComplete) {
-        console.log("⚠ Timeout waiting for Select2, initializing anyway...");
+        // console.log("⚠ Timeout waiting for Select2, initializing anyway...");
         clearInterval(checkSelect2Ready);
         initializeFieldTracking();
         attachFieldListeners();
@@ -253,25 +253,25 @@ document.addEventListener("DOMContentLoaded", function () {
     // Ignore Select2 internal buttons
     if (button.closest('.select2-container') || 
         button.closest('.select2-dropdown')) {
-      console.log("Button is Select2 internal - ignoring");
+      // console.log("Button is Select2 internal - ignoring");
       return false;
     }
 
     // Ignore buttons inside SweetAlert
     if (button.closest('.swal2-container')) {
-      console.log("Button is SweetAlert internal - ignoring");
+      // console.log("Button is SweetAlert internal - ignoring");
       return false;
     }
 
     // Check if button has data-ignore-dirty
     if (shouldIgnoreDirtyCheck(button)) {
-      console.log("Button has data-ignore-dirty");
+      // console.log("Button has data-ignore-dirty");
       return true;
     }
 
     // Allow all buttons inside forms (they should be able to submit/navigate without warning)
     if (button.closest('form')) {
-      console.log("Button is inside form - allowing");
+      // console.log("Button is inside form - allowing");
       return true;
     }
 
@@ -287,7 +287,7 @@ document.addEventListener("DOMContentLoaded", function () {
       button.hasAttribute('data-ignore-dirty');
 
     if (hasNavigationIntent) {
-      console.log("Button has navigation intent");
+      // console.log("Button has navigation intent");
     }
 
     return hasNavigationIntent;
@@ -301,7 +301,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   window.addEventListener("beforeunload", function (e) {
     if (allowNavigation || !isDirty) return;
-    console.log("beforeunload - preventing");
+    // console.log("beforeunload - preventing");
     e.preventDefault();
     e.returnValue = "";
   });
@@ -319,12 +319,12 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!historyGuardActive && isDirty) {
       history.pushState(null, "", location.href);
       historyGuardActive = true;
-      console.log("History guard activated");
+      // console.log("History guard activated");
     }
   }
 
   window.addEventListener("popstate", function (e) {
-    console.log("popstate event", {isDirty, allowNavigation, isNavigatingBack});
+    // console.log("popstate event", {isDirty, allowNavigation, isNavigatingBack});
     
     if (isNavigatingBack) {
       return;
@@ -361,16 +361,16 @@ document.addEventListener("DOMContentLoaded", function () {
     const button = e.target.closest("button, [role='button'], input[type='button'], input[type='submit']");
     
     if (button) {
-      console.log("Button clicked:", button);
+      // console.log("Button clicked:", button);
       if (isNavigationButton(button)) {
-        console.log("Allowing navigation for button");
+        // console.log("Allowing navigation for button");
         allowNavigation = true;
         return;
       }
     }
 
     if (!button && shouldIgnoreDirtyCheck(e.target)) {
-      console.log("Element has data-ignore-dirty");
+      // console.log("Element has data-ignore-dirty");
       allowNavigation = true;
     }
   }, true);
@@ -386,10 +386,10 @@ document.addEventListener("DOMContentLoaded", function () {
     
     if (!link) return;
 
-    console.log("Link clicked:", link.href);
+    // console.log("Link clicked:", link.href);
 
     if (shouldIgnoreDirtyCheck(link)) {
-      console.log("Link has data-ignore-dirty");
+      // console.log("Link has data-ignore-dirty");
       allowNavigation = true;
       return;
     }
@@ -400,16 +400,16 @@ document.addEventListener("DOMContentLoaded", function () {
         href.startsWith("#") || 
         href.startsWith("javascript:") ||
         link.target === "_blank") {
-      console.log("Link allowed (hash/javascript/blank)");
+      // console.log("Link allowed (hash/javascript/blank)");
       return;
     }
 
     if (!isDirty || allowNavigation) {
-      console.log("Link allowed (not dirty or navigation allowed)");
+      // console.log("Link allowed (not dirty or navigation allowed)");
       return;
     }
 
-    console.log("Link blocked - showing confirmation");
+    // console.log("Link blocked - showing confirmation");
     e.preventDefault();
     e.stopPropagation();
     e.stopImmediatePropagation();
@@ -427,14 +427,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
   forms.forEach(form => {
     form.addEventListener("submit", function (e) {
-      console.log("Form submitted - allowing navigation");
+      // console.log("Form submitted - allowing navigation");
       allowNavigation = true;
     });
 
     // Also handle buttons inside forms explicitly
     form.querySelectorAll("button, input[type='submit'], input[type='button']").forEach(button => {
       button.addEventListener("click", function(e) {
-        console.log("Form button clicked - allowing navigation");
+        // console.log("Form button clicked - allowing navigation");
         allowNavigation = true;
       });
     });

@@ -284,14 +284,14 @@
                 </div>
                 <div class="col-md-4">
                   <div class="form-group mb-4">
-                    <label for="city_id" class="form-label">{{ __('admin.City')}}</label>
-                    <select 
-                      class="form-select select2" 
-                      id="city_id" 
+                    <label for="city_id" class="form-label">{{ __('admin.District')}}</label>
+                    <select
+                      class="form-select select2"
+                      id="city_id"
                       name='city_id'
-                      data-placeholder="{{ __('admin.City')}}"
+                      data-placeholder="{{ __('admin.Select District')}}"
                     >
-                      <option value="0">{{ __('admin.City')}}</option>
+                      <option value="0">{{ __('admin.District')}}</option>
                       @php $name = 'name_'.$l; @endphp
                       @if($user->city_id)
                       <option value="{{$user->city_id}}" selected>{{$user->city->{'name_'.$l} }}</option>
@@ -778,7 +778,7 @@
                   selected = '';
               }
               $state.append('<option value="' + id + '" ' + selected + '>' + value + '</option>');
-              $('#city_id').html('<option value="" >{{ __('admin.City')}}</option>');
+              $('#city_id').html('<option value="" >{{ __('admin.District')}}</option>');
           });
           $('#state').show(150);
         }
@@ -795,7 +795,7 @@
             state_id: state_id
         },
         success: function(data) {
-            $city.html('<option value="" >{{ __('admin.City')}}</option>');
+            $city.html('<option value="" >{{ __('admin.District')}}</option>');
             $.each(data, function(id, value) {
                 if(currentCity == id){
                     selected = 'selected';

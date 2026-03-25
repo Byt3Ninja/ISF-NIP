@@ -62,7 +62,7 @@
                 </div>
                 <div class="d-flex flex-wrap flex-lg-nowrap align-items-center gap-3">
                   <a class="btn btn-primary" href="/dashboard/cycles/{{ $id }}">
-                    <i class="ti ti-components me-2"></i> {{ __('cycles.Manage Cycle') }}
+                    <i class="ti ti-adjustments me-2"></i> {{ __('cycles.Manage Cycle') }}
                   </a>
                   <a class="btn btn-label-primary" href="/dashboard/mentorship/view/{{ $id }}">
                     <i class="ti ti-settings me-2"></i> {{ __('cycles.Manage sessions') }}
