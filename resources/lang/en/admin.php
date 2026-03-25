@@ -3560,4 +3560,6 @@ return [
 	'Unassigned' => 'Unassigned',
 	'Disapprove' => 'Disapprove',
 	'mutiple_selection' => 'Multiple Selection',
+	'All_Groups' => 'All Groups',
+	'All_Difficulties'=> 'All Difficulties',
 ];

@@ -3617,4 +3617,6 @@ return [
 	'Unassigned' => 'غير مخصص',
 	'Disapprove' => 'الرفض',
 	'mutiple_selection' => 'اختيار متعدد',
+	'All_Groups' => 'كل المجموعات',
+	'All_Difficulties' => 'كل الصعوبات',
 ];
