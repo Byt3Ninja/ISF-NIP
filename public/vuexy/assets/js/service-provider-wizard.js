@@ -101,7 +101,7 @@
       document.querySelectorAll('.step-trigger').forEach((btn, index) => {
         // Enable all steps up to and including current step, plus any future completed steps
         const isAccessible = index <= currentStep || completedSteps.has(index);
-        
+
         if (isAccessible) {
           btn.disabled = false;
           btn.style.cursor = 'pointer';
@@ -119,7 +119,7 @@
       btn.addEventListener('click', function (e) {
         const currentStep = validationStepper._currentIndex;
         const isAccessible = index <= currentStep || completedSteps.has(index);
-        
+
         if (isAccessible) {
           validationStepper.to(index + 1);
         }
@@ -135,7 +135,7 @@
       step1InitialData = getStep1Data();
       step2InitialData = getStep2Data();
       step3InitialData = getStep3Data();
-      
+
       // Load completion status from existing data
       loadCompletedSteps();
       updateStepButtons();
@@ -159,22 +159,30 @@
         completedSteps.add(2);
       }
 
+      // ✅ If BOTH step 1 and step 2 are fulfilled, unlock steps 3, 4, and 5
+      if (hasStep1Data && hasStep2Data) {
+        completedSteps.add(2);
+        completedSteps.add(3);
+        completedSteps.add(4);
+      }
+
       // Check if step 3 has data
       const step3Data = JSON.parse(step3InitialData);
       const hasStep3Data = Object.values(step3Data).some(val => val !== '');
       if (hasStep3Data) {
         completedSteps.add(2);
         completedSteps.add(3);
+        completedSteps.add(4);
       }
 
-      // Check if step 4 (portfolio) has items
+      // Check if step 4 (portfolio) has items — already unlocks nothing new beyond what's above
       const $portfolioItems = $('.work-item-card:visible');
       if ($portfolioItems.length > 0) {
         let hasCompleteItems = false;
         $portfolioItems.each(function () {
           const hasTitle = $(this).find('.title-input').val().trim() !== '';
-          const hasMedia = $(this).find('.media-input')[0].files.length > 0 || 
-                          $(this).find('.upload-area img, .upload-area video').length > 0;
+          const hasMedia = $(this).find('.media-input')[0].files.length > 0 ||
+            $(this).find('.upload-area img, .upload-area video').length > 0;
           if (hasTitle && hasMedia) {
             hasCompleteItems = true;
             return false;
@@ -895,7 +903,7 @@
       });
     }
 
-     function getStep3Data() {
+    function getStep3Data() {
       const form = document.getElementById('service-provider-form-wizard');
       const formData = new FormData(form);
 
