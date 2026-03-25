@@ -184,7 +184,7 @@
               id="name_en" 
               name="name_en"
               required 
-              placeholder="{{__('admin.name_english')}}"
+              {{-- placeholder="{{__('admin.name_english')}}" --}}
               data-error-msg="{{ __('admin.name_english') }} {{ __('admin.must contain English letters only') }}">
             <div class="invalid-feedback">{{ __('admin.Required_Field') }}</div>
           </div>
@@ -198,7 +198,7 @@
               id="name_ar" 
               name="name_ar"
               required 
-              placeholder="{{__('admin.name_arabic')}}"
+              {{-- placeholder="{{__('admin.name_arabic')}}" --}}
               data-error-msg="{{ __('admin.name_arabic') }} {{ __('admin.must contain Arabic letters only') }}">
             <div class="invalid-feedback">{{ __('admin.Required_Field') }}</div>
           </div>
