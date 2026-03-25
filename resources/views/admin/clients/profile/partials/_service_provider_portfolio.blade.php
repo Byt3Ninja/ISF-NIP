@@ -52,9 +52,9 @@
                   <div class="upload-area border bg-light-subtle rounded p-6 text-center cursor-pointer">
                     @if($item->media_url)
                       @if($item->media_type === 'video')
-                        <video src="/191014/{{ $item->media_url }}" class="img-fluid rounded" style="max-height:100px;" preload="metadata"></video>
+                        <video src="{{ Storage::url($item->media_url) }}" class="img-fluid rounded" style="max-height:100px;" preload="metadata"></video>
                       @else
-                        <img src="/191014/{{ $item->media_url }}" class="img-fluid rounded" style="max-height:100px;">
+                        <img src="{{ Storage::url($item->media_url) }}" class="img-fluid rounded" style="max-height:100px;">
                       @endif
                       <div class="small mt-1 text-primary">{{ __('admin.change_file') }}</div>
                     @else
