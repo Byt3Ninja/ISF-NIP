@@ -3619,4 +3619,5 @@ return [
 	'mutiple_selection' => 'اختيار متعدد',
 	'All_Groups' => 'كل المجموعات',
 	'All_Difficulties' => 'كل الصعوبات',
+	'maximum_work_items_message' => 'يمكنك اضافة على الاكثر 20 عناصر للعمل',
 ];
