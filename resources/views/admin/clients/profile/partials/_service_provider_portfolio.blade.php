@@ -174,191 +174,192 @@
 
 @push('scripts')
 <script>
-  $(function() {
-    const $container = $('#itemsContainer');
-    const $addBtn = $('#addWorkItem');
-    const $template = $('#workItemTemplate');
-    const MAX_ITEMS = 20;
+$(function () {
+  const $container = $('#itemsContainer');
+  const $addBtn = $('#addWorkItem');
+  const $template = $('#workItemTemplate');
+  const MAX_ITEMS = 20;
 
-    // Initial item if none exists
-    if ($container.children().length === 0) {
-      addItem();
-    } else {
-      // Bind existing items
-      $container.find('.work-item-card').each(function() {
-        bindItem($(this));
-      });
-
-      // Initialize existing upload areas to prevent JS interference with server-rendered media
-      $container.find('.upload-area').off('click').on('click', function(e) {
-        e.stopPropagation();
-        const $item = $(this).closest('.work-item-card');
-        const $fileInput = $item.find('.media-input');
-        $fileInput.click();
-      });
-    }
-
-    $addBtn.on('click', function() {
-        if ($container.children(':visible').length < MAX_ITEMS) {
-            addItem();
-        } else {
-            // SweetAlert or similar could be used here
-            alert('Maximum ' + MAX_ITEMS + ' work items allowed.');
-        }
+  // Initial item if none exists
+  if ($container.children().length === 0) {
+    addItem();
+  } else {
+    // Bind existing items
+    $container.find('.work-item-card').each(function () {
+      bindItem($(this));
     });
 
-    function updateItemOrder() {
-      let visibleIndex = 1;
-      $container.find('.work-item-card:visible').each(function() {
-        $(this).find('.work-item-title').text(`{{ __('admin.work_item') }} ${visibleIndex++}`);
-      });
-    }
-
-    function addItem() {
-      const index = $container.children().length;
-      let html = $template.html();
-      
-      // Replace placeholders - do specific replacements first before general INDEX replacements
-      html = html.replace(/INDEX_PLUS_1/g, index + 1);
-      html = html.replace(/INDEX/g, index);
-      
-      const $item = $(html);
-      $container.append($item);
-      bindItem($item);
-      updateItemOrder();
-      
-      if (typeof window.rebuildPortfolioValidation === 'function') {
-        window.rebuildPortfolioValidation();
-      }
-    }
-
-    function bindItem($item) {
+    // Initialize existing upload areas to prevent JS interference with server-rendered media
+    $container.find('.upload-area').off('click').on('click', function (e) {
+      e.stopPropagation();
+      const $item = $(this).closest('.work-item-card');
       const $fileInput = $item.find('.media-input');
-      const $fileName = $item.find('.file-name');
-      const $previewBtn = $item.find('.preview-btn');
-      const $uploadArea = $item.find('.upload-area');
+      $fileInput.click();
+    });
+  }
 
-      // Only bind upload click if no existing media (prevents overwriting server media)
-      if ($uploadArea.find('img, video').length === 0) {
-        $uploadArea.on('click', () => $fileInput.click());
-      }
-
-      $item.find('.remove-item').on('click', () => {
-        const $idField = $item.find('input[name*="[id]"]');
-        if ($idField.val()) {
-          // If it has an ID, hide it and mark for deletion
-          $item.find('.delete-flag').val('true');
-          $item.find('input[type="text"], textarea').val('');
-          $item.find('.media-input').val('');
-          $item.find('.upload-area').empty();
-          $item.hide();
-        } else {
-          // If it's a new unsaved item, just remove it from DOM
-          $item.remove();
-        }
-        updateItemOrder();
-
-        if (typeof window.rebuildPortfolioValidation === 'function') {
-           window.rebuildPortfolioValidation();
-        }
-      });
-
-      $fileInput.on('change', function() {
-        const file = this.files[0];
-        if (!file) {
-          resetPreview();
-          return;
-        }
-
-        const $errorEl = $fileInput.siblings('.file-error');
-        const $parent = $fileInput.closest('.col-md-4');
-
-        // Clear previous errors
-        $errorEl.hide().addClass('d-none').empty();
-        $parent.removeClass('is-invalid');
-
-        if (file.size > 10 * 1024 * 1024) {
-          console.log('Portfolio file size validation failed');
-          $errorEl.html('{{ __("admin.file_size_too_large_portfolio") ?? "File size must be 10MB or less." }}').removeClass('d-none').show();
-          $parent.addClass('is-invalid');
-          $(this).val('');
-          return;
-        }
-        
-        const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg', 'image/webp', 'video/mp4'];
-        if (!allowedTypes.includes(file.type)) {
-           console.log('Portfolio file type validation failed');
-           $errorEl.html('{{ __("admin.unsupported_file_type_portfolio") ?? "Unsupported file type. Upload PNG, JPG, WEBP, or MP4." }}').removeClass('d-none').show();
-           $parent.addClass('is-invalid');
-           $(this).val('');
-          return;
-        }
-
-        $fileName.text(file.name);
-        $previewBtn.removeClass('d-none');
-        $previewBtn.off('click').on('click', () => showPreview(file));
-        
-        // Show local preview in the upload area
-        const reader = new FileReader();
-        reader.onload = (e) => {
-           $uploadArea.empty();
-           if (file.type.startsWith('image')) {
-             $('<img>', { src: e.target.result, class: 'img-fluid rounded', style: 'max-height: 100px;' }).appendTo($uploadArea);
-           } else {
-             $('<video>', { src: e.target.result, class: 'img-fluid rounded', style: 'max-height: 100px;' }).appendTo($uploadArea);
-           }
-           $uploadArea.append('<div class="small mt-1 text-primary">{{ __("admin.change_file") }}</div>');
-        };
-        reader.readAsDataURL(file);
-      });
-
-      function resetPreview() {
-        $fileName.text('{{ __("admin.no_file_selected") }}');
-        $previewBtn.addClass('d-none');
-        const $parent = $fileInput.closest('.col-md-4');
-        $parent.removeClass('is-invalid');
-        const $errorEl = $fileInput.siblings('.file-error');
-        if ($errorEl.length) $errorEl.hide().addClass('d-none').empty();
-      }
-      
-      // Handle existing media preview - always bind if media present
-      if ($uploadArea.find('img, video').length > 0) {
-        $previewBtn.removeClass('d-none');
-        $previewBtn.off('click.preview').on('click.preview', function() {
-          const $mediaEl = $uploadArea.find('img, video');
-          const type = $mediaEl.is('video') ? 'video' : 'image';
-          const src = $mediaEl.attr('src');
-          renderModalPreview(src, type);
-        });
-      }
-    }
-
-    function showPreview(file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const type = file.type.startsWith('video') ? 'video' : 'image';
-        renderModalPreview(e.target.result, type);
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function renderModalPreview(src, type) {
-      const $modalContent = $('#modalPreviewContent').empty();
-      if (type === 'image') {
-        $('<img>', { src: src, class: 'img-fluid rounded' }).appendTo($modalContent);
-      } else {
-        $('<video>', { src: src, controls: true, class: 'w-100 rounded' }).appendTo($modalContent);
-      }
-      new bootstrap.Modal('#mediaPreviewModal').show();
+  $addBtn.on('click', function () {
+    if ($container.children(':visible').length <= MAX_ITEMS) {
+      addItem();
+    } else {
+      // SweetAlert or similar could be used here
+      // alert('Maximum ' + MAX_ITEMS + ' work items allowed.');
+      releaseWarningAlert({ message: "{{ __('admin.maximum_work_items_message') }}" });
     }
   });
 
-  $('#portfolio_visibility').change(function() {
-    $('#portfolio_visibility_desc').text(
-      $(this).is(':checked') 
-        ? '{{ __("admin.visibility_public_desc") ?? "Portfolio is currently visible to everyone." }}' 
-        : '{{ __("admin.visibility_private_desc") ?? "Portfolio is private and only visible to you." }}'
-    );
-  }).trigger('change');
+  function updateItemOrder() {
+    let visibleIndex = 1;
+    $container.find('.work-item-card:visible').each(function () {
+      $(this).find('.work-item-title').text(`{{ __('admin.work_item') }} ${visibleIndex++}`);
+    });
+  }
+
+  function addItem() {
+    const index = $container.children().length;
+    let html = $template.html();
+
+    // Replace placeholders - do specific replacements first before general INDEX replacements
+    html = html.replace(/INDEX_PLUS_1/g, index + 1);
+    html = html.replace(/INDEX/g, index);
+
+    const $item = $(html);
+    $container.append($item);
+    bindItem($item);
+    updateItemOrder();
+
+    if (typeof window.rebuildPortfolioValidation === 'function') {
+      window.rebuildPortfolioValidation();
+    }
+  }
+
+  function bindItem($item) {
+    const $fileInput = $item.find('.media-input');
+    const $fileName = $item.find('.file-name');
+    const $previewBtn = $item.find('.preview-btn');
+    const $uploadArea = $item.find('.upload-area');
+
+    // Only bind upload click if no existing media (prevents overwriting server media)
+    if ($uploadArea.find('img, video').length === 0) {
+      $uploadArea.on('click', () => $fileInput.click());
+    }
+
+    $item.find('.remove-item').on('click', () => {
+      const $idField = $item.find('input[name*="[id]"]');
+      if ($idField.val()) {
+        // If it has an ID, hide it and mark for deletion
+        $item.find('.delete-flag').val('true');
+        $item.find('input[type="text"], textarea').val('');
+        $item.find('.media-input').val('');
+        $item.find('.upload-area').empty();
+        $item.hide();
+      } else {
+        // If it's a new unsaved item, just remove it from DOM
+        $item.remove();
+      }
+      updateItemOrder();
+
+      if (typeof window.rebuildPortfolioValidation === 'function') {
+        window.rebuildPortfolioValidation();
+      }
+    });
+
+    $fileInput.on('change', function () {
+      const file = this.files[0];
+      if (!file) {
+        resetPreview();
+        return;
+      }
+
+      const $errorEl = $fileInput.siblings('.file-error');
+      const $parent = $fileInput.closest('.col-md-4');
+
+      // Clear previous errors
+      $errorEl.hide().addClass('d-none').empty();
+      $parent.removeClass('is-invalid');
+
+      if (file.size > 10 * 1024 * 1024) {
+        console.log('Portfolio file size validation failed');
+        $errorEl.html('{{ __("admin.file_size_too_large_portfolio") ?? "File size must be 10MB or less." }}').removeClass('d-none').show();
+        $parent.addClass('is-invalid');
+        $(this).val('');
+        return;
+      }
+
+      const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg', 'image/webp', 'video/mp4'];
+      if (!allowedTypes.includes(file.type)) {
+        console.log('Portfolio file type validation failed');
+        $errorEl.html('{{ __("admin.unsupported_file_type_portfolio") ?? "Unsupported file type. Upload PNG, JPG, WEBP, or MP4." }}').removeClass('d-none').show();
+        $parent.addClass('is-invalid');
+        $(this).val('');
+        return;
+      }
+
+      $fileName.text(file.name);
+      $previewBtn.removeClass('d-none');
+      $previewBtn.off('click').on('click', () => showPreview(file));
+
+      // Show local preview in the upload area
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        $uploadArea.empty();
+        if (file.type.startsWith('image')) {
+          $('<img>', { src: e.target.result, class: 'img-fluid rounded', style: 'max-height: 100px;' }).appendTo($uploadArea);
+        } else {
+          $('<video>', { src: e.target.result, class: 'img-fluid rounded', style: 'max-height: 100px;' }).appendTo($uploadArea);
+        }
+        $uploadArea.append('<div class="small mt-1 text-primary">{{ __("admin.change_file") }}</div>');
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function resetPreview() {
+      $fileName.text('{{ __("admin.no_file_selected") }}');
+      $previewBtn.addClass('d-none');
+      const $parent = $fileInput.closest('.col-md-4');
+      $parent.removeClass('is-invalid');
+      const $errorEl = $fileInput.siblings('.file-error');
+      if ($errorEl.length) $errorEl.hide().addClass('d-none').empty();
+    }
+
+    // Handle existing media preview - always bind if media present
+    if ($uploadArea.find('img, video').length > 0) {
+      $previewBtn.removeClass('d-none');
+      $previewBtn.off('click.preview').on('click.preview', function () {
+        const $mediaEl = $uploadArea.find('img, video');
+        const type = $mediaEl.is('video') ? 'video' : 'image';
+        const src = $mediaEl.attr('src');
+        renderModalPreview(src, type);
+      });
+    }
+  }
+
+  function showPreview(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const type = file.type.startsWith('video') ? 'video' : 'image';
+      renderModalPreview(e.target.result, type);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function renderModalPreview(src, type) {
+    const $modalContent = $('#modalPreviewContent').empty();
+    if (type === 'image') {
+      $('<img>', { src: src, class: 'img-fluid rounded' }).appendTo($modalContent);
+    } else {
+      $('<video>', { src: src, controls: true, class: 'w-100 rounded' }).appendTo($modalContent);
+    }
+    new bootstrap.Modal('#mediaPreviewModal').show();
+  }
+});
+
+$('#portfolio_visibility').change(function () {
+  $('#portfolio_visibility_desc').text(
+    $(this).is(':checked')
+      ? '{{ __("admin.visibility_public_desc") ?? "Portfolio is currently visible to everyone." }}'
+      : '{{ __("admin.visibility_private_desc") ?? "Portfolio is private and only visible to you." }}'
+  );
+}).trigger('change');
 </script>
 @endpush

@@ -3562,4 +3562,5 @@ return [
 	'mutiple_selection' => 'Multiple Selection',
 	'All_Groups' => 'All Groups',
 	'All_Difficulties'=> 'All Difficulties',
+	'maximum_work_items_message' => 'Maximum 20 work items allowed',
 ];
