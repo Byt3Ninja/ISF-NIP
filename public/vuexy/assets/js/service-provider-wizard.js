@@ -99,8 +99,8 @@
     function updateStepButtons() {
       const currentStep = validationStepper._currentIndex;
       document.querySelectorAll('.step-trigger').forEach((btn, index) => {
-        // Steps 3,4,5 always enabled by default (optional after basics)
-        const isAccessible = index <= currentStep || completedSteps.has(index) || index >= 2;
+        // Enable all steps up to and including current step, plus any future completed steps
+        const isAccessible = index <= currentStep || completedSteps.has(index);
         
         if (isAccessible) {
           btn.disabled = false;
@@ -167,11 +167,23 @@
         completedSteps.add(3);
       }
 
-      // Check if step 4 (portfolio) has items - optional, enable if any data
+      // Check if step 4 (portfolio) has items
       const $portfolioItems = $('.work-item-card:visible');
       if ($portfolioItems.length > 0) {
-        completedSteps.add(3);
-        completedSteps.add(4);
+        let hasCompleteItems = false;
+        $portfolioItems.each(function () {
+          const hasTitle = $(this).find('.title-input').val().trim() !== '';
+          const hasMedia = $(this).find('.media-input')[0].files.length > 0 || 
+                          $(this).find('.upload-area img, .upload-area video').length > 0;
+          if (hasTitle && hasMedia) {
+            hasCompleteItems = true;
+            return false;
+          }
+        });
+        if (hasCompleteItems) {
+          completedSteps.add(3);
+          completedSteps.add(4);
+        }
       }
     }
 
@@ -957,7 +969,7 @@
                 const titleVal = $item.find('.title-input').val().trim();
                 const descVal = $item.find('.desc-input').val().trim();
 
-                if (titleVal || descVal) {
+                if (titleVal && descVal) {
                   return hasFile || hasExisting;
                 }
                 return true;
@@ -1029,8 +1041,15 @@
           callback: {
             message: translations[lang].at_least_one_item,
             callback: function () {
-              // Step 4 is optional - always valid
-              return true;
+              let isValid = false;
+              $('.work-item-card:visible').each(function () {
+                const hasTitle = $(this).find('.title-input').val().trim() !== '';
+                const hasMedia = $(this).find('.media-input')[0].files.length > 0 || $(this).find('.upload-area img, .upload-area video').length > 0;
+                if (hasTitle && hasMedia) {
+                  isValid = true; return false;
+                }
+              });
+              return isValid;
             }
           }
         }
@@ -1052,7 +1071,6 @@
           submitButton: new FormValidation.plugins.SubmitButton()
         }
       }).on('core.form.valid', function () {
-        // Optional step - always proceed after save
         saveStepData(3, FormValidation4);
       });
     }
