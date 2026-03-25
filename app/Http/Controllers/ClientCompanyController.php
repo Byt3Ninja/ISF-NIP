@@ -203,6 +203,25 @@ class ClientCompanyController extends Controller
         $trainingToSum = collect();
         $finalScreenAvg = collect();
         foreach ($almunies as $almuni) {
+            if (!empty($almuni->mentorship)) {
+                $mentorshipData = is_array($almuni->mentorship)
+                    ? $almuni->mentorship
+                    : json_decode($almuni->mentorship, true);
+                $mentorshipToSum = $mentorshipToSum->merge($mentorshipData ?? []);
+            }
+            if (!empty($almuni->training)) {
+                $trainingData = is_array($almuni->training)
+                    ? $almuni->training
+                    : json_decode($almuni->training, true);
+                $trainingToSum = $trainingToSum->merge($trainingData ?? []);
+            }
+            if (!empty($almuni->final_screening)) {
+                $finalScreenData = is_array($almuni->final_screening)
+                    ? $almuni->final_screening
+                    : json_decode($almuni->final_screening, true);
+                $finalScreenAvg = $finalScreenAvg->merge($finalScreenData ?? []);
+            }
+
             $programsRaw = json_decode($almuni->program ?? '[]');
             if (!is_array($programsRaw)) continue;
             foreach ($programsRaw as $p) {
@@ -210,11 +229,12 @@ class ClientCompanyController extends Controller
                 $orgObj = null;
                 if (isset($p->Organization)) {
                     if (is_object($p->Organization)) {
-                        $orgObj = (object)[ 'name' => $p->Organization->name_en0 ?? null ];
+                        $l = app()->getLocale();
+                        $orgObj = (object)[ 'name' => $p->Organization->{'name_' . $l} ?? $p->Organization->name_en ?? $p->Organization->name_ar ?? null ];
                     } else {
                         $orgObj = (object)[ 'name' => $p->Organization ];
                     }
-                    
+
                 } elseif (isset($p->{'Organization_Name'})) {
                     if (is_object($p->{'Organization Name'})) {
                         $orgObj = (object)[ 'name' => $p->{'Organization_Name'}->name ?? null ];
@@ -235,19 +255,10 @@ class ClientCompanyController extends Controller
                     'status' => $p->Status ?? 'completed',
                 ]);
             }
-            
-            if (!empty($almuni->mentorship)) {
-                $mentorshipToSum = collect(json_decode($almuni->mentorship, true));
-            }
-            if(!empty($almuni->training)){   
-                $trainingToSum = collect(json_decode($almuni->training, true));
-            }
-            if(!empty($almuni->final_screening)){
-                $finalScreenAvg = collect(json_decode($almuni->final_screening, true));
-            }
         }
         $programs = $programs->values()->all();
         $curentCycle = $company->cycledata?->mentorshipRequests?->where('user_id', $company?->user?->id)->sum('period');
+        
         $totalMinutes = $mentorshipToSum->sum('duration') + $curentCycle;
         $hours   = intdiv($totalMinutes, 60);
         $minutes = $totalMinutes % 60;
@@ -285,7 +296,10 @@ class ClientCompanyController extends Controller
         $alumniScores = collect();
         foreach ($almunies as $almuni) {
             if (!empty($almuni->final_screening)) {
-                $finalScreeningData = collect(json_decode($almuni->final_screening, true));
+                $fsRaw = is_array($almuni->final_screening)
+                    ? $almuni->final_screening
+                    : json_decode($almuni->final_screening, true);
+                $finalScreeningData = collect($fsRaw ?? []);
                 $overallScores = $finalScreeningData->pluck('overall_score')->filter();
 
                 if ($overallScores->isNotEmpty()) {
@@ -317,8 +331,10 @@ class ClientCompanyController extends Controller
         $alumniMentorships = collect();
         foreach ($almunies as $almuni) {
             if (!empty($almuni->mentorship)) {
-                $mentorshipData = collect(json_decode($almuni->mentorship, true));
-                $alumniMentorships = $alumniMentorships->merge($mentorshipData);
+                $mRaw = is_array($almuni->mentorship)
+                    ? $almuni->mentorship
+                    : json_decode($almuni->mentorship, true);
+                $alumniMentorships = $alumniMentorships->merge($mRaw ?? []);
             }
         }
 
