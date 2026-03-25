@@ -599,6 +599,7 @@ class TrainingController extends Controller
 			
 			// $sessions = TrainingSession::where('step_id', $id)->with('reports')->orderBy('datetime', 'ASC');
 			$current_step = $steps->where('id', $id)->first();
+			if( !$current_step ) { return abort(404); }
 			$sessions = TrainingSession::with('reports')->orderBy('datetime', 'ASC');
 			if( $request->company_id != 0 )
 			{ 
@@ -629,6 +630,7 @@ class TrainingController extends Controller
 			$program_steps = $steps->where('cycle_id', $current_step->cycle->id)->values();
 			return view('admin/settings/training/sessions', compact('steps', 'program_steps', 'id', 'sessions', 'cycles', 'online', 'current_step'));
 		} catch (\Throwable $e) {
+			if( $e->getStatusCode() == 404 ) { return abort(404); }
 			Log::error('Error in TrainingController@sessions: ' . $e->getMessage());
 		}
 	}

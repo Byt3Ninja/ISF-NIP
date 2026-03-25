@@ -27,6 +27,7 @@
   {{-- ============================================================
       Training Step Selection Card
   ============================================================ --}}
+  @if( !is_null( request()->id ) )
   <div class="card mb-4">
     <div class="card-body overflow-x-hidden text-nowrap">
       <div class="d-flex flex-wrap flex-lg-nowrap justify-content-between align-items-md-center">
@@ -67,6 +68,7 @@
       </div>
     </div>
   </div>
+  @endif
 
   {{-- ============================================================
        Main Card
