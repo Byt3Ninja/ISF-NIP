@@ -1206,6 +1206,14 @@
             if (stepIndex + 1 < 5) {
               completedSteps.add(stepIndex + 1);
             }
+
+            // ✅ Once step 2 (index 1) is saved, unlock steps 3, 4, and 5 immediately
+            if (stepIndex >= 1) {
+              completedSteps.add(2);
+              completedSteps.add(3);
+              completedSteps.add(4);
+            }
+
             updateStepButtons();
             validationStepper.next();
           } else {
