@@ -3,6 +3,7 @@
     $showPortfolio = $org ? $org->show_portfolio : true;
     $portfolios = $org ? $org->portfolios : collect();
 @endphp
+{{-- {{ dd($portfolios) }} --}}
 <div id="step-4-portfolio">
   <div class="row g-6">
     <div class="col-12">
@@ -49,10 +50,10 @@
 
                     <div class="upload-area border bg-light-subtle rounded p-6 text-center cursor-pointer">
                       @if($item->media_url)
-                        @if($item->media_type === 'video')
-                          <video src="{{ $item->media_full_url }}" class="img-fluid rounded" style="max-height: 100px;"></video>
+                       @if($item->media_type === 'video')
+                          <video src="/191014/{{ $item->media_url }}" class="img-fluid rounded" style="max-height: 100px;"></video>
                         @else
-                          <img src="{{ $item->media_full_url }}" class="img-fluid rounded" style="max-height: 100px;">
+                          <img src="/191014/{{ $item->media_url }}" class="img-fluid rounded" style="max-height: 100px;">
                         @endif
                         <div class="small mt-1 text-primary">{{ __('admin.change_file') }}</div>
                       @else
@@ -180,21 +181,14 @@ $(function () {
   const $template = $('#workItemTemplate');
   const MAX_ITEMS = 20;
 
-  // Initial item if none exists
+  // ── FIX: removed the redundant upload-area re-bind block that was overwriting
+  //         the preview handler set by bindItem for server-rendered items.
+  //         bindItem() now fully owns all click logic for every card.
   if ($container.children().length === 0) {
     addItem();
   } else {
-    // Bind existing items
     $container.find('.work-item-card').each(function () {
       bindItem($(this));
-    });
-
-    // Initialize existing upload areas to prevent JS interference with server-rendered media
-    $container.find('.upload-area').off('click').on('click', function (e) {
-      e.stopPropagation();
-      const $item = $(this).closest('.work-item-card');
-      const $fileInput = $item.find('.media-input');
-      $fileInput.click();
     });
   }
 
@@ -202,8 +196,6 @@ $(function () {
     if ($container.children(':visible').length <= MAX_ITEMS) {
       addItem();
     } else {
-      // SweetAlert or similar could be used here
-      // alert('Maximum ' + MAX_ITEMS + ' work items allowed.');
       releaseWarningAlert({ message: "{{ __('admin.maximum_work_items_message') }}" });
     }
   });
@@ -219,7 +211,6 @@ $(function () {
     const index = $container.children().length;
     let html = $template.html();
 
-    // Replace placeholders - do specific replacements first before general INDEX replacements
     html = html.replace(/INDEX_PLUS_1/g, index + 1);
     html = html.replace(/INDEX/g, index);
 
@@ -234,27 +225,48 @@ $(function () {
   }
 
   function bindItem($item) {
-    const $fileInput = $item.find('.media-input');
-    const $fileName = $item.find('.file-name');
+    const $fileInput  = $item.find('.media-input');
+    const $fileName   = $item.find('.file-name');
     const $previewBtn = $item.find('.preview-btn');
     const $uploadArea = $item.find('.upload-area');
 
-    // Only bind upload click if no existing media (prevents overwriting server media)
-    if ($uploadArea.find('img, video').length === 0) {
-      $uploadArea.on('click', () => $fileInput.click());
+    // ── FIX: unified upload-area click handling.
+    //
+    //   • New items (no server-rendered media): clicking the area opens the file picker.
+    //   • Existing items (has img/video from server): clicking the area ALSO opens the
+    //     file picker so the user can replace the file.  The preview button is the
+    //     dedicated control for showing the modal.
+    //
+    //   Previously, existing items skipped this bind entirely, then the outer init block
+    //   re-added it unconditionally — but that wiped out the preview handler that was
+    //   bound below.  Now bindItem owns all bindings and the outer block is gone.
+    $uploadArea.off('click').on('click', function () {
+      $fileInput.trigger('click');
+    });
+
+    // ── Existing server-rendered media: wire up preview button
+    if ($uploadArea.find('img, video').length > 0) {
+      $previewBtn.removeClass('d-none');
+
+      $previewBtn.off('click.preview').on('click.preview', function (e) {
+        e.stopPropagation(); // prevent bubbling to upload-area click → file picker
+        const $mediaEl = $uploadArea.find('img, video');
+        const type = $mediaEl.is('video') ? 'video' : 'image';
+        const src  = $mediaEl.attr('src');
+        renderModalPreview(src, type);
+      });
     }
 
-    $item.find('.remove-item').on('click', () => {
+    // ── Remove / soft-delete
+    $item.find('.remove-item').on('click', function () {
       const $idField = $item.find('input[name*="[id]"]');
       if ($idField.val()) {
-        // If it has an ID, hide it and mark for deletion
         $item.find('.delete-flag').val('true');
         $item.find('input[type="text"], textarea').val('');
         $item.find('.media-input').val('');
         $item.find('.upload-area').empty();
         $item.hide();
       } else {
-        // If it's a new unsaved item, just remove it from DOM
         $item.remove();
       }
       updateItemOrder();
@@ -264,6 +276,7 @@ $(function () {
       }
     });
 
+    // ── File input change
     $fileInput.on('change', function () {
       const file = this.files[0];
       if (!file) {
@@ -272,14 +285,12 @@ $(function () {
       }
 
       const $errorEl = $fileInput.siblings('.file-error');
-      const $parent = $fileInput.closest('.col-md-4');
+      const $parent  = $fileInput.closest('.col-md-4');
 
-      // Clear previous errors
       $errorEl.hide().addClass('d-none').empty();
       $parent.removeClass('is-invalid');
 
       if (file.size > 10 * 1024 * 1024) {
-        console.log('Portfolio file size validation failed');
         $errorEl.html('{{ __("admin.file_size_too_large_portfolio") ?? "File size must be 10MB or less." }}').removeClass('d-none').show();
         $parent.addClass('is-invalid');
         $(this).val('');
@@ -288,7 +299,6 @@ $(function () {
 
       const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg', 'image/webp', 'video/mp4'];
       if (!allowedTypes.includes(file.type)) {
-        console.log('Portfolio file type validation failed');
         $errorEl.html('{{ __("admin.unsupported_file_type_portfolio") ?? "Unsupported file type. Upload PNG, JPG, WEBP, or MP4." }}').removeClass('d-none').show();
         $parent.addClass('is-invalid');
         $(this).val('');
@@ -297,9 +307,15 @@ $(function () {
 
       $fileName.text(file.name);
       $previewBtn.removeClass('d-none');
-      $previewBtn.off('click').on('click', () => showPreview(file));
 
-      // Show local preview in the upload area
+      // ── FIX: use a named namespace so we can safely replace the handler
+      //         without stacking multiple listeners on repeated file changes.
+      $previewBtn.off('click.preview').on('click.preview', function (e) {
+        e.stopPropagation();
+        showPreview(file);
+      });
+
+      // Show local thumbnail in the upload area
       const reader = new FileReader();
       reader.onload = (e) => {
         $uploadArea.empty();
@@ -316,21 +332,10 @@ $(function () {
     function resetPreview() {
       $fileName.text('{{ __("admin.no_file_selected") }}');
       $previewBtn.addClass('d-none');
-      const $parent = $fileInput.closest('.col-md-4');
+      const $parent  = $fileInput.closest('.col-md-4');
       $parent.removeClass('is-invalid');
       const $errorEl = $fileInput.siblings('.file-error');
       if ($errorEl.length) $errorEl.hide().addClass('d-none').empty();
-    }
-
-    // Handle existing media preview - always bind if media present
-    if ($uploadArea.find('img, video').length > 0) {
-      $previewBtn.removeClass('d-none');
-      $previewBtn.off('click.preview').on('click.preview', function () {
-        const $mediaEl = $uploadArea.find('img, video');
-        const type = $mediaEl.is('video') ? 'video' : 'image';
-        const src = $mediaEl.attr('src');
-        renderModalPreview(src, type);
-      });
     }
   }
 
@@ -346,7 +351,7 @@ $(function () {
   function renderModalPreview(src, type) {
     const $modalContent = $('#modalPreviewContent').empty();
     if (type === 'image') {
-      $('<img>', { src: src, class: 'img-fluid rounded' }).appendTo($modalContent);
+      $('<img>',   { src: src, class: 'img-fluid rounded' }).appendTo($modalContent);
     } else {
       $('<video>', { src: src, controls: true, class: 'w-100 rounded' }).appendTo($modalContent);
     }
@@ -354,7 +359,7 @@ $(function () {
   }
 });
 
-$('#portfolio_visibility').change(function () {
+$('#portfolio_visibility').on('change', function () {
   $('#portfolio_visibility_desc').text(
     $(this).is(':checked')
       ? '{{ __("admin.visibility_public_desc") ?? "Portfolio is currently visible to everyone." }}'
