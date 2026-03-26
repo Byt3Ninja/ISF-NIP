@@ -43,14 +43,6 @@
         @if (session()->has('success'))
           <x-alert type="success" message="{{ session()->get('success') }}" />
         @endif
-        @if (session()->has('error'))
-          <x-alert type="danger" message="{{ session()->get('error') }}" />
-        @endif
-        @if ($errors->any())
-          @foreach ($errors->all() as $error)
-            <x-alert type="danger" message="{{ $error }}" />
-          @endforeach
-        @endif
 
         <div class="bs-stepper wizard-numbered">
           <!-- Wizard header -->
@@ -92,15 +84,29 @@
               <input type="hidden" name="current_step" id="current_step" value="{{ $activeStep }}">
               <input type="hidden" name="redirect_to" id="redirect_to" value="next">
 
-              <!-- Error Alert -->
-              <div class="px-8 mt-6" id="errorAlert" style="display: none;">
-                <div class="alert alert-danger alert-dismissible">
-                  <i class="ti ti-alert-triangle me-2"></i>
-                  <span id="errorAlertMessage"></span>
-                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              <!-- Alerts -->
+              <div class="px-8">
+                @if (session()->has('error'))
+                  <div class="mt-6">
+                    <x-alert type="danger" message="{{ session()->get('error') }}" />
+                  </div>
+                @endif
+                @if ($errors->any())
+                  <div class="mt-6">
+                    @foreach ($errors->all() as $error)
+                      <x-alert type="danger" message="{{ $error }}" />
+                    @endforeach
+                  </div>
+                @endif
+
+                <div id="errorAlert" style="display: none;">
+                  <div class="alert alert-danger alert-dismissible">
+                    <i class="ti ti-alert-triangle me-2"></i>
+                    <span id="errorAlertMessage"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
                 </div>
               </div>
-              <!--/ Error Alert -->
 
               @foreach ($tabs as $tab)
                 <div id="{{ $tab['id'] }}" class="content {{ $activeStep == $tab['step'] ? 'active' : '' }}">
@@ -646,63 +652,87 @@
         });
       }
 
-      // Override Stepper behavior for validation
       function initStepperWithValidation() {
         const wizardIcons = document.querySelector('.wizard-numbered');
         if (!wizardIcons) return;
 
-        // Initialize Stepper with linear: false to allow going back always
         const iconsStepper = new Stepper(wizardIcons, {
           linear: false
         });
 
-        // 2. Jump to the step from URL
         if (config.activeStep > 1) {
-          iconsStepper.to(config.activeStep); // bs-stepper .to() is 1-indexed in some versions, check yours
+          iconsStepper.to(config.activeStep);
         }
 
-        // Override next/previous to include validation
-        const originalNext = iconsStepper.next.bind(iconsStepper);
-        const originalPrevious = iconsStepper.previous.bind(iconsStepper);
+        // COMPLETELY disable step trigger clicks from stepper
+        document.querySelectorAll('.step-trigger').forEach(trigger => {
+          trigger.removeAttribute('data-bs-toggle');
+          
+          // Remove any existing click handlers from bs-stepper
+          const newTrigger = trigger.cloneNode(true);
+          trigger.parentNode.replaceChild(newTrigger, trigger);
+        });
 
-        iconsStepper.next = function() {
-          const currentStep = parseInt($('#current_step').val()) || config.activeStep;
-          const validator = validators[currentStep];
-
-          if (validator) {
-            validator.validate().then(status => {
-              if (status === 'Valid') {
-                originalNext();
-              } else {
-                // Validation failed, show error
-                utils.scrollToError();
-                utils.showError(config.translations.fixErrors);
-              }
-            });
-          } else {
-            originalNext();
-          }
-        };
-
-        iconsStepper.previous = function() {
-          originalPrevious();
-        };
-
-        // Update current_step when stepper changes step
         wizardIcons.addEventListener('shown.bs-stepper', function(event) {
           const newStep = (event.detail.indexStep !== undefined) ? event.detail.indexStep + 1 : config.activeStep;
           $('#current_step').val(newStep);
         });
 
-        // Store reference for later use
         window.iconsStepper = iconsStepper;
       }
+
+      function initStepperClickHandlers() {
+        // Now attach fresh handlers after cloning
+        $(document).on('click', '.step-trigger', function(e) {
+          e.preventDefault();
+          e.stopImmediatePropagation(); // Stop ALL other handlers
+          
+          const $trigger = $(this);
+          const targetStep = parseInt($trigger.data('tab-index'));
+          const currentStep = parseInt($('#current_step').val()) || config.activeStep;
+          
+          if ($trigger.is(':disabled') || $trigger.prop('disabled')) {
+            utils.showWarning(config.translations.completeStepsFirst);
+            return false;
+          }
+          
+          if (targetStep === currentStep) {
+            return false;
+          }
+          
+          if (targetStep > currentStep) {
+            const validator = validators[currentStep];
+            if (validator) {
+              validator.validate().then(status => {
+                if (status === 'Valid') {
+                  updateUrlStep(targetStep);
+                } else {
+                  utils.scrollToError();
+                  utils.showError(config.translations.fixErrors);
+                }
+              });
+              return false;
+            }
+          }
+          
+          updateUrlStep(targetStep);
+          return false;
+        });
+      }
+
+      function updateUrlStep(step) {
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('step', step);
+        window.location.href = window.location.pathname + '?' + urlParams.toString();
+      }
+
 
       // Initialize Everything
       $(document).ready(function() {
         initSelect2();
         initValidation(1);
         initValidation(2);
+        initStepperClickHandlers();
         initStepperWithValidation();
         initTabNavigation();
         initEventHandlers();
