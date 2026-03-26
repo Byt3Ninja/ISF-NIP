@@ -169,7 +169,7 @@ return [
 	'Add new user' => 'Add new user',
 	'Edit user' => 'Edit user',
 	'Change The account`s password' => 'Change The account`s password',
-	'Users`s List' => 'Users`s List',
+	'Users`s List' => 'Users List',
 	'Address' => 'Address',
 	'edit_currency' => 'Edit Currency',
 	'Name' => 'Name',

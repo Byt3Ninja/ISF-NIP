@@ -1,7 +1,7 @@
 <nav class="{{ $card ? 'card shadow-xs px-4 py-3 mb-4' : 'nav-align-top' }}">
     <ul class="nav nav-pills gap-1" role="tablist">
         @foreach ($tabs as $index => $tab)
-            <li class="nav-item {{ isset($tab['url']) ? '' : (isset($tab['route']) && $_user->ableTo($tab['route']) ? '' : '') }}" role="presentation">
+            <li class="nav-item flex-fill flex-md-grow-0 {{ isset($tab['url']) ? '' : (isset($tab['route']) && $_user->ableTo($tab['route']) ? '' : '') }}" role="presentation">
 
                 <a
                     @if (isset($tab['route'])) 
@@ -15,7 +15,7 @@
                         role="tab"
                     @endif
 
-                    class="nav-link
+                    class="nav-link w-100 text-center
                         @if (isset($tab['route']))
                             {{ isset($tab['params']) 
                                 ? (Route::is($tab['route']) && request()->route('status') == $tab['params'] ? 'active' : '') 
