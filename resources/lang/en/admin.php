@@ -3565,4 +3565,6 @@ return [
 	'maximum_work_items_message' => 'Maximum 20 work items allowed',
 	'start_imperonation_message' => 'You will login as this user. Are you sure you want to continue?',
 	'price_max_validation' => 'The price must be less than or equal to :max.',
+	'strong_password_validation' => 'Password must be strong including uppercase, lowercase, numbers, and special characters.',
+	'password_length_validation' => 'Password must be 8-20 characters long.',
 ];

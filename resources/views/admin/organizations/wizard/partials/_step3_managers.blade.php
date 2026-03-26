@@ -1,5 +1,5 @@
 <!-- Selected Managers Bar -->
-<div class="card bg-light-subtle shadow-none border-bottom border-top rounded-0">
+<div id="selectedManagersBar" class="card bg-light-subtle shadow-none border-bottom border-top rounded-0" style="display: none;">
   <div class="card-body py-4">
     <div class="d-flex justify-content-between align-items-center mb-2">
       <h6 class="card-title mb-0 ps-2">
@@ -11,7 +11,7 @@
     </div>
     
     <div id="selectedManagersContainer" class="d-flex flex-wrap gap-2 p-2 bg-light-subtle rounded border border-dashed" style="min-height: 50px;">
-      <span class="text-muted my-auto no-managers-message w-100 text-center">{{ __('admin.No managers selected') }}</span>
+        <!-- Message is handled by JS logic now -->
     </div>
     
     <!-- Hidden inputs container -->
@@ -157,6 +157,7 @@
 $(function () {
   const orgId = "{{ $organization->id ?? 0 }}";
   let selectedManagers = @json($assignedManagers ?? []);
+
   let searchTimeout = null;
   let currentPage = 0;
 
@@ -231,14 +232,35 @@ $(function () {
           },
           password: {
             validators: {
-              stringLength: { min: 8, message: '{{ __("validation.min.string", ["attribute" => "password", "min" => 8]) }}' },
+              notEmpty: { message: "{{ __('admin.Required_Field') }}" },
+              stringLength: {
+                min: 8,
+                max: 20,
+                message: "{{ __('admin.password_length_validation') }}",
+              },
+              regexp: {
+                regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).{8,}$/,
+                message: "{{ __('admin.strong_password_validation') }}"
+              }
             }
           },
           password_confirmation: {
             validators: {
+              notEmpty: { message: "{{ __('admin.Required_Field') }}" },
               identical: {
-                compare: function () { return document.getElementById('manager_password').value; },
+                compare: function () {
+                  return document.getElementById('createManagerWizardForm').querySelector('[name="password"]').value;
+                },
                 message: '{{ __("admin.Passwords do not match") }}',
+              },
+              stringLength: {
+                min: 8,
+                max: 20,
+                message: "{{ __('admin.password_length_validation') }}"
+              },
+              regexp: {
+                regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).{8,}$/,
+                message: "{{ __('admin.strong_password_validation') }}"
               }
             }
           },
@@ -283,19 +305,21 @@ $(function () {
   // ============================================================
 
   function syncSelection() {
+    const $bar = $('#selectedManagersBar'); // The outer card
     const $container = $('#selectedManagersContainer');
     const $inputStore = $('#managerIdsContainer');
-    const $noMsg     = $('.no-managers-message');
     const $clearBtn  = $('#clearAllManagers');
 
-    $container.find('.badge').remove();
+    // Clear previous badges and inputs
+    $container.empty();
     $inputStore.empty();
 
     if (selectedManagers.length === 0) {
-      $noMsg.show();
-      $clearBtn.hide();
+      // Hide the entire section if no one is selected
+      $bar.hide();
     } else {
-      $noMsg.hide();
+      // Show the entire section
+      $bar.show();
       $clearBtn.show();
 
       selectedManagers.forEach(m => {
@@ -309,7 +333,7 @@ $(function () {
       });
     }
 
-    // Sync list checkboxes
+    // Sync list checkboxes (existing logic)
     $('.manager-checkbox').prop('checked', false).closest('.list-group-item').removeClass('active bg-light-subtle');
     selectedManagers.forEach(m => {
       $(`.manager-card[data-id="${m.id}"]`).addClass('active bg-light-subtle').find('.manager-checkbox').prop('checked', true);
@@ -332,6 +356,7 @@ $(function () {
       start: page * 5,
       length: 5
     }, function (res) {
+      console.log('res.data', res.data);
       $('#managersLoading').hide();
       if (!res.data || res.data.length === 0) return $('#managersEmpty').show();
 

@@ -3622,4 +3622,6 @@ return [
 	'maximum_work_items_message' => 'يمكنك اضافة على الاكثر 20 عناصر للعمل',
 	'start_imperonation_message' => 'سوف تتم تسجيل الدخول بهذا المستخدم. هل ترغب في المتابعة؟',
 	'price_max_validation' => 'السعر يجب ان يكون اقل من او يساوي :max.',
+	'strong_password_validation' => "كلمة السر يجب أن تكون قوية حيث تتضمن حروفًا كبيرة وصغيرة وأرقامًا ورموزًا",
+	'password_length_validation' => 'يجب ان تتكون كلمة المرور من 8-20 حرفًا',
 ];
