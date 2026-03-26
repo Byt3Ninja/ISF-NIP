@@ -99,7 +99,7 @@ class MentorsController extends Controller
 					})->orderBy('start', 'DESC')->pluck('id')->first();
 			}
 			// $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
-			$mentors = User::role('mentor')->with('inviteMentors');
+			$mentors = User::role('mentor')->with('inviteMentors', 'mentorExpertises');
 			
 			$cList = CyclesMentors::where('cycle_id', $id)->pluck('user_id')->toArray();
 

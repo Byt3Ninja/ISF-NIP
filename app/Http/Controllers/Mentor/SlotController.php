@@ -350,9 +350,10 @@ class SlotController extends Controller
 				} else {
 						$query->where('date', $validated['date']);
 				}
-
+			
 				// Check if duplicate exists
 				$getschedule = $query->orderBy('created_at', 'desc')->first();
+				//dd($validated, $sessionType, $getschedule);
 				if ($getschedule != null) {
 					// If existing slot hasn't started yet (dfrom in future), replace it
 					if ($getschedule->dfrom && $getschedule->dfrom > now()) {
@@ -363,7 +364,10 @@ class SlotController extends Controller
 						], 422);
 						// $getschedule->delete();
 					} elseif ($getschedule->tfrom == $validated['tfrom'].':00' && $validated['tto'] >= $getschedule->tto) {
-						$getschedule->delete();
+						return response()->json([
+							'success' => false,
+							'message' => __('mentor.slot_already_exists') . ' ' . __('mentor.between', ['from' => $getschedule->tfrom, 'to' => $getschedule->tto]),
+						], 422);
 					} else {
 						return response()->json([
 								'success' => false,
@@ -479,17 +483,10 @@ class SlotController extends Controller
 							unset($slotData['days']); // remove weekday if exists
 					}
 					// if the original slot equals new slot, skip creation to prevent duplicates
-					// if the original slot equals new slot, skip creation to prevent duplicates
-					if (isset($slotData['date'])) {
-							$query = Schedule::where('date', $slotData['date']);
-							
-							if (isset($slotData['days'])) {
-									$query->where('days', $slotData['days']);
-							}
-							
-							$found = $query->first();
+					if(isset($slotData['date'])) {
+						$found = Schedule::where('date', $slotData['date'])->where('days', $slotData['days'])->first();
 					} else {
-							$found = null;
+						$found = null;
 					}
 					if ($found && $found->tfrom == $slotData['tfrom'] && $found->tto == $slotData['tto'] && $found->session_type == $slotData['session_type']) {
 						return response()->json([
