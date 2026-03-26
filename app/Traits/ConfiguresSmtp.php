@@ -23,10 +23,7 @@ trait ConfiguresSmtp
                 $mailConfig = $this->getSmtpConfig($smtpSettings);
 
                 if ($mailConfig) {
-                    // Clear any cached mail config
-                    \Illuminate\Support\Facades\Config::set('mail', config('mail'));
-
-                    // Set new mail config
+                    // Set new mail config (forgetMailers() is called inside MailConfig::set())
                     MailConfig::set($mailConfig);
 
                     \Log::info('Mail configuration applied:', [
