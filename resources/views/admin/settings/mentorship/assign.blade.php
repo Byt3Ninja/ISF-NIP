@@ -223,13 +223,8 @@
               <div class="row g-4 mb-4" id="mentors-grid">
                 @foreach ($mentors as $mentor)
                   @php
-                    // Get mentor's expertise IDs from bio
-                    $mentorExpertiseIds = [];
-                    if (isset($mentor->bio->expertise_ids)) {
-                        $mentorExpertiseIds = is_array($mentor->bio->expertise_ids) 
-                            ? $mentor->bio->expertise_ids 
-                            : json_decode($mentor->bio->expertise_ids, true) ?? [];
-                    }
+                    // Get mentor's expertise IDs from the mentor_expertise relationship
+                    $mentorExpertiseIds = $mentor->mentorExpertises->pluck('id')->toArray();
                     
                     // Get organization names for this mentor
                     $mentorOrgs = [];
