@@ -43,21 +43,46 @@ class ScreeningEvaluationResults extends Model
 		return $this->belongsTo(Company::class, 'company_id');
 	}
 
-	public static function metadata( $step_id, $company_id = null )
+	public static function metadata( $step_id, $company_id = null, $preloaded = null )
 	{
 		$_steps = collect([]);
 		$companies = collect([]);
 		$evaluation = collect([]);
 		$results = collect([]);
 		$comments = collect([]);
-		$getStep = Step::find( $step_id );
+		$get_comments = null;
+
+		$getStep = $preloaded
+			? $preloaded['steps']->get($step_id)
+			: Step::find( $step_id );
+
 		if( $getStep )
 		{
-			$companies = Company::where('cycle', $getStep->cycle_id)->where('step', $step_id)->get();
-			$_steps = Step::whereIn('cycle_id', $companies->pluck('cycle')->unique())->orderBy('arr')->get();
-			$evaluation = ScreeningEvaluation::getEvaluationData( $getStep->id );
-			$results = self::where('evaluation_id', $evaluation?->id )->get();
-			$get_comments = ScreeningEvaluationCustomFields::where('name', 'final_comment')->where('evaluation_id', $evaluation?->id)->with(['values'])->first();
+			$companies = $preloaded
+				? $preloaded['companies']->where('cycle', $getStep->cycle_id)->where('step', $step_id)->values()
+				: Company::with(['users', 'stepdata.cycle'])->where('cycle', $getStep->cycle_id)->where('step', $step_id)->get();
+
+			$_steps = $preloaded
+				? $preloaded['allSteps']->whereIn('cycle_id', $companies->pluck('cycle')->unique())->sortBy('arr')->values()
+				: Step::whereIn('cycle_id', $companies->pluck('cycle')->unique())->orderBy('arr')->get();
+
+			$evaluation = $preloaded
+				? ($preloaded['evaluations']->firstWhere('step', $getStep->id) ?? null)
+				: ScreeningEvaluation::getEvaluationData( $getStep->id );
+
+			$results = $preloaded
+				? $preloaded['results']->where('evaluation_id', $evaluation?->id)->values()
+				: self::with(['criteria', 'user'])->where('evaluation_id', $evaluation?->id )->get();
+
+			if( $preloaded )
+			{
+				$get_comments = $preloaded['comments']->where('evaluation_id', $evaluation?->id)->first();
+			}
+			else
+			{
+				$get_comments = ScreeningEvaluationCustomFields::where('name', 'final_comment')->where('evaluation_id', $evaluation?->id)->with(['values'])->first();
+			}
+
 			if( !empty( $get_comments ) && !is_null( $get_comments ) )
 			{
 				$comments = $get_comments->values;
@@ -65,16 +90,20 @@ class ScreeningEvaluationResults extends Model
 			}
 		}
 		$comments = $comments->map(function($comment) use ($get_comments) {
-			$evaluation_id = null;
-			$chkEvaluation = $get_comments->where('id', $comment->custom_field_id)->first();
-			$comment->evaluation_id = $chkEvaluation?->evaluation_id ?? null;
+			// Use direct property access instead of ->where() which triggers a query per comment
+			$comment->evaluation_id = ($get_comments && $get_comments->id == $comment->custom_field_id)
+				? $get_comments->evaluation_id
+				: null;
 			return $comment;
 		});
 
 		$l = app()->getLocale();
 		if( $getStep?->stype == 5 )
 		{
-			$finals = Finalscreening::where('step_id', $step_id)->with(['company', 'company.users'])->get()->map(function( $f ) {
+			$finals = ($preloaded
+				? $preloaded['finalscreenings']->where('step_id', $step_id)->values()
+				: Finalscreening::where('step_id', $step_id)->with(['company', 'company.users'])->get()
+			)->map(function( $f ) {
 				$judges = $f->judges;
 				if( !is_array( $judges ) ) { $judges = json_decode( $f->judges ); }
 				$f->judgers_ids = array_map(function( $i ) { return intval( $i ); }, $judges);
@@ -86,7 +115,10 @@ class ScreeningEvaluationResults extends Model
 				return array_map(function( $i ) { return intval( $i ); }, $judges);
 			})->flatten()->unique()->values();
 
-			$judges = User::whereIn('id', $users_ids)->get()->map(function( $user ) use ( $l ) {
+			$judges = ($preloaded
+				? $preloaded['allUsers']->whereIn('id', $users_ids)->values()
+				: User::whereIn('id', $users_ids)->get()
+			)->map(function( $user ) use ( $l ) {
 				$judger = new stdClass;
 				$judger->id = $user->id ?? 0;
 				$judger->name = ($user->{'first_name_' . $l} ?? '') . ' ' . ($user->{'last_name_' . $l} ?? '');
@@ -110,7 +142,10 @@ class ScreeningEvaluationResults extends Model
 		}
 		else
 		{
-			$getUsers = Screening::where('step_id', $step_id)->with(['user'])->get();
+			$getUsers = $preloaded
+				? $preloaded['screenings']->where('step_id', $step_id)->values()
+				: Screening::where('step_id', $step_id)->with(['user'])->get();
+
 			$judges = $getUsers->map(function($item) use ( $l ) {
 				$user = $item->user;
 				$judger = new stdClass;
@@ -144,7 +179,19 @@ class ScreeningEvaluationResults extends Model
 				$judges[$index]->startups = $get_companies->pluck('id');
 			}
 		}
-		elseif( $getStep?->data != 'grouptogroup' ) { foreach( $judges as $index => $judge ) { $judges[$index]->startups = $companies->pluck('id'); } }
+		elseif( $getStep?->data == 'grouptogroup' )
+		{
+			// Convert user IDs to company IDs (same conversion as stype=5 above)
+			foreach( $judges as $index => $judge )
+			{
+				$startup_ids = $judge->startups->toArray();
+				$get_companies = $companies->filter(function( $c ) use ( $startup_ids ) {
+					return $c->users->whereIn('id', $startup_ids)->count() > 0;
+				});
+				$judges[$index]->startups = $get_companies->pluck('id');
+			}
+		}
+		else { foreach( $judges as $index => $judge ) { $judges[$index]->startups = $companies->pluck('id'); } }
 
 		$scoped_comments = $comments->where('evaluation_id', $evaluation?->id)->values();
 		foreach( $judges as $index => $judge )
@@ -445,17 +492,73 @@ class ScreeningEvaluationResults extends Model
 		return $output;
 	}
 
-	public static function results( $step_id, $company_ids = null )
+	public static function results( $step_id, $company_ids = null, $precomputedMetadata = null, $resultsPreloaded = null )
 	{
 		$company_ids = is_array( $company_ids ) ? $company_ids : ( $company_ids ? [ $company_ids ] : null );
 		$l = app()->getLocale();
 
-		$metadata = self::metadata( $step_id );
+		$metadata = $precomputedMetadata ?? self::metadata( $step_id );
 		$evaluationForm = $metadata['evaluation'];
 		$allResults = $metadata['results'];
 		$allJudges = $metadata['judges'];
 
 		$targetCompanyIds = $company_ids ?? $metadata['companies']->pluck('id')->toArray();
+
+		// Use preloaded data if available (batched across all steps), otherwise query per step
+		$allCustomFields = collect();
+		$allFormCommentsByCompany = collect();
+		if( count($targetCompanyIds) > 0 && $evaluationForm )
+		{
+			if( $resultsPreloaded )
+			{
+				// Filter pre-fetched data for this evaluation
+				$allCustomFields = $resultsPreloaded['customFields']
+					->whereIn('company_id', $targetCompanyIds)
+					->where('evaluation_id', $evaluationForm->id)
+					->values();
+				$allFormCommentsByCompany = $resultsPreloaded['formComments'];
+			}
+			else
+			{
+				$placeholders = implode(',', array_fill(0, count($targetCompanyIds), '?'));
+				$allCustomFields = collect(\DB::select("SELECT
+						cfv.id AS id,
+						cf.name AS field,
+						cfv.value AS value,
+						cfv.is_approved AS is_approved,
+						cfv.user_id AS judger_id,
+						cfv.company_id AS company_id,
+						cf.evaluation_id AS evaluation_id,
+						u.first_name_en AS judger_first_name_en,
+						u.last_name_en AS judger_last_name_en,
+						u.first_name_ar AS judger_first_name_ar,
+						u.last_name_ar AS judger_last_name_ar
+					FROM
+						screening_evaluation_fields_values cfv
+					LEFT JOIN
+						screening_evaluation_custom_fields cf ON cf.id = cfv.custom_field_id
+					LEFT JOIN
+						users u ON u.id = cfv.user_id
+					WHERE
+						cfv.company_id IN ($placeholders)
+						AND cf.evaluation_id = ?
+				", array_merge($targetCompanyIds, [$evaluationForm->id])));
+
+				// Batch fetch form_data and comments
+				$allFormDataRows = \DB::table('form_data')->whereIn('company_id', $targetCompanyIds)->get();
+				if( $allFormDataRows->isNotEmpty() )
+				{
+					$allFormDataIds = $allFormDataRows->pluck('id')->toArray();
+					$allRawComments = \DB::table('form_data_judges_comments AS fc')
+						->join('form_data AS fd', 'fd.id', '=', 'fc.form_data_id')
+						->join('users AS u', 'u.id', '=', 'fc.user_id')
+						->whereIn('fc.form_data_id', $allFormDataIds)
+						->select(['fc.user_id', 'fd.question', 'fc.comment', 'fd.company_id'])
+						->get();
+					$allFormCommentsByCompany = $allRawComments->groupBy('company_id');
+				}
+			}
+		}
 
 		$output = [];
 
@@ -541,29 +644,7 @@ class ScreeningEvaluationResults extends Model
 				return $output;
 			});
 
-			$customFields = collect(\DB::select("SELECT
-					cfv.id AS id,
-					cf.name AS field,
-					cfv.value AS value,
-					cfv.is_approved AS is_approved,
-					cfv.user_id AS judger_id,
-					u.first_name_en AS judger_first_name_en,
-					u.last_name_en AS judger_last_name_en,
-					u.first_name_ar AS judger_first_name_ar,
-					u.last_name_ar AS judger_last_name_ar
-				FROM
-					screening_evaluation_fields_values cfv
-				LEFT JOIN
-					screening_evaluation_custom_fields cf ON cf.id = cfv.custom_field_id
-				LEFT JOIN
-					users u ON u.id = cfv.user_id
-				WHERE
-					cfv.company_id = ?
-					AND cf.evaluation_id = ?
-			", [
-				$company_id,
-				$evaluationForm?->id
-			]))->map(function( $item ) use ( $l ) {
+			$customFields = $allCustomFields->where('company_id', $company_id)->values()->map(function( $item ) use ( $l ) {
 				$output = new stdClass;
 				$output->id = $item->id;
 				$output->field = $item->field;
@@ -628,24 +709,9 @@ class ScreeningEvaluationResults extends Model
 				return !empty( $item->evaluation );
 			})->values();
 
-			// Fetch form submission comments for this company
-			$formCommentsByJudge = collect();
-			$formDataRows = DB::table('form_data')->where('company_id', $company_id)->get();
-			if( $formDataRows->isNotEmpty() )
-			{
-				$formDataIds = $formDataRows->pluck('id')->toArray();
-				$rawComments = DB::table('form_data_judges_comments AS fc')
-					->join('form_data AS fd', 'fd.id', '=', 'fc.form_data_id')
-					->join('users AS u', 'u.id', '=', 'fc.user_id')
-					->whereIn('fc.form_data_id', $formDataIds)
-					->select([
-						'fc.user_id',
-						'fd.question',
-						'fc.comment',
-					])
-					->get();
-				$formCommentsByJudge = $rawComments->groupBy('user_id');
-			}
+			// Use pre-fetched form comments for this company
+			$companyFormComments = $allFormCommentsByCompany->get($company_id, collect());
+			$formCommentsByJudge = $companyFormComments->groupBy('user_id');
 
 			$processedJudges = $processedJudges->map(function( $judge ) use ( $formCommentsByJudge ) {
 				$judge->form_comments = $formCommentsByJudge->get($judge->id, collect())->map(function( $c ) {

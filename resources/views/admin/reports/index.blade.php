@@ -87,45 +87,45 @@
             </div>
           </div>
 
-          {{-- Training Sessions --}}
+          {{-- Training Sessions (lazy-loaded via AJAX) --}}
           <div class="w-100 h-100 tab-pane fade" id="training" role="tabpanel" aria-labelledby="training-tab">
             <div class="card">
               <div class="card-body">
                 <div class="report-content mt-3" id="report-training">
-                  @include('admin.reports.ajax._trainingSessionsReport', $trainingData)
+                  <div class="d-flex justify-content-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>
                 </div>
               </div>
             </div>
           </div>
 
-          {{-- Screening --}}
+          {{-- Screening (lazy-loaded via AJAX) --}}
           <div class="w-100 h-100 tab-pane fade" id="screening" role="tabpanel" aria-labelledby="screening-tab">
             <div class="card">
               <div class="card-body">
                 <div class="report-content mt-3" id="report-screening">
-                  @include('admin.reports.ajax._screeningReport', $screeningData)
+                  <div class="d-flex justify-content-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>
                 </div>
               </div>
             </div>
           </div>
 
-          {{-- Final Screening --}}
+          {{-- Final Screening (lazy-loaded via AJAX) --}}
           <div class="w-100 h-100 tab-pane fade" id="finalScreening" role="tabpanel" aria-labelledby="finalScreening-tab">
             <div class="card">
               <div class="card-body">
                 <div class="report-content mt-3" id="report-finalScreening">
-                  @include('admin.reports.ajax._finalScreeningReport', $finalScreeningData)
+                  <div class="d-flex justify-content-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>
                 </div>
               </div>
             </div>
           </div>
 
-          {{-- Cycles --}}
+          {{-- Cycles (lazy-loaded via AJAX) --}}
           <div class="w-100 h-100 tab-pane fade" id="cycles" role="tabpanel" aria-labelledby="cycles-tab">
             <div class="card">
               <div class="card-body">
                 <div class="report-content mt-3" id="report-cycles">
-                  @include('admin.reports.ajax._cyclesReport', $cyclesData)
+                  <div class="d-flex justify-content-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>
                 </div>
               </div>
             </div>
@@ -151,23 +151,23 @@
             </div>
           </div>
 
-          {{-- Mentor Surveys --}}
+          {{-- Mentor Surveys (lazy-loaded via AJAX) --}}
           <div class="w-100 h-100 tab-pane fade" id="mentorSurveys" role="tabpanel" aria-labelledby="mentorSurveys-tab">
             <div class="card">
               <div class="card-body">
                 <div class="report-content mt-3" id="report-mentorSurveys">
-                  @include('admin.reports.ajax._mentorSurvey', $mentorSurveyData)
+                  <div class="d-flex justify-content-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>
                 </div>
               </div>
             </div>
           </div>
 
-          {{-- Startup Surveys --}}
+          {{-- Startup Surveys (lazy-loaded via AJAX) --}}
           <div class="w-100 h-100 tab-pane fade" id="startupSurveys" role="tabpanel" aria-labelledby="startupSurveys-tab">
             <div class="card">
               <div class="card-body">
                 <div class="report-content mt-3" id="report-startupSurveys">
-                  @include('admin.reports.ajax._startupSurveyReport', $startupSurveyData)
+                  <div class="d-flex justify-content-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>
                 </div>
               </div>
             </div>
@@ -182,6 +182,44 @@
 @section('scripts')
 <script>
   $(document).ready(function () {
+    // --- Lazy-load tabs via AJAX ---
+    var loadedTabs = { mentorship: true, companies: true };
+    var spinnerHtml = '<div class="d-flex justify-content-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+
+    function loadTab(type) {
+      if (loadedTabs[type]) return;
+      loadedTabs[type] = true;
+
+      var programId = $('#programSelect').val() || '';
+      if (programId === 'all') programId = '';
+      $('#report-' + type).html(spinnerHtml);
+
+      var ajaxData = { program_id: programId };
+      // Pass extra params for specific tabs
+      if (type === 'mentorSurveys') {
+        ajaxData.status = 'all';
+      }
+
+      $.ajax({
+        url: "{{ route('reports.view.ajax') }}/" + type,
+        data: ajaxData,
+        success: function (data) {
+          if (data['value'] === 1) {
+            $('#report-' + type).html(data['view']);
+          }
+        },
+        error: function () {
+          $('#report-' + type).html('<div class="alert alert-danger m-3">{{ __("admin.Error loading report") }}</div>');
+        }
+      });
+    }
+
+    // Trigger lazy-load when a tab is shown
+    $('button[data-bs-toggle="pill"]').on('show.bs.tab', function (e) {
+      var type = $(e.target).data('bs-target').replace('#', '');
+      loadTab(type);
+    });
+
     // --- Program selector: reload page with ?program_id=X ---
     $('#programSelect').change(function () {
       var url = new URL(window.location.href);
@@ -226,11 +264,7 @@
         url: "{{ route('reports.view.ajax') }}/companies",
         data: { id: companyId, program_id: programId },
         beforeSend: function () {
-          $('#report-companies').html(
-            '<div class="d-flex justify-content-center py-4">' +
-            '<div class="spinner-border text-primary" role="status">' +
-            '<span class="visually-hidden">Loading...</span></div></div>'
-          );
+          $('#report-companies').html(spinnerHtml);
         },
         success: function (data) {
           if (data['value'] === 1) {
