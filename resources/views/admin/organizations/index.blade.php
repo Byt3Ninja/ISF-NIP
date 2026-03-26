@@ -95,7 +95,7 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                 </div>
                 <div class="col-lg-auto d-flex justify-content-end">
                   @if ($_user->ableToAny(['organization.wizard.create', 'organization.wizard.store'], $permissions))
-                    <a href="{{ route('organization.wizard.create') }}" class="btn btn-primary text-nowrap">
+                    <a href="{{ route('organization.wizard.create') }}?step=1" class="btn btn-primary text-nowrap">
                       <i class="ti ti-plus me-2"></i> {{ __('admin.Add_New') }}
                     </a>
                   @endif
@@ -143,7 +143,7 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                         <ul class="dropdown-menu dropdown-menu-end">
                           @if ($_user->ableTo('organization.wizard.edit', $permissions))
                             <li>
-                              <a class="dropdown-item" href="{{ route('organization.wizard.edit', $org->id) }}">
+                              <a class="dropdown-item" href="{{ route('organization.wizard.edit', $org->id) }}?step=1">
                                 <i class="ti ti-edit me-2"></i> {{ __('admin.Edit') }}
                               </a>
                             </li>
