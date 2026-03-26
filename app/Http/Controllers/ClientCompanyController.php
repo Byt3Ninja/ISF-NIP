@@ -3448,8 +3448,34 @@ class ClientCompanyController extends Controller
            
             $company_relations = CompanyRelation::where('company_id', $id)->where('user_id', $company?->user?->id)->get();
             $step = Step::where('id', $company->step)->first();
-           
-            
+
+            // If the cycle has a Final Evaluation step (stype=5), verify the company has passed it
+            if ($company->cycle) {
+                $finalEvalStep = Step::where('cycle_id', $company->cycle)
+                    ->where('stype', 5)
+                    ->first();
+
+                if ($finalEvalStep) {
+                    $evaluation = ScreeningEvaluation::where('step_id', $finalEvalStep->id)->first();
+                    $hasPassed = false;
+                    if ($evaluation) {
+                        $hasPassed = ScreeningEvaluationResults::where('evaluation_id', $evaluation->id)
+                            ->where('company_id', $company->id)
+                            ->where('status', '!=', 0)
+                            ->exists();
+                    }
+                    if (!$hasPassed) {
+                        if ($request->ajax()) {
+                            return response()->json([
+                                'success' => false,
+                                'message' => __('startup.The selected startups have not passed the final screening yet')
+                            ], 422);
+                        }
+                        return redirect()->back()->with('warning', __('startup.The selected startups have not passed the final screening yet'));
+                    }
+                }
+            }
+
             $almuni = new Almuni();
             $almuni->user_id = $company?->user?->id;
             $almuni->cycle_id = $company->cycle;
