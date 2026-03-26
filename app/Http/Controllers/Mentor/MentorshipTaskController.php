@@ -313,30 +313,34 @@ class MentorshipTaskController extends Controller
 		$log->save();
 
 		// Send Notification To Mentor & Startup
-		$mentor = User::find($task->mentor_id);
-		$startup = User::find($task->user_id);
+		try {
+			$mentor = User::find($task->mentor_id);
+			$startup = User::find($task->user_id);
 
-		$message = "Task Status Updated: " . $task->title;
-		$data = [
-			'task' => $task,
-			'message' => $message,
-			'action' => 'move'
-		];
-		Notification::send([$mentor, $startup], new TaskNotification($data));
+			$message = "Task Status Updated: " . $task->title;
+			$data = [
+				'task' => $task,
+				'message' => $message,
+				'action' => 'move'
+			];
+			Notification::send([$mentor, $startup], new TaskNotification($data));
 
-				if ($task->user->country_code_w_a && $task->user->whatsapp) {
-					$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
-					$Massage = "Dear " . $task->user->name . ", This Is notification from " . $task->company->cycledata->title . " The Task name : " . $task->title . " status has been changed From " . $old . " To " . $new;
-					$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
-					Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
-				}
-				
-				if ($task->mentor->country_code_w_a && $task->mentor->whatsapp) {
-					$phoneNumber = $task->mentor->country_code_w_a . $task->mentor->whatsapp;
-					$Massage = "Dear " . $task->mentor->name . ", This Is notification from " . $task->company->cycledata->title . " The Task name : " . $task->title . " status has been changed From " . $old . " To " . $new;
-					$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
-					\Log::info('Message sent to mentor: ' . $phoneNumber . ' Result: ' . json_encode($result));
-				}
+			if ($task->user->country_code_w_a && $task->user->whatsapp) {
+				$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
+				$Massage = "Dear " . $task->user->name . ", This Is notification from " . $task->company?->cycledata?->title . " The Task name : " . $task->title . " status has been changed From " . $old . " To " . $new;
+				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+			}
+
+			if ($task->mentor->country_code_w_a && $task->mentor->whatsapp) {
+				$phoneNumber = $task->mentor->country_code_w_a . $task->mentor->whatsapp;
+				$Massage = "Dear " . $task->mentor->name . ", This Is notification from " . $task->company?->cycledata?->title . " The Task name : " . $task->title . " status has been changed From " . $old . " To " . $new;
+				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+				\Log::info('Message sent to mentor: ' . $phoneNumber . ' Result: ' . json_encode($result));
+			}
+		} catch (\Exception $e) {
+			Log::channel('system_exceptions')->info('moveTask notification error:', [$e->getMessage()]);
+		}
 
 		$condition = "mentorship_tasks.mentorship_request_id = ? ";
 		$tasks = $this->handleTask($lang, $condition, $task->mentorship_request_id, 'list');
@@ -873,8 +877,11 @@ class MentorshipTaskController extends Controller
 		if (!$task = MentorshipTask::find($id)) {
 			return back()->with('class', 'alert alert-danger')->with('message', trans('dash.try_2_access_not_found_content'));
 		}
+		$mentorship_request_id = $task->mentorship_request_id;
 		$task->delete();
-		return back()->with('class', 'alert alert-success')->with('message', trans('dash.deleted_successfully'));
+		return redirect(route('mentorshipTasks.index', ['mentorship_id' => $mentorship_request_id]))
+			->with('class', 'alert alert-success')
+			->with('message', trans('dash.deleted_successfully'));
 	}
 
 	public function sendComment(Request $request)
