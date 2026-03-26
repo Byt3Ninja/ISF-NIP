@@ -317,6 +317,40 @@
           </select>
         </div>
 
+        {{-- Programs --}}
+        <div class="col-12 mb-4">
+          @php
+            $selectedStep = $steps->firstWhere('id', request('id'));
+            $selectedCycleId = $selectedStep?->cycle_id;
+          @endphp
+          <label class="form-label">{{ __('admin.Program') }} <span class="text-danger">*</span></label>
+          <select name="cycle_id" id="program" class="form-select select2">
+            <option value="">{{ __('admin.Select Program') }}</option>
+            @foreach ($cycles as $cycle)
+              <option value="{{ $cycle->id }}"
+                {{ $selectedCycleId == $cycle->id ? 'selected' : '' }}>
+                {{ $cycle->title }}
+              </option>
+            @endforeach
+          </select>
+        </div>
+
+        {{-- Step --}}
+        <div class="col-12 mb-4">
+          <label class="form-label">{{ __('cycles.Step') }} <span class="text-danger">*</span></label>
+          <select name="step_id" id="step" class="form-select select2">
+            <option value="">{{ __('cycles.Select Step') }}</option>
+            @foreach ($steps as $step)
+              <option 
+                value="{{ $step->id }}" 
+                data-cycle="{{ $step->cycle_id }}"
+                {{ request('id') == $step->id ? 'selected' : '' }}>
+                {{ $step->title }}
+              </option>
+            @endforeach
+          </select>
+        </div>
+
         {{-- Date Range (online only) --}}
         <div class="col-12 mb-4" id="fieldDateRange">
           <label class="form-label">{{ __('admin.Start_Date') }} – {{ __('admin.End_Date') }} <span class="text-danger">*</span></label>
@@ -1313,5 +1347,50 @@ $(function () {
   }
 
 });
+</script>
+
+<script>
+  $(document).ready(function () {
+
+    const allSteps = $('#step option').clone(); // store all steps
+
+    function filterSteps() {
+      const selectedProgram = $('#program').val();
+      const selectedStep = $('#step').val();
+
+      // clear current options
+      $('#step').empty();
+
+      // always add default option
+      $('#step').append('<option value="">{{ __("cycles.Select Step") }}</option>');
+
+      // filter and append
+      allSteps.each(function () {
+        const stepCycle = $(this).data('cycle');
+
+        if (!selectedProgram || stepCycle == selectedProgram) {
+          $('#step').append($(this).clone());
+        }
+      });
+
+      // restore selected step if valid
+      if ($('#step option[value="' + selectedStep + '"]').length) {
+        $('#step').val(selectedStep);
+      } else {
+        $('#step').val(null);
+      }
+
+      // refresh Select2
+      $('#step').trigger('change.select2');
+    }
+
+    // when program changes
+    $('#program').on('change', function () {
+      filterSteps();
+    });
+
+    // initial load (edit mode)
+    filterSteps();
+  });
 </script>
 @stop
