@@ -271,9 +271,16 @@ class FinalscreeningController extends Controller
 		}
 		$companies = [];
 		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
-		if( $cstep ) { $companies = Company::whereIn('step', [$form?->id ?? 0, $cstep?->id ?? 0])->get(); } else { $cstep = []; }
 
-		/** Prepare Judging Panels for View (Clean Code) */
+		if( $cstep ) {
+			// Use the preceding step's ID (not BuilderForm ID) to also include companies still at the prior step
+			$precedingStep = Step::where('cycle_id', $cstep->cycle_id)->where('arr', $cstep->arr - 1)->first();
+			$companies = Company::whereIn('step', array_filter([$precedingStep?->id, $cstep->id]))->get();
+		} else {
+			$cstep = [];
+		}
+
+		/** Prepare Judging Panels for View */
 		$judgingPanels = [];
 		if ($cstep && isset($judgers_list) && count($judgers_list) > 0) {
 			foreach ($judgers_list as $panelId => $panelData) {
@@ -300,7 +307,11 @@ class FinalscreeningController extends Controller
 			$judgingPanels = [['judges' => [], 'companies' => [], 'session' => []]];
 		}
 
-		return view('admin.settings.final.show', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'forms', 'steps', 'id', 'svgs', 'evaluationForm', 'judgingPanels'));
+		/** Collect assigned judge/company IDs from panels only (not all companies in the step) */
+		$assignedJudgeIds = collect($judgingPanels)->pluck('judges')->flatten()->unique()->filter()->values();
+		$assignedCompanyIds = collect($judgingPanels)->pluck('companies')->flatten()->unique()->filter()->values();
+
+		return view('admin.settings.final.show', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'forms', 'steps', 'id', 'svgs', 'evaluationForm', 'judgingPanels', 'assignedJudgeIds', 'assignedCompanyIds'));
 	}
 
 	public function update(Request $request)

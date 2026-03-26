@@ -18,8 +18,8 @@
   <div class="col-12">
     <div class="card">
       <div class="card-header border-bottom">
-        <div class="d-flex justify-content-between align-items-center">
-          <h5 class="card-title mb-0">{{ __('admin.Users`s List') }}</h5>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+          <h5 class="card-title mb-3 mb-md-0">{{ __('admin.Users`s List') }}</h5>
           <div class="d-flex align-items-center gap-3">
             <x-export-dropdown />
 
@@ -72,11 +72,11 @@
                 // map each known role to a distinct badge color; add new roles here as needed
                 $roleColors = [
                     'admin'            => 'primary',
-                    'organizationManager'          => 'success',
-                    'mentor'           => 'dark',
+                    'organizationManager'          => 'dark',
+                    'mentor'           => 'info',
                     'registered'          => 'warning',
                     'judge'         => 'danger',
-                    'serviceProvider'             => 'info',
+                    'serviceProvider'             => 'success',
                     'No Role Assigned' => 'light',
                     // special states below
                     'Not Verified'     => 'secondary',
@@ -101,7 +101,7 @@
                     <a
                       href="{{ route('users.login_as', ['id' => $user->id]) }}"
                       title="{{ __('admin.Login as User') }}"
-                      class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill"
+                      class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill confirm-login-as"
                     >
                       <i class="fa-solid fa-user-secret fs-5"></i>
                     </a>
@@ -373,6 +373,21 @@ $(function () {
     });
   });
 
+  $(document).on('click', '.confirm-login-as', function (e) {
+    e.preventDefault();
+
+    let url = $(this).attr('href');
+
+    releaseWarningAlert({
+      title: "{{ __('admin.Confirm Action') }}",
+      message: "{{ __('admin.start_imperonation_message') }}",
+      confirmButtonText: "{{ __('admin.Yes') }}",
+      cancelButtonText: "{{ __('admin.cancel') }}",
+      onConfirm: function() {
+        window.location.href = url;
+      }
+    });
+  });
 });
 </script>
 @endsection

@@ -3563,4 +3563,5 @@ return [
 	'All_Groups' => 'All Groups',
 	'All_Difficulties'=> 'All Difficulties',
 	'maximum_work_items_message' => 'Maximum 20 work items allowed',
+	'start_imperonation_message' => 'You will login as this user. Are you sure you want to continue?',
 ];
