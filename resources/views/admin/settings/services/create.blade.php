@@ -396,6 +396,10 @@
               numeric: {
                 message: '{{ __('admin.must_be_valid_number') }}'
               },
+              lessThan: {
+                max: 9999999.99,
+                message: '{{ __('admin.price_max_validation', ['max' => 9999999.99]) }}'
+              },
               greaterThan: {
                 min: 0,
                 message: '{{ __('admin.must_not_be_less_than_0') }}'
