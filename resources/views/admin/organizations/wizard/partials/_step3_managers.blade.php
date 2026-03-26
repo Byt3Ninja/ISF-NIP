@@ -182,13 +182,13 @@ $(function () {
         fields: {
           first_name_en: {
             validators: {
-              notEmpty: { message: '{{ __("validation.required", ["attribute" => "first name"]) }}' },
+              notEmpty: { message: "{{ __('admin.Required_Field') }}" },
               regexp:   { regexp: /^[a-zA-Z\s]+$/, message: '{{ __("admin.First name must contain only English letters") }}' },
             }
           },
           last_name_en: {
             validators: {
-              notEmpty: { message: '{{ __("validation.required", ["attribute" => "last name"]) }}' },
+              notEmpty: { message: "{{ __('admin.Required_Field') }}" },
               regexp:   { regexp: /^[a-zA-Z\s]+$/, message: '{{ __("admin.Last name must contain only English letters") }}' },
             }
           },
@@ -204,18 +204,21 @@ $(function () {
           },
           gender: {
             validators: {
-              notEmpty: { message: '{{ __("validation.required", ["attribute" => "gender"]) }}' },
+              notEmpty: { message: "{{ __('admin.Required_Field') }}" },
             }
           },
           email: {
             validators: {
-              notEmpty:     { message: '{{ __("validation.required", ["attribute" => "email"]) }}' },
-              emailAddress: { message: '{{ __("validation.email", ["attribute" => "email"]) }}' },
+              notEmpty:     { message: "{{ __('admin.Required_Field') }}" },
+              regexp: {
+                regexp: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i,
+                message: "{{ __('admin.Please enter a valid email address') }}",
+              }
             }
           },
           phone: {
             validators: {
-              notEmpty: { message: '{{ __("validation.required", ["attribute" => "phone"]) }}' },
+              notEmpty: { message: "{{ __('admin.Required_Field') }}" },
               callback: {
                 message: '{{ __("auth.Invalid_Phone_Number") }}',
                 callback: function () {
