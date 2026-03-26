@@ -587,6 +587,7 @@ class TrainingController extends Controller
 					$query->whereIn('organization_id', $orgIds);
 				});
 			})->where('stype', 4)->with(['cycle', 'cycle.organization'])->get();
+			$cycles = $steps->pluck('cycle')->unique('id')->values();
 
 			if ($id == 0) {
 				$id = $steps->pluck('id')->first();
@@ -612,8 +613,6 @@ class TrainingController extends Controller
 			}
 			$sessions = $sessions->get();
 
-			$cycles = TrainingSession::with('step.cycle')->get()->pluck('step.cycle')->unique('id');
-			
 			$online = Training::visibleToUser()->get();
 			// if ($request->type != 0) {
 			// 	$sessions = $sessions->where('type', $request->type);
