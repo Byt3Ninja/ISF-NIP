@@ -356,7 +356,6 @@ $(function () {
       start: page * 5,
       length: 5
     }, function (res) {
-      console.log('res.data', res.data);
       $('#managersLoading').hide();
       if (!res.data || res.data.length === 0) return $('#managersEmpty').show();
 
