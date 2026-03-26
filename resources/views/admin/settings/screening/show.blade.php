@@ -28,21 +28,30 @@
 
 @php
 $status = strtolower($evaluationForm?->status);
-if( optional($cstep)->data == 'grouptogroup' )
-{
-  //
-}
-else
-{
-  $judgersList = collect( json_decode(optional($cstep)->list) ?? [] );
-  $judgersList = $judgersList->map(function($judger) { return intval($judger); });
-}
+$l = app()->getLocale();
+$maxVisible = 10;
 
 $pills = [
   ['title' => 'judging_panels', 'icon' => 'user-check'],
   ['title' => 'screening_guidelines' , 'icon' => 'help-circle'],
   ['title' => 'evaluation_model' , 'icon' => 'chart-dots'],
-]
+];
+
+$companiesById = $companies instanceof \Illuminate\Support\Collection ? $companies->keyBy('id') : collect($companies)->keyBy('id');
+
+$visibleJudgeIds = $assignedJudgeIds->take($maxVisible);
+$hiddenJudgeIds = $assignedJudgeIds->slice($maxVisible);
+$hiddenJudgeNames = $hiddenJudgeIds->map(fn($jid) => $judges->find($jid))
+    ->filter()
+    ->map(fn($j) => $j->{'first_name_'.$l} . ' ' . $j->{'last_name_'.$l})
+    ->implode("\n");
+
+$visibleCompanyIds = $assignedCompanyIds->take($maxVisible);
+$hiddenCompanyIds = $assignedCompanyIds->slice($maxVisible);
+$hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ?? null)
+    ->filter()
+    ->map(fn($c) => $c->{'name_'.$l})
+    ->implode("\n");
 @endphp
 
 @section('content')
@@ -185,19 +194,7 @@ $pills = [
               </div>
               <div class="p-3 bg-light-subtle rounded-2 border">
                 <div id="assigned-judges" class="d-flex flex-wrap gap-2">
-                  @php
-                    $maxVisible = 10;
-                    $allJudges = collect($judgers_list ?? [])
-                        ->pluck('judgers')
-                        ->flatten()
-                        ->merge($judgersList ?? [])
-                        ->unique()
-                        ->filter();
-                    $visibleJudges = $allJudges->take($maxVisible);
-                    $hiddenJudges = $allJudges->slice($maxVisible);
-                  @endphp
-
-                  @forelse ($visibleJudges as $judgeId)
+                  @forelse ($visibleJudgeIds as $judgeId)
                     @php $judge = $judges->find($judgeId); @endphp
 
                     @if ($judge)
@@ -224,20 +221,14 @@ $pills = [
                     </span>
                   @endforelse
 
-                  @if ($hiddenJudges->count() > 0)
-                    @php
-                      $hiddenJudgeNames = $hiddenJudges->map(fn($jid) => $judges->find($jid))
-                        ->filter()
-                        ->map(fn($j) => $j->{'first_name_'.$l} . ' ' . $j->{'last_name_'.$l})
-                        ->implode("\n");
-                    @endphp
+                  @if ($hiddenJudgeIds->count() > 0)
                     <span
                       class="badge bg-label-primary px-3 py-2 rounded-pill fw-semibold"
                       data-bs-toggle="tooltip"
                       data-bs-placement="top"
                       data-bs-custom-class="tooltip-wide"
                       title="{{ $hiddenJudgeNames }}"
-                    >+{{ $hiddenJudges->count() }}</span>
+                    >+{{ $hiddenJudgeIds->count() }}</span>
                   @endif
                 </div>
               </div>
@@ -252,19 +243,7 @@ $pills = [
               </div>
               <div class="p-3 bg-light-subtle rounded-2 border">
                 <div id="assigned-companies" class="d-flex flex-wrap gap-2">
-                  @php
-                    $allCompanies = collect($judgers_list ?? [])
-                        ->pluck('companies')
-                        ->flatten()
-                        ->unique()
-                        ->filter();
-
-                    $companiesById = $companies->keyBy('id');
-                    $visibleCompanies = $allCompanies->take($maxVisible);
-                    $hiddenCompanies = $allCompanies->slice($maxVisible);
-                  @endphp
-
-                  @forelse ($visibleCompanies as $companyId)
+                  @forelse ($visibleCompanyIds as $companyId)
                     @php $company = $companiesById[$companyId] ?? null; @endphp
 
                     @if ($company)
@@ -291,20 +270,14 @@ $pills = [
                     </span>
                   @endforelse
 
-                  @if ($hiddenCompanies->count() > 0)
-                    @php
-                      $hiddenCompanyNames = $hiddenCompanies->map(fn($cid) => $companiesById[$cid] ?? null)
-                        ->filter()
-                        ->map(fn($c) => $c->{'name_'.$l})
-                        ->implode("\n");
-                    @endphp
+                  @if ($hiddenCompanyIds->count() > 0)
                     <span
                       class="badge bg-label-primary px-3 py-2 rounded-pill fw-semibold"
                       data-bs-toggle="tooltip"
                       data-bs-placement="top"
                       data-bs-custom-class="tooltip-wide"
                       title="{{ $hiddenCompanyNames }}"
-                    >+{{ $hiddenCompanies->count() }}</span>
+                    >+{{ $hiddenCompanyIds->count() }}</span>
                   @endif
                 </div>
               </div>

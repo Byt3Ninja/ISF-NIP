@@ -281,36 +281,47 @@ class ScreeningController extends Controller
 		}
 		$companies = [];
 		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
-		if( $cstep ) { $companies = Company::whereIn('step', [$form?->id ?? 0, $cstep?->id ?? 0])->get(); } else { $cstep = []; }
 
-        /** Prepare Judging Panels for View (Clean Code) */
-        $judgingPanels = [];
-        if ($cstep && isset($judgers_list) && count($judgers_list) > 0) {
-            foreach ($judgers_list as $panelId => $panelData) {
-                $screening = \App\Screening::where('step_id', $cstep->id)->where('panel', $panelId)->first();
-                $panelEntry = [
-                    'judges' => (array) ($panelData['judgers'] ?? []),
-                    'companies' => (array) ($panelData['companies'] ?? []),
-                    'session' => []
-                ];
-                if ($screening && $screening->session_date) {
-                    $panelEntry['session'] = [
-                        'date' => $screening->session_date,
-                        'start_time' => $screening->start_time ? substr($screening->start_time, 0, 5) : '',
-                        'end_time' => $screening->end_time ? substr($screening->end_time, 0, 5) : '',
-                        'meeting_link' => $screening->meeting_link,
-                        'meeting_password' => $screening->meeting_password,
-                    ];
-                }
-                $judgingPanels[] = $panelEntry;
-            }
-        }
+		if( $cstep ) {
+			// Use the preceding step's ID (not BuilderForm ID) to also include companies still at the prior step
+			$precedingStep = Step::where('cycle_id', $cstep->cycle_id)->where('arr', $cstep->arr - 1)->first();
+			$companies = Company::whereIn('step', array_filter([$precedingStep?->id, $cstep->id]))->get();
+		} else {
+			$cstep = [];
+		}
 
-        if (empty($judgingPanels)) {
-            $judgingPanels = [['judges' => [], 'companies' => [], 'session' => []]];
-        }
+		/** Prepare Judging Panels for View */
+		$judgingPanels = [];
+		if ($cstep && isset($judgers_list) && count($judgers_list) > 0) {
+			foreach ($judgers_list as $panelId => $panelData) {
+				$screening = \App\Screening::where('step_id', $cstep->id)->where('panel', $panelId)->first();
+				$panelEntry = [
+					'judges' => (array) ($panelData['judgers'] ?? []),
+					'companies' => (array) ($panelData['companies'] ?? []),
+					'session' => []
+				];
+				if ($screening && $screening->session_date) {
+					$panelEntry['session'] = [
+						'date' => $screening->session_date,
+						'start_time' => $screening->start_time ? substr($screening->start_time, 0, 5) : '',
+						'end_time' => $screening->end_time ? substr($screening->end_time, 0, 5) : '',
+						'meeting_link' => $screening->meeting_link,
+						'meeting_password' => $screening->meeting_password,
+					];
+				}
+				$judgingPanels[] = $panelEntry;
+			}
+		}
 
-		return view('admin.settings.screening.show', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'forms', 'steps', 'id', 'svgs', 'evaluationForm', 'judgingPanels'));
+		if (empty($judgingPanels)) {
+			$judgingPanels = [['judges' => [], 'companies' => [], 'session' => []]];
+		}
+
+		/** Collect assigned judge/company IDs from panels only */
+		$assignedJudgeIds = collect($judgingPanels)->pluck('judges')->flatten()->unique()->filter()->values();
+		$assignedCompanyIds = collect($judgingPanels)->pluck('companies')->flatten()->unique()->filter()->values();
+
+		return view('admin.settings.screening.show', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'forms', 'steps', 'id', 'svgs', 'evaluationForm', 'judgingPanels', 'assignedJudgeIds', 'assignedCompanyIds'));
 	}
 
 	public function updateStepForm(Request $request)
