@@ -787,14 +787,27 @@
                 $('.mark-alumni-btn[data-company-id="' + companyId + '"]').addClass("btn-secondary");
               },
               error: function(xhr, status, error) {
-                var errorMessage = "{{ __('startup.mark_alumni_error') }}";
-                if (xhr.responseJSON && xhr.responseJSON.message) {
-                  errorMessage += ": " + xhr.responseJSON.message;
+                if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.message) {
+                  Swal.fire({
+                    title: '{{ __('admin.Warning') }}',
+                    text: xhr.responseJSON.message,
+                    icon: 'warning',
+                    confirmButtonText: '{{ __('admin.Confirm') }}',
+                    customClass: {
+                      confirmButton: 'btn btn-primary ms-3',
+                    },
+                    buttonsStyling: false,
+                  });
+                } else {
+                  var errorMessage = "{{ __('startup.mark_alumni_error') }}";
+                  if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage += ": " + xhr.responseJSON.message;
+                  }
+                  releaseFailureAlert({
+                    title: "{{ __('admin.Error') }}",
+                    message: errorMessage ? errorMessage : "{{ __('admin.unexpected_error') }}",
+                  });
                 }
-                releaseFailureAlert({
-                  title: "{{ __('admin.Error') }}",
-                  message: errorMessage ? errorMessage : "{{ __('admin.unexpected_error') }}",
-                });
               }
             });
           }
