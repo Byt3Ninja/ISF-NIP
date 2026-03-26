@@ -47,6 +47,7 @@ class OrganizationManagerService
             });
         }
 
+        $query = $query->orderBy('created_at', 'desc');
         // Get assigned manager IDs for this organization
         $assignedManagerIds = $organization->assignedUsers()->pluck('users.id')->toArray();
 

@@ -42,16 +42,17 @@ class AppServiceProvider extends ServiceProvider
 
                 if ($settings) {
                     if ($settings->email_provider === 'resend' && $settings->resend_api_key) {
-                        MailConfig::set([
+                        $data = [
                             'transport' => 'resend',
                             'api_key' => $settings->resend_api_key,
                             'from_address' => $settings->Mail ?? config('mail.from.address'),
                             'from_name' => $settings->title ?? config('mail.from.name', 'Your App Name'),
-                        ]);
+                        ];
+                        MailConfig::set($data);
                     } else {
                         Config::set('mail.driver', 'smtp');
                         Config::set('mail.host', $settings->host);
-                        Config::set('mail.port', $settings->Port);
+                        Config::set('mail.port', (int) $settings->Port);
                         Config::set('mail.username', $settings->Mail);
                         Config::set('mail.password', $settings->Mailpassword);
                         Config::set('mail.encryption', $settings->encryption);
