@@ -56,7 +56,7 @@
           <span class="fw-semibold">{{ __('cycles.Step') }}</span>
           <span class="badge bg-label-warning">
             <i class="ti ti-stairs ti-xs me-1"></i>
-            {{ $company->stepdata->title }}
+            {{ $company?->stepdata?->title ?? '-' }}
           </span>
         </div>
       </div>
