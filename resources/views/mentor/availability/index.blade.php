@@ -267,6 +267,7 @@
       let mergedEnd   = moment(endHHmm,   'HH:mm');
       const idsToDelete   = [];
       const idxToDelete   = [];
+      let conflictSlot    = null;
 
       existing.forEach((slot, idx) => {
           const slotStart = moment(slot.start, 'HH:mm');
@@ -275,6 +276,7 @@
           // Overlaps OR touches (adjacent slots are merged too)
           const overlaps = mergedStart.isSameOrBefore(slotEnd) && mergedEnd.isSameOrAfter(slotStart);
           if (overlaps) {
+              if (slotStart.isSame(mergedStart)) conflictSlot = slot;
               if (slotStart.isBefore(mergedStart)) mergedStart = slotStart;
               if (slotEnd.isAfter(mergedEnd))       mergedEnd   = slotEnd;
               idsToDelete.push(slot.id);
@@ -287,6 +289,7 @@
           mergedEnd:   mergedEnd.format('HH:mm'),
           idsToDelete,
           idxToDelete,
+          conflictSlot,
       };
   }
 
@@ -790,7 +793,19 @@
       if (!slot) return;
 
       // Compute merged range (absorbs any overlapping / touching existing slots)
-      const { mergedStart, mergedEnd, idsToDelete, idxToDelete } = computeMerge(type, key, slot.start, slot.end);
+      const { mergedStart, mergedEnd, idsToDelete, idxToDelete, conflictSlot } = computeMerge(type, key, slot.start, slot.end);
+
+      if (conflictSlot) {
+          releaseFailureAlert({
+              title: '{{ __('admin.Error') }}',
+              message: '{{ __('mentor.slot_already_exists') }}' + ' ' +
+                       '{{ __('mentor.between', ['from' => ':from', 'to' => ':to']) }}'
+                           .replace(':from', conflictSlot.start)
+                           .replace(':to',   conflictSlot.end),
+          });
+          return;
+      }
+
       const wasMerged = idsToDelete.length > 0;
 
       try {
@@ -1068,7 +1083,19 @@
       const end   = endTime.format('HH:mm');
 
       // Compute merged range
-      const { mergedStart, mergedEnd, idsToDelete, idxToDelete } = computeMerge('weekly', day, start, end);
+      const { mergedStart, mergedEnd, idsToDelete, idxToDelete, conflictSlot } = computeMerge('weekly', day, start, end);
+
+      if (conflictSlot) {
+          releaseFailureAlert({
+              title: '{{ __('admin.Error') }}',
+              message: '{{ __('mentor.slot_already_exists') }}' + ' ' +
+                       '{{ __('mentor.between', ['from' => ':from', 'to' => ':to']) }}'
+                           .replace(':from', conflictSlot.start)
+                           .replace(':to',   conflictSlot.end),
+          });
+          return;
+      }
+
       const wasMerged = idsToDelete.length > 0;
 
       try {
