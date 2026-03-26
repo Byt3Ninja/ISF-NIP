@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use App\Services\BroadcastConfigService;
+use App\Services\MailConfig;
 use Illuminate\Support\Facades\Broadcast;
 use App\Observers\WireChatMessageObserver;
 use Namu\WireChat\Models\Message;
@@ -40,15 +41,24 @@ class AppServiceProvider extends ServiceProvider
                 $settings = Settings::find(1);
 
                 if ($settings) {
-                    Config::set('mail.driver', 'smtp');
-                    Config::set('mail.host', $settings->host);
-                    Config::set('mail.port', $settings->Port);
-                    Config::set('mail.username', $settings->Mail);
-                    Config::set('mail.password', $settings->Mailpassword);
-                    Config::set('mail.encryption', $settings->encryption);
-                
-                    Config::set('mail.from.address', $settings->Mail);
-                    Config::set('mail.from.name', $settings->title ?? 'Your App Name');
+                    if ($settings->email_provider === 'resend' && $settings->resend_api_key) {
+                        MailConfig::set([
+                            'transport' => 'resend',
+                            'api_key' => $settings->resend_api_key,
+                            'from_address' => $settings->Mail ?? config('mail.from.address'),
+                            'from_name' => $settings->title ?? config('mail.from.name', 'Your App Name'),
+                        ]);
+                    } else {
+                        Config::set('mail.driver', 'smtp');
+                        Config::set('mail.host', $settings->host);
+                        Config::set('mail.port', $settings->Port);
+                        Config::set('mail.username', $settings->Mail);
+                        Config::set('mail.password', $settings->Mailpassword);
+                        Config::set('mail.encryption', $settings->encryption);
+
+                        Config::set('mail.from.address', $settings->Mail);
+                        Config::set('mail.from.name', $settings->title ?? 'Your App Name');
+                    }
                 }
             } catch (\Exception $e) {
                 $settings = null;
