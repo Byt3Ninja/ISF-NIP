@@ -144,7 +144,19 @@ class ScreeningEvaluationResults extends Model
 				$judges[$index]->startups = $get_companies->pluck('id');
 			}
 		}
-		elseif( $getStep?->data != 'grouptogroup' ) { foreach( $judges as $index => $judge ) { $judges[$index]->startups = $companies->pluck('id'); } }
+		elseif( $getStep?->data == 'grouptogroup' )
+		{
+			// Convert user IDs to company IDs (same conversion as stype=5 above)
+			foreach( $judges as $index => $judge )
+			{
+				$startup_ids = $judge->startups->toArray();
+				$get_companies = $companies->filter(function( $c ) use ( $startup_ids ) {
+					return $c->users->whereIn('id', $startup_ids)->count() > 0;
+				});
+				$judges[$index]->startups = $get_companies->pluck('id');
+			}
+		}
+		else { foreach( $judges as $index => $judge ) { $judges[$index]->startups = $companies->pluck('id'); } }
 
 		$scoped_comments = $comments->where('evaluation_id', $evaluation?->id)->values();
 		foreach( $judges as $index => $judge )
