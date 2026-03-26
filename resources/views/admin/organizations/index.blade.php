@@ -299,6 +299,10 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                     $('div[data-org-id="' + $(this).data('id') + '"]').fadeOut(300, function() {
                       $(this).remove();
                     });
+                    
+                    // Reload the page
+                    location.reload();
+
                   } else {
                     releaseFailureAlert({
                       title: "{{ __('admin.Error') }}",
