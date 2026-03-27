@@ -27,7 +27,7 @@
         placeholder="{{ __('admin.Enter section title') }}"
         maxlength="255"
       />
-      <div class="invalid-feedback title-feedback"></div>
+      {{-- <div class="invalid-feedback title-feedback"></div> --}}
       @error("custom_sections.{$idx}.title")
         <div class="invalid-feedback d-block">{{ $message }}</div>
       @enderror
@@ -52,7 +52,7 @@
         class="hidden-content"
         value="{{ $content }}"
       />
-      <div class="invalid-feedback content-feedback"></div>
+      {{-- <div class="invalid-feedback content-feedback"></div> --}}
       @error("custom_sections.{$idx}.content")
         <div class="invalid-feedback d-block">{{ $message }}</div>
       @enderror
@@ -135,7 +135,7 @@
           </div>
         </div>
       </div>
-      <div class="invalid-feedback visibility-feedback"></div>
+      {{-- <div class="invalid-feedback visibility-feedback"></div> --}}
       @error("custom_sections.{$idx}.visibility")
         <div class="invalid-feedback d-block">{{ $message }}</div>
       @enderror
