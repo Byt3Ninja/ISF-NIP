@@ -177,8 +177,14 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                   </div>
 
                   <div class="flex-grow-1">
+                    <!-- Status Badge -->
+                    <div class="badge bg-label-{{ $org->status == 1 ? 'info' : 'danger' }} mb-3">
+                      {{ $org->status == 1 ? __('admin.Active') : __('admin.Inactive') }}
+                    </div>
+
                     <!-- Description -->
                     <p class="mb-4 line-clamp-3">{{ $org->bio }}</p>
+
     
                     <!-- Managers -->
                     <div class="mb-4">
