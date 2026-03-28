@@ -360,18 +360,18 @@ class SlotController extends Controller
 						return response()->json([
 								'success' => false,
 								// message includes between time and date of existing slot for better UX
-								'message' => __('mentor.slot_already_exists') . ' ' . __('mentor.between', ['from' => $getschedule->tfrom, 'to' => $getschedule->tto]),
+								'message' =>  __('mentor.overlap', ['date' => $validated['date'],'from' => $getschedule->tfrom, 'to' => $getschedule->tto]),
 						], 422);
 						// $getschedule->delete();
 					} elseif ($getschedule->tfrom == $validated['tfrom'].':00' && $validated['tto'] >= $getschedule->tto) {
 						return response()->json([
 							'success' => false,
-							'message' => __('mentor.slot_already_exists') . ' ' . __('mentor.between', ['from' => $getschedule->tfrom, 'to' => $getschedule->tto]),
+							'message' =>  __('mentor.overlap', ['date' => $validated['date'],'from' => $getschedule->tfrom, 'to' => $getschedule->tto]),
 						], 422);
 					} else {
 						return response()->json([
 								'success' => false,
-								'message' => __('mentor.slot_already_exists') . ' ' . __('mentor.between', ['from' => $getschedule->tfrom, 'to' => $getschedule->tto]),
+								'message' =>  __('mentor.overlap', ['date' => $validated['date'],'from' => $getschedule->tfrom, 'to' => $getschedule->tto]),
 						], 422);
 					}
 				}
@@ -390,7 +390,7 @@ class SlotController extends Controller
 						if (in_array($dayName, $weekdays)) {
 							return response()->json([
 								'success' => false,
-								'message' => __('mentor.slot_already_exists') . ' ' . __('mentor.between', ['from' => $weekly->tfrom, 'to' => $weekly->tto]),
+								'message' =>  __('mentor.between', ['from' => $weekly->tfrom, 'to' => $weekly->tto]),
 							], 422);
 						}
 					}

@@ -49,7 +49,8 @@ return [
     'slot_added_success' => 'تم اضافة الفترة بنجاح',
     'slot_copied_success' => 'تم نسخ الفترة بنجاح',
     'slot_already_exists' => 'فترة التواجد هذه موجودة بالفعل',
-    'between' => 'بين :from و :to',
+    'between' => 'يتعارض مع :from و :to',
+    'overlap' => 'يتعارض مع: :date بين :from و :to',
     'weekly_availability_slots' => 'فترات التواجد الأسبوعية',
     'add_availability' => 'إضافة تواجد',
     'calendar_view' => 'عرض التقويم',
@@ -128,6 +129,6 @@ return [
     'session_end_time' => 'وقت انتهاء الجلسة',
     'please_select_session_times' => 'يرجى اختيار وقت الجلسة',
     'add_availability_slots' => 'إضافة فترات التواجد',
-    'this_time_before_now' => 'هذا الوقت قبل الان',
+    'this_time_before_now' => 'انتهى وقت هذا الموعد بالفعل. يرجى اختيار وقت في المستقبل.',
     'slots_merged' => 'تم اضافة الفترة تم دمجها',
 ];
