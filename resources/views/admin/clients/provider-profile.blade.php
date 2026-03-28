@@ -64,12 +64,12 @@
                       <span>{{ $provider->country_name }}{{ $provider->country_name && $operatingModeLabel ? ', ' : '' }}{{ __('admin.operating_mode.options.' . $operatingModeLabel) }}</span>
                     </div>
                   @endif
-                  @if($provider->review_count > 0)
+                  {{--  @if($provider->review_count > 0)  --}}
                     <div class="small d-flex align-items-center gap-1">
                       <i class="ti ti-star"></i>
                       <span>{{ $provider->avg_rating }} {{ __('admin.rating') }} ({{ $provider->review_count }} {{ __('admin.reviews') }})</span>
                     </div>
-                  @endif
+                  {{--  @endif  --}}
                 </div>
               </div>
 
