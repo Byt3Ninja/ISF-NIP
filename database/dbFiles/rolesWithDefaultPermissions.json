@@ -5024,19 +5024,7 @@
                     "admin",
                     "subadmin"
                 ]
-            },
-            {
-                "name": "company.financial_projection.set_current_date",
-                "description": "Set current date for company financial projections",
-                "guard_name": "web",
-                "is_core": 0,
-                "default_for": [
-                    "registered",
-                    "admin",
-                    "subadmin"
-                ]
             }
-
         ]
     },
     {

@@ -4595,9 +4595,4 @@ class ClientCompanyController extends Controller
             ], 500);
         }
     }
-
-    public function setCurrentHistoryDate(Request $request, int $id)
-    {
-        //
-    }
 }
