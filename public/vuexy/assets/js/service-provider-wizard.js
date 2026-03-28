@@ -25,8 +25,7 @@
       title_max:                       'Title must be less than 50 chars',
       desc_required:                   'Description is required',
       desc_max:                        'Description must be less than 100 chars',
-      at_least_one_item:               'Please add at least one complete work item',
-      save_and_next:                   'Save & Next',
+            save_and_next:                   'Save & Next',
       submit:                          'Submit',
       saving:                          'Saving...',
       submitting:                      'Submitting...',
@@ -122,7 +121,11 @@
 
   // Allow clicking step-trigger buttons only for accessible steps
   document.querySelectorAll('.step-trigger').forEach((btn, index) => {
+    console.log("index", index);
     btn.addEventListener('click', () => {
+      if (index === 3) {
+        buildStep4Validation();
+      }
       const currentStep = validationStepper._currentIndex;
       if (index <= currentStep || completedSteps.has(index)) {
         validationStepper.to(index + 1);
@@ -249,7 +252,7 @@
    */
   function attachRealTimeListeners() {
     // ── Step 1 ──────────────────────────────────────────────────────────────
-    ['company_name', 'contact_name', 'email', 'phone', 'country', 'state', 'city', 'about']
+    ['company_logo', 'company_name', 'contact_name', 'email', 'phone', 'country', 'state', 'city', 'about']
       .forEach(name => {
         const el = wizardForm.querySelector(`[name="${name}"]`);
         if (el) el.addEventListener('input', syncStepUnlockState);
@@ -754,32 +757,7 @@
       };
     });
 
-    // "At least one complete item" global check
-    if ($('#_portfolio_at_least_one').length === 0) {
-      $('<div id="portfolio-error-container" class="mb-3"></div>')
-        .append($('<input type="hidden" id="_portfolio_at_least_one" name="_portfolio_at_least_one">'))
-        .appendTo('#itemsContainer');
-    }
-
-    fields['_portfolio_at_least_one'] = {
-      validators: {
-        callback: {
-          message: t.at_least_one_item,
-          callback: () => {
-            let valid = false;
-            $('.work-item-card:visible').each(function () {
-              const hasTitle = $(this).find('.title-input').val().trim() !== '';
-              const hasMedia =
-                $(this).find('.media-input')[0].files.length > 0 ||
-                $(this).find('.upload-area img, .upload-area video').length > 0;
-              if (hasTitle && hasMedia) { valid = true; return false; }
-            });
-            return valid;
-          }
-        }
-      }
-    };
-
+    
     FormValidation4 = FormValidation.formValidation(stepEls[4], {
       fields,
       plugins: {
@@ -796,8 +774,9 @@
   }
 
   // Initialise portfolio validation and expose rebuild for external use
-  setTimeout(buildStep4Validation, 100);
+  // setTimeout(buildStep4Validation, 100);
   window.rebuildPortfolioValidation = buildStep4Validation;
+
 
   // ─── Stepper UI: Next/Prev button labels ─────────────────────────────────────
 
