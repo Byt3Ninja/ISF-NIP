@@ -4274,4 +4274,330 @@ class ClientCompanyController extends Controller
         return view('admin.clients.startup.company_perks');
     }
 
+    public function getFinancialProjectionRealtime(Request $request, int $id)
+    {
+        try {
+            // ----------------------------------------------------------
+            // 1. Authorisation guard
+            // ----------------------------------------------------------
+            $user = auth()->user();
+
+            if ($user->hasRole('registered') && $user->company_id != $id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('admin.NoHavePermission'),
+                ], 403);
+            }
+
+            // ----------------------------------------------------------
+            // 2. Resolve valuation date
+            // ----------------------------------------------------------
+            $allProjections = FinancialProjection::where('company_id', $id)
+                ->whereNotNull('valuation_date')
+                ->orderBy('valuation_date', 'desc')
+                ->get();
+
+            // Collect unique valuation dates (formatted as YYYY-MM)
+            $historicalDates = $allProjections
+                ->pluck('valuation_date')
+                ->unique()
+                ->map(fn ($d) => Carbon::parse($d)->format('Y-m'))
+                ->unique()
+                ->values()
+                ->toArray();
+
+            // Determine which valuation date to load
+            $requestedDate = $request->get('valuation_date'); // e.g. "2024-01"
+
+            if ($requestedDate) {
+                $valuationDateStr = $requestedDate;
+            } elseif (!empty($historicalDates)) {
+                $valuationDateStr = $historicalDates[0]; // most recent
+            } else {
+                $valuationDateStr = date('Y-m');
+            }
+
+            $valuationYear = (int) Carbon::parse($valuationDateStr . '-01')->format('Y');
+
+            // ----------------------------------------------------------
+            // 3. Load the 4 projection rows for this date
+            // ----------------------------------------------------------
+            // Filter by matching year-month (ignoring day component)
+            $projections = $allProjections->filter(function ($proj) use ($valuationDateStr) {
+                return Carbon::parse($proj->valuation_date)->format('Y-m') === $valuationDateStr;
+            })->keyBy('year');
+
+            // Detect locked currency (if any record already has one)
+            $firstRecord      = $projections->first();
+            $lockedCurrency   = $firstRecord?->currency ?? null;
+            $isCurrencyLocked = !is_null($lockedCurrency);
+
+            // ----------------------------------------------------------
+            // 4. Build the 4-year payload
+            // ----------------------------------------------------------
+            $yearOffsets = [
+                0 => ['offset' => -1, 'label' => __('startup.past_year')],
+                1 => ['offset' =>  0, 'label' => __('startup.forecast_year_1')],
+                2 => ['offset' =>  1, 'label' => __('startup.year_2')],
+                3 => ['offset' =>  2, 'label' => __('startup.year_3')],
+            ];
+
+            $yearsPayload = [];
+
+            foreach ($yearOffsets as $index => $meta) {
+                $year = $valuationYear + $meta['offset'];
+                $fp   = $projections->get($year); // may be null → blank row
+
+                $yearsPayload[$index] = [
+                    'year'  => $year,
+                    'label' => $meta['label'],
+                    'data'  => [
+                        // P&L
+                        'rev'    => $fp?->revenues                ?? null,
+                        'cogs'   => $fp?->cogs                    ?? null,
+                        'sal'    => $fp?->salaries                ?? null,
+                        'opex'   => $fp?->other_op_expenses       ?? null,
+                        'ebitda' => $fp?->ebitda                  ?? null,
+                        'da'     => $fp?->depreciation_amortization ?? null,
+                        'ebit'   => $fp?->ebit                    ?? null,
+                        'int'    => $fp?->interest                ?? null,
+                        'tax'    => $fp?->taxes                   ?? null,
+                        'np'     => $fp?->net_profit              ?? null,
+                        // Balance sheet / Working capital
+                        'rec'    => $fp?->receivables             ?? null,
+                        'inv'    => $fp?->inventory               ?? null,
+                        'pay'    => $fp?->payables                ?? null,
+                        'wc'     => $fp?->working_capital         ?? null,
+                        'dwc'    => $fp?->change_in_wc            ?? null,
+                        // Cash flow
+                        'capex'  => $fp?->capital_expenditures    ?? null,
+                        'debt'   => $fp?->debt_end_year           ?? null,
+                        'ddebt'  => $fp?->debt_change             ?? null,
+                        'fcf'    => $fp?->free_cash_flow          ?? null,
+                    ],
+                ];
+            }
+
+            // ----------------------------------------------------------
+            // 5. Return JSON
+            // ----------------------------------------------------------
+            return response()->json([
+                'success'            => true,
+                'valuation_date'     => $valuationDateStr,
+                'currency'           => $lockedCurrency,
+                'is_currency_locked' => $isCurrencyLocked,
+                'historical_dates'   => $historicalDates,
+                'years'              => $yearsPayload,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('getFinancialProjectionRealtime error: ' . $e->getMessage(), [
+                'company_id' => $id,
+                'trace'      => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => __('admin.error_loading_financial_data'),
+            ], 500);
+        }
+    }
+
+    public function saveFinancialProjection(Request $request, int $id)
+    {
+        try {
+            // ----------------------------------------------------------
+            // 1. Auth guard
+            // ----------------------------------------------------------
+            $user = auth()->user();
+
+            if ($user->hasRole('registered') && $user->company_id != $id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('admin.NoHavePermission'),
+                ], 403);
+            }
+
+            // ----------------------------------------------------------
+            // 2. Basic validation
+            // ----------------------------------------------------------
+            $request->validate([
+                'valuation_date' => 'required|date_format:Y-m',
+                'Currency' => 'required|string|max:10',
+            ]);
+
+            $valuationDateStr  = $request->input('valuation_date');
+            $valuationDateFull = $valuationDateStr . '-01';
+            $valuationYear     = (int) Carbon::parse($valuationDateFull)->year;
+            $requestedCurrency = $request->input('Currency');
+
+            // ADDED: Fail fast if currency is missing
+            if (!$requestedCurrency) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('admin.Currency is required'),
+                ], 422);
+            }
+
+            // ----------------------------------------------------------
+            // 3. Map: index → year  (0 = past, 1 = Y0, 2 = Y+1, 3 = Y+2)
+            // ----------------------------------------------------------
+            $yearOffsets = [-1, 0, 1, 2];
+            $fieldMap    = [
+                'rev'   => 'revenues',
+                'cogs'  => 'cogs',
+                'sal'   => 'salaries',
+                'opex'  => 'other_op_expenses',
+                'ebitda'=> 'ebitda',
+                'da'    => 'depreciation_amortization',
+                'ebit'  => 'ebit',
+                'int'   => 'interest',
+                'tax'   => 'taxes',
+                'np'    => 'net_profit',
+                'rec'   => 'receivables',
+                'inv'   => 'inventory',
+                'pay'   => 'payables',
+                'wc'    => 'working_capital',
+                'dwc'   => 'change_in_wc',
+                'capex' => 'capital_expenditures',
+                'debt'  => 'debt_end_year',
+                'ddebt' => 'debt_change',
+                'fcf'   => 'free_cash_flow',
+            ];
+
+            // ----------------------------------------------------------
+            // 4. Determine whether this is a single-field or full save
+            // ----------------------------------------------------------
+            $singleField = $request->input('field');
+            $singleValue = $request->input('value');
+
+            DB::beginTransaction();
+
+            $rows = [];
+
+            for ($i = 0; $i < 4; $i++) {
+                $year = $valuationYear + $yearOffsets[$i];
+
+                $record = FinancialProjection::firstOrNew([
+                    'company_id'     => $id,
+                    'valuation_date' => $valuationDateFull,
+                    'year'           => $year,
+                ]);
+
+                // // Currency guard: once a currency is stored it must not change
+                // if ($record->exists && $record->currency && $record->currency !== $requestedCurrency) {
+                //     DB::rollBack();
+                //     return response()->json([
+                //         'success' => false,
+                //         'message' => __('admin.You can not add more than one currency per year'),
+                //     ], 422);
+                // }
+
+                $record->company_id     = $id;
+                $record->user_id        = $user->id;
+                $record->valuation_date = $valuationDateFull;
+                $record->year           = $year;
+                $record->currency       = $requestedCurrency; // FIXED: Always set from request
+
+                // ── Single-field update ──────────────────────────────
+                if ($singleField) {
+                    if (preg_match('/^([a-z]+)_(\d)$/', $singleField, $m)) {
+                        $shortName = $m[1];
+                        $fieldIdx  = (int) $m[2];
+
+                        if ($fieldIdx === $i && isset($fieldMap[$shortName])) {
+                            $dbColumn          = $fieldMap[$shortName];
+                            $record->$dbColumn = is_numeric($singleValue) ? (float) $singleValue : null;
+                        }
+                    }
+                } else {
+                    // ── Full-form update ────────────────────────────
+                    foreach ($fieldMap as $short => $db) {
+                        $key = "{$short}_{$i}";
+                        if ($request->has($key)) {
+                            $val          = $request->input($key);
+                            $record->$db  = is_numeric($val) ? (float) $val : null;
+                        }
+                    }
+                }
+
+                $record->save();
+                $rows[$i] = $record;
+            }
+
+            DB::commit();
+
+            // ----------------------------------------------------------
+            // 5. Server-side recalculation
+            // ----------------------------------------------------------
+            $recalculated = [];
+            $prevWC       = 0.0;
+            $prevDebt     = 0.0;
+
+            foreach ($rows as $i => $r) {
+                $rev   = (float)($r->revenues ?? 0);
+                $cogs  = (float)($r->cogs ?? 0);
+                $sal   = (float)($r->salaries ?? 0);
+                $opex  = (float)($r->other_op_expenses ?? 0);
+                $da    = (float)($r->depreciation_amortization ?? 0);
+                $int   = (float)($r->interest ?? 0);
+                $tax   = (float)($r->taxes ?? 0);
+                $rec   = (float)($r->receivables ?? 0);
+                $inv   = (float)($r->inventory ?? 0);
+                $pay   = (float)($r->payables ?? 0);
+                $capex = (float)($r->capital_expenditures ?? 0);
+                $debt  = (float)($r->debt_end_year ?? 0);
+
+                $ebitda    = $rev - $cogs - $sal - $opex;
+                $ebit      = $ebitda - $da;
+                $netProfit = $ebit - $int - $tax;
+                $wc        = $rec + $inv - $pay;
+                $deltaWC   = ($i === 0) ? 0.0 : $wc - $prevWC;
+                $debtChg   = ($i === 0) ? 0.0 : $debt - $prevDebt;
+                $fcf       = $netProfit + $da - $capex - $deltaWC;
+
+                $recalculated["ebitda_{$i}"] = round($ebitda, 2);
+                $recalculated["ebit_{$i}"]   = round($ebit, 2);
+                $recalculated["np_{$i}"]     = round($netProfit, 2);
+                $recalculated["wc_{$i}"]     = round($wc, 2);
+                $recalculated["dwc_{$i}"]    = ($i === 0) ? null : round($deltaWC, 2);
+                $recalculated["ddebt_{$i}"]  = ($i === 0) ? null : round($debtChg, 2);
+                $recalculated["fcf_{$i}"]    = round($fcf, 2);
+
+                $prevWC   = $wc;
+                $prevDebt = $debt;
+            }
+
+            return response()->json([
+                'success'      => true,
+                'message'      => __('admin.financial_projection_saved_successfully'),
+                'recalculated' => $recalculated,
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'errors'  => $e->errors(),
+            ], 422);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('saveFinancialProjection error: ' . $e->getMessage(), [
+                'company_id' => $id,
+                'trace'      => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => __('admin.error_updating_financial_projection'),
+                'error_details' => config('app.debug') ? $e->getMessage() : null, // ADDED: helpful during debugging
+            ], 500);
+        }
+    }
+
+    public function setCurrentHistoryDate(Request $request, int $id)
+    {
+        //
+    }
 }
