@@ -66,6 +66,21 @@
   $currentTab = request()->get('tab') ?? 'howItWorks';
 @endphp
 
+{{-- Generate HTML option strings for icon selects --}}
+@php
+  function arrayToOptions($icons) {
+    $options = '';
+    foreach ($icons as $value => $label) {
+      $options .= "<option value=\"{$value}\">{$label}</option>\n";
+    }
+    return $options;
+  }
+
+  $stepIconOptionsHtml = arrayToOptions($stepIcons);
+  $metricIconOptionsHtml = arrayToOptions($metricIcons);
+  $benefitIconOptionsHtml = arrayToOptions($benefitIcons);
+@endphp
+
 @section('content')
   <div class="row">
     <div class="col-12">
@@ -320,9 +335,9 @@
       orgName        : "{{ $org->name }}", 
       checkSlugUrl   : "{{ route('organization.wizard.check.slug', $org->id) }}",
       requiredMsg    : "{{ __('admin.Required_Field') }}",
-      stepIconOptions    : "{{ htmlspecialchars(json_encode($stepIcons), ENT_QUOTES, 'UTF-8') }}",
-      metricIconOptions  : "{{ htmlspecialchars(json_encode($metricIcons), ENT_QUOTES, 'UTF-8') }}",
-      benefitIconOptions : "{{ htmlspecialchars(json_encode($benefitIcons), ENT_QUOTES, 'UTF-8') }}",
+      stepIconOptions    : {!! json_encode($stepIconOptionsHtml) !!},
+      metricIconOptions  : {!! json_encode($metricIconOptionsHtml) !!},
+      benefitIconOptions : {!! json_encode($benefitIconOptionsHtml) !!},
       i18n: {
         step              : "{{ __('admin.Step') }}", 
         selectIcon        : "{{ __('settings.Select Icon') }}",
@@ -345,6 +360,7 @@
         landingPublished  : "{{ __('admin.Landing Published') }}",
         landingUnpublished: "{{ __('admin.Landing Unpublished') }}",
         maximumLimitReached  : "{{ __('admin.maximum_limit_reached') }}",
+        metric_number_validation : "{{ __('admin.metric_number_validation') }}",
         items: "{{ __('admin.items') }}",
         allowed: "{{ __('admin.allowed') }}",
       },
