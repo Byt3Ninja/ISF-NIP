@@ -3585,4 +3585,5 @@ return [
 	'serviceProvider_desc' => 'Offer your services to startups',
 	'metric_number_validation' => 'Please enter a valid number (e.g., 100, 100.5, 100+, 1M, 75%)',
 	'wizard_organization' => 'Wizard Organization',
+	'District' => 'District',
 ];

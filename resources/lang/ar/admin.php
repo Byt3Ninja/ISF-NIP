@@ -3645,4 +3645,5 @@ return [
 	'financial_projection_saved_successfully' => 'تم حفظ التوقعات المالية بنجاح',
 	'metric_number_validation' => 'الرجاء إدخال رقم صحيح (مثلاً: 100، 100.5، 100+، مليون، 75%)',
 	'wizard_organization' => 'تنظيم المؤسسه',
+	'District' => 'حي',
 ];
