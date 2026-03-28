@@ -77,7 +77,7 @@ class OrganizationStep4Request extends FormRequest
             'partners_list.*.existing_logo' => 'nullable|string',
 
             // Section Type (for tab-isolated saves)
-            'section_type' => 'nullable|string|in:howItWorks,achievements,media,partners,programs',
+            'section_type' => 'nullable|string|in:howItWorks,achievements,media,partners,programs,url',
 
             // Theme
             'landing_theme' => 'nullable|in:gradient,minimal,vuexy',
@@ -212,6 +212,9 @@ class OrganizationStep4Request extends FormRequest
         // Only convert checkboxes for the current section (or all if no section_type)
         $sectionsToProcess = $sectionType ? [$sectionType] : array_keys($checkboxMap);
         foreach ($sectionsToProcess as $section) {
+            if (!isset($checkboxMap[$section])) {
+                continue;
+            }
             foreach ($checkboxMap[$section] as $field) {
                 $fields[$field] = $this->has($field);
             }
