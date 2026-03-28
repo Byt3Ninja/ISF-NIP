@@ -3580,4 +3580,5 @@ return [
 	'maximum_limit_reached' => 'Maximum limit reached',
 	'allowed' => 'allowed',
 	'items' => 'items',
+	'service_details' => 'Service Details',
 ];
