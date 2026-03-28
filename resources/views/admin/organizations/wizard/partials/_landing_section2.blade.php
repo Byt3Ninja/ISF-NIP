@@ -76,7 +76,7 @@
   
             <!-- Card Header -->
             <div class="card-header d-flex justify-content-between align-items-center py-2">
-              <h6 class="mb-0">Metric {{ $index + 1 }}</h6>
+              <h6 class="mb-0">{{ __('admin.Metric') }} {{ $index + 1 }}</h6>
               <button type="button" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill remove-item-btn">
                 <i class="ti ti-trash"></i>
               </button>
