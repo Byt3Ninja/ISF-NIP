@@ -1,697 +1,386 @@
 /**
  * app-lp-management.js
  * Organizational Landing Page Management
- *
- * Extracted & optimized from the Blade template inline script.
- * All Blade-rendered values are injected via `window.LPConfig` (see below).
- *
- * Required global bootstrap before this file is loaded:
- * ─────────────────────────────────────────────────────
- * window.LPConfig = {
- *   orgId          : <int>,
- *   orgName        : <string>,          // e.g. "Acme Corp"
- *   checkSlugUrl   : <string>,          // route('organization.wizard.check.slug', org->id)
- *   requiredMsg    : <string>,          // __('admin.Required_Field')
- *   stepIconOptions    : <string>,      // HTML <option value="icon-class">Label</option> block for step icons (generated from Blade)
- *   metricIconOptions  : <string>,      // HTML <option> block for metric icons  
- *   benefitIconOptions : <string>,      // HTML <option> block for benefit icons (unused - available for future use)
- *   i18n: {
- *     selectIcon        : '...',
- *     stepTitle         : '...',
- *     stepDescription   : '...',
- *     metricNumber      : '...',
- *     metricLabel       : '...',
- *     publicationName   : '...',
- *     publicationDate   : '...',
- *     articleTitle      : '...',
- *     articleLink       : '...',
- *     articleSummary    : '...',
- *     articleImage      : '...',
- *     partnerName       : '...',
- *     partnerLogo       : '...',
- *     logoPreview       : '...',
- *     landingPublished  : '...',
- *     landingUnpublished: '...',
- *   },
- * };
  */
 
 (function ($) {
   'use strict';
 
-  /* ═══════════════════════════════════════════════════════════
-     GUARD — abort cleanly if config is missing
-  ─────────────────────────────────────────────────────────── */
   if (!window.LPConfig) {
-    console.error('[app-lp-management] window.LPConfig is not defined. Aborting.');
+    console.error('[app-lp-management] window.LPConfig is not defined.');
     return;
   }
 
   const CFG = window.LPConfig;
   const i18n = CFG.i18n || {};
-
   const lang = document.documentElement.lang || 'en';
+  const isAr = lang === 'ar';
 
   /* ═══════════════════════════════════════════════════════════
-     1. CONSTANTS
+     1. TRANSLATIONS
   ─────────────────────────────────────────────────────────── */
-
-  const MAX_LIMITS = {
-    step: 4,
-    metric: 8,
-    article: 8,
-    partner: 20,
-    custom: 10,
+  const T = {
+    completeStep: isAr ? 'يرجى إكمال جميع حقول هذه الخطوة' : 'Please complete all fields in this step.',
+    completeMetric: isAr ? 'يرجى إكمال جميع حقول هذا المعيار' : 'Please complete all fields in this metric.',
+    completeArticle: isAr ? 'يرجى إكمال جميع حقول هذا المقال' : 'Please complete all fields in this article.',
+    completePartner: isAr ? 'يرجى إكمال جميع حقول هذا الشريك' : 'Please complete all fields in this partner.',
+    articleImageBadType: isAr ? 'نوع الملف غير صالح، يرجى رفع ملفات من نوع PNG أو JPG فقط' : 'Invalid file format. Please upload PNG or JPG files only.',
+    articleImageTooLarge: isAr ? 'الملف اكبر من الحد المسموح. الحد الأقصى المسموح به هو 5 ميجابايت' : 'File too large. Maximum size allowed is 5MB.',
+    logoImageBadType: isAr ? 'نوع الملف غير صالح (PNG, JPG, SVG)' : 'Invalid format (PNG, JPG, SVG).',
+    logoImageTooLarge: isAr ? 'الحد الأقصى 2 ميجابايت' : 'Max size 2MB.',
+    invalidUrl: isAr ? 'يرجى إدخال رابط صالح' : 'Please enter a valid URL.',
+    maxLimitReached: isAr ? 'لقد وصلت إلى الحد الأقصى المسموح به' : 'You have reached the maximum limit.',
+    required: CFG.requiredMsg || (isAr ? 'هذا الحقل مطلوب' : 'This field is required'),
+    optional: isAr ? 'اختياري' : 'Optional',
+    fixErrors: isAr ? 'يرجى تصحيح الأخطاء قبل الحفظ.' : 'Please fix the errors before saving.',
+    slugChecking: isAr ? 'جاري التحقق' : 'Checking',
+    slugAvailable: isAr ? 'متاح' : 'Available',
+    slugTaken: isAr ? 'مأخوذ بالفعل' : 'Already taken',
+    orderSaved: isAr ? 'تم حفظ الترتيب' : 'Order saved',
+    orderFailed: isAr ? 'فشل إعادة الترتيب' : 'Reorder failed',
   };
 
-  const CONTAINER_MAP = {
-    step: 'processStepsContainer',
-    metric: 'metricsContainer',
-    article: 'articlesContainer',
-    partner: 'partnersContainer',
-    custom: 'customSectionsContainer',
+  const MAX_LIMITS = { step: 4, metric: 8, article: 8, partner: 20 };
+  const CONTAINER_MAP = { step: 'processStepsContainer', metric: 'metricsContainer', article: 'articlesContainer', partner: 'partnersContainer' };
+
+  // Fields used for the "all or nothing" row logic
+  const REPEATER_TEXT_FIELDS = {
+    step: ['[title]', '[description]', '[icon]'],
+    metric: ['[number]', '[label]', '[icon]'],
+    article: ['[publication_name]', '[date]', '[title]', '[link]', '[summary]'],
+    partner: ['[name]']
   };
 
-  /** Maps tab section IDs → form-field name prefixes used for static header fields */
-  const SECTION_FORM_PREFIX_MAP = {
-    howItWorks: 'how_it_works',
-    achievements: 'achievements',
-    media: 'media',
-    partners: 'partners',
-    programs: 'programs',
-  };
-
-  const FILE_VALIDATION = {
-    allowedTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'],
-    maxBytes: 5 * 1024 * 1024,   // 5 MB
-    acceptedExtensions: 'png,jpg,jpeg,webp,svg',
-    maxSizeLabel: '5MB',
-    partnerMaxBytes: 2 * 1024 * 1024,   // 2 MB
-    partnerExtensions: 'png,jpg,jpeg,svg',
-    partnerSizeLabel: '2MB',
-  };
-
-  /* ═══════════════════════════════════════════════════════════
-     2. VALIDATOR REGISTRY
-  ─────────────────────────────────────────────────────────── */
-
-  /** Holds one FormValidation instance per form ID */
   const validators = {};
 
   /* ═══════════════════════════════════════════════════════════
-     3. VALIDATION ENGINE
+     2. HELPERS: Manual UI Feedback (For Partial-Fill Logic)
   ─────────────────────────────────────────────────────────── */
 
-  /**
-   * Find or create the .invalid-feedback element adjacent to `input`.
-   * Checks next siblings first (fast path), then the whole parent subtree.
-   */
-  function getOrCreateFeedback(input) {
-    let node = input.nextElementSibling;
-    while (node) {
-      if (node.classList.contains('invalid-feedback')) return node;
-      node = node.nextElementSibling;
+  function setManualError(input, message) {
+    const $el = $(input);
+    const $container = $el.closest('.fv-row, .mb-3, .col-12');
+    $el.addClass('is-invalid').removeClass('is-valid');
+    
+    let $fb = $container.find('.invalid-feedback');
+    if (!$fb.length) {
+      $fb = $('<div class="invalid-feedback d-block"></div>').insertAfter(input);
     }
-
-    const existing = input.parentNode.querySelector('.invalid-feedback');
-    if (existing) return existing;
-
-    const fb = document.createElement('div');
-    fb.className = 'invalid-feedback d-block';
-    input.parentNode.insertBefore(fb, input.nextSibling);
-    return fb;
+    $fb.text(message).show();
   }
 
-  function setFileError(input, message) {
-    input.classList.add('is-invalid');
-    input.classList.remove('is-valid');
-    getOrCreateFeedback(input).textContent = message;
+  function clearManualError(input) {
+    const $el = $(input);
+    const $container = $el.closest('.fv-row, .mb-3, .col-12');
+    $el.removeClass('is-invalid');
+    $container.find('.invalid-feedback').hide().text('');
   }
 
-  function clearFileError(input) {
-    input.classList.remove('is-invalid');
-    getOrCreateFeedback(input).textContent = '';
-  }
+  /* ═══════════════════════════════════════════════════════════
+     3. FILE PREVIEWS
+  ─────────────────────────────────────────────────────────── */
 
-  /**
-   * Validate a file input against allowed types + size limits.
-   * Returns true when valid (or empty).
-   */
-  function validateFileInput(input) {
+  function handleFileChange(input, type) {
+    const $item = $(input).closest('.repeater-item');
+    const $preview = $item.find(type === 'partner' ? '.logo-preview' : '.article-image-preview');
+    
     if (!input.files || !input.files[0]) {
-      clearFileError(input);
-      return true;
+      if (type !== 'partner') $preview.empty();
+      return;
     }
-
-    const { type, size } = input.files[0];
-    const badType = !FILE_VALIDATION.allowedTypes.includes(type);
-
-    // Check if this is a partner logo input
-    const isPartnerLogo = $(input).hasClass('logo-input');
-    const maxSize = isPartnerLogo ? FILE_VALIDATION.partnerMaxBytes : FILE_VALIDATION.maxBytes;
-    const badSize = size > maxSize;
-
-    if (badType || badSize) {
-      setFileError(
-        input,
-        badType
-          ? 'Only PNG, JPG, SVG files are allowed'
-          : isPartnerLogo
-            ? `File must be smaller than ${FILE_VALIDATION.partnerSizeLabel}`
-            : `File must be smaller than ${FILE_VALIDATION.maxSizeLabel}`
-      );
-      return false;
-    }
-
-    clearFileError(input);
-    return true;
-  }
-
-  /** Render a thumbnail preview inside the nearest preview container */
-  function showFilePreview(input) {
-    if (!input.files || !input.files[0]) return;
-
-    const col = input.closest('.col-12');
-    const $preview = col
-      ? $(col).find('.article-image-preview, .logo-preview')
-      : $(input).siblings('.article-image-preview, .logo-preview');
-
-    if (!$preview.length) return;
 
     const reader = new FileReader();
     reader.onload = (e) => {
-      $preview.html(
-        `<img src="${e.target.result}" class="img-thumbnail mt-2" style="max-height:60px;">`
-      );
+      const imgHtml = `<img src="${e.target.result}" class="img-thumbnail mt-2" style="max-height:60px;">`;
+      if (type === 'partner') {
+        $preview.html(imgHtml);
+      } else {
+        $preview.html(imgHtml);
+      }
     };
     reader.readAsDataURL(input.files[0]);
   }
 
-  function clearFilePreview(input) {
-    const col = input.closest('.col-12');
-    const $preview = col
-      ? $(col).find('.article-image-preview, .logo-preview')
-      : $(input).siblings('.article-image-preview, .logo-preview');
-    $preview.empty();
+  /* ═══════════════════════════════════════════════════════════
+     4. VALIDATION CORE
+  ─────────────────────────────────────────────────────────── */
+
+  function buildStandardPlugins() {
+    return {
+      trigger: new FormValidation.plugins.Trigger(),
+      bootstrap5: new FormValidation.plugins.Bootstrap5({
+        eleValidClass: 'is-valid',
+        eleInvalidClass: 'is-invalid',
+        // Target specific containers for consistent message placement
+        rowSelector: '.fv-row, .mb-3, .mb-2, .col-12, .col-md-6'
+      }),
+      submitButton: new FormValidation.plugins.SubmitButton(),
+      autoFocus: new FormValidation.plugins.AutoFocus(),
+    };
   }
 
-  /**
- * Validate metric number input - allows numbers, decimals, and optional text suffixes
- * Examples allowed: 100, 100.5, 100+, 1M, 1.5M, 1k, 5000+
- */
-  function validateMetricNumber(input) {
-    const value = input.value.trim();
+  function validateRepeaterRow($item, type) {
+    const fragments = REPEATER_TEXT_FIELDS[type] || [];
+    const fields = $item.find('input, select, textarea').filter(function() {
+      const name = $(this).attr('name') || '';
+      return fragments.some(f => name.includes(f));
+    }).get();
 
-    // Allow empty values
-    if (value === '') {
-      clearMetricError(input);
-      return true;
+    const anyFilled = fields.some(el => el.value.trim() !== '');
+    if (!anyFilled) {
+      fields.forEach(clearManualError);
+      return true; 
     }
 
-    // Regex pattern: allows numbers (with decimals) optionally followed by +, k, M, B, %
-    // Matches: 100, 100.5, 100+, 1.5k, 2M, 3B, 75%, 1000+
-    const pattern = /^(\d+(?:\.\d+)?)([$+%kMB]?)$/i;
+    let isValid = true;
+    const errorMsg = T[`complete${type.charAt(0).toUpperCase() + type.slice(1)}`] || T.required;
 
-    if (pattern.test(value)) {
-      clearMetricError(input);
-      return true;
-    }
-
-    setMetricError(input, i18n.metric_number_validation || 'Please enter a valid number (e.g., 100, 100.5, 100+, 1M, 75%)');
-    return false;
+    fields.forEach(el => {
+      if (!el.value.trim()) {
+        setManualError(el, errorMsg);
+        isValid = false;
+      } else {
+        clearManualError(el);
+      }
+    });
+    return isValid;
   }
 
-  function setMetricError(input, message) {
-    input.classList.add('is-invalid');
-    input.classList.remove('is-valid');
-    getOrCreateFeedback(input).textContent = message;
-  }
-
-  function clearMetricError(input) {
-    input.classList.remove('is-invalid');
-    const feedback = getOrCreateFeedback(input);
-    if (feedback) feedback.textContent = '';
-  }
-
-  // Add this inside your document ready function
-  $(document).on('input', 'input[name*="[number]"]', function () {
-    validateMetricNumber(this);
-  });
-
-  /**
-   * Initialise a FormValidation instance for a form.
-   *
-   * @param {string} formId      DOM id of the <form>
-   * @param {Object} fieldConfig FormValidation fields configuration object
-   */
-  function initSectionValidator(formId, fieldConfig) {
+  function attachStandardHandlers(formId, repeaterTypes, fv) {
     const form = document.getElementById(formId);
     if (!form) return;
 
-    // File-validation pre-submit gate (runs before FormValidation)
-    form.addEventListener(
-      'submit',
-      function (e) {
-        let hasFileError = false;
+    form.addEventListener('submit', function (e) {
+      let blocked = false;
 
-        let hasError = false;
-        $(this).find('input[name*="[number]"]').each(function () {
-          if (!validateMetricNumber(this)) {
-            hasError = true;
-          }
+      // Check partial-fill rows
+      repeaterTypes.forEach(type => {
+        $(`#${CONTAINER_MAP[type]}`).find('.repeater-item').each(function() {
+          if (!validateRepeaterRow($(this), type)) blocked = true;
         });
-
-        if (hasError) {
-          e.preventDefault();
-          toastr.error('Please fix metric number errors before saving.');
-        }
-
-        form.querySelectorAll('input[type="file"]').forEach((input) => {
-          if (!validateFileInput(input)) hasFileError = true;
-        });
-
-        if (hasFileError) {
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          toastr.error('Please fix file upload errors before saving.');
-        }
-      },
-      true
-    );
-
-    const fv = FormValidation.formValidation(form, {
-      fields: fieldConfig,
-      plugins: {
-        trigger: new FormValidation.plugins.Trigger({ event: { file: 'change' } }),
-        submitButton: new FormValidation.plugins.SubmitButton(),
-        bootstrap5: new FormValidation.plugins.Bootstrap5({
-          eleValidClass: '',
-          rowSelector: '.col-md-12, .col-md-6, .col-md-4, .col-lg-4, .col-12, .mb-3, .mb-2, .card-body',
-          feedbackIcons: false,
-        }),
-        autoFocus: new FormValidation.plugins.AutoFocus(),
-      },
-    })
-      // .on('core.form.invalid', () => toastr.error('Please fix the errors before saving.'))
-      .on('core.form.valid', () => form.submit())
-      .on('core.validator.validated', (data) => {
-        const input = data.element;
-
-        if (data.result.valid) {
-          input.classList.remove('is-invalid');
-          input.classList.add('is-valid');
-          getOrCreateFeedback(input).textContent = '';
-          if (data.validator === 'file') showFilePreview(input);
-          return;
-        }
-
-        input.classList.add('is-invalid');
-        input.classList.remove('is-valid');
-        getOrCreateFeedback(input).textContent = data.result.message || 'Invalid field';
-
-        if (data.validator === 'file') {
-          input.value = '';
-          clearFilePreview(input);
-        }
       });
+
+      if (blocked) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        toastr.error(T.fixErrors);
+      }
+    }, true);
+
+    fv.on('core.form.valid', () => form.submit());
+    
+    fv.on('core.validator.validated', (data) => {
+      const isPartner = $(data.element).hasClass('logo-input');
+      if (!data.result.valid && data.validator === 'file') {
+        data.element.value = '';
+        if (!isPartner) $(data.element).closest('.repeater-item').find('.article-image-preview').empty();
+      } else if (data.result.valid && data.validator === 'file') {
+        handleFileChange(data.element, isPartner ? 'partner' : 'article');
+      }
+    });
 
     validators[formId] = fv;
   }
 
   /* ═══════════════════════════════════════════════════════════
-     4. REPEATER — FIELD NAME HELPERS
+     5. REPEATER FIELD CONFIGURATIONS
   ─────────────────────────────────────────────────────────── */
-
-  /**
-   * Returns the canonical field names for a repeater type at a given index.
-   * Used to register / deregister FormValidation fields.
-   */
-  function getRepeaterFieldNames(type, index) {
-    const map = {
-      step: [
-        `process_steps[${index}][title]`,
-        `process_steps[${index}][description]`,
-        `process_steps[${index}][icon]`,
-      ],
-      metric: [
-        `metrics[${index}][number]`,
-        `metrics[${index}][label]`,
-        `metrics[${index}][icon]`,
-      ],
-      article: [
-        `articles[${index}][publication_name]`,
-        `articles[${index}][date]`,
-        `articles[${index}][title]`,
-        `articles[${index}][link]`,
-        `articles[${index}][summary]`,
-        `articles[${index}][image]`,
-      ],
-      partner: [
-        `partners_list[${index}][name]`,
-        `partners_list[${index}][logo]`,
-      ],
-      custom: [
-        `custom_sections[${index}][title]`,
-        `custom_sections[${index}][content]`,
-        `custom_sections[${index}][visibility]`,
-      ],
-    };
-    return map[type] || [];
-  }
-
-  /* ─── Field config factories ──────────────────────────────── */
-
-  function buildLogoFieldConfig(hasPreviewImage = false) {
-    const config = {
-      validators: {
-        file: {
-          extension: FILE_VALIDATION.partnerExtensions,
-          type: ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml'].join(','),
-          maxSize: FILE_VALIDATION.partnerMaxBytes,
-          message: `PNG, JPG, SVG <= ${FILE_VALIDATION.partnerSizeLabel}`,
-        },
-      },
-    };
-
-    if (!hasPreviewImage) {
-      config.validators.notEmpty = { message: i18n.requiredMsg || 'This field is required' };
-    }
-
-    return config;
-  }
-
-  function buildImageFieldConfig() {
-    return {
-      validators: {
-        file: {
-          extension: FILE_VALIDATION.acceptedExtensions,
-          type: FILE_VALIDATION.allowedTypes.join(','),
-          maxSize: FILE_VALIDATION.maxBytes,
-          message: `PNG, JPG, WEBP <= ${FILE_VALIDATION.maxSizeLabel}`,
-        },
-      },
-    };
-  }
-
-  function buildRequiredFieldConfig() {
-    return { validators: { notEmpty: { message: CFG.requiredMsg } } };
-  }
-
-  /* ─── Register / deregister ───────────────────────────────── */
 
   function addRepeaterValidation(formId, type, index) {
     const fv = validators[formId];
     if (!fv) return;
 
-    getRepeaterFieldNames(type, index).forEach((name) => {
-      if (name.includes('[logo]')) {
-        const hasPreviewImage = $(`input[name="${name}"]`).closest('.repeater-item').find('.logo-preview img').length > 0;
-        return fv.addField(name, buildLogoFieldConfig(hasPreviewImage));
-      }
-      if (name.includes('[image]')) return fv.addField(name, buildImageFieldConfig());
-      fv.addField(name, buildRequiredFieldConfig());
-    });
-  }
+    const fieldConfig = {};
+    const prefix = { step: 'process_steps', metric: 'metrics', article: 'articles', partner: 'partners_list' }[type];
 
-  function removeRepeaterValidation(formId, type, index) {
-    const fv = validators[formId];
-    if (!fv) return;
+    if (type === 'step') {
+      fieldConfig[`${prefix}[${index}][title]`] = { validators: { notEmpty: { message: T.required }, stringLength: { max: 255 } } };
+      fieldConfig[`${prefix}[${index}][description]`] = { validators: { notEmpty: { message: T.required }, stringLength: { max: 1000 } } };
+      fieldConfig[`${prefix}[${index}][icon]`] = { validators: { notEmpty: { message: T.required } } };
+    }
 
-    getRepeaterFieldNames(type, index).forEach((name) => {
-      try { fv.removeField(name); } catch (_) { /* field may not exist */ }
-    });
+    if (type === 'metric') {
+      fieldConfig[`${prefix}[${index}][number]`] = { 
+        validators: { 
+          notEmpty: { message: T.required },
+          regexp: { regexp: /^(\d+(?:\.\d+)?)([$+%kMB]?)$/i, message: isAr ? 'رقم غير صحيح' : 'Invalid format (e.g. 100, 1M, 75%)' }
+        } 
+      };
+      fieldConfig[`${prefix}[${index}][label]`] = { validators: { notEmpty: { message: T.required }, stringLength: { max: 255 } } };
+      fieldConfig[`${prefix}[${index}][icon]`] = { validators: { notEmpty: { message: T.required } } };
+    }
+
+    if (type === 'article') {
+      fieldConfig[`${prefix}[${index}][publication_name]`] = { validators: { notEmpty: { message: T.required } } };
+      fieldConfig[`${prefix}[${index}][date]`] = { validators: { notEmpty: { message: T.required } } };
+      fieldConfig[`${prefix}[${index}][title]`] = { validators: { notEmpty: { message: T.required } } };
+      fieldConfig[`${prefix}[${index}][link]`] = { validators: { notEmpty: { message: T.required }, uri: { message: T.invalidUrl } } };
+      fieldConfig[`${prefix}[${index}][summary]`] = { validators: { notEmpty: { message: T.required }, stringLength: { max: 1000 } } };
+      fieldConfig[`${prefix}[${index}][image]`] = { validators: { file: { extension: 'jpg,jpeg,png', type: 'image/jpeg,image/png', maxSize: 5*1024*1024, message: T.articleImageBadType } } };
+    }
+
+    if (type === 'partner') {
+      fieldConfig[`${prefix}[${index}][name]`] = { validators: { stringLength: { max: 255 } } };
+      fieldConfig[`${prefix}[${index}][logo]`] = {
+        validators: {
+          callback: {
+            message: T.required,
+            callback: (input) => {
+              const hasFile = input.value !== '';
+              const hasExisting = $(input.element).closest('.repeater-item').find('.logo-preview img').length > 0;
+              return hasFile || hasExisting;
+            }
+          },
+          file: { extension: 'jpg,jpeg,png,svg', type: 'image/jpeg,image/png,image/svg+xml', maxSize: 2*1024*1024, message: T.logoImageBadType }
+        }
+      };
+    }
+
+    Object.entries(fieldConfig).forEach(([name, config]) => fv.addField(name, config));
   }
 
   /* ═══════════════════════════════════════════════════════════
-     5. REPEATER — ADD
+     6. REPEATER ACTIONS (Add, Remove, Reindex)
   ─────────────────────────────────────────────────────────── */
 
   $(document).on('click', '.add-item-btn', function () {
     const type = $(this).data('type');
     const formId = $(this).closest('form').attr('id');
-    const $container = getContainerByType(type);
-    const index = $container.find('.repeater-item').length;
+    const $container = $('#' + CONTAINER_MAP[type]);
+    const count = $container.find('.repeater-item').length;
 
-    if (index >= (MAX_LIMITS[type] || 10)) {
-      toastr.warning(`${i18n.maximumLimitReached}, ${MAX_LIMITS[type]} ${i18n.items} ${i18n.allowed}`);
-      return;
-    }
+    if (count >= (MAX_LIMITS[type] || 10)) { toastr.warning(T.maxLimitReached); return; }
 
+    const $item = $(getTemplateHtml(type, count));
     $container.find('.empty-state').hide();
-
-    const $item = $(getTemplateHtml(type, index));
     $container.append($item);
-
-    initDatePicker();
-    addRepeaterValidation(formId, type, index);
-
-    if (type === 'partner') initPartnerPreview($item);
-    if (type === 'custom') initQuillOnElement($item.find('.quill-editor'));
+    
+    addRepeaterValidation(formId, type, count);
+    if (type === 'article') initDatePicker();
+    if (count + 1 >= MAX_LIMITS[type]) $(this).prop('disabled', true);
   });
-
-  /* ═══════════════════════════════════════════════════════════
-     6. REPEATER — REMOVE
-  ─────────────────────────────────────────────────────────── */
 
   $(document).on('click', '.remove-item-btn', function () {
     const $item = $(this).closest('.repeater-item');
     const $container = $item.parent();
     const formId = $(this).closest('form').attr('id');
-    const type = getTypeByContainer($container);
-    const index = parseInt($item.data('index'), 10);
+    const type = Object.keys(CONTAINER_MAP).find(k => CONTAINER_MAP[k] === $container.attr('id'));
+    
+    $item.remove();
+    reindexContainer($container, type, formId);
 
-    removeRepeaterValidation(formId, type, index);
-
-    $item.fadeOut(200, function () {
-      $(this).remove();
-      reindexContainer($container, type, formId);
-      if ($container.find('.repeater-item').length === 0) {
-        $container.find('.empty-state').show();
-      }
-    });
+    if ($container.find('.repeater-item').length === 0) $container.find('.empty-state').show();
+    $(`[data-type="${type}"].add-item-btn`).prop('disabled', false);
   });
 
-  /**
-   * Re-number every remaining repeater item after a removal.
-   * Also re-registers FormValidation fields with the corrected indices.
-   */
   function reindexContainer($container, type, formId) {
     const fv = validators[formId];
-    if (!fv) return;
-
-    const prefixMap = {
-      article: 'articles',
-      partner: 'partners_list',
-      step: 'process_steps',
-      metric: 'metrics',
-    };
-    const prefix = prefixMap[type];
-
     $container.find('.repeater-item').each(function (newIdx) {
       const $item = $(this);
 
-      // Deregister old field names
-      $item.find('input, select, textarea').each(function () {
+      // 1. Remove old names from Validator memory
+      $item.find('input, select, textarea').each(function() {
         const oldName = $(this).attr('name');
-        if (oldName) { try { fv.removeField(oldName); } catch (_) { } }
+        if (fv && oldName) try { fv.removeField(oldName); } catch(e) {}
       });
 
-      // Update DOM attributes
-      $item.attr('data-index', newIdx);
-      $item.find('.step-number').text(newIdx + 1);
+      // 2. Update DOM attributes
+      $item.attr('data-index', newIdx).find('.item-number').text(newIdx + 1);
+      $item.find('input, select, textarea').each(function() {
+        const name = $(this).attr('name');
+        if (name) $(this).attr('name', name.replace(/\[\d+\]/, `[${newIdx}]`));
+      });
 
-      // Rename inputs
-      if (prefix) {
-        $item.find('input, select, textarea').each(function () {
-          const name = $(this).attr('name');
-          if (name) $(this).attr('name', name.replace(/\[\d+\]/, `[${newIdx}]`));
-        });
-      }
-
-      // Re-register with new index
+      // 3. Re-register with new names
       addRepeaterValidation(formId, type, newIdx);
     });
   }
 
   /* ═══════════════════════════════════════════════════════════
-     7. REPEATER TEMPLATES
+     7. HTML TEMPLATES
   ─────────────────────────────────────────────────────────── */
 
   function getTemplateHtml(type, i) {
-    const templates = {
-      step: buildStepTemplate,
-      metric: buildMetricTemplate,
-      article: buildArticleTemplate,
-      partner: buildPartnerTemplate,
-    };
-    return templates[type] ? templates[type](i) : '';
-  }
+    const commonHeader = (title) => `
+      <div class="card-header d-flex justify-content-between align-items-center py-2">
+        <h6 class="mb-0">${title} <span class="item-number">${i + 1}</span></h6>
+        <button type="button" class="btn btn-icon btn-text-secondary remove-item-btn"><i class="ti ti-trash"></i></button>
+      </div>`;
 
-  function buildStepTemplate(i) {
-    return `
+    if (type === 'step') return `
       <div class="repeater-item card shadow-none mb-3 border" data-index="${i}">
-        <div class="card-header d-flex justify-content-between align-items-center py-2">
-          <h6 class="mb-0">${i18n.step || 'Step'} <span class="step-number">${i + 1}</span></h6>
-          <button type="button" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill remove-item-btn">
-            <i class="ti ti-trash"></i>
-          </button>
-        </div>
+        ${commonHeader(i18n.step || 'Step')}
         <div class="card-body py-3">
           <div class="row">
-            <div class="col-12 col-md-6 mb-2">
-              <input type="text" class="form-control"
-                     name="process_steps[${i}][title]"
-                     placeholder="${i18n.stepTitle || 'Step Title'}"
-                     maxlength="255">
+            <div class="col-md-6 mb-3 fv-row">
+              <input type="text" class="form-control" name="process_steps[${i}][title]" placeholder="${i18n.stepTitle}" maxlength="255">
             </div>
-            <div class="col-12 col-md-6 mb-2">
+            <div class="col-md-6 mb-3 fv-row">
               <select class="form-select" name="process_steps[${i}][icon]">
-                <option value="">${i18n.selectIcon || 'Select icon'}</option>
-                ${CFG.stepIconOptions || ''}
+                <option value="">${i18n.selectIcon}</option>${CFG.stepIconOptions}
               </select>
             </div>
-            <div class="col-12">
-              <textarea class="form-control"
-                        name="process_steps[${i}][description]"
-                        rows="2"
-                        placeholder="${i18n.stepDescription || 'Step Description'}"
-                        maxlength="1000"></textarea>
+            <div class="col-12 fv-row">
+              <textarea class="form-control" name="process_steps[${i}][description]" rows="2" placeholder="${i18n.stepDescription}" maxlength="1000"></textarea>
             </div>
           </div>
         </div>
       </div>`;
-  }
 
-  function buildMetricTemplate(i) {
-    return `
+    if (type === 'metric') return `
       <div class="repeater-item card shadow-none mb-3 border" data-index="${i}">
-        <div class="card-header d-flex justify-content-between align-items-center py-2">
-          <h6 class="mb-0">${i18n.metric || 'Metric'} ${i + 1}</h6>
-          <button type="button" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill remove-item-btn">
-            <i class="ti ti-trash"></i>
-          </button>
-        </div>
+        ${commonHeader(i18n.metric || 'Metric')}
         <div class="card-body py-3">
           <div class="row">
-            <div class="col-12 mb-3">
-              <input type="text" class="form-control"
-                     name="metrics[${i}][number]"
-                     placeholder="${i18n.metricNumber || 'Metric Number'}"
-                     maxlength="20"
-                    >
+            <div class="col-md-4 mb-3 fv-row">
+              <input type="text" class="form-control" name="metrics[${i}][number]" placeholder="100+">
             </div>
-            <div class="col-12 mb-3">
-              <input type="text" class="form-control"
-                     name="metrics[${i}][label]"
-                     placeholder="${i18n.metricLabel || 'Metric Label'}"
-                     maxlength="255">
+            <div class="col-md-4 mb-3 fv-row">
+              <input type="text" class="form-control" name="metrics[${i}][label]" placeholder="Label">
             </div>
-            <div class="col-12">
+            <div class="col-md-4 mb-3 fv-row">
               <select class="form-select" name="metrics[${i}][icon]">
-                <option value="">${i18n.selectIcon || 'Select icon'}</option>
-                ${CFG.metricIconOptions || ''}
+                <option value="">Icon</option>${CFG.metricIconOptions}
               </select>
             </div>
           </div>
         </div>
       </div>`;
-  }
 
-  function buildArticleTemplate(i) {
-    return `
+    if (type === 'article') return `
       <div class="repeater-item card shadow-none mb-3 border" data-index="${i}">
-        <div class="card-header d-flex justify-content-between align-items-center py-2">
-          <h6 class="mb-0">${i18n.article || 'Article'} ${i + 1}</h6>
-          <button type="button" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill remove-item-btn">
-            <i class="ti ti-trash"></i>
-          </button>
-        </div>
+        ${commonHeader(i18n.article || 'Article')}
         <div class="card-body py-3">
           <div class="row">
-            <div class="col-12 col-md-6 mb-3">
-              <label class="form-label">${i18n.publicationName || 'Publication Name'}</label>
-              <input type="text" class="form-control"
-                     name="articles[${i}][publication_name]"
-                     placeholder="${i18n.publicationName || 'Publication Name'}"
-                     maxlength="255">
-            </div>
-            <div class="col-12 col-md-6 mb-3">
-              <label class="form-label">${i18n.publicationDate || 'Publication Date'}</label>
-              <input type="text" class="form-control datepicker"
-                     name="articles[${i}][date]"
-                     placeholder="${i18n.publicationDate || 'Publication Date'}">
-            </div>
-            <div class="col-12 mb-3">
-              <label class="form-label">${i18n.articleTitle || 'Article Title'}</label>
-              <input type="text" class="form-control"
-                     name="articles[${i}][title]"
-                     placeholder="${i18n.articleTitle || 'Article Title'}"
-                     maxlength="255">
-            </div>
-            <div class="col-12 mb-3">
-              <label class="form-label">${i18n.articleLink || 'Article Link'}</label>
-              <input type="url" class="form-control"
-                     name="articles[${i}][link]"
-                     placeholder="${i18n.articleLink || 'Article Link'}"
-                     maxlength="500">
-            </div>
-            <div class="col-12 mb-3">
-              <label class="form-label">${i18n.articleSummary || 'Article Summary'}</label>
-              <textarea class="form-control"
-                        name="articles[${i}][summary]"
-                        rows="2"
-                        placeholder="${i18n.articleSummary || 'Article Summary'}"
-                        maxlength="1000"></textarea>
-            </div>
-            <div class="col-12">
-              <label class="form-label">${i18n.articleImage || 'Article Image'}</label>
-              <input type="file" class="form-control article-image-input"
-                     name="articles[${i}][image]"
-                     accept="image/png,image/jpeg,image/jpg">
-              <div class="article-image-preview rounded overflow-hidden mt-2"></div>
-              <small class="text-muted d-block mt-1">
-                PNG, JPG, SVG (Max: ${FILE_VALIDATION.maxSizeLabel})
-              </small>
+            <div class="col-md-6 mb-3 fv-row"><label class="form-label">${i18n.publicationName}</label><input type="text" class="form-control" name="articles[${i}][publication_name]"></div>
+            <div class="col-md-6 mb-3 fv-row"><label class="form-label">${i18n.publicationDate}</label><input type="text" class="form-control datepicker" name="articles[${i}][date]"></div>
+            <div class="col-12 mb-3 fv-row"><label class="form-label">${i18n.articleTitle}</label><input type="text" class="form-control" name="articles[${i}][title]"></div>
+            <div class="col-12 mb-3 fv-row"><label class="form-label">${i18n.articleLink}</label><input type="url" class="form-control" name="articles[${i}][link]"></div>
+            <div class="col-12 mb-3 fv-row"><label class="form-label">${i18n.articleSummary}</label><textarea class="form-control" name="articles[${i}][summary]" rows="2"></textarea></div>
+            <div class="col-12 fv-row">
+              <label class="form-label">${i18n.articleImage} (${T.optional})</label>
+              <input type="file" class="form-control" name="articles[${i}][image]" accept="image/png,image/jpeg">
+              <div class="article-image-preview mt-2"></div>
             </div>
           </div>
         </div>
       </div>`;
-  }
 
-  function buildPartnerTemplate(i) {
-    return `
+    if (type === 'partner') return `
       <div class="repeater-item card shadow-none mb-3 border" data-index="${i}">
-        <div class="card-header d-flex justify-content-between align-items-center py-2">
-          <h6 class="mb-0">${i18n.partner || 'Partner'} ${i + 1}</h6>
-          <button type="button" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill remove-item-btn">
-            <i class="ti ti-trash"></i>
-          </button>
-        </div>
+        ${commonHeader(i18n.partner || 'Partner')}
         <div class="card-body py-3">
           <div class="row">
-            <div class="col-12 mb-3">
-              <label class="form-label">${i18n.partnerName || 'Partner Name'}</label>
-              <input type="text"
-                     class="form-control name-input"
-                     name="partners_list[${i}][name]"
-                     placeholder="${i18n.partnerName || 'Partner Name'}"
-                     maxlength="255">
+            <div class="col-12 mb-3 fv-row">
+               <label class="form-label">${i18n.partnerName} (${T.optional})</label>
+               <input type="text" class="form-control" name="partners_list[${i}][name]">
             </div>
-            <div class="col-12 col-md-3 mb-3">
-              <label class="form-label">${i18n.logoPreview || 'Logo Preview'}</label>
-              <div class="logo-preview h-px-75 d-flex align-items-center justify-content-center bg-light-subtle rounded text-center py-3">
-                <i class="ti ti-building text-muted fs-3"></i>
-              </div>
+            <div class="col-md-3 mb-3 text-center">
+               <div class="logo-preview border rounded d-flex align-items-center justify-content-center bg-light" style="height:80px;"><i class="ti ti-photo text-muted"></i></div>
             </div>
-            <div class="col-12">
-              <label class="form-label">${i18n.partnerLogo || 'Partner Logo'}</label>
-              <input type="file"
-                     class="form-control logo-input"
-                     name="partners_list[${i}][logo]"
-                     accept="image/png,image/jpeg,image/jpg,image/svg+xml">
-              <small class="text-muted d-block mt-1">
-                PNG, JPG, SVG (Max: ${FILE_VALIDATION.partnerSizeLabel})
-              </small>
+            <div class="col-md-9 mb-3 fv-row">
+               <label class="form-label">${i18n.partnerLogo}</label>
+               <input type="file" class="form-control logo-input" name="partners_list[${i}][logo]" accept="image/*">
             </div>
           </div>
         </div>
@@ -699,206 +388,69 @@
   }
 
   /* ═══════════════════════════════════════════════════════════
-     8. PARTNER — logo + name live preview
+     8. DOCUMENT READY & INIT
   ─────────────────────────────────────────────────────────── */
 
-  function initPartnerPreview($card) {
-    $card.find('.name-input').on('input', function () {
-      $card.find('.partner-name-preview').text($(this).val() || 'New Partner');
-    });
-
-    $card.find('.logo-input').on('change', function (e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      if (file.size > FILE_VALIDATION.partnerMaxBytes) {
-        toastr.warning(`Logo too large. Max ${FILE_VALIDATION.partnerSizeLabel}`);
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        $card.find('.logo-preview').html(
-          `<img src="${ev.target.result}" class="img-fluid rounded" style="max-height:60px;">`
-        );
-      };
-      reader.readAsDataURL(file);
-    });
+  function initSection(formId, fields, repeaterTypes = []) {
+    const form = document.getElementById(formId);
+    if (!form) return;
+    const fv = FormValidation.formValidation(form, { fields, plugins: buildStandardPlugins() });
+    attachStandardHandlers(formId, repeaterTypes, fv);
   }
 
-  /* ═══════════════════════════════════════════════════════════
-     9. PROGRAMS — visibility toggle + drag-to-reorder
-  ─────────────────────────────────────────────────────────── */
-
-  $(document).on('change', '.program-visible-toggle', function () {
-    $(this)
-      .closest('.program-item')
-      .toggleClass('border-primary', this.checked)
-      .toggleClass('border-secondary opacity-75', !this.checked);
-  });
-
-  function initProgramsSortable() {
-    const container = document.getElementById('programsLandingContainer');
-    if (!container) return;
-
-    new Sortable(container, {
-      handle: '.drag-handle',
-      animation: 150,
-      onEnd() {
-        const orderedIds = Array.from(container.children)
-          .map((item) => parseInt(item.dataset.programId))
-          .filter(Boolean);
-
-        $.ajax({
-          url: `/dashboard/organization/${CFG.orgId}/programs/reorder`,
-          type: 'POST',
-          data: {
-            ordered_ids: orderedIds,
-            _token: $('meta[name="csrf-token"]').attr('content'),
-          },
-          success: () => toastr.success('Order saved'),
-          error: () => toastr.error('Reorder failed'),
-        });
-      },
-    });
+  function initDatePicker() {
+    if (window.flatpickr) $('.datepicker:not(.flatpickr-input)').flatpickr({ dateFormat: 'Y-m-d', allowInput: true });
   }
 
-  /* ═══════════════════════════════════════════════════════════
-     10. LANDING PAGE ENABLE TOGGLE
-  ─────────────────────────────────────────────────────────── */
+  $(function () {
+    const titleVal = { validators: { notEmpty: { message: T.required }, stringLength: { max: 255 } } };
+    const descVal = { validators: { notEmpty: { message: T.required }, stringLength: { max: 1000 } } };
 
-  function initLandingToggle() {
-    $('#landingEnabledToggle').on('change', function () {
-      const isEnabled = this.checked;
-      $('#landingStatusText').html(
-        isEnabled
-          ? `<span class="text-success"><i class="ti ti-check me-1"></i>${i18n.landingPublished || 'Landing page is published'}</span>`
-          : `<span class="text-warning"><i class="ti ti-eye-off me-1"></i>${i18n.landingUnpublished || 'Landing page is unpublished'}</span>`
-      );
+    // Initialize the main forms
+    initSection('form-howItWorks', { how_it_works_title: titleVal, how_it_works_subtitle: titleVal, how_it_works_description: descVal }, ['step']);
+    initSection('form-achievements', { achievements_title: titleVal, achievements_subtitle: titleVal, achievements_description: descVal }, ['metric']);
+    initSection('form-media', { media_title: titleVal, media_subtitle: titleVal, media_description: descVal }, ['article']);
+    initSection('form-partners', { partners_title: titleVal, partners_subtitle: titleVal, partners_description: descVal }, ['partner']);
+    initSection('form-programs', { programs_title: titleVal, programs_subtitle: titleVal, programs_description: descVal });
+
+    // Bootstrap existing server-rendered items
+    $('.repeater-item').each(function () {
+      const $item = $(this);
+      const formId = $item.closest('form').attr('id');
+      const type = Object.keys(CONTAINER_MAP).find(k => CONTAINER_MAP[k] === $item.parent().attr('id'));
+      if (formId && type) addRepeaterValidation(formId, type, $item.data('index'));
     });
-  }
 
-  /* ═══════════════════════════════════════════════════════════
-     11. SLUG — generate + availability check
-  ─────────────────────────────────────────────────────────── */
-
-  function initSlugControls() {
-    $('#generateSlugBtn').on('click', function () {
-      const slug = (CFG.orgName || '')
-        .toLowerCase()
-        .replace(/[^\w\s-]/g, '')
-        .replace(/[\s_]+/g, '-')
-        .replace(/^-+|-+$/g, '');
+    // Slug controls
+    $('#generateSlugBtn').on('click', function() {
+      const slug = (CFG.orgName || '').toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_]+/g, '-');
       $('#slug').val(slug);
     });
 
-    $('#checkSlugBtn').on('click', function () {
+    $('#checkSlugBtn').on('click', function() {
       const slug = $('#slug').val().trim();
-      if (!slug) { toastr.warning('Please enter a slug first'); return; }
-
-      const $feedback = $('#slugAvailabilityFeedback').show();
-      $feedback.html(`<span class="text-muted"><i class="ti ti-loader-2 ti-spin me-1"></i>${lang == 'en' ? 'Checking' : 'جاري التحقق'}…</span>`);
-
-      $.get(CFG.checkSlugUrl, { slug })
-        .done((res) => {
-          $feedback.html(
-            res.available
-              ? `<span class="text-success"><i class="ti ti-circle-check me-1"></i>${lang == 'en' ? 'Available' : 'متاح'}</span>`
-              : `<span class="text-danger"><i class="ti ti-circle-x me-1"></i>${lang == 'en' ? 'Already taken' : 'مأخوذ بالفعل'}</span>`
-          );
-        })
-        .fail(() => {
-          $feedback.html(`<span class="text-danger"><i class="ti ti-alert-circle me-1"></i>${lang == 'en' ? 'Check failed' : 'فشل التحقق'}</span>`);
-        });
+      if (!slug) return;
+      const $fb = $('#slugAvailabilityFeedback').show().html(T.slugChecking + '...');
+      $.get(CFG.checkSlugUrl, { slug }).done(res => {
+        $fb.html(res.available ? `<span class="text-success">${T.slugAvailable}</span>` : `<span class="text-danger">${T.slugTaken}</span>`);
+      });
     });
-  }
 
-  /* ═══════════════════════════════════════════════════════════
-     12. TAB NAVIGATION (page-reload strategy)
-  ─────────────────────────────────────────────────────────── */
+    initDatePicker();
 
-  function initTabNavigation() {
-    $(document).on('click', '.reload-tab', function () {
+    // Tab navigation logic
+    $('.reload-tab').on('click', function() {
       const url = new URL(window.location.href);
       url.searchParams.set('tab', $(this).data('tab-id'));
       window.location.href = url.toString();
     });
-  }
 
-  /* ═══════════════════════════════════════════════════════════
-     13. HELPERS
-  ─────────────────────────────────────────────────────────── */
-
-  function getContainerByType(type) {
-    return $('#' + (CONTAINER_MAP[type] || ''));
-  }
-
-  function getTypeByContainer($container) {
-    const id = $container.attr('id');
-    return Object.keys(CONTAINER_MAP).find((k) => CONTAINER_MAP[k] === id) || null;
-  }
-
-  function initDatePicker() {
-    if (typeof flatpickr === 'undefined') return;
-    $('.datepicker:not(.flatpickr-input)').flatpickr({ dateFormat: 'Y-m-d', allowInput: true });
-  }
-
-  /* ═══════════════════════════════════════════════════════════
-     14. BOOTSTRAP — DOCUMENT READY
-  ─────────────────────────────────────────────────────────── */
-
-  $(function () {
-
-    /* ── Tab navigation ─────────────────────────────────── */
-    initTabNavigation();
-
-    /* ── Landing enabled toggle ─────────────────────────── */
-    initLandingToggle();
-
-    /* ── Slug controls ──────────────────────────────────── */
-    initSlugControls();
-
-    /* ── URL / landing form validator ───────────────────── */
-    // initSectionValidator('landingPageForm', {
-    //   slug: {
-    //     validators: {
-    //       regexp: {
-    //         regexp : /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-    //         message: 'Invalid slug',
-    //       },
-    //     },
-    //   },
-    // });
-
-    /* ── Section-header field validators ────────────────── */
-    Object.keys(SECTION_FORM_PREFIX_MAP).forEach((key) => {
-      const prefix = SECTION_FORM_PREFIX_MAP[key];
-      initSectionValidator(`form-${key}`, {
-        [`${prefix}_title`]: { validators: { notEmpty: { message: CFG.requiredMsg } } },
-        [`${prefix}_subtitle`]: { validators: { notEmpty: { message: CFG.requiredMsg } } },
-        [`${prefix}_description`]: { validators: { notEmpty: { message: CFG.requiredMsg } } },
-      });
+    // Landing Enable Toggle
+    $('#landingEnabledToggle').on('change', function() {
+       const text = this.checked ? i18n.landingPublished : i18n.landingUnpublished;
+       const color = this.checked ? 'text-success' : 'text-warning';
+       $('#landingStatusText').html(`<span class="${color}">${text}</span>`);
     });
-
-    /* ── Existing (server-rendered) repeater items ──────── */
-    $('.repeater-item').each(function () {
-      const $item = $(this);
-      const formId = $item.closest('form').attr('id');
-      const $container = $item.parent();
-      const type = getTypeByContainer($container);
-      const idx = parseInt($item.data('index'), 10);
-
-      if (formId && type && type !== 'custom') {
-        addRepeaterValidation(formId, type, idx);
-      }
-      if (type === 'partner') initPartnerPreview($item);
-    });
-
-    /* ── Programs sortable ──────────────────────────────── */
-    initProgramsSortable();
-
-    /* ── Date pickers ───────────────────────────────────── */
-    initDatePicker();
   });
 
 })(jQuery);
