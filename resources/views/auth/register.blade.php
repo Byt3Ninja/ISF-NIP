@@ -53,12 +53,13 @@
     } */
 
     .iti__country-list {
+      direction: ltr !important;
+      text-align: left !important;
       position: absolute;
       left: 1rem;
       /* right: 0; */
       z-index: 9999;
       list-style: none;
-      text-align: left;
       padding: 0;
       margin: 0 0 0 -1px;
       box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);

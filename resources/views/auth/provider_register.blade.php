@@ -57,10 +57,10 @@
 	<link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/page-auth.css" />
 
 	<style>
-		div[data-validator] {
+		/* div[data-validator] {
 			width: 100% !important;
 			text-align: {{ $l == 'ar' ? 'end' : 'start' }} !important;
-		}
+		} */
 
 		#switcher-container {
 			position: absolute;
@@ -69,12 +69,13 @@
 		}
 
 		.iti__country-list {
+			direction: ltr !important;
+      text-align: left !important;
 			position: absolute;
 			left: 1rem;
 			/* right: 0; */
 			z-index: 9999;
 			list-style: none;
-			text-align: left;
 			padding: 0;
 			margin: 0 0 0 -1px;
 			box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
