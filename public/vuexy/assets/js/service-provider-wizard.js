@@ -1,1272 +1,947 @@
 /**
- *  Form Wizard
+ * Form Wizard — Service Provider
+ * Refactored with real-time step unlock
  */
 
 'use strict';
 
 (function () {
+
+  // ─── Translations ────────────────────────────────────────────────────────────
+
   const translations = {
     en: {
-      required: "This field is required",
-      logo: "Unsupported. Upload PNG, JPG, JPEG, WEBP or SVG | Max size: 5MB",
-      logoSize: "Logo size should not exceed 5MB",
-      hero_image: "Unsupported. Upload PNG, JPG, JPEG, WEBP or SVG | Max size: 10MB",
-      phone: "Should contain numbers only",
-      invalidPhone: "Should be a valid number",
-      invalid_url: "The URL is not valid",
-      email: "E-mail should be a valid email address",
-      media_required: "Media is required",
-      invalid_media: "Invalid file or size too large",
-      title_required: "Title is required",
-      title_max: "Title must be less than 50 chars",
-      desc_required: "Description is required",
-      desc_max: "Description must be less than 100 chars",
-      at_least_one_item: "Please add at least one complete work item",
-      save_and_next: "Save & Next",
-      submit: "Submit",
-      saving: "Saving...",
-      submitting: "Submitting...",
-      stat_value_required: "Value is required when a label is provided",
-      stat_label_required: "Label is required when a value is provided",
-      complete_work_item_details: "Complete the work item details.",
-      unsupported_file_type_portfolio: "Unsupported file type. Upload PNG, JPG, WEBP, or MP4.",
-      file_size_too_large_portfolio: "File size must be 10MB or less.",
-      change_file: "Change File",
+      required:                        'This field is required',
+      logo:                            'Unsupported. Upload PNG, JPG, JPEG, WEBP or SVG | Max size: 5MB',
+      logoSize:                        'Logo size should not exceed 5MB',
+      hero_image:                      'Unsupported. Upload PNG, JPG, JPEG, WEBP or SVG | Max size: 10MB',
+      phone:                           'Should contain numbers only',
+      invalidPhone:                    'Should be a valid number',
+      invalid_url:                     'The URL is not valid',
+      email:                           'E-mail should be a valid email address',
+      media_required:                  'Media is required',
+      invalid_media:                   'Invalid file or size too large',
+      title_required:                  'Title is required',
+      title_max:                       'Title must be less than 50 chars',
+      desc_required:                   'Description is required',
+      desc_max:                        'Description must be less than 100 chars',
+      at_least_one_item:               'Please add at least one complete work item',
+      save_and_next:                   'Save & Next',
+      submit:                          'Submit',
+      saving:                          'Saving...',
+      submitting:                      'Submitting...',
+      stat_value_required:             'Value is required when a label is provided',
+      stat_label_required:             'Label is required when a value is provided',
+      complete_work_item_details:      'Complete the work item details.',
+      unsupported_file_type_portfolio: 'Unsupported file type. Upload PNG, JPG, WEBP, or MP4.',
+      file_size_too_large_portfolio:   'File size must be 10MB or less.',
+      change_file:                     'Change File',
     },
     ar: {
-      required: "هذا الحقل مطلوب",
-      logo: "غير مدعوم. قم بتحميل PNG, JPG, JPEG, WEBP أو SVG | حجم الشعار لا يجب أن يتجاوز 5 MB",
-      logoSize: "حجم الشعار لا يجب أن يتجاوز 5 ميغابايت",
-      hero_image: "غير مدعوم. قم بتحميل PNG, JPG, JPEG, WEBP أو SVG | حجم الصورة لا يجب أن يتجاوز 10 MB",
-      phone: "يجب أن يحتوي على أرقام فقط",
-      invalidPhone: "يجب أن يكون رقم صالح",
-      invalid_url: "الرابط غير صالح",
-      email: "البريد الإلكتروني يجب أن يكون عنوان بريد إلكتروني صالح",
-      media_required: "الملف مطلوب",
-      invalid_media: "ملف غير صالح أو حجم كبير جداً",
-      title_required: "العنوان مطلوب",
-      title_max: "العنوان يجب أن يكون أقل من 50 حرف",
-      desc_required: "الوصف مطلوب",
-      desc_max: "الوصف يجب أن يكون أقل من 100 حرف",
-      at_least_one_item: "يرجى إضافة عمل واحد على الأقل",
-      save_and_next: "حفظ & التالي",
-      submit: "إرسال",
-      saving: "جاري الحفظ...",
-      submitting: "جاري الإرسال...",
-      stat_value_required: "القيمة مطلوبه عند إدخال عنوان",
-      stat_label_required: "العنوان مطلوب عند إدخال قيمة",
-      complete_work_item_details: "يرجى استكمال بيانات العمل",
-      unsupported_file_type_portfolio: "نوع الملف غير مدعوم. يرجى رفع PNG أو JPG أو WEBPأو MP4",
-      file_size_too_large_portfolio: "يجب ألا يزيد حجم الملف عن 10 ميجابايت",
-      change_file: "تغيير الملف",
+      required:                        'هذا الحقل مطلوب',
+      logo:                            'غير مدعوم. قم بتحميل PNG, JPG, JPEG, WEBP أو SVG | حجم الشعار لا يجب أن يتجاوز 5 MB',
+      logoSize:                        'حجم الشعار لا يجب أن يتجاوز 5 ميغابايت',
+      hero_image:                      'غير مدعوم. قم بتحميل PNG, JPG, JPEG, WEBP أو SVG | حجم الصورة لا يجب أن يتجاوز 10 MB',
+      phone:                           'يجب أن يحتوي على أرقام فقط',
+      invalidPhone:                    'يجب أن يكون رقم صالح',
+      invalid_url:                     'الرابط غير صالح',
+      email:                           'البريد الإلكتروني يجب أن يكون عنوان بريد إلكتروني صالح',
+      media_required:                  'الملف مطلوب',
+      invalid_media:                   'ملف غير صالح أو حجم كبير جداً',
+      title_required:                  'العنوان مطلوب',
+      title_max:                       'العنوان يجب أن يكون أقل من 50 حرف',
+      desc_required:                   'الوصف مطلوب',
+      desc_max:                        'الوصف يجب أن يكون أقل من 100 حرف',
+      at_least_one_item:               'يرجى إضافة عمل واحد على الأقل',
+      save_and_next:                   'حفظ & التالي',
+      submit:                          'إرسال',
+      saving:                          'جاري الحفظ...',
+      submitting:                      'جاري الإرسال...',
+      stat_value_required:             'القيمة مطلوبه عند إدخال عنوان',
+      stat_label_required:             'العنوان مطلوب عند إدخال قيمة',
+      complete_work_item_details:      'يرجى استكمال بيانات العمل',
+      unsupported_file_type_portfolio: 'نوع الملف غير مدعوم. يرجى رفع PNG أو JPG أو WEBPأو MP4',
+      file_size_too_large_portfolio:   'يجب ألا يزيد حجم الملف عن 10 ميجابايت',
+      change_file:                     'تغيير الملف',
     }
   };
 
-  let iti; // Declare iti in a scope accessible by custom validator
+  // ─── Globals ─────────────────────────────────────────────────────────────────
+
+  const lang = $('html').attr('lang') || 'en';
+  const t    = translations[lang];
+
+  let iti              = null; // intl-tel-input instance for #phone (legacy ref)
   let step1InitialData = null;
   let step2InitialData = null;
   let step3InitialData = null;
-  let completedSteps = new Set([0]); // Track completed steps, start with step 0 completed
 
-  const lang = $('html').attr('lang') || 'en';
+  // Tracks which step-trigger buttons should be clickable (0-indexed)
+  let completedSteps = new Set([0]);
 
-  const select2 = $('.select2'),
-    selectPicker = $('.selectpicker'),
-    intlTelInput = $('.intl-tel-input');
+  // FormValidation instances — populated during init
+  let FormValidation1 = null;
+  let FormValidation2 = null;
+  let FormValidation3 = null;
+  let FormValidation4 = null;
 
-  // Wizard Validation
-  // --------------------------------------------------------------------
-  const wizardValidation = document.querySelector('#wizard-validation');
-  if (typeof wizardValidation !== undefined && wizardValidation !== null) {
-    // Wizard form
-    const wizardValidationForm = wizardValidation.querySelector('#service-provider-form-wizard');
-    // Wizard steps
-    const wizardValidationFormStep1 = wizardValidationForm.querySelector('#step-1-basics');
-    const wizardValidationFormStep2 = wizardValidationForm.querySelector('#step-2-booking');
-    const wizardValidationFormStep3 = wizardValidationForm.querySelector('#step-3-stats');
-    const wizardValidationFormStep4 = wizardValidationForm.querySelector('#step-4-portfolio');
-    // const wizardValidationFormStep5 = wizardValidationForm.querySelector('#step-5-clients');
+  // ─── Bootstrap / jQuery aliases ──────────────────────────────────────────────
 
-    // Wizard next prev button
-    const wizardValidationNext = wizardValidationForm.querySelector('.btn-next');
-    const wizardValidationPrev = wizardValidationForm.querySelector('.btn-prev');
+  const $select2      = $('.select2');
+  const $intlTelInput = $('.intl-tel-input');
 
-    const validationStepper = new Stepper(wizardValidation, {
-      linear: false
-    });
+  // ─── Guard: only run if the wizard exists on this page ───────────────────────
 
-    // Function to update step button states
-    function updateStepButtons() {
-      const currentStep = validationStepper._currentIndex;
-      document.querySelectorAll('.step-trigger').forEach((btn, index) => {
-        // Enable all steps up to and including current step, plus any future completed steps
-        const isAccessible = index <= currentStep || completedSteps.has(index);
+  const wizardEl = document.querySelector('#wizard-validation');
+  if (!wizardEl) return;
 
-        if (isAccessible) {
-          btn.disabled = false;
-          btn.style.cursor = 'pointer';
-          btn.parentElement.style.cursor = 'pointer';
-        } else {
-          btn.disabled = true;
-          btn.style.cursor = 'default';
-          btn.parentElement.style.cursor = 'default';
-        }
-      });
-    }
+  const wizardForm      = wizardEl.querySelector('#service-provider-form-wizard');
+  const stepEls         = {
+    1: wizardForm.querySelector('#step-1-basics'),
+    2: wizardForm.querySelector('#step-2-booking'),
+    3: wizardForm.querySelector('#step-3-stats'),
+    4: wizardForm.querySelector('#step-4-portfolio'),
+  };
 
-    // Handle step button clicks
+  // ─── Stepper ─────────────────────────────────────────────────────────────────
+
+  const validationStepper = new Stepper(wizardEl, { linear: false });
+
+  // ─── Step-button enable/disable ──────────────────────────────────────────────
+
+  function updateStepButtons() {
+    const currentStep = validationStepper._currentIndex;
+
     document.querySelectorAll('.step-trigger').forEach((btn, index) => {
-      btn.addEventListener('click', function (e) {
-        const currentStep = validationStepper._currentIndex;
-        const isAccessible = index <= currentStep || completedSteps.has(index);
-
-        if (isAccessible) {
-          validationStepper.to(index + 1);
-        }
-      });
+      const accessible = index <= currentStep || completedSteps.has(index);
+      btn.disabled                    = !accessible;
+      btn.style.cursor                = accessible ? 'pointer' : 'default';
+      btn.parentElement.style.cursor  = accessible ? 'pointer' : 'default';
     });
+  }
 
-    // Initialize step buttons
-    setTimeout(() => updateStepButtons(), 100);
-
-    // Initialize data after DOM is ready
-    document.addEventListener('DOMContentLoaded', function () {
-      console.log('page loaded - init wizard');
-      step1InitialData = getStep1Data();
-      step2InitialData = getStep2Data();
-      step3InitialData = getStep3Data();
-
-      // Load completion status from existing data
-      loadCompletedSteps();
-      updateStepButtons();
+  // Allow clicking step-trigger buttons only for accessible steps
+  document.querySelectorAll('.step-trigger').forEach((btn, index) => {
+    btn.addEventListener('click', () => {
+      const currentStep = validationStepper._currentIndex;
+      if (index <= currentStep || completedSteps.has(index)) {
+        validationStepper.to(index + 1);
+      }
     });
+  });
 
-    // Function to detect which steps are already completed based on initial data
-    function loadCompletedSteps() {
-      // Check if step 1 has data
-      const step1Data = JSON.parse(step1InitialData);
-      const hasStep1Data = Object.values(step1Data).some(val => val !== '');
-      if (hasStep1Data) {
-        completedSteps.add(0);
-        completedSteps.add(1);
-      }
+  // Initialise buttons after stepper is ready
+  setTimeout(updateStepButtons, 100);
 
-      // Check if step 2 has data
-      const step2Data = JSON.parse(step2InitialData);
-      const hasStep2Data = Object.values(step2Data).some(val => val !== '');
-      if (hasStep2Data) {
-        completedSteps.add(1);
-        completedSteps.add(2);
-      }
+  // ─── Real-time completion checks ─────────────────────────────────────────────
 
-      // ✅ If BOTH step 1 and step 2 are fulfilled, unlock steps 3, 4, and 5
-      if (hasStep1Data && hasStep2Data) {
-        completedSteps.add(2);
-        completedSteps.add(3);
-        completedSteps.add(4);
-      }
+  /**
+   * Returns true when all required Step 1 fields are filled and valid enough
+   * to unlock the Step 2 trigger button.
+   */
+  function isStep1Complete() {
+    const requiredTextFields = [
+      'company_name', 'contact_name', 'email', 'phone', 'country', 'state', 'about'
+    ];
 
-      // Check if step 3 has data
-      const step3Data = JSON.parse(step3InitialData);
-      const hasStep3Data = Object.values(step3Data).some(val => val !== '');
-      if (hasStep3Data) {
-        completedSteps.add(2);
-        completedSteps.add(3);
-        completedSteps.add(4);
-      }
-
-      // Check if step 4 (portfolio) has items — already unlocks nothing new beyond what's above
-      const $portfolioItems = $('.work-item-card:visible');
-      if ($portfolioItems.length > 0) {
-        let hasCompleteItems = false;
-        $portfolioItems.each(function () {
-          const hasTitle = $(this).find('.title-input').val().trim() !== '';
-          const hasMedia = $(this).find('.media-input')[0].files.length > 0 ||
-            $(this).find('.upload-area img, .upload-area video').length > 0;
-          if (hasTitle && hasMedia) {
-            hasCompleteItems = true;
-            return false;
-          }
-        });
-        if (hasCompleteItems) {
-          completedSteps.add(3);
-          completedSteps.add(4);
-        }
-      }
+    for (const name of requiredTextFields) {
+      const el = wizardForm.querySelector(`[name="${name}"]`);
+      if (!el || el.value.trim() === '') return false;
     }
 
-    // Profile basics
-    const FormValidation1 = FormValidation.formValidation(wizardValidationFormStep1, {
-      fields: {
-        company_logo: {
-          validators: {
-            callback: {
-              message: translations[lang].required,
-              callback: function (input) {
-                if (input.value) {
-                  return true;
-                }
-                // Check if an existing image is present
-                const preview = document.getElementById('logo-preview-image');
-                if (preview && preview.getAttribute('src') && !preview.classList.contains('d-none')) {
-                  return true;
-                }
+    // Basic email sanity check
+    const emailEl = wizardForm.querySelector('[name="email"]');
+    if (emailEl && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailEl.value.trim())) return false;
 
-                return false;
-              }
-            },
-            file: {
-              extension: 'png,jpg,jpeg,svg,webp',
-              maxSize: 5 * 1024 * 1024, // 5MB
-              message: translations[lang].logo
-            }
-          }
-        },
+    // Logo: file selected OR existing preview visible
+    const logoInput   = wizardForm.querySelector('input[name="company_logo"]');
+    const logoPreview = document.getElementById('logo-preview-image');
+    const hasLogo =
+      (logoInput && logoInput.files && logoInput.files.length > 0) ||
+      (logoPreview && logoPreview.getAttribute('src') && !logoPreview.classList.contains('d-none'));
+    if (!hasLogo) return false;
 
-        company_name: {
-          validators: {
-            notEmpty: {
-              message: translations[lang].required,
-            }
-          }
-        },
-        contact_name: {
-          validators: {
-            notEmpty: {
-              message: translations[lang].required,
-            }
-          }
-        },
-        email: {
-          validators: {
-            notEmpty: {
-              message: translations[lang].required,
-            },
-            emailAddress: {
-              message: translations[lang].email,
-            }
-          }
-        },
-        phone: {
-          validators: {
-            notEmpty: {
-              message: translations[lang].required,
-            },
-            callback: {
-              message: translations[lang].invalidPhone,
-              callback: function (input) {
-                const value = input.value.trim();
+    return true;
+  }
 
-                // Skip validation if empty (handled by notEmpty validator)
-                if (value === '') {
-                  return { valid: true };
-                }
+  /**
+   * Returns true when all required Step 2 fields are filled and a hero image
+   * is present, unlocking Steps 3–5.
+   */
+  function isStep2Complete() {
+    const requiredTextFields = [
+      'hero_description', 'services_short_description', 'operating_mode', 'operating_region'
+    ];
 
-                // **NEW: Prevent users from typing + or country codes**
-                // The country code should ONLY come from the dropdown
-                if (value.includes('+')) {
-                  return {
-                    valid: false,
-                    message: translations[lang].phone // "Phone number should contain numbers only"
-                  };
-                }
-
-                // Check if contains only numbers and allowed phone characters (NO PLUS)
-                const numericRegex = /^[\d\s\-\(\)]+$/;
-                if (!numericRegex.test(value)) {
-                  return {
-                    valid: false,
-                    message: translations[lang].phone
-                  };
-                }
-
-                // Get ITI instance from the element
-                const itiInstance = $(input.element).data('iti');
-
-                if (!itiInstance) {
-                  // Fallback if iti not available - just check format
-                  const phoneRegex = /^[\d\s\-\(\)]{8,}$/;
-                  return {
-                    valid: phoneRegex.test(value),
-                    message: translations[lang].invalidPhone
-                  };
-                }
-
-                // Get selected country
-                const countryData = itiInstance.getSelectedCountryData();
-                const selectedCountry = countryData.iso2 || '';
-
-                // For Egypt, allow numbers starting with 0
-                if (selectedCountry.toLowerCase() === 'eg') {
-                  const cleanNumber = value.replace(/[\s\-\(\)]/g, '');
-
-                  if (cleanNumber.startsWith('0')) {
-                    if (cleanNumber.length === 11 && /^0(10|11|12|15|2)\d{8}$/.test(cleanNumber)) {
-                      return { valid: true };
-                    } else {
-                      return {
-                        valid: false,
-                        message: translations[lang].invalidPhone
-                      };
-                    }
-                  } else if (cleanNumber.length === 10 && /^(10|11|12|15|2)\d{8}$/.test(cleanNumber)) {
-                    return { valid: true };
-                  } else {
-                    return {
-                      valid: false,
-                      message: translations[lang].invalidPhone
-                    };
-                  }
-                }
-
-                // Validate using intl-tel-input for other countries
-                if (typeof itiInstance.isValidNumber === 'function') {
-                  const isValid = itiInstance.isValidNumber();
-
-                  if (!isValid) {
-                    return {
-                      valid: false,
-                      message: translations[lang].invalidPhone
-                    };
-                  }
-
-                  return { valid: true };
-                }
-
-                // Basic fallback
-                const phoneRegex = /^[\d\s\-\(\)]{8,}$/;
-                return {
-                  valid: phoneRegex.test(value),
-                  message: translations[lang].invalidPhone
-                };
-              }
-            }
-          }
-        },
-        whatsapp: {
-          validators: {
-            callback: {
-              message: translations[lang].invalidPhone,
-              callback: function (input) {
-                const value = input.value.trim();
-
-                // WhatsApp is optional - skip validation if empty
-                if (value === '') {
-                  return { valid: true };
-                }
-
-                // **NEW: Prevent users from typing + or country codes**
-                // The country code should ONLY come from the dropdown
-                if (value.includes('+')) {
-                  return {
-                    valid: false,
-                    message: translations[lang].phone // "Phone number should contain numbers only"
-                  };
-                }
-
-                // Check if contains only numbers and allowed phone characters (NO PLUS)
-                const numericRegex = /^[\d\s\-\(\)]+$/;
-                if (!numericRegex.test(value)) {
-                  return {
-                    valid: false,
-                    message: translations[lang].phone
-                  };
-                }
-
-                // Get ITI instance from the element
-                const itiInstance = $(input.element).data('iti');
-
-                if (!itiInstance) {
-                  // Fallback if iti not available - just check format
-                  const phoneRegex = /^[\d\s\-\(\)]{8,}$/;
-                  return {
-                    valid: phoneRegex.test(value),
-                    message: translations[lang].invalidPhone
-                  };
-                }
-
-                // Get selected country
-                const countryData = itiInstance.getSelectedCountryData();
-                const selectedCountry = countryData.iso2 || '';
-
-                // For Egypt, allow numbers starting with 0
-                if (selectedCountry.toLowerCase() === 'eg') {
-                  const cleanNumber = value.replace(/[\s\-\(\)]/g, '');
-
-                  if (cleanNumber.startsWith('0')) {
-                    if (cleanNumber.length === 11 && /^0(10|11|12|15|2)\d{8}$/.test(cleanNumber)) {
-                      return { valid: true };
-                    } else {
-                      return {
-                        valid: false,
-                        message: translations[lang].invalidPhone
-                      };
-                    }
-                  } else if (cleanNumber.length === 10 && /^(10|11|12|15|2)\d{8}$/.test(cleanNumber)) {
-                    return { valid: true };
-                  } else {
-                    return {
-                      valid: false,
-                      message: translations[lang].invalidPhone
-                    };
-                  }
-                }
-
-                // Validate using intl-tel-input for other countries
-                if (typeof itiInstance.isValidNumber === 'function') {
-                  const isValid = itiInstance.isValidNumber();
-
-                  if (!isValid) {
-                    return {
-                      valid: false,
-                      message: translations[lang].invalidPhone
-                    };
-                  }
-
-                  return { valid: true };
-                }
-
-                // Basic fallback
-                const phoneRegex = /^[\d\s\-\(\)]{8,}$/;
-                return {
-                  valid: phoneRegex.test(value),
-                  message: translations[lang].invalidPhone
-                };
-              }
-            }
-          }
-        },
-        country: {
-          validators: {
-            notEmpty: {
-              message: translations[lang].required,
-            }
-          }
-        },
-        state: {
-          validators: {
-            notEmpty: { message: translations[lang].required, }
-          }
-        },
-        city: {
-          validators: {}
-        },
-        about: {
-          validators: {
-            notEmpty: { message: translations[lang].required, }
-          }
-        }
-      },
-      plugins: {
-        trigger: new FormValidation.plugins.Trigger({
-          event: {
-            file: 'change'
-          }
-        }),
-        bootstrap5: new FormValidation.plugins.Bootstrap5({
-          // Use this for enabling/changing valid/invalid class
-          // eleInvalidClass: '',
-          eleValidClass: '',
-          rowSelector: '.mb-4'
-        }),
-        autoFocus: new FormValidation.plugins.AutoFocus(),
-        submitButton: new FormValidation.plugins.SubmitButton()
-      },
-      init: instance => {
-        instance.on('plugins.message.placed', function (e) {
-          //* Move the error message out of the `input-group` element
-          if (e.element.parentElement.classList.contains('input-group')) {
-            e.element.parentElement.insertAdjacentElement('afterend', e.messageElement);
-          }
-        });
-      }
-    }).on('core.form.valid', function (e) {
-      const currentData = getStep1Data();
-
-      // If no changes → skip AJAX
-      if (step1InitialData === currentData) {
-        completedSteps.add(0);
-        completedSteps.add(1);
-        updateStepButtons();
-        validationStepper.next();
-        return;
-      }
-
-      // Otherwise save
-      saveStepData(0, FormValidation1);
-    });
-
-    function getStep1Data() {
-      const form = document.getElementById('service-provider-form-wizard');
-      const formData = new FormData(form);
-
-      const data = {};
-
-      const fields = [
-        'company_name',
-        'contact_name',
-        'email',
-        'phone',
-        'whatsapp',
-        'country',
-        'state',
-        'city',
-        'about',
-        'zip',
-        'address',
-      ];
-
-      fields.forEach(name => {
-        data[name] = formData.get(name) || '';
-      });
-
-      // Handle company_logo separately
-      const logoInput = form.querySelector('input[name="company_logo"]');
-      if (logoInput && logoInput.files && logoInput.files.length > 0) {
-        data.company_logo = logoInput.files[0].name; // compare by file name
-      } else {
-        // fallback to existing preview image (if editing existing record)
-        const preview = document.getElementById('logo-preview-image');
-        data.company_logo = preview && preview.getAttribute('src')
-          ? preview.getAttribute('src')
-          : '';
-      }
-
-      return JSON.stringify(data);
+    for (const name of requiredTextFields) {
+      const el = wizardForm.querySelector(`[name="${name}"]`);
+      if (!el || el.value.trim() === '') return false;
     }
 
+    // Hero image: new file selected OR existing image in DOM
+    const heroInput    = wizardForm.querySelector('input[name="hero_image"]');
+    const existingHero = document.querySelector('#step-2-booking img');
+    const hasHero =
+      (heroInput && heroInput.files && heroInput.files.length > 0) ||
+      (existingHero && existingHero.getAttribute('src'));
+    if (!hasHero) return false;
 
-    // Phone intl-tel-input
-    if (intlTelInput.length) {
-      intlTelInput.each(function () {
-        var $this = $(this);
-        var inputId = $this.attr('id');
+    return true;
+  }
 
-        // $this.wrap('<div class="position-relative"></div>');
+  /**
+   * Step 3 (Key Stats) fields are all optional — treated as always passable.
+   */
+  function isStep3Complete() {
+    return true;
+  }
 
-        if (typeof window.intlTelInput === 'function') {
-          var itiInstance = window.intlTelInput($this[0], {
-            initialCountry: 'eg',
-            preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
-            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
-            formatOnDisplay: false,
-            separateDialCode: true,
-            autoPlaceholder: "aggressive",
-            customPlaceholder: function (selectedCountryPlaceholder) {
-              return "e.g. " + selectedCountryPlaceholder;
-            }
-          });
+  /**
+   * Returns true when at least one portfolio card has both a title and media.
+   */
+  function isStep4Complete() {
+    let valid = false;
+    $('.work-item-card:visible').each(function () {
+      const hasTitle = $(this).find('.title-input').val().trim() !== '';
+      const hasMedia =
+        $(this).find('.media-input')[0].files.length > 0 ||
+        $(this).find('.upload-area img, .upload-area video').length > 0;
+      if (hasTitle && hasMedia) { valid = true; return false; }
+    });
+    return valid;
+  }
 
-          // Store instance via jQuery .data() for validation access
-          $this.data('iti', itiInstance);
-
-          // Assign to global iti if it's the phone input (legacy support for existing validation code)
-          if (inputId === 'phone') {
-            iti = itiInstance;
-          }
-
-          // Function to update hidden input
-          var updateHiddenInput = function () {
-            var countryData = itiInstance.getSelectedCountryData();
-            var dialCode = countryData.dialCode;
-
-            if (inputId === 'phone') {
-              $('#country_code').val(dialCode);
-            } else if (inputId === 'whatsapp') {
-              $('#country_code_w_a').val(dialCode);
-            }
-          };
-
-          // Update on init (if empty)
-          if (inputId === 'phone' && !$('#country_code').val()) {
-            updateHiddenInput();
-          } else if (inputId === 'whatsapp' && !$('#country_code_w_a').val()) {
-            updateHiddenInput();
-          }
-
-          // Update on change and revalidate the field
-          $this.on('countrychange', function () {
-            updateHiddenInput();
-            if (inputId === 'phone') {
-              FormValidation1.revalidateField('phone');
-            } else if (inputId === 'whatsapp') {
-              FormValidation1.revalidateField('whatsapp');
-            }
-          });
-        }
-      });
+  /**
+   * Central function: re-evaluates every step's completion state and calls
+   * updateStepButtons() so the UI reflects the current state immediately.
+   */
+  function syncStepUnlockState() {
+    if (isStep1Complete()) {
+      completedSteps.add(0);
+      completedSteps.add(1); // unlocks step-2 trigger
     }
 
-    select2.each(function () {
-      var $this = $(this);
-      $this.wrap('<div class="position-relative"></div>');
-      $this.select2({
-        dropdownParent: $this.parent()
-      });
-      $this.on('change', function () {
-        const stepIndex = validationStepper._currentIndex;
-        if (stepIndex === 0) FormValidation1.revalidateField($this.attr('name'));
-        if (stepIndex === 1) FormValidation2.revalidateField($this.attr('name'));
-      });
-    });
-
-    // Intro & booking
-    const FormValidation2 = FormValidation.formValidation(wizardValidationFormStep2, {
-      fields: {
-        hero_image: {
-          validators: {
-            callback: {
-              message: translations[lang].required,
-              callback: function (input) {
-                if (input.value) return true;
-                const preview = wizardValidationFormStep2.querySelector('img');
-                return (preview && preview.getAttribute('src')) ? true : false;
-              }
-            },
-            file: {
-              extension: 'png,jpg,jpeg,svg,webp',
-              maxSize: 10 * 1024 * 1024, // 10MB
-              message: translations[lang].hero_image
-            }
-          }
-        },
-        hero_description: {
-          validators: {
-            notEmpty: {
-              message: translations[lang].required,
-            }
-          }
-        },
-        services_short_description: {
-          validators: {
-            notEmpty: {
-              message: translations[lang].required,
-            }
-          }
-        },
-        appointment_link: {
-          validators: {
-            uri: {
-              message: translations[lang].invalid_url
-            },
-          }
-        },
-        operating_mode: {
-          validators: {
-            notEmpty: {
-              message: translations[lang].required,
-            }
-          }
-        },
-        operating_region: {
-          validators: {
-            notEmpty: {
-              message: translations[lang].required,
-            }
-          }
-        }
-      },
-      plugins: {
-        trigger: new FormValidation.plugins.Trigger({
-          event: {
-            file: 'change'
-          }
-        }),
-        bootstrap5: new FormValidation.plugins.Bootstrap5({
-          // Use this for enabling/changing valid/invalid class
-          // eleInvalidClass: '',
-          eleValidClass: '',
-          rowSelector: '.mb-4'
-        }),
-        autoFocus: new FormValidation.plugins.AutoFocus(),
-        submitButton: new FormValidation.plugins.SubmitButton()
-      }
-    }).on('core.form.valid', function () {
-      const currentData = getStep2Data();
-
-      // If no changes → skip AJAX
-      if (step2InitialData === currentData) {
-        completedSteps.add(1);
-        completedSteps.add(2);
-        updateStepButtons();
-        validationStepper.next();
-        return;
-      }
-
-      saveStepData(1, FormValidation2);
-    });
-
-    function getStep2Data() {
-      const form = document.getElementById('service-provider-form-wizard');
-      const formData = new FormData(form);
-
-      const data = {};
-
-      // Normal fields
-      [
-        'hero_description',
-        'services_short_description',
-        'appointment_link',
-        'operating_mode',
-        'operating_region',
-      ].forEach(name => {
-        data[name] = formData.get(name) || '';
-      });
-
-      // Handle hero_image separately
-      const heroInput = form.querySelector('input[name="hero_image"]');
-
-      if (heroInput && heroInput.files && heroInput.files.length > 0) {
-        const file = heroInput.files[0];
-
-        // More reliable than just name
-        data.hero_image = `${file.name}_${file.size}`;
-      } else {
-        // If editing and image already exists in DB
-        const existingImage = document.querySelector('#step-2-booking img');
-        data.hero_image = existingImage
-          ? existingImage.getAttribute('src')
-          : '';
-      }
-
-      return JSON.stringify(data);
+    if (isStep2Complete()) {
+      completedSteps.add(1);
+      completedSteps.add(2);
+      completedSteps.add(3);
+      completedSteps.add(4); // unlocks steps 3-5 triggers
     }
 
-    // Key stats
-    const FormValidation3 = FormValidation.formValidation(wizardValidationFormStep3, {
-      fields: {
-        value1: {
-          validators: {
-            callback: {
-              message: translations[lang].stat_value_required,
-              callback: function (input) {
-                const label = document.getElementById('label1').value.trim();
-                return {
-                  valid: !label || input.value.trim() !== ''
-                };
-              }
-            }
-          }
-        },
-        label1: {
-          validators: {
-            callback: {
-              message: translations[lang].stat_label_required,
-              callback: function (input) {
-                const value = document.getElementById('value1').value.trim();
-                return {
-                  valid: !value || input.value.trim() !== ''
-                };
-              }
-            }
-          }
-        },
-        value2: {
-          validators: {
-            callback: {
-              message: translations[lang].stat_value_required,
-              callback: function (input) {
-                const label = document.getElementById('label2').value.trim();
-                return {
-                  valid: !label || input.value.trim() !== ''
-                };
-              }
-            }
-          }
-        },
-        label2: {
-          validators: {
-            callback: {
-              message: translations[lang].stat_label_required,
-              callback: function (input) {
-                const value = document.getElementById('value2').value.trim();
-                return {
-                  valid: !value || input.value.trim() !== ''
-                };
-              }
-            }
-          }
-        },
-        value3: {
-          validators: {
-            callback: {
-              message: translations[lang].stat_value_required,
-              callback: function (input) {
-                const label = document.getElementById('label3').value.trim();
-                return {
-                  valid: !label || input.value.trim() !== ''
-                };
-              }
-            }
-          }
-        },
-        label3: {
-          validators: {
-            callback: {
-              message: translations[lang].stat_label_required,
-              callback: function (input) {
-                const value = document.getElementById('value3').value.trim();
-                return {
-                  valid: !value || input.value.trim() !== ''
-                };
-              }
-            }
-          }
-        },
-        value4: {
-          validators: {
-            callback: {
-              message: translations[lang].stat_value_required,
-              callback: function (input) {
-                const label = document.getElementById('label4').value.trim();
-                return {
-                  valid: !label || input.value.trim() !== ''
-                };
-              }
-            }
-          }
-        },
-        label4: {
-          validators: {
-            callback: {
-              message: translations[lang].stat_label_required,
-              callback: function (input) {
-                const value = document.getElementById('value4').value.trim();
-                return {
-                  valid: !value || input.value.trim() !== ''
-                };
-              }
-            }
-          }
-        }
-      },
-      plugins: {
-        trigger: new FormValidation.plugins.Trigger(),
-        bootstrap5: new FormValidation.plugins.Bootstrap5({
-          eleValidClass: '',
-          rowSelector: '.mb-4'
-        }),
-        autoFocus: new FormValidation.plugins.AutoFocus(),
-        submitButton: new FormValidation.plugins.SubmitButton()
-      }
-    })
-      .on('core.form.valid', function () {
-        const currentData = getStep3Data();
+    // Step 3 is always passable once reachable
+    if (completedSteps.has(2) && isStep3Complete()) {
+      completedSteps.add(2);
+      completedSteps.add(3);
+      completedSteps.add(4);
+    }
 
-        // If no changes → skip AJAX
-        if (step3InitialData === currentData) {
-          completedSteps.add(2);
-          completedSteps.add(3);
-          updateStepButtons();
-          validationStepper.next();
-          return;
-        }
+    if (isStep4Complete()) {
+      completedSteps.add(3);
+      completedSteps.add(4); // unlocks step-5 trigger
+    }
 
-        // Otherwise save
-        saveStepData(2, FormValidation3);
-      })
-      .on('core.validator.validated', function (e) {
-        // When a field is validated, revalidate its paired field
-        const fieldPairs = {
-          'value1': 'label1',
-          'label1': 'value1',
-          'value2': 'label2',
-          'label2': 'value2',
-          'value3': 'label3',
-          'label3': 'value3',
-          'value4': 'label4',
-          'label4': 'value4'
-        };
+    updateStepButtons();
+  }
 
-        const pairedField = fieldPairs[e.field];
-        if (pairedField && !e.result.valid) {
-          // Only revalidate if current field became invalid
-          FormValidation3.revalidateField(pairedField);
-        }
+  /**
+   * Attach live input/change listeners across all steps.
+   * Uses event delegation on #itemsContainer for dynamically added portfolio cards.
+   */
+  function attachRealTimeListeners() {
+    // ── Step 1 ──────────────────────────────────────────────────────────────
+    ['company_name', 'contact_name', 'email', 'phone', 'country', 'state', 'city', 'about']
+      .forEach(name => {
+        const el = wizardForm.querySelector(`[name="${name}"]`);
+        if (el) el.addEventListener('input', syncStepUnlockState);
       });
 
-    // Add input event listeners to trigger cross-validation
+    const logoInput = wizardForm.querySelector('input[name="company_logo"]');
+    if (logoInput) logoInput.addEventListener('change', syncStepUnlockState);
+
+    // Select2 fields fire jQuery 'change', not native 'input'
+    $(wizardForm)
+      .find('select[name="country"], select[name="state"]')
+      .on('change', syncStepUnlockState);
+
+    // intl-tel-input flag/country change
+    $(wizardForm).find('.intl-tel-input').on('countrychange', syncStepUnlockState);
+
+    // ── Step 2 ──────────────────────────────────────────────────────────────
+    ['hero_description', 'services_short_description', 'appointment_link', 'operating_mode', 'operating_region']
+      .forEach(name => {
+        const el = wizardForm.querySelector(`[name="${name}"]`);
+        if (el) el.addEventListener('input', syncStepUnlockState);
+      });
+
+    const heroInput = wizardForm.querySelector('input[name="hero_image"]');
+    if (heroInput) heroInput.addEventListener('change', syncStepUnlockState);
+
+    $(wizardForm)
+      .find('select[name="operating_mode"], select[name="operating_region"]')
+      .on('change', syncStepUnlockState);
+
+    // ── Step 3 ──────────────────────────────────────────────────────────────
     for (let i = 1; i <= 4; i++) {
-      const valueField = document.getElementById(`value${i}`);
-      const labelField = document.getElementById(`label${i}`);
+      document.getElementById(`value${i}`)?.addEventListener('input', syncStepUnlockState);
+      document.getElementById(`label${i}`)?.addEventListener('input', syncStepUnlockState);
+    }
 
-      valueField.addEventListener('input', function () {
-        if (labelField.value.trim()) {
-          FormValidation3.revalidateField(`label${i}`);
-        }
-      });
+    // ── Step 4 — delegated so it covers dynamically added cards ─────────────
+    $('#itemsContainer').on('input change', '.title-input, .desc-input, .media-input', syncStepUnlockState);
 
-      labelField.addEventListener('input', function () {
-        if (valueField.value.trim()) {
-          FormValidation3.revalidateField(`value${i}`);
+    // Run once immediately to reflect any pre-filled / edit-mode data
+    syncStepUnlockState();
+  }
+
+  // ─── Snapshot helpers (change-detection before AJAX) ─────────────────────────
+
+  function getStep1Data() {
+    const fd = new FormData(wizardForm);
+    const fields = [
+      'company_name', 'contact_name', 'email', 'phone',
+      'whatsapp', 'country', 'state', 'city', 'about', 'zip', 'address',
+    ];
+    const data = {};
+    fields.forEach(name => { data[name] = fd.get(name) || ''; });
+
+    const logoInput   = wizardForm.querySelector('input[name="company_logo"]');
+    const logoPreview = document.getElementById('logo-preview-image');
+    data.company_logo =
+      (logoInput && logoInput.files && logoInput.files.length > 0)
+        ? logoInput.files[0].name
+        : (logoPreview && logoPreview.getAttribute('src') ? logoPreview.getAttribute('src') : '');
+
+    return JSON.stringify(data);
+  }
+
+  function getStep2Data() {
+    const fd = new FormData(wizardForm);
+    const fields = [
+      'hero_description', 'services_short_description',
+      'appointment_link', 'operating_mode', 'operating_region',
+    ];
+    const data = {};
+    fields.forEach(name => { data[name] = fd.get(name) || ''; });
+
+    const heroInput    = wizardForm.querySelector('input[name="hero_image"]');
+    const existingHero = document.querySelector('#step-2-booking img');
+    if (heroInput && heroInput.files && heroInput.files.length > 0) {
+      const f = heroInput.files[0];
+      data.hero_image = `${f.name}_${f.size}`;
+    } else {
+      data.hero_image = existingHero ? existingHero.getAttribute('src') : '';
+    }
+
+    return JSON.stringify(data);
+  }
+
+  function getStep3Data() {
+    const fd     = new FormData(wizardForm);
+    const data   = {};
+    const fields = ['value1','label1','value2','label2','value3','label3','value4','label4'];
+    fields.forEach(name => { data[name] = fd.get(name) || ''; });
+    return JSON.stringify(data);
+  }
+
+  // ─── Load previously completed steps from existing DB data ───────────────────
+
+  function loadCompletedSteps() {
+    const step1Data    = JSON.parse(step1InitialData);
+    const hasStep1Data = Object.values(step1Data).some(v => v !== '');
+    if (hasStep1Data) { completedSteps.add(0); completedSteps.add(1); }
+
+    const step2Data    = JSON.parse(step2InitialData);
+    const hasStep2Data = Object.values(step2Data).some(v => v !== '');
+    if (hasStep2Data) { completedSteps.add(1); completedSteps.add(2); }
+
+    if (hasStep1Data && hasStep2Data) {
+      completedSteps.add(2); completedSteps.add(3); completedSteps.add(4);
+    }
+
+    const step3Data    = JSON.parse(step3InitialData);
+    const hasStep3Data = Object.values(step3Data).some(v => v !== '');
+    if (hasStep3Data) { completedSteps.add(2); completedSteps.add(3); completedSteps.add(4); }
+
+    const $portfolioItems = $('.work-item-card:visible');
+    if ($portfolioItems.length > 0) {
+      $portfolioItems.each(function () {
+        const hasTitle = $(this).find('.title-input').val().trim() !== '';
+        const hasMedia =
+          $(this).find('.media-input')[0].files.length > 0 ||
+          $(this).find('.upload-area img, .upload-area video').length > 0;
+        if (hasTitle && hasMedia) {
+          completedSteps.add(3); completedSteps.add(4);
+          return false;
         }
       });
     }
+  }
 
-    function getStep3Data() {
-      const form = document.getElementById('service-provider-form-wizard');
-      const formData = new FormData(form);
+  // ─── Phone: intl-tel-input ───────────────────────────────────────────────────
 
-      const data = {};
+  /**
+   * Builds the phone validator callback (shared between #phone and #whatsapp).
+   * @param {boolean} required  – whether an empty value should fail
+   */
+  function buildPhoneValidator(required) {
+    return {
+      message: t.invalidPhone,
+      callback: function (input) {
+        const value = input.value.trim();
 
-      [
-        'value1',
-        'label1',
-        'value2',
-        'label2',
-        'value3',
-        'label3',
-        'value4',
-        'label4'
-      ].forEach(name => {
-        data[name] = formData.get(name) || '';
-      });
+        if (value === '') return { valid: !required };
 
-      return JSON.stringify(data);
-    }
+        if (value.includes('+')) return { valid: false, message: t.phone };
 
-    // Portfolio / Work Items - Step 4
-    let FormValidation4 = null;
-    function buildStep4Validation() {
-      // 1. SAFE DESTROY: Remove previous instance
-      if (FormValidation4) {
-        try {
-          FormValidation4.destroy();
-        } catch (e) {
-          console.warn("Cleanup suppressed");
-        }
-        FormValidation4 = null;
-      }
+        if (!/^[\d\s\-\(\)]+$/.test(value)) return { valid: false, message: t.phone };
 
-      const fields = {};
-      const $cards = $('.work-item-card');
+        const itiInstance = $(input.element).data('iti');
 
-      // 2. PREPARE FIELDS
-      $cards.each(function (index) {
-        const $card = $(this);
-        const names = {
-          id: `portfolio[${index}][id]`,
-          delete: `portfolio[${index}][delete]`,
-          media: `portfolio[${index}][media]`,
-          title: `portfolio[${index}][title]`,
-          desc: `portfolio[${index}][description]`
-        };
-
-        // Apply names to DOM so FormValidation can find them and backend gets correct array
-        $card.find('.item-id').attr('name', names.id);
-        $card.find('.delete-flag').attr('name', names.delete);
-        $card.find('.media-input').attr('name', names.media);
-        $card.find('.title-input').attr('name', names.title);
-        $card.find('.desc-input').attr('name', names.desc);
-
-        // Skip validation for deleted/hidden cards — they still need correct field names
-        // for the backend to process the delete flag, but must not block form submission
-        if ($card.find('.delete-flag').val() === 'true' || !$card.is(':visible')) {
-          return; // continue to next card
+        if (!itiInstance) {
+          return { valid: /^[\d\s\-\(\)]{8,}$/.test(value), message: t.invalidPhone };
         }
 
-        // Media Validation
-        fields[names.media] = {
-          validators: {
-            callback: {
-              message: translations[lang].complete_work_item_details,
-              callback: function (input) {
-                const $item = $(input.element).closest('.work-item-card');
-                const hasFile = input.element.files && input.element.files.length > 0;
-                const hasExisting = $item.find('.upload-area img, .upload-area video').length > 0;
-                const titleVal = $item.find('.title-input').val().trim();
-                const descVal = $item.find('.desc-input').val().trim();
+        const selectedCountry = (itiInstance.getSelectedCountryData().iso2 || '').toLowerCase();
 
-                if (titleVal && descVal) {
-                  return hasFile || hasExisting;
-                }
-                return true;
-              }
-            },
-            file: {
-              extension: 'png,jpg,jpeg,webp,mp4',
-              maxSize: 10485760,
-              message: translations[lang].unsupported_file_type_portfolio
-            }
+        if (selectedCountry === 'eg') {
+          const clean = value.replace(/[\s\-\(\)]/g, '');
+          if (clean.startsWith('0')) {
+            return {
+              valid: clean.length === 11 && /^0(10|11|12|15|2)\d{8}$/.test(clean),
+              message: t.invalidPhone,
+            };
           }
-        };
+          return {
+            valid: clean.length === 10 && /^(10|11|12|15|2)\d{8}$/.test(clean),
+            message: t.invalidPhone,
+          };
+        }
 
-        // Title Validation
-        fields[names.title] = {
-          validators: {
-            stringLength: { max: 50, message: translations[lang].title_max },
-            callback: {
-              message: translations[lang].complete_work_item_details,
-              callback: function (input) {
-                const val = input.value.trim();
-                const $item = $(input.element).closest('.work-item-card');
-                const hasFile = $item.find('.media-input')[0].files.length > 0;
-                const hasExisting = $item.find('.upload-area img, .upload-area video').length > 0;
-                const descVal = $item.find('.desc-input').val().trim();
+        if (typeof itiInstance.isValidNumber === 'function') {
+          return { valid: itiInstance.isValidNumber(), message: t.invalidPhone };
+        }
 
-                if (descVal || hasFile || hasExisting) {
-                  return val !== '';
-                }
-                return true;
-              }
-            }
-          }
-        };
+        return { valid: /^[\d\s\-\(\)]{8,}$/.test(value), message: t.invalidPhone };
+      }
+    };
+  }
 
-        // Description Validation
-        fields[names.desc] = {
-          validators: {
-            stringLength: { max: 100, message: translations[lang].desc_max },
-            callback: {
-              message: translations[lang].complete_work_item_details,
-              callback: function (input) {
-                const val = input.value.trim();
-                const $item = $(input.element).closest('.work-item-card');
-                const hasFile = $item.find('.media-input')[0].files.length > 0;
-                const hasExisting = $item.find('.upload-area img, .upload-area video').length > 0;
-                const titleVal = $item.find('.title-input').val().trim();
+  if ($intlTelInput.length) {
+    $intlTelInput.each(function () {
+      const $el    = $(this);
+      const inputId = $el.attr('id');
 
-                if (titleVal || hasFile || hasExisting) {
-                  return val !== '';
-                }
-                return true;
-              }
-            }
-          }
-        };
+      if (typeof window.intlTelInput !== 'function') return;
+
+      const itiInstance = window.intlTelInput($el[0], {
+        initialCountry:    'eg',
+        preferredCountries: ['eg', 'ae', 'sa', 'ma', 'dz', 'tn'],
+        utilsScript:       'https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js',
+        formatOnDisplay:   false,
+        separateDialCode:  true,
+        autoPlaceholder:   'aggressive',
+        customPlaceholder: (placeholder) => `e.g. ${placeholder}`,
       });
 
-      // 3. GLOBAL ERROR CONTAINER (For "At least one item" message)
-      // Ensure this row is VISIBLE so the error message is seen
-      if ($('#_portfolio_at_least_one').length === 0) {
-        $('<div id="portfolio-error-container" class="mb-3"></div>')
-          .append($('<input type="hidden" id="_portfolio_at_least_one" name="_portfolio_at_least_one">'))
-          .appendTo('#itemsContainer'); // Append to the end of your list
-      }
+      $el.data('iti', itiInstance);
 
-      fields['_portfolio_at_least_one'] = {
+      // Legacy global reference
+      if (inputId === 'phone') iti = itiInstance;
+
+      const updateDialCode = () => {
+        const dialCode = itiInstance.getSelectedCountryData().dialCode;
+        if (inputId === 'phone')     $('#country_code').val(dialCode);
+        if (inputId === 'whatsapp')  $('#country_code_w_a').val(dialCode);
+      };
+
+      // Initialise hidden dial-code field if not pre-filled
+      if (inputId === 'phone'    && !$('#country_code').val())     updateDialCode();
+      if (inputId === 'whatsapp' && !$('#country_code_w_a').val()) updateDialCode();
+
+      $el.on('countrychange', () => {
+        updateDialCode();
+        if (inputId === 'phone'    && FormValidation1) FormValidation1.revalidateField('phone');
+        if (inputId === 'whatsapp' && FormValidation1) FormValidation1.revalidateField('whatsapp');
+      });
+    });
+  }
+
+  // ─── Select2 ─────────────────────────────────────────────────────────────────
+
+  $select2.each(function () {
+    const $el = $(this);
+    $el.wrap('<div class="position-relative"></div>');
+    $el.select2({ dropdownParent: $el.parent() });
+
+    $el.on('change', function () {
+      const stepIndex = validationStepper._currentIndex;
+      if (stepIndex === 0 && FormValidation1) FormValidation1.revalidateField($el.attr('name'));
+      if (stepIndex === 1 && FormValidation2) FormValidation2.revalidateField($el.attr('name'));
+    });
+  });
+
+  // ─── FormValidation – Step 1: Profile Basics ─────────────────────────────────
+
+  FormValidation1 = FormValidation.formValidation(stepEls[1], {
+    fields: {
+      company_logo: {
         validators: {
           callback: {
-            message: translations[lang].at_least_one_item,
-            callback: function () {
-              let isValid = false;
-              $('.work-item-card:visible').each(function () {
-                const hasTitle = $(this).find('.title-input').val().trim() !== '';
-                const hasMedia = $(this).find('.media-input')[0].files.length > 0 || $(this).find('.upload-area img, .upload-area video').length > 0;
-                if (hasTitle && hasMedia) {
-                  isValid = true; return false;
-                }
-              });
-              return isValid;
+            message: t.required,
+            callback: (input) => {
+              if (input.value) return true;
+              const preview = document.getElementById('logo-preview-image');
+              return !!(preview && preview.getAttribute('src') && !preview.classList.contains('d-none'));
+            }
+          },
+          file: {
+            extension: 'png,jpg,jpeg,svg,webp',
+            maxSize:   5 * 1024 * 1024,
+            message:   t.logo,
+          }
+        }
+      },
+      company_name:  { validators: { notEmpty: { message: t.required } } },
+      contact_name:  { validators: { notEmpty: { message: t.required } } },
+      email: {
+        validators: {
+          notEmpty:     { message: t.required },
+          emailAddress: { message: t.email },
+        }
+      },
+      phone: {
+        validators: {
+          notEmpty: { message: t.required },
+          callback: buildPhoneValidator(true),
+        }
+      },
+      whatsapp: {
+        validators: {
+          callback: buildPhoneValidator(false),
+        }
+      },
+      country: { validators: { notEmpty: { message: t.required } } },
+      state:   { validators: { notEmpty: { message: t.required } } },
+      city:    { validators: {} },
+      about:   { validators: { notEmpty: { message: t.required } } },
+    },
+    plugins: {
+      trigger: new FormValidation.plugins.Trigger({ event: { file: 'change' } }),
+      bootstrap5: new FormValidation.plugins.Bootstrap5({
+        eleValidClass: '',
+        rowSelector:   '.mb-4',
+      }),
+      autoFocus:    new FormValidation.plugins.AutoFocus(),
+      submitButton: new FormValidation.plugins.SubmitButton(),
+    },
+    init: (instance) => {
+      instance.on('plugins.message.placed', (e) => {
+        if (e.element.parentElement.classList.contains('input-group')) {
+          e.element.parentElement.insertAdjacentElement('afterend', e.messageElement);
+        }
+      });
+    }
+  }).on('core.form.valid', () => {
+    const currentData = getStep1Data();
+    if (step1InitialData === currentData) {
+      completedSteps.add(0); completedSteps.add(1);
+      updateStepButtons();
+      validationStepper.next();
+      return;
+    }
+    saveStepData(0, FormValidation1);
+  });
+
+  // ─── FormValidation – Step 2: Intro & Booking ────────────────────────────────
+
+  FormValidation2 = FormValidation.formValidation(stepEls[2], {
+    fields: {
+      hero_image: {
+        validators: {
+          callback: {
+            message: t.required,
+            callback: (input) => {
+              if (input.value) return true;
+              const preview = stepEls[2].querySelector('img');
+              return !!(preview && preview.getAttribute('src'));
+            }
+          },
+          file: {
+            extension: 'png,jpg,jpeg,svg,webp',
+            maxSize:   10 * 1024 * 1024,
+            message:   t.hero_image,
+          }
+        }
+      },
+      hero_description:          { validators: { notEmpty: { message: t.required } } },
+      services_short_description:{ validators: { notEmpty: { message: t.required } } },
+      appointment_link:          { validators: { uri: { message: t.invalid_url } } },
+      operating_mode:            { validators: { notEmpty: { message: t.required } } },
+      operating_region:          { validators: { notEmpty: { message: t.required } } },
+    },
+    plugins: {
+      trigger: new FormValidation.plugins.Trigger({ event: { file: 'change' } }),
+      bootstrap5: new FormValidation.plugins.Bootstrap5({
+        eleValidClass: '',
+        rowSelector:   '.mb-4',
+      }),
+      autoFocus:    new FormValidation.plugins.AutoFocus(),
+      submitButton: new FormValidation.plugins.SubmitButton(),
+    }
+  }).on('core.form.valid', () => {
+    const currentData = getStep2Data();
+    if (step2InitialData === currentData) {
+      completedSteps.add(1); completedSteps.add(2);
+      updateStepButtons();
+      validationStepper.next();
+      return;
+    }
+    saveStepData(1, FormValidation2);
+  });
+
+  // ─── FormValidation – Step 3: Key Stats ──────────────────────────────────────
+
+  /**
+   * Builds a paired value/label validator for a stat row.
+   * @param {'value'|'label'} kind   – which side this field is
+   * @param {number}          index  – stat row index (1–4)
+   */
+  function buildStatValidator(kind, index) {
+    const pairedId  = kind === 'value' ? `label${index}` : `value${index}`;
+    const message   = kind === 'value' ? t.stat_value_required : t.stat_label_required;
+    return {
+      validators: {
+        callback: {
+          message,
+          callback: (input) => {
+            const pairedVal = document.getElementById(pairedId)?.value.trim();
+            return { valid: !pairedVal || input.value.trim() !== '' };
+          }
+        }
+      }
+    };
+  }
+
+  const step3Fields = {};
+  for (let i = 1; i <= 4; i++) {
+    step3Fields[`value${i}`] = buildStatValidator('value', i);
+    step3Fields[`label${i}`] = buildStatValidator('label', i);
+  }
+
+  FormValidation3 = FormValidation.formValidation(stepEls[3], {
+    fields: step3Fields,
+    plugins: {
+      trigger:      new FormValidation.plugins.Trigger(),
+      bootstrap5:   new FormValidation.plugins.Bootstrap5({ eleValidClass: '', rowSelector: '.mb-4' }),
+      autoFocus:    new FormValidation.plugins.AutoFocus(),
+      submitButton: new FormValidation.plugins.SubmitButton(),
+    }
+  })
+  .on('core.form.valid', () => {
+    const currentData = getStep3Data();
+    if (step3InitialData === currentData) {
+      completedSteps.add(2); completedSteps.add(3);
+      updateStepButtons();
+      validationStepper.next();
+      return;
+    }
+    saveStepData(2, FormValidation3);
+  })
+  .on('core.validator.validated', (e) => {
+    // Cross-revalidate the paired field when one becomes invalid
+    const pairs = {
+      value1:'label1', label1:'value1',
+      value2:'label2', label2:'value2',
+      value3:'label3', label3:'value3',
+      value4:'label4', label4:'value4',
+    };
+    const paired = pairs[e.field];
+    if (paired && !e.result.valid) FormValidation3.revalidateField(paired);
+  });
+
+  // Cross-validation on input events for stat pairs
+  for (let i = 1; i <= 4; i++) {
+    document.getElementById(`value${i}`)?.addEventListener('input', () => {
+      if (document.getElementById(`label${i}`).value.trim()) FormValidation3.revalidateField(`label${i}`);
+    });
+    document.getElementById(`label${i}`)?.addEventListener('input', () => {
+      if (document.getElementById(`value${i}`).value.trim()) FormValidation3.revalidateField(`value${i}`);
+    });
+  }
+
+  // ─── FormValidation – Step 4: Portfolio ──────────────────────────────────────
+
+  function buildStep4Validation() {
+    if (FormValidation4) {
+      try { FormValidation4.destroy(); } catch (_) { /* suppressed */ }
+      FormValidation4 = null;
+    }
+
+    const fields = {};
+    const $cards  = $('.work-item-card');
+
+    $cards.each(function (index) {
+      const $card = $(this);
+      const names = {
+        id:    `portfolio[${index}][id]`,
+        del:   `portfolio[${index}][delete]`,
+        media: `portfolio[${index}][media]`,
+        title: `portfolio[${index}][title]`,
+        desc:  `portfolio[${index}][description]`,
+      };
+
+      // Apply names so backend receives correct array keys
+      $card.find('.item-id').attr('name',     names.id);
+      $card.find('.delete-flag').attr('name', names.del);
+      $card.find('.media-input').attr('name', names.media);
+      $card.find('.title-input').attr('name', names.title);
+      $card.find('.desc-input').attr('name',  names.desc);
+
+      // Hidden/deleted cards still need correct names but must not block submit
+      if ($card.find('.delete-flag').val() === 'true' || !$card.is(':visible')) return;
+
+      fields[names.media] = {
+        validators: {
+          callback: {
+            message: t.complete_work_item_details,
+            callback: (input) => {
+              const $item    = $(input.element).closest('.work-item-card');
+              const hasFile  = input.element.files && input.element.files.length > 0;
+              const hasExist = $item.find('.upload-area img, .upload-area video').length > 0;
+              const title    = $item.find('.title-input').val().trim();
+              const desc     = $item.find('.desc-input').val().trim();
+              return (title && desc) ? (hasFile || hasExist) : true;
+            }
+          },
+          file: {
+            extension: 'png,jpg,jpeg,webp,mp4',
+            maxSize:   10485760,
+            message:   t.unsupported_file_type_portfolio,
+          }
+        }
+      };
+
+      fields[names.title] = {
+        validators: {
+          stringLength: { max: 50, message: t.title_max },
+          callback: {
+            message: t.complete_work_item_details,
+            callback: (input) => {
+              const $item    = $(input.element).closest('.work-item-card');
+              const hasFile  = $item.find('.media-input')[0].files.length > 0;
+              const hasExist = $item.find('.upload-area img, .upload-area video').length > 0;
+              const desc     = $item.find('.desc-input').val().trim();
+              return (desc || hasFile || hasExist) ? input.value.trim() !== '' : true;
             }
           }
         }
       };
 
-      // 4. INITIALIZE
-      FormValidation4 = FormValidation.formValidation(wizardValidationFormStep4, {
-        fields: fields,
-        plugins: {
-          trigger: new FormValidation.plugins.Trigger(),
-          bootstrap5: new FormValidation.plugins.Bootstrap5({
-            eleValidClass: '',
-            rowSelector: function (field) {
-              if (field === '_portfolio_at_least_one') return '#portfolio-error-container';
-              return '.mb-4, .col-md-4, .col-md-8';
+      fields[names.desc] = {
+        validators: {
+          stringLength: { max: 100, message: t.desc_max },
+          callback: {
+            message: t.complete_work_item_details,
+            callback: (input) => {
+              const $item    = $(input.element).closest('.work-item-card');
+              const hasFile  = $item.find('.media-input')[0].files.length > 0;
+              const hasExist = $item.find('.upload-area img, .upload-area video').length > 0;
+              const title    = $item.find('.title-input').val().trim();
+              return (title || hasFile || hasExist) ? input.value.trim() !== '' : true;
             }
-          }),
-          autoFocus: new FormValidation.plugins.AutoFocus(),
-          submitButton: new FormValidation.plugins.SubmitButton()
+          }
         }
-      }).on('core.form.valid', function () {
-        saveStepData(3, FormValidation4);
-      });
+      };
+    });
+
+    // "At least one complete item" global check
+    if ($('#_portfolio_at_least_one').length === 0) {
+      $('<div id="portfolio-error-container" class="mb-3"></div>')
+        .append($('<input type="hidden" id="_portfolio_at_least_one" name="_portfolio_at_least_one">'))
+        .appendTo('#itemsContainer');
     }
 
-    // Initialize step 4 validation on page load
-    // Wait for the portfolio items to be ready
-    setTimeout(function () {
-      buildStep4Validation();
-    }, 100);
-
-    // Expose function to rebuild validation when items are added/removed
-    window.rebuildPortfolioValidation = buildStep4Validation;
-
-    validationStepper._element.addEventListener('shown.bs-stepper', function (event) {
-      const $nextBtn = $('.btn-next');
-      const $text = $nextBtn.find('span');
-      const $icon = $nextBtn.find('i');
-
-      const isFirstStep = event.detail.indexStep === 0;
-
-      // Disable Previous button on first step
-      $('.btn-prev').css('visibility', isFirstStep ? 'hidden' : 'visible');
-
-      const isLastStep = event.detail.indexStep === 4;
-      const newText = isLastStep
-        ? translations[lang].submit
-        : translations[lang].save_and_next;
-
-      // Change text only if needed
-      if ($text.text().trim() !== newText) {
-        $text.text(newText);
-      }
-
-      // Toggle button color only if needed
-      $nextBtn.toggleClass('btn-success', isLastStep);
-      $nextBtn.toggleClass('btn-primary', !isLastStep);
-
-      // Toggle icon visibility
-      $icon.toggle(!isLastStep);
-
-      // Update step button states when stepper changes
-      updateStepButtons();
-    });
-
-    const wizardValidationNextButton = wizardValidation.querySelector('.btn-next');
-    wizardValidationNextButton.addEventListener('click', event => {
-      // When click the Next button, we will validate the current step
-      switch (validationStepper._currentIndex) {
-        case 0:
-          FormValidation1.validate();
-          break;
-
-        case 1:
-          FormValidation2.validate();
-          break;
-
-        case 2:
-          FormValidation3.validate();
-          break;
-
-        case 3: // Portfolio Step
-          if (FormValidation4) {
-            FormValidation4.validate();
-            // The UI will now show errors for the first item because our callback
-            // now returns 'false' if the first item is empty.
-          } else {
-            validationStepper.next();
-          }
-          break;
-
-        case 4: // Final Step (Step 5) - Submit the form
-          submitFormData();
-          break;
-
-        default:
-          break;
-      }
-    });
-
-    // Add this function to handle the AJAX submission for each step
-    function saveStepData(stepIndex, formValidationInstance) {
-      const form = document.getElementById('service-provider-form-wizard');
-      const formData = new FormData(form);
-      const route = form.getAttribute(`data-route-step-${stepIndex + 1}`);
-
-      if (!route) {
-        validationStepper.next();
-        return;
-      }
-
-      // Show loading state
-      const nextBtn = document.querySelector('.btn-next');
-      const originalText = nextBtn.querySelector('span').textContent;
-      const originalIcon = nextBtn.querySelector('i');
-
-      nextBtn.disabled = true;
-      nextBtn.querySelector('span').textContent = translations[lang].saving;
-      if (originalIcon) originalIcon.style.display = 'none';
-
-      // Add spinner
-      const spinner = document.createElement('span');
-      spinner.className = 'spinner-border spinner-border-sm me-2';
-      spinner.setAttribute('role', 'status');
-      nextBtn.prepend(spinner);
-
-      $.ajax({
-        url: route,
-        type: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        headers: {
-          'X-CSRF-TOKEN': $('input[name="_token"]').val()
-        },
-        success: function (response) {
-          spinner.remove();
-          nextBtn.disabled = false;
-          nextBtn.querySelector('span').textContent = originalText;
-          if (originalIcon) originalIcon.style.display = '';
-
-          if (response.success) {
-            // Mark current step as completed
-            completedSteps.add(stepIndex);
-            // Enable next step button
-            if (stepIndex + 1 < 5) {
-              completedSteps.add(stepIndex + 1);
-            }
-
-            // ✅ Once step 2 (index 1) is saved, unlock steps 3, 4, and 5 immediately
-            if (stepIndex >= 1) {
-              completedSteps.add(2);
-              completedSteps.add(3);
-              completedSteps.add(4);
-            }
-
-            updateStepButtons();
-            validationStepper.next();
-          } else {
-            releaseFailureAlert({
-              title: lang === 'ar' ? 'خطأ!' : 'Error!',
-              message: response.message || (lang === 'ar' ? 'حدث خطأ' : 'An error occurred'),
+    fields['_portfolio_at_least_one'] = {
+      validators: {
+        callback: {
+          message: t.at_least_one_item,
+          callback: () => {
+            let valid = false;
+            $('.work-item-card:visible').each(function () {
+              const hasTitle = $(this).find('.title-input').val().trim() !== '';
+              const hasMedia =
+                $(this).find('.media-input')[0].files.length > 0 ||
+                $(this).find('.upload-area img, .upload-area video').length > 0;
+              if (hasTitle && hasMedia) { valid = true; return false; }
             });
+            return valid;
           }
-        },
-        error: function (xhr) {
-          spinner.remove();
-          nextBtn.disabled = false;
-          nextBtn.querySelector('span').textContent = originalText;
-          if (originalIcon) originalIcon.style.display = '';
+        }
+      }
+    };
 
-          let errorMessage = lang === 'ar' ? 'حدث خطأ أثناء الحفظ' : 'An error occurred while saving';
-          if (xhr.status === 422 && xhr.responseJSON?.errors) {
-            const errors = xhr.responseJSON.errors;
-            errorMessage = Object.values(errors).flat().join('<br>');
+    FormValidation4 = FormValidation.formValidation(stepEls[4], {
+      fields,
+      plugins: {
+        trigger: new FormValidation.plugins.Trigger(),
+        bootstrap5: new FormValidation.plugins.Bootstrap5({
+          eleValidClass: '',
+          rowSelector: (field) =>
+            field === '_portfolio_at_least_one' ? '#portfolio-error-container' : '.mb-4, .col-md-4, .col-md-8',
+        }),
+        autoFocus:    new FormValidation.plugins.AutoFocus(),
+        submitButton: new FormValidation.plugins.SubmitButton(),
+      }
+    }).on('core.form.valid', () => saveStepData(3, FormValidation4));
+  }
+
+  // Initialise portfolio validation and expose rebuild for external use
+  setTimeout(buildStep4Validation, 100);
+  window.rebuildPortfolioValidation = buildStep4Validation;
+
+  // ─── Stepper UI: Next/Prev button labels ─────────────────────────────────────
+
+  wizardEl.addEventListener('shown.bs-stepper', (event) => {
+    const $nextBtn  = $('.btn-next');
+    const $text     = $nextBtn.find('span');
+    const $icon     = $nextBtn.find('i');
+    const stepIndex = event.detail.indexStep;
+    const isFirst   = stepIndex === 0;
+    const isLast    = stepIndex === 4;
+    const newText   = isLast ? t.submit : t.save_and_next;
+
+    $('.btn-prev').css('visibility', isFirst ? 'hidden' : 'visible');
+
+    if ($text.text().trim() !== newText) $text.text(newText);
+
+    $nextBtn.toggleClass('btn-success', isLast);
+    $nextBtn.toggleClass('btn-primary', !isLast);
+    $icon.toggle(!isLast);
+
+    updateStepButtons();
+    syncStepUnlockState(); // re-evaluate on every step change
+  });
+
+  // ─── Next button click → validate current step ───────────────────────────────
+
+  wizardEl.querySelector('.btn-next').addEventListener('click', () => {
+    switch (validationStepper._currentIndex) {
+      case 0: FormValidation1.validate(); break;
+      case 1: FormValidation2.validate(); break;
+      case 2: FormValidation3.validate(); break;
+      case 3: FormValidation4 ? FormValidation4.validate() : validationStepper.next(); break;
+      case 4: submitFormData(); break;
+    }
+  });
+
+  // ─── Prev button click ───────────────────────────────────────────────────────
+
+  wizardEl.querySelector('.btn-prev').addEventListener('click', () => {
+    validationStepper.previous();
+    // Refresh snapshots so change-detection works correctly after going back
+    step1InitialData = getStep1Data();
+    step2InitialData = getStep2Data();
+    step3InitialData = getStep3Data();
+  });
+
+  // ─── AJAX save per step ──────────────────────────────────────────────────────
+
+  function saveStepData(stepIndex, formValidationInstance) {
+    const route = wizardForm.getAttribute(`data-route-step-${stepIndex + 1}`);
+    if (!route) { validationStepper.next(); return; }
+
+    const formData  = new FormData(wizardForm);
+    const nextBtn   = document.querySelector('.btn-next');
+    const $span     = $(nextBtn).find('span');
+    const $icon     = $(nextBtn).find('i');
+    const origText  = $span.text();
+
+    // Loading state
+    nextBtn.disabled = true;
+    $span.text(t.saving);
+    $icon.hide();
+
+    const spinner = document.createElement('span');
+    spinner.className = 'spinner-border spinner-border-sm me-2';
+    spinner.setAttribute('role', 'status');
+    nextBtn.prepend(spinner);
+
+    $.ajax({
+      url:         route,
+      type:        'POST',
+      data:        formData,
+      processData: false,
+      contentType: false,
+      headers:     { 'X-CSRF-TOKEN': $('input[name="_token"]').val() },
+
+      success (response) {
+        spinner.remove();
+        nextBtn.disabled = false;
+        $span.text(origText);
+        $icon.show();
+
+        if (response.success) {
+          completedSteps.add(stepIndex);
+          if (stepIndex + 1 < 5) completedSteps.add(stepIndex + 1);
+
+          // Saving step 2+ immediately unlocks 3, 4, 5
+          if (stepIndex >= 1) {
+            completedSteps.add(2); completedSteps.add(3); completedSteps.add(4);
           }
 
+          updateStepButtons();
+          validationStepper.next();
+        } else {
           releaseFailureAlert({
-            title: lang === 'ar' ? 'خطأ!' : 'Error!',
-            message: errorMessage,
+            title:   lang === 'ar' ? 'خطأ!' : 'Error!',
+            message: response.message || (lang === 'ar' ? 'حدث خطأ' : 'An error occurred'),
           });
         }
-      });
-    }
+      },
 
-    // Final step — Clients are managed via their own AJAX CRUD,
-    // so Submit just shows success and redirects.
-    function submitFormData() {
-      releaseSuccessAlert({
-        title: lang === 'ar' ? 'تم!' : 'Done!',
-        message: lang === 'ar' ? 'تم حفظ الملف الشخصي بنجاح' : 'Profile saved successfully',
-      });
+      error (xhr) {
+        spinner.remove();
+        nextBtn.disabled = false;
+        $span.text(origText);
+        $icon.show();
 
-      // Redirect to the provider listing if admin edit, otherwise stay
-      const form = document.getElementById('service-provider-form-wizard');
-      const spId = form.querySelector('input[name="service_provider_id"]');
-      if (spId) {
-        setTimeout(() => {
-          window.location.href = '/dashboard/services_providers';
-        }, 1500);
+        let errorMessage = lang === 'ar' ? 'حدث خطأ أثناء الحفظ' : 'An error occurred while saving';
+        if (xhr.status === 422 && xhr.responseJSON?.errors) {
+          errorMessage = Object.values(xhr.responseJSON.errors).flat().join('<br>');
+        }
+
+        releaseFailureAlert({
+          title:   lang === 'ar' ? 'خطأ!' : 'Error!',
+          message: errorMessage,
+        });
       }
-    }
-
-    const wizardValidationPrevButton = wizardValidation.querySelector('.btn-prev');
-    wizardValidationPrevButton.addEventListener('click', event => {
-      validationStepper.previous();
-      step1InitialData = getStep1Data();
-      step2InitialData = getStep2Data();
-      step3InitialData = getStep3Data();
     });
   }
+
+  // ─── Final submit (Step 5) ───────────────────────────────────────────────────
+
+  function submitFormData() {
+    releaseSuccessAlert({
+      title:   lang === 'ar' ? 'تم!'                      : 'Done!',
+      message: lang === 'ar' ? 'تم حفظ الملف الشخصي بنجاح' : 'Profile saved successfully',
+    });
+
+    const spId = wizardForm.querySelector('input[name="service_provider_id"]');
+    if (spId) {
+      setTimeout(() => { window.location.href = '/dashboard/services_providers'; }, 1500);
+    }
+  }
+
+  // ─── DOMContentLoaded: snapshots + completed-step detection ──────────────────
+
+  document.addEventListener('DOMContentLoaded', () => {
+    step1InitialData = getStep1Data();
+    step2InitialData = getStep2Data();
+    step3InitialData = getStep3Data();
+
+    loadCompletedSteps();
+    updateStepButtons();
+    attachRealTimeListeners();
+  });
+
 })();
