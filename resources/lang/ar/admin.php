@@ -3395,7 +3395,7 @@ return [
 	'index_slot' => 'المواعيد',
 	'profile_view_company' => 'عرض البيانات الشخصية',
 	'service_image' => 'صورة الخدمة',
-	'add_service_description' => 'المعلومات الأساسية عن الخدمة',
+	'add_service_description' => 'المعلومات الأساسية',
 	'active_status' => 'حالة التفعيل',
 	'service_categorization_label' => 'الفئات والتعيين',
 	'service_categorization_description' => 'تعيين فئة الخدمة والوصول إلى المؤسسات',
