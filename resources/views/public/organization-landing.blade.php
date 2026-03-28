@@ -83,7 +83,7 @@
   <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
   <script src="/vuexy/assets/js/front-config.js"></script>
 </head>
-
+ 
 @php
  $sections = [
    ['id' => 'programs', 'label' => __('admin.Programs'), 'visible' => $landingPage->programs_enabled && isset($landingPrograms) && $landingPrograms->count() > 0],
@@ -294,13 +294,14 @@
                 @endforeach
               </div>
             @endif
-
+            
             <!-- CTA + Social -->
             <div class="d-flex justify-content-between align-items-center flex-wrap">
-              <a href="#programs" class="btn btn-xl btn-primary mb-8 mb-md-4">
-                {{ __('admin.explore_programs') }}
-              </a>
-
+              @if($landingPrograms->count() > 0)
+                <a href="#programs" class="btn btn-xl btn-primary mb-8 mb-md-4">
+                  {{ __('admin.explore_programs') }}
+                </a>
+              @endif
               @php
                 $socialLinks = [
                   'x' => $organization->twitter_handle,
