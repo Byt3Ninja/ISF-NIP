@@ -3586,4 +3586,6 @@ return [
 	'metric_number_validation' => 'Please enter a valid number (e.g., 100, 100.5, 100+, 1M, 75%)',
 	'wizard_organization' => 'Wizard Organization',
 	'District' => 'District',
+	'accepted_formats' => 'Accepted Formats',
+	'max_size' => 'Max Size',
 ];

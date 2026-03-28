@@ -289,6 +289,15 @@
       const validationRules = {
         step1: {
           fields: {
+            img_url: {
+              validators: {
+                file: {
+                  extension: 'png,jpg,jpeg',
+                  maxSize: 5 * 1024 * 1024,
+                  message: '{{ __("admin.accepted_formats") }}: PNG, JPG | {{ __("admin.max_size") }}: 5MB'
+                }
+              }
+            },
             name_en: {
               validators: {
                 notEmpty: { message: '{{ __("admin.organization_name_required") }}' },
@@ -361,9 +370,7 @@
               }
             },
             city_id: {
-              validators: {
-                notEmpty: { message: '{{ __("admin.Please select the city") }}' }
-              }
+              validators: {}
             },
             address: {
               validators: {
@@ -434,6 +441,14 @@
                 eleValidClass: '',
                 rowSelector: '.mb-4, .mb-6'
               }),
+              excluded: new FormValidation.plugins.Excluded({
+                excluded: function(field, element, elements) {
+                  if (field === 'img_url') return false;
+                  return element.getAttribute('type') === 'hidden'
+                    || element.style.display === 'none'
+                    || element.offsetWidth === 0 && element.offsetHeight === 0;
+                }
+              }),
               submitButton: new FormValidation.plugins.SubmitButton(),
               autoFocus: new FormValidation.plugins.AutoFocus()
             },
@@ -441,6 +456,12 @@
               instance.on('plugins.message.placed', function (e) {
                 if (e.element.parentElement.classList.contains('input-group')) {
                   e.element.parentElement.insertAdjacentElement('afterend', e.messageElement);
+                }
+                if (e.field === 'img_url') {
+                  const container = e.element.closest('.mb-6') || e.element.closest('.col-12');
+                  if (container) {
+                    container.appendChild(e.messageElement);
+                  }
                 }
               });
             }
