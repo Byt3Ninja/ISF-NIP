@@ -1,169 +1,157 @@
-<style>
-	.flatpickr-monthSelect-month.selected {
-		background-color: var(--bs-primary) !important;
-	}
-	.valuation-history-dropdown {
-		max-height: 300px;
-		overflow-y: auto;
-	}
-</style>
-
 <div class="card" dir="{{ $l == 'en' ? 'ltr' : 'rtl' }}">
 	{{-- MERGE financialProjection VALUES INTO $sections --}}
 	@php
-			$requestDate = request()->get('valuation_date');
-			$currentDate = $requestDate ?? (isset($valuation_date) ? $valuation_date : null);
-			
-			// Get historical valuation dates
-			$historicalDates = $historicalValuationDates ?? [];
-			
-			// -----------------------
-			// DEFINE SECTIONS FIRST
-			// -----------------------
-			$sections = [
-					[
-							'title' => 'startup.profit_and_loss',
-							'rows' => [
-									['label' => 'startup.revenues', 'name' => 'rev', 'required' => true],
-									['label' => 'startup.cogs', 'name' => 'cogs', 'required' => true],
-									['label' => 'startup.salaries', 'name' => 'sal', 'required' => true],
-									['label' => 'startup.other_op_expenses', 'name' => 'opex', 'required' => true],
-									['label' => 'startup.ebitda', 'name' => 'ebitda', 'calculated' => true],
-									['label' => 'startup.depreciation_and_amortization', 'name' => 'da', 'required' => false],
-									['label' => 'startup.ebit', 'name' => 'ebit', 'calculated' => true],
-									['label' => 'startup.interest', 'name' => 'int', 'required' => false],
-									['label' => 'startup.taxes', 'name' => 'tax', 'required' => false],
-									['label' => 'startup.net_profit', 'name' => 'np', 'calculated' => true],
-							],
-					],
-					[
-							'title' => 'startup.balance_sheet_and_working_capital',
-							'rows' => [
-									['label' => 'startup.receivables', 'name' => 'rec', 'required' => false],
-									['label' => 'startup.inventory', 'name' => 'inv', 'required' => false],
-									['label' => 'startup.payables', 'name' => 'pay', 'required' => false],
-									['label' => 'startup.working_capital', 'name' => 'wc', 'calculated' => true],
-									['label' => 'startup.change_in_wc', 'name' => 'dwc', 'calculated' => true, 'special' => 'delta'],
-							],
-					],
-					[
-							'title' => 'startup.cash_flow_items',
-							'rows' => [
-									['label' => 'startup.capital_expenditures', 'name' => 'capex', 'required' => false],
-									['label' => 'startup.debt_at_end_of_year', 'name' => 'debt', 'required' => false],
-									['label' => 'startup.debt_change', 'name' => 'ddebt', 'calculated' => true, 'special' => 'delta'],
-									['label' => 'startup.free_cash_flow', 'name' => 'fcf', 'calculated' => true, 'fw-bold' => true],
-							],
-					],
-			];
+		$requestDate = request()->get('valuation_date');
+		$currentDate = $requestDate ?? ($valuation_date ?? '');
+		$historicalDates = $historicalValuationDates ?? [];
 
-			// -----------------------
-			// MAP short names to DB columns
-			// -----------------------
-			$map = [
-					'rev' => 'revenues',
-					'cogs' => 'cogs',
-					'sal' => 'salaries',
-					'opex' => 'other_op_expenses',
-					'ebitda' => 'ebitda',
-					'da' => 'depreciation_amortization',
-					'ebit' => 'ebit',
-					'int' => 'interest',
-					'tax' => 'taxes',
-					'np' => 'net_profit',
+		$sections = [
+			[
+				'title' => 'startup.profit_and_loss',
+				'rows' => [
+					['label' => 'startup.revenues',                       'name' => 'rev',    'required' => true],
+					['label' => 'startup.cogs',                           'name' => 'cogs',   'required' => true],
+					['label' => 'startup.salaries',                       'name' => 'sal',    'required' => true],
+					['label' => 'startup.other_op_expenses',              'name' => 'opex',   'required' => true],
+					['label' => 'startup.ebitda',                         'name' => 'ebitda', 'calculated' => true],
+					['label' => 'startup.depreciation_and_amortization',  'name' => 'da',     'required' => false],
+					['label' => 'startup.ebit',                           'name' => 'ebit',   'calculated' => true],
+					['label' => 'startup.interest',                       'name' => 'int',    'required' => false],
+					['label' => 'startup.taxes',                          'name' => 'tax',    'required' => false],
+					['label' => 'startup.net_profit',                     'name' => 'np',     'calculated' => true],
+				],
+			],
+			[
+				'title' => 'startup.balance_sheet_and_working_capital',
+				'rows' => [
+					['label' => 'startup.receivables',   'name' => 'rec', 'required' => false],
+					['label' => 'startup.inventory',     'name' => 'inv', 'required' => false],
+					['label' => 'startup.payables',      'name' => 'pay', 'required' => false],
+					['label' => 'startup.working_capital','name' => 'wc', 'calculated' => true],
+					['label' => 'startup.change_in_wc',  'name' => 'dwc','calculated' => true, 'special' => 'delta'],
+				],
+			],
+			[
+				'title' => 'startup.cash_flow_items',
+				'rows' => [
+					['label' => 'startup.capital_expenditures',  'name' => 'capex', 'required' => false],
+					['label' => 'startup.debt_at_end_of_year',   'name' => 'debt',  'required' => false],
+					['label' => 'startup.debt_change',           'name' => 'ddebt', 'calculated' => true, 'special' => 'delta'],
+					['label' => 'startup.free_cash_flow',        'name' => 'fcf',   'calculated' => true, 'fw-bold' => true],
+				],
+			],
+		];
 
-					'rec' => 'receivables',
-					'inv' => 'inventory',
-					'pay' => 'payables',
-					'wc' => 'working_capital',
-					'dwc' => 'change_in_wc',
+		$map = [
+			'rev'   => 'revenues',
+			'cogs'  => 'cogs',
+			'sal'   => 'salaries',
+			'opex'  => 'other_op_expenses',
+			'ebitda'=> 'ebitda',
+			'da'    => 'depreciation_amortization',
+			'ebit'  => 'ebit',
+			'int'   => 'interest',
+			'tax'   => 'taxes',
+			'np'    => 'net_profit',
+			'rec'   => 'receivables',
+			'inv'   => 'inventory',
+			'pay'   => 'payables',
+			'wc'    => 'working_capital',
+			'dwc'   => 'change_in_wc',
+			'capex' => 'capital_expenditures',
+			'debt'  => 'debt_end_year',
+			'ddebt' => 'debt_change',
+			'fcf'   => 'free_cash_flow',
+		];
 
-					'capex' => 'capital_expenditures',
-					'debt' => 'debt_end_year',
-					'ddebt' => 'debt_change',
-					'fcf' => 'free_cash_flow',
-			];
+		if (isset($financialprojection) && $financialprojection instanceof \Illuminate\Support\Collection) {
+			$fpArray = $financialprojection->values()->all();
+		} elseif (isset($financialprojection) && is_array($financialprojection)) {
+			$fpArray = array_values($financialprojection);
+		} else {
+			$fpArray = [];
+		}
 
-			// -----------------------
-			// NORMALIZE incoming collection/array to a plain PHP array indexed 0..n-1
-			// so we can safely reference years by index (0..3)
-			// -----------------------
-			if (isset($financialprojection) && $financialprojection instanceof \Illuminate\Support\Collection) {
-					$fpArray = $financialprojection->values()->all();
-			} elseif (isset($financialprojection) && is_array($financialprojection)) {
-					$fpArray = array_values($financialprojection);
-			} else {
-					$fpArray = [];
-			}
+		foreach ($sections as $sIndex => $section) {
+			foreach ($section['rows'] as $rIndex => $row) {
+				$key    = $row['name'];
+				$values = [null, null, null, null];
 
-			// -----------------------
-			// MERGE VALUES INTO $sections -> each row gets 'values' => [year0, year1, year2, year3]
-			// -----------------------
-			foreach ($sections as $sIndex => $section) {
-					foreach ($section['rows'] as $rIndex => $row) {
-							$key = $row['name'];
-
-							// initialize empty values array for 4 years
-							$values = [null, null, null, null];
-
-							if (isset($map[$key])) {
-									for ($year = 0; $year < 4; $year++) {
-											$val = null;
-											if (isset($fpArray[$year]) && $fpArray[$year] !== null) {
-													// data_get works for Eloquent model / array / stdClass
-													$val = data_get($fpArray[$year], $map[$key]);
-											}
-											$values[$year] = $val;
-									}
-							}
-
-							$sections[$sIndex]['rows'][$rIndex]['values'] = $values;
+				if (isset($map[$key])) {
+					for ($year = 0; $year < 4; $year++) {
+						$val = null;
+						if (isset($fpArray[$year]) && $fpArray[$year] !== null) {
+							$val = data_get($fpArray[$year], $map[$key]);
+						}
+						$values[$year] = $val;
 					}
+				}
+
+				$sections[$sIndex]['rows'][$rIndex]['values'] = $values;
 			}
+		}
 	@endphp
-	{{-- END MERGE --}}
-	 <form  method="post" enctype="multipart/form-data" action="{{ route('company.profile_update_mine', isset($client) && $client->company ? $client->company->id : auth()->user()->id) }}">
-    {!! csrf_field() !!}
+
+	<form id="financialProjectionForm" method="post" enctype="multipart/form-data"
+		action="{{ route('company.profile_update_mine', isset($client) && $client->company ? $client->company->id : auth()->user()->id) }}">
+		{!! csrf_field() !!}
+
 		<div class="card-header border-bottom">
 			<h5 class="card-title mb-0">{{ $heading }}</h5>
 			<p class="mb-0 text-muted">{{ __('startup.enter_valuation_date_and_financial_data_to_generate_metrics') }}</p>
 		</div>
-		
+
 		<input name="CompanyN" type="hidden" value="15">
+
 		<div class="card-body">
 			<div class="row g-6">
+
+				{{-- Valuation Date --}}
 				<div class="col-lg-5">
 					<div class="mb-3 mb-md-0">
 						<label for="valuationDate" class="form-label">
 							{{ __('startup.valuation_date') }} <span class="text-danger">*</span>
 						</label>
 						<div class="input-group">
-							<input type="hidden" id="valuationDateHidden" name="valuation_date" value="{{ $currentDate ? $currentDate : date('Y-m') }}">
-							<input type="text" class="form-control rounded-start" id="valuationDate" value="{{ $currentDate ? $currentDate : date('Y-m') }}" name="valuation_date" required readonly>
-							
-							<button class="btn btn-outline-primary" type="button" id="openDatePicker" title="{{ __('startup.select_new_date') }}">
+							<input type="hidden"
+								id="valuationDateHidden"
+								name="valuation_date"
+								value="{{ $currentDate ?: date('Y-m') }}">
+
+							<input type="text"
+								class="form-control rounded-start"
+								id="valuationDate"
+								value="{{ $currentDate ?: date('Y-m') }}"
+								name="valuation_date_display"
+								required
+								readonly>
+
+							<button class="btn btn-outline-primary" type="button" id="openDatePicker"
+								title="{{ __('startup.select_new_date') }}">
 								<i class="ti ti-calendar-plus"></i>
 							</button>
-							
+
 							@if(count($historicalDates) > 0)
-								<button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="{{ __('startup.view_history') }}">
+								<button class="btn btn-outline-secondary dropdown-toggle" type="button"
+									data-bs-toggle="dropdown" aria-expanded="false"
+									title="{{ __('startup.view_history') }}">
 									<i class="ti ti-history"></i>
 								</button>
-								<ul class="dropdown-menu dropdown-menu-end valuation-history-dropdown">
+								<ul class="dropdown-menu dropdown-menu-end overflow-auto" style="max-height:300px">
 									<li class="dropdown-header">{{ __('startup.previous_valuation_dates') }}</li>
 									<li><hr class="dropdown-divider"></li>
-									@foreach($historicalDates as $histDate)
+									@foreach(collect($historicalDates)->unique() as $histDate)
 										<li>
-											<a class="dropdown-item valuation-history-item d-flex justify-content-between align-items-center" 
-												 href="#" 
-												 data-date="{{ $histDate }}">
-												<span>
-													<i class="ti ti-calendar me-2"></i>
-													{{ \Carbon\Carbon::parse($histDate)->format('F Y') }}
-												</span>
-												@if($histDate === $currentDate)
-													<span class="badge bg-primary ms-2">{{ __('startup.current') }}</span>
-												@endif
+											<a class="dropdown-item valuation-history-item d-flex justify-content-between align-items-center"
+												href="#"
+												data-date="{{ $histDate }}">
+													<span>
+															<i class="ti ti-calendar me-2"></i>
+															{{ \Carbon\Carbon::parse($histDate)->format('F Y') }}
+													</span>
+													@if($histDate === $currentDate)
+															<span class="badge bg-primary ms-2">{{ __('startup.current') }}</span>
+													@endif
 											</a>
 										</li>
 									@endforeach
@@ -175,22 +163,26 @@
 						</small>
 					</div>
 				</div>
+
+				{{-- Currency --}}
 				@php
-						$getCurrancy = !empty($getCurrancy)
-										? $getCurrancy
-										: (!empty(auth()->user()->company?->Currency)
-											? auth()->user()->company->Currency
-											: auth()->user()->currency);
+					$getCurrancy = !empty($getCurrancy)
+						? $getCurrancy
+						: (!empty(auth()->user()->company?->Currency)
+							? auth()->user()->company->Currency
+							: auth()->user()->currency);
 				@endphp
-							
 				<div class="col-lg-4">
 					<div class="mb-3 mb-md-0">
 						<label for="Currency" class="form-label">
 							{{ __('settings.Currency') }} <span class="text-danger">*</span>
 						</label>
-						<select class="form-control form-select" name="Currency" id="Currency" required @if($is_currency_disabled) disabled @endif>
+						<select class="form-control form-select" name="Currency" id="currency-select" required
+							@if($is_currency_disabled) disabled @endif
+							data-original-value="{{ $getCurrancy }}"
+							data-warn-confirmed="false"
+						>
 							<option value="" disabled>{{ __('settings.Currency') }}</option>
-							
 							@foreach ($Currencies as $Currency)
 								<option value="{{ $Currency->currency_code }}"
 									{{ $getCurrancy == $Currency->currency_code ? 'selected' : '' }}>
@@ -200,289 +192,492 @@
 						</select>
 					</div>
 				</div>
+
+				{{-- Save Button --}}
 				<div class="col-lg-3">
 					<div class="d-flex justify-content-end align-items-center h-100">
-						<button type="submit" class="btn btn-primary">
+						<button 
+							type="submit"
+							class="btn btn-primary d-flex align-items-center flex-shrink-0 text-nowrap"
+							id="fp-save-btn"
+							style="min-width: 150px;"
+						>
 							<i class="ti ti-device-floppy me-2"></i>
 							{{ __('admin.Save_Changes') }}
 						</button>
 					</div>
 				</div>
+
 			</div>
 		</div>
 
-    <div class="card-datatable table-responsive">
-      <table class="datatable-basic table mb-0" id="financialTable">
-        <thead class="bg-label-light">
-          <tr>
-            <th class="col-label">
-							{{ __('startup.line_item') }} {{ !empty($getCurrancy) ? ' ( ' . __('admin.' . $getCurrancy) . ' )' : '' }}
+		{{-- Financial Table --}}
+		<div class="card-datatable table-responsive">
+			<table class="datatable-basic table mb-0" id="financialTable">
+				<thead class="table-light">
+					<tr>
+						<th class="col-label">
+							{{ __('startup.line_item') }}
+							{{ !empty($getCurrancy) ? ' ( ' . __('admin.' . $getCurrancy) . ' )' : '' }}
 						</th>
-            <th class="" id="header-year-0">{{ __('startup.past_year') }}<br><small class="fw-normal text-secondary">-</small>
-            </th>
-            <th class="" id="header-year-1">
-              {{ __('startup.forecast_year_1') }}<br>
-              <small class="fw-normal text-secondary">-</small>
-            </th>
-            <th class="" id="header-year-2">{{ __('startup.year_2') }}<br><small class="fw-normal text-secondary">-</small></th>
-            <th class="" id="header-year-3">{{ __('startup.year_3') }}<br><small class="fw-normal text-secondary">-</small></th>
-          </tr>
-        </thead>       
-        <tbody>
-          @foreach ($sections as $section)
-            <tr class="fw-bold">
-              <td colspan="5">{{ __($section['title']) }}</td>
-            </tr>
+						<th id="header-year-0">
+							{{ __('startup.past_year') }}<br>
+							<small class="fw-normal text-secondary">-</small>
+						</th>
+						<th id="header-year-1">
+							{{ __('startup.forecast_year_1') }}<br>
+							<small class="fw-normal text-secondary">-</small>
+						</th>
+						<th id="header-year-2">
+							{{ __('startup.year_2') }}<br>
+							<small class="fw-normal text-secondary">-</small>
+						</th>
+						<th id="header-year-3">
+							{{ __('startup.year_3') }}<br>
+							<small class="fw-normal text-secondary">-</small>
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach ($sections as $section)
+						<tr class="fw-bold">
+							<td colspan="5">{{ __($section['title']) }}</td>
+						</tr>
 
-            @foreach ($section['rows'] as $row)
-              @if (isset($row['calculated']) && $row['calculated'])
-                <tr class="row-calculated bg-label-light">
-                  <td class="col-label">{{ __($row['label']) }}</td>
-                  @for ($i = 0; $i < 4; $i++)
-                    <td>
-                      <input 
-												type="text" 
-												class="form-control @if (isset($row['fw-bold'])) fw-bold @endif"
-                        id="{{ $row['name'] }}_{{ $i }}"  
+						@foreach ($section['rows'] as $row)
+							@if (isset($row['calculated']) && $row['calculated'])
+								<tr class="table-light">
+									<td class="col-label">{{ __($row['label']) }}</td>
+									@for ($i = 0; $i < 4; $i++)
+										<td>
+											<input
+												type="text"
+												class="form-control @if(isset($row['fw-bold'])) fw-bold @endif"
+												id="{{ $row['name'] }}_{{ $i }}"
 												name="{{ $row['name'] }}_{{ $i }}"
 												value="{{ $row['values'][$i] }}"
-                        @if (isset($row['special']) && $row['special'] == 'delta' && $i == 0) value="-" @endif readonly tabindex="-1"
+												@if(isset($row['special']) && $row['special'] == 'delta' && $i == 0) value="-" @endif
+												readonly
+												tabindex="-1"
 											/>
-                    </td>
-                  @endfor
-                </tr>
-              @else
-                <tr>
-                  <td class="col-label text-nowrap">{{ __($row['label']) }}
-                    @if ($row['required'])
-                      <span class="text-danger">*</span>
-                    @endif
-                  </td>
-                  @for ($i = 0; $i < 4; $i++)
-                    <td>
-                      <input 
-												type="number" 
+										</td>
+									@endfor
+								</tr>
+							@else
+								<tr>
+									<td class="col-label text-nowrap">
+										{{ __($row['label']) }}
+										@if ($row['required'])
+											<span class="text-danger">*</span>
+										@endif
+									</td>
+									@for ($i = 0; $i < 4; $i++)
+										<td>
+											<input
+												type="number"
 												class="form-control year-{{ $i }} input-trigger"
-                        name="{{ $row['name'] }}_{{ $i }}" @if ($row['required']) required @endif
-												value="{{ $row['values'][$i] ?? '' }}"	
+												name="{{ $row['name'] }}_{{ $i }}"
+												@if($row['required']) required @endif
+												value="{{ $row['values'][$i] ?? '' }}"
 											/>
-                    </td>
-                  @endfor
-                </tr>
-              @endif
-            @endforeach
-          @endforeach
-        </tbody>
-      </table>
-    </div>
-  </form>
+										</td>
+									@endfor
+								</tr>
+							@endif
+						@endforeach
+					@endforeach
+				</tbody>
+			</table>
+		</div>
+
+	</form>
 </div>
 
 @push('scripts')
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
 <script>
-// Financial Projection Form Logic
-document.addEventListener('DOMContentLoaded', function () {
+$(document).ready(function() {
+	// ═══════════════════════════════════════════════════════════════════════
+	// CONFIG
+	// ═══════════════════════════════════════════════════════════════════════
+	const CONFIG = {
+		COMPANY_ID: {{ isset($client) && $client->company ? $client->company->id : auth()->user()->company_id }},
+		IS_CURRENCY_DISABLED: "{{ $is_currency_disabled }}",
+		REALTIME_URL: "{{ route('company.financial_projection.realtime', isset($client) && $client->company ? $client->company->id : auth()->user()->company_id) }}",
+		AUTOSAVE_URL: "{{ route('company.financial_projection.save', isset($client) && $client->company ? $client->company->id : auth()->user()->company_id) }}",
+		CSRF_TOKEN: "{{ csrf_token() }}",
+		EDITABLE_FIELDS: ['rev','cogs','sal','opex','da','int','tax','rec','inv','pay','capex','debt']
+	};
 
-	let currentValuationDate = "{{ $currentDate ? $currentDate : '' }}";
-	const oldValuationDate = "{{ isset($valuation_date) ? $valuation_date : '' }}";
-	const historicalDates = @json($historicalDates ?? []);
+	console.log('CONFIG.IS_CURRENCY_DISABLED', CONFIG.IS_CURRENCY_DISABLED);
+
+	// ═══════════════════════════════════════════════════════════════════════
+	// STATE
+	// ═══════════════════════════════════════════════════════════════════════
+	let state = {
+		currentValuationDate: "{{ $currentDate ?: '' }}",
+		isSaving: false
+	};
+
+	// ═══════════════════════════════════════════════════════════════════════
+	// CACHED SELECTORS
+	// ═══════════════════════════════════════════════════════════════════════
+	const $dateVisible = $('#valuationDate');
+	const $dateHidden = $('#valuationDateHidden');
+	const $currency = $('#currency-select');
+	const $saveBtn = $('#fp-save-btn');
+	const $table = $('#financialTable');
+	const $form = $('#financialProjectionForm');
+
+	// ═══════════════════════════════════════════════════════════════════════
+	// UTILITY FUNCTIONS
+	// ═══════════════════════════════════════════════════════════════════════
+	const utils = {
+		getVal: (name) => {
+			const val = $(`input[name="${name}"]`).val();
+			return (val === '' || val === '-') ? 0 : parseFloat(val.replace(/,/g, '')) || 0;
+		},
+
+		formatNumber: (num) => {
+			if (num == null) return '-';
+			return Number(num).toLocaleString('en-US', {
+				minimumFractionDigits: 0,
+				maximumFractionDigits: 2
+			});
+		},
+
+		setCalc: (id, value) => {
+			const formatted = (value == null) ? '-' : utils.formatNumber(value);
+			$(`#${id}`).val(formatted);
+		},
+
+		setTableLoading: (loading) => {
+			$table.toggleClass('opacity-50 pe-none', loading);
+		},
+
+		formatDateRange: (start, end) => {
+			return `${start.format('MM/YYYY')} – ${end.format('MM/YYYY')}`;
+		}
+	};
+
+	// ═══════════════════════════════════════════════════════════════════════
+	// UPDATE HEADER DATES
+	// ═══════════════════════════════════════════════════════════════════════
+	function updateHeaders(valuationDateStr) {
+		if (!valuationDateStr || typeof moment === 'undefined') return;
+
+		const v = moment(valuationDateStr);
+		const periods = [
+			{ id: 0, start: moment(v).subtract(1, 'year'), end: moment(v).subtract(1, 'day') },
+			{ id: 1, start: moment(v), end: moment(v).add(1, 'year').subtract(1, 'day') },
+			{ id: 2, start: moment(v).add(1, 'year'), end: moment(v).add(2, 'years').subtract(1, 'day') },
+			{ id: 3, start: moment(v).add(2, 'years'), end: moment(v).add(3, 'years').subtract(1, 'day') }
+		];
+
+		periods.forEach(p => {
+			$(`#header-year-${p.id} small`).text(utils.formatDateRange(p.start, p.end));
+		});
+	}
+
+	// ═══════════════════════════════════════════════════════════════════════
+	// CALCULATE ALL FINANCIAL METRICS
+	// ═══════════════════════════════════════════════════════════════════════
+	function calculateAll() {
+		let prevWC = 0, prevDebt = 0;
+
+		for (let i = 0; i < 4; i++) {
+			const data = {
+				rev: utils.getVal(`rev_${i}`),
+				cogs: utils.getVal(`cogs_${i}`),
+				sal: utils.getVal(`sal_${i}`),
+				opex: utils.getVal(`opex_${i}`),
+				da: utils.getVal(`da_${i}`),
+				int: utils.getVal(`int_${i}`),
+				tax: utils.getVal(`tax_${i}`),
+				rec: utils.getVal(`rec_${i}`),
+				inv: utils.getVal(`inv_${i}`),
+				pay: utils.getVal(`pay_${i}`),
+				capex: utils.getVal(`capex_${i}`),
+				debt: utils.getVal(`debt_${i}`)
+			};
+
+			const calc = {
+				ebitda: data.rev - data.cogs - data.sal - data.opex,
+				ebit: 0,
+				netProfit: 0,
+				wc: data.rec + data.inv - data.pay,
+				deltaWC: (i === 0) ? null : 0,
+				debtChg: (i === 0) ? null : 0,
+				fcf: 0
+			};
+
+			calc.ebit = calc.ebitda - data.da;
+			calc.netProfit = calc.ebit - data.int - data.tax;
+			calc.deltaWC = (i === 0) ? null : calc.wc - prevWC;
+			calc.debtChg = (i === 0) ? null : data.debt - prevDebt;
+			calc.fcf = calc.netProfit + data.da - data.capex - (calc.deltaWC ?? 0);
+
+			utils.setCalc(`ebitda_${i}`, calc.ebitda);
+			utils.setCalc(`ebit_${i}`, calc.ebit);
+			utils.setCalc(`np_${i}`, calc.netProfit);
+			utils.setCalc(`wc_${i}`, calc.wc);
+			utils.setCalc(`dwc_${i}`, calc.deltaWC);
+			utils.setCalc(`ddebt_${i}`, calc.debtChg);
+			utils.setCalc(`fcf_${i}`, calc.fcf);
+
+			prevWC = calc.wc;
+			prevDebt = data.debt;
+		}
+	}
+
+	// ═══════════════════════════════════════════════════════════════════════
+	// LOAD PROJECTION FROM SERVER
+	// ═══════════════════════════════════════════════════════════════════════
+	function loadProjection(valuationDate) {
+		if (!valuationDate) return;
+
+		utils.setTableLoading(true);
+
+		$.ajax({
+			url: `${CONFIG.REALTIME_URL}?valuation_date=${encodeURIComponent(valuationDate)}`,
+			method: 'GET',
+			headers: { 'X-Requested-With': 'XMLHttpRequest' },
+			dataType: 'json'
+		})
+		.done(function(data) {
+			console.log('data', data);
+			if (!data.success) {
+				handleError(data.message ?? '{{ __("admin.error_loading_financial_data") }}');
+				return;
+			}
+
+			// Update state
+			state.currentValuationDate = data.valuation_date;
+			$dateHidden.val(data.valuation_date);
+			$dateVisible.val(data.valuation_date);
+
+			// Update currency if locked
+			if (data.is_currency_locked && data.currency) {
+				$currency.val(data.currency);
+			}
+
+			// Populate fields
+			for (let i = 0; i < 4; i++) {
+				const yearData = data.years[i]?.data ?? {};
+				CONFIG.EDITABLE_FIELDS.forEach(field => {
+					const val = yearData[field];
+					$(`input[name="${field}_${i}"]`).val((val != null) ? val : '');
+				});
+			}
+
+			calculateAll();
+			updateHeaders(data.valuation_date);
+			updateHistoryBadges(data.valuation_date);
+		})
+		.fail(function(err, xhr) {
+			const errMsg = err.responseJSON?.message;
+			console.log('errMsg', errMsg);
+			handleError(err.responseJSON?.message || '{{ __("admin.error_loading_financial_data") }}');
+			console.error('[FinancialProjection] Load error:', err);
+		})
+		.always(function() {
+			utils.setTableLoading(false);
+		});
+	}
+
+	// ═══════════════════════════════════════════════════════════════════════
+	// UPDATE HISTORY BADGES
+	// ═══════════════════════════════════════════════════════════════════════
+	function updateHistoryBadges(currentDate) {
+		$('.valuation-history-item .badge.bg-primary').remove();
+		$(`.valuation-history-item[data-date="${currentDate}"] span`).append(
+			`<span class="badge bg-primary ms-2">{{ __("startup.current") }}</span>`
+		);
+	}
+
+	// ═══════════════════════════════════════════════════════════════════════
+	// SAVE PROJECTION
+	// ═══════════════════════════════════════════════════════════════════════
+	function save() {
+		if (state.isSaving) return;
+
+		// Check currency change warning
+		// Warning should show if user changed currency AND current value differs from original getCurrency
+		const originalCurrency = $currency.data('original-value');
+		const currentCurrency = $currency.val();
+		const currencyChanged = currentCurrency !== originalCurrency;
+		
+		if (currencyChanged && $currency.data('warn-confirmed') !== 'true' && !CONFIG.IS_CURRENCY_DISABLED) {
+			releaseWarningAlert({
+				title: '{{ __('admin.Warning') }}!',
+				message: '{{ __('admin.change_currency_warning') }}',
+				onConfirm: () => {
+					$currency.data('warn-confirmed', 'true');
+					save();
+				},
+				onCancel: () => {
+					$currency.val(originalCurrency);
+				}
+			});
+			return;
+		}
+
+		const valuationDate = $dateHidden.val() || state.currentValuationDate;
+		if (!valuationDate) return;
+
+		state.isSaving = true;
+		$saveBtn.prop('disabled', true).html('{{ __("admin.saving") }}…');
+
+		const formData = new FormData();
+		formData.append('valuation_date', valuationDate);
+		formData.append('Currency', $currency.val() || '');
+		formData.append('_token', CONFIG.CSRF_TOKEN);
+
+		// Add all editable fields
+		CONFIG.EDITABLE_FIELDS.forEach(field => {
+			for (let i = 0; i < 4; i++) {
+				const val = $(`input[name="${field}_${i}"]`).val().replace(/,/g, '');
+				formData.append(`${field}_${i}`, val);
+			}
+		});
+
+		$.ajax({
+			url: CONFIG.AUTOSAVE_URL,
+			method: 'POST',
+			data: formData,
+			processData: false,
+			contentType: false,
+			headers: { 'X-CSRF-TOKEN': CONFIG.CSRF_TOKEN }
+		})
+		.done(function(data) {
+			if (!data.success) {
+				releaseFailureAlert({
+					title: '{{ __("admin.Error") }}',
+					message: data.message ?? '{{ __("admin.unepxected_error") }}'
+				});
+				return;
+			}
+
+			// Update recalculated values
+			$.each(data.recalculated ?? {}, function(key, val) {
+				$(`#${key}`).val((val == null) ? '-' : utils.formatNumber(val));
+			});
+
+			releaseSuccessAlert({
+				title: '{{ __("admin.Success") }}',
+				message: data.message ?? '{{ __("admin.stored") }}'
+			});
+
+			// Update original value and lock currency if changed
+			const wasCurrencyChanged = $currency.val() !== $currency.data('original-value');
+			$currency.data('original-value', $currency.val());
+			$currency.data('warn-confirmed', 'false');
+			if (wasCurrencyChanged) {
+				$currency.prop('disabled', true);
+			}
+		})
+		.fail(function(err) {
+			releaseFailureAlert({
+				title: '{{ __("admin.Error") }}',
+				message: '{{ __("admin.save_failed") }}'
+			});
+			console.error('[FinancialProjection] Save error:', err);
+		})
+		.always(function() {
+			state.isSaving = false;
+			$saveBtn.prop('disabled', false).html('<i class="ti ti-device-floppy me-2"></i> {{ __("admin.Save_Changes") }}');
+		});
+	}
+
+	// ═══════════════════════════════════════════════════════════════════════
+	// ERROR HANDLER
+	// ═══════════════════════════════════════════════════════════════════════
+	function handleError(message) {
+		console.error('[FinancialProjection]', message);
+		releaseFailureAlert({
+			title: '{{ __("admin.Error") }}',
+			message: message || '{{ __("admin.unexpected_error") }}'
+		});
+	}
+
+	// ═══════════════════════════════════════════════════════════════════════
+	// EVENT HANDLERS
+	// ═══════════════════════════════════════════════════════════════════════
 	
-	console.log('currentValuationDate', currentValuationDate);
-	console.log('oldValuationDate', oldValuationDate);
-	console.log('historicalDates', historicalDates);
+	// Currency change - reset warning flag if user reverts to original value
+	$currency.on('change', function() {
+		if ($(this).prop('disabled')) return;
+		
+		// If user changes back to original getCurrency value, reset the warning flag
+		if ($(this).val() === $(this).data('original-value')) {
+			$(this).data('warn-confirmed', 'false');
+		}
+	});
 
-	const dateInput = document.getElementById('valuationDate');
-	const valuationDateHidden = document.getElementById('valuationDateHidden');
-	const formInputs = document.querySelectorAll('.input-trigger');
-	const form = document.querySelector('form');
+	// Input triggers recalculation
+	$('.input-trigger').on('input', function() {
+		const val = $(this).val();
+		if (val.length > 15) $(this).val(val.slice(0, 15));
+		calculateAll();
+	});
 
-	// Initialize Flatpickr for Valuation Date
+	// History item click
+	$('.valuation-history-item').on('click', function(e) {
+		e.preventDefault();
+		e.stopImmediatePropagation();
+		const selectedDate = $(this).data('date');
+		if (selectedDate) loadProjection(selectedDate);
+	});
+
+	// Form submit
+	$form.on('submit', function(e) {
+		e.preventDefault();
+
+		if (!$dateHidden.val()) {
+			releaseWarningAlert({
+				title: '{{ __("startup.valuation_date_required") }}',
+				message: '{{ __("startup.please_select_valuation_date_before_saving") }}'
+			});
+			$dateVisible.addClass('is-invalid');
+			return;
+		}
+
+		save();
+	});
+
+	// ═══════════════════════════════════════════════════════════════════════
+	// FLATPICKR INITIALIZATION
+	// ═══════════════════════════════════════════════════════════════════════
 	const flatpickrInstance = flatpickr('#valuationDate', {
-		defaultDate: currentValuationDate ? new Date(currentValuationDate) : oldValuationDate ? new Date(oldValuationDate) : null,
+		defaultDate: state.currentValuationDate ? new Date(state.currentValuationDate + '-01') : null,
 		plugins: [
 			new monthSelectPlugin({
 				shorthand: true,
 				dateFormat: "Y-m",
-				altFormat: "F Y",
+				altFormat: "F Y"
 			})
 		],
-		onChange: function (selectedDates) {
-			if (selectedDates.length) {
-				const valDate = moment(selectedDates[0]);
-				const valDateStr = valDate.format("YYYY-MM");
-
-				currentValuationDate = valDateStr;
-				valuationDateHidden.value = valDateStr;
-				updateHeaders();
-
-				$(this.input).removeClass('is-invalid');
-
-				window.location.href='?valuation_date='+valDateStr;
-			}
+		onChange: function(selectedDates) {
+			if (!selectedDates.length) return;
+			const valDateStr = moment(selectedDates[0]).format("YYYY-MM");
+			$dateVisible.removeClass('is-invalid');
+			loadProjection(valDateStr);
 		}
 	});
 
-	// Handle "Open Date Picker" button click
-	document.getElementById('openDatePicker').addEventListener('click', function(e) {
+	$('#openDatePicker').on('click', function(e) {
 		e.preventDefault();
 		flatpickrInstance.open();
 	});
 
-	// Handle historical date selection
-	document.querySelectorAll('.valuation-history-item').forEach(item => {
-		item.addEventListener('click', function(e) {
-			e.preventDefault();
-			const selectedDate = this.getAttribute('data-date');
-			
-			// Redirect with the selected valuation date
-			const url = new URL(window.location.href);
-			url.searchParams.set('valuation_date', selectedDate);
-			window.location.href = url.href;
-		});
-	});
-
-	updateHeaders();
-
-	// Input Change Listener (for all financial inputs)
-	formInputs.forEach(input => {
-		input.addEventListener('input', function () {
-			if (this.value.length > 15) {
-				this.value = this.value.slice(0, 15);
-			}
-			calculateAll();
-		});
-	});
-
-	// Function to update header labels based on Valuation Date
-	function updateHeaders() {
-		const valDateStr = dateInput.value;
-		if (!valDateStr) return;
-
-		const valDate = moment(valDateStr);
-
-		const pastStart = moment(valDate).subtract(1, 'year');
-		const pastEnd = moment(valDate).subtract(1, 'day');
-
-		const fy1Start = moment(valDate);
-		const fy1End = moment(valDate).add(1, 'year').subtract(1, 'day');
-
-		const y2Start = moment(fy1End).add(1, 'day');
-		const y2End = moment(y2Start).add(1, 'year').subtract(1, 'day');
-
-		const y3Start = moment(y2End).add(1, 'day');
-		const y3End = moment(y3Start).add(1, 'year').subtract(1, 'day');
-
-		const fmt = (s, e) => `${s.format('MM/YYYY')} – ${e.format('MM/YYYY')}`;
-
-		document.querySelector('#header-year-0 small').textContent = fmt(pastStart, pastEnd);
-		document.querySelector('#header-year-1 small').textContent = fmt(fy1Start, fy1End);
-		document.querySelector('#header-year-2 small').textContent = fmt(y2Start, y2End);
-		document.querySelector('#header-year-3 small').textContent = fmt(y3Start, y3End);
+	// ═══════════════════════════════════════════════════════════════════════
+	// INITIALIZATION
+	// ═══════════════════════════════════════════════════════════════════════
+	calculateAll();
+	updateHeaders(state.currentValuationDate || moment().format('YYYY-MM'));
+	
+	if (state.currentValuationDate) {
+		loadProjection(state.currentValuationDate);
 	}
-
-	// Helper: Get value from input name, return 0 if empty
-	function getVal(name) {
-		const el = document.querySelector(`input[name="${name}"]`);
-		return el && el.value ? parseFloat(el.value) : 0;
-	}
-
-	// Helper: Format number with commas
-	function fmtNum(num) {
-		return num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
-	}
-
-	// Main Calculation Logic
-	function calculateAll() {
-		let prevWC = 0;
-		let prevDebt = 0;
-
-		for (let i = 0; i < 4; i++) {
-			const rev = getVal(`rev_${i}`);
-			const cogs = getVal(`cogs_${i}`);
-			const sal = getVal(`sal_${i}`);
-			const opex = getVal(`opex_${i}`);
-
-			const da = getVal(`da_${i}`);
-			const int = getVal(`int_${i}`);
-			const tax = getVal(`tax_${i}`);
-
-			const rec = getVal(`rec_${i}`);
-			const inv = getVal(`inv_${i}`);
-			const pay = getVal(`pay_${i}`);
-
-			const capex = getVal(`capex_${i}`);
-			const debt = getVal(`debt_${i}`);
-
-			const ebitda = rev - cogs - sal - opex;
-			document.getElementById(`ebitda_${i}`).value = fmtNum(ebitda);
-
-			const ebit = ebitda - da;
-			document.getElementById(`ebit_${i}`).value = fmtNum(ebit);
-
-			const netProfit = ebit - int - tax;
-			document.getElementById(`np_${i}`).value = fmtNum(netProfit);
-
-			const wc = rec + inv - pay;
-			document.getElementById(`wc_${i}`).value = fmtNum(wc);
-
-			let deltaWC = 0;
-			let debtChange = 0;
-
-			if (i === 0) {
-				deltaWC = 0;
-				debtChange = 0;
-				document.getElementById(`dwc_${i}`).value = "-";
-				document.getElementById(`ddebt_${i}`).value = "-";
-			} else {
-				deltaWC = wc - prevWC;
-				debtChange = debt - prevDebt;
-				document.getElementById(`dwc_${i}`).value = fmtNum(deltaWC);
-				document.getElementById(`ddebt_${i}`).value = fmtNum(debtChange);
-			}
-
-			const fcf = netProfit + da - capex - deltaWC;
-			document.getElementById(`fcf_${i}`).value = fmtNum(fcf);
-
-			prevWC = wc;
-			prevDebt = debt;
-		}
-	}
-
-	form.addEventListener('submit', function (e) {
-		if (!currentValuationDate) {
-			e.preventDefault();
-			
-			if (typeof releaseWarningAlert === 'function') {
-				releaseWarningAlert({
-					title: '{{ __("startup.valuation_date_required") }}',
-					message: '{{ __("startup.please_select_valuation_date_before_saving") }}',
-				});
-			}
-
-			$('#valuationDate').addClass('is-invalid');
-			return false;
-		}
-
-		if (currentValuationDate !== oldValuationDate) {
-			e.preventDefault();
-			
-			if (typeof releaseWarningAlert === 'function') {
-				releaseWarningAlert({
-					title: '{{ __("startup.valuation_date_changed") }}',
-					message: '{{ __("startup.valuation_date_changed_message") }}',
-					onConfirm: () => {
-						const url = new URL(window.location.href);
-						url.searchParams.set('valuation_date', currentValuationDate);
-						window.location.href = url.href;
-					}
-				});
-			}
-			
-			return false;
-		}
-	});
 });
 </script>
 @endpush
