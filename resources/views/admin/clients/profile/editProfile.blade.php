@@ -44,6 +44,7 @@
 
 @php
 $phone_codes = App\Country::all();
+$save_redirect_url = $_user->hasRole('serviceProvider') ? '/dashboard/show/myProfile' : '/dashboard/services_providers';
 
 $tabs = [
   ['account', 'accountSection', 'users'],
@@ -59,7 +60,7 @@ $serviceProviderSteps = [
   ['id' => 'clients', 'title' => __('admin.clients'), 'subtitle' => __('admin.provider_clients_subtitle')]
 ];
 
-if (auth()->user()->hasRole('Mentor')) {
+if ($_user->hasRole('Mentor')) {
   array_splice($tabs, 2, 0, [['info_profile', 'InfoProfileSection', 'users']]);
 }
 
@@ -257,7 +258,16 @@ $tabsList = collect($tabs)->map(function ($tab) {
 @section('pagescripts')
 @if($_user->hasRole('serviceProvider'))
 <script src="/vuexy/assets/js/service-provider-wizard.js"></script>
-
+<script>
+  const lang = $('html').attr('lang') || 'en';
+  function submitFormData() {
+    releaseSuccessAlert({
+      title: lang === 'ar' ? 'تم!' : 'Done!',
+      message: lang === 'ar' ? 'تم حفظ الملف الشخصي بنجاح' : 'Profile saved successfully',
+    });
+    setTimeout(() => { window.location.href = '{{ $save_redirect_url }}'; }, 1500);
+  }
+</script>
 @else
 <script>
   const lang = '{{ $l }}';
