@@ -184,7 +184,6 @@
 @push('scripts')
 <script>
 $(function () {
-
   const $container = $('#itemsContainer');
   const $template  = $('#workItemTemplate');
   const MAX_ITEMS  = 20;
