@@ -296,7 +296,7 @@
             @endif
 
             <!-- CTA + Social -->
-            <div class="d-flex align-items-center flex-wrap">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
               <a href="#programs" class="btn btn-xl btn-primary mb-8 mb-md-4">
                 {{ __('admin.explore_programs') }}
               </a>
@@ -311,9 +311,8 @@
                   'youtube' => $organization->youtube_channel_url
                 ]
               @endphp
-
               @if(array_filter($socialLinks))
-                <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 m{{ $isRtl ? 'e' : 's' }}-lg-auto">
+                <div class="d-flex flex-column flex-md-row align-items-md-center gap-2">
                   <span class="text-dark me-2 d-block">{{ __('admin.follow_us') }}</span>
                   <div class="d-flex align-items-center gap-2">
                     @foreach ($socialLinks as $icon => $link)
