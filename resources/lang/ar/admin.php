@@ -2997,6 +2997,7 @@ return [
 
 	// Achievements Section
 	'Achievements & Impact' => 'الإنجازات والأثر',
+	'Metric' => 'المؤشر',
 	'Impact Metrics' => 'مؤشرات الأثر',
 	'Add Metric' => 'إضافة مؤشر',
 	'Metric Number' => 'رقم المؤشر',
@@ -3013,6 +3014,7 @@ return [
 	'Add Article' => 'إضافة مقال',
 	'Publication Name' => 'اسم المنشور',
 	'Publication Date' => 'تاريخ المنشور',
+	'Article' => 'المقال',
 	'Article Date' => 'تاريخ المقال',
 	'Article Title' => 'عنوان المقال',
 	'Article Summary' => 'ملخص المقال',
@@ -3028,6 +3030,7 @@ return [
 	'Keep current image' => 'الاحتفاظ بالصورة الحالية',
 
 	// Partners Section
+	'Partner' => 'الشريك',
 	'Partners' => 'الشركاء',
 	'Partner Organizations' => 'المؤسسات الشريكة',
 	'Add Partner' => 'إضافة شريك',
@@ -3630,4 +3633,8 @@ return [
 	'edit_landing_programs_cards_desc' => 'اسحب لإعادة الترتيب، وقم بتبديل الرؤية. يتم الحفظ باستخدام زر الحفظ الموجود في علامة التبويب.',
 	'Step' => 'خطوة',
 	'Select a section to preview' => 'حدد قسم للمعاينة',
+	'DNo' => 'لا، إلغاء',
+	'maximum_limit_reached' => 'تم الوصول إلى الحد الأقصى',
+	'allowed' => 'مسموح',
+	'items' => 'عناصر',
 ];

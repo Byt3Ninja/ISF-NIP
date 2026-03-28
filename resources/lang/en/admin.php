@@ -2941,6 +2941,7 @@ return [
 
 	// Achievements Section
 	'Achievements & Impact' => 'Achievements & Impact',
+	'Metric' => 'Metric',
 	'Impact Metrics' => 'Impact Metrics',
 	'Add Metric' => 'Add Metric',
 	'Metric Number' => 'Metric Number',
@@ -2957,6 +2958,7 @@ return [
 	'Add Article' => 'Add Article',
 	'Publication Name' => 'Publication Name',
 	'Publication Date' => 'Publication Date',
+	'Article' => 'Article',
 	'Article Date' => 'Article Date',
 	'Article Title' => 'Article Title',
 	'Article Summary' => 'Article Summary',
@@ -2972,6 +2974,7 @@ return [
 	'Keep current image' => 'Keep current image',
 
 	// Partners Section
+	'Partner' => 'Partner',
 	'Partners' => 'Partners',
 	'Partner Organizations' => 'Partner Organizations',
 	'Add Partner' => 'Add Partner',
@@ -3573,4 +3576,8 @@ return [
 	'edit_landing_programs_cards_desc' => 'Drag to reorder, toggle visibility. Saves with tab Save button.',
 	'Step' => 'Step',
 	'Select a section to preview' => 'Select a section to preview',
+	'DNo' => 'No, Cancel',
+	'maximum_limit_reached' => 'Maximum limit reached',
+	'allowed' => 'allowed',
+	'items' => 'items',
 ];
