@@ -99,7 +99,7 @@
                   </div>
                 @endif
 
-                <div id="errorAlert" style="display: none;">
+                <div class="mt-6" id="errorAlert" style="display: none;">
                   <div class="alert alert-danger alert-dismissible">
                     <i class="ti ti-alert-triangle me-2"></i>
                     <span id="errorAlertMessage"></span>
