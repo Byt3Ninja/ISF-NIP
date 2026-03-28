@@ -52,6 +52,7 @@ $serviceProviderSteps = [
 ];
 
 $serviceProviderId = $provider->id;
+$save_redirect_url = $_user->hasRole('serviceProvider') ? '/dashboard/show/myProfile' : '/dashboard/services_providers';
 @endphp
 
 @section('content')
@@ -87,4 +88,14 @@ $serviceProviderId = $provider->id;
 
 @section('pagescripts')
 <script src="/vuexy/assets/js/service-provider-wizard.js"></script>
+<script>
+  const lang = $('html').attr('lang') || 'en';
+  function submitFormData() {
+    releaseSuccessAlert({
+      title: lang === 'ar' ? 'تم!' : 'Done!',
+      message: lang === 'ar' ? 'تم حفظ الملف الشخصي بنجاح' : 'Profile saved successfully',
+    });
+    setTimeout(() => { window.location.href = '{{ $save_redirect_url }}'; }, 1500);
+  }
+</script>
 @stop
