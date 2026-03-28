@@ -989,9 +989,11 @@
             <h6 class="footer-title mb-6">{{ __('admin.quick_links') }}</h6>
             <ul class="navbar-nav list-unstyled">
               @foreach($sections as $section)
-                <li class="nav-item mb-4">
-                  <a href="#{{ $section['id'] }}" class="footer-link">{{ $section['label'] }}</a>
-                </li>
+                @if(!str_contains($section['id'], 'custom'))
+                  <li class="nav-item mb-4">
+                    <a href="#{{ $section['id'] }}" class="footer-link">{{ $section['label'] }}</a>
+                  </li>
+                @endif
               @endforeach
             </ul>
           </div>
