@@ -47,10 +47,10 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/page-auth.css" />
 
   <style>
-    div[data-validator] {
+    /* div[data-validator] {
       width: 100% !important;
       text-align: {{ $l == 'ar' ? 'end' : 'start' }} !important;
-    }
+    } */
 
     .iti__country-list {
       position: absolute;
@@ -189,7 +189,7 @@
                   <div class="row gx-3 mb-4" dir="{{ $l == 'en' ? 'ltr': 'rtl' }}">
                     <!-- Switch Role -->
                     @foreach($accountRoles as $key => $role)
-                      <div class="col-md-6 mb-6">
+                      <div class="col-md-6">
                         <label for="{{ $role['label'] }}Role" style="display: grid; place-items: center;" class="form-check custom-option custom-option-icon cursor-pointer ps-md-3">
                           <div class="d-flex align-items-center">
                             <input 
@@ -211,7 +211,27 @@
                     @endforeach
                   </div>
                   <!--/ Switch Role -->
-
+                  <a href="/provider-registration">
+                    <div class="card bg-light-subtle shadow-none border mb-6">
+                      <div class="card-body py-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <div class="d-flex align-items-center gap-2">
+                            <div class="avatar avatar-md bg-card rounded border d-flex align-items-center justify-content-center">
+                              <i class="ti ti-briefcase text-dark"></i>
+                            </div>
+                            <div class="d-flex flex-column">
+                              <h6 class="mb-1">{{ __('admin.serviceProvider') }}</h6>
+                              <small>{{ __('admin.serviceProvider_desc') }}</small>
+                            </div>
+                          </div>
+                       
+                          <button type="button" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill">
+                            <i class="ti ti-arrow-narrow-{{ $l == 'en' ? 'right' : 'left' }} fs-3"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </a>
 
                   <div class="row">
                     <div>
@@ -242,164 +262,166 @@
                       @endif
 
                       <div id="profilePhotoWrapper" style="display: block;">
-                      <div class="col-12 mb-6">
-                        <label class="form-label fs-6 fw-bold d-block text-{{ $l == 'ar' ? 'end' : 'start' }}">
-                          {{ $l == 'en' ? 'Profile photo' : 'الصورة الشخصية' }}
-                        </label>
-                        <div id="uploader" class="uploader" tabindex="0">
-                          <div class="d-flex gap-5 align-items-center justify-content-center">
-                            <img id="avatarPreview" class="avatar-preview" src="/images/user-avatar.png" alt="avatar preview">
-                            <div class="text-{{ $l == 'ar' ? 'end' : 'start' }}">
-                              <strong id="uploaderTitle">
-                                {{ $l == 'en' ? 'Drag & drop or click to upload' : 'اسحب وأفلت أو انقر للتحميل' }}
-                              </strong>
-                              <div class="small text-muted">
-                                {{ $l == 'en' ? 'PNG, JPG, JPEG up to 10 MB' : 'PNG، JPG، JPEG بحد أقصى 10 MB' }}
-                              </div>
-                              <div class="mt-2 text-start">
-                                <button type="button" id="chooseBtn" class="btn btn-sm btn-label-primary">
-                                  {{ $l == 'en' ? 'Upload' : 'تحميل' }}
-                                  <i class="ti ti-upload ti-xs ms-1"></i>
-                                </button>
-                                <button type="button" id="removeBtn" class="btn btn-sm btn-label-secondary d-none">
-                                  {{ $l == 'en' ? 'Reset' : 'حذف' }}
-                                  <i class="ti ti-reload ti-xs ms-1"></i>
-                                </button>
+                        <div class="col-12 mb-6">
+                          <label class="form-label fs-6 mb-2 d-block ">
+                            {{ $l == 'en' ? 'Profile photo' : 'الصورة الشخصية' }}
+                          </label>
+                          <div id="uploader" class="card bg-light-subtle shadow-none border uploader" tabindex="0">
+                            <div class="card-body py-4">
+                              <div class="d-flex flex-column gap-3 align-items-center justify-content-center">
+                                <img id="avatarPreview" class="border rounded-circle avatar-preview" src="/images/user-avatar.png" alt="avatar preview" width="65" height="65">
+                                <div class="d-flex flex-column align-items-center">
+                                  <h6 class="mb-1" id="uploaderTitle">
+                                    {{ $l == 'en' ? 'Drag & drop or click to upload' : 'اسحب وأفلت أو انقر للتحميل' }}
+                                  </h6>
+                                  <div class="small text-muted">
+                                    {{ $l == 'en' ? 'PNG, JPG, JPEG up to 10 MB' : 'PNG، JPG، JPEG بحد أقصى 10 MB' }}
+                                  </div>
+                                  <div class="mt-2 text-start">
+                                    <button type="button" id="chooseBtn" class="btn btn-sm btn-label-primary">
+                                      {{ $l == 'en' ? 'Upload' : 'تحميل' }}
+                                      <i class="ti ti-upload ti-xs ms-1"></i>
+                                    </button>
+                                    <button type="button" id="removeBtn" class="btn btn-sm btn-label-secondary d-none">
+                                      {{ $l == 'en' ? 'Reset' : 'حذف' }}
+                                      <i class="ti ti-reload ti-xs ms-1"></i>
+                                    </button>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
 
-                        <input id="fileInput" class="file-input" type="file" accept="image/png, image/jpeg" name="img_url">
+                          <input id="fileInput" class="file-input" type="file" accept="image/png, image/jpeg" name="img_url">
 
-                        <div class="mt-3">
-                          <div class="progress" style="height:6px; display:none;">
-                            <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                          <div class="mt-3">
+                            <div class="progress" style="height:6px; display:none;">
+                              <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            @error('img_url')
+                              <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                           </div>
-                          @error('img_url')
-                            <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
-                          @enderror
                         </div>
-                      </div>
                       </div>
 
                       <div id="personalDetailsWrapper" style="display: block;">
                         <div class="col-12 mb-3">
-                          <label for="first_name" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('auth.firstName') }}</label>
+                          <label for="first_name" class="form-label fs-6 mb-2 w-100">{{ __('auth.firstName') }}</label>
                           <div class="input-group input-group-merge">
-                            <input name="first_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="first_name" placeholder="{{ __('auth.First English Name') }}" required autofocus />
+                            <input name="first_name" type="text" class="form-control" id="first_name" placeholder="{{ __('auth.First English Name') }}" required autofocus />
                             @error('first_name')
-                            <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                            <div class="invalid-feedback">{{ $message }}</div>
                           @enderror
                           </div>
                         </div>
 
                         <div class="col-12 mb-3">
-                          <label for="last_name" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __("auth.secondName") }}</label>
+                          <label for="last_name" class="form-label fs-6 mb-2 w-100">{{ __("auth.secondName") }}</label>
                           <div class="input-group input-group-merge">
-                            <input name="last_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="last_name" placeholder="{{ __('auth.Last English Name') }}" required />
+                            <input name="last_name" type="text" class="form-control" id="last_name" placeholder="{{ __('auth.Last English Name') }}" required />
                           </div>
                           @error('last_name')
-                            <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                            <div class="invalid-feedback">{{ $message }}</div>
                           @enderror
                         </div>
 
                         
                         <div class="col-12 mb-4">
-                          <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="gender">{{ __('auth.gender') }}</label>
-                          <select class="form-select select2 text-{{ $l == 'ar' ? 'end' : 'start' }}" name="gender" id="gender" required>
+                          <label class="form-label fs-6 mb-2 w-100" for="gender">{{ __('auth.gender') }}</label>
+                          <select class="form-select select2" name="gender" id="gender" required>
                             <option value="Male">{{ __('Male') }}</option>
                             <option value="Female">{{ __('Female') }}</option>
                           </select>
                           
                           @error('gender')
-                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                          <div class="invalid-feedback">{{ $message }}</div>
                           @enderror
                         </div>
                       </div>
                       
                       <div id="serviceProviderInputsWrapper" style="display: none;">
                         <div class="col-12 mb-3">
-                          <label for="company_name" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $l == 'en' ? 'Company Name' : 'اسم الشركة' }}</label>
+                          <label for="company_name" class="form-label fs-6 mb-2 w-100">{{ $l == 'en' ? 'Company Name' : 'اسم الشركة' }}</label>
                           <div class="input-group input-group-merge">
-                            <input name="company_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="company_name" placeholder="{{ $l == 'en' ? 'Company Name' : 'اسم الشركة' }}" />
+                            <input name="company_name" type="text" class="form-control" id="company_name" placeholder="{{ $l == 'en' ? 'Company Name' : 'اسم الشركة' }}" />
                           </div>
                           @error('company_name')
-                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                          <div class="invalid-feedback">{{ $message }}</div>
                           @enderror
                         </div>
                         
                         <div class="col-12 mb-3">
-                          <label for="contact_name" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $l == 'en' ? 'Contact Name' : 'اسم المتصل' }}</label>
+                          <label for="contact_name" class="form-label fs-6 mb-2 w-100">{{ $l == 'en' ? 'Contact Name' : 'اسم المتصل' }}</label>
                           <div class="input-group input-group-merge">
-                            <input name="contact_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="contact_name" placeholder="{{ $l == 'en' ? 'Contact Name' : 'اسم المتصل' }}" />
+                            <input name="contact_name" type="text" class="form-control" id="contact_name" placeholder="{{ $l == 'en' ? 'Contact Name' : 'اسم المتصل' }}" />
                           </div>
                           @error('contact_name')
-                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                          <div class="invalid-feedback">{{ $message }}</div>
                           @enderror
                         </div>
                       </div>
                       
                       <div class="col-12 mb-3">
-                        <label for="email" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('auth.E-Mail') }}</label>
+                        <label for="email" class="form-label fs-6 mb-2 w-100">{{ __('auth.E-Mail') }}</label>
                         <div class="input-group input-group-merge">
-                          <input name="email" type="email" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" placeholder="{{ __('auth.E-Mail') }}" required autocomplete="off" />
+                          <input name="email" type="email" class="form-control" placeholder="{{ __('auth.E-Mail') }}" required autocomplete="off" />
                         </div>
                         @error('email')
-                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                          <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                       </div>
                       
                       <div class="col-12 mb-4 form-password-toggle">
-                        <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="password">{{ __('auth.Password') }}</label>
+                        <label class="form-label fs-6 mb-2 w-100" for="password">{{ __('auth.Password') }}</label>
                         <div class="input-group input-group-merge">
                           <input type="password" class="form-control" id="password" placeholder="{{ __('auth.Password') }}" name="password" required aria-describedby="password" autocomplete="new-password" />
                           <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
                         </div>
                         @error('password')
-                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                          <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                       </div>
 
                       <div class="col-12 mb-4 form-password-toggle">
-                        <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="password_confirmation">{{ __('auth.Confirm') }}</label>
+                        <label class="form-label fs-6 mb-2 w-100" for="password_confirmation">{{ __('auth.Confirm') }}</label>
                         <div class="input-group input-group-merge">
                           <input type="password" class="form-control" id="password_confirmation" placeholder="{{ __('auth.Password') }}" name="password_confirmation" required aria-describedby="new-password" autocomplete="new-password" />
                           <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
                         </div>
                         @error('password_confirmation')
-                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                          <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                       </div>
 
                       <div class="col-12 mb-4 d-grid">
-                        <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="phone">{{ __('auth.Phone') }}</label>
-                        <input id="phone" type="tel" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" placeholder="{{ __('auth.Phone') }}" name="phone" required />
+                        <label class="form-label fs-6 mb-2 w-100" for="phone">{{ __('auth.Phone') }}</label>
+                        <input id="phone" type="tel" class="form-control" placeholder="{{ __('auth.Phone') }}" name="phone" required />
                         <small class="text-danger mt-1" id="phone-error" style="display: none;"></small>
                         <input type="hidden" name="country_code" id="phone_code" value="20">
                         @error('phone')
-                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                          <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                         @error('country_code')
-                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                          <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                       </div>
 
                       <div id="mentorInputsWrapper" style="display: none;">
                         <div class="col-12 mb-3">
-                          <label for="Title" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('admin.JobTitleEn') }}</label>
+                          <label for="Title" class="form-label fs-6 mb-2 w-100">{{ __('admin.JobTitleEn') }}</label>
                           <div class="input-group input-group-merge">
-                            <input name="title_en" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="Title" placeholder="{{ __('admin.JobTitleEn') }}" autocomplete="title_en" oninput="this.value = this.value.trimStart()" />
+                            <input name="title_en" type="text" class="form-control" id="Title" placeholder="{{ __('admin.JobTitleEn') }}" autocomplete="title_en" oninput="this.value = this.value.trimStart()" />
                           </div>
                           @error('title_en')
-                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                          <div class="invalid-feedback">{{ $message }}</div>
                           @enderror
                         </div>
 
                       <div class="col-12 mb-3">
-                        <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="expertise">{{ __('admin.Expertises') }}</label>
+                        <label class="form-label fs-6 mb-2 w-100" for="expertise">{{ __('admin.Expertises') }}</label>
                         <div class="form-group">
-                          <select name="expertise[]" class="select2 form-select text-{{ $l == 'ar' ? 'end' : 'start' }}" multiple="multiple" id="expertise" data-placeholder="{{__('admin.Expertises')}}" required>
+                          <select name="expertise[]" class="select2 form-select" multiple="multiple" id="expertise" data-placeholder="{{__('admin.Expertises')}}" required>
                             @php
                             $expertises = App\Expertise::where('parent_id', null)->get();
                             @endphp
@@ -413,27 +435,27 @@
                           </select>
                         </div>
                         @error('expertise')
-                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                          <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                       </div>
 
                       <div class="col-12 mb-3">
-                        <label for="bio_en" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('admin.userbio') }}</label>
+                        <label for="bio_en" class="form-label fs-6 mb-2 w-100">{{ __('admin.userbio') }}</label>
                         <div class="input-group">
-                          <textarea name="bio_en" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="bio_en" placeholder="{{ __('admin.userbio') }}" autocomplete="userbio" oninput="this.value = this.value.trimStart()"></textarea>
+                          <textarea name="bio_en" type="text" class="form-control" id="bio_en" placeholder="{{ __('admin.userbio') }}" autocomplete="userbio" oninput="this.value = this.value.trimStart()"></textarea>
                         </div>
                         @error('bio_en')
-                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                          <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                       </div>
 
                       <div class="col-12 mb-3">
-                        <label for="Linkedin" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('admin.Linkedin') }}</label>
+                        <label for="Linkedin" class="form-label fs-6 mb-2 w-100">{{ __('admin.Linkedin') }}</label>
                         <div class="input-group">
-                          <input value="{{ old('Linkedin') }}" name="Linkedin" type="url" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="Linkedin" placeholder="{{ __('admin.Linkedin') }}" autocomplete="Linkedin" />
+                          <input value="{{ old('Linkedin') }}" name="Linkedin" type="url" class="form-control" id="Linkedin" placeholder="{{ __('admin.Linkedin') }}" autocomplete="Linkedin" />
                         </div>
                         @error('Linkedin')
-                          <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                          <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                       </div>
                     </div>
@@ -479,7 +501,7 @@
               </a>
             </p>
 
-            <div class="divider my-6 mx-auto" style="width: 80%;">
+            {{-- <div class="divider my-6 mx-auto" style="width: 80%;">
               <div class="divider-text">{{ __('auth.or') }}</div>
             </div>
 
@@ -488,7 +510,7 @@
               <a href="/provider-registration">
                 <span>{{ __('admin.serviceProvider') }}</span>
               </a>
-            </p>
+            </p> --}}
 
             <div id="socialLoginSection" style="display: block;">
               @if ((isset($setting) && ($setting->LINKEDIN_LOGIN ?? 'disabled') === 'enabled') ||(isset($setting) && ($setting->GOOGLE_LOGIN ?? 'disabled') === 'enabled'))

@@ -3639,4 +3639,5 @@ return [
 	'items' => 'عناصر',
 	'service_details' => 'تفاصيل الخدمة',
 	'digits_only_validation' => 'يجب أن يحتوي هذا الحقل على أرقام فقط.',
+	'serviceProvider_desc' => 'قدّم خدماتك للشركات الناشئة',
 ];
