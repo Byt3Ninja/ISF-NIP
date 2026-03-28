@@ -77,6 +77,15 @@ class serviceProviders extends Model
 		return $this->belongsTo(User::class, 'user_id');
 	}
 
+	public function getProfilePictureAttribute()
+	{
+		$providerLogo = $this->img_url
+            ? (str_starts_with($this->img_url, 'https://') ? $this->img_url : '/191014/' . $this->img_url)
+            : '/images/user-placeholder.jpeg';
+
+		return $providerLogo;
+	}
+
     public function portfolios()
     {
         return $this->hasMany(ServiceProviderPortfolio::class, 'service_provider_id')->orderBy('order');
