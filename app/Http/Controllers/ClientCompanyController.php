@@ -4403,7 +4403,7 @@ class ClientCompanyController extends Controller
         }
     }
 
-     public function saveFinancialProjection(Request $request, int $id)
+    public function saveFinancialProjection(Request $request, int $id)
     {
         try {
             // ----------------------------------------------------------
@@ -4594,5 +4594,10 @@ class ClientCompanyController extends Controller
                 'error_details' => config('app.debug') ? $e->getMessage() : null, // ADDED: helpful during debugging
             ], 500);
         }
+    }
+
+    public function setCurrentHistoryDate(Request $request, int $id)
+    {
+        //
     }
 }
