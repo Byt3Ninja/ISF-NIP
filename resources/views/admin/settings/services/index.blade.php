@@ -262,9 +262,9 @@
 
                     <!-- Service Category & Status -->
                     {{--  @if (!$_user->hasRole('registered'))  --}}
-                      <div class="d-flex justify-content-between align-items-center mt-auto">
+                      <div class="d-flex justify-content-between align-items-center mt-auto mb-4">
                         <div 
-                          class="badge bg-label-secondary text-dark mb-4" 
+                          class="badge bg-label-secondary text-dark" 
                           data-bs-toggle="tooltip"  
                           data-bs-placement="top"
                           title="{{ __('admin.service_category') }}"
@@ -274,7 +274,7 @@
                         </div>
   
                         @if (!$_user->hasRole('registered'))
-                        <span class="badge py-1 px-2 bg-label-secondary fw-semibold">
+                        <span class="badge bg-label-{{ $service->status == 1 ? 'success' : 'danger' }}">
                           <i class="ti ti-point-filled text-{{ $service->status == 1 ? 'success' : 'danger' }}"></i>
                           {{ $service->status == 1 ? __('admin.Active') : __('admin.Inactive') }}
                         </span>
@@ -282,7 +282,7 @@
                       </div>
                     {{--  @endif  --}}
                   </div>
-                  
+
                   <!-- Request Service Button -->
                   @if ($_user->hasRole('registered'))
                     <button 
