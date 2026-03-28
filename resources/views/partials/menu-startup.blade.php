@@ -37,7 +37,7 @@ $navigationIcons = [
   $countSurvey = 0;
   $countSurvey = App\SurveyResponses::where('user_id', auth()->id())->whereNull('responses')->count();
 
-  $pendingServicesRequestsCount = 6;
+  $pendingServicesRequestsCount = 0;
 @endphp
 
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
@@ -95,7 +95,7 @@ $navigationIcons = [
                 <div>{{ __('settings.navigation.' . $child['title']) }}</div>
                 @if ($countSurvey > 0 && $child['title'] == 'surveys')
                   <span class="badge badge-center rounded-pill bg-danger ms-2">{{ $countSurvey }}</span>
-                @elseif ($pendingServicesRequestsCount > 0 && $child['title'] == 'services_requests')
+                @elseif ($pendingServicesRequestsCount == 0 && $child['title'] == 'services_requests')
                   <span class="badge badge-center rounded-pill bg-danger ms-2">{{ $pendingServicesRequestsCount }}</span>
                 @endif
               </div>

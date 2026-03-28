@@ -3648,4 +3648,5 @@ return [
 	'District' => 'حي',
 	'accepted_formats' => 'الصيغ المقبولة',
 	'max_size' => 'الحد الأقصى',
+	'service_category' => 'فئة الخدمة',
 ];

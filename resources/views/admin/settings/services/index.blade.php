@@ -245,40 +245,43 @@
                   </div>
                   @endif
 
-                  <!-- Service Price -->
-                  @if($service->price && $service->hide_price == 1 && !$_user->hasAnyRole(['admin', 'organizationManager', 'subadmin', 'serviceProvider']))
-                    {{-- Price hidden from non-management roles --}}
-                  @else
-                    <div class="d-flex align-items-center gap-2 mb-4">
-                      <div>{{ __('admin.Price') }}:</div>
-                      @if($service->price)
-                        <span class="fw-medium">{{ $service->price }} {{ $service->currency }}</span>
-                      @else
-                        <span class="fw-medium text-muted">{{ __('admin.free') }}</span>
-                      @endif
-                    </div>
-                  @endif
-
-                  <!-- Date & Status -->
-                  {{--  @if (!$_user->hasRole('registered'))  --}}
-                    <div class="d-flex justify-content-between align-items-center mt-auto">
-                      <div class="d-flex align-items-center gap-2">
-                        {{--  <i class="ti ti-calendar ti-sm text-muted"></i>  --}}
-                        <i class="ti ti-tag ti-sm text-muted"></i>
-                        <span class="fw-medium text-muted">
-                          {{--  {{ $service->created_at->format('Y-m-d') }}  --}}
-                          {{ $service->serviceCategory?->name ?? '' }}
-                        </span>
+                  <div class="d-flex flex-column flex-grow-1">
+                    <!-- Service Price -->
+                    @if($service->price && $service->hide_price == 1 && !$_user->hasAnyRole(['admin', 'organizationManager', 'subadmin', 'serviceProvider']))
+                      {{-- Price hidden from non-management roles --}}
+                    @else
+                      <div class="d-flex align-items-center gap-2 mb-4">
+                        <div>{{ __('admin.Price') }}:</div>
+                        @if($service->price)
+                          <span class="fw-medium">{{ $service->price }} {{ $service->currency }}</span>
+                        @else
+                          <span class="fw-medium text-muted">{{ __('admin.free') }}</span>
+                        @endif
                       </div>
+                    @endif
 
-                      @if (!$_user->hasRole('registered'))
-                      <span class="badge py-1 px-2 bg-label-secondary fw-semibold">
-                        <i class="ti ti-point-filled text-{{ $service->status == 1 ? 'success' : 'danger' }}"></i>
-                        {{ $service->status == 1 ? __('admin.Active') : __('admin.Inactive') }}
-                      </span>
-                      @endif
-                    </div>
-                  {{--  @endif  --}}
+                    <!-- Service Category & Status -->
+                    {{--  @if (!$_user->hasRole('registered'))  --}}
+                      <div class="d-flex justify-content-between align-items-center mt-auto mb-4">
+                        <div 
+                          class="badge bg-label-secondary text-dark" 
+                          data-bs-toggle="tooltip"  
+                          data-bs-placement="top"
+                          title="{{ __('admin.service_category') }}"
+                        >
+                          <i class="ti ti-briefcase ti-md me-2"></i>
+                          {{ $service->serviceCategory?->name ?? '' }}
+                        </div>
+  
+                        @if (!$_user->hasRole('registered'))
+                        <span class="badge bg-label-{{ $service->status == 1 ? 'success' : 'danger' }}">
+                          <i class="ti ti-point-filled text-{{ $service->status == 1 ? 'success' : 'danger' }}"></i>
+                          {{ $service->status == 1 ? __('admin.Active') : __('admin.Inactive') }}
+                        </span>
+                        @endif
+                      </div>
+                    {{--  @endif  --}}
+                  </div>
 
                   <!-- Request Service Button -->
                   @if ($_user->hasRole('registered'))
@@ -292,6 +295,7 @@
                       {{ __('admin.request_service') }}
                     </button>
                   @endif
+
                 </div>
               </div>
             </div>
