@@ -22,6 +22,7 @@ class ServiceProviderProfileController extends Controller
         $l = app()->getLocale();
         $user = auth()->user();
         $request = request();
+        $orgIds = $user->organizations_ids;
         $service_id = $request->query('service_id', null);
 
         // 1. Fetch service provider with country and user data
@@ -42,12 +43,23 @@ class ServiceProviderProfileController extends Controller
             abort(404);
         }
 
+        $my_services = [];
+        if( $user->hasRole('registered') )
+        {
+            $my_services = DB::table('organization_service')->whereIn('organization_id', $orgIds)
+                ->pluck('service_id')
+                ->toArray();
+        }
+
         // 2. Get all service IDs for this provider (including inactive, for reviews)
         $serviceIds = DB::table('services')
             ->where('service_provider_id', $id)
             ->whereNull('deleted_at')
             ->when(!empty( $service_id ), function ($query) use ($service_id) {
                 $query->where('id', $service_id);
+            })
+            ->when( count( $my_services ) > 0, function ($query) use ($my_services) {
+                $query->whereIn('id', $my_services);
             })
             ->pluck('id')
             ->toArray();
@@ -72,6 +84,9 @@ class ServiceProviderProfileController extends Controller
             ->where('s.status', true)
             ->whereNull('s.deleted_at')
             ->leftJoin('service_categories as sc', 'sc.id', '=', 's.service_category_id')
+            ->when( count( $my_services ) > 0, function ($query) use ($my_services) {
+                $query->whereIn('s.id', $my_services);
+            })
             ->select([
                 's.id',
                 "s.name_{$l} as name",
@@ -83,6 +98,7 @@ class ServiceProviderProfileController extends Controller
                 's.status',
                 's.avg_rating',
                 's.created_at',
+                's.service_category_id as category_id',
                 "sc.name_{$l} as category_name",
             ])
             ->get();
@@ -164,10 +180,13 @@ class ServiceProviderProfileController extends Controller
 
         // 10. Decode tags
         $tags = [];
-        if (!empty($provider->tags)) {
+        /* if (!empty($provider->tags)) {
             $decoded = json_decode($provider->tags, true);
             $tags = is_array($decoded) ? $decoded : [];
-        }
+        }*/
+        $tags = $services->pluck('category_name')->map(function ($name) {
+            return str_replace(['   ', '  '], '' , $name);
+        })->unique()->values()->toArray();
 
         // 11. Build stats array
         $stats = [];

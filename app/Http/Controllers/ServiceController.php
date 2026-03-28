@@ -38,7 +38,7 @@ class ServiceController extends Controller
 		$user = auth()->user();
 		$orgIds = $user->organizations_ids;
 		$Setting = Settings::where('id', 1)->first();
-		$services = Service::with(['serviceCategory', 'organizations' => function($query) use ($orgIds, $user) {
+		$services = Service::with(['serviceCategory', 'provider', 'organizations' => function($query) use ($orgIds, $user) {
 				if (!$user->hasAnyRole(['admin', 'serviceProvider'])) {
 					$query->whereIn('organizations.id', $orgIds);
 				}

@@ -45,7 +45,7 @@
                 @if(!empty($tags))
                   <div class="mb-6 d-flex flex-wrap gap-2">
                     @foreach($tags as $tag)
-                      <span class="badge bg-label-secondary text-dark border py-2 px-3">{{ $tag }}</span>
+                      <span class="badge bg-label-light rounded-pill text-dark border py-2 px-3">{{ $tag }}</span>
                     @endforeach
                   </div>
                 @endif
@@ -64,12 +64,12 @@
                       <span>{{ $provider->country_name }}{{ $provider->country_name && $operatingModeLabel ? ', ' : '' }}{{ __('admin.operating_mode.options.' . $operatingModeLabel) }}</span>
                     </div>
                   @endif
-                  @if($provider->review_count > 0)
+                  {{--  @if($provider->review_count > 0)  --}}
                     <div class="small d-flex align-items-center gap-1">
                       <i class="ti ti-star"></i>
                       <span>{{ $provider->avg_rating }} {{ __('admin.rating') }} ({{ $provider->review_count }} {{ __('admin.reviews') }})</span>
                     </div>
-                  @endif
+                  {{--  @endif  --}}
                 </div>
               </div>
 
@@ -210,7 +210,8 @@
                     alt="{{ $service->name ?: $service->name_en }}" class="rounded mb-4 img-fluid w-100 h-px-150 object-fit-cover"
                     onerror="this.onerror=null; this.src='/icons/account.svg';" />
 
-                  <h3 class="card-title h5 mb-3">{{ $service->name ?: $service->name_en }}</h3>
+                  <h3 class="card-title h5 mb-1">{{ $service->name ?: $service->name_en }}</h3>
+                  <small class="text-muted">{{ $service->category_name }}</small>
 
                   @if($service->avg_rating > 0 || $service->review_count > 0)
                     <div class="mb-3">
@@ -243,10 +244,10 @@
                         <i class="ti ti-calendar ti-sm text-muted"></i>
                         <span class="fw-medium text-muted">{{ \Carbon\Carbon::parse($service->created_at)->format('Y-m-d') }}</span>
                       </div>
-                      <span class="badge py-1 px-2 bg-label-secondary fw-semibold">
+                      {{--  <span class="badge py-1 px-2 bg-label-secondary fw-semibold">
                         <i class="ti ti-point-filled text-{{ $service->status ? 'success' : 'danger' }}"></i>
                         {{ $service->status ? __('admin.Active') : __('admin.Inactive') }}
-                      </span>
+                      </span>  --}}
                     </div>
                   @endif
 

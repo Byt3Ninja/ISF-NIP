@@ -205,7 +205,7 @@
                     </div>
                   </div>
                   @if ($service->vendor_name)
-                    @if($service->hide_vendor_info == 1 && !$_user->hasAnyRole(['admin', 'organizationManager', 'subadmin']))
+                    @if( ( $service->hide_vendor_info == 1 && !$_user->hasAnyRole(['admin', 'organizationManager', 'subadmin']) ) || $service->service_provider_id == $_user->service_provider?->id)
                       <div></div>
                     @else
                       <a
@@ -260,19 +260,25 @@
                   @endif
 
                   <!-- Date & Status -->
-                  @if (!$_user->hasRole('registered'))
+                  {{--  @if (!$_user->hasRole('registered'))  --}}
                     <div class="d-flex justify-content-between align-items-center mt-auto">
                       <div class="d-flex align-items-center gap-2">
-                        <i class="ti ti-calendar ti-sm text-muted"></i>
-                        <span class="fw-medium text-muted">{{ $service->created_at->format('Y-m-d') }}</span>
+                        {{--  <i class="ti ti-calendar ti-sm text-muted"></i>  --}}
+                        <i class="ti ti-tag ti-sm text-muted"></i>
+                        <span class="fw-medium text-muted">
+                          {{--  {{ $service->created_at->format('Y-m-d') }}  --}}
+                          {{ $service->serviceCategory?->name ?? '' }}
+                        </span>
                       </div>
 
+                      @if (!$_user->hasRole('registered'))
                       <span class="badge py-1 px-2 bg-label-secondary fw-semibold">
                         <i class="ti ti-point-filled text-{{ $service->status == 1 ? 'success' : 'danger' }}"></i>
                         {{ $service->status == 1 ? __('admin.Active') : __('admin.Inactive') }}
                       </span>
+                      @endif
                     </div>
-                  @endif
+                  {{--  @endif  --}}
 
                   <!-- Request Service Button -->
                   @if ($_user->hasRole('registered'))
