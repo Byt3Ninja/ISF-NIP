@@ -473,7 +473,6 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     Route::get('/company/{id}/financial-projection/realtime', [ClientCompanyController::class, 'getFinancialProjectionRealtime'])->name('company.financial_projection.realtime');
     Route::post('/company/{id}/financial-projection/save', [ClientCompanyController::class, 'saveFinancialProjection'])->name('company.financial_projection.save');
-    Route::post('/company/{id}/financial-projection/set-current-date', [ClientCompanyController::class, 'setCurrentHistoryDate'])->name('company.financial_projection.set_current_date');
 
     // startup growth
 
