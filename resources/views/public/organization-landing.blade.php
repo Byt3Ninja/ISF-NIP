@@ -280,7 +280,7 @@
             </h1>
             
             <!-- Description -->
-            <h2 class="hero-sub-title h5 mb-6 mb-md-12">
+            <h2 class="hero-sub-title h5 mb-6 mb-md-12 text-break">
               {{ Str::limit($organization->bio, 300) }}
             </h2>
 
