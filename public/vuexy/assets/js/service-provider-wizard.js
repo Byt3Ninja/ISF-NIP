@@ -395,6 +395,104 @@
     validationStepper.previous();
   });
 
+  function buildStep4Validation() {
+    if (FormValidation4) {
+      try { FormValidation4.destroy(); } catch (_) { /* suppressed */ }
+      FormValidation4 = null;
+    }
+
+    const fields = {};
+    const $cards  = $('.work-item-card');
+
+    $cards.each(function (index) {
+      const $card = $(this);
+      const names = {
+        id:    `portfolio[${index}][id]`,
+        del:   `portfolio[${index}][delete]`,
+        media: `portfolio[${index}][media]`,
+        title: `portfolio[${index}][title]`,
+        desc:  `portfolio[${index}][description]`,
+      };
+
+      $card.find('.item-id').attr('name',     names.id);
+      $card.find('.delete-flag').attr('name', names.del);
+      $card.find('.media-input').attr('name', names.media);
+      $card.find('.title-input').attr('name', names.title);
+      $card.find('.desc-input').attr('name',  names.desc);
+
+      if ($card.find('.delete-flag').val() === 'true' || !$card.is(':visible')) return;
+
+      fields[names.media] = {
+        validators: {
+          callback: {
+            message: t.complete_work_item_details,
+            callback: (input) => {
+              const $item    = $(input.element).closest('.work-item-card');
+              const hasFile  = input.element.files && input.element.files.length > 0;
+              const hasExist = $item.find('.upload-area img, .upload-area video').length > 0;
+              const title    = $item.find('.title-input').val().trim();
+              const desc     = $item.find('.desc-input').val().trim();
+              return (title && desc) ? (hasFile || hasExist) : true;
+            }
+          },
+          file: {
+            extension: 'png,jpg,jpeg,webp,mp4',
+            maxSize:   10485760,
+            message:   t.unsupported_file_type_portfolio,
+          }
+        }
+      };
+
+      fields[names.title] = {
+        validators: {
+          stringLength: { max: 50, message: t.title_max },
+          callback: {
+            message: t.complete_work_item_details,
+            callback: (input) => {
+              const $item    = $(input.element).closest('.work-item-card');
+              const hasFile  = $item.find('.media-input')[0].files.length > 0;
+              const hasExist = $item.find('.upload-area img, .upload-area video').length > 0;
+              const desc     = $item.find('.desc-input').val().trim();
+              return (desc || hasFile || hasExist) ? input.value.trim() !== '' : true;
+            }
+          }
+        }
+      };
+
+      fields[names.desc] = {
+        validators: {
+          stringLength: { max: 100, message: t.desc_max },
+          callback: {
+            message: t.complete_work_item_details,
+            callback: (input) => {
+              const $item    = $(input.element).closest('.work-item-card');
+              const hasFile  = $item.find('.media-input')[0].files.length > 0;
+              const hasExist = $item.find('.upload-area img, .upload-area video').length > 0;
+              const title    = $item.find('.title-input').val().trim();
+              return (title || hasFile || hasExist) ? input.value.trim() !== '' : true;
+            }
+          }
+        }
+      };
+    });
+
+    FormValidation4 = FormValidation.formValidation(stepEls[4], {
+      fields,
+      plugins: {
+        trigger: new FormValidation.plugins.Trigger(),
+        bootstrap5: new FormValidation.plugins.Bootstrap5({
+          eleValidClass: '',
+          rowSelector: (field) =>
+            field === '_portfolio_at_least_one' ? '#portfolio-error-container' : '.mb-4, .col-md-4, .col-md-8',
+        }),
+        autoFocus:    new FormValidation.plugins.AutoFocus(),
+        submitButton: new FormValidation.plugins.SubmitButton(),
+      }
+    }).on('core.form.valid', () => saveStepData(3, FormValidation4));
+  }
+
+  window.rebuildPortfolioValidation = buildStep4Validation;
+
   function saveStepData(stepIndex, formValidationInstance) {
     const route = wizardForm.getAttribute(`data-route-step-${stepIndex + 1}`);
     const nextBtn = document.querySelector('.btn-next');
@@ -426,13 +524,13 @@
     });
   }
 
-  function submitFormData() {
+  /* function submitFormData() {
     releaseSuccessAlert({
       title: lang === 'ar' ? 'تم!' : 'Done!',
       message: lang === 'ar' ? 'تم حفظ الملف الشخصي بنجاح' : 'Profile saved successfully',
     });
     setTimeout(() => { window.location.href = '/dashboard/services_providers'; }, 1500);
-  }
+  } */
 
   // ─── Initialization ──────────────────────────────────────────────────────────
 
