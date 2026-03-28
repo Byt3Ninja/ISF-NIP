@@ -45,59 +45,71 @@ class OrganizationLandingPageService
             $landingPage = $organization->landingPage ?? new OrganizationLandingPage();
             $landingPage->organization_id = $organization->id;
 
+            $sectionType = $data['section_type'] ?? null;
+
             // Landing Page Enabled
             $landingPage->landing_enabled = $data['landing_enabled'] ?? true;
 
             // How It Works Section
-            $landingPage->how_it_works_enabled = $data['how_it_works_enabled'] ?? false;
-            $landingPage->how_it_works_title = $data['how_it_works_title'] ?? null;
-            $landingPage->how_it_works_subtitle = $data['how_it_works_subtitle'] ?? null;
-            $landingPage->how_it_works_description = $data['how_it_works_description'] ?? null;
-            $landingPage->process_steps = $this->processProcessSteps($data['process_steps'] ?? []);
+            if (!$sectionType || $sectionType === 'howItWorks') {
+                $landingPage->how_it_works_enabled = $data['how_it_works_enabled'] ?? false;
+                $landingPage->how_it_works_title = $data['how_it_works_title'] ?? null;
+                $landingPage->how_it_works_subtitle = $data['how_it_works_subtitle'] ?? null;
+                $landingPage->how_it_works_description = $data['how_it_works_description'] ?? null;
+                $landingPage->process_steps = $this->processProcessSteps($data['process_steps'] ?? []);
+            }
 
             // Achievements Section
-            $landingPage->achievements_enabled = $data['achievements_enabled'] ?? false;
-            $landingPage->achievements_title = $data['achievements_title'] ?? null;
-            $landingPage->achievements_subtitle = $data['achievements_subtitle'] ?? null;
-            $landingPage->achievements_description = $data['achievements_description'] ?? null;
-            $landingPage->metrics = $this->processMetrics($data['metrics'] ?? []);
+            if (!$sectionType || $sectionType === 'achievements') {
+                $landingPage->achievements_enabled = $data['achievements_enabled'] ?? false;
+                $landingPage->achievements_title = $data['achievements_title'] ?? null;
+                $landingPage->achievements_subtitle = $data['achievements_subtitle'] ?? null;
+                $landingPage->achievements_description = $data['achievements_description'] ?? null;
+                $landingPage->metrics = $this->processMetrics($data['metrics'] ?? []);
+            }
 
             // Media & Recognition Section
-            $landingPage->media_enabled = $data['media_enabled'] ?? false;
-            $landingPage->media_title = $data['media_title'] ?? null;
-            $landingPage->media_subtitle = $data['media_subtitle'] ?? null;
-            $landingPage->media_description = $data['media_description'] ?? null;
-            $landingPage->articles = $this->processArticles(
-                $organization->id,
-                $data['articles'] ?? [],
-                $files['articles'] ?? [],
-                $landingPage->articles ?? []
-            );
+            if (!$sectionType || $sectionType === 'media') {
+                $landingPage->media_enabled = $data['media_enabled'] ?? false;
+                $landingPage->media_title = $data['media_title'] ?? null;
+                $landingPage->media_subtitle = $data['media_subtitle'] ?? null;
+                $landingPage->media_description = $data['media_description'] ?? null;
+                $landingPage->articles = $this->processArticles(
+                    $organization->id,
+                    $data['articles'] ?? [],
+                    $files['articles'] ?? [],
+                    $landingPage->articles ?? []
+                );
+            }
 
             // Partners Section
-            $landingPage->partners_enabled = $data['partners_enabled'] ?? false;
-            $landingPage->partners_title = $data['partners_title'] ?? null;
-            $landingPage->partners_subtitle = $data['partners_subtitle'] ?? null;
-            $landingPage->partners_description = $data['partners_description'] ?? null;
-            $landingPage->partners_list = $this->processPartners(
-                $organization->id,
-                $data['partners_list'] ?? [],
-                $files['partners_list'] ?? [],
-                $landingPage->partners_list ?? []
-            );
+            if (!$sectionType || $sectionType === 'partners') {
+                $landingPage->partners_enabled = $data['partners_enabled'] ?? false;
+                $landingPage->partners_title = $data['partners_title'] ?? null;
+                $landingPage->partners_subtitle = $data['partners_subtitle'] ?? null;
+                $landingPage->partners_description = $data['partners_description'] ?? null;
+                $landingPage->partners_list = $this->processPartners(
+                    $organization->id,
+                    $data['partners_list'] ?? [],
+                    $files['partners_list'] ?? [],
+                    $landingPage->partners_list ?? []
+                );
+            }
 
             // Programs Section
-            $landingPage->programs_enabled = $data['programs_enabled'] ?? false;
-            $landingPage->programs_title = $data['programs_title'] ?? null;
-            $landingPage->programs_subtitle = $data['programs_subtitle'] ?? null;
-            $landingPage->programs_description = $data['programs_description'] ?? null;
-            $landingPage->programs_order_by = $data['programs_order_by'] ?? 'newest';
+            if (!$sectionType || $sectionType === 'programs') {
+                $landingPage->programs_enabled = $data['programs_enabled'] ?? false;
+                $landingPage->programs_title = $data['programs_title'] ?? null;
+                $landingPage->programs_subtitle = $data['programs_subtitle'] ?? null;
+                $landingPage->programs_description = $data['programs_description'] ?? null;
+                $landingPage->programs_order_by = $data['programs_order_by'] ?? 'newest';
+            }
 
             // Theme
             $landingPage->landing_theme = $data['landing_theme'] ?? 'gradient';
 
             // Section Background Colors
-            $this->processSectionBackgrounds($landingPage, $data);
+            $this->processSectionBackgrounds($landingPage, $data, $sectionType);
 
             $landingPage->save();
 
@@ -382,42 +394,52 @@ class OrganizationLandingPageService
      * @param array $data
      * @return void
      */
-    protected function processSectionBackgrounds(OrganizationLandingPage $landingPage, array $data): void
+    protected function processSectionBackgrounds(OrganizationLandingPage $landingPage, array $data, ?string $sectionType = null): void
     {
-        // Hero
+        // Hero (always updated — no section_type guard)
         $landingPage->hero_bg_type = $data['hero_bg_type'] ?? 'solid';
         $landingPage->hero_bg_color = $data['hero_bg_color'] ?? null;
         $landingPage->hero_bg_gradient_start = $data['hero_bg_gradient_start'] ?? null;
         $landingPage->hero_bg_gradient_end = $data['hero_bg_gradient_end'] ?? null;
 
         // How It Works
-        $landingPage->how_it_works_bg_type = $data['how_it_works_bg_type'] ?? 'solid';
-        $landingPage->how_it_works_bg_color = $data['how_it_works_bg_color'] ?? null;
-        $landingPage->how_it_works_bg_gradient_start = $data['how_it_works_bg_gradient_start'] ?? null;
-        $landingPage->how_it_works_bg_gradient_end = $data['how_it_works_bg_gradient_end'] ?? null;
+        if (!$sectionType || $sectionType === 'howItWorks') {
+            $landingPage->how_it_works_bg_type = $data['how_it_works_bg_type'] ?? 'solid';
+            $landingPage->how_it_works_bg_color = $data['how_it_works_bg_color'] ?? null;
+            $landingPage->how_it_works_bg_gradient_start = $data['how_it_works_bg_gradient_start'] ?? null;
+            $landingPage->how_it_works_bg_gradient_end = $data['how_it_works_bg_gradient_end'] ?? null;
+        }
 
         // Achievements
-        $landingPage->achievements_bg_type = $data['achievements_bg_type'] ?? 'solid';
-        $landingPage->achievements_bg_color = $data['achievements_bg_color'] ?? null;
-        $landingPage->achievements_bg_gradient_start = $data['achievements_bg_gradient_start'] ?? null;
-        $landingPage->achievements_bg_gradient_end = $data['achievements_bg_gradient_end'] ?? null;
+        if (!$sectionType || $sectionType === 'achievements') {
+            $landingPage->achievements_bg_type = $data['achievements_bg_type'] ?? 'solid';
+            $landingPage->achievements_bg_color = $data['achievements_bg_color'] ?? null;
+            $landingPage->achievements_bg_gradient_start = $data['achievements_bg_gradient_start'] ?? null;
+            $landingPage->achievements_bg_gradient_end = $data['achievements_bg_gradient_end'] ?? null;
+        }
 
         // Media
-        $landingPage->media_bg_type = $data['media_bg_type'] ?? 'solid';
-        $landingPage->media_bg_color = $data['media_bg_color'] ?? null;
-        $landingPage->media_bg_gradient_start = $data['media_bg_gradient_start'] ?? null;
-        $landingPage->media_bg_gradient_end = $data['media_bg_gradient_end'] ?? null;
+        if (!$sectionType || $sectionType === 'media') {
+            $landingPage->media_bg_type = $data['media_bg_type'] ?? 'solid';
+            $landingPage->media_bg_color = $data['media_bg_color'] ?? null;
+            $landingPage->media_bg_gradient_start = $data['media_bg_gradient_start'] ?? null;
+            $landingPage->media_bg_gradient_end = $data['media_bg_gradient_end'] ?? null;
+        }
 
         // Partners
-        $landingPage->partners_bg_type = $data['partners_bg_type'] ?? 'solid';
-        $landingPage->partners_bg_color = $data['partners_bg_color'] ?? null;
-        $landingPage->partners_bg_gradient_start = $data['partners_bg_gradient_start'] ?? null;
-        $landingPage->partners_bg_gradient_end = $data['partners_bg_gradient_end'] ?? null;
+        if (!$sectionType || $sectionType === 'partners') {
+            $landingPage->partners_bg_type = $data['partners_bg_type'] ?? 'solid';
+            $landingPage->partners_bg_color = $data['partners_bg_color'] ?? null;
+            $landingPage->partners_bg_gradient_start = $data['partners_bg_gradient_start'] ?? null;
+            $landingPage->partners_bg_gradient_end = $data['partners_bg_gradient_end'] ?? null;
+        }
 
         // Programs
-        $landingPage->programs_bg_type = $data['programs_bg_type'] ?? 'solid';
-        $landingPage->programs_bg_color = $data['programs_bg_color'] ?? null;
-        $landingPage->programs_bg_gradient_start = $data['programs_bg_gradient_start'] ?? null;
-        $landingPage->programs_bg_gradient_end = $data['programs_bg_gradient_end'] ?? null;
+        if (!$sectionType || $sectionType === 'programs') {
+            $landingPage->programs_bg_type = $data['programs_bg_type'] ?? 'solid';
+            $landingPage->programs_bg_color = $data['programs_bg_color'] ?? null;
+            $landingPage->programs_bg_gradient_start = $data['programs_bg_gradient_start'] ?? null;
+            $landingPage->programs_bg_gradient_end = $data['programs_bg_gradient_end'] ?? null;
+        }
     }
 }
