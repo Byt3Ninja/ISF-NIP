@@ -3395,7 +3395,7 @@ return [
 	'index_slot' => 'المواعيد',
 	'profile_view_company' => 'عرض البيانات الشخصية',
 	'service_image' => 'صورة الخدمة',
-	'add_service_description' => 'المعلومات الأساسية عن الخدمة',
+	'add_service_description' => 'المعلومات الأساسية',
 	'active_status' => 'حالة التفعيل',
 	'service_categorization_label' => 'الفئات والتعيين',
 	'service_categorization_description' => 'تعيين فئة الخدمة والوصول إلى المؤسسات',
@@ -3643,4 +3643,9 @@ return [
 	'error_loading_financial_data' => 'حدث خطأ أثناء تحميل البيانات المالية. يرجى المحاولة مرة أخرى لاحقًا.',
 	'change_currency_warning' => 'بمجرد تغيير العملة، لا يمكن تغييرها مرة أخرى. هل تريد المتابعة؟',
 	'financial_projection_saved_successfully' => 'تم حفظ التوقعات المالية بنجاح',
+	'metric_number_validation' => 'الرجاء إدخال رقم صحيح (مثلاً: 100، 100.5، 100+، مليون، 75%)',
+	'wizard_organization' => 'تنظيم المؤسسه',
+	'District' => 'حي',
+	'accepted_formats' => 'الصيغ المقبولة',
+	'max_size' => 'الحد الأقصى',
 ];

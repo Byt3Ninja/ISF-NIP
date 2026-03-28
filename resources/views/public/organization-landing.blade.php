@@ -136,7 +136,7 @@
               @if($organization->img_url)
                 <img src="{{ $organization->imageUrl }}" alt="Logo" width="32" height="32" class="me-2 object-fit-contain rounded" />
               @endif
-              <span class="app-brand-text text-dark fw-bold">{{ Str::limit($isRtl ? $organization->name_ar : $organization->name_en, 10) }}</span>
+              <span class="app-brand-text text-dark fw-bold">{{ Str::limit($isRtl ? $organization->name_ar : $organization->name_en, 20) }}</span>
             </a>
           </div>
 
@@ -280,8 +280,8 @@
             </h1>
             
             <!-- Description -->
-            <h2 class="hero-sub-title h5 mb-6 mb-md-12 line-clamp-3">
-              {{ $organization->bio }}
+            <h2 class="hero-sub-title h5 mb-6 mb-md-12 text-break">
+              {{ Str::limit($organization->bio, 300) }}
             </h2>
 
             <!-- Industries -->
@@ -296,7 +296,7 @@
             @endif
 
             <!-- CTA + Social -->
-            <div class="d-flex align-items-center flex-wrap">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
               <a href="#programs" class="btn btn-xl btn-primary mb-8 mb-md-4">
                 {{ __('admin.explore_programs') }}
               </a>
@@ -311,9 +311,8 @@
                   'youtube' => $organization->youtube_channel_url
                 ]
               @endphp
-
               @if(array_filter($socialLinks))
-                <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 m{{ $isRtl ? 'e' : 's' }}-lg-auto">
+                <div class="d-flex flex-column flex-md-row align-items-md-center gap-2">
                   <span class="text-dark me-2 d-block">{{ __('admin.follow_us') }}</span>
                   <div class="d-flex align-items-center gap-2">
                     @foreach ($socialLinks as $icon => $link)
@@ -990,9 +989,11 @@
             <h6 class="footer-title mb-6">{{ __('admin.quick_links') }}</h6>
             <ul class="navbar-nav list-unstyled">
               @foreach($sections as $section)
-                <li class="nav-item mb-4">
-                  <a href="#{{ $section['id'] }}" class="footer-link">{{ $section['label'] }}</a>
-                </li>
+                @if(!str_contains($section['id'], 'custom'))
+                  <li class="nav-item mb-4">
+                    <a href="#{{ $section['id'] }}" class="footer-link">{{ $section['label'] }}</a>
+                  </li>
+                @endif
               @endforeach
             </ul>
           </div>

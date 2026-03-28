@@ -745,8 +745,8 @@ if (editStepForm) {
     // });
     // $('#fromDate,#toDate,#mfromDate,#mtoDate').datetimepicker({
     //   format: 'Y-m-d',
-    //   minDate: '{{ !is_null($ccycle) ? $ccycle->start->format('Y/m/d') : now()->format('Y/m/d') }}',
-    //   maxDate: '{{ !is_null($ccycle) ? $ccycle->end->format('Y/m/d') : now()->addDays(15)->format('Y/m/d') }}',
+    //   minDate: '{{ !is_null($ccycle) ? $ccycle->start ? $ccycle->start->format('Y/m/d') : null : now()->format('Y/m/d') }}',
+    //   maxDate: '{{ !is_null($ccycle) ? $ccycle->end ? $ccycle->end->format('Y/m/d') : null : now()->addDays(15)->format('Y/m/d') }}',
     //   timepicker: false
     // });
     $(document).ready(function() {

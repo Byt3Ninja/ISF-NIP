@@ -78,7 +78,7 @@
         <p class="text-muted small mb-0">{{ __('admin.edit_landing_programs_cards_desc') }}</p>
       </div>
       <div class="col-md-3">
-        <label class="form-label small fw-bold">{{ __('admin.Display Order') }}</label>
+        <label class="form-label">{{ __('admin.Display Order') }}</label>
         <select class="form-select form-select-sm" name="programs_order_by">
           <option value="newest" {{ old('programs_order_by', $landingPage->programs_order_by ?? 'newest') == 'newest' ? 'selected' : '' }}>{{ __('admin.Newest First') }}</option>
           <option value="oldest" {{ old('programs_order_by', $landingPage->programs_order_by ?? '') == 'oldest' ? 'selected' : '' }}>{{ __('admin.Oldest First') }}</option>

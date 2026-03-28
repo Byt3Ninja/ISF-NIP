@@ -76,6 +76,9 @@ class OrganizationStep4Request extends FormRequest
             'partners_list.*.logo' => 'nullable|image|mimes:png,jpg,jpeg,svg|max:2048',
             'partners_list.*.existing_logo' => 'nullable|string',
 
+            // Section Type (for tab-isolated saves)
+            'section_type' => 'nullable|string|in:howItWorks,achievements,media,partners,programs',
+
             // Theme
             'landing_theme' => 'nullable|in:gradient,minimal,vuexy',
 
@@ -107,6 +110,8 @@ class OrganizationStep4Request extends FormRequest
             'programs_subtitle' => 'nullable|string|max:255',
             'programs_description' => 'nullable|string|max:1000',
             'programs_order_by' => 'nullable|in:newest,oldest,custom',
+            'programs_visibility' => 'nullable|array',
+            'programs_visibility.*' => 'nullable|integer',
             'programs_bg_type' => 'nullable|in:solid,gradient',
             'programs_bg_color' => 'nullable|string|max:20',
             'programs_bg_gradient_start' => 'nullable|string|max:20',
@@ -191,14 +196,27 @@ class OrganizationStep4Request extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        // Convert checkbox values to boolean
-        $this->merge([
-            'landing_enabled' => $this->has('landing_enabled'),
-            'how_it_works_enabled' => $this->has('how_it_works_enabled'),
-            'achievements_enabled' => $this->has('achievements_enabled'),
-            'media_enabled' => $this->has('media_enabled'),
-            'partners_enabled' => $this->has('partners_enabled'),
-            'programs_enabled' => $this->has('programs_enabled'),
-        ]);
+        $sectionType = $this->input('section_type');
+
+        $checkboxMap = [
+            'howItWorks'   => ['how_it_works_enabled'],
+            'achievements' => ['achievements_enabled'],
+            'media'        => ['media_enabled'],
+            'partners'     => ['partners_enabled'],
+            'programs'     => ['programs_enabled'],
+        ];
+
+        // Always include landing_enabled
+        $fields = ['landing_enabled' => $this->has('landing_enabled')];
+
+        // Only convert checkboxes for the current section (or all if no section_type)
+        $sectionsToProcess = $sectionType ? [$sectionType] : array_keys($checkboxMap);
+        foreach ($sectionsToProcess as $section) {
+            foreach ($checkboxMap[$section] as $field) {
+                $fields[$field] = $this->has($field);
+            }
+        }
+
+        $this->merge($fields);
     }
 }

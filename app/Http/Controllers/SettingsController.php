@@ -953,7 +953,7 @@ class SettingsController extends Controller
     {
          $request->validate([
             'name_en' => 'nullable|string|max:255',
-            'img_url' => 'nullable|image',
+            'img_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
             'contact_email' => 'nullable|email',
             'contact_phone' => 'nullable|string|max:11',
             'address' => 'nullable|string',

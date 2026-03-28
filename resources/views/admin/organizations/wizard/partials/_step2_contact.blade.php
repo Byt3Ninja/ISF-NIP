@@ -111,7 +111,7 @@
     <div class="col-md-4 mb-4">
       <div class="form-group">
         <label class="form-label" for="city_id">
-          {{ __('admin.City') }} <span class="text-danger">*</span>
+          {{ __('admin.District') }} <!-- <span class="text-danger">*</span> -->
         </label>
         <select
           class="form-select select2 @error('city_id') is-invalid @enderror"
