@@ -110,6 +110,8 @@ class OrganizationStep4Request extends FormRequest
             'programs_subtitle' => 'nullable|string|max:255',
             'programs_description' => 'nullable|string|max:1000',
             'programs_order_by' => 'nullable|in:newest,oldest,custom',
+            'programs_visibility' => 'nullable|array',
+            'programs_visibility.*' => 'nullable|integer',
             'programs_bg_type' => 'nullable|in:solid,gradient',
             'programs_bg_color' => 'nullable|string|max:20',
             'programs_bg_gradient_start' => 'nullable|string|max:20',

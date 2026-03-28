@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Cycle;
 use App\Organization;
 use App\OrganizationLandingPage;
 use Illuminate\Support\Facades\DB;
@@ -103,6 +104,22 @@ class OrganizationLandingPageService
                 $landingPage->programs_subtitle = $data['programs_subtitle'] ?? null;
                 $landingPage->programs_description = $data['programs_description'] ?? null;
                 $landingPage->programs_order_by = $data['programs_order_by'] ?? 'newest';
+
+                // Bulk-update program landing visibility
+                if (isset($data['programs_visibility'])) {
+                    $visibleIds = array_values(array_filter($data['programs_visibility']));
+
+                    Cycle::where('organization_id', $organization->id)
+                        ->whereNull('deleted_at')
+                        ->update(['landing_visible' => false]);
+
+                    if (!empty($visibleIds)) {
+                        Cycle::where('organization_id', $organization->id)
+                            ->whereNull('deleted_at')
+                            ->whereIn('id', $visibleIds)
+                            ->update(['landing_visible' => true]);
+                    }
+                }
             }
 
             // Theme
