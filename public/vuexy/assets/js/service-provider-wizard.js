@@ -307,6 +307,10 @@
         separateDialCode: true,
       });
       $el.data('iti', itiInstance);
+      // Set initial country code so hidden field is never empty
+      const initialCode = itiInstance.getSelectedCountryData().dialCode;
+      if ($el.attr('id') === 'phone' && !$('#country_code').val()) $('#country_code').val(initialCode);
+      if ($el.attr('id') === 'whatsapp' && !$('#country_code_w_a').val()) $('#country_code_w_a').val(initialCode);
       $el.on('countrychange', () => {
         const code = itiInstance.getSelectedCountryData().dialCode;
         if ($el.attr('id') === 'phone') $('#country_code').val(code);

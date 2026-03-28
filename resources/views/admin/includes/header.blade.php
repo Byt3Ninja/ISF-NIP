@@ -1212,14 +1212,22 @@ $menuItems = $menuItems->flatMap(function($item) {
       <li class="nav-item navbar-dropdown dropdown-user dropdown ms-1">
         <a class="nav-link dropdown-toggle hide-arrow p-1" href="javascript:void(0);" data-bs-toggle="dropdown">
           <div class="avatar avatar-online avatar-sm">
-            @if (auth()->user()->image_url)
+            @if( $_user->hasRole('serviceProvider') )
               <img 
                 class="rounded-circle" 
-                src="{{ auth()->user()->image_url }}"
+                src="{{ $_user->service_provider?->profile_picture ?? '/images/user-placeholder.jpeg' }}"
                 onerror="this.src='/images/user-placeholder.jpeg'"
               />
             @else
-              <img class="rounded-circle" src="/images/user-placeholder.jpeg" alt="avatar" />
+              @if (auth()->user()->image_url)
+                <img 
+                  class="rounded-circle" 
+                  src="{{ auth()->user()->image_url }}"
+                  onerror="this.src='/images/user-placeholder.jpeg'"
+                />
+              @else
+                <img class="rounded-circle" src="/images/user-placeholder.jpeg" alt="avatar" />
+              @endif
             @endif
           </div>
         </a>
@@ -1229,14 +1237,22 @@ $menuItems = $menuItems->flatMap(function($item) {
               <div class="d-flex align-items-center">
                 <div class="flex-shrink-0 me-2">
                   <div class="avatar avatar-online">
-                    @if (auth()->user()->image_url)
+                    @if( $_user->hasRole('serviceProvider') )
                       <img 
                         class="rounded-circle" 
-                        src="{{ auth()->user()->image_url }}"
+                        src="{{ $_user->service_provider?->profile_picture ?? '/images/user-placeholder.jpeg' }}"
                         onerror="this.src='/images/user-placeholder.jpeg'"
                       />
                     @else
-                      <img class="rounded-circle" src="/images/user-placeholder.jpeg" alt="avatar" />
+                      @if (auth()->user()->image_url)
+                        <img 
+                          class="rounded-circle" 
+                          src="{{ auth()->user()->image_url }}"
+                          onerror="this.src='/images/user-placeholder.jpeg'"
+                        />
+                      @else
+                        <img class="rounded-circle" src="/images/user-placeholder.jpeg" alt="avatar" />
+                      @endif
                     @endif
                   </div>
                 </div>
