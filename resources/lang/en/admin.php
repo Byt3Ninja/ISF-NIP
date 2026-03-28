@@ -3588,4 +3588,5 @@ return [
 	'District' => 'District',
 	'accepted_formats' => 'Accepted Formats',
 	'max_size' => 'Max Size',
+	'service_category' => 'Service Category',
 ];
