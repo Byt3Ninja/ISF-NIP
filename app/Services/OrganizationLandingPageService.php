@@ -41,7 +41,7 @@ class OrganizationLandingPageService
             }
 
             $organization->save();
-
+            
             // Get or create landing page
             $landingPage = $organization->landingPage ?? new OrganizationLandingPage();
             $landingPage->organization_id = $organization->id;
@@ -106,9 +106,10 @@ class OrganizationLandingPageService
                 $landingPage->programs_order_by = $data['programs_order_by'] ?? 'newest';
 
                 // Bulk-update program landing visibility
-                if (isset($data['programs_visibility'])) {
-                    $visibleIds = array_values(array_filter($data['programs_visibility']));
-
+                // Use sectionType check so that unchecked-all (key absent) still resets visibility
+                if ($sectionType === 'programs' || isset($data['programs_visibility'])) {
+                    $visibleIds = array_values(array_filter($data['programs_visibility'] ?? []));
+                    
                     Cycle::where('organization_id', $organization->id)
                         ->whereNull('deleted_at')
                         ->update(['landing_visible' => false]);
