@@ -338,11 +338,24 @@
   };
   let currentEventPopover = null;
 
+  // Weekday translations for conflict messages
+  const weekdayTranslations = {
+      'Monday':    '{{ __('admin.Monday') }}',
+      'Tuesday':   '{{ __('admin.Tuesday') }}',
+      'Wednesday': '{{ __('admin.Wednesday') }}',
+      'Thursday':  '{{ __('admin.Thursday') }}',
+      'Friday':    '{{ __('admin.Friday') }}',
+      'Saturday':  '{{ __('admin.Saturday') }}',
+      'Sunday':    '{{ __('admin.Sunday') }}',
+  };
+
   // Helper function to create a slot object
   const createSlotObject = (slot) => ({
       id: slot.id,
       start: slot.start_time,
       end: slot.end_time,
+      date: slot.date || null,
+      weekday: slot.weekday || null,
       sessionType: slot.session_type,
       duration: moment(slot.end_time, 'HH:mm').diff(moment(slot.start_time, 'HH:mm'), 'minutes'),
       startsFrom: slot.starts_from || null
@@ -797,9 +810,9 @@
 
       if (conflictSlot) {
           releaseFailureAlert({
-              title: '{{ __('admin.Error') }}',
-              message: '{{ __('mentor.slot_already_exists') }}' + ' ' +
-                       '{{ __('mentor.between', ['from' => ':from', 'to' => ':to']) }}'
+              title: '{{ __('admin.Not_Available') }}',
+              message: '{{ __('mentor.overlap', ['date' => ':date','from' => ':from', 'to' => ':to']) }}'
+                           .replace(':date', conflictSlot.date || weekdayTranslations[conflictSlot.weekday] || conflictSlot.weekday)
                            .replace(':from', conflictSlot.start)
                            .replace(':to',   conflictSlot.end),
           });
@@ -1087,9 +1100,9 @@
 
       if (conflictSlot) {
           releaseFailureAlert({
-              title: '{{ __('admin.Error') }}',
-              message: '{{ __('mentor.slot_already_exists') }}' + ' ' +
-                       '{{ __('mentor.between', ['from' => ':from', 'to' => ':to']) }}'
+              title: '{{ __('admin.Not_Available') }}',
+              message: '{{ __('mentor.overlap', ['date' => ':date', 'from' => ':from', 'to' => ':to']) }}'
+                           .replace(':date', conflictSlot.date || weekdayTranslations[conflictSlot.weekday] || conflictSlot.weekday)
                            .replace(':from', conflictSlot.start)
                            .replace(':to',   conflictSlot.end),
           });
