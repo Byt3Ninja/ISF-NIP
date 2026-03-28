@@ -12,9 +12,9 @@
  *   orgName        : <string>,          // e.g. "Acme Corp"
  *   checkSlugUrl   : <string>,          // route('organization.wizard.check.slug', org->id)
  *   requiredMsg    : <string>,          // __('admin.Required_Field')
- *   stepIconOptions    : <string>,      // <option> HTML block for step icons
- *   metricIconOptions  : <string>,      // <option> HTML block for metric icons
- *   benefitIconOptions : <string>,      // <option> HTML block for benefit icons
+ *   stepIconOptions    : <string>,      // HTML <option value="icon-class">Label</option> block for step icons (generated from Blade)
+ *   metricIconOptions  : <string>,      // HTML <option> block for metric icons  
+ *   benefitIconOptions : <string>,      // HTML <option> block for benefit icons (unused - available for future use)
  *   i18n: {
  *     selectIcon        : '...',
  *     stepTitle         : '...',
@@ -57,38 +57,38 @@
   ─────────────────────────────────────────────────────────── */
 
   const MAX_LIMITS = {
-    step    : 4,
-    metric  : 8,
-    article : 8,
-    partner : 20,
-    custom  : 10,
+    step: 4,
+    metric: 8,
+    article: 8,
+    partner: 20,
+    custom: 10,
   };
 
   const CONTAINER_MAP = {
-    step    : 'processStepsContainer',
-    metric  : 'metricsContainer',
-    article : 'articlesContainer',
-    partner : 'partnersContainer',
-    custom  : 'customSectionsContainer',
+    step: 'processStepsContainer',
+    metric: 'metricsContainer',
+    article: 'articlesContainer',
+    partner: 'partnersContainer',
+    custom: 'customSectionsContainer',
   };
 
   /** Maps tab section IDs → form-field name prefixes used for static header fields */
   const SECTION_FORM_PREFIX_MAP = {
-    howItWorks   : 'how_it_works',
-    achievements : 'achievements',
-    media        : 'media',
-    partners     : 'partners',
-    programs     : 'programs',
+    howItWorks: 'how_it_works',
+    achievements: 'achievements',
+    media: 'media',
+    partners: 'partners',
+    programs: 'programs',
   };
 
   const FILE_VALIDATION = {
-    allowedTypes      : ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'],
-    maxBytes          : 5 * 1024 * 1024,   // 5 MB
+    allowedTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'],
+    maxBytes: 5 * 1024 * 1024,   // 5 MB
     acceptedExtensions: 'png,jpg,jpeg,webp,svg',
-    maxSizeLabel      : '5MB',
-    partnerMaxBytes   : 2 * 1024 * 1024,   // 2 MB
-    partnerExtensions : 'png,jpg,jpeg,svg',
-    partnerSizeLabel  : '2MB',
+    maxSizeLabel: '5MB',
+    partnerMaxBytes: 2 * 1024 * 1024,   // 2 MB
+    partnerExtensions: 'png,jpg,jpeg,svg',
+    partnerSizeLabel: '2MB',
   };
 
   /* ═══════════════════════════════════════════════════════════
@@ -137,35 +137,35 @@
    * Validate a file input against allowed types + size limits.
    * Returns true when valid (or empty).
    */
-function validateFileInput(input) {
-  if (!input.files || !input.files[0]) {
+  function validateFileInput(input) {
+    if (!input.files || !input.files[0]) {
+      clearFileError(input);
+      return true;
+    }
+
+    const { type, size } = input.files[0];
+    const badType = !FILE_VALIDATION.allowedTypes.includes(type);
+
+    // Check if this is a partner logo input
+    const isPartnerLogo = $(input).hasClass('logo-input');
+    const maxSize = isPartnerLogo ? FILE_VALIDATION.partnerMaxBytes : FILE_VALIDATION.maxBytes;
+    const badSize = size > maxSize;
+
+    if (badType || badSize) {
+      setFileError(
+        input,
+        badType
+          ? 'Only PNG, JPG, SVG files are allowed'
+          : isPartnerLogo
+            ? `File must be smaller than ${FILE_VALIDATION.partnerSizeLabel}`
+            : `File must be smaller than ${FILE_VALIDATION.maxSizeLabel}`
+      );
+      return false;
+    }
+
     clearFileError(input);
     return true;
   }
-
-  const { type, size } = input.files[0];
-  const badType = !FILE_VALIDATION.allowedTypes.includes(type);
-
-  // Check if this is a partner logo input
-  const isPartnerLogo = $(input).hasClass('logo-input');
-  const maxSize = isPartnerLogo ? FILE_VALIDATION.partnerMaxBytes : FILE_VALIDATION.maxBytes;
-  const badSize = size > maxSize;
-
-  if (badType || badSize) {
-    setFileError(
-      input,
-      badType
-        ? 'Only PNG, JPG, SVG files are allowed'
-        : isPartnerLogo
-          ? `File must be smaller than ${FILE_VALIDATION.partnerSizeLabel}`
-          : `File must be smaller than ${FILE_VALIDATION.maxSizeLabel}`
-    );
-    return false;
-  }
-
-  clearFileError(input);
-  return true;
-}
 
   /** Render a thumbnail preview inside the nearest preview container */
   function showFilePreview(input) {
@@ -196,6 +196,49 @@ function validateFileInput(input) {
   }
 
   /**
+ * Validate metric number input - allows numbers, decimals, and optional text suffixes
+ * Examples allowed: 100, 100.5, 100+, 1M, 1.5M, 1k, 5000+
+ */
+  function validateMetricNumber(input) {
+    const value = input.value.trim();
+
+    // Allow empty values
+    if (value === '') {
+      clearMetricError(input);
+      return true;
+    }
+
+    // Regex pattern: allows numbers (with decimals) optionally followed by +, k, M, B, %
+    // Matches: 100, 100.5, 100+, 1.5k, 2M, 3B, 75%, 1000+
+    const pattern = /^(\d+(?:\.\d+)?)([$+%kMB]?)$/i;
+
+    if (pattern.test(value)) {
+      clearMetricError(input);
+      return true;
+    }
+
+    setMetricError(input, i18n.metric_number_validation || 'Please enter a valid number (e.g., 100, 100.5, 100+, 1M, 75%)');
+    return false;
+  }
+
+  function setMetricError(input, message) {
+    input.classList.add('is-invalid');
+    input.classList.remove('is-valid');
+    getOrCreateFeedback(input).textContent = message;
+  }
+
+  function clearMetricError(input) {
+    input.classList.remove('is-invalid');
+    const feedback = getOrCreateFeedback(input);
+    if (feedback) feedback.textContent = '';
+  }
+
+  // Add this inside your document ready function
+  $(document).on('input', 'input[name*="[number]"]', function () {
+    validateMetricNumber(this);
+  });
+
+  /**
    * Initialise a FormValidation instance for a form.
    *
    * @param {string} formId      DOM id of the <form>
@@ -210,6 +253,19 @@ function validateFileInput(input) {
       'submit',
       function (e) {
         let hasFileError = false;
+
+        let hasError = false;
+        $(this).find('input[name*="[number]"]').each(function () {
+          if (!validateMetricNumber(this)) {
+            hasError = true;
+          }
+        });
+
+        if (hasError) {
+          e.preventDefault();
+          toastr.error('Please fix metric number errors before saving.');
+        }
+
         form.querySelectorAll('input[type="file"]').forEach((input) => {
           if (!validateFileInput(input)) hasFileError = true;
         });
@@ -226,38 +282,38 @@ function validateFileInput(input) {
     const fv = FormValidation.formValidation(form, {
       fields: fieldConfig,
       plugins: {
-        trigger     : new FormValidation.plugins.Trigger({ event: { file: 'change' } }),
+        trigger: new FormValidation.plugins.Trigger({ event: { file: 'change' } }),
         submitButton: new FormValidation.plugins.SubmitButton(),
-        bootstrap5  : new FormValidation.plugins.Bootstrap5({
+        bootstrap5: new FormValidation.plugins.Bootstrap5({
           eleValidClass: '',
-          rowSelector  : '.col-md-12, .col-md-6, .col-md-4, .col-lg-4, .col-12, .mb-3, .mb-2, .card-body',
+          rowSelector: '.col-md-12, .col-md-6, .col-md-4, .col-lg-4, .col-12, .mb-3, .mb-2, .card-body',
           feedbackIcons: false,
         }),
-        autoFocus   : new FormValidation.plugins.AutoFocus(),
+        autoFocus: new FormValidation.plugins.AutoFocus(),
       },
     })
-    // .on('core.form.invalid', () => toastr.error('Please fix the errors before saving.'))
-    .on('core.form.valid', () => form.submit())
-    .on('core.validator.validated', (data) => {
-      const input = data.element;
+      // .on('core.form.invalid', () => toastr.error('Please fix the errors before saving.'))
+      .on('core.form.valid', () => form.submit())
+      .on('core.validator.validated', (data) => {
+        const input = data.element;
 
-      if (data.result.valid) {
-        input.classList.remove('is-invalid');
-        input.classList.add('is-valid');
-        getOrCreateFeedback(input).textContent = '';
-        if (data.validator === 'file') showFilePreview(input);
-        return;
-      }
+        if (data.result.valid) {
+          input.classList.remove('is-invalid');
+          input.classList.add('is-valid');
+          getOrCreateFeedback(input).textContent = '';
+          if (data.validator === 'file') showFilePreview(input);
+          return;
+        }
 
-      input.classList.add('is-invalid');
-      input.classList.remove('is-valid');
-      getOrCreateFeedback(input).textContent = data.result.message || 'Invalid field';
+        input.classList.add('is-invalid');
+        input.classList.remove('is-valid');
+        getOrCreateFeedback(input).textContent = data.result.message || 'Invalid field';
 
-      if (data.validator === 'file') {
-        input.value = '';
-        clearFilePreview(input);
-      }
-    });
+        if (data.validator === 'file') {
+          input.value = '';
+          clearFilePreview(input);
+        }
+      });
 
     validators[formId] = fv;
   }
@@ -305,33 +361,33 @@ function validateFileInput(input) {
 
   /* ─── Field config factories ──────────────────────────────── */
 
-function buildLogoFieldConfig(hasPreviewImage = false) {
-  const config = {
-    validators: {
-      file: {
-        extension: FILE_VALIDATION.partnerExtensions,
-        type     : ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml'].join(','),
-        maxSize  : FILE_VALIDATION.partnerMaxBytes,
-        message  : `PNG, JPG, SVG <= ${FILE_VALIDATION.partnerSizeLabel}`,
+  function buildLogoFieldConfig(hasPreviewImage = false) {
+    const config = {
+      validators: {
+        file: {
+          extension: FILE_VALIDATION.partnerExtensions,
+          type: ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml'].join(','),
+          maxSize: FILE_VALIDATION.partnerMaxBytes,
+          message: `PNG, JPG, SVG <= ${FILE_VALIDATION.partnerSizeLabel}`,
+        },
       },
-    },
-  };
+    };
 
-  if (!hasPreviewImage) {
-    config.validators.notEmpty = { message: i18n.requiredMsg || 'This field is required' };
+    if (!hasPreviewImage) {
+      config.validators.notEmpty = { message: i18n.requiredMsg || 'This field is required' };
+    }
+
+    return config;
   }
-
-  return config;
-}
 
   function buildImageFieldConfig() {
     return {
       validators: {
         file: {
           extension: FILE_VALIDATION.acceptedExtensions,
-          type     : FILE_VALIDATION.allowedTypes.join(','),
-          maxSize  : FILE_VALIDATION.maxBytes,
-          message  : `PNG, JPG, WEBP <= ${FILE_VALIDATION.maxSizeLabel}`,
+          type: FILE_VALIDATION.allowedTypes.join(','),
+          maxSize: FILE_VALIDATION.maxBytes,
+          message: `PNG, JPG, WEBP <= ${FILE_VALIDATION.maxSizeLabel}`,
         },
       },
     };
@@ -343,19 +399,19 @@ function buildLogoFieldConfig(hasPreviewImage = false) {
 
   /* ─── Register / deregister ───────────────────────────────── */
 
-function addRepeaterValidation(formId, type, index) {
-  const fv = validators[formId];
-  if (!fv) return;
+  function addRepeaterValidation(formId, type, index) {
+    const fv = validators[formId];
+    if (!fv) return;
 
-  getRepeaterFieldNames(type, index).forEach((name) => {
-    if (name.includes('[logo]')) {
-      const hasPreviewImage = $(`input[name="${name}"]`).closest('.repeater-item').find('.logo-preview img').length > 0;
-      return fv.addField(name, buildLogoFieldConfig(hasPreviewImage));
-    }
-    if (name.includes('[image]')) return fv.addField(name, buildImageFieldConfig());
-    fv.addField(name, buildRequiredFieldConfig());
-  });
-}
+    getRepeaterFieldNames(type, index).forEach((name) => {
+      if (name.includes('[logo]')) {
+        const hasPreviewImage = $(`input[name="${name}"]`).closest('.repeater-item').find('.logo-preview img').length > 0;
+        return fv.addField(name, buildLogoFieldConfig(hasPreviewImage));
+      }
+      if (name.includes('[image]')) return fv.addField(name, buildImageFieldConfig());
+      fv.addField(name, buildRequiredFieldConfig());
+    });
+  }
 
   function removeRepeaterValidation(formId, type, index) {
     const fv = validators[formId];
@@ -371,10 +427,10 @@ function addRepeaterValidation(formId, type, index) {
   ─────────────────────────────────────────────────────────── */
 
   $(document).on('click', '.add-item-btn', function () {
-    const type    = $(this).data('type');
-    const formId  = $(this).closest('form').attr('id');
+    const type = $(this).data('type');
+    const formId = $(this).closest('form').attr('id');
     const $container = getContainerByType(type);
-    const index   = $container.find('.repeater-item').length;
+    const index = $container.find('.repeater-item').length;
 
     if (index >= (MAX_LIMITS[type] || 10)) {
       toastr.warning(`${i18n.maximumLimitReached}, ${MAX_LIMITS[type]} ${i18n.items} ${i18n.allowed}`);
@@ -390,7 +446,7 @@ function addRepeaterValidation(formId, type, index) {
     addRepeaterValidation(formId, type, index);
 
     if (type === 'partner') initPartnerPreview($item);
-    if (type === 'custom')  initQuillOnElement($item.find('.quill-editor'));
+    if (type === 'custom') initQuillOnElement($item.find('.quill-editor'));
   });
 
   /* ═══════════════════════════════════════════════════════════
@@ -398,11 +454,11 @@ function addRepeaterValidation(formId, type, index) {
   ─────────────────────────────────────────────────────────── */
 
   $(document).on('click', '.remove-item-btn', function () {
-    const $item      = $(this).closest('.repeater-item');
+    const $item = $(this).closest('.repeater-item');
     const $container = $item.parent();
-    const formId     = $(this).closest('form').attr('id');
-    const type       = getTypeByContainer($container);
-    const index      = parseInt($item.data('index'), 10);
+    const formId = $(this).closest('form').attr('id');
+    const type = getTypeByContainer($container);
+    const index = parseInt($item.data('index'), 10);
 
     removeRepeaterValidation(formId, type, index);
 
@@ -424,10 +480,10 @@ function addRepeaterValidation(formId, type, index) {
     if (!fv) return;
 
     const prefixMap = {
-      article : 'articles',
-      partner : 'partners_list',
-      step    : 'process_steps',
-      metric  : 'metrics',
+      article: 'articles',
+      partner: 'partners_list',
+      step: 'process_steps',
+      metric: 'metrics',
     };
     const prefix = prefixMap[type];
 
@@ -437,7 +493,7 @@ function addRepeaterValidation(formId, type, index) {
       // Deregister old field names
       $item.find('input, select, textarea').each(function () {
         const oldName = $(this).attr('name');
-        if (oldName) { try { fv.removeField(oldName); } catch (_) {} }
+        if (oldName) { try { fv.removeField(oldName); } catch (_) { } }
       });
 
       // Update DOM attributes
@@ -463,10 +519,10 @@ function addRepeaterValidation(formId, type, index) {
 
   function getTemplateHtml(type, i) {
     const templates = {
-      step    : buildStepTemplate,
-      metric  : buildMetricTemplate,
-      article : buildArticleTemplate,
-      partner : buildPartnerTemplate,
+      step: buildStepTemplate,
+      metric: buildMetricTemplate,
+      article: buildArticleTemplate,
+      partner: buildPartnerTemplate,
     };
     return templates[type] ? templates[type](i) : '';
   }
@@ -521,7 +577,8 @@ function addRepeaterValidation(formId, type, index) {
               <input type="text" class="form-control"
                      name="metrics[${i}][number]"
                      placeholder="${i18n.metricNumber || 'Metric Number'}"
-                     maxlength="20">
+                     maxlength="20"
+                    >
             </div>
             <div class="col-12 mb-3">
               <input type="text" class="form-control"
@@ -676,7 +733,7 @@ function addRepeaterValidation(formId, type, index) {
   $(document).on('change', '.program-visible-toggle', function () {
     $(this)
       .closest('.program-item')
-      .toggleClass('border-primary',   this.checked)
+      .toggleClass('border-primary', this.checked)
       .toggleClass('border-secondary opacity-75', !this.checked);
   });
 
@@ -685,7 +742,7 @@ function addRepeaterValidation(formId, type, index) {
     if (!container) return;
 
     new Sortable(container, {
-      handle   : '.drag-handle',
+      handle: '.drag-handle',
       animation: 150,
       onEnd() {
         const orderedIds = Array.from(container.children)
@@ -693,14 +750,14 @@ function addRepeaterValidation(formId, type, index) {
           .filter(Boolean);
 
         $.ajax({
-          url : `/dashboard/organization/${CFG.orgId}/programs/reorder`,
+          url: `/dashboard/organization/${CFG.orgId}/programs/reorder`,
           type: 'POST',
           data: {
             ordered_ids: orderedIds,
-            _token     : $('meta[name="csrf-token"]').attr('content'),
+            _token: $('meta[name="csrf-token"]').attr('content'),
           },
           success: () => toastr.success('Order saved'),
-          error  : () => toastr.error('Reorder failed'),
+          error: () => toastr.error('Reorder failed'),
         });
       },
     });
@@ -817,19 +874,19 @@ function addRepeaterValidation(formId, type, index) {
     Object.keys(SECTION_FORM_PREFIX_MAP).forEach((key) => {
       const prefix = SECTION_FORM_PREFIX_MAP[key];
       initSectionValidator(`form-${key}`, {
-        [`${prefix}_title`]      : { validators: { notEmpty: { message: CFG.requiredMsg } } },
-        [`${prefix}_subtitle`]   : { validators: { notEmpty: { message: CFG.requiredMsg } } },
+        [`${prefix}_title`]: { validators: { notEmpty: { message: CFG.requiredMsg } } },
+        [`${prefix}_subtitle`]: { validators: { notEmpty: { message: CFG.requiredMsg } } },
         [`${prefix}_description`]: { validators: { notEmpty: { message: CFG.requiredMsg } } },
       });
     });
 
     /* ── Existing (server-rendered) repeater items ──────── */
     $('.repeater-item').each(function () {
-      const $item      = $(this);
-      const formId     = $item.closest('form').attr('id');
+      const $item = $(this);
+      const formId = $item.closest('form').attr('id');
       const $container = $item.parent();
-      const type       = getTypeByContainer($container);
-      const idx        = parseInt($item.data('index'), 10);
+      const type = getTypeByContainer($container);
+      const idx = parseInt($item.data('index'), 10);
 
       if (formId && type && type !== 'custom') {
         addRepeaterValidation(formId, type, idx);

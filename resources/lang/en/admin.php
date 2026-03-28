@@ -3582,4 +3582,6 @@ return [
 	'items' => 'items',
 	'service_details' => 'Service Details',
 	'digits_only_validation' => 'This field must contain digits only',
+	'serviceProvider_desc' => 'Offer your services to startups',
+	'metric_number_validation' => 'Please enter a valid number (e.g., 100, 100.5, 100+, 1M, 75%)',
 ];
