@@ -308,6 +308,8 @@ $(document).ready(function() {
 		EDITABLE_FIELDS: ['rev','cogs','sal','opex','da','int','tax','rec','inv','pay','capex','debt']
 	};
 
+	console.log('CONFIG.IS_CURRENCY_DISABLED', CONFIG.IS_CURRENCY_DISABLED);
+
 	// ═══════════════════════════════════════════════════════════════════════
 	// STATE
 	// ═══════════════════════════════════════════════════════════════════════
@@ -442,6 +444,7 @@ $(document).ready(function() {
 			dataType: 'json'
 		})
 		.done(function(data) {
+			console.log('data', data);
 			if (!data.success) {
 				handleError(data.message ?? '{{ __("admin.error_loading_financial_data") }}');
 				return;
@@ -470,8 +473,10 @@ $(document).ready(function() {
 			updateHeaders(data.valuation_date);
 			updateHistoryBadges(data.valuation_date);
 		})
-		.fail(function(err) {
-			handleError('{{ __("admin.error_loading_financial_data") }}');
+		.fail(function(err, xhr) {
+			const errMsg = err.responseJSON?.message;
+			console.log('errMsg', errMsg);
+			handleError(err.responseJSON?.message || '{{ __("admin.error_loading_financial_data") }}');
 			console.error('[FinancialProjection] Load error:', err);
 		})
 		.always(function() {

@@ -3583,4 +3583,7 @@ return [
 	'service_details' => 'Service Details',
 	'digits_only_validation' => 'This field must contain digits only',
 	'serviceProvider_desc' => 'Offer your services to startups',
+	'error_loading_financial_data' => 'Error loading financial data. Please try again later.',
+	'change_currency_warning' => 'Once the currency is changed, it cannot be changed again. Do you want to continue?',
+	'financial_projection_saved_successfully' => 'Financial projection saved successfully.',
 ];
