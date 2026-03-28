@@ -83,6 +83,7 @@ class ServiceProviderProfileController extends Controller
                 's.status',
                 's.avg_rating',
                 's.created_at',
+                's.service_category_id as category_id',
                 "sc.name_{$l} as category_name",
             ])
             ->get();
@@ -164,10 +165,13 @@ class ServiceProviderProfileController extends Controller
 
         // 10. Decode tags
         $tags = [];
-        if (!empty($provider->tags)) {
+        /* if (!empty($provider->tags)) {
             $decoded = json_decode($provider->tags, true);
             $tags = is_array($decoded) ? $decoded : [];
-        }
+        }*/
+        $tags = $services->pluck('category_name')->map(function ($name) {
+            return str_replace(['   ', '  '], '' , $name);
+        })->unique()->values()->toArray();
 
         // 11. Build stats array
         $stats = [];
