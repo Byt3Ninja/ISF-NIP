@@ -136,7 +136,7 @@
               @if($organization->img_url)
                 <img src="{{ $organization->imageUrl }}" alt="Logo" width="32" height="32" class="me-2 object-fit-contain rounded" />
               @endif
-              <span class="app-brand-text text-dark fw-bold">{{ Str::limit($isRtl ? $organization->name_ar : $organization->name_en, 10) }}</span>
+              <span class="app-brand-text text-dark fw-bold">{{ Str::limit($isRtl ? $organization->name_ar : $organization->name_en, 20) }}</span>
             </a>
           </div>
 
@@ -280,8 +280,8 @@
             </h1>
             
             <!-- Description -->
-            <h2 class="hero-sub-title h5 mb-6 mb-md-12 line-clamp-3">
-              {{ $organization->bio }}
+            <h2 class="hero-sub-title h5 mb-6 mb-md-12">
+              {{ Str::limit($organization->bio, 300) }}
             </h2>
 
             <!-- Industries -->
