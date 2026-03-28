@@ -3646,4 +3646,6 @@ return [
 	'metric_number_validation' => 'الرجاء إدخال رقم صحيح (مثلاً: 100، 100.5، 100+، مليون، 75%)',
 	'wizard_organization' => 'تنظيم المؤسسه',
 	'District' => 'حي',
+	'accepted_formats' => 'الصيغ المقبولة',
+	'max_size' => 'الحد الأقصى',
 ];

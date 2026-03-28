@@ -3287,7 +3287,7 @@ return [
 	'image_only_allowed' => 'Only image files are allowed (PNG, JPG, JPEG, WEBP, SVG).',
 	'no_file_selected' => 'No file selected',
 	'work_item' => 'Work Item',
-	'add_another_work_item' => 'Add another work item',
+	'add_another_work_item' => 'Add another Work Item',
 	'media_label' => 'Media (Image / Video)',
 	'media_preview' => 'Media Preview',
 	'save_and_next' => 'Save & Next',
@@ -3586,4 +3586,6 @@ return [
 	'metric_number_validation' => 'Please enter a valid number (e.g., 100, 100.5, 100+, 1M, 75%)',
 	'wizard_organization' => 'Wizard Organization',
 	'District' => 'District',
+	'accepted_formats' => 'Accepted Formats',
+	'max_size' => 'Max Size',
 ];
