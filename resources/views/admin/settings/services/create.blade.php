@@ -12,7 +12,11 @@
 <form method="post" action="{{ route('services.store') }}" enctype="multipart/form-data" id="serviceForm">
   {!! csrf_field() !!}
   
-  <div class="card shadow-sm">
+  <div class="card">
+    <div class="card-header border-bottom mb-6">
+      <h5 class="card-title mb-0">{{ __('admin.Add new service') }}</h5>
+    </div>
+
     <div class="card-body">
 
       @if (session()->has('msg'))
@@ -45,8 +49,8 @@
       <!-- Service Details -->
       <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h5 class="card-title mb-1">{{ __('admin.Add new service') }}</h5>
-          <small class="text-muted">{{ __('admin.add_service_description') }}</small>
+          <h5 class="card-title mb-1">{{ __('admin.add_service_description') }}</h5>
+          <span class="text-muted">{{ __('admin.service_details') }}</span>
         </div>
         <div class="form-check form-switch">
           <input class="form-check-input" type="checkbox" id="activeStatus" name="is_active" value="1" {{ old('is_active', 1) ? 'checked' : '' }}>
@@ -123,7 +127,7 @@
       <!-- Categorization & Assignment -->
       <div class="mb-4">
         <h5 class="mb-1">{{ __('admin.service_categorization_label') }}</h5>
-        <small class="text-muted">{{ __('admin.service_categorization_description') }}</small>
+        <span class="text-muted">{{ __('admin.service_categorization_description') }}</span>
       </div>
   
       <!-- Category -->

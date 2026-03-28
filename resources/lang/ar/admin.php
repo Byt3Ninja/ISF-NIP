@@ -3637,4 +3637,5 @@ return [
 	'maximum_limit_reached' => 'تم الوصول إلى الحد الأقصى',
 	'allowed' => 'مسموح',
 	'items' => 'عناصر',
+	'service_details' => 'تفاصيل الخدمة',
 ];
