@@ -3638,4 +3638,5 @@ return [
 	'allowed' => 'مسموح',
 	'items' => 'عناصر',
 	'service_details' => 'تفاصيل الخدمة',
+	'digits_only_validation' => 'يجب أن يحتوي هذا الحقل على أرقام فقط.',
 ];
