@@ -35,12 +35,13 @@
                 @endif
                 
                 @if($form && $form['build_data'] && count($form['build_data']) > 0)
+                @if( $answers->count() == 0 )
                 <form method="post" action="/dashboard/cycles/save" enctype="multipart/form-data" class="mt-3">
                   @csrf
                   <input type="hidden" name="cycle" value="{{$c}}" />
                   <input type="hidden" name="id" value="{{$step->id}}" />
                   <input type="hidden" name="field_ids" value="{{ $field_ids }}" />
-                 
+                @endif 
                    @foreach($form['build_data'] as $sectionIndex => $section)
                   <div class="section-wrapper mb-4" data-section-logic="{{ $section['logic'] ?? 'continue' }}" data-section-id="{{ $sectionIndex }}">
                     @if($section['title'] || $section['description'])
@@ -79,6 +80,9 @@
                                   <select 
                                     id="{{ $id_for }}" 
                                     name="{{ $field_name }}"
+                                    @if( $answers->count() > 0 )
+                                    disabled
+                                    @endif
                                     class="form-select question-logic @error($field_name) is-invalid @enderror"
                                     {{ $question['is_required'] ? 'required' : '' }}
                                   >
@@ -98,6 +102,9 @@
                                     id="{{ $id_for }}" 
                                     name="{{ $field_name }}" 
                                     rows="3"
+                                    @if( $answers->count() > 0 )
+                                    disabled
+                                    @endif
                                     class="form-control @error($field_name) is-invalid @enderror"
                                     placeholder="{{ $question['label'] }}"
                                     {{ $question['is_required'] ? 'required' : '' }}
@@ -111,6 +118,9 @@
                                       <input 
                                         class="form-check-input question-logic" 
                                         type="radio" 
+                                        @if( $answers->count() > 0 )
+                                        disabled
+                                        @endif
                                         name="{{ $field_name }}" 
                                         id="{{ $id_for }}_{{ $optionIndex }}" 
                                         value="{{ $option }}"
@@ -129,14 +139,21 @@
                                 @case('checkboxes')
                                   <div class="options-group">
                                     @foreach($question['options'] as $optionIndex => $option)
+                                    @php
+                                      $options_data = collect($answers)->where('field_id', $question['id'])->first()?->answer ?? '[]';
+                                      $options_data = json_decode($options_data, true);
+                                    @endphp
                                     <div class="form-check mb-2">
                                       <input 
+                                        @if( $answers->count() > 0 )
+                                        disabled
+                                        @endif
                                         class="form-check-input question-logic" 
                                         type="checkbox" 
                                         name="{{ $field_name }}[]" 
                                         id="{{ $id_for }}_{{ $optionIndex }}" 
                                         value="{{ $option }}"
-                                        checked="{{ is_array(old($field_name)) && in_array($option, old($field_name)) ? 'checked' : '' }}"
+                                        {{ is_array($options_data) && in_array($option, $options_data) ? 'checked' : '' }}
                                         data-logic="{{ $question['logic'][$option] ?? 'continue' }}"
                                       />
                                       <label class="form-check-label" for="{{ $id_for }}_{{ $optionIndex }}">
@@ -149,6 +166,9 @@
 
                                 @case('linear_scale')
                                   <select 
+                                    @if( $answers->count() > 0 )
+                                    disabled
+                                    @endif
                                     id="{{ $id_for }}" 
                                     name="{{ $field_name }}"
                                     class="form-select @error($field_name) is-invalid @enderror"
@@ -164,6 +184,9 @@
                                 @case('date')
                                   <input 
                                     type="text"
+                                    @if( $answers->count() > 0 )
+                                    disabled
+                                    @endif
                                     class="form-control datepicker @error($field_name) is-invalid @enderror"
                                     id="{{ $id_for }}" 
                                     name="{{ $field_name }}" 
@@ -176,6 +199,9 @@
                                 @case('time')
                                   <input 
                                     type="text"
+                                    @if( $answers->count() > 0 )
+                                    disabled
+                                    @endif
                                     class="form-control timepicker @error($field_name) is-invalid @enderror"
                                     id="{{ $id_for }}" 
                                     name="{{ $field_name }}" 
@@ -188,6 +214,9 @@
                                 @case('file')
                                   <input 
                                     type="file"
+                                    @if( $answers->count() > 0 )
+                                    disabled
+                                    @endif
                                     class="form-control @error($field_name) is-invalid @enderror"
                                     id="{{ $id_for }}" 
                                     name="{{ $field_name }}"
@@ -208,6 +237,9 @@
                                 @default
                                   <input 
                                     type="text"
+                                    @if( $answers->count() > 0 )
+                                    disabled
+                                    @endif
                                     class="form-control @error($field_name) is-invalid @enderror"
                                     id="{{ $id_for }}" 
                                     name="{{ $field_name }}" 
@@ -228,10 +260,14 @@
                     </div>
                   </div>
                   @endforeach
+                  @if( $answers->count() == 0 )
                   <button type="submit" class="btn btn-primary btn-lg mt-4">
                     <i class="ti ti-send me-2"></i>{{ __('admin.submit') }}
                   </button>
+                  @endif
+                @if( $answers->count() == 0 )
                 </form>
+                @endif
                 @else
                   <div class="alert alert-warning">
                     {{ __('cycles.No Fields') }}
