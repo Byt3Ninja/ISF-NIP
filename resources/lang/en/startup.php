@@ -552,4 +552,5 @@ return [
   'no_forms' => 'No forms',
   'change_valuation_date' => 'Change valuation date',
 	'change_valuation_date_warning' => 'Are you sure you want to change the valuation date? You have unsaved data.',
+  'You cannot add this startup to alumni because it has no country' => 'You cannot add this startup to alumni because it has no country',
 ];
