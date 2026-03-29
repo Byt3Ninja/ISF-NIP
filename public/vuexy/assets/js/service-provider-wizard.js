@@ -11,66 +11,66 @@
 
   const translations = {
     en: {
-      required:                        'This field is required',
-      logo:                            'Unsupported. Upload PNG, JPG, JPEG, WEBP or SVG | Max size: 5MB',
-      logoSize:                        'Logo size should not exceed 5MB',
-      hero_image:                      'Unsupported. Upload PNG, JPG, JPEG, WEBP or SVG | Max size: 10MB',
-      phone:                           'Should contain numbers only',
-      invalidPhone:                    'Should be a valid number',
-      invalid_url:                     'The URL is not valid',
-      email:                           'E-mail should be a valid email address',
-      media_required:                  'Media is required',
-      invalid_media:                   'Invalid file or size too large',
-      title_required:                  'Title is required',
-      title_max:                       'Title must be less than 50 chars',
-      desc_required:                   'Description is required',
-      desc_max:                        'Description must be less than 100 chars',
-      save_and_next:                   'Save & Next',
-      submit:                          'Submit',
-      saving:                          'Saving...',
-      submitting:                      'Submitting...',
-      stat_value_required:             'Value is required when a label is provided',
-      stat_label_required:             'Label is required when a value is provided',
-      complete_work_item_details:      'Complete the work item details.',
+      required: 'This field is required',
+      logo: 'Unsupported. Upload PNG, JPG, JPEG, WEBP or SVG | Max size: 5MB',
+      logoSize: 'Logo size should not exceed 5MB',
+      hero_image: 'Unsupported. Upload PNG, JPG, JPEG, WEBP or SVG | Max size: 10MB',
+      phone: 'Should contain numbers only',
+      invalidPhone: 'Should be a valid number',
+      invalid_url: 'The URL is not valid',
+      email: 'E-mail should be a valid email address',
+      media_required: 'Media is required',
+      invalid_media: 'Invalid file or size too large',
+      title_required: 'Title is required',
+      title_max: 'Title must be less than 50 chars',
+      desc_required: 'Description is required',
+      desc_max: 'Description must be less than 100 chars',
+      save_and_next: 'Save & Next',
+      submit: 'Submit',
+      saving: 'Saving...',
+      submitting: 'Submitting...',
+      stat_value_required: 'Value is required when a label is provided',
+      stat_label_required: 'Label is required when a value is provided',
+      complete_work_item_details: 'Complete the work item details.',
       unsupported_file_type_portfolio: 'Unsupported file type. Upload PNG, JPG, WEBP, or MP4.',
-      file_size_too_large_portfolio:   'File size must be 10MB or less.',
-      change_file:                     'Change File',
+      file_size_too_large_portfolio: 'File size must be 10MB or less.',
+      change_file: 'Change File',
     },
     ar: {
-      required:                        'هذا الحقل مطلوب',
-      logo:                            'غير مدعوم. قم بتحميل PNG, JPG, JPEG, WEBP أو SVG | حجم الشعار لا يجب أن يتجاوز 5 MB',
-      logoSize:                        'حجم الشعار لا يجب أن يتجاوز 5 ميغابايت',
-      hero_image:                      'غير مدعوم. قم بتحميل PNG, JPG, JPEG, WEBP أو SVG | حجم الصورة لا يجب أن يتجاوز 10 MB',
-      phone:                           'يجب أن يحتوي على أرقام فقط',
-      invalidPhone:                    'يجب أن يكون رقم صالح',
-      invalid_url:                     'الرابط غير صالح',
-      email:                           'البريد الإلكتروني يجب أن يكون عنوان بريد إلكتروني صالح',
-      media_required:                  'الملف مطلوب',
-      invalid_media:                   'ملف غير صالح أو حجم كبير جداً',
-      title_required:                  'العنوان مطلوب',
-      title_max:                       'العنوان يجب أن يكون أقل من 50 حرف',
-      desc_required:                   'الوصف مطلوب',
-      desc_max:                        'الوصف يجب أن يكون أقل من 100 حرف',
-      at_least_one_item:               'يرجى إضافة عمل واحد على الأقل',
-      save_and_next:                   'حفظ & التالي',
-      submit:                          'إرسال',
-      saving:                          'جاري الحفظ...',
-      submitting:                      'جاري الإرسال...',
-      stat_value_required:             'القيمة مطلوبه عند إدخال عنوان',
-      stat_label_required:             'العنوان مطلوب عند إدخال قيمة',
-      complete_work_item_details:      'يرجى استكمال بيانات العمل',
+      required: 'هذا الحقل مطلوب',
+      logo: 'غير مدعوم. قم بتحميل PNG, JPG, JPEG, WEBP أو SVG | حجم الشعار لا يجب أن يتجاوز 5 MB',
+      logoSize: 'حجم الشعار لا يجب أن يتجاوز 5 ميغابايت',
+      hero_image: 'غير مدعوم. قم بتحميل PNG, JPG, JPEG, WEBP أو SVG | حجم الصورة لا يجب أن يتجاوز 10 MB',
+      phone: 'يجب أن يحتوي على أرقام فقط',
+      invalidPhone: 'يجب أن يكون رقم صالح',
+      invalid_url: 'الرابط غير صالح',
+      email: 'البريد الإلكتروني يجب أن يكون عنوان بريد إلكتروني صالح',
+      media_required: 'الملف مطلوب',
+      invalid_media: 'ملف غير صالح أو حجم كبير جداً',
+      title_required: 'العنوان مطلوب',
+      title_max: 'العنوان يجب أن يكون أقل من 50 حرف',
+      desc_required: 'الوصف مطلوب',
+      desc_max: 'الوصف يجب أن يكون أقل من 100 حرف',
+      at_least_one_item: 'يرجى إضافة عمل واحد على الأقل',
+      save_and_next: 'حفظ & التالي',
+      submit: 'إرسال',
+      saving: 'جاري الحفظ...',
+      submitting: 'جاري الإرسال...',
+      stat_value_required: 'القيمة مطلوبه عند إدخال عنوان',
+      stat_label_required: 'العنوان مطلوب عند إدخال قيمة',
+      complete_work_item_details: 'يرجى استكمال بيانات العمل',
       unsupported_file_type_portfolio: 'نوع الملف غير مدعوم. يرجى رفع PNG أو JPG أو WEBPأو MP4',
-      file_size_too_large_portfolio:   'يجب ألا يزيد حجم الملف عن 10 ميجابايت',
-      change_file:                     'تغيير الملف',
+      file_size_too_large_portfolio: 'يجب ألا يزيد حجم الملف عن 10 ميجابايت',
+      change_file: 'تغيير الملف',
     }
   };
 
   // ─── Globals ─────────────────────────────────────────────────────────────────
 
   const lang = $('html').attr('lang') || 'en';
-  const t    = translations[lang];
+  const t = translations[lang];
 
-  let iti              = null;
+  let iti = null;
   let step1InitialData = null;
   let step2InitialData = null;
   let step3InitialData = null;
@@ -83,14 +83,16 @@
   let FormValidation3 = null;
   let FormValidation4 = null;
 
-  const $select2      = $('.select2');
+  const $select2 = $('.select2');
   const $intlTelInput = $('.intl-tel-input');
+
 
   const wizardEl = document.querySelector('#wizard-validation');
   if (!wizardEl) return;
 
-  const wizardForm      = wizardEl.querySelector('#service-provider-form-wizard');
-  const stepEls         = {
+  const wizardForm = wizardEl.querySelector('#service-provider-form-wizard');
+  const logoInput = wizardForm.querySelector('input[name="company_logo"]');
+  const stepEls = {
     1: wizardForm.querySelector('#step-1-basics'),
     2: wizardForm.querySelector('#step-2-booking'),
     3: wizardForm.querySelector('#step-3-stats'),
@@ -109,10 +111,10 @@
     document.querySelectorAll('.step-trigger').forEach((btn, index) => {
       // Step index 0 is always accessible. Others depend on completedSteps Set.
       const isAccessible = index === 0 || completedSteps.has(index);
-      
+
       btn.disabled = !isAccessible;
       btn.classList.toggle('disabled', !isAccessible);
-      
+
       // Update styling for visual feedback
       const stepWrapper = btn.closest('.step');
       if (stepWrapper) {
@@ -125,7 +127,7 @@
   document.querySelectorAll('.step-trigger').forEach((btn, index) => {
     btn.addEventListener('click', (e) => {
       if (index === 3) buildStep4Validation();
-      
+
       if (index > 0 && !completedSteps.has(index)) {
         e.preventDefault();
         e.stopPropagation();
@@ -139,7 +141,7 @@
 
   function isStep1Complete() {
     const requiredFields = ['company_name', 'contact_name', 'email', 'phone', 'country', 'state', 'about'];
-    
+
     // Check text fields
     const allFieldsFilled = requiredFields.every(name => {
       const el = wizardForm.querySelector(`[name="${name}"]`);
@@ -153,16 +155,15 @@
     if (emailEl && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailEl.value.trim())) return false;
 
     // Logo check (file or existing preview)
-    const logoInput   = wizardForm.querySelector('input[name="company_logo"]');
     const logoPreview = document.getElementById('logo-preview-image');
     const hasLogo = (logoInput?.files?.length > 0) || (logoPreview?.getAttribute('src') && !logoPreview.classList.contains('d-none'));
-    
+
     return hasLogo;
   }
 
   function isStep2Complete() {
     const requiredFields = ['hero_description', 'services_short_description', 'operating_mode', 'operating_region'];
-    
+
     const allFieldsFilled = requiredFields.every(name => {
       const el = wizardForm.querySelector(`[name="${name}"]`);
       return el && el.value.trim() !== '';
@@ -170,10 +171,10 @@
 
     if (!allFieldsFilled) return false;
 
-    const heroInput    = wizardForm.querySelector('input[name="hero_image"]');
+    const heroInput = wizardForm.querySelector('input[name="hero_image"]');
     const existingHero = document.querySelector('#step-2-booking img');
     const hasHero = (heroInput?.files?.length > 0) || (existingHero?.getAttribute('src'));
-    
+
     return hasHero;
   }
 
@@ -220,7 +221,7 @@
 
     // Step 3 is optional, so if we are here, we check step 4
     if (isStep4Complete()) {
-        completedSteps.add(4);
+      completedSteps.add(4);
     }
 
     updateStepButtons();
@@ -333,21 +334,59 @@
 
   FormValidation1 = FormValidation.formValidation(stepEls[1], {
     fields: {
-      company_logo: { validators: { callback: { message: t.required, callback: (input) => isStep1Complete() }, file: { extension: 'png,jpg,jpeg,svg,webp', maxSize: 5*1024*1024, message: t.logo } } },
+      company_logo: {
+        validators: {
+          callback: {
+            message: t.required,
+            callback: function (input) {
+              const logoPreview = document.getElementById('logo-preview-image');
+              const hasNewFile = logoInput?.files?.length > 0;
+              const hasPreview = logoPreview?.getAttribute('src') && !logoPreview.classList.contains('d-none');
+
+              // Scroll to parent top
+              logoInput.closest('.button-wrapper').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+              return hasNewFile || !!hasPreview;
+            }
+          },
+          file: {
+            extension: 'png,jpg,jpeg,svg,webp',
+            maxSize: 5 * 1024 * 1024,
+            message: t.logo
+          }
+        }
+      },
       company_name: { validators: { notEmpty: { message: t.required } } },
       contact_name: { validators: { notEmpty: { message: t.required } } },
       email: { validators: { notEmpty: { message: t.required }, emailAddress: { message: t.email } } },
       phone: { validators: { notEmpty: { message: t.required }, callback: buildPhoneValidator(true) } },
-      whatsapp: { validators: { notEmpty: { message: t.required }, callback: buildPhoneValidator(true) } },
+      whatsapp: {
+        validators: {
+          callback: {
+            message: t.phone, // or your phone error message
+            callback: function (input) {
+              const value = input.value.trim();
+
+              // ✅ If empty → valid (skip validation)
+              if (value.length === 0) {
+                return true;
+              }
+
+              // ✅ If not empty → validate phone
+              return buildPhoneValidator(true).callback(input);
+            }
+          }
+        }
+      },
       country: { validators: { notEmpty: { message: t.required } } },
       state: { validators: { notEmpty: { message: t.required } } },
       about: { validators: { notEmpty: { message: t.required } } },
     },
     plugins: {
-        trigger: new FormValidation.plugins.Trigger({ event: { file: 'change' } }),
-        bootstrap5: new FormValidation.plugins.Bootstrap5({ eleValidClass: '', rowSelector: '.mb-4' }),
-        autoFocus: new FormValidation.plugins.AutoFocus(),
-        submitButton: new FormValidation.plugins.SubmitButton(),
+      trigger: new FormValidation.plugins.Trigger({ event: { file: 'change' } }),
+      bootstrap5: new FormValidation.plugins.Bootstrap5({ eleValidClass: '', rowSelector: '.mb-4' }),
+      autoFocus: new FormValidation.plugins.AutoFocus(),
+      submitButton: new FormValidation.plugins.SubmitButton(),
     }
   }).on('core.form.valid', () => {
     if (step1InitialData === getStep1Data()) { validationStepper.next(); return; }
@@ -380,35 +419,194 @@
       },
       hero_description: { validators: { notEmpty: { message: t.required } } },
       services_short_description: { validators: { notEmpty: { message: t.required } } },
+      appointment_link: { validators: { uri: { message: t.invalid_url } } },
       operating_mode: { validators: { notEmpty: { message: t.required } } },
       operating_region: { validators: { notEmpty: { message: t.required } } },
     },
     plugins: {
-        trigger: new FormValidation.plugins.Trigger({ event: { file: 'change' } }),
-        bootstrap5: new FormValidation.plugins.Bootstrap5({ eleValidClass: '', rowSelector: '.mb-4' }),
-        submitButton: new FormValidation.plugins.SubmitButton(),
+      trigger: new FormValidation.plugins.Trigger({ event: { file: 'change' } }),
+      bootstrap5: new FormValidation.plugins.Bootstrap5({ eleValidClass: '', rowSelector: '.mb-4' }),
+      submitButton: new FormValidation.plugins.SubmitButton(),
     }
   }).on('core.form.valid', () => {
     if (step2InitialData === getStep2Data()) { validationStepper.next(); return; }
     saveStepData(1, FormValidation2);
   });
 
-  // (Step 3 and Step 4 validation logic remains same as original but called via btn-next)
-  // ... [Step 3 & Step 4 field logic omitted for brevity, keeping existing logic] ...
-  
+  FormValidation3 = FormValidation.formValidation(stepEls[3], {
+    fields: {
+      value1: {
+        validators: {
+          callback: {
+            message: translations[lang].stat_value_required,
+            callback: function (input) {
+              const label = document.getElementById('label1').value.trim();
+              return {
+                valid: !label || input.value.trim() !== ''
+              };
+            }
+          }
+        }
+      },
+      label1: {
+        validators: {
+          callback: {
+            message: translations[lang].stat_label_required,
+            callback: function (input) {
+              const value = document.getElementById('value1').value.trim();
+              return {
+                valid: !value || input.value.trim() !== ''
+              };
+            }
+          }
+        }
+      },
+      value2: {
+        validators: {
+          callback: {
+            message: translations[lang].stat_value_required,
+            callback: function (input) {
+              const label = document.getElementById('label2').value.trim();
+              return {
+                valid: !label || input.value.trim() !== ''
+              };
+            }
+          }
+        }
+      },
+      label2: {
+        validators: {
+          callback: {
+            message: translations[lang].stat_label_required,
+            callback: function (input) {
+              const value = document.getElementById('value2').value.trim();
+              return {
+                valid: !value || input.value.trim() !== ''
+              };
+            }
+          }
+        }
+      },
+      value3: {
+        validators: {
+          callback: {
+            message: translations[lang].stat_value_required,
+            callback: function (input) {
+              const label = document.getElementById('label3').value.trim();
+              return {
+                valid: !label || input.value.trim() !== ''
+              };
+            }
+          }
+        }
+      },
+      label3: {
+        validators: {
+          callback: {
+            message: translations[lang].stat_label_required,
+            callback: function (input) {
+              const value = document.getElementById('value3').value.trim();
+              return {
+                valid: !value || input.value.trim() !== ''
+              };
+            }
+          }
+        }
+      },
+      value4: {
+        validators: {
+          callback: {
+            message: translations[lang].stat_value_required,
+            callback: function (input) {
+              const label = document.getElementById('label4').value.trim();
+              return {
+                valid: !label || input.value.trim() !== ''
+              };
+            }
+          }
+        }
+      },
+      label4: {
+        validators: {
+          callback: {
+            message: translations[lang].stat_label_required,
+            callback: function (input) {
+              const value = document.getElementById('value4').value.trim();
+              return {
+                valid: !value || input.value.trim() !== ''
+              };
+            }
+          }
+        }
+      }
+    },
+    plugins: {
+      trigger: new FormValidation.plugins.Trigger(),
+      bootstrap5: new FormValidation.plugins.Bootstrap5({
+        eleValidClass: '',
+        rowSelector: '.mb-4'
+      }),
+      autoFocus: new FormValidation.plugins.AutoFocus(),
+      submitButton: new FormValidation.plugins.SubmitButton()
+    }
+  })
+    .on('core.form.valid', function () {
+      // If no changes → skip AJAX
+      if (step3InitialData === getStep3Data()) { validationStepper.next(); return; }
+      // Otherwise save
+      saveStepData(2, FormValidation3);
+    })
+    .on('core.validator.validated', function (e) {
+      // When a field is validated, revalidate its paired field
+      const fieldPairs = {
+        'value1': 'label1',
+        'label1': 'value1',
+        'value2': 'label2',
+        'label2': 'value2',
+        'value3': 'label3',
+        'label3': 'value3',
+        'value4': 'label4',
+        'label4': 'value4'
+      };
+
+      const pairedField = fieldPairs[e.field];
+      if (pairedField && !e.result.valid) {
+        // Only revalidate if current field became invalid
+        FormValidation3.revalidateField(pairedField);
+      }
+    });
+
+
+  // Add input event listeners to trigger cross-validation
+  for (let i = 1; i <= 4; i++) {
+    const valueField = document.getElementById(`value${i}`);
+    const labelField = document.getElementById(`label${i}`);
+
+    valueField.addEventListener('input', function () {
+      if (labelField.value.trim()) {
+        FormValidation3.revalidateField(`label${i}`);
+      }
+    });
+
+    labelField.addEventListener('input', function () {
+      if (valueField.value.trim()) {
+        FormValidation3.revalidateField(`value${i}`);
+      }
+    });
+  }
+
   // ─── Core Wizard Actions ─────────────────────────────────────────────────────
 
   wizardEl.querySelector('.btn-next').addEventListener('click', () => {
     const idx = validationStepper._currentIndex;
     if (idx === 0) FormValidation1.validate();
     else if (idx === 1) FormValidation2.validate();
-    else if (idx === 2) { 
-        // Step 3 validation or skip
-        validationStepper.next(); 
+    else if (idx === 2) {
+      FormValidation3.validate();
     }
     else if (idx === 3) {
-        if (!FormValidation4) buildStep4Validation();
-        FormValidation4.validate();
+      if (!FormValidation4) buildStep4Validation();
+      FormValidation4.validate();
     }
     else if (idx === 4) submitFormData();
   });
@@ -424,23 +622,23 @@
     }
 
     const fields = {};
-    const $cards  = $('.work-item-card');
+    const $cards = $('.work-item-card');
 
     $cards.each(function (index) {
       const $card = $(this);
       const names = {
-        id:    `portfolio[${index}][id]`,
-        del:   `portfolio[${index}][delete]`,
+        id: `portfolio[${index}][id]`,
+        del: `portfolio[${index}][delete]`,
         media: `portfolio[${index}][media]`,
         title: `portfolio[${index}][title]`,
-        desc:  `portfolio[${index}][description]`,
+        desc: `portfolio[${index}][description]`,
       };
 
-      $card.find('.item-id').attr('name',     names.id);
+      $card.find('.item-id').attr('name', names.id);
       $card.find('.delete-flag').attr('name', names.del);
       $card.find('.media-input').attr('name', names.media);
       $card.find('.title-input').attr('name', names.title);
-      $card.find('.desc-input').attr('name',  names.desc);
+      $card.find('.desc-input').attr('name', names.desc);
 
       if ($card.find('.delete-flag').val() === 'true' || !$card.is(':visible')) return;
 
@@ -449,18 +647,18 @@
           callback: {
             message: t.complete_work_item_details,
             callback: (input) => {
-              const $item    = $(input.element).closest('.work-item-card');
-              const hasFile  = input.element.files && input.element.files.length > 0;
+              const $item = $(input.element).closest('.work-item-card');
+              const hasFile = input.element.files && input.element.files.length > 0;
               const hasExist = $item.find('.upload-area img, .upload-area video').length > 0;
-              const title    = $item.find('.title-input').val().trim();
-              const desc     = $item.find('.desc-input').val().trim();
+              const title = $item.find('.title-input').val().trim();
+              const desc = $item.find('.desc-input').val().trim();
               return (title && desc) ? (hasFile || hasExist) : true;
             }
           },
           file: {
             extension: 'png,jpg,jpeg,webp,mp4',
-            maxSize:   10485760,
-            message:   t.unsupported_file_type_portfolio,
+            maxSize: 10485760,
+            message: t.unsupported_file_type_portfolio,
           }
         }
       };
@@ -471,10 +669,10 @@
           callback: {
             message: t.complete_work_item_details,
             callback: (input) => {
-              const $item    = $(input.element).closest('.work-item-card');
-              const hasFile  = $item.find('.media-input')[0].files.length > 0;
+              const $item = $(input.element).closest('.work-item-card');
+              const hasFile = $item.find('.media-input')[0].files.length > 0;
               const hasExist = $item.find('.upload-area img, .upload-area video').length > 0;
-              const desc     = $item.find('.desc-input').val().trim();
+              const desc = $item.find('.desc-input').val().trim();
               return (desc || hasFile || hasExist) ? input.value.trim() !== '' : true;
             }
           }
@@ -487,10 +685,10 @@
           callback: {
             message: t.complete_work_item_details,
             callback: (input) => {
-              const $item    = $(input.element).closest('.work-item-card');
-              const hasFile  = $item.find('.media-input')[0].files.length > 0;
+              const $item = $(input.element).closest('.work-item-card');
+              const hasFile = $item.find('.media-input')[0].files.length > 0;
               const hasExist = $item.find('.upload-area img, .upload-area video').length > 0;
-              const title    = $item.find('.title-input').val().trim();
+              const title = $item.find('.title-input').val().trim();
               return (title || hasFile || hasExist) ? input.value.trim() !== '' : true;
             }
           }
@@ -507,7 +705,7 @@
           rowSelector: (field) =>
             field === '_portfolio_at_least_one' ? '#portfolio-error-container' : '.mb-4, .col-md-4, .col-md-8',
         }),
-        autoFocus:    new FormValidation.plugins.AutoFocus(),
+        autoFocus: new FormValidation.plugins.AutoFocus(),
         submitButton: new FormValidation.plugins.SubmitButton(),
       }
     }).on('core.form.valid', () => saveStepData(3, FormValidation4));
@@ -516,6 +714,7 @@
   window.rebuildPortfolioValidation = buildStep4Validation;
 
   function saveStepData(stepIndex, formValidationInstance) {
+    console.log('Step', stepIndex + 1, 'save triggered');
     const route = wizardForm.getAttribute(`data-route-step-${stepIndex + 1}`);
     const nextBtn = document.querySelector('.btn-next');
     const $span = $(nextBtn).find('span');
@@ -539,7 +738,11 @@
           validationStepper.next();
         }
       },
-      error() {
+      error(xhr) {
+        releaseFailureAlert({
+          title: lang === 'ar' ? 'خطأ!' : 'Error!',
+          message: xhr.responseJSON?.message || (lang === 'ar' ? 'حدث خطأ أثناء الحفظ' : 'An error occurred while saving'),
+        });
         nextBtn.disabled = false;
         $span.text(origText);
       }
@@ -556,16 +759,22 @@
 
   // ─── Initialization ──────────────────────────────────────────────────────────
 
+  logoInput?.addEventListener('change', () => {
+    FormValidation1.revalidateField('company_logo');
+    syncStepUnlockState();
+  });
+
   document.addEventListener('DOMContentLoaded', () => {
     step1InitialData = getStep1Data();
     step2InitialData = getStep2Data();
-    
+    step3InitialData = getStep3Data();
+
     attachRealTimeListeners();
     syncStepUnlockState();
   });
 
-  window.rebuildPortfolioValidation = function() {
-      // implementation of portfolio validation rebuild
+  window.rebuildPortfolioValidation = function () {
+    // implementation of portfolio validation rebuild
   };
 
 })();
