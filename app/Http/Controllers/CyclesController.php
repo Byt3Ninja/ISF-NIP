@@ -1046,17 +1046,23 @@ class CyclesController extends Controller
 
             $id = $step->id;
 
-            $field_map_ids = Formfield::where('step_id', $id)
+            $the_form = BuilderForm::findOrFail( $step->data );
+            $fields = $the_form->fields()
+                ->withPivot('options')
+                ->orderBy('builder_fields.id', 'asc')
+                ->get();
+
+            /* $field_map_ids = Formfield::where('step_id', $id)
                 ->where('builder_forms_id', $step->data)
                 ->pluck('id')
                 ->toArray();
 
-            // جلب كل الحقول الخاصة بالـ step
             $fields = $step->fields()
                 ->where('builder_forms_id', $step->data)
                 ->orderBy('form_fields.id', 'asc')
-                ->get();
+                ->get();  */
 
+            $field_map_ids = $fields->pluck('pivot.id')->toArray();
             // تجهيز البيانات بشكل منسق
             $structured = $fields->map(function ($field) {
                 $options = json_decode($field->pivot->options ?? '{}', true) ?? [];
@@ -1096,7 +1102,7 @@ class CyclesController extends Controller
             })
             ->values()
             ->toArray();
-        $answers = [];
+            $answers = [];
             // البنية النهائية
             $data = [
                 'id'          => $step->id,
@@ -1133,21 +1139,32 @@ class CyclesController extends Controller
         // if ($step->to < now()->format('Y-m-d')){return redirect()->back()->with(['msg' => 'Error can\'t open form, step timed out.', 'class' => 'danger']);}
         $id = $step->id;
 
-        $get_fields = Formfield::where('step_id', $id)->where('builder_forms_id', $step->data)->get();
+        /* $get_fields = Formfield::where('step_id', $id)->where('builder_forms_id', $step->data)->get();
         $field_map_ids = $get_fields->pluck('id')->toArray();
 
         // جلب كل الحقول الخاصة بالـ step
         $fields = $step->fields()
             ->where('builder_forms_id', $step->data)
             ->orderBy('form_fields.id', 'asc')
-            ->get();
+            ->get(); */
 
+        $the_form = BuilderForm::findOrFail( $step->data );
+        $fields = $the_form->fields()
+                ->withPivot('options')
+                ->orderBy('builder_fields.id', 'asc')
+                ->get();
+
+        $fields = $fields->map(function($field) {
+            $options = json_decode($field->pivot->options ?? '{}', true) ?? [];
+            $field->options = $options;
+            return $field;
+        });
+        $field_map_ids = $fields->pluck('pivot.id')->toArray();
         // تجهيز البيانات بشكل منسق
-        $structured = $get_fields->map(function ($field) {
-            
+        $structured = $fields->map(function ($field) { 
             $options = (array) $field->options;
             return [
-                'id'          => $field->id,
+                'id'          => $field->pivot->id,
                 'label'       => $options['label'] ?? '',
                 'description' => $options['description'] ?? '',
                 'section'     => $options['section'] ?? 'N/A',
@@ -1216,17 +1233,31 @@ class CyclesController extends Controller
     {
      
         $id = $request->id;
+        $step = Step::where('id', $id)->first();
+
         $validator = Validator::make($request->all(), [
             'id' => 'required|integer|exists:steps,id',
             'field_ids' => 'required|string',
         ]);
         abort_if($validator->fails(), 422, "Data error");
-        
-        
+
 
         // generating validation rules based on dynamic field config data
         $field_map_ids = explode(",", $request->input('field_ids'));
-        
+
+        $the_form = BuilderForm::findOrFail( $step->data );
+        $fields = $the_form->fields()
+            ->withPivot('options')
+            ->orderBy('builder_fields.id', 'asc')
+            ->get();
+
+        $field_mapper = $fields->map(function ($field) {
+            $pivot = $field->pivot;
+            $options = json_decode($pivot->options ?? '{}', true) ?? [];
+            $output = ['id' => $pivot->id];
+            $output = array_merge($output, $options);
+            return $output;
+        });
         $field_required_rules = collect($field_map_ids)->mapWithKeys(function ($id) {
             $field_options = Formfield::findOrFail($id)->options;
             if ($field_options->validation->required == 1) {
@@ -1250,25 +1281,41 @@ class CyclesController extends Controller
             ->withInput();
         }
 
+        $my_submissions = Formdata::where('user_id', Auth::id())->where('step_id', $id)->whereIn('field_id', $field_map_ids)->get();
         // gather the form data as field_name => [ label, data ]
-        foreach ($field_map_ids as $fid) {
-
+        foreach ($field_map_ids as $fid)
+        {
             $field_options = Formfield::findOrFail($fid)->options;
             $field_name = 'field_' . $fid;
 
             $uid = Auth::id();
             $cid = Auth::user()->company->id;
 
-          if ($request->hasFile($field_name)) {
-           $file = $request->file($field_name);
-        //    $originalName = $file->getClientOriginalName();
-        //    $file->storeAs('formsubmissions', $originalName, 'public_uploads');
-        //    $request->{$field_name} = 'formsubmissions/' . $originalName;
-         $imageName = $file->getClientOriginalName() . '.' . $file->getClientOriginalExtension();
-             $file->move(public_path('formsubmissions/'), $imageName);
-			 $request->{$field_name} = 'formsubmissions/' . $imageName;
+            $verifyInput = $field_mapper->where('id', $fid)->first();
 
-        }
+            if( $verifyInput && $verifyInput['type'] == 'file' )
+            {
+                if ($request->hasFile($field_name))
+                {
+                    $file = $request->file($field_name);
+                    // $originalName = $file->getClientOriginalName();
+                    // $file->storeAs('formsubmissions', $originalName, 'public_uploads');
+                    // $request->{$field_name} = 'formsubmissions/' . $originalName;
+                    $imageName = $file->getClientOriginalName() . '.' . $file->getClientOriginalExtension();
+                    $file->move(public_path('formsubmissions/'), $imageName);
+                    $request->{$field_name} = 'formsubmissions/' . $imageName;
+                }
+                else
+                {
+                    $request->{$field_name} = $my_submissions->where('field_id', $fid)->first()?->answer ?? null;
+                }
+            }
+
+            if( $verifyInput && $verifyInput['type'] == 'checkboxes' && is_array($request->{$field_name}) )
+            {
+                $request->{$field_name} = json_encode($request->{$field_name});
+            }
+
             // update cycle & step
             Auth::user()->company->update(['cycle' => $request->cycle, 'step' => $request->id]);
 

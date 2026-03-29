@@ -136,6 +136,7 @@
                                         name="{{ $field_name }}[]" 
                                         id="{{ $id_for }}_{{ $optionIndex }}" 
                                         value="{{ $option }}"
+                                        checked="{{ is_array(old($field_name)) && in_array($option, old($field_name)) ? 'checked' : '' }}"
                                         data-logic="{{ $question['logic'][$option] ?? 'continue' }}"
                                       />
                                       <label class="form-check-label" for="{{ $id_for }}_{{ $optionIndex }}">
