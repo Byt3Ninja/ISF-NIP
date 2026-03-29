@@ -61,7 +61,7 @@
   <!-- Services Short Description -->
   <div class="col-md-5 mb-4">
     <label class="fw-semibold">
-      {{ __('admin.services_short_description.label') }}
+      {{ __('admin.services_short_description.label') }} *
     </label>
     <p class="text-muted small mb-0">
       {{ __('admin.services_short_description.description') }}
@@ -108,7 +108,7 @@
   <!-- Operating Mode -->
   <div class="col-md-5 mb-4">
     <label class="fw-semibold">
-      {{ __('admin.operating_mode.label') }}
+      {{ __('admin.operating_mode.label') }} *
     </label>
     <p class="text-muted small mb-0">
       {{ __('admin.operating_mode.description') }}
@@ -136,7 +136,7 @@
   <!-- Operating Region -->
   <div class="col-md-5 mb-4">
     <label class="fw-semibold">
-      {{ __('admin.operating_region.label') }}
+      {{ __('admin.operating_region.label') }} *
     </label>
     <p class="text-muted small mb-0">
       {{ __('admin.operating_region.description') }}
