@@ -219,7 +219,10 @@ class NavigationHistoryMiddleware
                     foreach ($children as $parent) {
                         if (($parent['title'] ?? null) === $groupTitle && isset($parent['route'])) {
                             try {
-                                $parentUrl = route($parent['route']);
+                                $company = auth()->user()?->company;
+                                $parentUrl = $company
+                                    ? route($parent['route'], $company->id)
+                                    : route($parent['route']);
                             } catch (\Exception) {
                                 return null;
                             }
