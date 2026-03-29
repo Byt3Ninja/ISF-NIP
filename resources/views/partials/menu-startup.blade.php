@@ -96,7 +96,7 @@ $navigationIcons = [
                 @if ($countSurvey > 0 && $child['title'] == 'surveys')
                   <span class="badge badge-center rounded-pill bg-danger ms-2">{{ $countSurvey }}</span>
                 @elseif ($pendingServicesRequestsCount == 0 && $child['title'] == 'services_requests')
-                  <span class="badge badge-center rounded-pill bg-danger ms-2">{{ $pendingServicesRequestsCount }}</span>
+                  {{-- <span class="badge badge-center rounded-pill bg-danger ms-2">{{ $pendingServicesRequestsCount }}</span> --}}
                 @endif
               </div>
             </a>
