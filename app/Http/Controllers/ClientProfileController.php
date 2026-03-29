@@ -559,42 +559,51 @@ class ClientProfileController extends Controller
                     }
                     // If enrolledInProgramFilter is empty string (''), show all (no filter applied)
                 }
-                if (Auth::user()->company && !empty(Auth::user()->company->cycle)) {
-                    $cycleId = Auth::user()->company->cycle;
-                    $mentorIds = CyclesMentors::where('cycle_id', $cycleId)
-                        ->pluck('user_id')
-                        ->toArray();
-                    $mentors = $mentors->whereIn('id', $mentorIds);
-                }
+                // if (Auth::user()->company && !empty(Auth::user()->company->cycle)) {
+                //     $cycleId = Auth::user()->company->cycle;
+                //     $mentorIds = CyclesMentors::where('cycle_id', $cycleId)
+                //         ->pluck('user_id')
+                //         ->toArray();
+                //     $mentors = $mentors->whereIn('id', $mentorIds);
+                // }
+
+                $user = Auth::user();
+                $orgIds = $user->organizations_ids;
+
                 if (!empty($scopeFilter) && $scopeFilter !== 'all') {
-
                     if ($scopeFilter === 'public') {
-
-                        $mentors->where(function ($q) {
+                        // Public: no invitations OR has an accepted Public-scope invitation
+                        $mentors = $mentors->where(function ($q) {
                             $q->whereDoesntHave('inviteMentors')
-                            ->orWhere(function ($q2) {
-                                $q2->whereHas('inviteMentors', function ($q3) {
-                                    $q3->where('scope', 'Public')
-                                        ->where('status', 'accepted');
-                                });
-                            });
+                              ->orWhereHas('inviteMentors', function ($q2) {
+                                  $q2->where('scope', 'Public')->where('status', 'accepted');
+                              });
                         });
-                    
                     } else {
-                         $mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter, $request) {
-                             $query
-                             //->where('scope', $scopeFilter)
-                                 ->where('status', 'accepted');
-                             if ($request->scopeFilter != null) {
-                                 $query->whereJsonContains('organization_ids', (string) $request->scopeFilter);
-                             }
-                         });
-                        //$mentors = User::whereHas('mentorCycles', function ($q) use ($request) {
-                          //  if (!empty($request->organization)) {
-                            //    $q->where('organization_id', $request->organization);
-                           // }
-                       // });
+                        // Specific org: must have an accepted invitation with this org in organization_ids
+                        $mentors = $mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter) {
+                            $query->where('status', 'accepted')
+                                  ->whereJsonContains('organization_ids', (string) $scopeFilter);
+                        });
                     }
+                } else {
+                    // scopeFilter = all (or empty)
+                    // Non-admin with org: show org-cycle mentors + public mentors
+                    if (!$user->hasRole('Admin') && !empty($orgIds)) {
+                        $cycleIds = Cycle::whereIn('organization_id', $orgIds)->pluck('id')->toArray();
+                        $cycleMentorIds = CyclesMentors::whereIn('cycle_id', $cycleIds)->pluck('user_id')->toArray();
+
+                        $mentors = $mentors->where(function ($q) use ($cycleMentorIds) {
+                            $q->whereIn('id', $cycleMentorIds)
+                              ->orWhere(function ($q2) {
+                                  $q2->whereDoesntHave('inviteMentors')
+                                    ->orWhereHas('inviteMentors', function ($q3) {
+                                        $q3->where('scope', 'Public')->where('status', 'accepted');
+                                    });
+                              });
+                        });
+                    }
+                    // Admin: no restriction — show all mentors
                 }
 
                 $mentors = $mentors->with('mentorExpertises');
@@ -602,39 +611,35 @@ class ClientProfileController extends Controller
 
               
               
-                $user = Auth::user();
-                $orgIds = $user->organizations_ids;
                 if (!$user->hasRole('Admin') && !empty($orgIds)) {
-                        $cycles = Cycle::whereIn('organization_id', $orgIds)->get();
-                    if (!empty($scopeFilter) && $scopeFilter !== 'all') {
-                        if ($scopeFilter === 'public') {
-                    
-                            $mentors->where(function ($q) {
-                                $q->whereDoesntHave('inviteMentors')
-                                ->orWhere(function ($q2) {
-                                    $q2->whereHas('inviteMentors', function ($q3) {
-                                        $q3->where('scope', 'Public')
-                                            ->where('status', 'accepted');
-                                    });
-                                });
-                            });
-                        }else{
-                            $mentors->filter(function ($mentor) use ($request) {
-                                    return $mentor->inviteMentors->filter(function ($invite) use ($request) {
-                                        if ($invite->status !== 'accepted') {
-                                            return false;
-                                        }
-
-                                        if ($request->scopeFilter) {
-                                            $orgs = json_decode($invite->organization_ids, true) ?? [];
-                                            return in_array((string) $request->scopeFilter, $orgs);
-                                        }
-
-                                        return true;
-                                    })->isNotEmpty();
-                                });
-                        }
-                    }
+                    $cycles = Cycle::whereIn('organization_id', $orgIds)->get();
+                    // Dead post-collection filter code commented out (filters run at DB level above)
+                    // if (!empty($scopeFilter) && $scopeFilter !== 'all') {
+                    //     if ($scopeFilter === 'public') {
+                    //         $mentors->where(function ($q) {
+                    //             $q->whereDoesntHave('inviteMentors')
+                    //             ->orWhere(function ($q2) {
+                    //                 $q2->whereHas('inviteMentors', function ($q3) {
+                    //                     $q3->where('scope', 'Public')
+                    //                         ->where('status', 'accepted');
+                    //                 });
+                    //             });
+                    //         });
+                    //     } else {
+                    //         $mentors->filter(function ($mentor) use ($request) {
+                    //             return $mentor->inviteMentors->filter(function ($invite) use ($request) {
+                    //                 if ($invite->status !== 'accepted') {
+                    //                     return false;
+                    //                 }
+                    //                 if ($request->scopeFilter) {
+                    //                     $orgs = json_decode($invite->organization_ids, true) ?? [];
+                    //                     return in_array((string) $request->scopeFilter, $orgs);
+                    //                 }
+                    //                 return true;
+                    //             })->isNotEmpty();
+                    //         });
+                    //     }
+                    // }
                 } else {
                     $cycles = Cycle::all();
                 }
@@ -724,23 +729,17 @@ class ClientProfileController extends Controller
                 }
                 if (!empty($scopeFilter) && $scopeFilter !== 'all') {
                     if ($scopeFilter === 'public') {
-                        $mentors->where(function ($q) {
+                        $mentors = $mentors->where(function ($q) {
                             $q->whereDoesntHave('inviteMentors')
-                            ->orWhereHas('inviteMentors', function ($q2) {
-                                $q2->where('scope', 'public'); 
-                            });
+                              ->orWhereHas('inviteMentors', function ($q2) {
+                                  $q2->where('scope', 'Public')->where('status', 'accepted');
+                              });
                         });
                     } else {
-                        $mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter, $request) {
-                             $query
-                             //->where('scope', $scopeFilter)
-                                 ->where('status', 'accepted');
-                                 $query->whereJsonContains('organization_ids', (string) $scopeFilter);
-                         });
-
-                        //$mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter) {
-                        //    $query->where('scope', $scopeFilter);
-                       // });
+                        $mentors = $mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter) {
+                            $query->where('status', 'accepted')
+                                  ->whereJsonContains('organization_ids', (string) $scopeFilter);
+                        });
                     }
                 }
                 $mentors = $mentors->with('mentorExpertises');
