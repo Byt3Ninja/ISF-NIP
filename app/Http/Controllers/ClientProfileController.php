@@ -492,6 +492,24 @@ class ClientProfileController extends Controller
         $expertisesSearch = $request->input('expertises', []);
         $linkedin = $request->input('linkedin');
         $programFilter = $request->input('programFilter');
+        // Default to the user's enrolled cycle when no filter is provided
+        if (empty($programFilter)) {
+            $defaultUser = Auth::user();
+            if (!$defaultUser->hasRole('Admin')) {
+                if ($defaultUser->hasRole('Registered') && $defaultUser->company && !empty($defaultUser->company->cycle)) {
+                    // Registered user: use their company's specific cycle
+                    $programFilter = $defaultUser->company->cycle;
+                } else {
+                    // OrgManager/subadmin/Mentor: use latest cycle from their org
+                    $defaultOrgIds = $defaultUser->organizations_ids;
+                    if (!empty($defaultOrgIds)) {
+                        $programFilter = Cycle::whereIn('organization_id', $defaultOrgIds)
+                            ->orderBy('start', 'DESC')
+                            ->value('id');
+                    }
+                }
+            }
+        }
         $scopeFilter = $request->input('scopeFilter');
         $enrolledInProgramFilter = $request->input('enrolledInProgramFilter');
         if ($settings->mentor_list == 1) {
@@ -657,7 +675,7 @@ class ClientProfileController extends Controller
                 
                     
                 // $mentors = User::role('mentor')->get();
-                return view('mentors.index', compact('mentors', 'cycles', 'offline_allowed'));
+                return view('mentors.index', compact('mentors', 'cycles', 'offline_allowed', 'programFilter'));
             }
         } else {
 
