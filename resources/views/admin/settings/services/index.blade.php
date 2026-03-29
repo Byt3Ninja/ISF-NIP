@@ -116,7 +116,7 @@
                 </div>
               @endif
 
-              <div class="col-md-6 col-lg-auto d-flex flex-grow-1 justify-content-end">
+              <div class="col-md-6 col-lg-2">
                 <div class="d-flex justify-content-lg-end gap-2">
                   @if(request('search') || request('rating') || request('status') || request('org-id'))
                     <a href="{{ route('services.index') }}" class="btn bg-card border btn-icon">
@@ -183,25 +183,22 @@
                   <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
                     <h5 class="card-title mb-0">{{ $service->name }}</h5>
                     <div class="d-flex align-items-center justify-content-center gap-2">
+                      @if( !( $service->hide_vendor_info == 1 && !$_user->hasAnyRole(['admin', 'organizationManager', 'subadmin', 'serviceProvider']) ) )
+                      <a
+                        href="{{ isset($service->service_provider_id) ? '/dashboard/service-provider/' . $service->provider->id . '/profile?tab=reviews&service_id=' . $service->id : 'javascript:void(0)' }}"
+                        target="_blank"
+                      >
+                      @endif
                       <div class="badge bg-light-subtle text-dark py-1 px-2">
-                        @if($service->hide_vendor_info == 1 && !$_user->hasAnyRole(['admin', 'organizationManager', 'subadmin', 'serviceProvider']))
                         <span class="text-warning">
                           <i class="ti ti-star-filled ti-16px me-1"></i>
                         </span>
                         {{ number_format($service->rating ?? 0.0, 1) }}
-                        @else
-                        <a
-                          href="{{ isset($service->service_provider_id) ? '/dashboard/service-provider/' . $service->provider->id . '/profile?tab=reviews&service_id=' . $service->id : 'javascript:void(0)' }}"
-                          target="_blank"
-                        >
-                        <span class="text-warning">
-                          <i class="ti ti-star-filled ti-16px me-1"></i>
-                        </span>
-                        {{ number_format($service->rating ?? 0.0, 1) }}
-                        </a>
-                        @endif
                       </div>
                       <span class="fw-normal">({{ $service->review_count ?? '0' }})</span>
+                      @if( !( $service->hide_vendor_info == 1 && !$_user->hasAnyRole(['admin', 'organizationManager', 'subadmin', 'serviceProvider']) ) )
+                      </a>
+                      @endif
                     </div>
                   </div>
                   @if ($service->vendor_name)
@@ -262,27 +259,22 @@
 
                     <!-- Service Category & Status -->
                     {{--  @if (!$_user->hasRole('registered'))  --}}
-                      <div class="d-flex justify-content-between align-items-center mt-auto {{ $_user->hasRole('registered') ? 'mb-4' : '' }}">
+                      <div class="d-flex justify-content-between align-items-center mt-auto mb-4">
                         <div 
-                          class="badge bg-label-secondary text-dark me-2" 
+                          class="badge bg-label-secondary text-dark" 
                           data-bs-toggle="tooltip"  
                           data-bs-placement="top"
                           title="{{ __('admin.service_category') }}"
                         >
-                          <i class="ti ti-briefcase me-1"></i>
+                          <i class="ti ti-briefcase ti-md me-2"></i>
                           {{ $service->serviceCategory?->name ?? '' }}
                         </div>
   
                         @if (!$_user->hasRole('registered'))
-                        <div 
-                          class="badge bg-label-{{ $service->status == 1 ? 'success' : 'danger' }}"
-                          data-bs-toggle="tooltip"  
-                          data-bs-placement="top"
-                          title="{{ __('admin.status') }}"
-                        >
+                        <span class="badge bg-label-{{ $service->status == 1 ? 'success' : 'danger' }}">
                           <i class="ti ti-point-filled text-{{ $service->status == 1 ? 'success' : 'danger' }}"></i>
                           {{ $service->status == 1 ? __('admin.Active') : __('admin.Inactive') }}
-                        </div>
+                        </span>
                         @endif
                       </div>
                     {{--  @endif  --}}
