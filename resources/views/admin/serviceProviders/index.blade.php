@@ -31,7 +31,7 @@ $tabs = [
 	<x-navigation-pills :tabs="$tabs" />
 
 	{{-- Tab Content --}}
-	<div class="tab-content">
+	<div class="tab-content bg-card p-0">
 
 		{{-- ═══════════════════════════════════════════════════════════════
 		     Tab 1: Enrolled Service Providers
