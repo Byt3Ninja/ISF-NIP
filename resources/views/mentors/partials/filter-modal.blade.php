@@ -62,8 +62,13 @@
                   $organization = $organization_q
                       ->where('id', $_user->organization_id)
                       ->get();
+              } elseif ($_user->hasRole('Registered')) {
+                  $registeredOrgIds = $_user->organizations_ids;
+                  $organization = !empty($registeredOrgIds)
+                      ? $organization_q->whereIn('id', $registeredOrgIds)->get()
+                      : collect();
               } else {
-                  $organization = collect(); 
+                  $organization = collect();
               }
               //$organization = auth()->user()->hasRole('admin') ? $organization_q->get() : $organization_q->where('id', auth()->user()->organization_id)->get(); //App\Organization::all();
               @endphp
