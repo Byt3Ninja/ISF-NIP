@@ -3589,4 +3589,9 @@ return [
 	'accepted_formats' => 'Accepted Formats',
 	'max_size' => 'Max Size',
 	'service_category' => 'Service Category',
+	'financial_projection_saved_successfully' => 'Financial Projection saved successfully',
+	'change_currency_warning' => 'By changing the currency, you cannot change it again. Do you want to continue?',
+	'error_loading_financial_data' => 'Error loading financial data. Please try again later.',
+	'unepxected_error' => 'An unexpected error occurred. Please try again later.',
+	'save_failed' => 'Save failed. Please check your input and try again.',
 ];

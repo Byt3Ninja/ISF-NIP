@@ -111,7 +111,7 @@
   
       <!-- Description -->
        <div class="mb-5">
-        <label class="form-label">{{ __('admin.Description') }}</label>
+        <label class="form-label">{{ __('admin.Description') }} *</label>
         <textarea 
           class="form-control" 
           name="description_en" 
@@ -154,7 +154,7 @@
           </div>
         </div>
         <select class="form-select select2" name="organization_ids[]" id="organization_ids" data-placeholder="{{ __('admin.Select Organizations') }}" multiple>
-          <option value="">{{ __('admin.Select Organizations') }}</option>
+          {{-- <option value="">{{ __('admin.Select Organizations') }}</option> --}}
           @foreach ($organizations as $organization)
             <option value="{{ $organization->id }}" {{ in_array($organization->id, old('organization_ids', [])) ? 'selected' : '' }}>
               {{ $organization->{'name_' . app()->getLocale()} }}
@@ -268,9 +268,9 @@
   var providers = @json($providers);
   var providerStats = @json($providerStats ?? []);
   var profileBaseUrl = "{{ url('dashboard/service-provider') }}";
-
+  
   $(document).ready(function() {
-
+    // Trigger select2 change to remove validation
     $('.select2').on('change', function () {
       const fieldName = $(this).attr('name');
 
@@ -358,12 +358,20 @@
       e.preventDefault();
       $('#organization_ids > option').prop('selected', true);
       $('#organization_ids').trigger('change');
+      
+      // Revalidate the field to remove any error state if it was previously empty
+      fv.disableValidator('organization_ids[]', 'notEmpty');
+      fv.revalidateField('organization_ids[]');
     });
 
     $('#deselectAllOrgs').on('click', function(e) {
       e.preventDefault();
       $('#organization_ids > option').prop('selected', false);
       $('#organization_ids').trigger('change');
+
+      // Re-enable validation since the field is now empty
+      fv.enableValidator('organization_ids[]', 'notEmpty');
+      fv.revalidateField('organization_ids[]');
     });
 
     // Organization Counter
@@ -379,6 +387,13 @@
       {
         fields: {
           name_en: {
+            validators: {
+              notEmpty: {
+                message: '{{ __('admin.Required_Field') }}'
+              },
+            }
+          },
+          description_en: {
             validators: {
               notEmpty: {
                 message: '{{ __('admin.Required_Field') }}'
