@@ -175,22 +175,41 @@ class MentorsController extends Controller
 					}
 			} else {
 					// scopeFilter = all (or empty)
-					// Non-admin with org: show org-cycle mentors + public mentors
-					if (!$user->hasRole('Admin') && !empty($orgIds)) {
-							$cycleIds = Cycle::whereIn('organization_id', $orgIds)->pluck('id')->toArray();
-							$cycleMentorIds = CyclesMentors::whereIn('cycle_id', $cycleIds)->pluck('user_id')->toArray();
+					// Old logic (commented out): used user's orgIds + cycleMentorIds
+					// if (!$user->hasRole('Admin') && !empty($orgIds)) {
+					// 		$cycleIds = Cycle::whereIn('organization_id', $orgIds)->pluck('id')->toArray();
+					// 		$cycleMentorIds = CyclesMentors::whereIn('cycle_id', $cycleIds)->pluck('user_id')->toArray();
+					// 		$mentors = $mentors->where(function ($q) use ($cycleMentorIds) {
+					// 				$q->whereIn('id', $cycleMentorIds)
+					// 				  ->orWhere(function ($q2) {
+					// 						$q2->whereDoesntHave('inviteMentors')
+					// 						  ->orWhereHas('inviteMentors', function ($q3) {
+					// 								$q3->where('scope', 'Public')->where('status', 'accepted');
+					// 						  });
+					// 				  });
+					// 		});
+					// }
 
-							$mentors = $mentors->where(function ($q) use ($cycleMentorIds) {
-									$q->whereIn('id', $cycleMentorIds)
-									  ->orWhere(function ($q2) {
+					// New logic: restrict to this cycle's organization + public mentors
+					$cycle = Cycle::find($id);
+					$cycleOrgId = $cycle ? $cycle->organization_id : null;
+
+					if ($cycleOrgId) {
+							$mentors = $mentors->where(function ($q) use ($cycleOrgId) {
+									// Public mentors
+									$q->where(function ($q2) {
 											$q2->whereDoesntHave('inviteMentors')
 											  ->orWhereHas('inviteMentors', function ($q3) {
 													$q3->where('scope', 'Public')->where('status', 'accepted');
 											  });
-									  });
+									})
+									// OR mentors belonging to this cycle's organization
+									->orWhereHas('inviteMentors', function ($q2) use ($cycleOrgId) {
+											$q2->where('status', 'accepted')
+											   ->whereJsonContains('organization_ids', (string) $cycleOrgId);
+									});
 							});
 					}
-					// Admin: no restriction — show all mentors
 			}
 
 			if (!$user->hasRole('Admin') && !empty($orgIds)) {
