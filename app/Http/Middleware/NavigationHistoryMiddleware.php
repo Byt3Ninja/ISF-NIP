@@ -192,7 +192,7 @@ class NavigationHistoryMiddleware
     $ignoredTitles = [
         'logo', 'login', 'logout', 'auth', 'register',
         'password', 'reset', 'verify', 'sanctum',
-        'api', 'csrf', 'token', 'page', 'Lfm', 'Unisharp'
+        'api', 'csrf', 'token', 'page', 'lfm', 'unisharp', 'ar', 'en',
     ];
 
     // List of words - if title contains any of these, ignore it (all lowercase)
