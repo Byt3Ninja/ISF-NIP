@@ -1123,6 +1123,7 @@ class CyclesController extends Controller
             if( $user->company->step == $id ) {
                 $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->orderBy('form_data.id', 'ASC')->select('answer')->pluck('answer')->toArray();
             }
+            $answers = collect($answers);
             return view('admin.settings.cycles.form', $data)->with('data', $data)->with('step', $step)->with('c', $c)->with('answers', $answers);
         }
     }
