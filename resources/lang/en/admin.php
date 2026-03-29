@@ -3589,4 +3589,6 @@ return [
 	'accepted_formats' => 'Accepted Formats',
 	'max_size' => 'Max Size',
 	'service_category' => 'Service Category',
+	'financial_projection_saved_successfully' => 'Financial Projection saved successfully',
+	'change_currency_warning' => 'By changing the currency, you cannot change it again. Do you want to continue?',
 ];
