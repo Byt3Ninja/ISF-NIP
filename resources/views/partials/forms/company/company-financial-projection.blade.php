@@ -218,7 +218,7 @@
 					<tr>
 						<th class="col-label">
 							{{ __('startup.line_item') }}
-							{{ !empty($getCurrancy) ? ' ( ' . __('admin.' . $getCurrancy) . ' )' : '' }}
+							<span id="currency-label">{{ !empty($getCurrancy) ? ' ( ' . __('admin.' . $getCurrancy) . ' )' : '' }}</span>
 						</th>
 						<th id="header-year-0">
 							{{ __('startup.past_year') }}<br>
@@ -652,6 +652,8 @@ $(document).ready(function() {
 		if ($(this).val() === $(this).data('original-value')) {
 			$(this).data('warn-confirmed', 'false');
 		}
+		const selectedVal = $(this).val();
+		$('#currency-label').text(selectedVal ? ' ( ' + selectedVal + ' )' : '');
 	});
 
 	// Input triggers recalculation
