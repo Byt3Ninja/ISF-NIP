@@ -3445,7 +3445,12 @@ class ClientCompanyController extends Controller
         try {
             $user = Auth::user();
             $company = Company::findOrFail($id);
-           
+           if($company->country_id == null ){
+            return response()->json([
+                'success' => false,
+                'message' => __('startup.You cannot add this startup to alumni because it has no country')
+            ]);
+           }
             $company_relations = CompanyRelation::where('company_id', $id)->where('user_id', $company?->user?->id)->get();
             $step = Step::where('id', $company->step)->first();
             //dd($step, $company->step);
@@ -3543,25 +3548,25 @@ class ClientCompanyController extends Controller
                         $company->city->name_en ?? '',
                         $company->country->name_en ?? '',
                     ])),
-                    'Country' => $company->country->name_en,
-                    'Business_Type' => $company->business_type,
-                    'Relations'     => $relations_data,
-                    'Website_Link' => $company->website,
-                    'development_stage' => $company->development_stage,
-                    'funding_stage' => $company->funding_stage,
-                    'team_size' => $team_leaders->count(),
-                    'Sectors' => $jSectors,
-                    'Industries' => $jIndustry,
-                    'Technologies' => $jTechnologies,
+                    'Country' => $company->country->name_en ?? '',
+                    'Business_Type' => $company->business_type ?? '',
+                    'Relations'     => $relations_data ?? [],
+                    'Website_Link' => $company->website ?? '',
+                    'development_stage' => $company->development_stage ?? '',
+                    'funding_stage' => $company->funding_stage ?? '',
+                    'team_size' => $team_leaders->count() ?? '',
+                    'Sectors' => $jSectors ?? '',
+                    'Industries' => $jIndustry ?? '',
+                    'Technologies' => $jTechnologies ?? '',
 
                     'Social Media Links' => [
-                        'Facebook' => $company->facebook,
-                        'Twitter' => $company->twitter,
-                        'Linkedin' => $company->linkedin,
-                        'Instagram' => $company->instagram,
-                        'Youtube' => $company->youtube,
-                        'Google_Map' => $company->google_map,
-                        'tiktok' => $company->tiktok,
+                        'Facebook' => $company->facebook ?? '',
+                        'Twitter' => $company->twitter ?? '',
+                        'Linkedin' => $company->linkedin ?? '',
+                        'Instagram' => $company->instagram ?? '',
+                        'Youtube' => $company->youtube ?? '',
+                        'Google_Map' => $company->google_map ?? '',
+                        'tiktok' => $company->tiktok ?? '',
                     ],
                 ];
             $almuni->basic_startup_information = json_encode($basic_startup_information);
@@ -3572,11 +3577,11 @@ class ClientCompanyController extends Controller
                 foreach ($hackathons as $leader) {
                     
                     $startup_leader_information[] = [
-                        'ID' => $leader->id,
-                        'Full_Name' => $leader->Name,
+                        'ID' => $leader->id ?? '',
+                        'Full_Name' => $leader->Name ?? '',
                         'Country' => $company->country->name_en ?? '',
-                        'Email' => $leader->Email,
-                        'Phone_Number' => $company?->user?->phone,
+                        'Email' => $leader->Email ?? '',
+                        'Phone_Number' => $company?->user?->phone ?? '',
                     ];
                 }
                 
@@ -3588,10 +3593,10 @@ class ClientCompanyController extends Controller
                 
                 foreach ($getfounders as $founder) {
                     $founders[] = [
-                        'ID' => $founder->id,
-                        'Full_Name' => $founder->Name,
+                        'ID' => $founder->id ?? '',
+                        'Full_Name' => $founder->Name ?? '',
                         // 'Country' => $company->country->name_en ?? '',
-                        'Email' => $founder->Email,
+                        'Email' => $founder->Email ?? '',
                         // 'Phone_Number' => $founder->Phone,
                         // 'LinkedIn_Profile' => $founder->LinkedIn
                     ];
@@ -3613,15 +3618,15 @@ class ClientCompanyController extends Controller
               
                 foreach ($getemployees as $employee) {
                     $employees[] = [
-                        'ID' => $employee->id,
-                        'Full_Name' => $employee->Name,
+                        'ID' => $employee->id ?? '',
+                        'Full_Name' => $employee->Name ?? '',
                         // 'Country' => $company->country->name_en ?? '',
-                        'Email' => $employee->Email,
+                        'Email' => $employee->Email ?? '',
                         // 'Phone_Number' => $employee->Phone,
-                        'Job_Title' => $employee->RoleShereholder,
-                        'Gender' => $employee->gender,
-                        'Employment_Type' => $employee->employment_type,
-                        'Start Date' => $employee->hiring_date
+                        'Job_Title' => $employee->RoleShereholder ?? '',
+                        'Gender' => $employee->gender ?? '',
+                        'Employment_Type' => $employee->employment_type ?? '',
+                        'Start Date' => $employee->hiring_date ?? ''
 
                     ];
                 }
