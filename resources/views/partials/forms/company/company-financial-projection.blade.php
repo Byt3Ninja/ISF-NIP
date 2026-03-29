@@ -315,7 +315,8 @@ $(document).ready(function() {
 	// ═══════════════════════════════════════════════════════════════════════
 	let state = {
 		currentValuationDate: "{{ $currentDate ?: '' }}",
-		isSaving: false
+		isSaving: false,
+		pendingDateChange: null  // Holds the date to switch to after user confirms
 	};
 
 	// ═══════════════════════════════════════════════════════════════════════
@@ -358,6 +359,49 @@ $(document).ready(function() {
 			return `${start.format('MM/YYYY')} – ${end.format('MM/YYYY')}`;
 		}
 	};
+
+	// ═══════════════════════════════════════════════════════════════════════
+	// VALUATION DATE CHANGE WARNING
+	// ═══════════════════════════════════════════════════════════════════════
+
+	/**
+	 * Returns true if the user has typed a value into at least one
+	 * editable financial input (number inputs that are NOT readonly/calculated).
+	 */
+	function hasFinancialInput() {
+		return CONFIG.EDITABLE_FIELDS.some(field => {
+			for (let i = 0; i < 4; i++) {
+				const val = $(`input[name="${field}_${i}"]`).val();
+				if (val !== '' && val !== null && val !== undefined) {
+					return true;
+				}
+			}
+			return false;
+		});
+	}
+
+	/**
+	 * Show a confirmation warning before switching valuation dates,
+	 * but ONLY when the user has filled at least one financial input.
+	 * If there is nothing filled in, skip the warning and call onConfirm directly.
+	 *
+	 * @param {string} newDate      - The new YYYY-MM date the user selected.
+	 * @param {Function} onConfirm  - Called when the user clicks "Yes, change it" (or immediately if no data).
+	 * @param {Function} onCancel   - Called when the user clicks "Cancel".
+	 */
+	function confirmValuationDateChange(newDate, onConfirm, onCancel) {
+		if (!hasFinancialInput()) {
+			onConfirm();
+			return;
+		}
+
+		releaseWarningAlert({
+			title: '{{ __("startup.change_valuation_date") }}',
+			message: '{{ __("startup.change_valuation_date_warning") }}',
+			onConfirm: onConfirm,
+			onCancel: onCancel
+		});
+	}
 
 	// ═══════════════════════════════════════════════════════════════════════
 	// UPDATE HEADER DATES
@@ -501,7 +545,6 @@ $(document).ready(function() {
 		if (state.isSaving) return;
 
 		// Check currency change warning
-		// Warning should show if user changed currency AND current value differs from original getCurrency
 		const originalCurrency = $currency.data('original-value');
 		const currentCurrency = $currency.val();
 		const currencyChanged = currentCurrency !== originalCurrency;
@@ -606,8 +649,6 @@ $(document).ready(function() {
 	// Currency change - reset warning flag if user reverts to original value
 	$currency.on('change', function() {
 		if ($(this).prop('disabled')) return;
-		
-		// If user changes back to original getCurrency value, reset the warning flag
 		if ($(this).val() === $(this).data('original-value')) {
 			$(this).data('warn-confirmed', 'false');
 		}
@@ -620,12 +661,22 @@ $(document).ready(function() {
 		calculateAll();
 	});
 
-	// History item click
+	// History item click — warn before switching dates
 	$('.valuation-history-item').on('click', function(e) {
 		e.preventDefault();
 		e.stopImmediatePropagation();
+
 		const selectedDate = $(this).data('date');
-		if (selectedDate) loadProjection(selectedDate);
+		if (!selectedDate || selectedDate === state.currentValuationDate) return;
+
+		confirmValuationDateChange(selectedDate,
+			// Confirmed — proceed with loading the selected date
+			function() {
+				loadProjection(selectedDate);
+			},
+			// Cancelled — do nothing; stay on current date
+			function() { /* no-op */ }
+		);
 	});
 
 	// Form submit
@@ -656,11 +707,30 @@ $(document).ready(function() {
 				altFormat: "F Y"
 			})
 		],
-		onChange: function(selectedDates) {
+		onChange: function(selectedDates, dateStr) {
 			if (!selectedDates.length) return;
-			const valDateStr = moment(selectedDates[0]).format("YYYY-MM");
+
+			const newDateStr = moment(selectedDates[0]).format("YYYY-MM");
+
+			// No change — nothing to warn about
+			if (newDateStr === state.currentValuationDate) return;
+
 			$dateVisible.removeClass('is-invalid');
-			loadProjection(valDateStr);
+
+			confirmValuationDateChange(newDateStr,
+				// Confirmed — load the new date
+				function() {
+					loadProjection(newDateStr);
+				},
+				// Cancelled — restore flatpickr to the previous date without triggering onChange again
+				function() {
+					if (state.currentValuationDate) {
+						flatpickrInstance.setDate(state.currentValuationDate + '-01', false);
+					} else {
+						flatpickrInstance.clear(false);
+					}
+				}
+			);
 		}
 	});
 

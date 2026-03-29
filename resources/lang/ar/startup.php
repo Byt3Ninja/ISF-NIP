@@ -551,5 +551,6 @@ return [
   'no_quizzes' => 'لا توجد اختبارات',
   'no_services' => 'لا توجد خدمات',
   'no_forms' => 'لا توجد نماذج',
-  
+  'change_valuation_date' => 'تغيير تاريخ التقييم',
+  'change_valuation_date_warning' => 'هل أنت متأكد أنك تريد تغيير تاريخ التقييم؟ لديك بيانات غير محفوظة.',  
 ];
