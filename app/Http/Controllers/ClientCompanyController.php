@@ -1961,6 +1961,8 @@ class ClientCompanyController extends Controller
                     // if($user->company->currancy == $data['Currency']){
                     //     $data['Currency'] = $user->company->currancy;
                     // }
+                    
+                     
 
                        if($updateFinancial != null && $updateFinancial->currency != $data['Currency']){
                         return redirect()->back()->with(['msg' => 'You can not add more than one currency per year', 'class' => 'danger']);
@@ -4443,6 +4445,11 @@ class ClientCompanyController extends Controller
                     'message' => __('admin.Currency is required'),
                 ], 422);
             }
+            
+            if($user->company->Currency == $requestedCurrency){
+                         $requestedCurrency = null;
+                     }
+                   
 
             // ----------------------------------------------------------
             // 3. Map: index → year  (0 = past, 1 = Y0, 2 = Y+1, 3 = Y+2)
