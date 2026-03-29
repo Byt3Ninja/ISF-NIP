@@ -129,16 +129,20 @@ class NavigationHistoryMiddleware
             'title' => $title,
         ];
 
+        // Get group parent entry if exists
+        $groupParentEntry = $this->getGroupParentEntry($routeName);
+
         if ($isFromMenu) {
-            // From menu: Reset to Dashboard / Current Page only
-            $trail = [
-                [
-                    'url' => $dashboardUrl,
-                    'route' => 'core.dashboard_view',
-                    'title' => 'dashboard',
-                ],
-                $currentEntry,
-            ];
+            // From menu: Reset to Dashboard / (group parent if any) / Current Page
+            $trail = [[
+                'url' => $dashboardUrl,
+                'route' => 'core.dashboard_view',
+                'title' => 'dashboard',
+            ]];
+            if ($groupParentEntry) {
+                $trail[] = $groupParentEntry;
+            }
+            $trail[] = $currentEntry;
         } else {
             // From internal button: Append to trail
 
@@ -155,6 +159,14 @@ class NavigationHistoryMiddleware
                     // Update URL but don't add new entry
                     $trail[count($trail) - 1] = $currentEntry;
                 } else {
+                    // Insert group parent if not already in trail
+                    if ($groupParentEntry) {
+                        $groupInTrail = array_search($groupParentEntry['title'], array_column($trail, 'title'));
+                        if ($groupInTrail === false) {
+                            $trail[] = $groupParentEntry;
+                        }
+                    }
+
                     // Add to trail
                     $trail[] = $currentEntry;
 
@@ -180,6 +192,49 @@ class NavigationHistoryMiddleware
             }
         }
         return false;
+    }
+
+    /**
+     * Get breadcrumb entry for the group parent of a route, if any
+     */
+    private function getGroupParentEntry(?string $routeName): ?array
+    {
+        if (!$routeName) {
+            return null;
+        }
+
+        $navConfig = config('navigation');
+        if (!is_callable($navConfig)) {
+            return null;
+        }
+
+        $navItems = $navConfig();
+
+        foreach ($navItems as $section) {
+            $children = $section['children'] ?? [];
+            foreach ($children as $child) {
+                if (($child['route'] ?? null) === $routeName && isset($child['group'])) {
+                    $groupTitle = $child['group'];
+                    // Find the parent item with this title
+                    foreach ($children as $parent) {
+                        if (($parent['title'] ?? null) === $groupTitle && isset($parent['route'])) {
+                            try {
+                                $parentUrl = route($parent['route']);
+                            } catch (\Exception) {
+                                return null;
+                            }
+                            return [
+                                'url'   => $parentUrl,
+                                'route' => $parent['route'],
+                                'title' => $groupTitle,
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
