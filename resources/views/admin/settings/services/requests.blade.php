@@ -283,12 +283,7 @@
     </div>
     @empty
     <div class="col-12">
-      <div class="card shadow-sm">
-        <div class="card-body text-center py-5">
-          <i class="ti ti-clipboard-list ti-48px text-muted mb-3 d-block"></i>
-          <p class="text-muted mb-0">{{ __('admin.no_service_requests_yet') }}</p>
-        </div>
-      </div>
+      @include('includes.no-result', ['message' => __('admin.no_service_requests_yet')])
     </div>
     @endforelse
   </div>

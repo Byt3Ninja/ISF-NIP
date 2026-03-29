@@ -102,8 +102,9 @@ class ServiceController extends Controller
 		->get();
 
 		$services = $services->map(function ($service) {
-			$rating = $service->requests->whereNotNull('rate')->where('approved', true)->avg('rate') ?? 0;
-			$service->rating = $rating;
+			$service_ratings = $service->requests->whereNotNull('rate')->where('approved', true);
+			$service->rating = $service_ratings->avg('rate') ?? 0;
+			$service->review_count = $service_ratings->count();
 			return $service;
 		})
 		->when($request->has('rate') && $request != 'all' && is_numeric($request->rate), function ($query) use ($request) {
