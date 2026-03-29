@@ -338,6 +338,7 @@
       contact_name: { validators: { notEmpty: { message: t.required } } },
       email: { validators: { notEmpty: { message: t.required }, emailAddress: { message: t.email } } },
       phone: { validators: { notEmpty: { message: t.required }, callback: buildPhoneValidator(true) } },
+      whatsapp: { validators: { notEmpty: { message: t.required }, callback: buildPhoneValidator(true) } },
       country: { validators: { notEmpty: { message: t.required } } },
       state: { validators: { notEmpty: { message: t.required } } },
       about: { validators: { notEmpty: { message: t.required } } },
@@ -355,7 +356,28 @@
 
   FormValidation2 = FormValidation.formValidation(stepEls[2], {
     fields: {
-      hero_image: { validators: { callback: { message: t.required, callback: (input) => isStep2Complete() }, file: { extension: 'png,jpg,jpeg,svg,webp', maxSize: 10*1024*1024, message: t.hero_image } } },
+      hero_image: {
+        validators: {
+          callback: {
+            message: t.required,
+            callback: function (input) {
+              const fileInput = document.getElementById('hero_image');
+              const previewContainer = document.getElementById('hero-preview-container');
+
+              const hasNewFile = fileInput.files && fileInput.files.length > 0;
+              const hasPreview = previewContainer && !previewContainer.classList.contains('d-none');
+
+              // Valid if user uploaded OR already has preview
+              return hasNewFile || hasPreview;
+            }
+          },
+          file: {
+            extension: 'png,jpg,jpeg,svg,webp',
+            maxSize: 10 * 1024 * 1024,
+            message: t.hero_image
+          }
+        }
+      },
       hero_description: { validators: { notEmpty: { message: t.required } } },
       services_short_description: { validators: { notEmpty: { message: t.required } } },
       operating_mode: { validators: { notEmpty: { message: t.required } } },
