@@ -37,7 +37,6 @@
               value="1"
               {{ old('programs_enabled', $landingPage->programs_enabled ?? false) ? 'checked' : '' }}
               data-section="programs"
-              checked="true"
             />
             <label class="form-check-label" for="programs_enabled">
               {{ __('admin.Enable Section') }}
