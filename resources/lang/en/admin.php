@@ -3596,4 +3596,7 @@ return [
 	'save_failed' => 'Save failed. Please check your input and try again.',
 	'invalid_url' => 'The URL is not valid.',
 	'current_logo' => 'Current Logo',
+	'Applications_Closed' => 'Applications Closed',
+	'Starting_Soon' => 'Starting Soon',
+	'application_status' => 'Application Status',
 ];
