@@ -3451,7 +3451,7 @@ class ClientCompanyController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => __('startup.You cannot add this startup to alumni because it has no country')
-            ]);
+            ], 422);
            }
             $company_relations = CompanyRelation::where('company_id', $id)->where('user_id', $company?->user?->id)->get();
             $step = Step::where('id', $company->step)->first();
