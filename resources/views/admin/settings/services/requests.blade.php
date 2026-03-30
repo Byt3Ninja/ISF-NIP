@@ -290,7 +290,7 @@
 
   {{-- Pagination --}}
   @if($requests->hasPages())
-  <div class="w-100 mt-12">
+  <div class="w-100 mt-8">
     {{ $requests->links('pagination::bootstrap-5') }}
   </div>
   @endif
