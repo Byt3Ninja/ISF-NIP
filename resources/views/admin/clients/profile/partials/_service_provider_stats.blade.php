@@ -27,7 +27,7 @@
       <div class="card-body px-4 pb-2">
         <div class="mb-4">
           <label for="value1" class="form-label">{{ __('admin.Value') }}</label>
-          <input type="number" class="form-control" id="value1" name="value1" value="{{ $org ? $org->stat1_value : '' }}" placeholder="{{ __('admin.Value') }}" maxlength="20">
+          <input type="number" class="form-control" min="0" id="value1" name="value1" value="{{ $org ? $org->stat1_value : '' }}" placeholder="{{ __('admin.Value') }}" maxlength="20" onkeydown="return event.key !== '-'">
         </div>
         <div class="mb-4">
           <label for="label1" class="form-label">{{ __('admin.label') }}</label>
@@ -46,7 +46,7 @@
       <div class="card-body px-4 pb-2">
         <div class="mb-4">
           <label for="value2" class="form-label">{{ __('admin.Value') }}</label>
-          <input type="number" class="form-control" id="value2" name="value2" value="{{ $org ? $org->stat2_value : '' }}" placeholder="{{ __('admin.Value') }}" maxlength="20">
+          <input type="number" class="form-control" min="0" id="value2" name="value2" value="{{ $org ? $org->stat2_value : '' }}" placeholder="{{ __('admin.Value') }}" maxlength="20" onkeydown="return event.key !== '-'">
         </div>
         <div class="mb-4">
           <label for="label2" class="form-label">{{ __('admin.label') }}</label>
@@ -65,7 +65,7 @@
       <div class="card-body px-4 pb-2">
         <div class="mb-4">
           <label for="value3" class="form-label">{{ __('admin.Value') }}</label>
-          <input type="number" class="form-control" id="value3" name="value3" value="{{ $org ? $org->stat3_value : '' }}" placeholder="{{ __('admin.Value') }}" maxlength="20">
+          <input type="number" class="form-control" min="0" id="value3" name="value3" value="{{ $org ? $org->stat3_value : '' }}" placeholder="{{ __('admin.Value') }}" maxlength="20" onkeydown="return event.key !== '-'">
         </div>
         <div class="mb-4">
           <label for="label3" class="form-label">{{ __('admin.label') }}</label>
@@ -84,7 +84,7 @@
       <div class="card-body px-4 pb-2">
         <div class="mb-4">
           <label for="value4" class="form-label">{{ __('admin.Value') }}</label>
-          <input type="number" class="form-control" id="value4" name="value4" value="{{ $org ? $org->stat4_value : '' }}" placeholder="{{ __('admin.Value') }}" maxlength="20">
+          <input type="number" class="form-control" min="0" id="value4" name="value4" value="{{ $org ? $org->stat4_value : '' }}" placeholder="{{ __('admin.Value') }}" maxlength="20" onkeydown="return event.key !== '-'">
         </div>
         <div class="mb-4">
           <label for="label4" class="form-label">{{ __('admin.label') }}</label>
