@@ -21,7 +21,7 @@
 
     <div class="col-12">
       <div class="mb-4">
-        <label for="portfolio_description" class="form-label">{{ __('admin.services_short_description.label') }} *</label>
+        <label for="portfolio_description" class="form-label">{{ __('admin.services_short_description.label') }}</label>
         <input type="text" class="form-control" id="portfolio_description" name="portfolio_description"
           value="{{ $org ? $org->portfolio_description : '' }}" maxlength="50"
           placeholder="{{ __('admin.services_short_description.label') }}">
