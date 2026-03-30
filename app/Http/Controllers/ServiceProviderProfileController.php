@@ -79,6 +79,7 @@ class ServiceProviderProfileController extends Controller
         $provider->review_count = $ratingData->review_count ?? 0;
 
         // 4. Fetch active services with per-service review count
+
         $services = DB::table('services as s')
             ->where('s.service_provider_id', $id)
             ->where('s.status', true)
@@ -94,6 +95,7 @@ class ServiceProviderProfileController extends Controller
                 "s.description_{$l} as description",
                 's.img_url',
                 's.price',
+                's.hide_price',
                 's.currency',
                 's.status',
                 's.avg_rating',
@@ -101,8 +103,7 @@ class ServiceProviderProfileController extends Controller
                 's.service_category_id as category_id',
                 "sc.name_{$l} as category_name",
             ])
-            ->get();
-
+            ->OrderBy('s.created_at', 'desc')->paginate(9)->withQueryString()->appends(['tab' => 'services']);
         // Batch-fetch review counts per service
         if ($services->isNotEmpty()) {
             $serviceCounts = DB::table('services_requests')
@@ -113,7 +114,7 @@ class ServiceProviderProfileController extends Controller
                 ->selectRaw('service_id, COUNT(*) as review_count')
                 ->pluck('review_count', 'service_id');
 
-            $services = $services->map(function ($s) use ($serviceCounts) {
+            $services = $services->through(function ($s) use ($serviceCounts) {
                 $s->review_count = $serviceCounts[$s->id] ?? 0;
                 return $s;
             });
@@ -228,9 +229,13 @@ class ServiceProviderProfileController extends Controller
         // 15. Operating mode label
         $operatingModeLabel = $provider->operating_mode ?? '';
 
+        $active_tab = 'overview';
+        if( $request->has('tab') ) { $active_tab = $request->tab; }
+
         return view('admin.clients.provider-profile', compact(
             'provider',
             'services',
+            'active_tab',
             'portfolios',
             'clients',
             'reviews',
