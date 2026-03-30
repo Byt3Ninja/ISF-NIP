@@ -3653,4 +3653,7 @@ return [
 	'save_failed' => 'فشل الحفظ. يرجى المحاولة مرة أخرى.',
 	'invalid_url' => 'الرابط غير صالح',
 	'current_logo' => 'الشعار الحالي',	
+	'Applications_Closed' => 'التقديم مغلق',
+	'Starting_Soon' => 'يبدأ قريباً',
+	'application_status' => 'حالة التقديم',
 ];

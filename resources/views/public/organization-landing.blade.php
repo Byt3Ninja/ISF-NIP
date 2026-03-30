@@ -352,7 +352,7 @@
                     aria-selected="{{ $loop->first ? 'true' : 'false' }}"
                   >
                     {{-- <i class="ti ti-{{ $tab['icon'] }} me-1"></i> --}}
-                    {{ $tab['label'] }}
+                    {{ Str::limit($tab['label'], 50) }}
                   </a>
                 </li>
               @endif
@@ -366,166 +366,194 @@
 
   <!-- Programs Section -->
   @if($landingPage->programs_enabled && isset($landingPrograms) && $landingPrograms->count() > 0)
-  <section id="programs" class="section-py bg-body landing-reviews pb-0"
-    @php
-      $programsBg = '';
-      if (($landingPage->programs_bg_type ?? 'solid') === 'gradient' && $landingPage->programs_bg_gradient_start && $landingPage->programs_bg_gradient_end) {
-        $programsBg = "background: linear-gradient(135deg, {$landingPage->programs_bg_gradient_start}, {$landingPage->programs_bg_gradient_end});";
-      } elseif ($landingPage->programs_bg_color) {
-        $programsBg = "background-color: {$landingPage->programs_bg_color};";
-      }
-    @endphp
-    @if($programsBg) style="{{ $programsBg }}" @endif
-  >
+  <section id="programs" class="section-py">
     <div class="container">
-      <div class="row align-items-center gx-0 gy-4 g-lg-5 mb-5 pb-md-5">
-        <div class="col-md-6 col-lg-5 col-xl-3">
-          @if($landingPage->programs_subtitle)
-            <div class="text-center mb-4">
-              <span class="badge bg-label-primary">{{ $landingPage->programs_subtitle }}</span>
-            </div>
-          @endif
-          @if($landingPage->programs_title)
-            <h4 class="text-center mb-1">
-              <span class="position-relative fw-extrabold z-1">
-                {{ $landingPage->programs_title }}
-                <img
-                  src="/vuexy/assets/img/front-pages/icons/section-title-icon.png"
-                  alt="section title"
-                  class="section-title-img position-absolute object-fit-contain bottom-0 z-n1" />
-              </span>
-            </h4>
-          @endif
-          @if($landingPage->programs_description)
-            <p class="text-center mb-12">
-              {{ $landingPage->programs_description }}
-            </p>
-          @endif
-
-          <div class="landing-reviews-btns" id="programs-nav-controls">
-            <button
-              id="programs-previous-btn"
-              class="btn btn-label-primary reviews-btn me-4 scaleX-n1-rtl"
-              type="button">
-              <i class="ti ti-chevron-left ti-md"></i>
-            </button>
-            <button id="programs-next-btn" class="btn btn-label-primary reviews-btn scaleX-n1-rtl" type="button">
-              <i class="ti ti-chevron-right ti-md"></i>
-            </button>
-          </div>
+      @if($landingPage->programs_subtitle)
+        <div class="text-center mb-4">
+          <span class="badge bg-label-primary">{{ $landingPage->programs_subtitle }}</span>
         </div>
-        <div class="col-md-6 col-lg-7 col-xl-9">
-          <div class="swiper-programs-carousel overflow-hidden">
-            <style>
-              #swiper-programs .swiper-wrapper { align-items: stretch; }
-              #swiper-programs .swiper-slide { height: auto; }
-            </style>
-            <div class="swiper" id="swiper-programs">
-              <div class="swiper-wrapper">
-                @foreach($landingPrograms as $program)
-                  <div class="swiper-slide">
-                    <div class="card h-100 border shadow-none">
-                      <div class="card-body d-flex flex-column">
-                        {{-- Logo + Type badge --}}
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                          <img
-                            src="{{ $program->logo }}"
+      @endif
+      @if($landingPage->programs_title)
+        <h4 class="text-center mb-1">
+          <span class="position-relative fw-extrabold z-1">
+            {{ $landingPage->programs_title }}
+            <img
+              src="/vuexy/assets/img/front-pages/icons/section-title-icon.png"
+              alt="laptop charging"
+              class="section-title-img position-absolute object-fit-contain bottom-0 z-n1" />
+          </span>
+        </h4>
+      @endif
+      @if($landingPage->programs_description)
+        <p class="text-center mb-12">
+          {{ $landingPage->programs_description }}
+        </p>
+      @endif
+      
+      <div class="swiper-programs-carousel overflow-hidden">
+        <div class="swiper" id="swiper-programs">
+          <div class="swiper-wrapper">
+            @foreach($landingPrograms as $program)
+              <div class="swiper-slide h-100">
+                <div class="card h-100 border shadow-none mb-12" style="width: calc(100% - 24px); margin-inline-end: 24px;">
+                  <div class="card-body d-flex flex-column p-4">
+
+                    {{-- Logo + Type badge --}}
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                      <div class="rounded-3 border bg-body-secondary d-flex align-items-center justify-content-center p-1"
+                          style="width: 56px; height: 56px; flex-shrink: 0;">
+                        <img src="{{ $program->logo ?? '/images/team/3.png' }}"
                             alt="{{ $program->title }}"
-                            class="rounded"
-                            style="width: 48px; height: 48px; object-fit: contain;"
-                          />
-                          <span class="badge bg-label-{{ $program->type == 'Hackathon' ? 'warning' : 'primary' }}">
-                            {{ __('cycles.' . ($program->type ?? 'General_Program')) }}
-                          </span>
-                        </div>
+                            onerror="this.onerror=null;this.src='/images/team/3.png';"
+                            style="width: 40px; height: 40px; object-fit: contain;" />
+                      </div>
+                      <span class="badge bg-label-secondary rounded-pill">
+                        {{ __('cycles.' . ($program->type ?? 'General_Program')) }}
+                      </span>
+                    </div>
 
-                        {{-- Program name --}}
-                        <h5 class="card-title mb-3">{{ $program->title }}</h5>
+                    {{-- Title --}}
+                    <h5 class="fw-semibold mb-2" style="font-size: 16px; line-height: 1.35;">
+                      {{ $program->title }}
+                    </h5>
 
-                        {{-- Focus area tags --}}
-                        @if($program->focusAreas && $program->focusAreas->count() > 0)
-                          <div class="d-flex flex-wrap gap-1 mb-3">
-                            @foreach($program->focusAreas->take(3) as $area)
-                              <span class="badge bg-label-dark rounded-pill">
-                                {{ $isRtl ? $area->name_ar : $area->name_en }}
-                              </span>
-                            @endforeach
-                            @if($program->focusAreas->count() > 3)
-                              <span class="badge bg-label-secondary rounded-pill">
-                                +{{ $program->focusAreas->count() - 3 }}
-                              </span>
-                            @endif
-                          </div>
-                        @endif
+                    {{-- Description --}}
+                    @if($program->description)
+                      <p class="line-clamp-3 mb-0">
+                        {{ $program->description }}
+                      </p>
+                    @endif
 
-                        {{-- Short description --}}
-                        @if($program->short_description)
-                          <p class="card-text text-muted mb-3" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
-                            {{ $program->short_description }}
-                          </p>
-                        @endif
+                    {{-- Push everything below to bottom --}}
+                    <div class="mt-auto">
+                      <hr class="opacity-25 my-3">
 
-                        {{-- Benefits --}}
-                        @if($program->benefits && $program->benefits->count() > 0)
-                          <div class="row g-2 mb-3">
-                            @foreach($program->benefits->take(4) as $benefit)
-                              <div class="col-6">
-                                <div class="d-flex align-items-center">
-                                  @if($benefit->icon)
-                                    <i class="ti {{ $benefit->icon }} me-2 text-primary"></i>
-                                  @else
-                                    <i class="ti ti-circle-check me-2 text-primary"></i>
-                                  @endif
-                                  <small class="text-truncate">{{ $isRtl ? ($benefit->label_ar ?: $benefit->label_en) : $benefit->label_en }}</small>
+                      {{-- Date + Location --}}
+                      @if($program->start || $program->location)
+                        <div class="d-flex flex-wrap gap-3 mb-4">
+                          @if($program->start)
+                            <div class="d-flex align-items-center gap-2">
+                              <div class="avatar">
+                                <div class="avatar-initial rounded">
+                                  <i class="ti ti-calendar text-dark"></i>
                                 </div>
                               </div>
-                            @endforeach
-                          </div>
-                        @endif
-
-                        {{-- Spacer to push bottom content down --}}
-                        <div class="mt-auto">
-                          {{-- Date + Location --}}
-                          @if($program->start || $program->location)
-                            <div class="border rounded p-2 mb-3 d-flex flex-wrap gap-3">
-                              @if($program->start)
-                                <div class="d-flex align-items-center">
-                                  <i class="ti ti-calendar me-1 text-muted"></i>
-                                  <small class="text-muted">{{ $program->start->format('M d, Y') }}</small>
+                              <div>
+                                <div class="small text-secondary">
+                                  {{ __('admin.Program Duration') }}
                                 </div>
-                              @endif
-                              @if($program->location)
-                                <div class="d-flex align-items-center">
-                                  <i class="ti ti-map-pin me-1 text-muted"></i>
-                                  <small class="text-muted">{{ $program->location }}</small>
+                                <div class="fw-semibold">
+                                  {{ $program->start->format('M d') }}
+                                  @if($program->end)
+                                    – {{ $program->end->format('M d, Y') }}
+                                  @else
+                                    , {{ $program->start->format('Y') }}
+                                  @endif
                                 </div>
-                              @endif
+                              </div>
                             </div>
                           @endif
 
-                          {{-- CTA Buttons (only if public URL is set) --}}
-                          @if($program->public_slug)
-                            <div class="d-flex gap-2">
-                              <a href="/{{ $organization->short_code }}/program/{{ $program->public_slug }}"
-                                class="btn btn-outline-primary flex-fill">
-                                {{ __('admin.View Program') }}
-                              </a>
-                              <a href="/{{ $organization->short_code }}/program/{{ $program->public_slug }}/apply"
-                                class="btn btn-primary flex-fill">
-                                {{ __('admin.Apply Now') }}
-                              </a>
+                          @if($program->location)
+                            <div class="d-flex align-items-center gap-2">
+                              <div class="avatar">
+                                <div class="avatar-initial rounded">
+                                  <i class="ti ti-map-pin text-dark"></i>
+                                </div>
+                              </div>
+                              <div>
+                                <div class="small text-secondary">
+                                  {{ __('admin.Location') }}
+                                </div>
+                                <div class="fw-semibold">
+                                  {{ $program->location }}
+                                </div>
+                              </div>
                             </div>
                           @endif
                         </div>
-                      </div>
+                      @endif
+
+                      {{-- Application status + CTA --}}
+                      {{-- @if(true) --}}
+                        @php
+                          $now = now();
+
+                          $isUpcoming = $program->start && $now->lt($program->start);
+                          $isOpen     = $program->start && $program->end && $now->between($program->start, $program->end);
+                          $isClosed   = $program->end && $now->gt($program->end);
+
+                         $statusClass = $isOpen ? 'bg-label-success'
+                              : ($isUpcoming ? 'bg-label-warning'
+                               : 'bg-label-danger');
+
+                          $dotColor = $isOpen ? 'success'
+                                    : ($isUpcoming ? 'warning' : 'danger');
+
+                          $statusLabel = $isOpen ? __('admin.Open')
+                                        : ($isUpcoming ? __('admin.Starting_Soon')
+                                                      : __('admin.Closed'));
+                        
+                          $statusIcon = $isOpen ? 'hourglass'
+                                        : ($isUpcoming ? 'hourglass-empty'
+                                                      : 'lock');
+                          $dotColor    = $isOpen  ? 'success'
+                                      : ($isUpcoming ? 'warning' : 'danger');
+                        @endphp
+
+                        <div class="d-flex align-items-center gap-2 mb-6">
+                          <div class="avatar">
+                            <div class="avatar-initial rounded">
+                              <i class="ti ti-{{ $statusIcon }} text-dark"></i>
+                            </div>
+                          </div>
+                          <div>
+                            <div class="small text-secondary">
+                              {{ __('admin.application_status') }}
+                            </div>
+                            <div class="fw-semibold">
+                              {{ $statusLabel }}
+                            </div>
+                          </div>
+                        </div>
+
+                        @if($isOpen && $program->public_slug)
+                          <a href="/{{ $organization->short_code }}/program/{{ $program->public_slug }}/apply"
+                            class="btn btn-primary w-100 fw-semibold"
+                            style="border-radius: 10px; padding: 10px;">
+                            {{ __('admin.Apply Now') }}
+                            <i class="ti ti-arrow-narrow-{{ $isRtl ? 'left' : 'right' }} ms-2"></i>
+                          </a>
+                        @elseif($isUpcoming)
+                          <button class="btn btn-label-warning w-100 fw-semibold" disabled>
+                            {{ __('admin.Starting_Soon') }}
+                          </button>
+                        @else
+                          <button class="btn btn-label-secondary w-100 fw-semibold" disabled>
+                            {{ __('admin.Applications_Closed') }}
+                          </button>
+                        @endif
+                      {{-- @endif --}}
                     </div>
+
                   </div>
-                @endforeach
+                </div>
               </div>
-              <div class="swiper-pagination mt-4"></div>
-            </div>
+            @endforeach
           </div>
+          <!-- Pagination -->
+          <div class="swiper-pagination pt-4"></div>
         </div>
+      </div>
+  
+      <!-- Navigation Controls -->
+      <div class="programs-nav-controls text-center pt-4" id="programs-nav-controls">
+        <button id="programs-previous-btn" class="btn btn-label-primary programs-btn programs-previous-btn me-4 scaleX-n1-rtl" type="button">
+          <i class="ti ti-chevron-left ti-md"></i>
+        </button>
+        <button id="programs-next-btn" class="btn btn-label-primary programs-btn programs-next-btn scaleX-n1-rtl" type="button">
+          <i class="ti ti-chevron-right ti-md"></i>
+        </button>
       </div>
     </div>
   </section>
@@ -1072,9 +1100,7 @@
         swiperLogos = document.getElementById('swiper-partners-logos'),
         swiperPartners = document.getElementById('swiper-partners'),
         swiperPrograms = document.getElementById('swiper-programs');
-
-      // swiper carousel
-      // Customers reviews
+        
       // -----------------------------------
       // Programs carousel
       // -----------------------------------
@@ -1090,7 +1116,7 @@
             prevEl: '#programs-previous-btn'
           },
           pagination: {
-            el: swiperPrograms.querySelector('.swiper-pagination'),
+            el: '.swiper-pagination',
             clickable: true
           },
           breakpoints: {
@@ -1142,8 +1168,6 @@
           }
         });
       }
-
-
 
       // Review client logo
       // -----------------------------------
