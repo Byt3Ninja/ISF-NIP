@@ -273,7 +273,7 @@
 
   {{-- Pagination --}}
   @if($requests->hasPages())
-  <div class="d-flex justify-content-end mt-4">
+  <div class="w-100 mt-12">
     {{ $requests->links('pagination::bootstrap-5') }}
   </div>
   @endif
