@@ -79,7 +79,9 @@
 
                 {{-- Info --}}
                 <div class="min-w-0">
-                  <h6 class="fw-semibold text-truncate mb-1">{{ $spClient->name }}</h6>
+                  <h6 class="fw-semibold text-truncate mb-1">
+                    {{ Str::limit($spClient->name, 25) }}
+                  </h6>
                   <div class="text-secondary small text-truncate">
                     @if ($spClient->external_link)
                       <a href="{{ $spClient->external_link }}" target="_blank"
@@ -137,15 +139,25 @@
 
         <div class="form-group mb-4">
           <label class="form-label">{{ __('admin.client_name') }} *</label>
-          <input type="text" class="form-control" id="client-name"
-                 placeholder="{{ __('admin.client_name') }}">
+          <input 
+            type="text" 
+            class="form-control" 
+            id="client-name"
+            placeholder="{{ __('admin.client_name') }}"
+            maxlength="100"
+          />
           <div class="invalid-feedback">{{ __('admin.Required_Field') }}</div>
         </div>
 
         <div class="form-group mb-4">
           <label class="form-label">{{ __('admin.external_link') }}</label>
-          <input type="url" class="form-control" id="client-url"
-                 placeholder="https://example.com">
+          <input 
+            type="url" 
+            class="form-control" 
+            id="client-url"
+            placeholder="https://example.com"
+            maxlength="500"
+          />
           <div class="invalid-feedback">{{ __('admin.Please enter a valid URL') }}</div>
         </div>
 
@@ -246,7 +258,7 @@
             ${logoHtml}
           </div>
           <div class="min-w-0">
-            <h6 class="fw-semibold text-truncate mb-1">${escapeHtml(client.name)}</h6>
+            <h6 class="fw-semibold text-truncate mb-1">${escapeHtml(client.name.substring(0, 25)) client.name.length > 25 ? '…' : ''}</h6>
             <div class="text-secondary small text-truncate">${linkHtml}</div>
           </div>
         </div>

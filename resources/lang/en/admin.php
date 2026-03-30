@@ -3595,4 +3595,5 @@ return [
 	'unepxected_error' => 'An unexpected error occurred. Please try again later.',
 	'save_failed' => 'Save failed. Please check your input and try again.',
 	'invalid_url' => 'The URL is not valid.',
+	'current_logo' => 'Current Logo',
 ];
