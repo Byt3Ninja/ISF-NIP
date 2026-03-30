@@ -297,11 +297,11 @@
             
             <!-- CTA + Social -->
             <div class="d-flex justify-content-between align-items-center flex-wrap">
-              @if($landingPrograms->count() > 0)
+              {{-- @if($landingPrograms->count() > 0) --}}
                 <a href="#programs" class="btn btn-xl btn-primary mb-8 mb-md-4">
                   {{ __('admin.explore_programs') }}
                 </a>
-              @endif
+              {{-- @endif --}}
               @php
                 $socialLinks = [
                   'x' => $organization->twitter_handle,
@@ -365,7 +365,7 @@
   <!--/ Navigation Pills -->
 
   <!-- Programs Section -->
-  @if($landingPage->programs_enabled && isset($landingPrograms) && $landingPrograms->count() > 0)
+  @if(isset($landingPrograms) && $landingPrograms->count() > 0)
   <section id="programs" class="section-py">
     <div class="container">
       @if($landingPage->programs_subtitle)
@@ -554,6 +554,18 @@
         <button id="programs-next-btn" class="btn btn-label-primary programs-btn programs-next-btn scaleX-n1-rtl" type="button">
           <i class="ti ti-chevron-right ti-md"></i>
         </button>
+      </div>
+    </div>
+  </section>
+  @else
+  <section id="programs" class="section-py">
+    <div class="container">
+      <div class="card bg-light-subtle shadow-none border">
+        <div class="card-body">
+          <div class="text-center">
+            <h5 class="mb-2">{{ __('admin.no_landing_programs') }}</h5>
+          </div>
+        </div>
       </div>
     </div>
   </section>

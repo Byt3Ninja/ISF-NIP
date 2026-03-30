@@ -3599,4 +3599,5 @@ return [
 	'Applications_Closed' => 'Applications Closed',
 	'Starting_Soon' => 'Starting Soon',
 	'application_status' => 'Application Status',
+	'no_landing_programs' => 'No programs are available right now.',
 ];

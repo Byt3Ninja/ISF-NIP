@@ -3656,4 +3656,5 @@ return [
 	'Applications_Closed' => 'التقديم مغلق',
 	'Starting_Soon' => 'يبدأ قريباً',
 	'application_status' => 'حالة التقديم',
+	'no_landing_programs' => 'لا يوجد برامج متاحة حالياً',
 ];
