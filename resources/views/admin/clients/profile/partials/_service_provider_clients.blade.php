@@ -67,7 +67,7 @@
                     @php
                       $clientLogo = $spClient->logo_url
                         ? (str_starts_with($spClient->logo_url, 'https://') ? $spClient->logo_url : '/191014/' . $spClient->logo_url)
-                        : '/vuexy/assets/img/avatars/3.png';
+                        : '/icons/account.svg';
                     @endphp
                     <img src="{{ $clientLogo }}"
                          class="w-100 h-100 object-fit-contain"
