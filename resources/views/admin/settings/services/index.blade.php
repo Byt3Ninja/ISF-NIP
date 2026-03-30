@@ -108,10 +108,10 @@
                   <select class="form-select select2" name="rating" data-placeholder="{{ __('admin.all_ratings') }}">
                     <option value="all">{{ __('admin.all_ratings') }}</option>
                     <option value="5" {{ request('rating') == '5' ? 'selected' : '' }}>★★★★★ (5 {{ __('admin.stars') }})</option>
-                    <option value="4" {{ request('rating') == '4' ? 'selected' : '' }}>★★★★☆ (4 {{ __('admin.stars') }}</option>
-                    <option value="3" {{ request('rating') == '3' ? 'selected' : '' }}>★★★☆☆ (3 {{ __('admin.stars') }}</option>
-                    <option value="2" {{ request('rating') == '2' ? 'selected' : '' }}>★★☆☆☆ (2 {{ __('admin.stars') }}</option>
-                    <option value="1" {{ request('rating') == '1' ? 'selected' : '' }}>★☆☆☆☆ (1 {{ __('admin.star') }}</option>
+                    <option value="4" {{ request('rating') == '4' ? 'selected' : '' }}>★★★★☆ (4 {{ __('admin.stars') }})</option>
+                    <option value="3" {{ request('rating') == '3' ? 'selected' : '' }}>★★★☆☆ (3 {{ __('admin.stars') }})</option>
+                    <option value="2" {{ request('rating') == '2' ? 'selected' : '' }}>★★☆☆☆ (2 {{ __('admin.stars') }})</option>
+                    <option value="1" {{ request('rating') == '1' ? 'selected' : '' }}>★☆☆☆☆ (1 {{ __('admin.star') }})</option>
                   </select>
                 </div>
               @endif
