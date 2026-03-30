@@ -89,7 +89,7 @@
                   @endif
                 @endif
                 @if($canSchedule && $provider->appointment_link)
-                  <a class="btn btn-primary" href="{{ $provider->appointment_link }}" target="_blank" rel="noopener noreferrer">
+                  <a class="btn btn-primary text-nowrap" href="{{ $provider->appointment_link }}" target="_blank" rel="noopener noreferrer">
                     <i class="ti ti-calendar-check me-2"></i>{{ __('admin.schedule_meeting') }}
                   </a>
                 @endif
