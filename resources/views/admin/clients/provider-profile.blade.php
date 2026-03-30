@@ -236,7 +236,17 @@
                   <p class="card-text line-clamp-3 mb-4">
                     {!! $service->description !!}
                   </p>
-
+                  
+                  <!-- Price -->
+                  @if ($service->hide_price == 0)
+                    <div class="mb-3">
+                      @if ($service->price > 0)
+                        <span class="fs-5 fw-semibold">{{ $service->price }} {{ $service->currency }}</span>
+                      @else
+                        <span class="fs-5 fw-semibold">{{ __('admin.Hidden') }}</span>
+                      @endif
+                    </div>
+                  @endif
                   <!-- Date & Status -->
                   @if ($showDateStatus)
                     <div class="d-flex justify-content-between align-items-center mt-auto">
@@ -266,12 +276,15 @@
                 </div>
               </div>
             </div>
+            
             @endforeach
+            {{ $services->links('pagination::bootstrap-5') }}
           </div>
           @else
             @include('includes.no-result', ['message' => __('admin.no_services_available')])
           @endif
         </div>
+        
       </div>
     </div>
 
