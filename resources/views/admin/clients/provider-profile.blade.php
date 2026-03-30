@@ -154,7 +154,7 @@
           <div class="row">
             <!-- About Section -->
             <div class="{{ $provider->show_stats && count($stats) > 0 ? 'col-lg-7 col-md-6' : 'col-12' }} mb-4 mb-md-0 pe-8">
-              <h2 class="h5 mb-4">{{ __('admin.description') }}</h2>
+              <h2 class="h4 mb-4" style="font-weight: bold">{{ __('admin.About') }}</h2>
               @if($provider->description)
                 <div class="mb-0">{!! nl2br(e($provider->description)) !!}</div>
               @endif
@@ -165,6 +165,10 @@
               <div class="col-lg-5 col-md-6">
                 <div class="bg-light-subtle rounded p-8 h-100">
                   <div class="row g-4 justify-content-center text-center">
+                    <!-- Key Stats -->
+                    <div class="col-12" >
+                      <h3 class="mb-4" style="font-weight: bold;">{{ __('admin.Key_Stats') }}</h3>
+                    </div>
                     @foreach($stats as $stat)
                       <div class="col-6 d-flex flex-column align-items-center">
                         <div class="fs-4 fw-semibold text-dark mb-1">{{ $stat['value'] }}</div>

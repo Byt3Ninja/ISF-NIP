@@ -3657,4 +3657,6 @@ return [
 	'Starting_Soon' => 'يبدأ قريباً',
 	'application_status' => 'حالة التقديم',
 	'no_landing_programs' => 'لا يوجد برامج متاحة حالياً',
+	'About' => 'حول',
+	'Key_Stats' => 'الاحصاءات الرئيسية',
 ];
