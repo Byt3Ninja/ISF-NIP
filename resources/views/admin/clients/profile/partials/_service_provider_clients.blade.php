@@ -162,16 +162,15 @@
         </div>
 
         <div class="form-group mb-4">
-          <label class="form-label">{{ __('admin.client_logo') }}</label>
-
           {{-- Current logo preview (edit mode) --}}
           <div id="client-logo-preview-wrap" class="mb-2 d-none">
+            <p class="text-muted small mb-1 mb-0">{{ __('admin.current_logo') ?? 'Current logo' }}</p>
             <img id="client-logo-preview" src="" alt="Current Logo"
                  class="rounded-3 object-fit-contain border"
                  style="width:64px;height:64px;">
-            <p class="text-muted small mt-1 mb-0">{{ __('admin.current_logo') ?? 'Current logo' }}</p>
           </div>
-
+          
+          <label class="form-label">{{ __('admin.client_logo') }}</label>
           <input type="file" class="form-control" id="client-logo" accept="image/*">
           <span id="client-logo-filename" class="form-text"></span>
           <div class="invalid-feedback"></div>
@@ -258,7 +257,7 @@
             ${logoHtml}
           </div>
           <div class="min-w-0">
-            <h6 class="fw-semibold text-truncate mb-1">${escapeHtml(client.name.substring(0, 25)) client.name.length > 25 ? '…' : ''}</h6>
+            <h6 class="fw-semibold text-truncate mb-1">${escapeHtml(client.name.length > 25 ? client.name.substring(0, 25) + '…' : client.name)}</h6>
             <div class="text-secondary small text-truncate">${linkHtml}</div>
           </div>
         </div>
