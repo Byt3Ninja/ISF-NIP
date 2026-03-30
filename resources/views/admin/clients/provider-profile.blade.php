@@ -106,14 +106,14 @@
 <div class="nav-align-top mb-6">
   <ul class="nav nav-pills flex-column flex-sm-row mb-6 gap-2 gap-lg-0" role="tablist">
     <li class="nav-item">
-      <button type="button" class="nav-link active d-flex align-items-center gap-2" role="tab" data-bs-toggle="tab"
+      <button type="button" class="nav-link {{ $active_tab == 'overview' ? 'active' : '' }} d-flex align-items-center gap-2" role="tab" data-bs-toggle="tab"
         data-bs-target="#overview" aria-controls="overview" aria-selected="true">
         <i class="ti ti-home"></i>
         <span>{{ __('admin.overview') }}</span>
       </button>
     </li>
     <li class="nav-item">
-      <button type="button" class="nav-link d-flex align-items-center gap-2" role="tab" data-bs-toggle="tab"
+      <button type="button" class="nav-link {{ $active_tab == 'services' ? 'active' : '' }} d-flex align-items-center gap-2" role="tab" data-bs-toggle="tab"
         data-bs-target="#services" aria-controls="services" aria-selected="false">
         <i class="ti ti-briefcase"></i>
         <span>{{ __('admin.Services') }}</span>
@@ -121,7 +121,7 @@
     </li>
     @if($provider->show_portfolio)
       <li class="nav-item">
-        <button type="button" class="nav-link d-flex align-items-center gap-2" role="tab" data-bs-toggle="tab"
+        <button type="button" class="nav-link {{ $active_tab == 'portfolio' ? 'active' : '' }} d-flex align-items-center gap-2" role="tab" data-bs-toggle="tab"
           data-bs-target="#portfolio" aria-controls="portfolio" aria-selected="false">
           <i class="ti ti-layout-grid"></i>
           <span>{{ __('admin.portfolio') }}</span>
@@ -130,7 +130,7 @@
     @endif
     @if($provider->show_clients)
       <li class="nav-item">
-        <button type="button" class="nav-link d-flex align-items-center gap-2" role="tab" data-bs-toggle="tab"
+        <button type="button" class="nav-link {{ $active_tab == 'clients' ? 'active' : '' }} d-flex align-items-center gap-2" role="tab" data-bs-toggle="tab"
           data-bs-target="#clients" aria-controls="clients" aria-selected="false">
           <i class="ti ti-users"></i>
           <span>{{ __('admin.clients') }}</span>
@@ -138,7 +138,7 @@
       </li>
     @endif
     <li class="nav-item">
-      <button type="button" class="nav-link d-flex align-items-center gap-2" role="tab" data-bs-toggle="tab"
+      <button type="button" class="nav-link {{ $active_tab == 'reviews' ? 'active' : '' }} d-flex align-items-center gap-2" role="tab" data-bs-toggle="tab"
         data-bs-target="#reviews" aria-controls="reviews" aria-selected="false">
         <i class="ti ti-star"></i>
         <span>{{ __('admin.reviews') }}</span>
@@ -148,7 +148,7 @@
 
   <div class="tab-content p-0 bg-transparent border-0 shadow-none">
     <!-- About and Key Stats Section -->
-    <div class="tab-pane fade show active" id="overview" role="tabpanel">
+    <div class="tab-pane fade {{ $active_tab == 'overview' ? 'show active' : '' }}" id="overview" role="tabpanel">
       <div class="card border-0 shadow-sm mb-6">
         <div class="card-body">
           <div class="row">
@@ -181,7 +181,7 @@
     </div>
 
     <!-- Services Section -->
-    <div class="tab-pane fade" id="services" role="tabpanel">
+    <div class="tab-pane fade {{ $active_tab == 'services' ? 'show active' : '' }}" id="services" role="tabpanel">
       <div class="card mb-6">
         <div class="card-header">
           <h2 class="h5 mb-2">{{ __('admin.Services') }}</h2>
@@ -290,7 +290,7 @@
 
     <!-- Portfolio Section -->
     @if($provider->show_portfolio)
-    <div class="tab-pane fade" id="portfolio" role="tabpanel">
+    <div class="tab-pane fade {{ $active_tab == 'portfolio' ? 'show active' : '' }}" id="portfolio" role="tabpanel">
       <div class="card mb-6">
         <div class="card-header">
           <h2 class="h5 mb-2">{{ __('admin.portfolio') }}</h2>
@@ -392,7 +392,7 @@
 
     <!-- Clients Section -->
     @if($provider->show_clients)
-    <div class="tab-pane fade" id="clients" role="tabpanel">
+    <div class="tab-pane fade {{ $active_tab == 'clients' ? 'show active' : '' }}" id="clients" role="tabpanel">
       <div class="card mb-6">
         <div class="card-header">
           <h2 class="h5 mb-2">{{ __('admin.clients') }}</h2>
@@ -440,7 +440,7 @@
     @endif
 
     <!-- Reviews Section -->
-    <div class="tab-pane fade" id="reviews" role="tabpanel">
+    <div class="tab-pane fade {{ $active_tab == 'reviews' ? 'show active' : '' }}" id="reviews" role="tabpanel">
       <div class="card mb-6">
         <div class="card-header">
           <h2 class="h5 mb-2">{{ __('admin.reviews') }}</h2>

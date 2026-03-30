@@ -103,7 +103,7 @@ class ServiceProviderProfileController extends Controller
                 's.service_category_id as category_id',
                 "sc.name_{$l} as category_name",
             ])
-            ->OrderBy('s.created_at', 'desc')->paginate(9);
+            ->OrderBy('s.created_at', 'desc')->paginate(9)->withQueryString()->appends(['tab' => 'services']);
         // Batch-fetch review counts per service
         if ($services->isNotEmpty()) {
             $serviceCounts = DB::table('services_requests')
@@ -229,9 +229,13 @@ class ServiceProviderProfileController extends Controller
         // 15. Operating mode label
         $operatingModeLabel = $provider->operating_mode ?? '';
 
+        $active_tab = 'overview';
+        if( $request->has('tab') ) { $active_tab = $request->tab; }
+
         return view('admin.clients.provider-profile', compact(
             'provider',
             'services',
+            'active_tab',
             'portfolios',
             'clients',
             'reviews',
