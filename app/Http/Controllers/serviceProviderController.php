@@ -604,9 +604,9 @@ class serviceProviderController extends Controller
 			$data['logo_url'] = $request->file('client_logo')->store('service_providers_clients', ['disk' => 'public_uploads']);
 		}
 
-		$provider->clients()->create($data);
+		$client = $provider->clients()->create($data);
 
-		return response()->json(['success' => true, 'message' => __('admin.client_added_successfully')]);
+		return response()->json(['success' => true, 'message' => __('admin.client_added_successfully'), 'client' => $client]);
 	}
 
 	public function updateClient(Request $request, $id, $clientId)
@@ -630,7 +630,7 @@ class serviceProviderController extends Controller
 
 		$client->save();
 
-		return response()->json(['success' => true, 'message' => __('admin.client_updated_successfully')]);
+		return response()->json(['success' => true, 'message' => __('admin.client_updated_successfully'), 'client' => $client]);
 	}
 
 	public function destroyClient($id, $clientId)
