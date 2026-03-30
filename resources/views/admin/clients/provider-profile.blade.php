@@ -154,12 +154,13 @@
           <div class="row">
             <!-- About Section -->
             <div class="{{ $provider->show_stats && count($stats) > 0 ? 'col-lg-7 col-md-6' : 'col-12' }} mb-4 mb-md-0 pe-8">
-              <h2 class="h4 mb-4" style="font-weight: bold">{{ __('admin.About') }}</h2>
-              @if($provider->description)
-                <div class="mb-0">{!! nl2br(e($provider->description)) !!}</div>
+              @if($provider->description != null)
+                <h2 class="h4 mb-4" style="font-weight: bold">{{ __('admin.About') }}</h2>
+                @if($provider->description)
+                  <div class="mb-0">{!! nl2br(e($provider->description)) !!}</div>
+                @endif
               @endif
             </div>
-
             <!-- Key Stats Section -->
             @if($provider->show_stats && count($stats) > 0)
               <div class="col-lg-5 col-md-6">
