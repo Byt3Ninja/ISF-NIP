@@ -49,18 +49,21 @@
         </div>
       @endforeach
 
-      <div class="d-flex justify-content-between align-items-center mt-6">
-        <button type="button" class="btn btn-label-secondary btn-prev waves-effect" style="visibility: hidden;">
-          <i class="ti ti-arrow-left ti-xs me-sm-2 me-0"></i>
-          <span class="align-middle d-sm-inline-block d-none">{{ __('admin.Previous') }}</span>
-        </button>
-        <button type="button" class="btn btn-primary btn-next waves-effect waves-light">
-          <span class="align-middle d-sm-inline-block d-none me-sm-2">
-            {{ __('admin.save_and_next') }}
-          </span>
-          <i class="ti ti-arrow-right ti-xs"></i>
-        </button>
+      <div class="border-top mt-6 px-0">
+        <div class="d-flex justify-content-between align-items-center mt-6">
+          <button type="button" class="btn btn-label-secondary btn-prev waves-effect" style="visibility: hidden;">
+            <i class="ti ti-arrow-left ti-xs me-sm-2 me-0"></i>
+            <span class="align-middle d-sm-inline-block d-none">{{ __('admin.Previous') }}</span>
+          </button>
+          <button type="button" class="btn btn-primary btn-next waves-effect waves-light">
+            <span class="align-middle d-sm-inline-block d-none me-sm-2">
+              {{ __('admin.save_and_next') }}
+            </span>
+            <i class="ti ti-arrow-right ti-xs"></i>
+          </button>
+        </div>
       </div>
+
     </form>
   </div>
 </div>
