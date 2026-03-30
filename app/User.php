@@ -251,6 +251,10 @@ class User extends Authenticatable implements MustVerifyEmail
                 : [];
         } else {
             $result = [];
+            // check for user organizations table
+            if ($this->organizations()->count() > 0) {
+                $result = $this->organizations()->pluck('organizations.id')->toArray();
+            }
         }
 
         $this->attributes['_cached_organizations_ids'] = $result;
