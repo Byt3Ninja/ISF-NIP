@@ -86,63 +86,56 @@ class UserService
      * @throws \Exception
      * @return array{message: string, status: int, success: bool|array{success: bool, user: mixed}}
      */
-    public function store(array $data): array
-    {
-        try{
-            
-            $result_service_provider = $this->userRepository->registerServiceProvider($data);
-            $result = $this->userRepository->create($data);
-            
-         
-        if($result['success'] ==true){
-            $update_invite_mentor = InviteMentor::where('email', $data['email'])->orderBy('created_at', 'desc')->first();
-            if($update_invite_mentor){
-                $update_invite_mentor->update([
-                    'mentor_id' => $result['data']->id,
-                    'status'    => 'Accepted',
-                ]);
-                if($update_invite_mentor->organization_ids != null){
-                    $mentorId = $result['data']->id;
-                    $cycles = Cycle::whereIn(
-                        'organization_id',
-                        $update_invite_mentor->organization_ids
-                    )->get();
-                    foreach ($cycles as $cycle) {
-                        $cycle->mentors()->syncWithoutDetaching([$mentorId]);
-                    }
-                }
-            }
-        $user=$result['data'];
-        Storage::disk('UsersLFM')->makeDirectory("$user->id");
-		Storage::disk('UsersLFM')->makeDirectory("$user->id/BusinessPlans");
-		Storage::disk('UsersLFM')->makeDirectory("$user->id/FinancialPlans");
-		Storage::disk('UsersLFM')->makeDirectory("$user->id/PitchDeck");
-		Storage::disk('UsersLFM')->makeDirectory("$user->id/Shared");
-		Storage::disk('UsersLFM')->makeDirectory("$user->id/Others");
+	public function store(array $data): array
+	{
+		try{
+			$result = $this->userRepository->create( $data );
+			if( $result['success'] == true )
+			{
+				if( $data['role'] == 'serviceProvider' && array_key_exists('contact_name', $data) )
+				{
+					$data['user'] = $result['data'];
+					$result_service_provider = $this->userRepository->registerServiceProvider( $data );
+				}
+				$update_invite_mentor = InviteMentor::where('email', $data['email'])->orderBy('created_at', 'desc')->first();
+				if($update_invite_mentor)
+				{
+					$update_invite_mentor->update([
+						'mentor_id' => $result['data']->id,
+						'status' => 'Accepted',
+					]);
+					if($update_invite_mentor->organization_ids != null){
+						$mentorId = $result['data']->id;
+						$cycles = Cycle::whereIn(
+							'organization_id',
+							$update_invite_mentor->organization_ids
+						)->get();
+						foreach ($cycles as $cycle) {
+							$cycle->mentors()->syncWithoutDetaching([$mentorId]);
+						}
+					}
+				}
+				$user = $result['data'];
+				Storage::disk('UsersLFM')->makeDirectory("$user->id");
+				Storage::disk('UsersLFM')->makeDirectory("$user->id/BusinessPlans");
+				Storage::disk('UsersLFM')->makeDirectory("$user->id/FinancialPlans");
+				Storage::disk('UsersLFM')->makeDirectory("$user->id/PitchDeck");
+				Storage::disk('UsersLFM')->makeDirectory("$user->id/Shared");
+				Storage::disk('UsersLFM')->makeDirectory("$user->id/Others");
 
-
-        if($user->hasRole('Judger')){
-               $user->notify(new WelcomeJudgerNotification($user));
-        }else{
-             $user->notify(new WelcomeUserNotification($user, $data['password']));
-        }
-
-        return $result;
-        }
-
-
-
-
-
-        } catch (\Throwable $e) {
-            return [
-            'success' => false,
-            'message' => 'Failed to create user',
-            'data'    => null,
-            'errors'  => [$e->getMessage()]
-            ];
-        }
-    }
+				if($user->hasRole('Judger')) { $user->notify(new WelcomeJudgerNotification($user)); }
+				else { $user->notify(new WelcomeUserNotification($user, $data['password'])); }
+			}
+			return $result;
+		} catch (\Throwable $e) {
+			return [
+				'success' => false,
+				'message' => 'Failed to create user',
+				'data'    => null,
+				'errors'  => [$e->getMessage()]
+			];
+		}
+	}
 
     /**
      * Summary of update
