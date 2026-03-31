@@ -4437,7 +4437,6 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "registered",
                     "organizationmanager",
                     "subadmin",
                     "serviceProvider"
