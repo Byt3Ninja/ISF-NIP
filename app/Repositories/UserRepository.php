@@ -186,28 +186,30 @@ class UserRepository
 
     public function registerServiceProvider(array $data)
     {
-        
         try {
-           
-                $email = $data['email'];
-                $user = User::where('email', $email)->first();
-                if($user){
-                    return [
-                        'success' => false,
-                        'message' => 'Email already exists',
-                        'data'    => null,
-                        'errors'  => ['Email already exists']
-                        ];
-                }
+            $email = $data['email'];
+            /* $user = User::where('email', $email)->first();
+            if($user){
+                return [
+                    'success' => false,
+                    'message' => 'Email already exists',
+                    'data'    => null,
+                    'errors'  => ['Email already exists']
+                    ];
+            } */
+            if( array_key_exists('contact_name', $data) )
+            {
                 $parse_name = explode(' ', $data['contact_name']);
-					$first_name = $parse_name[0];
-                    $last_name = isset($parse_name[1]) ? $parse_name[1] : '';
-                    $data['first_name'] = $first_name;
-                    $data['last_name'] = $last_name;
+                $first_name = $parse_name[0];
+                $last_name = isset($parse_name[1]) ? $parse_name[1] : '';
+                $data['first_name'] = $first_name;
+                $data['last_name'] = $last_name;
                 $contact_name = $data['contact_name'];
+                $user = $data['user'];
+                $full_name = trim( $data['first_name'] . ' ' . $data['last_name'] );
                 $registration = new serviceProviderRegistration;
-                $registration->company_name = $data['company_name'];
-                $registration->contact_name = $data['contact_name'];
+                $registration->company_name = $full_name;
+                $registration->contact_name = $full_name;
                 $registration->email = $data['email'];
                 $registration->country_code = $data['country_code'];
                 $registration->phone = '+' . $data['country_code'] . $data['phone'];
@@ -223,11 +225,7 @@ class UserRepository
                         Mail::to($registration->email)->queue(new serviceProviderRegistrationMail( $contact_name ));
                     }
                 }
-                
-            
-                return $registration;
-            
-
+            }
             return [
                 'success' => true,
                 'message' => 'Service Provider registered successfully',

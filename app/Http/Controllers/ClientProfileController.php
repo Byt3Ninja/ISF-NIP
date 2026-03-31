@@ -8,6 +8,7 @@ use App\Country;
 use App\Currency;
 use App\Cycle;
 use App\CyclesMentors;
+use App\serviceProviders;
 use App\Expertise;
 use App\Http\Requests\UpdateClientProfilePasswordRequest;
 use App\Http\Requests\UpdateClientProfileRequest;
@@ -161,6 +162,16 @@ class ClientProfileController extends Controller
 
         if ($client->hasRole('serviceProvider')) {
             $provider = $client->service_provider;
+            if (!$provider) {
+                $provider = new serviceProviders;
+				$provider->company_name = $client->name;
+				$provider->contact_name = $client->name;
+				$provider->email = $client->email;
+				$provider->phone = $client->phone;
+				$provider->status = true;
+				$provider->user_id = $client->id;
+				$provider->save();
+            }
             if ($provider) {
                 return redirect()->route('service_provider.profile', $provider->id);
             }

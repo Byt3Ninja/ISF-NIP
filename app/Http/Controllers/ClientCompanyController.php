@@ -411,12 +411,11 @@ class ClientCompanyController extends Controller
             ->orderBy('valuation_date', 'desc')
             ->get();
             $availableValuationDates = $Historyfinancialprojection->pluck('valuation_date')->unique();
-            $financials = $Historyfinancialprojection->where('valuation_date', $valuation_dateSearch.'-01')->keyBy('year');
+            $financials = $Historyfinancialprojection->filter(fn($fp) => $fp->valuation_date->format('Y-m-d') === $valuation_dateSearch.'-01')->keyBy('year');
             $historicalValuationDates = $availableValuationDates->map(function ($date) {
                 return Carbon::parse($date)->format('Y-m');
             });
             $valuationDate = $request->valuation_date ?? $valuation_dateSearch;
- 
         $map = function ($fp) {
             return [
                 'revenue'        => (float) ($fp->revenues ?? 0),
@@ -450,7 +449,7 @@ class ClientCompanyController extends Controller
             $valuationYear + 1 => ['key' => 'year2', 'label' => __('startup.financial.year_2')],
             $valuationYear + 2 => ['key' => 'year3', 'label' => __('startup.financial.year_3')],
         ];
-
+    
         foreach ($expectedYears as $year => $meta) {
             $data = isset($financials[$year]) ? $map($financials[$year]) : $map(new FinancialProjection());
             $periods[$meta['key']] = [
@@ -510,7 +509,6 @@ class ClientCompanyController extends Controller
                 'count' => $company->user?->mentorship?->whereNotNull('rating')->where('done', 1)->count() ?? 0, // Count of mentorship sessions
             ],
         ];
-
         return view('admin/clients/startup/company_profile', compact('company',
         'formTitle',
         'formData',
