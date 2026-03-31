@@ -94,7 +94,7 @@
       <li class="nav-item">
         <a class="nav-link {{ request('request_status') == null ? 'active' : '' }}" href="{{ route('service_requests.list_mine') }}">
           {{ __('admin.all_requests') }}
-          <span class="badge badge-center rounded-pill bg-danger bg-glow ms-2">
+          <span class="badge badge-center rounded-pill bg-light text-primary bg-glow ms-2">
             {{ $stats['total'] ?? 0 }}
           </span>
         </a>
@@ -104,7 +104,7 @@
         <a class="nav-link {{ request('request_status') == 'pending' ? 'active' : '' }}"
           href="{{ route('service_requests.list_mine', ['request_status' => 'pending']) }}">
           {{ __('admin.pending') }}
-          <span class="badge badge-center rounded-pill bg-danger ms-2">
+          <span class="badge badge-center rounded-pill bg-light text-primary ms-2">
             {{ $stats['pending'] ?? 0 }}
           </span>
         </a>
@@ -114,7 +114,7 @@
         <a class="nav-link {{ request('request_status') == 'completed' ? 'active' : '' }}"
           href="{{ route('service_requests.list_mine', ['request_status' => 'completed']) }}">
           {{ __('admin.completed') }}
-          <span class="badge badge-center rounded-pill bg-danger ms-2">
+          <span class="badge badge-center rounded-pill bg-light text-primary ms-2">
             {{ $stats['completed'] ?? 0 }}
           </span>
         </a>
@@ -124,7 +124,7 @@
         <a class="nav-link {{ request('request_status') == 'approved' ? 'active' : '' }}"
           href="{{ route('service_requests.list_mine', ['request_status' => 'approved']) }}">
           {{ __('admin.Approved') }}
-          <span class="badge badge-center rounded-pill bg-danger ms-2">
+          <span class="badge badge-center rounded-pill bg-light text-primary ms-2">
             {{ $stats['approved'] ?? 0 }}
           </span>
         </a>
@@ -134,7 +134,7 @@
         <a class="nav-link {{ request('request_status') == 'rejected' ? 'active' : '' }}"
           href="{{ route('service_requests.list_mine', ['request_status' => 'rejected']) }}">
           {{ __('admin.Rejected') }}
-          <span class="badge badge-center rounded-pill bg-danger ms-2">
+          <span class="badge badge-center rounded-pill bg-light text-primary ms-2">
             {{ $stats['rejected'] ?? 0 }}
           </span>
         </a>
