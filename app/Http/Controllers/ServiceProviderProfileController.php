@@ -371,6 +371,7 @@ class ServiceProviderProfileController extends Controller
                 DB::raw("CONCAT(COALESCE(u.first_name_{$l}, u.first_name_en, ''), ' ', COALESCE(u.last_name_{$l}, u.last_name_en, '')) as reviewer_name"),
                 'u.img_url as reviewer_img',
                 'u.created_at as reviewer_joined_at',
+                'co.id as company_id',
                 "co.name_{$l} as company_name",
                 'co.name_en as company_name_en',
             ])
