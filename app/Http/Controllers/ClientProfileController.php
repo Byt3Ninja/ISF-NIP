@@ -52,6 +52,7 @@ class ClientProfileController extends Controller
         $this->whatsAppService = $whatsAppService;
         $this->notificationSettingsService = $notificationSettingsService;
     }
+
     /**
      * Show the form for editing the specified resource.
      *
@@ -120,12 +121,8 @@ class ClientProfileController extends Controller
                 'google2fa_url' => $google2fa_url
             );
 
-
-
-        // Fetch activities
-        $activities = Activity::where('user_id', Auth::user()->id)
-        ->orderBy('activity_time', 'desc')
-        ->get();
+            // Fetch activities
+            $activities = Activity::where('user_id', $client->id)->orderBy('activity_time', 'desc')->get();
             return view('admin/clients/profile/editProfile', compact('client', 'Currencies', 'countries', 'states', 'cities', 'expertises', 'data','activities', 'industries'));
         } catch (Exception $e) {
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
@@ -185,13 +182,6 @@ class ClientProfileController extends Controller
         
         return view('admin/clients/profile', compact('client', 'mentors', 'mentorshipTasks', 'mentrequests_count', 'mentrequests_period', 'average_rating'));
     }
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Type  $Type
-     * @return \Illuminate\Http\Response
-     */
 
     public function Updatebio(Request $request)
     {
@@ -219,6 +209,14 @@ class ClientProfileController extends Controller
         }
         return redirect()->route('user.profile_view')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
     }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Type  $Type
+     * @return \Illuminate\Http\Response
+     */
     public function update(UpdateClientProfileRequest $request)
     {
         
