@@ -162,6 +162,7 @@ class ServiceProviderProfileController extends Controller
             ->where('service_provider_id', $id)
             ->where('status', true)
             ->whereNull('deleted_at')
+            ->whereIn('id', $reviews['data']->pluck('service_id')->unique()->values()->toArray())
             ->select('id', "name_{$l} as name", 'name_en')
             ->get();
 
@@ -364,6 +365,7 @@ class ServiceProviderProfileController extends Controller
                 'sr.review_body',
                 'sr.reviewed_at',
                 'sr.user_id as reviewer_user_id',
+                's.id as service_id',
                 "s.name_{$l} as service_name",
                 's.name_en as service_name_en',
                 DB::raw("CONCAT(COALESCE(u.first_name_{$l}, u.first_name_en, ''), ' ', COALESCE(u.last_name_{$l}, u.last_name_en, '')) as reviewer_name"),
