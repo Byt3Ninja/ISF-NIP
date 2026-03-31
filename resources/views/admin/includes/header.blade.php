@@ -366,28 +366,28 @@
         'icon' => 'ti ti-clock-hour-2 me-3 ti-md',
         'route' => null,
         'permission' => ['TimeSheet.index', 'time_sheets.reports.finance.view', 'time_sheets.view.mine'],
-        'isVisible' => $_user->ableToAny(["TimeSheet.index", "time_sheets.reports.finance.view", "time_sheets.view.mine"], $permissions),
+        'isVisible' => $_user->ableToAny(["TimeSheet.index", "time_sheets.reports.finance.view", "time_sheets.view.mine"], $permissions) && app()->environment(['local', 'dev', 'test']),
         'subItems' => [
             [
                 'label' => $l == 'en' ? 'Time sheet' : 'الجدول الزمني',
                 'icon' => 'ti ti-clock-record',
                 'route' => 'TimeSheet.index',
-                'permission' => 'TimeSheet.index',
-                'isVisible' => true
+                'permission' => $_user->ableTo('TimeSheet.index', $permissions) && app()->environment(['local', 'dev', 'test']),
+                'isVisible' => $_user->ableTo('TimeSheet.index', $permissions) && app()->environment(['local', 'dev', 'test'])
             ],
             [
                 'label' => $l == 'en' ? 'Financial Report' : 'التقرير المالي',
                 'icon' => 'ti ti-report-money',
                 'route' => 'time_sheets.reports.finance.view',
-                'permission' => 'time_sheets.reports.finance.view',
-                'isVisible' => true
+                'permission' => $_user->ableTo('time_sheets.reports.finance.view', $permissions) && app()->environment(['local', 'dev', 'test']) && !$_user->hasRole("organizationManager"),
+                'isVisible' => $_user->ableTo('time_sheets.reports.finance.view', $permissions) && app()->environment(['local', 'dev', 'test']) && !$_user->hasRole("organizationManager")
             ],
             [
                 'label' => $l == 'en' ? 'Users TimeSheets' : 'الجدول الزمني للمستخدمين',
                 'icon' => 'ti ti-user-check',
                 'route' => 'time_sheets.view.mine',
-                'permission' => 'time_sheets.view.mine',
-                'isVisible' => true
+                'permission' => $_user->ableTo('time_sheets.view.mine', $permissions) && app()->environment(['local', 'dev', 'test']) && !$_user->hasRole("organizationManager"),
+                'isVisible' => $_user->ableTo('time_sheets.view.mine', $permissions) && app()->environment(['local', 'dev', 'test']) && !$_user->hasRole("organizationManager")
             ]
         ]
     ],
