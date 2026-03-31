@@ -308,8 +308,6 @@ $(document).ready(function() {
 		EDITABLE_FIELDS: ['rev','cogs','sal','opex','da','int','tax','rec','inv','pay','capex','debt']
 	};
 
-	console.log('CONFIG.IS_CURRENCY_DISABLED', CONFIG.IS_CURRENCY_DISABLED);
-
 	// ═══════════════════════════════════════════════════════════════════════
 	// STATE
 	// ═══════════════════════════════════════════════════════════════════════
