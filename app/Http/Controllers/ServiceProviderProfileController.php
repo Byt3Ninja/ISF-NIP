@@ -79,7 +79,6 @@ class ServiceProviderProfileController extends Controller
         $provider->review_count = $ratingData->review_count ?? 0;
 
         // 4. Fetch active services with per-service review count
-
         $services = DB::table('services as s')
             ->where('s.service_provider_id', $id)
             ->where('s.status', true)
