@@ -3659,4 +3659,12 @@ return [
 	'no_landing_programs' => 'لا يوجد برامج متاحة حالياً',
 	'About' => 'حول',
 	'Key_Stats' => 'الاحصاءات الرئيسية',
+	'cofounder' => 'شريك مؤسس',
+	'Linkedin_URL' => 'رابط لينكدإن',
+	'commitment' => 'الالتزام',
+	'full_time' => 'دوام كامل',
+	'part_time' => 'دوام جزئي',
+	'investor_details' => 'تفاصيل المستثمر',
+	'shareholder_details' => 'تفاصيل المساهم',
+	'ownership_percentage' => 'نسبة الملكية',
 ];
