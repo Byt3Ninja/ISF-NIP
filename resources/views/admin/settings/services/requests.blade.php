@@ -237,8 +237,9 @@
                 data-has-review="{{ $request['has_review'] ? '1' : '0' }}"
                 data-founder-name="{{ $request['founder_name'] ?? '' }}"
                 data-founder-img="{{ $request['founder_img'] ?? '' }}"
-                data-unread-count="{{ $request['unread_count'] ?? 0 }}">
-                <i class="ti ti-history me-1"></i> {{ __('admin.view_history') }}
+                data-unread-count="{{ $request['unread_count'] ?? 0 }}"
+                data-tab="reviews">
+                <i class="ti ti-history me-1"></i> {{ __('admin.View') }} {{ __('admin.reviews') }}
               </button>
 
             @elseif($request['status'] === 'Approved')
@@ -955,7 +956,12 @@ if (ocRespond) {
 
     renderReviewTab(btn);
 
-    bootstrap.Tab.getOrCreateInstance($('#tab-timeline')).show();
+    // Activate specific tab based on button
+    if (btn.dataset.tab === 'reviews') {
+      bootstrap.Tab.getOrCreateInstance(document.getElementById('tab-reviews')).show();
+    } else {
+      bootstrap.Tab.getOrCreateInstance($('#tab-timeline')).show();
+    }
     formHistoryReply.reset();
     $('#histReplyCount').textContent = '0';
     fvHistoryReply && fvHistoryReply.resetForm(true);
