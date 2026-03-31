@@ -486,7 +486,6 @@ $(document).ready(function() {
 			dataType: 'json'
 		})
 		.done(function(data) {
-			console.log('data', data);
 			if (!data.success) {
 				handleError(data.message ?? '{{ __("admin.error_loading_financial_data") }}');
 				return;
