@@ -1,6 +1,6 @@
 @forelse($reviews as $review)
 <div class="col-12 col-md-6 review-item">
-  <div class="bg-card rounded-3 p-4 border h-100">
+  <div class="bg-card review-card-item rounded-3 p-4 border h-100">
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-start mb-3">
       <div class="d-flex gap-3">
@@ -26,9 +26,13 @@
         @endif
 
         <div>
-          <h6 class="mb-1 fw-semibold">{{ trim($review->reviewer_name) }}</h6>
+          <h6 class="mb-1 fw-semibold">
+            <a class="text-dark" href="{{ route('clients.profile_view', $review->reviewer_user_id) }}"> {{ trim($review->reviewer_name) }} </a>
+          </h6>
           @if($review->company_name ?? $review->company_name_en ?? null)
-            <div class="text-muted small">{{ $review->company_name ?: $review->company_name_en }}</div>
+            <div class="text-muted small">
+              <a class="text-muted" href="{{ route('company.profile_view', $review->company_id) }}"> {{ $review->company_name ?: $review->company_name_en }} </a>
+            </div>
           @endif
           <div class="d-flex align-items-center gap-2 mt-1 flex-wrap">
             <span class="badge bg-light-subtle border text-dark rounded-pill">
@@ -62,10 +66,10 @@
     @if($review->review_title)
       <h6 class="fw-semibold mb-2">{{ $review->review_title }}</h6>
     @endif
-    <p>{{ $review->review_body ?: $review->rate_comment }}</p>
+    <div class="mb-7">{{ $review->review_body ?: $review->rate_comment }}</div>
 
     <!-- Date -->
-    <div class="text-muted small">
+    <div class="text-muted small reviewed-at-date">
       {{ \Carbon\Carbon::parse($review->reviewed_at)->format('F j, Y') }}
     </div>
   </div>

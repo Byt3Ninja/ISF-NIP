@@ -4,6 +4,10 @@
 
 @section('style')
 <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/page-profile.css" />
+<style>
+  .review-card-item { position: relative; }
+  .reviewed-at-date { position: absolute; bottom: 10px; }
+</style>
 @stop
 
 @section('content')

@@ -133,10 +133,16 @@ class ClientProfileController extends Controller
         }
     }
 
-    public function show()
+    public function showClientProfile( $id )
     {
-        $client = Auth::user();
-        $mentors = CyclesMentors::where('user_id', Auth::user()->id ?? 0)->get();
+        return $this->show( $id );
+    }
+
+    public function show( $id = null )
+    {
+        $client = is_null( $id ) ? Auth::user() : User::find($id);
+
+        $mentors = CyclesMentors::where('user_id', $client->id ?? 0)->get();
 
         $globalRoles = ['Admin', 'Organization Manager', 'subadmin'];
 
@@ -150,10 +156,10 @@ class ClientProfileController extends Controller
         } else {
             $mentorshipTasks = collect();
         }
-        $mentrequests = MentorshipRequest::where('mentor_id', Auth::user()->id);
+        $mentrequests = MentorshipRequest::where('mentor_id', $client->id);
         $mentrequests_count = $mentrequests->count();
         $mentrequests_period = $mentrequests->sum('period') / 60;
-        $average_rating = MentorshipRequest::where('mentor_id', Auth::user()->id)
+        $average_rating = MentorshipRequest::where('mentor_id', $client->id)
             ->where('approved', 'Yes')
             ->whereNotNull('rating') // تأكد أن عمود التقييم يحتوي على قيم
             ->avg('rating');
@@ -441,12 +447,10 @@ class ClientProfileController extends Controller
         }
     }
 
-    public function showMintorprofile($id)
+    public function showMentorProfile($id)
     {
-
-
         $client = User::find($id);
-        if (!empty($client)) {
+        if (!empty($client) && $client->hasRole('Mentor') ) {
             // $exp = Expertise::where('parent_id',null)->get();
             // $expertises = Expertise::where('parent_id',null)->get();
             $mentrequests = MentorshipRequest::where('mentor_id', $id);
@@ -491,7 +495,7 @@ class ClientProfileController extends Controller
             ));
 
         } else {
-            return redirect()->route('user.profile_view')->with(['msg' => 'FailedStore', 'class' => 'danger']);
+            return redirect()->route('user.profile_view');
         }
     }
 
