@@ -271,6 +271,7 @@
   function getStep3Data() {
     const fd = new FormData(wizardForm);
     const data = {};
+    data.stats_visibility = document.getElementById('stats_visibility')?.checked ? '1' : '0';
     for (let i = 1; i <= 4; i++) { data[`value${i}`] = fd.get(`value${i}`) || ''; data[`label${i}`] = fd.get(`label${i}`) || ''; }
     return JSON.stringify(data);
   }
