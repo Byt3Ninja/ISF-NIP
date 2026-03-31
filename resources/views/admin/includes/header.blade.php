@@ -392,7 +392,7 @@ $menuItems = [
         'icon' => 'ti ti-folder',
         'route' => 'projects.index',
         'permission' => 'projects.index',
-        'isVisible' => true,
+        'isVisible' => $_user->ableTo('projects.index', $permissions) && app()->environment(['local', 'dev', 'test']),
         'subItems' => []
     ],
 
