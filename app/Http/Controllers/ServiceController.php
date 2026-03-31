@@ -702,6 +702,7 @@ class ServiceController extends Controller
 					$q2->where('service_provider_id', $providerId);
 				});
 			})
+			->with(['user', 'service', 'service.provider'])
 			->first();
 
 		if (empty($serviceRequest)) {
@@ -797,13 +798,14 @@ class ServiceController extends Controller
 			$body     = __("admin.{$bodyKey}", $bodyParams, $founderLang);
 			$inApp    = __("admin.{$inAppKey}", $params, $founderLang);
 
-			$notification = new TemplateEmail([
+			$emailParams = [
 				$subject,
 				$greeting,
 				$body,
 				$actionUrl,
 				$inApp,
-			]);
+			];
+			$notification = new TemplateEmail( $emailParams );
 			$notification->ActionText = $ctaText;
 
 			$founder->notify($notification);
