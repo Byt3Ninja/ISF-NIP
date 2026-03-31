@@ -43,30 +43,30 @@
 @stop
 
 @php
-$phone_codes = App\Country::all();
-$save_redirect_url = $_user->hasRole('serviceProvider') ? '/dashboard/show/myProfile' : '/dashboard/services_providers';
+  $phone_codes = App\Country::all();
+  $save_redirect_url = $_user->hasRole('serviceProvider') ? '/dashboard/show/myProfile' : '/dashboard/services_providers';
 
-$tabs = [
-  ['account', 'accountSection', 'users'],
-  ['security', 'securitySection', 'lock'],
-  ['notifications', 'notificationsSection', 'bell'],
-];
+  $tabs = [
+    ['account', 'accountSection', 'users'],
+    ['security', 'securitySection', 'lock'],
+    ['notifications', 'notificationsSection', 'bell'],
+  ];
 
-$serviceProviderSteps = [
-  ['id' => 'basics', 'title' => __('admin.profile_basics'), 'subtitle' => __('admin.provider_basics_subtitle')],
-  ['id' => 'booking', 'title' => __('admin.intro_booking'), 'subtitle' => __('admin.provider_booking_subtitle')],
-  ['id' => 'stats', 'title' => __('admin.key_stats'), 'subtitle' => __('admin.provider_stats_subtitle')],
-  ['id' => 'portfolio', 'title' => __('admin.portfolio'), 'subtitle' => __('admin.provider_portfolio_subtitle')],
-  ['id' => 'clients', 'title' => __('admin.clients'), 'subtitle' => __('admin.provider_clients_subtitle')]
-];
+  $serviceProviderSteps = [
+    ['id' => 'basics', 'title' => __('admin.profile_basics'), 'subtitle' => __('admin.provider_basics_subtitle')],
+    ['id' => 'booking', 'title' => __('admin.intro_booking'), 'subtitle' => __('admin.provider_booking_subtitle')],
+    ['id' => 'stats', 'title' => __('admin.key_stats'), 'subtitle' => __('admin.provider_stats_subtitle')],
+    ['id' => 'portfolio', 'title' => __('admin.portfolio'), 'subtitle' => __('admin.provider_portfolio_subtitle')],
+    ['id' => 'clients', 'title' => __('admin.clients'), 'subtitle' => __('admin.provider_clients_subtitle')]
+  ];
 
-if ($_user->hasRole('Mentor')) {
-  array_splice($tabs, 2, 0, [['info_profile', 'InfoProfileSection', 'users']]);
-}
+  if ($_user->hasRole('Mentor')) {
+    array_splice($tabs, 2, 0, [['info_profile', 'InfoProfileSection', 'users']]);
+  }
 
-$tabsList = collect($tabs)->map(function ($tab) {
-  return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2]];
-})->toArray();
+  $tabsList = collect($tabs)->map(function ($tab) {
+    return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2]];
+  })->toArray();
 @endphp
 
 @section('content')
