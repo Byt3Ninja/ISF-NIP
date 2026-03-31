@@ -365,7 +365,7 @@
       </li>
     @endif
 
-    @if( $_user->ableTo('projects.index', $permissions) )
+    @if( $_user->ableTo('projects.index', $permissions) && app()->environment(['local', 'dev', 'test']) )
       <li class="{{ Request::is('dashboard/projects*') ? 'active' : '' }} menu-item">
         <a class="menu-link" href="{{ route('projects.index') }}">
           <i class="menu-icon tf-icons ti ti-folder"></i>
@@ -421,7 +421,7 @@
             <div>{{ $l == 'en' ? 'Timesheets' : 'الجداول الزمنية' }}</div>
           </a>
           <ul class="menu-sub">
-            @if ($_user->ableToAny(['TimeSheet.index'], $permissions))
+            @if ($_user->ableToAny(['TimeSheet.index'], $permissions) && app()->environment(['local', 'dev', 'test']))
               <li class="{{ Request::is('dashboard/TimeSheet*') ? 'active' : '' }} menu-item">
                 <a href="{{ route('TimeSheet.index') }}" class="menu-link">
                   <div>{{ $l == 'en' ? 'Timesheets List' : 'قائمة الجداول الزمنية' }}</div>
