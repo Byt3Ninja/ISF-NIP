@@ -665,7 +665,7 @@
                                               updateCalendarStyles();
                                           });
                                   } else {
-                                      toastr.error(result?.message ? result.message : "{{ __('admin.unexpected_error') }}",);
+                                      toastr.error(result?.message ? result.message : "{{ __('admin.unexpected_error') }}");
                                   }
                               })
                               .catch(error => {
@@ -735,7 +735,7 @@
                       if(result.success) {
                           toastr.success(result?.message ? result.message : "{{ __('mentor.slot_removed_success') }}");
                       } else {
-                          toastr.error(result?.message ? result.message : "{{ __('admin.unexpected_error') }}",);
+                          toastr.error(result?.message ? result.message : "{{ __('admin.unexpected_error') }}");
                       }
                   })
                   .catch(error => {
@@ -849,7 +849,7 @@
               ? "{{ __('mentor.slot_added_to_date', ['date' => ':date']) }}".replace(':date', moment(key).format('MMMM D, YYYY'))
               : "{{ __('mentor.slot_added_to_all', ['day' => ':day']) }}".replace(':day', key + 's');
 
-          toastr.success(toastMsg, '{{ __('mentor.slot_added_success') }}', wasMerged ? `${to12Hour(mergedStart)} - ${to12Hour(mergedEnd)}` : null);
+          toastr.success(toastMsg);
 
       } catch (error) {
           toastr.error(error?.message ?? "{{ __('admin.unexpected_error') }}");
@@ -1248,7 +1248,7 @@
           updateSlotsList();
           updateCalendarStyles();
 
-          toastr.success(result.message, wasMerged ? `${result.message} ({{ __('mentor.slots_merged') }}: ${to12Hour(mergedStart)} – ${to12Hour(mergedEnd)})` : null);
+          toastr.success(result.message ? result.message : "{{ __('mentor.slot_added_success') }}");
 
           form.remove();
 
