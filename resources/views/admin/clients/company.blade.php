@@ -3,6 +3,7 @@
 @section('vendorstyle')
 {{-- Monthly Date Picker CDN ( For Financial Projection Form ) --}}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/toastr/toastr.css" />
 @stop
 
 @section('style')
@@ -173,6 +174,7 @@
 <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+  <script src="/vuexy/assets/vendor/libs/toastr/toastr.js"></script>
 <script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
 <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
 <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
@@ -387,26 +389,26 @@
       }
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-      // الاستماع لتغيير التبويبات
-      document.querySelectorAll('.nav-link').forEach(tab => {
-        tab.addEventListener('shown.bs.tab', function(e) {
-          // تحديد التبويب النشط
-          const activeTab = e.target.getAttribute('href');
-          // تعطيل الحقول المطلوبة للتبويبات غير النشطة
-          document.querySelectorAll('.tab-pane').forEach(pane => {
-            if (pane.getAttribute('id') === activeTab.substring(
-              1)) {
-              pane.querySelectorAll('input').forEach(input =>
-                input.removeAttribute('disabled'));
-            } else {
-              pane.querySelectorAll('input').forEach(input =>
-                input.setAttribute('disabled', 'disabled'));
-            }
-          });
-        });
-      });
-    });
+    // document.addEventListener('DOMContentLoaded', function() {
+    //   // الاستماع لتغيير التبويبات
+    //   document.querySelectorAll('.nav-link').forEach(tab => {
+    //     tab.addEventListener('shown.bs.tab', function(e) {
+    //       // تحديد التبويب النشط
+    //       const activeTab = e.target.getAttribute('href');
+    //       // تعطيل الحقول المطلوبة للتبويبات غير النشطة
+    //       document.querySelectorAll('.tab-pane').forEach(pane => {
+    //         if (pane.getAttribute('id') === activeTab.substring(
+    //           1)) {
+    //           pane.querySelectorAll('input').forEach(input =>
+    //             input.removeAttribute('disabled'));
+    //         } else {
+    //           pane.querySelectorAll('input').forEach(input =>
+    //             input.setAttribute('disabled', 'disabled'));
+    //         }
+    //       });
+    //     });
+    //   });
+    // });
 
     // Function to upload file with progress bar
     function uploadFile(inputId, progressBarId, route) {

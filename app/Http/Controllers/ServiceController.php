@@ -493,7 +493,7 @@ class ServiceController extends Controller
 				'date'                => $row->date_time ? \Carbon\Carbon::parse($row->date_time)->format('M d, Y • H:i') : '—',
 				'description'         => $row->comment ?? '—',
 				'service_description' => $row->service_description ?? '—',
-				'image_url'           => $row->service_img ? '/191014/' . $row->service_img : '/icons/account.svg',
+				'image_url'           => $row->service_img ? '/191014/' . $row->service_img : '/images/team/3.png',
 				'status'              => $status,
 				'price'               => !$row->hide_price && $row->price > 0 ? $row->price : null,
 				'currency'            => $row->currency,
