@@ -3667,4 +3667,8 @@ return [
 	'investor_details' => 'تفاصيل المستثمر',
 	'shareholder_details' => 'تفاصيل المساهم',
 	'ownership_percentage' => 'نسبة الملكية',
+	'add_section' => 'اضافة قسم',
+	'maximum_sections_reached' => 'تم الوصول إلى الحد الأقصى للأقسام',
+	'Landing Unpublished' => 'الصفحة الرئيسية غير منشورة',
+	'Landing Published' => 'الصفحة الرئيسية منشورة',
 ];

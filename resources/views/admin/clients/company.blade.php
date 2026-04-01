@@ -3,7 +3,6 @@
 @section('vendorstyle')
 {{-- Monthly Date Picker CDN ( For Financial Projection Form ) --}}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/toastr/toastr.css" />
 @stop
 
 @section('style')
