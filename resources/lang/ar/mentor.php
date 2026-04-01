@@ -132,4 +132,7 @@ return [
     'this_time_before_now' => 'انتهى وقت هذا الموعد بالفعل. يرجى اختيار وقت في المستقبل.',
     'slots_merged' => 'تم اضافة الفترة تم دمجها',
     'slots_copied_success' => 'تم نسخ الفترة بنجاح',
+    'session_booked_successfully' => 'تم حجز الجلسة بنجاح',
+    'request_sent_success' => 'تم ارسال الطلب بنجاح',
+    'session_expired_message' => 'انتهت صلاحية الجلسة. يرجى تحديث الصفحة والمحاولة مرة أخرى.',
 ];

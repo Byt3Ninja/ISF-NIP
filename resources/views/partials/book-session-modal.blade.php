@@ -90,12 +90,23 @@
                 </div>
               </div>
             </div>
-            <div class="col-12">
+            <!-- Duration & Location on the same row -->
+            <div class="col-md-6">
               <div class="d-flex gap-2">
                 <i class="ti ti-hourglass-empty"></i>
                 <div>
                   <div class="small">{{ __('admin.duration') }}</div>
                   <div class="fw-medium" id="detailDuration">-</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6" id="detailLocationWrap" style="display: none;">
+              <div class="d-flex gap-2">
+                <i class="ti ti-map-pin"></i>
+                <div>
+                  <div class="small">{{ __('admin.Location') }}</div>
+                  <a href="#" id="detailLocation" target="_blank"
+                     class="fw-medium text-decoration-underline text-body">-</a>
                 </div>
               </div>
             </div>
@@ -197,20 +208,9 @@ $(document).ready(function () {
   const hideMessages = () => $('#slotError, #slotSuccess').hide();
 
   // ─── Parse the redirected HTML page for session flash messages ────────────
-  // The controller uses return back()->with(['msg' => '...', 'class' => '...'])
-  // After AJAX follows the redirect, we receive the destination HTML page.
-  // We look for the flashed msg in the returned HTML by checking a meta tag
-  // or a known element. But the simplest approach: we add X-Requested-With
-  // header so Laravel detects AJAX — but back() still redirects.
-  //
-  // Best solution: intercept the redirect response via the X-Redirect header
-  // trick — jQuery AJAX automatically follows redirects, so we receive the
-  // final page HTML. We parse it for known success/error indicators.
   const parseFlashFromHtml = (html) => {
-    // Parse the returned HTML page looking for flash message containers
     const $page = $($.parseHTML(html, document, true));
 
-    // Try common flash/alert selectors used in the app
     const successSelectors = [
       '[data-flash="success"]', '.alert-success', '[class*="success"]'
     ];
@@ -228,8 +228,6 @@ $(document).ready(function () {
       if (text) return { success: false, message: text };
     }
 
-    // Fallback: if we got HTML back at all, the request went through.
-    // Check for known success/error strings in the raw HTML.
     if (html.includes('Request_successfully_added_Startup') || html.includes('successfully')) {
       return { success: true, message: '{{ __('mentor.session_booked_successfully') }}' };
     }
@@ -249,21 +247,10 @@ $(document).ready(function () {
       return { success: false, message: '{{ __('api.max_concurrent_sessions_reached') }}' };
     }
 
-    // If none matched, assume success (page reloaded without error)
     return { success: true, message: '{{ __('mentor.session_booked_successfully') }}' };
   };
 
   // ─── Build FormData ───────────────────────────────────────────────────────
-  // Field mapping to MentorsController@addWait (non-admin branch):
-  //   date               → $request->date
-  //   session_start_time → $request->session_start_time  (used for datefrom & schedule query)
-  //   session_end_time   → $request->session_end_time    (used for dateto   & schedule query)
-  //   mentorid           → $request->mentorid
-  //   organization_id    → $request->organization_id
-  //   cycle_id           → $request->cycle_id
-  //   session_type       → $request->session_type
-  //   notes              → $request->notes
-  //   file_url           → $request->file('file_url')
   const buildFormData = () => {
     const slot = state.selectedSlot;
     const fd   = new FormData();
@@ -273,10 +260,10 @@ $(document).ready(function () {
     fd.append('organization_id',    state.organizationId);
     fd.append('cycle_id',           state.cycleId);
     fd.append('date',               state.selectedDate);
-    fd.append('session_start_time', slot.start_time);   // used by controller for datefrom + schedule lookup
-    fd.append('session_end_time',   slot.end_time);     // used by controller for dateto   + schedule lookup
-    fd.append('timeFrom',           slot.start_time);   // kept for compatibility
-    fd.append('timeTo',             slot.end_time);     // kept for compatibility
+    fd.append('session_start_time', slot.start_time);
+    fd.append('session_end_time',   slot.end_time);
+    fd.append('timeFrom',           slot.start_time);
+    fd.append('timeTo',             slot.end_time);
     fd.append('session_type',       slot.session_type);
     fd.append('notes',              $('#additionalNotes').val() || '');
 
@@ -407,6 +394,19 @@ $(document).ready(function () {
     $('#displayStartTime').text(formatTime12(slot.start_time));
     $('#displayEndTime').text(formatTime12(slot.end_time));
     $('#detailDuration').text(`${duration} @lang('admin.min')`);
+
+    // ── Location in details (same row as duration) ──
+    const loc     = slot?.location || '';
+    const locText = loc.length > 30 ? loc.slice(0, 30) + '…' : loc;
+    const showLoc = loc && (slot.session_type === 'Offline' || slot.session_type === 'Both');
+    if (showLoc) {
+      $('#detailLocation')
+        .attr('href', `https://www.google.com/maps/search/${encodeURIComponent(loc)}`)
+        .text(locText);
+      $('#detailLocationWrap').show();
+    } else {
+      $('#detailLocationWrap').hide();
+    }
 
     $('#sessionDetails').show();
     hideMessages();
@@ -560,10 +560,6 @@ $(document).ready(function () {
   });
 
   // ─── AJAX Submit ──────────────────────────────────────────────────────────
-  // The controller uses return back()->with([...]) which issues a redirect.
-  // jQuery follows the redirect automatically and returns the final HTML page.
-  // We do NOT use dataType:'json' — instead we receive the HTML and parse the
-  // flash message out of it to determine success or failure.
   $('#submit-button').on('click', function () {
     if (!state.selectedSlot) {
       showError('{{ __('mentor.select_available_slot') }}');
@@ -585,16 +581,14 @@ $(document).ready(function () {
       data: buildFormData(),
       processData: false,
       contentType: false,
-      // No dataType:'json' — controller returns a redirect, not JSON
     })
     .done(function (html) {
       const result = parseFlashFromHtml(html);
 
       if (result.success) {
-        // showSuccess(result.message);
         releaseSuccessAlert({
           title: "{{ __('admin.Success') }}",
-          message: result.message || 'Request Sent Successfully',
+          message: result.message || "{{ __('mentor.request_sent_success') }}",
         });
         setTimeout(() => {
           $('#bookingModal').modal('hide');
@@ -602,26 +596,21 @@ $(document).ready(function () {
         }, 1500);
       } else {
         showError(result.message);
-        // releaseFailureAlert({
-        //   title: "{{ __('admin.Error') }}",
-        //   message: result.message || '{{ __('admin.unexpected_error') }}',
-        // });
         $btn.prop('disabled', false)
             .html('<i class="ti ti-send me-2"></i>{{ __('admin.Submit') }}');
       }
     })
     .fail(function (xhr) {
-      let msg = 'Something went wrong. Please try again.';
+      let msg = '{{ __('admin.unexpected_error') }}';
 
-      // 422 = Laravel validation error (only the notes field is validated)
       if (xhr.status === 422) {
         try {
           const json = JSON.parse(xhr.responseText);
-          if (json.errors) msg = Object.values(json.errors).flat().join('<br>');
+          if (json.errors)  msg = Object.values(json.errors).flat().join('<br>');
           else if (json.message) msg = json.message;
         } catch (_) {}
       } else if (xhr.status === 419) {
-        msg = 'Session expired. Please refresh the page and try again.';
+        msg = '{{ __('mentor.session_expired_messsage') }}';
       } else {
         try {
           const json = JSON.parse(xhr.responseText);
