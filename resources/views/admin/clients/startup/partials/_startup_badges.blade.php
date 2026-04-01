@@ -29,7 +29,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
     <div class="row gy-6">
       @foreach ($achievements as $key => $item)
         {{-- Skip the hackathon/winner badge (index 1) --}}
-        @if ($loop->index === 1)
+        @if ($loop->index === 1 || $loop->index === 3)
           @continue
         @endif
         <div class="col-md-4">
