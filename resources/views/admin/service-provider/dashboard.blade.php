@@ -180,14 +180,25 @@
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2 border-bottom mb-6">
                 <h5 class="card-title mb-0">{{ __('dashboard.sp_requests_inbox') }}</h5>
                 @if($canBulkAction)
-                <div class="d-flex align-items-center gap-3" id="bulk-actions">
-                    <button id="btn-bulk-accept" class="btn btn-primary" disabled>
-                        <i class="ti ti-checks me-1"></i>{{ __('dashboard.sp_bulk_accept') }}
-                    </button>
-                    <button id="btn-bulk-reject" class="btn btn-label-secondary" disabled>
-                        <i class="ti ti-x me-1"></i>{{ __('dashboard.sp_bulk_reject') }}
-                    </button>
-                </div>
+                    <div class="d-flex align-items-center gap-3" id="bulk-actions">
+                        <button id="btn-bulk-accept"
+                                class="btn btn-primary"
+                                disabled
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="top"
+                                title="{{ __('dashboard.sp_bulk_accept') }}">
+                            <i class="ti ti-checks me-1"></i>
+                        </button>
+
+                        <button id="btn-bulk-reject"
+                                class="btn btn-label-secondary"
+                                disabled
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="top"
+                                title="{{ __('dashboard.sp_bulk_reject') }}">
+                            <i class="ti ti-x me-1"></i>
+                        </button>
+                    </div>
                 @endif
             </div>
             <div class="card-body">
