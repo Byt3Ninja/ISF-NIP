@@ -2404,12 +2404,21 @@ class ClientCompanyController extends Controller
         // إنشاء وحفظ بيانات العضو في قاعدة البيانات
         $teamMember = Team_member::where('id', $request->id)->first(); // افترض أن لديك موديل اسمه TeamMember
 
+        if (!$teamMember) {
+            return response()->json([
+                'state' => false,
+                'message' => __('admin.no_Team_member')
+            ], 404);
+        }
+
         $teamMember->delete();
 
         // استجابة بعد الحفظ
-        return redirect()->route('company.profile_view_mine', $companyId)->with(['msg' => 'DeletedSuccessfully', 'class' => 'success']);
+        return response()->json([
+            'state' => true,
+            'message' => __('admin.DeletedSuccessfully')
+        ]);
     }
-
 
 
     public function AddMileStone(Request $request, $id = null)

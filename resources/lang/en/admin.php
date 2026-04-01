@@ -3601,5 +3601,13 @@ return [
 	'application_status' => 'Application Status',
 	'no_landing_programs' => 'No programs are available right now.',
 	'About' => 'About',
-	'Key_Stats' => 'Key Stats'
+	'Key_Stats' => 'Key Stats',
+	'cofounder' => 'Co-founder',
+	'Linkedin_URL' => 'LinkedIn URL',
+	'commitment' => 'Commitment',
+	'full_time' => 'Full-time',
+	'part_time' => 'Part-time',
+	'investor_details' => 'Investor Details',
+	'shareholder_details' => 'Shareholder Details',
+	'ownership_percentage' => 'Ownership Percentage',
 ];

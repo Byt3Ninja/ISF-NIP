@@ -52,6 +52,7 @@ class ClientProfileController extends Controller
         $this->whatsAppService = $whatsAppService;
         $this->notificationSettingsService = $notificationSettingsService;
     }
+
     /**
      * Show the form for editing the specified resource.
      *
@@ -120,12 +121,8 @@ class ClientProfileController extends Controller
                 'google2fa_url' => $google2fa_url
             );
 
-
-
-        // Fetch activities
-        $activities = Activity::where('user_id', Auth::user()->id)
-        ->orderBy('activity_time', 'desc')
-        ->get();
+            // Fetch activities
+            $activities = Activity::where('user_id', $client->id)->orderBy('activity_time', 'desc')->get();
             return view('admin/clients/profile/editProfile', compact('client', 'Currencies', 'countries', 'states', 'cities', 'expertises', 'data','activities', 'industries'));
         } catch (Exception $e) {
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
@@ -133,10 +130,16 @@ class ClientProfileController extends Controller
         }
     }
 
-    public function show()
+    public function showClientProfile( $id )
     {
-        $client = Auth::user();
-        $mentors = CyclesMentors::where('user_id', Auth::user()->id ?? 0)->get();
+        return $this->show( $id );
+    }
+
+    public function show( $id = null )
+    {
+        $client = is_null( $id ) ? Auth::user() : User::find($id);
+
+        $mentors = CyclesMentors::where('user_id', $client->id ?? 0)->get();
 
         $globalRoles = ['Admin', 'Organization Manager', 'subadmin'];
 
@@ -150,10 +153,10 @@ class ClientProfileController extends Controller
         } else {
             $mentorshipTasks = collect();
         }
-        $mentrequests = MentorshipRequest::where('mentor_id', Auth::user()->id);
+        $mentrequests = MentorshipRequest::where('mentor_id', $client->id);
         $mentrequests_count = $mentrequests->count();
         $mentrequests_period = $mentrequests->sum('period') / 60;
-        $average_rating = MentorshipRequest::where('mentor_id', Auth::user()->id)
+        $average_rating = MentorshipRequest::where('mentor_id', $client->id)
             ->where('approved', 'Yes')
             ->whereNotNull('rating') // تأكد أن عمود التقييم يحتوي على قيم
             ->avg('rating');
@@ -179,13 +182,6 @@ class ClientProfileController extends Controller
         
         return view('admin/clients/profile', compact('client', 'mentors', 'mentorshipTasks', 'mentrequests_count', 'mentrequests_period', 'average_rating'));
     }
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Type  $Type
-     * @return \Illuminate\Http\Response
-     */
 
     public function Updatebio(Request $request)
     {
@@ -213,6 +209,14 @@ class ClientProfileController extends Controller
         }
         return redirect()->route('user.profile_view')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
     }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Type  $Type
+     * @return \Illuminate\Http\Response
+     */
     public function update(UpdateClientProfileRequest $request)
     {
         
@@ -441,12 +445,10 @@ class ClientProfileController extends Controller
         }
     }
 
-    public function showMintorprofile($id)
+    public function showMentorProfile($id)
     {
-
-
         $client = User::find($id);
-        if (!empty($client)) {
+        if (!empty($client) && $client->hasRole('Mentor') ) {
             // $exp = Expertise::where('parent_id',null)->get();
             // $expertises = Expertise::where('parent_id',null)->get();
             $mentrequests = MentorshipRequest::where('mentor_id', $id);
@@ -491,7 +493,7 @@ class ClientProfileController extends Controller
             ));
 
         } else {
-            return redirect()->route('user.profile_view')->with(['msg' => 'FailedStore', 'class' => 'danger']);
+            return redirect()->route('user.profile_view');
         }
     }
 

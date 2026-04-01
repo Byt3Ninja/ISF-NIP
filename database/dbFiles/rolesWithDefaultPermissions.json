@@ -1097,6 +1097,21 @@
                     "mentor",
                     "judger"
                 ]
+            },
+            {
+                "name": "service_provider.reviews",
+                "description": "View Service Provider Reviews",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "serviceProvider",
+                    "registered",
+                    "mentor",
+                    "judger"
+                ]
             }
         ]
     },
@@ -4422,7 +4437,6 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "registered",
                     "organizationmanager",
                     "subadmin",
                     "serviceProvider"
@@ -4817,6 +4831,7 @@
                     "mentor",
                     "judger",
                     "registered",
+                    "serviceProvider",
                     "organizationmanager",
                     "subadmin"
                 ]

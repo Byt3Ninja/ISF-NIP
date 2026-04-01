@@ -191,7 +191,7 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
         </h6>
       </div>
       <div class="d-flex align-items-center gap-3">
-        @if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->ableTo('company.profile_view_mine', $permissions) && $_user->hasRole('registered') && $_user->company_id == $company->id ) )
+        @if( $_user->hasAnyRole('Admin') || ( $_user->ableTo('company.profile_view_mine', $permissions) && $_user->hasRole('registered') && $_user->company_id == $company->id ) )
           <a href="/dashboard/myCompany/{{ $company->id }}" class="btn btn-white text-primary shadow-sm border">
             {{ __('startup.edit_info') }} <i class="ti ti-settings ms-2"></i>
           </a>

@@ -332,8 +332,15 @@
 
             let actions = '';
             if (CAN_QUICK_ACTION && row.is_pending) {
-                actions = '<button class="btn btn-sm btn-success me-1 btn-accept" data-id="'+row.id+'">'+LABELS.accept+'</button>' +
-                          '<button class="btn btn-sm btn-danger btn-reject" data-id="'+row.id+'">'+LABELS.reject+'</button>';
+                actions =
+                    '<button class="btn btn-sm btn-primary me-1 mb-1 btn-accept" data-id="'+row.id+'" ' +
+                        'data-bs-toggle="tooltip" data-bs-placement="top" title="'+LABELS.accept+'">' +
+                        '<i class="ti ti-check"></i>' +
+                    '</button>' +
+                    '<button class="btn btn-sm btn-label-secondary btn-reject" data-id="'+row.id+'" ' +
+                        'data-bs-toggle="tooltip" data-bs-placement="top" title="'+LABELS.reject+'">' +
+                        '<i class="ti ti-x"></i>' +
+                    '</button>';
             }
 
             let checkbox = '';

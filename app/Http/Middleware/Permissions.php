@@ -14,8 +14,11 @@ class Permissions
 {
     public $exceptNames = [
         'core.dashboard_view',
+        'clients.profile_view',
         'cycle.custom_pages.image',
         'cycle.custom_pages.upload_image',
+        'service_provider.reviews',
+        'service_provider.profile',
         'organizations.logo',
         'organization.landing.asset',
         'organization.landing.public',

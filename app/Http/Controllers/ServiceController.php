@@ -493,7 +493,7 @@ class ServiceController extends Controller
 				'date'                => $row->date_time ? \Carbon\Carbon::parse($row->date_time)->format('M d, Y • H:i') : '—',
 				'description'         => $row->comment ?? '—',
 				'service_description' => $row->service_description ?? '—',
-				'image_url'           => $row->service_img ? '/191014/' . $row->service_img : '/icons/account.svg',
+				'image_url'           => $row->service_img ? '/191014/' . $row->service_img : '/images/team/3.png',
 				'status'              => $status,
 				'price'               => !$row->hide_price && $row->price > 0 ? $row->price : null,
 				'currency'            => $row->currency,
@@ -504,7 +504,7 @@ class ServiceController extends Controller
 				'has_review'          => !is_null($row->rate),
 				'founder_img'         => $row->founder_img ? '/191014/' . $row->founder_img : '/icons/account.svg',
 				'founder_name'        => $row->founder_name ?? 'N/A',
-				'founder_url'         => $row->founder_user_id ? route('mentors.profile_view', $row->founder_user_id) : '#',
+				'founder_url'         => $row->founder_user_id ? route('clients.profile_view', $row->founder_user_id) : '#',
 				'startup_name'        => $row->startup_name ?? 'N/A',
 				'startup_url'         => $row->startup_id ? route('company.profile_view', $row->startup_id) : '#',
 				'unread_count'        => (int) ($row->unread_messages_count ?? 0),
@@ -702,6 +702,7 @@ class ServiceController extends Controller
 					$q2->where('service_provider_id', $providerId);
 				});
 			})
+			->with(['user', 'service', 'service.provider'])
 			->first();
 
 		if (empty($serviceRequest)) {
@@ -797,13 +798,14 @@ class ServiceController extends Controller
 			$body     = __("admin.{$bodyKey}", $bodyParams, $founderLang);
 			$inApp    = __("admin.{$inAppKey}", $params, $founderLang);
 
-			$notification = new TemplateEmail([
+			$emailParams = [
 				$subject,
 				$greeting,
 				$body,
 				$actionUrl,
 				$inApp,
-			]);
+			];
+			$notification = new TemplateEmail( $emailParams );
 			$notification->ActionText = $ctaText;
 
 			$founder->notify($notification);
@@ -1465,7 +1467,7 @@ class ServiceController extends Controller
 				'has_review'          => !is_null($row->rate),
 				'founder_name'        => $row->founder_name ?? 'N/A',
 				'founder_img'         => $row->founder_img ? '/191014/' . $row->founder_img : '/icons/account.svg',
-				'founder_url'         => $row->founder_user_id ? route('mentors.profile_view', $row->founder_user_id) : '#',
+				'founder_url'         => $row->founder_user_id ? route('clients.profile_view', $row->founder_user_id) : '#',
 				'startup_name'        => $row->startup_name ?? 'N/A',
 				'startup_url'         => $row->startup_id ? route('company.profile_view', $row->startup_id) : '#',
 				'unread_count'        => (int) ($row->unread_messages_count ?? 0),

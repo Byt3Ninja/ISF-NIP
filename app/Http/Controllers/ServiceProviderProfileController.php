@@ -79,7 +79,6 @@ class ServiceProviderProfileController extends Controller
         $provider->review_count = $ratingData->review_count ?? 0;
 
         // 4. Fetch active services with per-service review count
-
         $services = DB::table('services as s')
             ->where('s.service_provider_id', $id)
             ->where('s.status', true)
@@ -163,6 +162,7 @@ class ServiceProviderProfileController extends Controller
             ->where('service_provider_id', $id)
             ->where('status', true)
             ->whereNull('deleted_at')
+            ->whereIn('id', $reviews['data']->pluck('service_id')->unique()->values()->toArray())
             ->select('id', "name_{$l} as name", 'name_en')
             ->get();
 
@@ -365,11 +365,13 @@ class ServiceProviderProfileController extends Controller
                 'sr.review_body',
                 'sr.reviewed_at',
                 'sr.user_id as reviewer_user_id',
+                's.id as service_id',
                 "s.name_{$l} as service_name",
                 's.name_en as service_name_en',
                 DB::raw("CONCAT(COALESCE(u.first_name_{$l}, u.first_name_en, ''), ' ', COALESCE(u.last_name_{$l}, u.last_name_en, '')) as reviewer_name"),
                 'u.img_url as reviewer_img',
                 'u.created_at as reviewer_joined_at',
+                'co.id as company_id',
                 "co.name_{$l} as company_name",
                 'co.name_en as company_name_en',
             ])

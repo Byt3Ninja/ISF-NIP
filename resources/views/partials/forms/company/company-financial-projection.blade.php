@@ -308,8 +308,6 @@ $(document).ready(function() {
 		EDITABLE_FIELDS: ['rev','cogs','sal','opex','da','int','tax','rec','inv','pay','capex','debt']
 	};
 
-	console.log('CONFIG.IS_CURRENCY_DISABLED', CONFIG.IS_CURRENCY_DISABLED);
-
 	// ═══════════════════════════════════════════════════════════════════════
 	// STATE
 	// ═══════════════════════════════════════════════════════════════════════
@@ -488,7 +486,6 @@ $(document).ready(function() {
 			dataType: 'json'
 		})
 		.done(function(data) {
-			console.log('data', data);
 			if (!data.success) {
 				handleError(data.message ?? '{{ __("admin.error_loading_financial_data") }}');
 				return;

@@ -52,7 +52,7 @@
                     onchange="window.open('/dashboard/mentorship/assign/'+this.options[this.selectedIndex].value,'_self');">
                     @foreach ($cycles as $cycle)
                       <option value="{{ $cycle->id }}" {{ $cycle->id == $id ? 'selected' : '' }}>
-                        {{ $cycle->title }} ({{ $cycle->start->format('d-m-Y') }} - {{ $cycle->end->format('d-m-Y') }})
+                        {{ $cycle->title }} ({{ optional($cycle->start)->format('d-m-Y') ?? '' }} - {{ optional($cycle->end)->format('d-m-Y') ?? '' }})
                       </option>
                     @endforeach
                     @if (!$id)
@@ -158,7 +158,7 @@
                     <select id="ratingFilter" class="form-select">
                       <option value="0">{{ __('admin.Rating') }} ({{ __('admin.All') }})</option>
                       @for($i=1; $i<=5; $i++)
-                        <option value="{{ $i }}">{{ $i }}</option>
+                        <option value="{{ $i }}">{{ $i }} {{ $i == 1 ? __('admin.star') : __('admin.star') }} {{ $i == 5 ? '' : '& ' .  __('admin.up') }}</option>
                       @endfor
                     </select>
                   </div>
@@ -190,8 +190,8 @@
               <!-- TOOLBAR & PAGINATION CONTROLS -->
               <div class="card shadow-none border-bottom mb-6">
                 <div class="card-body">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center gap-8">
+                  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                    <div class="d-flex align-items-center gap-8 mb-6 mb-md-0">
                       <div class="form-check mb-0">
                           <input class="form-check-input" type="checkbox" id="checkAllVisible">
                           <label class="form-check-label fw-bold" for="checkAllVisible">
@@ -659,10 +659,11 @@
 
                 // Rating: use Math.round to match display
                 let matchesRating = true;
+
                 if (selectedRating > 0) {
-                    const mentorRating = parseFloat(col.dataset.rating);
-                    matchesRating = Math.round(mentorRating) === selectedRating;
-                }
+                      const mentorRating = parseFloat(col.dataset.rating) || 0;
+                      matchesRating = mentorRating >= selectedRating;
+                  }
 
                 // Scope - fixed to use lowercase and proper comparison
                 let matchesScope = true;

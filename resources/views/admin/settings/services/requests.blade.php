@@ -109,7 +109,7 @@
       <li class="nav-item">
         <a class="nav-link {{ request('request_status') == null ? 'active' : '' }}" href="{{ route('service_requests.list_all') }}">
           {{ __('admin.all_requests') }}
-          <span class="badge badge-center rounded-pill bg-danger bg-glow ms-2">
+          <span class="badge badge-center rounded-pill bg-light text-primary bg-glow ms-2">
             {{ $stats['total'] ?? 0 }}
           </span>
         </a>
@@ -119,7 +119,7 @@
         <a class="nav-link {{ request('request_status') == 'pending' ? 'active' : '' }}"
           href="{{ route('service_requests.list_all', ['request_status' => 'pending']) }}">
           {{ __('admin.pending') }}
-          <span class="badge badge-center rounded-pill bg-danger ms-2">
+          <span class="badge badge-center rounded-pill bg-light text-primary ms-2">
             {{ $stats['pending'] ?? 0 }}
           </span>
         </a>
@@ -129,7 +129,7 @@
         <a class="nav-link {{ request('request_status') == 'completed' ? 'active' : '' }}"
           href="{{ route('service_requests.list_all', ['request_status' => 'completed']) }}">
           {{ __('admin.completed') }}
-          <span class="badge badge-center rounded-pill bg-danger ms-2">
+          <span class="badge badge-center rounded-pill bg-light text-primary ms-2">
             {{ $stats['completed'] ?? 0 }}
           </span>
         </a>
@@ -139,7 +139,7 @@
         <a class="nav-link {{ request('request_status') == 'approved' ? 'active' : '' }}"
           href="{{ route('service_requests.list_all', ['request_status' => 'approved']) }}">
           {{ __('admin.Approved') }}
-          <span class="badge badge-center rounded-pill bg-danger ms-2">
+          <span class="badge badge-center rounded-pill bg-light text-primary ms-2">
             {{ $stats['approved'] ?? 0 }}
           </span>
         </a>
@@ -149,7 +149,7 @@
         <a class="nav-link {{ request('request_status') == 'rejected' ? 'active' : '' }}"
           href="{{ route('service_requests.list_all', ['request_status' => 'rejected']) }}">
           {{ __('admin.Rejected') }}
-          <span class="badge badge-center rounded-pill bg-danger ms-2">
+          <span class="badge badge-center rounded-pill bg-light text-primary ms-2">
             {{ $stats['rejected'] ?? 0 }}
           </span>
         </a>
@@ -237,8 +237,9 @@
                 data-has-review="{{ $request['has_review'] ? '1' : '0' }}"
                 data-founder-name="{{ $request['founder_name'] ?? '' }}"
                 data-founder-img="{{ $request['founder_img'] ?? '' }}"
-                data-unread-count="{{ $request['unread_count'] ?? 0 }}">
-                <i class="ti ti-history me-1"></i> {{ __('admin.view_history') }}
+                data-unread-count="{{ $request['unread_count'] ?? 0 }}"
+                data-tab="reviews">
+                <i class="ti ti-history me-1"></i> {{ __('admin.View') }} {{ __('admin.reviews') }}
               </button>
 
             @elseif($request['status'] === 'Approved')
@@ -955,7 +956,12 @@ if (ocRespond) {
 
     renderReviewTab(btn);
 
-    bootstrap.Tab.getOrCreateInstance($('#tab-timeline')).show();
+    // Activate specific tab based on button
+    if (btn.dataset.tab === 'reviews') {
+      bootstrap.Tab.getOrCreateInstance(document.getElementById('tab-reviews')).show();
+    } else {
+      bootstrap.Tab.getOrCreateInstance($('#tab-timeline')).show();
+    }
     formHistoryReply.reset();
     $('#histReplyCount').textContent = '0';
     fvHistoryReply && fvHistoryReply.resetForm(true);
