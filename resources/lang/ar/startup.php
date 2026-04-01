@@ -554,4 +554,11 @@ return [
   'change_valuation_date' => 'تغيير تاريخ التقييم',
   'change_valuation_date_warning' => 'هل أنت متأكد أنك تريد تغيير تاريخ التقييم؟ لديك بيانات غير محفوظة.',
   'You cannot add this startup to alumni because it has no country' => 'لا يمكنك إضافة هذه الشركة الناشئة إلى الخريجين لأنها لا تحتوي على دولة',
+  
+  'support_and_mentorship' => 'الدعم الإرشاد',
+  'support_mentorship_title' => 'متطلبات الدعم الإرشاد',
+  'support_mentorship_subtitle' => 'ابحث واختر مجالاً أو أكثر من مجالات الخبرة النشطة.',
+  'support_and_mentorship_label' => 'مجالات الخبرة المطلوبة للدعم',
+  'support_and_mentorship_validation' => 'يرجى اختيار مجال واحد على الأقل من مجالات الخبرة.',
+  'support_and_mentorship_success' => 'تم حفظ متطلبات الدعم والارشاد بنجاح',
 ];
