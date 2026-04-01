@@ -3610,4 +3610,8 @@ return [
 	'investor_details' => 'Investor Details',
 	'shareholder_details' => 'Shareholder Details',
 	'ownership_percentage' => 'Ownership Percentage',
+	'add_section' => 'Add Section',
+	'maximum_sections_reached' => 'Maximum sections reached',
+	'Landing Unpublished' => 'Landing Unpublished',
+	'Landing Published' => 'Landing Published',
 ];

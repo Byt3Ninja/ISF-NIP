@@ -131,4 +131,5 @@ return [
     'add_availability_slots' => 'Add Availability Slots',
     'this_time_before_now' => 'This time slot has already passed. Please select a future time.',
     'slots_merged' => 'Slot created successfully and Merged',
+    'slots_copied_success' => 'Slot copied successfully',
 ];

@@ -131,4 +131,5 @@ return [
     'add_availability_slots' => 'إضافة فترات التواجد',
     'this_time_before_now' => 'انتهى وقت هذا الموعد بالفعل. يرجى اختيار وقت في المستقبل.',
     'slots_merged' => 'تم اضافة الفترة تم دمجها',
+    'slots_copied_success' => 'تم نسخ الفترة بنجاح',
 ];

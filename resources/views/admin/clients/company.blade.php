@@ -3,7 +3,6 @@
 @section('vendorstyle')
 {{-- Monthly Date Picker CDN ( For Financial Projection Form ) --}}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/toastr/toastr.css" />
 @stop
 
 @section('style')
@@ -17,11 +16,33 @@
 		max-height: 300px;
 		overflow-y: auto;
 	}
+   #expertiseDropdownList {
+    display: none; 
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1050; /* Higher than other UI elements */
+    background-color: #fff;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,.1);
+    margin-top: 2px;
+  }
+
+  #expertiseDropdownList.show {
+    display: block;
+  }
 </style>
 @stop
 
 @php
   $name = 'name_' . $l;
+
+  // Check if there're some expertises are active
+  $hasActiveExpertises = true;
+  $showSupportTab = $hasActiveExpertises;
+
   $tabs = collect([
       ['company-info', 'ti-building-skyscraper', $l == 'en' ? 'Startup Info' : 'معلومات الشركة'],
       ['industry-sectors', 'ti-apps', $l == 'en' ? 'Industry / Sectors' : ' الصناعة / القطاعات'],
@@ -35,11 +56,19 @@
       ['company-milestones', 'ti-flag', $l == 'en' ? 'Milestones' : 'الإنجازات'],
       ['business_model', 'ti-presentation', $l == 'en' ? 'Business Model' : ' نموذج الاعمال '],
       ['customer_growth', 'ti-trending-up', $l == 'en' ? 'Customer Growth' : 'نمو العملاء'],
-  ])
-      ->map(function ($tab) {
-          return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
-      })
-      ->toArray();
+  ]);
+
+  if ($showSupportTab) {
+      $tabs->push(['support_mentorship', 'ti-brand-my-oppo', $l == 'en' ? 'Support & Mentorship' : 'الدعم والمشاركة']);
+  }
+
+  $tabs = $tabs->map(function ($tab) {
+      return [
+          'target' => $tab[0],
+          'icon'   => $tab[1],
+          'label'  => $tab[2]
+      ];
+  })->toArray();
 @endphp
 
 @section('content')
@@ -151,6 +180,9 @@
                   @break
                   @case('customer_growth')
                     @include('partials.forms.company.company-customers', ['heading' => $tab['label']])
+                  @break
+                  @case('support_mentorship')
+                    @include('partials.forms.company.company-support', ['heading' => $tab['label']])
                   @break
                 @endswitch
               </div>

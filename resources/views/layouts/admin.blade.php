@@ -87,7 +87,7 @@
 
     <!-- Vendors JS -->
     <script src="/vuexy/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
-
+    <script src="/vuexy/assets/vendor/libs/toastr/toastr.js"></script>
     <script src="/vuexy/assets/vendor/libs/swiper/swiper.js"></script>
     @yield('scripts')
     <!-- End Vendor JS-->
