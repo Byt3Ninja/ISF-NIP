@@ -121,9 +121,15 @@ class ClientProfileController extends Controller
                 'google2fa_url' => $google2fa_url
             );
 
+            // In your ProfileController or wherever you return the edit view
+
+            $countriesIso3Map = $countries->pluck('iso3', 'id')
+                ->map(fn($iso3) => strtolower($iso3))
+                ->toArray();
+
             // Fetch activities
             $activities = Activity::where('user_id', $client->id)->orderBy('activity_time', 'desc')->get();
-            return view('admin/clients/profile/editProfile', compact('client', 'Currencies', 'countries', 'states', 'cities', 'expertises', 'data','activities', 'industries'));
+            return view('admin/clients/profile/editProfile', compact('client', 'Currencies', 'countries', 'states', 'cities', 'expertises', 'data','activities', 'industries', 'countriesIso3Map'));
         } catch (Exception $e) {
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);

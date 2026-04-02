@@ -3671,4 +3671,11 @@ return [
 	'maximum_sections_reached' => 'تم الوصول إلى الحد الأقصى للأقسام',
 	'Landing Unpublished' => 'الصفحة الرئيسية غير منشورة',
 	'Landing Published' => 'الصفحة الرئيسية منشورة',
+	'identity' => 'الهوية',
+	'national_id' => 'الهوية الوطنية',
+	'date_of_birth' => 'تاريخ الميلاد',
+	'Education_Status' => 'حالة التعليم',
+	'Select_Education_Status' => 'حدد حالة التعليم',
+	'Graduate' => 'خريج',
+	'Student' => 'طالب',
 ];
