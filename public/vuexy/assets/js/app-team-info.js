@@ -7,7 +7,15 @@
   const PLURAL = { founder: 'founders', investor: 'investors', shareholder: 'shareholders' };
 
   const TYPE_CONFIG = {
-    founder: { teamsNo: 'Founders', fieldMap: { name: 'founder_name', email: 'founder_email', linkedin: 'founder_linkedin' } },
+    founder: { teamsNo: 'Founders', fieldMap: { 
+      name: 'founder_name', 
+      email: 'founder_email', 
+      linkedin: 'founder_linkedin',
+      phone: 'founder_phone',
+      type: 'founder_type',
+      join_date: 'founder_join_date',
+      commitment: 'founder_commitment'
+    } },
     investor: { teamsNo: 'Investors', fieldMap: { name: 'investor_name', type: 'investment_type' } },
     shareholder: { teamsNo: 'Shareholders', fieldMap: { name: 'shareholder_name', role: 'shareholder_role', percentage: 'shareholder_ownership_percentage' } }
   };
