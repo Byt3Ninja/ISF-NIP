@@ -564,4 +564,10 @@ return [
 
   'mvp_prototype_link' => 'رابط المبدئ الأول / نموذج أولي',
   'view_prototype' => 'عرض النموذج',
+
+  'additional_info' => 'معلومات اضافية',
+  'achievements' => 'الإنجازات',
+  'mission' => 'المهمة',
+  'why_this_startup' => 'لماذا هذه الشركة الناشئة؟',
+  'startup_expertise' => 'خبرة الشركة الناشئة',
 ];
