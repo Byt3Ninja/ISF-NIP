@@ -53,7 +53,6 @@
           id="sustainable-mutiple-select"
           class="form-select select2"
           data-placeholder="{{ __('admin.Select') }}"
-          
           data-allow-clear="true"
           multiple
         >
@@ -100,26 +99,38 @@
 
       </div>
 
-      {{-- Products / Services --}}
-      <div class="mt-4">
-        <label class="form-label fw-semibold">
-          {{ __('admin.product_service_description') }}
-        </label>
+      {{-- Additional Info Section --}}
+      <div class="border-bottom my-4">
+        <h5 class="card-title">{{ __('startup.additional_info') }}</h5>
+      </div>
 
-        <textarea
-          class="form-control"
-          id="products_services_description"
-          name="products_services_description"
-          rows="4"
-          maxlength="1000"
-          placeholder="{{ __('admin.product_service_description') }}"
-        >{{ old('products_services_description', optional($client->company)->products_services_description) }}</textarea>
+      <div class="row g-4">
 
-        <div class="text-end mt-1">
-          <small class="text-muted" id="products_services_description_count">
-            {{ strlen(optional($client->company)->products_services_description ?? '') }}/1000
-          </small>
-        </div>
+        @php
+          $optionalFields = [
+            'achievements',
+            'mission',
+            'why_this_startup',
+            'startup_expertise',
+          ];
+        @endphp
+
+        @foreach($optionalFields as $field)
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">
+              {{ __('startup.' . $field) }}
+            </label>
+            <textarea
+              class="form-control"
+              name="{{ $field }}"
+              rows="4"
+              maxlength="1000"
+              placeholder="{{ __('startup.' . $field) }}"
+              oninput="this.value = this.value.trimStart()"
+            >{{ optional($client->company)->$field ?? old($field) }}</textarea>
+          </div>
+        @endforeach
+
       </div>
 
       {{-- Submit --}}
