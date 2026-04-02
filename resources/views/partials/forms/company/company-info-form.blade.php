@@ -327,9 +327,31 @@
               placeholder="{{ __('admin.previous_incubator_placeholder') }}" />
           </div>
         </div>
+        
+        {{-- Products / Services --}}
+        <div class="mb-4">
+          <label class="form-label fw-semibold">
+            {{ __('admin.product_service_description') }}
+          </label>
+
+          <textarea
+            class="form-control"
+            id="products_services_description"
+            name="products_services_description"
+            rows="4"
+            maxlength="1000"
+            placeholder="{{ __('admin.product_service_description') }}"
+          >{{ old('products_services_description', optional($client->company)->products_services_description) }}</textarea>
+
+          <div class="text-end mt-1">
+            <small class="text-muted" id="products_services_description_count">
+              {{ strlen(optional($client->company)->products_services_description ?? '') }}/1000
+            </small>
+          </div>
+        </div>
  
         {{-- ── Submit ── --}}
-        <div class="col-12 d-flex justify-content-end">
+        <div class="col-12 d-flex justify-content-end mt-4">
           <button class="btn btn-primary" id="submit-button" type="submit">
             <span class="me-2" id="button-text">{{ __('admin.Save') }}</span>
             <span class="spinner-border spinner-border-sm d-none" id="button-spinner" role="status" aria-hidden="true"></span>

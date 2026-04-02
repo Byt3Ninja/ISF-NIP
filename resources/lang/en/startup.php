@@ -563,4 +563,10 @@ return [
   
   'mvp_prototype_link' => 'MVP / Prototype Link',
   'view_prototype' => 'View Prototype',
+
+  'additional_info' => 'Additional Info',
+  'achievements' => 'Achievements',
+  'mission' => 'Mission',
+  'why_this_startup' => 'Why this startup?',
+  'startup_expertise' => 'Startup Expertise',
 ];
