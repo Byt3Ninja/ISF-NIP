@@ -469,19 +469,7 @@ $(function() {
         'X-Requested-With': 'XMLHttpRequest'
       },
       success: function(response) {
-        if (typeof releaseSuccessAlert === 'function') {
-          releaseSuccessAlert({
-            title: '{{ $l == "en" ? "Success" : "تم بنجاح" }}',
-            message: '{{ $l == "en" ? "Company classification updated successfully" : "تم تحديث تصنيف الشركة بنجاح" }}'
-          });
-        } else if (typeof showToast === 'function') {
-          showToast({
-            type: 'success',
-            message: '{{ $l == "en" ? "Company classification updated successfully" : "تم تحديث تصنيف الشركة بنجاح" }}'
-          });
-        } else {
-          alert('{{ $l == "en" ? "Company classification updated successfully" : "تم تحديث تصنيف الشركة بنجاح" }}');
-        }
+        toastr.success("{{ __('admin.startup_profile_updated') }}")
         saveInitialState(); // Update initial state after successful save
         checkForChanges();
       },

@@ -47,7 +47,7 @@
       ['company-info', 'ti-building-skyscraper', $l == 'en' ? 'Startup Info' : 'معلومات الشركة'],
       ['industry-sectors', 'ti-apps', $l == 'en' ? 'Industry / Sectors' : ' الصناعة / القطاعات'],
       ['company-contact', 'ti-phone', $l == 'en' ? 'Contact Info' : 'معلومات الاتصال'],
-      ['company-desc', 'ti-file-description', $l == 'en' ? 'Description' : 'الوصف'],
+      ['company-desc', 'ti-file-description', __('admin.about_or_description')],
       ['company-financial-info', 'ti-report-money', $l == 'en' ? 'Financial Info' : 'المعلومات المالية'],
       ['company-financial-projection', 'ti-database-dollar', $l == 'en' ? 'Financial Projection' : 'التوقعات المالية'],
       ['team-info', 'ti-briefcase', __('startup.team_info')],
