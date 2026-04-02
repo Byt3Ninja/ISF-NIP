@@ -153,8 +153,10 @@ class TemplateNotification extends Notification implements ShouldQueue
         }
 
         // Set sender if specified
-        if ($this->template->sender) {
+        if (!empty($this->template->sender) && filter_var($this->template->sender, FILTER_VALIDATE_EMAIL)) {
             $mailMessage->from($this->template->sender);
+        } else {
+            $mailMessage->from(config('mail.from.address'), config('mail.from.name'));
         }
 
         return $mailMessage;
