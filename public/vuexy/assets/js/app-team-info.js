@@ -55,7 +55,14 @@
       addShareholder: "Add Shareholder",
       tip: "Tip: Use search above to filter existing members",
       noResultsDesc: "Try adjusting your search term",
-      clearSearch: "Clear search"
+      clearSearch: "Clear search",
+      deleteMsg: "Are you sure you want to delete ${name}?",
+      yesDelete: "Yes, delete!",
+      noCancel: "No, cancel!",
+      founder: "Founder",
+      investor: "Investor",
+      shareholder: "Shareholder",
+      delete: "Delete"
     },
     ar: {
       noResults: (term) => `لا توجد نتائج لـ "${term}"`,
@@ -67,7 +74,13 @@
       addShareholder: "إضافة مساهم",
       tip: "نصيحة: استخدم مربع البحث أعلاه لتصفية الأعضاء",
       noResultsDesc: "حاول تعديل كلمة البحث",
-      clearSearch: "مسح البحث"
+      clearSearch: "مسح البحث",
+      deleteMsg: "هل تريد حذف ${name}؟",
+      yesDelete: "نعم، حذف!",
+      noCancel: "لا، إلغاء!",
+      founder: "المؤسس",
+      investor: "المستثمر",
+      shareholder: "المساهم"
     }
   };
 
@@ -220,7 +233,7 @@
         <div class="text-center py-5 my-4 border rounded-3 border-dashed bg-light-subtle empty-state">
           <div class="avatar avatar-lg bg-card mx-auto mb-4">
             <div class="w-100 h-100 d-flex align-items-center justify-content-center">
-              <i class="${icons[type]} text-dark"></i>
+              <i class="ti ${icons[type]} text-dark"></i>
             </div>
           </div>
           <h5 class="mb-2 fw-semibold">${titles[type]}</h5>
@@ -428,17 +441,28 @@
   }
 
   function deleteItem(type, id) {
-    if (!confirm(LANG === 'ar' ? 'تأكيد الحذف؟' : 'Confirm deletion?')) return;
+    // if (!confirm(LANG === 'ar' ? 'تأكيد الحذف؟' : 'Confirm deletion?')) return;
 
-    $.ajax({
-      url: TEAM_INFO_CONFIG.routes.delete,
-      method: 'POST',
-      data: { id },
-      headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-      success() {
-        appData[PLURAL[type]] = appData[PLURAL[type]].filter(i => String(i.id) !== String(id));
-        renderList(type);
-        toastr.success(LANG === 'ar' ? 'تم الحذف' : 'Deleted');
+    const name = appData[PLURAL[type]].find(i => String(i.id) === String(id)).name;
+
+    releaseWarningAlert({
+      title: `${t.delete} ${t[type]}`,
+      message: `${t.deleteMsg.replace('${name}', escapeHtml(name))}`,
+      confirmText: `${t.yesDelete}`,
+      cancelText: `${t.noCancel}`,
+      confirmColor: 'danger',
+      onConfirm: () => {
+        $.ajax({
+          url: TEAM_INFO_CONFIG.routes.delete,
+          method: 'POST',
+          data: { id },
+          headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+          success() {
+            appData[PLURAL[type]] = appData[PLURAL[type]].filter(i => String(i.id) !== String(id));
+            renderList(type);
+            toastr.success(LANG === 'ar' ? 'تم الحذف' : 'Deleted');
+          }
+        });
       }
     });
   }
