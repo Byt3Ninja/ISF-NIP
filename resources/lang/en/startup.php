@@ -560,4 +560,6 @@ return [
   'support_and_mentorship_label' => 'Required support areas of expertise',
   'support_and_mentorship_validation' => 'Please select at least one support area of expertise.',
   'support_and_mentorship_success' => 'Support & Mentorship needs saved successfully.',
+  
+  'mvp_prototype_link' => 'MVP / Prototype Link',
 ];
