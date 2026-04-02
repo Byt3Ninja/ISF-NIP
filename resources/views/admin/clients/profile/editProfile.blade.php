@@ -253,6 +253,20 @@
 <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+
+<script>
+  window.CONFIG = {
+    csrf_token: "{{ csrf_token() }}",
+    user: @json(Auth::user()),
+    phoneCountryCode: "+{{ $client->country_code ? $client->country_code : '' }}",
+    whatsappCountryCode: "+{{ $client->country_code_w_a ? $client->country_code_w_a : '' }}",
+    countriesIso3Map: @json($countriesIso3Map ?? []),
+    routes: {
+      sendCode: "{{ route('security.2fa_code_send') }}",
+      verifyCode: "{{ route('security.2fa_code_verify') }}",
+    }
+  }
+</script>
 @stop
 
 @section('pagescripts')
@@ -274,7 +288,7 @@
 </script>
 
 <!-- Page JS -->
-<script src="/vuexy/assets/js/edit-profile.js"></script>
+<script src="/vuexy/assets/js/app-edit-profile.js"></script>
 <script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
 
 <script>
@@ -438,91 +452,7 @@
 </script>
 @endrole
 
-<script>
-  // Initialize the phone input
-const phoneInput = document.getElementById("phone");
-const whatsappInput = document.getElementById("whatsapp");
-const phoneError = document.getElementById('phone-error');
-const whatsappError = document.getElementById('whatsapp-error');
-
-const countryCodeFromDB = "+{{ $client->country_code ? $client->country_code : '' }}";
-const countryCodeWAFromDB = "+{{ $client->country_code_w_a ? $client->country_code_w_a : '' }}";
-
-// Get country code from dial code
-function getCountryCode(code) {
-  let dialCode = code.toString().trim();
-  const countryData = intlTelInputGlobals.getCountryData();
-  const country = countryData.find(country => `+${country.dialCode}` === dialCode);
-
-  if (country) {
-    // console.log("Country Code Found: " + country.iso2);
-    return country.iso2;
-  }
-  return "eg";
-}
-
-// Initialize intl-tel-input
-const iti = intlTelInput(phoneInput, {
-  initialCountry: getCountryCode(countryCodeFromDB),
-  preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
-  utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
-  formatOnDisplay: false,
-  separateDialCode: true,
-  autoPlaceholder: "aggressive",
-  customPlaceholder: (placeholder) => "e.g. " + placeholder,
-});
-
-// Access the phone number with code
-phoneInput.addEventListener('input', function() {
-  const fullPhoneNumber = iti.getNumber();
-  const countryCode = iti.getSelectedCountryData().dialCode;
-  const countryCodeInput = document.getElementById('country_code');
-  countryCodeInput.value = countryCode;
-
-  if (!iti.isValidNumber() && fullPhoneNumber.length !== 0) {
-    phoneError.style.display = 'block';
-    phoneError.innerText = '{{ __('auth.Invalid_Phone_Number') }}';
-  } else {
-    phoneError.style.display = 'none';
-  }
-});
-
-// Reset phone input value on select another country code
-phoneInput.addEventListener("countrychange", () => {
-  phoneInput.value = '';
-});
-
-// Initialize intl-tel-input for WhatsApp
-const whatsappIti = intlTelInput(whatsappInput, {
-  initialCountry: getCountryCode(countryCodeWAFromDB),
-  preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
-  utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
-  separateDialCode: true,
-  formatOnDisplay: false,
-  autoPlaceholder: "aggressive",
-  customPlaceholder: (placeholder) => "e.g. " + placeholder,
-});
-
-// Access the WhatsApp number with code
-whatsappInput.addEventListener('input', function() {
-  const fullPhoneNumber = whatsappIti.getNumber();
-  const countryCode = whatsappIti.getSelectedCountryData().dialCode;
-  const countryCodeInput = document.getElementById('country_code_w_a');
-  countryCodeInput.value = countryCode;
-
-  if (!whatsappIti.isValidNumber() && fullPhoneNumber.length !== 0) {
-    whatsappError.style.display = 'block';
-    whatsappError.innerText = '{{ __('auth.Invalid_WhatsApp_Number') }}';
-  } else {
-    whatsappError.style.display = 'none';
-  }
-});
-
-// Reset WhatsApp input value on select another country code
-whatsappInput.addEventListener("countrychange", () => {
-  whatsappInput.value = '';
-});
-
+{{-- <script>
 // Send code
 function sendCode(type) {    
     if (type === 'whatsapp' && !whatsappIti.isValidNumber()) {
@@ -637,6 +567,6 @@ $(document).on('input', '.otp-input', function() {
     $(this).next('.otp-input').focus();
   }
 });
-</script>
+</script> --}}
 @endif
 @stop

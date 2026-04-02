@@ -637,4 +637,5 @@ return [
     'The passcode for this meeting is' => 'كود الجلسة هو',
     'select_new_step' => 'اختر المرحلة الجديدة',
     'change_training_step' => 'تغيير مرحلة التدريب',
+    'please_select_step' => 'يرجى اختيار المرحلة',
 ];

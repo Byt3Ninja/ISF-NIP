@@ -3614,4 +3614,11 @@ return [
 	'maximum_sections_reached' => 'Maximum sections reached',
 	'Landing Unpublished' => 'Landing Unpublished',
 	'Landing Published' => 'Landing Published',
+	'identity' => 'Identity',
+	'national_id' => 'National ID',
+	'date_of_birth' => 'Date of Birth',
+	'Education_Status' => 'Education Status',
+	'Select_Education_Status' => 'Select Education Status',
+	'Graduate' => 'Graduate',
+	'Student' => 'Student',
 ];

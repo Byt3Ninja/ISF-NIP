@@ -720,7 +720,7 @@
         var selectedStep = $('#modalStepSelect').val();
 
         if (!selectedStep) {
-          alert('{{ __("cycles.Please select a step") }}');
+          alert('{{ __("cycles.please_select_step") }}');
           return;
         }
 
@@ -735,7 +735,7 @@
         }
 
         if (companiesToUpdate.length === 0) {
-          alert('{{ __("cycles.No companies selected") }}');
+          alert('{{ __("cycles.no_startups_selected") }}');
           return;
         }
 
