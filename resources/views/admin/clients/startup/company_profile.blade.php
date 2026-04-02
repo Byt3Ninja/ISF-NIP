@@ -192,13 +192,20 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
       </div>
       <div class="d-flex align-items-center gap-3">
         @if( $_user->hasAnyRole('Admin') || ( $_user->ableTo('company.profile_view_mine', $permissions) && $_user->hasRole('registered') && $_user->company_id == $company->id ) )
-          <a href="/dashboard/myCompany/{{ $company->id }}" class="btn btn-white text-primary shadow-sm border">
+          <a href="/dashboard/myCompany/{{ $company->id }}" class="btn btn-outline-primary">
             {{ __('startup.edit_info') }} <i class="ti ti-settings ms-2"></i>
           </a>
         @else
           <button data-bs-toggle="modal" data-bs-target="#MessageModal" class="btn btn-label-primary">
             {{ __('admin.Contact') }} <i class="ti ti-message ms-2"></i>
           </button>
+        @endif
+        <!-- Replace href with mvp_prototype_link (remove after integration)  -->
+        <!-- Prototype Link -->
+        @if (isset($company->mvp_prototype_link))
+        <a href="https://www.google.com" class="btn btn-primary shadow-sm border">
+          {{ __('startup.view_prototype') }} <i class="ti ti-eye ms-2"></i>
+        </a>
         @endif
       </div>
     </div>

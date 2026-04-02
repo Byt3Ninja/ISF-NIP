@@ -54,7 +54,7 @@
       ['employees', 'ti-users-group', __('startup.Employees')],
       ['pitch-deck', 'ti-presentation', $l == 'en' ? 'Pitch Deck' : 'الوثائق'],
       ['company-milestones', 'ti-flag', $l == 'en' ? 'Milestones' : 'الإنجازات'],
-      ['business_model', 'ti-presentation', $l == 'en' ? 'Business Model' : ' نموذج الاعمال '],
+      ['business_model', 'ti-cash-banknote', $l == 'en' ? 'Business Model / MVP' : 'نموذج العمل / المنتج'],
       ['customer_growth', 'ti-trending-up', $l == 'en' ? 'Customer Growth' : 'نمو العملاء'],
   ]);
 
