@@ -202,9 +202,11 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
         @endif
         <!-- Replace href with mvp_prototype_link (remove after integration)  -->
         <!-- Prototype Link -->
+        @if (isset($company->mvp_prototype_link))
         <a href="https://www.google.com" class="btn btn-primary shadow-sm border">
           {{ __('startup.view_prototype') }} <i class="ti ti-eye ms-2"></i>
         </a>
+        @endif
       </div>
     </div>
 
