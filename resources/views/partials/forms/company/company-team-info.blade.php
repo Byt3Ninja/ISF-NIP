@@ -213,7 +213,14 @@ $tabs = [
           <label class="form-label">{{ __('admin.investment_type') }}</label>
           <select name="type" class="form-select">
             <option value="Angel_Investor">{{ __('admin.Angel_Investor') }}</option>
+            <option value="Angel_Group">{{ __('admin.Angel_Group') }}</option>
             <option value="Venture_Capital_Firm">{{ __('admin.Venture_Capital_Firm') }}</option>
+            <option value="Accelerator">{{ __('admin.Accelerator') }}</option>
+            <option value="Incubator">{{ __('admin.Incubator') }}</option>
+            <option value="Corporate_Investor">{{ __('admin.Corporate_Investor') }}</option>
+            <option value="Family_Office">{{ __('admin.Family_Office') }}</option>
+            <option value="Family">{{ __('admin.Family') }}</option>
+            <option value="Friends">{{ __('admin.Friends') }}</option>
           </select>
           <div class="invalid-feedback" id="error-type-investor">{{ __('admin.Required_Field') }}</div>
         </div>

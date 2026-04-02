@@ -62,7 +62,18 @@
       founder: "Founder",
       investor: "Investor",
       shareholder: "Shareholder",
-      delete: "Delete"
+      delete: "Delete",
+       investmentTypes: {
+        Angel_Investor:      'Angel Investor',
+        Angel_Group:         'Angel Group',
+        Venture_Capital_Firm:'Venture Capital Firm',
+        Accelerator:         'Accelerator',
+        Incubator:           'Incubator',
+        Corporate_Investor:  'Corporate Investor',
+        Family_Office:       'Family Office',
+        Family:              'Family',
+        Friends:             'Friends',
+      }
     },
     ar: {
       noResults: (term) => `لا توجد نتائج لـ "${term}"`,
@@ -80,11 +91,27 @@
       noCancel: "لا، إلغاء!",
       founder: "المؤسس",
       investor: "المستثمر",
-      shareholder: "المساهم"
+      shareholder: "المساهم",
+       investmentTypes: {
+        Angel_Investor:      'مستثمر ملاك',
+        Angel_Group:         'مجموعة ملاك',
+        Venture_Capital_Firm:'شركة رأس مال مخاطر',
+        Accelerator:         'مسرّع أعمال',
+        Incubator:           'حاضنة أعمال',
+        Corporate_Investor:  'مستثمر مؤسسي',
+        Family_Office:       'مكتب عائلي',
+        Family:              'عائلة',
+        Friends:             'أصدقاء',
+      }
     }
   };
 
   const t = TRANSLATIONS[LANG] || TRANSLATIONS.en;
+
+  function translateInvestmentType(raw) {
+    if (!raw) return '';
+    return (t.investmentTypes && t.investmentTypes[raw]) || raw;
+  }
 
   /* ─────────────────────────────────────────────
      UTILITIES
@@ -312,7 +339,9 @@
             </div>
             <div class="flex-grow-1 ms-3">
               <h6 class="mb-0 fw-bold">${escapeHtml(item.name)}</h6>
-              <small class="text-secondary d-block mb-1">${escapeHtml(item.type || 'Standard')}</small>
+              <small class="text-secondary d-block mb-1">
+                ${escapeHtml(translateInvestmentType(item.type) || 'Standard')}
+              </small>
               <small class="text-success fw-bold">${escapeHtml(item.investment_amount || '')}</small>
             </div>
             ${buildDropdown('investor', item.id)}
