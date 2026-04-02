@@ -563,4 +563,5 @@ return [
   'support_and_mentorship_success' => 'تم حفظ متطلبات الدعم والارشاد بنجاح',
 
   'mvp_prototype_link' => 'رابط المبدئ الأول / نموذج أولي',
+  'view_prototype' => 'عرض النموذج',
 ];

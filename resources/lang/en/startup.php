@@ -562,4 +562,5 @@ return [
   'support_and_mentorship_success' => 'Support & Mentorship needs saved successfully.',
   
   'mvp_prototype_link' => 'MVP / Prototype Link',
+  'view_prototype' => 'View Prototype',
 ];
