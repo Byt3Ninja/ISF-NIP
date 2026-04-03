@@ -604,4 +604,7 @@ return [
   // Financial Plan Section
   'financial_plan'          => 'الخطة المالية',
   'financial_projections'   => 'التوقعات المالية',
+
+  'Full-time' => 'دوام كامل',
+  'Part-time' => 'دوام جزئي',
 ];
