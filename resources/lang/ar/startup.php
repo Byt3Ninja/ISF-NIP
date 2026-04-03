@@ -607,4 +607,5 @@ return [
 
   'Full-time' => 'دوام كامل',
   'Part-time' => 'دوام جزئي',
+  'employees_statistics' => 'الموظفين / الإحصائيات',
 ];

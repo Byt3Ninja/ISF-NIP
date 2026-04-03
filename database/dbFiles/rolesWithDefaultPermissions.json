@@ -5039,6 +5039,17 @@
                     "admin",
                     "subadmin"
                 ]
+            },
+            {
+                "name": "company.employees_statistics",
+                "description": "Save company employees statistics",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "registered",
+                    "admin",
+                    "subadmin"
+                ]
             }
         ]
     },

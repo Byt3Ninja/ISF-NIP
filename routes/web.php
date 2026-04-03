@@ -472,6 +472,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('/delete-document', 'ClientCompanyController@deleteDocument')->name('company.profile_documents_delete');
     Route::post('/delete-image/{id?}', 'ClientCompanyController@deleteImage')->name('company.profile_images_delete');
 
+    Route::post('/save-statistics/{id?}', 'ClientCompanyController@saveStatistics')->name('company.employees_statistics');
+
     Route::get('/company/{id}/financial-projection/realtime', [ClientCompanyController::class, 'getFinancialProjectionRealtime'])->name('company.financial_projection.realtime');
     Route::post('/company/{id}/financial-projection/save', [ClientCompanyController::class, 'saveFinancialProjection'])->name('company.financial_projection.save');
 
