@@ -202,7 +202,10 @@
                     <div>
                       <h6 class="mb-2">{{ $l == 'en' ? 'Technologies' : 'التقنيات' }}</h6>
                       <div class="d-flex flex-wrap gap-2">
-                        @foreach($technologies as $technology)
+                        @php
+                          $uniqueTechnologies = $technologies->unique('name')->values();
+                        @endphp
+                        @foreach($uniqueTechnologies as $technology)
                           <div class="badge bg-label-secondary rounded-pill">
                             {{ $technology->name }}
                           </div>

@@ -566,8 +566,42 @@ return [
   'view_prototype' => 'عرض النموذج',
 
   'additional_info' => 'معلومات اضافية',
-  'achievements' => 'الإنجازات',
-  'mission' => 'المهمة',
-  'why_this_startup' => 'لماذا هذه الشركة الناشئة؟',
-  'startup_expertise' => 'خبرة الشركة الناشئة',
+
+  // About Challenges Section
+  'about_challenges'        => 'نبذة عن الشركة الناشئة والتحديات',
+  'problem_being_solved'    => 'ما المشكلة التي يتم حلها؟',
+  'problem'                 => 'المشكلة',
+  'about_market_opportunity'=> 'فرصة السوق',
+  'competitors'             => 'المنافسون',
+  'monetization'            => 'تحقيق الإيرادات',
+  'challenges'              => 'التحديات',
+
+  // Mission Section
+  'mission'                 => 'المهمة',
+  'our_mission'             => 'مهمتنا',
+
+  // Why This Startup Section
+  'why_this_startup'        => 'لماذا هذه الشركة الناشئة؟',
+  'what_makes_us_different' => 'ما الذي يميزنا',
+
+  // Achievements Section
+  'achievements'            => 'الإنجازات',
+
+  // Startup Expertise Section
+  'startup_expertise'       => 'خبرات الشركة الناشئة',
+  'areas_of_expertise'      => 'مجالات الخبرة',
+
+  // Sustainability Section
+  'sustainability_goals'    => 'أهداف الاستدامة',
+
+  // Business Model Section
+  'business_model'          => 'نموذج العمل',
+  'how_we_operate'          => 'كيف نعمل',
+  'model_type'              => 'نوع النموذج',
+  'description'             => 'الوصف',
+  'business_plan'           => 'خطة العمل',
+
+  // Financial Plan Section
+  'financial_plan'          => 'الخطة المالية',
+  'financial_projections'   => 'التوقعات المالية',
 ];
