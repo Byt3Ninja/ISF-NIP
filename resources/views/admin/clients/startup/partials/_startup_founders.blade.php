@@ -36,7 +36,7 @@ $staticFounders = [
 <div class="col-md-4">
   <div class="card shadow-sm" style="height: 320px; overflow-y: hidden;">
     <div class="py-4 px-8">
-      <h5 class="card-title mb-2">{{ __('admin.Founders') }} ( {{count($founders)}} )</h5>
+      <h5 class="card-title mb-2">{{ __('admin.Founders') }} ( {{count($staticFounders)}} )</h5>
       @if (count($staticFounders) > 0)
       <div class="row" style="position: relative; height: 90%;">
         @if (count($staticFounders) > 2)
@@ -100,6 +100,7 @@ $staticFounders = [
   </div>
 </div>
 
+@push('scripts')
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const founderCols2 = document.querySelectorAll('.founder-col-2');
@@ -158,3 +159,4 @@ $staticFounders = [
     updateVisibility2();
   });
 </script>
+@endpush

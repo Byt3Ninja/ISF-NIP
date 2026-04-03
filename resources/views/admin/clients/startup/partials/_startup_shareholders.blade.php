@@ -53,6 +53,7 @@
   </div>
 </div>
 
+@push('scripts')
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const shareholderCols = document.querySelectorAll('#shareholder-col');
@@ -114,3 +115,4 @@
     updateVisibility(); // Initial check on page load
   });
 </script>
+@endpush

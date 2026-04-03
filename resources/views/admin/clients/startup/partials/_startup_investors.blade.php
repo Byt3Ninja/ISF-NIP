@@ -1,7 +1,7 @@
 <div class="col-md-4">
   <div class="card shadow-sm" style="height: 320px; overflow-y: hidden;">
     <div class="py-4 px-8">
-      <h5 class="card-title mb-2">{{ __('admin.investors') }} ( {{count($Shareholders)}} )</h5>
+      <h5 class="card-title mb-2">{{ __('admin.investors') }} ( {{count($Investors)}} )</h5>
       @if (count($Investors) > 0)
       <div class="row" style="position: relative; height: 90%;">
         @if (count($Investors) > 4)
@@ -48,6 +48,7 @@
   </div>
 </div>
 
+@push('scripts')
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const investorCols = document.querySelectorAll('.investor-col');
@@ -106,3 +107,4 @@
     updateVisibility(); // Initial state on page load
   });
 </script>
+@endpush
