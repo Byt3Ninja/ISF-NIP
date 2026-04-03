@@ -34,12 +34,12 @@ $staticFounders = [
 @endphp
 
 <div class="col-md-4">
-  <div class="card shadow-sm" style="height: 310px; overflow-y: hidden;">
+  <div class="card shadow-sm" style="height: 330px; overflow-y: hidden;">
     <div class="py-4 px-8">
       <h5 class="card-title mb-2">{{ __('admin.Founders') }} ( {{count($founders)}} )</h5>
-      @if (count($founders) > 0)
+      @if (count($staticFounders) > 0)
       <div class="row" style="position: relative; height: 90%;">
-        @if (count($founders) > 2)
+        @if (count($staticFounders) > 2)
         <button id="founder-prev-2" class="btn btn-sm btn-icon btn-white rounded-circle shadow border d-none"
           style="position: absolute; left: -1rem; top: 46%; transform: translateY(-50%); z-index: 1;">
           <i class="ti ti-chevron-left"></i>
