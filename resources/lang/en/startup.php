@@ -603,4 +603,7 @@ return [
   // Financial Plan Section
   'financial_plan'          => 'Financial Plan',
   'financial_projections'   => 'Financial Projections',
+
+  'Full-time' => 'Full-time',
+  'Part-time' => 'Part-time',
 ];
