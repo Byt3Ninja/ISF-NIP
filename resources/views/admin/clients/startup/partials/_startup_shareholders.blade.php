@@ -4,7 +4,7 @@
       <h5 class="card-title mb-2">{{ __('admin.shareholders') }} ( {{count($Shareholders)}} )</h5>
       @if (count($Shareholders) > 0)
       <div class="row" style="position: relative; height: 90%;">
-        @if (count($Shareholders) > 2)
+        @if (count($Shareholders) > 3)
           <button id="shareholder-prev" class="btn btn-sm btn-icon btn-white rounded-circle shadow border d-none" style="position: absolute; left: -1rem; top: 46%; transform: translateY(-50%); z-index: 1;">
             <i class="ti ti-chevron-left"></i>
           </button>            
@@ -74,7 +74,7 @@
     }
 
     let currentIndex = 0;
-    const itemsPerPage = 2; // Number of items to display at a time
+    const itemsPerPage = 3; // Number of items to display at a time
 
     function updateVisibility() {
       shareholderCols.forEach((col, index) => {

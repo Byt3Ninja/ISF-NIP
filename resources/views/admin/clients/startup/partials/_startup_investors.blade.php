@@ -4,7 +4,7 @@
       <h5 class="card-title mb-2">{{ __('admin.investors') }} ( {{count($Shareholders)}} )</h5>
       @if (count($Investors) > 0)
       <div class="row" style="position: relative; height: 90%;">
-        @if (count($Investors) > 2)
+        @if (count($Investors) > 4)
         <button id="investor-prev" class="btn btn-sm btn-icon btn-white rounded-circle shadow border d-none"
           style="position: absolute; left: -1rem; top: 46%; transform: translateY(-50%); z-index: 1;">
           <i class="ti ti-chevron-left"></i>
@@ -69,7 +69,7 @@
     }
 
     let currentIndex = 0;
-    const itemsPerPage = 2; // Number of items to show at a time
+    const itemsPerPage = 4; // Number of items to show at a time
 
     function updateVisibility() {
       investorCols.forEach((col, index) => {
