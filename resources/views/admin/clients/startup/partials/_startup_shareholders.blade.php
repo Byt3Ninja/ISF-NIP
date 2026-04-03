@@ -1,6 +1,6 @@
 <div class="col-md-4">
-  <div class="card shadow-sm" style="height: 310px; overflow-y: hidden;">
-  <div class="py-4 px-8" style="height: 300px;">
+  <div class="card shadow-sm" style="height: 330px; overflow-y: hidden;">
+    <div class="py-4 px-8" style="height: 300px;">
       <h5 class="card-title mb-2">{{ __('admin.shareholders') }} ( {{count($Shareholders)}} )</h5>
       @if (count($Shareholders) > 0)
       <div class="row" style="position: relative; height: 90%;">
