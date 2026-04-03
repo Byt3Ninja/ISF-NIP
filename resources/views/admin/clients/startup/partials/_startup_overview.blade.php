@@ -11,7 +11,7 @@
                 </div>
                 <h5 class="mb-1 fw-semibold">{{ __('admin.Funding_Stage') }}</h5>
                 <span
-                  class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4"
+                  class="badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4"
                   style="width: fit-content;">
                   {{ $company->development_stage ? __('admin.' . $company->development_stage) : __('admin.N/A') }}
                 </span>
@@ -28,7 +28,7 @@
                 </div>
                 <h5 class="mb-1 fw-semibold">{{ __('admin.Country') }}</h5>
                 <span
-                  class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4"
+                  class="badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4"
                   style="width: fit-content;">
                   {{-- <i class="flag-icon flag-icon-eg" style="font-size: 10px;"></i> --}}
                   {{ optional($company->country)->{'name_' . $l} }}
@@ -52,11 +52,11 @@
   
                 @if(!is_numeric($company->stage))
                 <span
-                  class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4"
+                  class="badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4"
                   style="width: fit-content;">{{ $company->stage ? __('admin.stage_'.$company->stage) : __('admin.N/A') }}</span>
                 @else
                 <span
-                  class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4"
+                  class="badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4"
                   style="width: fit-content;">{{ $stage != null ? $stage->{'name_' . $l} : __('admin.N/A') }}</span>
                 @endif
               </div>
@@ -85,7 +85,7 @@
                 @endphp
                   @foreach (array_slice($countryIds, 0, 1) as $index => $countryId)
                     <div
-                      class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-2"
+                      class="badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-2"
                       style="min-width: 110px;">
                       <span class="line-clamp-1">
                         {{ $targetedCountries[$countryId]->{'name_' . $l} ?? __('admin.N/A') }}
@@ -95,7 +95,7 @@
                   @if (is_array($countryIds) && count($countryIds) > 1)
                   <button type="button" class="btn p-0" data-bs-toggle="modal" data-bs-target="#targetedMarketModal">
                     <span
-                      class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-3 py-1"
+                      class="badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-3 py-1"
                       style="width: fit-content;"
                       data-bs-toggle="tooltip"
                       data-bs-placement="top"
@@ -106,7 +106,7 @@
                   @endif
                 @else
                 <span
-                  class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4"
+                  class="badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4"
                   style="width: fit-content;">{{ __('admin.N/A') }}</span>
                 @endif
                 @endif
@@ -125,7 +125,7 @@
                 <h5 class="mb-1 fw-semibold">{{ __('admin.Business Type') }}</h5>
                 <div class="d-flex align-items-center justify-content-center mt-2" style="gap: 5px;">
                   <span
-                    class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4"
+                    class="badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4"
                     style="width: fit-content;">{{ $company->business_type ?? __('admin.N/A') }}</span>
                 </div>
               </div>
@@ -145,7 +145,7 @@
                   $sector = App\Sector::where('id', $company->sector)->first();
                   @endphp
                   <span
-                    class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4"
+                    class="badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4"
                     style="width: fit-content;">{{ $sector->name_en ?? __('admin.N/A') }}</span>
                 </div>
               </div>

@@ -565,8 +565,42 @@ return [
   'view_prototype' => 'View Prototype',
 
   'additional_info' => 'Additional Info',
-  'achievements' => 'Achievements',
-  'mission' => 'Mission',
-  'why_this_startup' => 'Why this startup?',
-  'startup_expertise' => 'Startup Expertise',
+
+  // About Challenges Section
+  'about_challenges'        => 'About & Challenges',
+  'problem_being_solved'    => "What's the problem being solved?",
+  'problem'                 => 'Problem',
+  'about_market_opportunity'=> 'Market Opportunity',
+  'competitors'             => 'Competitors',
+  'monetization'            => 'Monetization',
+  'challenges'              => 'Challenges',
+
+  // Mission Section
+  'mission'                 => 'Mission',
+  'our_mission'             => 'Our Mission',
+
+  // Why This Startup Section
+  'why_this_startup'        => 'Why This Startup?',
+  'what_makes_us_different' => 'What Makes Us Different',
+
+  // Achievements Section
+  'achievements'            => 'Achievements',
+
+  // Startup Expertise Section
+  'startup_expertise'       => 'Startup Expertise',
+  'areas_of_expertise'      => 'Areas of Expertise',
+
+  // Sustainability Section
+  'sustainability_goals'    => 'Sustainability Goals',
+
+  // Business Model Section
+  'business_model'          => 'Business Model',
+  'how_we_operate'          => 'How We Operate',
+  'model_type'              => 'Model Type',
+  'description'             => 'Description',
+  'business_plan'           => 'Business Plan',
+
+  // Financial Plan Section
+  'financial_plan'          => 'Financial Plan',
+  'financial_projections'   => 'Financial Projections',
 ];
