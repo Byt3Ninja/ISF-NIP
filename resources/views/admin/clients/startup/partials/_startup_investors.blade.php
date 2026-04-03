@@ -1,7 +1,7 @@
 <div class="col-md-4">
-  <div class="card shadow-sm" style="height: 300px; overflow-y: hidden;">
+  <div class="card shadow-sm" style="height: 310px; overflow-y: hidden;">
     <div class="py-4 px-8">
-      <h5 class="card-title mb-3">{{ __('admin.investors') }} ( {{count($Shareholders)}} )</h5>
+      <h5 class="card-title mb-2">{{ __('admin.investors') }} ( {{count($Shareholders)}} )</h5>
       @if (count($Investors) > 0)
       <div class="row" style="position: relative; height: 90%;">
         @if (count($Investors) > 2)
@@ -16,22 +16,20 @@
         @endif
 
         @foreach ($Investors as $Investor)
-        <div class="investor-col col-12 mb-2">
-          <div class="card shadow-sm border">
-            <div class="p-3">
-              <div class="d-flex align-items-center">
-                <div class="border d-flex radius-15 d-flex flex-shrink-0" style="width: 80px; height: 80px;">
-                  <img src="/images/background/logo.png" class="img-fluid m-auto" alt="logo" />
+        <div class="investor-col col-12 mb-1">
+          <div class="card item-card shadow-none border mb-0">
+            <div class="card-body py-2 px-3 d-flex align-items-center">
+              <div class="avatar">
+                <div class="avatar-initial text-dark rounded flex-shrink-0">
+                  <i class="ti ti-building-bank"></i>
                 </div>
-                <div class="mx-3 d-flex flex-column justify-content-center gap-1">
-                  <div class="text-black fs-6">{{ $Investor->Name }}</div>
-                  <div class="d-flex align-items-center gap-2">
-                    <i class="ti ti-drone text-info"></i>
-                    <button class="btn btn-outline-primary btn-xs rounded-pill fw-bold" style="height: 18px;">
-                      {{ $Investor->investorType }}
-                    </button>
-                  </div>
-                </div>
+              </div>
+              <div class="flex-grow-1 ms-3">
+                <h6 class="mb-0">{{ $Investor->Name }}</h6>
+                @if ($Investor->investorType)
+                <small class="text-secondary d-block">{{ __('admin.' . ($Investor->investorType ?? 'Standard')) }}</small>
+                @endif
+                {{-- <small class="text-success fw-bold">{{ $Investor->investment_amount ?? '' }}</small> --}}
               </div>
             </div>
           </div>
