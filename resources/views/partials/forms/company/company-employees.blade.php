@@ -451,7 +451,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const companyId = @json(request()->route('id') ?? auth()->user()->company?->id);
 
-    fetch(`/${companyId}`, {
+    fetch(`{{ route('company.employees_statistics', '') }}/${companyId}`, {
       method: 'POST',
       headers: {
         'X-CSRF-TOKEN': csrfToken,
