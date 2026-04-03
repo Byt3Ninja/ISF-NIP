@@ -606,4 +606,5 @@ return [
 
   'Full-time' => 'Full-time',
   'Part-time' => 'Part-time',
+  'employees_statistics' => 'Employees / Statistics',
 ];
