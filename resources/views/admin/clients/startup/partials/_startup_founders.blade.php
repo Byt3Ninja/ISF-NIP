@@ -34,7 +34,7 @@ $staticFounders = [
 @endphp
 
 <div class="col-md-4">
-  <div class="card shadow-sm" style="height: 330px; overflow-y: hidden;">
+  <div class="card shadow-sm" style="height: 320px; overflow-y: hidden;">
     <div class="py-4 px-8">
       <h5 class="card-title mb-2">{{ __('admin.Founders') }} ( {{count($founders)}} )</h5>
       @if (count($staticFounders) > 0)
