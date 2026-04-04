@@ -3698,4 +3698,11 @@ return [
 	'financial_overview' => 'نظرة مالية عامة',
 	'generate_revenue' => 'هل يحقق عملك إيرادات؟',
 	'average_annual_revenues' => 'متوسط الايرادات السنوية',
+	'Raised' => 'مجموع المال',
+	'Market' => 'السوق',
+	'Dev_Stage' => 'مرحلة التنمية',
+	'Key Metrics' => 'المعايير الرئيسية',
+	'Business' => 'العمل',
+	'Pre-money' => 'قبل التوزيع',
+	'Years' => 'سنوات',
 ];
