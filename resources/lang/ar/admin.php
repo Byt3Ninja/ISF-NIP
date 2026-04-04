@@ -3694,4 +3694,8 @@ return [
 	'Partnership' => 'شراكة',
 	'Shareholding' => 'ملكية',
 	'startup_profile_updated' => 'تم تحديث ملف تعريف الشركة الناشئة بنجاح',
+	'business_profile' => 'ملف تعريف الشركة',
+	'financial_overview' => 'نظرة مالية عامة',
+	'generate_revenue' => 'هل يحقق عملك إيرادات؟',
+	'average_annual_revenues' => 'متوسط الايرادات السنوية',
 ];

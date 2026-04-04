@@ -353,8 +353,8 @@
         {{-- ── Submit ── --}}
         <div class="col-12 d-flex justify-content-end mt-4">
           <button class="btn btn-primary" id="submit-button" type="submit">
-            <span class="me-2" id="button-text">{{ __('admin.Save') }}</span>
-            <span class="spinner-border spinner-border-sm d-none" id="button-spinner" role="status" aria-hidden="true"></span>
+            <span id="button-text">{{ __('admin.Save') }}</span>
+            <span class="spinner-border spinner-border-sm ms-2 d-none" id="button-spinner" role="status" aria-hidden="true"></span>
           </button>
         </div>
 

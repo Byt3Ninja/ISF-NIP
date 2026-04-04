@@ -136,8 +136,8 @@
       {{-- Submit --}}
       <div class="text-end mt-4">
         <button type="submit" class="btn btn-primary" id="submit-button-desc">
-          <span class="me-2" id="button-text-desc">{{ __('admin.Save') }}</span>
-          <span id="button-spinner-desc" class="spinner-border spinner-border-sm d-none"></span>
+          <span id="button-text-desc">{{ __('admin.Save') }}</span>
+          <span id="button-spinner-desc" class="spinner-border spinner-border-sm ms-2 d-none"></span>
         </button>
       </div>
 
