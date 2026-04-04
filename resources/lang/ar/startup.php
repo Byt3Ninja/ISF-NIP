@@ -607,4 +607,9 @@ return [
 
   'Full-time' => 'دوام كامل',
   'Part-time' => 'دوام جزئي',
+  'employees_statistics' => 'الموظفين / الإحصائيات',
+  'total_employees' => 'إجمالي الموظفين',
+  'male_employees' => 'الموظفون الذكور',
+  'female_employees' => 'الموظفات الإناث',
+  'of_total' => 'من الاجمالي',
 ];

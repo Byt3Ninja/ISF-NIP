@@ -384,7 +384,7 @@ return [
   'other_op_expenses' => 'Other Op. Expenses',
   'ebitda' => 'EBITDA',
   'depreciation_and_amortization' => 'Depreciation & Amortization',
-  'ebit' => 'EBIT',
+  'ebit' => 'EBIT ( Operating Income )',
   'interest' => 'Interest',
   'taxes' => 'Taxes',
   'net_profit' => 'Net Profit',
@@ -606,4 +606,9 @@ return [
 
   'Full-time' => 'Full-time',
   'Part-time' => 'Part-time',
+  'employees_statistics' => 'Employees / Statistics',
+  'total_employees' => 'Total employees',
+  'male_employees' => 'Male employees',
+  'female_employees' => 'Female employees',
+  'of_total' => 'of total',
 ];

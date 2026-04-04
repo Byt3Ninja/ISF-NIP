@@ -51,7 +51,7 @@
       ['company-financial-info', 'ti-report-money', $l == 'en' ? 'Financial Info' : 'المعلومات المالية'],
       ['company-financial-projection', 'ti-database-dollar', $l == 'en' ? 'Financial Projection' : 'التوقعات المالية'],
       ['team-info', 'ti-briefcase', __('startup.team_info')],
-      ['employees', 'ti-users-group', __('startup.Employees')],
+      ['employees', 'ti-users-group', __('startup.employees_statistics')],
       ['pitch-deck', 'ti-presentation', $l == 'en' ? 'Pitch Deck' : 'الوثائق'],
       ['company-milestones', 'ti-flag', $l == 'en' ? 'Milestones' : 'الإنجازات'],
       ['business_model', 'ti-cash-banknote', $l == 'en' ? 'Business Model / MVP' : 'نموذج العمل / المنتج'],

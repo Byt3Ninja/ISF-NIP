@@ -4614,4 +4614,14 @@ class ClientCompanyController extends Controller
             ], 500);
         }
     }
+
+    public function saveStatistics (Request $request, $id)
+    {
+        // $company = Company::where('id', $id)->first();
+        // $female_employees = $request->female_employees;
+        // $male_employees = $request->male_employees;
+        // $total_employees = $request->total_employees;
+        // $company->save();
+        return response()->json(['status' => 'success']);
+    }
 }
