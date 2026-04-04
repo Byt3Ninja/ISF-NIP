@@ -91,22 +91,17 @@
             />
 
           </div>
-          <div class="position-relative">
+          <div class="position-relative mt-2">
             @if (optional($client->company)->business_plan != null)
-              <div class="card shadow-sm border mt-6" id="business_plan_card">
-                <div class="p-4">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center gap-3">
-                      <i class="ti ti-file text-warning"></i>
-                      <span>{{ basename($client->company->business_plan) }}</span>
-                    </div>
-                    <a class="btn btn-transparent" href="{{ $client->company->business_plan }}" target="_blank"
-                      download="{{ basename($client->company->business_plan) }}">
-                      <i class="ti ti-download text-primary"></i>
-                    </a>
-                  </div>
-                </div>
-              </div>
+            <a 
+              href="{{ $client->company->business_plan }}"
+              target="_blank" 
+              download
+              class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2">
+              <i class="ti ti-file text-warning"></i>
+              {{ basename($client->company->business_plan) }}
+              <i class="ti ti-download"></i>
+            </a>
             @endif
           </div>
         </div>
