@@ -384,7 +384,7 @@ return [
   'other_op_expenses' => 'Other Op. Expenses',
   'ebitda' => 'EBITDA',
   'depreciation_and_amortization' => 'Depreciation & Amortization',
-  'ebit' => 'EBIT',
+  'ebit' => 'EBIT ( Operating Income )',
   'interest' => 'Interest',
   'taxes' => 'Taxes',
   'net_profit' => 'Net Profit',
