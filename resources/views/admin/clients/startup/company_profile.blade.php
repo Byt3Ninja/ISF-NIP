@@ -240,7 +240,6 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
       <!-- Overview Section -->
       <section class="tab-pane fade {{ $activeKey == 0 ? 'show active' : '' }}" id="overview" role="tabpanel" aria-labelledby="overview-tab">
         @include('admin.clients.startup.partials._startup_overview')
-        @include('admin.clients.startup.partials._startup_about')
       </section>
       
       <!-- Milestones Section -->
@@ -248,39 +247,39 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
         @include('admin.clients.startup.partials._startup_milestones')
       </section>
 
-    @php
-    $total_employees = 30;
-    $male_employees = 20;
-    $female_employees = 10;
-    $male_pct = $total_employees > 0 ? round(($male_employees / $total_employees) * 100) : 0;
-    $female_pct = $total_employees > 0 ? round(($female_employees / $total_employees) * 100) : 0;
-    
-    $employeesKpis = [
-      [
-        'title' => __('startup.total_employees'),
-        'value' => $total_employees,
-        'icon' => 'ti-users-group',
-        'color' => 'success',
-        'type' => 'split',
-      ],
-      [
-        'title' => __('startup.male_employees'),
-        'value' => $male_employees,
-        'icon' => 'ti-gender-male',
-        'color' => 'primary',
-        'type' => 'pct',
-        'pct' => $male_pct,
-      ],
-      [
-        'title' => __('startup.female_employees'),
-        'value' => $female_employees,
-        'icon' => 'ti-gender-female',
-        'color' => 'info',
-        'type' => 'pct',
-        'pct' => $female_pct,
-      ],
-    ];
-    @endphp
+      @php
+      $total_employees = 30;
+      $male_employees = 20;
+      $female_employees = 10;
+      $male_pct = $total_employees > 0 ? round(($male_employees / $total_employees) * 100) : 0;
+      $female_pct = $total_employees > 0 ? round(($female_employees / $total_employees) * 100) : 0;
+      
+      $employeesKpis = [
+        [
+          'title' => __('startup.total_employees'),
+          'value' => $total_employees,
+          'icon' => 'ti-users-group',
+          'color' => 'success',
+          'type' => 'split',
+        ],
+        [
+          'title' => __('startup.male_employees'),
+          'value' => $male_employees,
+          'icon' => 'ti-gender-male',
+          'color' => 'primary',
+          'type' => 'pct',
+          'pct' => $male_pct,
+        ],
+        [
+          'title' => __('startup.female_employees'),
+          'value' => $female_employees,
+          'icon' => 'ti-gender-female',
+          'color' => 'info',
+          'type' => 'pct',
+          'pct' => $female_pct,
+        ],
+      ];
+      @endphp
       
       <!-- Team Section -->
       <section class="tab-pane fade" id="team" role="tabpanel" aria-labelledby="team-tab">
