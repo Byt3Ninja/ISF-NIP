@@ -1,59 +1,33 @@
-/* Edit Company Validations */
+/* Edit Company Validations - Optimized & Simplified jQuery */
 'use strict';
 
 let editInfoFV = null;
 let editDescFV = null;
 let mvpFV = null;
+let financialFV = null;
 
 const $select2 = $('.select2');
 
-/* ─── Translation Strings ──────────────────────────────────────────────────── */
+/* ==================== Translations (Simplified) ==================== */
 const translations = {
   en: {
     required_field: 'This field is required.',
     save: 'Save',
     saving: 'Saving...',
-    name_en: {
-      notEmpty: 'This field is required.',
-      stringOnly: 'Please enter a valid company name'
-    },
-    name_ar: {
-      notEmpty: 'This field is required.',
-      stringOnly: 'Please enter a valid company name'
-    },
-    address_en: {
-      notEmpty: 'This field is required.',
-      address: 'Please enter a valid address using letters, numbers and dashes only.'
-    },
-    address_ar: {
-      notEmpty: 'This field is required.',
-      address: 'Please enter a valid address using letters, numbers and dashes only.'
-    },
-    est_date: {
-      establishmentDate: 'Establishment date cannot be a future date'
-    },
-    product_or_service: {
-      notEmpty: 'This field is required.'
-    },
-    years_of_operations: {
-      notEmpty: 'This field is required.'
-    },
-    sector: {
-      notEmpty: 'This field is required.'
-    },
-    'business_categories[]': {
-      notEmpty: 'Please select at least one business category'
-    },
-    country_id: {
-      notEmpty: 'This field is required.'
-    },
-    state_id: {
-      notEmpty: 'This field is required.'
-    },
+    saveSuccess: 'Startup profile updated successfully.',
+    financialSaveSuccess: 'Financial information updated successfully.',
+
+    name_en: { stringOnly: 'Please enter a valid company name' },
+    name_ar: { stringOnly: 'Please enter a valid company name' },
+    address_en: { address: 'Please enter a valid address using letters, numbers and dashes only.' },
+    address_ar: { address: 'Please enter a valid address using letters, numbers and dashes only.' },
+
+    est_date: { establishmentDate: 'Establishment date cannot be a future date' },
+
     other_category: {
-      notEmpty: "Please specify your business type in the 'Other' field.",
       stringOnly: 'Business type accepts Arabic and English letters only'
     },
+
     Commercial_Register: {
       format: 'Invalid file format. Only PDF, PNG, or JPEG is allowed.',
       size: 'File size exceeds 10 MB. Please upload a smaller file.',
@@ -64,88 +38,47 @@ const translations = {
       size: 'File size exceeds 10 MB. Please upload a smaller file.',
       required: 'Please upload the Tax Card.'
     },
-    Country_Register: {
-      notEmpty: 'This field is required.'
-    },
-    company_registration_type: {
-      notEmpty: 'This field is required.'
-    },
-    previous_incubation: {
-      notEmpty: 'This field is required.'
-    },
+
     previous_incubator: {
-      notEmpty: 'This field is required.',
       maxLength: 'Previous Incubator must be at most 150 characters.'
     },
-    /* MVP tab */
-    business_model: {
-      notEmpty: 'Business model is required'
-    },
-    other_business_model: {
-      notEmpty: 'Other business model is required'
-    },
+
+    /* MVP Tab */
     business_model_description: {
-      notEmpty: 'Description is required',
       min: 'Minimum 10 characters required'
     },
     mvp_prototype_link: {
-      notEmpty: 'MVP prototype link is required',
       invalid_url: 'Please enter a valid URL'
     },
     business_plan: {
-      notEmpty: 'Business plan attachment is required',
       file_invalid: 'Invalid file. Only PDF/DOC/DOCX up to 5MB allowed',
       file_required: 'Business plan is required'
     },
-    /* Toast */
-    saveSuccess: 'Startup profile updated successfully.',
-    processing: 'Processing...'
+
+    /* Financial Tab */
+    average_annual_revenues: {
+      number: 'Please enter a valid number.',
+      min: 'Value cannot be less than 0.'
+    }
   },
   ar: {
+    required_field: 'هذا الحقل مطلوب.',
     save: 'حفظ',
-    required_field: "هذا الحقل مطلوب.",
     saving: 'جاري الحفظ...',
-    name_en: {
-      notEmpty: 'هذا الحقل مطلوب.',
-      stringOnly: 'الرجاء إدخال اسم شركة صالح'
-    },
-    name_ar: {
-      notEmpty: 'هذا الحقل مطلوب.',
-      stringOnly: 'الرجاء إدخال اسم شركة صالح'
-    },
-    address_en: {
-      notEmpty: 'هذا الحقل مطلوب.',
-      address: 'الرجاء إدخال عنوان صالح باستخدام الحروف والأرقام والشرطات فقط.'
-    },
-    address_ar: {
-      notEmpty: 'هذا الحقل مطلوب.',
-      address: 'الرجاء إدخال عنوان صالح باستخدام الحروف والأرقام والشرطات فقط.'
-    },
-    est_date: {
-      establishmentDate: 'لا يمكن أن يكون تاريخ التأسيس تاريخًا مستقبليًا'
-    },
-    product_or_service: {
-      notEmpty: 'هذا الحقل مطلوب.'
-    },
-    years_of_operations: {
-      notEmpty: 'هذا الحقل مطلوب.'
-    },
-    sector: {
-      notEmpty: 'هذا الحقل مطلوب.'
-    },
-    'business_categories[]': {
-      notEmpty: 'الرجاء اختيار فئة عمل واحدة على الأقل'
-    },
-    country_id: {
-      notEmpty: 'هذا الحقل مطلوب.'
-    },
-    state_id: {
-      notEmpty: 'هذا الحقل مطلوب.'
-    },
+    saveSuccess: 'تم تحديث ملف الشركة الناشئة بنجاح.',
+    financialSaveSuccess: 'تم تحديث المعلومات المالية بنجاح.',
+
+    name_en: { stringOnly: 'الرجاء إدخال اسم شركة صالح' },
+    name_ar: { stringOnly: 'الرجاء إدخال اسم شركة صالح' },
+    address_en: { address: 'الرجاء إدخال عنوان صالح باستخدام الحروف والأرقام والشرطات فقط.' },
+    address_ar: { address: 'الرجاء إدخال عنوان صالح باستخدام الحروف والأرقام والشرطات فقط.' },
+
+    est_date: { establishmentDate: 'لا يمكن أن يكون تاريخ التأسيس تاريخًا مستقبليًا' },
+
     other_category: {
-      notEmpty: 'الرجاء تحديد نوع عملك في الحقل "آخر".',
       stringOnly: 'نوع العمل يقبل الحروف العربية والإنجليزية فقط'
     },
+
     Commercial_Register: {
       format: 'تنسيق الملف غير صالح. يُسمح فقط بملفات PDF أو PNG أو JPEG.',
       size: 'يتجاوز حجم الملف 10 ميجابايت. يرجى تحميل ملف أصغر.',
@@ -156,74 +89,39 @@ const translations = {
       size: 'يتجاوز حجم الملف 10 ميجابايت. يرجى تحميل ملف أصغر.',
       required: 'يرجى رفع البطاقة الضريبية'
     },
-    Country_Register: {
-      notEmpty: 'هذا الحقل مطلوب.'
-    },
-    company_registration_type: {
-      notEmpty: 'هذا الحقل مطلوب.'
-    },
-    previous_incubation: {
-      notEmpty: 'هذا الحقل مطلوب.'
-    },
+
     previous_incubator: {
-      notEmpty: 'هذا الحقل مطلوب.',
       maxLength: 'يجب ألا يتجاوز حقل الحاضنة السابقة 150 حرفًا.'
     },
-    /* MVP tab */
-    business_model: {
-      notEmpty: 'نموذج العمل مطلوب'
-    },
-    other_business_model: {
-      notEmpty: 'يرجى إدخال نموذج العمل الآخر'
-    },
+
+    /* MVP Tab */
     business_model_description: {
-      notEmpty: 'الوصف مطلوب',
       min: 'يجب ألا يقل عن 10 أحرف'
     },
     mvp_prototype_link: {
-      notEmpty: 'رابط النموذج الأولي مطلوب',
       invalid_url: 'يرجى إدخال رابط صحيح'
     },
     business_plan: {
-      notEmpty: 'يرجى رفع ملف خطة العمل',
       file_invalid: 'ملف غير صالح. فقط PDF أو DOC أو DOCX بحجم أقصى 5MB',
       file_required: 'ملف خطة العمل مطلوب'
     },
-    /* Toast */
-    saveSuccess: 'تم تحديث ملف الشركة الناشئة بنجاح.',
-    processing: 'جاري المعالجة...'
+
+    /* Financial Tab */
+    average_annual_revenues: {
+      number: 'يرجى إدخال رقم صحيح.',
+      min: 'لا يمكن أن تكون القيمة أقل من 0.'
+    }
   }
 };
 
-/* ─── Description-tab translations ─────────────────────────────────────────── */
-const descTranslations = {
-  en: {
-    company_description: { stringOnly: 'Company description accepts letters and symbols only' },
-    about_problem: { stringOnly: 'About the problem accepts letters only' },
-    about_market_opportunity: { stringOnly: 'About the market opportunity accepts letters only' },
-    about_competitors: { stringOnly: 'About the competitors accepts letters only' },
-    about_monetize: { stringOnly: 'About monetize accepts letters only' },
-    about_challenges: { stringOnly: 'About challenges accepts letters only' }
-  },
-  ar: {
-    company_description: { stringOnly: 'وصف الشركة يقبل الحروف والرموز فقط' },
-    about_problem: { stringOnly: 'حول المشكلة يقبل الحروف فقط' },
-    about_market_opportunity: { stringOnly: 'حول فرص السوق يقبل الحروف فقط' },
-    about_competitors: { stringOnly: 'حول المنافسين يقبل الحروف فقط' },
-    about_monetize: { stringOnly: 'حول التحويل يقبل الحروف فقط' },
-    about_challenges: { stringOnly: 'حول التحديات يقبل الحروف فقط' }
-  }
-};
+/* ─── Helpers ───────────────────────────────────────────────────────────── */
 
-/* ─── File validator helper ─────────────────────────────────────────────────── */
 function validateFileField(input, fieldName, lang) {
-  const createdTax = document.getElementById('CreatedTax');
-  if (!createdTax || createdTax.value !== '1') return { valid: true };
+  if ($('#CreatedTax').val() !== '1') return { valid: true };
 
   const fileInput = input.element;
-  const hiddenInput = document.querySelector(`input[name="${fieldName}_value"]`);
   const hasNewFile = fileInput.files && fileInput.files.length > 0;
-  const hasExisting = hiddenInput && hiddenInput.value;
+  const hasExisting = $(`input[name="${fieldName}_value"]`).val();
 
   if (!hasNewFile && !hasExisting) {
     return { valid: false, message: translations[lang][fieldName].required };
@@ -231,625 +129,385 @@ function validateFileField(input, fieldName, lang) {
 
   if (hasNewFile) {
     const file = fileInput.files[0];
-    const allowedExts = ['pdf', 'png', 'jpeg', 'jpg'];
+    const allowed = ['pdf', 'png', 'jpeg', 'jpg'];
     const ext = file.name.split('.').pop().toLowerCase();
 
-    if (!allowedExts.includes(ext)) {
+    if (!allowed.includes(ext)) {
       return { valid: false, message: translations[lang][fieldName].format };
     }
     if (file.size > 10 * 1024 * 1024) {
       return { valid: false, message: translations[lang][fieldName].size };
     }
   }
-
   return { valid: true };
 }
 
-/* ─── Main ──────────────────────────────────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded', function () {
+function submitFormWithFetch({ form, submitBtnId, btnTextId, btnSpinnerId, successMessage }) {
+  const $btn = $(`#${submitBtnId}`);
+  const $text = $(`#${btnTextId}`);
+  const $spinner = $(`#${btnSpinnerId}`);
+  const t = translations[lang];
 
-  const editInfoForm = document.getElementById('edit-info-form');
-  const editDescForm = document.getElementById('desc-form');
-  const mvpForm = document.getElementById('mvp-form');
+  $btn.prop('disabled', true);
+  $text.text(t.saving);
+  $spinner.removeClass('d-none');
 
-  const establishmentDate = document.querySelectorAll('#est-date');
-  const businessCategories = document.querySelectorAll('input[name="business_categories[]"]');
-  const createdTaxSelect = document.getElementById('CreatedTax');
-  const prevIncubationSelect = document.getElementById('previous_incubation');
-  const prevIncubatorWrapper = document.getElementById('previousIncubatorWrapper');
-  const prevIncubatorInput = document.getElementById('previous_incubator');
-  const descTextarea = document.getElementById('products_services_description');
-  const descCounter = document.getElementById('products_services_description_count');
-
-  /* ── Character counter for description ── */
-  if (descTextarea && descCounter) {
-    descTextarea.addEventListener('input', function () {
-      descCounter.textContent = `${this.value.length}/1000`;
+  fetch(form.action, {
+    method: 'POST',
+    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+    body: new FormData(form)
+  })
+    .then(res => res.ok ? res.json().catch(() => ({})) : Promise.reject())
+    .then(() => toastr.success(successMessage))
+    .catch(() => form.submit())
+    .finally(() => {
+      $btn.prop('disabled', false);
+      $text.text(t.save);
+      $spinner.addClass('d-none');
     });
-  }
+}
 
-  /* ─────────────────────────── Info-form validation config ─────────────────── */
-  const validationConfig = {
-    fields: {
-      name_en: {
-        validators: {
-          notEmpty: { message: translations[lang].name_en.notEmpty },
-          regexp: {
-            regexp: /^[\p{L}\d\s.,;&@:-]+$/u,
-            message: translations[lang].name_en.stringOnly
-          }
-        }
-      },
-      name_ar: {
-        validators: {
-          notEmpty: { message: translations[lang].name_ar.notEmpty },
-          regexp: {
-            regexp: /^[\p{L}\d\s.,;&@:-]+$/u,
-            message: translations[lang].name_ar.stringOnly
-          }
-        }
-      },
-      address_en: {
-        validators: {
-          notEmpty: { message: translations[lang].address_en.notEmpty },
-          regexp: {
-            regexp: /^(?!\s)[\p{L}\p{N}\s,;:-]*$/u,
-            message: translations[lang].address_en.address
-          }
-        }
-      },
-      address_ar: {
-        validators: {
-          notEmpty: { message: translations[lang].address_ar.notEmpty },
-          regexp: {
-            regexp: /^(?!\s)[\p{L}\p{N}\s,;:-]*$/u,
-            message: translations[lang].address_ar.address
-          }
-        }
-      },
-      est_date: {
-        validators: {
-          callback: {
-            message: translations[lang].est_date.establishmentDate,
-            callback: function (input) {
-              if (!input.value) return true;
-              const date = new Date(input.value);
-              const today = new Date();
-              return date <= today;
-            }
-          }
-        }
-      },
-      product_or_service: {
-        validators: {
-          notEmpty: { message: translations[lang].product_or_service.notEmpty }
-        }
-      },
-      years_of_operations: {
-        validators: {
-          notEmpty: { message: translations[lang].years_of_operations.notEmpty }
-        }
-      },
-      country_id: {
-        validators: {
-          notEmpty: { message: translations[lang].country_id.notEmpty }
-        }
-      },
-      state_id: {
-        validators: {
-          notEmpty: { message: translations[lang].state_id.notEmpty }
-        }
-      },
-      'business_categories[]': {
-        validators: {
-          notEmpty: { message: translations[lang]['business_categories[]'].notEmpty }
-        }
-      },
-      other_category: {
-        validators: {
-          notEmpty: { message: translations[lang].other_category.notEmpty },
-          regexp: {
-            regexp: /^[a-zA-Z\u0621-\u064A\s]*$/i,
-            message: translations[lang].other_category.stringOnly
-          }
-        }
-      },
-      Commercial_Register: {
-        validators: {
-          callback: {
-            callback: function (input) {
-              return validateFileField(input, 'Commercial_Register', lang);
-            }
-          }
-        }
-      },
-      Tax_Card: {
-        validators: {
-          callback: {
-            callback: function (input) {
-              return validateFileField(input, 'Tax_Card', lang);
-            }
-          }
-        }
-      },
-      Country_Register: {
-        validators: {
-          callback: {
-            callback: function (input) {
-              const createdTax = document.getElementById('CreatedTax');
-              if (createdTax && createdTax.value === '1') {
-                if (!input.value || input.value === '') {
-                  return { valid: false, message: translations[lang].Country_Register.notEmpty };
-                }
-              }
-              return { valid: true };
-            }
-          }
-        }
-      },
-      company_registration_type: {
-        validators: {
-          notEmpty: { message: translations[lang].company_registration_type.notEmpty }
-        }
-      },
-      previous_incubation: {
-        validators: {
-          notEmpty: { message: translations[lang].previous_incubation.notEmpty }
-        }
-      },
-      previous_incubator: {
-        validators: {
-          callback: {
-            callback: function (input) {
-              const isYes = prevIncubationSelect && prevIncubationSelect.value === '1';
-              if (!isYes) return { valid: true };
-
-              const val = (input.value || '').trim();
-              if (!val) {
-                return { valid: false, message: translations[lang].previous_incubator.notEmpty };
-              }
-              if (val.length > 150) {
-                return { valid: false, message: translations[lang].previous_incubator.maxLength };
-              }
-              return { valid: true };
-            }
-          }
-        }
-      },
-      products_services_description: {
-        validators: {
-          callback: {
-            callback: function (input) {
-              const val = (input.value || '').trim();
-              if (val.length > 1000) {
-                return { valid: false, message: translations[lang].products_services_description.maxLength };
-              }
-              return { valid: true };
-            }
-          }
-        }
-      }
-    },
-
-    plugins: {
-      trigger: new FormValidation.plugins.Trigger(),
-      bootstrap5: new FormValidation.plugins.Bootstrap5({
-        eleValidClass: '',
-        rowSelector: '.mb-6, .mb-3, .mb-4, .form-group'
-      }),
-      submitButton: new FormValidation.plugins.SubmitButton(),
-      autoFocus: new FormValidation.plugins.AutoFocus()
-    },
-
-    init: instance => {
-      instance.on('plugins.message.placed', function (e) {
-        if (e.element.parentElement.classList.contains('input-group')) {
-          e.element.parentElement.insertAdjacentElement('afterend', e.messageElement);
-        }
-      });
-    }
+function buildFVPlugins(rowSelector = '.mb-6, .mb-3, .mb-4, .form-group') {
+  return {
+    trigger: new FormValidation.plugins.Trigger(),
+    bootstrap5: new FormValidation.plugins.Bootstrap5({ eleValidClass: '', rowSelector }),
+    submitButton: new FormValidation.plugins.SubmitButton(),
+    autoFocus: new FormValidation.plugins.AutoFocus()
   };
+}
 
-  /* ─────────────────────────── Desc-form validation config ─────────────────── */
-  const descValidationConfig = {
-    fields: {
-      "Sustainable_development[]": {
-        validators: {
-          notEmpty: {
-            message: translations[lang].required_field
-          },
-        }
-      }
-    },
-    plugins: {
-      trigger: new FormValidation.plugins.Trigger(),
-      bootstrap5: new FormValidation.plugins.Bootstrap5({ eleValidClass: '', rowSelector: '.mb-4' }),
-      submitButton: new FormValidation.plugins.SubmitButton(),
-      autoFocus: new FormValidation.plugins.AutoFocus()
-    },
-    init: instance => {
-      instance.on('plugins.message.placed', function (e) {
-        if (e.element.parentElement.classList.contains('input-group')) {
-          e.element.parentElement.insertAdjacentElement('afterend', e.messageElement);
-        }
-      });
-    }
-  };
+/* ─── Main ──────────────────────────────────────────────────────────────── */
 
-  /* ─────────────────────────── MVP-form validation config ──────────────────── */
-  const mvpValidationConfig = {
-    fields: {
-      business_model: {
-        validators: {
-          notEmpty: {
-            message: translations[lang].business_model.notEmpty
+$(function () {
+
+  /* Character Counter */
+  $('#products_services_description').on('input', function () {
+    $('#products_services_description_count').text(`${this.value.length}/1000`);
+  });
+
+  /* ====================== INFO FORM ====================== */
+  if ($('#edit-info-form').length) {
+    editInfoFV = FormValidation.formValidation(document.getElementById('edit-info-form'), {
+      fields: {
+        name_en: {
+          validators: {
+            notEmpty: { message: translations[lang].required_field },
+            regexp: { regexp: /^[\p{L}\d\s.,;&@:-]+$/u, message: translations[lang].name_en.stringOnly }
           }
-        }
-      },
-
-      other_business_model: {
-        validators: {
-          callback: {
-            message: translations[lang].other_business_model.notEmpty,
-            callback: function (input) {
-              const businessModelEl = document.getElementById('business_model');
-              if (businessModelEl && businessModelEl.value === 'Other') {
-                return input.value.trim() !== '';
+        },
+        name_ar: {
+          validators: {
+            notEmpty: { message: translations[lang].required_field },
+            regexp: { regexp: /^[\p{L}\d\s.,;&@:-]+$/u, message: translations[lang].name_ar.stringOnly }
+          }
+        },
+        address_en: {
+          validators: {
+            notEmpty: { message: translations[lang].required_field },
+            regexp: { regexp: /^(?!\s)[\p{L}\p{N}\s,;:-]*$/u, message: translations[lang].address_en.address }
+          }
+        },
+        address_ar: {
+          validators: {
+            notEmpty: { message: translations[lang].required_field },
+            regexp: { regexp: /^(?!\s)[\p{L}\p{N}\s,;:-]*$/u, message: translations[lang].address_ar.address }
+          }
+        },
+        est_date: {
+          validators: {
+            callback: {
+              message: translations[lang].est_date.establishmentDate,
+              callback: ({ value }) => !value || new Date(value) <= new Date()
+            }
+          }
+        },
+        product_or_service: { validators: { notEmpty: { message: translations[lang].required_field } } },
+        years_of_operations: { validators: { notEmpty: { message: translations[lang].required_field } } },
+        country_id: { validators: { notEmpty: { message: translations[lang].required_field } } },
+        state_id: { validators: { notEmpty: { message: translations[lang].required_field } } },
+        'business_categories[]': {
+          validators: { notEmpty: { message: translations[lang].required_field } }
+        },
+        other_category: {
+          validators: {
+            notEmpty: { message: translations[lang].required_field },
+            regexp: { regexp: /^[a-zA-Z\u0621-\u064A\s]*$/i, message: translations[lang].other_category.stringOnly }
+          }
+        },
+        Commercial_Register: {
+          validators: { callback: { callback: input => validateFileField(input, 'Commercial_Register', lang) } }
+        },
+        Tax_Card: {
+          validators: { callback: { callback: input => validateFileField(input, 'Tax_Card', lang) } }
+        },
+        Country_Register: {
+          validators: {
+            callback: {
+              callback: () => $('#CreatedTax').val() === '1' && !$('#Country_Register').val()
+                ? { valid: false, message: translations[lang].required_field }
+                : { valid: true }
+            }
+          }
+        },
+        company_registration_type: { validators: { notEmpty: { message: translations[lang].required_field } } },
+        previous_incubation: { validators: { notEmpty: { message: translations[lang].required_field } } },
+        previous_incubator: {
+          validators: {
+            callback: {
+              callback: ({ value }) => {
+                if ($('#previous_incubation').val() !== '1') return { valid: true };
+                const val = (value || '').trim();
+                if (!val) return { valid: false, message: translations[lang].required_field };
+                if (val.length > 150) return { valid: false, message: translations[lang].previous_incubator.maxLength };
+                return { valid: true };
               }
-              return true;
             }
           }
         }
       },
-
-      business_model_description: {
-        validators: {
-          notEmpty: {
-            message: translations[lang].business_model_description.notEmpty
-          },
-          stringLength: {
-            min: 10,
-            message: translations[lang].business_model_description.min
-          }
-        }
-      },
-
-      mvp_prototype_link: {
-        validators: {
-          uri: {
-            message: translations[lang].mvp_prototype_link.invalid_url
-          }
-        }
-      },
-
-      business_plan: {
-        validators: {
-          file: {
-            extension: 'pdf,doc,docx',
-            type: 'application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            maxSize: 5 * 1024 * 1024,
-            message: translations[lang].business_plan.file_invalid
-          },
-          callback: {
-            message: translations[lang].business_plan.file_required,
-            callback: function (input) {
-              const hasExistingFile = document.querySelector('#business_plan_card') !== null;
-              if (hasExistingFile) return true;
-              return input.files.length > 0;
-            }
-          }
-        }
-      }
-    },
-
-    plugins: {
-      trigger: new FormValidation.plugins.Trigger(),
-      bootstrap5: new FormValidation.plugins.Bootstrap5({
-        rowSelector: '.mb-4',
-        eleInvalidClass: '',
-        eleValidClass: ''
-      }),
-      submitButton: new FormValidation.plugins.SubmitButton(),
-      autoFocus: new FormValidation.plugins.AutoFocus()
-    }
-  };
-
-  /* ─────────────────────────── Info-form setup ─────────────────────────────── */
-  if (editInfoForm) {
-
-    editInfoForm.addEventListener('submit', function (e) {
-      // FormValidation's DefaultSubmit plugin is NOT used here; we do it manually.
+      plugins: buildFVPlugins()
     });
 
-    editInfoFV = FormValidation.formValidation(editInfoForm, {
-      ...validationConfig,
-      plugins: {
-        ...validationConfig.plugins,
-        submitButton: new FormValidation.plugins.SubmitButton()
+    // Message placement fix
+    editInfoFV.on('plugins.message.placed', e => {
+      if (e.element.parentElement.classList.contains('input-group')) {
+        e.element.parentElement.after(e.messageElement);
       }
     });
 
-    editInfoFV.on('core.form.valid', function () {
-      const submitBtn = document.getElementById('submit-button');
-      const btnText = document.getElementById('button-text');
-      const btnSpinner = document.getElementById('button-spinner');
-
-      if (submitBtn) submitBtn.disabled = true;
-      if (btnText) btnText.classList.add('d-none');
-      if (btnSpinner) btnSpinner.classList.remove('d-none');
-
-      const formData = new FormData(editInfoForm);
-
-      fetch(editInfoForm.action, {
-        method: 'POST',
-        headers: { 'X-Requested-With': 'XMLHttpRequest' },
-        body: formData
-      })
-        .then(res => res.ok ? res.json().catch(() => ({})) : Promise.reject(res))
-        .then(() => {
-          toastr.success(translations[lang].saveSuccess);
-        })
-        .catch(() => {
-          editInfoForm.submit();
-        })
-        .finally(() => {
-          if (submitBtn) submitBtn.disabled = false;
-          if (btnText) btnText.classList.remove('d-none');
-          if (btnText) btnText.textContent = translations[lang].save || 'Save';
-          if (btnSpinner) btnSpinner.classList.add('d-none');
-        });
+    // Submit Handler
+    editInfoFV.on('core.form.valid', () => {
+      submitFormWithFetch({
+        form: document.getElementById('edit-info-form'),
+        submitBtnId: 'submit-button',
+        btnTextId: 'button-text',
+        btnSpinnerId: 'button-spinner',
+        successMessage: translations[lang].saveSuccess
+      });
     });
 
-    /* ── Select2 for Country_Register ── */
-    const countryRegisterSelect = document.getElementById('Country_Register');
-    if (countryRegisterSelect && !$(countryRegisterSelect).hasClass('select2-hidden-accessible')) {
-      $(countryRegisterSelect).select2({
-        placeholder: countryRegisterSelect.getAttribute('data-placeholder') || 'Select Country',
-        allowClear: true
-      });
-    }
+    /* Other Category Toggle */
+    function syncOtherCategory() {
+      const isOther = $('input[name="business_categories[]"]:checked').filter((_, el) =>
+        el.value === 'Other' || el.value === 'أخرى'
+      ).length > 0;
 
-    if (countryRegisterSelect) {
-      $(countryRegisterSelect).on('select2:select select2:unselect select2:clear change select2:close', function () {
-        setTimeout(() => editInfoFV.revalidateField('Country_Register'), 50);
-      });
-    }
+      $('#otherCategoryInput').toggle(isOther);
 
-    /* ── Other category visibility ── */
-    const checkOtherCategoryVisibility = () => {
-      const isOtherSelected = Array.from(businessCategories).some(
-        cat => (cat.value === 'Other' || cat.value === 'أخرى') && cat.checked
-      );
-      const otherCategoryInput = document.getElementById('otherCategoryInput');
-      if (otherCategoryInput) otherCategoryInput.style.display = isOtherSelected ? 'block' : 'none';
-
-      if (isOtherSelected) {
+      if (isOther) {
         editInfoFV.enableValidator('other_category', 'notEmpty');
         editInfoFV.enableValidator('other_category', 'regexp');
       } else {
         editInfoFV.disableValidator('other_category', 'notEmpty');
         editInfoFV.disableValidator('other_category', 'regexp');
+        editInfoFV.resetField('other_category');
       }
-    };
+    }
+    syncOtherCategory();
+    $('input[name="business_categories[]"]').on('change', syncOtherCategory);
 
-    checkOtherCategoryVisibility();
+    /* File Validation Toggle */
+    const fileFields = ['Commercial_Register', 'Tax_Card', 'Country_Register'];
 
-    businessCategories.forEach(category => {
-      category.addEventListener('change', function () {
-        const isOtherSelected = Array.from(businessCategories).some(
-          cat => (cat.value === 'Other' || cat.value === 'أخرى') && cat.checked
-        );
-        const otherCategoryInput = document.getElementById('otherCategoryInput');
-
-        if (isOtherSelected) {
-          if (otherCategoryInput) otherCategoryInput.style.display = 'block';
-          editInfoFV.enableValidator('other_category', 'notEmpty');
-          editInfoFV.enableValidator('other_category', 'regexp');
-        } else {
-          if (otherCategoryInput) otherCategoryInput.style.display = 'none';
-          editInfoFV.disableValidator('other_category', 'notEmpty');
-          editInfoFV.disableValidator('other_category', 'regexp');
-          editInfoFV.resetField('other_category');
-        }
-      });
-    });
-
-    /* ── File validation enable/disable based on CreatedTax ── */
-    const handleFileValidation = () => {
-      const yes = createdTaxSelect && createdTaxSelect.value === '1';
-      ['Commercial_Register', 'Tax_Card', 'Country_Register'].forEach(field => {
-        if (yes) {
+    function syncFileValidation() {
+      const isRegistered = $('#CreatedTax').val() === '1';
+      fileFields.forEach(field => {
+        if (isRegistered) {
           editInfoFV.enableValidator(field, 'callback');
         } else {
           editInfoFV.disableValidator(field, 'callback');
           editInfoFV.resetField(field);
         }
       });
-    };
-
-    handleFileValidation();
-
-    if (createdTaxSelect) {
-      createdTaxSelect.addEventListener('change', function () {
-        handleFileValidation();
-        ['Commercial_Register', 'Tax_Card', 'Country_Register'].forEach(field => {
-          editInfoFV.revalidateField(field);
-        });
-        setTimeout(() => editInfoFV.revalidateField('Country_Register'), 100);
-      });
     }
+    syncFileValidation();
+    $('#CreatedTax').on('change', () => {
+      syncFileValidation();
+      fileFields.forEach(f => editInfoFV.revalidateField(f));
+    });
 
-    const commercialRegisterInput = document.getElementById('Commercial_Register');
-    const taxCardInput = document.getElementById('Tax_Card');
+    /* Revalidate file inputs */
+    $('#Commercial_Register, #Tax_Card').on('change', function () {
+      editInfoFV.revalidateField(this.id);
+    });
 
-    if (commercialRegisterInput) {
-      commercialRegisterInput.addEventListener('change', () => editInfoFV.revalidateField('Commercial_Register'));
-    }
-    if (taxCardInput) {
-      taxCardInput.addEventListener('change', () => editInfoFV.revalidateField('Tax_Card'));
-    }
-
-    /* ── Previous Incubation → show/hide Previous Incubator ── */
-    const toggleIncubatorField = () => {
-      if (!prevIncubationSelect || !prevIncubatorWrapper) return;
-      const isYes = prevIncubationSelect.value === '1';
-      prevIncubatorWrapper.style.display = isYes ? '' : 'none';
-
+    /* Previous Incubation Toggle */
+    function syncIncubator() {
+      const isYes = $('#previous_incubation').val() === '1';
+      $('#previousIncubatorWrapper').toggle(isYes);
       if (!isYes) {
-        if (prevIncubatorInput) prevIncubatorInput.value = '';
+        $('#previous_incubator').val('');
         editInfoFV.resetField('previous_incubator');
       }
-
       editInfoFV.revalidateField('previous_incubator');
-    };
-
-    toggleIncubatorField();
-
-    if (prevIncubationSelect) {
-      prevIncubationSelect.addEventListener('change', function () {
-        toggleIncubatorField();
-        editInfoFV.revalidateField('previous_incubation');
-      });
     }
+    syncIncubator();
+    $('#previous_incubation').on('change', syncIncubator);
+    $('#previous_incubator').on('input', () => editInfoFV.revalidateField('previous_incubator'));
 
-    if (prevIncubatorInput) {
-      prevIncubatorInput.addEventListener('input', () => editInfoFV.revalidateField('previous_incubator'));
-    }
-
-    if (descTextarea) {
-      descTextarea.addEventListener('input', () => editInfoFV.revalidateField('products_services_description'));
-    }
+    /* Country Register Select2 */
+    $('#Country_Register').select2({
+      placeholder: 'Select Country',
+      allowClear: true
+    }).on('change select2:close', () => {
+      setTimeout(() => editInfoFV.revalidateField('Country_Register'), 50);
+    });
   }
 
-  /* ─────────────────────────── Desc-form setup ─────────────────────────────── */
-  if (editDescForm) {
-
-    editDescForm.addEventListener('submit', function (e) {
-      // FormValidation's DefaultSubmit plugin is NOT used here; we do it manually.
+  /* ====================== DESCRIPTION FORM ====================== */
+  if ($('#desc-form').length) {
+    editDescFV = FormValidation.formValidation(document.getElementById('desc-form'), {
+      fields: {
+        'Sustainable_development[]': {
+          validators: { notEmpty: { message: translations[lang].required_field } }
+        }
+      },
+      plugins: buildFVPlugins('.mb-4')
     });
 
-    editDescFV = FormValidation.formValidation(editDescForm, descValidationConfig);
-
-    editDescFV.on('core.form.valid', function () {
-      const submitBtn = document.getElementById('submit-button-desc');
-      const btnText = document.getElementById('button-text-desc');
-      const btnSpinner = document.getElementById('button-spinner-desc');
-
-      if (submitBtn) submitBtn.disabled = true;
-      if (btnText) btnText.textContent = translations[lang].saving || 'Saving...';
-      if (btnSpinner) btnSpinner.classList.remove('d-none');
-
-      const formData = new FormData(editDescForm);
-
-      fetch(editDescForm.action, {
-        method: 'POST',
-        headers: { 'X-Requested-With': 'XMLHttpRequest' },
-        body: formData
-      })
-        .then(res => res.ok ? res.json().catch(() => ({})) : Promise.reject(res))
-        .then(() => {
-          toastr.success(translations[lang].saveSuccess || 'Description updated successfully.');
-        })
-        .catch(() => {
-          editDescForm.submit();
-        })
-        .finally(() => {
-          if (submitBtn) submitBtn.disabled = false;
-          if (btnText) btnText.classList.remove('d-none');
-          if (btnText) btnText.textContent = translations[lang].save || 'Save';
-          if (btnSpinner) btnSpinner.classList.add('d-none');
-        });
-    });
-
-    const sustainableSelect = document.getElementById('sustainable-mutiple-select');
-    if (sustainableSelect) {
-      $(sustainableSelect).on('select2:select select2:unselect', function () {
-        setTimeout(() => {
-          if (editDescFV) editDescFV.revalidateField('Sustainable_development[]');
-        }, 100);
+    editDescFV.on('core.form.valid', () => {
+      submitFormWithFetch({
+        form: document.getElementById('desc-form'),
+        submitBtnId: 'submit-button-desc',
+        btnTextId: 'button-text-desc',
+        btnSpinnerId: 'button-spinner-desc',
+        successMessage: translations[lang].saveSuccess
       });
-    }
+    });
+
+    $('#sustainable-mutiple-select').on('select2:select select2:unselect', () => {
+      setTimeout(() => editDescFV?.revalidateField('Sustainable_development[]'), 100);
+    });
   }
 
-  /* ─────────────────────────── MVP-form setup ──────────────────────────────── */
-  if (mvpForm) {
+  /* ====================== MVP FORM ====================== */
+  if ($('#mvp-form').length) {
+    const $businessModel = $('#business_model');
 
-    mvpForm.addEventListener('submit', function (e) {
-      // FormValidation's DefaultSubmit plugin is NOT used here; we do it manually.
+    mvpFV = FormValidation.formValidation(document.getElementById('mvp-form'), {
+      fields: {
+        business_model: { validators: { notEmpty: { message: translations[lang].required_field } } },
+        other_business_model: {
+          validators: {
+            callback: {
+              message: translations[lang].required_field,
+              callback: () => $businessModel.val() !== 'Other' || $('#other_business_model').val().trim() !== ''
+            }
+          }
+        },
+        business_model_description: {
+          validators: {
+            notEmpty: { message: translations[lang].required_field },
+            stringLength: { min: 10, message: translations[lang].business_model_description.min }
+          }
+        },
+        mvp_prototype_link: {
+          validators: { uri: { message: translations[lang].mvp_prototype_link.invalid_url } }
+        },
+        business_plan: {
+          validators: {
+            file: {
+              extension: 'pdf,doc,docx',
+              maxSize: 5 * 1024 * 1024,
+              message: translations[lang].business_plan.file_invalid
+            },
+            callback: {
+              message: translations[lang].business_plan.file_required,
+              callback: ({ files }) => $('#business_plan_card').length || files.length > 0
+            }
+          }
+        }
+      },
+      plugins: buildFVPlugins('.mb-4')
     });
 
-    mvpFV = FormValidation.formValidation(mvpForm, mvpValidationConfig);
-
-    mvpFV.on('core.form.valid', function () {
-      const submitBtn = document.getElementById('submit-button-mvp');
-      const btnText = document.getElementById('button-text-mvp');
-      const btnSpinner = document.getElementById('button-spinner-mvp');
-
-      if (submitBtn) submitBtn.disabled = true;
-      if (btnText) btnText.textContent = translations[lang].saving || 'Saving...';
-      if (btnSpinner) btnSpinner.classList.remove('d-none');
-
-      const formData = new FormData(mvpForm);
-
-      fetch(mvpForm.action, {
-        method: 'POST',
-        headers: { 'X-Requested-With': 'XMLHttpRequest' },
-        body: formData
-      })
-        .then(res => res.ok ? res.json().catch(() => ({})) : Promise.reject(res))
-        .then(() => {
-          toastr.success(translations[lang].saveSuccess);
-        })
-        .catch(() => {
-          mvpForm.submit();
-        })
-        .finally(() => {
-          if (submitBtn) submitBtn.disabled = false;
-          if (btnText) btnText.classList.remove('d-none');
-          if (btnText) btnText.textContent = translations[lang].save || 'Save';
-          if (btnSpinner) btnSpinner.classList.add('d-none');
-        });
+    mvpFV.on('core.form.valid', () => {
+      submitFormWithFetch({
+        form: document.getElementById('mvp-form'),
+        submitBtnId: 'submit-button-mvp',
+        btnTextId: 'button-text-mvp',
+        btnSpinnerId: 'button-spinner-mvp',
+        successMessage: translations[lang].saveSuccess
+      });
     });
 
-    /* ── Toggle "Other" business model field ── */
-    const businessModelEl = document.getElementById('business_model');
-    const otherWrapper = mvpForm.querySelector('.IfOther');
+    /* Toggle Other Business Model */
+    function syncOtherBusinessModel() {
+      const isOther = $businessModel.val() === 'Other';
+      $('.IfOther').toggle(isOther);
+      if (!isOther) mvpFV.revalidateField('other_business_model');
+    }
+    $businessModel.on('change', syncOtherBusinessModel);
+    syncOtherBusinessModel();
+  }
 
-    const toggleOtherField = () => {
-      if (!businessModelEl || !otherWrapper) return;
-      if (businessModelEl.value === 'Other') {
-        otherWrapper.style.display = 'block';
+  /* ====================== FINANCIAL FORM ====================== */
+  if ($('#financial-form').length) {
+    const $generateRevenue = $('#generate_revenue');
+
+    financialFV = FormValidation.formValidation(document.getElementById('financial-form'), {
+      fields: {
+        generate_revenue: { validators: { notEmpty: { message: translations[lang].required_field } } },
+        average_annual_revenues: {
+          validators: {
+            callback: {
+              callback: ({ value }) => {
+                if ($generateRevenue.val() !== 'yes') return { valid: true };
+                const val = (value || '').trim();
+                if (!val) return { valid: false, message: translations[lang].required_field };
+                if (!/^\d+$/.test(val)) return { valid: false, message: translations[lang].average_annual_revenues.number };
+                if (Number(val) < 0) return { valid: false, message: translations[lang].average_annual_revenues.min };
+                return { valid: true };
+              }
+            }
+          }
+        }
+      },
+      plugins: buildFVPlugins('.mb-4, .form-group')
+    });
+
+    financialFV.on('core.form.valid', () => {
+      submitFormWithFetch({
+        form: document.getElementById('financial-form'),
+        submitBtnId: 'submit-button-financial',
+        btnTextId: 'button-text-financial',
+        btnSpinnerId: 'button-spinner-financial',
+        successMessage: translations[lang].financialSaveSuccess
+      });
+    });
+
+    /* Show/Hide Average Annual Revenues */
+    function syncRevenueField() {
+      const isYes = $generateRevenue.val() === 'yes';
+      $('#average_annual_revenues_wrapper').toggle(isYes);
+      if (!isYes) {
+        $('#average_annual_revenues').val('');
+        financialFV.resetField('average_annual_revenues');
       } else {
-        otherWrapper.style.display = 'none';
-        mvpFV.revalidateField('other_business_model');
+        financialFV.revalidateField('average_annual_revenues');
       }
-    };
-
-    if (businessModelEl) {
-      businessModelEl.addEventListener('change', toggleOtherField);
     }
+    syncRevenueField();
+    $generateRevenue.on('change', () => {
+      syncRevenueField();
+      financialFV.revalidateField('generate_revenue');
+    });
 
-    // Init visibility on load
-    toggleOtherField();
+    $('#average_annual_revenues').on('input', () => financialFV.revalidateField('average_annual_revenues'));
   }
 
-  /* ─────────────────────────── Shared Select2 revalidation ─────────────────── */
-  $select2.each(function () {
-    const $el = $(this);
-    $el.select2().on('change', function () {
-      if (editInfoFV) editInfoFV.revalidateField($el.attr('name'));
-      if (editDescFV) editDescFV.revalidateField($el.attr('name'));
-      if (mvpFV) mvpFV.revalidateField($el.attr('name'));
+  /* ====================== SHARED ====================== */
+  $select2.on('change', function () {
+    const fieldName = $(this).attr('name');
+    [editInfoFV, editDescFV, mvpFV, financialFV].forEach(fv => {
+      if (fv) fv.revalidateField(fieldName);
     });
   });
 
-  /* ─────────────────────────── Flatpickr for est_date ─────────────────────── */
-  if (establishmentDate && establishmentDate.length) {
-    establishmentDate.forEach(el => {
-      el.flatpickr({
-        monthSelectorType: 'static',
-        maxDate: 'today'
-      });
-    });
-  }
-});
+  /* Flatpickr */
+  $('#est-date').flatpickr({
+    monthSelectorType: 'static',
+    maxDate: 'today'
+  });
+
+})(jQuery);

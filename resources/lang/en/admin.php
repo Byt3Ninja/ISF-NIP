@@ -452,7 +452,7 @@ return [
 	'problem' => 'Problem',
 	'idea' => 'idea',
 	'est_date' => 'Establishment date',
-	'raised_fund_egp' => 'Raised Fund in ',
+	'raised_fund_egp' => 'Raised Fund',
 	'team_num' => 'Team number',
 	'Fax' => 'Fax',
 	'stage' => 'Stage',
@@ -3638,4 +3638,8 @@ return [
 	'Partnership' => 'Partnership',
 	'Shareholding' => 'Shareholding',
 	'startup_profile_updated' => 'Startup profile updated successfully',
+	'business_profile' => 'Business Profile',
+	'financial_overview' => 'Financial Overview',
+	'generate_revenue' => 'Does your business generate revenue?',
+	'average_annual_revenues' => 'Average Annual Revenues',
 ];
