@@ -67,7 +67,7 @@
                 
                 <!-- Reset Button (shown when filters are active) -->
                 @php
-                  $hasActiveFilters = request()->hasAny(['programFilter', 'sector', 'stage', 'orgnization']) || 
+                  $hasActiveFilters = request()->hasAny(['programFilter', 'sector', 'stage', 'orgnization', 'status', 'alumni']) || 
                                     (request()->has('sectors') && !empty(request('sectors')));
                 @endphp
                 @if($hasActiveFilters)
@@ -343,6 +343,25 @@
         </div>
         
         <div class="modal-body">
+          <!-- Status Filter -->
+          <div class="form-group mb-4">
+            <label for="alumniStatusFilter" class="form-label">{{ __('admin.status') ?? 'Status' }}</label>
+            <select name="status" id="alumniStatusFilter" class="form-select select2">
+              <option value="all" {{ request('status', 'all') == 'all' ? 'selected' : '' }}>
+                {{ __('admin.applied_all') ?? 'Applied (All) Startups' }}
+              </option>
+              <option value="incubated" {{ request('status') == 'incubated' ? 'selected' : '' }}>
+                {{ __('admin.incubated') ?? 'Incubated Startups' }}
+              </option>
+              <option value="alumni" {{ request('status') == 'alumni' ? 'selected' : '' }}>
+                {{ __('startup.alumni') ?? 'Alumni Startups' }}
+              </option>
+              <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>
+                {{ __('admin.Rejected') ?? 'Rejected Startups' }}
+              </option>
+            </select>
+          </div>
+          
           <!-- Organization Filter (Admin and Sub-Admin) -->
           @if(auth()->user()->hasRole('Admin') || auth()->user()->isSubAdmin())
           <div class="form-group mb-4">
