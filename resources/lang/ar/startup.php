@@ -612,4 +612,8 @@ return [
   'male_employees' => 'الموظفون الذكور',
   'female_employees' => 'الموظفات الإناث',
   'of_total' => 'من الاجمالي',
+  
+  'rank' => 'الرتبة',
+  'general' => 'عامة',
+	'hackathon' => 'هاكثون',
 ];

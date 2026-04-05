@@ -611,4 +611,8 @@ return [
   'male_employees' => 'Male employees',
   'female_employees' => 'Female employees',
   'of_total' => 'of total',
+
+  'rank' => 'Rank',
+  'general' => 'General',
+	'hackathon' => 'Hackathon',
 ];
