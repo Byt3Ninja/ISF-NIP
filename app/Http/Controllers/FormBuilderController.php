@@ -142,15 +142,15 @@ class FormBuilderController extends Controller
 
                 switch ($fields->search($field->field_id)) {
                     case 'select':
-                        $type = 'dropdown';
+                        $type = $options->type ?? 'dropdown';
                         $listOptions = $options->values ?? [];
                         break;
                     case 'textarea':
-                        $type = 'paragraph';
+                        $type = $options->type ?? 'paragraph';
                         $listOptions = [];
                         break;
                     case 'file':
-                        $type = 'file';
+                        $type = $options->type ?? 'file';
                         $listOptions = [];
                         break;
                     default:
