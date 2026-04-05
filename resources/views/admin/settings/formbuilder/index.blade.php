@@ -85,12 +85,12 @@
           @if (request()->has('org_id') || request()->has('form_id'))
           <button class="btn btn-outline-secondary" onclick="location.href='/dashboard/show-builder'">
             <i class="ti ti-refresh"></i>
-            <span class="d-none d-md-inline ms-2">{{ __('admin.Reset') }}</span>
+            <span class="ms-2">{{ __('admin.Reset') }}</span>
           </button>
           @endif
-          <button class="btn btn-label-secondary" data-bs-toggle="modal" data-bs-target="#filterModal">
-            <i class="ti ti-filter"></i>
-            <span class="d-none d-md-inline ms-2">{{ __('cycles.Show_Filters') }}</span>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#filterModal">
+            <i class="ti ti-switch-horizontal"></i>
+            <span class="ms-2">{{ __('builder.switch_form') }}</span>
           </button>
         </div>
       </div>
@@ -133,7 +133,7 @@
 
         <div class="form-group">
           <label class="form-label">{{ __('builder.Form_Title') }}</label>
-          <input type="text" id="formTitle" class="form-control"
+          <input type="text" name="title" id="formTitle" class="form-control"
             placeholder="{{ __('builder.Untitled_form') }}"
             value="{{ old('title', optional($title)->form_name ?? '') }}">
         </div>
@@ -147,7 +147,7 @@
         @if ($showOrgDrop)
         <div class="form-group mt-4">
           <label class="form-label">{{ __('builder.Organization') }}</label>
-          <select class="select2 form-control" id="organization_id" name="organization_id"
+          <select class="select2 form-control form-org-select" id="organization_id" name="organization_id"
             data-placeholder="{{ __('builder.Select_Organization') }}" required>
             <option value="" disabled {{ !$orgIdParam ? 'selected' : '' }}>
               {{ __('builder.Select_Organization') }}
@@ -175,27 +175,29 @@
       </div>
     </div>
 
-    {{-- ── Items container ── --}}
-    <div id="itemsContainer"></div>
+    {{-- ── Form builder ── --}}
+    <form id="builder-form">
+      {{-- ── Items container ── --}}
+      <div id="itemsContainer"></div>
 
-    {{-- ── Footer actions ── --}}
-    <div class="card card-body">
-      <div class="d-flex align-items-center gap-4">
-        <button type="button"
-          class="btn btn-lg btn-outline-secondary d-flex align-items-center gap-2"
-          onclick="addSection()">
-          <i class="ti ti-plus"></i>
-          {{ __('builder.Add_Section') }}
-        </button>
-        <button type="button" class="btn btn-lg btn-primary" onclick="saveForm()">
-          <span class="text-nowrap">
-            {{ $mode === 'EDIT' ? __('builder.Edit_Form') : __('builder.Add_Form') }}
-          </span>
-          <i class="ti ti-check ms-2"></i>
-        </button>
+      {{-- ── Footer actions ── --}}
+      <div class="card card-body">
+        <div class="d-flex align-items-center gap-4">
+          <button type="button"
+            class="btn btn-lg btn-outline-secondary d-flex align-items-center gap-2"
+            onclick="addSection()">
+            <i class="ti ti-plus"></i>
+            {{ __('builder.Add_Section') }}
+          </button>
+          <button type="button" class="btn btn-lg btn-primary" onclick="saveForm()">
+            <span class="text-nowrap">
+              {{ $mode === 'EDIT' ? __('builder.Edit_Form') : __('builder.Add_Form') }}
+            </span>
+            <i class="ti ti-check ms-2"></i>
+          </button>
+        </div>
       </div>
-    </div>
-
+    </form>
   </div>
 </div>
 
@@ -260,16 +262,16 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">{{ __('builder.Filter_Forms') }}</h5>
+        <h5 class="modal-title">{{ __('builder.switch_form') }}</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <form method="GET" action="/dashboard/show-builder">
+        <form id="switch-form" method="GET" action="/dashboard/show-builder">
           <div id="organizationFilterContainer" class="form-group mb-4">
             <label class="form-label">{{ __('builder.Select_Organization') }}</label>
             <select class="form-select select2" id="organizationFilter" name="org_id"
               data-placeholder="{{ __('builder.Select_Organization') }}">
-              <option value="0">{{ __('admin.All_Organizations') }}</option>
+              <option value="">{{ __('admin.All_Organizations') }}</option>
               @foreach ($organizations as $organization)
               <option value="{{ $organization->id }}"
                 {{ $organization->id == request('org_id') ? 'selected' : '' }}>
@@ -277,18 +279,20 @@
               </option>
               @endforeach
             </select>
+            <div class="invalid-feedback" id="organizationFilterError" style="display: none">{{ __('admin.Required_Field') }}</div>
           </div>
           <div class="form-group">
             <label class="form-label">{{ __('builder.Select_Form') }}</label>
             <select class="form-select select2" id="formFilter" name="form_id">
               <option value="">{{ __('builder.All_Forms') }}</option>
             </select>
+            <div class="invalid-feedback" id="formFilterError" style="display: none">{{ __('admin.Required_Field') }}</div>
           </div>
           <div class="d-flex justify-content-end align-items-center gap-3 mt-10">
             <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
               {{ __('cycles.Close') }}
             </button>
-            <button type="submit" class="btn btn-primary">{{ __('cycles.Apply_Filters') }}</button>
+            <button type="submit" class="btn btn-primary">{{ __('builder.switch') }}</button>
           </div>
         </form>
       </div>
@@ -393,7 +397,9 @@
       are_you_sure:                 '{{ __("Are you sure?") }}',
       deleting_form:                '{{ __("builder.deleting form") }}',
       yes:                          '{{ __("admin.DYes") }}',
-      no:                           '{{ __("admin.DNo") }}'
+      no:                           '{{ __("admin.DNo") }}',
+      confirm_switch:                '{{ __("builder.confirm_switch") }}',
+      confirm_switch_message:                '{{ __("builder.confirm_switch_message") }}'
     }
   };
 </script>
