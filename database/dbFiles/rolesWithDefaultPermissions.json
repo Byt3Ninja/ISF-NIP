@@ -5631,6 +5631,28 @@
                     "organizationmanager",
                     "subadmin"
                 ]
+            },
+            {
+                "name": "forms.reorder_sections",
+                "description": "Reorder Form Sections",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "reorder_questions",
+                "description": "Reorder Form Questions",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
             }
         ]
     },
