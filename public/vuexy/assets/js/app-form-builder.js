@@ -56,18 +56,75 @@ let t;   // = FB_CONFIG.translations
   $('#organizationFilter').on('change', updateFormSelect);
   updateFormSelect();
 
+  let initialState = $('#builder-form').serialize();
+  let isBuilderFormDirty = false;
+
+  console.log('builder-form', $('#builder-form'));
+
+  $('#builder-form').on('input change', function () {
+    isBuilderFormDirty = initialState !== $(this).serialize();
+    // console.log('isDirty:', isBuilderFormDirty);
+  });
+
+  $('#formTitle').on('input', function () {
+    isBuilderFormDirty = initialState !== $(this).serialize();
+    // console.log('isDirty:', isBuilderFormDirty);
+  });
+
+  $('.form-org-select').on('change', function () {
+    isBuilderFormDirty = initialState !== $(this).serialize();
+    // console.log('isDirty:', isBuilderFormDirty);
+  });
+
+  $('#organizationFilter').on('change', function () {
+    $(this).removeClass("is-invalid");
+    $('#organizationFilterError').hide();
+  });
+
+  $('#formFilter').on('change', function () {
+    $(this).removeClass("is-invalid");
+    $('#formFilterError').hide();
+  });
+
   $('#filterModal form').on('submit', function (e) {
     e.preventDefault();
     let org_id  = $('#organizationFilter').val();
     let form_id = $('#formFilter').val();
     let url     = '/dashboard/show-builder';
 
+    if (!org_id || org_id === '0') {
+      $('#organizationFilter').trigger('focus');
+      $('#organizationFilter').addClass('is-invalid');
+      $('#organizationFilterError').show();
+      return;
+    }
+    
+    if (!form_id) {
+      $('#formFilter').trigger('focus');
+      $('#formFilter').addClass('is-invalid');
+      $('#formFilterError').show();
+      return;
+    }
+
+    // console.log('isBuilderFormDirty', isBuilderFormDirty);
+    
     if (form_id) {
       url += '/' + form_id;
       const selected = FB_CONFIG.allForms.find(f => String(f.id) === String(form_id));
       if (selected) org_id = selected.organization_id;
     }
     if (org_id && org_id !== '0') url += '?org_id=' + org_id;
+
+    if (isBuilderFormDirty) {
+      releaseWarningAlert({
+        title: FB_CONFIG.translations.confirm_switch,
+        message: FB_CONFIG.translations.confirm_switch_message,
+        onConfirm: () => location.href = url,
+      });
+
+      return;
+    }
+
     location.href = url;
   });
 
@@ -357,13 +414,13 @@ function addSection(sectionData = null) {
             <i class="ti ti-grip-vertical text-muted drag-handle cursor-move mt-1"
                title="${t.drag_to_reorder}"></i>
             <div class="flex-fill">
-              <input type="text" class="section-title form-control mb-2"
+              <input type="text" name="sections[${sectionId}][title]" class="section-title form-control mb-2"
                 placeholder="${t.section_title_optional}"
                 onchange="updateAllLogicPanels()"
-                value="${escHtml(sectionData?.title ?? '')}">
-              <input type="text" class="section-description form-control mb-3"
+                value="${escHtml(sectionData?.title ?? '')}"> 
+              <input type="text" name="sections[${sectionId}][description]" class="section-description form-control mb-3"
                 placeholder="${t.section_description_optional}"
-                value="${escHtml(sectionData?.description ?? '')}">
+                value="${escHtml(sectionData?.description ?? '')}"> 
             </div>
             <button type="button" class="btn btn-link text-muted p-0"
               onclick="deleteSection(this)"
@@ -373,8 +430,8 @@ function addSection(sectionData = null) {
           </div>
           <div class="mt-4 pt-4 border-top">
             <div class="text-muted small fw-medium mb-2">${t.after_this_section}</div>
-            <select class="section-logic form-select">
-              <option value="continue">${t.continue_next_section}</option>
+            <select name="sections[${sectionId}][logic]" class="section-logic form-select">
+              <option value="continue">${t.continue_next_section}</option> 
               ${sections.map(s => `<option value="section-${s.id}">${t.go_to} ${s.title}</option>`).join('')}
               <option value="submit">${t.submit_form}</option>
             </select>
@@ -425,12 +482,12 @@ function createQuestionHTML(itemId, inSection = false) {
           <i class="ti ti-grip-vertical text-muted drag-handle cursor-move mt-1"
              title="${t.drag_to_reorder}"></i>
           <div class="flex-fill">
-            <input type="text"
-              class="question-title form-control form-control-lg border-0 border-bottom border-2 mb-4"
-              placeholder="${t.question}">
+            <input type="text" name="questions[${itemId}][title]"
+              class="question-title form-control form-control-lg border-bottom mb-4"
+              placeholder="${t.question}"> 
 
-            <select class="question-type form-select mb-3" onchange="updateQuestionOptions(this)">
-              <option value="short_answer">${t.short_answer}</option>
+            <select name="questions[${itemId}][question_type]" class="question-type form-select mb-3" onchange="updateQuestionOptions(this)">
+              <option value="short_answer">${t.short_answer}</option> 
               <option value="paragraph">${t.paragraph}</option>
               <option value="multiple_choice">${t.multiple_choice}</option>
               <option value="checkboxes">${t.checkboxes}</option>
@@ -455,7 +512,7 @@ function createQuestionHTML(itemId, inSection = false) {
         </div>
         <div class="mt-4 pt-4 border-top d-flex align-items-center justify-content-end gap-3">
           <div class="form-check">
-            <input type="checkbox" class="question-required form-check-input">
+            <input type="checkbox" name="questions[${itemId}][required]" class="question-required form-check-input"> 
             <label class="form-check-label">${t.required}</label>
           </div>
         </div>
@@ -505,18 +562,18 @@ function updateQuestionOptions(select) {
         <div class="row g-3 mt-1">
           <div class="col-md-4">
             <label class="form-label small text-muted">${t.min_value}</label>
-            <input type="number" class="number-min form-control form-control-sm"
-              placeholder="${t.min_optional}">
+            <input type="number" name="questions[${cardId}][number_config][min]" class="number-min form-control form-control-sm"
+              placeholder="${t.min_optional}"> 
           </div>
           <div class="col-md-4">
             <label class="form-label small text-muted">${t.max_value}</label>
-            <input type="number" class="number-max form-control form-control-sm"
-              placeholder="${t.max_optional}">
+            <input type="number" name="questions[${cardId}][number_config][max]" class="number-max form-control form-control-sm"
+              placeholder="${t.max_optional}"> 
           </div>
           <div class="col-md-4">
             <label class="form-label small text-muted">${t.step}</label>
-            <input type="number" class="number-step form-control form-control-sm"
-              placeholder="1" min="0.000001">
+            <input type="number" name="questions[${cardId}][number_config][step]" class="number-step form-control form-control-sm"
+              placeholder="1" min="0.000001"> 
           </div>
         </div>
       </div>`,
@@ -526,9 +583,9 @@ function updateQuestionOptions(select) {
         <input type="email" class="form-control text-muted"
           placeholder="${t.email_placeholder}" disabled>
         <div class="form-check mt-2">
-          <input type="checkbox" class="email-confirm-toggle form-check-input"
+          <input type="checkbox" name="questions[${cardId}][email_config][confirm]" class="email-confirm-toggle form-check-input"
             id="emailConfirmToggle_${cardId}"
-            onchange="toggleEmailConfirm(this)">
+            onchange="toggleEmailConfirm(this)"> 
           <label class="form-check-label small" for="emailConfirmToggle_${cardId}">
             ${t.require_email_confirmation}
           </label>
@@ -548,8 +605,8 @@ function updateQuestionOptions(select) {
         </div>
         <div class="mt-2">
           <label class="form-label small text-muted">${t.allowed_domains_optional}</label>
-          <input type="text" class="url-allowed-domains form-control form-control-sm"
-            placeholder="${t.allowed_domains_placeholder}">
+          <input type="text" name="questions[${cardId}][url_config][allowed_domains]" class="url-allowed-domains form-control form-control-sm"
+            placeholder="${t.allowed_domains_placeholder}"> 
           <div class="form-text">${t.allowed_domains_hint}</div>
         </div>
       </div>`,
@@ -567,12 +624,12 @@ function updateQuestionOptions(select) {
         </div>
         <div class="row g-3">
           <div class="col-md-6">
-            <input type="text" class="scale-label-low form-control"
-              placeholder="${t.label_low}" value="${t.low}" disabled>
+            <input type="text" name="questions[${cardId}][scale][label_low]" class="scale-label-low form-control"
+              placeholder="${t.label_low}" value="${t.low}" disabled> 
           </div>
           <div class="col-md-6">
-            <input type="text" class="scale-label-high form-control"
-              placeholder="${t.label_high}" value="${t.high}" disabled>
+            <input type="text" name="questions[${cardId}][scale][label_high]" class="scale-label-high form-control"
+              placeholder="${t.label_high}" value="${t.high}" disabled> 
           </div>
         </div>
       </div>`,
@@ -622,10 +679,10 @@ function createOptionHTML(type, number, value = '') {
   return `
     <div class="d-flex align-items-center gap-2">
       <span class="text-muted">${icon}</span>
-      <input type="text" class="option-input form-control form-control-sm border-0 border-bottom flex-fill"
+      <input type="text" name="questions[OPTION_ID][options][]" class="option-input form-control form-control-sm border-0 border-bottom flex-fill"
         placeholder="${t.option} ${number}"
         value="${escHtml(value)}"
-        onchange="updateLogicPanelOptions(this)">
+        onchange="updateLogicPanelOptions(this)"> 
       <button type="button" class="btn btn-link text-muted p-0" onclick="removeOption(this)">
         <i class="ti ti-x"></i>
       </button>

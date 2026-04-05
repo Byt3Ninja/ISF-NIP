@@ -103,4 +103,9 @@ return [
     'Allowed_domains_optional' => 'Allowed domains (optional)',
     'Allowed_domains_placeholder' => 'Allowed domains (example: example.com, example2.com)',
     'Allowed_domains_hint' => 'Allowed domains (example: example.com, example2.com)',
+    'switch_form' => 'Switch Form',
+    'switch' => 'Switch',
+    'confirm' => 'Confirm',
+    'confirm_switch' => 'Confirm Switch',
+    'confirm_switch_message' => 'You have unsaved changes. Switching forms will discard them.'
 ];

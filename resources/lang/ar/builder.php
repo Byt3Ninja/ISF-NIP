@@ -103,4 +103,9 @@ return [
     'Allowed_domains_optional' => 'نطاقات مقبولة (اختياري)',
     'Allowed_domains_placeholder' => 'نطاقات مقبولة (مثال: example.com, example2.com)',
     'Allowed_domains_hint' => 'نطاقات مقبولة (مثال: example.com, example2.com)',
+    'switch_form' => 'تغيير النموذج',
+    'switch' => 'تغيير',
+    'confirm' => 'تأكيد',
+    'confirm_switch' => 'تأكيد تغيير النماذج',
+    'confirm_switch_message' => 'لديك تغييرات غير محفوظة. سيؤدي تبديل النماذج إلى تجاهلها.',
 ];
