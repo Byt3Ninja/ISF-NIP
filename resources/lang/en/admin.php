@@ -3649,4 +3649,6 @@ return [
 	'Business' => 'Business',
 	'Pre-money' => 'Pre-money',
 	'Years' => 'Years',
+	'applied_all' => 'Applied (All)',
+	'incubated' => 'Incubated',
 ];

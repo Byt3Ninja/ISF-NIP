@@ -628,4 +628,12 @@ class FormBuilderController extends Controller
             ], 500);
         }
     }
+
+    public function reorderSections(Request $request){
+        return response()->json(['status' => 'success']);
+    }
+
+    public function reorderQuestions(Request $request){
+        return response()->json(['status' => 'success']);
+    }
 }

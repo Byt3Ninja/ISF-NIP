@@ -3705,4 +3705,6 @@ return [
 	'Business' => 'العمل',
 	'Pre-money' => 'قبل التوزيع',
 	'Years' => 'سنوات',
+	'applied_all' => 'تم التطبيق (الكل)',
+	'incubated' => 'حاضنه',
 ];
