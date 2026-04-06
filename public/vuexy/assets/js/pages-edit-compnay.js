@@ -43,6 +43,11 @@ const translations = {
       maxLength: 'Previous Incubator must be at most 150 characters.'
     },
 
+    /* Desc Tab */
+    company_description: {
+      max: "Description must not exceeds 500 characters.",
+    },
+
     /* MVP Tab */
     business_model_description: {
       min: 'Minimum 10 characters required'
@@ -92,6 +97,11 @@ const translations = {
 
     previous_incubator: {
       maxLength: 'يجب ألا يتجاوز حقل الحاضنة السابقة 150 حرفًا.'
+    },
+
+    /* Desc Tab */
+    company_description: {
+      max: "يجب ألا يتجاوز الوصف 500 حرف.",
     },
 
     /* MVP Tab */
@@ -158,7 +168,15 @@ function submitFormWithFetch({ form, submitBtnId, btnTextId, btnSpinnerId, succe
     body: new FormData(form)
   })
     .then(res => res.ok ? res.json().catch(() => ({})) : Promise.reject())
-    .then(() => toastr.success(successMessage))
+    .then(() => {
+      toastr.success(successMessage);
+      setTimeout(() => {
+        if (!location.href.includes('myCompany')) {
+          return;
+        }
+        location.href = location.href.replace('myCompany', 'companyProfile')
+      } , 500);
+    })
     .catch(() => form.submit())
     .finally(() => {
       $btn.prop('disabled', false);
@@ -178,7 +196,7 @@ function buildFVPlugins(rowSelector = '.mb-6, .mb-3, .mb-4, .form-group') {
 
 /* ─── Main ──────────────────────────────────────────────────────────────── */
 
-$(function () {
+(function ($) {
 
   /* Character Counter */
   $('#products_services_description').on('input', function () {
@@ -215,6 +233,7 @@ $(function () {
         },
         est_date: {
           validators: {
+            notEmpty: { message: translations[lang].required_field },
             callback: {
               message: translations[lang].est_date.establishmentDate,
               callback: ({ value }) => !value || new Date(value) <= new Date()
@@ -358,6 +377,12 @@ $(function () {
   if ($('#desc-form').length) {
     editDescFV = FormValidation.formValidation(document.getElementById('desc-form'), {
       fields: {
+        company_description: {
+          stringLength: {
+            max: 500,
+            message: translations[lang].company_description.max
+          },
+        },
         'Sustainable_development[]': {
           validators: { notEmpty: { message: translations[lang].required_field } }
         }

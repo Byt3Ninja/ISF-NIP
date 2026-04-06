@@ -37,40 +37,55 @@
         </section>
 
         <!-- Cycle Selection -->
-        <section id="cycle-selection">
-          <div class="card-header mb-4">
-            <h4 class="mb-1">{{ __('cycles.manage_mentors') }}</h4>
-            <p class="mb-0">{{ __('cycles.manage_mentor_description1') }}</p>
-            <p class="mb-0">{{ __('cycles.manage_mentor_description2') }}</p>
-          </div>
-          <div class="card mb-6">
-            <div class="card-body overflow-x-hidden text-nowrap">
-              <div class="d-flex flex-wrap flex-lg-nowrap justify-content-between align-items-md-center">
-                <div class="form-group d-flex flex-column flex-lg-row align-items-lg-center gap-2 mb-6 mb-lg-0 me-lg-4">
-                  <label class="form-label fs-6">{{ __('cycles.Select_Cycle') }}:</label>
-                  <select id="cstep" class="select2 form-select" style="width: 350px;"
-                    onchange="window.open('/dashboard/mentorship/assign/'+this.options[this.selectedIndex].value,'_self');">
+        <section id="cycle-selection" class="mb-4">
+          <div class="card">
+            <div class="card-body">
+
+              {{-- Header text --}}
+              <div class="row mb-3">
+                <div class="col-12">
+                  <h4 class="mb-1">{{ __('cycles.manage_mentors') }}</h4>
+                  <p class="mb-0 text-muted">{{ __('cycles.manage_mentor_description1') }}</p>
+                  <p class="mb-0 text-muted">{{ __('cycles.manage_mentor_description2') }}</p>
+                </div>
+              </div>
+
+              {{-- Cycle dropdown + action buttons --}}
+              <div class="row g-3 align-items-end">
+
+                {{-- Dropdown --}}
+                <div class="col-12 col-lg-5">
+                  <label class="form-label" for="cstep">{{ __('cycles.Select_Cycle') }}</label>
+                  <select id="cstep" class="form-select select2"
+                    onchange="window.open('/dashboard/mentorship/assign/'+this.value,'_self');">
                     @foreach ($cycles as $cycle)
-                      <option value="{{ $cycle->id }}" {{ $cycle->id == $id ? 'selected' : '' }}>
-                        {{ $cycle->title }} ({{ optional($cycle->start)->format('d-m-Y') ?? '' }} - {{ optional($cycle->end)->format('d-m-Y') ?? '' }})
+                      <option value="{{ $cycle->id }}" @selected($cycle->id == $id)>
+                        {{ $cycle->title }}
+                       ({{ $cycle->start->format('d-m-Y') ?? '-' }} - {{ $cycle->end->format('d-m-Y') ?? '-' }})
+                       — {{ optional($cycle->organization)->name }}
                       </option>
                     @endforeach
-                    @if (!$id)
-                      <option> {{ __('cycles.No records saved') }} </option>
-                    @endif
+                    @unless ($id)
+                      <option>{{ __('cycles.No records saved') }}</option>
+                    @endunless
                   </select>
                 </div>
-                <div class="d-flex flex-wrap flex-lg-nowrap align-items-center gap-3">
-                  <a class="btn btn-primary" href="/dashboard/cycles/{{ $id }}">
-                    <i class="ti ti-adjustments me-2"></i> {{ __('cycles.Manage Cycle') }}
-                  </a>
-                  <a class="btn btn-label-primary" href="/dashboard/mentorship/view/{{ $id }}">
-                    <i class="ti ti-settings me-2"></i> {{ __('cycles.Manage sessions') }}
-                  </a>
-                  <a class="btn btn-outline-primary" href="/dashboard/mentorship/{{ $id }}/surveys">
-                    <i class="ti ti-question-mark me-2"></i> {{ __('cycles.Manage Surveys') }}
-                  </a>
+
+                {{-- Action buttons --}}
+                <div class="col-12 col-lg-7">
+                  <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
+                    <a class="btn btn-primary" href="/dashboard/cycles/{{ $id }}">
+                      <i class="ti ti-adjustments me-2"></i>{{ __('cycles.Manage Cycle') }}
+                    </a>
+                    <a class="btn btn-label-primary" href="/dashboard/mentorship/view/{{ $id }}">
+                      <i class="ti ti-settings me-2"></i>{{ __('cycles.Manage sessions') }}
+                    </a>
+                    <a class="btn btn-outline-primary" href="/dashboard/mentorship/{{ $id }}/surveys">
+                      <i class="ti ti-question-mark me-2"></i>{{ __('cycles.Manage Surveys') }}
+                    </a>
+                  </div>
                 </div>
+
               </div>
             </div>
           </div>
