@@ -408,7 +408,7 @@ return [
   'mark_alumni' => 'Mark as Alumni',
   'already_alumni' => 'Already Alumni',
   'mark_alumni_confirmation' => 'This action is irreversible. The startup will be graduated, and a snapshot of its information and participation records will be saved permanently.',
-  'mark_alumni_success' => 'The startup has been marked as alumni.',
+  'mark_alumni_success' => 'The selected startups marked as alumni.',
   'mark_alumni_error' => 'An error occurred while marking the startup as alumni.',
 
   'not_started' => 'Not Started',
@@ -615,4 +615,6 @@ return [
   'rank' => 'Rank',
   'general' => 'General',
 	'hackathon' => 'Hackathon',
+  
+  'mark_alumni_confirmation_bulk' => 'This action is irreversible. The selected startups will be graduated, and a snapshot of their information and participation records will be saved permanently.',
 ];

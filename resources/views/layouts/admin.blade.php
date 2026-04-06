@@ -462,7 +462,7 @@
       }
 
       // Global SweetAlert2 configuration
-      const releaseSuccessAlert = ({title, message}) => {
+      window.releaseSuccessAlert = ({title, message}) => {
         Swal.fire({
           icon: 'success',
           title: title || '',
@@ -479,11 +479,12 @@
         });
       }
 
-      const releaseWarningAlert = ({title, message, onConfirm, onCancel, confirmText, cancelText, confirmColor}) => {
+      window.releaseWarningAlert = ({title, message, html, onConfirm, onCancel, confirmText, cancelText, confirmColor}) => {
         Swal.fire({
           icon: 'warning',
           title: title || '',
-          html: message,
+          text: message,
+          html: html,
           showCancelButton: onConfirm ? true : false,
           showConfirmButton: true,
           confirmButtonText: onConfirm ? (confirmText || "{{ __('admin.Confirm') }}") : "{{ __('admin.OK') }}",
@@ -506,7 +507,7 @@
         });
       }
 
-      const releaseFailureAlert = ({title, message}) => {
+      window.releaseFailureAlert = ({title, message}) => {
         Swal.fire({
           icon: 'error',
           title: title || '',
@@ -521,7 +522,7 @@
         });
       }
 
-      const getSharedDataTableConfig = ({ title, pageLength, descIndex, actionsIndex, withoutFilter = false }) => {
+      window.getSharedDataTableConfig = ({ title, pageLength, descIndex, actionsIndex, withoutFilter = false }) => {
         const config = {
           responsive: true,
           pageLength: pageLength ?? 10,

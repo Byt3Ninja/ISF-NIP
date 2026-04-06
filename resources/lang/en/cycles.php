@@ -645,4 +645,6 @@ return [
     'select_new_step' => 'Select New Step',
     'change_training_step' => 'Change Training Step',
     'please_select_step' => 'Please select a step',
+    'delete_program' => 'Delete Program',
+    'program_delete_success' => 'Program deleted successfully!'
 ];
