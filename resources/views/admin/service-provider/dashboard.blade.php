@@ -7,14 +7,23 @@
 
 {{-- APPROVAL STATUS BANNER --}}
 @if($approvalStatus === 'pending')
-<div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
-    <div class="me-3">
-        <span class="avatar-initial rounded bg-label-warning">
-            <i class="ti ti-clock-hour-4 ti-md"></i>
-        </span>
-    </div>
-    <div>
-        <p class="mb-0 fw-semibold">{{ __('dashboard.sp_status_pending_message') }}</p>
+<div class="alert alert-warning d-flex align-items-center justify-content-between shadow-sm border-0 rounded-3 p-3 mb-4" role="alert">
+    
+    <div class="d-flex align-items-center">
+        <div class="me-3">
+            <div class="rounded-circle bg-warning bg-opacity-25 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                <i class="ti ti-clock-hour-4 text-warning fs-4"></i>
+            </div>
+        </div>
+
+        <div>
+            <h6 class="mb-1 fw-bold text-warning">
+                {{ __('dashboard.sp_pending_status_title') ?? 'Pending Status' }}
+            </h6>
+            <p class="mb-0 text-body">
+                {{ __('dashboard.sp_status_pending_message') }}
+            </p>
+        </div>
     </div>
 </div>
 {{--  @elseif($approvalStatus === 'accepted')
@@ -30,19 +39,44 @@
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>  --}}
 @elseif($approvalStatus === 'rejected')
-<div class="alert alert-danger mb-4" role="alert">
-    <div class="d-flex align-items-center mb-2">
-        <span class="avatar-initial rounded bg-label-danger me-3">
-            <i class="ti ti-circle-x ti-md"></i>
-        </span>
-        <p class="mb-0 fw-semibold">{{ __('dashboard.sp_status_rejected_message') }}</p>
+<div class="alert alert-danger d-flex align-items-start justify-content-between shadow-sm border-0 rounded-3 p-3 mb-4" role="alert">
+    
+    <div class="d-flex align-items-start">
+        <!-- Icon -->
+        <div class="me-3">
+            <div class="rounded-circle bg-danger bg-opacity-25 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                <i class="ti ti-circle-x text-danger fs-4"></i>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div>
+            <h6 class="mb-1 fw-bold text-danger">
+                {{ __('dashboard.sp_status_rejected_title') ?? 'Request Rejected' }}
+            </h6>
+
+            <p class="mb-1 text-body">
+                {{ __('dashboard.sp_status_rejected_message') }}
+            </p>
+
+            @if(!empty($rejectionReason))
+            <div class="mb-1 text-body">
+                <span class="fw-semibold text-dark">
+                    {{ __('dashboard.sp_status_rejected_reason_label') }}:
+                </span>
+                <span class="text-muted">
+                    {{ $rejectionReason }}
+                </span>
+            </div>
+            @endif
+
+            @if(!empty($_settings->Platform_support_email))
+            <div class="small text-body">
+                {{ __('dashboard.sp_status_rejected_support', ['email' => $_settings->Platform_support_email]) }}
+            </div>
+            @endif
+        </div>
     </div>
-    @if(!empty($rejectionReason))
-    <p class="mb-1"><strong>{{ __('dashboard.sp_status_rejected_reason_label') }}:</strong> {{ $rejectionReason }}</p>
-    @endif
-    @if(!empty($_settings->Platform_support_email))
-    <p class="mb-0">{{ __('dashboard.sp_status_rejected_support', ['email' => $_settings->Platform_support_email]) }}</p>
-    @endif
 </div>
 @endif
 
