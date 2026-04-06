@@ -3709,4 +3709,7 @@ return [
 	'incubated' => 'حاضنه',
 	'archive' => 'ارشفه',
 	'view_tasks' => 'عرض التاسكات',
+	'Incubated_Startups' =>  'شركة ناشئة محُتضَنة',
+	'Applied_Startups' => ' شركة ناشئة مُتقدمة للانضمام ',
+	'Alumni_Startups' => 'شركات ناشئة متخرجة',
 ];

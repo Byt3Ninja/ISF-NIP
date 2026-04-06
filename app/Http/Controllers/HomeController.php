@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Almuni;
 use App\Step;
 use App\User;
 use stdClass;
@@ -303,10 +304,59 @@ class HomeController extends Controller
                 $companies_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
             }
             $companies = collect(DB::select($companies_q));
+            if ($organizations_ids != null) {
+                $incubators_company = Company::whereHas('cycle', function ($q) use ($organizations_ids) {
+                    $q->whereIn('organization_id', $organizations_ids);
+                })->whereHas('stepdata', function ($q) {
+                    $q->where('stype', '!=', 1);
+                })->get();
+            } else {
+                $incubators_company = Company::whereNotNull('cycle')->whereHas('stepdata', function ($q) {
+                    $q->where('stype', '!=', 1);
+                })->get();
+            }
+
+            if ($organizations_ids != null || $user->hasRole('admin')) {
+                $applied_companies_by_cycle_q = "SELECT
+                        comp.cycle,
+                        c.id AS cycle_id,
+                        COUNT(comp.id) AS company_count
+                    FROM
+                        companies comp
+                    LEFT JOIN
+                        steps s ON s.id = comp.step AND s.stype = 1
+                    LEFT JOIN
+                        cycles c ON c.id = comp.cycle
+                    WHERE
+                        comp.deleted_at IS NULL
+                        AND comp.cycle IS NOT NULL
+                        AND s.id IS NOT NULL
+                ";
+                if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+                    $applied_companies_by_cycle_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
+                }
+                $applied_companies_by_cycle_q .= " GROUP BY comp.cycle, c.id";
+
+                $applied_companies_by_cycle = collect(DB::select($applied_companies_by_cycle_q));
+                $applied_company_count = $applied_companies_by_cycle->sum('company_count');
+
+                $alumni_company = Almuni::whereHas('cycle', function ($q) use ($organizations_ids) {
+                    $q->whereIn('organization_id', $organizations_ids);
+                })
+                ->select('company_id')
+                ->distinct()
+                ->get();
+                               
+            } else {
+                $applied_companies_by_cycle = collect([]);
+                $applied_company_count = 0;
+                $alumni_company = Almuni::groupBy('company_id')->get();
+
+            }
         } else {
             $companies = collect([]);
         }
-
+           
         if (array_intersect(['dashboard.widgets_cards_mentorship_requests_view', 'dashboard.widgets_cards_mentorship_sessions_durations_view'], $permissions)) {
             $mentorship_requests_q = "SELECT
                     mr.id,
@@ -2019,6 +2069,33 @@ class HomeController extends Controller
             'text' => 'completed_mentorship_sessions',
             'permissions' => ['mentorships.sessions_list'],
             'count' => $completed_mentorship_sessions->count(),
+            'isRating' => false,
+        ];
+        $data['countCards'][] = [
+            'color' => 'info',
+            'href' => '/dashboard/companies',
+            'icon' => 'ti-building',
+            'text' => 'Alumni_Startups',
+            'permissions' => ['users.view_companies', 'dashboard.widgets_cards_startups_view'],
+            'count' => $alumni_company->count(),
+            'isRating' => false,
+        ];
+        $data['countCards'][] = [
+            'color' => 'info',
+            'href' => '/dashboard/companies',
+            'icon' => 'ti-building',
+            'text' => 'Incubated_Startups',
+            'permissions' => ['users.view_companies', 'dashboard.widgets_cards_startups_view'],
+            'count' => $incubators_company->count(),
+            'isRating' => false,
+        ];
+        $data['countCards'][] = [
+            'color' => 'info',
+            'href' => '/dashboard/companies',
+            'icon' => 'ti-building',
+            'text' => 'Applied_Startups',
+            'permissions' => ['users.view_companies', 'dashboard.widgets_cards_startups_view'],
+            'count' => $applied_company_count,
             'isRating' => false,
         ];
         $data['countCards'][] = [
