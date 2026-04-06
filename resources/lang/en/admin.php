@@ -2617,7 +2617,7 @@ return [
 	'trigger_update' => 'Trigger Update',
 	'tags' => 'Tags',
 	'overall_status' => 'Overall Status',
-	'startup_statuses' => 'Startup Statuses',
+	'assignee_startups_statuses' => 'Assignee Startups Statuses',
 	'edit_task' => 'Edit Task',
 	'Update' => 'Update',
 	'trigger_status_update' => 'Trigger Status Update',

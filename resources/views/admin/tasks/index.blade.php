@@ -321,29 +321,27 @@ $(function () {
     }
     
     const assigneesHtml = data.assignees.map(a => {
-      // Find startup data to check for logo
-      const startup = startups.find(s => s.id === a.id);
-      const logoUrl = startup?.logo;
-      let avatarHtml;
-
-      if (logoUrl) {
-        avatarHtml = 
-        `<div class="avatar avatar-sm me-2">
-          <img src="${logoUrl}" alt="logo" class="rounded-circle border" />
-        </div>`;
-      } else {
-        avatarHtml = `<span class="avatar avatar-sm me-2"><span class="avatar-initial rounded-circle bg-label-primary">${a.name.split(' ').map(n => n[0]).join('').toUpperCase()}</span></span>`;
-      }
+      const logoUrl = a.logo;
+      const initials = a.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+      const statusInfo = statusObj[a.status.toLowerCase()] || { class: 'bg-label-secondary', title: 'Unknown' };
+      const avatarHtml = logoUrl
+        ? `<img src="http://127.0.0.1:8000/191014/users/nNF9KgDmzUy3rbdWDOwONdNu4lFU4v7ObGH8V3Hp.jpg" alt="Logo" class="rounded-circle border" style="width:40px;height:40px;object-fit:cover;" onerror="this.outerHTML='<span class=\'avatar-initial rounded-circle bg-label-primary d-flex align-items-center justify-content-center\' style=\'width:40px;height:40px;font-size:13px;font-weight:600;\'>${initials}</span>'" />`
+        : `<span class="avatar-initial rounded-circle bg-label-primary d-flex align-items-center justify-content-center" style="width:40px;height:40px;font-size:13px;font-weight:600;">${initials}</span>`;
 
       return `
-        <div class="d-flex align-items-center justify-content-between mb-2 p-2 border rounded">
-          <div class="d-flex align-items-center">
-            ${avatarHtml}
-            <div><strong>${a.name}</strong><br><small class="text-muted">{{ __('admin.last_updated') }}: ${a.lastUpdated}</small></div>
+        <div class="d-flex align-items-center justify-content-between p-3 mb-2 rounded-3 border bg-light-subtle">
+          <div class="d-flex align-items-center gap-3">
+            <a href="${a.profile_url}" target="_blank" class="flex-shrink-0 text-decoration-none">
+              ${avatarHtml}
+            </a>
+            <div>
+              <a href="${a.profile_url}" target="_blank" class="fw-semibold text-body text-decoration-none d-block">${a.name}</a>
+              <small class="text-muted"><i class="ti ti-clock me-1"></i>{{ __('admin.last_updated') }}: ${a.lastUpdated}</small>
+            </div>
           </div>
-          <div class="d-flex align-items-center gap-3 text-end">
-            <div><span>{{ __('admin.Status') }} :</span> <span class="badge ${ (statusObj[a.status.toLowerCase()] || {class: 'bg-label-secondary'}).class }">${ (statusObj[a.status.toLowerCase()] || {title: 'Unknown'}).title }</span></div>
-            <!-- <button class="btn btn-sm btn-outline-primary trigger-company" data-company="${a.name}" data-current-status="${a.status}"><i class="ti ti-send me-1"></i>{{ __('admin.trigger_update') }}</button> -->
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge ${statusInfo.class}">${statusInfo.title}</span>
+            <a href="${a.profile_url}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="ti ti-settings me-1"></i>{{ __('admin.Manage') }}</a>
           </div>
         </div>`;
     }).join('');
@@ -396,7 +394,12 @@ $(function () {
                     <i class="ti ti-user fs-4 text-info"></i>
                     {{ __('admin.Created_By') }}:
                 </strong>
-                <div class="ms-5">${data.creator.name}</div>
+                <a href="${data.creator.profile_url}" target="_blank" class="d-flex align-items-center gap-2 mt-2 ms-5 text-decoration-none text-body">
+                    <div class="avatar avatar-sm">
+                        <img src="${data.creator.avatar}" alt="${data.creator.name}" class="rounded-circle border" style="width:32px;height:32px;object-fit:cover;" onerror="this.src='/images/placeholder.jpg'" />
+                    </div>
+                    <span>${data.creator.name}</span>
+                </a>
             </div>
 
             <!-- Creator Role -->
@@ -452,13 +455,13 @@ $(function () {
                 <div class="ms-5">${data.dueDate}</div>
             </div>
 
-            <!-- Startup Statuses / Assignees -->
+            <!-- Assignee Startups Statuses -->
             <div class="col-12 mb-3 mt-5">
-                <strong class="d-flex align-items-center gap-2">
-                    <i class="ti ti-users fs-4 text-primary"></i>
-                    {{ __('admin.startup_statuses') }}:
+                <strong class="d-flex align-items-center gap-2 mb-3">
+                    <i class="ti ti-building-skyscraper fs-4 text-primary"></i>
+                    {{ __('admin.assignee_startups_statuses') }}:
                 </strong>
-                <div class="mt-2 ms-5">
+                <div>
                     ${assigneesHtml}
                 </div>
             </div>
@@ -470,7 +473,7 @@ $(function () {
             ${attachmentsHtml}
         </div>
     `);
-    // Store task ID in modal for trigger-company button
+    // Store task ID in modal for future use
     $('#viewTaskModal').data('taskId', data.id);
     $('#viewTaskModal').modal('show');
   });
@@ -536,46 +539,6 @@ $(function () {
     $('#addTaskModal').modal('show');
   });
 
-  // Trigger company update
-  $(document).on('click', '.trigger-company', function () {
-    const { company, currentStatus } = $(this).data();
-    const $btn = $(this);
-    const $modal = $('#viewTaskModal');
-    
-    // Get task ID from modal data
-    const taskId = $modal.data('taskId');
-    if (!taskId) {
-      showToast({type: 'error', message: 'Could not load task. Please try again later.'});
-      return;
-    }
-    
-    showAlert('{{ __('admin.trigger_status_update') }}', `{{ __('admin.send_notification_to') }} ${company} {{ __('admin.to_update_task_status') }}?`, 'question', '{{ __('admin.send_trigger') }}')
-      .then((result) => {
-        if (result.isConfirmed) {
-          $.ajax({
-            url: `/dashboard/tasks/${taskId}/trigger-update`,
-            method: 'POST',
-            dataType: 'json',
-            data: {
-              company: company,
-              currentStatus: currentStatus
-            },
-            headers: {
-              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            success: function(response) {
-              showToast({type: 'success', message: `{{ __('admin.notification_sent_to') }} ${company}.`});
-              $btn.prop('disabled', true).html('<i class="ti ti-clock me-1"></i>{{ __('admin.triggered') }}');
-            },
-            error: function(xhr) {
-              const errorMsg = xhr.responseJSON?.message;
-              console.error('Failed to trigger update:', xhr);
-              showToast({type: 'error', message: errorMsg ? errorMsg : '{{ __('admin.unexpected_error') }}'});
-            }
-          });
-        }
-      });
-  });
 });
 
 // Initialize Tagify for tags input
