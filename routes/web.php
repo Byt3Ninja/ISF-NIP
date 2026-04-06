@@ -619,6 +619,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('tasks/assignees/{program_id}', [TasksController::class, 'getAssignees'])->name('tasks.get_assignees');
     Route::get('tasks/titles', [TasksController::class, 'getTaskTitles'])->name('tasks.get_titles');
     Route::get('tasks/{taskId}/download/{filename}', [TasksController::class, 'downloadAttachment'])->name('tasks.download_attachment')->where('filename', '.*');
+    Route::delete('tasks/{taskId}/attachments/{filename}', [TasksController::class, 'deleteAttachment'])->name('tasks.delete_attachment')->where('filename', '.*');
     Route::resource('tasks', 'TasksController');
 
     // Forms

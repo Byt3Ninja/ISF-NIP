@@ -3,7 +3,7 @@
   <div class="card-header border-bottom">
     <div class="d-flex align-items-center justify-content-between">
       <h5 class="card-title mb-0">{{ __('admin.tasks_management') }}</h5>
-      <button class="btn btn-primary ms-2" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+      <button class="btn btn-primary ms-2" data-bs-toggle="offcanvas" data-bs-target="#addTaskModal">
         <i class="ti ti-plus"></i>
         <span class="d-none d-md-inline ms-md-2">{{ __('admin.add_new_task') }}</span>
       </button>

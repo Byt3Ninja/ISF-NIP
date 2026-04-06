@@ -9438,6 +9438,16 @@
                     "admin",
                     "organizationmanager"
                 ]
+            },
+            {
+                "name": "tasks.delete_attachment",
+                "description": "Delete task attachment",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
             }
         ]
     },

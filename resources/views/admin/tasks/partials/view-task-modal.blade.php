@@ -1,29 +1,34 @@
-<!-- Modal to view task details -->
-<div
-  class="modal fade"
-  id="viewTaskModal"
-  tabindex="-1"
-  aria-labelledby="viewTaskModalLabel"
-  aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="viewTaskModalLabel">{{ __('admin.task_details') }}</h5>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="modal"
-          aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div id="task-details-content">
-          <!-- Task details will be populated here -->
+{{-- ═══════════════════════════════════════════
+     Offcanvas — View Task Details
+═══════════════════════════════════════════ --}}
+<div class="offcanvas offcanvas-end" tabindex="-1" id="viewTaskModal" aria-labelledby="viewTaskModalLabel">
+
+  {{-- Header --}}
+  <div class="offcanvas-header border-bottom">
+    <div class="d-flex align-items-center gap-2">
+      <div class="avatar avatar-sm flex-shrink-0">
+        <div class="avatar-initial rounded-circle bg-label-info">
+          <i class="ti ti-eye ti-sm"></i>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('admin.close') }}</button>
-      </div>
+      <h5 class="offcanvas-title mb-0" id="viewTaskModalLabel">{{ __('admin.task_details') }}</h5>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+
+  {{-- Body --}}
+  <div class="offcanvas-body p-0">
+    <div id="task-details-content" class="p-4">
+      {{-- Populated via JS --}}
     </div>
   </div>
+
+  {{-- Footer --}}
+  <div class="offcanvas-footer border-top p-3 text-end">
+    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">
+      <i class="ti ti-x me-1"></i>{{ __('admin.close') }}
+    </button>
+  </div>
+
 </div>
-<!--/ Modal to view task details -->
+{{-- /Offcanvas View Task Details --}}

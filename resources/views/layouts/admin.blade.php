@@ -537,7 +537,7 @@
             search: '',
             searchPlaceholder: '{{ __('admin.Search') }}...',
           },
-          dom: '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-1"l><"col-sm-12 col-md-7 filters"><"col-sm-12 col-md-3"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+          dom: '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-1"l><"col-sm-12 col-md-7 filters"><"col-sm-12 col-md-3"f>>Bt<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
           ...(actionsIndex && {
             columnDefs: [
               {

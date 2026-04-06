@@ -1,11 +1,11 @@
 @php
   $countCards = [
     ['key' => 'total_tasks', 'title' => __('admin.total_tasks'), 'subtitle' => __('admin.all_tasks')],
-    ['key' => 'pending', 'title' => __('admin.Pending'), 'subtitle' => __('admin.tasks_waiting')],
-    ['key' => 'active', 'title' => __('admin.Active'), 'subtitle' => "(in_progress_count)" . __('admin.boardTitleProgress') . ", (in_review_count) " . __('admin.boardTitleReview')],
-    ['key' => 'completed', 'title' => __('admin.Completed'), 'subtitle' => __('admin.finished_tasks')],
+    ['key' => 'pending',     'title' => __('admin.Pending'),     'subtitle' => __('admin.tasks_waiting')],
+    ['key' => 'active',      'title' => __('admin.Active'),      'subtitle' => null],
+    ['key' => 'done',        'title' => __('admin.Completed') . ' / ' . __('admin.archived'),   'subtitle' => null],
   ];
-  $icons = ['ti-clipboard-list', 'ti-clock', 'ti-refresh', 'ti-check'];
+  $icons  = ['ti-clipboard-list', 'ti-clock', 'ti-refresh', 'ti-check'];
   $colors = ['primary', 'warning', 'info', 'success'];
 @endphp
 
@@ -23,17 +23,26 @@
                 <h4 class="mb-0 me-2">
                   {{ ($stats['active']['in_progress_count'] ?? 0) + ($stats['active']['in_review_count'] ?? 0) }}
                 </h4>
+              @elseif ($card['key'] === 'done')
+                <h4 class="mb-0 me-2">
+                  {{ ($stats['completed'] ?? 0) + ($stats['archived'] ?? 0) }}
+                </h4>
               @else
                 <h4 class="mb-0 me-2">{{ $stats[$card['key']] ?? 0 }}</h4>
               @endif
             </div>
             @if ($card['key'] === 'active')
-              <small class="mb-0 text-muted text-capitalize">
+              <small class="mb-0 text-muted">
                 ( {{ $stats['active']['in_progress_count'] ?? 0 }} ) {{ __('admin.boardTitleProgress') }},
                 ( {{ $stats['active']['in_review_count'] ?? 0 }} ) {{ __('admin.boardTitleReview') }}
               </small>
+            @elseif ($card['key'] === 'done')
+              <small class="mb-0 text-muted">
+                ( {{ $stats['completed'] ?? 0 }} ) {{ __('admin.Completed') }},
+                ( {{ $stats['archived'] ?? 0 }} ) {{ __('admin.archived') }}
+              </small>
             @else
-              <small class="mb-0 text-muted">{!! $card['subtitle'] !!}</small>
+              <small class="mb-0 text-muted">{{ $card['subtitle'] }}</small>
             @endif
           </div>
           <div class="avatar">

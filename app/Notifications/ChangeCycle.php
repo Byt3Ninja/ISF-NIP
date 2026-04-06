@@ -114,7 +114,7 @@ class ChangeCycle extends Notification implements ShouldQueue
 
         return (new MailMessage)
             ->from($from['address'], $from['name'])
-            ->subject(__('emails.change_cycle_subject'))
+            ->subject(__('email.change_cycle_subject'))
             ->view('emails.change-cycle', array_merge([
                 'data' => $this->data,
             ], $orgData));
