@@ -232,8 +232,10 @@ return [
     'sp_service_status_changed' => 'تم تغيير حالة الخدمة ":name"',
 
     // بانر حالة الموافقة لمزود الخدمة
+    'sp_pending_status_title' => 'الحالة المعلقة',
     'sp_status_pending_message' => 'طلبك قيد المراجعة',
     'sp_status_accepted_message' => 'تم قبول طلبك. مرحبًا بك في المنصة',
+    'sp_status_rejected_title' => 'تم رفض الطلب',
     'sp_status_rejected_message' => 'تم رفض طلبك',
     'sp_status_rejected_support' => 'إذا كنت تعتقد أن هذا القرار غير صحيح، يرجى التواصل معنا عبر :email',
     'sp_status_rejected_reason_label' => 'السبب',

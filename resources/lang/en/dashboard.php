@@ -232,8 +232,10 @@ return [
     'sp_service_status_changed' => 'Service ":name" status changed',
 
     // Service Provider Approval Status Banner
+    'sp_pending_status_title' => 'Pending Status',
     'sp_status_pending_message' => 'Your request is under review.',
     'sp_status_accepted_message' => 'Your request has been accepted. Welcome to the platform.',
+    'sp_status_rejected_title' => 'Request Rejected',
     'sp_status_rejected_message' => 'Your request has been rejected.',
     'sp_status_rejected_support' => 'If you believe this is a mistake, please contact us at :email.',
     'sp_status_rejected_reason_label' => 'Reason',
