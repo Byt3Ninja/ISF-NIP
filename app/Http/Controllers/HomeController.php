@@ -355,8 +355,12 @@ class HomeController extends Controller
             }
         } else {
             $companies = collect([]);
+            $incubators_company = collect([]);
+            $alumni_company = collect([]);
+            $applied_companies_by_cycle = collect([]);
+            $applied_company_count = 0;
         }
-           
+
         if (array_intersect(['dashboard.widgets_cards_mentorship_requests_view', 'dashboard.widgets_cards_mentorship_sessions_durations_view'], $permissions)) {
             $mentorship_requests_q = "SELECT
                     mr.id,
