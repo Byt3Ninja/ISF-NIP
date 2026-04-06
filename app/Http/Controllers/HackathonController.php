@@ -897,7 +897,7 @@ class HackathonController extends Controller
         }
         else
         {
-            $judges_ids = json_decode($judges->first()?->judges);
+            $judges_ids = (array) json_decode($judges->first()?->judges);
             $judges_ids = array_map('intval', $judges_ids);
             $judges_users = DB::table('users as u')->whereIn('u.id', $judges_ids)->select(
                 'u.id',
