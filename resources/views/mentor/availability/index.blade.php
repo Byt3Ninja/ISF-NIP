@@ -653,10 +653,7 @@
                               .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok'))
                               .then(result => {
                                   if(result.success) {
-                                      showToast({
-                                          type: 'success',
-                                          'message': result?.message ? result.message : "{{ __('mentor.slot_removed_success') }}",
-                                      });
+                                      toastr.success(result?.message ? result.message : "{{ __('mentor.slot_removed_success') }}");
                                       fetch('/dashboard/availability/slots', {
                                         headers: {
                                           "Accept": "application/json"
@@ -668,17 +665,11 @@
                                               updateCalendarStyles();
                                           });
                                   } else {
-                                       releaseFailureAlert({
-                                          'title': '{{ __('admin.Error') }}',
-                                          'message': result?.message ? result.message : "{{ __('admin.unexpected_error') }}",
-                                      });
+                                      toastr.error(result?.message ? result.message : "{{ __('admin.unexpected_error') }}");
                                   }
                               })
                               .catch(error => {
-                                  releaseFailureAlert({
-                                      'title': '{{ __('admin.Error') }}',
-                                      'message': error?.message ? error.message : "{{ __('admin.unexpected_error') }}",
-                                  });
+                                  toastr.error(error?.message ?? "{{ __('admin.unexpected_error') }}");
                               });
                           }
                       }
@@ -742,22 +733,13 @@
                   .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok'))
                   .then(result => {
                       if(result.success) {
-                          showToast({
-                              type: 'success',
-                              'message': result?.message ? result.message : "{{ __('mentor.slot_removed_success') }}",
-                          });
+                          toastr.success(result?.message ? result.message : "{{ __('mentor.slot_removed_success') }}");
                       } else {
-                           releaseFailureAlert({
-                              'title': '{{ __('admin.Error') }}',
-                              'message': result?.message ? result.message : "{{ __('admin.unexpected_error') }}",
-                          });
+                          toastr.error(result?.message ? result.message : "{{ __('admin.unexpected_error') }}");
                       }
                   })
                   .catch(error => {
-                      releaseFailureAlert({
-                          'title': '{{ __('admin.Error') }}',
-                          'message': error?.message ? error.message : "{{ __('admin.unexpected_error') }}",
-                      });
+                      toastr.error(error?.message ?? "{{ __('admin.unexpected_error') }}");
                   });
               }
 
@@ -809,7 +791,7 @@
       const { mergedStart, mergedEnd, idsToDelete, idxToDelete, conflictSlot } = computeMerge(type, key, slot.start, slot.end);
 
       if (conflictSlot) {
-          releaseFailureAlert({
+          releaseWarningAlert({
               title: '{{ __('admin.Not_Available') }}',
               message: '{{ __('mentor.overlap', ['date' => ':date','from' => ':from', 'to' => ':to']) }}'
                            .replace(':date', conflictSlot.date || weekdayTranslations[conflictSlot.weekday] || conflictSlot.weekday)
@@ -867,19 +849,10 @@
               ? "{{ __('mentor.slot_added_to_date', ['date' => ':date']) }}".replace(':date', moment(key).format('MMMM D, YYYY'))
               : "{{ __('mentor.slot_added_to_all', ['day' => ':day']) }}".replace(':day', key + 's');
 
-          showToast({
-              type: 'success',
-              title: '{{ __('mentor.slot_added_success') }}',
-              message: wasMerged
-                  ? `${toastMsg} ({{ __('mentor.slots_merged') }}: ${to12Hour(mergedStart)} – ${to12Hour(mergedEnd)})`
-                  : toastMsg,
-          });
+          toastr.success(toastMsg);
 
       } catch (error) {
-          releaseFailureAlert({
-              title: '{{ __('admin.Error') }}',
-              message: error?.message ?? "{{ __('admin.unexpected_error') }}",
-          });
+          toastr.error(error?.message ?? "{{ __('admin.unexpected_error') }}");
       }
   }
   // ──────────────────────────────────────────────────────────────────────────
@@ -1099,7 +1072,7 @@
       const { mergedStart, mergedEnd, idsToDelete, idxToDelete, conflictSlot } = computeMerge('weekly', day, start, end);
 
       if (conflictSlot) {
-          releaseFailureAlert({
+          releaseWarningAlert({
               title: '{{ __('admin.Not_Available') }}',
               message: '{{ __('mentor.overlap', ['date' => ':date', 'from' => ':from', 'to' => ':to']) }}'
                            .replace(':date', conflictSlot.date || weekdayTranslations[conflictSlot.weekday] || conflictSlot.weekday)
@@ -1156,19 +1129,13 @@
           $('#list-view-session-type').val('Online');
           $('#list-view-day-select').val('Sunday');
 
-          showToast({
-              type: 'success',
-              title: '{{ __('mentor.slot_added_success') }}',
-              message: wasMerged
-                  ? `${result.message} ({{ __('mentor.slots_merged') }}: ${to12Hour(mergedStart)} – ${to12Hour(mergedEnd)})`
-                  : result.message,
-          });
+          toastr.success(wasMerged
+              ? `${result.message} ({{ __('mentor.slots_merged') }}: ${to12Hour(mergedStart)} – ${to12Hour(mergedEnd)})`
+              : result.message,
+          );
 
       } catch (error) {
-          releaseFailureAlert({
-              title: '{{ __('admin.Error') }}',
-              message: error?.message ?? "{{ __('admin.unexpected_error') }}",
-          });
+          toastr.error(error?.message ?? "{{ __('admin.unexpected_error') }}");
       }
   });
   // ──────────────────────────────────────────────────────────────────────────
@@ -1281,21 +1248,12 @@
           updateSlotsList();
           updateCalendarStyles();
 
-          showToast({
-              type: 'success',
-              title: '{{ __('mentor.slot_added_success') }}',
-              message: wasMerged
-                  ? `${result.message} ({{ __('mentor.slots_merged') }}: ${to12Hour(mergedStart)} – ${to12Hour(mergedEnd)})`
-                  : result.message,
-          });
+          toastr.success(result.message ? result.message : "{{ __('mentor.slot_added_success') }}");
 
           form.remove();
 
       } catch (error) {
-          releaseFailureAlert({
-              title: '{{ __('admin.Error') }}',
-              message: error?.message ?? "{{ __('admin.unexpected_error') }}",
-          });
+          toastr.error(error?.message ?? "{{ __('admin.unexpected_error') }}");
       }
   });
   // ──────────────────────────────────────────────────────────────────────────
@@ -1438,18 +1396,10 @@
               updateSlotsList();
               updateCalendarStyles();
 
-              showToast({
-                  type: 'success',
-                  message: result.message,
-              });
+              toastr.success(result?.message || "{{ __('mentor.slots_copied_success') }}");
           })
           .catch(error => {
-              releaseFailureAlert({
-                  title: '{{ __('admin.Error') }}',
-                  message: error?.message
-                      ? error.message
-                      : "{{ __('admin.unexpected_error') }}",
-              });
+              toastr.error(error?.message ?? "{{ __('admin.unexpected_error') }}");
           });
 
           popover.dispose();

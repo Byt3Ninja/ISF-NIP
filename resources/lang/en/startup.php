@@ -39,14 +39,14 @@ return [
   'team_info' => 'Team Info',
   'startup_size' => 'Startup Size',
   'startup_size_1' => 'Self-employed',
-  'startup_size_2' => '1-10 employees',
-  'startup_size_3' => '11-50 employees',
-  'startup_size_4' => '51-200 employees',
-  'startup_size_5' => '201-500 employees',
-  'startup_size_6' => '501-1000 employees',
-  'startup_size_7' => '1001-5000 employees',
-  'startup_size_8' => '5001-10000 employees',
-  'startup_size_9' => '10001+ employees',
+  'startup_size_2' => '1-10 Employees',
+  'startup_size_3' => '11-50 Employees',
+  'startup_size_4' => '51-200 Employees',
+  'startup_size_5' => '201-500 Employees',
+  'startup_size_6' => '501-1000 Employees',
+  'startup_size_7' => '1001-5000 Employees',
+  'startup_size_8' => '5001-10000 Employees',
+  'startup_size_9' => '10001+ Employees',
   
   'about_challenges' => 'About & Challenges',
   'about_problem' => 'About Problem',
@@ -384,7 +384,7 @@ return [
   'other_op_expenses' => 'Other Op. Expenses',
   'ebitda' => 'EBITDA',
   'depreciation_and_amortization' => 'Depreciation & Amortization',
-  'ebit' => 'EBIT',
+  'ebit' => 'EBIT ( Operating Income )',
   'interest' => 'Interest',
   'taxes' => 'Taxes',
   'net_profit' => 'Net Profit',
@@ -408,7 +408,7 @@ return [
   'mark_alumni' => 'Mark as Alumni',
   'already_alumni' => 'Already Alumni',
   'mark_alumni_confirmation' => 'This action is irreversible. The startup will be graduated, and a snapshot of its information and participation records will be saved permanently.',
-  'mark_alumni_success' => 'The startup has been marked as alumni.',
+  'mark_alumni_success' => 'The selected startups marked as alumni.',
   'mark_alumni_error' => 'An error occurred while marking the startup as alumni.',
 
   'not_started' => 'Not Started',
@@ -560,4 +560,61 @@ return [
   'support_and_mentorship_label' => 'Required support areas of expertise',
   'support_and_mentorship_validation' => 'Please select at least one support area of expertise.',
   'support_and_mentorship_success' => 'Support & Mentorship needs saved successfully.',
+  
+  'mvp_prototype_link' => 'MVP / Prototype Link',
+  'view_prototype' => 'View Prototype',
+
+  'additional_info' => 'Additional Info',
+
+  // About Challenges Section
+  'about_challenges'        => 'About & Challenges',
+  'problem_being_solved'    => "What's the problem being solved?",
+  'problem'                 => 'Problem',
+  'about_market_opportunity'=> 'Market Opportunity',
+  'competitors'             => 'Competitors',
+  'monetization'            => 'Monetization',
+  'challenges'              => 'Challenges',
+
+  // Mission Section
+  'mission'                 => 'Mission',
+  'our_mission'             => 'Our Mission',
+
+  // Why This Startup Section
+  'why_this_startup'        => 'Why This Startup?',
+  'what_makes_us_different' => 'What Makes Us Different',
+
+  // Achievements Section
+  'achievements'            => 'Achievements',
+
+  // Startup Expertise Section
+  'startup_expertise'       => 'Startup Expertise',
+  'areas_of_expertise'      => 'Areas of Expertise',
+
+  // Sustainability Section
+  'sustainability_goals'    => 'Sustainability Goals',
+
+  // Business Model Section
+  'business_model'          => 'Business Model',
+  'how_we_operate'          => 'How We Operate',
+  'model_type'              => 'Model Type',
+  'description'             => 'Description',
+  'business_plan'           => 'Business Plan',
+
+  // Financial Plan Section
+  'financial_plan'          => 'Financial Plan',
+  'financial_projections'   => 'Financial Projections',
+
+  'Full-time' => 'Full-time',
+  'Part-time' => 'Part-time',
+  'employees_statistics' => 'Employees / Statistics',
+  'total_employees' => 'Total employees',
+  'male_employees' => 'Male employees',
+  'female_employees' => 'Female employees',
+  'of_total' => 'of total',
+
+  'rank' => 'Rank',
+  'general' => 'General',
+	'hackathon' => 'Hackathon',
+  
+  'mark_alumni_confirmation_bulk' => 'This action is irreversible. The selected startups will be graduated, and a snapshot of their information and participation records will be saved permanently.',
 ];

@@ -7,7 +7,15 @@
   const PLURAL = { founder: 'founders', investor: 'investors', shareholder: 'shareholders' };
 
   const TYPE_CONFIG = {
-    founder: { teamsNo: 'Founders', fieldMap: { name: 'founder_name', email: 'founder_email', linkedin: 'founder_linkedin' } },
+    founder: { teamsNo: 'Founders', fieldMap: { 
+      name: 'founder_name', 
+      email: 'founder_email', 
+      linkedin: 'founder_linkedin',
+      phone: 'founder_phone',
+      type: 'founder_type',
+      join_date: 'founder_join_date',
+      commitment: 'founder_commitment'
+    } },
     investor: { teamsNo: 'Investors', fieldMap: { name: 'investor_name', type: 'investment_type' } },
     shareholder: { teamsNo: 'Shareholders', fieldMap: { name: 'shareholder_name', role: 'shareholder_role', percentage: 'shareholder_ownership_percentage' } }
   };
@@ -55,7 +63,25 @@
       addShareholder: "Add Shareholder",
       tip: "Tip: Use search above to filter existing members",
       noResultsDesc: "Try adjusting your search term",
-      clearSearch: "Clear search"
+      clearSearch: "Clear search",
+      deleteMsg: "Are you sure you want to delete ${name}?",
+      yesDelete: "Yes, delete!",
+      noCancel: "No, cancel!",
+      founder: "Founder",
+      investor: "Investor",
+      shareholder: "Shareholder",
+      delete: "Delete",
+       investmentTypes: {
+        Angel_Investor:      'Angel Investor',
+        Angel_Group:         'Angel Group',
+        Venture_Capital_Firm:'Venture Capital Firm',
+        Accelerator:         'Accelerator',
+        Incubator:           'Incubator',
+        Corporate_Investor:  'Corporate Investor',
+        Family_Office:       'Family Office',
+        Family:              'Family',
+        Friends:             'Friends',
+      }
     },
     ar: {
       noResults: (term) => `لا توجد نتائج لـ "${term}"`,
@@ -67,11 +93,33 @@
       addShareholder: "إضافة مساهم",
       tip: "نصيحة: استخدم مربع البحث أعلاه لتصفية الأعضاء",
       noResultsDesc: "حاول تعديل كلمة البحث",
-      clearSearch: "مسح البحث"
+      clearSearch: "مسح البحث",
+      deleteMsg: "هل تريد حذف ${name}؟",
+      yesDelete: "نعم، حذف!",
+      noCancel: "لا، إلغاء!",
+      founder: "المؤسس",
+      investor: "المستثمر",
+      shareholder: "المساهم",
+       investmentTypes: {
+        Angel_Investor:      'مستثمر ملاك',
+        Angel_Group:         'مجموعة ملاك',
+        Venture_Capital_Firm:'شركة رأس مال مخاطر',
+        Accelerator:         'مسرّع أعمال',
+        Incubator:           'حاضنة أعمال',
+        Corporate_Investor:  'مستثمر مؤسسي',
+        Family_Office:       'مكتب عائلي',
+        Family:              'عائلة',
+        Friends:             'أصدقاء',
+      }
     }
   };
 
   const t = TRANSLATIONS[LANG] || TRANSLATIONS.en;
+
+  function translateInvestmentType(raw) {
+    if (!raw) return '';
+    return (t.investmentTypes && t.investmentTypes[raw]) || raw;
+  }
 
   /* ─────────────────────────────────────────────
      UTILITIES
@@ -220,7 +268,7 @@
         <div class="text-center py-5 my-4 border rounded-3 border-dashed bg-light-subtle empty-state">
           <div class="avatar avatar-lg bg-card mx-auto mb-4">
             <div class="w-100 h-100 d-flex align-items-center justify-content-center">
-              <i class="${icons[type]} text-dark"></i>
+              <i class="ti ${icons[type]} text-dark"></i>
             </div>
           </div>
           <h5 class="mb-2 fw-semibold">${titles[type]}</h5>
@@ -299,7 +347,9 @@
             </div>
             <div class="flex-grow-1 ms-3">
               <h6 class="mb-0 fw-bold">${escapeHtml(item.name)}</h6>
-              <small class="text-secondary d-block mb-1">${escapeHtml(item.type || 'Standard')}</small>
+              <small class="text-secondary d-block mb-1">
+                ${escapeHtml(translateInvestmentType(item.type) || 'Standard')}
+              </small>
               <small class="text-success fw-bold">${escapeHtml(item.investment_amount || '')}</small>
             </div>
             ${buildDropdown('investor', item.id)}
@@ -428,17 +478,28 @@
   }
 
   function deleteItem(type, id) {
-    if (!confirm(LANG === 'ar' ? 'تأكيد الحذف؟' : 'Confirm deletion?')) return;
+    // if (!confirm(LANG === 'ar' ? 'تأكيد الحذف؟' : 'Confirm deletion?')) return;
 
-    $.ajax({
-      url: TEAM_INFO_CONFIG.routes.delete,
-      method: 'POST',
-      data: { id },
-      headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-      success() {
-        appData[PLURAL[type]] = appData[PLURAL[type]].filter(i => String(i.id) !== String(id));
-        renderList(type);
-        toastr.success(LANG === 'ar' ? 'تم الحذف' : 'Deleted');
+    const name = appData[PLURAL[type]].find(i => String(i.id) === String(id)).name;
+
+    releaseWarningAlert({
+      title: `${t.delete} ${t[type]}`,
+      message: `${t.deleteMsg.replace('${name}', escapeHtml(name))}`,
+      confirmText: `${t.yesDelete}`,
+      cancelText: `${t.noCancel}`,
+      confirmColor: 'danger',
+      onConfirm: () => {
+        $.ajax({
+          url: TEAM_INFO_CONFIG.routes.delete,
+          method: 'POST',
+          data: { id },
+          headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+          success() {
+            appData[PLURAL[type]] = appData[PLURAL[type]].filter(i => String(i.id) !== String(id));
+            renderList(type);
+            toastr.success(LANG === 'ar' ? 'تم الحذف' : 'Deleted');
+          }
+        });
       }
     });
   }

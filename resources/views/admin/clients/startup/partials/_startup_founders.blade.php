@@ -1,10 +1,45 @@
+@php
+$staticFounders = [
+  [
+    'id' => 1,
+    'name' => 'Alex Rivera',
+    'email' => 'kareem.fullstackdeveloper@gmail.com',
+    'phone' => '+1 555 0123',
+    'linkedin' => 'https://linkedin.com/in/alexrivera',
+    'join_date' => '2024-01-10',
+    'type' => 'Founder',
+    'commitment' => 'Full-time',
+  ],
+  [
+    'id' => 2,
+    'name' => 'John Doe',
+    'email' => 'johndoe@startup.io',
+    'phone' => '+1 555 0124',
+    'linkedin' => 'https://linkedin.com/in/johndoe',
+    'join_date' => '2024-01-12',
+    'type' => 'Founder',
+    'commitment' => 'Full-time',
+  ],
+  [
+    'id' => 3,
+    'name' => 'Jane Doe',
+    'email' => 'janedoe@startup.io',
+    'phone' => '+1 555 0125',
+    'linkedin' => 'https://linkedin.com/in/janedoe',
+    'join_date' => '2024-01-15',
+    'type' => 'Founder',
+    'commitment' => 'Part-time',
+  ],
+];
+@endphp
+
 <div class="col-md-4">
-  <div class="card shadow-sm" style="height: 300px; overflow-y: hidden;">
+  <div class="card shadow-sm" style="height: 320px; overflow-y: hidden;">
     <div class="py-4 px-8">
-      <h5 class="card-title mb-3">{{ __('admin.Founders') }} ( {{count($founders)}} )</h5>
-      @if (count($founders) > 0)
+      <h5 class="card-title mb-2">{{ __('admin.Founders') }} ( {{count($staticFounders)}} )</h5>
+      @if (count($staticFounders) > 0)
       <div class="row" style="position: relative; height: 90%;">
-        @if (count($founders) > 2)
+        @if (count($staticFounders) > 2)
         <button id="founder-prev-2" class="btn btn-sm btn-icon btn-white rounded-circle shadow border d-none"
           style="position: absolute; left: -1rem; top: 46%; transform: translateY(-50%); z-index: 1;">
           <i class="ti ti-chevron-left"></i>
@@ -15,23 +50,38 @@
         </button>
         @endif
 
-        @foreach ($founders as $fonder)
+        @foreach ($staticFounders as $founder)
         <div class="founder-col-2 col-12 mb-2">
-          <div class="p-3 shadow-sm border overflow-hidden">
-            <div class="d-flex align-items-center">
-              <div class="border d-flex radius-15 d-flex flex-shrink-0" style="width: 80px; height: 80px;">
-                <img src="/images/background/logo.png" class="img-fluid m-auto" alt="logo" />
-              </div>
-              <div class="mx-3 d-flex flex-column justify-content-center gap-1" style="height: 76px;">
-                <div class="text-black fs-6">{{ $fonder->Name }}</div>
-                <div class="d-flex align-items-center gap-2">
-                  <i class="ti ti-mail text-primary"></i>
-                  <span class="text-muted text-xs line-clamp-1">{{ $fonder->Email }}</span>
+          <div class="card item-card shadow-none border mb-0">
+            <div class="card-body py-2 px-3">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <h6 class="mb-0">{{ $founder['name'] }}</h6>
+                  <small class="text-muted">{{ $founder['type'] }}</small>
                 </div>
-                <a href="{{ $fonder->LinkedIn }}" class="d-flex align-items-center gap-2" style="width: 200px;">
-                  <img src="/icons/linkedin.svg" width="18" height="18" />
-                  <span class="text-muted text-xs line-clamp-1">{{ $fonder->LinkedIn }}</span>
+                <span class="badge bg-label-secondary text-dark">{{ $founder['commitment'] ? __('startup.' . $founder['commitment']) : '' }}</span>
+              </div>
+              <div class="d-flex flex-wrap align-items-center gap-2 mt-2">
+                <a 
+                  href="mailto:{{ $founder['email'] }}" 
+                  class=" small text-muted"
+                >
+                  <i class="ti ti-mail ti-sm"></i>
+                  <span class="ms-1">
+                    {{ Str::limit($founder['email'], 25) . (strlen($founder['email']) > 25 ? '...' : '') }}
+                  </span>
                 </a>
+                <a 
+                  href="tel:{{ preg_replace('/[^0-9]/', '', str_replace('+', '', $founder['phone'] ?? '')) }}"
+                  class=" small text-muted ms-auto"
+                >
+                  <i class="ti ti-phone ti-sm"></i>
+                  <span class="ms-1">{{ str_replace('+', '', $founder['phone'] ?? 'N/A') }}</span>
+                </a>
+                <div class=" small text-muted">
+                  <i class="ti ti-calendar ti-sm"></i>
+                  <span>{{ $founder['join_date'] ?? 'N/A' }}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -50,6 +100,7 @@
   </div>
 </div>
 
+@push('scripts')
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const founderCols2 = document.querySelectorAll('.founder-col-2');
@@ -108,3 +159,4 @@
     updateVisibility2();
   });
 </script>
+@endpush

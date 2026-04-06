@@ -4,7 +4,6 @@
 @section('subTitle', $organization->{'name_' . $l})
 
 @section('style')
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/toastr/toastr.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
@@ -319,7 +318,6 @@
   <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
-  <script src="/vuexy/assets/vendor/libs/toastr/toastr.js"></script>
   <script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
   <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
@@ -378,16 +376,16 @@
       csrfToken   : '{{ csrf_token() }}',
       lang: {
         required      : '{{ __("admin.Required_Field") }}',
-        maxReached    : '{{ __("admin.Maximum sections reached") }}',
+        maxReached    : '{{ __("admin.maximum_sections_reached") }}',
         warning:       '{{ __("admin.Warning") }}',
         confirmDelete : '{{ __("admin.Are you sure you want to delete this section?") }}',
         deleteError   : '{{ __("admin.Error deleting section") }}',
         reorderError  : '{{ __("admin.Error reordering sections") }}',
         newSection    : '{{ __("admin.New Section") }}',
         untitled      : '{{ __("admin.Untitled Section") }}',
-        saveError     : '{{ __("admin.Please fix the errors before saving") }}',
+        saveError     : '{{ __("admin.save_failed") }}',
         quillDir      : '{{ $l == "ar" ? "rtl" : "ltr" }}',
-        addSection     : '{{ __("admin.Add Section") }}',
+        addSection     : '{{ __("admin.add_section") }}',
         DYes: '{{ __("admin.DYes") }}',
         DNo: '{{ __("admin.DNo") }}',
         saving: '{{ __("admin.saving") }}',

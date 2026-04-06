@@ -142,15 +142,15 @@ class FormBuilderController extends Controller
 
                 switch ($fields->search($field->field_id)) {
                     case 'select':
-                        $type = 'dropdown';
+                        $type = $options->type ?? 'dropdown';
                         $listOptions = $options->values ?? [];
                         break;
                     case 'textarea':
-                        $type = 'paragraph';
+                        $type = $options->type ?? 'paragraph';
                         $listOptions = [];
                         break;
                     case 'file':
-                        $type = 'file';
+                        $type = $options->type ?? 'file';
                         $listOptions = [];
                         break;
                     default:
@@ -627,5 +627,13 @@ class FormBuilderController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function reorderSections(Request $request){
+        return response()->json(['status' => 'success']);
+    }
+
+    public function reorderQuestions(Request $request){
+        return response()->json(['status' => 'success']);
     }
 }

@@ -131,4 +131,8 @@ return [
     'add_availability_slots' => 'Add Availability Slots',
     'this_time_before_now' => 'This time slot has already passed. Please select a future time.',
     'slots_merged' => 'Slot created successfully and Merged',
+    'slots_copied_success' => 'Slot copied successfully',
+    'session_booked_successfully' => 'Session Booked Successfully',
+    'request_sent_success' => 'Request Sent Successfully',
+    'session_expired_messsage' => 'Session expired. Please refresh the page and try again.',
 ];

@@ -1,292 +1,575 @@
 @extends('layouts.admin')
 
-<?php
-  // Static form structure
+@php
   $form = $data;
-
-?>
+  $sections = collect($form['build_data'] ?? []);
+  $totalSections = $sections->count();
+  $totalQuestions = $sections->sum(fn($section) => count($section['questions'] ?? []));
+  $isReadOnly = $answers->count() > 0;
+  $typeMeta = [
+      'short_answer' => ['icon' => 'ti ti-pencil', 'label' => __('builder.Short_answer')],
+      'paragraph' => ['icon' => 'ti ti-align-left', 'label' => __('builder.Paragraph')],
+      'multiple_choice' => ['icon' => 'ti ti-circle-dot', 'label' => __('builder.Multiple_choice')],
+      'checkboxes' => ['icon' => 'ti ti-checkbox', 'label' => __('builder.Checkboxes')],
+      'dropdown' => ['icon' => 'ti ti-selector', 'label' => __('builder.Dropdown')],
+      'linear_scale' => ['icon' => 'ti ti-chart-dots-3', 'label' => __('builder.Linear_scale')],
+      'date' => ['icon' => 'ti ti-calendar-event', 'label' => __('builder.Date')],
+      'time' => ['icon' => 'ti ti-clock-hour-4', 'label' => __('builder.Time')],
+      'file' => ['icon' => 'ti ti-paperclip', 'label' => __('builder.File_upload')],
+  ];
+@endphp
 
 @section('title', __('cycles.Cycle'))
 @section('subTitle', __('cycles.join Cycle'))
 
+@section('vendorstyle')
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+@endsection
+
+@section('style')
+<style>
+  .application-hero {
+    background:
+      radial-gradient(circle at top right, rgba(var(--bs-success-rgb), 0.18), transparent 28%),
+      linear-gradient(135deg, rgba(var(--bs-primary-rgb), 0.14), rgba(var(--bs-info-rgb), 0.08) 58%, rgba(var(--bs-body-bg-rgb), 0.1));
+  }
+</style>
+@endsection
+
 @section('content')
-<div class="">
-  <div class="">
-    <div class="content-body">
-      <section>
-        <div class="row">
-          <div class="col-12">
-            <div class="card shadow-sm">
-              <div class="card-header d-flex justify-content-between align-items-center border-bottom">
-                <div>
-                  <h4 class="card-title mb-1">{{ $form['title'] }}</h4>
-                  <small class="text-muted">{{ $form['description'] }}</small>
-                </div>
-              </div>
-              <div class="card-body">
-                @if(session()->has('msg'))
-                <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show" role="alert">
-                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                  <div class="d-flex align-items-center">
-                    <i class="bx bx-{{Session::get('class')=='success'?'check-circle':'error'}} me-2"></i>
-                    <span>{{ __('admin.'.session()->get('msg')) }} {{ Session::forget('msg') }}</span>
-                  </div>
-                </div>
+<section>
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow-sm overflow-hidden">
+        <div class="card-body application-hero p-4 p-lg-5 border-bottom">
+          <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-start gap-4">
+            <div>
+              <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                <span class="badge bg-label-primary rounded-pill px-3 py-2">
+                  <i class="ti ti-rocket me-1"></i>{{ __('cycles.join Cycle') }}
+                </span>
+                @if($isReadOnly)
+                  <span class="badge bg-label-success rounded-pill px-3 py-2">
+                    <i class="ti ti-check me-1"></i>
+                    {{ $l == 'en' ? 'Submitted' : 'تم الإرسال' }}
+                  </span>
+                @else
+                  <span class="badge bg-label-secondary rounded-pill px-3 py-2">
+                    <i class="ti ti-edit-circle me-1"></i>
+                    {{ $l == 'en' ? 'Open for application' : 'مفتوح للتقديم' }}
+                  </span>
                 @endif
-                
-                @if($form && $form['build_data'] && count($form['build_data']) > 0)
-                @if( $answers->count() == 0 )
-                <form method="post" action="/dashboard/cycles/save" enctype="multipart/form-data" class="mt-3">
-                  @csrf
-                  <input type="hidden" name="cycle" value="{{$c}}" />
-                  <input type="hidden" name="id" value="{{$step->id}}" />
-                  <input type="hidden" name="field_ids" value="{{ $field_ids }}" />
-                @endif 
-                   @foreach($form['build_data'] as $sectionIndex => $section)
-                  <div class="section-wrapper mb-4" data-section-logic="{{ $section['logic'] ?? 'continue' }}" data-section-id="{{ $sectionIndex }}">
-                    @if($section['title'] || $section['description'])
-                    <div class="section-header mb-3">
-                      @if($section['title'])
-                      <h5 class="section-title text-primary mb-1">{{ $section['title'] }}</h5>
-                      @endif
-                      @if($section['description'])
-                      <p class="section-description text-muted mb-0">{{ $section['description'] }}</p>
-                      @endif
+              </div>
+
+              <h2 class="mb-2">{{ $form['title'] }}</h2>
+              <p class="text-muted mb-0 mw-75">
+                {{ $form['description'] }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-body p-4 p-lg-5">
+          @if(session()->has('msg'))
+            <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show rounded-3 mb-4" role="alert">
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              <div class="d-flex align-items-center">
+                <i class="bx bx-{{ Session::get('class') == 'success' ? 'check-circle' : 'error' }} me-2"></i>
+                <span>{{ __('admin.'.session()->get('msg')) }} {{ Session::forget('msg') }}</span>
+              </div>
+            </div>
+          @endif
+
+          @if($form && $form['build_data'] && count($form['build_data']) > 0)
+            @if(!$isReadOnly)
+              <form id="cycleApplicationForm" method="post" action="/dashboard/cycles/save" enctype="multipart/form-data" class="d-flex flex-column gap-4" novalidate>
+                @csrf
+                <input type="hidden" name="cycle" value="{{ $c }}" />
+                <input type="hidden" name="id" value="{{ $step->id }}" />
+                <input type="hidden" name="field_ids" value="{{ $field_ids }}" />
+            @endif
+
+            @foreach($form['build_data'] as $sectionIndex => $section)
+              <div class="section-wrapper" data-section-logic="{{ $section['logic'] ?? 'continue' }}" data-section-id="{{ $sectionIndex }}">
+                <div class="card border shadow-sm overflow-hidden">
+                  <div class="card-header bg-body border-0 px-4 px-lg-5 pt-4 pt-lg-5">
+                    <div class="d-flex align-items-start gap-3">
+                      <span class="avatar avatar-md">
+                        <span class="avatar-initial rounded bg-label-primary fw-semibold">{{ $sectionIndex + 1 }}</span>
+                      </span>
+                      <div>
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                          <span class="badge bg-label-primary rounded-pill">
+                            {{ __('builder.Section') }} {{ $sectionIndex + 1 }}
+                          </span>
+                          <span class="badge bg-label-secondary rounded-pill">
+                            {{ count($section['questions'] ?? []) }} {{ __('admin.Questions') }}
+                          </span>
+                        </div>
+                        @if($section['title'])
+                          <h4 class="mb-1">{{ $section['title'] }}</h4>
+                        @endif
+                        @if($section['description'])
+                          <p class="text-muted mb-0">{{ $section['description'] }}</p>
+                        @endif
+                      </div>
                     </div>
-                    @endif
-                    <div class="card border shadow-sm">
-                      <div class="card-body p-4">
-                        <div class="row g-4">
-                        
-                          @foreach($section['questions'] as $question)
-                          @php
-                            $field_name = 'field_' . $question['id'];
-                            $id_for = 'input-fld-' . $question['id'];
-                          @endphp
+                  </div>
 
-                          <div class="col-12">
-                            <div class="form-group">
-                              @if($question['label'])
-                                <label for="{{ $id_for }}" class="form-label fw-semibold mb-2">
-                                  {{ $question['label'] }}
-                                  @if($question['is_required'])
-                                    <span class="text-danger ms-1">*</span>
-                                  @endif
-                                </label>
-                              @endif
+                  <div class="card-body p-4 p-lg-5">
+                    <div class="row g-4">
+                      @foreach($section['questions'] as $question)
+                        @php
+                          $fieldName = 'field_' . $question['id'];
+                          $fieldId = 'input-fld-' . $question['id'];
+                          $meta = $typeMeta[$question['type']] ?? ['icon' => 'ti ti-help', 'label' => ucfirst(str_replace('_', ' ', $question['type']))];
+                          $fullWidthTypes = ['paragraph', 'multiple_choice', 'checkboxes', 'linear_scale', 'file'];
+                          $columnClass = in_array($question['type'], $fullWidthTypes, true) ? 'col-12' : 'col-12 col-xl-6';
+                          $checkboxAnswers = collect($answers)->where('field_id', $question['id'])->first()?->answer ?? '[]';
+                          $checkboxAnswers = json_decode($checkboxAnswers, true);
+                        @endphp
 
+                        <div class="{{ $columnClass }}">
+                          <div class="card application-question-card border shadow-none h-100">
+                            <div class="card-body p-4">
+                              <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+                                <div class="d-flex align-items-start gap-3">
+                                  <span class="avatar avatar-sm mt-1">
+                                    <span class="avatar-initial rounded bg-label-primary">
+                                      <i class="{{ $meta['icon'] }} ti-sm"></i>
+                                    </span>
+                                  </span>
+                                  <div>
+                                    @if($question['label'])
+                                      <label for="{{ $fieldId }}" class="form-label fw-semibold mb-1">
+                                        {{ $question['label'] }}
+                                        @if($question['is_required'])
+                                          <span class="text-danger ms-1">*</span>
+                                        @endif
+                                      </label>
+                                    @endif
+                                    <div class="text-muted small">
+                                      {{ $question['is_required'] ? 'Required field' : 'Optional field' }}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div class="application-field-control">
                               @switch($question['type'])
                                 @case('dropdown')
-                                  <select 
-                                    id="{{ $id_for }}" 
-                                    name="{{ $field_name }}"
-                                    @if( $answers->count() > 0 )
-                                    disabled
-                                    @endif
-                                    class="form-select question-logic @error($field_name) is-invalid @enderror"
-                                    {{ $question['is_required'] ? 'required' : '' }}
-                                  >
-                                    <option value="">{{ $question['label'] }}</option>
-                                    @foreach($question['options'] as $option)
-                                      <option value="{{ $option }}" 
-                                        data-logic="{{ $question['logic'][$option] ?? 'continue' }}"
-                                        {{ old($field_name) == $option ? 'selected' : '' }}>
-                                        {{ $option === '__OTHER__' ? __('builder.Other') : $option }}
-                                      </option>
-                                    @endforeach
-                                  </select>
+                                  <div class="input-group">
+                                    <span class="input-group-text bg-label-primary border-end-0">
+                                      <i class="{{ $meta['icon'] }}"></i>
+                                    </span>
+                                    <select
+                                      id="{{ $fieldId }}"
+                                      name="{{ $fieldName }}"
+                                      class="form-select question-logic @error($fieldName) is-invalid @enderror"
+                                      {{ $question['is_required'] ? 'required' : '' }}
+                                      {{ $isReadOnly ? 'disabled' : '' }}
+                                    >
+                                      <option value="">{{ $question['label'] }}</option>
+                                      @foreach($question['options'] as $option)
+                                        <option
+                                          value="{{ $option }}"
+                                          data-logic="{{ $question['logic'][$option] ?? 'continue' }}"
+                                          {{ old($fieldName) == $option ? 'selected' : '' }}
+                                        >
+                                          {{ $option === '__OTHER__' ? __('builder.Other') : $option }}
+                                        </option>
+                                      @endforeach
+                                    </select>
+                                  </div>
                                   @break
 
                                 @case('paragraph')
-                                  <textarea 
-                                    id="{{ $id_for }}" 
-                                    name="{{ $field_name }}" 
-                                    rows="3"
-                                    @if( $answers->count() > 0 )
-                                    disabled
-                                    @endif
-                                    class="form-control @error($field_name) is-invalid @enderror"
+                                  <textarea
+                                    id="{{ $fieldId }}"
+                                    name="{{ $fieldName }}"
+                                    rows="4"
+                                    class="form-control @error($fieldName) is-invalid @enderror"
                                     placeholder="{{ $question['label'] }}"
                                     {{ $question['is_required'] ? 'required' : '' }}
-                                  >{{ old($field_name) }}</textarea>
+                                    {{ $isReadOnly ? 'disabled' : '' }}
+                                  >{{ old($fieldName) }}</textarea>
                                   @break
 
                                 @case('multiple_choice')
-                                  <div class="options-group">
+                                  <div class="vstack gap-2 options-group">
                                     @foreach($question['options'] as $optionIndex => $option)
-                                    <div class="form-check mb-2">
-                                      <input 
-                                        class="form-check-input question-logic" 
-                                        type="radio" 
-                                        @if( $answers->count() > 0 )
-                                        disabled
-                                        @endif
-                                        name="{{ $field_name }}" 
-                                        id="{{ $id_for }}_{{ $optionIndex }}" 
-                                        value="{{ $option }}"
-                                        data-logic="{{ $question['logic'][$option] ?? 'continue' }}"
-                                        {{ old($field_name) == $option ? 'checked' : '' }}
-                                        {{ $question['is_required'] ? 'required' : '' }}
-                                      />
-                                      <label class="form-check-label" for="{{ $id_for }}_{{ $optionIndex }}">
-                                        {{ $option === '__OTHER__' ? __('builder.Other') : $option }}
-                                      </label>
-                                    </div>
+                                      <div class="form-check m-0 py-4 ps-10 border rounded-3">
+                                        <input
+                                          class="form-check-input question-logic"
+                                          type="radio"
+                                          name="{{ $fieldName }}"
+                                          id="{{ $fieldId }}_{{ $optionIndex }}"
+                                          value="{{ $option }}"
+                                          data-logic="{{ $question['logic'][$option] ?? 'continue' }}"
+                                          {{ old($fieldName) == $option ? 'checked' : '' }}
+                                          {{ $question['is_required'] ? 'required' : '' }}
+                                          {{ $isReadOnly ? 'disabled' : '' }}
+                                        />
+                                        <label class="form-check-label w-100 ps-1" for="{{ $fieldId }}_{{ $optionIndex }}">
+                                          {{ $option === '__OTHER__' ? __('builder.Other') : $option }}
+                                        </label>
+                                      </div>
                                     @endforeach
                                   </div>
                                   @break
 
                                 @case('checkboxes')
-                                  <div class="options-group">
+                                  <div class="vstack gap-2 options-group">
                                     @foreach($question['options'] as $optionIndex => $option)
-                                    @php
-                                      $options_data = collect($answers)->where('field_id', $question['id'])->first()?->answer ?? '[]';
-                                      $options_data = json_decode($options_data, true);
-                                    @endphp
-                                    <div class="form-check mb-2">
-                                      <input 
-                                        @if( $answers->count() > 0 )
-                                        disabled
-                                        @endif
-                                        class="form-check-input question-logic" 
-                                        type="checkbox" 
-                                        name="{{ $field_name }}[]" 
-                                        id="{{ $id_for }}_{{ $optionIndex }}" 
-                                        value="{{ $option }}"
-                                        {{ is_array($options_data) && in_array($option, $options_data) ? 'checked' : '' }}
-                                        data-logic="{{ $question['logic'][$option] ?? 'continue' }}"
-                                      />
-                                      <label class="form-check-label" for="{{ $id_for }}_{{ $optionIndex }}">
-                                        {{ $option === '__OTHER__' ? __('builder.Other') : $option }}
-                                      </label>
-                                    </div>
+                                      <div class="form-check m-0 py-4 ps-10 border rounded-3">
+                                        <input
+                                          class="form-check-input question-logic"
+                                          type="checkbox"
+                                          name="{{ $fieldName }}[]"
+                                          id="{{ $fieldId }}_{{ $optionIndex }}"
+                                          value="{{ $option }}"
+                                          {{ is_array($checkboxAnswers) && in_array($option, $checkboxAnswers, true) ? 'checked' : '' }}
+                                          data-logic="{{ $question['logic'][$option] ?? 'continue' }}"
+                                          {{ $question['is_required'] ? 'required' : '' }}
+                                          {{ $isReadOnly ? 'disabled' : '' }}
+                                        />
+                                        <label class="form-check-label w-100 ps-1" for="{{ $fieldId }}_{{ $optionIndex }}">
+                                          {{ $option === '__OTHER__' ? __('builder.Other') : $option }}
+                                        </label>
+                                      </div>
                                     @endforeach
                                   </div>
                                   @break
 
                                 @case('linear_scale')
-                                  <select 
-                                    @if( $answers->count() > 0 )
-                                    disabled
-                                    @endif
-                                    id="{{ $id_for }}" 
-                                    name="{{ $field_name }}"
-                                    class="form-select @error($field_name) is-invalid @enderror"
-                                    {{ $question['is_required'] ? 'required' : '' }}
-                                  >
-                                    <option value="">Select a rating</option>
-                                    @for($i = 1; $i <= 5; $i++)
-                                      <option value="{{ $i }}" {{ old($field_name) == $i ? 'selected' : '' }}>{{ $i }}</option>
-                                    @endfor
-                                  </select>
+                                  <div class="d-flex flex-column flex-md-row align-items-md-center gap-3">
+                                    <select
+                                      id="{{ $fieldId }}"
+                                      name="{{ $fieldName }}"
+                                      class="form-select w-px-250 @error($fieldName) is-invalid @enderror"
+                                      {{ $question['is_required'] ? 'required' : '' }}
+                                      {{ $isReadOnly ? 'disabled' : '' }}
+                                    >
+                                      <option value="">Select a rating</option>
+                                      @for($i = 1; $i <= 5; $i++)
+                                        <option value="{{ $i }}" {{ old($fieldName) == $i ? 'selected' : '' }}>{{ $i }}</option>
+                                      @endfor
+                                    </select>
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                      @for($i = 1; $i <= 5; $i++)
+                                        <span class="badge bg-label-primary rounded-pill px-3 py-2">{{ $i }}</span>
+                                      @endfor
+                                    </div>
+                                  </div>
+                                  <div class="d-flex justify-content-between text-muted small mt-2">
+                                    <span>Low</span>
+                                    <span>High</span>
+                                  </div>
                                   @break
 
                                 @case('date')
-                                  <input 
-                                    type="text"
-                                    @if( $answers->count() > 0 )
-                                    disabled
-                                    @endif
-                                    class="form-control datepicker @error($field_name) is-invalid @enderror"
-                                    id="{{ $id_for }}" 
-                                    name="{{ $field_name }}" 
-                                    value="{{ old($field_name) }}"
-                                    placeholder="{{ $question['label'] }}"
-                                    {{ $question['is_required'] ? 'required' : '' }}
-                                  />
+                                  <div class="input-group">
+                                    <span class="input-group-text bg-label-primary border-end-0">
+                                      <i class="{{ $meta['icon'] }}"></i>
+                                    </span>
+                                    <input
+                                      type="text"
+                                      class="form-control datepicker @error($fieldName) is-invalid @enderror"
+                                      id="{{ $fieldId }}"
+                                      name="{{ $fieldName }}"
+                                      value="{{ old($fieldName) }}"
+                                      placeholder="{{ $question['label'] }}"
+                                      {{ $question['is_required'] ? 'required' : '' }}
+                                      {{ $isReadOnly ? 'disabled' : '' }}
+                                    />
+                                  </div>
                                   @break
 
                                 @case('time')
-                                  <input 
-                                    type="text"
-                                    @if( $answers->count() > 0 )
-                                    disabled
-                                    @endif
-                                    class="form-control timepicker @error($field_name) is-invalid @enderror"
-                                    id="{{ $id_for }}" 
-                                    name="{{ $field_name }}" 
-                                    value="{{ old($field_name) }}"
-                                    placeholder="{{ $question['label'] }}"
-                                    {{ $question['is_required'] ? 'required' : '' }}
-                                  />
+                                  <div class="input-group">
+                                    <span class="input-group-text bg-label-primary border-end-0">
+                                      <i class="{{ $meta['icon'] }}"></i>
+                                    </span>
+                                    <input
+                                      type="text"
+                                      class="form-control timepicker @error($fieldName) is-invalid @enderror"
+                                      id="{{ $fieldId }}"
+                                      name="{{ $fieldName }}"
+                                      value="{{ old($fieldName) }}"
+                                      placeholder="{{ $question['label'] }}"
+                                      {{ $question['is_required'] ? 'required' : '' }}
+                                      {{ $isReadOnly ? 'disabled' : '' }}
+                                    />
+                                  </div>
                                   @break
 
                                 @case('file')
-                                  <input 
+                                  <input
                                     type="file"
-                                    @if( $answers->count() > 0 )
-                                    disabled
-                                    @endif
-                                    class="form-control @error($field_name) is-invalid @enderror"
-                                    id="{{ $id_for }}" 
-                                    name="{{ $field_name }}"
+                                    class="form-control @error($fieldName) is-invalid @enderror"
+                                    id="{{ $fieldId }}"
+                                    name="{{ $fieldName }}"
                                     {{ $question['is_required'] ? 'required' : '' }}
+                                    {{ $isReadOnly ? 'disabled' : '' }}
                                   />
                                   @php
-                                  if( trim( old($field_name) ) && !empty( old($field_name) ) ):
+                                    $existingFile = trim(old($fieldName));
                                   @endphp
+                                  @if($existingFile !== '')
                                     <div class="mt-2">
-                                      <a href="{{ URL::to( old($field_name) ) }}" target="_blank">
-                                        <i class="ti ti-download"></i> {{ __('admin.Download') }}
+                                      <a href="{{ URL::to($existingFile) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="ti ti-download me-1"></i>{{ __('admin.Download') }}
                                       </a>
                                     </div>
-                                  @php endif; @endphp
+                                  @endif
                                   @break
-                                    
+
                                 @case('short_answer')
                                 @default
-                                  <input 
-                                    type="text"
-                                    @if( $answers->count() > 0 )
-                                    disabled
-                                    @endif
-                                    class="form-control @error($field_name) is-invalid @enderror"
-                                    id="{{ $id_for }}" 
-                                    name="{{ $field_name }}" 
-                                    value="{{ old($field_name) }}"
-                                    placeholder="{{ $question['label'] }}"
-                                    {{ $question['is_required'] ? 'required' : '' }}
-                                  />
+                                  <div class="input-group">
+                                    <span class="input-group-text bg-label-primary border-end-0">
+                                      <i class="{{ $meta['icon'] }}"></i>
+                                    </span>
+                                    <input
+                                      type="text"
+                                      class="form-control application-short-answer @error($fieldName) is-invalid @enderror"
+                                      id="{{ $fieldId }}"
+                                      name="{{ $fieldName }}"
+                                      value="{{ old($fieldName) }}"
+                                      placeholder="{{ $question['label'] }}"
+                                      {{ $question['is_required'] ? 'required' : '' }}
+                                      {{ $isReadOnly ? 'disabled' : '' }}
+                                    />
+                                  </div>
                               @endswitch
+                              </div>
 
-                              @error($field_name)
-                              <div class="invalid-feedback">{{ $message }}</div>
+                              @error($fieldName)
+                                <div class="invalid-feedback d-block mt-2">{{ $message }}</div>
                               @enderror
                             </div>
                           </div>
-                          @endforeach
                         </div>
-                      </div>
+                      @endforeach
                     </div>
                   </div>
-                  @endforeach
-                  @if( $answers->count() == 0 )
-                  <button type="submit" class="btn btn-primary btn-lg mt-4">
-                    <i class="ti ti-send me-2"></i>{{ __('admin.submit') }}
-                  </button>
-                  @endif
-                @if( $answers->count() == 0 )
-                </form>
-                @endif
-                @else
-                  <div class="alert alert-warning">
-                    {{ __('cycles.No Fields') }}
-                  </div>
-                @endif
+                </div>
               </div>
+            @endforeach
+
+            @if(!$isReadOnly)
+              <div class="card border shadow-none">
+                <div class="card-body p-4 p-lg-5">
+                  <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                    <div>
+                      <h5 class="mb-1">
+                        {{ $l == 'en' ? 'Complete your application' : 'اكمل تقديمك' }}
+                      </h5>
+                      <p class="text-muted mb-0">
+                        {{ $l == 'en' 
+                          ? 'Double-check the required answers and submit once everything looks ready.' 
+                          : 'تحقق من الاجابات المطلوبة وقم بالتقديم بمجرد انتهاء التحقق' }}
+                      </p>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                      <i class="ti ti-send me-2"></i>{{ __('admin.submit') }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              </form>
+            @endif
+          @else
+            <div class="alert alert-warning border border-warning rounded-3 mb-0">
+              {{ $l == 'en' ? 'The form has no questions yet.' : 'لا يوجد أسئلة في هذا النموذج' }}
             </div>
-          </div>
+          @endif
         </div>
-      </section>
+      </div>
     </div>
   </div>
-</div>
+</section>
 @stop
+
+@section('scripts')
+<script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
+<script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
+<script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+@endsection
 
 @section('pagescripts')
 <script>
-  // Initialize date pickers
+  document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('cycleApplicationForm');
+    const submitMode = 'native';
+
+    if (!form || typeof FormValidation === 'undefined') {
+      return;
+    }
+
+    const locale = document.documentElement.lang === 'ar' ? 'ar' : 'en';
+    const translations = {
+      en: {
+        required: 'This field is required.',
+        email: 'Please enter a valid email address.',
+        phone: 'Please enter a valid phone number.',
+        url: 'Please enter a valid URL starting with http:// or https://.',
+      },
+      ar: {
+        required: 'هذا الحقل مطلوب.',
+        email: 'يرجى إدخال عنوان بريد إلكتروني صالح.',
+        phone: 'يرجى إدخال رقم هاتف صالح.',
+        url: 'يرجى إدخال رابط صالح يبدأ بـ http:// أو https://.',
+      }
+    };
+
+    const t = translations[locale];
+    const fields = {};
+    const processedNames = new Set();
+    let isSubmitting = false;
+
+    const getLabel = field => {
+      const questionCard = field.closest('.application-question-card');
+      const label = questionCard?.querySelector('.form-label');
+      return (label?.textContent || field.getAttribute('placeholder') || field.name || 'This field')
+        .replace(/\*/g, '')
+        .trim();
+    };
+
+    const addRequiredValidator = (validators, field, label) => {
+      validators.callback = {
+        message: t.required,
+        callback: function () {
+          const group = form.querySelectorAll(`[name="${field.name.replace(/"/g, '\\"')}"]`);
+
+          if (field.type === 'radio') {
+            return Array.from(group).some(input => input.checked);
+          }
+
+          if (field.type === 'checkbox') {
+            return Array.from(group).some(input => input.checked);
+          }
+
+          if (field.type === 'file') {
+            return field.files.length > 0 || field.value.trim() !== '';
+          }
+
+          return field.value.trim() !== '';
+        }
+      };
+    };
+
+    form.querySelectorAll('input[name], select[name], textarea[name]').forEach(field => {
+      if (field.disabled || processedNames.has(field.name) || field.type === 'hidden') {
+        return;
+      }
+
+      const label = getLabel(field);
+      const validators = {};
+      const labelText = label.toLowerCase();
+      const isRequired = field.required || field.getAttribute('aria-required') === 'true';
+
+      if (isRequired) {
+        addRequiredValidator(validators, field, label);
+      }
+
+      if (labelText.includes('email')) {
+        validators.emailAddress = {
+          message: t.email
+        };
+      }
+
+      if (labelText.includes('phone')) {
+        validators.callback_phone = {
+          message: t.phone,
+          callback: function () {
+            const value = field.value.trim();
+            return value === '' || /^[+]?[\d\s().-]{6,20}$/.test(value);
+          }
+        };
+      }
+
+      if (labelText.includes('url') || labelText.includes('linkedin') || labelText.includes('portfolio') || labelText.includes('website')) {
+        validators.callback_url = {
+          message: t.url,
+          callback: function () {
+            const value = field.value.trim();
+            return value === '' || /^(https?:\/\/).+/i.test(value);
+          }
+        };
+      }
+
+      if (Object.keys(validators).length > 0) {
+        fields[field.name] = { validators };
+      }
+
+      processedNames.add(field.name);
+    });
+
+    if (Object.keys(fields).length === 0) {
+      return;
+    }
+
+    const fv = FormValidation.formValidation(form, {
+      fields,
+      plugins: {
+        trigger: new FormValidation.plugins.Trigger(),
+        bootstrap5: new FormValidation.plugins.Bootstrap5({
+          rowSelector: '.application-question-card',
+          eleInvalidClass: 'is-invalid',
+          eleValidClass: ''
+        }),
+        submitButton: new FormValidation.plugins.SubmitButton(),
+        defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
+        autoFocus: new FormValidation.plugins.AutoFocus()
+      },
+      init: instance => {
+        instance.on('plugins.message.placed', function (e) {
+          if (e.element.closest('.application-field-control')) {
+            e.element.closest('.application-field-control').insertAdjacentElement('afterend', e.messageElement);
+            return;
+          }
+
+          if (e.element.parentElement.classList.contains('input-group')) {
+            e.element.parentElement.insertAdjacentElement('afterend', e.messageElement);
+          }
+        });
+      }
+    });
+
+    fv.on('plugins.message.placed', function (e) {
+      if (e.element.closest('.application-field-control')) {
+        e.element.closest('.application-field-control').insertAdjacentElement('afterend', e.messageElement);
+        return;
+      }
+
+      if (e.element.closest('.input-group')) {
+        e.element.closest('.input-group').insertAdjacentElement('afterend', e.messageElement);
+        return;
+      }
+
+      if (e.element.closest('.options-group')) {
+        e.element.closest('.options-group').insertAdjacentElement('afterend', e.messageElement);
+      }
+    });
+
+    form.querySelectorAll('input[name], select[name], textarea[name]').forEach(field => {
+      if (field.disabled || !field.name || !fields[field.name]) {
+        return;
+      }
+
+      ['change', 'input'].forEach(eventName => {
+        field.addEventListener(eventName, function () {
+          fv.revalidateField(field.name);
+        });
+      });
+    });
+  });
+</script>
+
+<script>
   flatpickr(".datepicker", { dateFormat: "Y-m-d", allowInput: true });
+  flatpickr(".timepicker", { enableTime: true, noCalendar: true, dateFormat: "H:i", allowInput: true });
 
   document.addEventListener("DOMContentLoaded", function () {
     const sections = document.querySelectorAll(".section-wrapper");
@@ -295,7 +578,6 @@
     const submitCard = submitBtn?.closest('.card');
     const logicInputs = document.querySelectorAll(".question-logic");
 
-    // All sections visible
     sections.forEach(section => {
       section.style.display = "block";
     });
@@ -304,15 +586,12 @@
       if (!element) return;
       let logic = "continue";
 
-      // --- Determine logic type ---
       if (element.tagName === "SELECT") {
         const selectedOption = element.options[element.selectedIndex];
         logic = selectedOption ? selectedOption.dataset.logic : "continue";
       }
 
-      // --- Apply logic behavior ---
       if (logic === "submit") {
-        // Scroll to submit button smoothly, then trigger submit
         if (submitCard) {
           submitCard.scrollIntoView({ behavior: "smooth", block: "center" });
         }
@@ -322,7 +601,6 @@
       }
     }
 
-    // --- Attach listeners ---
     logicInputs.forEach(input => {
       input.addEventListener("change", function () {
         handleLogic(this);

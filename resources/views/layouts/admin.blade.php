@@ -87,7 +87,7 @@
 
     <!-- Vendors JS -->
     <script src="/vuexy/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
-
+    <script src="/vuexy/assets/vendor/libs/toastr/toastr.js"></script>
     <script src="/vuexy/assets/vendor/libs/swiper/swiper.js"></script>
     @yield('scripts')
     <!-- End Vendor JS-->
@@ -462,7 +462,7 @@
       }
 
       // Global SweetAlert2 configuration
-      const releaseSuccessAlert = ({title, message}) => {
+      window.releaseSuccessAlert = ({title, message}) => {
         Swal.fire({
           icon: 'success',
           title: title || '',
@@ -479,11 +479,12 @@
         });
       }
 
-      const releaseWarningAlert = ({title, message, onConfirm, onCancel, confirmText, cancelText, confirmColor}) => {
+      window.releaseWarningAlert = ({title, message, html, onConfirm, onCancel, confirmText, cancelText, confirmColor}) => {
         Swal.fire({
           icon: 'warning',
           title: title || '',
-          html: message,
+          text: message,
+          html: html,
           showCancelButton: onConfirm ? true : false,
           showConfirmButton: true,
           confirmButtonText: onConfirm ? (confirmText || "{{ __('admin.Confirm') }}") : "{{ __('admin.OK') }}",
@@ -506,7 +507,7 @@
         });
       }
 
-      const releaseFailureAlert = ({title, message}) => {
+      window.releaseFailureAlert = ({title, message}) => {
         Swal.fire({
           icon: 'error',
           title: title || '',
@@ -521,7 +522,7 @@
         });
       }
 
-      const getSharedDataTableConfig = ({ title, pageLength, descIndex, actionsIndex, withoutFilter = false }) => {
+      window.getSharedDataTableConfig = ({ title, pageLength, descIndex, actionsIndex, withoutFilter = false }) => {
         const config = {
           responsive: true,
           pageLength: pageLength ?? 10,
@@ -536,7 +537,7 @@
             search: '',
             searchPlaceholder: '{{ __('admin.Search') }}...',
           },
-          dom: '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-1"l><"col-sm-12 col-md-7 filters"><"col-sm-12 col-md-3"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+          dom: '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-1"l><"col-sm-12 col-md-7 filters"><"col-sm-12 col-md-3"f>>Bt<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
           ...(actionsIndex && {
             columnDefs: [
               {

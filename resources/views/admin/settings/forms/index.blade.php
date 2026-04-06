@@ -112,10 +112,14 @@ document.addEventListener('DOMContentLoaded', function () {
     order: [[5, 'desc']],
     lengthMenu: [ [7, 10, 25, 50, -1], [7, 10, 25, 50, "@lang('admin.All')"] ],
     columnDefs: [{ orderable: false, targets: -1 }],
-    language: {
-      url: '{{ $l }}' === 'ar'
-        ? "https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json"
-        : "https://cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json"
+   language: {
+      url:
+        document.dir === 'rtl'
+          ? 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json'
+          : 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json',
+      sLengthMenu: '_MENU_',
+      search: '',
+      searchPlaceholder: '{{ __('admin.Search') }}...',
     },
     dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'fB>>" +
          "<'row'<'col-sm-12'tr>>" +
@@ -144,6 +148,11 @@ document.addEventListener('DOMContentLoaded', function () {
           formsTable.column(2).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
         });
       @endif
+
+      setTimeout(() => {
+        $('.dataTables_filter .form-control').removeClass('form-control-sm');
+        $('.dataTables_length .form-select').removeClass('form-select-sm');
+      }, 300);
     }
   });
 
@@ -214,10 +223,14 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     },
     language: {
-      url: '{{ $l }}' === 'ar'
-        ? "https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json"
-        : "https://cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json"
-    }
+      url:
+        document.dir === 'rtl'
+          ? 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json'
+          : 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json',
+      sLengthMenu: '_MENU_',
+      search: '',
+      searchPlaceholder: '{{ __('admin.Search') }}...',
+    },
   });
 
 

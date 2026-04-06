@@ -409,7 +409,7 @@ return [
   'mark_alumni' => 'تحويل إلى خريج',
   'already_alumni' => 'خريج بالفعل',
   'mark_alumni_confirmation' => 'هذا الإجراء لا يمكن التراجع عنه. سيتم تخرج الشركة الناشئة وسيتم حفظ لقطة من معلوماتها وسجل مشاركاتها بشكل دائم.',
-  'mark_alumni_success' => 'تم تحويل الشركة الناشئة إلى خريج بنجاح.',
+  'mark_alumni_success' => 'تم تعيين الشركات الناشئة كخريجين بنجاح.',
   'mark_alumni_error' => 'حدث خطأ في تحويل الشركة الناشئة إلى خريج.',
 
   'not_started' => 'لم يبدء',
@@ -561,4 +561,61 @@ return [
   'support_and_mentorship_label' => 'مجالات الخبرة المطلوبة للدعم',
   'support_and_mentorship_validation' => 'يرجى اختيار مجال واحد على الأقل من مجالات الخبرة.',
   'support_and_mentorship_success' => 'تم حفظ متطلبات الدعم والارشاد بنجاح',
+
+  'mvp_prototype_link' => 'رابط المبدئ الأول / نموذج أولي',
+  'view_prototype' => 'عرض النموذج',
+
+  'additional_info' => 'معلومات اضافية',
+
+  // About Challenges Section
+  'about_challenges'        => 'نبذة عن الشركة الناشئة والتحديات',
+  'problem_being_solved'    => 'ما المشكلة التي يتم حلها؟',
+  'problem'                 => 'المشكلة',
+  'about_market_opportunity'=> 'فرصة السوق',
+  'competitors'             => 'المنافسون',
+  'monetization'            => 'تحقيق الإيرادات',
+  'challenges'              => 'التحديات',
+
+  // Mission Section
+  'mission'                 => 'المهمة',
+  'our_mission'             => 'مهمتنا',
+
+  // Why This Startup Section
+  'why_this_startup'        => 'لماذا هذه الشركة الناشئة؟',
+  'what_makes_us_different' => 'ما الذي يميزنا',
+
+  // Achievements Section
+  'achievements'            => 'الإنجازات',
+
+  // Startup Expertise Section
+  'startup_expertise'       => 'خبرات الشركة الناشئة',
+  'areas_of_expertise'      => 'مجالات الخبرة',
+
+  // Sustainability Section
+  'sustainability_goals'    => 'أهداف الاستدامة',
+
+  // Business Model Section
+  'business_model'          => 'نموذج العمل',
+  'how_we_operate'          => 'كيف نعمل',
+  'model_type'              => 'نوع النموذج',
+  'description'             => 'الوصف',
+  'business_plan'           => 'خطة العمل',
+
+  // Financial Plan Section
+  'financial_plan'          => 'الخطة المالية',
+  'financial_projections'   => 'التوقعات المالية',
+
+  'Full-time' => 'دوام كامل',
+  'Part-time' => 'دوام جزئي',
+  'employees_statistics' => 'الموظفين / الإحصائيات',
+  'total_employees' => 'إجمالي الموظفين',
+  'male_employees' => 'الموظفون الذكور',
+  'female_employees' => 'الموظفات الإناث',
+  'of_total' => 'من الاجمالي',
+  
+  'rank' => 'الرتبة',
+  'general' => 'عامة',
+	'hackathon' => 'هاكثون',
+
+  'mark_alumni_confirmation_bulk' => 'هذا الإجراء لا يمكن التراجع عنه. سيتم تخرج الشركات الناشئة المحددة وسيتم حفظ لقطة من معلوماتها وسجل مشاركاتها بشكل دائم.',
 ];

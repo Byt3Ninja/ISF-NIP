@@ -3,7 +3,6 @@
 @section('vendorstyle')
 {{-- Monthly Date Picker CDN ( For Financial Projection Form ) --}}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/toastr/toastr.css" />
 @stop
 
 @section('style')
@@ -48,14 +47,14 @@
       ['company-info', 'ti-building-skyscraper', $l == 'en' ? 'Startup Info' : 'معلومات الشركة'],
       ['industry-sectors', 'ti-apps', $l == 'en' ? 'Industry / Sectors' : ' الصناعة / القطاعات'],
       ['company-contact', 'ti-phone', $l == 'en' ? 'Contact Info' : 'معلومات الاتصال'],
-      ['company-desc', 'ti-file-description', $l == 'en' ? 'Description' : 'الوصف'],
+      ['company-desc', 'ti-file-description', __('admin.about_or_description')],
       ['company-financial-info', 'ti-report-money', $l == 'en' ? 'Financial Info' : 'المعلومات المالية'],
       ['company-financial-projection', 'ti-database-dollar', $l == 'en' ? 'Financial Projection' : 'التوقعات المالية'],
       ['team-info', 'ti-briefcase', __('startup.team_info')],
-      ['employees', 'ti-users-group', __('startup.Employees')],
+      ['employees', 'ti-users-group', __('startup.employees_statistics')],
       ['pitch-deck', 'ti-presentation', $l == 'en' ? 'Pitch Deck' : 'الوثائق'],
       ['company-milestones', 'ti-flag', $l == 'en' ? 'Milestones' : 'الإنجازات'],
-      ['business_model', 'ti-presentation', $l == 'en' ? 'Business Model' : ' نموذج الاعمال '],
+      ['business_model', 'ti-cash-banknote', $l == 'en' ? 'Business Model / MVP' : 'نموذج العمل / المنتج'],
       ['customer_growth', 'ti-trending-up', $l == 'en' ? 'Customer Growth' : 'نمو العملاء'],
   ]);
 

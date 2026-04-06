@@ -105,7 +105,7 @@
                 @endforeach
               </select>
             </div>
-            <div class="col-12 mb-4">
+            {{-- <div class="col-12 mb-4">
               <label class="form-label" for="task-tags">{{ __('admin.Tags') }}</label>
               <input
                 type="text"
@@ -115,7 +115,7 @@
                 placeholder="{{ __('admin.Select_Tags') }}"
                 data-whitelist='@json($tags->pluck('name'))'
               />
-            </div>
+            </div> --}}
             <div class="col-12 mb-4">
               <label class="form-label mb-2">{{ __('admin.attachments')}}</label>
               <div class="border bg-light-subtle rounded p-3 text-center cursor-pointer"

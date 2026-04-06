@@ -51,14 +51,18 @@ class AppServiceProvider extends ServiceProvider
                         MailConfig::set($data);
                     } else {
                         Config::set('mail.driver', 'smtp');
-                        Config::set('mail.host', $settings->host);
-                        Config::set('mail.port', (int) $settings->Port);
-                        Config::set('mail.username', $settings->Mail);
-                        Config::set('mail.password', $settings->Mailpassword);
-                        Config::set('mail.encryption', $settings->encryption);
+                        Config::set('mail.host', $settings->host ?? env('MAIL_HOST'));
+                        Config::set('mail.port', $settings->Port ?? env('MAIL_PORT'));
+                        Config::set('mail.username', $settings->Mail ?? env('MAIL_USERNAME'));
+                        Config::set('mail.password', $settings->Mailpassword ?? env('MAIL_PASSWORD'));
+                        Config::set('mail.encryption', $settings->encryption ?? env('MAIL_ENCRYPTION'));
 
-                        Config::set('mail.from.address', $settings->Mail);
-                        Config::set('mail.from.name', $settings->title ?? 'Your App Name');
+                        Config::set('mail.from.address', 
+                            (!empty($settings->Mail) && filter_var($settings->Mail, FILTER_VALIDATE_EMAIL)) 
+                                ? $settings->Mail 
+                                : env('MAIL_FROM_ADDRESS')
+                        );
+                        Config::set('mail.from.name', $settings->title ?? env('MAIL_FROM_NAME', config('app.name')));
                     }
                 }
             } catch (\Exception $e) {

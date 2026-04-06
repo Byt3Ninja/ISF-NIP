@@ -192,13 +192,20 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
       </div>
       <div class="d-flex align-items-center gap-3">
         @if( $_user->hasAnyRole('Admin') || ( $_user->ableTo('company.profile_view_mine', $permissions) && $_user->hasRole('registered') && $_user->company_id == $company->id ) )
-          <a href="/dashboard/myCompany/{{ $company->id }}" class="btn btn-white text-primary shadow-sm border">
+          <a href="/dashboard/myCompany/{{ $company->id }}" class="btn btn-outline-primary">
             {{ __('startup.edit_info') }} <i class="ti ti-settings ms-2"></i>
           </a>
         @else
           <button data-bs-toggle="modal" data-bs-target="#MessageModal" class="btn btn-label-primary">
             {{ __('admin.Contact') }} <i class="ti ti-message ms-2"></i>
           </button>
+        @endif
+        <!-- Replace href with mvp_prototype_link (remove after integration)  -->
+        <!-- Prototype Link -->
+        @if (isset($company->mvp_prototype_link))
+        <a href="https://www.google.com" class="btn btn-primary shadow-sm border">
+          {{ __('startup.view_prototype') }} <i class="ti ti-eye ms-2"></i>
+        </a>
         @endif
       </div>
     </div>
@@ -233,16 +240,99 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
       <!-- Overview Section -->
       <section class="tab-pane fade {{ $activeKey == 0 ? 'show active' : '' }}" id="overview" role="tabpanel" aria-labelledby="overview-tab">
         @include('admin.clients.startup.partials._startup_overview')
-        @include('admin.clients.startup.partials._startup_about')
       </section>
       
       <!-- Milestones Section -->
       <section class="tab-pane fade" id="milestones" role="tabpanel" aria-labelledby="milestones-tab">
         @include('admin.clients.startup.partials._startup_milestones')
       </section>
+
+      @php
+      $total_employees = 30;
+      $male_employees = 20;
+      $female_employees = 10;
+      $male_pct = $total_employees > 0 ? round(($male_employees / $total_employees) * 100) : 0;
+      $female_pct = $total_employees > 0 ? round(($female_employees / $total_employees) * 100) : 0;
+      
+      $employeesKpis = [
+        [
+          'title' => __('startup.total_employees'),
+          'value' => $total_employees,
+          'icon' => 'ti-users-group',
+          'color' => 'success',
+          'type' => 'split',
+        ],
+        [
+          'title' => __('startup.male_employees'),
+          'value' => $male_employees,
+          'icon' => 'ti-gender-male',
+          'color' => 'primary',
+          'type' => 'pct',
+          'pct' => $male_pct,
+        ],
+        [
+          'title' => __('startup.female_employees'),
+          'value' => $female_employees,
+          'icon' => 'ti-gender-female',
+          'color' => 'info',
+          'type' => 'pct',
+          'pct' => $female_pct,
+        ],
+      ];
+      @endphp
       
       <!-- Team Section -->
       <section class="tab-pane fade" id="team" role="tabpanel" aria-labelledby="team-tab">
+        <div class="row g-6 mb-6">
+          @foreach ($employeesKpis as $kpi)
+            <div class="col-md-4">
+              <div class="card h-100 card-border-shadow-{{ $kpi['color'] }}">
+                <div class="card-body">
+            
+                  {{-- Header: icon + value --}}
+                  <div class="d-flex align-items-center mb-2">
+                    <div class="avatar me-4">
+                      <span class="avatar-initial rounded bg-label-{{ $kpi['color'] }}">
+                        <i class="ti {{ $kpi['icon'] }} ti-28px"></i>
+                      </span>
+                    </div>
+                    <h4 class="mb-0">{{ $kpi['value'] }}</h4>
+                  </div>
+            
+                  {{-- Label --}}
+                  <p class="mb-1">{{ $kpi['title'] }}</p>
+            
+                  {{-- Sub-row: split (total) or percentage (male/female) --}}
+                  @if ($kpi['type'] === 'split')
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-label-primary">
+                      <i class="ti ti-gender-male me-1"></i>{{ $male_employees }}M
+                    </span>
+                    <span class="badge bg-label-info">
+                      <i class="ti ti-gender-female me-1"></i>{{ $female_employees }}F
+                    </span>
+                    <small class="text-muted">{{ $male_pct }}% / {{ $female_pct }}%</small>
+                  </div>
+                  <div class="progress" style="height: 5px;">
+                    <div class="progress-bar bg-primary" style="width: {{ $male_pct }}%"></div>
+                    <div class="progress-bar bg-info" style="width: {{ $female_pct }}%"></div>
+                  </div>
+                  @else
+                  <p class="mb-2">
+                    <span class="badge bg-label-{{ $kpi['color'] }}">{{ $kpi['pct'] }}%</span>
+                    <small class="text-muted ms-1">{{ __('startup.of_total') }}</small>
+                  </p>
+                  <div class="progress" style="height: 3px;">
+                    <div class="progress-bar bg-{{ $kpi['color'] }}" style="width: {{ $kpi['pct'] }}%"></div>
+                  </div>
+                  @endif
+            
+                </div>
+              </div>
+            </div>
+          @endforeach
+        </div>
+
         <div class="row">
           @include('admin.clients.startup.partials._startup_founders')
           @include('admin.clients.startup.partials._startup_shareholders')
