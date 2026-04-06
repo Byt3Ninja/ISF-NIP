@@ -3652,4 +3652,5 @@ return [
 	'applied_all' => 'Applied (All)',
 	'incubated' => 'Incubated',
 	'archive' => 'Archive',
+	'view_tasks'=> 'View Tasks',
 ];
