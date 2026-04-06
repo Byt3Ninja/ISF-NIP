@@ -148,7 +148,7 @@
         {{-- ── Establishment Date ── --}}
         <div class="col-md-6 col-12 mb-4">
           <div class="form-group">
-            <label class="form-label fs-6 fw-semibold mb-2" for="est_date">{{ __('admin.est_date') }}</label>
+            <label class="form-label fs-6 fw-semibold mb-2" for="est_date">{{ __('admin.est_date') }} *</label>
             <input class="form-control" id="est-date" name="est_date" type="text"
               value="{{ $client->company ? $client->company->est_date : old('est_date') }}"
               placeholder="YYYY-MM-DD" />

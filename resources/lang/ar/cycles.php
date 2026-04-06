@@ -638,4 +638,7 @@ return [
     'select_new_step' => 'اختر المرحلة الجديدة',
     'change_training_step' => 'تغيير مرحلة التدريب',
     'please_select_step' => 'يرجى اختيار المرحلة',
+    'delete_program' => 'حذف البرنامج',
+    'delete_program_message' => 'هل أنت متأكد من رغبتك في حذف هذا البرنامج؟',
+    'program_delete_success' => 'تم حذف البرنامج بنجاح!'
 ];
