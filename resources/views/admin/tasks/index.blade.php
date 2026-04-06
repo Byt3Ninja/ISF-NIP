@@ -2,7 +2,7 @@
 
 @section('vendorstyle')
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
+{{-- <link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" /> --}}
 @stop
 
 @php
@@ -31,7 +31,7 @@ $authUser = auth()->user();
 <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
-<script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script>
+{{-- <script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script> --}}
 @stop
 
 @section('pagescripts')
@@ -107,7 +107,7 @@ $(function () {
       processing: true,
       responsive: true,
       data: tasks,
-      columns: [{ data: null }, { data: 'title' }, { data: 'creator' }, { data: 'program' }, { data: 'assignees' }, { data: 'priority' }, { data: 'overallStatus' }, { data: 'dueDate' }, { data: 'id' }],
+      columns: [{ data: null }, { data: 'title' }, { data: 'creator' }, { data: 'program' }, { data: 'priority' }, { data: 'overallStatus' }, { data: 'dueDate' }, { data: 'id' }],
       columnDefs: [
         {
           className: 'control', orderable: false, searchable: false, responsivePriority: 2, targets: 0,
@@ -116,7 +116,7 @@ $(function () {
         {
           targets: 1, responsivePriority: 4,
           render: (data, type, full) => `
-            <div class="d-flex justify-content-start align-items-start task-title" style="max-width: 250px;">
+            <div class="d-flex justify-content-start align-items-start task-title" style="max-width: 200px;">
               <div class="d-flex flex-column overflow-y-hidden" style="width: 100%; min-width: 0; max-height: 80px;">
                 <a href="javascript:;" class="text-heading fw-medium line-clamp-1"><span>${full.title}</span></a>
                 <small class="text-muted line-clamp-3">${full.description}</small>
@@ -125,50 +125,51 @@ $(function () {
         },
         { targets: 2, render: (data, type, full) => `
           <div>
-            <span class="text-heading">${full.creator.name}</span>
+            <span class="text-heading">${full.creator.name ? full.creator.name : full.creator.first_name_en + ' ' + full.creator.last_name_en}</span>
             <small class="text-muted d-block text-uppercase">${roleObj[full.creator.role] || full.creator.role}</small>
           </div>
           `,
         },
         { targets: 3, render: (data, type, full) => `<span class="text-heading">${full.program.title}</span>` },
+        // {
+        //   targets: 4,
+        //   render: (data, type, full) => {
+        //     const assignees = full.assignees;
+        //     let html = assignees.slice(0, 2).map(a => {
+        //       const cls = statusObj[a.status]?.class || 'bg-label-secondary';
+        //       return `<span class="badge ${cls} me-1 mb-1" title="${a.name} - ${a.status}">${a.name}</span>`;
+        //     }).join('');
+        //     if (assignees.length > 2) html += `<span class="badge bg-label-secondary">+${assignees.length - 2}</span>`;
+        //     return html;
+        //   }
+        // },
         {
           targets: 4,
-          render: (data, type, full) => {
-            const assignees = full.assignees;
-            let html = assignees.slice(0, 2).map(a => {
-              const cls = statusObj[a.status]?.class || 'bg-label-secondary';
-              return `<span class="badge ${cls} me-1 mb-1" title="${a.name} - ${a.status}">${a.name}</span>`;
-            }).join('');
-            if (assignees.length > 2) html += `<span class="badge bg-label-secondary">+${assignees.length - 2}</span>`;
-            return html;
-          }
-        },
-        {
-          targets: 5,
           render: (d, t, f) => {
             const priorityInfo = priorityObj[f.priority] || { class: 'bg-label-secondary', title: 'Unknown' };
             return `<span class="badge ${priorityInfo.class}" text-capitalized>${priorityInfo.title}</span>`;
           }
         },
         {
-          targets: 6,
+          targets: 5,
           render: (d, t, f) => {
             const statusInfo = statusObj[f.overallStatus.toLowerCase()] || { class: 'bg-label-secondary', title: 'Unknown' };
             return `<span class="badge ${statusInfo.class}" text-capitalized>${statusInfo.title}</span>`;
           }
         },
-        { targets: 7, render: (d, t, f) => `<span class="text-heading">${f.dueDate}</span>` },
+        { targets: 6, render: (d, t, f) => `<span class="text-heading">${f.dueDate !== 'N/A' ? moment(f.dueDate, 'YYYY-MM-DD').format('YYYY-MM-DD') : 'N/A'}</span>` },
         {
           targets: -1, searchable: false, orderable: false,
           render: () => `
             <div class="d-flex align-items-center">
               <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill task-view"><i class="ti ti-eye ti-md"></i></a>
-              <!-- <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill task-edit"><i class="ti ti-pencil ti-md"></i></a> -->
+              <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill task-edit"><i class="ti ti-pencil ti-md"></i></a>
+              <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill task-archive"><i class="ti ti-archive ti-md"></i></a>
               <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill delete-record"><i class="ti ti-trash ti-md"></i></a>
             </div>`
         }
       ],
-      order: [[6, 'desc']],
+      order: [[5, 'desc']],
       dom: '<"row"<"col-12 col-lg-9 d-flex flex-wrap align-items-center ps-0 ps-lg-3"l><"col-12 col-lg-3 dt-action-buttons text-xl-end text-lg-start text-md-end text-start d-flex align-items-center justify-content-end flex-md-row flex-column mb-6 mb-md-0 pe-0 pe-lg-2"fB>>t<"row px-6"<"col-sm-12 col-lg-6"i><"col-sm-12 col-lg-6 d-flex justify-content-end"p>>',
       language: {
         url: document.dir == 'rtl'
@@ -347,31 +348,127 @@ $(function () {
         </div>`;
     }).join('');
 
-    const tagsHtml = data.tags?.length ? `<div class="col-12 mb-3"><strong>{{ __('admin.tags') }}</strong><div class="d-flex flex-wrap gap-2 mt-2">${data.tags.map(tag => `<span class="badge bg-label-info">${tag}</span>`).join('')}</div></div>` : '';
+    // const tagsHtml = data.tags?.length ? `<div class="col-12 mb-3"><strong>{{ __('admin.tags') }}</strong><div class="d-flex flex-wrap gap-2 mt-2">${data.tags.map(tag => `<span class="badge bg-label-info">${tag}</span>`).join('')}</div></div>` : '';
 
     const attachmentsHtml = data.attachments?.length ?
-      `<div class="col-12 mb-3 mt-6"><strong>{{ __('admin.attachments') }}:</strong><div class="mt-2 d-flex flex-wrap gap-2">` +
-      data.attachments.map(file => `
-        <a href="/storage/${file.path}" target="_blank" class="btn btn-sm btn-outline-secondary waves-effect waves-light">
-          <i class="ti ti-file-text me-1"></i>${file.name}
-        </a>`).join('') +
+      `<div class="col-12 mb-3 mt-5">
+        <strong class="d-flex align-items-center gap-2">
+          <i class="ti ti-paperclip fs-4 text-muted"></i>
+          {{ __('admin.attachments') }}:
+        </strong>
+        <div class="mt-2 ms-5 d-flex flex-wrap gap-2">` +
+      data.attachments.map(file => {
+        const iconMap = {
+          'application/pdf': 'ti-file-type-pdf text-danger',
+          'image/': 'ti-photo text-success',
+          'video/': 'ti-video text-info',
+          'application/zip': 'ti-file-zip text-warning',
+          'application/vnd': 'ti-file-spreadsheet text-success',
+        };
+        let iconClass = 'ti-file-text text-secondary';
+        for (const [mime, cls] of Object.entries(iconMap)) {
+          if ((file.type || '').startsWith(mime)) { iconClass = cls; break; }
+        }
+        const sizeKb = file.size ? (file.size / 1024).toFixed(1) + ' KB' : '';
+        return `<a href="/storage/${file.path}" target="_blank" class="btn btn-sm btn-outline-secondary waves-effect waves-light d-flex align-items-center gap-1">
+          <i class="ti ${iconClass}"></i>
+          <span>${file.name}</span>
+          ${sizeKb ? `<small class="text-muted">(${sizeKb})</small>` : ''}
+        </a>`;
+      }).join('') +
       `</div></div>`
       : '';
 
-    $('#task-details-content').html(`
-      <div class="row">
-        <div class="col-12 mb-4"><h4>${data.title}</h4><p class="text-muted">${data.description}</p></div>
-        <div class="col-lg-6 mb-3"><strong>{{ __('admin.Created_By') }}:</strong> ${data.creator.name}</div>
-        <div class="col-lg-6 mb-3"><strong>{{ __('admin.Creator_Role') }}:</strong> <span class="text-uppercase">${roleObj[data.creator.role] || data.creator.role}</span></div>
-        <div class="col-lg-6 mb-3"><strong>{{ __('admin.Program') }}:</strong> ${data.program.title}</div>
-        <div class="col-lg-6 mb-3"><strong>{{ __('admin.Priority') }}:</strong> <span class="badge ${priorityObj[data.priority].class} ms-2">${priorityObj[data.priority].title}</span></div>
-        <div class="col-lg-6 mb-3"><strong>{{ __('admin.overall_status') }}:</strong> <span class="badge ${ (statusObj[data.overallStatus.toLowerCase()] || {class: 'bg-label-secondary'}).class } ms-2">${ (statusObj[data.overallStatus.toLowerCase()] || {title: 'Unknown'}).title }</span></div>
-        <div class="col-lg-6 mb-3"><strong>{{ __('admin.Due_Date') }}:</strong> ${data.dueDate}</div>
-        <div class="col-12 mb-3 mt-6"><strong>{{ __('admin.startup_statuses') }}:</strong><div class="mt-2">${assigneesHtml}</div></div>
-        ${tagsHtml}
-        ${attachmentsHtml}
-        <div class="col-12 mb-3 mt-6" id="attachments-container" style="display: none;"><strong>{{ __('admin.attachments') }}:</strong><div class="mt-2" id="attachments-list"></div></div>
-      </div>
+      $('#task-details-content').html(`
+        <div class="row">
+            <!-- Title & Description -->
+            <div class="col-12 mb-4">
+                <h4 class="d-flex align-items-center gap-2">
+                    <i class="ti ti-clipboard-text fs-3 text-primary"></i>
+                    ${data.title}
+                </h4>
+                <p class="text-muted ms-5">${data.description || 'No description provided.'}</p>
+            </div>
+
+            <!-- Created By -->
+            <div class="col-lg-6 mb-3">
+                <strong class="d-flex align-items-center gap-2">
+                    <i class="ti ti-user fs-4 text-info"></i>
+                    {{ __('admin.Created_By') }}:
+                </strong>
+                <div class="ms-5">${data.creator.name}</div>
+            </div>
+
+            <!-- Creator Role -->
+            <div class="col-lg-6 mb-3">
+                <strong class="d-flex align-items-center gap-2">
+                    <i class="ti ti-shield-check fs-4 text-info"></i>
+                    {{ __('admin.Creator_Role') }}:
+                </strong>
+                <div class="ms-5">
+                    <span class="text-uppercase">${roleObj[data.creator.role] || data.creator.role}</span>
+                </div>
+            </div>
+
+            <!-- Program -->
+            <div class="col-lg-6 mb-3">
+                <strong class="d-flex align-items-center gap-2">
+                    <i class="ti ti-rocket fs-4 text-success"></i>
+                    {{ __('admin.Program') }}:
+                </strong>
+                <div class="ms-5">${data.program.title}</div>
+            </div>
+
+            <!-- Priority -->
+            <div class="col-lg-6 mb-3">
+                <strong class="d-flex align-items-center gap-2">
+                    <i class="ti ti-flag fs-4 text-warning"></i>
+                    {{ __('admin.Priority') }}:
+                </strong>
+                <div class="ms-5">
+                    <span class="badge ${priorityObj[data.priority].class}">${priorityObj[data.priority].title}</span>
+                </div>
+            </div>
+
+            <!-- Overall Status -->
+            <div class="col-lg-6 mb-3">
+                <strong class="d-flex align-items-center gap-2">
+                    <i class="ti ti-status-change fs-4 text-primary"></i>
+                    {{ __('admin.overall_status') }}:
+                </strong>
+                <div class="ms-5">
+                    <span class="badge ${(statusObj[data.overallStatus.toLowerCase()] || {class: 'bg-label-secondary'}).class}">
+                        ${(statusObj[data.overallStatus.toLowerCase()] || {title: 'Unknown'}).title}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Due Date -->
+            <div class="col-lg-6 mb-3">
+                <strong class="d-flex align-items-center gap-2">
+                    <i class="ti ti-calendar-time fs-4 text-danger"></i>
+                    {{ __('admin.Due_Date') }}:
+                </strong>
+                <div class="ms-5">${data.dueDate}</div>
+            </div>
+
+            <!-- Startup Statuses / Assignees -->
+            <div class="col-12 mb-3 mt-5">
+                <strong class="d-flex align-items-center gap-2">
+                    <i class="ti ti-users fs-4 text-primary"></i>
+                    {{ __('admin.startup_statuses') }}:
+                </strong>
+                <div class="mt-2 ms-5">
+                    ${assigneesHtml}
+                </div>
+            </div>
+
+            {{-- Tags Section --}}
+            {{-- ${tagsHtml} --}}
+
+            <!-- Attachments -->
+            ${attachmentsHtml}
+        </div>
     `);
     // Store task ID in modal for trigger-company button
     $('#viewTaskModal').data('taskId', data.id);
@@ -428,10 +525,10 @@ $(function () {
     }
 
     // Set tags in Tagify
-    tagifyInstance.removeAllTags();
-    if (data.tags && Array.isArray(data.tags)) {
-      tagifyInstance.addTags(data.tags);
-    }
+    // tagifyInstance.removeAllTags();
+    // if (data.tags && Array.isArray(data.tags)) {
+    //   tagifyInstance.addTags(data.tags);
+    // }
 
     $('#addTaskModalLabel').text('{{ __('admin.edit_task') }}');
     $('.data-submit').text('{{ __('admin.Update') }}');
@@ -482,21 +579,21 @@ $(function () {
 });
 
 // Initialize Tagify for tags input
-const tagifyInput = document.getElementById('task-tags');
-const tagifyWhitelist = tagifyInput.dataset.whitelist ? JSON.parse(tagifyInput.dataset.whitelist) : [];
+// const tagifyInput = document.getElementById('task-tags');
+// const tagifyWhitelist = tagifyInput.dataset.whitelist ? JSON.parse(tagifyInput.dataset.whitelist) : [];
 
-const tagifyInstance = new Tagify(tagifyInput, {
-  whitelist: tagifyWhitelist,
-  maxTags: 50,
-  dropdown: {
-    maxItems: 20,
-    classname: 'tags-look',
-    enabled: 0,
-    closeOnSelect: false
-  },
-  enforceWhitelist: false,
-  placeholder: tagifyInput.placeholder
-});
+// const tagifyInstance = new Tagify(tagifyInput, {
+//   whitelist: tagifyWhitelist,
+//   maxTags: 50,
+//   dropdown: {
+//     maxItems: 20,
+//     classname: 'tags-look',
+//     enabled: 0,
+//     closeOnSelect: false
+//   },
+//   enforceWhitelist: false,
+//   placeholder: tagifyInput.placeholder
+// });
 
 // Validation & Form Logic
 (function () {
@@ -533,7 +630,7 @@ const tagifyInstance = new Tagify(tagifyInput, {
     $('#task-due-date').val('');
 
     // Reset tags
-    tagifyInstance.removeAllTags();
+    // tagifyInstance.removeAllTags();
 
     // Reset select2 elements (need to trigger change for proper display)
     $('#task-program').val('').trigger('change');
@@ -572,8 +669,8 @@ const tagifyInstance = new Tagify(tagifyInput, {
       assigneeIds.forEach(id => formData.append('assignees[]', id));
 
       // Append tags from Tagify to formData
-      const tags = tagifyInstance.value.map(tag => tag.value || tag);
-      tags.forEach(tag => formData.append('tags[]', tag));
+      // const tags = tagifyInstance.value.map(tag => tag.value || tag);
+      // tags.forEach(tag => formData.append('tags[]', tag));
 
       // Append other form fields to formData (already collected by new FormData(form) for basic inputs)
       formData.set('title', formData.get('taskTitle'));
@@ -614,9 +711,7 @@ const tagifyInstance = new Tagify(tagifyInput, {
           headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
           },
-        success: function(response) {
-          console.log('response', response);
-          
+        success: function(response) {          
           // Map assignees from the response to match DataTable structure
           const mappedAssignees = response.data.assignees.map(assignee => ({
             id: assignee.id,
@@ -640,8 +735,8 @@ const tagifyInstance = new Tagify(tagifyInput, {
             assignees: mappedAssignees,
             priority: response.data.priority,
             overallStatus: response.data.status,
-            dueDate: response.data.due_date ? moment(response.data.due_date).format('YYYY-MM-DD') : 'N/A',
-            tags: response.data.tags || []
+            dueDate: response.data.due_date ? moment(response.data.due_date, 'YYYY-MM-DD').format('YYYY-MM-DD') : 'N/A',
+            // tags: response.data.tags || []
           };
           
           if (editRow) {

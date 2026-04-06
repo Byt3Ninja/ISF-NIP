@@ -3707,4 +3707,5 @@ return [
 	'Years' => 'سنوات',
 	'applied_all' => 'تم التطبيق (الكل)',
 	'incubated' => 'حاضنه',
+	'archive' => 'ارشفه',
 ];

@@ -236,7 +236,7 @@ class TasksController extends Controller
                 'message' => app()->getLocale() == 'ar' 
                     ? 'تم إنشاء المهمة بنجاح' 
                     : 'Task created successfully.',
-                'data' => $task->load('program', 'assignees')
+                'data' => $task->load('program', 'assignees', 'creator')
             ], 201);
 
         } catch (\Exception $e) {
@@ -362,7 +362,7 @@ class TasksController extends Controller
                 'message' => app()->getLocale() == 'ar'
                     ? 'تم تحديث المهمة بنجاح'
                     : 'Task updated successfully.',
-                'data' => $task->load('program', 'assignees')
+                'data' => $task->load('program', 'assignees', 'creator')
             ], 200);
 
         } catch (\Exception $e) {
