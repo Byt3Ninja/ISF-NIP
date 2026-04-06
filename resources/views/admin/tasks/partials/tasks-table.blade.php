@@ -17,7 +17,7 @@
           <th class="text-nowrap">{{ __('admin.task') }}</th>
           <th class="text-nowrap">{{ __('admin.created_by') }}</th>
           <th class="text-nowrap">{{ __('admin.Program') }}</th>
-          <th class="text-nowrap">{{ __('admin.assignees') }}</th>
+          {{-- <th class="text-nowrap">{{ __('admin.assignees') }}</th> --}}
           <th class="text-nowrap">{{ __('admin.Priority') }}</th>
           <th class="text-nowrap">{{ __('admin.Status') }}</th>
           <th class="text-nowrap">{{ __('admin.Due_Date') }}</th>
