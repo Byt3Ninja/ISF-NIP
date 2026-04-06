@@ -77,5 +77,12 @@ return [
     'Notes' => 'Notes',
     'Attachments' => 'Attachments',
     'Best_regards' => 'Best regards,',
+    'change_cycle_subject' => 'Change Cycle Notification',
+    'change_cycle_heading' => 'Change Cycle Notification',
+    'hello' => 'Hello',
+    'user' => 'User',
+    'cycle_changed' => 'Your startup cycle has changed from :from to :to',
+    'organization' => 'Organization',
+    'thank_you' => 'Thank You',
 
 ];

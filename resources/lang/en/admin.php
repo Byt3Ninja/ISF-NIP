@@ -3653,4 +3653,7 @@ return [
 	'incubated' => 'Incubated',
 	'archive' => 'Archive',
 	'view_tasks'=> 'View Tasks',
+	'Incubated_Startups' => 'Incubated Startups',
+	'Applied_Startups' => 'Applied Startups',
+	'Alumni_Startups' => 'Alumni Startups',
 ];
