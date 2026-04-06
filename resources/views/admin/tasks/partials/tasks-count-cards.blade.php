@@ -4,15 +4,16 @@
     ['key' => 'pending', 'title' => __('admin.Pending'), 'subtitle' => __('admin.tasks_waiting')],
     ['key' => 'active', 'title' => __('admin.Active'), 'subtitle' => "(in_progress_count)" . __('admin.boardTitleProgress') . ", (in_review_count) " . __('admin.boardTitleReview')],
     ['key' => 'completed', 'title' => __('admin.Completed'), 'subtitle' => __('admin.finished_tasks')],
+    ['key' => 'archived', 'title' => __('admin.archived'), 'subtitle' => __('admin.archived_tasks')],
   ];
-  $icons = ['ti-clipboard-list', 'ti-clock', 'ti-refresh', 'ti-check'];
-  $colors = ['primary', 'warning', 'info', 'success'];
+  $icons  = ['ti-clipboard-list', 'ti-clock', 'ti-refresh', 'ti-check', 'ti-archive'];
+  $colors = ['primary', 'warning', 'info', 'success', 'secondary'];
 @endphp
 
 <!-- Count Cards -->
 <div class="row g-6 mb-6">
   @foreach ($countCards as $key => $card)
-  <div class="col-sm-6 col-xl-3">
+  <div class="col-sm-6 col-xl">
     <div class="card">
       <div class="card-body">
         <div class="d-flex align-items-start justify-content-between">
