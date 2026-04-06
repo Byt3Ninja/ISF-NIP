@@ -74,9 +74,6 @@ const statusObj = {
   completed: { title: '{{ __('admin.boardTitleCompleted') }}', class: 'bg-label-success'  },
   archived:  { title: '{{ __('admin.archived') }}',            class: 'bg-label-secondary' }
 };
-  review:    { title: '{{ __('admin.boardTitleReview') }}',    class: 'bg-label-primary' },
-  completed: { title: '{{ __('admin.boardTitleCompleted') }}', class: 'bg-label-success' }
-};
 
 const roleObj = {
   admin:               '{{ __('admin.Admin') }}',
