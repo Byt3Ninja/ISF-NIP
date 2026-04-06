@@ -3651,4 +3651,5 @@ return [
 	'Years' => 'Years',
 	'applied_all' => 'Applied (All)',
 	'incubated' => 'Incubated',
+	'archive' => 'Archive',
 ];
