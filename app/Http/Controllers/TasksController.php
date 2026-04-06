@@ -103,6 +103,7 @@ class TasksController extends Controller
                 'in_review_count' => $tasksData->where('status', 'review')->count(),
             ],
             'completed' => $tasksData->where('status', 'completed')->count(),
+            'archived' => $tasksData->where('status', 'archived')->count(),
         ];
 
         return view("admin.tasks.index", compact("programs", "startups", "tags", "stats", "tasks"));
@@ -126,11 +127,10 @@ class TasksController extends Controller
             'title' => 'required|string|max:200',
             'description' => 'nullable|string|max:2000',
             'program_id' => 'required|exists:cycles,id',
-            'taskAssignees' => 'required|array|min:1',
-            'taskAssignees.*' => 'exists:companies,id',
+            'assignees' => 'required|array|min:1',
+            'assignees.*' => 'exists:companies,id',
             'priority' => 'required|in:Low,Medium,High',
-            'status' => 'required|in:pending,progress,review,completed',
-            'due_date' => 'nullable|date|after_or_equal:today',
+            'status' => 'required|in:pending,progress,review,completed,archived',
             'tags' => 'nullable|array',
             'attachments' => 'nullable|array|max:10',
             'attachments.*' => 'file|max:10240',
@@ -226,7 +226,7 @@ class TasksController extends Controller
 
             // Attach assignees (companies/startups) - use sync to prevent duplicates
             $assigneeData = [];
-            foreach ($request->taskAssignees as $companyId) {
+            foreach ($request->assignees as $companyId) {
                 $assigneeData[$companyId] = [
                     'status' => 'pending',
                     'last_updated' => now(),
@@ -239,7 +239,7 @@ class TasksController extends Controller
                 'message' => app()->getLocale() == 'ar' 
                     ? 'تم إنشاء المهمة بنجاح' 
                     : 'Task created successfully.',
-                'data' => $task->load('program', 'assignees', 'creator')
+                'data' => $task->load('program', 'assignees', 'creator.roles')
             ], 201);
 
         } catch (\Exception $e) {
@@ -293,7 +293,7 @@ class TasksController extends Controller
             'assignees' => 'sometimes|required|array|min:1',
             'assignees.*' => 'exists:companies,id',
             'priority' => 'sometimes|required|in:Low,Medium,High',
-            'status' => 'sometimes|required|in:pending,progress,review,completed',
+            'status' => 'sometimes|required|in:pending,progress,review,completed,archived',
             'due_date' => 'nullable|date',
             'tags' => 'nullable|array',
         ]);
@@ -329,12 +329,13 @@ class TasksController extends Controller
 
             $task->update($data);
 
-            // Update assignees if provided
+            // Update assignees if provided — preserve existing statuses
             if ($request->has('assignees')) {
+                $existingStatuses = $task->assignees()->pluck('status', 'company_id')->toArray();
                 $assigneeData = [];
                 foreach ($request->assignees as $companyId) {
                     $assigneeData[$companyId] = [
-                        'status' => 'pending',
+                        'status' => $existingStatuses[$companyId] ?? 'pending',
                         'last_updated' => now(),
                     ];
                 }
@@ -365,7 +366,7 @@ class TasksController extends Controller
                 'message' => app()->getLocale() == 'ar'
                     ? 'تم تحديث المهمة بنجاح'
                     : 'Task updated successfully.',
-                'data' => $task->load('program', 'assignees', 'creator')
+                'data' => $task->load('program', 'assignees', 'creator.roles')
             ], 200);
 
         } catch (\Exception $e) {
@@ -466,6 +467,53 @@ class TasksController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Delete a single attachment from a task.
+     */
+    public function deleteAttachment($taskId, $filename)
+    {
+        try {
+            $task = ProgramTask::find($taskId);
+
+            if (!$task) {
+                return response()->json(['success' => false, 'message' => 'Task not found.'], 404);
+            }
+
+            $attachments = $task->attachments ?? [];
+            $target = null;
+            $remaining = [];
+
+            foreach ($attachments as $att) {
+                if ($att['name'] === $filename) {
+                    $target = $att;
+                } else {
+                    $remaining[] = $att;
+                }
+            }
+
+            if (!$target) {
+                return response()->json(['success' => false, 'message' => 'Attachment not found.'], 404);
+            }
+
+            // Delete physical file
+            if (Storage::disk('public')->exists($target['path'])) {
+                Storage::disk('public')->delete($target['path']);
+            }
+
+            $task->update(['attachments' => $remaining]);
+
+            return response()->json([
+                'success' => true,
+                'message' => app()->getLocale() == 'ar' ? 'تم حذف المرفق بنجاح' : 'Attachment deleted successfully.',
+                'attachments' => $remaining,
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error deleting attachment: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
         }
     }
 
