@@ -130,7 +130,7 @@ $(function () {
           </div>
           `,
         },
-        { targets: 3, render: (data, type, full) => `<span class="text-heading">${full.program.title}</span>` },
+        { targets: 3, render: (data, type, full) => `<a href="/dashboard/programlist/${full.program.id}" target="_blank" class="text-heading text-decoration-none">${full.program.title}</a>` },
         // {
         //   targets: 4,
         //   render: (data, type, full) => {
@@ -419,7 +419,9 @@ $(function () {
                     <i class="ti ti-rocket fs-4 text-success"></i>
                     {{ __('admin.Program') }}:
                 </strong>
-                <div class="ms-5">${data.program.title}</div>
+                <div class="ms-5">
+                    <a href="/dashboard/programlist/${data.program.id}" target="_blank" class="text-body text-decoration-none fw-semibold">${data.program.title}</a>
+                </div>
             </div>
 
             <!-- Priority -->
