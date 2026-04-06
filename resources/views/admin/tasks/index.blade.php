@@ -342,7 +342,7 @@ $(function () {
             <div><strong>${a.name}</strong><br><small class="text-muted">{{ __('admin.last_updated') }}: ${a.lastUpdated}</small></div>
           </div>
           <div class="d-flex align-items-center gap-3 text-end">
-            <div><span>Status:</span> <span class="badge ${ (statusObj[a.status.toLowerCase()] || {class: 'bg-label-secondary'}).class }">${ (statusObj[a.status.toLowerCase()] || {title: 'Unknown'}).title }</span></div>
+            <div><span>{{ __('admin.Status') }} :</span> <span class="badge ${ (statusObj[a.status.toLowerCase()] || {class: 'bg-label-secondary'}).class }">${ (statusObj[a.status.toLowerCase()] || {title: 'Unknown'}).title }</span></div>
             <!-- <button class="btn btn-sm btn-outline-primary trigger-company" data-company="${a.name}" data-current-status="${a.status}"><i class="ti ti-send me-1"></i>{{ __('admin.trigger_update') }}</button> -->
           </div>
         </div>`;
