@@ -3708,4 +3708,5 @@ return [
 	'applied_all' => 'تم التطبيق (الكل)',
 	'incubated' => 'حاضنه',
 	'archive' => 'ارشفه',
+	'view_tasks' => 'عرض التاسكات',
 ];
