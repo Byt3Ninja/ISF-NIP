@@ -75,6 +75,8 @@ class TasksController extends Controller
                                 ? $assignee->pivot->last_updated 
                                 : $assignee->pivot->last_updated->format('Y-m-d'))
                             : 'N/A',
+                        'logo' => $assignee->logo ?? null,
+                        'profile_url' => url('/dashboard/companyProfile/' . $assignee->id),
                     ];
                 })->toArray(),
                 'priority' => $task->priority,
@@ -86,6 +88,7 @@ class TasksController extends Controller
                     'id' => $task->creator->id,
                     'name' => $task->creator->name,
                     'role' => $task->creator->roles->first()->name ?? 'N/A',
+                    'avatar' => $task->creator->image_url,
                     'profile_url' => url('/dashboard/users/' . $task->creator->id),
                 ] : null,
             ];

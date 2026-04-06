@@ -2669,7 +2669,7 @@ return [
 	'trigger_update' => 'اشعار بالتحديث',
 	'tags' => 'العلامات',
 	'overall_status' => 'الحالة العامة',
-	'startup_statuses' => 'حالات الشركات الناشئة',
+	'assignee_startups_statuses' => 'حالات الشركات الناشئة المعيّنة',
 	'edit_task' => 'تعديل المهمة',
 	'Update' => 'تحديث',
 	'trigger_status_update' => 'تحديث حالة المهمة',
