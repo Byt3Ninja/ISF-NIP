@@ -643,18 +643,14 @@ class TasksController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => app()->getLocale() == 'ar'
-                    ? 'تمت إضافة التعليق بنجاح'
-                    : 'Comment added successfully'
+                'message' => __('admin.comment_success')
             ]);
 
         } catch (\Exception $e) {
             \Log::error('Error downloading attachment: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => app()->getLocale() == 'ar'
-                    ? 'فشل في إضافة التعليق'
-                    : 'Failed to add comment'
+                'message' => __('admin.comment_failed')
             ], 500);
         }
     }
@@ -677,9 +673,7 @@ class TasksController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => app()->getLocale() == 'ar'
-                    ? 'تمت إضافة التعليق بنجاح'
-                    : 'تم تحديث حالة المهمة بنجاح'
+                'message' => __('admin.Task_status_updated_successfully')
             ]);
 
         } catch (\Exception $e) {
@@ -687,6 +681,36 @@ class TasksController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => __('admin.move_task_failed')
+            ], 500);
+        }
+    }
+    
+    public function addFeedback($taskId)
+    {
+        $task = ProgramTask::find($taskId);
+        
+         try {
+            $task = ProgramTask::find($taskId);
+            
+            if (!$task) {
+                return response()->json([
+                    'success' => false,
+                    'message' => app()->getLocale() == 'ar'
+                        ? 'المهمة غير موجودة'
+                        : 'Task not found.'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => __('admin.feedback_added_success'),
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error downloading attachment: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => __('admin.feedback_failed')
             ], 500);
         }
     }
