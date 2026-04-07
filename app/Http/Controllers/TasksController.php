@@ -473,6 +473,44 @@ class TasksController extends Controller
     /**
      * Delete a single attachment from a task.
      */
+    public function uploadAttachment(Request $request, $taskId)
+    {
+        try {
+            $task = ProgramTask::find($taskId);
+
+            if (!$task) {
+                return response()->json(['success' => false, 'message' => 'Task not found.'], 404);
+            }
+
+            $request->validate([
+                'attachment' => 'required|file|max:5120|mimes:jpeg,png,gif,pdf',
+            ]);
+
+            $file = $request->file('attachment');
+            $path = $file->store('tasks/attachments', 'public');
+
+            $newAtt = [
+                'name' => $file->getClientOriginalName(),
+                'path' => $path,
+                'size' => $file->getSize(),
+                'type' => $file->getMimeType(),
+            ];
+
+            $attachments = $task->attachments ?? [];
+            $attachments[] = $newAtt;
+            $task->update(['attachments' => $attachments]);
+
+            return response()->json([
+                'success'    => true,
+                'attachment' => array_merge($newAtt, ['url' => Storage::disk('public')->url($path)]),
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error uploading attachment: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
+        }
+    }
+
     public function deleteAttachment($taskId, $filename)
     {
         try {
@@ -583,6 +621,72 @@ class TasksController extends Controller
                 'message' => app()->getLocale() == 'ar'
                     ? 'حدث خطأ أثناء تحميل المرفق'
                     : 'An error occurred while downloading the attachment.'
+            ], 500);
+        }
+    }
+
+    public function addComment($taskId, $comment)
+    {
+        $task = ProgramTask::find($taskId);
+        
+         try {
+            $task = ProgramTask::find($taskId);
+            
+            if (!$task) {
+                return response()->json([
+                    'success' => false,
+                    'message' => app()->getLocale() == 'ar'
+                        ? 'المهمة غير موجودة'
+                        : 'Task not found.'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => app()->getLocale() == 'ar'
+                    ? 'تمت إضافة التعليق بنجاح'
+                    : 'Comment added successfully'
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error downloading attachment: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => app()->getLocale() == 'ar'
+                    ? 'فشل في إضافة التعليق'
+                    : 'Failed to add comment'
+            ], 500);
+        }
+    }
+    
+    public function moveTask($taskId)
+    {
+        $task = ProgramTask::find($taskId);
+        
+         try {
+            $task = ProgramTask::find($taskId);
+            
+            if (!$task) {
+                return response()->json([
+                    'success' => false,
+                    'message' => app()->getLocale() == 'ar'
+                        ? 'المهمة غير موجودة'
+                        : 'Task not found.'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => app()->getLocale() == 'ar'
+                    ? 'تمت إضافة التعليق بنجاح'
+                    : 'تم تحديث حالة المهمة بنجاح'
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error downloading attachment: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => __('admin.move_task_failed')
             ], 500);
         }
     }
