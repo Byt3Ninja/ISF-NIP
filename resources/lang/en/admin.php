@@ -369,7 +369,7 @@ return [
 	'enspec' => 'Specialization',
 	'Request Date/ Time' => 'Request Date/ Time',
 	'Add your notes' => 'Add your note',
-	'Add comment' => 'Add comment',
+	'Add comment' => 'Add Comment',
 	'Make a request' => 'Make a service request',
 	'Close' => 'Close',
 	'Website' => 'Website',
