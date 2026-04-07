@@ -1,0 +1,397 @@
+/**
+ * kanban-tasks.js
+ * All task CRUD actions: view, add, edit, archive, comments, feedback, attachments.
+ * Depends on: kanban-utils.js, kanban-renderers.js, kanban-board.js, kanban-dropzone.js
+ * Reads config from: window.KanbanConfig
+ */
+
+function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, etFv) {
+  const cfg = window.KanbanConfig;
+  const lbl = cfg.labels;
+
+  // ─── View Task ─────────────────────────────────────────────────────────────
+
+  $(document).on('click', '.view-task-btn', function () {
+    const taskId   = $(this).data('task-id');
+    const taskData = tasks.find(t => t.id === taskId);
+    if (!taskData) return;
+
+    const p      = cfg.priorityMap[taskData.priority];
+    const sLabel = cfg.statusMap[taskData.status];
+
+    $('#vt-title').text(taskData.title);
+    $('#vt-description').html(taskData.description);
+    $('#vt-due-date').text(taskData.due_date || 'N/A');
+    $('#vt-priority').html(`<span class="badge ${p.cls} rounded-pill"><span class="d-inline-block rounded-circle me-1 ${p.dot}" style="width:6px;height:6px;"></span>${p.label}</span>`);
+    $('#vt-status').html(`<span class="badge bg-label-secondary rounded-pill">${sLabel}</span>`);
+
+    // Assignee — Admin only
+    if (cfg.isAdmin && taskData.assignee) {
+      const { startup, founder } = taskData.assignee;
+
+      const _avatar = (obj, bgCls) => {
+        const ri = (obj.name || '?').substring(0, 2).toUpperCase();
+        return obj.img_url
+          ? `<img src="${obj.img_url}" alt="${obj.name}" class="rounded-circle object-fit-cover" style="width:40px;height:40px;">`
+          : `<span class="avatar-initial ${bgCls} rounded-circle d-flex align-items-center justify-content-center fw-semibold" style="width:40px;height:40px;font-size:13px;">${ri}</span>`;
+      };
+      const _wrap = (obj, bgCls, nameEl) => {
+        const av = _avatar(obj, bgCls);
+        $(nameEl + '-avatar').html(obj.profile_url ? `<a href="${obj.profile_url}" target="_blank">${av}</a>` : av);
+        $(nameEl + '-name').html(obj.profile_url ? `<a href="${obj.profile_url}" target="_blank" class="text-body">${obj.name}</a>` : obj.name);
+      };
+      _wrap(startup, 'bg-label-info',    '#vt-assignee-startup');
+      _wrap(founder, 'bg-label-primary', '#vt-assignee-founder');
+      $('#vt-assignee-wrapper').removeClass('d-none');
+    } else {
+      $('#vt-assignee-wrapper').addClass('d-none');
+    }
+
+    renderAttachmentsList(taskData.attachments, taskId, '#vt-attachments-list');
+    renderActivitiesList(taskData.activities,              '#vt-activities-list');
+    renderCommentsList(taskData.comments,                  '#vt-comments-list');
+    renderFeedbackList(taskData.feedbacks    || [],        '#vt-feedback-list');
+    renderSubmissionsList(taskData.submissions || [],      '#vt-submissions-list');
+
+    $('#vt-comment-count').text(taskData.comments_count      ?? (taskData.comments     ? taskData.comments.length     : 0));
+    $('#vt-feedback-count').text(taskData.feedbacks_count    ?? (taskData.feedbacks    ? taskData.feedbacks.length    : 0));
+    $('#vt-submissions-count').text(taskData.submissions_count ?? (taskData.submissions ? taskData.submissions.length : 0));
+
+    $('#vt-edit-trigger-btn').data('task-id', taskId);
+    $('#vt-upload-btn-task-id').val(taskId);
+    $('#vt-send-comment-btn').data('task-id', taskId);
+
+    dzReset();
+    vtCommentQ.setContents([]);
+
+    // Reset to first tab
+    bootstrap.Tab.getOrCreateInstance(document.querySelector('#viewTaskOffcanvas .nav-tabs .nav-link')).show();
+    bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('viewTaskOffcanvas')).show();
+  });
+
+  $('#vt-edit-trigger-btn').on('click', function () {
+    const taskId = $(this).data('task-id');
+    bootstrap.Offcanvas.getInstance(document.getElementById('viewTaskOffcanvas')).hide();
+    setTimeout(() => $(`.edit-task-btn[data-task-id="${taskId}"]`).trigger('click'), 350);
+  });
+
+  // ─── Add Task ──────────────────────────────────────────────────────────────
+
+  $('#addTaskForm').on('submit', function (e) {
+    e.preventDefault();
+    const $form = $(this);
+    const $btn  = $('#add-submit-btn');
+
+    addFv.validate().then(function (status) {
+      if (status !== 'Valid') return;
+      if (!validateFiles($('#add-attachments'), '#add-file-error')) return;
+
+      $btn.prop('disabled', true).html(`<span class="spinner-border spinner-border-sm me-2"></span>${lbl.processing}`);
+
+      const fd = new FormData($form[0]);
+      fd.append('description', addDescQ.root.innerHTML);
+      fd.append('program_id', program.id);
+
+      $.ajax({
+        url: cfg.routes.storeTask,
+        type: 'POST', data: fd, processData: false, contentType: false,
+        success: function (response) {
+          toastr.success(lbl.storedSuccessfully);
+          const newTask = response.task || {
+            id: response.id || Date.now(),
+            title: $form.find('[name="title"]').val(),
+            description: addDescQ.root.innerHTML,
+            due_date: $form.find('[name="due_date"]').val(),
+            priority: $('#add-priority').val(),
+            status: $('#add-status').val(),
+            creator: response.creator || null,
+            attachments: response.attachments || [],
+            activities: response.activities || [],
+            comments: [],
+          };
+          tasks.push(newTask);
+          syncTaskToBoard(newTask, null);
+          $form[0].reset();
+          addDescQ.setContents([]);
+          $('#add-priority, #add-status').val('').trigger('change');
+          addFv.resetForm(true);
+          $('#addTaskOffcanvas').offcanvas('hide');
+          $btn.prop('disabled', false).html(lbl.create);
+        },
+        error: function () {
+          toastr.error(lbl.saveFailed);
+          $btn.prop('disabled', false).text(lbl.create);
+        }
+      });
+    });
+  });
+
+  // ─── Edit Task ─────────────────────────────────────────────────────────────
+
+  $(document).on('click', '.edit-task-btn', function () {
+    const taskId   = $(this).data('task-id');
+    const taskData = tasks.find(t => t.id === taskId);
+    if (!taskData) return;
+
+    $('#et-id').val(taskData.id);
+    $('#et-title').val(taskData.title);
+    $('#et-due-date').val(taskData.due_date);
+    etDescQ.root.innerHTML = taskData.description;
+    $('#et-priority').val(taskData.priority).trigger('change');
+    $('#et-status').val(taskData.status).trigger('change');
+    $('#et-attachments').val('').removeClass('is-invalid');
+    $('#et-file-error').text('');
+
+    if (taskData.attachments && taskData.attachments.length) {
+      $('#et-current-attachments-wrapper').removeClass('d-none');
+      renderAttachmentsList(taskData.attachments, taskId, '#et-current-attachments-list');
+    } else {
+      $('#et-current-attachments-wrapper').addClass('d-none');
+    }
+    bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('editTaskOffcanvas')).show();
+  });
+
+  $('#editTaskForm').on('submit', function (e) {
+    e.preventDefault();
+    const $form = $(this);
+    const $btn  = $('#et-submit-btn');
+
+    etFv.validate().then(function (status) {
+      if (status !== 'Valid') return;
+      if (!validateFiles($('#et-attachments'), '#et-file-error')) return;
+
+      const taskId = $('#et-id').val();
+      $btn.prop('disabled', true).html(`<span class="spinner-border spinner-border-sm me-2"></span>${lbl.processing}`);
+
+      const fd = new FormData($form[0]);
+      fd.append('description', etDescQ.root.innerHTML);
+
+      $.ajax({
+        url: cfg.routes.updateTask.replace(':id', taskId),
+        type: 'POST', data: fd, processData: false, contentType: false,
+        success: function (response) {
+          toastr.success(lbl.storedSuccessfully);
+          const idx = tasks.findIndex(t => t.id == taskId);
+          if (idx !== -1) {
+            const oldStatus   = tasks[idx].status;
+            const updatedTask = response.task || {
+              ...tasks[idx],
+              title: $('#et-title').val(),
+              description: etDescQ.root.innerHTML,
+              due_date: $('#et-due-date').val(),
+              priority: $('#et-priority').val(),
+              status: $('#et-status').val(),
+              attachments: response.attachments || tasks[idx].attachments,
+            };
+            tasks[idx] = updatedTask;
+            syncTaskToBoard(updatedTask, oldStatus);
+          }
+          $('#editTaskOffcanvas').offcanvas('hide');
+          $btn.prop('disabled', false).html(lbl.update);
+        },
+        error: function () {
+          toastr.error(lbl.updateFailed);
+          $btn.prop('disabled', false).text(lbl.update);
+        }
+      });
+    });
+  });
+
+  // ─── Archive Task ──────────────────────────────────────────────────────────
+
+  $(document).on('click', '.archive-task-btn', function () {
+    const taskId = $(this).data('task-id');
+    const task   = tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    const isArchived  = task.status === 'archived';
+    const newStatus   = isArchived ? 'pending' : 'archived';
+    const actionLabel = isArchived ? lbl.reopenTask : lbl.archiveTask;
+    const bodyText    = isArchived ? lbl.reopenTaskConfirm : lbl.archiveTaskConfirm;
+
+    releaseWarningAlert({
+      title: actionLabel + '?', message: bodyText,
+      confirmText: lbl.yes, cancelText: lbl.no,
+      confirmColor: isArchived ? 'warning' : 'secondary',
+      onConfirm: () => {
+        $.ajax({
+          url: cfg.routes.moveTask.replace(':id', taskId).replace(':status', newStatus),
+          type: 'PATCH', contentType: 'application/json',
+          data: JSON.stringify({ status: newStatus }),
+          success: function () {
+            const oldStatus = task.status;
+            task.status = newStatus;
+            if (newStatus === 'archived') {
+              $(`.kanban-item[data-task-id="${taskId}"]`).fadeOut(300, function () {
+                $(this).remove();
+                const $board = $(`.kanban-board[data-board="${oldStatus}"] .kanban-drag`);
+                if ($board.find('.kanban-item:not(.d-none)').length === 0) {
+                  $board.append(`<p class="text-muted small text-center py-3 m-0" data-empty-board>${lbl.noTasks}</p>`);
+                }
+                $('.kanban-board').each(function () {
+                  $(this).find('.board-count').text($(this).find('.kanban-item:not(.d-none)').length);
+                });
+              });
+            } else {
+              syncTaskToBoard(task, oldStatus);
+            }
+            toastr.success(isArchived ? lbl.taskReopened : lbl.taskArchived);
+          },
+          error: () => toastr.error(lbl.updateFailed)
+        });
+      }
+    });
+  });
+
+  // ─── Delete Attachment ─────────────────────────────────────────────────────
+
+  $(document).on('click', '.delete-attachment-btn', function () {
+    const $btn         = $(this);
+    const taskId       = $btn.data('task-id');
+    const attachmentId = $btn.data('attachment-id');
+
+    releaseWarningAlert({
+      title: lbl.deleteAttachment + '?', message: lbl.recover,
+      confirmText: lbl.yes, cancelText: lbl.no, confirmColor: 'danger',
+      onConfirm: () => {
+        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+        $.ajax({
+          url: cfg.routes.deleteAttachment.replace(':taskId', taskId).replace(':filename', attachmentId),
+          type: 'DELETE',
+          success: function () {
+            $(`#att-row-${attachmentId}`).fadeOut(300, function () {
+              $(this).remove();
+              toastr.success(lbl.attachmentDeletedSuccess);
+              const task = tasks.find(t => t.id == taskId);
+              if (task && task.attachments) task.attachments = task.attachments.filter(a => a.id != attachmentId);
+              if ($('#vt-attachments-list .attachment-item').length === 0) {
+                $('#vt-attachments-list').html(`<span class="text-muted small">${lbl.noAttachments}</span>`);
+              }
+              if ($('#et-current-attachments-list .attachment-item').length === 0) {
+                $('#et-current-attachments-wrapper').addClass('d-none');
+              }
+            });
+          },
+          error: function () {
+            toastr.error(lbl.deleteFailed);
+            $btn.prop('disabled', false).html('<i class="ti ti-trash ti-xs"></i>');
+          }
+        });
+      }
+    });
+  });
+
+  // ─── Add Comment ───────────────────────────────────────────────────────────
+
+  $('#vt-send-comment-btn').on('click', function () {
+    const taskId    = $(this).data('task-id');
+    const html      = vtCommentQ.root.innerHTML;
+    const plainText = vtCommentQ.getText().trim();
+    if (!plainText) return;
+
+    const $btn = $(this);
+    $btn.prop('disabled', true).text('...');
+
+    $.ajax({
+      url: cfg.routes.addComment.replace(':id', taskId),
+      type: 'POST', contentType: 'application/json',
+      data: JSON.stringify({ comment: html }),
+      success: function (response) {
+        toastr.success(lbl.commentSuccess);
+        const c = response.comment || { user: lbl.you, time: lbl.justNow, text: html, img_url: null };
+
+        if ($('#vt-comments-list p.text-muted').length) $('#vt-comments-list').empty();
+
+        $('#vt-comments-list').append(`
+          <div class="d-flex align-items-start gap-3 mb-3">
+            <div class="flex-shrink-0 mt-1">${buildAvatar(c.user, c.img_url, c.user_id)}</div>
+            <div class="flex-grow-1 bg-lighter rounded p-3">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="fw-semibold text-dark">${c.user}</span>
+                <span class="text-muted" style="font-size:.7rem;">${c.time}</span>
+              </div>
+              <div class="ql-editor p-0 small text-body" style="min-height:auto;">${c.text}</div>
+            </div>
+          </div>`);
+
+        $('#vt-comment-count').text((parseInt($('#vt-comment-count').text()) || 0) + 1);
+        const task = tasks.find(t => t.id == taskId);
+        if (task) { if (!task.comments) task.comments = []; task.comments.push(c); }
+        vtCommentQ.setContents([]);
+        $btn.prop('disabled', false).text(lbl.send);
+      },
+      error: function () {
+        toastr.error(lbl.commentFailed);
+        $btn.prop('disabled', false).text(lbl.send);
+      }
+    });
+  });
+
+  // ─── Submit Feedback ───────────────────────────────────────────────────────
+
+  $('#vt-submit-feedback-btn').on('click', function () {
+    const taskId  = $('#vt-send-comment-btn').data('task-id');
+    const decision = $('input[name="vt_feedback_decision"]:checked').val();
+    const note     = $('#vt-fb-note').val().trim();
+    if (!decision) { toastr.warning(lbl.requiredField); return; }
+
+    const $btn = $(this);
+    $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>');
+
+    $.ajax({
+      url: cfg.routes.addFeedback.replace(':id', taskId),
+      type: 'POST', contentType: 'application/json',
+      data: JSON.stringify({ decision, note }),
+      success: function (response) {
+        toastr.success(lbl.feedbackSuccess);
+        const fb = response.feedback || {
+          user: cfg.currentUserName, img_url: null,
+          time: lbl.justNow, decision, text: note,
+        };
+
+        const task = tasks.find(t => t.id == taskId);
+        if (task) {
+          if (!task.feedbacks) task.feedbacks = [];
+          task.feedbacks.push(fb);
+          $('#vt-feedback-count').text(task.feedbacks.length);
+        }
+
+        const $list = $('#vt-feedback-list');
+        if ($list.find('p.text-muted').length) $list.empty();
+
+        const badge = decision === 'pass'
+          ? `<span class="badge bg-label-success ms-2"><i class="ti ti-circle-check ti-xs me-1"></i>${lbl.passTask}</span>`
+          : `<span class="badge bg-label-warning ms-2"><i class="ti ti-refresh ti-xs me-1"></i>${lbl.needsRevision}</span>`;
+
+        $list.prepend(`
+          <div class="d-flex align-items-start gap-3 mb-3 pb-3 border-bottom">
+            <div class="flex-shrink-0 mt-1">${buildAvatar(fb.user, fb.img_url, fb.user_id)}</div>
+            <div class="flex-grow-1">
+              <div class="d-flex justify-content-between align-items-center mb-1 flex-wrap gap-1">
+                <span class="fw-semibold text-dark">${fb.user}${badge}</span>
+                <span class="text-muted" style="font-size:.7rem;">${fb.time}</span>
+              </div>
+              ${note ? `<div class="small text-body bg-lighter rounded p-2">${note}</div>` : ''}
+            </div>
+          </div>`);
+
+        $('#vt-fb-note').val('');
+        $('input[name="vt_feedback_decision"][value="pass"]').prop('checked', true);
+        $('#vt-fb-pass-wrapper').addClass('checked');
+        $('#vt-fb-revision-wrapper').removeClass('checked');
+        $btn.prop('disabled', false).html(`<i class="ti ti-send ti-xs me-1"></i>${lbl.submitFeedback}`);
+      },
+      error: function () {
+        toastr.error(lbl.feedbackFailed);
+        $btn.prop('disabled', false).html(`<i class="ti ti-send ti-xs me-1"></i>${lbl.submitFeedback}`);
+      }
+    });
+  });
+
+  // Toggle custom radio .checked class
+  $(document).on('change', 'input[name="vt_feedback_decision"]', function () {
+    $('input[name="vt_feedback_decision"]').each(function () {
+      $(this).closest('.custom-option').toggleClass('checked', $(this).is(':checked'));
+    });
+  });
+}
