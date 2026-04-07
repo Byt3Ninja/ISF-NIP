@@ -196,14 +196,20 @@ $priorityConfig = [
           <li class="nav-item">
             <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#vt-details" role="tab"><i class="ti ti-info-circle ti-xs me-1"></i> {{ __('admin.Details') ?? 'Details' }}</button>
           </li>
-          @role('Registered')
+          @role('Mentor')
+          <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#vt-submissions" role="tab">
+              <i class="ti ti-paperclip ti-xs me-1"></i> {{ __('admin.Submissions') ?? 'Submissions' }}
+              <span class="badge badge-center bg-label-warning rounded-pill ms-1" id="vt-submissions-count">0</span>
+            </button>
+          </li>
+          @endrole
           <li class="nav-item">
             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#vt-feedback" role="tab">
               <i class="ti ti-star ti-xs me-1"></i> {{ __('admin.feedback') }}
               <span class="badge badge-center bg-label-primary rounded-pill ms-1" id="vt-feedback-count">0</span>
             </button>
           </li>
-          @endrole
           <li class="nav-item">
             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#vt-comments" role="tab">
               <i class="ti ti-message ti-xs me-1"></i> {{ __('admin.Comments') }} 
@@ -211,16 +217,11 @@ $priorityConfig = [
             </button>
           </li>
           <li class="nav-item">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#vt-activity" role="tab"><i class="ti ti-activity ti-xs me-1"></i> {{ __('admin.Activity') ?? 'Activity' }}</button>
-          </li>
-          @role('Mentor')
-          <li class="nav-item">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#vt-submissions" role="tab">
-              <i class="ti ti-paperclip ti-xs me-1"></i> {{ __('admin.Submissions') ?? 'Submissions' }}
-              <span class="badge badge-center bg-label-info rounded-pill ms-1" id="vt-submissions-count">0</span>
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#vt-activity" role="tab">
+              <i class="ti ti-activity ti-xs me-1"></i> {{ __('admin.Activities') }}
+              <span class="badge badge-center bg-label-info bg-glow rounded-pill ms-1" id="vt-comment-count">0</span>
             </button>
           </li>
-          @endrole
         </ul>
 
         <div class="tab-content p-0 flex-grow-1 overflow-auto">
@@ -266,10 +267,16 @@ $priorityConfig = [
             </div>
           </div>
 
+          {{-- SUBMISSIONS TAB --}}
+          <div class="tab-pane fade" id="vt-submissions" role="tabpanel">
+            <div id="vt-submissions-list" class="small pe-2"></div>
+          </div>
+
            {{-- FEEDBACK TAB --}}
           <div class="tab-pane fade" id="vt-feedback" role="tabpanel">
             <div id="vt-feedback-list" class="small pe-2"></div>
           </div>
+          
           {{-- COMMENTS TAB --}}
           <div class="tab-pane fade" id="vt-comments" role="tabpanel">
 
@@ -295,12 +302,6 @@ $priorityConfig = [
           <div class="tab-pane fade" id="vt-activity" role="tabpanel">
             <div id="vt-activities-list" class="small pe-2"></div>
           </div>
-
-          {{-- SUBMISSIONS TAB --}}
-          <div class="tab-pane fade" id="vt-submissions" role="tabpanel">
-            <div id="vt-submissions-list" class="small pe-2"></div>
-          </div>
-
         </div>
 
         <div class="d-flex gap-2 pt-3 border-top mt-3">
