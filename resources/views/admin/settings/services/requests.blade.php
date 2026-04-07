@@ -191,13 +191,15 @@
           @endif
 
           {{-- Startup & Founder --}}
-          <div class="d-flex flex-column gap-1 mb-3">
-            <div class="small">
-              <span class="text-muted">{{ __('admin.StartUp_name') }}:</span>
+          <div class="d-flex flex-column gap-2 mb-4">
+            <div class="d-flex align-items-center gap-2">
+              <i class="ti ti-building-skyscraper text-dark"></i>
+              <span class="text-body">{{ __('admin.Startup') }}:</span>
               <a href="{{ $request['startup_url'] ?? '#' }}" class="fw-semibold text-dark text-decoration-none">{{ $request['startup_name'] }}</a>
             </div>
-            <div class="small">
-              <span class="text-muted">{{ __('admin.founder_name') }}:</span>
+            <div class="d-flex align-items-center gap-2">
+              <i class="ti ti-user text-dark"></i>
+              <span class="text-body">{{ __('admin.registered') }}:</span>
               <a href="{{ $request['founder_url'] ?? '#' }}" class="fw-semibold text-dark text-decoration-none">{{ $request['founder_name'] }}</a>
             </div>
           </div>

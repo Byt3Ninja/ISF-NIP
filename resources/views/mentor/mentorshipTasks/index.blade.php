@@ -1,1793 +1,1287 @@
 @extends('layouts.admin')
 
 @section('vendorstyle')
-	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/jkanban/jkanban.css" />
-	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
-	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
-	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
 @stop
 
-@php $user = auth()->user(); @endphp
+@php
+$cycle = [
+  'id' => 84,
+  'title' => 'Alumni Program',
+];
+
+// Initial mocked data (Replace with actual backend data)
+$tasks = [
+  [
+    'id' => 1,
+    'title' => 'Design System Audit',
+    'description' => '<p>Review existing UI components.</p>',
+    'due_date' => '2025-04-15',
+    'priority' => 'High',
+    'status' => 'pending',
+    'creator' => ['name' => 'Alice Johnson', 'img_url' => '/vuexy/assets/img/avatars/1.png'],
+    'attachments' => [
+      ['id' => 101, 'name' => 'audit_v1.pdf', 'url' => '/storage/docs/audit_v1.pdf'],
+      ['id' => 102, 'name' => 'screenshot.png', 'url' => '/storage/images/screenshot.png']
+    ],
+    'activities' => [
+      ['user' => 'Alice Johnson', 'action' => 'Created this task', 'time' => 'Today 9:00 AM', 'img_url' => '/vuexy/assets/img/avatars/1.png']
+    ],
+    'comments' => [
+      ['id' => 1, 'user' => 'Bob Smith', 'text' => '<p>We need to prioritize the typography tokens.</p>', 'time' => 'Today 10:00 AM', 'img_url' => '/vuexy/assets/img/avatars/2.png']
+    ],
+    'feedbacks' => [
+      ['id' => 1, 'user' => 'Bob Smith', 'text' => '<p>We need to prioritize the typography tokens.</p>', 'time' => 'Today 10:00 AM', 'img_url' => '/vuexy/assets/img/avatars/2.png']
+    ],
+    'submissions' => [
+      [
+        'user'    => 'Bob Smith',
+        'img_url' => '/vuexy/assets/img/avatars/2.png',
+        'time'    => 'Today 11:00 AM',
+        'note'    => 'First draft submission.',
+        'files'   => [
+          ['name' => 'audit_v1.pdf',    'url' => '/storage/docs/audit_v1.pdf'],
+          ['name' => 'screenshot.png',  'url' => '/storage/images/screenshot.png'],
+        ],
+      ],
+    ],
+  ],
+];
+
+$boards = [
+  'pending' => ['label' => __('admin.Pending'), 'color' => 'bg-label-secondary'],
+  'progress' => ['label' => __('admin.In_Progress'), 'color' => 'bg-label-warning'],
+  'review' => ['label' => __('admin.In_Review'), 'color' => 'bg-label-info'],
+  'completed' => ['label' => __('admin.Completed'), 'color' => 'bg-label-success'],
+];
+
+$priorityConfig = [
+  'Low' => ['label' => __('admin.Low'), 'class' => 'bg-label-secondary', 'dot' => 'bg-secondary'],
+  'Medium' => ['label' => __('admin.Medium'), 'class' => 'bg-label-info', 'dot' => 'bg-info'],
+  'High' => ['label' => __('admin.High'), 'class' => 'bg-label-danger', 'dot' => 'bg-danger'],
+];
+@endphp
 
 @section('style')
-	<link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-kanban.css" />
-	<style>
-		#card-header {
-			display: flex;
-			gap: 10px;
-			width: 100%;
-		}
-		.text-xs {
-			font-size: 12px;
-		}
+<style>
+  /* Minimal custom CSS. Relying on Bootstrap 5 utilities for layout */
+  .cursor-grab { cursor: grab; }
+  .cursor-grab:active { cursor: grabbing; }
+  .sortable-ghost { opacity: 0.4; background-color: var(--bs-secondary-bg) !important; border: 1px dashed var(--bs-secondary); }
 
-		@media screen and (min-width: 768px) {
-			#card-header {
-				width: 50%;
-			}
-		}
-		.kanban-container,
-		.kanban-wrapper {
-			display: flex !important;
-			width: 100% !important;
-			flex-grow: 1 !important;
-			padding-inline-start: 0.7rem;
-		}
-
-		.kanban-item,
-		.kanban-board {
-			padding: 0 !important;
-			width: 300px !important;
-		}
-
-		.kanban-board-header {
-			padding: 0 !important;
-			background-color: var(--bs-light) !important;
-			margin-bottom: 1rem !important;
-			width: 100% !important;
-			border-radius: 0.25rem !important;
-		}
-
-		.kanban-title-board {
-			font-size: 1rem !important;
-			font-weight: 600 !important;
-			padding: 0.3rem 1rem !important;
-			letter-spacing: 0.5px !important;
-		}
-		p,
-		span {
-			font-size: 12px;
-		}
-	</style>
+  .ql-editor {
+    min-height: 150px !important;
+    max-height: 150px !important;
+  }
+  
+  #vt-comment-editor .ql-editor {
+    min-height: 80px !important;
+    max-height: 120px !important;
+  }
+</style>
 @stop
 
 @section('content')
-	<!-- Content wrapper -->
-	<div class="">
-		<!-- Content -->
-		<div class="">
-			<div class="card">
-				<!-- Startup Info Header -->
-				<div id="startup-info-header"
-					class="card-header mx-6 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 border-bottom mb-4">
-					<div class="d-flex align-items-center">
-						@if (!empty($data['company_name']))
-						<div class="d-flex align-items-center">
-							<div
-								class="p-2 w-px-75 h-px-75 border shadow-sm rounded d-flex justify-content-center align-items-center me-4">
-								<img src="{{ $data['start_up_logo'] ?? '/images/logo-placeholder.png' }}"
-									alt="{{ $data['company_name'] }} Logo" class="rounded h-100 w-100 object-fit-contain overflow-hidden"
-									onerror="this.onerror=null; this.src='/images/logo-placeholder.png';">
-							</div>
-							<div>
-								<h4 class="mb-0">{{ $data['company_name'] }}</h4>
-								<small class="text-muted">{{ $data['program_name'] }}</small>
-							</div>
-						</div>
-						@endif
-					</div>
-					<div class="d-flex flex-column gap-3">
-						<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
-							<span class="fw-bold me-6">{{ __('admin.Current_Step') }}</span>
-							<div class="badge bg-label-primary" style="width: fit-content;">{{ $data['step_name'] }}</div>
-						</div>
-						<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
-							<span class="fw-bold me-6">{{ __('admin.Mentor_Session_Appointment') }}</span>
-							@if (!empty($data['mentor_zoom_date']))
-								<div class="badge bg-label-secondary" style="width: fit-content;">
-									<i class="ti ti-calendar ti-16px me-1"></i>
-									<span>{{ \Carbon\Carbon::parse($data['mentor_zoom_date'])->format('M d, Y H:i') }}</span>
-								</div>
-							@endif
-						</div>
-					</div>
-				</div>
-				<!-- / Startup Info Header -->
+  <div>
+    {{-- TOOLBAR --}}
+    <div class="card shadow-xs mb-6">
+      <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-md-center gap-3">
+          <div class="d-flex align-items-center gap-2">
+            <div class="avatar">
+              <div class="avatar-initial rounded-circle">
+                <i class="ti ti-rocket ti-md text-primary"></i>
+              </div>
+            </div>
+            <h5 class="card-title mb-0">{{ $cycle['title'] }}</h5>
+          </div>
+          <div class="d-flex align-items-center gap-3">
+            <div class="input-group input-group-merge">
+              <span class="input-group-text">
+                <i class="ti ti-search text-muted"></i>
+              </span>
+              <input type="text" id="kanbanSearch" class="form-control" placeholder="{{ __('admin.Search') }}..." />
+            </div>
+            @if ($_user->ableTo('tasks.store', $permissions))
+            <button class="btn btn-primary text-nowrap px-8" type="button" data-bs-toggle="offcanvas" data-bs-target="#addTaskOffcanvas">
+              <i class="ti ti-plus me-2"></i> {{ __('admin.Add_Task') }}
+            </button>
+            @endif
+          </div>  
+        </div>
+      </div>
+    </div>
 
-				<div class="card-body">
-					<div class="d-flex justify-content-end w-100 border-bottom pb-3">
-						<div id="card-header">
-							<div class="ms-md-8 d-flex flex-grow-1 position-relative">
-								<input id="search-task" type="text" class="form-control px-8" placeholder="{{ __('admin.Search') }}" />
-								<i class="ti ti-search position-absolute top-50 translate-middle-y mx-2"></i>
-							</div>
-							@role('Mentor')
-							<button id="addTaskButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#formTaskModal">
-								<div class="d-none d-md-inline me-2">
-									{{ __('admin.Add_Task') }}
-								</div>
-								<i class="ti ti-plus"></i>
-							</button>
-							@endrole
-						</div>
-					</div>
-				</div>
+    {{-- KANBAN BOARDS --}}
+    <div class="d-flex align-items-start gap-4 overflow-x-auto pb-3" id="kanbanWrapper">
+      @foreach ($boards as $statusKey => $board)
+        @php $boardTasks = array_values(array_filter($tasks, fn($t) => $t['status'] === $statusKey)); @endphp
+        <div class="bg-body border rounded p-2 flex-shrink-0 kanban-board" data-board="{{ $statusKey }}" style="width: 300px;">
+          <header class="d-flex align-items-center gap-2 px-2 py-2 mb-2">
+            <span class="badge {{ $board['color'] }} rounded-pill board-count">{{ count($boardTasks) }}</span>
+            <h6 class="mb-0 fw-semibold">{{ $board['label'] }}</h6>
+          </header>
 
-				<div class="app-kanban">
-					<!-- Kanban Wrapper -->
-					@if (!empty($tasks) && count($tasks) > 0)
-						<div class="kanban-wrapper"></div>
-					@else
-						<div class="d-flex flex-column justify-content-center align-items-center gap-4 my-10">
-							<img src="/icons/not-found.svg" width="337" height="234" />
-							<h4 class="mb-0 text-center">
-								 {{ __('admin.No_Tasks') }}
-							</h4>
-							<button id="addTaskButton" class="btn btn-md btn-primary" data-bs-toggle="modal" data-bs-target="#formTaskModal">
-								<i class="ti ti-plus me-2"></i>
-								{{ __('admin.Add_Task') }}
-							</button>
-						</div>
-					@endif
-				</div>		
-			</div>
-		</div>
-		<!-- / Content -->
+          <main class="kanban-drag d-flex flex-column gap-2" style="min-height: 60px;">
+            @forelse ($boardTasks as $task)
+              @php
+                $p = $priorityConfig[$task['priority']];
+                $r = $task['creator'] ?? ['name' => 'User'];
+                $ri = strtoupper(substr($r['name'], 0, 2));
+                $attCount = isset($task['attachments']) ? count($task['attachments']) : 0;
+                $commentCount = isset($task['comments']) ? count($task['comments']) : 0;
+              @endphp
+              <div class="card shadow-sm border-0 cursor-grab kanban-item" data-task-id="{{ $task['id'] }}" data-search-text="{{ strtolower($task['title']) }}">
+                <div class="card-body p-3">
+                  <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="badge {{ $p['class'] }} rounded-pill" style="font-size: 0.7rem;">
+                      <span class="d-inline-block rounded-circle me-1 {{ $p['dot'] }}" style="width: 6px; height: 6px;"></span>{{ $p['label'] }}
+                    </span>
+                    <div class="d-flex align-items-center gap-1">
+                      <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle view-task-btn" type="button" data-task-id="{{ $task['id'] }}" title="{{ __('admin.View') }}"><i class="ti ti-eye ti-md text-dark"></i></button>
+                      @if ($_user->ableTo('tasks.update', $permissions))
+                      <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle edit-task-btn" type="button" data-task-id="{{ $task['id'] }}" title="{{ __('admin.Edit') }}"><i class="ti ti-edit ti-md text-dark"></i></button>
+                      @endif
+                      <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle archive-task-btn" type="button" data-task-id="{{ $task['id'] }}" title="{{ __('admin.archive_task') }}"><i class="ti ti-archive ti-md text-dark"></i></button>
+                    </div>
+                  </div>
+                  <h6 class="mb-1 text-truncate">{{ $task['title'] }}</h6>
+                  <div class="text-muted small mb-2 line-clamp-2">{!! strip_tags($task['description']) !!}</div>
+                  <div class="d-flex align-items-center justify-content-between small text-muted mt-3">
+                    <span class="d-flex align-items-center gap-2">
+                      @if($attCount > 0)
+                        <span class="d-flex align-items-center" title="{{ $attCount }} Attachments">
+                          <i class="ti ti-paperclip ti-xs me-1"></i>{{ $attCount }}
+                        </span>
+                      @endif
+                      @if($commentCount > 0)
+                        <span class="d-flex align-items-center" title="{{ $commentCount }} Comments">
+                          <i class="ti ti-message ti-xs me-1"></i>{{ $commentCount }}
+                        </span>
+                      @endif
+                      <span class="d-flex align-items-center">
+                        <i class="ti ti-calendar ti-xs me-1"></i> {{ $task['due_date'] }}
+                      </span>
+                    </span>
+                    <div data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $r['name'] }}">
+                      @if (!empty($r['img_url']))
+                        <img src="{{ $r['img_url'] }}" alt="avatar" class="rounded-circle object-fit-cover" style="width: 24px; height: 24px;" />
+                      @else
+                        <span class="badge bg-label-primary rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 24px; height: 24px;">{{ $ri }}</span>
+                      @endif
+                    </div>
+                  </div>
+                </div>
+              </div>
+            @empty
+              <p class="text-muted small text-center py-3 m-0" data-empty-board>{{ __('admin.No_Tasks') }}</p>
+            @endforelse
+          </main>
+        </div>
+      @endforeach
+    </div>
 
-		<!-- View Task Modal -->
-		<div class="modal fade" id="viewTaskModal" tabindex="-1" aria-labelledby="viewTaskModalLabel" aria-hidden="true">
-			<div class="modal-dialog modal-lg">
-				<div class="modal-content rounded overflow-hidden bg-label-light p-4">
-					<div class="mb-4 p-4 p-md-0">
-						<div class="d-flex justify-content-between align-items-center w-100">
-							<div class="d-flex align-items-center gap-3">
-								
-								<div class="cursor-pointer" id="editTakButton" data-id="" data-task="">
-									@role('Mentor')
-									<i class="ti ti-edit text-primary ti-20px"></i>
-									@endrole
-								</div>
-								
-								<div class="cursor-pointer" id="confirmDeleteTask" data-task="">
-									@role('Mentor')
-									<i class="ti ti-trash text-danger ti-20px"></i>
-									@endrole
-								</div>
-								
-							</div>
-							<h6 class="modal-title" id="viewTaskModalLabel">{{ __('admin.View_Task') }}</h6>
-							<div id="closeViewTask" class="cursor-pointer border rounded" data-bs-dismiss="modal" aria-label="Close">
-								<i class="ti ti-x ti-20px text-primary"></i>
-							</div>
-						</div>
-					</div>
-					<div class="bg-white rounded border border-light p-2 p-md-4">
-						<h4 id="task-details-name" class="fw-medium">{{ __('admin.Task_Name') }}</h4>
-						<div class="bg-label-secondary p-2 rounded mb-3" style="max-width: 100%;">
-							<h6 class="fw-semibold mb-1">{{ __('admin.Description') }}</h6>
-							<p id="task-details-contents" class="text-secondary" style="white-space: normal; word-break: break-word; overflow-wrap: break-word;">
-							</p>
-						</div>
-						<div
-							class="mb-3 w-100 d-flex flex-wrap flex-md-nowrap justify-content-between gap-2 align-items-center pb-2 border-bottom">
-							<div class="d-flex justify-content-center align-items-center gap-2">
-								<div class="d-flex justify-content-center align-items-center gap-1">
-									<i class="ti ti-flag text-primary ti-24px"></i>
-									<span class="text-dark">{{ __('admin.Priority') }}:</span>
-								</div>
-								<div id="task-details-priority" class="badge bg-label-warning d-flex align-items-center justify-content-center">
-									<div style="width: 9px; height: 9px;" class="bg-warning rounded-circle me-1"></div>
-									<span class="fw-semibold">{{ __('admin.Medium') }}</span>
-								</div>
-							</div>
-							<div class="d-flex justify-content-center align-items-center gap-2">
-								<div class="p-2 border rounded d-flex flex-column">
-									<span class="text-dark fw-bold">{{ __('admin.Created') }}</span>
-									<span class="text-muted"><i class="ti ti-clock me-1 ti-16px"></i><span id="task-details-reported-at">24 Feb 04:20 PM</span> </span>
-								</div>
-								<div class="p-2 border rounded d-flex flex-column">
-									<span class="text-dark fw-bold">{{ __('admin.Updated') }}</span>
-									<span class="text-muted"><i class="ti ti-clock me-1 ti-16px"></i><span id="task-details-updated-at">24 Feb 04:20 PM</span> </span>
-								</div>
-							</div>
-						</div>
-						<div class="bg-label-secondary p-2 rounded mb-3 border">
-							<div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-white">
-								<div class="d-flex align-items-center justify-content-center gap-2">
-									<h6 class="fw-semibold mb-0"><i class="ti ti-paperclip text-primary ti-24px me-2"></i>{{ __('admin.Attachments') }}</h6>
-									<h6 class="mb-0"><span class="badge bg-white text-dark" id="attachmentCount">0</span></h6>
-								</div>
-								<input type="file" id="fileInput" style="display: none;" multiple onchange="handleFileUpload(event)" data-task="" />
-								<button type="button" class="btn btn-sm btn-outline-info" style="width: 24px;"
-									onclick="document.getElementById('fileInput').click();">
-									<i class="ti ti-plus ti-16px"></i>
-								</button>
-							</div>
-							<div class="d-flex flex-wrap gap-2" id="fileList"></div>
-						</div>
-						<div class="d-flex gap-10 mb-3 pb-3">
-							<div class="d-flex flex-column gap-4">
-								<h6 class="mb-0 fw-medium text-nowrap"><i class="ti ti-circle-dot text-primary ti-20px me-2"></i>{{ __('admin.Status') }}</h6>
-								<h6 class="mb-0 fw-medium text-nowrap"><i class="ti ti-users text-primary ti-20px me-2"></i>{{ __('admin.Assignee') }}</h6>
-								<h6 class="mb-0 fw-medium text-nowrap"><i class="ti ti-users text-primary ti-20px me-2"></i>{{ __('admin.Reporter') }}</h6>
-								<h6 class="mb-0 fw-medium text-nowrap"><i class="ti ti-calendar text-primary ti-20px me-2"></i>{{ __('admin.Due_Date') }}</h6>
-								<h6 class="mb-0 fw-medium text-nowrap"><i class="ti ti-calendar text-primary ti-20px me-2"></i>{{ __('admin.Complete_Date') }}</h6>
-								<h6 class="mb-0 fw-medium text-nowrap"><i class="ti ti-tag text-primary ti-20px me-2"></i>{{ __('admin.Tags') }}</h6>
-							</div>
-							<div class="d-flex flex-column gap-3 overflow-x-auto">
-								<div id="task-details-status" class="badge bg-label-secondary d-flex align-items-center" style="width:fit-content;">
-									<div style="width:10px; height:10px;" class="rounded-circle me-2"></div>
-									<span class="fw-semibold">{{ __('admin.In_Progress') }}</span>
-								</div>
-								<div id="task-details-assignee" class="d-flex align-items-center">
-									<img src="#" class="rounded-circle" title="#" alt="#" width="24" height="24" style="{{ $lang == 'en' ? 'margin-right: -5px;' : 'margin-left: -5px;' }}">
-								</div>
-								<div id="task-details-reporter" class="d-flex align-items-center">
-									<img src="#" class="rounded-circle" title="#" alt="#" width="24" height="24" style="{{ $lang == 'en' ? 'margin-right: -5px;' : 'margin-left: -5px;' }}">
-								</div>
-								<div id="task-details-due-date" class="d-flex align-items-center gap-3 py-0">
-									<div class="badge bg-label-secondary radius-10 date">
-										<i class="ti ti-calendar-time ti-18px text-info"></i>
-										<span class="fw-semibold text-xs text-dark mx-2">2024-03-01</span>
-									</div>
-								</div>
-								<div id="task-details-done-date" class="d-flex align-items-center gap-3 py-0">
-									<div class="badge bg-label-secondary radius-10 date">
-										<i class="ti ti-calendar-time ti-18px text-info"></i>
-										<span class="fw-semibold text-xs text-dark mx-2">2024-03-01</span>
-									</div>
-								</div>
-								<div id="task-details-labels" class="d-flex align-items-center justify-content-center gap-3"></div>
-							</div>
-						</div>
-						<div class="d-flex align-items-center gap-2 mb-2 pb-2 border-bottom">
-							<div id="commentsTab" class="pb-2 border-bottom border-primary">
-								<button id="commentsButton" style="border-radius: 15px" class="btn btn-outline-primary">{{ __('admin.Comments') }}</button>
-							</div>
-							<div id="activityTab" class="pb-2 ">
-								<button id="activityButton" style="border-radius: 15px" class="btn">{{ __('admin.Activity') }}</button>
-							</div>
-						</div>
-						<div id="commentsContainer">
-							<div id="commentList" class="">
-								<!-- Rendered comments will appear here -->
-							</div>
-							<div class="bg-label-secondary p-2 rounded mb-3 border">
-								<div class="d-flex align-items-center gap-2">
-									<input type="text" id="commentInput" class="form-control bg-white" placeholder="{{ __('admin.Add_Comment') }}" />
-									<button id="commentButton" data-task="" type="button" class="btn btn-info">{{ __('admin.Publish') }}</button>
-								</div>
-							</div>
-						</div>
-						<div id="activityContainer" class="d-none">
-							<div id="activityList" class=""></div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<!-- / View Task Modal -->
+    {{-- VIEW TASK OFFCANVAS --}}
+    <div class="offcanvas offcanvas-end w-px-600" tabindex="-1" id="viewTaskOffcanvas">
+      <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title"><i class="ti ti-eye me-1 text-primary"></i> {{ __('admin.View_Task') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+      </div>
+      <div class="offcanvas-body pt-0 d-flex flex-column">
+        
+        <ul class="nav nav-tabs mb-3 rounded-0 mt-3" role="tablist">
+          <li class="nav-item">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#vt-details" role="tab"><i class="ti ti-info-circle ti-xs me-1"></i> {{ __('admin.Details') ?? 'Details' }}</button>
+          </li>
+          @role('Mentor')
+          <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#vt-submissions" role="tab">
+              <i class="ti ti-paperclip ti-xs me-1"></i> {{ __('admin.Submissions') ?? 'Submissions' }}
+              <span class="badge badge-center bg-label-warning rounded-pill ms-1" id="vt-submissions-count">0</span>
+            </button>
+          </li>
+          @endrole
+          <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#vt-feedback" role="tab">
+              <i class="ti ti-star ti-xs me-1"></i> {{ __('admin.feedback') }}
+              <span class="badge badge-center bg-label-primary rounded-pill ms-1" id="vt-feedback-count">0</span>
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#vt-comments" role="tab">
+              <i class="ti ti-message ti-xs me-1"></i> {{ __('admin.Comments') }} 
+              <span class="badge badge-center bg-label-danger bg-glow rounded-pill ms-1" id="vt-comment-count">0</span>
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#vt-activity" role="tab">
+              <i class="ti ti-activity ti-xs me-1"></i> {{ __('admin.Activities') }}
+              <span class="badge badge-center bg-label-info bg-glow rounded-pill ms-1" id="vt-comment-count">0</span>
+            </button>
+          </li>
+        </ul>
 
-		<!-- Add Task Modal -->
-		<div class="modal fade" id="formTaskModal" tabindex="-1" aria-labelledby="formTaskModal" aria-hidden="true">
-			<div class="modal-dialog modal-md">
-				<div class="modal-content rounded overflow-hidden bg-label-light p-md-4">
-					<div class="mb-4 p-4 p-md-0">
-						<div class="d-flex justify-content-between align-items-center w-100">
-							<h6 class="modal-title" id="form-modal-title">{{ __('admin.Create_New_Task') }}</h6>
-							<div id="closeViewTask" class="cursor-pointer border rounded" data-bs-dismiss="modal" aria-label="Close">
-								<i class="ti ti-x ti-20px text-primary"></i>
-							</div>
-						</div>
-					</div>
-					<div class="bg-white rounded border border-light p-4">
-						<form action="#" method="POST">
-							<div class="mb-3">
-								<label for="task-name" class="form-label">{{ __('admin.Task_Name') }}</label>
-								<input type="text" class="form-control" id="task-name" name="task-name" placeholder="{{ __('admin.Task_Name') }}" />
-							</div>
-							<div class="mb-3">
-								<label for="task-content" class="form-label">{{ __('admin.Description') }}</label>
-								<div style="height: 150px; overflow-y: auto;" class="border border-light rounded">
-									<div id="task-content-editor" class="form-control border-none"></div>
-								</div>
-								<textarea class="form-control d-none" id="task-content" name="task-content" rows="3"></textarea>
-							</div>
-							<div class="bg-label-secondary p-2 rounded mb-3 border">
-								<div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-white">
-									<div class="d-flex align-items-center justify-content-center gap-2">
-										<h6 class="fw-semibold mb-0"><i class="ti ti-paperclip text-primary ti-24px me-2"></i>{{ __('admin.Attachments') }}</h6>
-										<h6 class="mb-0"><span class="badge bg-white text-dark" id="createAttachmentCount">0</span></h6>
-									</div>
-									<input type="file" id="createFileInput" style="display: none;" multiple onchange="handleAttachmentCreate(event)" data-task="" />
-									<button type="button" class="btn btn-sm btn-outline-info" style="width: 24px;"
-										onclick="document.getElementById('createFileInput').click();">
-										<i class="ti ti-plus ti-16px"></i>
-									</button>
-								</div>
-								<div class="d-flex flex-wrap gap-2" id="createFileList"></div>
-							</div>
-							<div class="row mb-3">
-								<div class="col-3 d-flex align-items-center">
-									<label for="task-status" class="form-label">
-										<i class="ti ti-flag text-primary ti-24px"></i>
-										{{ __('admin.Priority') }}
-									</label>
-								</div>
-								<div class="col-4">
-									<select class="form-select select2" id="task-priority" name="task-priority">
-										<option value="low">{{ __('admin.Low') }}</option>
-										<option value="medium">{{ __('admin.Medium') }}</option>
-										<option value="high">{{ __('admin.High') }}</option>
-									</select>
-								</div>
-							</div>
-							<div class="row mb-3">
-								<div class="col-3 d-flex align-items-center">
-									<label for="task-status" class="form-label">
-										<i class="ti ti-circle-dot text-primary ti-20px me-2"></i>
-										{{ __('admin.Status') }}
-									</label>
-								</div>
-								<div class="col-4">
-									<select class="form-select select2" id="task-status" name="task-status">
-										<option value="pending">{{ __('admin.Pending') }}</option>
-										<option value="progress">{{ __('admin.In_Progress') }}</option>
-										<option value="review">{{ __('admin.Review') }}</option>
-										<option value="completed">{{ __('admin.Completed') }}</option>
-									</select>
-								</div>
-							</div>
-							<div class="row mb-3">
-								<div class="col-3 d-flex align-items-center">
-									<label for="task-assignee" class="form-label">
-										<i class="ti ti-users text-primary ti-20px me-2"></i>
-										{{ __('admin.Assignee') }}
-									</label>
-								</div>
-								<div class="col-9">
-									{{-- <select class="form-select select2" id="task-assignee" name="task-assignee">
-										<option value="1">User 1</option>
-										<option value="2">User 2</option>
-										<option value="3">User 3</option>
-									</select> --}}
-									<input id="task-assignee" name="task-assignee" class="form-control" placeholder="{{ __('admin.Select_Users') }}" value="" />
-								</div>
-							</div>
-							<div class="row mb-3">
-								<div class="col-3 d-flex align-items-center">
-									<label for="task-due-date" class="form-label">
-										<i class="ti ti-calendar text-primary ti-20px me-2"></i>
-										{{ __('admin.Due_Date') }}
-									</label>
-								</div>
-								<div class="col-4">
-									<input type="text" class="form-control flatpickr" id="task-due-date" name="task-due-date" placeholder="{{ $lang == 'en' ? 'Select due date' : 'اختر تاريخ الانتهاء' }}" 
-										style="font-size: 12px;"
-									/>
-								</div>
-								<div class="col-4">
-									{{--  <input type="date" class="form-control" id="task-due-date" name="task-due-date" />  --}}
-								</div>
-							</div>
-							<div class="row mb-3">
-								<div class="col-3 d-flex align-items-center">
-									<label for="tags" class="form-label">
-										<i class="ti ti-tag text-primary ti-20px me-2"></i>
-										{{ __('admin.Tags') }}
-									</label>
-								</div>
-								<div class="col-9">
-									<input id="task-labels" name="task-labels" class="form-control" placeholder="{{ __('admin.Select_Labels') }}" value="" />
-								</div>
-							</div>
-						</form>
-					</div>
-					<div class="mt-md-4 d-flex align-items-center gap-3 p-4 p-md-0">
-						<button type="button" class="btn btn-label-secondary w-px-100" data-bs-dismiss="modal">{{ __('admin.Cancel') }}</button>
-						<button id="createTask" type="button" class="btn btn-primary w-px-100">
-							{{ __('admin.Create') }}
-							<span class="spinner-border spinner-border-sm d-none ms-2" role="status" aria-hidden="true"></span>
-						</button>
-					</div>
-				</div>
-			</div>
-		</div>
-		
-		<!-- Edit Task Modal -->
-		<div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModal" aria-hidden="true">
-			<div class="modal-dialog modal-md">
-				<div class="modal-content rounded overflow-hidden bg-label-light p-4">
-					<div class="mb-4 p-4 p-md-0">
-						<div class="d-flex justify-content-between align-items-center w-100">
-							<h6 class="modal-title" id="form-modal-title">{{ __('admin.Edit_Task') }}</h6>
-							<div id="closeViewTask" class="cursor-pointer border rounded" data-bs-dismiss="modal" aria-label="Close">
-								<i class="ti ti-x ti-20px text-primary"></i>
-							</div>
-						</div>
-					</div>
-					<div class="bg-white rounded border border-light p-2 p-md-4">
-						<form action="#" method="POST" id="editTaskForm">
-							<div class="mb-3">
-								<label for="task-name" class="form-label">{{ __('admin.Task_Name') }}</label>
-								<input type="text" class="form-control" id="edit-task-name" name="edit-task-name" placeholder="{{ __('admin.Task_Name') }}" />
-							</div>
-							<div class="mb-3">
-								<label class="form-label">{{ __('admin.Description') }}</label>
-								<div style="height: 150px; overflow-y: auto;" class="border border-light rounded">
-									<div id="edit-task-content-editor" class="form-control border-none"></div>
-								</div>
-								<textarea class="form-control d-none" id="edit-task-content" name="edit-task-content" rows="3"></textarea>
-							</div>
-							<div class="bg-label-secondary p-2 rounded mb-3 border">
-								<div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-white">
-									<div class="d-flex align-items-center justify-content-center gap-2">
-										<h6 class="fw-semibold mb-0"><i class="ti ti-paperclip text-primary ti-24px me-2"></i>{{ __('admin.Attachments') }}</h6>
-										<h6 class="mb-0"><span class="badge bg-white text-dark" id="editAttachmentCount">0</span></h6>
-									</div>
-									<input type="file" id="editFileInput" style="display: none;" multiple onchange="handleAttachmentEdit(event)" data-task="" />
-									<button type="button" class="btn btn-sm btn-outline-info" style="width: 24px;"
-										onclick="document.getElementById('editFileInput').click();">
-										<i class="ti ti-plus ti-16px"></i>
-									</button>
-								</div>
-								<div class="d-flex flex-wrap gap-2" id="editFileList"></div>
-							</div>
-							<div class="row mb-3">
-								<div class="col-3 d-flex align-items-center">
-									<label for="task-status" class="form-label">
-										<i class="ti ti-flag text-primary ti-24px"></i>
-										{{ __('admin.Priority') }}
-									</label>
-								</div>
-								<div class="col-4">
-									<select class="form-select select2" id="edit-task-priority" name="edit-task-priority">
-										<option value="low">{{ __('admin.Low') }}</option>
-										<option value="medium">{{ __('admin.Medium') }}</option>
-										<option value="high">{{ __('admin.High') }}</option>
-									</select>
-								</div>
-							</div>
-							<div class="row mb-3">
-								<div class="col-3 d-flex align-items-center">
-									<label for="task-status" class="form-label">
-										<i class="ti ti-circle-dot text-primary ti-20px me-2"></i>
-										{{ __('admin.Status') }}
-									</label>
-								</div>
-								<div class="col-4">
-									<select class="form-select select2" id="edit-task-status" name="edit-task-status">
-										<option value="pending">{{ __('admin.Pending') }}</option>
-										<option value="progress">{{ __('admin.In_Progress') }}</option>
-										<option value="review">{{ __('admin.Review') }}</option>
-										<option value="completed">{{ __('admin.Completed') }}</option>
-									</select>
-								</div>
-							</div>
-							<div class="row mb-3">
-								<div class="col-3 d-flex align-items-center">
-									<label for="task-assignee" class="form-label">
-										<i class="ti ti-users text-primary ti-20px me-2"></i>
-										{{ __('admin.Assignee') }}
-									</label>
-								</div>
-								<div class="col-9">
-									{{-- <select class="form-select select2" id="task-assignee" name="task-assignee">
-										<option value="1">User 1</option>
-										<option value="2">User 2</option>
-										<option value="3">User 3</option>
-									</select> --}}
-									<input
-										id="edit-task-assignee"
-										name="edit-task-assignee"
-										class="form-control"
-										placeholder="{{ __('admin.Select_Users') }}"
-										value=""
-									/>
-								</div>
-							</div>
-							<div class="row mb-3">
-								<div class="col-3 d-flex align-items-center">
-									<label for="task-due-date" class="form-label">
-										<i class="ti ti-calendar text-primary ti-20px me-2"></i>
-										{{ __('admin.Due_Date') }}
-									</label>
-								</div>
-								<div class="col-4">
-									<input type="text" class="form-control flatpickr" id="edit-task-due-date" name="edit-task-due-date" placeholder="{{ $lang == 'en' ? 'Select due date' : 'اختر تاريخ الانتهاء' }}" 
-										style="font-size: 12px;"
-									/>
-								</div>
-								{{--  <div class="col-4">
-									<input type="date" class="form-control" id="edit-task-due-date" name="edit-task-due-date" />
-								</div>  --}}
-							</div>
-							<div class="row mb-3">
-								<div class="col-3 d-flex align-items-center">
-									<label for="tags" class="form-label">
-										<i class="ti ti-tag text-primary ti-20px me-2"></i>
-										{{ __('admin.Tags') }}
-									</label>
-								</div>
-								<div class="col-9">
-									<input
-										id="edit-task-labels"
-										name="edit-task-labels"
-										class="form-control"
-										placeholder="{{ __('admin.Select_Tags') }}"
-										value=""
-									/>
-								</div>
-							</div>
-						</form>
-					</div>
-					<div class="mt-md-4 d-flex align-items-center gap-3 p-4 p-md-0">
-						<input type="hidden" id="edit-task-id" name="edit-task-id" value="0" />
-						<button type="button" class="btn btn-label-secondary w-px-100" data-bs-dismiss="modal">{{ __('admin.Cancel') }}</button>
-						<button id="editTaskBtn" type="button" class="btn btn-primary w-px-100">
-							{{ __('admin.Edit') }}
-							<span class="spinner-border spinner-border-sm d-none ms-2" role="status" aria-hidden="true"></span>
-						</button>
-					</div>
-				</div>
-			</div>
-		</div>
+        <div class="tab-content p-0 flex-grow-1 overflow-auto">
+          {{-- DETAILS TAB --}}
+          <div class="tab-pane fade show active" id="vt-details" role="tabpanel">
+            <div class="mb-3">
+              <span class="text-muted small d-block mb-1">{{ __('admin.Title') }}</span>
+              <h6 id="vt-title" class="mb-0"></h6>
+            </div>
+            <div class="mb-3">
+              <span class="text-muted small d-block mb-1">{{ __('admin.Description') }}</span>
+              <div id="vt-description" class="bg-body border rounded p-3 small" style="min-height: 80px;"></div>
+            </div>
+            <div class="row g-3 mb-4">
+              <div class="col-6">
+                <span class="text-muted small d-block mb-1">{{ __('admin.Due_Date') }}</span>
+                <p id="vt-due-date" class="mb-0 small fw-medium"></p>
+              </div>
+              <div class="col-6">
+                <span class="text-muted small d-block mb-1">{{ __('admin.Priority') }}</span>
+                <div id="vt-priority"></div>
+              </div>
+              <div class="col-6">
+                <span class="text-muted small d-block mb-1">{{ __('admin.Status') }}</span>
+                <div id="vt-status"></div>
+              </div>
+            </div>
 
-		<div class="content-backdrop fade"></div>
-		<div style="display: none;" class="offcanvas-backdrop fade show"></div>
-	</div>
-	<!-- Content wrapper -->
+            <div class="mb-4">
+              <span class="text-muted small d-block mb-1">{{ __('admin.Attachments') }}</span>
+              <div id="vt-attachments-list" class="d-flex flex-column gap-2 small mb-3"></div>
+
+              {{-- Add Attachment Directly from View Drawer --}}
+              <div class="border-top pt-3">
+                <label class="form-label small">{{ __('admin.your_submission') }} <span class="text-muted">({{ __('admin.max') }} 10MB)</span></label>
+                <div class="input-group input-group-sm">
+                  <input type="file" id="vt-new-attachment" class="form-control"
+                    accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-zip-compressed,text/plain,text/csv" />
+                  <button class="btn btn-outline-primary" type="button" id="vt-upload-btn"><i class="ti ti-upload ti-xs me-1"></i> {{ __('admin.Upload') }}</button>
+                </div>
+                <div class="invalid-feedback d-block" id="vt-upload-error"></div>
+              </div>
+            </div>
+          </div>
+
+          {{-- SUBMISSIONS TAB --}}
+          <div class="tab-pane fade" id="vt-submissions" role="tabpanel">
+            <div id="vt-submissions-list" class="small pe-2"></div>
+          </div>
+
+           {{-- FEEDBACK TAB --}}
+          <div class="tab-pane fade" id="vt-feedback" role="tabpanel">
+            <div id="vt-feedback-list" class="small pe-2"></div>
+          </div>
+          
+          {{-- COMMENTS TAB --}}
+          <div class="tab-pane fade" id="vt-comments" role="tabpanel">
+
+            <div id="vt-comments-list" class="small mb-4 pe-2"></div>
+            
+            <div class="border-top pt-3 mt-auto">
+              <label class="form-label small fw-medium">{{ __('admin.Add comment') }}</label>
+              <div id="vt-comment-editor" class="border rounded-top"></div>
+              <div class="border border-top-0 rounded-bottom p-1 d-flex justify-content-between align-items-center">
+                <div id="vt-comment-toolbar">
+                  <span class="ql-formats m-0">
+                    <button class="ql-bold"></button>
+                    <button class="ql-italic"></button>
+                    <button class="ql-underline"></button>
+                  </span>
+                </div>
+                <button class="btn btn-sm btn-primary" type="button" id="vt-send-comment-btn">{{ __('admin.send') }}</button>
+              </div>
+            </div>
+          </div>
+
+          {{-- ACTIVITY TAB --}}
+          <div class="tab-pane fade" id="vt-activity" role="tabpanel">
+            <div id="vt-activities-list" class="small pe-2"></div>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 pt-3 border-top mt-3">
+          @if ($_user->ableTo('tasks.update', $permissions))
+          <button type="button" class="btn btn-outline-primary" id="vt-edit-trigger-btn">
+            <i class="ti ti-edit ti-xs me-1"></i> {{ __('admin.Edit_Task') }}
+          </button>
+          @endif
+          <button type="button" class="btn btn-label-secondary" data-bs-dismiss="offcanvas">{{ __('admin.Close') }}</button>
+        </div>
+      </div>
+    </div>
+
+    {{-- ADD TASK OFFCANVAS --}}
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="addTaskOffcanvas" style="width: 480px;">
+      <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title"><i class="ti ti-plus me-1 text-primary"></i> {{ __('admin.add_new_task') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+      </div>
+      <div class="offcanvas-body">
+        <form class="d-flex flex-column h-100" id="addTaskForm" novalidate enctype="multipart/form-data">
+          <div class="flex-grow-1 overflow-auto">
+            <div class="mb-3">
+              <label class="form-label">{{ __('admin.Title') }} <span class="text-danger">*</span></label>
+              <input type="text" name="title" class="form-control" placeholder="{{ __('admin.Title') }}" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ __('admin.Description') }}</label>
+              <div class="border border-bottom-0 rounded-top p-1"><div id="add-desc-toolbar"><span class="ql-formats"><button class="ql-bold"></button><button class="ql-italic"></button><button class="ql-list" value="ordered"></button><button class="ql-list" value="bullet"></button></span></div></div>
+              <div id="add-desc-editor" class="border rounded-top"></div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ __('admin.Due_Date') }}</label>
+              <input type="text" id="add-due-date" name="due_date" class="form-control" placeholder="YYYY-MM-DD" />
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label class="form-label">{{ __('admin.Priority') }} <span class="text-danger">*</span></label>
+                <select name="priority" id="add-priority" class="select2 form-select">
+                  <option value="">{{ __('admin.Select') }}</option>
+                  <option value="Low">{{ __('admin.Low') }}</option>
+                  <option value="Medium">{{ __('admin.Medium') }}</option>
+                  <option value="High">{{ __('admin.High') }}</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label">{{ __('admin.Status') }} <span class="text-danger">*</span></label>
+                <select name="status" id="add-status" class="select2 form-select">
+                  <option value="">{{ __('admin.Select') }}</option>
+                  <option value="pending">{{ __('admin.Pending') }}</option>
+                  <option value="progress">{{ __('admin.In_Progress') }}</option>
+                  <option value="review">{{ __('admin.In_Review') }}</option>
+                  <option value="completed">{{ __('admin.Completed') }}</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label d-flex justify-content-between">
+                <span>{{ __('admin.Attachments') }}</span>
+                <span class="text-muted small">{{ __('admin.Max_Each_5_Image_Pdf') }}</span>
+              </label>
+              <input type="file" name="attachments[]" id="add-attachments" class="form-control" accept="image/jpeg,image/png,image/gif,application/pdf" multiple />
+              <div class="invalid-feedback" id="add-file-error"></div>
+            </div>
+
+          </div>
+          <div class="d-flex gap-2 mt-auto">
+            <button type="submit" class="btn btn-primary" id="add-submit-btn">{{ __('admin.Create') }}</button>
+            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="offcanvas">{{ __('admin.Cancel') }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    {{-- EDIT TASK OFFCANVAS --}}
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="editTaskOffcanvas" style="width: 480px;">
+      <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title"><i class="ti ti-edit me-1 text-warning"></i> {{ __('admin.Edit_Task') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+      </div>
+      <div class="offcanvas-body">
+        <form id="editTaskForm" class="d-flex flex-column h-100" novalidate enctype="multipart/form-data">
+          <input type="hidden" id="et-id" name="id" />
+          <input type="hidden" name="_method" value="PUT" />
+
+          <div class="flex-grow-1 overflow-auto">
+            <div class="mb-3">
+              <label class="form-label">{{ __('admin.Title') }} <span class="text-danger">*</span></label>
+              <input type="text" id="et-title" name="title" class="form-control" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ __('admin.Description') }}</label>
+              <div class="border border-bottom-0 rounded-top p-1"><div id="et-desc-toolbar"><span class="ql-formats"><button class="ql-bold"></button><button class="ql-italic"></button><button class="ql-list" value="ordered"></button><button class="ql-list" value="bullet"></button></span></div></div>
+              <div id="et-desc-editor" class="border rounded-top"></div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ __('admin.Due_Date') }}</label>
+              <input type="text" id="et-due-date" name="due_date" class="form-control" />
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label class="form-label">{{ __('admin.Priority') }} <span class="text-danger">*</span></label>
+                <select name="priority" id="et-priority" class="select2 form-select">
+                  <option value="Low">{{ __('admin.Low') }}</option>
+                  <option value="Medium">{{ __('admin.Medium') }}</option>
+                  <option value="High">{{ __('admin.High') }}</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label">{{ __('admin.Status') }} <span class="text-danger">*</span></label>
+                <select name="status" id="et-status" class="select2 form-select">
+                  <option value="pending">{{ __('admin.Pending') }}</option>
+                  <option value="progress">{{ __('admin.In_Progress') }}</option>
+                  <option value="review">{{ __('admin.In_Review') }}</option>
+                  <option value="completed">{{ __('admin.Completed') }}</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label">{{ __('admin.Attachments') }}</label>
+
+              <div id="et-current-attachments-wrapper" class="mb-3 d-none">
+                <span class="d-block small text-muted mb-2">{{ __('admin.current_files') }}</span>
+                <div id="et-current-attachments-list" class="d-flex flex-column gap-2 small"></div>
+              </div>
+
+              <label class="form-label d-flex justify-content-between">
+                <span>{{ __('admin.Upload') }}</span>
+                <span class="text-muted small">{{ __('admin.max') }} 5MB</span>
+              </label>
+              <input type="file" name="attachments[]" id="et-attachments" class="form-control" accept="image/jpeg,image/png,image/gif,application/pdf" multiple />
+              <div class="invalid-feedback" id="et-file-error"></div>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 mt-auto">
+            <button type="submit" class="btn btn-primary" id="et-submit-btn">{{ __('admin.Update') }}</button>
+            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="offcanvas">{{ __('admin.Cancel') }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
 @stop
 
 @section('scripts')
-	<script src="/vuexy/assets/vendor/libs/jkanban/jkanban.js"></script>
-	<script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script>
-	<script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
-	<script src="/vuexy/assets/vendor/libs/bloodhound/bloodhound.js"></script>
-	<script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
-  <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
-
-	<script>
-		// Handle attachments upload
-		function handleFileUpload(event) {
-			const files = event.target.files;
-			const task_id = $('#fileInput').attr('data-task');
-			validateAndUploadFiles(files, task_id, 'view');
-		}
-
-		// Handle attachments create
-		function handleAttachmentCreate(event) {
-			const files = event.target.files;
-			validateAndUploadFiles(files, null, 'create');
-		}
-
-		// Handle attachments edit
-		function handleAttachmentEdit(event) {
-			const files = event.target.files;
-			const task_id = $('#editFileInput').attr('data-task');
-			validateAndUploadFiles(files, task_id, 'edit');
-		}
-
-		// Validate and upload files
-		function validateAndUploadFiles(files, task_id, mode) {
-			const allowedTypes = [
-				'application/pdf', 
-				'image/jpeg', 
-				'image/png', 
-				'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 
-				'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-				'application/vnd.openxmlformats-officedocument.presentationml.presentation'
-			];
-			const maxFileSize = 10 * 1024 * 1024; // 10 MB
-
-			for (const file of files) {
-				if (!allowedTypes.includes(file.type)) {
-					const errorMessage = lang === 'ar' 
-						? 'يسمح فقط بملفات PDF و DOCX و XLSX و PPTX و JPG و JPEG و PNG.' 
-						: 'Only PDF, DOCX, XLSX, PPTX, JPG, JPEG, and PNG files are allowed.';
-					releaseFailureAlert({ message: errorMessage });
-					return;
-				}
-
-				if (file.size > maxFileSize) {
-					const errorMessage = lang === 'ar' 
-						? 'الملف كبير جدًا. الحد الأقصى المسموح به هو 10 ميجابايت.' 
-						: 'File too large. Maximum size allowed is 10 MB.';
-					releaseFailureAlert({ message: errorMessage });
-					return;
-				}
-			}
-			
-			// For create mode, store files for later upload
-			if (mode === 'create') {
-				pendingCreateAttachments = Array.from(files);
-				renderFiles(files, mode);
-			} else {
-				uploadFiles(files, task_id, mode);
-			}
-		}
-
-		// Upload files handler
-		function uploadFiles(files, task_id, mode) {
-			const formData = new FormData();
-
-			for (const file of files) {
-				formData.append('attachments[]', file);
-			}
-			
-			formData.append('mentorship_request_id', {{ $session_id }});
-			if (task_id) {
-				formData.append('task_id', task_id);
-			}
-			formData.append('_token', '{{ csrf_token() }}');
-
-			$.ajax({
-				url: "{{ URL::to('dashboard/mentor/mentorshipTasks/upload-attachments') }}",
-				type: 'POST',
-				data: formData,
-				processData: false,
-				contentType: false,
-				success: function(response) {
-					if (response.status) {
-						// Update the board_tasks array with updated task data
-						const taskIndex = board_tasks.findIndex(task => task.id == task_id);
-						if (taskIndex !== -1) {
-							board_tasks[taskIndex] = response.task;
-						}
-						
-						// Only render files for edit mode after upload, not for create mode since modal is closing
-						if (mode !== 'create') {
-							renderFiles(response.task.files, mode);
-						} else {
-							// For create mode, reload kanban to update attachment count in task item
-							reloadKanban();
-						}
-					} else {
-						releaseFailureAlert({ message: response.message });
-					}
-				},
-				error: function(error) {
-					releaseFailureAlert({
-						title: "{{ __('admin.Error') }}!",
-						message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
-					});
-				}
-			});
-		}
-
-		// Render files handler
-		function renderFiles(files, mode) {
-			let fileList, attachmentCount;
-			if (mode === 'view') {
-				fileList = document.getElementById('fileList');
-				attachmentCount = document.getElementById('attachmentCount');
-			} else if (mode === 'create') {
-				fileList = document.getElementById('createFileList');
-				attachmentCount = document.getElementById('createAttachmentCount');
-			} else if (mode === 'edit') {
-				fileList = document.getElementById('editFileList');
-				attachmentCount = document.getElementById('editAttachmentCount');
-				// Clear the file list before rendering new files
-				fileList.innerHTML = '';
-			}
-
-			// Clear the file list only if mode is not 'edit'
-			if (mode !== 'edit') {
-				fileList.innerHTML = '';
-			}
-
-			Array.from(files).forEach(file => {
-				const fileDiv = document.createElement('div');
-				fileDiv.className = 'border rounded p-2 d-flex align-items-center bg-white';
-				if (mode === 'create') {
-					fileDiv.innerHTML = `
-						<i class="ti ti-file text-info ti-20px me-2"></i>
-						<span class="text-dark fw-bold">${file.name}</span>
-						<div class="cursor-pointer me-2" onclick="deleteFileFromCreate(this.parentElement);">
-							<i class="ti ti-trash text-danger ti-16px ms-2"></i>
-						</div>
-						<a href="${URL.createObjectURL(file)}" download="${file.name}" class="ms-auto">
-							<i class="ti ti-download text-primary ti-16px"></i>
-						</a>
-					`;
-				} else {
-					fileDiv.innerHTML = `
-						<i class="ti ti-file text-info ti-20px me-2"></i>
-						<span class="text-dark fw-bold">${file.name}</span>
-						<div class="cursor-pointer me-2" onclick="deleteFileHandler('${file.name}', '${file.id}', this.parentElement);">
-							<i class="ti ti-trash text-danger ti-16px ms-2"></i>
-						</div>
-						<a href="${file.url}" download="${file.name}" class="ms-auto">
-							<i class="ti ti-download text-primary ti-16px"></i>
-						</a>
-					`;
-				}
-				fileList.appendChild(fileDiv);
-			});
-			attachmentCount.textContent = files.length;
-		}
-
-		// Delete file handler
-		function deleteFileHandler(fileName, fileId, ele) {
-			$('#viewTaskModal').modal('hide');
-			Swal.fire({
-				title: "{{__('admin.SureDelete')}}",
-				text: "{{__('admin.Recover')}}",
-				icon: "warning",
-				showCancelButton: true,
-				confirmButtonText: "{{ __('admin.DYes') }}",
-				cancelButtonText: "{{ __('admin.No') }}",
-				reverseButtons: true,
-				customClass: {
-						confirmButton: 'btn btn-danger me-2',
-						cancelButton: 'btn btn-label-secondary',
-				},
-				buttonsStyling: false,
-			}).then((result) => {
-				if (result.isConfirmed) {
-					$('#viewTaskModal').modal('show');
-					$.ajax({
-						url: "{{ URL::to('dashboard/mentor/mentorshipTasks/delete-attachments') }}",
-						type: 'POST',
-						data: { file: fileId, _token: '{{ csrf_token() }}' },
-						success: function(response) {
-							if (response.status) {
-								ele.remove();
-								const attachmentCount = document.getElementById('attachmentCount');
-								attachmentCount.textContent = document.getElementById('fileList').children.length;
-							} else {
-								releaseFailureAlert({ message: response.message });
-							}
-						},
-						error: function(error) {
-							releaseFailureAlert({
-								title: "{{ __('admin.Error') }}!",
-								message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
-							});
-						}
-					});
-					return;
-				}
-				$('#viewTaskModal').modal('show');
-			});
-		}
-
-		// Delete file from create modal
-		function deleteFileFromCreate(ele) {
-			ele.remove();
-			const attachmentCount = document.getElementById('createAttachmentCount');
-			attachmentCount.textContent = document.getElementById('createFileList').children.length;
-		}
-	</script>
+<script src="/vuexy/assets/vendor/libs/sortablejs/sortable.js"></script>
+<script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
+<script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
+<script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
+<script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
 @stop
 
 @section('pagescripts')
-	<script src="/vuexy/assets/js/forms-typeahead.js"></script>
-	<script>
-		let data = @json($data);
-		var kanban;
-		var boards = @json($kanban);
-		var lang = '{{ $l }}';
+<script>
+$(document).ready(function () {
+  'use strict';
 
-		// Global variable to store files selected during task creation
-		let pendingCreateAttachments = [];
+  const isAbleToEdit = '{{ $_user->ableTo('tasks.store', $permissions) }}' === '1' ;
 
-		if (lang === 'en') {
-			boards.forEach(board => {
-				if (board.id === 'progress') {
-					board.title = 'In Progress';
-				} else if (board.id) {
-					board.title = board.id.charAt(0).toUpperCase() + board.id.slice(1);
-				}
-			});
-		}
+  const PRIORITY_MAP = {
+    Low:    { label: '{{ __("admin.Low") }}',    cls: 'bg-label-secondary', dot: 'bg-secondary' },
+    Medium: { label: '{{ __("admin.Medium") }}', cls: 'bg-label-info',      dot: 'bg-info' },
+    High:   { label: '{{ __("admin.High") }}',   cls: 'bg-label-danger',    dot: 'bg-danger' },
+  };
 
-		var board_tasks = @json($tasks);
-		function getElement(el) { 
-			let id = $(el).data('eid');
-			let element = board_tasks.filter(item => item.id == id)[0];
-			return element;
-		}
+  const STATUS_MAP = {
+    pending:   '{{ __("admin.Pending") }}',
+    progress:  '{{ __("admin.In_Progress") }}',
+    review:    '{{ __("admin.In_Review") }}',
+    completed: '{{ __("admin.Completed") }}',
+  };
 
-		// Render Kanban board
-		const renderKanbanBoard = () => {
-			const element = document.querySelector('.kanban-wrapper');
-			if (!element) return;
-			kanban = new jKanban({
-				element: '.kanban-wrapper',
-				gutter: '15px',
-				widthBoard: '250px',
-				boards,
-				addItemButton: false,
-				dragBoards: true,
-				dragItems: true,
-				click: (el) => {
-					let element = getElement(el);
-					let id = element.id;
-					let url = "{{ URL::to('dashboard/mentor/mentorshipTasks/display') }}/" + id;
-					$('#editTakButton').attr('data-id', '');
-					$('#editTakButton').attr('task', 'id');
-					$.ajax({
-						url: url,
-						type: "GET",
-						dataType: "json",
-						success: function( element ) {
-							let bg = '';
-							$('#editTakButton').attr('data-id', id);
-							$('#editTakButton').attr('data-task', id);
-							$('#confirmDeleteTask').attr('data-task', id);
-							$('#commentButton').attr('data-task', id);
-							$('#fileInput').attr('data-task', id);
-							
-							if( element.priority == 'high' ) { bg = 'danger'; }
-							else if( element.priority == 'medium' ) { bg = 'warning'; }
-							else { bg = 'success'; }
-							let priority = lang === 'en' ? (element.priority.charAt(0).toUpperCase() + element.priority.slice(1)) : element.priority_visible;
-							let reported_at = new Date(element.reported_at);
-							let updated_at = new Date(element.updated_at);
-		
-							let reported_month = reported_at.toLocaleString('default', { month: 'short' });
-							let reported_day = `0${reported_at.getDate()}`.slice(-2);
-							let reported_hours = `0${reported_at.getHours()}`.slice(-2);
-							let reported_minutes = `0${reported_at.getMinutes()}`.slice(-2);
-							let reported_AmPm = reported_at.getHours() >= 12 ? 'PM' : 'AM';
-							let reported_at_pretty = `${reported_day} ${reported_month} ${reported_hours}:${reported_minutes} ${reported_AmPm}`;
-		
-							let updated_month = updated_at.toLocaleString('default', { month: 'short' });
-							let updated_day = `0${updated_at.getDate()}`.slice(-2);
-							let updated_hours = `0${updated_at.getHours()}`.slice(-2);
-							let updated_minutes = `0${updated_at.getMinutes()}`.slice(-2);
-							let updated_AmPm = updated_at.getHours() >= 12 ? 'PM' : 'AM';
-							let updated_at_pretty = `${updated_day} ${updated_month} ${updated_hours}:${updated_minutes} ${updated_AmPm}`;
-							
-							$('#task-details-name').html(element.name);
-							$('#task-details-contents').html(element.content);
-		
-							$('#task-details-priority').removeClass('bg-label-warning bg-label-danger bg-label-success');
-							$('#task-details-priority .rounded-circle').removeClass('bg-warning bg-danger bg-success');
-							$('#task-details-priority').addClass(`bg-label-${bg}`);
-							$('#task-details-priority .rounded-circle').addClass(`bg-${bg}`);
-							$('#task-details-priority .fw-semibold').html(priority);
-		
-							$('#task-details-reported-at').html(reported_at_pretty);
-							$('#task-details-updated-at').html(updated_at_pretty);
-							$('#attachmentCount').html(element.attachments);
+  let tasks = @json($tasks);
+  const program = @json($cycle);
 
-							$('#task-details-status .rounded-circle').removeClass('bg-secondary bg-warning bg-info bg-success');
-							if( element.status.toLowerCase() == 'pending' ) { $('#task-details-status .rounded-circle').addClass('bg-secondary'); }
-							else if( element.status.toLowerCase() == 'progress' ) { $('#task-details-status .rounded-circle').addClass('bg-info'); }
-							else if( element.status.toLowerCase() == 'review' ) { $('#task-details-status .rounded-circle').addClass('bg-warning'); }
-							else if( element.status.toLowerCase() == 'completed' ) { $('#task-details-status .rounded-circle').addClass('bg-success'); }
-		
-							var due_date = '-';
-							if( element.due_date != null )
-							{
-								due_date = new Date(element.due_date);
-								due_date = due_date.toISOString().split('T')[0];
-							}
-							var done_date = '-';
-							if( element.done_date != null )
-							{
-								done_date = new Date(element.done_date);
-								done_date = done_date.toISOString().split('T')[0];
-							}
-		
-							let statusText = element.visible_status;
-							if (lang === 'en') {
-								if (element.status === 'progress') {
-									statusText = 'In Progress';
-								} else {
-									statusText = element.status.charAt(0).toUpperCase() + element.status.slice(1);
-								}
-							}
-							$('#task-details-status .fw-semibold').html( statusText );
-		
-							$('#task-details-assignee img.rounded-circle').prop({src: element.assignee.photo, title: element.assignee.name, alt: element.assignee.name });
-							$('#task-details-reporter img.rounded-circle').prop({src: element.reporter.photo, title: element.reporter.name, alt: element.reporter.name });
-							
-							if (due_date != '-') {
-								$('#task-details-due-date .fw-semibold').html(due_date);
-							} else {
-								$('#task-details-due-date .fw-semibold').html('N / A');
-							}
+  // Fallback string definitions if translation is missing
+  const noActivitiesStr = '{{ __("admin.no_recent_activities") }}';
+  const noCommentsStr   = '{{ __("admin.no_comments") }}';
 
-							console.log('done_date', done_date);
-							if (done_date != '-') {
-								$('#task-details-done-date .fw-semibold').html(done_date);
-							} else {
-								$('#task-details-done-date .fw-semibold').html('N / A');
-							}
-				
-							var labels = element.labels.map(label => `<h6 class="mb-0"><span class="badge bg-label-info">${label.name}</span></h6>`).join('');
-							$('#task-details-labels').html(labels);
-							let commentList = document.getElementById('commentList');
-							commentList.innerHTML = '';
-							if( element.comments.length ) { commentList.classList.add('bg-label-secondary', 'p-2', 'rounded', 'mb-3', 'border'); }
-							else { commentList.classList.remove('bg-label-secondary', 'p-2', 'rounded', 'mb-3', 'border'); }
-		
-							element.comments.forEach(comment => {
-								commentList.innerHTML += `
-									<div class="border rounded p-2 mb-2 bg-white">
-										<div class="d-flex justify-content-between comment-element">
-											<div class="d-flex align-items-center gap-2 mb-2">
-												<img src="${comment.commenter.photo}" class="rounded-circle" title="${comment.commenter.name}" alt="${comment.commenter.name}" width="34" height="34">
-												<div class="d-flex align-items-center gap-2">
-													<h6 class="mb-0 text-dark fw-bold">${comment.commenter.name}</h6>
-													<span title="${comment.created_at}" class="text-secondary text-xs">${comment.created_since}</span>
-													${comment.edited ? '<span class="text-dark"<i class="fas fa-pencil" style="font-size: 10px;"></i> </span>' : ''}
-												</div>
-											</div>
-											<div class="cursor-pointer" onclick="this.parentElement.parentElement.remove(); if( $('#commentList .comment-element').length == 0 ) { commentList.classList.remove('bg-label-secondary', 'p-2', 'rounded', 'mb-3', 'border'); }">
-												<i class="ti ti-trash text-danger ti-16px"></i>
-											</div>
-										</div>
-										<div class="comment-text text-muted mb-0 text-wrap px-2 text-${lang == 'ar' ? 'right' : 'left'}" style="overflow-wrap: break-word;">
-											${comment.comment}
-										</div>
-									</div>
-								`;
-							});
-		
-							let activityList = document.getElementById('activityList');
-							activityList.innerHTML = '';
-		
-							if( element.logs.length > 0 ) {
-								activityList.classList.add('bg-label-secondary', 'p-2', 'rounded', 'mb-3', 'border'); 
-								element.logs.forEach(log => {
-									activityList.innerHTML += `
-										<div class="border rounded p-2 mb-2 bg-white">
-											<div class="d-flex justify-content-between">
-												<div class="d-flex align-items-center gap-2 mb-2">
-													<img src="${log.user.photo}" class="rounded-circle" title="${log.user.name}" alt="${log.user.name}" width="34" height="34">
-													<div class="d-flex align-items-center gap-2">
-														<h6 class="mb-0 text-dark fw-bold">${log.user.name}</h6>
-														<span title="${log.created_at}" class="text-secondary text-xs">${log.created_since}</span>
-													</div>
-												</div>
-											</div>
-											<div class="text-muted mb-0" style="font-size: 14px; direction: {{ $lang == 'ar' ? 'rtl' : 'ltr' }};">${log.footprint}</div>
-										</div>
-									`;
-								});
-							}
-							else {
-								activityList.classList.remove('bg-label-secondary', 'p-2', 'rounded', 'mb-3', 'border'); 
-								activityList.innerHTML = `
-									<div class="border rounded p-2 mb-2 bg-white">
-										<div class="text-muted mb-0 text-center">
-											{{ __('admin.No_Activity_Found') }}
-										</div>
-								`;
-							}
-		
+  $.ajaxSetup({
+    headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+  });
 
-							// Handle view attachments
-							renderFilesHandler(element.files, 'view');
-		
-							$('#viewTaskModal').modal('show');
-						},
-						error: function(error) {
-							console.log('error', error);
-							releaseFailureAlert({
-								title: "{{ __('admin.Error') }}!",
-								message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
-							});
-						}
-					});
-				},
-				dragEl: (el, source) => {
-					// 
-				},
-				dragendEl: el => {
-					// Perform any additional actions here
-				},
-				dropEl: (el, target, source, sibling) => {
-					var element = getElement(el);
+  // --- Validate Multiple Files ---
+  function validateFiles(fileInput, errorSelector) {
+    const files = fileInput[0].files;
+    const $errorDiv = $(errorSelector);
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/svg+xml', 'application/pdf', 'application/zip', 'application/x-rar-compressed', 'application/vnd.rar', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'];
+    const maxSize = 10 * 1024 * 1024; // 10MB limit
+    
+    fileInput.removeClass('is-invalid');
+    $errorDiv.text('');
 
-					var target_board_elements = target.parentElement.getElementsByClassName('kanban-item');
-					var target_board_elements_array = Array.from(target_board_elements);
+    if (files.length === 0) return true;
 
-					var ids = target_board_elements_array.map((board_element, index) => { return $(board_element).data('eid'); });
+    for (let i = 0; i < files.length; i++) {
+      if (!allowedTypes.includes(files[i].type)) {
+        fileInput.addClass('is-invalid');
+        $errorDiv.text(`File "${files[i].name}" has an invalid type. Only JPG, PNG, GIF, PDF allowed.`);
+        return false;
+      }
+      if (files[i].size > maxSize) {
+        fileInput.addClass('is-invalid');
+        $errorDiv.text(`File "${files[i].name}" exceeds the 5MB limit.`);
+        return false;
+      }
+    }
+    return true;
+  }
 
-					// Perform any additional actions here
-					var send_data = {
-						_token: "{{ csrf_token() }}",
-						board_ids: ids,
-						moved_task_id: element.id,
-						mentorship_request_id: '{{ $session_id }}',
-						old_board: source.parentElement.dataset.id,
-						new_board: target.parentElement.dataset.id
-					}
-					$.ajax({
-						url: "{{ URL::to('dashboard/mentor/mentorshipTasks/move-task') }}",
-						type: "POST",
-						data: send_data,
-						dataType: "json",
-						success: function(response) {
-							if( response.status )
-							{
-								var data = response.data;
-								boards = data.kanban;
-								board_tasks = data.tasks;
-								labels = data.labels;
-							}
-							else
-							{
-								releaseFailureAlert({ message: response.message });
-							}
-							reloadKanban();
-						},
-						error: function(error) {
-							reloadKanban();
-							if( error.status == 422 ) {
-								for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { releaseFailureAlert({ message }); }); }
-								return;
-							} 
-							releaseFailureAlert({
-								title: "{{ __('admin.Error') }}!",
-								message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
-							});
-						}
-					});
-				}
-			});
-		};
+  // --- Build a kanban card HTML string for a task ---
+  function buildTaskCard(task) {
+    const p = PRIORITY_MAP[task.priority] || PRIORITY_MAP['Low'];
+    const r = task.creator || { name: 'User', img_url: null };
+    const ri = (r.name || 'U').substring(0, 2).toUpperCase();
+    const attCount = task.attachments ? task.attachments.length : 0;
+    const commentCount = task.comments ? task.comments.length : 0;
+    const avatarHtml = r.img_url
+      ? `<img src="${r.img_url}" alt="avatar" class="rounded-circle object-fit-cover" style="width:24px;height:24px;" />`
+      : `<span class="badge bg-label-primary rounded-circle d-flex align-items-center justify-content-center p-0" style="width:24px;height:24px;">${ri}</span>`;
 
-		// Render kanban item
-		const renderKanbanItem = () => {
-			const tasks = document.querySelectorAll('.kanban-item');
-			tasks.forEach(item => {
-				var element = getElement(item);
+    return `
+      <div class="card shadow-sm border-0 cursor-grab kanban-item" data-task-id="${task.id}" data-search-text="${(task.title || '').toLowerCase()}">
+        <div class="card-body p-3">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="badge ${p.cls} rounded-pill" style="font-size:0.7rem;">
+              <span class="d-inline-block rounded-circle me-1 ${p.dot}" style="width:6px;height:6px;"></span>${p.label}
+            </span>
+            <div class="d-flex align-items-center gap-1">
+              <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle view-task-btn" type="button" data-task-id="${task.id}" title="{{ __('admin.View') }}"><i class="ti ti-eye ti-md text-dark"></i></button>
+              ${isAbleToEdit 
+                ? `<button class="btn btn-sm btn-icon btn-text-secondary rounded-circle edit-task-btn" type="button" data-task-id="${task.id}" title="{{ __('admin.Edit') }}"><i class="ti ti-edit ti-md text-dark"></i></button>` 
+                : ''
+              }
+              <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle archive-task-btn" type="button" data-task-id="${task.id}" title="{{ __('admin.archive_task') }}"><i class="ti ti-archive ti-md text-dark"></i></button>
+            </div>
+          </div>
+          <h6 class="mb-1 text-truncate">${$('<div>').text(task.title).html()}</h6>
+          <div class="text-muted small mb-2 line-clamp-2">${$('<div>').html(task.description).text()}</div>
+          <div class="d-flex align-items-center justify-content-between small text-muted mt-3">
+            <span class="d-flex align-items-center gap-2">
+              ${attCount > 0 ? `<span class="d-flex align-items-center" title="${attCount} Attachments"><i class="ti ti-paperclip ti-xs me-1"></i>${attCount}</span>` : ''}
+              ${commentCount > 0 ? `<span class="d-flex align-items-center" title="${commentCount} Comments"><i class="ti ti-message ti-xs me-1"></i>${commentCount}</span>` : ''}
+              <span class="d-flex align-items-center"><i class="ti ti-calendar ti-xs me-1"></i> ${task.due_date || ''}</span>
+            </span>
+            <div data-bs-toggle="tooltip" data-bs-placement="top" title="${$('<div>').text(r.name).html()}">${avatarHtml}</div>
+          </div>
+        </div>
+      </div>`;
+  }
 
-				const labels = element?.labels.map(label => {
-				// Check if `name` is a valid JSON string or a simple string
-				if (label.name.startsWith("[") && label.name.endsWith("]")) {
-					try {
-						const parsed = JSON.parse(label.name); // Parse the stringified JSON
-						return parsed.map(item => item.value); // Extract `value` properties
-					} catch (e) {
-						console.error("Error parsing JSON:", e);
-						return []; // Handle invalid JSON gracefully
-					}
-				} else {
-					// If `name` is a simple string, wrap it in an array
-					return [label.name];
-				}
-			}).flat(); // Flatten the result into a single array if needed
-				let taskContent = element.content;
-				let taskName = element.name;
-				let comments = element.comments;
-				let reported_at = new Date(element.reported_at);
-				let month = reported_at.toLocaleString('default', { month: 'short' });
-				let day = `0${reported_at.getDate()}`.slice(-2);
-				let reported_at_pretty = `${day} ${month}`;
-				let bg = '';
-				if( element.priority == 'high' ) { bg = 'danger'; }
-				else if( element.priority == 'medium' ) { bg = 'warning'; }
-				else { bg = 'success'; }
-				let priority = lang === 'en' ? (element.priority.charAt(0).toUpperCase() + element.priority.slice(1)) : element.priority_visible;
+  // --- Add or update a task card in the correct board column ---
+  function syncTaskToBoard(task, oldStatus) {
+    const $existingCard = $(`.kanban-item[data-task-id="${task.id}"]`);
+    const $targetBoard = $(`.kanban-board[data-board="${task.status}"] .kanban-drag`);
+    const newCardHtml = buildTaskCard(task);
 
-				let content = `
-					<div class="card shadow-sm p-3 d-flex flex-column">
-						<div class="d-flex align-items-center gap-1 mb-2">
-							${labels?.slice(0, 2)?.map(label => `<div class="badge bg-label-info">
-								<div class="fw-bold" style="font-size: 11px;">${label}</div>
-							</div>`).join('')}
-							<div class="badge bg-label-${bg} d-flex align-items-center justify-content-center">
-								<div style="width: 7px; height: 7px;" class="bg-${bg} rounded-circle me-1"></div>
-								<div class="fw-bold" style="font-size: 11px;">${priority}</div>
-							</div>
-						</div>
-						<div class="d-flex flex-column gap-2 border-bottom mb-2">
-							<h6 class="mb-0 fw-bold mb-3">${taskName}</h6>
-							<!-- <p class="text-muted mb-1 text-xs">${taskContent}</p> -->
-						</div>
-						<div class="d-flex justify-content-between">
-							<div class="d-flex justify-content-center align-items-center">
-								<img src="${element.assignee.photo}" class="rounded-circle" title="${element.assignee.name}" alt="${element.assignee.name}" width="24" height="24" style="{{ $lang == 'en' ? 'margin-right: -5px;' : 'margin-left: -5px;' }}">
-							</div>
-							<div class="d-flex justify-content-center align-items-center gap-2">
-								<span class="text-xs"><i class='ti ti-paperclip ti-16px me-1'></i>${element.attachments}</span>
-								<span class="text-xs"><i class="ti ti-clock ti-16px me-1"></i>${reported_at_pretty}</span>
-								<span class="text-xs"><i class="ti ti-message-2 ti-16px me-1"></i>${comments.length}</span>
-							</div>
-						</div>
-					</div>
-				`;
+    if ($existingCard.length) {
+      if (oldStatus && oldStatus !== task.status) {
+        // Moved to a different column — remove from old, append to new
+        const $oldBoard = $(`.kanban-board[data-board="${oldStatus}"] .kanban-drag`);
+        $existingCard.remove();
+        if ($oldBoard.find('.kanban-item:not(.d-none)').length === 0) {
+          $oldBoard.append('<p class="text-muted small text-center py-3 m-0" data-empty-board>{{ __("admin.No_Tasks") }}</p>');
+        }
+        $targetBoard.find('[data-empty-board]').remove();
+        $targetBoard.append(newCardHtml);
+      } else {
+        // Same column — replace in place
+        $existingCard.replaceWith(newCardHtml);
+      }
+    } else {
+      // New task — append to target board
+      $targetBoard.find('[data-empty-board]').remove();
+      $targetBoard.append(newCardHtml);
+    }
 
-				item.innerHTML = content;
-			})
-		};
+    // Reinit tooltips on new elements
+    $('[data-bs-toggle="tooltip"]').tooltip();
 
-		const reloadKanban = () => {
-			if (kanban) {
-				kanban = null;
-			}
-			var kanbanWrapper = document.querySelector('.kanban-wrapper');
-			if (kanbanWrapper) {
-				var parent = kanbanWrapper.parentNode;
-				parent.removeChild(kanbanWrapper);
-				kanbanWrapper = document.createElement('div');
-				kanbanWrapper.className = 'kanban-wrapper';
-				parent.appendChild(kanbanWrapper);
-			} else {
-				// If the kanban wrapper doesn't exist (e.g., when adding the first task)
-				const appKanban = document.querySelector('.app-kanban');
-				if (appKanban) {
-					// Remove the 'no tasks' message
-					const noTasksMessage = appKanban.querySelector('.d-flex.flex-column.justify-content-center');
-					if (noTasksMessage) {
-						noTasksMessage.remove();
-					}
-					// Create and append the kanban wrapper
-					kanbanWrapper = document.createElement('div');
-					kanbanWrapper.className = 'kanban-wrapper';
-					appKanban.appendChild(kanbanWrapper);
-				}
-			}
-			renderKanbanBoard();
-			setTimeout(() => {
-				renderKanbanItem();
-			}, 10);
-		}
+    // Update all board badge counts
+    $('.kanban-board').each(function () {
+      $(this).find('.board-count').text($(this).find('.kanban-item:not(.d-none)').length);
+    });
+  }
 
-		// Filter tasks on search
-		const searchTask = () => {
-			const searchInput = document.getElementById('search-task');
-			if (!searchInput) return;
-			searchInput.addEventListener('input', (e) => {
-				const searchValue = e.target.value;
-				const tasks = document.querySelectorAll('.kanban-item');
-				tasks.forEach(task => {
-					const title = task.getAttribute('data-name');
-					if (title.toLowerCase().includes(searchValue.toLowerCase())) {
-						task.style.display = 'block';
-					} else {
-						task.style.display = 'none';
-					}
-				});
-			});
-		}
+  // --- HTML Generator for Attachments ---
+  function renderAttachmentsList(attachments, taskId, containerSelector) {
+    const $container = $(containerSelector);
+    if (!attachments || attachments.length === 0) {
+      $container.html('<span class="text-muted small">@lang("admin.no_attachments")</span>');
+      return;
+    }
 
-		if (board_tasks && board_tasks.length > 0) {
-			renderKanbanBoard();
-			renderKanbanItem();
-			searchTask();
-		}
-	</script>
-	<script>
-		// Handle attachments upload
-		function handleFileUpload(event) {
-			const files = event.target.files;
-			const task_id = $('#fileInput').attr('data-task');
-			validateAndUploadFiles(files, task_id, 'view');
-		}
-		
-		// Handle attachments create
-		function handleAttachmentCreate(event) {
-			const files = event.target.files;
-			validateAndUploadFiles(files, null, 'create');
-		}
+    let html = '';
+    attachments.forEach(att => {
+      html += `
+        <div class="d-flex align-items-center justify-content-between border rounded p-2 bg-lighter attachment-item" id="att-row-${att.id}">
+          <a href="${att.url}" target="_blank" class="text-primary fw-medium text-truncate d-flex align-items-center gap-1" style="max-width: 85%;">
+            <i class="ti ti-paperclip ti-xs flex-shrink-0"></i> 
+            <span class="text-truncate">${att.name}</span>
+          </a>
+          <button type="button" class="btn btn-icon btn-sm btn-text-danger rounded-circle delete-attachment-btn" data-task-id="${taskId}" data-attachment-id="${att.id}" title="{{ __('admin.Remove') }}">
+            <i class="ti ti-trash ti-xs"></i>
+          </button>
+        </div>
+      `;
+    });
+    $container.html(html);
+  }
 
-		// Render files handler
-		const renderFilesHandler = (files, mode) => {
-			
-			if (mode == 'view')
-			{
-				console.log('view mode');
-				const fileList = document.getElementById('fileList');
-				const attachmentCount = document.getElementById('attachmentCount');
-				fileList.innerHTML = '';
-				Array.from(files).forEach(file => {
-					const fileDiv = document.createElement('div');
-					fileDiv.className = 'border rounded p-2 d-flex align-items-center bg-white';
-					fileDiv.innerHTML = `
-						<i class="ti ti-file text-info ti-20px me-2"></i>
-						<span class="text-dark fw-bold">${file.name}</span>
-						<div 
-							class="cursor-pointer me-2" 
-							onclick="deleteFileHandlerFunc('${file.name}', '${file.id}', this.parentElement);"
-						>
-							<i class="ti ti-trash text-danger ti-16px ms-2"></i>
-						</div>
-						<a href="${file.url}" download="${file.url}" class="ms-auto">
-							<i class="ti ti-download text-primary ti-16px"></i>
-						</a>
-					`;
-					fileList.appendChild(fileDiv);
-				});
-				attachmentCount.textContent = files.length;
-			} else {
-				const fileList = mode === 'create' ? document.getElementById('createFileList') : document.getElementById('editFileList');
-				const attachmentCount = mode === 'create' ? document.getElementById('createAttachmentCount') : document.getElementById('editAttachmentCount');
-				fileList.innerHTML = '';
-				Array.from(files).forEach(file => {
-					const fileDiv = document.createElement('div');
-					fileDiv.className = 'border rounded p-2 d-flex align-items-center bg-white';
-					fileDiv.innerHTML = `
-						<i class="ti ti-file text-info ti-20px me-2"></i>
-						<span class="text-dark fw-bold">${file.name}</span>
-						<div 
-							class="cursor-pointer me-2" 
-							onclick="deleteFileHandlerFunc('${file.name}', '${file.id}', this.parentElement);"
-						>
-							<i class="ti ti-trash text-danger ti-16px ms-2"></i>
-						</div>
-						<a href="${file.url}" download="${file.url}" class="ms-auto">
-							<i class="ti ti-download text-primary ti-16px"></i>
-						</a>
-					`;
-					fileList.appendChild(fileDiv);
-				});
-				attachmentCount.textContent = files.length;
-			}
-		}
+  // --- HTML Generator for Activities ---
+  function renderActivitiesList(activities, containerSelector) {
+    const $container = $(containerSelector);
+    if (!activities || activities.length === 0) {
+      $container.html(`<p class="text-muted text-center py-4 mb-0">${noActivitiesStr}</p>`);
+      return;
+    }
+    
+    let html = '';
+    activities.forEach(act => {
+      const ri = (act.user || 'U').substring(0, 2).toUpperCase();
+      const avatar = act.img_url 
+        ? `<img src="${act.img_url}" alt="${act.user}" class="rounded-circle" style="width:32px;height:32px;object-fit:cover;">` 
+        : `<span class="avatar-initial bg-label-primary rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:12px;">${ri}</span>`;
+      
+      html += `
+        <div class="d-flex align-items-start gap-3 mb-3 pb-2 border-bottom">
+          <div class="flex-shrink-0 mt-1">${avatar}</div>
+          <div>
+            <p class="mb-1"><span class="fw-semibold text-dark">${act.user}</span> ${act.action}</p>
+            <span class="text-muted" style="font-size: 0.75rem;">${act.time}</span>
+          </div>
+        </div>
+      `;
+    });
+    $container.html(html);
+  }
 
-		// Delete file handler
-		const deleteFileHandlerFunc = (fileName, fileId, ele) => {
-			$('#viewTaskModal').modal('hide');
-			Swal.fire({
-				title: "{{__('admin.SureDelete')}}",
-				text: "{{__('admin.Recover')}}",
-				icon: "warning",
-				showCancelButton: true,
-				confirmButtonText: "{{ __('admin.DYes') }}",
-				cancelButtonText: "{{ __('admin.No') }}",
-				reverseButtons: true,
-				customClass: {
-						confirmButton: 'btn btn-danger me-2',
-						cancelButton: 'btn btn-label-secondary',
-				},
-				buttonsStyling: false,
-			}).then((result) => {
-				if (result.isConfirmed) {
-					$('#viewTaskModal').modal('show');
-					$.ajax({
-						url: "{{ URL::to('dashboard/mentor/mentorshipTasks/delete-attachments') }}",
-						type: 'POST',
-						data: { file: fileId, _token: '{{ csrf_token() }}' },
-						success: function(response) {
-							if( response.status )
-							{
-								ele.remove();
-								const attachmentCount = document.getElementById('attachmentCount');
-								attachmentCount.textContent = document.getElementById('fileList').children.length;
-								
-								// Update the task attachment count in board_tasks and reload kanban
-								const taskId = $('#fileInput').attr('data-task');
-								const taskIndex = board_tasks.findIndex(task => task.id == taskId);
-								if (taskIndex !== -1) {
-									board_tasks[taskIndex].attachments = document.getElementById('fileList').children.length;
-									reloadKanban();
-								}
-							} else { releaseFailureAlert({ message: response.message }); }
-						},
-						error: function(error) {
-							releaseFailureAlert({
-								title: "{{ __('admin.Error') }}!",
-								message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
-							});
-						}
-					});
-					return;
-				}
+  // --- HTML Generator for Submissions ---
+  function renderSubmissionsList(submissions, containerSelector) {
+    const $container = $(containerSelector);
+    const noSubmissionsStr = '{{ __("admin.no_submissions") ?? "No submissions yet." }}';
 
-				$('#viewTaskModal').modal('show');
-			});
-		};
-	</script>
-	<script>
-		const commentsTab = document.getElementById('commentsTab');
-		const activityTab = document.getElementById('activityTab');
+    if (!submissions || submissions.length === 0) {
+      $container.html(`<p class="text-muted text-center py-4 mb-0">${noSubmissionsStr}</p>`);
+      return;
+    }
 
-		const commentsContainer = document.getElementById('commentsContainer');
-		const activityContainer = document.getElementById('activityContainer');
+    const EXT_ICON = {
+      pdf:  'ti-file-type-pdf text-danger',
+      doc:  'ti-file-type-doc text-primary',
+      docx: 'ti-file-type-doc text-primary',
+      xls:  'ti-file-type-xls text-success',
+      xlsx: 'ti-file-type-xls text-success',
+      png:  'ti-photo text-info',
+      jpg:  'ti-photo text-info',
+      jpeg: 'ti-photo text-info',
+      gif:  'ti-photo text-info',
+    };
 
-		const commentsButton = document.getElementById('commentsButton');
-		const activityButton = document.getElementById('activityButton');
+    function fileIcon(name) {
+      const ext = (name || '').split('.').pop().toLowerCase();
+      return EXT_ICON[ext] || 'ti-file text-secondary';
+    }
 
-		commentsButton.addEventListener('click', () => {
-			activityButton.classList.remove('btn-outline-primary');
-			commentsButton.classList.add('btn-outline-primary');
-			commentsTab.classList.add('border-bottom', 'border-primary');
-			activityTab.classList.remove('border-bottom', 'border-primary');
-			commentsContainer.classList.remove('d-none');
-			activityContainer.classList.add('d-none');
-		});
+    let html = '';
+    submissions.forEach(sub => {
+      const ri = (sub.user || 'U').substring(0, 2).toUpperCase();
+      const avatar = sub.img_url
+        ? `<img src="${sub.img_url}" alt="${sub.user}" class="rounded-circle" style="width:32px;height:32px;object-fit:cover;">`
+        : `<span class="avatar-initial bg-label-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:12px;">${ri}</span>`;
 
-		activityButton.addEventListener('click', () => {
-			activityButton.classList.add('btn-outline-primary');
-			commentsButton.classList.remove('btn-outline-primary');
-			activityTab.classList.add('border-bottom', 'border-primary');
-			commentsTab.classList.remove('border-bottom', 'border-primary');
-			activityContainer.classList.remove('d-none');
-			commentsContainer.classList.add('d-none');
-		});
-	</script>
-	<script type="text/javascript">
-		var labels = @json($labels);
-		var selected_tags = [];
-		var edit_selected_tags = [];
-		var selected_user = null;
-		var edit_selected_user = null;
-		var TagsCustomInlineSuggestion;
-		var AssigneeCustomInlineSuggestion;
-		var EditTagsCustomInlineSuggestion;
-		var EditAssigneeCustomInlineSuggestion;
+      const files = sub.files || [];
+      const filesHtml = files.length
+        ? files.map(f => `
+            <a href="${f.url}" target="_blank" class="d-flex align-items-center gap-2 border rounded p-2 bg-body text-body text-decoration-none mb-1">
+              <i class="ti ${fileIcon(f.name)} ti-sm flex-shrink-0"></i>
+              <span class="text-truncate small">${f.name}</span>
+              <i class="ti ti-download ti-xs ms-auto text-muted flex-shrink-0"></i>
+            </a>`).join('')
+        : `<span class="text-muted small">{{ __('admin.no_attachments') ?? 'No files.' }}</span>`;
 
-		const tagsInput = document.getElementById('task-labels');
-		const assigneeInput = document.getElementById('task-assignee');
-		const editTagsInput = document.getElementById('edit-task-labels');
-		const editAssigneeInput = document.getElementById('edit-task-assignee');
-		const editTakButton = document.getElementById('editTakButton');
-		const DeleteTaskButton = document.getElementById('confirmDeleteTask');
-		const commentButton = document.getElementById('commentButton');
+      html += `
+        <div class="mb-4 pb-3 border-bottom">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            ${avatar}
+            <div>
+              <span class="fw-semibold text-dark d-block">${sub.user || ''}</span>
+              <span class="text-muted" style="font-size:0.7rem;">${sub.time || ''}</span>
+            </div>
+          </div>
+          ${sub.note ? `<p class="small text-muted mb-2">${sub.note}</p>` : ''}
+          <div>${filesHtml}</div>
+        </div>`;
+    });
 
-		const refreshLabelsForCreate = () => {
-			TagsCustomInlineSuggestion.off('change');
-			TagsCustomInlineSuggestion.destroy();
-			$('#task-labels').val('');
-			TagsCustomInlineSuggestion = new Tagify(tagsInput, {
-				whitelist: labels,
-				maxTags: 10,
-				dropdown: {
-					maxItems: 20,
-					classname: 'tags-inline',
-					enabled: 0,
-					closeOnSelect: false
-				}
-			}).on('change', function(e) { selected_tags =  e.detail.value.trim() ? selected_tags = JSON.parse( e.detail.value ) : []; });
-		};
+    $container.html(html);
+  }
 
-		const refreshLabelsForEdit = () => {
-			EditTagsCustomInlineSuggestion.off('change');
-			EditTagsCustomInlineSuggestion.destroy();
-			$('#edit-task-labels').val('');
-			EditTagsCustomInlineSuggestion = new Tagify(editTagsInput, {
-				whitelist: labels,
-				maxTags: 10,
-				dropdown: {
-					maxItems: 20,
-					classname: 'tags-inline',
-					enabled: 0,
-					closeOnSelect: false
-				}
-			}).on('change', function(e) { edit_selected_tags =  e.detail.value.trim() ? edit_selected_tags = JSON.parse( e.detail.value ) : []; });
-		}
+  // --- HTML Generator for Feedback ---
+  function renderFeedbackList(feedbacks, containerSelector) {
+    const $container = $(containerSelector);
+    const noFeedbackStr = '{{ __("admin.no_feedback") }}';
 
-		document.addEventListener('DOMContentLoaded', function() {
-			$("#task-labels").val('');
-			$("#task-assignee").val('');
-			TagsCustomInlineSuggestion = new Tagify(tagsInput, {
-				whitelist: labels,
-				maxTags: 10,
-				dropdown: {
-					maxItems: 20,
-					classname: 'tags-inline',
-					enabled: 0,
-					closeOnSelect: false
-				}
-			}).on('change', function(e) { selected_tags =  e.detail.value.trim() ? selected_tags = JSON.parse( e.detail.value ) : []; });
+    if (!feedbacks || feedbacks.length === 0) {
+      $container.html(`<p class="text-muted text-center py-4 mb-0">${noFeedbackStr}</p>`);
+      return;
+    }
 
-			AssigneeCustomInlineSuggestion = new Tagify(assigneeInput, {
-				whitelist: @json($users),
-				maxTags: 1,
-				dropdown: {
-					maxItems: 20,
-					classname: 'tags-inline',
-					enabled: 0,
-					closeOnSelect: true
-				}
-			}).on('change', function(e) {
-				if( e.detail.value.trim() )
-				{
-					selected_user = JSON.parse( e.detail.value ).map(item => item.id)[0];
-				} else { selected_user = null; }
-			});
-		});
+    const RATING_COLORS = ['', 'danger', 'danger', 'warning', 'info', 'success'];
 
-		editTakButton.addEventListener('click', function(e) {
-			console.log('edit task button clicked');
-			e.preventDefault();
-			let task_id = $(this).attr('data-id');
-			let url = "{{ URL::to('dashboard/mentor/mentorshipTasks/display') }}/" + task_id;
-			$.ajax({
-				url: url,
-				type: "GET",
-				dataType: "json",
-				success: function( element ) {
-					$('#edit-task-id').val( element.id );
-					$('#edit-task-name').val( element.name );
-					$('#edit-task-content').val( element.content );
-					editQuill.root.innerHTML = element.content;
-					$('#edit-task-priority').val( element.priority );
-					$('#edit-task-priority').trigger('change');
-					$('#edit-task-status').val( element.status );
-					$('#edit-task-status').trigger('change');
-					$('#edit-task-due-date').val( element.due_date );
-					$('#editFileInput').attr('data-task', element.id);
-					renderFilesHandler(element.files, 'edit');
-					if( typeof( EditAssigneeCustomInlineSuggestion ) !== 'undefined' )
-					{
-						EditAssigneeCustomInlineSuggestion.off('change');
-						EditAssigneeCustomInlineSuggestion.destroy();
-					}
-					let assignee = [];
-					assignee.push({"id":element.assignee.id,"value":element.assignee.name});
-					$('#edit-task-assignee').val(JSON.stringify(assignee));
-					edit_selected_user = element.assignee.id;
-					EditAssigneeCustomInlineSuggestion = new Tagify(editAssigneeInput, {
-						whitelist: @json($users),
-						maxTags: 1,
-						dropdown: {
-							maxItems: 20,
-							classname: 'tags-inline',
-							enabled: 0,
-							closeOnSelect: true
-						}
-					}).on('change', function(e) {
-						if( e.detail.value.trim() )
-						{
-							edit_selected_user = JSON.parse( e.detail.value ).map(item => item.id)[0];
-						} else { edit_selected_user = null; }
-					});
+    let html = '';
+    feedbacks.forEach(fb => {
+      const ri = (fb.user || 'U').substring(0, 2).toUpperCase();
+      const avatar = fb.img_url
+        ? `<img src="${fb.img_url}" alt="${fb.user}" class="rounded-circle" style="width:32px;height:32px;object-fit:cover;">`
+        : `<span class="avatar-initial bg-label-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:12px;">${ri}</span>`;
 
-					if( typeof( EditTagsCustomInlineSuggestion ) !== 'undefined' )
-					{
-						EditTagsCustomInlineSuggestion.off('change');
-						EditTagsCustomInlineSuggestion.destroy();
-					}
-					let _labels = [];
-					element.labels.map(label => _labels.push({"id":label.id,"value":label.name}));
-					$('#edit-task-labels').val(JSON.stringify(_labels));
+      const rating = parseInt(fb.rating) || 0;
+      const stars = Array.from({ length: 5 }, (_, i) =>
+        `<i class="ti ti-star${i < rating ? '-filled text-warning' : ' text-muted'}" style="font-size:0.85rem;"></i>`
+      ).join('');
 
-					EditTagsCustomInlineSuggestion = new Tagify(editTagsInput, {
-						whitelist: labels,
-						maxTags: 10,
-						dropdown: {
-							maxItems: 20,
-							classname: 'tags-inline',
-							enabled: 0,
-							closeOnSelect: false
-						}
-					}).on('change', function(e) { edit_selected_tags =  e.detail.value.trim() ? edit_selected_tags = JSON.parse( e.detail.value ) : []; });
-					element.labels.map(label => edit_selected_tags.push({id: label.id, value: label.name}));
-					$('#viewTaskModal').modal('hide');
-					$('#editTaskModal').modal('show');
-				},
-				error: function(error) {
-					releaseFailureAlert({
-						title: "{{ __('admin.Error') }}!",
-						message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
-					});
-				}
-			});
-		});
+      html += `
+        <div class="d-flex align-items-start gap-3 mb-3 pb-3 border-bottom">
+          <div class="flex-shrink-0 mt-1">${avatar}</div>
+          <div class="flex-grow-1">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="fw-semibold text-dark">${fb.user || ''}</span>
+              <span class="text-muted" style="font-size:0.7rem;">${fb.time || ''}</span>
+            </div>
+            <div class="mb-1">${stars}</div>
+            ${fb.text ? `<div class="small text-body bg-lighter rounded p-2">${fb.text}</div>` : ''}
+          </div>
+        </div>`;
+    });
+    $container.html(html);
+  }
 
-		DeleteTaskButton.addEventListener('click', function(e) {
-			e.preventDefault();
-			let task_id = $(this).attr('data-task');
-			Swal.fire({
-				title: "{{__('admin.SureDelete')}}",
-				text: "{{__('admin.Recover')}}",
-				icon: "warning",
-				showCancelButton: true,
-				confirmButtonText: "{{ __('admin.DYes') }}",
-				cancelButtonText: "{{ __('admin.No') }}",
-				reverseButtons: true,
-				customClass: {
-						confirmButton: 'btn btn-danger me-2',
-						cancelButton: 'btn btn-label-secondary',
-				},
-				buttonsStyling: false,
-			}).then((result) => {
-				if (result.isConfirmed) {
-					var send_data = {
-						_token: "{{ csrf_token() }}",
-						mentorship_request_id: '{{ $session_id }}',
-						task_id: task_id,
-					}
-					$.ajax({
-						url: "{{ URL::to('dashboard/mentor/mentorshipTasks/remove-task') }}",
-						type: "POST",
-						data: send_data,
-						dataType: "json",
-						success: function(response) {
-							if( response.status )
-							{
-								$('#viewTaskModal').modal('hide');
-								var data = response.data;
-								boards = data.kanban;
-								board_tasks = data.tasks;
-								releaseSuccessAlert({ message: response.message, title: response.title });
-								reloadKanban();
-							} else { releaseFailureAlert({ message: response.message }); }
-						},
-						error: function(error) {
-							if( error.status == 422 ) {
-								for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { releaseFailureAlert({message: message}); }); }
-								return;
-							}
+  // --- HTML Generator for Comments ---
+  function renderCommentsList(comments, containerSelector) {
+    const $container = $(containerSelector);
+    if (!comments || comments.length === 0) {
+      $container.html(`<p class="text-muted text-center py-4 mb-0">${noCommentsStr}</p>`);
+      return;
+    }
+    
+    let html = '';
+    comments.forEach(c => {
+      const ri = (c.user || 'U').substring(0, 2).toUpperCase();
+      const avatar = c.img_url 
+        ? `<img src="${c.img_url}" alt="${c.user}" class="rounded-circle" style="width:32px;height:32px;object-fit:cover;">` 
+        : `<span class="avatar-initial bg-label-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:12px;">${ri}</span>`;
+      
+      html += `
+        <div class="d-flex align-items-start gap-3 mb-3">
+          <div class="flex-shrink-0 mt-1">${avatar}</div>
+          <div class="flex-grow-1 bg-lighter rounded p-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="fw-semibold text-dark">${c.user}</span>
+              <span class="text-muted" style="font-size: 0.7rem;">${c.time}</span>
+            </div>
+            <div class="ql-editor p-0 small text-body" style="min-height:auto;">${c.text}</div>
+          </div>
+        </div>
+      `;
+    });
+    $container.html(html);
+  }
 
-							releaseFailureAlert({
-								title: "{{ __('admin.Error') }}!",
-								message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
-							});
-						}
-					});
-				}
-			});
-		})
+  // --- Initialize Plugins ---
+  const addDescQ = new Quill('#add-desc-editor', { theme: 'snow', modules: { toolbar: '#add-desc-toolbar' } });
+  const etDescQ  = new Quill('#et-desc-editor',  { theme: 'snow', modules: { toolbar: '#et-desc-toolbar' } });
+  const vtCommentQ = new Quill('#vt-comment-editor', { theme: 'snow', modules: { toolbar: '#vt-comment-toolbar' } });
 
-		commentButton.addEventListener('click', function(e) {
-			e.preventDefault();
-			const commentInput = document.getElementById('commentInput');
-			const commentList = document.getElementById('commentList');
+  $('#add-due-date, #et-due-date').flatpickr({ dateFormat: 'Y-m-d' });
+  $('#add-priority, #add-status').select2({ dropdownParent: $('#addTaskOffcanvas') });
+  $('#et-priority, #et-status').select2({ dropdownParent: $('#editTaskOffcanvas') });
 
-			const allComments = commentList.querySelectorAll('div .comment-text');
-			
-			const commentText = commentInput.value.trim();
+  // --- Drag & Drop ---
+  $('.kanban-drag').each(function () {
+    new Sortable(this, {
+      group: 'kanban-boards',
+      animation: 150,
+      ghostClass: 'sortable-ghost',
+      onEnd: function (evt) {
+        if (evt.from === evt.to) return;
 
-			let alreadyExists = false;
-			
-			if (commentText) {
-				allComments.forEach(comment => {
-					console.log('comment.textContent.trim()', comment.textContent.trim());
-					if (comment.textContent.trim() === commentText.trim()) {
-						alreadyExists = true;
-					}
-				});
+        const taskId = $(evt.item).data('task-id');
+        const newStatus = $(evt.to).closest('.kanban-board').data('board');
+        const oldStatus = $(evt.from).closest('.kanban-board').data('board');
 
-				if (alreadyExists) {
-					commentInput.value = '';
-					releaseWarningAlert({ message: "{{ __('mentor.mentorshipTasks.comment_already_exists') }}" });
-					return;
-				}
+        // Update tasks array
+        const task = tasks.find(t => t.id === taskId);
+        if (task) task.status = newStatus;
 
-				let task_id = $(this).attr('data-task');
-				var send_data = {
-					_token: "{{ csrf_token() }}",
-					mentorship_request_id: '{{ $session_id }}',
-					task_id: task_id,
-					comment: commentText
-				}
-				$.ajax({
-					url: "{{ URL::to('dashboard/mentor/mentorshipTasks/post-comment') }}",
-					type: "POST",
-					data: send_data,
-					dataType: "json",
-					success: function(response) {
-						if( response.status )
-						{
-							commentList.classList.add('bg-label-secondary', 'p-2', 'rounded', 'mb-3', 'border');
-							const commentDiv = document.createElement('div');
-							commentDiv.className = 'border rounded p-2 mb-2 bg-white';
-							commentDiv.innerHTML = `
-								<div class="d-flex justify-content-between comment-element">
-									<div class="d-flex align-items-center gap-2 mb-2">
-										<img src="{{ URL::to( $user->image_url ) }}" class="rounded-circle" title="{{ $user->name }}" alt="{{ $user->name }}" width="34" height="34">
-										<div class="d-flex align-items-center gap-2">
-											<h6 class="mb-0 text-dark fw-bold">{{ $user->name }}</h6>
-											<span class="text-secondary text-xs">Just Now</span>
-										</div>
-									</div>
-									<div class="cursor-pointer" onclick="this.parentElement.parentElement.remove(); if( $('#commentList .comment-element').length == 0 ) { commentList.classList.remove('bg-label-secondary', 'p-2', 'rounded', 'mb-3', 'border'); }">
-										<i class="ti ti-trash text-danger ti-16px"></i>
-									</div>
-								</div>
-								<div class="comment-text text-muted mb-0 text-wrap px-2 text-${lang == 'ar' ? 'right' : 'left'}" style="overflow-wrap: break-word;">
-									${commentText}
-								</div>
-							`;
-							commentList.appendChild(commentDiv);
-							commentInput.value = '';
-						} else { releaseFailureAlert({ message: response.message }); }
-					},
-					error: function(error) {
-						if( error.status == 422 ) {
-							for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { releaseFailureAlert({ message }); }); }
-							return;
-						}
+        $(evt.to).find('[data-empty-board]').remove();
+        if ($(evt.from).find('.kanban-item:not(.d-none)').length === 0) {
+          $(evt.from).append('<p class="text-muted small text-center py-3 m-0" data-empty-board>@lang("admin.No_Tasks")</p>');
+        }
 
-						releaseFailureAlert({
-							title: "{{ __('admin.Error') }}!",
-							message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
-						});
-					}
-				});
-			}
-		})
+        $('.kanban-board').each(function () {
+          $(this).find('.board-count').text($(this).find('.kanban-item:not(.d-none)').length);
+        });
 
-		$(document).on('click', '#createTask', function(e) {
-			e.preventDefault();
-			var send_data = {
-				_token: "{{ csrf_token() }}",
-				mentorship_request_id: '{{ $session_id }}',
-				title: $('#task-name').val(),
-				description: $('#task-content').val(),
-				due_date: $("#task-due-date").val(),
-				status: $('#task-status').val(),
-				priority: $("#task-priority").val(),
-				assignee: selected_user,
-				labels: selected_tags
-			};
-			var $button = $(this);
-			var $spinner = $button.find('.spinner-border');
-			$spinner.removeClass('d-none');
-			$.ajax({
-				url: "{{ URL::to('dashboard/mentor/mentorshipTasks/add-task') }}",
-				type: "POST",
-				data: send_data,
-				dataType: "json",
-				success: function(response) {
-					$spinner.addClass('d-none');
-					if( response.status )
-					{
-						var data = response.data;
-						boards = data.kanban;
-						board_tasks = data.tasks;
-						labels = data.labels;
-						
-						// Upload any pending attachments that were selected during task creation
-						if (pendingCreateAttachments.length > 0) {
-							const taskId = data.task.id;
-							uploadFiles(pendingCreateAttachments, taskId, 'create');
-							pendingCreateAttachments = []; // Clear the pending attachments
-						}
-						
-						$('#formTaskModal').modal('hide');
-						refreshLabelsForCreate();
-						$('#task-name').val('');
-						$('#task-content').val('');
-						quill.root.innerHTML = '';
-						$("#task-due-date").val('');
-						$('#task-status').val('pending');
-						$("#task-priority").val('low');
-						$("#task-labels").val('');
-						$("#task-assignee").val('');
-						// Reset attachments
-						$('#createFileList').empty();
-						$('#createAttachmentCount').text('0');
-						$('#createFileInput').val('');
-						releaseSuccessAlert({ message: response.message, title: response.title });
-						reloadKanban();
-					} else { releaseFailureAlert({ message: response.message }); }
-				},
-				error: function(error) {
-					$spinner.addClass('d-none');
-					
-					if( error.status == 422 ) {
-						for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { releaseFailureAlert({ message }); }); }
-						return;
-					}
+        $.ajax({
+          url: '{{ route("tasks.move", ["taskId" => ":id", "status" => ":status"]) }}'
+            .replace(':id', taskId)
+            .replace(':status', newStatus),
+          type: 'PATCH',
+          contentType: 'application/json',
+          data: JSON.stringify({ status: newStatus }),
+          error: function () {
+            // Revert: move card back and restore tasks array
+            if (task) task.status = oldStatus;
+            $(evt.from).append(evt.item);
+            $(evt.to).find('[data-empty-board]').remove();
+            if ($(evt.to).find('.kanban-item:not(.d-none)').length === 0) {
+              $(evt.to).append('<p class="text-muted small text-center py-3 m-0" data-empty-board>@lang("admin.No_Tasks")</p>');
+            }
+            $('.kanban-board').each(function () {
+              $(this).find('.board-count').text($(this).find('.kanban-item:not(.d-none)').length);
+            });
+            toastr.error('{{ __("admin.move_task_failed") }}');
+          }
+        });
+      }
+    });
+  });
 
-					releaseFailureAlert({
-						title: "{{ __('admin.Error') }}!",
-						message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
-					});
-				}
-			});
-		});
+  // --- Form Validation Config ---
+  const fvConfig = {
+    fields: {
+      title: { validators: { notEmpty: { message: '{{ __("admin.Required_Field") }}' } } },
+      priority: { validators: { notEmpty: { message: '{{ __("admin.Required_Field") }}' } } },
+      status: { validators: { notEmpty: { message: '{{ __("admin.Required_Field") }}' } } }
+    },
+    plugins: {
+      trigger: new FormValidation.plugins.Trigger(),
+      bootstrap5: new FormValidation.plugins.Bootstrap5({ rowSelector: '.mb-3, .col-6' })
+    }
+  };
 
-		$(document).on('click', '#editTaskBtn', function(e) {
-			e.preventDefault();
-			var send_data = {
-				_token: "{{ csrf_token() }}",
-				mentorship_request_id: '{{ $session_id }}',
-				task_id: $('#edit-task-id').val(),
-				title: $('#edit-task-name').val(),
-				description: $('#edit-task-content').val(),
-				due_date: $("#edit-task-due-date").val(),
-				status: $('#edit-task-status').val(),
-				priority: $("#edit-task-priority").val(),
-				assignee: edit_selected_user,
-				labels: edit_selected_tags
-			};
-			var $button = $(this);
-			var $spinner = $button.find('.spinner-border');
-			$spinner.removeClass('d-none');
-			$.ajax({
-				url: "{{ URL::to('dashboard/mentor/mentorshipTasks/edit-task') }}",
-				type: "POST",
-				data: send_data,
-				dataType: "json",
-				success: function(response) {
-					$spinner.addClass('d-none');
-					if( response.status )
-					{
-						var data = response.data;
-						boards = data.kanban;
-						board_tasks = data.tasks;
-						labels = data.labels;
-						$('#editTaskModal').modal('hide');
-						refreshLabelsForEdit();
-						$('#edit-task-name').val('');
-						$('#edit-task-content').val('');
-						editQuill.root.innerHTML = '';
-						$("#edit-task-due-date").val('');
-						$('#edit-task-status').val('pending');
-						$("#edit-task-priority").val('low');
-						$("#edit-task-labels").val('');
-						$("#edit-task-assignee").val('');
-						releaseSuccessAlert({ message: response.message, title: response.title });
-						reloadKanban();
-					} else { releaseFailureAlert({ message: response.message }); }
-				},
-				error: function(error) {
-					$spinner.addClass('d-none');
-					if( error.status == 422 ) {
-						for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { releaseFailureAlert({ message }); }); }
-						return;
-					}
+  const addFv = FormValidation.formValidation(document.getElementById('addTaskForm'), fvConfig);
+  const etFv  = FormValidation.formValidation(document.getElementById('editTaskForm'), fvConfig);
 
-					releaseFailureAlert({
-						title: "{{ __('admin.Error') }}!",
-						message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
-					});
-				}
-			});
-		});
-	</script>
-	<script>
-		// Initialize Quill editor for task content
-		var quill = new Quill('#task-content-editor', {
-			theme: 'snow',
-			placeholder: lang == 'en' ? 'Write task content here...' : 'اكتب محتوى المهمة هنا...',
-		});
-		quill.on('text-change', function() {
-			document.getElementById('task-content').value = quill.root.innerHTML;
-		});
+  $('#add-priority').on('change', () => addFv.revalidateField('priority'));
+  $('#add-status').on('change', () => addFv.revalidateField('status'));
+  $('#et-priority').on('change', () => etFv.revalidateField('priority'));
+  $('#et-status').on('change', () => etFv.revalidateField('status'));
 
-		// Initialize Quill editor for edit task content
-		var editQuill = new Quill('#edit-task-content-editor', {
-			theme: 'snow'
-		});
-		editQuill.on('text-change', function() {
-			document.getElementById('edit-task-content').value = editQuill.root.innerHTML;
-		});
+  $('#add-attachments').on('change', function() { validateFiles($(this), '#add-file-error'); });
+  $('#et-attachments').on('change', function() { validateFiles($(this), '#et-file-error'); });
+  $('#vt-new-attachment').on('change', function() { validateFiles($(this), '#vt-upload-error'); });
 
-		// // Set initial content for edit task
-		// $('#editTakButton').on('click', function() {
-		// 	var content = $('#edit-task-content').val();
-		// 	editQuill.root.innerHTML = content;
-		// });
 
-		// Initialize Flatpickr for due date fields
-		document.addEventListener('DOMContentLoaded', function() {
-			// Initialize Flatpickr for create task modal
-			flatpickr("#task-due-date", {
-				dateFormat: "Y-m-d",
-				minDate: "today",
-			});
+  // --- DELETE ATTACHMENT (Shared) ---
+  $(document).on('click', '.delete-attachment-btn', function () {
+    const $btn = $(this);
+    const taskId = $btn.data('task-id');
+    const attachmentId = $btn.data('attachment-id');
 
-			// Initialize Flatpickr for edit task modal
-			flatpickr("#edit-task-due-date", {
-				dateFormat: "Y-m-d",
-				minDate: "today",
-			});
+    releaseWarningAlert({
+      title: '{{ __("admin.delete_attachment") }}?',
+      message: '{{ __("admin.Recover") }}',
+      confirmText: '{{ __("admin.DYes") }}',
+      cancelText: '{{ __("admin.DNo") }}',
+      confirmColor: 'danger',
+      onConfirm: () => {
+        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+  
+        $.ajax({
+          url: '{{ route("tasks.delete_attachment", ["taskId" => ":taskId", "filename" => ":filename"]) }}'.replace(':taskId', taskId).replace(':filename', attachmentId),
+          type: 'DELETE',
+          success: function() {
+            $(`#att-row-${attachmentId}`).fadeOut(300, function() {
+              $(this).remove();
+              toastr.success('{{ __("admin.attachment_deleted_success") }}');
 
-			// Clear task description field when opening add task modal
-			$('#formTaskModal').on('show.bs.modal', function() {
-				quill.root.innerHTML = '';
-				document.getElementById('task-content').value = '';
-				// Reset attachments when modal opens
-				$('#createFileList').empty();
-				$('#createAttachmentCount').text('0');
-				$('#createFileInput').val('');
-				pendingCreateAttachments = [];
-			});
-		});
-	</script>
+              // Sync tasks array
+              const task = tasks.find(t => t.id == taskId);
+              if (task && task.attachments) {
+                task.attachments = task.attachments.filter(a => a.id != attachmentId);
+              }
+
+              if ($('#vt-attachments-list .attachment-item').length === 0) {
+                $('#vt-attachments-list').html('<span class="text-muted small">@lang("admin.no_attachments")</span>');
+              }
+              if ($('#et-current-attachments-list .attachment-item').length === 0) {
+                $('#et-current-attachments-wrapper').addClass('d-none');
+              }
+            });
+          },
+          error: function() {
+            toastr.error('{{ __("admin.delete_failed") }}');
+            $btn.prop('disabled', false).html('<i class="ti ti-trash ti-xs"></i>');
+          }
+        });
+      }
+    });
+  });
+
+  // --- ADD ATTACHMENT (Directly from View Drawer) ---
+  $('#vt-upload-btn').on('click', function () {
+    const $fileInput = $('#vt-new-attachment');
+    if ($fileInput[0].files.length === 0) return;
+    if (!validateFiles($fileInput, '#vt-upload-error')) return;
+
+    const taskId = $(this).data('task-id');
+    const $btn = $(this);
+
+    let formData = new FormData();
+    formData.append('attachment', $fileInput[0].files[0]);
+
+    $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+
+    $.ajax({
+      url: '{{ route("tasks.upload_attachment", ":taskId") }}'.replace(':taskId', taskId),
+      type: 'POST',
+      data: formData,
+      processData: false,
+      contentType: false,
+      success: function(response) {
+        toastr.success('{{ __("admin.attachment_uploaded_success") }}');
+        const newAtt = response.attachment || { id: Date.now(), name: $fileInput[0].files[0].name, url: '#' };
+
+        // Sync tasks array
+        const task = tasks.find(t => t.id == taskId);
+        if (task) {
+          if (!task.attachments) task.attachments = [];
+          task.attachments.push(newAtt);
+        }
+        
+        if ($('#vt-attachments-list').text().trim() === '@lang("admin.no_attachments")' || $('#vt-attachments-list').text().trim() === 'None') {
+          $('#vt-attachments-list').empty();
+        }
+        
+        const html = `
+          <div class="d-flex align-items-center justify-content-between border rounded p-2 bg-lighter attachment-item" id="att-row-${newAtt.id}">
+            <a href="${newAtt.url}" target="_blank" class="text-primary fw-medium text-truncate d-flex align-items-center gap-1" style="max-width: 85%;">
+              <i class="ti ti-paperclip ti-xs flex-shrink-0"></i> <span class="text-truncate">${newAtt.name}</span>
+            </a>
+            <button type="button" class="btn btn-icon btn-sm btn-text-danger rounded-circle delete-attachment-btn" data-task-id="${taskId}" data-attachment-id="${newAtt.id}" title="{{ __('admin.Remove') }}">
+              <i class="ti ti-trash ti-xs"></i>
+            </button>
+          </div>
+        `;
+        $('#vt-attachments-list').append(html);
+        $fileInput.val('');
+        $btn.prop('disabled', false).html('<i class="ti ti-upload ti-xs me-1"></i> {{ __("admin.Upload") }}');
+      },
+      error: function() {
+        toastr.error('{{ __("admin.upload_failed") }}');
+        $btn.prop('disabled', false).html('<i class="ti ti-upload ti-xs me-1"></i> {{ __("admin.Upload") }}');
+      }
+    });
+  });
+
+  // --- ADD TASK POST ---
+  $('#addTaskForm').on('submit', function (e) {
+    e.preventDefault();
+    const $form = $(this);
+    const $btn = $('#add-submit-btn');
+
+    addFv.validate().then(function (status) {
+      if (status !== 'Valid') return;
+      if (!validateFiles($('#add-attachments'), '#add-file-error')) return;
+
+      $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>{{ __("admin.processing") }}');
+
+      let formData = new FormData($form[0]);
+      formData.append('description', addDescQ.root.innerHTML);
+      formData.append('program_id', program.id);
+
+      $.ajax({
+        url: '{{ route("tasks.store") }}',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) { 
+          toastr.success('{{ __("admin.StoredSuccessfully") }}');
+
+          // Build new task object from response or form data
+          const newTask = response.task || {
+            id: response.id || Date.now(),
+            title: $form.find('[name="title"]').val(),
+            description: addDescQ.root.innerHTML,
+            due_date: $form.find('[name="due_date"]').val(),
+            priority: $('#add-priority').val(),
+            status: $('#add-status').val(),
+            creator: response.creator || null,
+            attachments: response.attachments || [],
+            activities: response.activities || [],
+            comments: [],
+          };
+
+          tasks.push(newTask);
+          syncTaskToBoard(newTask, null);
+
+          // Reset form
+          $form[0].reset();
+          addDescQ.setContents([]);
+          $('#add-priority, #add-status').val('').trigger('change');
+          addFv.resetForm(true);
+
+          $('#addTaskOffcanvas').offcanvas('hide');
+          $btn.prop('disabled', false).html('{{ __("admin.Create") }}');
+        },
+        error: function() {
+          toastr.error('{{ __("admin.save_failed") }}');
+          $btn.prop('disabled', false).text('{{ __("admin.Create") }}');
+        }
+      });
+    });
+  });
+
+  // --- VIEW TASK ---
+  $(document).on('click', '.view-task-btn', function () {
+    const taskId = $(this).data('task-id');
+    const taskData = tasks.find(task => task.id === taskId);
+    if(!taskData) return;
+
+    const p = PRIORITY_MAP[taskData.priority];
+    const sLabel = STATUS_MAP[taskData.status];
+
+    $('#vt-title').text(taskData.title);
+    $('#vt-description').html(taskData.description);
+    $('#vt-due-date').text(taskData.due_date || 'N/A');
+    $('#vt-priority').html(`<span class="badge ${p.cls} rounded-pill"><span class="d-inline-block rounded-circle me-1 ${p.dot}" style="width: 6px; height: 6px;"></span>${p.label}</span>`);
+    $('#vt-status').html(`<span class="badge bg-label-secondary rounded-pill">${sLabel}</span>`);
+    
+    renderAttachmentsList(taskData.attachments, taskId, '#vt-attachments-list');
+    renderActivitiesList(taskData.activities, '#vt-activities-list');
+    renderCommentsList(taskData.comments, '#vt-comments-list');
+    renderFeedbackList(taskData.feedbacks || [], '#vt-feedback-list');
+    renderSubmissionsList(taskData.submissions || [], '#vt-submissions-list');
+    $('#vt-comment-count').text(taskData.comments ? taskData.comments.length : 0);
+    $('#vt-feedback-count').text(taskData.feedbacks ? taskData.feedbacks.length : 0);
+    $('#vt-submissions-count').text(taskData.submissions ? taskData.submissions.length : 0);
+
+    $('#vt-edit-trigger-btn').data('task-id', taskId);
+    $('#vt-upload-btn').data('task-id', taskId);
+    $('#vt-send-comment-btn').data('task-id', taskId);
+    $('#vt-new-attachment').val(''); 
+    vtCommentQ.setContents([]); 
+
+    // Reset tabs to show details first
+    const viewTabs = new bootstrap.Tab(document.querySelector('#viewTaskOffcanvas .nav-tabs .nav-link'));
+    viewTabs.show();
+
+    bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('viewTaskOffcanvas')).show();
+  });
+
+  $('#vt-edit-trigger-btn').on('click', function() {
+    const taskId = $(this).data('task-id');
+    bootstrap.Offcanvas.getInstance(document.getElementById('viewTaskOffcanvas')).hide();
+    setTimeout(() => { $(`.edit-task-btn[data-task-id="${taskId}"]`).trigger('click'); }, 350);
+  });
+
+  // --- ADD COMMENT (View Task) ---
+  $('#vt-send-comment-btn').on('click', function() {
+    const taskId = $(this).data('task-id');
+    const commentHtml = vtCommentQ.root.innerHTML;
+    const plainText = vtCommentQ.getText().trim();
+    
+    if (!plainText) return;
+
+    const $btn = $(this);
+    $btn.prop('disabled', true).text('...');
+
+    $.ajax({
+      url: '{{ route("tasks.add_comment", ":id") }}'.replace(':id', taskId),
+      type: 'POST',
+      data: JSON.stringify({ comment: commentHtml }),
+      contentType: 'application/json',
+      success: function(response) {
+        toastr.success('{{ __("admin.comment_success") }}');
+        
+        const newComment = response.comment || { 
+          user: 'You', 
+          time: 'Just now', 
+          text: commentHtml, 
+          img_url: null 
+        };
+
+        if ($('#vt-comments-list').text().trim() === noCommentsStr) {
+          $('#vt-comments-list').empty();
+        }
+
+        const ri = (newComment.user || 'U').substring(0, 2).toUpperCase();
+        const avatar = newComment.img_url 
+          ? `<img src="${newComment.img_url}" alt="${newComment.user}" class="rounded-circle" style="width:32px;height:32px;object-fit:cover;">` 
+          : `<span class="avatar-initial bg-label-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:12px;">${ri}</span>`;
+
+        const html = `
+          <div class="d-flex align-items-start gap-3 mb-3">
+            <div class="flex-shrink-0 mt-1">${avatar}</div>
+            <div class="flex-grow-1 bg-lighter rounded p-3">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="fw-semibold text-dark">${newComment.user}</span>
+                <span class="text-muted" style="font-size: 0.7rem;">${newComment.time}</span>
+              </div>
+              <div class="ql-editor p-0 small text-body" style="min-height:auto;">${newComment.text}</div>
+            </div>
+          </div>
+        `;
+        
+        $('#vt-comments-list').append(html);
+
+        let count = parseInt($('#vt-comment-count').text()) || 0;
+        $('#vt-comment-count').text(count + 1);
+
+        // Sync tasks array
+        const task = tasks.find(t => t.id == taskId);
+        if (task) {
+          if (!task.comments) task.comments = [];
+          task.comments.push(newComment);
+        }
+
+        vtCommentQ.setContents([]);
+        $btn.prop('disabled', false).text('{{ __("admin.send") }}');
+      },
+      error: function() {
+        toastr.error('{{ __("admin.comment_failed") }}');
+        $btn.prop('disabled', false).text('{{ __("admin.send") }}');
+      }
+    });
+  });
+
+  // --- ARCHIVE TASK ---
+  $(document).on('click', '.archive-task-btn', function () {
+    const taskId = $(this).data('task-id');
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    const isArchived  = task.status === 'archived';
+    const newStatus   = isArchived ? 'pending' : 'archived';
+    const actionLabel = isArchived ? '{{ __("admin.reopen_task") }}' : '{{ __("admin.archive_task") }}';
+    const bodyText    = isArchived ? '{{ __("admin.reopen_task_confirm") }}' : '{{ __("admin.archive_task_confirm") }}';
+
+    releaseWarningAlert({
+      title: actionLabel + '?',
+      message: bodyText,
+      confirmText: '{{ __("admin.DYes") }}',
+      cancelText: '{{ __("admin.DNo") }}',
+      confirmColor: isArchived ? 'warning' : 'secondary',
+      onConfirm: () => {
+        $.ajax({
+          url: '{{ route("tasks.move", ["taskId" => ":id", "status" => ":status"]) }}'
+            .replace(':id', taskId)
+            .replace(':status', newStatus),
+          type: 'PATCH',
+          contentType: 'application/json',
+          data: JSON.stringify({ status: newStatus }),
+          success: function () {
+            const oldStatus = task.status;
+            task.status = newStatus;
+
+            if (newStatus === 'archived') {
+              // Remove card from board entirely
+              $(`.kanban-item[data-task-id="${taskId}"]`).fadeOut(300, function () {
+                $(this).remove();
+                const $board = $(`.kanban-board[data-board="${oldStatus}"] .kanban-drag`);
+                if ($board.find('.kanban-item:not(.d-none)').length === 0) {
+                  $board.append('<p class="text-muted small text-center py-3 m-0" data-empty-board>{{ __("admin.No_Tasks") }}</p>');
+                }
+                $('.kanban-board').each(function () {
+                  $(this).find('.board-count').text($(this).find('.kanban-item:not(.d-none)').length);
+                });
+              });
+            } else {
+              syncTaskToBoard(task, oldStatus);
+            }
+
+            toastr.success(isArchived ? '{{ __("admin.task_reopened") }}' : '{{ __("admin.task_archived") }}');
+          },
+          error: function () {
+            toastr.error('{{ __("admin.update_failed") }}');
+          }
+        });
+      }
+    });
+  });
+
+  // --- EDIT TASK ---
+  $(document).on('click', '.edit-task-btn', function () {
+    const taskId = $(this).data('task-id');
+    const taskData = tasks.find(task => task.id === taskId);
+    if(!taskData) return;
+
+    $('#et-id').val(taskData.id);
+    $('#et-title').val(taskData.title);
+    $('#et-due-date').val(taskData.due_date);
+    etDescQ.root.innerHTML = taskData.description;
+    $('#et-priority').val(taskData.priority).trigger('change');
+    $('#et-status').val(taskData.status).trigger('change');
+    
+    $('#et-attachments').val('').removeClass('is-invalid');
+    $('#et-file-error').text('');
+
+    if (taskData.attachments && taskData.attachments.length > 0) {
+      $('#et-current-attachments-wrapper').removeClass('d-none');
+      renderAttachmentsList(taskData.attachments, taskId, '#et-current-attachments-list');
+    } else {
+      $('#et-current-attachments-wrapper').addClass('d-none');
+    }
+
+    bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('editTaskOffcanvas')).show();
+  });
+
+  $('#editTaskForm').on('submit', function (e) {
+    e.preventDefault();
+    const $form = $(this);
+    const $btn = $('#et-submit-btn');
+
+    etFv.validate().then(function (status) {
+      if (status !== 'Valid') return;
+      if (!validateFiles($('#et-attachments'), '#et-file-error')) return;
+
+      const taskId = $('#et-id').val();
+      $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>{{ __("admin.processing") }}');
+
+      let formData = new FormData($form[0]);
+      formData.append('description', etDescQ.root.innerHTML);
+
+      $.ajax({
+        url: '{{ route("tasks.update", ":id") }}'.replace(':id', taskId),
+        type: 'POST', // Sent as POST because of _method=PUT hidden field
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) { 
+          toastr.success('{{ __("admin.StoredSuccessfully") }}');
+
+          const idx = tasks.findIndex(t => t.id == taskId);
+          if (idx !== -1) {
+            const oldStatus = tasks[idx].status;
+            const updatedTask = response.task || {
+              ...tasks[idx],
+              title: $('#et-title').val(),
+              description: etDescQ.root.innerHTML,
+              due_date: $('#et-due-date').val(),
+              priority: $('#et-priority').val(),
+              status: $('#et-status').val(),
+              attachments: response.attachments || tasks[idx].attachments,
+            };
+            tasks[idx] = updatedTask;
+            syncTaskToBoard(updatedTask, oldStatus);
+          }
+
+          $('#editTaskOffcanvas').offcanvas('hide');
+          $btn.prop('disabled', false).html('{{ __("admin.Update") }}');
+        },
+        error: function() {
+          toastr.error('{{ __("admin.update_failed") }}');
+          $btn.prop('disabled', false).text('{{ __("admin.Update") }}');
+        }
+      });
+    });
+  });
+
+  // --- LIVE SEARCH ---
+  $('#kanbanSearch').on('input', function () {
+    const q = $(this).val().trim().toLowerCase();
+    $('.kanban-item').each(function () {
+      const show = $(this).data('search-text').includes(q);
+      $(this).toggleClass('d-none', !show);
+    });
+    // Update badge counts after filtering
+    $('.kanban-board').each(function () {
+      $(this).find('.board-count').text($(this).find('.kanban-item:not(.d-none)').length);
+    });
+  });
+
+});
+</script>
 @stop

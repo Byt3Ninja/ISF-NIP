@@ -366,15 +366,25 @@
 
             let actions = '';
             if (CAN_QUICK_ACTION && row.is_pending) {
-                actions =
-                    '<button class="btn btn-sm btn-primary me-1 mb-1 btn-accept" data-id="'+row.id+'" ' +
-                        'data-bs-toggle="tooltip" data-bs-placement="top" title="'+LABELS.accept+'">' +
-                        '<i class="ti ti-check"></i>' +
-                    '</button>' +
-                    '<button class="btn btn-sm btn-label-secondary btn-reject" data-id="'+row.id+'" ' +
-                        'data-bs-toggle="tooltip" data-bs-placement="top" title="'+LABELS.reject+'">' +
-                        '<i class="ti ti-x"></i>' +
-                    '</button>';
+               actions = `
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill btn-accept"
+                            data-id="${row.id}"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top"
+                            title="${LABELS.accept}">
+                            <i class="ti ti-circle-check"></i>
+                        </button>
+
+                        <button class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill btn-reject"
+                            data-id="${row.id}"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top"
+                            title="${LABELS.reject}">
+                            <i class="ti ti-circle-x"></i>
+                        </button>
+                    </div>
+                `;
             }
 
             let checkbox = '';
