@@ -13,56 +13,825 @@ $cycle = [
   'title' => 'Alumni Program',
 ];
 
-// Initial mocked data (Replace with actual backend data)
 $tasks = [
+  // Task 1: New - Completed Design Task
   [
     'id' => 1,
-    'title' => 'Design System Audit',
-    'description' => '<p>Review existing UI components.</p>',
-    'due_date' => '2025-04-15',
+    'title' => 'Brand Identity Guidelines',
+    'description' => '<p>Develop a comprehensive brand identity guideline document.</p><ul><li>Typography & Color Palette</li><li>Logo usage rules</li><li>Tone of voice</li></ul><p>Please deliver as a high-resolution PDF.</p>',
+    'due_date' => '2025-03-15',
     'priority' => 'High',
-    'status' => 'pending',
-    'creator' => ['name' => 'Alice Johnson', 'img_url' => '/vuexy/assets/img/avatars/1.png'],
+    'status' => 'completed',
+    'created_at' => '2025-03-01T09:00:00Z',
+    'updated_at' => '2025-03-14T16:45:00Z',
+
+    'creator' => [
+      'id' => 1,
+      'name' => 'Alice Johnson',
+      'img_url' => '/vuexy/assets/img/avatars/1.png',
+      'profile_url' => '/show/UserProfile/1',
+    ],
+
+    'assignee' => [
+      'startup' => [
+        'id' => 10,
+        'name' => 'Designa Studio',
+        'img_url' => '/vuexy/assets/img/icons/brands/figma.png',
+        'profile_url' => '/dashboard/companyProfile/10',
+      ],
+      'founder' => [
+        'id' => 2,
+        'name' => 'Mark Evans',
+        'img_url' => '/vuexy/assets/img/avatars/2.png',
+        'profile_url' => '/show/UserProfile/2',
+      ],
+    ],
+
     'attachments' => [
-      ['id' => 101, 'name' => 'audit_v1.pdf', 'url' => '/storage/docs/audit_v1.pdf'],
-      ['id' => 102, 'name' => 'screenshot.png', 'url' => '/storage/images/screenshot.png']
-    ],
-    'activities' => [
-      ['user' => 'Alice Johnson', 'user_id' => 1, 'action' => 'Created this task', 'time' => 'Today 9:00 AM', 'img_url' => '/vuexy/assets/img/avatars/1.png']
-    ],
-    'comments' => [
-      ['id' => 1, 'user' => 'Bob Smith', 'user_id' => 2, 'text' => '<p>We need to prioritize the typography tokens.</p>', 'time' => 'Today 10:00 AM', 'img_url' => '/vuexy/assets/img/avatars/2.png']
-    ],
-    'feedbacks' => [
-      ['id' => 1, 'user' => 'Bob Smith', 'user_id' => 2, 'text' => '<p>We need to prioritize the typography tokens.</p>', 'time' => 'Today 10:00 AM', 'img_url' => '/vuexy/assets/img/avatars/2.png']
-    ],
-    'submissions' => [
       [
-        'user'    => 'Bob Smith',
+        'id' => 101,
+        'name' => 'competitor_analysis.pdf',
+        'url' => '/storage/designs/competitor_analysis.pdf',
+        'mime_type' => 'application/pdf',
+        'size_bytes' => 1048576, // 1MB
+        'uploaded_at' => '2025-03-01T09:15:00Z',
+      ],
+    ],
+
+    'activities' => [
+      [
+        'user' => 'Alice Johnson',
+        'user_id' => 1,
+        'img_url' => '/vuexy/assets/img/avatars/1.png',
+        'action' => 'created this task',
+        'type' => 'created',
+        'time' => 'Mar 1, 9:00 AM',
+        'created_at' => '2025-03-01T09:00:00Z',
+      ],
+      [
+        'user' => 'Alice Johnson',
+        'user_id' => 1,
+        'img_url' => '/vuexy/assets/img/avatars/1.png',
+        'action' => 'marked task as Completed',
+        'type' => 'completed',
+        'time' => 'Mar 14, 4:45 PM',
+        'created_at' => '2025-03-14T16:45:00Z',
+      ],
+    ],
+
+    'comments' => [
+      [
+        'id' => 10,
+        'user' => 'Mark Evans',
         'user_id' => 2,
         'img_url' => '/vuexy/assets/img/avatars/2.png',
-        'time'    => 'Today 11:00 AM',
-        'note'    => 'First draft submission.',
-        'files'   => [
-          ['name' => 'audit_v1.pdf',    'url' => '/storage/docs/audit_v1.pdf'],
-          ['name' => 'screenshot.png',  'url' => '/storage/images/screenshot.png'],
+        'text' => '<p>The typography choices are excellent. Adding the final PDF to my submission.</p>',
+        'time' => 'Mar 13, 2:00 PM',
+        'created_at' => '2025-03-13T14:00:00Z',
+        'updated_at' => null,
+      ],
+    ],
+
+    'feedbacks' => [
+      [
+        'id' => 30,
+        'user' => 'Alice Johnson',
+        'user_id' => 1,
+        'img_url' => '/vuexy/assets/img/avatars/1.png',
+        'decision' => 'approved',
+        'text' => 'Perfect execution. Client is very happy with the results.',
+        'time' => 'Mar 14, 4:30 PM',
+        'created_at' => '2025-03-14T16:30:00Z',
+      ],
+    ],
+
+    'submissions' => [
+      [
+        'id' => 20,
+        'user' => 'Mark Evans',
+        'user_id' => 2,
+        'img_url' => '/vuexy/assets/img/avatars/2.png',
+        'note' => 'Final Brand Guidelines v1.0',
+        'status' => 'approved',
+        'time' => 'Mar 13, 5:00 PM',
+        'created_at' => '2025-03-13T17:00:00Z',
+        'files' => [
+          [
+            'id' => 300,
+            'name' => 'Brand_Guidelines_v1.pdf',
+            'url' => '/storage/designs/Brand_Guidelines_v1.pdf',
+            'mime_type' => 'application/pdf',
+            'size_bytes' => 5242880, // 5MB
+          ],
         ],
       ],
     ],
+
+    'comments_count' => 1,
+    'feedbacks_count' => 1,
+    'submissions_count' => 1,
+    'attachments_count' => 1,
+  ],
+
+  // Task 2: Your Original Design Task (Enhanced)
+  [
+    'id' => 2,
+    'title' => 'Mobile App Onboarding UX',
+    'description' => '<p>Create a seamless onboarding experience with illustrations and animations.</p><p><strong>Requirements:</strong></p><ul><li>Max 3 screens</li><li>Include "Skip" option</li><li>Use existing brand colors</li></ul>',
+    'due_date' => '2025-04-20',
+    'priority' => 'Medium',
+    'status' => 'in_progress',
+    'created_at' => '2025-04-05T08:00:00Z',
+    'updated_at' => '2025-04-06T12:30:00Z',
+
+    'creator' => [
+      'id' => 3,
+      'name' => 'Sarah Lee',
+      'img_url' => '/vuexy/assets/img/avatars/3.png',
+      'profile_url' => '/show/UserProfile/3',
+    ],
+
+    'assignee' => [
+      'startup' => [
+        'id' => 11,
+        'name' => 'AppFlow Labs',
+        'img_url' => '/vuexy/assets/img/icons/brands/chrome.png',
+        'profile_url' => '/dashboard/companyProfile/11',
+      ],
+      'founder' => [
+        'id' => 4,
+        'name' => 'David Kim',
+        'img_url' => '/vuexy/assets/img/avatars/4.png',
+        'profile_url' => '/show/UserProfile/4',
+      ],
+    ],
+
+    'attachments' => [
+      [
+        'id' => 110,
+        'name' => 'onboarding_wireframes.fig',
+        'url' => '/storage/designs/onboarding_wireframes.fig',
+        'mime_type' => 'application/octet-stream',
+        'size_bytes' => 409600,
+        'uploaded_at' => '2025-04-05T09:00:00Z',
+      ],
+    ],
+
+    'activities' => [
+      [
+        'user' => 'Sarah Lee',
+        'user_id' => 3,
+        'img_url' => '/vuexy/assets/img/avatars/3.png',
+        'action' => 'created this task',
+        'type' => 'created',
+        'time' => 'Apr 5, 8:00 AM',
+        'created_at' => '2025-04-05T08:00:00Z',
+      ],
+      [
+        'user' => 'David Kim',
+        'user_id' => 4,
+        'img_url' => '/vuexy/assets/img/avatars/4.png',
+        'action' => 'moved task to In Progress',
+        'type' => 'moved',
+        'time' => 'Apr 5, 10:00 AM',
+        'created_at' => '2025-04-05T10:00:00Z',
+      ],
+    ],
+
+    'comments' => [
+      [
+        'id' => 11,
+        'user' => 'David Kim',
+        'user_id' => 4,
+        'img_url' => '/vuexy/assets/img/avatars/4.png',
+        'text' => '<p>Let’s simplify step one. I think users might get overwhelmed by the text.</p>',
+        'time' => 'Apr 5, 10:30 AM',
+        'created_at' => '2025-04-05T10:30:00Z',
+        'updated_at' => null,
+      ],
+    ],
+
+    'feedbacks' => [
+      [
+        'id' => 31,
+        'user' => 'Sarah Lee',
+        'user_id' => 3,
+        'img_url' => '/vuexy/assets/img/avatars/3.png',
+        'decision' => 'revision',
+        'text' => 'First screen is too dense, reduce text.',
+        'time' => 'Apr 6, 11:00 AM',
+        'created_at' => '2025-04-06T11:00:00Z',
+      ],
+      [
+        'id' => 32,
+        'user' => 'David Kim',
+        'user_id' => 4,
+        'img_url' => '/vuexy/assets/img/avatars/4.png',
+        'decision' => 'approved',
+        'text' => 'Animations look great. Will proceed with building the assets.',
+        'time' => 'Apr 6, 12:30 PM',
+        'created_at' => '2025-04-06T12:30:00Z',
+      ],
+    ],
+
+    'submissions' => [
+      [
+        'id' => 21,
+        'user' => 'David Kim',
+        'user_id' => 4,
+        'img_url' => '/vuexy/assets/img/avatars/4.png',
+        'note' => 'Initial onboarding screens. Need feedback on the Lottie animations.',
+        'status' => 'pending_review',
+        'time' => 'Apr 6, 9:00 AM',
+        'created_at' => '2025-04-06T09:00:00Z',
+        'files' => [
+          [
+            'id' => 301,
+            'name' => 'onboarding_v1.fig',
+            'url' => '/storage/designs/onboarding_v1.fig',
+            'mime_type' => 'application/octet-stream',
+            'size_bytes' => 500000,
+          ],
+        ],
+      ],
+    ],
+
+    'comments_count' => 1,
+    'feedbacks_count' => 2,
+    'submissions_count' => 1,
+    'attachments_count' => 1,
+  ],
+
+  // Task 3: Your Original Tech Task (Enhanced)
+  [
+    'id' => 3,
+    'title' => 'API Performance Optimization',
+    'description' => '<p>Analyze slow endpoints and reduce response time below 200ms.</p><p>Specifically look at the <code>/api/v1/reports</code> endpoint. We are seeing spikes during peak hours.</p>',
+    'due_date' => '2025-04-10',
+    'priority' => 'High',
+    'status' => 'review',
+    'created_at' => '2025-04-02T12:00:00Z',
+    'updated_at' => '2025-04-06T16:00:00Z',
+
+    'creator' => [
+      'id' => 5,
+      'name' => 'Michael Brown',
+      'img_url' => '/vuexy/assets/img/avatars/5.png',
+      'profile_url' => '/show/UserProfile/5',
+    ],
+
+    'assignee' => [
+      'startup' => [
+        'id' => 12,
+        'name' => 'ScaleTech',
+        'img_url' => '/vuexy/assets/img/icons/brands/firefox.png',
+        'profile_url' => '/dashboard/companyProfile/12',
+      ],
+      'founder' => [
+        'id' => 6,
+        'name' => 'Emma Wilson',
+        'img_url' => '/vuexy/assets/img/avatars/6.png',
+        'profile_url' => '/show/UserProfile/6',
+      ],
+    ],
+
+    'attachments' => [
+      [
+        'id' => 120,
+        'name' => 'performance_log.txt',
+        'url' => '/storage/logs/performance_log.txt',
+        'mime_type' => 'text/plain',
+        'size_bytes' => 20480,
+        'uploaded_at' => '2025-04-02T12:10:00Z',
+      ],
+    ],
+
+    'activities' => [
+      [
+        'user' => 'Michael Brown',
+        'user_id' => 5,
+        'img_url' => '/vuexy/assets/img/avatars/5.png',
+        'action' => 'uploaded logs',
+        'type' => 'upload',
+        'time' => 'Apr 2, 12:10 PM',
+        'created_at' => '2025-04-02T12:10:00Z',
+      ],
+    ],
+
+    'comments' => [
+      [
+        'id' => 12,
+        'user' => 'Emma Wilson',
+        'user_id' => 6,
+        'img_url' => '/vuexy/assets/img/avatars/6.png',
+        'text' => '<p>Consider Redis caching. It seems like we are hitting the DB on every single request for static lookup tables.</p>',
+        'time' => 'Apr 6, 2:00 PM',
+        'created_at' => '2025-04-06T14:00:00Z',
+        'updated_at' => null,
+      ],
+    ],
+
+    'feedbacks' => [
+      [
+        'id' => 33,
+        'user' => 'Emma Wilson',
+        'user_id' => 6,
+        'img_url' => '/vuexy/assets/img/avatars/6.png',
+        'decision' => 'approved',
+        'text' => 'Performance verified on staging. Averaging 140ms response time now.',
+        'time' => 'Apr 6, 3:30 PM',
+        'created_at' => '2025-04-06T15:30:00Z',
+      ],
+    ],
+
+    'submissions' => [
+      [
+        'id' => 22,
+        'user' => 'Michael Brown',
+        'user_id' => 5,
+        'img_url' => '/vuexy/assets/img/avatars/5.png',
+        'note' => 'Optimized queries and implemented Redis layer for static data.',
+        'status' => 'pending_review',
+        'time' => 'Apr 6, 3:00 PM',
+        'created_at' => '2025-04-06T15:00:00Z',
+        'files' => [],
+      ],
+    ],
+
+    'comments_count' => 1,
+    'feedbacks_count' => 1,
+    'submissions_count' => 1,
+    'attachments_count' => 1,
+  ],
+
+  // Task 4: Original Marketing Task (Filled out missing variables)
+  [
+    'id' => 4,
+    'title' => 'Marketing Landing Page Copy',
+    'description' => '<p>Write persuasive copy for the new Spring Campaign landing page.</p><ul><li>Focus on "time-saving" benefits</li><li>Include 2 variations for A/B testing the H1 header</li></ul>',
+    'due_date' => '2025-04-18',
+    'priority' => 'Low',
+    'status' => 'completed',
+    'created_at' => '2025-03-30T10:00:00Z',
+    'updated_at' => '2025-04-04T09:00:00Z',
+
+    'creator' => [
+      'id' => 7,
+      'name' => 'Olivia Martinez',
+      'img_url' => '/vuexy/assets/img/avatars/7.png',
+      'profile_url' => '/show/UserProfile/7',
+    ],
+
+    'assignee' => [
+      'startup' => [
+        'id' => 13,
+        'name' => 'CopyCrafters',
+        'img_url' => '/vuexy/assets/img/icons/brands/mailchimp.png',
+        'profile_url' => '/dashboard/companyProfile/13',
+      ],
+      'founder' => [
+        'id' => 8,
+        'name' => 'James Anderson',
+        'img_url' => '/vuexy/assets/img/avatars/8.png',
+        'profile_url' => '/show/UserProfile/8',
+      ],
+    ],
+
+    'attachments' => [],
+    'activities' => [
+      [
+        'user' => 'Olivia Martinez',
+        'user_id' => 7,
+        'img_url' => '/vuexy/assets/img/avatars/7.png',
+        'action' => 'marked task as Completed',
+        'type' => 'completed',
+        'time' => 'Apr 4, 9:00 AM',
+        'created_at' => '2025-04-04T09:00:00Z',
+      ],
+    ],
+    'comments' => [],
+    'feedbacks' => [
+      [
+        'id' => 35,
+        'user' => 'James Anderson',
+        'user_id' => 8,
+        'img_url' => '/vuexy/assets/img/avatars/8.png',
+        'decision' => 'approved',
+        'text' => 'Ready to publish. Excellent tone of voice.',
+        'time' => 'Apr 3, 2:15 PM',
+        'created_at' => '2025-04-03T14:15:00Z',
+      ],
+    ],
+    'submissions' => [
+      [
+        'id' => 23,
+        'user' => 'James Anderson',
+        'user_id' => 8,
+        'img_url' => '/vuexy/assets/img/avatars/8.png',
+        'note' => 'Attached the final word doc with 2 H1 variations.',
+        'status' => 'approved',
+        'time' => 'Apr 3, 11:00 AM',
+        'created_at' => '2025-04-03T11:00:00Z',
+        'files' => [
+          [
+            'id' => 302,
+            'name' => 'landing_page_copy_vFinal.docx',
+            'url' => '/storage/docs/landing_page_copy_vFinal.docx',
+            'mime_type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'size_bytes' => 153600,
+          ],
+        ],
+      ],
+    ],
+
+    'comments_count' => 0,
+    'feedbacks_count' => 1,
+    'submissions_count' => 1,
+    'attachments_count' => 0,
+  ],
+
+  // Task 5: Original DB Task (Filled out missing variables)
+  [
+    'id' => 5,
+    'title' => 'Database Schema Refactor',
+    'description' => '<p>Normalize tables for the user management module.</p><p>Extract user preferences into a separate <code>user_settings</code> table to prevent row bloat in the main <code>users</code> table.</p>',
+    'due_date' => '2025-04-25',
+    'priority' => 'High',
+    'status' => 'pending',
+    'created_at' => '2025-04-06T07:30:00Z',
+    'updated_at' => '2025-04-07T10:00:00Z',
+
+    'creator' => [
+      'id' => 9,
+      'name' => 'Daniel White',
+      'img_url' => '/vuexy/assets/img/avatars/9.png',
+      'profile_url' => '/show/UserProfile/9',
+    ],
+
+    'assignee' => [
+      'startup' => [
+        'id' => 14,
+        'name' => 'DataFlow Inc.',
+        'img_url' => '/vuexy/assets/img/icons/brands/asana.png',
+        'profile_url' => '/dashboard/companyProfile/14',
+      ],
+      'founder' => [
+        'id' => 10,
+        'name' => 'Sophia Taylor',
+        'img_url' => '/vuexy/assets/img/avatars/10.png',
+        'profile_url' => '/show/UserProfile/10',
+      ],
+    ],
+
+    'attachments' => [
+      [
+        'id' => 125,
+        'name' => 'current_schema.png',
+        'url' => '/storage/designs/current_schema.png',
+        'mime_type' => 'image/png',
+        'size_bytes' => 204800,
+        'uploaded_at' => '2025-04-06T07:35:00Z',
+      ],
+    ],
+    'activities' => [],
+    'comments' => [],
+    'feedbacks' => [
+      [
+        'id' => 37,
+        'user' => 'Sophia Taylor',
+        'user_id' => 10,
+        'img_url' => '/vuexy/assets/img/avatars/10.png',
+        'decision' => 'rejected',
+        'text' => 'Needs redesign. The proposed ERD breaks existing joins in the billing service.',
+        'time' => 'Apr 7, 9:00 AM',
+        'created_at' => '2025-04-07T09:00:00Z',
+      ],
+    ],
+    'submissions' => [
+      [
+        'id' => 24,
+        'user' => 'Sophia Taylor',
+        'user_id' => 10,
+        'img_url' => '/vuexy/assets/img/avatars/10.png',
+        'note' => 'Here is my initial schema proposal.',
+        'status' => 'rejected',
+        'time' => 'Apr 6, 4:00 PM',
+        'created_at' => '2025-04-06T16:00:00Z',
+        'files' => [
+          [
+            'id' => 303,
+            'name' => 'proposed_erd_v1.pdf',
+            'url' => '/storage/docs/proposed_erd_v1.pdf',
+            'mime_type' => 'application/pdf',
+            'size_bytes' => 1024000,
+          ],
+        ],
+      ],
+    ],
+
+    'comments_count' => 0,
+    'feedbacks_count' => 1,
+    'submissions_count' => 1,
+    'attachments_count' => 1,
+  ],
+
+  // Task 6: New - DevOps / Urgent Task
+  [
+    'id' => 6,
+    'title' => 'Migrate to AWS RDS',
+    'description' => '<p>Migrate our primary PostgreSQL database from the self-hosted EC2 instance to <strong>AWS RDS</strong> for automated backups and Multi-AZ support.</p><p><em>Note: Zero downtime is expected. Ensure replica synchronization before flipping the DNS switch.</em></p>',
+    'due_date' => '2025-04-08',
+    'priority' => 'Urgent',
+    'status' => 'in_progress',
+    'created_at' => '2025-04-04T08:00:00Z',
+    'updated_at' => '2025-04-07T11:00:00Z',
+
+    'creator' => [
+      'id' => 11,
+      'name' => 'Chris Martin',
+      'img_url' => '/vuexy/assets/img/avatars/11.png',
+      'profile_url' => '/show/UserProfile/11',
+    ],
+
+    'assignee' => [
+      'startup' => [
+        'id' => 15,
+        'name' => 'CloudOps Solutions',
+        'img_url' => '/vuexy/assets/img/icons/brands/aws.png',
+        'profile_url' => '/dashboard/companyProfile/15',
+      ],
+      'founder' => [
+        'id' => 12,
+        'name' => 'Kevin Hart',
+        'img_url' => '/vuexy/assets/img/avatars/12.png',
+        'profile_url' => '/show/UserProfile/12',
+      ],
+    ],
+
+    'attachments' => [],
+
+    'activities' => [
+      [
+        'user' => 'Kevin Hart',
+        'user_id' => 12,
+        'img_url' => '/vuexy/assets/img/avatars/12.png',
+        'action' => 'started the migration process',
+        'type' => 'progress',
+        'time' => 'Apr 7, 10:00 AM',
+        'created_at' => '2025-04-07T10:00:00Z',
+      ],
+    ],
+
+    'comments' => [
+      [
+        'id' => 13,
+        'user' => 'Chris Martin',
+        'user_id' => 11,
+        'img_url' => '/vuexy/assets/img/avatars/11.png',
+        'text' => '<p>Please confirm once the initial data dump is restored on RDS.</p>',
+        'time' => 'Apr 7, 10:15 AM',
+        'created_at' => '2025-04-07T10:15:00Z',
+        'updated_at' => null,
+      ],
+      [
+        'id' => 14,
+        'user' => 'Kevin Hart',
+        'user_id' => 12,
+        'img_url' => '/vuexy/assets/img/avatars/12.png',
+        'text' => '<p>Dump restored. Setting up logical replication now.</p>',
+        'time' => 'Apr 7, 11:00 AM',
+        'created_at' => '2025-04-07T11:00:00Z',
+        'updated_at' => null,
+      ]
+    ],
+
+    'feedbacks' => [],
+    'submissions' => [],
+
+    'comments_count' => 2,
+    'feedbacks_count' => 0,
+    'submissions_count' => 0,
+    'attachments_count' => 0,
+  ],
+
+  // Task 7: New - Frontend Bug Fix
+  [
+    'id' => 7,
+    'title' => 'Fix Mobile Navigation Glitch',
+    'description' => '<p>The hamburger menu overlaps with the company logo on devices smaller than 375px width (e.g., iPhone SE).</p><p>Please adjust the flexbox wrapping to ensure it behaves correctly.</p>',
+    'due_date' => '2025-04-12',
+    'priority' => 'Medium',
+    'status' => 'progress',
+    'created_at' => '2025-04-07T09:00:00Z',
+    'updated_at' => '2025-04-07T09:00:00Z',
+
+    'creator' => [
+      'id' => 3,
+      'name' => 'Sarah Lee',
+      'img_url' => '/vuexy/assets/img/avatars/3.png',
+      'profile_url' => '/show/UserProfile/3',
+    ],
+
+    'assignee' => [],
+
+    'attachments' => [
+      [
+        'id' => 130,
+        'name' => 'nav_bug_screenshot.png',
+        'url' => '/storage/issues/nav_bug_screenshot.png',
+        'mime_type' => 'image/png',
+        'size_bytes' => 150000,
+        'uploaded_at' => '2025-04-07T09:05:00Z',
+      ],
+    ],
+
+    'activities' => [
+      [
+        'user' => 'Sarah Lee',
+        'user_id' => 3,
+        'img_url' => '/vuexy/assets/img/avatars/3.png',
+        'action' => 'created this bug ticket',
+        'type' => 'created',
+        'time' => 'Apr 7, 9:00 AM',
+        'created_at' => '2025-04-07T09:00:00Z',
+      ],
+    ],
+
+    'comments' => [],
+    'feedbacks' => [],
+    'submissions' => [],
+
+    'comments_count' => 0,
+    'feedbacks_count' => 0,
+    'submissions_count' => 0,
+    'attachments_count' => 1,
+  ],
+
+  // Task 8: New - Security Audit
+  [
+    'id' => 8,
+    'title' => 'Annual Penetration Testing',
+    'description' => '<p>Conduct a gray-box penetration test on the primary web application.</p><ul><li>Check for OWASP Top 10 vulnerabilities</li><li>Audit 3rd-party dependencies</li><li>Provide a risk mitigation report</li></ul>',
+    'due_date' => '2025-05-01',
+    'priority' => 'High',
+    'status' => 'review',
+    'created_at' => '2025-03-20T08:00:00Z',
+    'updated_at' => '2025-04-07T14:00:00Z',
+
+    'creator' => [
+      'id' => 11,
+      'name' => 'Chris Martin',
+      'img_url' => '/vuexy/assets/img/avatars/11.png',
+      'profile_url' => '/show/UserProfile/11',
+    ],
+
+    'assignee' => [
+      'startup' => [
+        'id' => 16,
+        'name' => 'CyberSec Shield',
+        'img_url' => '/vuexy/assets/img/icons/brands/github.png',
+        'profile_url' => '/dashboard/companyProfile/16',
+      ],
+      'founder' => [
+        'id' => 14,
+        'name' => 'Nina Dobrev',
+        'img_url' => '/vuexy/assets/img/avatars/14.png',
+        'profile_url' => '/show/UserProfile/14',
+      ],
+    ],
+
+    'attachments' => [
+      [
+        'id' => 140,
+        'name' => 'scoping_document.pdf',
+        'url' => '/storage/security/scoping_document.pdf',
+        'mime_type' => 'application/pdf',
+        'size_bytes' => 850000,
+        'uploaded_at' => '2025-03-20T08:30:00Z',
+      ]
+    ],
+
+    'activities' => [
+      [
+        'user' => 'Nina Dobrev',
+        'user_id' => 14,
+        'img_url' => '/vuexy/assets/img/avatars/14.png',
+        'action' => 'submitted the final vulnerability report',
+        'type' => 'submit',
+        'time' => 'Apr 7, 1:45 PM',
+        'created_at' => '2025-04-07T13:45:00Z',
+      ]
+    ],
+
+    'comments' => [
+      [
+        'id' => 15,
+        'user' => 'Nina Dobrev',
+        'user_id' => 14,
+        'img_url' => '/vuexy/assets/img/avatars/14.png',
+        'text' => '<p>Attached the final report. Only found a few low-severity issues related to missing security headers.</p>',
+        'time' => 'Apr 7, 1:50 PM',
+        'created_at' => '2025-04-07T13:50:00Z',
+        'updated_at' => null,
+      ]
+    ],
+
+    'feedbacks' => [],
+
+    'submissions' => [
+      [
+        'id' => 25,
+        'user' => 'Nina Dobrev',
+        'user_id' => 14,
+        'img_url' => '/vuexy/assets/img/avatars/14.png',
+        'note' => 'Pen-Test Final Report 2025',
+        'status' => 'pending_review',
+        'time' => 'Apr 7, 1:45 PM',
+        'created_at' => '2025-04-07T13:45:00Z',
+        'files' => [
+          [
+            'id' => 304,
+            'name' => 'Pentest_Report_April2025.pdf',
+            'url' => '/storage/security/Pentest_Report_April2025.pdf',
+            'mime_type' => 'application/pdf',
+            'size_bytes' => 2500000,
+          ]
+        ],
+      ]
+    ],
+
+    'comments_count' => 1,
+    'feedbacks_count' => 0,
+    'submissions_count' => 1,
+    'attachments_count' => 1,
   ],
 ];
 
 $boards = [
-  'pending' => ['label' => __('admin.Pending'), 'color' => 'bg-label-secondary'],
-  'progress' => ['label' => __('admin.In_Progress'), 'color' => 'bg-label-warning'],
-  'review' => ['label' => __('admin.In_Review'), 'color' => 'bg-label-info'],
+  'pending'   => ['label' => __('admin.Pending'), 'color' => 'bg-label-secondary'],
+  'progress'  => ['label' => __('admin.In_Progress'), 'color' => 'bg-label-warning'],
+  'review'    => ['label' => __('admin.In_Review'), 'color' => 'bg-label-info'],
   'completed' => ['label' => __('admin.Completed'), 'color' => 'bg-label-success'],
 ];
 
 $priorityConfig = [
-  'Low' => ['label' => __('admin.Low'), 'class' => 'bg-label-secondary', 'dot' => 'bg-secondary'],
+  'Low'    => ['label' => __('admin.Low'), 'class' => 'bg-label-secondary', 'dot' => 'bg-secondary'],
   'Medium' => ['label' => __('admin.Medium'), 'class' => 'bg-label-info', 'dot' => 'bg-info'],
-  'High' => ['label' => __('admin.High'), 'class' => 'bg-label-danger', 'dot' => 'bg-danger'],
+  'High'   => ['label' => __('admin.High'), 'class' => 'bg-label-danger', 'dot' => 'bg-danger'],
+];
+
+// Reformat mappings cleanly for JS injections later
+$jsPriorityMap = [];
+foreach($priorityConfig as $k => $v) {
+    $jsPriorityMap[$k] = ['label' => $v['label'], 'cls' => $v['class'], 'dot' => $v['dot']];
+}
+
+$jsStatusMap = [];
+foreach($boards as $k => $v) {
+    $jsStatusMap[$k] = $v['label'];
+}
+
+// Offcanvas Tab Definitions
+$offcanvasTabs = [
+  [
+    'target' => '#vt-details',
+    'icon'   => 'ti-info-circle',
+    'label'  => __('admin.Details') ?? 'Details',
+    'active' => true,
+    'show'   => true,
+  ],
+  [
+    'target' => '#vt-submissions',
+    'icon'   => 'ti-paperclip',
+    'label'  => __('admin.Submissions') ?? 'Submissions',
+    'badge'  => ['id' => 'vt-submissions-count', 'class' => 'bg-label-warning'],
+    'active' => false,
+    'show'   => $_user->ableTo('tasks.update', $permissions),
+  ],
+  [
+    'target' => '#vt-feedback',
+    'icon'   => 'ti-star',
+    'label'  => __('admin.feedback'),
+    'badge'  => ['id' => 'vt-feedback-count', 'class' => 'bg-label-primary'],
+    'active' => false,
+    'show'   => true,
+  ],
+  [
+    'target' => '#vt-comments',
+    'icon'   => 'ti-message',
+    'label'  => __('admin.Comments'),
+    'badge'  => ['id' => 'vt-comment-count', 'class' => 'bg-label-danger bg-glow'],
+    'active' => false,
+    'show'   => true,
+  ],
+  [
+    'target' => '#vt-activity',
+    'icon'   => 'ti-activity',
+    'label'  => __('admin.Activities'),
+    'badge'  => ['id' => 'vt-activity-count', 'class' => 'bg-label-info bg-glow'],
+    'active' => false,
+    'show'   => true,
+  ],
 ];
 @endphp
 
@@ -77,10 +846,21 @@ $priorityConfig = [
     min-height: 150px !important;
     max-height: 150px !important;
   }
-  
+
   #vt-comment-editor .ql-editor {
     min-height: 80px !important;
     max-height: 120px !important;
+  }
+
+  #vt-dropzone.dz-dragover {
+    border-color: var(--bs-primary) !important;
+    background-color: rgba(var(--bs-primary-rgb), .05);
+  }
+  #vt-dropzone-queue .dz-queue-item .dz-progress-bar {
+    height: 3px;
+    border-radius: 2px;
+    background: var(--bs-primary);
+    transition: width .3s;
   }
 </style>
 @stop
@@ -129,11 +909,11 @@ $priorityConfig = [
           <main class="kanban-drag d-flex flex-column gap-2" style="min-height: 60px;">
             @forelse ($boardTasks as $task)
               @php
-                $p = $priorityConfig[$task['priority']];
+                $p = $priorityConfig[$task['priority']] ?? $priorityConfig['Medium'];
                 $r = $task['creator'] ?? ['name' => 'User'];
                 $ri = strtoupper(substr($r['name'], 0, 2));
-                $attCount = isset($task['attachments']) ? count($task['attachments']) : 0;
-                $commentCount = isset($task['comments']) ? count($task['comments']) : 0;
+                $attCount = count($task['attachments'] ?? []);
+                $commentCount = count($task['comments'] ?? []);
               @endphp
               <div class="card shadow-sm border-0 cursor-grab kanban-item" data-task-id="{{ $task['id'] }}" data-search-text="{{ strtolower($task['title']) }}">
                 <div class="card-body p-3">
@@ -193,77 +973,101 @@ $priorityConfig = [
       </div>
       <div class="offcanvas-body pt-0 d-flex flex-column">
         
-        <ul class="nav nav-tabs mb-6 rounded-0 mt-3" role="tablist">
-          <li class="nav-item">
-            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#vt-details" role="tab"><i class="ti ti-info-circle ti-xs me-1"></i> {{ __('admin.Details') ?? 'Details' }}</button>
-          </li>
-          @role('Mentor')
-          <li class="nav-item">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#vt-submissions" role="tab">
-              <i class="ti ti-paperclip ti-xs me-1"></i> {{ __('admin.Submissions') ?? 'Submissions' }}
-              <span class="badge badge-center bg-label-warning rounded-pill ms-1" id="vt-submissions-count">0</span>
-            </button>
-          </li>
-          @endrole
-          <li class="nav-item">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#vt-feedback" role="tab">
-              <i class="ti ti-star ti-xs me-1"></i> {{ __('admin.feedback') }}
-              <span class="badge badge-center bg-label-primary rounded-pill ms-1" id="vt-feedback-count">0</span>
-            </button>
-          </li>
-          <li class="nav-item">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#vt-comments" role="tab">
-              <i class="ti ti-message ti-xs me-1"></i> {{ __('admin.Comments') }} 
-              <span class="badge badge-center bg-label-danger bg-glow rounded-pill ms-1" id="vt-comment-count">0</span>
-            </button>
-          </li>
-          <li class="nav-item">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#vt-activity" role="tab">
-              <i class="ti ti-activity ti-xs me-1"></i> {{ __('admin.Activities') }}
-              <span class="badge badge-center bg-label-info bg-glow rounded-pill ms-1" id="vt-comment-count">0</span>
-            </button>
-          </li>
+        {{-- TAB NAVIGATION GENERATED DYNAMICALLY --}}
+        <ul class="nav nav-tabs pb-6 mb-4 rounded-0 mt-3" role="tablist">
+          @foreach($offcanvasTabs as $tab)
+            @if($tab['show'])
+              <li class="nav-item">
+                <button class="nav-link {{ $tab['active'] ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="{{ $tab['target'] }}" role="tab">
+                  <i class="ti {{ $tab['icon'] }} ti-xs me-1"></i> {{ $tab['label'] }}
+                  @if(isset($tab['badge']))
+                    <span class="badge badge-center {{ $tab['badge']['class'] }} rounded-pill ms-1" id="{{ $tab['badge']['id'] }}">0</span>
+                  @endif
+                </button>
+              </li>
+            @endif
+          @endforeach
         </ul>
 
         <div class="tab-content p-0 flex-grow-1 overflow-auto">
           {{-- DETAILS TAB --}}
           <div class="tab-pane fade show active" id="vt-details" role="tabpanel">
             <div class="mb-3">
-              <span class="text-muted small d-block mb-1">{{ __('admin.Title') }}</span>
-              <h6 id="vt-title" class="mb-0"></h6>
+              <span class="text-muted d-block mb-1">{{ __('admin.Title') }}</span>
+              <h6 id="vt-title" class="mb-0 text-dark"></h6>
             </div>
             <div class="mb-3">
-              <span class="text-muted small d-block mb-1">{{ __('admin.Description') }}</span>
-              <div id="vt-description" class="bg-body border rounded p-3 small" style="min-height: 80px;"></div>
+              <span class="text-muted d-block mb-1">{{ __('admin.Description') }}</span>
+              <div id="vt-description" class="text-dark bg-body border rounded p-3" style="min-height: 80px;"></div>
             </div>
             <div class="row g-3 mb-4">
               <div class="col-6">
-                <span class="text-muted small d-block mb-1">{{ __('admin.Due_Date') }}</span>
-                <p id="vt-due-date" class="mb-0 small fw-medium"></p>
+                <span class="text-muted d-block mb-1">{{ __('admin.Due_Date') }}</span>
+                <p id="vt-due-date" class="mb-0 text-dark"></p>
               </div>
               <div class="col-6">
-                <span class="text-muted small d-block mb-1">{{ __('admin.Priority') }}</span>
+                <span class="text-muted d-block mb-1">{{ __('admin.Priority') }}</span>
                 <div id="vt-priority"></div>
               </div>
               <div class="col-6">
-                <span class="text-muted small d-block mb-1">{{ __('admin.Status') }}</span>
+                <span class="text-muted d-block mb-1">{{ __('admin.Status') }}</span>
                 <div id="vt-status"></div>
               </div>
             </div>
 
+            @role('Admin')
+            <div class="mb-4 d-none" id="vt-assignee-wrapper">
+              <span class="text-muted small d-block mb-2">{{ __('admin.Assignee') ?? 'Assignee' }}</span>
+              <div class="border rounded p-3 bg-body d-flex flex-column gap-3">
+                <div class="d-flex align-items-center gap-3" id="vt-assignee-startup">
+                  <div id="vt-assignee-startup-avatar"></div>
+                  <div>
+                    <span class="small">{{ __('admin.Startup') ?? 'Startup' }}</span>
+                    <div id="vt-assignee-startup-name" class="fw-semibold text-dark"></div>
+                  </div>
+                </div>
+                <div class="d-flex align-items-center gap-3 border-top pt-3" id="vt-assignee-founder">
+                  <div id="vt-assignee-founder-avatar"></div>
+                  <div>
+                    <span class="small">{{ __('admin.Founder') ?? 'Founder' }}</span>
+                    <div id="vt-assignee-founder-name" class="fw-semibold text-dark"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            @endrole
+
             <div class="mb-4">
-              <span class="text-muted small d-block mb-1">{{ __('admin.Attachments') }}</span>
+              <span class="text-muted small d-block mb-1">{{ $_user->ableTo('tasks.update', $permissions) ? __('admin.provided_resources') : __('admin.Attachments') }}</span>
               <div id="vt-attachments-list" class="d-flex flex-column gap-2 small mb-3"></div>
 
-              {{-- Add Attachment Directly from View Drawer --}}
+              {{-- Dropzone Upload --}}
               <div class="border-top pt-3">
-                <label class="form-label small">{{ __('admin.your_submission') }} <span class="text-muted">({{ __('admin.max') }} 10MB)</span></label>
-                <div class="input-group input-group-sm">
-                  <input type="file" id="vt-new-attachment" class="form-control"
-                    accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-zip-compressed,text/plain,text/csv" />
-                  <button class="btn btn-outline-primary" type="button" id="vt-upload-btn"><i class="ti ti-upload ti-xs me-1"></i> {{ __('admin.Upload') }}</button>
+                <label class="form-label small mb-2">
+                  {{ $_user->ableTo('tasks.update', $permissions) ? __('admin.upload_attachments') : __('admin.your_submission') }}
+                  <span class="text-muted">({{ __('admin.max') }} 5 {{ __('admin.files') ?? 'files' }}, 10MB {{ __('admin.each') ?? 'each' }})</span>
+                </label>
+
+                <div id="vt-dropzone"
+                  class="bg-light-subtle border border-dashed rounded p-4 text-center position-relative"
+                  style="cursor:pointer; border-color: var(--bs-border-color) !important; transition: border-color .2s, background .2s;">
+                  <input type="file" id="vt-dropzone-input" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" style="cursor:pointer;"
+                    accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-zip-compressed,text/plain,text/csv"
+                    multiple />
+                  <i class="ti ti-cloud-upload ti-lg text-primary mb-2 d-block"></i>
+                  <p class="mb-0 small">{{ __('admin.dropzone') }}</p>
+                  <p class="mb-0 text-muted small">{{ __('admin.max_5_files') }}</p>
                 </div>
-                <div class="invalid-feedback d-block" id="vt-upload-error"></div>
+
+                <div id="vt-dropzone-queue" class="d-flex flex-column gap-2 mt-2"></div>
+
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                  <div class="invalid-feedback d-block" id="vt-upload-error"></div>
+                  <button type="button" class="btn btn-sm btn-primary text-nowrap ms-auto d-none" id="vt-dropzone-upload-btn">
+                    <i class="ti ti-upload ti-xs me-1"></i>{{ __('admin.upload_all') }}
+                  </button>
+                </div>
+                <input type="hidden" id="vt-upload-btn-task-id" value="" />
               </div>
             </div>
           </div>
@@ -281,7 +1085,6 @@ $priorityConfig = [
             <div class="mt-3" id="vt-feedback-form-wrapper">
               <h5 class="fw-semibold small mb-3">{{ __('admin.add_feedback') }}</h5>
 
-              {{-- Decision --}}
               <div class="mb-3">
                 <label class="form-label small">{{ __('admin.feedback_decision') }} <span class="text-danger">*</span></label>
                 <div class="row g-3">
@@ -306,7 +1109,6 @@ $priorityConfig = [
                 </div>
               </div>
 
-              {{-- Note --}}
               <div class="mb-3">
                 <label class="form-label small" for="vt-fb-note">{{ __('admin.feedback_note') }}</label>
                 <textarea id="vt-fb-note" class="form-control" rows="3" placeholder="{{ __('admin.feedback_note_placeholder') }}"></textarea>
@@ -321,7 +1123,6 @@ $priorityConfig = [
           
           {{-- COMMENTS TAB --}}
           <div class="tab-pane fade" id="vt-comments" role="tabpanel">
-
             <div id="vt-comments-list" class="small mb-4 pe-2"></div>
             
             <div class="border-top pt-3 mt-auto">
@@ -384,19 +1185,18 @@ $priorityConfig = [
                 <label class="form-label">{{ __('admin.Priority') }} <span class="text-danger">*</span></label>
                 <select name="priority" id="add-priority" class="select2 form-select">
                   <option value="">{{ __('admin.Select') }}</option>
-                  <option value="Low">{{ __('admin.Low') }}</option>
-                  <option value="Medium">{{ __('admin.Medium') }}</option>
-                  <option value="High">{{ __('admin.High') }}</option>
+                  @foreach($priorityConfig as $k => $p)
+                    <option value="{{ $k }}">{{ $p['label'] }}</option>
+                  @endforeach
                 </select>
               </div>
               <div class="col-6">
                 <label class="form-label">{{ __('admin.Status') }} <span class="text-danger">*</span></label>
                 <select name="status" id="add-status" class="select2 form-select">
                   <option value="">{{ __('admin.Select') }}</option>
-                  <option value="pending">{{ __('admin.Pending') }}</option>
-                  <option value="progress">{{ __('admin.In_Progress') }}</option>
-                  <option value="review">{{ __('admin.In_Review') }}</option>
-                  <option value="completed">{{ __('admin.Completed') }}</option>
+                  @foreach($boards as $k => $b)
+                    <option value="{{ $k }}">{{ $b['label'] }}</option>
+                  @endforeach
                 </select>
               </div>
             </div>
@@ -448,18 +1248,17 @@ $priorityConfig = [
               <div class="col-6">
                 <label class="form-label">{{ __('admin.Priority') }} <span class="text-danger">*</span></label>
                 <select name="priority" id="et-priority" class="select2 form-select">
-                  <option value="Low">{{ __('admin.Low') }}</option>
-                  <option value="Medium">{{ __('admin.Medium') }}</option>
-                  <option value="High">{{ __('admin.High') }}</option>
+                  @foreach($priorityConfig as $k => $p)
+                    <option value="{{ $k }}">{{ $p['label'] }}</option>
+                  @endforeach
                 </select>
               </div>
               <div class="col-6">
                 <label class="form-label">{{ __('admin.Status') }} <span class="text-danger">*</span></label>
                 <select name="status" id="et-status" class="select2 form-select">
-                  <option value="pending">{{ __('admin.Pending') }}</option>
-                  <option value="progress">{{ __('admin.In_Progress') }}</option>
-                  <option value="review">{{ __('admin.In_Review') }}</option>
-                  <option value="completed">{{ __('admin.Completed') }}</option>
+                  @foreach($boards as $k => $b)
+                    <option value="{{ $k }}">{{ $b['label'] }}</option>
+                  @endforeach
                 </select>
               </div>
             </div>
@@ -498,6 +1297,11 @@ $priorityConfig = [
 <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+<script src="/js/kanban/kanban-utils.js"></script>
+<script src="/js/kanban/kanban-renderers.js"></script>
+<script src="/js/kanban/kanban-board.js"></script>
+<script src="/js/kanban/kanban-dropzone.js"></script>
+<script src="/js/kanban/kanban-tasks.js"></script>
 @stop
 
 @section('pagescripts')
@@ -505,914 +1309,137 @@ $priorityConfig = [
 $(document).ready(function () {
   'use strict';
 
-  const isAbleToEdit = {{ $_user->ableTo('tasks.store', $permissions) ? 'true' : 'false' }};
+  // ─── Server-side config injected into JS ────────────────────────────────
+  window.KanbanConfig = {
+    isAbleToEdit:    @json($_user->ableTo('tasks.store', $permissions)),
+    isAdmin:         @json(auth()->user()->hasRole('Admin')),
+    currentUserName: @json(auth()->user()->name ?? 'You'),
+    profileBaseUrl:  @json(url("/show/UserProfile")),
 
-  const PRIORITY_MAP = {
-    Low:    { label: '{{ __("admin.Low") }}',    cls: 'bg-label-secondary', dot: 'bg-secondary' },
-    Medium: { label: '{{ __("admin.Medium") }}', cls: 'bg-label-info',      dot: 'bg-info' },
-    High:   { label: '{{ __("admin.High") }}',   cls: 'bg-label-danger',    dot: 'bg-danger' },
+    priorityMap: @json($jsPriorityMap),
+    statusMap:   @json($jsStatusMap),
+
+    routes: {
+      storeTask:        '{{ route("tasks.store") }}',
+      updateTask:       '{{ route("tasks.update", ":id") }}',
+      moveTask:         '{{ route("tasks.move", ["taskId" => ":id", "status" => ":status"]) }}',
+      uploadAttachment: '{{ route("tasks.upload_attachment", ":taskId") }}',
+      deleteAttachment: '{{ route("tasks.delete_attachment", ["taskId" => ":taskId", "filename" => ":filename"]) }}',
+      addComment:       '{{ route("tasks.add_comment", ":id") }}',
+      addFeedback:      '{{ route("tasks.add_feedback", ":id") }}',
+    },
+
+    labels: {
+      // General
+      processing:         @json(__('admin.processing')),
+      storedSuccessfully: @json(__('admin.StoredSuccessfully')),
+      saveFailed:         @json(__('admin.save_failed')),
+      updateFailed:       @json(__('admin.update_failed')),
+      deleteFailed:       @json(__('admin.delete_failed')),
+      requiredField:      @json(__('admin.Required_Field')),
+      noTasks:            @json(__('admin.No_Tasks')),
+      you:                @json(__('admin.You') ?? 'You'),
+      justNow:            @json(__('admin.Just_Now') ?? 'Just now'),
+      // Buttons
+      view:               @json(__('admin.View')),
+      edit:               @json(__('admin.Edit')),
+      create:             @json(__('admin.Create')),
+      update:             @json(__('admin.Update')),
+      send:               @json(__('admin.send')),
+      remove:             @json(__('admin.Remove')),
+      download:           @json(__('admin.Download') ?? 'Download'),
+      yes:                @json(__('admin.DYes')),
+      no:                 @json(__('admin.DNo')),
+      // Tasks
+      archiveTask:        @json(__('admin.archive_task')),
+      archiveTaskConfirm: @json(__('admin.archive_task_confirm')),
+      reopenTask:         @json(__('admin.reopen_task')),
+      reopenTaskConfirm:  @json(__('admin.reopen_task_confirm')),
+      taskArchived:       @json(__('admin.task_archived')),
+      taskReopened:       @json(__('admin.task_reopened')),
+      moveTaskFailed:     @json(__('admin.move_task_failed')),
+      // Attachments
+      noAttachments:            @json(__('admin.no_attachments')),
+      deleteAttachment:         @json(__('admin.delete_attachment')),
+      recover:                  @json(__('admin.Recover')),
+      attachmentDeletedSuccess: @json(__('admin.attachment_deleted_success')),
+      attachmentUploadedSuccess:@json(__('admin.attachment_uploaded_success')),
+      uploading:                @json(__('admin.Uploading') ?? 'Uploading...'),
+      uploadAll:                @json(__('admin.upload_all')),
+      uploaded:                 @json(__('admin.uploaded') ?? 'uploaded'),
+      failed:                   @json(__('admin.failed') ?? 'failed'),
+      maxFilesReached:          @json(__('admin.max_files_reached') ?? 'Maximum 5 files allowed.'),
+      invalidFileType:          @json(__('admin.invalid_file_type') ?? 'has an unsupported type.'),
+      exceedsSizeLimit:         @json(__('admin.exceeds_size_limit') ?? 'exceeds 10MB limit.'),
+      // Comments
+      noComments:     @json(__('admin.no_comments')),
+      commentSuccess: @json(__('admin.comment_success')),
+      commentFailed:  @json(__('admin.comment_failed')),
+      // Feedback
+      noFeedback:     @json(__('admin.no_feedback') ?? 'No feedback yet.'),
+      feedbackSuccess:@json(__('admin.feedback_success') ?? 'Feedback submitted.'),
+      feedbackFailed: @json(__('admin.feedback_failed') ?? 'Failed to submit feedback.'),
+      submitFeedback: @json(__('admin.submit_feedback') ?? 'Submit Feedback'),
+      passTask:       @json(__('admin.Pass_Task') ?? 'Pass Task'),
+      needsRevision:  @json(__('admin.Needs_Revision') ?? 'Needs Revision'),
+      // Submissions
+      noSubmissions:  @json(__('admin.no_submissions') ?? 'No submissions yet.'),
+      pendingReview:  @json(__('admin.Pending_Review') ?? 'Pending Review'),
+      approved:       @json(__('admin.Approved') ?? 'Approved'),
+      rejected:       @json(__('admin.Rejected') ?? 'Rejected'),
+      // Activities
+      noActivities:   @json(__('admin.no_recent_activities')),
+    },
   };
 
-  const STATUS_MAP = {
-    pending:   '{{ __("admin.Pending") }}',
-    progress:  '{{ __("admin.In_Progress") }}',
-    review:    '{{ __("admin.In_Review") }}',
-    completed: '{{ __("admin.Completed") }}',
-  };
+  // ─── Bootstrap ──────────────────────────────────────────────────────────
+  $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
 
-  let tasks = @json($tasks);
+  let tasks     = @json($tasks);
   const program = @json($cycle);
 
-  // Fallback string definitions if translation is missing
-  const noActivitiesStr = '{{ __("admin.no_recent_activities") }}';
-  const noCommentsStr   = '{{ __("admin.no_comments") }}';
-
-  // Base URL for user profiles
-  const profileBaseUrl = '{{ url("/show/UserProfile") }}';
-
-  // --- Build a clickable avatar element ---
-  function buildAvatar(name, imgUrl, userId) {
-    const ri   = (name || 'U').substring(0, 2).toUpperCase();
-    const href = userId ? `${profileBaseUrl}/${userId}` : '#';
-    const inner = imgUrl
-      ? `<img src="${imgUrl}" alt="${name}" class="rounded-circle" style="width:32px;height:32px;object-fit:cover;">`
-      : `<span class="avatar-initial bg-label-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:12px;">${ri}</span>`;
-    return `<a href="${href}" target="_blank" class="d-inline-flex" title="${name}">${inner}</a>`;
-  }
-
-  $.ajaxSetup({
-    headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
-  });
-
-  // --- Validate Multiple Files ---
-  function validateFiles(fileInput, errorSelector) {
-    const files = fileInput[0].files;
-    const $errorDiv = $(errorSelector);
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/svg+xml', 'application/pdf', 'application/zip', 'application/x-rar-compressed', 'application/vnd.rar', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'];
-    const maxSize = 10 * 1024 * 1024; // 10MB limit
-    
-    fileInput.removeClass('is-invalid');
-    $errorDiv.text('');
-
-    if (files.length === 0) return true;
-
-    for (let i = 0; i < files.length; i++) {
-      if (!allowedTypes.includes(files[i].type)) {
-        fileInput.addClass('is-invalid');
-        $errorDiv.text(`File "${files[i].name}" has an invalid type. Only JPG, PNG, GIF, PDF allowed.`);
-        return false;
-      }
-      if (files[i].size > maxSize) {
-        fileInput.addClass('is-invalid');
-        $errorDiv.text(`File "${files[i].name}" exceeds the 5MB limit.`);
-        return false;
-      }
-    }
-    return true;
-  }
-
-  // --- Build a kanban card HTML string for a task ---
-  function buildTaskCard(task) {
-    const p = PRIORITY_MAP[task.priority] || PRIORITY_MAP['Low'];
-    const r = task.creator || { name: 'User', img_url: null };
-    const ri = (r.name || 'U').substring(0, 2).toUpperCase();
-    const attCount = task.attachments ? task.attachments.length : 0;
-    const commentCount = task.comments ? task.comments.length : 0;
-    const avatarHtml = r.img_url
-      ? `<img src="${r.img_url}" alt="avatar" class="rounded-circle object-fit-cover" style="width:24px;height:24px;" />`
-      : `<span class="badge bg-label-primary rounded-circle d-flex align-items-center justify-content-center p-0" style="width:24px;height:24px;">${ri}</span>`;
-
-    return `
-      <div class="card shadow-sm border-0 cursor-grab kanban-item" data-task-id="${task.id}" data-search-text="${(task.title || '').toLowerCase()}">
-        <div class="card-body p-3">
-          <div class="d-flex align-items-center justify-content-between mb-2">
-            <span class="badge ${p.cls} rounded-pill" style="font-size:0.7rem;">
-              <span class="d-inline-block rounded-circle me-1 ${p.dot}" style="width:6px;height:6px;"></span>${p.label}
-            </span>
-            <div class="d-flex align-items-center gap-1">
-              <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle view-task-btn" type="button" data-task-id="${task.id}" title="{{ __('admin.View') }}"><i class="ti ti-eye ti-md text-dark"></i></button>
-              ${isAbleToEdit 
-                ? `<button class="btn btn-sm btn-icon btn-text-secondary rounded-circle edit-task-btn" type="button" data-task-id="${task.id}" title="{{ __('admin.Edit') }}"><i class="ti ti-edit ti-md text-dark"></i></button>` 
-                : ''
-              }
-              <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle archive-task-btn" type="button" data-task-id="${task.id}" title="{{ __('admin.archive_task') }}"><i class="ti ti-archive ti-md text-dark"></i></button>
-            </div>
-          </div>
-          <h6 class="mb-1 text-truncate">${$('<div>').text(task.title).html()}</h6>
-          <div class="text-muted small mb-2 line-clamp-2">${$('<div>').html(task.description).text()}</div>
-          <div class="d-flex align-items-center justify-content-between small text-muted mt-3">
-            <span class="d-flex align-items-center gap-2">
-              ${attCount > 0 ? `<span class="d-flex align-items-center" title="${attCount} Attachments"><i class="ti ti-paperclip ti-xs me-1"></i>${attCount}</span>` : ''}
-              ${commentCount > 0 ? `<span class="d-flex align-items-center" title="${commentCount} Comments"><i class="ti ti-message ti-xs me-1"></i>${commentCount}</span>` : ''}
-              <span class="d-flex align-items-center"><i class="ti ti-calendar ti-xs me-1"></i> ${task.due_date || ''}</span>
-            </span>
-            <div data-bs-toggle="tooltip" data-bs-placement="top" title="${$('<div>').text(r.name).html()}">${avatarHtml}</div>
-          </div>
-        </div>
-      </div>`;
-  }
-
-  // --- Add or update a task card in the correct board column ---
-  function syncTaskToBoard(task, oldStatus) {
-    const $existingCard = $(`.kanban-item[data-task-id="${task.id}"]`);
-    const $targetBoard = $(`.kanban-board[data-board="${task.status}"] .kanban-drag`);
-    const newCardHtml = buildTaskCard(task);
-
-    if ($existingCard.length) {
-      if (oldStatus && oldStatus !== task.status) {
-        // Moved to a different column — remove from old, append to new
-        const $oldBoard = $(`.kanban-board[data-board="${oldStatus}"] .kanban-drag`);
-        $existingCard.remove();
-        if ($oldBoard.find('.kanban-item:not(.d-none)').length === 0) {
-          $oldBoard.append('<p class="text-muted small text-center py-3 m-0" data-empty-board>{{ __("admin.No_Tasks") }}</p>');
-        }
-        $targetBoard.find('[data-empty-board]').remove();
-        $targetBoard.append(newCardHtml);
-      } else {
-        // Same column — replace in place
-        $existingCard.replaceWith(newCardHtml);
-      }
-    } else {
-      // New task — append to target board
-      $targetBoard.find('[data-empty-board]').remove();
-      $targetBoard.append(newCardHtml);
-    }
-
-    // Reinit tooltips on new elements
-    $('[data-bs-toggle="tooltip"]').tooltip();
-
-    // Update all board badge counts
-    $('.kanban-board').each(function () {
-      $(this).find('.board-count').text($(this).find('.kanban-item:not(.d-none)').length);
-    });
-  }
-
-  // --- HTML Generator for Attachments ---
-  function renderAttachmentsList(attachments, taskId, containerSelector) {
-    const $container = $(containerSelector);
-    if (!attachments || attachments.length === 0) {
-      $container.html('<span class="text-muted small">@lang("admin.no_attachments")</span>');
-      return;
-    }
-
-    let html = '';
-    attachments.forEach(att => {
-      html += `
-        <div class="d-flex align-items-center justify-content-between border rounded p-2 bg-lighter attachment-item" id="att-row-${att.id}">
-          <a href="${att.url}" target="_blank" class="text-primary fw-medium text-truncate d-flex align-items-center gap-1" style="max-width: 85%;">
-            <i class="ti ti-paperclip ti-xs flex-shrink-0"></i> 
-            <span class="text-truncate">${att.name}</span>
-          </a>
-          <button type="button" class="btn btn-icon btn-sm btn-text-danger rounded-circle delete-attachment-btn" data-task-id="${taskId}" data-attachment-id="${att.id}" title="{{ __('admin.Remove') }}">
-            <i class="ti ti-trash ti-xs"></i>
-          </button>
-        </div>
-      `;
-    });
-    $container.html(html);
-  }
-
-  // --- HTML Generator for Activities ---
-  function renderActivitiesList(activities, containerSelector) {
-    const $container = $(containerSelector);
-    if (!activities || activities.length === 0) {
-      $container.html(`<p class="text-muted text-center py-4 mb-0">${noActivitiesStr}</p>`);
-      return;
-    }
-    
-    let html = '';
-    activities.forEach(act => {
-      const ri = (act.user || 'U').substring(0, 2).toUpperCase();
-      const avatar = buildAvatar(act.user, act.img_url, act.user_id);
-      
-      html += `
-        <div class="d-flex align-items-start gap-3 mb-3 pb-2 border-bottom">
-          <div class="flex-shrink-0 mt-1">${avatar}</div>
-          <div>
-            <p class="mb-1"><span class="fw-semibold text-dark">${act.user}</span> ${act.action}</p>
-            <span class="text-muted" style="font-size: 0.75rem;">${act.time}</span>
-          </div>
-        </div>
-      `;
-    });
-    $container.html(html);
-  }
-
-  // --- HTML Generator for Submissions ---
-  function renderSubmissionsList(submissions, containerSelector) {
-    const $container = $(containerSelector);
-    const noSubmissionsStr = '{{ __("admin.no_submissions") ?? "No submissions yet." }}';
-
-    if (!submissions || submissions.length === 0) {
-      $container.html(`<p class="text-muted text-center py-4 mb-0">${noSubmissionsStr}</p>`);
-      return;
-    }
-
-    const EXT_ICON = {
-      pdf:  'ti-file-type-pdf text-danger',
-      doc:  'ti-file-type-doc text-primary',
-      docx: 'ti-file-type-doc text-primary',
-      xls:  'ti-file-type-xls text-success',
-      xlsx: 'ti-file-type-xls text-success',
-      png:  'ti-photo text-info',
-      jpg:  'ti-photo text-info',
-      jpeg: 'ti-photo text-info',
-      gif:  'ti-photo text-info',
-    };
-
-    function fileIcon(name) {
-      const ext = (name || '').split('.').pop().toLowerCase();
-      return EXT_ICON[ext] || 'ti-file text-secondary';
-    }
-
-    let html = '';
-    submissions.forEach(sub => {
-      const ri = (sub.user || 'U').substring(0, 2).toUpperCase();
-      const avatar = buildAvatar(sub.user, sub.img_url, sub.user_id);
-
-      const files = sub.files || [];
-      const filesHtml = files.length
-        ? files.map(f => `
-            <a href="${f.url}" target="_blank" class="d-flex align-items-center gap-2 border rounded p-2 bg-body text-body text-decoration-none mb-1">
-              <i class="ti ${fileIcon(f.name)} ti-sm flex-shrink-0"></i>
-              <span class="text-truncate small">${f.name}</span>
-              <i class="ti ti-download ti-xs ms-auto text-muted flex-shrink-0"></i>
-            </a>`).join('')
-        : `<span class="text-muted small">{{ __('admin.no_attachments') ?? 'No files.' }}</span>`;
-
-      html += `
-        <div class="mb-4 pb-3 border-bottom">
-          <div class="d-flex align-items-center gap-2 mb-2">
-            ${avatar}
-            <div>
-              <span class="fw-semibold text-dark d-block">${sub.user || ''}</span>
-              <span class="text-muted" style="font-size:0.7rem;">${sub.time || ''}</span>
-            </div>
-          </div>
-          ${sub.note ? `<p class="small text-muted mb-2">${sub.note}</p>` : ''}
-          <div>${filesHtml}</div>
-        </div>`;
-    });
-
-    $container.html(html);
-  }
-
-  // --- HTML Generator for Feedback ---
-  function renderFeedbackList(feedbacks, containerSelector) {
-    const $container = $(containerSelector);
-    const noFeedbackStr = '{{ __("admin.no_feedback") }}';
-
-    if (!feedbacks || feedbacks.length === 0) {
-      $container.html(`<p class="text-muted text-center py-4 mb-0">${noFeedbackStr}</p>`);
-      return;
-    }
-
-    const RATING_COLORS = ['', 'danger', 'danger', 'warning', 'info', 'success'];
-
-    let html = '';
-    feedbacks.forEach(fb => {
-      const ri = (fb.user || 'U').substring(0, 2).toUpperCase();
-      const avatar = buildAvatar(fb.user, fb.img_url, fb.user_id);
-
-      const rating = parseInt(fb.rating) || 0;
-      const stars = Array.from({ length: 5 }, (_, i) =>
-        `<i class="ti ti-star${i < rating ? '-filled text-warning' : ' text-muted'}" style="font-size:0.85rem;"></i>`
-      ).join('');
-
-      html += `
-        <div class="d-flex align-items-start gap-3 mb-3 pb-3 border-bottom">
-          <div class="flex-shrink-0 mt-1">${avatar}</div>
-          <div class="flex-grow-1">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-              <span class="fw-semibold text-dark">${fb.user || ''}</span>
-              <span class="text-muted" style="font-size:0.7rem;">${fb.time || ''}</span>
-            </div>
-            <div class="mb-1">${stars}</div>
-            ${fb.text ? `<div class="small text-body bg-lighter rounded p-2">${fb.text}</div>` : ''}
-          </div>
-        </div>`;
-    });
-    $container.html(html);
-  }
-
-  // --- HTML Generator for Comments ---
-  function renderCommentsList(comments, containerSelector) {
-    const $container = $(containerSelector);
-    if (!comments || comments.length === 0) {
-      $container.html(`<p class="text-muted text-center py-4 mb-0">${noCommentsStr}</p>`);
-      return;
-    }
-    
-    let html = '';
-    comments.forEach(c => {
-      const ri = (c.user || 'U').substring(0, 2).toUpperCase();
-      const avatar = buildAvatar(c.user, c.img_url, c.user_id);
-      
-      html += `
-        <div class="d-flex align-items-start gap-3 mb-3">
-          <div class="flex-shrink-0 mt-1">${avatar}</div>
-          <div class="flex-grow-1 bg-lighter rounded p-3">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-              <span class="fw-semibold text-dark">${c.user}</span>
-              <span class="text-muted" style="font-size: 0.7rem;">${c.time}</span>
-            </div>
-            <div class="ql-editor p-0 small text-body" style="min-height:auto;">${c.text}</div>
-          </div>
-        </div>
-      `;
-    });
-    $container.html(html);
-  }
-
-  // --- Initialize Plugins ---
-  const addDescQ = new Quill('#add-desc-editor', { theme: 'snow', modules: { toolbar: '#add-desc-toolbar' } });
-  const etDescQ  = new Quill('#et-desc-editor',  { theme: 'snow', modules: { toolbar: '#et-desc-toolbar' } });
+  // Plugins
+  const addDescQ   = new Quill('#add-desc-editor',   { theme: 'snow', modules: { toolbar: '#add-desc-toolbar' } });
+  const etDescQ    = new Quill('#et-desc-editor',    { theme: 'snow', modules: { toolbar: '#et-desc-toolbar' } });
   const vtCommentQ = new Quill('#vt-comment-editor', { theme: 'snow', modules: { toolbar: '#vt-comment-toolbar' } });
 
   $('#add-due-date, #et-due-date').flatpickr({ dateFormat: 'Y-m-d' });
   $('#add-priority, #add-status').select2({ dropdownParent: $('#addTaskOffcanvas') });
   $('#et-priority, #et-status').select2({ dropdownParent: $('#editTaskOffcanvas') });
 
-  // --- Drag & Drop ---
-  $('.kanban-drag').each(function () {
-    new Sortable(this, {
-      group: 'kanban-boards',
-      animation: 150,
-      ghostClass: 'sortable-ghost',
-      onEnd: function (evt) {
-        if (evt.from === evt.to) return;
-
-        const taskId = $(evt.item).data('task-id');
-        const newStatus = $(evt.to).closest('.kanban-board').data('board');
-        const oldStatus = $(evt.from).closest('.kanban-board').data('board');
-
-        // Update tasks array
-        const task = tasks.find(t => t.id === taskId);
-        if (task) task.status = newStatus;
-
-        $(evt.to).find('[data-empty-board]').remove();
-        if ($(evt.from).find('.kanban-item:not(.d-none)').length === 0) {
-          $(evt.from).append('<p class="text-muted small text-center py-3 m-0" data-empty-board>@lang("admin.No_Tasks")</p>');
-        }
-
-        $('.kanban-board').each(function () {
-          $(this).find('.board-count').text($(this).find('.kanban-item:not(.d-none)').length);
-        });
-
-        $.ajax({
-          url: '{{ route("tasks.move", ["taskId" => ":id", "status" => ":status"]) }}'
-            .replace(':id', taskId)
-            .replace(':status', newStatus),
-          type: 'PATCH',
-          contentType: 'application/json',
-          data: JSON.stringify({ status: newStatus }),
-          error: function () {
-            // Revert: move card back and restore tasks array
-            if (task) task.status = oldStatus;
-            $(evt.from).append(evt.item);
-            $(evt.to).find('[data-empty-board]').remove();
-            if ($(evt.to).find('.kanban-item:not(.d-none)').length === 0) {
-              $(evt.to).append('<p class="text-muted small text-center py-3 m-0" data-empty-board>@lang("admin.No_Tasks")</p>');
-            }
-            $('.kanban-board').each(function () {
-              $(this).find('.board-count').text($(this).find('.kanban-item:not(.d-none)').length);
-            });
-            toastr.error('{{ __("admin.move_task_failed") }}');
-          }
-        });
-      }
-    });
-  });
-
-  // --- Form Validation Config ---
+  // Form validation
   const fvConfig = {
     fields: {
-      title: { validators: { notEmpty: { message: '{{ __("admin.Required_Field") }}' } } },
-      priority: { validators: { notEmpty: { message: '{{ __("admin.Required_Field") }}' } } },
-      status: { validators: { notEmpty: { message: '{{ __("admin.Required_Field") }}' } } }
+      title:    { validators: { notEmpty: { message: @json(__('admin.Required_Field')) } } },
+      priority: { validators: { notEmpty: { message: @json(__('admin.Required_Field')) } } },
+      status:   { validators: { notEmpty: { message: @json(__('admin.Required_Field')) } } },
     },
     plugins: {
-      trigger: new FormValidation.plugins.Trigger(),
-      bootstrap5: new FormValidation.plugins.Bootstrap5({ rowSelector: '.mb-3, .col-6' })
-    }
+      trigger:    new FormValidation.plugins.Trigger(),
+      bootstrap5: new FormValidation.plugins.Bootstrap5({ rowSelector: '.mb-3, .col-6' }),
+    },
   };
-
   const addFv = FormValidation.formValidation(document.getElementById('addTaskForm'), fvConfig);
   const etFv  = FormValidation.formValidation(document.getElementById('editTaskForm'), fvConfig);
 
-  $('#add-priority').on('change', () => addFv.revalidateField('priority'));
-  $('#add-status').on('change', () => addFv.revalidateField('status'));
-  $('#et-priority').on('change', () => etFv.revalidateField('priority'));
-  $('#et-status').on('change', () => etFv.revalidateField('status'));
-
-  $('#add-attachments').on('change', function() { validateFiles($(this), '#add-file-error'); });
-  $('#et-attachments').on('change', function() { validateFiles($(this), '#et-file-error'); });
-  $('#vt-new-attachment').on('change', function() { validateFiles($(this), '#vt-upload-error'); });
-
-
-  // --- DELETE ATTACHMENT (Shared) ---
-  $(document).on('click', '.delete-attachment-btn', function () {
-    const $btn = $(this);
-    const taskId = $btn.data('task-id');
-    const attachmentId = $btn.data('attachment-id');
-
-    releaseWarningAlert({
-      title: '{{ __("admin.delete_attachment") }}?',
-      message: '{{ __("admin.Recover") }}',
-      confirmText: '{{ __("admin.DYes") }}',
-      cancelText: '{{ __("admin.DNo") }}',
-      confirmColor: 'danger',
-      onConfirm: () => {
-        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
-  
-        $.ajax({
-          url: '{{ route("tasks.delete_attachment", ["taskId" => ":taskId", "filename" => ":filename"]) }}'.replace(':taskId', taskId).replace(':filename', attachmentId),
-          type: 'DELETE',
-          success: function() {
-            $(`#att-row-${attachmentId}`).fadeOut(300, function() {
-              $(this).remove();
-              toastr.success('{{ __("admin.attachment_deleted_success") }}');
-
-              // Sync tasks array
-              const task = tasks.find(t => t.id == taskId);
-              if (task && task.attachments) {
-                task.attachments = task.attachments.filter(a => a.id != attachmentId);
-              }
-
-              if ($('#vt-attachments-list .attachment-item').length === 0) {
-                $('#vt-attachments-list').html('<span class="text-muted small">@lang("admin.no_attachments")</span>');
-              }
-              if ($('#et-current-attachments-list .attachment-item').length === 0) {
-                $('#et-current-attachments-wrapper').addClass('d-none');
-              }
-            });
-          },
-          error: function() {
-            toastr.error('{{ __("admin.delete_failed") }}');
-            $btn.prop('disabled', false).html('<i class="ti ti-trash ti-xs"></i>');
-          }
-        });
-      }
+  // Bind change event listeners compactly
+  ['add', 'et'].forEach(prefix => {
+    [`#${prefix}-priority`, `#${prefix}-status`].forEach(sel => {
+      const field = sel.split('-')[1];
+      const fv = prefix === 'add' ? addFv : etFv;
+      $(sel).on('change', () => fv.revalidateField(field));
     });
-  });
-
-  // --- ADD ATTACHMENT (Directly from View Drawer) ---
-  $('#vt-upload-btn').on('click', function () {
-    const $fileInput = $('#vt-new-attachment');
-    if ($fileInput[0].files.length === 0) return;
-    if (!validateFiles($fileInput, '#vt-upload-error')) return;
-
-    const taskId = $(this).data('task-id');
-    const $btn = $(this);
-
-    let formData = new FormData();
-    formData.append('attachment', $fileInput[0].files[0]);
-
-    $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
-
-    $.ajax({
-      url: '{{ route("tasks.upload_attachment", ":taskId") }}'.replace(':taskId', taskId),
-      type: 'POST',
-      data: formData,
-      processData: false,
-      contentType: false,
-      success: function(response) {
-        toastr.success('{{ __("admin.attachment_uploaded_success") }}');
-        const newAtt = response.attachment || { id: Date.now(), name: $fileInput[0].files[0].name, url: '#' };
-
-        // Sync tasks array
-        const task = tasks.find(t => t.id == taskId);
-        if (task) {
-          if (!task.attachments) task.attachments = [];
-          task.attachments.push(newAtt);
-        }
-        
-        if ($('#vt-attachments-list').text().trim() === '@lang("admin.no_attachments")' || $('#vt-attachments-list').text().trim() === 'None') {
-          $('#vt-attachments-list').empty();
-        }
-        
-        const html = `
-          <div class="d-flex align-items-center justify-content-between border rounded p-2 bg-lighter attachment-item" id="att-row-${newAtt.id}">
-            <a href="${newAtt.url}" target="_blank" class="text-primary fw-medium text-truncate d-flex align-items-center gap-1" style="max-width: 85%;">
-              <i class="ti ti-paperclip ti-xs flex-shrink-0"></i> <span class="text-truncate">${newAtt.name}</span>
-            </a>
-            <button type="button" class="btn btn-icon btn-sm btn-text-danger rounded-circle delete-attachment-btn" data-task-id="${taskId}" data-attachment-id="${newAtt.id}" title="{{ __('admin.Remove') }}">
-              <i class="ti ti-trash ti-xs"></i>
-            </button>
-          </div>
-        `;
-        $('#vt-attachments-list').append(html);
-        $fileInput.val('');
-        $btn.prop('disabled', false).html('<i class="ti ti-upload ti-xs me-1"></i> {{ __("admin.Upload") }}');
-      },
-      error: function() {
-        toastr.error('{{ __("admin.upload_failed") }}');
-        $btn.prop('disabled', false).html('<i class="ti ti-upload ti-xs me-1"></i> {{ __("admin.Upload") }}');
-      }
-    });
-  });
-
-  // --- ADD TASK POST ---
-  $('#addTaskForm').on('submit', function (e) {
-    e.preventDefault();
-    const $form = $(this);
-    const $btn = $('#add-submit-btn');
-
-    addFv.validate().then(function (status) {
-      if (status !== 'Valid') return;
-      if (!validateFiles($('#add-attachments'), '#add-file-error')) return;
-
-      $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>{{ __("admin.processing") }}');
-
-      let formData = new FormData($form[0]);
-      formData.append('description', addDescQ.root.innerHTML);
-      formData.append('program_id', program.id);
-
-      $.ajax({
-        url: '{{ route("tasks.store") }}',
-        type: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function(response) { 
-          toastr.success('{{ __("admin.StoredSuccessfully") }}');
-
-          // Build new task object from response or form data
-          const newTask = response.task || {
-            id: response.id || Date.now(),
-            title: $form.find('[name="title"]').val(),
-            description: addDescQ.root.innerHTML,
-            due_date: $form.find('[name="due_date"]').val(),
-            priority: $('#add-priority').val(),
-            status: $('#add-status').val(),
-            creator: response.creator || null,
-            attachments: response.attachments || [],
-            activities: response.activities || [],
-            comments: [],
-          };
-
-          tasks.push(newTask);
-          syncTaskToBoard(newTask, null);
-
-          // Reset form
-          $form[0].reset();
-          addDescQ.setContents([]);
-          $('#add-priority, #add-status').val('').trigger('change');
-          addFv.resetForm(true);
-
-          $('#addTaskOffcanvas').offcanvas('hide');
-          $btn.prop('disabled', false).html('{{ __("admin.Create") }}');
-        },
-        error: function() {
-          toastr.error('{{ __("admin.save_failed") }}');
-          $btn.prop('disabled', false).text('{{ __("admin.Create") }}');
-        }
-      });
-    });
-  });
-
-  // --- VIEW TASK ---
-  $(document).on('click', '.view-task-btn', function () {
-    const taskId = $(this).data('task-id');
-    const taskData = tasks.find(task => task.id === taskId);
-    if(!taskData) return;
-
-    const p = PRIORITY_MAP[taskData.priority];
-    const sLabel = STATUS_MAP[taskData.status];
-
-    $('#vt-title').text(taskData.title);
-    $('#vt-description').html(taskData.description);
-    $('#vt-due-date').text(taskData.due_date || 'N/A');
-    $('#vt-priority').html(`<span class="badge ${p.cls} rounded-pill"><span class="d-inline-block rounded-circle me-1 ${p.dot}" style="width: 6px; height: 6px;"></span>${p.label}</span>`);
-    $('#vt-status').html(`<span class="badge bg-label-secondary rounded-pill">${sLabel}</span>`);
     
-    renderAttachmentsList(taskData.attachments, taskId, '#vt-attachments-list');
-    renderActivitiesList(taskData.activities, '#vt-activities-list');
-    renderCommentsList(taskData.comments, '#vt-comments-list');
-    renderFeedbackList(taskData.feedbacks || [], '#vt-feedback-list');
-    renderSubmissionsList(taskData.submissions || [], '#vt-submissions-list');
-    $('#vt-comment-count').text(taskData.comments ? taskData.comments.length : 0);
-    $('#vt-feedback-count').text(taskData.feedbacks ? taskData.feedbacks.length : 0);
-    $('#vt-submissions-count').text(taskData.submissions ? taskData.submissions.length : 0);
-
-    $('#vt-edit-trigger-btn').data('task-id', taskId);
-    $('#vt-upload-btn').data('task-id', taskId);
-    $('#vt-send-comment-btn').data('task-id', taskId);
-    $('#vt-new-attachment').val(''); 
-    vtCommentQ.setContents([]); 
-
-    // Reset tabs to show details first
-    const viewTabs = new bootstrap.Tab(document.querySelector('#viewTaskOffcanvas .nav-tabs .nav-link'));
-    viewTabs.show();
-
-    bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('viewTaskOffcanvas')).show();
-  });
-
-  $('#vt-edit-trigger-btn').on('click', function() {
-    const taskId = $(this).data('task-id');
-    bootstrap.Offcanvas.getInstance(document.getElementById('viewTaskOffcanvas')).hide();
-    setTimeout(() => { $(`.edit-task-btn[data-task-id="${taskId}"]`).trigger('click'); }, 350);
-  });
-
-  // --- ADD COMMENT (View Task) ---
-  $('#vt-send-comment-btn').on('click', function() {
-    const taskId = $(this).data('task-id');
-    const commentHtml = vtCommentQ.root.innerHTML;
-    const plainText = vtCommentQ.getText().trim();
-    
-    if (!plainText) return;
-
-    const $btn = $(this);
-    $btn.prop('disabled', true).text('...');
-
-    $.ajax({
-      url: '{{ route("tasks.add_comment", ":id") }}'.replace(':id', taskId),
-      type: 'POST',
-      data: JSON.stringify({ comment: commentHtml }),
-      contentType: 'application/json',
-      success: function(response) {
-        toastr.success('{{ __("admin.comment_success") }}');
-        
-        const newComment = response.comment || { 
-          user: 'You', 
-          time: 'Just now', 
-          text: commentHtml, 
-          img_url: null 
-        };
-
-        if ($('#vt-comments-list').text().trim() === noCommentsStr) {
-          $('#vt-comments-list').empty();
-        }
-
-        const ri = (newComment.user || 'U').substring(0, 2).toUpperCase();
-        const avatar = buildAvatar(newComment.user, newComment.img_url, newComment.user_id);
-
-        const html = `
-          <div class="d-flex align-items-start gap-3 mb-3">
-            <div class="flex-shrink-0 mt-1">${avatar}</div>
-            <div class="flex-grow-1 bg-lighter rounded p-3">
-              <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="fw-semibold text-dark">${newComment.user}</span>
-                <span class="text-muted" style="font-size: 0.7rem;">${newComment.time}</span>
-              </div>
-              <div class="ql-editor p-0 small text-body" style="min-height:auto;">${newComment.text}</div>
-            </div>
-          </div>
-        `;
-        
-        $('#vt-comments-list').append(html);
-
-        let count = parseInt($('#vt-comment-count').text()) || 0;
-        $('#vt-comment-count').text(count + 1);
-
-        // Sync tasks array
-        const task = tasks.find(t => t.id == taskId);
-        if (task) {
-          if (!task.comments) task.comments = [];
-          task.comments.push(newComment);
-        }
-
-        vtCommentQ.setContents([]);
-        $btn.prop('disabled', false).text('{{ __("admin.send") }}');
-      },
-      error: function() {
-        toastr.error('{{ __("admin.comment_failed") }}');
-        $btn.prop('disabled', false).text('{{ __("admin.send") }}');
-      }
+    $(`#${prefix}-attachments`).on('change', function () {
+      validateFiles($(this), `#${prefix}-file-error`);
     });
   });
 
-  // --- SUBMIT FEEDBACK ---
-  $('#vt-submit-feedback-btn').on('click', function () {
-    const taskId = $('#vt-send-comment-btn').data('task-id');
-    const decision = $('input[name="vt_feedback_decision"]:checked').val();
-    const note = $('#vt-fb-note').val().trim();
-
-    if (!decision) {
-      toastr.warning('{{ __("admin.Required_Field") }}');
-      return;
-    }
-
-    const $btn = $(this);
-    $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>');
-
-    $.ajax({
-      url: '{{ route("tasks.add_feedback", ":id") }}'.replace(':id', taskId),
-      type: 'POST',
-      contentType: 'application/json',
-      data: JSON.stringify({ decision, note }),
-      success: function (response) {
-        toastr.success('{{ __("admin.feedback_success") ?? "Feedback submitted." }}');
-
-        const newFeedback = response.feedback || {
-          user: '{{ auth()->user()->name ?? "You" }}',
-          img_url: null,
-          time: '{{ __("admin.Just_Now") ?? "Just now" }}',
-          rating: decision === 'pass' ? 5 : 2,
-          text: note,
-          decision,
-        };
-
-        // Sync tasks array
-        const task = tasks.find(t => t.id == taskId);
-        if (task) {
-          if (!task.feedbacks) task.feedbacks = [];
-          task.feedbacks.push(newFeedback);
-          $('#vt-feedback-count').text(task.feedbacks.length);
-        }
-
-        // Prepend to list
-        const $list = $('#vt-feedback-list');
-        if ($list.find('p.text-muted').length) $list.empty();
-
-        const ri = (newFeedback.user || 'U').substring(0, 2).toUpperCase();
-        const avatar = buildAvatar(newFeedback.user, newFeedback.img_url, newFeedback.user_id);
-
-        const decisionBadge = decision === 'pass'
-          ? `<span class="badge bg-label-success ms-2"><i class="ti ti-circle-check ti-xs me-1"></i>{{ __("admin.Pass_Task") ?? "Pass Task" }}</span>`
-          : `<span class="badge bg-label-warning ms-2"><i class="ti ti-refresh ti-xs me-1"></i>{{ __("admin.Needs_Revision") ?? "Needs Revision" }}</span>`;
-
-        const html = `
-          <div class="d-flex align-items-start gap-3 mb-3 pb-3 border-bottom">
-            <div class="flex-shrink-0 mt-1">${avatar}</div>
-            <div class="flex-grow-1">
-              <div class="d-flex justify-content-between align-items-center mb-1 flex-wrap gap-1">
-                <span class="fw-semibold text-dark">${newFeedback.user}${decisionBadge}</span>
-                <span class="text-muted" style="font-size:0.7rem;">${newFeedback.time}</span>
-              </div>
-              ${note ? `<div class="small text-body bg-lighter rounded p-2">${note}</div>` : ''}
-            </div>
-          </div>`;
-
-        $list.prepend(html);
-
-        // Reset form
-        $('#vt-fb-note').val('');
-        $('input[name="vt_feedback_decision"][value="pass"]').prop('checked', true);
-        $('#vt-fb-pass-wrapper').addClass('checked');
-        $('#vt-fb-revision-wrapper').removeClass('checked');
-
-        $btn.prop('disabled', false).html('<i class="ti ti-send ti-xs me-1"></i> {{ __("admin.submit_feedback") }}');
-      },
-      error: function () {
-        toastr.error('{{ __("admin.feedback_failed") ?? "Failed to submit feedback." }}');
-        $btn.prop('disabled', false).html('<i class="ti ti-send ti-xs me-1"></i> {{ __("admin.submit_feedback") }}');
-      }
-    });
-  });
-
-  // Toggle .checked class on custom radio options
-  $(document).on('change', 'input[name="vt_feedback_decision"]', function () {
-    $('input[name="vt_feedback_decision"]').each(function () {
-      $(this).closest('.custom-option').toggleClass('checked', $(this).is(':checked'));
-    });
-  });
-
-  // --- ARCHIVE TASK ---
-  $(document).on('click', '.archive-task-btn', function () {
-    const taskId = $(this).data('task-id');
-    const task = tasks.find(t => t.id === taskId);
-    if (!task) return;
-
-    const isArchived  = task.status === 'archived';
-    const newStatus   = isArchived ? 'pending' : 'archived';
-    const actionLabel = isArchived ? '{{ __("admin.reopen_task") }}' : '{{ __("admin.archive_task") }}';
-    const bodyText    = isArchived ? '{{ __("admin.reopen_task_confirm") }}' : '{{ __("admin.archive_task_confirm") }}';
-
-    releaseWarningAlert({
-      title: actionLabel + '?',
-      message: bodyText,
-      confirmText: '{{ __("admin.DYes") }}',
-      cancelText: '{{ __("admin.DNo") }}',
-      confirmColor: isArchived ? 'warning' : 'secondary',
-      onConfirm: () => {
-        $.ajax({
-          url: '{{ route("tasks.move", ["taskId" => ":id", "status" => ":status"]) }}'
-            .replace(':id', taskId)
-            .replace(':status', newStatus),
-          type: 'PATCH',
-          contentType: 'application/json',
-          data: JSON.stringify({ status: newStatus }),
-          success: function () {
-            const oldStatus = task.status;
-            task.status = newStatus;
-
-            if (newStatus === 'archived') {
-              // Remove card from board entirely
-              $(`.kanban-item[data-task-id="${taskId}"]`).fadeOut(300, function () {
-                $(this).remove();
-                const $board = $(`.kanban-board[data-board="${oldStatus}"] .kanban-drag`);
-                if ($board.find('.kanban-item:not(.d-none)').length === 0) {
-                  $board.append('<p class="text-muted small text-center py-3 m-0" data-empty-board>{{ __("admin.No_Tasks") }}</p>');
-                }
-                $('.kanban-board').each(function () {
-                  $(this).find('.board-count').text($(this).find('.kanban-item:not(.d-none)').length);
-                });
-              });
-            } else {
-              syncTaskToBoard(task, oldStatus);
-            }
-
-            toastr.success(isArchived ? '{{ __("admin.task_reopened") }}' : '{{ __("admin.task_archived") }}');
-          },
-          error: function () {
-            toastr.error('{{ __("admin.update_failed") }}');
-          }
-        });
-      }
-    });
-  });
-
-  // --- EDIT TASK ---
-  $(document).on('click', '.edit-task-btn', function () {
-    const taskId = $(this).data('task-id');
-    const taskData = tasks.find(task => task.id === taskId);
-    if(!taskData) return;
-
-    $('#et-id').val(taskData.id);
-    $('#et-title').val(taskData.title);
-    $('#et-due-date').val(taskData.due_date);
-    etDescQ.root.innerHTML = taskData.description;
-    $('#et-priority').val(taskData.priority).trigger('change');
-    $('#et-status').val(taskData.status).trigger('change');
-    
-    $('#et-attachments').val('').removeClass('is-invalid');
-    $('#et-file-error').text('');
-
-    if (taskData.attachments && taskData.attachments.length > 0) {
-      $('#et-current-attachments-wrapper').removeClass('d-none');
-      renderAttachmentsList(taskData.attachments, taskId, '#et-current-attachments-list');
-    } else {
-      $('#et-current-attachments-wrapper').addClass('d-none');
-    }
-
-    bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('editTaskOffcanvas')).show();
-  });
-
-  $('#editTaskForm').on('submit', function (e) {
-    e.preventDefault();
-    const $form = $(this);
-    const $btn = $('#et-submit-btn');
-
-    etFv.validate().then(function (status) {
-      if (status !== 'Valid') return;
-      if (!validateFiles($('#et-attachments'), '#et-file-error')) return;
-
-      const taskId = $('#et-id').val();
-      $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>{{ __("admin.processing") }}');
-
-      let formData = new FormData($form[0]);
-      formData.append('description', etDescQ.root.innerHTML);
-
-      $.ajax({
-        url: '{{ route("tasks.update", ":id") }}'.replace(':id', taskId),
-        type: 'POST', // Sent as POST because of _method=PUT hidden field
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function(response) { 
-          toastr.success('{{ __("admin.StoredSuccessfully") }}');
-
-          const idx = tasks.findIndex(t => t.id == taskId);
-          if (idx !== -1) {
-            const oldStatus = tasks[idx].status;
-            const updatedTask = response.task || {
-              ...tasks[idx],
-              title: $('#et-title').val(),
-              description: etDescQ.root.innerHTML,
-              due_date: $('#et-due-date').val(),
-              priority: $('#et-priority').val(),
-              status: $('#et-status').val(),
-              attachments: response.attachments || tasks[idx].attachments,
-            };
-            tasks[idx] = updatedTask;
-            syncTaskToBoard(updatedTask, oldStatus);
-          }
-
-          $('#editTaskOffcanvas').offcanvas('hide');
-          $btn.prop('disabled', false).html('{{ __("admin.Update") }}');
-        },
-        error: function() {
-          toastr.error('{{ __("admin.update_failed") }}');
-          $btn.prop('disabled', false).text('{{ __("admin.Update") }}');
-        }
-      });
-    });
-  });
-
-  // --- LIVE SEARCH ---
-  $('#kanbanSearch').on('input', function () {
-    const q = $(this).val().trim().toLowerCase();
-    $('.kanban-item').each(function () {
-      const show = $(this).data('search-text').includes(q);
-      $(this).toggleClass('d-none', !show);
-    });
-    // Update badge counts after filtering
-    $('.kanban-board').each(function () {
-      $(this).find('.board-count').text($(this).find('.kanban-item:not(.d-none)').length);
-    });
-  });
-
+  // Init modules
+  initKanbanDragDrop(tasks);
+  initKanbanSearch();
+  initDropzone(tasks);
+  initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, etFv);
 });
 </script>
 @stop

@@ -3701,4 +3701,11 @@ return [
 	'feedback_decision' => 'Feedback Decision',
 	'feedback_added_success' => 'Feedback added successfully',
 	'feedback_failed' => 'Failed to add feedback',
+	'upload_attachments' => 'Upload Attachments',
+	'dropzone' => 'Drop files here or click to browse',
+	'max_5_files' => 'Maximum 5 Files',
+	'upload_all' => 'Upload All',
+	'provided_resources' => 'Provided Resources',
+	'task_archived' => 'Task Archived Successfully',
+	'task_reopened' => 'Task Reopened Successfully',
 ];
