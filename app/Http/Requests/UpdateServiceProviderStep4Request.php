@@ -102,6 +102,7 @@ class UpdateServiceProviderStep4Request extends FormRequest
     public function messages()
     {
         return [
+            'portfolio.*.id.exists' => __('admin.invalid_work_item') ?? 'This work item is invalid or no longer exists.',
             'portfolio.*.title.required_with' => __('admin.complete_work_item_details') ?? 'Complete the work item details.',
             'portfolio.*.description.required_with' => __('admin.complete_work_item_details') ?? 'Complete the work item details.',
             'portfolio.*.media.required_with' => __('admin.complete_work_item_details') ?? 'Complete the work item details.',

@@ -606,6 +606,7 @@
       FormValidation3.validate();
     }
     else if (idx === 3) {
+      clearPortfolioErrors();
       if (!FormValidation4) buildStep4Validation();
       FormValidation4.validate();
     }
@@ -714,6 +715,76 @@
 
   window.rebuildPortfolioValidation = buildStep4Validation;
 
+  function clearPortfolioErrors() {
+    $('.work-item-card .server-error').remove();
+    $('.work-item-card').removeClass('border-danger');
+  }
+
+  function displayPortfolioErrors(errors) {
+    clearPortfolioErrors();
+
+    const fieldLabels = {
+      id: lang === 'ar' ? 'العنصر' : 'Item',
+      media: lang === 'ar' ? 'الملف' : 'Media',
+      title: lang === 'ar' ? 'العنوان' : 'Title',
+      description: lang === 'ar' ? 'الوصف' : 'Description',
+    };
+
+    // Group errors by portfolio index: portfolio.0.title -> index 0
+    const grouped = {};
+    for (const [key, messages] of Object.entries(errors)) {
+      const match = key.match(/^portfolio\.(\d+)\.(\w+)$/);
+      if (!match) continue;
+      const idx = parseInt(match[1], 10);
+      const field = match[2];
+      if (!grouped[idx]) grouped[idx] = [];
+      grouped[idx].push({ field, messages });
+    }
+
+    const $cards = $('.work-item-card');
+    let firstErrorCard = null;
+
+    for (const [idx, fieldErrors] of Object.entries(grouped)) {
+      const $card = $cards.eq(parseInt(idx, 10));
+      if (!$card.length) continue;
+
+      $card.addClass('border-danger');
+      if (!firstErrorCard) firstErrorCard = $card;
+
+      for (const { field, messages } of fieldErrors) {
+        const label = fieldLabels[field] || field;
+        const $target = field === 'media'
+          ? $card.find('.file-error')
+          : $card.find(`[name="portfolio[${idx}][${field}]"]`);
+
+        if (field === 'media') {
+          $target.html(messages.join('<br>')).removeClass('d-none');
+        } else {
+          const errorHtml = messages
+            .map(m => `<div class="server-error text-danger small mt-1">${m}</div>`)
+            .join('');
+          $target.after(errorHtml);
+        }
+      }
+    }
+
+    // Handle non-portfolio errors (e.g. portfolio_visibility, portfolio_description)
+    const nonPortfolioErrors = Object.entries(errors)
+      .filter(([key]) => !key.match(/^portfolio\.\d+\./))
+      .flatMap(([, msgs]) => msgs);
+
+    if (nonPortfolioErrors.length) {
+      releaseFailureAlert({
+        title: lang === 'ar' ? 'خطأ!' : 'Error!',
+        message: nonPortfolioErrors.join('\n'),
+      });
+    }
+
+    if (firstErrorCard) {
+      firstErrorCard[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
   function saveStepData(stepIndex, formValidationInstance) {
     console.log('Step', stepIndex + 1, 'save triggered');
     const route = wizardForm.getAttribute(`data-route-step-${stepIndex + 1}`);
@@ -740,12 +811,18 @@
         }
       },
       error(xhr) {
-        releaseFailureAlert({
-          title: lang === 'ar' ? 'خطأ!' : 'Error!',
-          message: xhr.responseJSON?.message || (lang === 'ar' ? 'حدث خطأ أثناء الحفظ' : 'An error occurred while saving'),
-        });
         nextBtn.disabled = false;
         $span.text(origText);
+
+        const errors = xhr.responseJSON?.errors;
+        if (errors && stepIndex === 3) {
+          displayPortfolioErrors(errors);
+        } else {
+          releaseFailureAlert({
+            title: lang === 'ar' ? 'خطأ!' : 'Error!',
+            message: xhr.responseJSON?.message || (lang === 'ar' ? 'حدث خطأ أثناء الحفظ' : 'An error occurred while saving'),
+          });
+        }
       }
     });
   }
@@ -773,9 +850,5 @@
     attachRealTimeListeners();
     syncStepUnlockState();
   });
-
-  window.rebuildPortfolioValidation = function () {
-    // implementation of portfolio validation rebuild
-  };
 
 })();

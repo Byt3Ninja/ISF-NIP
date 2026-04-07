@@ -3559,6 +3559,7 @@ return [
 	'no_service_requests_yet' => 'لا توجد طلبات خدمات حتى الآن.',
 	'request_a_service' => 'طلب خدمة',
 	'Hidden' => 'مخفي',
+	'invalid_work_item' => 'عنصر العمل هذا غير صالح أو لم يعد موجوداً.',
 	'complete_work_item_details' => 'أكمل تفاصيل عنصر العمل.',
 	'unsupported_file_type_portfolio' => 'نوع ملف غير مدعوم. قم بتحميل PNG، JPG، WEBP، او فيديو MP4.',
 	'file_size_too_large_portfolio' => 'حجم الملف يجب ان يكون 10MB او اقل.',

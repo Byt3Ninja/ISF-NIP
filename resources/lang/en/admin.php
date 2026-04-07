@@ -3502,6 +3502,7 @@ return [
 	'no_service_requests_yet' => 'No service requests yet.',
 	'request_a_service' => 'Request a Service',
 	'Hidden' => 'Hidden',
+	'invalid_work_item' => 'This work item is invalid or no longer exists.',
 	'complete_work_item_details' => 'Complete the work item details.',
 	'unsupported_file_type_portfolio' => 'Unsupported file type. Upload PNG, JPG, WEBP, or MP4.',
 	'file_size_too_large_portfolio' => 'File size must be 10MB or less.',
