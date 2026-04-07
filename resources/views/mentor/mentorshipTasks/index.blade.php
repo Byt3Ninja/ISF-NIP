@@ -36,6 +36,18 @@ $tasks = [
     'feedbacks' => [
       ['id' => 1, 'user' => 'Bob Smith', 'text' => '<p>We need to prioritize the typography tokens.</p>', 'time' => 'Today 10:00 AM', 'img_url' => '/vuexy/assets/img/avatars/2.png']
     ],
+    'submissions' => [
+      [
+        'user'    => 'Bob Smith',
+        'img_url' => '/vuexy/assets/img/avatars/2.png',
+        'time'    => 'Today 11:00 AM',
+        'note'    => 'First draft submission.',
+        'files'   => [
+          ['name' => 'audit_v1.pdf',    'url' => '/storage/docs/audit_v1.pdf'],
+          ['name' => 'screenshot.png',  'url' => '/storage/images/screenshot.png'],
+        ],
+      ],
+    ],
   ],
 ];
 
@@ -130,7 +142,9 @@ $priorityConfig = [
                     </span>
                     <div class="d-flex align-items-center gap-1">
                       <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle view-task-btn" type="button" data-task-id="{{ $task['id'] }}" title="{{ __('admin.View') }}"><i class="ti ti-eye ti-md text-dark"></i></button>
+                      @if ($_user->ableTo('tasks.update', $permissions))
                       <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle edit-task-btn" type="button" data-task-id="{{ $task['id'] }}" title="{{ __('admin.Edit') }}"><i class="ti ti-edit ti-md text-dark"></i></button>
+                      @endif
                       <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle archive-task-btn" type="button" data-task-id="{{ $task['id'] }}" title="{{ __('admin.archive_task') }}"><i class="ti ti-archive ti-md text-dark"></i></button>
                     </div>
                   </div>
@@ -182,12 +196,14 @@ $priorityConfig = [
           <li class="nav-item">
             <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#vt-details" role="tab"><i class="ti ti-info-circle ti-xs me-1"></i> {{ __('admin.Details') ?? 'Details' }}</button>
           </li>
+          @role('Registered')
           <li class="nav-item">
             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#vt-feedback" role="tab">
               <i class="ti ti-star ti-xs me-1"></i> {{ __('admin.feedback') }}
               <span class="badge badge-center bg-label-primary rounded-pill ms-1" id="vt-feedback-count">0</span>
             </button>
           </li>
+          @endrole
           <li class="nav-item">
             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#vt-comments" role="tab">
               <i class="ti ti-message ti-xs me-1"></i> {{ __('admin.Comments') }} 
@@ -197,6 +213,14 @@ $priorityConfig = [
           <li class="nav-item">
             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#vt-activity" role="tab"><i class="ti ti-activity ti-xs me-1"></i> {{ __('admin.Activity') ?? 'Activity' }}</button>
           </li>
+          @role('Mentor')
+          <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#vt-submissions" role="tab">
+              <i class="ti ti-paperclip ti-xs me-1"></i> {{ __('admin.Submissions') ?? 'Submissions' }}
+              <span class="badge badge-center bg-label-info rounded-pill ms-1" id="vt-submissions-count">0</span>
+            </button>
+          </li>
+          @endrole
         </ul>
 
         <div class="tab-content p-0 flex-grow-1 overflow-auto">
@@ -272,12 +296,19 @@ $priorityConfig = [
             <div id="vt-activities-list" class="small pe-2"></div>
           </div>
 
+          {{-- SUBMISSIONS TAB --}}
+          <div class="tab-pane fade" id="vt-submissions" role="tabpanel">
+            <div id="vt-submissions-list" class="small pe-2"></div>
+          </div>
+
         </div>
 
         <div class="d-flex gap-2 pt-3 border-top mt-3">
+          @if ($_user->ableTo('tasks.update', $permissions))
           <button type="button" class="btn btn-outline-primary" id="vt-edit-trigger-btn">
             <i class="ti ti-edit ti-xs me-1"></i> {{ __('admin.Edit_Task') }}
           </button>
+          @endif
           <button type="button" class="btn btn-label-secondary" data-bs-dismiss="offcanvas">{{ __('admin.Close') }}</button>
         </div>
       </div>
@@ -431,6 +462,8 @@ $priorityConfig = [
 $(document).ready(function () {
   'use strict';
 
+  const isAbleToEdit = '{{ $_user->ableTo('tasks.store', $permissions) }}' === '1' ;
+
   const PRIORITY_MAP = {
     Low:    { label: '{{ __("admin.Low") }}',    cls: 'bg-label-secondary', dot: 'bg-secondary' },
     Medium: { label: '{{ __("admin.Medium") }}', cls: 'bg-label-info',      dot: 'bg-info' },
@@ -502,7 +535,10 @@ $(document).ready(function () {
             </span>
             <div class="d-flex align-items-center gap-1">
               <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle view-task-btn" type="button" data-task-id="${task.id}" title="{{ __('admin.View') }}"><i class="ti ti-eye ti-md text-dark"></i></button>
-              <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle edit-task-btn" type="button" data-task-id="${task.id}" title="{{ __('admin.Edit') }}"><i class="ti ti-edit ti-md text-dark"></i></button>
+              ${isAbleToEdit 
+                ? `<button class="btn btn-sm btn-icon btn-text-secondary rounded-circle edit-task-btn" type="button" data-task-id="${task.id}" title="{{ __('admin.Edit') }}"><i class="ti ti-edit ti-md text-dark"></i></button>` 
+                : ''
+              }
               <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle archive-task-btn" type="button" data-task-id="${task.id}" title="{{ __('admin.archive_task') }}"><i class="ti ti-archive ti-md text-dark"></i></button>
             </div>
           </div>
@@ -605,6 +641,67 @@ $(document).ready(function () {
         </div>
       `;
     });
+    $container.html(html);
+  }
+
+  // --- HTML Generator for Submissions ---
+  function renderSubmissionsList(submissions, containerSelector) {
+    const $container = $(containerSelector);
+    const noSubmissionsStr = '{{ __("admin.no_submissions") ?? "No submissions yet." }}';
+
+    if (!submissions || submissions.length === 0) {
+      $container.html(`<p class="text-muted text-center py-4 mb-0">${noSubmissionsStr}</p>`);
+      return;
+    }
+
+    const EXT_ICON = {
+      pdf:  'ti-file-type-pdf text-danger',
+      doc:  'ti-file-type-doc text-primary',
+      docx: 'ti-file-type-doc text-primary',
+      xls:  'ti-file-type-xls text-success',
+      xlsx: 'ti-file-type-xls text-success',
+      png:  'ti-photo text-info',
+      jpg:  'ti-photo text-info',
+      jpeg: 'ti-photo text-info',
+      gif:  'ti-photo text-info',
+    };
+
+    function fileIcon(name) {
+      const ext = (name || '').split('.').pop().toLowerCase();
+      return EXT_ICON[ext] || 'ti-file text-secondary';
+    }
+
+    let html = '';
+    submissions.forEach(sub => {
+      const ri = (sub.user || 'U').substring(0, 2).toUpperCase();
+      const avatar = sub.img_url
+        ? `<img src="${sub.img_url}" alt="${sub.user}" class="rounded-circle" style="width:32px;height:32px;object-fit:cover;">`
+        : `<span class="avatar-initial bg-label-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:12px;">${ri}</span>`;
+
+      const files = sub.files || [];
+      const filesHtml = files.length
+        ? files.map(f => `
+            <a href="${f.url}" target="_blank" class="d-flex align-items-center gap-2 border rounded p-2 bg-body text-body text-decoration-none mb-1">
+              <i class="ti ${fileIcon(f.name)} ti-sm flex-shrink-0"></i>
+              <span class="text-truncate small">${f.name}</span>
+              <i class="ti ti-download ti-xs ms-auto text-muted flex-shrink-0"></i>
+            </a>`).join('')
+        : `<span class="text-muted small">{{ __('admin.no_attachments') ?? 'No files.' }}</span>`;
+
+      html += `
+        <div class="mb-4 pb-3 border-bottom">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            ${avatar}
+            <div>
+              <span class="fw-semibold text-dark d-block">${sub.user || ''}</span>
+              <span class="text-muted" style="font-size:0.7rem;">${sub.time || ''}</span>
+            </div>
+          </div>
+          ${sub.note ? `<p class="small text-muted mb-2">${sub.note}</p>` : ''}
+          <div>${filesHtml}</div>
+        </div>`;
+    });
+
     $container.html(html);
   }
 
@@ -945,8 +1042,10 @@ $(document).ready(function () {
     renderActivitiesList(taskData.activities, '#vt-activities-list');
     renderCommentsList(taskData.comments, '#vt-comments-list');
     renderFeedbackList(taskData.feedbacks || [], '#vt-feedback-list');
+    renderSubmissionsList(taskData.submissions || [], '#vt-submissions-list');
     $('#vt-comment-count').text(taskData.comments ? taskData.comments.length : 0);
     $('#vt-feedback-count').text(taskData.feedbacks ? taskData.feedbacks.length : 0);
+    $('#vt-submissions-count').text(taskData.submissions ? taskData.submissions.length : 0);
 
     $('#vt-edit-trigger-btn').data('task-id', taskId);
     $('#vt-upload-btn').data('task-id', taskId);
