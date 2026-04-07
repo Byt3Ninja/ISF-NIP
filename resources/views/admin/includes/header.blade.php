@@ -120,7 +120,7 @@ $menuItems = [
 
     // Companies
     [
-        'label' => __('breadcrumb.startups'),
+        'label' => $_user->hasRole('Mentor') ? __('breadcrumb.startup_hub') : __('breadcrumb.startups'),
         'icon' => 'ti ti-building ti-md me-2 me-lg-4 ti-lg',
         'route' => 'users.view_companies',
         'permission' => 'users.view_companies',
