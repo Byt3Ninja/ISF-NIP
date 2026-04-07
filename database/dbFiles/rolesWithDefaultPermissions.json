@@ -9406,7 +9406,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor"
                 ]
             },
             {
@@ -9416,7 +9418,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor"
                 ]
             },
             {
@@ -9427,6 +9431,19 @@
                 "default_for": [
                     "admin",
                     "organizationmanager"
+                ]
+            },
+            {
+                "name": "tasks.move",
+                "description": "Move task (udpate its status)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor",
+                    "registered"
                 ]
             },
             {
@@ -9446,7 +9463,35 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "tasks.upload_attachment",
+                "description": "Upload task attachment",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor",
+                    "registered"
+                ]
+            },
+            {
+                "name": "tasks.add_comment",
+                "description": "Add Task comment",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor",
+                    "registered"
                 ]
             }
         ]
