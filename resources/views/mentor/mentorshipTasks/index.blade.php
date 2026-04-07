@@ -32,7 +32,10 @@ $tasks = [
     ],
     'comments' => [
       ['id' => 1, 'user' => 'Bob Smith', 'text' => '<p>We need to prioritize the typography tokens.</p>', 'time' => 'Today 10:00 AM', 'img_url' => '/vuexy/assets/img/avatars/2.png']
-    ]
+    ],
+    'feedbacks' => [
+      ['id' => 1, 'user' => 'Bob Smith', 'text' => '<p>We need to prioritize the typography tokens.</p>', 'time' => 'Today 10:00 AM', 'img_url' => '/vuexy/assets/img/avatars/2.png']
+    ],
   ],
 ];
 
@@ -126,8 +129,9 @@ $priorityConfig = [
                       <span class="d-inline-block rounded-circle me-1 {{ $p['dot'] }}" style="width: 6px; height: 6px;"></span>{{ $p['label'] }}
                     </span>
                     <div class="d-flex align-items-center gap-1">
-                      <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle view-task-btn" type="button" data-task-id="{{ $task['id'] }}" title="{{ __('admin.View') }}"><i class="ti ti-eye ti-xs"></i></button>
-                      <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle edit-task-btn" type="button" data-task-id="{{ $task['id'] }}" title="{{ __('admin.Edit') }}"><i class="ti ti-edit ti-xs"></i></button>
+                      <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle view-task-btn" type="button" data-task-id="{{ $task['id'] }}" title="{{ __('admin.View') }}"><i class="ti ti-eye ti-md text-dark"></i></button>
+                      <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle edit-task-btn" type="button" data-task-id="{{ $task['id'] }}" title="{{ __('admin.Edit') }}"><i class="ti ti-edit ti-md text-dark"></i></button>
+                      <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle archive-task-btn" type="button" data-task-id="{{ $task['id'] }}" title="{{ __('admin.archive_task') }}"><i class="ti ti-archive ti-md text-dark"></i></button>
                     </div>
                   </div>
                   <h6 class="mb-1 text-truncate">{{ $task['title'] }}</h6>
@@ -167,7 +171,7 @@ $priorityConfig = [
     </div>
 
     {{-- VIEW TASK OFFCANVAS --}}
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="viewTaskOffcanvas" style="width: 520px;">
+    <div class="offcanvas offcanvas-end w-px-600" tabindex="-1" id="viewTaskOffcanvas">
       <div class="offcanvas-header border-bottom">
         <h5 class="offcanvas-title"><i class="ti ti-eye me-1 text-primary"></i> {{ __('admin.View_Task') }}</h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
@@ -179,13 +183,19 @@ $priorityConfig = [
             <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#vt-details" role="tab"><i class="ti ti-info-circle ti-xs me-1"></i> {{ __('admin.Details') ?? 'Details' }}</button>
           </li>
           <li class="nav-item">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#vt-activity" role="tab"><i class="ti ti-activity ti-xs me-1"></i> {{ __('admin.Activity') ?? 'Activity' }}</button>
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#vt-feedback" role="tab">
+              <i class="ti ti-star ti-xs me-1"></i> {{ __('admin.feedback') }}
+              <span class="badge badge-center bg-label-primary rounded-pill ms-1" id="vt-feedback-count">0</span>
+            </button>
           </li>
           <li class="nav-item">
             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#vt-comments" role="tab">
               <i class="ti ti-message ti-xs me-1"></i> {{ __('admin.Comments') }} 
-              <span class="badge badge-center bg-danger bg-glow rounded-pill ms-1" id="vt-comment-count">0</span>
+              <span class="badge badge-center bg-label-danger bg-glow rounded-pill ms-1" id="vt-comment-count">0</span>
             </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#vt-activity" role="tab"><i class="ti ti-activity ti-xs me-1"></i> {{ __('admin.Activity') ?? 'Activity' }}</button>
           </li>
         </ul>
 
@@ -221,9 +231,10 @@ $priorityConfig = [
 
               {{-- Add Attachment Directly from View Drawer --}}
               <div class="border-top pt-3">
-                <label class="form-label small">{{ __('admin.upload_file') }} <span class="text-muted">({{ __('admin.max') }} 5MB)</span></label>
+                <label class="form-label small">{{ __('admin.your_submission') }} <span class="text-muted">({{ __('admin.max') }} 10MB)</span></label>
                 <div class="input-group input-group-sm">
-                  <input type="file" id="vt-new-attachment" class="form-control" accept="image/jpeg,image/png,image/gif,application/pdf" />
+                  <input type="file" id="vt-new-attachment" class="form-control"
+                    accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-zip-compressed,text/plain,text/csv" />
                   <button class="btn btn-outline-primary" type="button" id="vt-upload-btn"><i class="ti ti-upload ti-xs me-1"></i> {{ __('admin.Upload') }}</button>
                 </div>
                 <div class="invalid-feedback d-block" id="vt-upload-error"></div>
@@ -231,13 +242,13 @@ $priorityConfig = [
             </div>
           </div>
 
-          {{-- ACTIVITY TAB --}}
-          <div class="tab-pane fade" id="vt-activity" role="tabpanel">
-            <div id="vt-activities-list" class="small pe-2"></div>
+           {{-- FEEDBACK TAB --}}
+          <div class="tab-pane fade" id="vt-feedback" role="tabpanel">
+            <div id="vt-feedback-list" class="small pe-2"></div>
           </div>
-
           {{-- COMMENTS TAB --}}
           <div class="tab-pane fade" id="vt-comments" role="tabpanel">
+
             <div id="vt-comments-list" class="small mb-4 pe-2"></div>
             
             <div class="border-top pt-3 mt-auto">
@@ -255,6 +266,12 @@ $priorityConfig = [
               </div>
             </div>
           </div>
+
+          {{-- ACTIVITY TAB --}}
+          <div class="tab-pane fade" id="vt-activity" role="tabpanel">
+            <div id="vt-activities-list" class="small pe-2"></div>
+          </div>
+
         </div>
 
         <div class="d-flex gap-2 pt-3 border-top mt-3">
@@ -442,8 +459,8 @@ $(document).ready(function () {
   function validateFiles(fileInput, errorSelector) {
     const files = fileInput[0].files;
     const $errorDiv = $(errorSelector);
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'application/pdf'];
-    const maxSize = 5 * 1024 * 1024; // 5MB limit
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/svg+xml', 'application/pdf', 'application/zip', 'application/x-rar-compressed', 'application/vnd.rar', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'];
+    const maxSize = 10 * 1024 * 1024; // 10MB limit
     
     fileInput.removeClass('is-invalid');
     $errorDiv.text('');
@@ -484,8 +501,9 @@ $(document).ready(function () {
               <span class="d-inline-block rounded-circle me-1 ${p.dot}" style="width:6px;height:6px;"></span>${p.label}
             </span>
             <div class="d-flex align-items-center gap-1">
-              <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle view-task-btn" type="button" data-task-id="${task.id}" title="{{ __('admin.View') }}"><i class="ti ti-eye ti-xs"></i></button>
-              <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle edit-task-btn" type="button" data-task-id="${task.id}" title="{{ __('admin.Edit') }}"><i class="ti ti-edit ti-xs"></i></button>
+              <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle view-task-btn" type="button" data-task-id="${task.id}" title="{{ __('admin.View') }}"><i class="ti ti-eye ti-md text-dark"></i></button>
+              <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle edit-task-btn" type="button" data-task-id="${task.id}" title="{{ __('admin.Edit') }}"><i class="ti ti-edit ti-md text-dark"></i></button>
+              <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle archive-task-btn" type="button" data-task-id="${task.id}" title="{{ __('admin.archive_task') }}"><i class="ti ti-archive ti-md text-dark"></i></button>
             </div>
           </div>
           <h6 class="mb-1 text-truncate">${$('<div>').text(task.title).html()}</h6>
@@ -586,6 +604,46 @@ $(document).ready(function () {
           </div>
         </div>
       `;
+    });
+    $container.html(html);
+  }
+
+  // --- HTML Generator for Feedback ---
+  function renderFeedbackList(feedbacks, containerSelector) {
+    const $container = $(containerSelector);
+    const noFeedbackStr = '{{ __("admin.no_feedback") }}';
+
+    if (!feedbacks || feedbacks.length === 0) {
+      $container.html(`<p class="text-muted text-center py-4 mb-0">${noFeedbackStr}</p>`);
+      return;
+    }
+
+    const RATING_COLORS = ['', 'danger', 'danger', 'warning', 'info', 'success'];
+
+    let html = '';
+    feedbacks.forEach(fb => {
+      const ri = (fb.user || 'U').substring(0, 2).toUpperCase();
+      const avatar = fb.img_url
+        ? `<img src="${fb.img_url}" alt="${fb.user}" class="rounded-circle" style="width:32px;height:32px;object-fit:cover;">`
+        : `<span class="avatar-initial bg-label-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:12px;">${ri}</span>`;
+
+      const rating = parseInt(fb.rating) || 0;
+      const stars = Array.from({ length: 5 }, (_, i) =>
+        `<i class="ti ti-star${i < rating ? '-filled text-warning' : ' text-muted'}" style="font-size:0.85rem;"></i>`
+      ).join('');
+
+      html += `
+        <div class="d-flex align-items-start gap-3 mb-3 pb-3 border-bottom">
+          <div class="flex-shrink-0 mt-1">${avatar}</div>
+          <div class="flex-grow-1">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="fw-semibold text-dark">${fb.user || ''}</span>
+              <span class="text-muted" style="font-size:0.7rem;">${fb.time || ''}</span>
+            </div>
+            <div class="mb-1">${stars}</div>
+            ${fb.text ? `<div class="small text-body bg-lighter rounded p-2">${fb.text}</div>` : ''}
+          </div>
+        </div>`;
     });
     $container.html(html);
   }
@@ -886,7 +944,9 @@ $(document).ready(function () {
     renderAttachmentsList(taskData.attachments, taskId, '#vt-attachments-list');
     renderActivitiesList(taskData.activities, '#vt-activities-list');
     renderCommentsList(taskData.comments, '#vt-comments-list');
+    renderFeedbackList(taskData.feedbacks || [], '#vt-feedback-list');
     $('#vt-comment-count').text(taskData.comments ? taskData.comments.length : 0);
+    $('#vt-feedback-count').text(taskData.feedbacks ? taskData.feedbacks.length : 0);
 
     $('#vt-edit-trigger-btn').data('task-id', taskId);
     $('#vt-upload-btn').data('task-id', taskId);
@@ -973,6 +1033,61 @@ $(document).ready(function () {
       error: function() {
         toastr.error('{{ __("admin.comment_failed") }}');
         $btn.prop('disabled', false).text('{{ __("admin.send") }}');
+      }
+    });
+  });
+
+  // --- ARCHIVE TASK ---
+  $(document).on('click', '.archive-task-btn', function () {
+    const taskId = $(this).data('task-id');
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    const isArchived  = task.status === 'archived';
+    const newStatus   = isArchived ? 'pending' : 'archived';
+    const actionLabel = isArchived ? '{{ __("admin.reopen_task") }}' : '{{ __("admin.archive_task") }}';
+    const bodyText    = isArchived ? '{{ __("admin.reopen_task_confirm") }}' : '{{ __("admin.archive_task_confirm") }}';
+
+    releaseWarningAlert({
+      title: actionLabel + '?',
+      message: bodyText,
+      confirmText: '{{ __("admin.DYes") }}',
+      cancelText: '{{ __("admin.DNo") }}',
+      confirmColor: isArchived ? 'warning' : 'secondary',
+      onConfirm: () => {
+        $.ajax({
+          url: '{{ route("tasks.move", ["taskId" => ":id", "status" => ":status"]) }}'
+            .replace(':id', taskId)
+            .replace(':status', newStatus),
+          type: 'PATCH',
+          contentType: 'application/json',
+          data: JSON.stringify({ status: newStatus }),
+          success: function () {
+            const oldStatus = task.status;
+            task.status = newStatus;
+
+            if (newStatus === 'archived') {
+              // Remove card from board entirely
+              $(`.kanban-item[data-task-id="${taskId}"]`).fadeOut(300, function () {
+                $(this).remove();
+                const $board = $(`.kanban-board[data-board="${oldStatus}"] .kanban-drag`);
+                if ($board.find('.kanban-item:not(.d-none)').length === 0) {
+                  $board.append('<p class="text-muted small text-center py-3 m-0" data-empty-board>{{ __("admin.No_Tasks") }}</p>');
+                }
+                $('.kanban-board').each(function () {
+                  $(this).find('.board-count').text($(this).find('.kanban-item:not(.d-none)').length);
+                });
+              });
+            } else {
+              syncTaskToBoard(task, oldStatus);
+            }
+
+            toastr.success(isArchived ? '{{ __("admin.task_reopened") }}' : '{{ __("admin.task_archived") }}');
+          },
+          error: function () {
+            toastr.error('{{ __("admin.update_failed") }}');
+          }
+        });
       }
     });
   });

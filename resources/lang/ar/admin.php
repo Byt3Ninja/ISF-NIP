@@ -3744,4 +3744,7 @@ return [
 	'comment_failed' => 'فشل في إضافة التعليق',
 	'update_failed' => 'فشلت عملية التحديث',
 	'no_recent_activities' => 'لا توجد أنشطة الأخيرة',
+	'no_feedback' => 'لا توجد تقيمات بعد',
+	'feedback' => 'سجل تقيمات',
+	'your_submission' => 'تقديمك',
 ];
