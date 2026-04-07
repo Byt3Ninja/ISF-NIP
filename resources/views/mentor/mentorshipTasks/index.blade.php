@@ -28,17 +28,18 @@ $tasks = [
       ['id' => 102, 'name' => 'screenshot.png', 'url' => '/storage/images/screenshot.png']
     ],
     'activities' => [
-      ['user' => 'Alice Johnson', 'action' => 'Created this task', 'time' => 'Today 9:00 AM', 'img_url' => '/vuexy/assets/img/avatars/1.png']
+      ['user' => 'Alice Johnson', 'user_id' => 1, 'action' => 'Created this task', 'time' => 'Today 9:00 AM', 'img_url' => '/vuexy/assets/img/avatars/1.png']
     ],
     'comments' => [
-      ['id' => 1, 'user' => 'Bob Smith', 'text' => '<p>We need to prioritize the typography tokens.</p>', 'time' => 'Today 10:00 AM', 'img_url' => '/vuexy/assets/img/avatars/2.png']
+      ['id' => 1, 'user' => 'Bob Smith', 'user_id' => 2, 'text' => '<p>We need to prioritize the typography tokens.</p>', 'time' => 'Today 10:00 AM', 'img_url' => '/vuexy/assets/img/avatars/2.png']
     ],
     'feedbacks' => [
-      ['id' => 1, 'user' => 'Bob Smith', 'text' => '<p>We need to prioritize the typography tokens.</p>', 'time' => 'Today 10:00 AM', 'img_url' => '/vuexy/assets/img/avatars/2.png']
+      ['id' => 1, 'user' => 'Bob Smith', 'user_id' => 2, 'text' => '<p>We need to prioritize the typography tokens.</p>', 'time' => 'Today 10:00 AM', 'img_url' => '/vuexy/assets/img/avatars/2.png']
     ],
     'submissions' => [
       [
         'user'    => 'Bob Smith',
+        'user_id' => 2,
         'img_url' => '/vuexy/assets/img/avatars/2.png',
         'time'    => 'Today 11:00 AM',
         'note'    => 'First draft submission.',
@@ -192,7 +193,7 @@ $priorityConfig = [
       </div>
       <div class="offcanvas-body pt-0 d-flex flex-column">
         
-        <ul class="nav nav-tabs mb-3 rounded-0 mt-3" role="tablist">
+        <ul class="nav nav-tabs mb-6 rounded-0 mt-3" role="tablist">
           <li class="nav-item">
             <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#vt-details" role="tab"><i class="ti ti-info-circle ti-xs me-1"></i> {{ __('admin.Details') ?? 'Details' }}</button>
           </li>
@@ -526,6 +527,19 @@ $(document).ready(function () {
   const noActivitiesStr = '{{ __("admin.no_recent_activities") }}';
   const noCommentsStr   = '{{ __("admin.no_comments") }}';
 
+  // Base URL for user profiles
+  const profileBaseUrl = '{{ url("/show/UserProfile") }}';
+
+  // --- Build a clickable avatar element ---
+  function buildAvatar(name, imgUrl, userId) {
+    const ri   = (name || 'U').substring(0, 2).toUpperCase();
+    const href = userId ? `${profileBaseUrl}/${userId}` : '#';
+    const inner = imgUrl
+      ? `<img src="${imgUrl}" alt="${name}" class="rounded-circle" style="width:32px;height:32px;object-fit:cover;">`
+      : `<span class="avatar-initial bg-label-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:12px;">${ri}</span>`;
+    return `<a href="${href}" target="_blank" class="d-inline-flex" title="${name}">${inner}</a>`;
+  }
+
   $.ajaxSetup({
     headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
   });
@@ -669,9 +683,7 @@ $(document).ready(function () {
     let html = '';
     activities.forEach(act => {
       const ri = (act.user || 'U').substring(0, 2).toUpperCase();
-      const avatar = act.img_url 
-        ? `<img src="${act.img_url}" alt="${act.user}" class="rounded-circle" style="width:32px;height:32px;object-fit:cover;">` 
-        : `<span class="avatar-initial bg-label-primary rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:12px;">${ri}</span>`;
+      const avatar = buildAvatar(act.user, act.img_url, act.user_id);
       
       html += `
         <div class="d-flex align-items-start gap-3 mb-3 pb-2 border-bottom">
@@ -716,9 +728,7 @@ $(document).ready(function () {
     let html = '';
     submissions.forEach(sub => {
       const ri = (sub.user || 'U').substring(0, 2).toUpperCase();
-      const avatar = sub.img_url
-        ? `<img src="${sub.img_url}" alt="${sub.user}" class="rounded-circle" style="width:32px;height:32px;object-fit:cover;">`
-        : `<span class="avatar-initial bg-label-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:12px;">${ri}</span>`;
+      const avatar = buildAvatar(sub.user, sub.img_url, sub.user_id);
 
       const files = sub.files || [];
       const filesHtml = files.length
@@ -762,9 +772,7 @@ $(document).ready(function () {
     let html = '';
     feedbacks.forEach(fb => {
       const ri = (fb.user || 'U').substring(0, 2).toUpperCase();
-      const avatar = fb.img_url
-        ? `<img src="${fb.img_url}" alt="${fb.user}" class="rounded-circle" style="width:32px;height:32px;object-fit:cover;">`
-        : `<span class="avatar-initial bg-label-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:12px;">${ri}</span>`;
+      const avatar = buildAvatar(fb.user, fb.img_url, fb.user_id);
 
       const rating = parseInt(fb.rating) || 0;
       const stars = Array.from({ length: 5 }, (_, i) =>
@@ -798,9 +806,7 @@ $(document).ready(function () {
     let html = '';
     comments.forEach(c => {
       const ri = (c.user || 'U').substring(0, 2).toUpperCase();
-      const avatar = c.img_url 
-        ? `<img src="${c.img_url}" alt="${c.user}" class="rounded-circle" style="width:32px;height:32px;object-fit:cover;">` 
-        : `<span class="avatar-initial bg-label-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:12px;">${ri}</span>`;
+      const avatar = buildAvatar(c.user, c.img_url, c.user_id);
       
       html += `
         <div class="d-flex align-items-start gap-3 mb-3">
@@ -1139,9 +1145,7 @@ $(document).ready(function () {
         }
 
         const ri = (newComment.user || 'U').substring(0, 2).toUpperCase();
-        const avatar = newComment.img_url 
-          ? `<img src="${newComment.img_url}" alt="${newComment.user}" class="rounded-circle" style="width:32px;height:32px;object-fit:cover;">` 
-          : `<span class="avatar-initial bg-label-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:12px;">${ri}</span>`;
+        const avatar = buildAvatar(newComment.user, newComment.img_url, newComment.user_id);
 
         const html = `
           <div class="d-flex align-items-start gap-3 mb-3">
@@ -1222,9 +1226,7 @@ $(document).ready(function () {
         if ($list.find('p.text-muted').length) $list.empty();
 
         const ri = (newFeedback.user || 'U').substring(0, 2).toUpperCase();
-        const avatar = newFeedback.img_url
-          ? `<img src="${newFeedback.img_url}" alt="${newFeedback.user}" class="rounded-circle" style="width:32px;height:32px;object-fit:cover;">`
-          : `<span class="avatar-initial bg-label-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:12px;">${ri}</span>`;
+        const avatar = buildAvatar(newFeedback.user, newFeedback.img_url, newFeedback.user_id);
 
         const decisionBadge = decision === 'pass'
           ? `<span class="badge bg-label-success ms-2"><i class="ti ti-circle-check ti-xs me-1"></i>{{ __("admin.Pass_Task") ?? "Pass Task" }}</span>`
