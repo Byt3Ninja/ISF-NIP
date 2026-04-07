@@ -106,7 +106,7 @@ $priorityConfig = [
               <input type="text" id="kanbanSearch" class="form-control" placeholder="{{ __('admin.Search') }}..." />
             </div>
             @if ($_user->ableTo('tasks.store', $permissions))
-            <button class="btn btn-primary text-nowrap px-8" type="button" data-bs-toggle="offcanvas" data-bs-target="#addTaskOffcanvas">
+            <button class="btn btn-primary text-nowrap px-10" type="button" data-bs-toggle="offcanvas" data-bs-target="#addTaskOffcanvas">
               <i class="ti ti-plus me-2"></i> {{ __('admin.Add_Task') }}
             </button>
             @endif
@@ -185,7 +185,7 @@ $priorityConfig = [
     </div>
 
     {{-- VIEW TASK OFFCANVAS --}}
-    <div class="offcanvas offcanvas-end w-px-600" tabindex="-1" id="viewTaskOffcanvas">
+    <div class="offcanvas offcanvas-end w-px-{{ $_user->ableTo('tasks.update', $permissions) ? '700' : '600' }}" tabindex="-1" id="viewTaskOffcanvas">
       <div class="offcanvas-header border-bottom">
         <h5 class="offcanvas-title"><i class="ti ti-eye me-1 text-primary"></i> {{ __('admin.View_Task') }}</h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
@@ -275,6 +275,47 @@ $priorityConfig = [
            {{-- FEEDBACK TAB --}}
           <div class="tab-pane fade" id="vt-feedback" role="tabpanel">
             <div id="vt-feedback-list" class="small pe-2"></div>
+
+            @if ($_user->ableTo('tasks.update', $permissions))
+            <div class="mt-3" id="vt-feedback-form-wrapper">
+              <h5 class="fw-semibold small mb-3">{{ __('admin.add_feedback') }}</h5>
+
+              {{-- Decision --}}
+              <div class="mb-3">
+                <label class="form-label small">{{ __('admin.feedback_decision') }} <span class="text-danger">*</span></label>
+                <div class="row g-3">
+                  <div class="col-6">
+                    <div class="form-check custom-option custom-option-basic checked" id="vt-fb-pass-wrapper">
+                      <label class="form-check-label custom-option-content" for="vt-fb-pass">
+                        <input name="vt_feedback_decision" class="form-check-input" type="radio" value="pass" id="vt-fb-pass" checked>
+                        <span class="custom-option-header"><span class="h6 mb-0">{{ __('admin.pass_task') }}</span></span>
+                        <span class="custom-option-body"><small>{{ __('admin.mark_as_completed') }}</small></span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="form-check custom-option custom-option-basic" id="vt-fb-revision-wrapper">
+                      <label class="form-check-label custom-option-content" for="vt-fb-revision">
+                        <input name="vt_feedback_decision" class="form-check-input" type="radio" value="revision" id="vt-fb-revision">
+                        <span class="custom-option-header"><span class="h6 mb-0">{{ __('admin.needs_revision') }}</span></span>
+                        <span class="custom-option-body"><small>{{ __('admin.request_changes') }}</small></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {{-- Note --}}
+              <div class="mb-3">
+                <label class="form-label small" for="vt-fb-note">{{ __('admin.feedback_note') }}</label>
+                <textarea id="vt-fb-note" class="form-control" rows="3" placeholder="{{ __('admin.feedback_note_placeholder') }}"></textarea>
+              </div>
+
+              <button type="button" class="btn btn-primary" id="vt-submit-feedback-btn">
+                <i class="ti ti-send ti-xs me-1"></i> {{ __('admin.submit_feedback') }}
+              </button>
+            </div>
+            @endif
           </div>
           
           {{-- COMMENTS TAB --}}
@@ -310,7 +351,7 @@ $priorityConfig = [
             <i class="ti ti-edit ti-xs me-1"></i> {{ __('admin.Edit_Task') }}
           </button>
           @endif
-          <button type="button" class="btn btn-label-secondary" data-bs-dismiss="offcanvas">{{ __('admin.Close') }}</button>
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">{{ __('admin.Close') }}</button>
         </div>
       </div>
     </div>
@@ -463,7 +504,7 @@ $priorityConfig = [
 $(document).ready(function () {
   'use strict';
 
-  const isAbleToEdit = '{{ $_user->ableTo('tasks.store', $permissions) }}' === '1' ;
+  const isAbleToEdit = {{ $_user->ableTo('tasks.store', $permissions) ? 'true' : 'false' }};
 
   const PRIORITY_MAP = {
     Low:    { label: '{{ __("admin.Low") }}',    cls: 'bg-label-secondary', dot: 'bg-secondary' },
@@ -1134,6 +1175,94 @@ $(document).ready(function () {
         toastr.error('{{ __("admin.comment_failed") }}');
         $btn.prop('disabled', false).text('{{ __("admin.send") }}');
       }
+    });
+  });
+
+  // --- SUBMIT FEEDBACK ---
+  $('#vt-submit-feedback-btn').on('click', function () {
+    const taskId = $('#vt-send-comment-btn').data('task-id');
+    const decision = $('input[name="vt_feedback_decision"]:checked').val();
+    const note = $('#vt-fb-note').val().trim();
+
+    if (!decision) {
+      toastr.warning('{{ __("admin.Required_Field") }}');
+      return;
+    }
+
+    const $btn = $(this);
+    $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>');
+
+    $.ajax({
+      url: '{{ route("tasks.add_feedback", ":id") }}'.replace(':id', taskId),
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({ decision, note }),
+      success: function (response) {
+        toastr.success('{{ __("admin.feedback_success") ?? "Feedback submitted." }}');
+
+        const newFeedback = response.feedback || {
+          user: '{{ auth()->user()->name ?? "You" }}',
+          img_url: null,
+          time: '{{ __("admin.Just_Now") ?? "Just now" }}',
+          rating: decision === 'pass' ? 5 : 2,
+          text: note,
+          decision,
+        };
+
+        // Sync tasks array
+        const task = tasks.find(t => t.id == taskId);
+        if (task) {
+          if (!task.feedbacks) task.feedbacks = [];
+          task.feedbacks.push(newFeedback);
+          $('#vt-feedback-count').text(task.feedbacks.length);
+        }
+
+        // Prepend to list
+        const $list = $('#vt-feedback-list');
+        if ($list.find('p.text-muted').length) $list.empty();
+
+        const ri = (newFeedback.user || 'U').substring(0, 2).toUpperCase();
+        const avatar = newFeedback.img_url
+          ? `<img src="${newFeedback.img_url}" alt="${newFeedback.user}" class="rounded-circle" style="width:32px;height:32px;object-fit:cover;">`
+          : `<span class="avatar-initial bg-label-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:12px;">${ri}</span>`;
+
+        const decisionBadge = decision === 'pass'
+          ? `<span class="badge bg-label-success ms-2"><i class="ti ti-circle-check ti-xs me-1"></i>{{ __("admin.Pass_Task") ?? "Pass Task" }}</span>`
+          : `<span class="badge bg-label-warning ms-2"><i class="ti ti-refresh ti-xs me-1"></i>{{ __("admin.Needs_Revision") ?? "Needs Revision" }}</span>`;
+
+        const html = `
+          <div class="d-flex align-items-start gap-3 mb-3 pb-3 border-bottom">
+            <div class="flex-shrink-0 mt-1">${avatar}</div>
+            <div class="flex-grow-1">
+              <div class="d-flex justify-content-between align-items-center mb-1 flex-wrap gap-1">
+                <span class="fw-semibold text-dark">${newFeedback.user}${decisionBadge}</span>
+                <span class="text-muted" style="font-size:0.7rem;">${newFeedback.time}</span>
+              </div>
+              ${note ? `<div class="small text-body bg-lighter rounded p-2">${note}</div>` : ''}
+            </div>
+          </div>`;
+
+        $list.prepend(html);
+
+        // Reset form
+        $('#vt-fb-note').val('');
+        $('input[name="vt_feedback_decision"][value="pass"]').prop('checked', true);
+        $('#vt-fb-pass-wrapper').addClass('checked');
+        $('#vt-fb-revision-wrapper').removeClass('checked');
+
+        $btn.prop('disabled', false).html('<i class="ti ti-send ti-xs me-1"></i> {{ __("admin.submit_feedback") }}');
+      },
+      error: function () {
+        toastr.error('{{ __("admin.feedback_failed") ?? "Failed to submit feedback." }}');
+        $btn.prop('disabled', false).html('<i class="ti ti-send ti-xs me-1"></i> {{ __("admin.submit_feedback") }}');
+      }
+    });
+  });
+
+  // Toggle .checked class on custom radio options
+  $(document).on('change', 'input[name="vt_feedback_decision"]', function () {
+    $('input[name="vt_feedback_decision"]').each(function () {
+      $(this).closest('.custom-option').toggleClass('checked', $(this).is(':checked'));
     });
   });
 
