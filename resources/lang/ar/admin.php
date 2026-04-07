@@ -3757,4 +3757,11 @@ return [
 	'feedback_decision' => 'قرار الملاحظات',
 	'feedback_added_success' => 'تم إضافة التقييم بنجاح',
 	'feedback_failed' => 'فشل في إضافة التقييم',
+	'upload_attachments' => 'ارفع المرفقات',
+	'dropzone' => 'أسقط الملفات هنا أو انقر للتصفح',
+	'max_5_files' => 'الحد الأقصى 5 ملفات',
+	'upload_all' => 'ارفع الكل',
+	'provided_resources' => 'الموارد المقدمة',
+	'task_archived' => 'تمت أرشفة المهمة',
+	'task_reopened' => 'أعيد فتح المهمة',
 ];
