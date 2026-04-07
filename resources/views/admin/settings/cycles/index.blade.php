@@ -10,9 +10,9 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
 <style>
 
-  .daterangepicker {
+  /* .daterangepicker {
     margin-top: 1rem !important;
-  }
+  } */
 
   #mob {
     display: flex;
@@ -269,7 +269,7 @@
 <!-- Modals -->
 <!--Cycle Modal -->
 <div class="modal fade" id="cycleForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+  <div class="modal-dialog modal-dialog-scrollable">
     <div class="modal-content">
       <form class="form" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data"
         autocomplete="off">
