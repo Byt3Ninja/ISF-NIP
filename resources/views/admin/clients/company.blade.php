@@ -99,7 +99,7 @@
 
       <div class="row g-6">
         <div class="col-12 col-lg-3">
-          <nav class="bg-card p-4 rounded shadow-sm d-none d-md-block">
+          <nav class="bg-card p-4 rounded shadow-sm d-none d-md-block" style="position: sticky; top: 20px;">
             <!-- Tabs -->
             <ul class="nav nav-align-left nav-pills flex-column">
               @foreach ($tabs as $key => $tab)
