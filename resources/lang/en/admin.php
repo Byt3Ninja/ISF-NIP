@@ -3687,5 +3687,8 @@ return [
 	'comment_success' => 'Comment added successfully',
 	'comment_failed' => 'Faile to add comment',
 	'update_failed' => 'Failed to update',
-	'no_recent_activities' => 'No recent activities'
+	'no_recent_activities' => 'No recent activities',
+	'no_feedback' => 'No feedback yet',
+	'feedback' => 'Feedback',
+	'your_submission' => 'Your submission',
 ];
