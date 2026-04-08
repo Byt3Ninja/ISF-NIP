@@ -1045,7 +1045,7 @@ $offcanvasTabs = [
               <div class="border-top pt-3">
                 <label class="form-label small mb-2">
                   {{ $_user->ableTo('tasks.update', $permissions) ? __('admin.upload_attachments') : __('admin.your_submission') }}
-                  <span class="text-muted">({{ __('admin.max') }} 5 {{ __('admin.files') ?? 'files' }}, 10MB {{ __('admin.each') ?? 'each' }})</span>
+                  <span class="text-muted">({{ __('admin.max') }} 5 {{ __('admin.files') ?? 'files' }}, 10MB {{ __('admin.each') }})</span>
                 </label>
 
                 <div id="vt-dropzone"

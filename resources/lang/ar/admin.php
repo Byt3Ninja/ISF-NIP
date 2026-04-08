@@ -3773,4 +3773,5 @@ return [
 	'just_now' => 'الآن',
 	'email_thank_you' => 'شكراً لاستخدامكم نظامنا!',
 	'email_salutation' => 'مع أطيب التحيات،',
+	'each' => 'لكل',
 ];

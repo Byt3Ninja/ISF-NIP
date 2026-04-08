@@ -3717,4 +3717,5 @@ return [
 	'just_now' => 'Just Now',
 	'email_thank_you' => 'Thank you for using our system!',
 	'email_salutation' => 'Kind regards,',
+	'each' => 'each',
 ];
