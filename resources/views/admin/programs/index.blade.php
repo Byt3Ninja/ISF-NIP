@@ -216,9 +216,13 @@
                     @else
                       href="javascript:void(0);" 
                     @endif
-                    class="d-flex flex-column text-center text-dark btn btn-text-secondary waves-effect waves-light"
+                    class="d-flex flex-column text-center text-dark btn btn-text-info waves-effect waves-light"
                   >
-                    <i class="ti ti-building-skyscraper ti-lg text-info"></i>
+                    <div class="avatar">
+                      <div class="avatar-initial bg-label-info rounded-circle">
+                        <i class="ti ti-building-skyscraper ti-lg text-info"></i>
+                      </div>
+                    </div>
                     <div class="d-flex align-items-center gap-2 mt-1">
                       <strong>{{ $cycle->companies->count() }}</strong>
                       <span>{{ __('admin.Startups') }}</span>
@@ -230,9 +234,13 @@
                     @else
                       href="javascript:void(0);" 
                     @endif
-                    class="d-flex flex-column text-center text-dark btn btn-text-secondary waves-effect waves-light"
+                    class="d-flex flex-column text-center text-dark btn btn-text-success waves-effect waves-light"
                   >
-                    <i class="ti ti-recycle ti-lg text-success"></i>
+                    <div class="avatar">
+                      <div class="avatar-initial bg-label-success rounded-circle">
+                        <i class="ti ti-recycle ti-lg text-success"></i>
+                      </div>
+                    </div>
                     <div class="d-flex align-items-center gap-2 mt-1">
                       <strong>{{ $cycle->steps->count() }}</strong>
                       <span>{{ __('cycles.steps') }}</span>
@@ -246,9 +254,13 @@
                     @else
                       href="javascript:void(0);" 
                     @endif
-                    class="d-flex flex-column text-center text-dark btn btn-text-secondary waves-effect waves-light"
+                    class="d-flex flex-column text-center text-dark btn btn-text-warning waves-effect waves-light"
                   >
-                    <i class="ti ti-users ti-lg text-warning"></i>
+                    <div class="avatar">
+                      <div class="avatar-initial bg-label-warning rounded-circle">
+                        <i class="ti ti-users ti-lg text-warning"></i>
+                      </div>
+                    </div>
                     <div class="d-flex align-items-center gap-2 mt-1">
                       <strong>{{ $cycle->mentors->unique('id')->count() }}</strong>
                       <span>{{ __('admin.Mentors') }}</span>
