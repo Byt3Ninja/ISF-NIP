@@ -35,5 +35,13 @@ class MentorshipTask extends Model
         return $this->belongsToMany(Label::class, 'mentorship_task_labels', 'mentorship_tasks_id', 'label_id');
     }
 
-    
+    public function files()
+    {
+        return $this->hasMany(MentorshipTaskFile::class, 'mentorship_task_id');
+    }
+
+    public function logs()
+    {
+        return $this->hasMany(MentorshipTaskLog::class, 'mentorship_task_id');
+    }
 }
