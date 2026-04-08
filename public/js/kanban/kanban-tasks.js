@@ -477,6 +477,17 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
           if (!task.feedbacks) task.feedbacks = [];
           task.feedbacks.push(fb);
           $('#vt-feedback-count').text(task.feedbacks.length);
+
+          // Move task to the appropriate board based on decision
+          const oldStatus = task.status;
+          const newStatus = decision === 'pass' ? 'completed' : 'pending';
+          if (oldStatus !== newStatus) {
+            task.status = newStatus;
+            syncTaskToBoard(task, oldStatus);
+            // Update the status badge in the offcanvas details tab
+            const statusMap = cfg.statusMap;
+            $('#vt-status').html(`<span class="badge bg-label-${newStatus === 'completed' ? 'success' : 'secondary'} rounded-pill">${statusMap[newStatus] || newStatus}</span>`);
+          }
         }
 
         const $list = $('#vt-feedback-list');
