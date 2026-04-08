@@ -3774,4 +3774,5 @@ return [
 	'email_thank_you' => 'شكراً لاستخدامكم نظامنا!',
 	'email_salutation' => 'مع أطيب التحيات،',
 	'each' => 'لكل',
+	'Max_5_Files_10MB_Each' => 'الحد الأقصى 5 ملفات، 10 MB لكل ملف',
 ];

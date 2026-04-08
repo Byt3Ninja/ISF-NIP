@@ -43,84 +43,904 @@ class MentorshipTaskController extends Controller
 	public function index(Request $request)
 	{
 		// Get mentorship_id from request or session
-		$mentorshipId = $request->get('mentorship_id') ?? session('last_mentorship_id');
+		// $mentorshipId = $request->get('mentorship_id') ?? session('last_mentorship_id');
 
-		if (!$mentorshipId) {
-			// Redirect to sessions list if no mentorship_id available
-			return redirect()->route('mentorships.sessions_list_detailed');
-		}
+		// if (!$mentorshipId) {
+		// 	// Redirect to sessions list if no mentorship_id available
+		// 	return redirect()->route('mentorships.sessions_list_detailed');
+		// }
 
 		// Store for future use
-		session(['last_mentorship_id' => $mentorshipId]);
+		// session(['last_mentorship_id' => $mentorshipId]);
 
-		$lang = app()->getLocale();
-		$condition = "mentorship_tasks.mentorship_request_id = ? ";
-		$tasks = $this->handleTask($lang, $condition, $mentorshipId, 'list');
-		$tasks = $tasks->sortBy('row_no')->values();
+		// $lang = app()->getLocale();
+		// $condition = "mentorship_tasks.mentorship_request_id = ? ";
+		// $tasks = $this->handleTask($lang, $condition, $mentorshipId, 'list');
+		// $tasks = $tasks->sortBy('row_no')->values();
 
-		$available_statuses = ['pending', 'progress', 'review', 'completed'];
-		$session = $this->getSession($lang, $mentorshipId);
-		$session_id = $session['id'];
-		$mentor = $session['mentor'];
-		$users = $session['startups'];
-		$company = $session['company'];
-		$labels = $session['labels'];
+		// $available_statuses = ['pending', 'progress', 'review', 'completed'];
+		// $session = $this->getSession($lang, $mentorshipId);
+		// $session_id = $session['id'];
+		// $mentor = $session['mentor'];
+		// $users = $session['startups'];
+		// $company = $session['company'];
+		// $labels = $session['labels'];
 
-		$_tasks = $tasks->groupBy('status');
-		foreach ($available_statuses as $status) {
-			if (!$_tasks->has($status)) {
-				$_tasks->put($status, collect([]));
-			}
+		// $_tasks = $tasks->groupBy('status');
+		// foreach ($available_statuses as $status) {
+		// 	if (!$_tasks->has($status)) {
+		// 		$_tasks->put($status, collect([]));
+		// 	}
+		// }
+		// $kanban = [];
+		// foreach ($available_statuses as $status) {
+		// 	$kanban[] = [
+		// 		'id' => $status . '-board',
+		// 		'title' => __('admin.boardTitle' . ucfirst($status)),
+		// 		'item' => $_tasks->get($status),
+		// 	];
+		// }
+
+		// $startup = "SELECT MR.id,
+		// MR.mentor_id as MT_mentor_id,
+		// MR.user_id as MT_user_id,
+		// MR.id as MT_mentorship_request_id,
+		// C.id as MT_company_id,
+		// C.name_en as C_name_en,
+		// C.logo as C_logo,
+		// C.step as C_step,
+		// C.cycle as C_cycle,
+		// U.id as U_id,
+		// Cy.title as CY_title,
+		// Cy.id as CY_id,
+		// S.title as S_title,
+		// S.id as S_id,
+		// MR.zoom_date as MR_zoom_date
+		// FROM
+		// mentorship_requests as MR
+		// LEFT JOIN users as U ON U.id = MR.user_id
+		// LEFT JOIN companies as C ON C.id = U.company_id
+		// LEFT JOIN steps as S ON S.id = C.step
+		// LEFT JOIN cycles as Cy ON Cy.id = C.cycle
+		// WHERE MR.id = ? ";
+		// $startup = DB::select($startup, [$mentorshipId]);
+		// $startup = collect($startup)->first();
+		// $data = [];
+		// $data['id'] = $startup->id ?? '';
+		// $data['company_name'] = $startup->C_name_en ?? '';
+		// $data['start_up_logo'] = $startup->C_logo ?? '';
+		// $data['program_name'] = $startup->CY_title ?? '';
+		// $data['step_name'] = $startup->S_title ?? '';
+		// $data['mentor_session_id'] = $startup->MT_mentorship_request_id ?? '';
+		// $data['mentor_zoom_date'] = $startup->MR_zoom_date ?? '';
+
+		$cycle = [
+			'id' => 84,
+			'title' => 'Alumni Program',
+		];
+
+		$tasks = [
+			// Task 1: New - Completed Design Task
+			[
+				'id' => 1,
+				'title' => 'Brand Identity Guidelines',
+				'description' => '<p>Develop a comprehensive brand identity guideline document.</p><ul><li>Typography & Color Palette</li><li>Logo usage rules</li><li>Tone of voice</li></ul><p>Please deliver as a high-resolution PDF.</p>',
+				'due_date' => '2025-03-15',
+				'priority' => 'High',
+				'status' => 'completed',
+				'created_at' => '2025-03-01T09:00:00Z',
+				'updated_at' => '2025-03-14T16:45:00Z',
+
+				'creator' => [
+					'id' => 1,
+					'name' => 'Alice Johnson',
+					'img_url' => '/vuexy/assets/img/avatars/1.png',
+					'profile_url' => '/show/UserProfile/1',
+				],
+
+				'assignee' => [
+					'startup' => [
+						'id' => 10,
+						'name' => 'Designa Studio',
+						'img_url' => '/vuexy/assets/img/icons/brands/figma.png',
+						'profile_url' => '/dashboard/companyProfile/10',
+					],
+					'founder' => [
+						'id' => 2,
+						'name' => 'Mark Evans',
+						'img_url' => '/vuexy/assets/img/avatars/2.png',
+						'profile_url' => '/show/UserProfile/2',
+					],
+				],
+
+				'attachments' => [
+					[
+						'id' => 101,
+						'name' => 'competitor_analysis.pdf',
+						'url' => '/storage/designs/competitor_analysis.pdf',
+						'mime_type' => 'application/pdf',
+						'size_bytes' => 1048576, // 1MB
+						'uploaded_at' => '2025-03-01T09:15:00Z',
+					],
+				],
+
+				'activities' => [
+					[
+						'user' => 'Alice Johnson',
+						'user_id' => 1,
+						'img_url' => '/vuexy/assets/img/avatars/1.png',
+						'action' => 'created this task',
+						'type' => 'created',
+						'time' => 'Mar 1, 9:00 AM',
+						'created_at' => '2025-03-01T09:00:00Z',
+					],
+					[
+						'user' => 'Alice Johnson',
+						'user_id' => 1,
+						'img_url' => '/vuexy/assets/img/avatars/1.png',
+						'action' => 'marked task as Completed',
+						'type' => 'completed',
+						'time' => 'Mar 14, 4:45 PM',
+						'created_at' => '2025-03-14T16:45:00Z',
+					],
+				],
+
+				'comments' => [
+					[
+						'id' => 10,
+						'user' => 'Mark Evans',
+						'user_id' => 2,
+						'img_url' => '/vuexy/assets/img/avatars/2.png',
+						'text' => '<p>The typography choices are excellent. Adding the final PDF to my submission.</p>',
+						'time' => 'Mar 13, 2:00 PM',
+						'created_at' => '2025-03-13T14:00:00Z',
+						'updated_at' => null,
+					],
+				],
+
+				'feedbacks' => [
+					[
+						'id' => 30,
+						'user' => 'Alice Johnson',
+						'user_id' => 1,
+						'img_url' => '/vuexy/assets/img/avatars/1.png',
+						'decision' => 'approved',
+						'text' => 'Perfect execution. Client is very happy with the results.',
+						'time' => 'Mar 14, 4:30 PM',
+						'created_at' => '2025-03-14T16:30:00Z',
+					],
+				],
+
+				'submissions' => [
+					[
+						'id' => 20,
+						'user' => 'Mark Evans',
+						'user_id' => 2,
+						'img_url' => '/vuexy/assets/img/avatars/2.png',
+						'note' => 'Final Brand Guidelines v1.0',
+						'status' => 'approved',
+						'time' => 'Mar 13, 5:00 PM',
+						'created_at' => '2025-03-13T17:00:00Z',
+						'files' => [
+							[
+								'id' => 300,
+								'name' => 'Brand_Guidelines_v1.pdf',
+								'url' => '/storage/designs/Brand_Guidelines_v1.pdf',
+								'mime_type' => 'application/pdf',
+								'size_bytes' => 5242880, // 5MB
+							],
+						],
+					],
+				],
+
+				'comments_count' => 1,
+				'feedbacks_count' => 1,
+				'submissions_count' => 1,
+				'attachments_count' => 1,
+			],
+
+			// Task 2: Your Original Design Task (Enhanced)
+			[
+				'id' => 2,
+				'title' => 'Mobile App Onboarding UX',
+				'description' => '<p>Create a seamless onboarding experience with illustrations and animations.</p><p><strong>Requirements:</strong></p><ul><li>Max 3 screens</li><li>Include "Skip" option</li><li>Use existing brand colors</li></ul>',
+				'due_date' => '2025-04-20',
+				'priority' => 'Medium',
+				'status' => 'in_progress',
+				'created_at' => '2025-04-05T08:00:00Z',
+				'updated_at' => '2025-04-06T12:30:00Z',
+
+				'creator' => [
+					'id' => 3,
+					'name' => 'Sarah Lee',
+					'img_url' => '/vuexy/assets/img/avatars/3.png',
+					'profile_url' => '/show/UserProfile/3',
+				],
+
+				'assignee' => [
+					'startup' => [
+						'id' => 11,
+						'name' => 'AppFlow Labs',
+						'img_url' => '/vuexy/assets/img/icons/brands/chrome.png',
+						'profile_url' => '/dashboard/companyProfile/11',
+					],
+					'founder' => [
+						'id' => 4,
+						'name' => 'David Kim',
+						'img_url' => '/vuexy/assets/img/avatars/4.png',
+						'profile_url' => '/show/UserProfile/4',
+					],
+				],
+
+				'attachments' => [
+					[
+						'id' => 110,
+						'name' => 'onboarding_wireframes.fig',
+						'url' => '/storage/designs/onboarding_wireframes.fig',
+						'mime_type' => 'application/octet-stream',
+						'size_bytes' => 409600,
+						'uploaded_at' => '2025-04-05T09:00:00Z',
+					],
+				],
+
+				'activities' => [
+					[
+						'user' => 'Sarah Lee',
+						'user_id' => 3,
+						'img_url' => '/vuexy/assets/img/avatars/3.png',
+						'action' => 'created this task',
+						'type' => 'created',
+						'time' => 'Apr 5, 8:00 AM',
+						'created_at' => '2025-04-05T08:00:00Z',
+					],
+					[
+						'user' => 'David Kim',
+						'user_id' => 4,
+						'img_url' => '/vuexy/assets/img/avatars/4.png',
+						'action' => 'moved task to In Progress',
+						'type' => 'moved',
+						'time' => 'Apr 5, 10:00 AM',
+						'created_at' => '2025-04-05T10:00:00Z',
+					],
+				],
+
+				'comments' => [
+					[
+						'id' => 11,
+						'user' => 'David Kim',
+						'user_id' => 4,
+						'img_url' => '/vuexy/assets/img/avatars/4.png',
+						'text' => '<p>Let’s simplify step one. I think users might get overwhelmed by the text.</p>',
+						'time' => 'Apr 5, 10:30 AM',
+						'created_at' => '2025-04-05T10:30:00Z',
+						'updated_at' => null,
+					],
+				],
+
+				'feedbacks' => [
+					[
+						'id' => 31,
+						'user' => 'Sarah Lee',
+						'user_id' => 3,
+						'img_url' => '/vuexy/assets/img/avatars/3.png',
+						'decision' => 'revision',
+						'text' => 'First screen is too dense, reduce text.',
+						'time' => 'Apr 6, 11:00 AM',
+						'created_at' => '2025-04-06T11:00:00Z',
+					],
+					[
+						'id' => 32,
+						'user' => 'David Kim',
+						'user_id' => 4,
+						'img_url' => '/vuexy/assets/img/avatars/4.png',
+						'decision' => 'approved',
+						'text' => 'Animations look great. Will proceed with building the assets.',
+						'time' => 'Apr 6, 12:30 PM',
+						'created_at' => '2025-04-06T12:30:00Z',
+					],
+				],
+
+				'submissions' => [
+					[
+						'id' => 21,
+						'user' => 'David Kim',
+						'user_id' => 4,
+						'img_url' => '/vuexy/assets/img/avatars/4.png',
+						'note' => 'Initial onboarding screens. Need feedback on the Lottie animations.',
+						'status' => 'pending_review',
+						'time' => 'Apr 6, 9:00 AM',
+						'created_at' => '2025-04-06T09:00:00Z',
+						'files' => [
+							[
+								'id' => 301,
+								'name' => 'onboarding_v1.fig',
+								'url' => '/storage/designs/onboarding_v1.fig',
+								'mime_type' => 'application/octet-stream',
+								'size_bytes' => 500000,
+							],
+						],
+					],
+				],
+
+				'comments_count' => 1,
+				'feedbacks_count' => 2,
+				'submissions_count' => 1,
+				'attachments_count' => 1,
+			],
+
+			// Task 3: Your Original Tech Task (Enhanced)
+			[
+				'id' => 3,
+				'title' => 'API Performance Optimization',
+				'description' => '<p>Analyze slow endpoints and reduce response time below 200ms.</p><p>Specifically look at the <code>/api/v1/reports</code> endpoint. We are seeing spikes during peak hours.</p>',
+				'due_date' => '2025-04-10',
+				'priority' => 'High',
+				'status' => 'review',
+				'created_at' => '2025-04-02T12:00:00Z',
+				'updated_at' => '2025-04-06T16:00:00Z',
+
+				'creator' => [
+					'id' => 5,
+					'name' => 'Michael Brown',
+					'img_url' => '/vuexy/assets/img/avatars/5.png',
+					'profile_url' => '/show/UserProfile/5',
+				],
+
+				'assignee' => [
+					'startup' => [
+						'id' => 12,
+						'name' => 'ScaleTech',
+						'img_url' => '/vuexy/assets/img/icons/brands/firefox.png',
+						'profile_url' => '/dashboard/companyProfile/12',
+					],
+					'founder' => [
+						'id' => 6,
+						'name' => 'Emma Wilson',
+						'img_url' => '/vuexy/assets/img/avatars/6.png',
+						'profile_url' => '/show/UserProfile/6',
+					],
+				],
+
+				'attachments' => [
+					[
+						'id' => 120,
+						'name' => 'performance_log.txt',
+						'url' => '/storage/logs/performance_log.txt',
+						'mime_type' => 'text/plain',
+						'size_bytes' => 20480,
+						'uploaded_at' => '2025-04-02T12:10:00Z',
+					],
+				],
+
+				'activities' => [
+					[
+						'user' => 'Michael Brown',
+						'user_id' => 5,
+						'img_url' => '/vuexy/assets/img/avatars/5.png',
+						'action' => 'uploaded logs',
+						'type' => 'upload',
+						'time' => 'Apr 2, 12:10 PM',
+						'created_at' => '2025-04-02T12:10:00Z',
+					],
+				],
+
+				'comments' => [
+					[
+						'id' => 12,
+						'user' => 'Emma Wilson',
+						'user_id' => 6,
+						'img_url' => '/vuexy/assets/img/avatars/6.png',
+						'text' => '<p>Consider Redis caching. It seems like we are hitting the DB on every single request for static lookup tables.</p>',
+						'time' => 'Apr 6, 2:00 PM',
+						'created_at' => '2025-04-06T14:00:00Z',
+						'updated_at' => null,
+					],
+				],
+
+				'feedbacks' => [
+					[
+						'id' => 33,
+						'user' => 'Emma Wilson',
+						'user_id' => 6,
+						'img_url' => '/vuexy/assets/img/avatars/6.png',
+						'decision' => 'approved',
+						'text' => 'Performance verified on staging. Averaging 140ms response time now.',
+						'time' => 'Apr 6, 3:30 PM',
+						'created_at' => '2025-04-06T15:30:00Z',
+					],
+				],
+
+				'submissions' => [
+					[
+						'id' => 22,
+						'user' => 'Michael Brown',
+						'user_id' => 5,
+						'img_url' => '/vuexy/assets/img/avatars/5.png',
+						'note' => 'Optimized queries and implemented Redis layer for static data.',
+						'status' => 'pending_review',
+						'time' => 'Apr 6, 3:00 PM',
+						'created_at' => '2025-04-06T15:00:00Z',
+						'files' => [],
+					],
+				],
+
+				'comments_count' => 1,
+				'feedbacks_count' => 1,
+				'submissions_count' => 1,
+				'attachments_count' => 1,
+			],
+
+			// Task 4: Original Marketing Task (Filled out missing variables)
+			[
+				'id' => 4,
+				'title' => 'Marketing Landing Page Copy',
+				'description' => '<p>Write persuasive copy for the new Spring Campaign landing page.</p><ul><li>Focus on "time-saving" benefits</li><li>Include 2 variations for A/B testing the H1 header</li></ul>',
+				'due_date' => '2025-04-18',
+				'priority' => 'Low',
+				'status' => 'completed',
+				'created_at' => '2025-03-30T10:00:00Z',
+				'updated_at' => '2025-04-04T09:00:00Z',
+
+				'creator' => [
+					'id' => 7,
+					'name' => 'Olivia Martinez',
+					'img_url' => '/vuexy/assets/img/avatars/7.png',
+					'profile_url' => '/show/UserProfile/7',
+				],
+
+				'assignee' => [
+					'startup' => [
+						'id' => 13,
+						'name' => 'CopyCrafters',
+						'img_url' => '/vuexy/assets/img/icons/brands/mailchimp.png',
+						'profile_url' => '/dashboard/companyProfile/13',
+					],
+					'founder' => [
+						'id' => 8,
+						'name' => 'James Anderson',
+						'img_url' => '/vuexy/assets/img/avatars/8.png',
+						'profile_url' => '/show/UserProfile/8',
+					],
+				],
+
+				'attachments' => [],
+				'activities' => [
+					[
+						'user' => 'Olivia Martinez',
+						'user_id' => 7,
+						'img_url' => '/vuexy/assets/img/avatars/7.png',
+						'action' => 'marked task as Completed',
+						'type' => 'completed',
+						'time' => 'Apr 4, 9:00 AM',
+						'created_at' => '2025-04-04T09:00:00Z',
+					],
+				],
+				'comments' => [],
+				'feedbacks' => [
+					[
+						'id' => 35,
+						'user' => 'James Anderson',
+						'user_id' => 8,
+						'img_url' => '/vuexy/assets/img/avatars/8.png',
+						'decision' => 'approved',
+						'text' => 'Ready to publish. Excellent tone of voice.',
+						'time' => 'Apr 3, 2:15 PM',
+						'created_at' => '2025-04-03T14:15:00Z',
+					],
+				],
+				'submissions' => [
+					[
+						'id' => 23,
+						'user' => 'James Anderson',
+						'user_id' => 8,
+						'img_url' => '/vuexy/assets/img/avatars/8.png',
+						'note' => 'Attached the final word doc with 2 H1 variations.',
+						'status' => 'approved',
+						'time' => 'Apr 3, 11:00 AM',
+						'created_at' => '2025-04-03T11:00:00Z',
+						'files' => [
+							[
+								'id' => 302,
+								'name' => 'landing_page_copy_vFinal.docx',
+								'url' => '/storage/docs/landing_page_copy_vFinal.docx',
+								'mime_type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+								'size_bytes' => 153600,
+							],
+						],
+					],
+				],
+
+				'comments_count' => 0,
+				'feedbacks_count' => 1,
+				'submissions_count' => 1,
+				'attachments_count' => 0,
+			],
+
+			// Task 5: Original DB Task (Filled out missing variables)
+			[
+				'id' => 5,
+				'title' => 'Database Schema Refactor',
+				'description' => '<p>Normalize tables for the user management module.</p><p>Extract user preferences into a separate <code>user_settings</code> table to prevent row bloat in the main <code>users</code> table.</p>',
+				'due_date' => '2025-04-25',
+				'priority' => 'High',
+				'status' => 'pending',
+				'created_at' => '2025-04-06T07:30:00Z',
+				'updated_at' => '2025-04-07T10:00:00Z',
+
+				'creator' => [
+					'id' => 9,
+					'name' => 'Daniel White',
+					'img_url' => '/vuexy/assets/img/avatars/9.png',
+					'profile_url' => '/show/UserProfile/9',
+				],
+
+				'assignee' => [
+					'startup' => [
+						'id' => 14,
+						'name' => 'DataFlow Inc.',
+						'img_url' => '/vuexy/assets/img/icons/brands/asana.png',
+						'profile_url' => '/dashboard/companyProfile/14',
+					],
+					'founder' => [
+						'id' => 10,
+						'name' => 'Sophia Taylor',
+						'img_url' => '/vuexy/assets/img/avatars/10.png',
+						'profile_url' => '/show/UserProfile/10',
+					],
+				],
+
+				'attachments' => [
+					[
+						'id' => 125,
+						'name' => 'current_schema.png',
+						'url' => '/storage/designs/current_schema.png',
+						'mime_type' => 'image/png',
+						'size_bytes' => 204800,
+						'uploaded_at' => '2025-04-06T07:35:00Z',
+					],
+				],
+				'activities' => [],
+				'comments' => [],
+				'feedbacks' => [
+					[
+						'id' => 37,
+						'user' => 'Sophia Taylor',
+						'user_id' => 10,
+						'img_url' => '/vuexy/assets/img/avatars/10.png',
+						'decision' => 'rejected',
+						'text' => 'Needs redesign. The proposed ERD breaks existing joins in the billing service.',
+						'time' => 'Apr 7, 9:00 AM',
+						'created_at' => '2025-04-07T09:00:00Z',
+					],
+				],
+				'submissions' => [
+					[
+						'id' => 24,
+						'user' => 'Sophia Taylor',
+						'user_id' => 10,
+						'img_url' => '/vuexy/assets/img/avatars/10.png',
+						'note' => 'Here is my initial schema proposal.',
+						'status' => 'rejected',
+						'time' => 'Apr 6, 4:00 PM',
+						'created_at' => '2025-04-06T16:00:00Z',
+						'files' => [
+							[
+								'id' => 303,
+								'name' => 'proposed_erd_v1.pdf',
+								'url' => '/storage/docs/proposed_erd_v1.pdf',
+								'mime_type' => 'application/pdf',
+								'size_bytes' => 1024000,
+							],
+						],
+					],
+				],
+
+				'comments_count' => 0,
+				'feedbacks_count' => 1,
+				'submissions_count' => 1,
+				'attachments_count' => 1,
+			],
+
+			// Task 6: New - DevOps / Urgent Task
+			[
+				'id' => 6,
+				'title' => 'Migrate to AWS RDS',
+				'description' => '<p>Migrate our primary PostgreSQL database from the self-hosted EC2 instance to <strong>AWS RDS</strong> for automated backups and Multi-AZ support.</p><p><em>Note: Zero downtime is expected. Ensure replica synchronization before flipping the DNS switch.</em></p>',
+				'due_date' => '2025-04-08',
+				'priority' => 'Urgent',
+				'status' => 'in_progress',
+				'created_at' => '2025-04-04T08:00:00Z',
+				'updated_at' => '2025-04-07T11:00:00Z',
+
+				'creator' => [
+					'id' => 11,
+					'name' => 'Chris Martin',
+					'img_url' => '/vuexy/assets/img/avatars/11.png',
+					'profile_url' => '/show/UserProfile/11',
+				],
+
+				'assignee' => [
+					'startup' => [
+						'id' => 15,
+						'name' => 'CloudOps Solutions',
+						'img_url' => '/vuexy/assets/img/icons/brands/aws.png',
+						'profile_url' => '/dashboard/companyProfile/15',
+					],
+					'founder' => [
+						'id' => 12,
+						'name' => 'Kevin Hart',
+						'img_url' => '/vuexy/assets/img/avatars/12.png',
+						'profile_url' => '/show/UserProfile/12',
+					],
+				],
+
+				'attachments' => [],
+
+				'activities' => [
+					[
+						'user' => 'Kevin Hart',
+						'user_id' => 12,
+						'img_url' => '/vuexy/assets/img/avatars/12.png',
+						'action' => 'started the migration process',
+						'type' => 'progress',
+						'time' => 'Apr 7, 10:00 AM',
+						'created_at' => '2025-04-07T10:00:00Z',
+					],
+				],
+
+				'comments' => [
+					[
+						'id' => 13,
+						'user' => 'Chris Martin',
+						'user_id' => 11,
+						'img_url' => '/vuexy/assets/img/avatars/11.png',
+						'text' => '<p>Please confirm once the initial data dump is restored on RDS.</p>',
+						'time' => 'Apr 7, 10:15 AM',
+						'created_at' => '2025-04-07T10:15:00Z',
+						'updated_at' => null,
+					],
+					[
+						'id' => 14,
+						'user' => 'Kevin Hart',
+						'user_id' => 12,
+						'img_url' => '/vuexy/assets/img/avatars/12.png',
+						'text' => '<p>Dump restored. Setting up logical replication now.</p>',
+						'time' => 'Apr 7, 11:00 AM',
+						'created_at' => '2025-04-07T11:00:00Z',
+						'updated_at' => null,
+					]
+				],
+
+				'feedbacks' => [],
+				'submissions' => [],
+
+				'comments_count' => 2,
+				'feedbacks_count' => 0,
+				'submissions_count' => 0,
+				'attachments_count' => 0,
+			],
+
+			// Task 7: New - Frontend Bug Fix
+			[
+				'id' => 7,
+				'title' => 'Fix Mobile Navigation Glitch',
+				'description' => '<p>The hamburger menu overlaps with the company logo on devices smaller than 375px width (e.g., iPhone SE).</p><p>Please adjust the flexbox wrapping to ensure it behaves correctly.</p>',
+				'due_date' => '2025-04-12',
+				'priority' => 'Medium',
+				'status' => 'progress',
+				'created_at' => '2025-04-07T09:00:00Z',
+				'updated_at' => '2025-04-07T09:00:00Z',
+
+				'creator' => [
+					'id' => 3,
+					'name' => 'Sarah Lee',
+					'img_url' => '/vuexy/assets/img/avatars/3.png',
+					'profile_url' => '/show/UserProfile/3',
+				],
+
+				'assignee' => [],
+
+				'attachments' => [
+					[
+						'id' => 130,
+						'name' => 'nav_bug_screenshot.png',
+						'url' => '/storage/issues/nav_bug_screenshot.png',
+						'mime_type' => 'image/png',
+						'size_bytes' => 150000,
+						'uploaded_at' => '2025-04-07T09:05:00Z',
+					],
+				],
+
+				'activities' => [
+					[
+						'user' => 'Sarah Lee',
+						'user_id' => 3,
+						'img_url' => '/vuexy/assets/img/avatars/3.png',
+						'action' => 'created this bug ticket',
+						'type' => 'created',
+						'time' => 'Apr 7, 9:00 AM',
+						'created_at' => '2025-04-07T09:00:00Z',
+					],
+				],
+
+				'comments' => [],
+				'feedbacks' => [],
+				'submissions' => [],
+
+				'comments_count' => 0,
+				'feedbacks_count' => 0,
+				'submissions_count' => 0,
+				'attachments_count' => 1,
+			],
+
+			// Task 8: New - Security Audit
+			[
+				'id' => 8,
+				'title' => 'Annual Penetration Testing',
+				'description' => '<p>Conduct a gray-box penetration test on the primary web application.</p><ul><li>Check for OWASP Top 10 vulnerabilities</li><li>Audit 3rd-party dependencies</li><li>Provide a risk mitigation report</li></ul>',
+				'due_date' => '2025-05-01',
+				'priority' => 'High',
+				'status' => 'review',
+				'created_at' => '2025-03-20T08:00:00Z',
+				'updated_at' => '2025-04-07T14:00:00Z',
+
+				'creator' => [
+					'id' => 11,
+					'name' => 'Chris Martin',
+					'img_url' => '/vuexy/assets/img/avatars/11.png',
+					'profile_url' => '/show/UserProfile/11',
+				],
+
+				'assignee' => [
+					'startup' => [
+						'id' => 16,
+						'name' => 'CyberSec Shield',
+						'img_url' => '/vuexy/assets/img/icons/brands/github.png',
+						'profile_url' => '/dashboard/companyProfile/16',
+					],
+					'founder' => [
+						'id' => 14,
+						'name' => 'Nina Dobrev',
+						'img_url' => '/vuexy/assets/img/avatars/14.png',
+						'profile_url' => '/show/UserProfile/14',
+					],
+				],
+
+				'attachments' => [
+					[
+						'id' => 140,
+						'name' => 'scoping_document.pdf',
+						'url' => '/storage/security/scoping_document.pdf',
+						'mime_type' => 'application/pdf',
+						'size_bytes' => 850000,
+						'uploaded_at' => '2025-03-20T08:30:00Z',
+					]
+				],
+
+				'activities' => [
+					[
+						'user' => 'Nina Dobrev',
+						'user_id' => 14,
+						'img_url' => '/vuexy/assets/img/avatars/14.png',
+						'action' => 'submitted the final vulnerability report',
+						'type' => 'submit',
+						'time' => 'Apr 7, 1:45 PM',
+						'created_at' => '2025-04-07T13:45:00Z',
+					]
+				],
+
+				'comments' => [
+					[
+						'id' => 15,
+						'user' => 'Nina Dobrev',
+						'user_id' => 14,
+						'img_url' => '/vuexy/assets/img/avatars/14.png',
+						'text' => '<p>Attached the final report. Only found a few low-severity issues related to missing security headers.</p>',
+						'time' => 'Apr 7, 1:50 PM',
+						'created_at' => '2025-04-07T13:50:00Z',
+						'updated_at' => null,
+					]
+				],
+
+				'feedbacks' => [],
+
+				'submissions' => [
+					[
+						'id' => 25,
+						'user' => 'Nina Dobrev',
+						'user_id' => 14,
+						'img_url' => '/vuexy/assets/img/avatars/14.png',
+						'note' => 'Pen-Test Final Report 2025',
+						'status' => 'pending_review',
+						'time' => 'Apr 7, 1:45 PM',
+						'created_at' => '2025-04-07T13:45:00Z',
+						'files' => [
+							[
+								'id' => 304,
+								'name' => 'Pentest_Report_April2025.pdf',
+								'url' => '/storage/security/Pentest_Report_April2025.pdf',
+								'mime_type' => 'application/pdf',
+								'size_bytes' => 2500000,
+							]
+						],
+					]
+				],
+
+				'comments_count' => 1,
+				'feedbacks_count' => 0,
+				'submissions_count' => 1,
+				'attachments_count' => 1,
+			],
+		];
+
+		$boards = [
+			'pending'   => ['label' => __('admin.Pending'), 'color' => 'bg-label-secondary'],
+			'progress'  => ['label' => __('admin.In_Progress'), 'color' => 'bg-label-warning'],
+			'review'    => ['label' => __('admin.In_Review'), 'color' => 'bg-label-info'],
+			'completed' => ['label' => __('admin.Completed'), 'color' => 'bg-label-success'],
+		];
+
+		$priorityConfig = [
+			'Low'    => ['label' => __('admin.Low'), 'class' => 'bg-label-secondary', 'dot' => 'bg-secondary'],
+			'Medium' => ['label' => __('admin.Medium'), 'class' => 'bg-label-info', 'dot' => 'bg-info'],
+			'High'   => ['label' => __('admin.High'), 'class' => 'bg-label-danger', 'dot' => 'bg-danger'],
+		];
+
+		// Reformat mappings cleanly for JS injections later
+		$jsPriorityMap = [];
+		foreach($priorityConfig as $k => $v) {
+				$jsPriorityMap[$k] = ['label' => $v['label'], 'cls' => $v['class'], 'dot' => $v['dot']];
 		}
-		$kanban = [];
-		foreach ($available_statuses as $status) {
-			$kanban[] = [
-				'id' => $status . '-board',
-				'title' => __('admin.boardTitle' . ucfirst($status)),
-				'item' => $_tasks->get($status),
-			];
+
+		$jsStatusMap = [];
+		foreach($boards as $k => $v) {
+				$jsStatusMap[$k] = $v['label'];
 		}
 
-		$startup = "SELECT MR.id,
-		MR.mentor_id as MT_mentor_id,
-		MR.user_id as MT_user_id,
-		MR.id as MT_mentorship_request_id,
-		C.id as MT_company_id,
-		C.name_en as C_name_en,
-		C.logo as C_logo,
-		C.step as C_step,
-		C.cycle as C_cycle,
-		U.id as U_id,
-		Cy.title as CY_title,
-		Cy.id as CY_id,
-		S.title as S_title,
-		S.id as S_id,
-		MR.zoom_date as MR_zoom_date
-		FROM
-		mentorship_requests as MR
-		LEFT JOIN users as U ON U.id = MR.user_id
-		LEFT JOIN companies as C ON C.id = U.company_id
-		LEFT JOIN steps as S ON S.id = C.step
-		LEFT JOIN cycles as Cy ON Cy.id = C.cycle
-		WHERE MR.id = ? ";
-		$startup = DB::select($startup, [$mentorshipId]);
-		$startup = collect($startup)->first();
-		$data = [];
-		$data['id'] = $startup->id ?? '';
-		$data['company_name'] = $startup->C_name_en ?? '';
-		$data['start_up_logo'] = $startup->C_logo ?? '';
-		$data['program_name'] = $startup->CY_title ?? '';
-		$data['step_name'] = $startup->S_title ?? '';
-		$data['mentor_session_id'] = $startup->MT_mentorship_request_id ?? '';
-		$data['mentor_zoom_date'] = $startup->MR_zoom_date ?? '';
+		// Offcanvas Tab Definitions
+		$offcanvasTabs = [
+			[
+				'target' => '#vt-details',
+				'icon'   => 'ti-info-circle',
+				'label'  => __('admin.Details') ?? 'Details',
+				'active' => true,
+				'show'   => true,
+			],
+			[
+				'target' => '#vt-submissions',
+				'icon'   => 'ti-paperclip',
+				'label'  => __('admin.Submissions') ?? 'Submissions',
+				'badge'  => ['id' => 'vt-submissions-count', 'class' => 'bg-label-warning'],
+				'active' => false,
+				'show'=> auth()->user()->ableTo('tasks.update') === '1' ? true : false,
+			],
+			[
+				'target' => '#vt-feedback',
+				'icon'   => 'ti-star',
+				'label'  => __('admin.feedback'),
+				'badge'  => ['id' => 'vt-feedback-count', 'class' => 'bg-label-primary'],
+				'active' => false,
+				'show'   => true,
+			],
+			[
+				'target' => '#vt-comments',
+				'icon'   => 'ti-message',
+				'label'  => __('admin.Comments'),
+				'badge'  => ['id' => 'vt-comment-count', 'class' => 'bg-label-danger bg-glow'],
+				'active' => false,
+				'show'   => true,
+			],
+			[
+				'target' => '#vt-activity',
+				'icon'   => 'ti-activity',
+				'label'  => __('admin.Activities'),
+				'badge'  => ['id' => 'vt-activity-count', 'class' => 'bg-label-info bg-glow'],
+				'active' => false,
+				'show'   => true,
+			],
+		];
 
-			
-
-
-
-
-
-		return view('mentor.mentorshipTasks.index', compact('tasks', 'kanban', 'lang', 'session_id', 'mentor', 'users', 'company', 'labels', 'data'));
+		return view('kanban.index', compact('cycle', 'tasks', 'boards', 'priorityConfig', 'jsPriorityMap', 'jsStatusMap', 'offcanvasTabs'));
 	}
 
 	/**

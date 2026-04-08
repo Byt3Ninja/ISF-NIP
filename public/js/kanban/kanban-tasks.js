@@ -9,6 +9,77 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
   const cfg = window.KanbanConfig;
   const lbl = cfg.labels;
 
+  // ─── Inline Dropzone (Add / Edit) ──────────────────────────────────────────
+
+  function makeInlineDz(dzId, inputId, queueId, errorId) {
+    let queue = []; // { file, id }
+
+    function renderQueue() {
+      const $q = $(queueId);
+      $q.empty();
+      queue.forEach(item => {
+        $q.append(`
+          <div class="d-flex align-items-center gap-2 border rounded p-2 bg-body" id="idzq-${item.id}">
+            <i class="ti ${fileIcon(item.file.name)} ti-sm flex-shrink-0"></i>
+            <div class="flex-grow-1 overflow-hidden">
+              <div class="text-truncate small fw-medium">${item.file.name}</div>
+              <div class="text-muted" style="font-size:.7rem;">${formatFileSize(item.file.size)}</div>
+            </div>
+            <button type="button" class="btn btn-icon btn-sm btn-text-danger rounded-circle flex-shrink-0 idz-remove-btn" data-idz="${item.id}" data-dz-scope="${dzId}">
+              <i class="ti ti-x ti-xs"></i>
+            </button>
+          </div>`);
+      });
+      $(errorId).text('');
+    }
+
+    function addFiles(files) {
+      Array.from(files).forEach(file => {
+        if (queue.length >= DZ_MAX_FILES) { $(errorId).text(lbl.maxFilesReached); return; }
+        if (!DZ_ACCEPT_TYPES.includes(file.type)) { $(errorId).text(`"${file.name}" ${lbl.invalidFileType}`); return; }
+        if (file.size > DZ_MAX_SIZE_MB * 1024 * 1024) { $(errorId).text(`"${file.name}" ${lbl.exceedsSizeLimit}`); return; }
+        if (queue.find(i => i.file.name === file.name && i.file.size === file.size)) return;
+        queue.push({ file, id: Date.now() + Math.random() });
+      });
+      renderQueue();
+    }
+
+    function reset() { queue = []; renderQueue(); }
+
+    function getFiles() { return queue.map(i => i.file); }
+
+    // Click to browse
+    $(dzId).on('click', function (e) {
+      if (!$(e.target).hasClass('idz-remove-btn') && !$(e.target).closest('.idz-remove-btn').length) {
+        $(inputId).val('');
+        $(inputId)[0].click();
+      }
+    });
+
+    $(inputId).on('change', function () { addFiles(this.files); $(this).val(''); });
+
+    $(dzId).on('dragover dragenter', function (e) {
+      e.preventDefault(); e.stopPropagation();
+      $(this).addClass('dz-dragover');
+    }).on('dragleave dragend drop', function (e) {
+      e.preventDefault(); e.stopPropagation();
+      $(this).removeClass('dz-dragover');
+      if (e.type === 'drop') addFiles(e.originalEvent.dataTransfer.files);
+    });
+
+    $(document).on('click', `.idz-remove-btn[data-dz-scope="${dzId}"]`, function (e) {
+      e.stopPropagation();
+      const id = $(this).data('idz');
+      queue = queue.filter(i => i.id != id);
+      renderQueue();
+    });
+
+    return { reset, getFiles };
+  }
+
+  const addDz = makeInlineDz('#add-dropzone', '#add-dropzone-input', '#add-dropzone-queue', '#add-file-error');
+  const etDz  = makeInlineDz('#et-dropzone',  '#et-dropzone-input',  '#et-dropzone-queue',  '#et-file-error');
+
   // ─── View Task ─────────────────────────────────────────────────────────────
 
   $(document).on('click', '.view-task-btn', function () {
@@ -84,13 +155,13 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
 
     addFv.validate().then(function (status) {
       if (status !== 'Valid') return;
-      if (!validateFiles($('#add-attachments'), '#add-file-error')) return;
 
       $btn.prop('disabled', true).html(`<span class="spinner-border spinner-border-sm me-2"></span>${lbl.processing}`);
 
       const fd = new FormData($form[0]);
       fd.append('description', addDescQ.root.innerHTML);
       fd.append('program_id', program.id);
+      addDz.getFiles().forEach(f => fd.append('attachments[]', f));
 
       $.ajax({
         url: cfg.routes.storeTask,
@@ -113,6 +184,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
           syncTaskToBoard(newTask, null);
           $form[0].reset();
           addDescQ.setContents([]);
+          addDz.reset();
           $('#add-priority, #add-status').val('').trigger('change');
           addFv.resetForm(true);
           $('#addTaskOffcanvas').offcanvas('hide');
@@ -139,7 +211,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
     etDescQ.root.innerHTML = taskData.description;
     $('#et-priority').val(taskData.priority).trigger('change');
     $('#et-status').val(taskData.status).trigger('change');
-    $('#et-attachments').val('').removeClass('is-invalid');
+    etDz.reset();
     $('#et-file-error').text('');
 
     if (taskData.attachments && taskData.attachments.length) {
@@ -158,13 +230,13 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
 
     etFv.validate().then(function (status) {
       if (status !== 'Valid') return;
-      if (!validateFiles($('#et-attachments'), '#et-file-error')) return;
 
       const taskId = $('#et-id').val();
       $btn.prop('disabled', true).html(`<span class="spinner-border spinner-border-sm me-2"></span>${lbl.processing}`);
 
       const fd = new FormData($form[0]);
       fd.append('description', etDescQ.root.innerHTML);
+      etDz.getFiles().forEach(f => fd.append('attachments[]', f));
 
       $.ajax({
         url: cfg.routes.updateTask.replace(':id', taskId),
@@ -187,6 +259,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
             syncTaskToBoard(updatedTask, oldStatus);
           }
           $('#editTaskOffcanvas').offcanvas('hide');
+          etDz.reset();
           $btn.prop('disabled', false).html(lbl.update);
         },
         error: function () {
