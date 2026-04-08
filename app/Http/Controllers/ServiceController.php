@@ -153,10 +153,33 @@ class ServiceController extends Controller
 	{
 		$user = auth()->user();
 		$orgIds = $user->organizations_ids;
-		$serviceCategories = ServiceCategory::where(function ($q) use ($orgIds) {
-				$q->whereNull('organization_id')
-				  ->orWhereHas('organization', function ($q) use ($orgIds) {
+		$serviceCategories = ServiceCategory::with(['organization', 'creator', 'creator.roles', 'creator.organizations'])
+			->where(function ($q) use ($orgIds) {
+				$q->whereHas('organization', function ($q) use ($orgIds) {
 					$q->whereIn('organizations.id', $orgIds);
+				})
+				->orWhere(function ($q) use ($orgIds) {
+					$q->whereNull('organization_id')
+					  ->where(function ($q) use ($orgIds) {
+						$q->whereNull('created_by')
+						  ->orWhereHas('creator', function ($q) {
+							$q->whereHas('roles', function ($q) {
+								$q->where('default_for', 'Admin');
+							});
+						})
+						->orWhereHas('creator', function ($q) {
+							$q->whereDoesntHave('roles', function ($q) {
+								$q->where('default_for', 'subadmin');
+							});
+						})
+						->orWhereHas('creator', function ($q) use ($orgIds) {
+							$q->whereHas('roles', function ($q) {
+								$q->where('default_for', 'subadmin');
+							})->whereHas('organizations', function ($q) use ($orgIds) {
+								$q->whereIn('organizations.id', $orgIds);
+							});
+						});
+					});
 				});
 			})->get();
 		$Setting = Settings::where('id', 1)->first();
@@ -263,10 +286,33 @@ class ServiceController extends Controller
 	{
 		$user = auth()->user();
 		$orgIds = $user->organizations_ids;
-		$serviceCategories = ServiceCategory::where(function ($q) use ($orgIds) {
-				$q->whereNull('organization_id')
-				  ->orWhereHas('organization', function ($q) use ($orgIds) {
+		$serviceCategories = ServiceCategory::with(['organization', 'creator', 'creator.roles', 'creator.organizations'])
+			->where(function ($q) use ($orgIds) {
+				$q->whereHas('organization', function ($q) use ($orgIds) {
 					$q->whereIn('organizations.id', $orgIds);
+				})
+				->orWhere(function ($q) use ($orgIds) {
+					$q->whereNull('organization_id')
+					  ->where(function ($q) use ($orgIds) {
+						$q->whereNull('created_by')
+						  ->orWhereHas('creator', function ($q) {
+							$q->whereHas('roles', function ($q) {
+								$q->where('default_for', 'Admin');
+							});
+						})
+						->orWhereHas('creator', function ($q) {
+							$q->whereDoesntHave('roles', function ($q) {
+								$q->where('default_for', 'subadmin');
+							});
+						})
+						->orWhereHas('creator', function ($q) use ($orgIds) {
+							$q->whereHas('roles', function ($q) {
+								$q->where('default_for', 'subadmin');
+							})->whereHas('organizations', function ($q) use ($orgIds) {
+								$q->whereIn('organizations.id', $orgIds);
+							});
+						});
+					});
 				});
 			})->get();
 		if ($user->hasAnyRole('Admin|serviceProvider')) {

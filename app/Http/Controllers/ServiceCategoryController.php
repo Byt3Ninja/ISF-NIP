@@ -36,7 +36,7 @@ class ServiceCategoryController extends Controller
 	{
 		$user = auth()->user();
 		$orgIds = $user->organizations_ids;
-		$serviceCategories = ServiceCategory::with(['organization', 'creator'])
+		$serviceCategories = ServiceCategory::with(['organization', 'creator', 'creator.roles', 'creator.organizations'])
 			->where(function ($q) use ($orgIds, $user) {
 				// Categories assigned to a specific org the user can access
 				$q->whereHas('organization', function ($q) use ($orgIds) {
@@ -50,19 +50,19 @@ class ServiceCategoryController extends Controller
 						  $q->whereNull('created_by')
 							->orWhereHas('creator', function ($q) {
 								$q->whereHas('roles', function ($q) {
-									$q->where('name', 'Admin');
+									$q->where('default_for', 'Admin');
 								});
 							})
 							// Created by a non-SubAdmin (role changed) = system-wide fallback
 							->orWhereHas('creator', function ($q) {
 								$q->whereDoesntHave('roles', function ($q) {
-									$q->where('name', 'subadmin');
+									$q->where('default_for', 'subadmin');
 								});
 							})
 							// Created by SubAdmin whose orgs overlap with current user's orgs
 							->orWhereHas('creator', function ($q) use ($orgIds) {
 								$q->whereHas('roles', function ($q) {
-									$q->where('name', 'subadmin');
+									$q->where('default_for', 'subadmin');
 								})->whereHas('organizations', function ($q) use ($orgIds) {
 									$q->whereIn('organizations.id', $orgIds);
 								});
