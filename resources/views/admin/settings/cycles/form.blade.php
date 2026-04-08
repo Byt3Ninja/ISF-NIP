@@ -309,9 +309,11 @@
                                     class="form-control @error($fieldName) is-invalid @enderror"
                                     id="{{ $fieldId }}"
                                     name="{{ $fieldName }}"
+                                    data-file-input="1"
                                     {{ $question['is_required'] ? 'required' : '' }}
                                     {{ $isReadOnly ? 'disabled' : '' }}
                                   />
+                                  <div class="file-validation-error invalid-feedback d-none mt-1" id="{{ $fieldId }}-error"></div>
                                   @php
                                     $existingFile = trim(old($fieldName));
                                   @endphp
@@ -570,6 +572,121 @@
 <script>
   flatpickr(".datepicker", { dateFormat: "Y-m-d", allowInput: true });
   flatpickr(".timepicker", { enableTime: true, noCalendar: true, dateFormat: "H:i", allowInput: true });
+
+  (function () {
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+    const ALLOWED_TYPES = [
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-powerpoint',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'application/pdf',
+      'image/jpeg',
+      'image/png',
+      'image/webp',
+    ];
+    const ALLOWED_EXTS = /\.(doc|docx|xls|xlsx|ppt|pptx|pdf|jpg|jpeg|png|webp)$/i;
+
+    const locale = document.documentElement.lang === 'ar' ? 'ar' : 'en';
+    const messages = {
+      en: {
+        size: 'File size must not exceed 10 MB.',
+        type: 'Supported file types are Word, Excel, PPT, PDF, JPG, JPEG, PNG, and WEBP.',
+      },
+      ar: {
+        size: 'يجب ألا يتجاوز حجم الملف 10 ميجابايت.',
+        type: 'أنواع الملفات المدعومة هي  Word وExcel وPPT وPDF وJPG وJPEG وPNG وWEBP.',
+      },
+    };
+    const t = messages[locale];
+
+    function validateFileInput(input) {
+      const errorEl = document.getElementById(input.id + '-error');
+      if (!errorEl) return true;
+
+      const file = input.files[0];
+      if (!file) {
+        clearError(input, errorEl);
+        return true;
+      }
+
+      const typeOk = ALLOWED_TYPES.includes(file.type) || ALLOWED_EXTS.test(file.name);
+      if (!typeOk) {
+        showError(input, errorEl, t.type);
+        return false;
+      }
+
+      if (file.size > MAX_FILE_SIZE) {
+        showError(input, errorEl, t.size);
+        return false;
+      }
+
+      clearError(input, errorEl);
+      return true;
+    }
+
+    function showError(input, errorEl, msg) {
+      input.classList.add('is-invalid');
+      errorEl.textContent = msg;
+      errorEl.classList.remove('d-none');
+      errorEl.classList.add('d-block');
+    }
+
+    function clearError(input, errorEl) {
+      input.classList.remove('is-invalid');
+      errorEl.textContent = '';
+      errorEl.classList.add('d-none');
+      errorEl.classList.remove('d-block');
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const fileInputs = document.querySelectorAll('input[data-file-input]');
+      const form = document.getElementById('cycleApplicationForm');
+
+      function allFileInputsValid() {
+        let valid = true;
+        fileInputs.forEach(function (input) {
+          if (!validateFileInput(input)) valid = false;
+        });
+        return valid;
+      }
+
+      function scrollToFirstFileError() {
+        const firstInvalid = form && form.querySelector('input[data-file-input].is-invalid');
+        if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      fileInputs.forEach(function (input) {
+        input.addEventListener('change', function () {
+          validateFileInput(input);
+        });
+      });
+
+      if (form) {
+        // Override form.submit() so programmatic calls (FormValidation DefaultSubmit,
+        // logic handler) are also blocked when a file error exists.
+        const nativeSubmit = HTMLFormElement.prototype.submit.bind(form);
+        form.submit = function () {
+          if (!allFileInputsValid()) {
+            scrollToFirstFileError();
+            return;
+          }
+          nativeSubmit();
+        };
+
+        // Also block the submit event (covers button clicks not going through FV).
+        form.addEventListener('submit', function (e) {
+          if (!allFileInputsValid()) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            scrollToFirstFileError();
+          }
+        }, true);
+      }
+    });
+  })();
 
   document.addEventListener("DOMContentLoaded", function () {
     const sections = document.querySelectorAll(".section-wrapper");
