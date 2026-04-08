@@ -350,7 +350,7 @@ class HomeController extends Controller
             } else {
                 $applied_companies_by_cycle = collect([]);
                 $applied_company_count = 0;
-                $alumni_company = Almuni::groupBy('company_id')->get();
+                $alumni_company = Almuni::select('company_id')->distinct()->get();
 
             }
         } else {
