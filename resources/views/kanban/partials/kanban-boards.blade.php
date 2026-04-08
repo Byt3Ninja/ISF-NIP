@@ -49,12 +49,15 @@
                     <i class="ti ti-calendar ti-xs me-1"></i> {{ $task['due_date'] }}
                   </span>
                 </span>
-                <div data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $r['name'] }}">
-                  @if (!empty($r['img_url']))
-                    <img src="{{ $r['img_url'] }}" alt="avatar" class="rounded-circle object-fit-cover" style="width: 24px; height: 24px;" />
-                  @else
-                    <span class="badge bg-label-primary rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 24px; height: 24px;">{{ $ri }}</span>
-                  @endif
+                <div class="d-flex align-items-center gap-2">
+                  <span>{{ __('admin.Reporter') }}:</span>
+                  <div data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $r['name'] }}">
+                    @if (!empty($r['img_url']))
+                      <img src="{{ $r['img_url'] }}" alt="avatar" class="rounded-circle object-fit-cover" style="width: 24px; height: 24px;" />
+                    @else
+                      <span class="badge bg-label-primary rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 24px; height: 24px;">{{ $ri }}</span>
+                    @endif
+                  </div>
                 </div>
               </div>
             </div>

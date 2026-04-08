@@ -135,7 +135,7 @@ class MentorshipTaskController extends Controller
 					'id' => 1,
 					'name' => 'Alice Johnson',
 					'img_url' => '/vuexy/assets/img/avatars/1.png',
-					'profile_url' => '/show/UserProfile/1',
+					'profile_url' => '/dashboard/show/UserProfile/1',
 				],
 
 				'assignee' => [
@@ -149,7 +149,7 @@ class MentorshipTaskController extends Controller
 						'id' => 2,
 						'name' => 'Mark Evans',
 						'img_url' => '/vuexy/assets/img/avatars/2.png',
-						'profile_url' => '/show/UserProfile/2',
+						'profile_url' => '/dashboard/show/UserProfile/2',
 					],
 				],
 
@@ -254,7 +254,7 @@ class MentorshipTaskController extends Controller
 					'id' => 3,
 					'name' => 'Sarah Lee',
 					'img_url' => '/vuexy/assets/img/avatars/3.png',
-					'profile_url' => '/show/UserProfile/3',
+					'profile_url' => '/dashboard/show/UserProfile/3',
 				],
 
 				'assignee' => [
@@ -268,7 +268,7 @@ class MentorshipTaskController extends Controller
 						'id' => 4,
 						'name' => 'David Kim',
 						'img_url' => '/vuexy/assets/img/avatars/4.png',
-						'profile_url' => '/show/UserProfile/4',
+						'profile_url' => '/dashboard/show/UserProfile/4',
 					],
 				],
 
@@ -383,7 +383,7 @@ class MentorshipTaskController extends Controller
 					'id' => 5,
 					'name' => 'Michael Brown',
 					'img_url' => '/vuexy/assets/img/avatars/5.png',
-					'profile_url' => '/show/UserProfile/5',
+					'profile_url' => '/dashboard/show/UserProfile/5',
 				],
 
 				'assignee' => [
@@ -397,7 +397,7 @@ class MentorshipTaskController extends Controller
 						'id' => 6,
 						'name' => 'Emma Wilson',
 						'img_url' => '/vuexy/assets/img/avatars/6.png',
-						'profile_url' => '/show/UserProfile/6',
+						'profile_url' => '/dashboard/show/UserProfile/6',
 					],
 				],
 
@@ -485,7 +485,7 @@ class MentorshipTaskController extends Controller
 					'id' => 7,
 					'name' => 'Olivia Martinez',
 					'img_url' => '/vuexy/assets/img/avatars/7.png',
-					'profile_url' => '/show/UserProfile/7',
+					'profile_url' => '/dashboard/show/UserProfile/7',
 				],
 
 				'assignee' => [
@@ -499,7 +499,7 @@ class MentorshipTaskController extends Controller
 						'id' => 8,
 						'name' => 'James Anderson',
 						'img_url' => '/vuexy/assets/img/avatars/8.png',
-						'profile_url' => '/show/UserProfile/8',
+						'profile_url' => '/dashboard/show/UserProfile/8',
 					],
 				],
 
@@ -571,7 +571,7 @@ class MentorshipTaskController extends Controller
 					'id' => 9,
 					'name' => 'Daniel White',
 					'img_url' => '/vuexy/assets/img/avatars/9.png',
-					'profile_url' => '/show/UserProfile/9',
+					'profile_url' => '/dashboard/show/UserProfile/9',
 				],
 
 				'assignee' => [
@@ -585,7 +585,7 @@ class MentorshipTaskController extends Controller
 						'id' => 10,
 						'name' => 'Sophia Taylor',
 						'img_url' => '/vuexy/assets/img/avatars/10.png',
-						'profile_url' => '/show/UserProfile/10',
+						'profile_url' => '/dashboard/show/UserProfile/10',
 					],
 				],
 
@@ -656,7 +656,7 @@ class MentorshipTaskController extends Controller
 					'id' => 11,
 					'name' => 'Chris Martin',
 					'img_url' => '/vuexy/assets/img/avatars/11.png',
-					'profile_url' => '/show/UserProfile/11',
+					'profile_url' => '/dashboard/show/UserProfile/11',
 				],
 
 				'assignee' => [
@@ -670,7 +670,7 @@ class MentorshipTaskController extends Controller
 						'id' => 12,
 						'name' => 'Kevin Hart',
 						'img_url' => '/vuexy/assets/img/avatars/12.png',
-						'profile_url' => '/show/UserProfile/12',
+						'profile_url' => '/dashboard/show/UserProfile/12',
 					],
 				],
 
@@ -735,7 +735,7 @@ class MentorshipTaskController extends Controller
 					'id' => 3,
 					'name' => 'Sarah Lee',
 					'img_url' => '/vuexy/assets/img/avatars/3.png',
-					'profile_url' => '/show/UserProfile/3',
+					'profile_url' => '/dashboard/show/UserProfile/3',
 				],
 
 				'assignee' => [],
@@ -788,7 +788,7 @@ class MentorshipTaskController extends Controller
 					'id' => 11,
 					'name' => 'Chris Martin',
 					'img_url' => '/vuexy/assets/img/avatars/11.png',
-					'profile_url' => '/show/UserProfile/11',
+					'profile_url' => '/dashboard/show/UserProfile/11',
 				],
 
 				'assignee' => [
@@ -802,7 +802,7 @@ class MentorshipTaskController extends Controller
 						'id' => 14,
 						'name' => 'Nina Dobrev',
 						'img_url' => '/vuexy/assets/img/avatars/14.png',
-						'profile_url' => '/show/UserProfile/14',
+						'profile_url' => '/dashboard/show/UserProfile/14',
 					],
 				],
 
@@ -912,7 +912,7 @@ class MentorshipTaskController extends Controller
 				'label'  => __('admin.Submissions') ?? 'Submissions',
 				'badge'  => ['id' => 'vt-submissions-count', 'class' => 'bg-label-warning'],
 				'active' => false,
-				'show'=> auth()->user()->ableTo('tasks.update') === '1' ? true : false,
+				'show'=> auth()->user()->hasAnyRole(['admin', 'subadmin', 'organizationManager']),
 			],
 			[
 				'target' => '#vt-feedback',

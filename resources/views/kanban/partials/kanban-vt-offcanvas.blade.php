@@ -48,7 +48,7 @@
           </div>
         </div>
 
-        @role('Admin')
+        @if ($_user->hasAnyRole('admin|subadmin|organizationManager'))
         <div class="mb-4 d-none" id="vt-assignee-wrapper">
           <span class="text-muted small d-block mb-2">{{ __('admin.Assignee') ?? 'Assignee' }}</span>
           <div class="border rounded p-3 bg-body d-flex flex-column gap-3">
@@ -68,7 +68,7 @@
             </div>
           </div>
         </div>
-        @endrole
+        @endif
 
         <div class="mb-4">
           <span class="text-muted small d-block mb-1">{{ $_user->ableTo('tasks.update', $permissions) ? __('admin.provided_resources') : __('admin.Attachments') }}</span>
@@ -114,7 +114,7 @@
       <div class="tab-pane fade" id="vt-feedback" role="tabpanel">
         <div id="vt-feedback-list" class="small pe-2"></div>
 
-        @if ($_user->ableTo('tasks.update', $permissions))
+        @if ($_user->ableTo('tasks.add_feedback', $permissions))
         <div class="mt-3" id="vt-feedback-form-wrapper">
           <h5 class="fw-semibold small mb-3">{{ __('admin.add_feedback') }}</h5>
 

@@ -55,7 +55,10 @@ function buildTaskCard(task) {
             ${commentCount > 0 ? `<span class="d-flex align-items-center" title="${commentCount} Comments"><i class="ti ti-message ti-xs me-1"></i>${commentCount}</span>` : ''}
             <span class="d-flex align-items-center"><i class="ti ti-calendar ti-xs me-1"></i> ${task.due_date || ''}</span>
           </span>
-          <div data-bs-toggle="tooltip" data-bs-placement="top" title="${$('<div>').text(r.name).html()}">${avatarHtml}</div>
+          <div class="d-flex align-items-center gap-2">
+            <span>${cfg.labels.reporter}:</span>
+            <div data-bs-toggle="tooltip" data-bs-placement="top" title="${$('<div>').text(r.name).html()}">${avatarHtml}</div>
+          </div>
         </div>
       </div>
     </div>`;

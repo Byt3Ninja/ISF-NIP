@@ -71,8 +71,10 @@
   window.KanbanConfig = {
     isAbleToEdit:    @json($_user->ableTo('tasks.store', $permissions)),
     isAdmin:         @json(auth()->user()->hasRole('Admin')),
+    isSubAdmin:         @json(auth()->user()->hasRole('subadmin')),
+    isOrgManager:         @json(auth()->user()->hasRole('OrganizationManager')),
     currentUserName: @json(auth()->user()->name ?? 'You'),
-    profileBaseUrl:  @json(url("/show/UserProfile")),
+    profileBaseUrl:  @json(url("/dashboard/show/UserProfile")),
 
     priorityMap: @json($jsPriorityMap),
     statusMap:   @json($jsStatusMap),
@@ -109,6 +111,7 @@
       yes:                @json(__('admin.DYes')),
       no:                 @json(__('admin.DNo')),
       // Tasks
+      reporter:           @json(__('admin.Reporter')),
       archiveTask:        @json(__('admin.archive_task')),
       archiveTaskConfirm: @json(__('admin.archive_task_confirm')),
       reopenTask:         @json(__('admin.reopen_task')),
