@@ -65,11 +65,18 @@ function validateFiles(fileInput, errorSelector) {
     'application/vnd.ms-powerpoint',
     'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   ];
-  const maxSize = 10 * 1024 * 1024;
+  const maxSize  = 10 * 1024 * 1024;
+  const maxFiles = 5;
 
   fileInput.removeClass('is-invalid');
   $errorDiv.text('');
   if (!files.length) return true;
+
+  if (files.length > maxFiles) {
+    fileInput.addClass('is-invalid');
+    $errorDiv.text(`You can upload a maximum of ${maxFiles} files at a time.`);
+    return false;
+  }
 
   for (let i = 0; i < files.length; i++) {
     if (!allowedTypes.includes(files[i].type)) {

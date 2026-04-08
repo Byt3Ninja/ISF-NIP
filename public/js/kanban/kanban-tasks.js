@@ -9,14 +9,85 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
   const cfg = window.KanbanConfig;
   const lbl = cfg.labels;
 
+  // ─── Inline Dropzone (Add / Edit) ──────────────────────────────────────────
+
+  function makeInlineDz(dzId, inputId, queueId, errorId) {
+    let queue = []; // { file, id }
+
+    function renderQueue() {
+      const $q = $(queueId);
+      $q.empty();
+      queue.forEach(item => {
+        $q.append(`
+          <div class="d-flex align-items-center gap-2 border rounded p-2 bg-body" id="idzq-${item.id}">
+            <i class="ti ${fileIcon(item.file.name)} ti-sm flex-shrink-0"></i>
+            <div class="flex-grow-1 overflow-hidden">
+              <div class="text-truncate small fw-medium">${item.file.name}</div>
+              <div class="text-muted" style="font-size:.7rem;">${formatFileSize(item.file.size)}</div>
+            </div>
+            <button type="button" class="btn btn-icon btn-sm btn-text-danger rounded-circle flex-shrink-0 idz-remove-btn" data-idz="${item.id}" data-dz-scope="${dzId}">
+              <i class="ti ti-x ti-xs"></i>
+            </button>
+          </div>`);
+      });
+      $(errorId).text('');
+    }
+
+    function addFiles(files) {
+      Array.from(files).forEach(file => {
+        if (queue.length >= DZ_MAX_FILES) { $(errorId).text(lbl.maxFilesReached); return; }
+        if (!DZ_ACCEPT_TYPES.includes(file.type)) { $(errorId).text(`"${file.name}" ${lbl.invalidFileType}`); return; }
+        if (file.size > DZ_MAX_SIZE_MB * 1024 * 1024) { $(errorId).text(`"${file.name}" ${lbl.exceedsSizeLimit}`); return; }
+        if (queue.find(i => i.file.name === file.name && i.file.size === file.size)) return;
+        queue.push({ file, id: Date.now() + Math.random() });
+      });
+      renderQueue();
+    }
+
+    function reset() { queue = []; renderQueue(); }
+
+    function getFiles() { return queue.map(i => i.file); }
+
+    // Click to browse
+    $(dzId).on('click', function (e) {
+      if (!$(e.target).hasClass('idz-remove-btn') && !$(e.target).closest('.idz-remove-btn').length) {
+        $(inputId).val('');
+        $(inputId)[0].click();
+      }
+    });
+
+    $(inputId).on('change', function () { addFiles(this.files); $(this).val(''); });
+
+    $(dzId).on('dragover dragenter', function (e) {
+      e.preventDefault(); e.stopPropagation();
+      $(this).addClass('dz-dragover');
+    }).on('dragleave dragend drop', function (e) {
+      e.preventDefault(); e.stopPropagation();
+      $(this).removeClass('dz-dragover');
+      if (e.type === 'drop') addFiles(e.originalEvent.dataTransfer.files);
+    });
+
+    $(document).on('click', `.idz-remove-btn[data-dz-scope="${dzId}"]`, function (e) {
+      e.stopPropagation();
+      const id = $(this).data('idz');
+      queue = queue.filter(i => i.id != id);
+      renderQueue();
+    });
+
+    return { reset, getFiles };
+  }
+
+  const addDz = makeInlineDz('#add-dropzone', '#add-dropzone-input', '#add-dropzone-queue', '#add-file-error');
+  const etDz = makeInlineDz('#et-dropzone', '#et-dropzone-input', '#et-dropzone-queue', '#et-file-error');
+
   // ─── View Task ─────────────────────────────────────────────────────────────
 
   $(document).on('click', '.view-task-btn', function () {
-    const taskId   = $(this).data('task-id');
+    const taskId = $(this).data('task-id');
     const taskData = tasks.find(t => t.id === taskId);
     if (!taskData) return;
 
-    const p      = cfg.priorityMap[taskData.priority];
+    const p = cfg.priorityMap[taskData.priority];
     const sLabel = cfg.statusMap[taskData.status];
 
     $('#vt-title').text(taskData.title);
@@ -25,36 +96,79 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
     $('#vt-priority').html(`<span class="badge ${p.cls} rounded-pill"><span class="d-inline-block rounded-circle me-1 ${p.dot}" style="width:6px;height:6px;"></span>${p.label}</span>`);
     $('#vt-status').html(`<span class="badge bg-label-secondary rounded-pill">${sLabel}</span>`);
 
-    // Assignee — Admin only
-    if (cfg.isAdmin && taskData.assignee) {
+    console.log('cfg.isAdmin', cfg.isAdmin)
+    // console.log('isSubAdmin',isSubAdmin)
+    console.log('cfg.isOrgManager', cfg.isOrgManager)
+    console.log('taskData.assignee', taskData.assignee)
+
+    if (taskData.assignee && (cfg.isAdmin || cfg.isSubAdmin || cfg.isOrgManager)) {
       const { startup, founder } = taskData.assignee;
 
-      const _avatar = (obj, bgCls) => {
-        const ri = (obj.name || '?').substring(0, 2).toUpperCase();
+      const _avatar = (obj = {}, bgCls) => {
+        const name = obj.name || '?';
+        const ri = name.substring(0, 2).toUpperCase();
+
         return obj.img_url
-          ? `<img src="${obj.img_url}" alt="${obj.name}" class="rounded-circle object-fit-cover" style="width:40px;height:40px;">`
+          ? `<img src="${obj.img_url}" alt="${name}" class="rounded-circle object-fit-cover" style="width:40px;height:40px;">`
           : `<span class="avatar-initial ${bgCls} rounded-circle d-flex align-items-center justify-content-center fw-semibold" style="width:40px;height:40px;font-size:13px;">${ri}</span>`;
       };
-      const _wrap = (obj, bgCls, nameEl) => {
+
+      const _wrap = (obj = {}, bgCls, nameEl) => {
+        const { profile_url, name = '' } = obj;
         const av = _avatar(obj, bgCls);
-        $(nameEl + '-avatar').html(obj.profile_url ? `<a href="${obj.profile_url}" target="_blank">${av}</a>` : av);
-        $(nameEl + '-name').html(obj.profile_url ? `<a href="${obj.profile_url}" target="_blank" class="text-body">${obj.name}</a>` : obj.name);
+
+        $(nameEl + '-avatar').html(
+          profile_url
+            ? `<a href="${profile_url}" target="_blank">${av}</a>`
+            : av
+        );
+
+        $(nameEl + '-name').html(
+          profile_url
+            ? `<a href="${profile_url}" target="_blank" class="text-body">${name}</a>`
+            : name
+        );
       };
-      _wrap(startup, 'bg-label-info',    '#vt-assignee-startup');
-      _wrap(founder, 'bg-label-primary', '#vt-assignee-founder');
-      $('#vt-assignee-wrapper').removeClass('d-none');
+
+      // 👉 Check existence
+      const hasStartup = startup && startup.name;
+      const hasFounder = founder && founder.name;
+
+      // Startup
+      if (hasStartup) {
+        _wrap(startup, 'bg-label-info', '#vt-assignee-startup');
+        $('#vt-assignee-startup').removeClass('d-none');
+      } else {
+        $('#vt-assignee-startup').addClass('d-none');
+      }
+
+      // Founder
+      if (hasFounder) {
+        _wrap(founder, 'bg-label-primary', '#vt-assignee-founder');
+        $('#vt-assignee-founder').removeClass('d-none');
+      } else {
+        $('#vt-assignee-founder').addClass('d-none');
+      }
+
+      // Wrapper (only show if at least one exists)
+      if (hasStartup || hasFounder) {
+        $('#vt-assignee-wrapper').removeClass('d-none');
+      } else {
+        $('#vt-assignee-wrapper').addClass('d-none');
+      }
+
     } else {
       $('#vt-assignee-wrapper').addClass('d-none');
     }
 
     renderAttachmentsList(taskData.attachments, taskId, '#vt-attachments-list');
-    renderActivitiesList(taskData.activities,              '#vt-activities-list');
-    renderCommentsList(taskData.comments,                  '#vt-comments-list');
-    renderFeedbackList(taskData.feedbacks    || [],        '#vt-feedback-list');
-    renderSubmissionsList(taskData.submissions || [],      '#vt-submissions-list');
+    renderActivitiesList(taskData.activities, '#vt-activities-list');
+    renderCommentsList(taskData.comments, '#vt-comments-list');
+    renderFeedbackList(taskData.feedbacks || [], '#vt-feedback-list');
+    renderSubmissionsList(taskData.submissions || [], '#vt-submissions-list');
 
-    $('#vt-comment-count').text(taskData.comments_count      ?? (taskData.comments     ? taskData.comments.length     : 0));
-    $('#vt-feedback-count').text(taskData.feedbacks_count    ?? (taskData.feedbacks    ? taskData.feedbacks.length    : 0));
+    $('#vt-comment-count').text(taskData.comments_count ?? (taskData.comments ? taskData.comments.length : 0));
+    $('#vt-feedback-count').text(taskData.feedbacks_count ?? (taskData.feedbacks ? taskData.feedbacks.length : 0));
     $('#vt-submissions-count').text(taskData.submissions_count ?? (taskData.submissions ? taskData.submissions.length : 0));
 
     $('#vt-edit-trigger-btn').data('task-id', taskId);
@@ -80,17 +194,17 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
   $('#addTaskForm').on('submit', function (e) {
     e.preventDefault();
     const $form = $(this);
-    const $btn  = $('#add-submit-btn');
+    const $btn = $('#add-submit-btn');
 
     addFv.validate().then(function (status) {
       if (status !== 'Valid') return;
-      if (!validateFiles($('#add-attachments'), '#add-file-error')) return;
 
       $btn.prop('disabled', true).html(`<span class="spinner-border spinner-border-sm me-2"></span>${lbl.processing}`);
 
       const fd = new FormData($form[0]);
       fd.append('description', addDescQ.root.innerHTML);
       fd.append('program_id', program.id);
+      addDz.getFiles().forEach(f => fd.append('attachments[]', f));
 
       $.ajax({
         url: cfg.routes.storeTask,
@@ -113,6 +227,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
           syncTaskToBoard(newTask, null);
           $form[0].reset();
           addDescQ.setContents([]);
+          addDz.reset();
           $('#add-priority, #add-status').val('').trigger('change');
           addFv.resetForm(true);
           $('#addTaskOffcanvas').offcanvas('hide');
@@ -129,7 +244,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
   // ─── Edit Task ─────────────────────────────────────────────────────────────
 
   $(document).on('click', '.edit-task-btn', function () {
-    const taskId   = $(this).data('task-id');
+    const taskId = $(this).data('task-id');
     const taskData = tasks.find(t => t.id === taskId);
     if (!taskData) return;
 
@@ -139,7 +254,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
     etDescQ.root.innerHTML = taskData.description;
     $('#et-priority').val(taskData.priority).trigger('change');
     $('#et-status').val(taskData.status).trigger('change');
-    $('#et-attachments').val('').removeClass('is-invalid');
+    etDz.reset();
     $('#et-file-error').text('');
 
     if (taskData.attachments && taskData.attachments.length) {
@@ -154,17 +269,17 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
   $('#editTaskForm').on('submit', function (e) {
     e.preventDefault();
     const $form = $(this);
-    const $btn  = $('#et-submit-btn');
+    const $btn = $('#et-submit-btn');
 
     etFv.validate().then(function (status) {
       if (status !== 'Valid') return;
-      if (!validateFiles($('#et-attachments'), '#et-file-error')) return;
 
       const taskId = $('#et-id').val();
       $btn.prop('disabled', true).html(`<span class="spinner-border spinner-border-sm me-2"></span>${lbl.processing}`);
 
       const fd = new FormData($form[0]);
       fd.append('description', etDescQ.root.innerHTML);
+      etDz.getFiles().forEach(f => fd.append('attachments[]', f));
 
       $.ajax({
         url: cfg.routes.updateTask.replace(':id', taskId),
@@ -173,7 +288,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
           toastr.success(lbl.storedSuccessfully);
           const idx = tasks.findIndex(t => t.id == taskId);
           if (idx !== -1) {
-            const oldStatus   = tasks[idx].status;
+            const oldStatus = tasks[idx].status;
             const updatedTask = response.task || {
               ...tasks[idx],
               title: $('#et-title').val(),
@@ -187,6 +302,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
             syncTaskToBoard(updatedTask, oldStatus);
           }
           $('#editTaskOffcanvas').offcanvas('hide');
+          etDz.reset();
           $btn.prop('disabled', false).html(lbl.update);
         },
         error: function () {
@@ -201,13 +317,13 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
 
   $(document).on('click', '.archive-task-btn', function () {
     const taskId = $(this).data('task-id');
-    const task   = tasks.find(t => t.id === taskId);
+    const task = tasks.find(t => t.id === taskId);
     if (!task) return;
 
-    const isArchived  = task.status === 'archived';
-    const newStatus   = isArchived ? 'pending' : 'archived';
+    const isArchived = task.status === 'archived';
+    const newStatus = isArchived ? 'pending' : 'archived';
     const actionLabel = isArchived ? lbl.reopenTask : lbl.archiveTask;
-    const bodyText    = isArchived ? lbl.reopenTaskConfirm : lbl.archiveTaskConfirm;
+    const bodyText = isArchived ? lbl.reopenTaskConfirm : lbl.archiveTaskConfirm;
 
     releaseWarningAlert({
       title: actionLabel + '?', message: bodyText,
@@ -246,8 +362,8 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
   // ─── Delete Attachment ─────────────────────────────────────────────────────
 
   $(document).on('click', '.delete-attachment-btn', function () {
-    const $btn         = $(this);
-    const taskId       = $btn.data('task-id');
+    const $btn = $(this);
+    const taskId = $btn.data('task-id');
     const attachmentId = $btn.data('attachment-id');
 
     releaseWarningAlert({
@@ -284,8 +400,8 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
   // ─── Add Comment ───────────────────────────────────────────────────────────
 
   $('#vt-send-comment-btn').on('click', function () {
-    const taskId    = $(this).data('task-id');
-    const html      = vtCommentQ.root.innerHTML;
+    const taskId = $(this).data('task-id');
+    const html = vtCommentQ.root.innerHTML;
     const plainText = vtCommentQ.getText().trim();
     if (!plainText) return;
 
@@ -330,10 +446,17 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
   // ─── Submit Feedback ───────────────────────────────────────────────────────
 
   $('#vt-submit-feedback-btn').on('click', function () {
-    const taskId  = $('#vt-send-comment-btn').data('task-id');
+    const taskId = $('#vt-send-comment-btn').data('task-id');
     const decision = $('input[name="vt_feedback_decision"]:checked').val();
-    const note     = $('#vt-fb-note').val().trim();
+    const note = $('#vt-fb-note').val().trim();
     if (!decision) { toastr.warning(lbl.requiredField); return; }
+    if (!note) {
+      $('#vt-fb-note').addClass('is-invalid');
+      $('#vt-fb-note').siblings('.invalid-feedback').remove();
+      $('#vt-fb-note').after(`<div class="invalid-feedback d-block">${lbl.requiredField}</div>`);
+      return;
+    }
+    $('#vt-fb-note').removeClass('is-invalid').siblings('.invalid-feedback').remove();
 
     const $btn = $(this);
     $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>');
@@ -354,6 +477,17 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
           if (!task.feedbacks) task.feedbacks = [];
           task.feedbacks.push(fb);
           $('#vt-feedback-count').text(task.feedbacks.length);
+
+          // Move task to the appropriate board based on decision
+          const oldStatus = task.status;
+          const newStatus = decision === 'pass' ? 'completed' : 'pending';
+          if (oldStatus !== newStatus) {
+            task.status = newStatus;
+            syncTaskToBoard(task, oldStatus);
+            // Update the status badge in the offcanvas details tab
+            const statusMap = cfg.statusMap;
+            $('#vt-status').html(`<span class="badge bg-label-${newStatus === 'completed' ? 'success' : 'secondary'} rounded-pill">${statusMap[newStatus] || newStatus}</span>`);
+          }
         }
 
         const $list = $('#vt-feedback-list');
@@ -375,7 +509,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
             </div>
           </div>`);
 
-        $('#vt-fb-note').val('');
+        $('#vt-fb-note').val('').removeClass('is-invalid').siblings('.invalid-feedback').remove();
         $('input[name="vt_feedback_decision"][value="pass"]').prop('checked', true);
         $('#vt-fb-pass-wrapper').addClass('checked');
         $('#vt-fb-revision-wrapper').removeClass('checked');
@@ -393,5 +527,12 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
     $('input[name="vt_feedback_decision"]').each(function () {
       $(this).closest('.custom-option').toggleClass('checked', $(this).is(':checked'));
     });
+  });
+
+  // Clear feedback note validation on input
+  $(document).on('input', '#vt-fb-note', function () {
+    if ($(this).val().trim()) {
+      $(this).removeClass('is-invalid').siblings('.invalid-feedback').remove();
+    }
   });
 }

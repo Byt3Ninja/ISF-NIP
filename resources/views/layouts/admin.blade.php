@@ -435,9 +435,6 @@
       }
     </script>
 
-    <!-- BEGIN: Page JS-->
-    @yield('pagescripts')
-
     <script>
       // Global Toast function
       function showToast(options) {
@@ -537,7 +534,7 @@
             search: '',
             searchPlaceholder: '{{ __('admin.Search') }}...',
           },
-          dom: '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-1"l><"col-sm-12 col-md-7 filters"><"col-sm-12 col-md-3"f>>Bt<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+          dom: '<"d-flex justify-content-between align-items-center mx-0 mb-0 row"<"col-sm-12 col-md-1 mb-0"l><"col-sm-12 col-md-7 mb-0 filters"><"col-sm-12 col-md-3 mb-0"f>>Bt<"d-flex justify-content-between mx-0 mb-0 row"<"col-sm-12 col-md-6 mb-0"i><"col-sm-12 col-md-6 mb-0"p>>',
           ...(actionsIndex && {
             columnDefs: [
               {
@@ -581,6 +578,10 @@
         return config;
       };
     </script>
+
+    <!-- BEGIN: Page JS-->
+    @yield('pagescripts')
+
 
     <script>
       // Show/hide search menu
