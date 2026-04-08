@@ -3765,6 +3765,12 @@ return [
 	'provided_resources' => 'الموارد المقدمة',
 	'task_archived' => 'تمت أرشفة المهمة',
 	'task_reopened' => 'أعيد فتح المهمة',
+	'uploaded' => 'تم الرفع',
+	'max_5_files_reached' => 'الحد الأقصى 5 ملفات مسموح بها.',
+	'feedback_success' => 'تم إرسال الملاحظات بنجاح.',
+	'no_submissions' => 'لا توجد تقديمات بعد.',
+	'pending_review' => 'في انتظار المراجعة',
+	'just_now' => 'الآن',
 	'email_thank_you' => 'شكراً لاستخدامكم نظامنا!',
 	'email_salutation' => 'مع أطيب التحيات،',
 ];

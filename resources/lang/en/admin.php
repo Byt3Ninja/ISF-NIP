@@ -3709,6 +3709,12 @@ return [
 	'provided_resources' => 'Provided Resources',
 	'task_archived' => 'Task Archived Successfully',
 	'task_reopened' => 'Task Reopened Successfully',
+	'uploaded' => 'Uploaded',
+	'max_5_files_reached' => 'Maximum 5 files allowed.',
+	'feedback_success' => 'Feedback submitted succesfully.',
+	'no_submissions' => 'No submissions yet.',
+	'pending_review' => 'Pending Review',
+	'just_now' => 'Just Now',
 	'email_thank_you' => 'Thank you for using our system!',
 	'email_salutation' => 'Kind regards,',
 ];

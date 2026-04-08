@@ -334,6 +334,13 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
     const decision = $('input[name="vt_feedback_decision"]:checked').val();
     const note     = $('#vt-fb-note').val().trim();
     if (!decision) { toastr.warning(lbl.requiredField); return; }
+    if (!note) {
+      $('#vt-fb-note').addClass('is-invalid');
+      $('#vt-fb-note').siblings('.invalid-feedback').remove();
+      $('#vt-fb-note').after(`<div class="invalid-feedback d-block">${lbl.requiredField}</div>`);
+      return;
+    }
+    $('#vt-fb-note').removeClass('is-invalid').siblings('.invalid-feedback').remove();
 
     const $btn = $(this);
     $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>');
@@ -375,7 +382,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
             </div>
           </div>`);
 
-        $('#vt-fb-note').val('');
+        $('#vt-fb-note').val('').removeClass('is-invalid').siblings('.invalid-feedback').remove();
         $('input[name="vt_feedback_decision"][value="pass"]').prop('checked', true);
         $('#vt-fb-pass-wrapper').addClass('checked');
         $('#vt-fb-revision-wrapper').removeClass('checked');
@@ -393,5 +400,12 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
     $('input[name="vt_feedback_decision"]').each(function () {
       $(this).closest('.custom-option').toggleClass('checked', $(this).is(':checked'));
     });
+  });
+
+  // Clear feedback note validation on input
+  $(document).on('input', '#vt-fb-note', function () {
+    if ($(this).val().trim()) {
+      $(this).removeClass('is-invalid').siblings('.invalid-feedback').remove();
+    }
   });
 }
