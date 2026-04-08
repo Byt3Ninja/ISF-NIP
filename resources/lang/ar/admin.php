@@ -3775,4 +3775,7 @@ return [
 	'email_salutation' => 'مع أطيب التحيات،',
 	'each' => 'لكل',
 	'Max_5_Files_10MB_Each' => 'الحد الأقصى 5 ملفات، 10 MB لكل ملف',
+	'View_Archived' => 'عرض المؤرشف',
+	'Archived_Tasks' => 'المهام المؤرشفة',
+	'No_Archived_Tasks' => 'لم يتم العثور على مهام مؤرشفة',
 ];

@@ -3719,4 +3719,7 @@ return [
 	'email_salutation' => 'Kind regards,',
 	'each' => 'each',
 	'Max_5_Files_10MB_Each' => 'Max 5 files, 10MB each',
+	'View_Archived' => 'View Archived',
+	'Archived_Tasks' => 'Archived Tasks',
+	'No_Archived_Tasks' => 'No archived tasks found',
 ];

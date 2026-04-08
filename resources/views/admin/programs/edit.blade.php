@@ -478,7 +478,7 @@
                             }
                         },
                         error: function(error) {
-                            console.log(error);
+                            // console.log(error);
                             Swal.fire({
                                 icon: 'error',
                                 title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
@@ -512,7 +512,7 @@
                         cycleid: cycleId
                     },
                     success: function(response) {
-                        console.log(response);
+                        // console.log(response);
                         $('#date-range-picker').daterangepicker({
                             opens: isRtl ? 'left' : 'right',
                             drops: 'up',

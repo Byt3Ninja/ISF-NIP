@@ -940,7 +940,31 @@ class MentorshipTaskController extends Controller
 			],
 		];
 
-		return view('kanban.index', compact('cycle', 'tasks', 'boards', 'priorityConfig', 'jsPriorityMap', 'jsStatusMap', 'offcanvasTabs'));
+		$archivedTasks = [
+			[
+				'id' => 101,
+				'title' => 'Legacy Payment Gateway Integration',
+				'description' => '<p>Integrate the old Stripe v2 payment gateway before migrating to the new API. This task is no longer needed as we have fully migrated to Stripe v3.</p>',
+				'status' => 'archived',
+				'archived_at' => '2025-02-10T11:00:00Z',
+			],
+			[
+				'id' => 102,
+				'title' => 'User Onboarding Email Sequence',
+				'description' => '<p>Design and implement a 5-step onboarding email drip campaign for new signups. Archived after switching to an automated CRM tool.</p>',
+				'status' => 'archived',
+				'archived_at' => '2025-03-01T09:30:00Z',
+			],
+			[
+				'id' => 103,
+				'title' => 'Dashboard Analytics Widget',
+				'description' => '<p>Build a real-time analytics widget for the admin dashboard showing DAU/MAU metrics. Deprioritized in favor of a third-party analytics integration.</p>',
+				'status' => 'archived',
+				'archived_at' => '2025-03-18T14:15:00Z',
+			],
+		];
+
+		return view('kanban.index', compact('cycle', 'tasks', 'boards', 'priorityConfig', 'jsPriorityMap', 'jsStatusMap', 'offcanvasTabs', 'archivedTasks'));
 	}
 
 	/**

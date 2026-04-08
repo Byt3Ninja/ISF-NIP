@@ -17,6 +17,11 @@
           </span>
           <input type="text" id="kanbanSearch" class="form-control" placeholder="{{ __('admin.Search') }}..." />
         </div>
+        @if (count($archivedTasks) > 0)
+        <button class="btn btn-outline-secondary px-12 text-nowrap" type="button" data-bs-toggle="offcanvas" data-bs-target="#archivedTasksOffcanvas">
+          <i class="ti ti-archive me-2"></i> {{ __('admin.View_Archived') }}
+        </button>
+        @endif
         @if ($_user->ableTo('tasks.store', $permissions))
         <button class="btn btn-primary text-nowrap px-10" type="button" data-bs-toggle="offcanvas" data-bs-target="#addTaskOffcanvas">
           <i class="ti ti-plus me-2"></i> {{ __('admin.Add_Task') }}
