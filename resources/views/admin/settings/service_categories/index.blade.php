@@ -157,7 +157,7 @@
           
           <div class="mb-3 {{ $isSingleOrg ? 'd-none' : '' }}" id="organizationWrapper">
             <label for="organization_id" class="form-label">{{ __('cycles.Select_Organization')}} <span class="text-danger">*</span></label>
-            <select {{ !$isSingleOrg && !$authUser->hasRole('Admin') ? 'required' : '' }} class="form-select" id="organization_id" name="organization_id" data-placeholder="{{ __('cycles.Select_Organization') }}">
+            <select {{ !$isSingleOrg && !$authUser->hasRole('Admin') && !($authUser->isSubAdmin() && count($authUser->organizations_ids) > 1) ? 'required' : '' }} class="form-select" id="organization_id" name="organization_id" data-placeholder="{{ __('cycles.Select_Organization') }}">
               @if( $showOrgDropdown ) <option disabled value="">{{ __('cycles.Select_Organization') }}</option> @endif
               @if($authUser->hasRole('Admin'))
                 <option value="all">{{ __('admin.All_Organizations') }}</option>
@@ -165,6 +165,7 @@
                   <option value="{{ $org->id }}">{{ $org->{'name_' . app()->getLocale()} }}</option>
                 @endforeach
               @elseif($authUser->isSubAdmin())
+                <option value="all">{{ __('admin.All_Organizations') }}</option>
                 @foreach( $authUser->organizations as $org )
                   <option value="{{ $org->id }}">{{ $org->{'name_' . app()->getLocale()} }}</option>
                 @endforeach
@@ -279,6 +280,7 @@ $(function() {
   const submitBtn = $('#submitBtn');
   const isSingleOrg = {{ $isSingleOrg ? 'true' : 'false' }};
   const isAdmin = {{ $authUser->hasRole('Admin') ? 'true' : 'false' }};
+  const isSubAdminMultiOrg = {{ $authUser->isSubAdmin() && count($authUser->organizations_ids) > 1 ? 'true' : 'false' }};
 
   // Custom validation patterns
   const englishPattern = /^[A-Za-z\s]+$/;
@@ -317,7 +319,7 @@ $(function() {
 
   $('#organization_id').on('change', function() {
     const input = $(this);
-    if (!isSingleOrg && !isAdmin && !input.val()) {
+    if (!isSingleOrg && !isAdmin && !isSubAdminMultiOrg && !input.val()) {
       input.addClass('is-invalid');
     } else {
       input.removeClass('is-invalid');
@@ -371,7 +373,7 @@ $(function() {
     let isValid = true;
     
     // Validate organization if not single org and not admin
-    if (!isSingleOrg && !isAdmin) {
+    if (!isSingleOrg && !isAdmin && !isSubAdminMultiOrg) {
       const orgSelect = $('#organization_id');
       if (!orgSelect.val()) {
         orgSelect.addClass('is-invalid');
