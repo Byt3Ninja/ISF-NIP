@@ -654,7 +654,8 @@
               const hasExist = $item.find('.upload-area img, .upload-area video').length > 0;
               const title = $item.find('.title-input').val().trim();
               const desc = $item.find('.desc-input').val().trim();
-              return (title && desc) ? (hasFile || hasExist) : true;
+              if (title || desc) return hasFile || hasExist;
+              return true;
             }
           },
           file: {
@@ -675,7 +676,8 @@
               const hasFile = $item.find('.media-input')[0].files.length > 0;
               const hasExist = $item.find('.upload-area img, .upload-area video').length > 0;
               const desc = $item.find('.desc-input').val().trim();
-              return (desc || hasFile || hasExist) ? input.value.trim() !== '' : true;
+              if (desc || hasFile || hasExist) return input.value.trim() !== '';
+              return true;
             }
           }
         }
@@ -691,7 +693,8 @@
               const hasFile = $item.find('.media-input')[0].files.length > 0;
               const hasExist = $item.find('.upload-area img, .upload-area video').length > 0;
               const title = $item.find('.title-input').val().trim();
-              return (title || hasFile || hasExist) ? input.value.trim() !== '' : true;
+              if (title || hasFile || hasExist) return input.value.trim() !== '';
+              return true;
             }
           }
         }
