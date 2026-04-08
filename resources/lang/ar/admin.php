@@ -3765,4 +3765,6 @@ return [
 	'provided_resources' => 'الموارد المقدمة',
 	'task_archived' => 'تمت أرشفة المهمة',
 	'task_reopened' => 'أعيد فتح المهمة',
+	'email_thank_you' => 'شكراً لاستخدامكم نظامنا!',
+	'email_salutation' => 'مع أطيب التحيات،',
 ];

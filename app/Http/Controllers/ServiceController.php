@@ -805,7 +805,7 @@ class ServiceController extends Controller
 				$actionUrl,
 				$inApp,
 			];
-			$notification = new TemplateEmail( $emailParams );
+			$notification = new TemplateEmail( $emailParams, $founderLang );
 			$notification->ActionText = $ctaText;
 
 			$founder->notify($notification);

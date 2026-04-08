@@ -3709,4 +3709,6 @@ return [
 	'provided_resources' => 'Provided Resources',
 	'task_archived' => 'Task Archived Successfully',
 	'task_reopened' => 'Task Reopened Successfully',
+	'email_thank_you' => 'Thank you for using our system!',
+	'email_salutation' => 'Kind regards,',
 ];
