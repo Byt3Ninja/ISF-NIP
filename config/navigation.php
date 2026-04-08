@@ -168,7 +168,6 @@ return function () {
     'people' => [
       'title' => 'people_and_organizations',
       'children' => [
-        ['title' => 'organization_types', 'route' => 'organization-types.index', 'menuOnly' => true],
         ['title' => 'organizations', 'route' => 'organizations.index', 'menuOnly' => true],
         ['title' => 'create_organization', 'route' => 'organization.wizard.create', 'menuOnly' => false],
         ['title' => 'edit_organization', 'route' => 'organization.wizard.edit', 'menuOnly' => false],
@@ -233,7 +232,6 @@ return function () {
         ['title' => 'expertise', 'route' => 'settings.expertise_view', 'menuOnly' => false],
         ['title' => 'notification_templates', 'route' => 'notification-templates.index', 'menuOnly' => false],
         ['title' => 'notification_triggers', 'route' => 'notification-triggers.index', 'menuOnly' => false],
-        ['title' => 'countries', 'route' => 'country-management.index', 'menuOnly' => true],
         ['title' => 'license_key', 'route' => 'license.activate_view_form']
       ],
     ],

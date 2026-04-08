@@ -5,6 +5,21 @@
 
 @section('vendorstyle')
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+<style>
+  .dataTables_wrapper .dataTables_filter,
+  .dataTables_wrapper .dataTables_length {
+    margin-bottom: 0 !important;
+  }
+</style>
+@stop
+
+@section('style')
+<style>
+  .dataTables_wrapper .dataTables_filter,
+  .dataTables_wrapper .dataTables_length {
+    margin-bottom: 0 !important;
+  }
+</style>
 @stop
 
 @section('content')
