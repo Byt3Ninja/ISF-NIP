@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 class Service extends Model
 {
 	use Auditable;
+	public static $module = 'Services';
 	protected $fillable = ['organization_id', 'service_category_id', 'service_provider_id', 'name_en', 'name_ar','price', 'currency', 'status', 'avg_rating', 'description_en', 'description_ar', 'img_url','vendor_name','vendor_email','vendor_phone','hide_price','hide_vendor_info'];
 
 	public function getNameAttribute()
