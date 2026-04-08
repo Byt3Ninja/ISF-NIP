@@ -155,6 +155,50 @@
       </div>
     </div>
   </div>
+
+  <hr class="my-6" />
+
+  <!-- Offline Session Location -->
+  <h5>{{ $l == 'ar' ? 'موقع الجلسة الحضورية' : 'Offline Session Location' }}</h5>
+  <div class="col-12 mb-3">
+    <div class="form-group">
+      <label class="form-label fs-6 fw-semibold" for="offline_location_address">
+        {{ $l == 'ar' ? 'العنوان' : 'Address' }}
+      </label>
+      <input
+        type="text"
+        id="offline_location_address"
+        name="offline_location_address"
+        class="form-control"
+        maxlength="250"
+        value="{{ $ccycle?->offline_location_address }}"
+        placeholder="{{ $l == 'ar' ? 'أدخل العنوان' : 'Enter address' }}"
+      >
+      <div class="invalid-feedback"></div>
+    </div>
+  </div>
+  <div class="col-12 mb-2">
+    <div class="form-group">
+      <label class="form-label fs-6 fw-semibold" for="offline_location_map">
+        {{ $l == 'ar' ? 'رابط خرائط جوجل' : 'Google Map' }}
+      </label>
+      <input
+        type="url"
+        id="offline_location_map"
+        name="offline_location_map"
+        class="form-control"
+        maxlength="250"
+        value="{{ $ccycle?->offline_location_map }}"
+        placeholder="https://maps.google.com/..."
+      >
+      <div class="invalid-feedback"></div>
+    </div>
+  </div>
+  <div class="col-12">
+    <small class="text-muted">
+      {{ $l == 'ar' ? 'في حال تركها فارغة، سيتم أخذ تفاصيل موقع الجلسة الحضورية من إعدادات المنظمة.' : 'If left empty, offline session location details will be taken from the organization configuration.' }}
+    </small>
+  </div>
 </div>
 
 @push('scripts')
@@ -301,6 +345,34 @@
       }
     });
     
+    // Real-time validation for offline location address (max 250)
+    $(document).on('input', '#offline_location_address', function() {
+      const value = $(this).val();
+      $(this).removeClass('is-invalid');
+      if (value.length > 250) {
+        $(this).addClass('is-invalid');
+        $(this).siblings('.invalid-feedback').text('{{ $l == "en" ? "Address must not exceed 250 characters" : "يجب ألا يتجاوز العنوان 250 حرفاً" }}');
+      } else {
+        $(this).siblings('.invalid-feedback').text('');
+      }
+    });
+
+    // Real-time validation for offline location map URL (max 250, must be a valid Google Maps URL)
+    const googleMapsRegex = /^https:\/\/(www\.)?(google\.[a-z.]+\/maps|maps\.google\.[a-z.]+|goo\.gl\/maps|maps\.app\.goo\.gl)\/.*/i;
+    $(document).on('input', '#offline_location_map', function() {
+      const value = $(this).val().trim();
+      $(this).removeClass('is-invalid');
+      if (value.length > 250) {
+        $(this).addClass('is-invalid');
+        $(this).siblings('.invalid-feedback').text('{{ $l == "en" ? "Google Map URL must not exceed 250 characters" : "يجب ألا يتجاوز رابط الخريطة 250 حرفاً" }}');
+      } else if (value && !googleMapsRegex.test(value)) {
+        $(this).addClass('is-invalid');
+        $(this).siblings('.invalid-feedback').text('{{ $l == "en" ? "Please enter a valid Google Maps URL" : "يرجى إدخال رابط خرائط جوجل صحيح" }}');
+      } else {
+        $(this).siblings('.invalid-feedback').text('');
+      }
+    });
+
     // Real-time validation for public slug
     $(document).on('input', '#public_slug', function() {
       const value = $(this).val().trim();
@@ -323,14 +395,14 @@
     $(document).ready(function() {
       // Initialize public slug visibility
       const isPublic = $('#is_public').val();
-      console.log('Initial is_public value:', isPublic); // Debug log
+      // console.log('Initial is_public value:', isPublic); // Debug log
       
       if (isPublic == '1') {
         $('#public_slug_div').show();
-        console.log('Showing public slug div'); // Debug log
+        // console.log('Showing public slug div'); // Debug log
       } else {
         $('#public_slug_div').hide();
-        console.log('Hiding public slug div'); // Debug log
+        // console.log('Hiding public slug div'); // Debug log
       }
 
       // Initialize hours reminder visibility
