@@ -216,7 +216,7 @@
                     @else
                       href="javascript:void(0);" 
                     @endif
-                    class="d-flex flex-column text-center text-dark"
+                    class="d-flex flex-column text-center text-dark btn btn-text-secondary waves-effect waves-light"
                   >
                     <i class="ti ti-building-skyscraper ti-lg text-info"></i>
                     <div class="d-flex align-items-center gap-2 mt-1">
@@ -230,7 +230,7 @@
                     @else
                       href="javascript:void(0);" 
                     @endif
-                    class="d-flex flex-column text-center text-dark"
+                    class="d-flex flex-column text-center text-dark btn btn-text-secondary waves-effect waves-light"
                   >
                     <i class="ti ti-recycle ti-lg text-success"></i>
                     <div class="d-flex align-items-center gap-2 mt-1">
@@ -246,7 +246,7 @@
                     @else
                       href="javascript:void(0);" 
                     @endif
-                    class="d-flex flex-column text-center text-dark"
+                    class="d-flex flex-column text-center text-dark btn btn-text-secondary waves-effect waves-light"
                   >
                     <i class="ti ti-users ti-lg text-warning"></i>
                     <div class="d-flex align-items-center gap-2 mt-1">
