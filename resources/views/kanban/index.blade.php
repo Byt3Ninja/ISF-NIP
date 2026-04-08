@@ -46,6 +46,7 @@
     @include('kanban.partials.kanban-vt-offcanvas')
     @include('kanban.partials.kanban-at-offcanvas')
     @include('kanban.partials.kanban-et-offcanvas')
+    @include('kanban.partials.kanban-archived-offcanvas')
   </div>
 @stop
 
