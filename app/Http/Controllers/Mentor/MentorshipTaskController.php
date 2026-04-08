@@ -143,7 +143,7 @@ class MentorshipTaskController extends Controller
 						'id' => 10,
 						'name' => 'Designa Studio',
 						'img_url' => '/vuexy/assets/img/icons/brands/figma.png',
-						'profile_url' => '/dashboard/companyProfile/10',
+						'profile_url' => '/dashboard/companyProfile/112',
 					],
 					'founder' => [
 						'id' => 2,
@@ -262,7 +262,7 @@ class MentorshipTaskController extends Controller
 						'id' => 11,
 						'name' => 'AppFlow Labs',
 						'img_url' => '/vuexy/assets/img/icons/brands/chrome.png',
-						'profile_url' => '/dashboard/companyProfile/11',
+						'profile_url' => '/dashboard/companyProfile/112',
 					],
 					'founder' => [
 						'id' => 4,
@@ -391,7 +391,7 @@ class MentorshipTaskController extends Controller
 						'id' => 12,
 						'name' => 'ScaleTech',
 						'img_url' => '/vuexy/assets/img/icons/brands/firefox.png',
-						'profile_url' => '/dashboard/companyProfile/12',
+						'profile_url' => '/dashboard/companyProfile/112',
 					],
 					'founder' => [
 						'id' => 6,
@@ -493,7 +493,7 @@ class MentorshipTaskController extends Controller
 						'id' => 13,
 						'name' => 'CopyCrafters',
 						'img_url' => '/vuexy/assets/img/icons/brands/mailchimp.png',
-						'profile_url' => '/dashboard/companyProfile/13',
+						'profile_url' => '/dashboard/companyProfile/112',
 					],
 					'founder' => [
 						'id' => 8,
@@ -579,7 +579,7 @@ class MentorshipTaskController extends Controller
 						'id' => 14,
 						'name' => 'DataFlow Inc.',
 						'img_url' => '/vuexy/assets/img/icons/brands/asana.png',
-						'profile_url' => '/dashboard/companyProfile/14',
+						'profile_url' => '/dashboard/companyProfile/112',
 					],
 					'founder' => [
 						'id' => 10,
@@ -664,7 +664,7 @@ class MentorshipTaskController extends Controller
 						'id' => 15,
 						'name' => 'CloudOps Solutions',
 						'img_url' => '/vuexy/assets/img/icons/brands/aws.png',
-						'profile_url' => '/dashboard/companyProfile/15',
+						'profile_url' => '/dashboard/companyProfile/112',
 					],
 					'founder' => [
 						'id' => 12,
@@ -796,7 +796,7 @@ class MentorshipTaskController extends Controller
 						'id' => 16,
 						'name' => 'CyberSec Shield',
 						'img_url' => '/vuexy/assets/img/icons/brands/github.png',
-						'profile_url' => '/dashboard/companyProfile/16',
+						'profile_url' => '/dashboard/companyProfile/112',
 					],
 					'founder' => [
 						'id' => 14,
