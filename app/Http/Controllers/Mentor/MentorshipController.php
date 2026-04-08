@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Mentor;
 
-use App\User;
 use App\Company;
+use App\Cycle;
+use App\Http\Controllers\Controller;
+use App\MentorshipRequest;
 use App\MentorshipTask;
 use App\SurveyResponses;
-use App\MentorshipRequest;
+use App\User;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Spatie\Permission\Traits\HasRoles;
 
 class MentorshipController extends Controller
@@ -19,14 +20,17 @@ class MentorshipController extends Controller
         $available_surveys = SurveyResponses::whereIn('user_id', $mentorRequests->pluck('mentor_id'))->whereIn('triggered_at', $mentorRequests->pluck('id'))->where('triggered_by', 'session')->get();
 
         $sessions = collect([]);
+        $cycles = collect([]);
         if(auth()->user() && auth()->user()->hasRole('Mentor')) {
             $sessions = auth()->user()->mentorSessions()->whereDate('zoom_date','<',now()->format('Y-m-d H:i'))->where('approved','Yes')->orderBy('zoom_date','DESC')->get();
+            $cycles = auth()->user()->mentorCycles()->get();
         }
         if(auth()->user() && auth()->user()->hasRole('Registered')) {
             $company_id = auth()->user()->company_id;
             if(auth()->user()->company) {
                 $usersCompany = auth()->user()->company->users()->where('company_id', $company_id)->get();
                 $sessions = MentorshipRequest::whereIn('user_id', $usersCompany->pluck('id'))->whereDate('zoom_date','<',now()->format('Y-m-d H:i'))->where('approved','Yes')->orderBy('zoom_date','DESC')->get();
+                $cycles = collect([auth()->user()->company->cycledata])->filter();
             } else {
                 $sessions = collect(); // Empty collection if no company
             }
@@ -35,9 +39,22 @@ class MentorshipController extends Controller
             $company_id = Company::all();
             $usersCompany = User::whereIn('company_id', $company_id->pluck('id'))->get();
             $sessions = MentorshipRequest::whereIn('user_id', $usersCompany->pluck('id'))->whereDate('zoom_date','<',now()->format('Y-m-d H:i'))->where('approved','Yes')->orderBy('zoom_date','DESC')->get();
+            $cycles = Cycle::all();
         }
+        //['id' => 1,  'title' => 'Cycle 1',  'completed' => 3,  'pending' => 2],
+        // maping cycles with completed and pending sessions count
+        $cycles = $cycles->map(function ($cycle) use ($sessions) {
+            $completed = MentorshipTask::whereHas('mentorshipRequest', fn($q) => $q->where('cycle_id', $cycle->id))->where('status', 'completed')->count();
+            $pending = MentorshipTask::whereHas('mentorshipRequest', fn($q) => $q->where('cycle_id', $cycle->id))->where('status', '!=', 'completed')->count();
+            return [
+                'id' => $cycle->id,
+                'title' => $cycle->title,
+                'completed' => $completed,
+                'pending' => $pending,
+            ];
+        });
         
-        return view('mentor.mentorshipSessions.index',compact('sessions','available_surveys'));
+        return view('mentor.mentorshipSessions.index',compact('sessions','available_surveys','cycles'));
     }
 
 

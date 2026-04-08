@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@php
+{{-- @php
 $cycles = [
   ['id' => 1,  'title' => 'Cycle 1',  'completed' => 3,  'pending' => 2],
   ['id' => 2,  'title' => 'Cycle 2',  'completed' => 5,  'pending' => 1],
@@ -15,7 +15,7 @@ $cycles = [
   ['id' => 11, 'title' => 'Cycle 11', 'completed' => 9,  'pending' => 0],
   ['id' => 12, 'title' => 'Cycle 12', 'completed' => 3,  'pending' => 4],
 ];
-@endphp
+@endphp --}}
 
 @section('content')
 <div class="card">
@@ -67,7 +67,7 @@ $cycles = [
             </td>
             <td class="text-center">
               <a
-                href="/dashboard/mentor/mentorshipTasks"
+                href="{{ route('mentorshipTasks.index', ['cycle_id' => $cycle['id']]) }}"
                 class="btn btn-sm btn-primary"
               >
                 <i class="ti ti-eye me-1"></i> {{ __('admin.view_tasks') }}

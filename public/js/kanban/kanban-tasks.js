@@ -87,8 +87,8 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
     const taskData = tasks.find(t => t.id === taskId);
     if (!taskData) return;
 
-    const p = cfg.priorityMap[taskData.priority];
-    const sLabel = cfg.statusMap[taskData.status];
+    const p = cfg.priorityMap[taskData.priority] ?? cfg.priorityMap['Medium'];
+    const sLabel = cfg.statusMap[taskData.status] ?? taskData.status;
 
     $('#vt-title').text(taskData.title);
     $('#vt-description').html(taskData.description);
