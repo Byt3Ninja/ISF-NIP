@@ -81,27 +81,36 @@ class UpdateServiceProviderStep4Request extends FormRequest
                         $fail(__('admin.unsupported_file_type_portfolio'));
                     }
                 },
-                function ($attribute, $value, $fail) {
-                    $index = explode('.', $attribute)[1];
-                    $item = $this->input("portfolio.{$index}");
-                    if (($item['delete'] ?? 'false') === 'true') return;
-
-                    $hasId = !empty($item['id']);
-                    $hasTitle = !empty($item['title']);
-                    $hasDesc = !empty($item['description']);
-                    $hasNewFile = $this->hasFile($attribute);
-
-                    if (($hasTitle || $hasDesc) && !$hasId && !$hasNewFile) {
-                        $fail(__('admin.complete_work_item_details'));
-                    }
-                }
             ],
         ];
+    }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $portfolio = $this->input('portfolio', []);
+            foreach ($portfolio as $index => $item) {
+                if (($item['delete'] ?? 'false') === 'true') continue;
+
+                $hasId = !empty($item['id']);
+                $hasTitle = !empty($item['title']);
+                $hasDesc = !empty($item['description']);
+                $hasNewFile = $this->hasFile("portfolio.{$index}.media");
+
+                if (($hasTitle || $hasDesc) && !$hasId && !$hasNewFile) {
+                    $validator->errors()->add(
+                        "portfolio.{$index}.media",
+                        __('admin.complete_work_item_details') ?? 'Complete the work item details.'
+                    );
+                }
+            }
+        });
     }
 
     public function messages()
     {
         return [
+            'portfolio.*.id.exists' => __('admin.invalid_work_item') ?? 'This work item is invalid or no longer exists.',
             'portfolio.*.title.required_with' => __('admin.complete_work_item_details') ?? 'Complete the work item details.',
             'portfolio.*.description.required_with' => __('admin.complete_work_item_details') ?? 'Complete the work item details.',
             'portfolio.*.media.required_with' => __('admin.complete_work_item_details') ?? 'Complete the work item details.',
