@@ -1,6 +1,7 @@
 .DS_Store
 /node_modules
 # /public
+/docs/*
 /public/storage
 /public/pitch_decks
 /public/191014
