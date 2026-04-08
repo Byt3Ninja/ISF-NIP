@@ -152,12 +152,17 @@ class ServiceController extends Controller
 	public function create()
 	{
 		$user = auth()->user();
-		$serviceCategories = ServiceCategory::all();
+		$orgIds = $user->organizations_ids;
+		$serviceCategories = ServiceCategory::where(function ($q) use ($orgIds) {
+				$q->whereNull('organization_id')
+				  ->orWhereHas('organization', function ($q) use ($orgIds) {
+					$q->whereIn('organizations.id', $orgIds);
+				});
+			})->get();
 		$Setting = Settings::where('id', 1)->first();
 		if ($user->hasAnyRole('Admin|serviceProvider')) {
 			$organizations = Organization::all();
 		} elseif ($user->hasAnyRole(['organizationManager', 'subadmin'])) {
-			$orgIds = $user->organizations_ids;
 			$organizations = Organization::whereIn('id', $orgIds)->get();
 		} else {
 			$organizations = collect();
@@ -257,11 +262,16 @@ class ServiceController extends Controller
 	public function edit(Service $service)
 	{
 		$user = auth()->user();
-		$serviceCategories = ServiceCategory::all();
+		$orgIds = $user->organizations_ids;
+		$serviceCategories = ServiceCategory::where(function ($q) use ($orgIds) {
+				$q->whereNull('organization_id')
+				  ->orWhereHas('organization', function ($q) use ($orgIds) {
+					$q->whereIn('organizations.id', $orgIds);
+				});
+			})->get();
 		if ($user->hasAnyRole('Admin|serviceProvider')) {
 			$organizations = Organization::all();
 		} elseif ($user->hasAnyRole(['organizationManager', 'subadmin'])) {
-			$orgIds = $user->organizations_ids;
 			$organizations = Organization::whereIn('id', $orgIds)->get();
 		} else {
 			$organizations = collect();
