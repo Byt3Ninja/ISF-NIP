@@ -90,6 +90,19 @@
   .hide-before::before {
     display: none;
   }
+
+  .dataTables_wrapper .row {
+    margin-bottom: 0 !important;
+  }
+
+  .dataTables_wrapper .dataTables_info,
+  .dataTables_wrapper .dataTables_paginate {
+    margin-top: 0 !important;
+  }
+
+  .card-datatable {
+    padding-top: 0 !important;
+  }
 </style>
 <!-- END: Page CSS-->
 
