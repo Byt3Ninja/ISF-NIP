@@ -87,7 +87,7 @@
             </div>
             <div class="col-md-6">
               <div class="form-group">
-                <label class="fs-6 form-label fw-semibold mb-1" for="twitter">{{ __('admin.Twitter') }}</label>
+                <label class="fs-6 form-label fw-semibold mb-1" for="twitter">X</label>
                 <div class="input-group input-group-merge">
                   <input 
                     type="url" 
