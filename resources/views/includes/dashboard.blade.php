@@ -1042,19 +1042,19 @@
 													
 														<a href="{{ route('mentorship.join', $session->id) }}" target="_blank">
 															<button title="Start Meeting" type="button" data-value="{{ $session->id }}" type="button" class="btn btn-label-primary rounded">
-																<i class="ti ti-link"></i> {{ __('admin.Join Meeting') }}
+																<i class="ti ti-link me-2"></i> {{ __('admin.Join Meeting') }}
 															</button>
 														</a>
 														@if( !empty( $session->passcode ) )
 															| <button title="Show Passcode" type="button" data-passcode="{{ $session->passcode }}" type="button" class="btn btn-label-warning show-passcode rounded">
-																<i class="ti ti-key"></i>
+																<i class="ti ti-key me-2"></i>
 															</button>
 														@endif
 													@else
 														<span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
 													@endif
 												@else
-													<i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }}
+													<i class="ti ti-alarm me-2"></i> {{ __('admin.Meeting_will_start_at_time') }}
 												@endif
 											@else
 											
