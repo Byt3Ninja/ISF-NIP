@@ -40,6 +40,17 @@
           </div>
         </div>
 
+        @if(isset($startups) && count($startups))
+        <div class="mb-3">
+          <label class="form-label">{{ __('admin.assignees') }}</label>
+          <select name="assignees[]" id="add-assignees" class="select2 form-select" multiple data-placeholder="{{ __('admin.select_assignees') }}">
+            @foreach($startups as $startup)
+              <option value="{{ $startup['id'] }}">{{ $startup['name'] }}</option>
+            @endforeach
+          </select>
+        </div>
+        @endif
+
         <div class="mb-4">
           <label class="form-label d-flex justify-content-between">
             <span>{{ __('admin.Attachments') }}</span>

@@ -15,6 +15,7 @@ use Spatie\Permission\Traits\HasRoles;
 class MentorshipController extends Controller
 {
     public function index(){
+        
         $user = auth()->user();
         $mentorRequests =  MentorshipRequest::all();
         $available_surveys = SurveyResponses::whereIn('user_id', $mentorRequests->pluck('mentor_id'))->whereIn('triggered_at', $mentorRequests->pluck('id'))->where('triggered_by', 'session')->get();
@@ -43,14 +44,36 @@ class MentorshipController extends Controller
         }
         //['id' => 1,  'title' => 'Cycle 1',  'completed' => 3,  'pending' => 2],
         // maping cycles with completed and pending sessions count
-        $cycles = $cycles->map(function ($cycle) use ($sessions, $user) {
-            $completed = ProgramTask::where('program_id', $cycle->id)->where('status', 'completed')->where('status', '!=', 'archived')->where('created_by', $user->id)->count();
-            $pending = ProgramTask::where('program_id', $cycle->id)->where('status', '!=', 'completed')->where('status', '!=', 'archived')->where('created_by', $user->id)->count();
+        // $cycles = $cycles->map(function ($cycle) use ($sessions, $user) {
+        //     $completed = ProgramTask::where('program_id', $cycle->id)->where('status', 'completed')->where('status', '!=', 'archived')->where('created_by', $user->id)->count();
+        //     $pending = ProgramTask::where('program_id', $cycle->id)->where('status', '!=', 'completed')->where('status', '!=', 'archived')->where('created_by', $user->id)->count();
+        //     return [
+        //         'id' => $cycle->id,
+        //         'title' => $cycle->title,
+        //         'completed' => $completed,
+        //         'pending' => $pending,
+        //     ];
+        // });
+
+        $isRegistered = $user->hasRole('Registered');
+        $userCompanyId = $isRegistered ? $user->company_id : null;
+
+        $cycles = $cycles->map(function ($cycle) use ($user, $isRegistered, $userCompanyId) {
+            $baseQuery = fn() => ProgramTask::where('program_id', $cycle->id)
+                ->where('status', '!=', 'archived')
+                ->when($isRegistered,
+                    fn($q) => $q->whereHas('assignees', fn($q2) => $q2->where('companies.id', $userCompanyId)),
+                    fn($q) => $q->where('created_by', $user->id)
+                );
+
+            $completed = (clone $baseQuery())->where('status', 'completed')->count();
+            $pending   = (clone $baseQuery())->where('status', '!=', 'completed')->count();
+
             return [
-                'id' => $cycle->id,
-                'title' => $cycle->title,
+                'id'        => $cycle->id,
+                'title'     => $cycle->title,
                 'completed' => $completed,
-                'pending' => $pending,
+                'pending'   => $pending,
             ];
         });
         

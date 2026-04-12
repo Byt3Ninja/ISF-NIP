@@ -46,6 +46,7 @@ class MentorshipTaskController extends Controller
 	 */
 	public function index(Request $request)
 	{
+		
 		// Get mentorship_id from request or session
 		// $mentorshipId = $request->get('mentorship_id') ?? session('last_mentorship_id');
 
@@ -126,13 +127,27 @@ class MentorshipTaskController extends Controller
 		];
 		$lang = app()->getLocale();
 
-		$rawTasks = ProgramTask::where('program_id', $cycleId)
-			->with(['creator', 'assignees'])
-			->get();
+		$startups = Company::where('cycle', $cycleId)
+			->select('id', 'name_en', 'name_ar', 'logo')
+			->get()
+			->map(fn($c) => [
+				'id'   => $c->id,
+				'name' => $c->name_en ?? $c->name_ar ?? 'N/A',
+			]);
+
+		$user = auth()->user();
+		$tasksQuery = ProgramTask::where('program_id', $cycleId)
+			->with(['creator', 'assignees', 'feedbacks.user', 'activities.user']);
+
+		if ($user->hasRole('registered')) {
+			$tasksQuery->whereHas('assignees', fn($q) => $q->where('companies.id', $user->company_id));
+		}
+
+		$rawTasks = $tasksQuery->get();
 
 		$tasks = $rawTasks->map(function ($task) use ($lang) {
 			$creator  = $task->creator;
-			$company  = $task->assignees->first();
+			$company  = $task->assignees->first(); // kept for reference
 			$attachments = collect($task->attachments ?? []);
 
 			return [
@@ -152,15 +167,22 @@ class MentorshipTaskController extends Controller
 					'profile_url' => '/dashboard/show/UserProfile/' . $creator->id,
 				] : null,
 
-				'assignee' => [
-					'startup' => $company ? [
-						'id'          => $company->id,
-						'name'        => $company->{'name_' . $lang} ?? $company->name_en,
-						'img_url'     => Company::logo_handler($company->logo),
-						'profile_url' => '/dashboard/companyProfile/' . $company->id,
-					] : null,
-					'founder' => null,
-				],
+				// 'assignee' => [
+				// 	'startup' => $company ? [
+				// 		'id'          => $company->id,
+				// 		'name'        => $company->{'name_' . $lang} ?? $company->name_en,
+				// 		'img_url'     => Company::logo_handler($company->logo),
+				// 		'profile_url' => '/dashboard/companyProfile/' . $company->id,
+				// 	] : null,
+				// 	'founder' => null,
+				// ],
+
+				'assignees' => $task->assignees->map(fn($a) => [
+					'id'          => $a->id,
+					'name'        => $a->{'name_' . $lang} ?? $a->name_en ?? 'N/A',
+					'img_url'     => Company::logo_handler($a->logo),
+					'profile_url' => '/dashboard/companyProfile/' . $a->id,
+				])->toArray(),
 
 				'attachments' => $attachments->map(fn($a, $i) => [
 					'id'          => $i + 1,
@@ -170,8 +192,6 @@ class MentorshipTaskController extends Controller
 					'size_bytes'  => null,
 					'uploaded_at' => null,
 				])->values()->toArray(),
-
-				'activities'        => [],
 				'comments'          => $task->comments()->with('user')->get()->map(fn($c) => [
 					'id'      => $c->id,
 					'user'    => $c->user?->name,
@@ -180,16 +200,46 @@ class MentorshipTaskController extends Controller
 					'text'    => $c->comment,
 					'time'    => $c->created_at->diffForHumans(),
 				])->toArray(),
-				'feedbacks'         => [],
+				 'feedbacks' => $task->feedbacks->map(function($fb) {
+                    return [
+                        'id'       => $fb->id,
+                        'user'     => $fb->user->name ?? 'N/A',
+                        'user_id'  => $fb->user_id,
+                        'img_url'  => $fb->user ? User::image_handler($fb->user->img_url) : null,
+                        'decision' => $fb->decision,
+                        'text'     => $fb->note,
+                        'time'     => $fb->created_at->diffForHumans(),
+                    ];
+                })->toArray(),
+				
+                'activities' => $task->activities->map(function($act) {
+                    $action = match($act->action) {
+                        'create' => app()->getLocale() == 'en' ? 'created this task' : 'انشاء هذا المهمة',
+                        'update' =>	__('admin.Updated') . ' ' . $act->column . ($act->was && $act->new ? __('admin.From') . ' "' . $act->was . __('admin.To') . ' "' . $act->new . '"' : ''),
+                        'move'   => __('admin.Moved') . ' ' . ($act->was && $act->new ? __('admin.From') . ' "' . $act->was . __('admin.To') . ' "' . $act->new . '"' : ''),
+                        'comment'  => app()->getLocale() == 'en' ? 'added a comment' : 'أضاف تعليق',
+                        'feedback' => app()->getLocale() == 'en' ? 'submitted feedback' : 'أضاف تعليق',
+                        'delete'   => app()->getLocale() == 'en' ? 'deleted this task' : 'حذف هذا المهمة',
+                        default    => $act->action,
+                    };
+					return [
+                        'user'    => $act->user->name ?? 'N/A',
+                        'user_id' => $act->user_id,
+                        'img_url' => $act->user ? User::image_handler($act->user->img_url) : null,
+                        'action'  => $action,
+                        'time'    => $act->created_at->diffForHumans(),
+                    ];
+                })->toArray(),
 				'submissions'       => [],
 
 				'comments_count'    => $task->comments()->count(),
-				'feedbacks_count'   => 0,
+				'feedbacks_count'   => $task->feedbacks()->count(),
+				'activities_count'  => $task->activities->count(),
 				'submissions_count' => 0,
 				'attachments_count' => $attachments->count(),
 			];
 		})->values()->toArray();
-
+			
 		$__unused = [
 			// Task 1: New - Completed Design Task
 			[
@@ -390,7 +440,7 @@ class MentorshipTaskController extends Controller
 				'archived_at' => $task->updated_at,
 			])->values()->toArray();
 
-		return view('kanban.index', compact('cycle', 'tasks', 'boards', 'priorityConfig', 'jsPriorityMap', 'jsStatusMap', 'offcanvasTabs', 'archivedTasks'));
+		return view('kanban.index', compact('cycle', 'tasks', 'boards', 'priorityConfig', 'jsPriorityMap', 'jsStatusMap', 'offcanvasTabs', 'archivedTasks', 'startups'));
 	}
 
 	/**
