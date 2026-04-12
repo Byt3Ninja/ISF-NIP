@@ -503,18 +503,12 @@ class SettingsController extends Controller
 	public function update_settingsmail(Request $request)
 	{
 		$id = $request->input('id');
-		$host = $request->input('host');
-		$Mail = $request->input('Mail');
-		$Mailpassword = $request->input('Mailpassword');
-		$Port = $request->input('Port');
-		$encryption = $request->input('Encryption');
-
 		$updateSittings = Settings::where('id', $id)->first();
-		$updateSittings->host = $host;
-		$updateSittings->Mail = $Mail;
-		$updateSittings->Mailpassword = $Mailpassword;
-		$updateSittings->Port = $Port;
-		$updateSittings->encryption = $encryption;
+		$updateSittings->host = $request->input('email_provider', 'smtp');
+		$updateSittings->Mail = $request->input('Mail');
+		$updateSittings->Mailpassword = $request->input('Mailpassword');
+		$updateSittings->Port = $request->input('Port');
+		$updateSittings->encryption = $request->input('Encryption');
 		$updateSittings->save();
 
 		return redirect()->back()->with('message', 'StoredSuccessfully');
