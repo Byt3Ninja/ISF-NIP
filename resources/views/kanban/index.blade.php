@@ -168,7 +168,9 @@
 
   $('#add-due-date, #et-due-date').flatpickr({ dateFormat: 'Y-m-d' });
   $('#add-priority, #add-status').select2({ dropdownParent: $('#addTaskOffcanvas') });
+  $('#add-assignees').select2({ dropdownParent: $('#addTaskOffcanvas'), placeholder: @json(__('admin.select_assignees')) });
   $('#et-priority, #et-status').select2({ dropdownParent: $('#editTaskOffcanvas') });
+  $('#et-assignees').select2({ dropdownParent: $('#editTaskOffcanvas'), placeholder: @json(__('admin.select_assignees')) });
 
   // Form validation
   const fvConfig = {

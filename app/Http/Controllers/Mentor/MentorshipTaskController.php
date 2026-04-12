@@ -127,13 +127,27 @@ class MentorshipTaskController extends Controller
 		];
 		$lang = app()->getLocale();
 
-		$rawTasks = ProgramTask::where('program_id', $cycleId)
-			->with(['creator', 'assignees', 'feedbacks.user', 'activities.user'])
-			->get();
+		$startups = Company::where('cycle', $cycleId)
+			->select('id', 'name_en', 'name_ar', 'logo')
+			->get()
+			->map(fn($c) => [
+				'id'   => $c->id,
+				'name' => $c->name_en ?? $c->name_ar ?? 'N/A',
+			]);
+
+		$user = auth()->user();
+		$tasksQuery = ProgramTask::where('program_id', $cycleId)
+			->with(['creator', 'assignees', 'feedbacks.user', 'activities.user']);
+
+		if ($user->hasRole('registered')) {
+			$tasksQuery->whereHas('assignees', fn($q) => $q->where('companies.id', $user->company_id));
+		}
+
+		$rawTasks = $tasksQuery->get();
 
 		$tasks = $rawTasks->map(function ($task) use ($lang) {
 			$creator  = $task->creator;
-			$company  = $task->assignees->first();
+			$company  = $task->assignees->first(); // kept for reference
 			$attachments = collect($task->attachments ?? []);
 
 			return [
@@ -153,15 +167,22 @@ class MentorshipTaskController extends Controller
 					'profile_url' => '/dashboard/show/UserProfile/' . $creator->id,
 				] : null,
 
-				'assignee' => [
-					'startup' => $company ? [
-						'id'          => $company->id,
-						'name'        => $company->{'name_' . $lang} ?? $company->name_en,
-						'img_url'     => Company::logo_handler($company->logo),
-						'profile_url' => '/dashboard/companyProfile/' . $company->id,
-					] : null,
-					'founder' => null,
-				],
+				// 'assignee' => [
+				// 	'startup' => $company ? [
+				// 		'id'          => $company->id,
+				// 		'name'        => $company->{'name_' . $lang} ?? $company->name_en,
+				// 		'img_url'     => Company::logo_handler($company->logo),
+				// 		'profile_url' => '/dashboard/companyProfile/' . $company->id,
+				// 	] : null,
+				// 	'founder' => null,
+				// ],
+
+				'assignees' => $task->assignees->map(fn($a) => [
+					'id'          => $a->id,
+					'name'        => $a->{'name_' . $lang} ?? $a->name_en ?? 'N/A',
+					'img_url'     => Company::logo_handler($a->logo),
+					'profile_url' => '/dashboard/companyProfile/' . $a->id,
+				])->toArray(),
 
 				'attachments' => $attachments->map(fn($a, $i) => [
 					'id'          => $i + 1,
@@ -193,12 +214,12 @@ class MentorshipTaskController extends Controller
 				
                 'activities' => $task->activities->map(function($act) {
                     $action = match($act->action) {
-                        'create' => 'created this task',
-                        'update' => 'updated ' . $act->column . ($act->was && $act->new ? ' from "' . $act->was . '" to "' . $act->new . '"' : ''),
-                        'move'   => 'moved task' . ($act->was && $act->new ? ' from "' . $act->was . '" to "' . $act->new . '"' : ''),
-                        'comment'  => 'added a comment',
-                        'feedback' => 'submitted feedback',
-                        'delete'   => 'deleted this task',
+                        'create' => app()->getLocale() == 'en' ? 'created this task' : 'انشاء هذا المهمة',
+                        'update' =>	__('admin.Updated') . ' ' . $act->column . ($act->was && $act->new ? __('admin.From') . ' "' . $act->was . __('admin.To') . ' "' . $act->new . '"' : ''),
+                        'move'   => __('admin.Moved') . ' ' . ($act->was && $act->new ? __('admin.From') . ' "' . $act->was . __('admin.To') . ' "' . $act->new . '"' : ''),
+                        'comment'  => app()->getLocale() == 'en' ? 'added a comment' : 'أضاف تعليق',
+                        'feedback' => app()->getLocale() == 'en' ? 'submitted feedback' : 'أضاف تعليق',
+                        'delete'   => app()->getLocale() == 'en' ? 'deleted this task' : 'حذف هذا المهمة',
                         default    => $act->action,
                     };
 					return [
@@ -419,7 +440,7 @@ class MentorshipTaskController extends Controller
 				'archived_at' => $task->updated_at,
 			])->values()->toArray();
 
-		return view('kanban.index', compact('cycle', 'tasks', 'boards', 'priorityConfig', 'jsPriorityMap', 'jsStatusMap', 'offcanvasTabs', 'archivedTasks'));
+		return view('kanban.index', compact('cycle', 'tasks', 'boards', 'priorityConfig', 'jsPriorityMap', 'jsStatusMap', 'offcanvasTabs', 'archivedTasks', 'startups'));
 	}
 
 	/**

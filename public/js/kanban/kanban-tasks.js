@@ -96,67 +96,56 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
     $('#vt-priority').html(`<span class="badge ${p.cls} rounded-pill"><span class="d-inline-block rounded-circle me-1 ${p.dot}" style="width:6px;height:6px;"></span>${p.label}</span>`);
     $('#vt-status').html(`<span class="badge bg-label-secondary rounded-pill">${sLabel}</span>`);
 
-    console.log('cfg.isAdmin', cfg.isAdmin)
-    // console.log('isSubAdmin',isSubAdmin)
-    console.log('cfg.isOrgManager', cfg.isOrgManager)
-    console.log('taskData.assignee', taskData.assignee)
-
-    if (taskData.assignee && (cfg.isAdmin || cfg.isSubAdmin || cfg.isOrgManager)) {
-      const { startup, founder } = taskData.assignee;
-
-      const _avatar = (obj = {}, bgCls) => {
-        const name = obj.name || '?';
-        const ri = name.substring(0, 2).toUpperCase();
-
-        return obj.img_url
-          ? `<img src="${obj.img_url}" alt="${name}" class="rounded-circle object-fit-cover" style="width:40px;height:40px;">`
-          : `<span class="avatar-initial ${bgCls} rounded-circle d-flex align-items-center justify-content-center fw-semibold" style="width:40px;height:40px;font-size:13px;">${ri}</span>`;
-      };
-
-      const _wrap = (obj = {}, bgCls, nameEl) => {
-        const { profile_url, name = '' } = obj;
-        const av = _avatar(obj, bgCls);
-
-        $(nameEl + '-avatar').html(
-          profile_url
-            ? `<a href="${profile_url}" target="_blank">${av}</a>`
-            : av
-        );
-
-        $(nameEl + '-name').html(
-          profile_url
-            ? `<a href="${profile_url}" target="_blank" class="text-body">${name}</a>`
-            : name
-        );
-      };
-
-      // 👉 Check existence
-      const hasStartup = startup && startup.name;
-      const hasFounder = founder && founder.name;
-
-      // Startup
-      if (hasStartup) {
-        _wrap(startup, 'bg-label-info', '#vt-assignee-startup');
-        $('#vt-assignee-startup').removeClass('d-none');
-      } else {
-        $('#vt-assignee-startup').addClass('d-none');
-      }
-
-      // Founder
-      if (hasFounder) {
-        _wrap(founder, 'bg-label-primary', '#vt-assignee-founder');
-        $('#vt-assignee-founder').removeClass('d-none');
-      } else {
-        $('#vt-assignee-founder').addClass('d-none');
-      }
-
-      // Wrapper (only show if at least one exists)
-      if (hasStartup || hasFounder) {
-        $('#vt-assignee-wrapper').removeClass('d-none');
-      } else {
-        $('#vt-assignee-wrapper').addClass('d-none');
-      }
-
+    // ── Old single-assignee (startup/founder) display ────────────���─────────
+    // console.log('cfg.isAdmin', cfg.isAdmin)
+    // console.log('cfg.isOrgManager', cfg.isOrgManager)
+    // console.log('taskData.assignee', taskData.assignee)
+    // if (taskData.assignee && (cfg.isAdmin || cfg.isSubAdmin || cfg.isOrgManager)) {
+    //   const { startup, founder } = taskData.assignee;
+    //   const _avatar = (obj = {}, bgCls) => {
+    //     const name = obj.name || '?';
+    //     const ri = name.substring(0, 2).toUpperCase();
+    //     return obj.img_url
+    //       ? `<img src="${obj.img_url}" alt="${name}" class="rounded-circle object-fit-cover" style="width:40px;height:40px;">`
+    //       : `<span class="avatar-initial ${bgCls} rounded-circle d-flex align-items-center justify-content-center fw-semibold" style="width:40px;height:40px;font-size:13px;">${ri}</span>`;
+    //   };
+    //   const _wrap = (obj = {}, bgCls, nameEl) => {
+    //     const { profile_url, name = '' } = obj;
+    //     const av = _avatar(obj, bgCls);
+    //     $(nameEl + '-avatar').html(profile_url ? `<a href="${profile_url}" target="_blank">${av}</a>` : av);
+    //     $(nameEl + '-name').html(profile_url ? `<a href="${profile_url}" target="_blank" class="text-body">${name}</a>` : name);
+    //   };
+    //   const hasStartup = startup && startup.name;
+    //   const hasFounder = founder && founder.name;
+    //   if (hasStartup) { _wrap(startup, 'bg-label-info', '#vt-assignee-startup'); $('#vt-assignee-startup').removeClass('d-none'); }
+    //   else { $('#vt-assignee-startup').addClass('d-none'); }
+    //   if (hasFounder) { _wrap(founder, 'bg-label-primary', '#vt-assignee-founder'); $('#vt-assignee-founder').removeClass('d-none'); }
+    //   else { $('#vt-assignee-founder').addClass('d-none'); }
+    //   if (hasStartup || hasFounder) { $('#vt-assignee-wrapper').removeClass('d-none'); }
+    //   else { $('#vt-assignee-wrapper').addClass('d-none'); }
+    // } else {
+    //   $('#vt-assignee-wrapper').addClass('d-none');
+    // }
+    // ── New multi-assignee display ──────────────────────────────────────────
+    const assignees = taskData.assignees || [];
+    // if (assignees.length && (cfg.isAdmin || cfg.isSubAdmin || cfg.isOrgManager)) {
+    if (assignees.length) {
+      const $list = $('#vt-assignees-list').empty();
+      assignees.forEach((a, i) => {
+        const ri = (a.name || '?').substring(0, 2).toUpperCase();
+        const avatar = a.img_url
+          ? `<img src="${a.img_url}" alt="${a.name}" class="rounded-circle object-fit-cover" style="width:40px;height:40px;">`
+          : `<span class="avatar-initial bg-label-info rounded-circle d-flex align-items-center justify-content-center fw-semibold" style="width:40px;height:40px;font-size:13px;">${ri}</span>`;
+        const nameHtml = a.profile_url
+          ? `<a href="${a.profile_url}" target="_blank" class="text-body fw-semibold">${a.name}</a>`
+          : `<span class="fw-semibold text-dark">${a.name}</span>`;
+        $list.append(`
+          <div class="d-flex align-items-center gap-3 ${i > 0 ? 'border-top pt-3' : ''}">
+            ${a.profile_url ? `<a href="${a.profile_url}" target="_blank">${avatar}</a>` : avatar}
+            <div>${nameHtml}</div>
+          </div>`);
+      });
+      $('#vt-assignee-wrapper').removeClass('d-none');
     } else {
       $('#vt-assignee-wrapper').addClass('d-none');
     }
@@ -205,6 +194,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
       const fd = new FormData($form[0]);
       fd.append('description', addDescQ.root.innerHTML);
       fd.append('program_id', program.id);
+      ($('#add-assignees').val() || []).forEach(id => fd.append('assignees[]', id));
       addDz.getFiles().forEach(f => fd.append('attachments[]', f));
 
       $.ajax({
@@ -212,17 +202,24 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
         type: 'POST', data: fd, processData: false, contentType: false,
         success: function (response) {
           toastr.success(lbl.storedSuccessfully);
-          const newTask = response.task || {
-            id: response.id || Date.now(),
-            title: $form.find('[name="title"]').val(),
-            description: addDescQ.root.innerHTML,
-            due_date: $form.find('[name="due_date"]').val(),
-            priority: $('#add-priority').val(),
-            status: $('#add-status').val(),
-            creator: response.creator || null,
-            attachments: response.attachments || [],
-            activities: response.activities || [],
+          const d = response.data || {};
+          const newTask = {
+            id: d.id || Date.now(),
+            title: d.title || $form.find('[name="title"]').val(),
+            description: d.description || addDescQ.root.innerHTML,
+            due_date: d.due_date || $form.find('[name="due_date"]').val() || null,
+            priority: d.priority || $('#add-priority').val(),
+            status: d.status || $('#add-status').val(),
+            creator: d.creator || null,
+            attachments: d.attachments || [],
+            activities: [],
             comments: [],
+            assignees: (d.assignees || []).map(a => ({
+              id: a.id,
+              name: a.name_en || a.name_ar || 'N/A',
+              img_url: a.logo || null,
+              profile_url: '/dashboard/companyProfile/' + a.id,
+            })),
           };
           tasks.push(newTask);
           syncTaskToBoard(newTask, null);
@@ -230,6 +227,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
           addDescQ.setContents([]);
           addDz.reset();
           $('#add-priority, #add-status').val('').trigger('change');
+          $('#add-assignees').val(null).trigger('change');
           addFv.resetForm(true);
           $('#addTaskOffcanvas').offcanvas('hide');
           $btn.prop('disabled', false).html(lbl.create);
@@ -255,6 +253,8 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
     etDescQ.root.innerHTML = taskData.description;
     $('#et-priority').val(taskData.priority).trigger('change');
     $('#et-status').val(taskData.status).trigger('change');
+    const currentAssigneeIds = (taskData.assignees || []).map(a => String(a.id));
+    $('#et-assignees').val(currentAssigneeIds).trigger('change');
     etDz.reset();
     $('#et-file-error').text('');
 
@@ -280,6 +280,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
 
       const fd = new FormData($form[0]);
       fd.append('description', etDescQ.root.innerHTML);
+      ($('#et-assignees').val() || []).forEach(id => fd.append('assignees[]', id));
       etDz.getFiles().forEach(f => fd.append('attachments[]', f));
 
       $.ajax({
@@ -304,6 +305,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
           }
           $('#editTaskOffcanvas').offcanvas('hide');
           etDz.reset();
+          $('#et-assignees').val(null).trigger('change');
           $btn.prop('disabled', false).html(lbl.update);
         },
         error: function () {
