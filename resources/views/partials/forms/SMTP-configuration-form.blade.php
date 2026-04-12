@@ -4,6 +4,7 @@
     <label class="form-label mb-1">{{ __('settings.email_provider') }}</label>
     <select id="emailProviderSelect" class="form-control" name="email_provider">
       <option value="smtp" {{ ($Title->email_provider ?? 'smtp') === 'smtp' ? 'selected' : '' }}>SMTP</option>
+      <option value="gmail" {{ ($Title->email_provider ?? 'gmail') === 'gmail' ? 'selected' : '' }}>Gmail SMTP</option>
       <option value="resend" {{ ($Title->email_provider ?? 'smtp') === 'resend' ? 'selected' : '' }}>Resend</option>
     </select>
   </div>
