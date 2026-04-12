@@ -9496,6 +9496,18 @@
                     "mentor",
                     "registered"
                 ]
+            },
+            {
+                "name": "tasks.add_feedback",
+                "description": "Add Task feedback",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor"
+                ]
             }
         ]
     },

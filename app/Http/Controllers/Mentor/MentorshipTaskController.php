@@ -46,6 +46,7 @@ class MentorshipTaskController extends Controller
 	 */
 	public function index(Request $request)
 	{
+		
 		// Get mentorship_id from request or session
 		// $mentorshipId = $request->get('mentorship_id') ?? session('last_mentorship_id');
 
@@ -127,7 +128,7 @@ class MentorshipTaskController extends Controller
 		$lang = app()->getLocale();
 
 		$rawTasks = ProgramTask::where('program_id', $cycleId)
-			->with(['creator', 'assignees'])
+			->with(['creator', 'assignees', 'feedbacks.user', 'activities.user'])
 			->get();
 
 		$tasks = $rawTasks->map(function ($task) use ($lang) {
@@ -170,8 +171,6 @@ class MentorshipTaskController extends Controller
 					'size_bytes'  => null,
 					'uploaded_at' => null,
 				])->values()->toArray(),
-
-				'activities'        => [],
 				'comments'          => $task->comments()->with('user')->get()->map(fn($c) => [
 					'id'      => $c->id,
 					'user'    => $c->user?->name,
@@ -180,16 +179,46 @@ class MentorshipTaskController extends Controller
 					'text'    => $c->comment,
 					'time'    => $c->created_at->diffForHumans(),
 				])->toArray(),
-				'feedbacks'         => [],
+				 'feedbacks' => $task->feedbacks->map(function($fb) {
+                    return [
+                        'id'       => $fb->id,
+                        'user'     => $fb->user->name ?? 'N/A',
+                        'user_id'  => $fb->user_id,
+                        'img_url'  => $fb->user ? User::image_handler($fb->user->img_url) : null,
+                        'decision' => $fb->decision,
+                        'text'     => $fb->note,
+                        'time'     => $fb->created_at->diffForHumans(),
+                    ];
+                })->toArray(),
+				
+                'activities' => $task->activities->map(function($act) {
+                    $action = match($act->action) {
+                        'create' => 'created this task',
+                        'update' => 'updated ' . $act->column . ($act->was && $act->new ? ' from "' . $act->was . '" to "' . $act->new . '"' : ''),
+                        'move'   => 'moved task' . ($act->was && $act->new ? ' from "' . $act->was . '" to "' . $act->new . '"' : ''),
+                        'comment'  => 'added a comment',
+                        'feedback' => 'submitted feedback',
+                        'delete'   => 'deleted this task',
+                        default    => $act->action,
+                    };
+					return [
+                        'user'    => $act->user->name ?? 'N/A',
+                        'user_id' => $act->user_id,
+                        'img_url' => $act->user ? User::image_handler($act->user->img_url) : null,
+                        'action'  => $action,
+                        'time'    => $act->created_at->diffForHumans(),
+                    ];
+                })->toArray(),
 				'submissions'       => [],
 
 				'comments_count'    => $task->comments()->count(),
-				'feedbacks_count'   => 0,
+				'feedbacks_count'   => $task->feedbacks()->count(),
+				'activities_count'  => $task->activities->count(),
 				'submissions_count' => 0,
 				'attachments_count' => $attachments->count(),
 			];
 		})->values()->toArray();
-
+			
 		$__unused = [
 			// Task 1: New - Completed Design Task
 			[

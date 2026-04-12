@@ -170,6 +170,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
     $('#vt-comment-count').text(taskData.comments_count ?? (taskData.comments ? taskData.comments.length : 0));
     $('#vt-feedback-count').text(taskData.feedbacks_count ?? (taskData.feedbacks ? taskData.feedbacks.length : 0));
     $('#vt-submissions-count').text(taskData.submissions_count ?? (taskData.submissions ? taskData.submissions.length : 0));
+    $('#vt-activity-count').text(taskData.activities_count ?? (taskData.activities ? taskData.activities.length : 0));
 
     $('#vt-edit-trigger-btn').data('task-id', taskId);
     $('#vt-upload-btn-task-id').val(taskId);
@@ -477,7 +478,6 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
           if (!task.feedbacks) task.feedbacks = [];
           task.feedbacks.push(fb);
           $('#vt-feedback-count').text(task.feedbacks.length);
-
           // Move task to the appropriate board based on decision
           const oldStatus = task.status;
           const newStatus = decision === 'pass' ? 'completed' : 'pending';
