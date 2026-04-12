@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Broadcast;
 use App\Observers\WireChatMessageObserver;
 use Namu\WireChat\Models\Message;
 use App\Services\BreadcrumbService;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\GmailTransport;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -50,16 +52,15 @@ class AppServiceProvider extends ServiceProvider
                         ];
                         MailConfig::set($data);
                     } else {
-                        Config::set('mail.driver', 'smtp');
-                        Config::set('mail.host', $settings->host ?? env('MAIL_HOST'));
-                        Config::set('mail.port', $settings->Port ?? env('MAIL_PORT'));
-                        Config::set('mail.username', $settings->Mail ?? env('MAIL_USERNAME'));
-                        Config::set('mail.password', $settings->Mailpassword ?? env('MAIL_PASSWORD'));
-                        Config::set('mail.encryption', $settings->encryption ?? env('MAIL_ENCRYPTION'));
-
-                        Config::set('mail.from.address', 
-                            (!empty($settings->Mail) && filter_var($settings->Mail, FILTER_VALIDATE_EMAIL)) 
-                                ? $settings->Mail 
+                        Config::set('mail.default', 'gmail');
+                        Config::set('mail.mailers.smtp.host', $settings->host ?? env('MAIL_HOST'));
+                        Config::set('mail.mailers.smtp.port', $settings->Port ?? env('MAIL_PORT'));
+                        Config::set('mail.mailers.smtp.username', $settings->Mail ?? env('MAIL_USERNAME'));
+                        Config::set('mail.mailers.smtp.password', $settings->Mailpassword ?? env('MAIL_PASSWORD'));
+                        Config::set('mail.mailers.smtp.encryption', $settings->encryption ?? env('MAIL_ENCRYPTION'));
+                        Config::set('mail.from.address',
+                            (!empty($settings->Mail) && filter_var($settings->Mail, FILTER_VALIDATE_EMAIL))
+                                ? $settings->Mail
                                 : env('MAIL_FROM_ADDRESS')
                         );
                         Config::set('mail.from.name', $settings->title ?? env('MAIL_FROM_NAME', config('app.name')));
@@ -71,6 +72,13 @@ class AppServiceProvider extends ServiceProvider
                 // Log::error('Could not load mail settings from database: ' . $e->getMessage());
             }
         }
+
+        Mail::extend('gmail', function () {
+            return new GmailTransport(
+                config('mail.mailers.smtp.username') ?? env('MAIL_USERNAME'),
+                config('mail.mailers.smtp.password') ?? env('MAIL_PASSWORD')
+            );
+        });
         view()->composer('*', function ($view) use ($settings) {
             if (session()->has('locale')) {
                 \App::setLocale(session()->get('locale'));

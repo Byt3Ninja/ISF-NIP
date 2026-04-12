@@ -533,7 +533,7 @@ class SettingsController extends Controller
 		}
 
 		// SMTP provider (existing logic)
-		$updateSittings->email_provider = 'smtp';
+		$updateSittings->email_provider = $request->input('email_provider', 'smtp');
 		$updateSittings->host = $request->input('host');
 		$updateSittings->Mail = $request->input('Mail');
 		$updateSittings->Mailpassword = $request->input('Mailpassword');
