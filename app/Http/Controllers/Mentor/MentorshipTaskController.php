@@ -9,6 +9,8 @@ use App\Jobs\SendTaskNotificationJob;
 use App\Label;
 use App\MentorshipRequest;
 use App\MentorshipTask;
+use App\ProgramTask;
+use App\Company;
 use App\MentorshipTaskComment;
 use App\MentorshipTaskFile;
 use App\MentorshipTaskLog;
@@ -124,85 +126,67 @@ class MentorshipTaskController extends Controller
 		];
 		$lang = app()->getLocale();
 
-		$rawTasks = MentorshipTask::whereHas('mentorshipRequest', fn($q) => $q->where('cycle_id', $cycleId))
-			->with(['mentor', 'user', 'company', 'comments.user', 'files', 'logs.user'])
-			->whereNull('parent_id')
+		$rawTasks = ProgramTask::where('program_id', $cycleId)
+			->with(['creator', 'assignees'])
 			->get();
 
 		$tasks = $rawTasks->map(function ($task) use ($lang) {
-			$mentor  = $task->mentor;
-			$user    = $task->user;
-			$company = $task->company;
+			$creator  = $task->creator;
+			$company  = $task->assignees->first();
+			$attachments = collect($task->attachments ?? []);
 
 			return [
 				'id'          => $task->id,
 				'title'       => $task->title,
 				'description' => $task->description,
-				'due_date'    => $task->due_date,
-				'priority'    => $task->priority ? ucfirst($task->priority) : 'Medium',
+				'due_date'    => $task->due_date?->format('Y-m-d'),
+				'priority'    => $task->priority ?? 'Medium',
 				'status'      => $task->status,
 				'created_at'  => $task->created_at,
 				'updated_at'  => $task->updated_at,
 
-				'creator' => $mentor ? [
-					'id'          => $mentor->id,
-					'name'        => $mentor->name,
-					'img_url'     => \App\User::image_handler($mentor->img_url),
-					'profile_url' => '/dashboard/show/UserProfile/' . $mentor->id,
+				'creator' => $creator ? [
+					'id'          => $creator->id,
+					'name'        => $creator->name,
+					'img_url'     => User::image_handler($creator->img_url),
+					'profile_url' => '/dashboard/show/UserProfile/' . $creator->id,
 				] : null,
 
 				'assignee' => [
 					'startup' => $company ? [
 						'id'          => $company->id,
 						'name'        => $company->{'name_' . $lang} ?? $company->name_en,
-						'img_url'     => \App\Company::logo_handler($company->logo),
+						'img_url'     => Company::logo_handler($company->logo),
 						'profile_url' => '/dashboard/companyProfile/' . $company->id,
 					] : null,
-					'founder' => $user ? [
-						'id'          => $user->id,
-						'name'        => $user->name,
-						'img_url'     => \App\User::image_handler($user->img_url),
-						'profile_url' => '/dashboard/show/UserProfile/' . $user->id,
-					] : null,
+					'founder' => null,
 				],
 
-				'attachments' => $task->files->map(fn($f) => [
-					'id'          => $f->id,
-					'name'        => $f->file_name,
-					'url'         => URL::to('dashboard/uploads/tasks/' . $task->mentorship_request_id . '/cards/' . $task->id . '/' . $f->file),
+				'attachments' => $attachments->map(fn($a, $i) => [
+					'id'          => $i + 1,
+					'name'        => $a['name'] ?? basename($a['path'] ?? ''),
+					'url'         => isset($a['path']) ? Storage::url($a['path']) : null,
 					'mime_type'   => null,
 					'size_bytes'  => null,
-					'uploaded_at' => $f->created_at,
+					'uploaded_at' => null,
 				])->values()->toArray(),
 
-				'activities' => $task->logs->map(fn($l) => [
-					'user'       => $l->user?->name,
-					'user_id'    => $l->user_id,
-					'img_url'    => \App\User::image_handler($l->user?->img_url),
-					'action'     => $l->action,
-					'type'       => $l->action,
-					'time'       => Carbon::parse($l->created_at)->format('M j, g:i A'),
-					'created_at' => $l->created_at,
-				])->values()->toArray(),
-
-				'comments' => $task->comments->map(fn($c) => [
-					'id'         => $c->id,
-					'user'       => $c->user?->name,
-					'user_id'    => $c->user_id,
-					'img_url'    => \App\User::image_handler($c->user?->img_url),
-					'text'       => $c->comment,
-					'time'       => Carbon::parse($c->created_at)->format('M j, g:i A'),
-					'created_at' => $c->created_at,
-					'updated_at' => $c->updated_at,
-				])->values()->toArray(),
-
+				'activities'        => [],
+				'comments'          => $task->comments()->with('user')->get()->map(fn($c) => [
+					'id'      => $c->id,
+					'user'    => $c->user?->name,
+					'user_id' => $c->user_id,
+					'img_url' => User::image_handler($c->user?->img_url),
+					'text'    => $c->comment,
+					'time'    => $c->created_at->diffForHumans(),
+				])->toArray(),
 				'feedbacks'         => [],
 				'submissions'       => [],
 
-				'comments_count'    => $task->comments->count(),
+				'comments_count'    => $task->comments()->count(),
 				'feedbacks_count'   => 0,
 				'submissions_count' => 0,
-				'attachments_count' => $task->files->count(),
+				'attachments_count' => $attachments->count(),
 			];
 		})->values()->toArray();
 
@@ -325,7 +309,7 @@ class MentorshipTaskController extends Controller
 				'submissions_count' => 1,
 				'attachments_count' => 1,
 			],
-			
+
 		];
 
 		$boards = [
@@ -395,29 +379,16 @@ class MentorshipTaskController extends Controller
 			],
 		];
 
-		$archivedTasks = [
-			[
-				'id' => 101,
-				'title' => 'Legacy Payment Gateway Integration',
-				'description' => '<p>Integrate the old Stripe v2 payment gateway before migrating to the new API. This task is no longer needed as we have fully migrated to Stripe v3.</p>',
-				'status' => 'archived',
-				'archived_at' => '2025-02-10T11:00:00Z',
-			],
-			[
-				'id' => 102,
-				'title' => 'User Onboarding Email Sequence',
-				'description' => '<p>Design and implement a 5-step onboarding email drip campaign for new signups. Archived after switching to an automated CRM tool.</p>',
-				'status' => 'archived',
-				'archived_at' => '2025-03-01T09:30:00Z',
-			],
-			[
-				'id' => 103,
-				'title' => 'Dashboard Analytics Widget',
-				'description' => '<p>Build a real-time analytics widget for the admin dashboard showing DAU/MAU metrics. Deprioritized in favor of a third-party analytics integration.</p>',
-				'status' => 'archived',
-				'archived_at' => '2025-03-18T14:15:00Z',
-			],
-		];
+		$archivedTasks = ProgramTask::where('program_id', $cycleId)
+			->where('status', 'archived')
+			->get()
+			->map(fn($task) => [
+				'id'          => $task->id,
+				'title'       => $task->title,
+				'description' => $task->description,
+				'status'      => 'archived',
+				'archived_at' => $task->updated_at,
+			])->values()->toArray();
 
 		return view('kanban.index', compact('cycle', 'tasks', 'boards', 'priorityConfig', 'jsPriorityMap', 'jsStatusMap', 'offcanvasTabs', 'archivedTasks'));
 	}
@@ -566,6 +537,7 @@ class MentorshipTaskController extends Controller
 
 	public function moveTask(Request $request)
 	{
+	
 		$user = auth()->user();
 		$lang = app()->getLocale();
 		$this->validate($request, [
@@ -883,22 +855,22 @@ class MentorshipTaskController extends Controller
 				return response()->json($output, 422);
 		}
 
-		// Normalize comment text
-    $commentText = trim($request->comment);
+			// Normalize comment text
+		$commentText = trim($request->comment);
 
-    // Prevent duplicate comment (same user, same task, same text)
-    $exists = MentorshipTaskComment::where('mentorship_task_id', $request->task_id)
-        ->where('user_id', $user->id)
-        ->where('comment', $commentText)
-        ->exists();
+		// Prevent duplicate comment (same user, same task, same text)
+		$exists = MentorshipTaskComment::where('mentorship_task_id', $request->task_id)
+			->where('user_id', $user->id)
+			->where('comment', $commentText)
+			->exists();
 
-    if ($exists) {
-        return response()->json([
-            'status' => false,
-            'title' => 'Duplicate',
-            'message' => __('mentor.mentorshipTasks.comment_already_exists'),
-        ], 409);
-    }
+		if ($exists) {
+			return response()->json([
+				'status' => false,
+				'title' => 'Duplicate',
+				'message' => __('mentor.mentorshipTasks.comment_already_exists'),
+			], 409);
+		}
 
 		$comment = new MentorshipTaskComment;
 		$comment->mentorship_task_id = $request->task_id;
