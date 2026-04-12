@@ -6,6 +6,9 @@ use App\Cycle;
 use App\Company;
 use App\Tags;
 use App\ProgramTask;
+use App\ProgramTaskComment;
+use App\MentorshipTask;
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
@@ -127,7 +130,7 @@ class TasksController extends Controller
             'title' => 'required|string|max:200',
             'description' => 'nullable|string|max:2000',
             'program_id' => 'required|exists:cycles,id',
-            'assignees' => 'required|array|min:1',
+            'assignees' => 'nullable|array',
             'assignees.*' => 'exists:companies,id',
             'priority' => 'required|in:Low,Medium,High',
             'status' => 'required|in:pending,progress,review,completed,archived',
@@ -226,7 +229,7 @@ class TasksController extends Controller
 
             // Attach assignees (companies/startups) - use sync to prevent duplicates
             $assigneeData = [];
-            foreach ($request->assignees as $companyId) {
+            foreach ($request->assignees ?? [] as $companyId) {
                 $assigneeData[$companyId] = [
                     'status' => 'pending',
                     'last_updated' => now(),
@@ -625,13 +628,11 @@ class TasksController extends Controller
         }
     }
 
-    public function addComment($taskId, $comment)
+    public function addComment(Request $request, $taskId)
     {
-        $task = ProgramTask::find($taskId);
-        
-         try {
+        try {
             $task = ProgramTask::find($taskId);
-            
+
             if (!$task) {
                 return response()->json([
                     'success' => false,
@@ -641,13 +642,28 @@ class TasksController extends Controller
                 ], 404);
             }
 
+            $comment = $task->comments()->create([
+                'user_id' => auth()->id(),
+                'comment' => $request->input('comment'),
+            ]);
+
+            $user = auth()->user();
+
             return response()->json([
-                'success' => false,
-                'message' => __('admin.comment_success')
+                'success' => true,
+                'message' => __('admin.comment_success'),
+                'comment' => [
+                    'id'      => $comment->id,
+                    'user'    => $user->name,
+                    'user_id' => $user->id,
+                    'img_url' => User::image_handler($user->img_url),
+                    'text'    => $comment->comment,
+                    'time'    => $comment->created_at->diffForHumans(),
+                ],
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Error downloading attachment: ' . $e->getMessage());
+            \Log::error('Error adding comment: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => __('admin.comment_failed')
@@ -655,13 +671,11 @@ class TasksController extends Controller
         }
     }
     
-    public function moveTask($taskId)
+    public function moveTask($taskId, $status)
     {
-        $task = ProgramTask::find($taskId);
-        
-         try {
-            $task = ProgramTask::find($taskId);
-            
+        try {
+            $task = ProgramTask::find($taskId) ?? MentorshipTask::find($taskId);
+
             if (!$task) {
                 return response()->json([
                     'success' => false,
@@ -671,13 +685,16 @@ class TasksController extends Controller
                 ], 404);
             }
 
+            $task->status = $status;
+            $task->save();
+
             return response()->json([
-                'success' => false,
+                'success' => true,
                 'message' => __('admin.Task_status_updated_successfully')
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Error downloading attachment: ' . $e->getMessage());
+            \Log::error('Error moving task: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => __('admin.move_task_failed')

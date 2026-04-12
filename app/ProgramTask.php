@@ -47,6 +47,11 @@ class ProgramTask extends Model
     /**
      * Get the companies assigned to this task
      */
+    public function comments()
+    {
+        return $this->hasMany(ProgramTaskComment::class, 'program_task_id');
+    }
+
     public function assignees()
     {
         return $this->belongsToMany(Company::class, 'program_task_assignees', 'program_task_id', 'company_id')

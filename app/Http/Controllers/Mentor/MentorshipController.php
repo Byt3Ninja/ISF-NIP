@@ -6,7 +6,7 @@ use App\Company;
 use App\Cycle;
 use App\Http\Controllers\Controller;
 use App\MentorshipRequest;
-use App\MentorshipTask;
+use App\ProgramTask;
 use App\SurveyResponses;
 use App\User;
 use Illuminate\Http\Request;
@@ -15,7 +15,7 @@ use Spatie\Permission\Traits\HasRoles;
 class MentorshipController extends Controller
 {
     public function index(){
-
+        $user = auth()->user();
         $mentorRequests =  MentorshipRequest::all();
         $available_surveys = SurveyResponses::whereIn('user_id', $mentorRequests->pluck('mentor_id'))->whereIn('triggered_at', $mentorRequests->pluck('id'))->where('triggered_by', 'session')->get();
 
@@ -43,9 +43,9 @@ class MentorshipController extends Controller
         }
         //['id' => 1,  'title' => 'Cycle 1',  'completed' => 3,  'pending' => 2],
         // maping cycles with completed and pending sessions count
-        $cycles = $cycles->map(function ($cycle) use ($sessions) {
-            $completed = MentorshipTask::whereHas('mentorshipRequest', fn($q) => $q->where('cycle_id', $cycle->id))->where('status', 'completed')->count();
-            $pending = MentorshipTask::whereHas('mentorshipRequest', fn($q) => $q->where('cycle_id', $cycle->id))->where('status', '!=', 'completed')->count();
+        $cycles = $cycles->map(function ($cycle) use ($sessions, $user) {
+            $completed = ProgramTask::where('program_id', $cycle->id)->where('status', 'completed')->where('status', '!=', 'archived')->where('created_by', $user->id)->count();
+            $pending = ProgramTask::where('program_id', $cycle->id)->where('status', '!=', 'completed')->where('status', '!=', 'archived')->where('created_by', $user->id)->count();
             return [
                 'id' => $cycle->id,
                 'title' => $cycle->title,
