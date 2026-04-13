@@ -193,6 +193,8 @@ class TasksController extends Controller
 
         try {
             // Handle file attachments
+            /** @var \App\User $uploader */
+            $uploader = auth()->user();
             $attachments = [];
             if ($request->hasFile('attachments')) {
                 foreach ($request->file('attachments') as $file) {
@@ -209,10 +211,11 @@ class TasksController extends Controller
                     // Store the file
                     $path = $file->store('tasks/attachments', 'public');
                     $attachments[] = [
-                        'name' => $file->getClientOriginalName(),
-                        'path' => $path,
-                        'size' => $file->getSize(),
-                        'type' => $file->getMimeType()
+                        'name'   => $file->getClientOriginalName(),
+                        'path'   => $path,
+                        'size'   => $file->getSize(),
+                        'type'   => $file->getMimeType(),
+                        'status' => $uploader->hasRole('registered') ? 'submission' : 'attachment',
                     ];
                 }
             }
@@ -403,6 +406,8 @@ class TasksController extends Controller
 
             // Handle file attachments
             if ($request->hasFile('attachments')) {
+                /** @var \App\User $uploader */
+                $uploader = auth()->user();
                 $attachments = $task->attachments ?? [];
                 foreach ($request->file('attachments') as $file) {
                     // Validate file size (10 MB)
@@ -411,10 +416,11 @@ class TasksController extends Controller
                     // Store the file
                     $path = $file->store('tasks/attachments', 'public');
                     $attachments[] = [
-                        'name' => $file->getClientOriginalName(),
-                        'path' => $path,
-                        'size' => $file->getSize(),
-                        'type' => $file->getMimeType()
+                        'name'   => $file->getClientOriginalName(),
+                        'path'   => $path,
+                        'size'   => $file->getSize(),
+                        'type'   => $file->getMimeType(),
+                        'status' => $uploader->hasRole('registered') ? 'submission' : 'attachment',
                     ];
                 }
                 $task->update(['attachments' => $attachments]);
@@ -545,14 +551,17 @@ class TasksController extends Controller
                 'attachment' => 'required|file|max:5120|mimes:jpeg,png,gif,pdf',
             ]);
 
+            /** @var \App\User $uploader */
+            $uploader = auth()->user();
             $file = $request->file('attachment');
             $path = $file->store('tasks/attachments', 'public');
 
             $newAtt = [
-                'name' => $file->getClientOriginalName(),
-                'path' => $path,
-                'size' => $file->getSize(),
-                'type' => $file->getMimeType(),
+                'name'   => $file->getClientOriginalName(),
+                'path'   => $path,
+                'size'   => $file->getSize(),
+                'type'   => $file->getMimeType(),
+                'status' => $uploader->hasRole('registered') ? 'submission' : 'attachment',
             ];
 
             $attachments = $task->attachments ?? [];
