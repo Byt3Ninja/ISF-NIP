@@ -235,8 +235,8 @@ class MentorshipTaskController extends Controller
 				'comments_count'    => $task->comments()->count(),
 				'feedbacks_count'   => $task->feedbacks()->count(),
 				'activities_count'  => $task->activities->count(),
-				'submissions_count' => 0,
-				'attachments_count' => $attachments->count(),
+				'submissions_count' => $attachments->where('status', 'submission')->count(),
+				'attachments_count' => $attachments->where('status', 'attachment')->count(),
 			];
 		})->values()->toArray();
 			
