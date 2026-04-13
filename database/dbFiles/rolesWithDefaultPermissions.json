@@ -9437,6 +9437,18 @@
                 ]
             },
             {
+                "name": "tasks.show",
+                "description": "show task details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "subadmin",
+                    "organizationmanager",
+                    "mentor"
+                ]
+            },
+            {
                 "name": "tasks.move",
                 "description": "Move task (udpate its status)",
                 "guard_name": "web",
