@@ -25,6 +25,8 @@ return [
     'Add_New_Form' => 'Add New Form',
     'Add_Form' => 'Add Form',
     'Edit_Form' => 'Edit Form',
+    'Update_Form' => 'Update Form',
+    'Form_updated_successfully' => 'Form updated successfully.',
     'Copy_Form' => 'Copy Form',
     'Form_Title' => 'Form Title',
     'Untitled_form' => 'Untitled form',

@@ -284,10 +284,20 @@ Loads the builder UI. Given an optional form id, it:
 ### `saveForm($id, Request $request)`
 
 AJAX endpoint that accepts a JSON payload built by `extractQuestionData()` on
-the client. It:
+the client. The route `{id}` is the **authoritative** form identifier: `0`
+(or missing) means "create new", any positive integer means "update that
+specific form, including renaming it".
 
-1. Finds or creates the `BuilderForm` by `(form_name, organization_id)`.
-2. Translates each question into a `{ field_id, options }` tuple:
+It:
+
+1. Validates the envelope (`form_fields_data.items`, `title`,
+   `organization_id`).
+2. If `$id > 0` and a matching `BuilderForm` exists, the form is loaded and
+   its `form_name` + `organization_id` are updated in place; otherwise a new
+   `BuilderForm` row is created. This replaces the legacy "look up by
+   `(form_name, organization_id)`" path, which silently orphaned forms on
+   rename and rewrote the wrong form on name collisions.
+3. Translates each question into a `{ field_id, options }` tuple:
    - `field_id` maps the semantic type to a row in the `fields` table
      (`input`, `textarea`, `select`, `radio`, `checkbox`, `file`, `number`,
      `email`, `url`, …).
@@ -295,14 +305,29 @@ the client. It:
      `description`, `validation`, `logic`, and type-specific configuration
      such as `values` (for choice types), `min/max/step` (for `number`), or
      `confirm` (for `email`).
-3. Wraps the entire re-attach in a DB transaction: existing attachments are
-   detached, then new rows are attached to `builder_fields`.
+4. Wraps the entire re-attach in a DB transaction: existing attachments are
+   detached, then new rows are attached to `builder_fields`. Any
+   `\Throwable` raised inside the transaction is reported via Laravel's
+   `report()` helper and returned to the client as `success: false` with
+   the original exception message — no more generic error pages.
 
 Response:
 
 ```json
-{ "success": true, "id": 42, "organization_id": 7 }
+{
+  "success": true,
+  "id": 42,
+  "organization_id": 7,
+  "action": "updated",   // or "created"
+  "message": null
+}
 ```
+
+The client uses `action` to pick between the "Form saved successfully." /
+"تم حفظ النموذج بنجاح!" and "Form updated successfully." /
+"تم تحديث النموذج بنجاح." messages, and always reloads
+`/dashboard/show-builder/{id}` after a save so the form remains accessible
+for further edits.
 
 ### `showForm($id)`
 
@@ -604,6 +629,46 @@ in order:
 ---
 
 ## Changelog
+
+### 2026-04-14 — Allow form editing without save error (GV-2137)
+
+- **Fixed save-by-name bug.** `saveForm()` used to look up the target form
+  by `(form_name, organization_id)` and ignored the route `{id}`
+  parameter entirely. Renaming a form therefore created a *new* form and
+  orphaned the original, and a name collision silently rewrote the wrong
+  form. The action now uses the route id as the authoritative identifier
+  and updates `form_name` + `organization_id` on the loaded model, so
+  renames are persisted correctly and a fresh `BuilderForm` is only
+  created when the id is `0`.
+- **Fixed silent 500 on save errors.** The `catch (Exception $e)` block
+  around the DB transaction was unqualified inside a namespaced class
+  and `Exception` was not imported, so it resolved to
+  `App\Http\Controllers\Exception` (nonexistent) and raised a fatal
+  "class not found" whenever any real exception was thrown during the
+  re-attach. The catch now uses `\Throwable`, reports the exception via
+  `report()`, and returns `success: false` + the original message so the
+  UI can show a real error instead of a generic system page. This was
+  the most common source of the "some forms give an error" symptom
+  described in the ticket.
+- **Button relabel.** The save button inside the builder now reads
+  **Update Form** / **تحديث النموذج** while in edit mode (was
+  "Edit Form" / "تحرير النموذج"). Create mode still reads "Add Form".
+- **Per-mode success message.** `saveForm()` returns a new `action` key
+  (`created` | `updated`) and the client picks between
+  `Form_saved_successfully` and the new `Form_updated_successfully`
+  strings. The Arabic message matches the spec exactly:
+  `تم تحديث النموذج بنجاح.`
+- **Form stays accessible after save.** The client now always reloads
+  `/dashboard/show-builder/{id}` after a successful save, so updated
+  values survive a page refresh and the form remains editable. Edit-mode
+  saves used to navigate straight to the read-only render view, which
+  is what produced the "form becomes inaccessible after save" report.
+- **Envelope validation.** `saveForm()` now also validates
+  `form_fields_data.title` and `form_fields_data.organization_id` before
+  touching the database, so malformed payloads short-circuit with a
+  proper 422 instead of hitting the transaction.
+- **Lang files** gained `Update_Form` and `Form_updated_successfully`
+  in both `en/builder.php` and `ar/builder.php`.
 
 ### 2026-04-13 — File upload hardening (GV-2136)
 

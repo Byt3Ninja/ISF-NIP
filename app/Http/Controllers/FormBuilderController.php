@@ -407,27 +407,42 @@ class FormBuilderController extends Controller
      */
     public function saveForm($id, Request $request)
     {
-        //  dd($request->all());
-
         $request->validate([
             'form_fields_data' => 'required|array',
             'form_fields_data.items' => 'required|array',
+            'form_fields_data.title' => 'required|string',
+            'form_fields_data.organization_id' => 'required|integer|exists:organizations,id',
         ]);
 
         $form_data = $request->form_fields_data;
 
-        
-        $form = BuilderForm::where('form_name', $form_data['title'])->where('organization_id', $form_data['organization_id'])->first();
-       
-        if ($form) {
-            $id = $form->id;
-        }else{
-        $form = new BuilderForm;
+        // Route parameter `{id}` is the authoritative form identifier.
+        // "0" / missing means "create new"; any other value means "update that
+        // specific form" (including renaming it). The old implementation
+        // looked the form up by (form_name, organization_id) which broke
+        // renames — a rename created a new form and orphaned the original,
+        // and a name collision silently rewrote the wrong form.
+        $is_edit = false;
+        $form = null;
+
+        if ($id && (int) $id > 0) {
+            $form = BuilderForm::find($id);
+            if ($form) {
+                $is_edit = true;
+                $form->form_name = $form_data['title'];
+                $form->organization_id = $form_data['organization_id'];
+                $form->save();
+            }
+        }
+
+        if (!$is_edit) {
+            $form = new BuilderForm;
             $form->form_name = $form_data['title'];
             $form->organization_id = $form_data['organization_id'];
             $form->save();
-            $id = $form->id;
         }
+
+        $id = $form->id;
         
         $fields = Field::all()->mapWithKeys(function ($field) {
             return [$field->field_type => $field->id];
@@ -563,6 +578,7 @@ class FormBuilderController extends Controller
         });
 
         $save_success = true;
+        $error_message = null;
 
         try {
             DB::transaction(function () use ($config, $id) {
@@ -575,14 +591,18 @@ class FormBuilderController extends Controller
                     ]);
                 });
             });
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $save_success = false;
+            $error_message = $e->getMessage();
+            report($e);
         }
-        
+
         return response()->json([
-            'success' => $save_success,
-            'id' => $id,
+            'success'         => $save_success,
+            'id'              => $id,
             'organization_id' => $form_data['organization_id'],
+            'action'          => $is_edit ? 'updated' : 'created',
+            'message'         => $error_message,
         ]);
 
     }

@@ -25,6 +25,8 @@ return [
     'Add_New_Form' => 'إضافة نموذج جديد',
     'Add_Form' => 'إضافة نموذج',
     'Edit_Form' => 'تحرير النموذج',
+    'Update_Form' => 'تحديث النموذج',
+    'Form_updated_successfully' => 'تم تحديث النموذج بنجاح.',
     'Copy_Form' => 'نسخ النموذج',
     'Form_Title' => 'عنوان النموذج',
     'Untitled_form' => 'نموذج بدون عنوان',

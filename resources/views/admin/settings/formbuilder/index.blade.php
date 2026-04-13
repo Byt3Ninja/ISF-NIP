@@ -191,7 +191,7 @@
           </button>
           <button type="button" class="btn btn-lg btn-primary" onclick="saveForm()">
             <span class="text-nowrap">
-              {{ $mode === 'EDIT' ? __('builder.Edit_Form') : __('builder.Add_Form') }}
+              {{ $mode === 'EDIT' ? __('builder.Update_Form') : __('builder.Add_Form') }}
             </span>
             <i class="ti ti-check ms-2"></i>
           </button>
@@ -388,6 +388,7 @@
       form_title_required:          '{{ __("builder.Form_title_required") }}',
       organization_required:        '{{ __("builder.Organization_required") }}',
       form_saved_successfully:      '{{ __("builder.Form_saved_successfully") }}',
+      form_updated_successfully:    '{{ __("builder.Form_updated_successfully") }}',
       error_saving_form:            '{{ __("builder.Error_saving_form") }}',
       error_occurred:               '{{ __("builder.Error_Occurred") }}',
       /* ── modal / delete ── */
