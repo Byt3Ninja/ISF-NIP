@@ -107,5 +107,13 @@ return [
     'switch' => 'Switch',
     'confirm' => 'Confirm',
     'confirm_switch' => 'Confirm Switch',
-    'confirm_switch_message' => 'You have unsaved changes. Switching forms will discard them.'
+    'confirm_switch_message' => 'You have unsaved changes. Switching forms will discard them.',
+    'Validation_required' => 'This field is required.',
+    'Validation_email' => 'Please enter a valid email address.',
+    'Validation_number' => 'Please enter numbers only.',
+    'Validation_time' => 'Please enter a valid time.',
+    'Confirm_submit_title' => 'Submit application?',
+    'Confirm_submit_message' => 'Once you submit, uploaded files cannot be recovered automatically if a server-side error occurs. You will need to re-attach them. Continue?',
+    'Confirm_yes_submit' => 'Yes, submit',
+    'Confirm_cancel' => 'Cancel',
 ];

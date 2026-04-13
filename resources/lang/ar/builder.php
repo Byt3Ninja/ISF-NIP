@@ -108,4 +108,12 @@ return [
     'confirm' => 'تأكيد',
     'confirm_switch' => 'تأكيد تغيير النماذج',
     'confirm_switch_message' => 'لديك تغييرات غير محفوظة. سيؤدي تبديل النماذج إلى تجاهلها.',
+    'Validation_required' => 'هذا الحقل مطلوب.',
+    'Validation_email' => 'يرجى إدخال بريد إلكتروني صحيح.',
+    'Validation_number' => 'يرجى إدخال أرقام فقط.',
+    'Validation_time' => 'يرجى إدخال وقت صحيح.',
+    'Confirm_submit_title' => 'إرسال النموذج؟',
+    'Confirm_submit_message' => 'بمجرد الإرسال، لا يمكن استرجاع الملفات المرفوعة تلقائياً في حال حدوث خطأ من الخادم. ستحتاج إلى إعادة إرفاقها. هل تريد المتابعة؟',
+    'Confirm_yes_submit' => 'نعم، إرسال',
+    'Confirm_cancel' => 'إلغاء',
 ];

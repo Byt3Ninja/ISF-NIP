@@ -1,0 +1,535 @@
+# Forms Module
+
+The Forms Management module lets tenant admins, sub-admins, organization
+managers, and founders build custom forms, publish them to programs, render
+them to end users, and capture validated submissions. It powers application
+forms, surveys, and any program step that needs structured data collection.
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [For Regular Users](#for-regular-users-non-technical)
+  - [Who can use this module](#who-can-use-this-module)
+  - [Creating a form](#creating-a-form)
+  - [Adding sections and questions](#adding-sections-and-questions)
+  - [Question types](#question-types)
+  - [Response logic](#response-logic-conditional-flow)
+  - [Previewing and sharing a form](#previewing-and-sharing-a-form)
+  - [Submitting a form (end-user view)](#submitting-a-form-end-user-view)
+  - [Validation behavior](#validation-behavior)
+  - [FAQ](#frequently-asked-questions-faq)
+- [For Developers](#for-developers-technical)
+  - [Architecture](#architecture)
+  - [Routes](#routes)
+  - [Controllers and actions](#controllers-and-actions)
+  - [Database schema](#database-schema)
+  - [Question type reference](#question-type-reference)
+  - [Validation pipeline](#validation-pipeline)
+  - [Data preservation on failed submission](#data-preservation-on-failed-submission)
+  - [Internationalization](#internationalization)
+  - [File structure](#file-structure)
+  - [Extending with a new question type](#extending-with-a-new-question-type)
+
+---
+
+## Overview
+
+The Forms module has three conceptual surfaces:
+
+1. **Builder** – a drag-and-drop UI at `/dashboard/show-builder` where form
+   authors compose forms from sections and questions.
+2. **Renderer** – a public-facing form at `/dashboard/show-form/{id}` where
+   end users answer the questions and submit their responses.
+3. **Submission handler** – the backend pipeline that validates submissions,
+   stores responses, and relays success/failure back to the user.
+
+Forms are scoped to an **organization**. Which forms a user can see depends on
+their role (see [Who can use this module](#who-can-use-this-module)).
+
+---
+
+# For Regular Users (Non-Technical)
+
+## Who can use this module
+
+| Role                  | Can build forms | Can see forms of                          | Can submit |
+| --------------------- | :-------------: | ----------------------------------------- | :--------: |
+| Admin (Super/Tenant)  |       Yes       | All organizations                         |    N/A     |
+| Sub-Admin             |       Yes       | Organizations they are linked to          |    N/A     |
+| Organization Manager  |       Yes       | Their own organization(s)                 |    N/A     |
+| Founder (registered)  |       No        | Forms attached to programs they joined    |    Yes     |
+
+Non-builder roles (Mentor, Judge, Service Provider) do not interact with this
+module directly.
+
+## Creating a form
+
+1. Open **Dashboard → Form Builder** (`/dashboard/show-builder`).
+2. Click **Add Form** (or **Switch Form** to open an existing one).
+3. Give the form a title and pick an organization. If you only belong to one
+   organization, this step is automatic.
+4. Start adding sections and questions (see below).
+5. Click **Save Form** when you are done. The form is ready to be referenced
+   from program steps immediately.
+
+## Adding sections and questions
+
+A form is organized into **sections**, and each section holds one or more
+**questions**. Sections are purely visual groupings — they help users see a
+long form in chunks and also drive conditional flow (see below).
+
+- **Add Section** creates a new section at the bottom of the form.
+- **Add Question to Section** adds a question inside a section.
+- Sections and questions can be reordered by dragging the handle on the left.
+- A section can be deleted together with its questions via the three-dot menu.
+
+Each question has:
+
+- A **title** (the label shown to the end user).
+- A **type** (see next section).
+- A **Required** toggle.
+- Type-specific settings (options, min/max, allowed domains, …).
+
+## Question types
+
+| Type               | What it captures                                               |
+| ------------------ | -------------------------------------------------------------- |
+| Short answer       | A single line of free text.                                    |
+| Paragraph          | A multi-line text area.                                        |
+| Number             | A numeric value with optional min, max, and step.              |
+| Email              | An email address, with an optional "confirm email" second box. |
+| URL                | A URL, with an optional list of allowed domains.               |
+| Multiple choice    | One choice from a list (radio buttons).                        |
+| Checkboxes         | Zero or more choices from a list.                              |
+| Dropdown           | One choice from a dropdown.                                    |
+| Linear scale       | A numeric rating, e.g. 1–5 or 1–10.                            |
+| Date               | A calendar date (`YYYY-MM-DD`).                                |
+| Time               | A time of day in 24-hour format (`HH:MM`).                     |
+| File upload        | A single file attachment.                                      |
+
+For choice-based types (multiple choice, checkboxes, dropdown) you can add a
+special **"Other"** option so respondents can type a custom answer. The
+"Other" text field is always optional — respondents can leave it empty.
+
+## Response logic (conditional flow)
+
+Each option in a multiple choice or dropdown question can jump the respondent
+to a different section, or end the form ("Submit form"). Use the **Response
+Logic** panel on a question to wire this up. The default is **Continue to next
+section**.
+
+## Previewing and sharing a form
+
+From the builder, click **View Saved Form** to see what respondents will see.
+This is the same URL your program steps will link to
+(`/dashboard/show-form/{id}`). The preview shows section and question counts
+at the top and allows authors to jump back into edit mode.
+
+## Submitting a form (end-user view)
+
+As a founder filling out a form, you will see one section at a time. When you
+answer a question that has response logic attached, the form will scroll to
+the next relevant section.
+
+### Validation behavior
+
+The form is validated on the client as you type, and again on the server when
+you submit. The messages you will see are:
+
+| Problem                              | English                                | Arabic                                  |
+| ------------------------------------ | -------------------------------------- | --------------------------------------- |
+| Required field is empty              | This field is required.                | هذا الحقل مطلوب.                        |
+| Email field has an invalid address   | Please enter a valid email address.    | يرجى إدخال بريد إلكتروني صحيح.          |
+| Number field has non-numeric input   | Please enter numbers only.             | يرجى إدخال أرقام فقط.                   |
+| Time field has an invalid value      | Please enter a valid time.             | يرجى إدخال وقت صحيح.                    |
+
+All error messages appear **directly underneath the relevant field**. A bad
+value in one field never blocks the form from rendering or triggers a generic
+"system error" page.
+
+If your submission is rejected by the server (for example because a field is
+required and you left it blank), the form reloads with **all your previously
+entered values still in place** — short answers, paragraphs, selected radio
+buttons, checked boxes, dropdown selections, dates, and times are all
+preserved. Only uploaded files need to be re-attached (see next section).
+
+### File uploads and the all-or-nothing rule
+
+Browsers do not let a server re-populate a file input after a failed
+submission — this is a security restriction outside of Incubator's control.
+Because of this, forms that contain a **File upload** question follow an
+**all-or-nothing** rule:
+
+1. When you click **Submit** on such a form, you will see a confirmation
+   dialog reminding you that if submission fails you will have to re-attach
+   your files.
+2. If you click **Yes, submit**, the form is sent in full.
+3. If you click **Cancel**, nothing is sent and your values remain as they
+   were.
+
+Forms without file uploads do not show this dialog.
+
+## Frequently Asked Questions (FAQ)
+
+**Q: I marked "Other" as not required but the form still asks me to fill it.**
+A: "Other" is always optional unless you also mark the parent question as
+required AND no standard option is selected. Pick one of the standard options
+or type a value into the "Other" box.
+
+**Q: Why does my submission reset all the fields when it fails?**
+A: It shouldn't — that was a bug that is now fixed. If you still see this,
+make sure you are on the latest build and contact support with the form ID.
+
+**Q: Can I attach multiple files to one question?**
+A: Not yet. One file per file-upload question. Add more file-upload questions
+if you need to collect several attachments.
+
+**Q: Can I export submissions?**
+A: Submissions are stored in the `form_data` table and are surfaced through
+the program submissions views. Bulk export is handled by those views rather
+than the Forms module itself.
+
+---
+
+# For Developers (Technical)
+
+## Architecture
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│                            FORMS MODULE                                  │
+│                                                                          │
+│  ┌────────────────┐    ┌────────────────┐    ┌────────────────────────┐  │
+│  │  Form Builder  │───>│   Form Render  │───>│   Submission Handler   │  │
+│  │  (author UI)   │    │   (end user)   │    │   (validate + store)   │  │
+│  └────────────────┘    └────────────────┘    └────────────────────────┘  │
+│         │                      │                        │                │
+│      saveForm             showForm                handleFormRequest       │
+│    (AJAX, JSON)          (Blade view)              (POST + redirect)      │
+│         │                      │                        │                │
+│  ┌──────▼──────────────────────▼────────────────────────▼──────────┐     │
+│  │   builder_forms  ──<  builder_fields  >──  fields               │     │
+│  │                  (pivot: options JSON)                          │     │
+│  │                                                                 │     │
+│  │                    form_data  (submitted values)                │     │
+│  └─────────────────────────────────────────────────────────────────┘     │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+All three surfaces are served by a single controller,
+`App\Http\Controllers\FormBuilderController`. The builder UI lives in
+`resources/views/admin/settings/formbuilder/index.blade.php` with a thick JS
+companion at `public/vuexy/assets/js/app-form-builder.js`. The render UI lives
+in `resources/views/admin/settings/formbuilder/form.blade.php`.
+
+## Routes
+
+All routes are defined in `routes/web.php` under the admin group:
+
+| Method  | URI                                 | Name                        | Action                                  |
+| ------- | ----------------------------------- | --------------------------- | --------------------------------------- |
+| GET     | `/dashboard/show-builder/{id?}`     | `forms.builder_view`        | `FormBuilderController@showBuilder`     |
+| POST    | `/dashboard/form/{id}/save-form`    | `forms.design_save`         | `FormBuilderController@saveForm`        |
+| GET     | `/dashboard/show-form/{id}`         | `forms.render_view`         | `FormBuilderController@showForm`        |
+| POST    | `/dashboard/submit-form`            | `forms.submissions_create`  | `FormBuilderController@handleFormRequest` |
+| DELETE  | `/dashboard/form/{id}/delete`       | `forms.delete`              | `FormBuilderController@deleteForm`      |
+| DELETE  | `/dashboard/form/{id}/reorder-…`    | `forms.reorder_sections`    | `FormBuilderController@reorderSections` |
+| DELETE  | `/dashboard/form/{id}/reorder-…`    | `forms.reorder_questions`   | `FormBuilderController@reorderQuestions` |
+
+Access is gated by the standard Spatie permission on the route name, see
+`database/dbFiles/_permissions.json`.
+
+## Controllers and actions
+
+### `showBuilder($id?)`
+
+Loads the builder UI. Given an optional form id, it:
+
+1. Resolves the user's accessible organizations via `$user->organizations_ids`.
+2. Loads (or lazily creates) a `BuilderForm` for the current org.
+3. Reads every `BuilderField` attached to the form, decodes the `options`
+   JSON, and groups the data by section into a structure consumed by
+   `app-form-builder.js` via the `FB_CONFIG.builderData` global.
+
+### `saveForm($id, Request $request)`
+
+AJAX endpoint that accepts a JSON payload built by `extractQuestionData()` on
+the client. It:
+
+1. Finds or creates the `BuilderForm` by `(form_name, organization_id)`.
+2. Translates each question into a `{ field_id, options }` tuple:
+   - `field_id` maps the semantic type to a row in the `fields` table
+     (`input`, `textarea`, `select`, `radio`, `checkbox`, `file`, `number`,
+     `email`, `url`, …).
+   - `options` is a JSON blob that includes the `label`, `section`,
+     `description`, `validation`, `logic`, and type-specific configuration
+     such as `values` (for choice types), `min/max/step` (for `number`), or
+     `confirm` (for `email`).
+3. Wraps the entire re-attach in a DB transaction: existing attachments are
+   detached, then new rows are attached to `builder_fields`.
+
+Response:
+
+```json
+{ "success": true, "id": 42, "organization_id": 7 }
+```
+
+### `showForm($id)`
+
+Renders the end-user view. The action loads `BuilderField` rows in ascending
+insertion order and groups them by `options.section` exactly like
+`showBuilder` does. Each question is collapsed into:
+
+```php
+[
+  'id'          => 123,
+  'label'       => 'Your name',
+  'description' => '',
+  'section'     => 'About you',
+  'type'        => 'short_answer',
+  'is_required' => true,
+  'options'     => [...choices if any...],
+  'logic'       => [...per-option jump targets...],
+]
+```
+
+The Blade template (`form.blade.php`) then switches on `$question['type']` to
+render the right input element. Every rendered input carries a `data-qtype`
+attribute that is later read by the client-side validator.
+
+### `handleFormRequest(Request $request)`
+
+POST target for the rendered form. It:
+
+1. Hard-validates the envelope: `builder_form_id` and `field_ids` must be
+   present. Missing envelope → HTTP 422.
+2. Iterates the comma-separated `field_ids`, loads the `BuilderField` for
+   each, and builds a `rules_array` plus localized `custom_messages`:
+   - `required` if `options.validation.required === 1`, else `nullable`.
+   - `email` for `options.type === 'email'`.
+   - `numeric` for `options.type === 'number'` or `'linear_scale'`.
+   - `date_format:H:i` for `options.type === 'time'`.
+   - `date` for `options.type === 'date'`.
+3. Feeds the rules into a `Validator` with localized messages (EN/AR based on
+   `app()->getLocale()`).
+4. On failure: `redirect()->back()->withErrors($v)->withInput()` so that both
+   errors and previously entered values survive into the redirect target.
+5. On success: redirects back with a success flash message.
+
+### `deleteForm($id)`
+
+Blocks deletion when the form is referenced by program steps or when any
+`form_data` row points at one of its fields, and returns a bilingual JSON
+error message in either case.
+
+## Database schema
+
+The module uses four tables:
+
+| Table            | Purpose                                                                                                      |
+| ---------------- | ------------------------------------------------------------------------------------------------------------ |
+| `builder_forms`  | One row per form. Columns: `id`, `form_name`, `organization_id`, timestamps.                                 |
+| `fields`         | Catalog of primitive field types (`input`, `textarea`, `select`, `radio`, `checkbox`, `file`, `number`, …). |
+| `builder_fields` | Pivot between `builder_forms` and `fields`. Column `options` holds a JSON blob with label, validation, etc.  |
+| `form_data`      | Submitted values, one row per answered question per submission.                                              |
+
+The `options` JSON stored on `builder_fields` is the source of truth for
+question configuration. Example:
+
+```json
+{
+  "label": "Your age",
+  "section": "About you",
+  "description": "",
+  "type": "number",
+  "min": "18",
+  "max": "99",
+  "step": "1",
+  "validation": { "required": 1 },
+  "logic": []
+}
+```
+
+## Question type reference
+
+The `options.type` field tells both the renderer and the validator how to
+handle the question. The canonical list is:
+
+| `options.type`    | Underlying `fields.field_type` | HTML input                        | Validators applied                        |
+| ----------------- | ------------------------------ | --------------------------------- | ----------------------------------------- |
+| `short_answer`    | `input`                        | `<input type="text">`             | required                                  |
+| `paragraph`       | `textarea`                     | `<textarea>`                      | required                                  |
+| `number`          | `number` (fallback `input`)    | `<input type="number">`           | required, numeric                         |
+| `email`           | `input`                        | `<input type="email">`            | required, email                           |
+| `url`             | `input`                        | `<input type="url">`              | required, URL format (client-side)        |
+| `multiple_choice` | `select`                       | `<input type="radio">`            | required                                  |
+| `checkboxes`      | `radio`                        | `<input type="checkbox">`         | required                                  |
+| `dropdown`        | `select`                       | `<select>`                        | required                                  |
+| `linear_scale`    | `input`                        | `<select>` (1–N)                  | required, numeric                         |
+| `date`            | `input`                        | `<input class="datepicker">`      | required, `date`                          |
+| `time`            | `input`                        | `<input class="timepicker">`      | required, `date_format:H:i`               |
+| `file`            | `file`                         | `<input type="file">`             | required; triggers confirmation dialog    |
+
+## Validation pipeline
+
+Validation happens in two places and both use the same error copy so the
+experience is identical regardless of which layer rejects the input.
+
+### Client side
+
+`form.blade.php` wires up `@form-validation/bootstrap5` against every input
+that has a `name`. For each field it reads `data-qtype` and attaches only the
+validators that make sense for that type (required, email, numeric, time,
+URL). Error messages are placed immediately after the `.application-field-control`
+wrapper via the `plugins.message.placed` callback, which keeps them under the
+input visually. Locale is driven by `document.documentElement.lang`.
+
+### Server side
+
+`handleFormRequest` builds `rules_array` and `custom_messages` per field as
+described above. The localized message map is:
+
+```php
+[
+    'en' => [
+        'required' => 'This field is required.',
+        'email'    => 'Please enter a valid email address.',
+        'numeric'  => 'Please enter numbers only.',
+        'time'     => 'Please enter a valid time.',
+    ],
+    'ar' => [
+        'required' => 'هذا الحقل مطلوب.',
+        'email'    => 'يرجى إدخال بريد إلكتروني صحيح.',
+        'numeric'  => 'يرجى إدخال أرقام فقط.',
+        'time'     => 'يرجى إدخال وقت صحيح.',
+    ],
+]
+```
+
+Failed submissions return via `redirect()->back()->withErrors()->withInput()`.
+
+## Data preservation on failed submission
+
+Non-file inputs are preserved automatically: the Blade template reads back the
+previous value from Laravel's `old($fieldName)` helper on every input type,
+including the `checked`/`selected` state for radios, checkboxes and dropdowns.
+
+**Files are an explicit exception.** Browsers do not allow any form of
+server-side repopulation of an `<input type="file">`. Rather than silently
+dropping files or implementing a temp-storage scheme that would silently
+duplicate uploads, the Forms module enforces an **all-or-nothing** contract:
+
+- When a rendered form contains at least one file input, the
+  `DefaultSubmit` FormValidation plugin is **not** registered.
+- Instead, the client-side listener for `core.form.valid` prompts the user
+  with a confirmation dialog ("uploaded files cannot be recovered
+  automatically if a server-side error occurs…").
+- On accept, the listener calls
+  `HTMLFormElement.prototype.submit.call(form)` directly, bypassing any
+  further FormValidation lifecycle hooks.
+- On cancel, nothing is sent.
+
+This keeps the submission atomic from the user's perspective: either the
+whole thing goes through, or nothing does — and the user is warned upfront.
+
+## Internationalization
+
+- **Builder UI**: strings come from `resources/lang/{en,ar}/builder.php` and
+  are injected into JS via `FB_CONFIG.translations` in `index.blade.php`.
+- **Render UI**: the validation messages and the submit confirmation copy
+  are currently hard-coded in `form.blade.php`'s inline script (keyed on
+  `document.documentElement.lang`). The same strings are **also** present in
+  `builder.php` under `Validation_required`, `Validation_email`,
+  `Validation_number`, `Validation_time`, `Confirm_submit_title`, and
+  `Confirm_submit_message` so a future refactor can centralize them.
+- **Backend**: `handleFormRequest` picks its message map based on
+  `app()->getLocale()`.
+
+If you add a new message, keep all three locations in sync.
+
+## File structure
+
+```
+app/Http/Controllers/FormBuilderController.php           # all three actions
+app/BuilderForm.php                                      # forms eloquent model
+app/BuilderField.php                                     # pivot model
+app/Field.php                                            # field-type catalog
+database/dbFiles/fields.json                             # seed list of field types
+database/seeders/FieldSeeder.php                         # seeds the catalog
+resources/views/admin/settings/formbuilder/index.blade.php  # builder shell + FB_CONFIG
+resources/views/admin/settings/formbuilder/form.blade.php   # render UI + client validation
+public/vuexy/assets/js/app-form-builder.js               # builder interactions
+resources/lang/en/builder.php                            # English strings
+resources/lang/ar/builder.php                            # Arabic strings
+routes/web.php                                           # module routes
+```
+
+## Extending with a new question type
+
+To add a new question type (say, "rating stars"), touch the following points
+in order:
+
+1. **Seed a `fields` row** (if a new primitive HTML input is needed) via
+   `database/dbFiles/fields.json` and re-run `FieldSeeder`.
+2. **Builder JS** — add the new `<option>` to the `.question-type` dropdown
+   in `createQuestionHTML()` and a matching template inside
+   `updateQuestionOptions()`. Extend `extractQuestionData()` so the
+   type-specific settings are serialized into the outgoing payload, and
+   `populateQuestionData()` so the settings can be restored in edit mode.
+3. **`saveForm()`** — add a `case` to the `switch ($field_type)` that maps
+   the new type to a `field_id` and writes the right `additional_config`.
+4. **`showBuilder()`** — usually nothing to do, because the default branch
+   already echoes `options.type` back to the builder.
+5. **`showForm()` / `form.blade.php`** — add a `@case('your_type')` inside
+   the Blade switch that renders the input, sets `value="{{ old($fieldName) }}"`
+   for preservation, and tags it with `data-qtype="your_type"`.
+6. **Client validator** — in the inline script in `form.blade.php`, add a
+   branch that reads `data-qtype === 'your_type'` and attaches the
+   appropriate validator callback with a localized message.
+7. **Server validator** — in `handleFormRequest()`, add a `case 'your_type'`
+   inside the type switch that appends the matching Laravel rule (for
+   example `regex:/.../`) and a localized error message to `$custom_messages`.
+8. **Lang files** — add any new strings to both `en/builder.php` and
+   `ar/builder.php`. The convention is `Validation_{key}` for error copy
+   and `PascalCase` for labels.
+9. **Docs** — update the [Question type reference](#question-type-reference)
+   table and the [Question types](#question-types) list above.
+
+---
+
+## Changelog
+
+### 2026-04-13 — Custom form input overhaul (GV-2273, GV-2372, GV-2376, GV-2377)
+
+- **Number question type** is now fully supported end-to-end. It was wired in
+  the builder JS already but silently dropped by `saveForm()`; it now serializes
+  `min`/`max`/`step`, renders as `<input type="number">`, and is validated both
+  client-side and server-side as `numeric`.
+- **Email and URL question types** are now persisted by `saveForm()` with
+  their type-specific config (`confirm`, `allowed_domains`) and rendered by
+  `showForm()`; previously they were dropped into the `default` branch.
+- **Client-side validation** in the render view no longer guesses the
+  validator from the field label. Every rendered input now carries a
+  `data-qtype` attribute and the FormValidation wiring reads it directly,
+  producing exact messages for `required` / `email` / `numeric` / `time` /
+  `url` in both English and Arabic. The Arabic email message was corrected
+  from `… صالح` to `… صحيح` to match the product copy.
+- **Server-side validation** in `handleFormRequest()` now builds per-field
+  rules from each question's stored `options.type` (`required`, `email`,
+  `numeric`, `date_format:H:i`, `date`) with localized messages driven by
+  `app()->getLocale()`. It continues to use `redirect()->back()->withErrors()->withInput()`,
+  so non-file inputs survive a failed submission unchanged.
+- **File uploads follow an all-or-nothing contract.** Forms containing an
+  `<input type="file">` no longer register the `DefaultSubmit` FormValidation
+  plugin. Instead, a `core.form.valid` listener shows a confirmation dialog
+  reminding the user that files cannot be automatically re-attached after a
+  server-side failure, and either submits the form in full or cancels it. The
+  prior (unworkable) "preserve files on failed submit" requirement has been
+  removed from the spec.
+- **Lang files** gained `Validation_required/_email/_number/_time`,
+  `Confirm_submit_title/_message`, `Confirm_yes_submit`, and `Confirm_cancel`
+  in both `en/builder.php` and `ar/builder.php`. The render view currently
+  duplicates these strings inline for simplicity; a future refactor can
+  centralize via `__()`.

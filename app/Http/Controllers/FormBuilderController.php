@@ -310,27 +310,61 @@ class FormBuilderController extends Controller
         abort_if($validator->fails(), 422, "Data error");
 
         // generating validation rules based on dynamic field config data
+        $locale = app()->getLocale() === 'ar' ? 'ar' : 'en';
+        $messages_map = [
+            'en' => [
+                'required' => 'This field is required.',
+                'email'    => 'Please enter a valid email address.',
+                'numeric'  => 'Please enter numbers only.',
+                'time'     => 'Please enter a valid time.',
+            ],
+            'ar' => [
+                'required' => 'هذا الحقل مطلوب.',
+                'email'    => 'يرجى إدخال بريد إلكتروني صحيح.',
+                'numeric'  => 'يرجى إدخال أرقام فقط.',
+                'time'     => 'يرجى إدخال وقت صحيح.',
+            ],
+        ];
+        $L = $messages_map[$locale];
+
         $field_map_ids = explode(",", $request->input('field_ids'));
-        $field_required_rules = collect($field_map_ids)->mapWithKeys(function($id){
-        $field_options = BuilderField::findOrFail($id)->options;
-            if($field_options->validation->required == 1) {
-                $rules = ['required'];
-                if(isset($field_options->type) && $field_options->type == "email") $rules[] = 'email';
+        $rules_array = [];
+        $custom_messages = [];
 
-                return [
-                    'field_'. $id => implode("|", $rules)
-                ];
-            }
-            else {
-                return ['field_'. $id => 'nullable'];
-            }
-        });
+        foreach ($field_map_ids as $id) {
+            $field_options = BuilderField::findOrFail($id)->options;
+            $field_name = 'field_' . $id;
+            $type = $field_options->type ?? 'text';
+            $required = intval($field_options->validation->required ?? 0) === 1;
 
-        // validation based on dynamic data
-        $dynamic_validator = Validator::make($request->all(), $field_required_rules->toArray(), [
-            'required' => "field can't be left blank",
-            'email' => 'field must be a valid email address'
-        ]);
+            $rules = [];
+            $rules[] = $required ? 'required' : 'nullable';
+
+            switch ($type) {
+                case 'email':
+                    $rules[] = 'email';
+                    $custom_messages[$field_name . '.email'] = $L['email'];
+                    break;
+                case 'number':
+                case 'linear_scale':
+                    $rules[] = 'numeric';
+                    $custom_messages[$field_name . '.numeric'] = $L['numeric'];
+                    break;
+                case 'time':
+                    $rules[] = 'date_format:H:i';
+                    $custom_messages[$field_name . '.date_format'] = $L['time'];
+                    break;
+                case 'date':
+                    $rules[] = 'date';
+                    $custom_messages[$field_name . '.date'] = $L['time'];
+                    break;
+            }
+
+            $rules_array[$field_name] = implode('|', $rules);
+            $custom_messages[$field_name . '.required'] = $L['required'];
+        }
+
+        $dynamic_validator = Validator::make($request->all(), $rules_array, $custom_messages);
 
         if ($dynamic_validator->fails()) {
             return redirect()->back()
@@ -452,6 +486,35 @@ class FormBuilderController extends Controller
                     case 'time':
                         $field_id = $fields['input'] ?? 0;
                         $additional_config = ['type' => 'time'];
+                        break;
+
+                    case 'number':
+                        $field_id = $fields['number'] ?? $fields['input'] ?? 0;
+                        $numberConfig = $question['number_config'] ?? [];
+                        $additional_config = [
+                            'type' => 'number',
+                            'min'  => $numberConfig['min']  ?? '',
+                            'max'  => $numberConfig['max']  ?? '',
+                            'step' => $numberConfig['step'] ?? '',
+                        ];
+                        break;
+
+                    case 'email':
+                        $field_id = $fields['input'] ?? 0;
+                        $emailConfig = $question['email_config'] ?? [];
+                        $additional_config = [
+                            'type'    => 'email',
+                            'confirm' => !empty($emailConfig['confirm']),
+                        ];
+                        break;
+
+                    case 'url':
+                        $field_id = $fields['input'] ?? 0;
+                        $urlConfig = $question['url_config'] ?? [];
+                        $additional_config = [
+                            'type'            => 'url',
+                            'allowed_domains' => $urlConfig['allowed_domains'] ?? '',
+                        ];
                         break;
 
                     case 'file':
