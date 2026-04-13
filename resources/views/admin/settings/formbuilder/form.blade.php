@@ -78,6 +78,12 @@
 
         <div class="card-body p-4 p-lg-5">
           @if($form && $form['build_data'] && count($form['build_data']) > 0)
+            @if($errors->has('upload'))
+              <div class="alert alert-danger border border-danger rounded-3 mb-0">
+                <i class="ti ti-alert-triangle me-2"></i>{{ $errors->first('upload') }}
+              </div>
+            @endif
+
             <form id="applicationPreviewForm" action="{{ route('forms.submissions_create') }}" method="POST" enctype="multipart/form-data" class="d-flex flex-column gap-4" novalidate>
               @csrf
               <input type="hidden" name="builder_form_id" value="{{ $id }}" />
@@ -306,9 +312,14 @@
                                       id="{{ $fieldId }}"
                                       name="{{ $fieldName }}"
                                       data-qtype="file"
+                                      accept=".doc,.docx,.xls,.xlsx,.ppt,.pptx,.pdf,.jpg,.jpeg,.png,.webp,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/pdf,image/jpeg,image/png,image/webp"
                                       {{ $question['is_required'] ? 'required' : '' }}
                                     />
-                                    <div class="form-text mt-2">Accepted file is attached as part of the application package.</div>
+                                    <div class="form-text mt-2">
+                                      {{ $l == 'ar'
+                                        ? 'الحد الأقصى 10 ميجابايت. الأنواع المسموح بها: Word, Excel, PowerPoint, PDF, JPG, JPEG, PNG, WEBP.'
+                                        : 'Max 10 MB. Allowed types: Word, Excel, PowerPoint, PDF, JPG, JPEG, PNG, WEBP.' }}
+                                    </div>
                                     @break
 
                                   @case('number')
@@ -463,6 +474,8 @@
         numeric: 'Please enter numbers only.',
         time: 'Please enter a valid time.',
         url: 'Please enter a valid URL starting with http:// or https://.',
+        file_size: 'File size must not exceed 10 MB.',
+        file_type: 'Supported file types are Word, Excel, PowerPoint, PDF, JPG, JPEG, PNG, and WEBP.',
         confirm_submit_title: 'Submit application?',
         confirm_submit_message: 'Once you submit, uploaded files cannot be recovered automatically if a server-side error occurs. You will need to re-attach them. Continue?',
         confirm_yes: 'Yes, submit',
@@ -474,12 +487,17 @@
         numeric: 'يرجى إدخال أرقام فقط.',
         time: 'يرجى إدخال وقت صحيح.',
         url: 'يرجى إدخال رابط صالح يبدأ بـ http:// أو https://.',
+        file_size: 'يجب ألا يتجاوز حجم الملف 10 ميجابايت.',
+        file_type: 'أنواع الملفات المدعومة هي Word وExcel وPowerPoint وPDF وJPG وJPEG وPNG وWEBP.',
         confirm_submit_title: 'إرسال النموذج؟',
         confirm_submit_message: 'بمجرد الإرسال، لا يمكن استرجاع الملفات المرفوعة تلقائياً في حال حدوث خطأ من الخادم. ستحتاج إلى إعادة إرفاقها. هل تريد المتابعة؟',
         confirm_yes: 'نعم، إرسال',
         confirm_no: 'إلغاء',
       }
     };
+
+    const ALLOWED_FILE_EXTENSIONS = ['doc','docx','xls','xlsx','ppt','pptx','pdf','jpg','jpeg','png','webp'];
+    const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
     const t = translations[locale];
     const fields = {};
@@ -564,6 +582,25 @@
           callback: function () {
             const value = (field.value || '').trim();
             return value === '' || /^(https?:\/\/).+/i.test(value);
+          }
+        };
+      }
+
+      if (qtype === 'file') {
+        validators.callback_file_type = {
+          message: t.file_type,
+          callback: function () {
+            if (!field.files || field.files.length === 0) return true;
+            const name = field.files[0].name || '';
+            const ext = name.split('.').pop().toLowerCase();
+            return ALLOWED_FILE_EXTENSIONS.indexOf(ext) !== -1;
+          }
+        };
+        validators.callback_file_size = {
+          message: t.file_size,
+          callback: function () {
+            if (!field.files || field.files.length === 0) return true;
+            return field.files[0].size <= MAX_FILE_SIZE_BYTES;
           }
         };
       }

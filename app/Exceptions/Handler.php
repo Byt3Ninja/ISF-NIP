@@ -8,6 +8,8 @@ use App\Traits\ApiResponder;
 use Sentry\Laravel\Facade as Sentry;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\Exceptions\PostTooLargeException;
+use Illuminate\Support\MessageBag;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
@@ -56,6 +58,27 @@ class Handler extends ExceptionHandler
 
     if ($exception instanceof AuthorizationException) {
             return $this->forbidden(__('api.forbidden'));
+    }
+
+    // Turn PHP/nginx "payload too large" into an inline validation message
+    // on the form that was posted. Without this, oversized uploads would
+    // render Laravel's generic 413 error page.
+    if ($exception instanceof PostTooLargeException) {
+        $locale = app()->getLocale() === 'ar' ? 'ar' : 'en';
+        $message = $locale === 'ar'
+            ? 'يجب ألا يتجاوز حجم الملف 10 ميجابايت.'
+            : 'File size must not exceed 10 MB.';
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => $message,
+            ], 413);
+        }
+
+        return redirect()->back()
+            ->withErrors(new MessageBag(['upload' => $message]))
+            ->withInput();
     }
 
     return parent::render($request, $exception);

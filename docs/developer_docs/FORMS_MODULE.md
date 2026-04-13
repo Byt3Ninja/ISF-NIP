@@ -155,6 +155,34 @@ entered values still in place** — short answers, paragraphs, selected radio
 buttons, checked boxes, dropdown selections, dates, and times are all
 preserved. Only uploaded files need to be re-attached (see next section).
 
+### File upload limits
+
+Every **File upload** question is subject to the same policy, enforced on
+both the client and the server:
+
+- **Maximum size:** 10 MB per file.
+- **Allowed extensions:** `doc`, `docx`, `xls`, `xlsx`, `ppt`, `pptx`, `pdf`,
+  `jpg`, `jpeg`, `png`, `webp`.
+- **Anything else is blocked** — including executable and scripting
+  extensions such as `exe`, `php`, `phtml`, `sh`, `bash`, `bin`, `pl`,
+  `cgi`, `ksh`, `htaccess`, `htpasswd`. These are not in the whitelist and
+  are never accepted by the validator.
+
+If a selected file violates either rule, the form stays on screen, the
+invalid file input is highlighted, and the inline message appears under the
+field:
+
+| Problem        | English                                                                               | Arabic                                                                           |
+| -------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| File too large | File size must not exceed 10 MB.                                                      | يجب ألا يتجاوز حجم الملف 10 ميجابايت.                                            |
+| Bad file type  | Supported file types are Word, Excel, PowerPoint, PDF, JPG, JPEG, PNG, and WEBP.      | أنواع الملفات المدعومة هي Word وExcel وPowerPoint وPDF وJPG وJPEG وPNG وWEBP.     |
+
+If the web server itself rejects the upload as too large (nginx
+`client_max_body_size` → HTTP 413), Laravel catches the
+`PostTooLargeException` and redirects the user back to the form with a
+top-of-page banner carrying the same "File size must not exceed 10 MB."
+message, so founders never land on a raw error page.
+
 ### File uploads and the all-or-nothing rule
 
 Browsers do not let a server re-populate a file input after a failed
@@ -370,7 +398,7 @@ handle the question. The canonical list is:
 | `linear_scale`    | `input`                        | `<select>` (1–N)                  | required, numeric                         |
 | `date`            | `input`                        | `<input class="datepicker">`      | required, `date`                          |
 | `time`            | `input`                        | `<input class="timepicker">`      | required, `date_format:H:i`               |
-| `file`            | `file`                         | `<input type="file">`             | required; triggers confirmation dialog    |
+| `file`            | `file`                         | `<input type="file">`             | required, `file`, `max:10240`, `mimes:doc,docx,xls,xlsx,ppt,pptx,pdf,jpg,jpeg,png,webp`; triggers confirmation dialog |
 
 ## Validation pipeline
 
@@ -409,6 +437,82 @@ described above. The localized message map is:
 ```
 
 Failed submissions return via `redirect()->back()->withErrors()->withInput()`.
+
+## File upload enforcement
+
+File upload questions are enforced by **three** layers that all share the
+same whitelist and size cap, so the same message surfaces to the user
+regardless of which layer catches the problem:
+
+1. **HTML hint** — the `<input type="file">` carries an `accept` attribute
+   listing both the allowed extensions and their MIME equivalents. This is
+   advisory only (browsers honor it for the file picker but will happily
+   accept drag-and-drop), so the other two layers cannot be skipped.
+2. **Client-side** — two `FormValidation` callbacks in `form.blade.php`
+   read `field.files[0]` and check:
+   - `callback_file_size` — bytes must be ≤ `10 * 1024 * 1024`.
+   - `callback_file_type` — extension (case-insensitive) must be in
+     `ALLOWED_FILE_EXTENSIONS`.
+   These fire before the form is submitted, so the founder never leaves
+   the page. Messages come from the `translations[locale]` map.
+3. **Server-side** — `handleFormRequest()` attaches three rules to every
+   field whose `options.type === 'file'`:
+   - `file`      — must be a real uploaded file
+   - `max:10240` — size in kilobytes (10 MB)
+   - `mimes:doc,docx,xls,xlsx,ppt,pptx,pdf,jpg,jpeg,png,webp`
+
+   Laravel's `mimes` rule maps extensions through `Symfony\Mime\MimeTypes`
+   and compares against the actual uploaded content, so a renamed `.php`
+   or `.exe` will not slip through by spoofing the extension. Dangerous
+   extensions (`php`, `phtml`, `sh`, `bash`, `bin`, `pl`, `cgi`, `ksh`,
+   `htaccess`, `htpasswd`, `exe`, …) are simply not in the whitelist and
+   are therefore unconditionally rejected.
+
+### 413 / PostTooLargeException
+
+nginx and PHP both enforce a hard byte cap (`client_max_body_size`,
+`post_max_size`, `upload_max_filesize`). When a payload exceeds those
+limits, the request never reaches `handleFormRequest()` — it short-circuits
+with an HTTP 413. Laravel raises `PostTooLargeException` in that case, and
+`App\Exceptions\Handler::render()` catches it:
+
+```php
+if ($exception instanceof PostTooLargeException) {
+    $locale  = app()->getLocale() === 'ar' ? 'ar' : 'en';
+    $message = $locale === 'ar'
+        ? 'يجب ألا يتجاوز حجم الملف 10 ميجابايت.'
+        : 'File size must not exceed 10 MB.';
+
+    if ($request->expectsJson()) {
+        return response()->json(['success' => false, 'message' => $message], 413);
+    }
+
+    return redirect()->back()
+        ->withErrors(new MessageBag(['upload' => $message]))
+        ->withInput();
+}
+```
+
+The redirect attaches the message under the `upload` error key, and the
+render view displays a top-of-page banner whenever `$errors->has('upload')`:
+
+```blade
+@if($errors->has('upload'))
+  <div class="alert alert-danger ...">
+    <i class="ti ti-alert-triangle me-2"></i>{{ $errors->first('upload') }}
+  </div>
+@endif
+```
+
+Because the `upload` key is global (no specific field), the banner is the
+right surface for a 413 — we don't know which file caused it, only that the
+aggregate payload was too large. The client-side pre-check should catch
+this in almost all cases; the banner is the safety net for requests that
+bypass JS or hit PHP/nginx limits lower than 10 MB.
+
+> **Ops note:** make sure `upload_max_filesize`, `post_max_size`
+> (`php.ini`), and `client_max_body_size` (nginx) are configured to at
+> least 10 MB so the legitimate case never triggers the 413 path.
 
 ## Data preservation on failed submission
 
@@ -500,6 +604,35 @@ in order:
 ---
 
 ## Changelog
+
+### 2026-04-13 — File upload hardening (GV-2136)
+
+- **Size cap:** every file upload question now rejects files larger than
+  10 MB. Enforced on the client (byte check against
+  `MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024`) and on the server (Laravel
+  `max:10240` rule). Inline message: `File size must not exceed 10 MB.` /
+  `يجب ألا يتجاوز حجم الملف 10 ميجابايت.`
+- **Extension whitelist:** only `doc`, `docx`, `xls`, `xlsx`, `ppt`,
+  `pptx`, `pdf`, `jpg`, `jpeg`, `png`, `webp` are accepted. Anything else
+  (including `exe`, `php`, `phtml`, `sh`, `bash`, `bin`, `pl`, `cgi`,
+  `ksh`, `htaccess`, `htpasswd`) is rejected both client-side (extension
+  callback) and server-side (`mimes:` rule, which verifies the real MIME
+  type so a renamed `.php` file cannot pass as a `.pdf`). Inline message:
+  `Supported file types are Word, Excel, PowerPoint, PDF, JPG, JPEG, PNG,
+  and WEBP.` / `أنواع الملفات المدعومة هي Word وExcel وPowerPoint وPDF
+  وJPG وJPEG وPNG وWEBP.`
+- **HTML `accept` hint** added to the file input so the native file
+  picker defaults to the allowed types.
+- **Hint text** ("Max 10 MB. Allowed types: …") now shown under every
+  file input in both locales.
+- **413 graceful handling:** `App\Exceptions\Handler::render()` catches
+  `PostTooLargeException` and redirects back to the form with the
+  localized size message attached under the `upload` error key. The
+  render view shows this as a top-of-page banner
+  (`$errors->has('upload')`), so founders never land on a raw nginx 413
+  error page.
+- **Lang files:** added `Validation_file_size`, `Validation_file_type`,
+  `File_upload_hint` to both `en/builder.php` and `ar/builder.php`.
 
 ### 2026-04-13 — Custom form input overhaul (GV-2273, GV-2372, GV-2376, GV-2377)
 

@@ -313,19 +313,27 @@ class FormBuilderController extends Controller
         $locale = app()->getLocale() === 'ar' ? 'ar' : 'en';
         $messages_map = [
             'en' => [
-                'required' => 'This field is required.',
-                'email'    => 'Please enter a valid email address.',
-                'numeric'  => 'Please enter numbers only.',
-                'time'     => 'Please enter a valid time.',
+                'required'  => 'This field is required.',
+                'email'     => 'Please enter a valid email address.',
+                'numeric'   => 'Please enter numbers only.',
+                'time'      => 'Please enter a valid time.',
+                'file_size' => 'File size must not exceed 10 MB.',
+                'file_type' => 'Supported file types are Word, Excel, PowerPoint, PDF, JPG, JPEG, PNG, and WEBP.',
             ],
             'ar' => [
-                'required' => 'هذا الحقل مطلوب.',
-                'email'    => 'يرجى إدخال بريد إلكتروني صحيح.',
-                'numeric'  => 'يرجى إدخال أرقام فقط.',
-                'time'     => 'يرجى إدخال وقت صحيح.',
+                'required'  => 'هذا الحقل مطلوب.',
+                'email'     => 'يرجى إدخال بريد إلكتروني صحيح.',
+                'numeric'   => 'يرجى إدخال أرقام فقط.',
+                'time'      => 'يرجى إدخال وقت صحيح.',
+                'file_size' => 'يجب ألا يتجاوز حجم الملف 10 ميجابايت.',
+                'file_type' => 'أنواع الملفات المدعومة هي Word وExcel وPowerPoint وPDF وJPG وJPEG وPNG وWEBP.',
             ],
         ];
         $L = $messages_map[$locale];
+
+        // File upload policy (shared with client-side in form.blade.php).
+        $allowed_file_extensions = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'pdf', 'jpg', 'jpeg', 'png', 'webp'];
+        $max_file_size_kb = 10 * 1024; // 10 MB
 
         $field_map_ids = explode(",", $request->input('field_ids'));
         $rules_array = [];
@@ -357,6 +365,14 @@ class FormBuilderController extends Controller
                 case 'date':
                     $rules[] = 'date';
                     $custom_messages[$field_name . '.date'] = $L['time'];
+                    break;
+                case 'file':
+                    $rules[] = 'file';
+                    $rules[] = 'max:' . $max_file_size_kb;
+                    $rules[] = 'mimes:' . implode(',', $allowed_file_extensions);
+                    $custom_messages[$field_name . '.file']  = $L['file_type'];
+                    $custom_messages[$field_name . '.max']   = $L['file_size'];
+                    $custom_messages[$field_name . '.mimes'] = $L['file_type'];
                     break;
             }
 
