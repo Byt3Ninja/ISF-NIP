@@ -56,11 +56,11 @@
 <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
-<script src="/js/kanban/kanban-utils.js"></script>
-<script src="/js/kanban/kanban-renderers.js"></script>
-<script src="/js/kanban/kanban-board.js"></script>
-<script src="/js/kanban/kanban-dropzone.js"></script>
-<script src="/js/kanban/kanban-tasks.js"></script>
+<script src="/js/kanban/kanban-utils.js?v={{ filemtime(public_path('js/kanban/kanban-utils.js')) }}"></script>
+<script src="/js/kanban/kanban-renderers.js?v={{ filemtime(public_path('js/kanban/kanban-renderers.js')) }}"></script>
+<script src="/js/kanban/kanban-board.js?v={{ filemtime(public_path('js/kanban/kanban-board.js')) }}"></script>
+<script src="/js/kanban/kanban-dropzone.js?v={{ filemtime(public_path('js/kanban/kanban-dropzone.js')) }}"></script>
+<script src="/js/kanban/kanban-tasks.js?v={{ filemtime(public_path('js/kanban/kanban-tasks.js')) }}"></script>
 @stop
 
 @section('pagescripts')
@@ -168,7 +168,9 @@
 
   $('#add-due-date, #et-due-date').flatpickr({ dateFormat: 'Y-m-d' });
   $('#add-priority, #add-status').select2({ dropdownParent: $('#addTaskOffcanvas') });
+  $('#add-assignees').select2({ dropdownParent: $('#addTaskOffcanvas'), placeholder: @json(__('admin.select_assignees')) });
   $('#et-priority, #et-status').select2({ dropdownParent: $('#editTaskOffcanvas') });
+  $('#et-assignees').select2({ dropdownParent: $('#editTaskOffcanvas'), placeholder: @json(__('admin.select_assignees')) });
 
   // Form validation
   const fvConfig = {

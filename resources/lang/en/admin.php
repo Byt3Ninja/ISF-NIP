@@ -3722,4 +3722,5 @@ return [
 	'View_Archived' => 'View Archived',
 	'Archived_Tasks' => 'Archived Tasks',
 	'No_Archived_Tasks' => 'No archived tasks found',
+	'Moved' => 'Moved',
 ];

@@ -48,6 +48,7 @@
           </div>
         </div>
 
+        {{--
         @if ($_user->hasAnyRole('admin|subadmin|organizationManager'))
         <div class="mb-4 d-none" id="vt-assignee-wrapper">
           <span class="text-muted small d-block mb-2">{{ __('admin.Assignee') ?? 'Assignee' }}</span>
@@ -69,6 +70,11 @@
           </div>
         </div>
         @endif
+        --}}
+        <div class="mb-4 d-none" id="vt-assignee-wrapper">
+          <span class="text-muted small d-block mb-2">{{ __('admin.assignees') }}</span>
+          <div class="border rounded p-3 bg-body d-flex flex-column gap-3" id="vt-assignees-list"></div>
+        </div>
 
         <div class="mb-4">
           <span class="text-muted small d-block mb-1">{{ $_user->ableTo('tasks.update', $permissions) ? __('admin.provided_resources') : __('admin.Attachments') }}</span>

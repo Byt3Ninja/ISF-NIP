@@ -7,6 +7,7 @@ use App\Company;
 use App\Tags;
 use App\ProgramTask;
 use App\ProgramTaskComment;
+use App\ProgramTaskActivity;
 use App\MentorshipTask;
 use App\User;
 use Illuminate\Http\Request;
@@ -50,7 +51,7 @@ class TasksController extends Controller
         $tags = Tags::select('id', 'name')->orderBy("id", "desc")->get();
 
         // Fetch real tasks from database
-        $tasksData = ProgramTask::with(['program', 'assignees', 'creator'])
+        $tasksData = ProgramTask::with(['program', 'assignees', 'creator', 'feedbacks.user', 'activities.user'])
             ->when(!$user->hasRole('admin') && !empty($orgIds), function ($q) use ($orgIds) {
                 $q->whereHas('program', function($pq) use ($orgIds) {
                     $pq->whereIn('organization_id', $orgIds);
@@ -58,7 +59,7 @@ class TasksController extends Controller
             })
             ->orderBy('created_at', 'desc')
             ->get();
-
+        
         $tasks = $tasksData->map(function($task) {
             return [
                 'id' => $task->id,
@@ -94,6 +95,37 @@ class TasksController extends Controller
                     'avatar' => $task->creator->image_url,
                     'profile_url' => url('/dashboard/users/' . $task->creator->id),
                 ] : null,
+                'feedbacks' => $task->feedbacks->map(function($fb) {
+                    return [
+                        'id'       => $fb->id,
+                        'user'     => $fb->user->name ?? 'N/A',
+                        'user_id'  => $fb->user_id,
+                        'img_url'  => $fb->user ? User::image_handler($fb->user->img_url) : null,
+                        'decision' => $fb->decision,
+                        'text'     => $fb->note,
+                        'time'     => $fb->created_at->diffForHumans(),
+                    ];
+                })->toArray(),
+                'activities' => $task->activities->map(function($act) {
+                    $action = match($act->action) {
+                        'create' => 'created this task',
+                        'update' => 'updated ' . $act->column . ($act->was && $act->new ? ' from "' . $act->was . '" to "' . $act->new . '"' : ''),
+                        'move'   => 'moved task' . ($act->was && $act->new ? ' from "' . $act->was . '" to "' . $act->new . '"' : ''),
+                        'comment'  => 'added a comment',
+                        'feedback' => 'submitted feedback',
+                        'delete'   => 'deleted this task',
+                        default    => $act->action,
+                    };
+                    return [
+                        'user'    => $act->user->name ?? 'N/A',
+                        'user_id' => $act->user_id,
+                        'img_url' => $act->user ? User::image_handler($act->user->img_url) : null,
+                        'action'  => $action,
+                        'time'    => $act->created_at->diffForHumans(),
+                    ];
+                })->toArray(),
+                'activities_count' => $task->activities->count(),
+                'feedbacks_count'  => $task->feedbacks->count(),
             ];
         });
 
@@ -161,6 +193,8 @@ class TasksController extends Controller
 
         try {
             // Handle file attachments
+            /** @var \App\User $uploader */
+            $uploader = auth()->user();
             $attachments = [];
             if ($request->hasFile('attachments')) {
                 foreach ($request->file('attachments') as $file) {
@@ -177,10 +211,11 @@ class TasksController extends Controller
                     // Store the file
                     $path = $file->store('tasks/attachments', 'public');
                     $attachments[] = [
-                        'name' => $file->getClientOriginalName(),
-                        'path' => $path,
-                        'size' => $file->getSize(),
-                        'type' => $file->getMimeType()
+                        'name'   => $file->getClientOriginalName(),
+                        'path'   => $path,
+                        'size'   => $file->getSize(),
+                        'type'   => $file->getMimeType(),
+                        'status' => $uploader->hasRole('registered') ? 'submission' : 'attachment',
                     ];
                 }
             }
@@ -237,10 +272,16 @@ class TasksController extends Controller
             }
             $task->assignees()->sync($assigneeData);
 
+            ProgramTaskActivity::create([
+                'program_task_id' => $task->id,
+                'user_id'         => auth()->id(),
+                'action'          => 'create',
+            ]);
+
             return response()->json([
                 'success' => true,
-                'message' => app()->getLocale() == 'ar' 
-                    ? 'تم إنشاء المهمة بنجاح' 
+                'message' => app()->getLocale() == 'ar'
+                    ? 'تم إنشاء المهمة بنجاح'
                     : 'Task created successfully.',
                 'data' => $task->load('program', 'assignees', 'creator.roles')
             ], 201);
@@ -310,6 +351,8 @@ class TasksController extends Controller
         }
 
         try {
+            $oldValues = $task->only(['title', 'description', 'program_id', 'priority', 'status', 'due_date', 'tags']);
+
             // Process tags - create new ones if they don't exist
             $data = $request->only(['title', 'description', 'program_id', 'priority', 'status']);
             
@@ -332,6 +375,22 @@ class TasksController extends Controller
 
             $task->update($data);
 
+            $trackable = ['title', 'description', 'priority', 'status', 'due_date'];
+            foreach ($trackable as $col) {
+                $old = $oldValues[$col] ?? null;
+                $new = $task->$col ?? null;
+                if ((string) $old !== (string) $new) {
+                    ProgramTaskActivity::create([
+                        'program_task_id' => $task->id,
+                        'user_id'         => auth()->id(),
+                        'action'          => 'update',
+                        'column'          => $col,
+                        'was'             => $old,
+                        'new'             => $new,
+                    ]);
+                }
+            }
+
             // Update assignees if provided — preserve existing statuses
             if ($request->has('assignees')) {
                 $existingStatuses = $task->assignees()->pluck('status', 'company_id')->toArray();
@@ -347,6 +406,8 @@ class TasksController extends Controller
 
             // Handle file attachments
             if ($request->hasFile('attachments')) {
+                /** @var \App\User $uploader */
+                $uploader = auth()->user();
                 $attachments = $task->attachments ?? [];
                 foreach ($request->file('attachments') as $file) {
                     // Validate file size (10 MB)
@@ -355,10 +416,11 @@ class TasksController extends Controller
                     // Store the file
                     $path = $file->store('tasks/attachments', 'public');
                     $attachments[] = [
-                        'name' => $file->getClientOriginalName(),
-                        'path' => $path,
-                        'size' => $file->getSize(),
-                        'type' => $file->getMimeType()
+                        'name'   => $file->getClientOriginalName(),
+                        'path'   => $path,
+                        'size'   => $file->getSize(),
+                        'type'   => $file->getMimeType(),
+                        'status' => $uploader->hasRole('registered') ? 'submission' : 'attachment',
                     ];
                 }
                 $task->update(['attachments' => $attachments]);
@@ -489,14 +551,17 @@ class TasksController extends Controller
                 'attachment' => 'required|file|max:5120|mimes:jpeg,png,gif,pdf',
             ]);
 
+            /** @var \App\User $uploader */
+            $uploader = auth()->user();
             $file = $request->file('attachment');
             $path = $file->store('tasks/attachments', 'public');
 
             $newAtt = [
-                'name' => $file->getClientOriginalName(),
-                'path' => $path,
-                'size' => $file->getSize(),
-                'type' => $file->getMimeType(),
+                'name'   => $file->getClientOriginalName(),
+                'path'   => $path,
+                'size'   => $file->getSize(),
+                'type'   => $file->getMimeType(),
+                'status' => $uploader->hasRole('registered') ? 'submission' : 'attachment',
             ];
 
             $attachments = $task->attachments ?? [];
@@ -647,6 +712,12 @@ class TasksController extends Controller
                 'comment' => $request->input('comment'),
             ]);
 
+            ProgramTaskActivity::create([
+                'program_task_id' => $task->id,
+                'user_id'         => auth()->id(),
+                'action'          => 'comment',
+            ]);
+
             $user = auth()->user();
 
             return response()->json([
@@ -685,8 +756,22 @@ class TasksController extends Controller
                 ], 404);
             }
 
+            $oldStatus = $task->status;
             $task->status = $status;
             $task->save();
+           
+            if ($task instanceof ProgramTask) {
+                
+                ProgramTaskActivity::create([
+                    'program_task_id' => $task->id,
+                    'user_id'         => auth()->id(),
+                    'action'          => 'move',
+                    'column'          => 'status',
+                    'was'             => $oldStatus,
+                    'new'             => $status,
+                ]);
+                
+            }
 
             return response()->json([
                 'success' => true,
@@ -702,13 +787,11 @@ class TasksController extends Controller
         }
     }
     
-    public function addFeedback($taskId)
+    public function addFeedback(Request $request, $taskId)
     {
-        $task = ProgramTask::find($taskId);
-        
-         try {
+        try {
             $task = ProgramTask::find($taskId);
-            
+
             if (!$task) {
                 return response()->json([
                     'success' => false,
@@ -718,13 +801,52 @@ class TasksController extends Controller
                 ], 404);
             }
 
+            $validator = Validator::make($request->all(), [
+                'decision' => 'required|in:pass,revision',
+                'note'     => 'required|string',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $validator->errors()->first(),
+                    'errors'  => $validator->errors()
+                ], 422);
+            }
+
+            $feedback = $task->feedbacks()->create([
+                'user_id'  => auth()->id(),
+                'decision' => $request->input('decision'),
+                'note'     => $request->input('note'),
+            ]);
+
+            $task->status = $request->input('decision') === 'pass' ? 'completed' : 'pending';
+            $task->save();
+
+            $user = auth()->user();
+
+            ProgramTaskActivity::create([
+                'program_task_id' => $task->id,
+                'user_id'         => auth()->id(),
+                'action'          => 'feedback',
+            ]);
+
             return response()->json([
-                'success' => false,
-                'message' => __('admin.feedback_added_success'),
+                'success'  => true,
+                'message'  => __('admin.feedback_added_success'),
+                'feedback' => [
+                    'id'       => $feedback->id,
+                    'user'     => $user->name,
+                    'user_id'  => $user->id,
+                    'img_url'  => User::image_handler($user->img_url),
+                    'decision' => $feedback->decision,
+                    'text'     => $feedback->note,
+                    'time'     => $feedback->created_at->diffForHumans(),
+                ],
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Error downloading attachment: ' . $e->getMessage());
+            \Log::error('Error adding feedback: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => __('admin.feedback_failed')

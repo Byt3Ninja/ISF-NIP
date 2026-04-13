@@ -3778,4 +3778,5 @@ return [
 	'View_Archived' => 'عرض المؤرشف',
 	'Archived_Tasks' => 'المهام المؤرشفة',
 	'No_Archived_Tasks' => 'لم يتم العثور على مهام مؤرشفة',
+	'Moved' => 'تم النقل'
 ];
