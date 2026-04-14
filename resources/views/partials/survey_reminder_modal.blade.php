@@ -127,12 +127,12 @@
 
     // Show modal immediately on page load
     document.addEventListener('DOMContentLoaded', function() {
-      // showSurveyReminder();
+      showSurveyReminder();
     });
 
     // Show modal every 10 minutes (600,000 milliseconds)
     setInterval(function() {
-      // showSurveyReminder();
+      showSurveyReminder();
     }, 600000);
   </script>
 @endif
