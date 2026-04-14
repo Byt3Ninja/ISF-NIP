@@ -2670,7 +2670,7 @@ class HomeController extends Controller
                 users as u ON u.id = mr.mentor_id 
             WHERE
                 
-                AND user_id = ?
+                 user_id = ?
                 AND approved = 'Yes'
                 AND rating IS NULL
             ORDER BY
