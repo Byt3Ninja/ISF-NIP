@@ -549,46 +549,17 @@ function updateQuestionOptions(select) {
     time:         `<input type="time"  class="form-control" disabled>`,
     file:         `<input type="file"  class="form-control" disabled>`,
 
-    // number: `
-    //   <div>
-    //     <input type="number" class="form-control text-muted"
-    //       placeholder="${t.number_placeholder}" disabled>
-    //     <div class="row g-3 mt-1">
-    //       <div class="col-md-4">
-    //         <label class="form-label small text-muted">${t.min_value}</label>
-    //         <input type="number" name="questions[${cardId}][number_config][min]" class="number-min form-control form-control-sm"
-    //           placeholder="${t.min_optional}"> 
-    //       </div>
-    //       <div class="col-md-4">
-    //         <label class="form-label small text-muted">${t.max_value}</label>
-    //         <input type="number" name="questions[${cardId}][number_config][max]" class="number-max form-control form-control-sm"
-    //           placeholder="${t.max_optional}"> 
-    //       </div>
-    //       <div class="col-md-4">
-    //         <label class="form-label small text-muted">${t.step}</label>
-    //         <input type="number" name="questions[${cardId}][number_config][step]" class="number-step form-control form-control-sm"
-    //           placeholder="1" min="0.000001"> 
-    //       </div>
-    //     </div>
-    //   </div>`,
+    number: `
+      <div>
+        <input type="number" class="form-control text-muted"
+          placeholder="${t.number_placeholder}" disabled>
+      </div>`,
 
-    // email: `
-    //   <div>
-    //     <input type="email" class="form-control text-muted"
-    //       placeholder="${t.email_placeholder}" disabled>
-    //     <div class="form-check mt-2">
-    //       <input type="checkbox" name="questions[${cardId}][email_config][confirm]" class="email-confirm-toggle form-check-input"
-    //         id="emailConfirmToggle_${cardId}"
-    //         onchange="toggleEmailConfirm(this)"> 
-    //       <label class="form-check-label small" for="emailConfirmToggle_${cardId}">
-    //         ${t.require_email_confirmation}
-    //       </label>
-    //     </div>
-    //     <div class="email-confirm-field mt-2 d-none">
-    //       <input type="email" class="form-control text-muted"
-    //         placeholder="${t.confirm_email_placeholder}" disabled>
-    //     </div>
-    //   </div>`,
+    email: `
+      <div>
+        <input type="email" class="form-control text-muted"
+          placeholder="${t.email_placeholder}" disabled>
+       `,
 
     url: `
       <div>
