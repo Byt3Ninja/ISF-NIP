@@ -5,7 +5,12 @@
   $sections = collect($form['build_data'] ?? []);
   $totalSections = $sections->count();
   $totalQuestions = $sections->sum(fn($section) => count($section['questions'] ?? []));
-  $isReadOnly = $answers->count() > 0;
+  // Previously this flag forced the whole form into a read-only view after
+  // first submission, which blocked GV-2134's "founder can edit a
+  // submitted form" flow. The form is now always editable; we only keep
+  // the flag to drive the "Submitted" badge and the CTA label.
+  $hasSubmission = $answers->count() > 0;
+  $isReadOnly = false;
   $typeMeta = [
       'short_answer' => ['icon' => 'ti ti-pencil', 'label' => __('builder.Short_answer')],
       'paragraph' => ['icon' => 'ti ti-align-left', 'label' => __('builder.Paragraph')],
@@ -48,7 +53,7 @@
                 <span class="badge bg-label-primary rounded-pill px-3 py-2">
                   <i class="ti ti-rocket me-1"></i>{{ __('cycles.join Cycle') }}
                 </span>
-                @if($isReadOnly)
+                @if($hasSubmission)
                   <span class="badge bg-label-success rounded-pill px-3 py-2">
                     <i class="ti ti-check me-1"></i>
                     {{ $l == 'en' ? 'Submitted' : 'تم الإرسال' }}
@@ -304,21 +309,40 @@
                                   @break
 
                                 @case('file')
+                                  @php
+                                    $existingFile = trim(old($fieldName) ?? '');
+                                    // If the founder already uploaded a file for this field in a
+                                    // previous submission we keep showing the download link and
+                                    // drop the native `required` attribute + the hidden sentinel
+                                    // tells the client-side validator that an existing file
+                                    // already satisfies the rule. Uploading a new file replaces
+                                    // the old one; leaving it untouched keeps it.
+                                    $hasExistingFile = $existingFile !== '';
+                                  @endphp
+                                  @if($hasExistingFile)
+                                    <input type="hidden" name="{{ $fieldName }}_existing" value="{{ $existingFile }}" />
+                                  @endif
                                   <input
                                     type="file"
                                     class="form-control @error($fieldName) is-invalid @enderror"
                                     id="{{ $fieldId }}"
                                     name="{{ $fieldName }}"
                                     data-file-input="1"
-                                    {{ $question['is_required'] ? 'required' : '' }}
-                                    {{ $isReadOnly ? 'disabled' : '' }}
+                                    data-has-existing="{{ $hasExistingFile ? '1' : '0' }}"
+                                    accept=".doc,.docx,.xls,.xlsx,.ppt,.pptx,.pdf,.jpg,.jpeg,.png,.webp,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/pdf,image/jpeg,image/png,image/webp"
+                                    {{ ($question['is_required'] && !$hasExistingFile) ? 'required' : '' }}
                                   />
                                   <div class="file-validation-error invalid-feedback d-none mt-1" id="{{ $fieldId }}-error"></div>
-                                  @php
-                                    $existingFile = trim(old($fieldName));
-                                  @endphp
-                                  @if($existingFile !== '')
-                                    <div class="mt-2">
+                                  <div class="form-text mt-2">
+                                    {{ $l == 'ar'
+                                      ? 'الحد الأقصى 10 ميجابايت. الأنواع المسموح بها: Word, Excel, PowerPoint, PDF, JPG, JPEG, PNG, WEBP.'
+                                      : 'Max 10 MB. Allowed types: Word, Excel, PowerPoint, PDF, JPG, JPEG, PNG, WEBP.' }}
+                                  </div>
+                                  @if($hasExistingFile)
+                                    <div class="mt-2 d-flex align-items-center gap-2 flex-wrap">
+                                      <span class="text-muted small">
+                                        <i class="ti ti-paperclip me-1"></i>{{ $l == 'ar' ? 'الملف الحالي:' : 'Current file:' }}
+                                      </span>
                                       <a href="{{ URL::to($existingFile) }}" target="_blank" class="btn btn-sm btn-outline-primary">
                                         <i class="ti ti-download me-1"></i>{{ __('admin.Download') }}
                                       </a>
@@ -416,14 +440,21 @@
         email: 'Please enter a valid email address.',
         phone: 'Please enter a valid phone number.',
         url: 'Please enter a valid URL starting with http:// or https://.',
+        file_size: 'File size must not exceed 10 MB.',
+        file_type: 'Supported file types are Word, Excel, PowerPoint, PDF, JPG, JPEG, PNG, and WEBP.',
       },
       ar: {
         required: 'هذا الحقل مطلوب.',
-        email: 'يرجى إدخال عنوان بريد إلكتروني صالح.',
+        email: 'يرجى إدخال بريد إلكتروني صحيح.',
         phone: 'يرجى إدخال رقم هاتف صالح.',
         url: 'يرجى إدخال رابط صالح يبدأ بـ http:// أو https://.',
+        file_size: 'يجب ألا يتجاوز حجم الملف 10 ميجابايت.',
+        file_type: 'أنواع الملفات المدعومة هي Word وExcel وPowerPoint وPDF وJPG وJPEG وPNG وWEBP.',
       }
     };
+
+    const ALLOWED_FILE_EXTENSIONS = ['doc','docx','xls','xlsx','ppt','pptx','pdf','jpg','jpeg','png','webp'];
+    const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
     const t = translations[locale];
     const fields = {};
@@ -453,6 +484,9 @@
           }
 
           if (field.type === 'file') {
+            // A previously-submitted file satisfies the required rule even
+            // though the native <input type="file"> is empty on the client.
+            if (field.dataset.hasExisting === '1') return true;
             return field.files.length > 0 || field.value.trim() !== '';
           }
 
@@ -497,6 +531,25 @@
           callback: function () {
             const value = field.value.trim();
             return value === '' || /^(https?:\/\/).+/i.test(value);
+          }
+        };
+      }
+
+      if (field.type === 'file') {
+        validators.callback_file_type = {
+          message: t.file_type,
+          callback: function () {
+            if (!field.files || field.files.length === 0) return true;
+            const name = field.files[0].name || '';
+            const ext = name.split('.').pop().toLowerCase();
+            return ALLOWED_FILE_EXTENSIONS.indexOf(ext) !== -1;
+          }
+        };
+        validators.callback_file_size = {
+          message: t.file_size,
+          callback: function () {
+            if (!field.files || field.files.length === 0) return true;
+            return field.files[0].size <= MAX_FILE_SIZE_BYTES;
           }
         };
       }

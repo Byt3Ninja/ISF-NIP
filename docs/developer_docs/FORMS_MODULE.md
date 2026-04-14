@@ -371,6 +371,58 @@ POST target for the rendered form. It:
    errors and previously entered values survive into the redirect target.
 5. On success: redirects back with a success flash message.
 
+### `CyclesController@my($id)` / `CyclesController@saveForm(Request $request)`
+
+The founder-facing submission flow does **not** go through
+`FormBuilderController::handleFormRequest` — that action is only used by
+the admin form preview. The real submission path is on `CyclesController`
+and is reachable from the founder dashboard via
+`/dashboard/cycles/my/{step_id}`:
+
+- `my($id)` loads the `Step`, resolves its `BuilderForm`, re-groups the
+  questions by section in the same shape as `showForm()`, queries
+  `Formdata` for any existing answers by the current user, and flashes
+  them into the session via `session()->flashInput(...)` so that
+  `old($fieldName)` in the Blade view picks up the previously-submitted
+  values (including file paths).
+- `saveForm(Request $request)` is the POST target. It reads
+  `field_ids`, pre-hydrates the request with any previously-submitted
+  **file** paths (so the `required` rule on file fields passes when the
+  founder re-opens an already-submitted form and does not re-upload
+  anything), then runs the same per-field rule builder used by
+  `FormBuilderController::handleFormRequest`: `required`, `email`,
+  `numeric`, `date_format:H:i`, `date`, and the
+  `file|max:10240|mimes:…` stack (the file stack is only attached when a
+  fresh upload is actually present, otherwise the hydrated path string
+  would be rejected by the `file` rule). Messages are localized from the
+  same EN/AR map.
+- On validation failure it `redirect()->back()->withErrors()->withInput()`
+  — identical to the admin preview, so entered values survive a failed
+  submission.
+- On success it writes one `Formdata` row per field via `updateOrInsert`
+  and redirects the founder back to the dashboard with a success flash.
+
+The founder cycles view at
+`resources/views/admin/settings/cycles/form.blade.php` renders file
+inputs with:
+
+- An `accept` attribute and max-size hint text, matching the policy
+  defined by GV-2136.
+- A `data-has-existing="1"` attribute + hidden `field_{id}_existing`
+  sentinel whenever `old($fieldName)` flashes a path from a previous
+  submission.
+- No `required` attribute when `$hasExistingFile` is true, so the
+  browser's native validation does not block re-submission without
+  re-uploading.
+- A "Current file: [Download]" row beneath the input that lets the
+  founder download the previously uploaded file or ignore it and
+  replace it by picking a new file.
+
+The client-side `addRequiredValidator` callback returns `true`
+immediately when the input's `dataset.hasExisting === '1'`, so the
+FormValidation layer also treats a previously-submitted file as a
+valid existing value.
+
 ### `deleteForm($id)`
 
 Blocks deletion when the form is referenced by program steps or when any
@@ -629,6 +681,59 @@ in order:
 ---
 
 ## Changelog
+
+### 2026-04-14 — Preserve uploaded required files on form view (GV-2134)
+
+- **Fixed "file is required on re-submit" bug.**
+  `CyclesController::saveForm()` used to run the `required` validator
+  *before* falling back to any previously-uploaded file path, so a
+  founder re-opening an already-submitted form and clicking Submit
+  without re-attaching the file would be rejected with "field can't be
+  left blank". The action now queries the founder's existing
+  `Formdata` rows up front and merges each stored file path into the
+  request (`$request->merge(['field_X' => $existing_path])`) **before**
+  the validator runs, so the required rule sees a valid value.
+- **File rule only applies to fresh uploads.** When the hydrated value
+  is a string path (not an `UploadedFile`), the `file|max|mimes` stack
+  is skipped for that field; those rules are only attached when
+  `$request->hasFile()` is true. This keeps the size + type enforcement
+  from GV-2136 without rejecting legitimate re-submissions.
+- **Unlocked the cycles form for editing.** The founder cycles view
+  (`resources/views/admin/settings/cycles/form.blade.php`) used to set
+  `$isReadOnly = true` as soon as any previous answer existed, which
+  dropped the `<form>` wrapper and the submit button entirely — making
+  it impossible to edit a submitted form. The flag was split into
+  `$hasSubmission` (drives the "Submitted" status badge) and
+  `$isReadOnly = false` (kept for backward compatibility but no longer
+  gates rendering), so the form is always editable while still
+  showing that it has been submitted.
+- **File inputs now treat previously-uploaded files as valid existing
+  values.** Every file input with a flashed `old()` value:
+    - drops the native `required` attribute so the browser does not
+      block submission,
+    - sets `data-has-existing="1"` so the JS
+      `addRequiredValidator` callback short-circuits with `true`,
+    - emits a hidden `field_{id}_existing` sentinel that carries the
+      stored path, and
+    - renders a "Current file: [Download]" row letting the founder
+      download the existing file or replace it by selecting a new
+      one.
+  Uploading a new file replaces the stored path; leaving the input
+  empty keeps the old file.
+- **Dashboard CTA relabel.** The founder dashboard step tile now
+  shows **View** (with a `ti-eye` icon) instead of **Submit** for any
+  step that already has a `form_data` row for the current user. The
+  link target is unchanged — it still opens `/cycles/my/{id}` — the
+  label just honestly reflects that a submission exists.
+- **File policy brought to parity.** Cycles form now carries the same
+  `accept` attribute, max-size hint, and client-side
+  `callback_file_type` / `callback_file_size` validators that GV-2136
+  added to the admin form preview. Oversized or wrong-type uploads
+  are blocked inline on the cycles page too.
+- **Arabic email message corrected.** The cycles form's hardcoded JS
+  translation map used `… صالح`; it now matches the product spec
+  `يرجى إدخال بريد إلكتروني صحيح.` for consistency with
+  `FormBuilderController`.
 
 ### 2026-04-14 — Allow form editing without save error (GV-2137)
 
