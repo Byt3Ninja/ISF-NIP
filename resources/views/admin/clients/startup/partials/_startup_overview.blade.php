@@ -109,7 +109,7 @@
       'id'      => 'tab-why-startup',
       'title'   => __('startup.why_this_startup'),
       'heading' => __('startup.what_makes_us_different'),
-      'value'   => $whyThisStartup ?: __('admin.N/A'),
+      'value'   => $whyThisStartup,
       'icon'    => 'ti-sparkles',
       'color'   => 'success',
     ],
@@ -122,6 +122,7 @@
       'color'   => 'info',
       'badge'   => $businessModelBadge,
       'link'    => $co->mvp_prototype_link ?? null,
+      'always'  => true,
     ],
     [
       'id'      => 'tab-challenges',
@@ -130,6 +131,7 @@
       'value'   => $co->about_problem ?: __('admin.N/A'),
       'icon'    => 'ti-alert-triangle',
       'color'   => 'danger',
+      'always'  => true,
     ],
     [
       'id'      => 'tab-market-opportunity',
@@ -138,6 +140,7 @@
       'value'   => $co->about_market_opportunity ?: __('admin.N/A'),
       'icon'    => 'ti-chart-arcs',
       'color'   => 'primary',
+      'always'  => true,
     ],
     [
       'id'      => 'tab-competitors',
@@ -146,6 +149,7 @@
       'value'   => $co->about_competitors ?: __('admin.N/A'),
       'icon'    => 'ti-sword',
       'color'   => 'warning',
+      'always'  => true,
     ],
     [
       'id'      => 'tab-monetization',
@@ -154,16 +158,43 @@
       'value'   => $co->about_monetize ?: __('admin.N/A'),
       'icon'    => 'ti-coins',
       'color'   => 'success',
+      'always'  => true,
     ],
     [
       'id'      => 'tab-mission',
       'title'   => __('startup.mission'),
       'heading' => __('startup.our_mission'),
-      'value'   => $co->mission ?: __('admin.N/A'),
+      'value'   => $co->mission,
       'icon'    => 'ti-target',
       'color'   => 'primary',
     ],
+    [
+      'id'      => 'tab-achievements',
+      'title'   => __('startup.achievements'),
+      'heading' => __('startup.achievements_and_progress'),
+      'value'   => $co->achievements,
+      'icon'    => 'ti-award',
+      'color'   => 'warning',
+    ],
+    [
+      'id'      => 'tab-startup-expertise',
+      'title'   => __('startup.startup_expertise'),
+      'heading' => __('startup.areas_of_expertise'),
+      'value'   => $co->startup_expertise,
+      'icon'    => 'ti-bulb',
+      'color'   => 'info',
+    ],
   ];
+
+  // GV-2052: Hide description tabs (why_this_startup, mission, achievements,
+  // startup_expertise) when their underlying column is empty / whitespace.
+  // Legacy tabs are marked 'always' => true and remain visible with N/A fallback.
+  $strategyTabs = array_values(array_filter($strategyTabs, function ($tab) {
+    if (!empty($tab['always'])) {
+      return true;
+    }
+    return isset($tab['value']) && trim((string) $tab['value']) !== '';
+  }));
 
   // --- Registration & Offering Logic ---
   $regType          = trim($co->company_registration_type ?? '');
@@ -396,7 +427,7 @@
                 </div>
               @endif
               <h6 class="fw-bold">{{ $tab['heading'] }}</h6>
-              <p class="{{ empty($tab['link']) ? 'mb-0' : '' }}">{{ $tab['value'] }}</p>
+              <p class="text-break {{ empty($tab['link']) ? 'mb-0' : '' }}" style="white-space: pre-line; word-break: break-word;">{{ $tab['value'] }}</p>
               @if (!empty($tab['link']))
                 <a href="{{ $tab['link'] }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary">
                   <i class="ti ti-link me-1"></i>
@@ -889,7 +920,7 @@
                   @endif
                 </div>
                 <p class="text-muted small mb-2">{{ $detail['heading'] }}</p>
-                <p class="mb-0" style="white-space: pre-line;">{{ $detail['value'] }}</p>
+                <p class="text-break mb-0" style="white-space: pre-line; word-break: break-word;">{{ $detail['value'] }}</p>
                 @if (!empty($detail['link']))
                   <a href="{{ $detail['link'] }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary mt-3">
                     <i class="ti ti-link me-1"></i>
