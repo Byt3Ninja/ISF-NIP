@@ -2658,7 +2658,7 @@ class HomeController extends Controller
             ],
         ];
 
-        $dateRate = date("Y-m-d 17:00:00");
+        $dateRate = date("Y-m-d 23:59:59");
         $notRated_men = "SELECT
                 *, 
                 CONCAT(TRIM(COALESCE(u.first_name_en, '')), ' ', TRIM(COALESCE(u.last_name_en, ''))) AS MentorName_en,
@@ -2669,8 +2669,8 @@ class HomeController extends Controller
             LEFT JOIN
                 users as u ON u.id = mr.mentor_id 
             WHERE
-                
-                 user_id = ?
+                zoom_date < ?
+                AND user_id = ?
                 AND approved = 'Yes'
                 AND rating IS NULL
             ORDER BY
@@ -2715,8 +2715,7 @@ class HomeController extends Controller
         $filtration = ScreeningEvaluation::getMyEvaluationStatus( $filtration, $getNotEvaluatedCompanies, $established_evaluations );
         $evaluation = ScreeningEvaluation::getMyEvaluationStatus( $evaluation, $getNotEvaluatedCompanies, $established_evaluations );
 
-        $notRated_men = DB::select($notRated_men, [ Auth::id()]);
-        dd($notRated_men);
+        $notRated_men = DB::select($notRated_men, [$dateRate, Auth::id()]);
         $notRated_men = collect($notRated_men);
         // check for rating services
 
