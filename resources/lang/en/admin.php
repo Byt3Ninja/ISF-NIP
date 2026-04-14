@@ -3646,6 +3646,8 @@ return [
 	'company_registration_type_placeholder' => 'Select Company Registration Type',
 	'previous_incubator' => 'Previous Incubator',
 	'previous_incubator_placeholder' => 'Enter Previous incubator name',
+	'previous_incubator_max_length' => 'Previous Incubator must not exceed 150 characters.',
+	'products_services_description_max_length' => 'Products/Services Description must not exceed 1000 characters.',
 	'product_service_description' => 'Product/Service Description',
 	'product_service_description_placeholder' => 'Describe your products or services',
 	'previous_incubation' => 'Previous Incubation',

@@ -106,7 +106,11 @@ class Company extends Model
         'Country_Register_id',
         'targeted_market',
         'industries',
-        'technologies_used'
+        'technologies_used',
+        'previous_incubation',
+        'previous_incubator',
+        'company_registration_type',
+        'products_services_description',
     ];
 
 

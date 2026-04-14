@@ -1025,6 +1025,10 @@ class ClientCompanyController extends Controller
                     'other_category' => 'nullable|string|max:255',
                     'Commercial_Register' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
                     'Tax_Card' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
+                    'previous_incubation' => 'required|in:0,1',
+                    'previous_incubator' => 'nullable|required_if:previous_incubation,1|string|max:150',
+                    'company_registration_type' => 'required|in:Not registered yet,Individual (Sole Proprietorship),Limited Liability Company (LLC),One Person Company (OPC),Partnership,Shareholding,Other',
+                    'products_services_description' => 'nullable|string|max:1000',
                 ], [
                     'name_en.required' => __('admin.Name is required'),
                     'country_id.required' => __('admin.Country is required'),
@@ -1043,6 +1047,13 @@ class ClientCompanyController extends Controller
                     'Tax_Card.file' => __('admin.invalid_file_format'),
                     'Tax_Card.mimes' => __('admin.invalid_file_format'),
                     'Tax_Card.max' => __('admin.file_size_exceeds'),
+                    'previous_incubation.required' => __('admin.this_field_is_required'),
+                    'previous_incubation.in' => __('admin.this_field_is_required'),
+                    'previous_incubator.required_if' => __('admin.this_field_is_required'),
+                    'previous_incubator.max' => __('admin.previous_incubator_max_length'),
+                    'company_registration_type.required' => __('admin.this_field_is_required'),
+                    'company_registration_type.in' => __('admin.this_field_is_required'),
+                    'products_services_description.max' => __('admin.products_services_description_max_length'),
                 ]);
 
                 // Custom Validation for Mandatory Files if "Have Registered Startup" is Yes
@@ -1119,6 +1130,12 @@ class ClientCompanyController extends Controller
                 $result->Commercial_Register = $Commercial_Register;
                 $result->Tax_Card = $Tax_Card;
                 $result->Country_Register_id = $cuntryReg ?? 0;
+                $result->previous_incubation = $data['previous_incubation'];
+                $result->previous_incubator = $data['previous_incubation'] === '1'
+                    ? ($data['previous_incubator'] ?? null)
+                    : null;
+                $result->company_registration_type = $data['company_registration_type'];
+                $result->products_services_description = $data['products_services_description'] ?? null;
             }
             if ($data['CompanyN'] == 2) {
                 $validatedData = $request->validate([
