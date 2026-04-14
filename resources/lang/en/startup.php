@@ -619,4 +619,12 @@ return [
 	'hackathon' => 'Hackathon',
   
   'mark_alumni_confirmation_bulk' => 'This action is irreversible. The selected startups will be graduated, and a snapshot of their information and participation records will be saved permanently.',
+
+  // Registration & Offering Details (GV-2063)
+  'registration_offering_details_title'      => 'Registration & Offering Details',
+  'registration_offering_details_subtitle'   => 'Company structure and business model',
+  'no_registration_offering_details_added_yet' => 'No registration and offering details added yet.',
+  'registration_type'                        => 'Registration Type',
+  'offering_type'                            => 'Offering Type',
+  'products_services_description'            => 'Products / Services Description',
 ];

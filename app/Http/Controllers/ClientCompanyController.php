@@ -562,8 +562,20 @@ class ClientCompanyController extends Controller
             ],
         ];
 
+        $registrationType = trim((string) ($company->company_registration_type ?? ''));
+        $offeringType     = trim((string) ($company->business_type ?? ''));
+        $productsDesc     = trim((string) ($company->products_services_description ?? ''));
+
+        $registrationOfferingDetails = [
+            'registration_type' => $registrationType !== '' ? $registrationType : null,
+            'offering_type'     => $offeringType !== ''     ? $offeringType     : null,
+            'products_desc'     => $productsDesc !== ''     ? $productsDesc     : null,
+            'has_any'           => ($registrationType !== '' || $offeringType !== '' || $productsDesc !== ''),
+        ];
+
         return view('admin/clients/startup/company_profile', compact('company',
         'employeesKpis',
+        'registrationOfferingDetails',
         'formTitle',
         'formData',
         'evaluationForm', 

@@ -196,13 +196,15 @@
     return isset($tab['value']) && trim((string) $tab['value']) !== '';
   }));
 
-  // --- Registration & Offering Logic ---
-  $regType          = trim($co->company_registration_type ?? '');
-  $offeringType     = trim($co->offering_type ?? '');
-  $productsDesc     = trim($co->products_services_description ?? '');
+  // --- Registration & Offering Logic (GV-2063) ---
+  // Display-ready array is computed in ClientCompanyController::show().
+  $regType        = $registrationOfferingDetails['registration_type'] ?? null;
+  $offeringType   = $registrationOfferingDetails['offering_type'] ?? null;
+  $productsDesc   = $registrationOfferingDetails['products_desc'] ?? null;
+  $hasRegOffering = (bool) ($registrationOfferingDetails['has_any'] ?? false);
+
   $generatesRevenue = (bool) ($co->generates_revenue ?? false);
   $revenueAmount    = (float) ($co->revenue_amount ?? 0);
-  $hasRegOffering   = $regType || $offeringType || $productsDesc || $generatesRevenue;
 
   // --- Locale-aware helpers ---
   $isEn          = $l === 'en';
@@ -596,12 +598,8 @@
     <div class="card border-0 shadow-sm">
       <div class="card-header border-bottom">
         <div>
-          <h5 class="mb-0">
-            {{ $isEn ? 'Registration & Offering Details' : 'تفاصيل التسجيل ونوع التقديم' }}
-          </h5>
-          <small class="text-muted">
-            {{ $isEn ? 'Company structure and business model' : 'هيكل الشركة ونموذج الأعمال' }}
-          </small>
+          <h5 class="mb-0">{{ __('startup.registration_offering_details_title') }}</h5>
+          <small class="text-muted">{{ __('startup.registration_offering_details_subtitle') }}</small>
         </div>
       </div>
       <div class="card-body p-4">
@@ -613,9 +611,7 @@
               </div>
             </div>
             <p class="text-muted mb-0">
-              {{ $isEn
-                ? 'No registration and offering details added yet.'
-                : 'لم تتم إضافة تفاصيل التسجيل ونوع التقديم بعد.' }}
+              {{ __('startup.no_registration_offering_details_added_yet') }}
             </p>
           </div>
         @else
@@ -629,7 +625,7 @@
                   <div class="min-w-0">
                     <small class="d-block text-muted text-uppercase fw-semibold mb-1"
                       style="font-size: 0.7rem; letter-spacing: 0.05em;">
-                      {{ $isEn ? 'Registration Type' : 'نوع التسجيل' }}
+                      {{ __('startup.registration_type') }}
                     </small>
                     <span class="fw-semibold">{{ $regType }}</span>
                   </div>
@@ -646,7 +642,7 @@
                   <div class="min-w-0">
                     <small class="d-block text-muted text-uppercase fw-semibold mb-1"
                       style="font-size: 0.7rem; letter-spacing: 0.05em;">
-                      {{ $isEn ? 'Offering Type' : 'نوع التقديم' }}
+                      {{ __('startup.offering_type') }}
                     </small>
                     <span class="fw-semibold">{{ $offeringType }}</span>
                   </div>
@@ -692,9 +688,9 @@
                   <div class="min-w-0 flex-grow-1">
                     <small class="d-block text-muted text-uppercase fw-semibold mb-2"
                       style="font-size: 0.7rem; letter-spacing: 0.05em;">
-                      {{ $isEn ? 'Products / Services Description' : 'وصف المنتجات / الخدمات' }}
+                      {{ __('startup.products_services_description') }}
                     </small>
-                    <p class="mb-0" style="word-break: break-word; overflow-wrap: break-word; white-space: pre-line; line-height: 1.6;">
+                    <p class="mb-0 text-break" style="word-break: break-word; overflow-wrap: break-word; white-space: pre-line; line-height: 1.6;">
                       {{ $productsDesc }}
                     </p>
                   </div>

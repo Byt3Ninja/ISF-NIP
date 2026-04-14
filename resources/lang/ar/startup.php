@@ -620,4 +620,12 @@ return [
 	'hackathon' => 'هاكثون',
 
   'mark_alumni_confirmation_bulk' => 'هذا الإجراء لا يمكن التراجع عنه. سيتم تخرج الشركات الناشئة المحددة وسيتم حفظ لقطة من معلوماتها وسجل مشاركاتها بشكل دائم.',
+
+  // Registration & Offering Details (GV-2063)
+  'registration_offering_details_title'      => 'تفاصيل التسجيل ونوع التقديم',
+  'registration_offering_details_subtitle'   => 'هيكل الشركة ونموذج الأعمال',
+  'no_registration_offering_details_added_yet' => 'لم تتم إضافة تفاصيل التسجيل ونوع التقديم بعد.',
+  'registration_type'                        => 'نوع التسجيل',
+  'offering_type'                            => 'نوع التقديم',
+  'products_services_description'            => 'وصف المنتجات / الخدمات',
 ];
