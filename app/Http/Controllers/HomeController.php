@@ -2669,7 +2669,7 @@ class HomeController extends Controller
             LEFT JOIN
                 users as u ON u.id = mr.mentor_id 
             WHERE
-                zoom_date < ?
+                
                 AND user_id = ?
                 AND approved = 'Yes'
                 AND rating IS NULL
