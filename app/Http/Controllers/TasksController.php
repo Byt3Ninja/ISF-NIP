@@ -126,6 +126,7 @@ class TasksController extends Controller
                 })->toArray(),
                 'activities_count' => $task->activities->count(),
                 'feedbacks_count'  => $task->feedbacks->count(),
+                'createdAt'        => $task->created_at->timestamp,
             ];
         });
 

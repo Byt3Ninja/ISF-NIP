@@ -1232,7 +1232,7 @@ class CyclesController extends Controller
 
     public function saveForm(Request $request)
     {
-     
+
         $id = $request->id;
         $step = Step::where('id', $id)->first();
 
@@ -1242,8 +1242,6 @@ class CyclesController extends Controller
         ]);
         abort_if($validator->fails(), 422, "Data error");
 
-
-        // generating validation rules based on dynamic field config data
         $field_map_ids = explode(",", $request->input('field_ids'));
 
         $the_form = BuilderForm::findOrFail( $step->data );
@@ -1259,30 +1257,110 @@ class CyclesController extends Controller
             $output = array_merge($output, $options);
             return $output;
         });
-        $field_required_rules = collect($field_map_ids)->mapWithKeys(function ($id) {
-            $field_options = Formfield::findOrFail($id)->options;
-            if ($field_options->validation->required == 1) {
-                $rules = ['required'];
-                if (isset($field_options->type) && $field_options->type == "email") $rules[] = 'email';
-                return [
-                    'field_' . $id => implode("|", $rules)
-                ];
-            }else {
-                return ['field_' . $id => 'nullable'];
+
+        // Pre-hydrate the request with previously-submitted file paths so the
+        // `required` rule on file fields passes when the founder re-opens an
+        // already-submitted form and does not re-upload anything. Without
+        // this, the validator rejects the form as "file is required" even
+        // though a valid file is already attached in the database — the bug
+        // GV-2134 is fixing.
+        $my_submissions = Formdata::where('user_id', Auth::id())
+            ->where('step_id', $id)
+            ->whereIn('field_id', $field_map_ids)
+            ->get();
+
+        foreach ($field_map_ids as $fid) {
+            $field_config = $field_mapper->where('id', $fid)->first();
+            if ($field_config && ($field_config['type'] ?? null) === 'file' && !$request->hasFile('field_' . $fid)) {
+                $existing = $my_submissions->where('field_id', $fid)->first()?->answer;
+                if (!empty($existing)) {
+                    $request->merge(['field_' . $fid => $existing]);
+                }
             }
-        });
-        $dynamic_validator = Validator::make($request->all(), $field_required_rules->toArray(), [
-            'required' => "field can't be left blank",
-            'email' => 'field must be a valid email address'
-        ]);
-        
-        if ($dynamic_validator->fails()) {
-            return redirect()->back()
-            ->withErrors($dynamic_validator)
-            ->withInput();
         }
 
-        $my_submissions = Formdata::where('user_id', Auth::id())->where('step_id', $id)->whereIn('field_id', $field_map_ids)->get();
+        // Localized validation messages shared with FormBuilderController.
+        $locale = app()->getLocale() === 'ar' ? 'ar' : 'en';
+        $messages_map = [
+            'en' => [
+                'required'  => 'This field is required.',
+                'email'     => 'Please enter a valid email address.',
+                'numeric'   => 'Please enter numbers only.',
+                'time'      => 'Please enter a valid time.',
+                'file_size' => 'File size must not exceed 10 MB.',
+                'file_type' => 'Supported file types are Word, Excel, PowerPoint, PDF, JPG, JPEG, PNG, and WEBP.',
+            ],
+            'ar' => [
+                'required'  => 'هذا الحقل مطلوب.',
+                'email'     => 'يرجى إدخال بريد إلكتروني صحيح.',
+                'numeric'   => 'يرجى إدخال أرقام فقط.',
+                'time'      => 'يرجى إدخال وقت صحيح.',
+                'file_size' => 'يجب ألا يتجاوز حجم الملف 10 ميجابايت.',
+                'file_type' => 'أنواع الملفات المدعومة هي Word وExcel وPowerPoint وPDF وJPG وJPEG وPNG وWEBP.',
+            ],
+        ];
+        $L = $messages_map[$locale];
+
+        $allowed_file_extensions = ['doc','docx','xls','xlsx','ppt','pptx','pdf','jpg','jpeg','png','webp'];
+        $max_file_size_kb = 10 * 1024;
+
+        $rules_array = [];
+        $custom_messages = [];
+
+        foreach ($field_map_ids as $fid) {
+            $field_options = Formfield::findOrFail($fid)->options;
+            $field_name = 'field_' . $fid;
+            $type = $field_options->type ?? 'text';
+            $required = intval($field_options->validation->required ?? 0) === 1;
+
+            $rules = [];
+            $rules[] = $required ? 'required' : 'nullable';
+
+            switch ($type) {
+                case 'email':
+                    $rules[] = 'email';
+                    $custom_messages[$field_name . '.email'] = $L['email'];
+                    break;
+                case 'number':
+                case 'linear_scale':
+                    $rules[] = 'numeric';
+                    $custom_messages[$field_name . '.numeric'] = $L['numeric'];
+                    break;
+                case 'time':
+                    $rules[] = 'date_format:H:i';
+                    $custom_messages[$field_name . '.date_format'] = $L['time'];
+                    break;
+                case 'date':
+                    $rules[] = 'date';
+                    $custom_messages[$field_name . '.date'] = $L['time'];
+                    break;
+                case 'file':
+                    // Only enforce file/max/mimes on a fresh upload. The
+                    // hydrated previously-submitted path is a string, so
+                    // Laravel's `file` rule would reject it — we skip the
+                    // type/size checks when no new file was attached.
+                    if ($request->hasFile($field_name)) {
+                        $rules[] = 'file';
+                        $rules[] = 'max:' . $max_file_size_kb;
+                        $rules[] = 'mimes:' . implode(',', $allowed_file_extensions);
+                        $custom_messages[$field_name . '.file']  = $L['file_type'];
+                        $custom_messages[$field_name . '.max']   = $L['file_size'];
+                        $custom_messages[$field_name . '.mimes'] = $L['file_type'];
+                    }
+                    break;
+            }
+
+            $rules_array[$field_name] = implode('|', $rules);
+            $custom_messages[$field_name . '.required'] = $L['required'];
+        }
+
+        $dynamic_validator = Validator::make($request->all(), $rules_array, $custom_messages);
+
+        if ($dynamic_validator->fails()) {
+            return redirect()->back()
+                ->withErrors($dynamic_validator)
+                ->withInput();
+        }
         // gather the form data as field_name => [ label, data ]
         foreach ($field_map_ids as $fid)
         {

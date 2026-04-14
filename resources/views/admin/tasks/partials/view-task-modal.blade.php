@@ -1,7 +1,7 @@
 {{-- ═══════════════════════════════════════════
      Offcanvas — View Task Details
 ═══════════════════════════════════════════ --}}
-<div class="offcanvas offcanvas-end" tabindex="-1" id="viewTaskModal" aria-labelledby="viewTaskModalLabel">
+<div class="offcanvas offcanvas-end w-px-500" tabindex="-1" id="viewTaskModal" aria-labelledby="viewTaskModalLabel">
 
   {{-- Header --}}
   <div class="offcanvas-header border-bottom">
