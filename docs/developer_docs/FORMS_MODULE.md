@@ -682,6 +682,52 @@ in order:
 
 ## Changelog
 
+### 2026-04-14 — Email & Number question types across roles (GV-2274, GV-2275, GV-2276, GV-2277, GV-2278, GV-2279)
+
+**Confirmation pass — no code changes required.** This family of tickets
+asks for Email and Number question types in form creation and edit mode
+for Super Admin / Tenant Admin, Sub-Admin, and Organization Manager.
+The full pipeline was already delivered by the GV-2273 overhaul on
+2026-04-13. Verified end-to-end against the acceptance criteria:
+
+- **Dropdown options** — `<option value="number">` / `<option
+  value="email">` are present in the question-type `<select>` rendered
+  by `createQuestionHTML()` in
+  `public/vuexy/assets/js/app-form-builder.js` (alongside `url`, which
+  is also supported but not strictly required by this ticket).
+- **Type-specific config UI** — the `number` template exposes
+  `min` / `max` / `step` inputs; the `email` template exposes the
+  "Require email confirmation" toggle. Both render in create and edit
+  modes via `updateQuestionOptions()`.
+- **Save path** — `FormBuilderController::saveForm()` has explicit
+  `case 'number'`, `case 'email'`, and `case 'url'` branches in its
+  question-type switch, writing `options.type` + the type-specific
+  config (`min/max/step`, `confirm`, `allowed_domains`) into
+  `builder_fields.options`. The `Required` toggle is serialized via
+  `validation.required = !empty($question['required']) ? 1 : 0`.
+- **Edit reload** — `FormBuilderController::showBuilder()` reads
+  `options.type` back through its `default` branch, so the builder JS
+  sees `type: 'number'` or `type: 'email'` on the payload and
+  `populateQuestionData()` restores the dropdown selection plus the
+  `number_config` / `email_config` fields in place.
+- **Render + validation** — the founder-facing view has
+  `@case('number'|'email'|'url')` branches that emit
+  `<input type="number">`, `<input type="email">`, and
+  `<input type="url">` with `data-qtype` attributes, and the
+  client-side FormValidation wiring applies `emailAddress`,
+  `callback_numeric`, and `callback_url` validators with localized
+  messages (see the GV-2273 changelog entry below for the exact copy).
+- **Role access** — `forms.builder_view`, `forms.render_view`, and
+  `forms.design_save` permissions are granted by default to `admin`,
+  `organizationmanager`, and `subadmin` in
+  `database/dbFiles/rolesWithDefaultPermissions.json`, so all three
+  target roles can reach both the create and edit flows.
+
+QA can therefore close GV-2274 through GV-2279 against the existing
+GV-2273 implementation — no further code changes are required. If a
+regression is ever introduced to this feature, re-run the GV-2273 test
+plan (builder dropdown → save → refresh → edit → re-save) to reproduce.
+
 ### 2026-04-14 — Preserve uploaded required files on form view (GV-2134)
 
 - **Fixed "file is required on re-submit" bug.**
