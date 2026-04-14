@@ -18,6 +18,7 @@ use App\Service;
 use App\Surveys;
 use App\Currency;
 use App\Employee;
+use App\Expertise;
 use App\Formdata;
 use App\Settings;
 use App\Training;
@@ -46,6 +47,7 @@ use Illuminate\Validation\Rule;
 use App\Services\CompanyService;
 use App\ScreeningEvaluationResults;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use App\ScreeningEvaluationCriteria;
 use Illuminate\Support\Facades\Auth;
 use Google\Service\PolyService\Format;
@@ -509,7 +511,71 @@ class ClientCompanyController extends Controller
                 'count' => $company->user?->mentorship?->whereNotNull('rating')->where('done', 1)->count() ?? 0, // Count of mentorship sessions
             ],
         ];
+        $totalEmployees  = $company?->total_employees;
+        $maleEmployees   = $company?->male_employees;
+        $femaleEmployees = $company?->female_employees;
+
+        $hasTotal  = is_int($totalEmployees) && $totalEmployees > 0;
+        $hasMale   = is_int($maleEmployees);
+        $hasFemale = is_int($femaleEmployees);
+
+        $malePct   = ($hasTotal && $hasMale)   ? (int) round(($maleEmployees   / $totalEmployees) * 100) : 0;
+        $femalePct = ($hasTotal && $hasFemale) ? (int) round(($femaleEmployees / $totalEmployees) * 100) : 0;
+
+        $showDistributionBar = $hasTotal && ($hasMale || $hasFemale);
+
+        $naLabel = __('admin.N/A');
+
+        $employeesKpis = [
+            [
+                'title'       => __('startup.total_employees'),
+                'value'       => $hasTotal ? (string) $totalEmployees : $naLabel,
+                'na'          => !$hasTotal,
+                'icon'        => 'ti-users-group',
+                'color'       => 'success',
+                'type'        => 'split',
+                'has_male'    => $hasTotal && $hasMale,
+                'has_female'  => $hasTotal && $hasFemale,
+                'male_value'  => $maleEmployees,
+                'female_value'=> $femaleEmployees,
+                'male_pct'    => $malePct,
+                'female_pct'  => $femalePct,
+                'show_bar'    => $showDistributionBar,
+            ],
+            [
+                'title' => __('startup.male_employees'),
+                'value' => ($hasTotal && $hasMale) ? (string) $maleEmployees : $naLabel,
+                'na'    => !($hasTotal && $hasMale),
+                'icon'  => 'ti-gender-male',
+                'color' => 'primary',
+                'type'  => 'pct',
+                'pct'   => $malePct,
+            ],
+            [
+                'title' => __('startup.female_employees'),
+                'value' => ($hasTotal && $hasFemale) ? (string) $femaleEmployees : $naLabel,
+                'na'    => !($hasTotal && $hasFemale),
+                'icon'  => 'ti-gender-female',
+                'color' => 'info',
+                'type'  => 'pct',
+                'pct'   => $femalePct,
+            ],
+        ];
+
+        $registrationType = trim((string) ($company->company_registration_type ?? ''));
+        $offeringType     = trim((string) ($company->business_type ?? ''));
+        $productsDesc     = trim((string) ($company->products_services_description ?? ''));
+
+        $registrationOfferingDetails = [
+            'registration_type' => $registrationType !== '' ? $registrationType : null,
+            'offering_type'     => $offeringType !== ''     ? $offeringType     : null,
+            'products_desc'     => $productsDesc !== ''     ? $productsDesc     : null,
+            'has_any'           => ($registrationType !== '' || $offeringType !== '' || $productsDesc !== ''),
+        ];
+
         return view('admin/clients/startup/company_profile', compact('company',
+        'employeesKpis',
+        'registrationOfferingDetails',
         'formTitle',
         'formData',
         'evaluationForm', 
@@ -855,6 +921,28 @@ class ClientCompanyController extends Controller
             ];
                 // dd($financialprojection);
             $company = $company_instance; // For backward compatibility in the view
+
+            $areasOfExpertiseQuery = Expertise::whereNull('parent_id');
+            if (Schema::hasColumn('expertises', 'status')) {
+                $areasOfExpertiseQuery->where('status', 'active');
+            }
+            $areasOfExpertise = $areasOfExpertiseQuery
+                ->orderBy('title')
+                ->get()
+                ->map(function ($experty) use ( $l ) {
+                    
+                    $output = new stdClass;
+                    $output->id = $experty->id;
+                    $output->name = $l === 'en' ? $experty->title : ( $experty->title_ar ?? $experty->title);
+                    return $output;
+                })
+                ->values()
+                ->toArray();
+            $hasAreasOfExpertise = count($areasOfExpertise) > 0;
+            $companyExpertiseIds = $company_instance
+                ? $company_instance->expertises()->pluck('expertises.id')->map(fn($v) => (int) $v)->values()->toArray()
+                : [];
+
             return view('admin/clients/company', compact(
                 'client',
                 '_countries',
@@ -887,6 +975,9 @@ class ClientCompanyController extends Controller
                 'growthMetrics',
                 'company',
                 'is_currency_disabled',
+                'areasOfExpertise',
+                'companyExpertiseIds',
+                'hasAreasOfExpertise',
             ));
         } catch (Exception $e) {
             //log what happend
@@ -1025,6 +1116,10 @@ class ClientCompanyController extends Controller
                     'other_category' => 'nullable|string|max:255',
                     'Commercial_Register' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
                     'Tax_Card' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
+                    'previous_incubation' => 'required|in:0,1',
+                    'previous_incubator' => 'nullable|required_if:previous_incubation,1|string|max:150',
+                    'company_registration_type' => 'required|in:Not registered yet,Individual (Sole Proprietorship),Limited Liability Company (LLC),One Person Company (OPC),Partnership,Shareholding,Other',
+                    'products_services_description' => 'nullable|string|max:1000',
                 ], [
                     'name_en.required' => __('admin.Name is required'),
                     'country_id.required' => __('admin.Country is required'),
@@ -1043,6 +1138,13 @@ class ClientCompanyController extends Controller
                     'Tax_Card.file' => __('admin.invalid_file_format'),
                     'Tax_Card.mimes' => __('admin.invalid_file_format'),
                     'Tax_Card.max' => __('admin.file_size_exceeds'),
+                    'previous_incubation.required' => __('admin.this_field_is_required'),
+                    'previous_incubation.in' => __('admin.this_field_is_required'),
+                    'previous_incubator.required_if' => __('admin.this_field_is_required'),
+                    'previous_incubator.max' => __('admin.previous_incubator_max_length'),
+                    'company_registration_type.required' => __('admin.this_field_is_required'),
+                    'company_registration_type.in' => __('admin.this_field_is_required'),
+                    'products_services_description.max' => __('admin.products_services_description_max_length'),
                 ]);
 
                 // Custom Validation for Mandatory Files if "Have Registered Startup" is Yes
@@ -1119,6 +1221,12 @@ class ClientCompanyController extends Controller
                 $result->Commercial_Register = $Commercial_Register;
                 $result->Tax_Card = $Tax_Card;
                 $result->Country_Register_id = $cuntryReg ?? 0;
+                $result->previous_incubation = $data['previous_incubation'];
+                $result->previous_incubator = $data['previous_incubation'] === '1'
+                    ? ($data['previous_incubator'] ?? null)
+                    : null;
+                $result->company_registration_type = $data['company_registration_type'];
+                $result->products_services_description = $data['products_services_description'] ?? null;
             }
             if ($data['CompanyN'] == 2) {
                 $validatedData = $request->validate([
@@ -1188,6 +1296,10 @@ class ClientCompanyController extends Controller
                     'about_competitors' => 'nullable',
                     'about_monetize' => 'nullable',
                     'about_challenges' => 'nullable',
+                    'achievements' => 'nullable|string|max:1000',
+                    'mission' => 'nullable|string|max:1000',
+                    'why_this_startup' => 'nullable|string|max:1000',
+                    'startup_expertise' => 'nullable|string|max:1000',
                 ]);
                 if (isset($data['Sustainable_development'])) {
                     $result->Sustainable_development = json_encode($data['Sustainable_development']);
@@ -1202,6 +1314,10 @@ class ClientCompanyController extends Controller
                 $result->about_competitors = $data['about_competitors'];
                 $result->about_monetize = $data['about_monetize'];
                 $result->about_challenges = $data['about_challenges'];
+                $result->achievements = $data['achievements'] ?? null;
+                $result->mission = $data['mission'] ?? null;
+                $result->why_this_startup = $data['why_this_startup'] ?? null;
+                $result->startup_expertise = $data['startup_expertise'] ?? null;
             }
             if ($data['CompanyN'] == 4) {
                 $request->validate([
@@ -1213,11 +1329,23 @@ class ClientCompanyController extends Controller
                     'development_stage' => 'nullable',
                     'targeted_market.*' => 'nullable',
                     'business_type' => 'nullable',
+                    'generate_revenue' => 'required|in:yes,no',
+                    'average_annual_revenues' => 'required_if:generate_revenue,yes|nullable|integer|min:0|max:999999999999',
+                    'financial_plan' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx|max:10240',
                 ], [
                     'pre_money_valuation.numeric' => __('admin.Pre-money valuation must be a number'),
                     'pre_money_valuation.min' => __('admin.Pre-money valuation must be a positive number'),
                     'raised_fund.numeric' => __('admin.Raised fund must be a number'),
                     'raised_fund.min' => __('admin.Raised fund must be a positive number'),
+                    'generate_revenue.required' => __('admin.this_field_is_required'),
+                    'generate_revenue.in' => __('admin.this_field_is_required'),
+                    'average_annual_revenues.required_if' => __('admin.this_field_is_required'),
+                    'average_annual_revenues.integer' => __('admin.please_enter_a_valid_number'),
+                    'average_annual_revenues.min' => __('admin.value_cannot_be_less_than_zero'),
+                    'average_annual_revenues.max' => __('admin.please_enter_a_valid_number'),
+                    'financial_plan.file' => __('admin.financial_plan_invalid_type'),
+                    'financial_plan.mimes' => __('admin.financial_plan_invalid_type'),
+                    'financial_plan.max' => __('admin.financial_plan_too_large'),
                 ]);
 
                 $data['Funding_Target'] = $data['Funding_Target'] == null ? 0 : $data['Funding_Target'];
@@ -1258,6 +1386,10 @@ class ClientCompanyController extends Controller
                 $result->business_type = $data['business_type'];
                 $result->financial_plan = $uploadedFile;
                 $result->financial_plan_description = $data['financial_plan_description'];
+                $result->generate_revenue = $data['generate_revenue'];
+                $result->average_annual_revenues = $data['generate_revenue'] === 'yes'
+                    ? $data['average_annual_revenues']
+                    : null;
             }
             if ($data['CompanyN'] == 5) {
                 $request->validate([
@@ -1417,9 +1549,12 @@ class ClientCompanyController extends Controller
                     'business_model' => 'required',
                     'business_model_description' => 'required|string|max:255',
                     'business_plan' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx|max:20480', // max limit to be defined later from admin panel settings
+                    'mvp_prototype_link' => 'nullable|url|max:500',
                 ], [
                     'business_model.required' => __('admin.business_model is required'),
                     'business_model_description.required' => __('admin.business_model_description is required'),
+                    'mvp_prototype_link.url' => __('startup.mvp_prototype_link_invalid_url'),
+                    'mvp_prototype_link.max' => __('startup.mvp_prototype_link_invalid_url'),
                 ]);
 
                 if ($request->hasFile('business_plan')) {
@@ -1440,20 +1575,73 @@ class ClientCompanyController extends Controller
                         $uploadedFile = 'business_plan/' . $path . $originalName;
                     }
                 } else {
-                    return redirect()->back()->with(['msg' => 'Business Plan file not selected', 'class' => 'danger'])->withInput();
+                    // return redirect()->back()->with(['msg' => 'Business Plan file not selected', 'class' => 'danger'])->withInput();
+                    $uploadedFile = $result->business_plan;
                 }
 
                 $result->business_model = $data['business_model'];
                 $result->other_business_model = $data['other_business_model'];
                 $result->business_model_description = $data['business_model_description'];
                 $result->business_plan = $uploadedFile;
+                $result->mvp_prototype_link = $request->input('mvp_prototype_link');
             }
             if($result->name_en == null){
                 return redirect()->back()->with(['msg' => 'name_is_required', 'class' => 'danger']);
             }
             $result->save();
 
-            
+            if ($data['CompanyN'] == 16) {
+                $rawTags = $request->input('expertise_tags');
+                if (is_string($rawTags)) {
+                    $decoded = json_decode($rawTags, true);
+                    $rawTags = is_array($decoded) ? $decoded : [];
+                }
+                if (!is_array($rawTags)) {
+                    $rawTags = [];
+                }
+                $expertiseIds = array_values(array_unique(array_filter(array_map('intval', $rawTags))));
+                $request->merge(['expertise_tags' => $expertiseIds]);
+
+                $validator = \Validator::make($request->all(), [
+                    'expertise_tags'   => 'required|array|min:1',
+                    'expertise_tags.*' => 'integer|exists:expertises,id',
+                ], [
+                    'expertise_tags.required' => __('admin.this_field_is_required'),
+                    'expertise_tags.array'    => __('admin.this_field_is_required'),
+                    'expertise_tags.min'      => __('admin.this_field_is_required'),
+                    'expertise_tags.*.exists' => __('admin.this_field_is_required'),
+                ]);
+
+                if ($validator->fails()) {
+                    if ($request->ajax()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => $validator->errors()->first(),
+                            'errors'  => $validator->errors(),
+                        ], 422);
+                    }
+                    return redirect()->back()->withErrors($validator)->withInput();
+                }
+
+                $activeIdsQuery = Expertise::whereNull('parent_id')->whereIn('id', $expertiseIds);
+                if (Schema::hasColumn('expertises', 'status')) {
+                    $activeIdsQuery->where('status', 'active');
+                }
+                $activeIds = $activeIdsQuery->pluck('id')->map(fn($v) => (int) $v)->toArray();
+
+                $result->expertises()->sync($activeIds);
+
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => __('admin.startup_profile_updated'),
+                    ]);
+                }
+
+                return redirect()->route('company.profile_view_mine', $result->id)
+                    ->with(['msg' => 'startup_profile_updated', 'class' => 'success']);
+            }
+
             if ($data['CompanyN'] == 14) {
                 // Set up debug logging using Laravel's Log facade
                 Log::debug('Starting company update process', [
@@ -4615,13 +4803,87 @@ class ClientCompanyController extends Controller
         }
     }
 
-    public function saveStatistics (Request $request, $id)
+    public function saveStatistics(Request $request, $id = null)
     {
-        // $company = Company::where('id', $id)->first();
-        // $female_employees = $request->female_employees;
-        // $male_employees = $request->male_employees;
-        // $total_employees = $request->total_employees;
-        // $company->save();
-        return response()->json(['status' => 'success']);
+        if (isset($id) && !is_null($id)) {
+            $user = User::where('company_id', $id)->first();
+        } else {
+            $user = auth()->user();
+        }
+
+        $companyId = $user->company_id ?? null;
+        if (!$companyId) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('admin.no_company_associated'),
+                ], 404);
+            }
+            return redirect()->back()->with(['msg' => 'NoHaveCompany', 'class' => 'danger']);
+        }
+
+        $company = Company::find($companyId);
+        if (!$company) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('admin.no_company_associated'),
+                ], 404);
+            }
+            return redirect()->back()->with(['msg' => 'NoHaveCompany', 'class' => 'danger']);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'total_employees'  => 'required|integer|min:0|max:999999',
+            'male_employees'   => 'nullable|integer|min:0|max:999999',
+            'female_employees' => 'nullable|integer|min:0|max:999999',
+        ], [
+            'total_employees.required' => __('admin.this_field_is_required'),
+            'total_employees.integer'  => __('admin.please_enter_a_valid_number'),
+            'total_employees.min'      => __('admin.value_cannot_be_less_than_zero'),
+            'total_employees.max'      => __('admin.please_enter_a_valid_number'),
+            'male_employees.integer'   => __('admin.please_enter_a_valid_number'),
+            'male_employees.min'       => __('admin.value_cannot_be_less_than_zero'),
+            'male_employees.max'       => __('admin.please_enter_a_valid_number'),
+            'female_employees.integer' => __('admin.please_enter_a_valid_number'),
+            'female_employees.min'     => __('admin.value_cannot_be_less_than_zero'),
+            'female_employees.max'     => __('admin.please_enter_a_valid_number'),
+        ]);
+
+        $validator->after(function ($v) use ($request) {
+            $male   = $request->input('male_employees');
+            $female = $request->input('female_employees');
+            $total  = $request->input('total_employees');
+
+            if ($male !== null && $male !== '' && $female !== null && $female !== '' && $total !== null && $total !== '') {
+                if (((int) $male + (int) $female) !== (int) $total) {
+                    $v->errors()->add('female_employees', __('admin.employee_gender_sum_mismatch'));
+                }
+            }
+        });
+
+        if ($validator->fails()) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'errors'  => $validator->errors(),
+                ], 422);
+            }
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $company->total_employees  = $request->input('total_employees');
+        $company->male_employees   = $request->input('male_employees');
+        $company->female_employees = $request->input('female_employees');
+        $company->save();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('admin.employee_statistics_updated'),
+            ]);
+        }
+
+        return redirect()->back()->with(['msg' => __('admin.employee_statistics_updated'), 'class' => 'success']);
     }
 }

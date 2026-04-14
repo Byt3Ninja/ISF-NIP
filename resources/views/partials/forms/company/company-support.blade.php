@@ -1,12 +1,6 @@
 @php
-  $expertises = [
-    ['id' => 1, 'name' => 'IT'], ['id' => 2, 'name' => 'Design'], ['id' => 3, 'name' => 'Marketing'],
-    ['id' => 4, 'name' => 'Sales'], ['id' => 5, 'name' => 'HR'], ['id' => 6, 'name' => 'Finance'],
-    ['id' => 7, 'name' => 'Legal'], ['id' => 8, 'name' => 'Operations'], ['id' => 9, 'name' => 'Customer Support'],
-    ['id' => 10, 'name' => 'Product Management'], ['id' => 11, 'name' => 'Business Development'],
-  ];
-  // Ensure $expertisesSelected is an array of strings or objects
-  $expertisesSelected = $expertisesSelected ?? [];
+  $expertiseOptions = $areasOfExpertise ?? [];
+  $initialExpertiseIds = $companyExpertiseIds ?? [];
 @endphp
 
 <div class="card">
@@ -14,26 +8,26 @@
     <h5 class="card-title border-bottom pb-2 mb-6">
       {{ __('startup.support_mentorship_title') }}
     </h5>
-    
+
     <form id="expertiseForm" method="post" action="{{ route('company.profile_update_mine', $client->company->id ?? auth()->id()) }}">
       @csrf
-      <input name="CompanyN" type="hidden" value="14">
+      <input name="CompanyN" type="hidden" value="16">
 
       <div class="mb-4">
         <label class="form-label fw-semibold">
           {{ __('startup.support_and_mentorship_label') }}
           <span class="text-danger">*</span>
         </label>
-        
+
         <!-- Widget Container -->
         <div id="expertiseWidget" class="position-relative border rounded-3 p-3 bg-card">
-          
+
           <!-- Selected Tags Container -->
           <div id="expertiseTagsContainer" class="d-flex flex-wrap gap-2 mb-2"></div>
 
           <!-- Input Group -->
           <div class="position-relative">
-            <input 
+            <input
               type="text"
               id="expertiseSearchInput"
               class="form-control border-0 bg-transparent shadow-none p-0"
@@ -51,11 +45,11 @@
         <div id="supportAreasHelp" class="form-text">
           {{ __('startup.support_and_mentorship_subtitle') }}
         </div>
-        
+
         <!-- Error Message -->
         <div id="expertiseErr" class="mt-2 text-danger d-none">
           <i class="ti ti-alert-circle me-1"></i>
-          {{ __('startup.support_and_mentorship_validation') }}
+          <span id="expertiseErrText">{{ __('admin.this_field_is_required') }}</span>
         </div>
       </div>
 
@@ -72,24 +66,30 @@
 @push('scripts')
 <script>
 (function () {
-  const ALL_OPTIONS = @json($expertises);
-  const INITIAL_VALUES = @json($expertisesSelected);
+  const ALL_OPTIONS = @json($expertiseOptions);
+  const INITIAL_IDS = @json($initialExpertiseIds);
   const LANG = '{{ $l }}';
-  
-  let selectedTags = [];
+  const MSG_REQUIRED = @json(__('admin.this_field_is_required'));
+  const MSG_DUPLICATE = @json(__('admin.support_area_already_selected'));
+  const MSG_SUCCESS = @json(__('admin.startup_profile_updated'));
+
+  const OPTIONS_BY_ID = {};
+  ALL_OPTIONS.forEach(o => { OPTIONS_BY_ID[o.id] = o; });
+
+  let selectedIds = [];
 
   document.addEventListener('DOMContentLoaded', function() {
-    // Initialize data
-    if (Array.isArray(INITIAL_VALUES)) {
-      selectedTags = INITIAL_VALUES
-        .map(v => (typeof v === 'object' ? v.name : v))
-        .filter(Boolean);
+    if (Array.isArray(INITIAL_IDS)) {
+      selectedIds = INITIAL_IDS
+        .map(v => (typeof v === 'object' && v !== null ? parseInt(v.id, 10) : parseInt(v, 10)))
+        .filter(id => !isNaN(id) && OPTIONS_BY_ID[id]);
     }
 
     const $input = $('#expertiseSearchInput');
     const $dropdown = $('#expertiseDropdownList');
     const $form = $('#expertiseForm');
     const $error = $('#expertiseErr');
+    const $errorText = $('#expertiseErrText');
     const $widget = $('#expertiseWidget');
     const $btn = $('#expertiseSubmitBtn');
 
@@ -99,104 +99,104 @@
       const container = document.getElementById('expertiseTagsContainer');
       container.innerHTML = '';
 
-      selectedTags.forEach((tag, index) => {
+      selectedIds.forEach((id, index) => {
+        const option = OPTIONS_BY_ID[id];
+        if (!option) return;
+
         const chip = document.createElement('div');
         chip.className = 'badge bg-primary rounded-pill d-flex align-items-center gap-2 px-3 py-2 fs-6 expertise-chip';
-
-        chip.innerHTML = `
-          <span>${tag}</span>
-          <button type="button" class="btn-close btn-close-white p-0 remove-tag" data-idx="${index}" style="width:0.5rem; height:0.5rem"></button>
-        `;
-
+        const label = document.createElement('span');
+        label.textContent = option.name;
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-close btn-close-white p-0 remove-tag';
+        removeBtn.setAttribute('data-idx', index);
+        removeBtn.style.width = '0.5rem';
+        removeBtn.style.height = '0.5rem';
+        chip.appendChild(label);
+        chip.appendChild(removeBtn);
         container.appendChild(chip);
       });
 
-      // Update hidden input for form submission
-      document.getElementById('expertise_tags_input').value = JSON.stringify(selectedTags);
+      document.getElementById('expertise_tags_input').value = JSON.stringify(selectedIds);
 
-      if (selectedTags.length > 0) {
-        $error.addClass('d-none');
-        $widget.removeClass('border-danger');
+      if (selectedIds.length > 0) {
+        hideError();
       }
     }
 
-    function addTag(val) {
-      val = val.trim();
-      // Check if value exists in ALL_OPTIONS
-      const exists = ALL_OPTIONS.some(o => o.name.toLowerCase() === val.toLowerCase());
+    function showError(message) {
+      $errorText.text(message);
+      $error.removeClass('d-none');
+      $widget.addClass('border-2 border-danger');
+    }
 
-      if (!exists) return; //
-      
-      if (val && !selectedTags.some(t => t.toLowerCase() === val.toLowerCase())) {
-        selectedTags.push(val);
-        render();
+    function hideError() {
+      $error.addClass('d-none');
+      $widget.removeClass('border-2 border-danger');
+    }
+
+    function addTagById(id) {
+      id = parseInt(id, 10);
+      if (isNaN(id) || !OPTIONS_BY_ID[id]) return;
+      if (selectedIds.includes(id)) {
+        showError(MSG_DUPLICATE);
+        return;
       }
+      selectedIds.push(id);
+      render();
       $input.val('');
       $dropdown.removeClass('show');
     }
 
-    // Event: Remove tag
     $(document).on('click', '.remove-tag', function() {
-      const idx = $(this).data('idx');
-      selectedTags.splice(idx, 1);
-      render();
+      const idx = parseInt($(this).data('idx'), 10);
+      if (!isNaN(idx)) {
+        selectedIds.splice(idx, 1);
+        render();
+      }
     });
 
-    // Event: Search & Dropdown Filter
     $input.on('input focus', function() {
       const q = $(this).val().toLowerCase().trim();
 
-      const filtered = ALL_OPTIONS.filter(o => 
-        o.name.toLowerCase().includes(q) &&
-        !selectedTags.some(t => t.toLowerCase() === o.name.toLowerCase())
+      const filtered = ALL_OPTIONS.filter(o =>
+        o.name.toLowerCase().includes(q) && !selectedIds.includes(o.id)
       );
 
       $dropdown.empty();
 
-      if (q || filtered.length) {
+      if (filtered.length) {
         filtered.forEach(o => {
-          $dropdown.append(`<li><a class="dropdown-item" href="javascript:void(0);">${o.name}</a></li>`);
+          const item = $('<li><a class="dropdown-item" href="javascript:void(0);"></a></li>');
+          item.find('a').text(o.name).attr('data-id', o.id);
+          $dropdown.append(item);
         });
-
-        // // Add custom option if it doesn't exist
-        // if (q && !filtered.some(f => f.name.toLowerCase() === q)) {
-        //   const addLabel = LANG === 'en' ? '+ Add:' : '+ إضافة:';
-        //   $dropdown.append(`<li><a class="dropdown-item text-primary border-top" href="javascript:void(0);"><strong>${addLabel}</strong> ${q}</a></li>`);
-        // }
-
         $dropdown.addClass('show');
       } else {
         $dropdown.removeClass('show');
       }
     });
 
-    // Event: Select from dropdown
     $dropdown.on('click', '.dropdown-item', function(e) {
       e.preventDefault();
-
-      const val = $(this).text().trim();
-
-      // Only allow valid options
-      const exists = ALL_OPTIONS.some(o => o.name.toLowerCase() === val.toLowerCase());
-
-      if (exists) {
-        addTag(val);
+      const id = $(this).data('id');
+      if (id) {
+        addTagById(id);
       }
     });
 
-    // Event: Close dropdown when clicking outside
     $(document).on('mousedown', function(e) {
       if (!$(e.target).closest('#expertiseWidget').length) {
         $dropdown.removeClass('show');
       }
     });
 
-    // Form Submit Validation
     $form.on('submit', function (e) {
       e.preventDefault();
-      if (selectedTags.length === 0) {  
-        $error.removeClass('d-none');
-        $widget.addClass('border-2 border-danger');
+
+      if (selectedIds.length === 0) {
+        showError(MSG_REQUIRED);
         $input.focus();
         return;
       }
@@ -205,8 +205,7 @@
           .html('<span class="spinner-border spinner-border-sm me-1"></span> ' + (LANG === 'en' ? 'Saving...' : 'جاري الحفظ...'));
 
       const formData = new FormData($form[0]);
-
-      formData.set('expertise_tags', JSON.stringify(selectedTags));
+      formData.set('expertise_tags', JSON.stringify(selectedIds));
 
       $.ajax({
         url: $form.attr('action'),
@@ -218,10 +217,12 @@
           'X-Requested-With': 'XMLHttpRequest'
         },
         success: function(response) {
-          toaster.success(response.message || "{{ __('admin.support_and_mentorship_success') }}");
+          hideError();
+          if (typeof toastr !== 'undefined' && toastr.success) {
+            toastr.success((response && response.message) || MSG_SUCCESS);
+          }
         },
         error: function(xhr) {
-          console.error('Error:', xhr);
           let errorMessage = '';
           if (xhr.responseJSON && xhr.responseJSON.message) {
             errorMessage = xhr.responseJSON.message;
@@ -229,11 +230,13 @@
             const errors = Object.values(xhr.responseJSON.errors).flat();
             errorMessage = errors.join(', ');
           }
-          
-          toastr.error(errorMessage || "{{ 'admin.unexpected_error' }}");
+          showError(errorMessage || MSG_REQUIRED);
+          if (typeof toastr !== 'undefined' && toastr.error) {
+            toastr.error(errorMessage || MSG_REQUIRED);
+          }
         },
         complete: function() {
-          $btn.prop('disabled', false).html("{{ __('admin.Save') }}");
+          $btn.prop('disabled', false).html(@json(__('admin.Save')));
         }
       });
     });

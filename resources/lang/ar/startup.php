@@ -385,7 +385,7 @@ return [
   'other_op_expenses' => 'مصاريف تشغيلية أخرى',
   'ebitda' => 'EBITDA (الربح قبل الفوائد والضرائب والإهلاك والإطفاء)',
   'depreciation_and_amortization' => 'الإهلاك والإطفاء',
-  'ebit' => 'EBIT (الربح قبل الفوائد والضرائب)',
+  'ebit' => 'EBIT (الدخل التشغيلي)',
   'interest' => 'الفوائد',
   'taxes' => 'الضرائب',
   'net_profit' => 'صافي الربح',
@@ -558,11 +558,13 @@ return [
   'support_and_mentorship' => 'الدعم الإرشاد',
   'support_mentorship_title' => 'متطلبات الدعم الإرشاد',
   'support_mentorship_subtitle' => 'ابحث واختر مجالاً أو أكثر من مجالات الخبرة النشطة.',
+  'support_and_mentorship_subtitle' => 'ابحث واختر مجالاً أو أكثر من مجالات الخبرة النشطة.',
   'support_and_mentorship_label' => 'مجالات الخبرة المطلوبة للدعم',
   'support_and_mentorship_validation' => 'يرجى اختيار مجال واحد على الأقل من مجالات الخبرة.',
   'support_and_mentorship_success' => 'تم حفظ متطلبات الدعم والارشاد بنجاح',
 
   'mvp_prototype_link' => 'رابط المبدئ الأول / نموذج أولي',
+  'mvp_prototype_link_invalid_url' => 'يرجى إدخال رابط صحيح.',
   'view_prototype' => 'عرض النموذج',
 
   'additional_info' => 'معلومات اضافية',
@@ -618,4 +620,12 @@ return [
 	'hackathon' => 'هاكثون',
 
   'mark_alumni_confirmation_bulk' => 'هذا الإجراء لا يمكن التراجع عنه. سيتم تخرج الشركات الناشئة المحددة وسيتم حفظ لقطة من معلوماتها وسجل مشاركاتها بشكل دائم.',
+
+  // Registration & Offering Details (GV-2063)
+  'registration_offering_details_title'      => 'تفاصيل التسجيل ونوع التقديم',
+  'registration_offering_details_subtitle'   => 'هيكل الشركة ونموذج الأعمال',
+  'no_registration_offering_details_added_yet' => 'لم تتم إضافة تفاصيل التسجيل ونوع التقديم بعد.',
+  'registration_type'                        => 'نوع التسجيل',
+  'offering_type'                            => 'نوع التقديم',
+  'products_services_description'            => 'وصف المنتجات / الخدمات',
 ];

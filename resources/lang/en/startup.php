@@ -384,7 +384,7 @@ return [
   'other_op_expenses' => 'Other Op. Expenses',
   'ebitda' => 'EBITDA',
   'depreciation_and_amortization' => 'Depreciation & Amortization',
-  'ebit' => 'EBIT ( Operating Income )',
+  'ebit' => 'EBIT (Operating Income)',
   'interest' => 'Interest',
   'taxes' => 'Taxes',
   'net_profit' => 'Net Profit',
@@ -554,14 +554,16 @@ return [
 	'change_valuation_date_warning' => 'Are you sure you want to change the valuation date?',
   'You cannot add this startup to alumni because it has no country' => 'You cannot add this startup to alumni because it has no country',
 
-  'support_and_mentorship" => "Support & Mentorship',
+  'support_and_mentorship' => 'Support & Mentorship',
   'support_mentorship_title' => 'Support & Mentorship Needs',
+  'support_mentorship_subtitle' => 'Search and choose one or more active areas of expertise.',
   'support_and_mentorship_subtitle' => 'Search and choose one or more active areas of expertise.',
   'support_and_mentorship_label' => 'Required support areas of expertise',
   'support_and_mentorship_validation' => 'Please select at least one support area of expertise.',
   'support_and_mentorship_success' => 'Support & Mentorship needs saved successfully.',
   
   'mvp_prototype_link' => 'MVP / Prototype Link',
+  'mvp_prototype_link_invalid_url' => 'Enter a valid URL.',
   'view_prototype' => 'View Prototype',
 
   'additional_info' => 'Additional Info',
@@ -617,4 +619,12 @@ return [
 	'hackathon' => 'Hackathon',
   
   'mark_alumni_confirmation_bulk' => 'This action is irreversible. The selected startups will be graduated, and a snapshot of their information and participation records will be saved permanently.',
+
+  // Registration & Offering Details (GV-2063)
+  'registration_offering_details_title'      => 'Registration & Offering Details',
+  'registration_offering_details_subtitle'   => 'Company structure and business model',
+  'no_registration_offering_details_added_yet' => 'No registration and offering details added yet.',
+  'registration_type'                        => 'Registration Type',
+  'offering_type'                            => 'Offering Type',
+  'products_services_description'            => 'Products / Services Description',
 ];

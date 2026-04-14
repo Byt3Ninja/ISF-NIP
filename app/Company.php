@@ -82,6 +82,8 @@ class Company extends Model
         'institutions',
         'development_stage',
         'revenue_generating',
+        'generate_revenue',
+        'average_annual_revenues',
         'currently_fundraising',
         'desired_funding_amount',
         'business_model',
@@ -89,6 +91,7 @@ class Company extends Model
         'pitch_deck',
         'financial_plan',
         'business_model_description',
+        'mvp_prototype_link',
         'business_plan_description',
         'country_code',
         'pitch_deck_description',
@@ -106,13 +109,27 @@ class Company extends Model
         'Country_Register_id',
         'targeted_market',
         'industries',
-        'technologies_used'
+        'technologies_used',
+        'previous_incubation',
+        'previous_incubator',
+        'company_registration_type',
+        'products_services_description',
+        'achievements',
+        'mission',
+        'why_this_startup',
+        'startup_expertise',
+        'total_employees',
+        'male_employees',
+        'female_employees',
     ];
 
 
     protected $casts = [
         'business_categories' => 'array',
         'product_photo' => 'array',
+        'total_employees' => 'integer',
+        'male_employees' => 'integer',
+        'female_employees' => 'integer',
     ];
     public static function logo_handler( $img )
     {
@@ -407,5 +424,15 @@ class Company extends Model
     public function companyRelations()
     {
         return $this->hasMany(CompanyRelation::class, 'company_id', 'id');
+    }
+
+    public function expertises()
+    {
+        return $this->belongsToMany(
+            \App\Expertise::class,
+            'company_expertise',
+            'company_id',
+            'expertise_id'
+        )->withTimestamps();
     }
 }

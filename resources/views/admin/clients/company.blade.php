@@ -39,9 +39,8 @@
 @php
   $name = 'name_' . $l;
 
-  // Check if there're some expertises are active
-  $hasActiveExpertises = true;
-  $showSupportTab = $hasActiveExpertises;
+  // Show the Support & Mentorship tab only when active Areas of Expertise exist.
+  $showSupportTab = isset($hasAreasOfExpertise) ? (bool) $hasAreasOfExpertise : false;
 
   $tabs = collect([
       ['company-info', 'ti-building-skyscraper', $l == 'en' ? 'Startup Info' : 'معلومات الشركة'],

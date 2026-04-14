@@ -120,7 +120,9 @@
               value="{{ $client->company ? $client->company->average_annual_revenues : old('average_annual_revenues') }}"
               name="average_annual_revenues"
               min="0"
-              oninput="this.value = this.value.slice(0, 12)"
+              step="1"
+              inputmode="numeric"
+              oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12)"
               autocomplete="average_annual_revenues"
             >
           </div>
@@ -225,7 +227,15 @@
 
           <div class="col-12 mb-3">
             <label for="financial_plan" class="form-label fw-medium">{{ __('admin.Financial plan attachment') }}</label>
-            <input id="financial_plan" class="form-control" type="file" name="financial_plan">
+            <input
+              id="financial_plan"
+              class="form-control @error('financial_plan') is-invalid @enderror"
+              type="file"
+              name="financial_plan"
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
+            @error('financial_plan')
+              <div class="invalid-feedback d-block">{{ $message }}</div>
+            @enderror
           </div>
 
           @if(optional($client->company)->financial_plan != null)

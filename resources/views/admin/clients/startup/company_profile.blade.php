@@ -200,10 +200,9 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
             {{ __('admin.Contact') }} <i class="ti ti-message ms-2"></i>
           </button>
         @endif
-        <!-- Replace href with mvp_prototype_link (remove after integration)  -->
-        <!-- Prototype Link -->
-        @if (isset($company->mvp_prototype_link))
-        <a href="https://www.google.com" class="btn btn-primary shadow-sm border">
+        @php $mvpLink = trim((string) ($company->mvp_prototype_link ?? '')); @endphp
+        @if ($mvpLink !== '')
+        <a href="{{ $mvpLink }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary shadow-sm border">
           {{ __('startup.view_prototype') }} <i class="ti ti-eye ms-2"></i>
         </a>
         @endif
@@ -247,48 +246,15 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
         @include('admin.clients.startup.partials._startup_milestones')
       </section>
 
-      @php
-      $total_employees = 30;
-      $male_employees = 20;
-      $female_employees = 10;
-      $male_pct = $total_employees > 0 ? round(($male_employees / $total_employees) * 100) : 0;
-      $female_pct = $total_employees > 0 ? round(($female_employees / $total_employees) * 100) : 0;
-      
-      $employeesKpis = [
-        [
-          'title' => __('startup.total_employees'),
-          'value' => $total_employees,
-          'icon' => 'ti-users-group',
-          'color' => 'success',
-          'type' => 'split',
-        ],
-        [
-          'title' => __('startup.male_employees'),
-          'value' => $male_employees,
-          'icon' => 'ti-gender-male',
-          'color' => 'primary',
-          'type' => 'pct',
-          'pct' => $male_pct,
-        ],
-        [
-          'title' => __('startup.female_employees'),
-          'value' => $female_employees,
-          'icon' => 'ti-gender-female',
-          'color' => 'info',
-          'type' => 'pct',
-          'pct' => $female_pct,
-        ],
-      ];
-      @endphp
-      
       <!-- Team Section -->
       <section class="tab-pane fade" id="team" role="tabpanel" aria-labelledby="team-tab">
+        <h5 class="mb-4">{{ __('startup.employees_statistics') }}</h5>
         <div class="row g-6 mb-6">
           @foreach ($employeesKpis as $kpi)
             <div class="col-md-4">
               <div class="card h-100 card-border-shadow-{{ $kpi['color'] }}">
                 <div class="card-body">
-            
+
                   {{-- Header: icon + value --}}
                   <div class="d-flex align-items-center mb-2">
                     <div class="avatar me-4">
@@ -298,35 +264,55 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
                     </div>
                     <h4 class="mb-0">{{ $kpi['value'] }}</h4>
                   </div>
-            
+
                   {{-- Label --}}
                   <p class="mb-1">{{ $kpi['title'] }}</p>
-            
+
                   {{-- Sub-row: split (total) or percentage (male/female) --}}
                   @if ($kpi['type'] === 'split')
-                  <div class="d-flex align-items-center gap-2 mb-2">
-                    <span class="badge bg-label-primary">
-                      <i class="ti ti-gender-male me-1"></i>{{ $male_employees }}M
-                    </span>
-                    <span class="badge bg-label-info">
-                      <i class="ti ti-gender-female me-1"></i>{{ $female_employees }}F
-                    </span>
-                    <small class="text-muted">{{ $male_pct }}% / {{ $female_pct }}%</small>
-                  </div>
-                  <div class="progress" style="height: 5px;">
-                    <div class="progress-bar bg-primary" style="width: {{ $male_pct }}%"></div>
-                    <div class="progress-bar bg-info" style="width: {{ $female_pct }}%"></div>
-                  </div>
+                    @if ($kpi['show_bar'])
+                      <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                        @if ($kpi['has_male'])
+                          <span class="badge bg-label-primary">
+                            <i class="ti ti-gender-male me-1"></i>{{ $kpi['male_value'] }}M
+                          </span>
+                        @endif
+                        @if ($kpi['has_female'])
+                          <span class="badge bg-label-info">
+                            <i class="ti ti-gender-female me-1"></i>{{ $kpi['female_value'] }}F
+                          </span>
+                        @endif
+                        <small class="text-muted">
+                          @if ($kpi['has_male'] && $kpi['has_female'])
+                            {{ $kpi['male_pct'] }}% / {{ $kpi['female_pct'] }}%
+                          @elseif ($kpi['has_male'])
+                            {{ $kpi['male_pct'] }}%
+                          @else
+                            {{ $kpi['female_pct'] }}%
+                          @endif
+                        </small>
+                      </div>
+                      <div class="progress" style="height: 5px;">
+                        @if ($kpi['has_male'])
+                          <div class="progress-bar bg-primary" style="width: {{ $kpi['male_pct'] }}%"></div>
+                        @endif
+                        @if ($kpi['has_female'])
+                          <div class="progress-bar bg-info" style="width: {{ $kpi['female_pct'] }}%"></div>
+                        @endif
+                      </div>
+                    @endif
                   @else
-                  <p class="mb-2">
-                    <span class="badge bg-label-{{ $kpi['color'] }}">{{ $kpi['pct'] }}%</span>
-                    <small class="text-muted ms-1">{{ __('startup.of_total') }}</small>
-                  </p>
-                  <div class="progress" style="height: 3px;">
-                    <div class="progress-bar bg-{{ $kpi['color'] }}" style="width: {{ $kpi['pct'] }}%"></div>
-                  </div>
+                    @if (!$kpi['na'])
+                      <p class="mb-2">
+                        <span class="badge bg-label-{{ $kpi['color'] }}">{{ $kpi['pct'] }}%</span>
+                        <small class="text-muted ms-1">{{ __('startup.of_total') }}</small>
+                      </p>
+                      <div class="progress" style="height: 3px;">
+                        <div class="progress-bar bg-{{ $kpi['color'] }}" style="width: {{ $kpi['pct'] }}%"></div>
+                      </div>
+                    @endif
                   @endif
-            
+
                 </div>
               </div>
             </div>

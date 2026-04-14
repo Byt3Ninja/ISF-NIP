@@ -60,19 +60,19 @@
         </div>
         
         <div class="col-12 mb-4">
-          <label for="business_model_description" class="form-label">
+          <label for="mvp_prototype_link" class="form-label">
             {{ __('startup.mvp_prototype_link')}}
           </label>
           <div class="position-relative">
-            <input 
-              type="url" 
-              name="mvp_prototype_link" 
-              class="form-control" 
+            <input
+              type="url"
+              name="mvp_prototype_link"
+              class="form-control"
               id="mvp_prototype_link"
-              placeholder="{{ __('startup.mvp_prototype_link') }}" 
+              placeholder="{{ __('startup.mvp_prototype_link') }}"
               value="{{ $client->company ? $client->company->mvp_prototype_link : old('mvp_prototype_link') }}"
-              autocomplete="mvp_prototype_link" value="{{ $client->company ? $client->company->mvp_prototype_link : old('mvp_prototype_link') }}"
-              required
+              autocomplete="mvp_prototype_link"
+              maxlength="500"
             >
           </div>
         </div>
