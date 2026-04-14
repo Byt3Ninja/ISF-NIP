@@ -682,6 +682,53 @@ in order:
 
 ## Changelog
 
+### 2026-04-14 — Email & Number display in form view across roles (GV-2280, GV-2281, GV-2282)
+
+**Confirmation pass — no code changes required.** This ticket family
+asks that Email and Number questions render correctly in the form view
+for Super Admin / Tenant Admin, Sub-Admin, and Organization Manager,
+with the required indicator shown only on required questions. The
+rendering pipeline was already delivered by the GV-2273 overhaul on
+2026-04-13. Verified against the acceptance criteria:
+
+- **Email renders as an email input.** The `@case('email')` branch in
+  `resources/views/admin/settings/formbuilder/form.blade.php` emits
+  `<input type="email" … data-qtype="email">`, so the browser treats
+  the field as an email input and triggers the matching validators on
+  the client (`emailAddress`) and the server (`email` rule) with the
+  localized messages delivered by GV-2273.
+- **Number renders as a number input.** The `@case('number')` branch
+  emits `<input type="number" inputmode="decimal" …
+  data-qtype="number">`, again with the matching `callback_numeric`
+  validator on the client and `numeric` rule on the server.
+- **Required indicator is shared across all question types.** It is
+  rendered once per question via:
+  ```blade
+  @if($question['is_required'])
+    <span class="text-danger ms-1">*</span>
+  @endif
+  ```
+  and a secondary helper line
+  `{{ $question['is_required'] ? 'Required field' : 'Optional field' }}`.
+  Because these blocks live *outside* the per-type `@switch`, they
+  apply uniformly to Email, Number, and every other question type —
+  so a required Email or Number question shows the asterisk plus
+  "Required field", and an optional one shows neither.
+- **HTML `required` attribute** is also wired per case
+  (`{{ $question['is_required'] ? 'required' : '' }}`) on both the
+  email and number inputs, so the browser's native validation
+  participates too.
+- **Role access** is covered by `forms.render_view`, which
+  `database/dbFiles/rolesWithDefaultPermissions.json` already grants
+  to `admin`, `organizationmanager`, and `subadmin` by default.
+
+QA can close GV-2280 through GV-2282 against the existing GV-2273
+implementation — no further code changes are required. Regression
+test: build a form with one required Email, one optional Email, one
+required Number, and one optional Number; open the rendered form and
+confirm the asterisk and "Required field" text appear only on the
+required pair.
+
 ### 2026-04-14 — Email & Number question types across roles (GV-2274, GV-2275, GV-2276, GV-2277, GV-2278, GV-2279)
 
 **Confirmation pass — no code changes required.** This family of tickets
