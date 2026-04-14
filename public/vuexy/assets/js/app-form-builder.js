@@ -881,14 +881,19 @@ function saveForm() {
         releaseFailureAlert({ message: data?.message || t.error_saving_form });
         return;
       }
-      releaseSuccessAlert({ message: t.form_saved_successfully });
+      const wasUpdated = data.action === 'updated';
+      releaseSuccessAlert({
+        message: wasUpdated ? t.form_updated_successfully : t.form_saved_successfully
+      });
+      // Reload the builder for the same form so the edited values
+      // survive a refresh and the form remains accessible for further
+      // edits. Previously edit-mode saves navigated to show-form, which
+      // broke the "stays accessible after saving" expectation.
       setTimeout(() => {
-        if (data.id) {
-          window.location.href = FB_CONFIG.mode === 'EDIT'
-            ? `/dashboard/show-form/${data.id}`
-            : `/dashboard/show-builder/${data.id}${data.organization_id ? '?org_id=' + data.organization_id : ''}`;
-        }
-      }, 2000);
+        if (!data.id) return;
+        const orgParam = data.organization_id ? '?org_id=' + data.organization_id : '';
+        window.location.href = `/dashboard/show-builder/${data.id}${orgParam}`;
+      }, 1500);
     })
     .catch(() => releaseFailureAlert({ message: t.error_saving_form }));
 }

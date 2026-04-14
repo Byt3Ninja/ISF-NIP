@@ -78,6 +78,12 @@
 
         <div class="card-body p-4 p-lg-5">
           @if($form && $form['build_data'] && count($form['build_data']) > 0)
+            @if($errors->has('upload'))
+              <div class="alert alert-danger border border-danger rounded-3 mb-0">
+                <i class="ti ti-alert-triangle me-2"></i>{{ $errors->first('upload') }}
+              </div>
+            @endif
+
             <form id="applicationPreviewForm" action="{{ route('forms.submissions_create') }}" method="POST" enctype="multipart/form-data" class="d-flex flex-column gap-4" novalidate>
               @csrf
               <input type="hidden" name="builder_form_id" value="{{ $id }}" />
@@ -163,6 +169,7 @@
                                         id="{{ $fieldId }}"
                                         name="{{ $fieldName }}"
                                         class="form-select question-logic @error($fieldName) is-invalid @enderror"
+                                        data-qtype="dropdown"
                                         {{ $question['is_required'] ? 'required' : '' }}
                                       >
                                         <option value="">{{ $question['label'] }}</option>
@@ -186,6 +193,7 @@
                                       rows="4"
                                       class="form-control @error($fieldName) is-invalid @enderror"
                                       placeholder="{{ $question['label'] }}"
+                                      data-qtype="paragraph"
                                       {{ $question['is_required'] ? 'required' : '' }}
                                     >{{ old($fieldName) }}</textarea>
                                     @break
@@ -201,6 +209,7 @@
                                             id="{{ $fieldId }}_{{ $optionIndex }}"
                                             value="{{ $option }}"
                                             data-logic="{{ $question['logic'][$option] ?? 'continue' }}"
+                                            data-qtype="multiple_choice"
                                             {{ old($fieldName) == $option ? 'checked' : '' }}
                                             {{ $question['is_required'] ? 'required' : '' }}
                                           />
@@ -223,6 +232,7 @@
                                             id="{{ $fieldId }}_{{ $optionIndex }}"
                                             value="{{ $option }}"
                                             data-logic="{{ $question['logic'][$option] ?? 'continue' }}"
+                                            data-qtype="checkboxes"
                                             {{ in_array($option, is_array($checkboxOld) ? $checkboxOld : [], true) ? 'checked' : '' }}
                                             {{ $question['is_required'] ? 'required' : '' }}
                                           />
@@ -271,6 +281,7 @@
                                         name="{{ $fieldName }}"
                                         value="{{ old($fieldName) }}"
                                         placeholder="{{ $question['label'] }}"
+                                        data-qtype="date"
                                         {{ $question['is_required'] ? 'required' : '' }}
                                       />
                                     </div>
@@ -288,6 +299,7 @@
                                         name="{{ $fieldName }}"
                                         value="{{ old($fieldName) }}"
                                         placeholder="{{ $question['label'] }}"
+                                        data-qtype="time"
                                         {{ $question['is_required'] ? 'required' : '' }}
                                       />
                                     </div>
@@ -299,9 +311,70 @@
                                       class="form-control @error($fieldName) is-invalid @enderror"
                                       id="{{ $fieldId }}"
                                       name="{{ $fieldName }}"
+                                      data-qtype="file"
+                                      accept=".doc,.docx,.xls,.xlsx,.ppt,.pptx,.pdf,.jpg,.jpeg,.png,.webp,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/pdf,image/jpeg,image/png,image/webp"
                                       {{ $question['is_required'] ? 'required' : '' }}
                                     />
-                                    <div class="form-text mt-2">Accepted file is attached as part of the application package.</div>
+                                    <div class="form-text mt-2">
+                                      {{ $l == 'ar'
+                                        ? 'الحد الأقصى 10 ميجابايت. الأنواع المسموح بها: Word, Excel, PowerPoint, PDF, JPG, JPEG, PNG, WEBP.'
+                                        : 'Max 10 MB. Allowed types: Word, Excel, PowerPoint, PDF, JPG, JPEG, PNG, WEBP.' }}
+                                    </div>
+                                    @break
+
+                                  @case('number')
+                                    <div class="input-group">
+                                      <span class="input-group-text bg-label-primary border-end-0">
+                                        <i class="{{ $meta['icon'] }}"></i>
+                                      </span>
+                                      <input
+                                        type="number"
+                                        inputmode="decimal"
+                                        class="form-control @error($fieldName) is-invalid @enderror"
+                                        id="{{ $fieldId }}"
+                                        name="{{ $fieldName }}"
+                                        value="{{ old($fieldName) }}"
+                                        placeholder="{{ $question['label'] }}"
+                                        data-qtype="number"
+                                        {{ $question['is_required'] ? 'required' : '' }}
+                                      />
+                                    </div>
+                                    @break
+
+                                  @case('email')
+                                    <div class="input-group">
+                                      <span class="input-group-text bg-label-primary border-end-0">
+                                        <i class="{{ $meta['icon'] }}"></i>
+                                      </span>
+                                      <input
+                                        type="email"
+                                        class="form-control @error($fieldName) is-invalid @enderror"
+                                        id="{{ $fieldId }}"
+                                        name="{{ $fieldName }}"
+                                        value="{{ old($fieldName) }}"
+                                        placeholder="{{ $question['label'] }}"
+                                        data-qtype="email"
+                                        {{ $question['is_required'] ? 'required' : '' }}
+                                      />
+                                    </div>
+                                    @break
+
+                                  @case('url')
+                                    <div class="input-group">
+                                      <span class="input-group-text bg-label-primary border-end-0">
+                                        <i class="{{ $meta['icon'] }}"></i>
+                                      </span>
+                                      <input
+                                        type="url"
+                                        class="form-control @error($fieldName) is-invalid @enderror"
+                                        id="{{ $fieldId }}"
+                                        name="{{ $fieldName }}"
+                                        value="{{ old($fieldName) }}"
+                                        placeholder="{{ $question['label'] }}"
+                                        data-qtype="url"
+                                        {{ $question['is_required'] ? 'required' : '' }}
+                                      />
+                                    </div>
                                     @break
 
                                   @case('short_answer')
@@ -317,6 +390,7 @@
                                         name="{{ $fieldName }}"
                                         value="{{ old($fieldName) }}"
                                         placeholder="{{ $question['label'] }}"
+                                        data-qtype="short_answer"
                                         {{ $question['is_required'] ? 'required' : '' }}
                                       />
                                     </div>
@@ -397,16 +471,33 @@
       en: {
         required: 'This field is required.',
         email: 'Please enter a valid email address.',
-        phone: 'Please enter a valid phone number.',
+        numeric: 'Please enter numbers only.',
+        time: 'Please enter a valid time.',
         url: 'Please enter a valid URL starting with http:// or https://.',
+        file_size: 'File size must not exceed 10 MB.',
+        file_type: 'Supported file types are Word, Excel, PowerPoint, PDF, JPG, JPEG, PNG, and WEBP.',
+        confirm_submit_title: 'Submit application?',
+        confirm_submit_message: 'Once you submit, uploaded files cannot be recovered automatically if a server-side error occurs. You will need to re-attach them. Continue?',
+        confirm_yes: 'Yes, submit',
+        confirm_no: 'Cancel',
       },
       ar: {
         required: 'هذا الحقل مطلوب.',
-        email: 'يرجى إدخال عنوان بريد إلكتروني صالح.',
-        phone: 'يرجى إدخال رقم هاتف صالح.',
+        email: 'يرجى إدخال بريد إلكتروني صحيح.',
+        numeric: 'يرجى إدخال أرقام فقط.',
+        time: 'يرجى إدخال وقت صحيح.',
         url: 'يرجى إدخال رابط صالح يبدأ بـ http:// أو https://.',
+        file_size: 'يجب ألا يتجاوز حجم الملف 10 ميجابايت.',
+        file_type: 'أنواع الملفات المدعومة هي Word وExcel وPowerPoint وPDF وJPG وJPEG وPNG وWEBP.',
+        confirm_submit_title: 'إرسال النموذج؟',
+        confirm_submit_message: 'بمجرد الإرسال، لا يمكن استرجاع الملفات المرفوعة تلقائياً في حال حدوث خطأ من الخادم. ستحتاج إلى إعادة إرفاقها. هل تريد المتابعة؟',
+        confirm_yes: 'نعم، إرسال',
+        confirm_no: 'إلغاء',
       }
     };
+
+    const ALLOWED_FILE_EXTENSIONS = ['doc','docx','xls','xlsx','ppt','pptx','pdf','jpg','jpeg','png','webp'];
+    const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
     const t = translations[locale];
     const fields = {};
@@ -444,6 +535,8 @@
       };
     };
 
+    const timeRegex = /^([01]?\d|2[0-3]):[0-5]\d$/;
+
     form.querySelectorAll('input[name], select[name], textarea[name]').forEach(field => {
       if (field.disabled || processedNames.has(field.name) || field.type === 'hidden') {
         return;
@@ -451,35 +544,63 @@
 
       const label = getLabel(field);
       const validators = {};
-      const labelText = label.toLowerCase();
+      const qtype = field.dataset.qtype || '';
       const isRequired = field.required || field.getAttribute('aria-required') === 'true';
 
       if (isRequired) {
         addRequiredValidator(validators, field, label);
       }
 
-      if (labelText.includes('email')) {
-        validators.emailAddress = {
-          message: t.email
-        };
+      if (qtype === 'email') {
+        validators.emailAddress = { message: t.email };
       }
 
-      if (labelText.includes('phone')) {
-        validators.callback_phone = {
-          message: t.phone,
+      if (qtype === 'number' || qtype === 'linear_scale') {
+        validators.callback_numeric = {
+          message: t.numeric,
           callback: function () {
-            const value = field.value.trim();
-            return value === '' || /^[+]?[\d\s().-]{6,20}$/.test(value);
+            const value = (field.value || '').trim();
+            if (value === '') return true;
+            return !isNaN(value) && isFinite(value);
           }
         };
       }
 
-      if (labelText.includes('url') || labelText.includes('linkedin') || labelText.includes('portfolio') || labelText.includes('website')) {
+      if (qtype === 'time') {
+        validators.callback_time = {
+          message: t.time,
+          callback: function () {
+            const value = (field.value || '').trim();
+            return value === '' || timeRegex.test(value);
+          }
+        };
+      }
+
+      if (qtype === 'url') {
         validators.callback_url = {
           message: t.url,
           callback: function () {
-            const value = field.value.trim();
+            const value = (field.value || '').trim();
             return value === '' || /^(https?:\/\/).+/i.test(value);
+          }
+        };
+      }
+
+      if (qtype === 'file') {
+        validators.callback_file_type = {
+          message: t.file_type,
+          callback: function () {
+            if (!field.files || field.files.length === 0) return true;
+            const name = field.files[0].name || '';
+            const ext = name.split('.').pop().toLowerCase();
+            return ALLOWED_FILE_EXTENSIONS.indexOf(ext) !== -1;
+          }
+        };
+        validators.callback_file_size = {
+          message: t.file_size,
+          callback: function () {
+            if (!field.files || field.files.length === 0) return true;
+            return field.files[0].size <= MAX_FILE_SIZE_BYTES;
           }
         };
       }
@@ -495,19 +616,27 @@
       return;
     }
 
+    const hasFileField = form.querySelector('input[type="file"]') !== null;
+
+    const pluginConfig = {
+      trigger: new FormValidation.plugins.Trigger(),
+      bootstrap5: new FormValidation.plugins.Bootstrap5({
+        rowSelector: '.application-question-card',
+        eleInvalidClass: 'is-invalid',
+        eleValidClass: ''
+      }),
+      submitButton: new FormValidation.plugins.SubmitButton(),
+      autoFocus: new FormValidation.plugins.AutoFocus()
+    };
+    // Only auto-submit when there are no file fields. With file fields we
+    // intercept with a confirmation dialog below (all-or-nothing submission).
+    if (!hasFileField) {
+      pluginConfig.defaultSubmit = new FormValidation.plugins.DefaultSubmit();
+    }
+
     const fv = FormValidation.formValidation(form, {
       fields,
-      plugins: {
-        trigger: new FormValidation.plugins.Trigger(),
-        bootstrap5: new FormValidation.plugins.Bootstrap5({
-          rowSelector: '.application-question-card',
-          eleInvalidClass: 'is-invalid',
-          eleValidClass: ''
-        }),
-        submitButton: new FormValidation.plugins.SubmitButton(),
-        defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
-        autoFocus: new FormValidation.plugins.AutoFocus()
-      },
+      plugins: pluginConfig,
       init: instance => {
         instance.on('plugins.message.placed', function (e) {
           if (e.element.closest('.application-field-control')) {
@@ -549,6 +678,19 @@
         });
       });
     });
+
+    // All-or-nothing submit confirmation for forms containing file uploads.
+    // Files cannot be repopulated by `old()` after a failed submission, so we
+    // warn the user once upfront: either the submission completes fully, or
+    // they cancel and nothing is sent.
+    if (hasFileField) {
+      fv.on('core.form.valid', function () {
+        const ok = window.confirm(t.confirm_submit_title + '\n\n' + t.confirm_submit_message);
+        if (ok) {
+          HTMLFormElement.prototype.submit.call(form);
+        }
+      });
+    }
   });
 </script>
 

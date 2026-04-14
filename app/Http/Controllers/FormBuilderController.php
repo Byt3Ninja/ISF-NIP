@@ -310,27 +310,77 @@ class FormBuilderController extends Controller
         abort_if($validator->fails(), 422, "Data error");
 
         // generating validation rules based on dynamic field config data
+        $locale = app()->getLocale() === 'ar' ? 'ar' : 'en';
+        $messages_map = [
+            'en' => [
+                'required'  => 'This field is required.',
+                'email'     => 'Please enter a valid email address.',
+                'numeric'   => 'Please enter numbers only.',
+                'time'      => 'Please enter a valid time.',
+                'file_size' => 'File size must not exceed 10 MB.',
+                'file_type' => 'Supported file types are Word, Excel, PowerPoint, PDF, JPG, JPEG, PNG, and WEBP.',
+            ],
+            'ar' => [
+                'required'  => 'هذا الحقل مطلوب.',
+                'email'     => 'يرجى إدخال بريد إلكتروني صحيح.',
+                'numeric'   => 'يرجى إدخال أرقام فقط.',
+                'time'      => 'يرجى إدخال وقت صحيح.',
+                'file_size' => 'يجب ألا يتجاوز حجم الملف 10 ميجابايت.',
+                'file_type' => 'أنواع الملفات المدعومة هي Word وExcel وPowerPoint وPDF وJPG وJPEG وPNG وWEBP.',
+            ],
+        ];
+        $L = $messages_map[$locale];
+
+        // File upload policy (shared with client-side in form.blade.php).
+        $allowed_file_extensions = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'pdf', 'jpg', 'jpeg', 'png', 'webp'];
+        $max_file_size_kb = 10 * 1024; // 10 MB
+
         $field_map_ids = explode(",", $request->input('field_ids'));
-        $field_required_rules = collect($field_map_ids)->mapWithKeys(function($id){
-        $field_options = BuilderField::findOrFail($id)->options;
-            if($field_options->validation->required == 1) {
-                $rules = ['required'];
-                if(isset($field_options->type) && $field_options->type == "email") $rules[] = 'email';
+        $rules_array = [];
+        $custom_messages = [];
 
-                return [
-                    'field_'. $id => implode("|", $rules)
-                ];
-            }
-            else {
-                return ['field_'. $id => 'nullable'];
-            }
-        });
+        foreach ($field_map_ids as $id) {
+            $field_options = BuilderField::findOrFail($id)->options;
+            $field_name = 'field_' . $id;
+            $type = $field_options->type ?? 'text';
+            $required = intval($field_options->validation->required ?? 0) === 1;
 
-        // validation based on dynamic data
-        $dynamic_validator = Validator::make($request->all(), $field_required_rules->toArray(), [
-            'required' => "field can't be left blank",
-            'email' => 'field must be a valid email address'
-        ]);
+            $rules = [];
+            $rules[] = $required ? 'required' : 'nullable';
+
+            switch ($type) {
+                case 'email':
+                    $rules[] = 'email';
+                    $custom_messages[$field_name . '.email'] = $L['email'];
+                    break;
+                case 'number':
+                case 'linear_scale':
+                    $rules[] = 'numeric';
+                    $custom_messages[$field_name . '.numeric'] = $L['numeric'];
+                    break;
+                case 'time':
+                    $rules[] = 'date_format:H:i';
+                    $custom_messages[$field_name . '.date_format'] = $L['time'];
+                    break;
+                case 'date':
+                    $rules[] = 'date';
+                    $custom_messages[$field_name . '.date'] = $L['time'];
+                    break;
+                case 'file':
+                    $rules[] = 'file';
+                    $rules[] = 'max:' . $max_file_size_kb;
+                    $rules[] = 'mimes:' . implode(',', $allowed_file_extensions);
+                    $custom_messages[$field_name . '.file']  = $L['file_type'];
+                    $custom_messages[$field_name . '.max']   = $L['file_size'];
+                    $custom_messages[$field_name . '.mimes'] = $L['file_type'];
+                    break;
+            }
+
+            $rules_array[$field_name] = implode('|', $rules);
+            $custom_messages[$field_name . '.required'] = $L['required'];
+        }
+
+        $dynamic_validator = Validator::make($request->all(), $rules_array, $custom_messages);
 
         if ($dynamic_validator->fails()) {
             return redirect()->back()
@@ -357,27 +407,42 @@ class FormBuilderController extends Controller
      */
     public function saveForm($id, Request $request)
     {
-        //  dd($request->all());
-
         $request->validate([
             'form_fields_data' => 'required|array',
             'form_fields_data.items' => 'required|array',
+            'form_fields_data.title' => 'required|string',
+            'form_fields_data.organization_id' => 'required|integer|exists:organizations,id',
         ]);
 
         $form_data = $request->form_fields_data;
 
-        
-        $form = BuilderForm::where('form_name', $form_data['title'])->where('organization_id', $form_data['organization_id'])->first();
-       
-        if ($form) {
-            $id = $form->id;
-        }else{
-        $form = new BuilderForm;
+        // Route parameter `{id}` is the authoritative form identifier.
+        // "0" / missing means "create new"; any other value means "update that
+        // specific form" (including renaming it). The old implementation
+        // looked the form up by (form_name, organization_id) which broke
+        // renames — a rename created a new form and orphaned the original,
+        // and a name collision silently rewrote the wrong form.
+        $is_edit = false;
+        $form = null;
+
+        if ($id && (int) $id > 0) {
+            $form = BuilderForm::find($id);
+            if ($form) {
+                $is_edit = true;
+                $form->form_name = $form_data['title'];
+                $form->organization_id = $form_data['organization_id'];
+                $form->save();
+            }
+        }
+
+        if (!$is_edit) {
+            $form = new BuilderForm;
             $form->form_name = $form_data['title'];
             $form->organization_id = $form_data['organization_id'];
             $form->save();
-            $id = $form->id;
         }
+
+        $id = $form->id;
         
         $fields = Field::all()->mapWithKeys(function ($field) {
             return [$field->field_type => $field->id];
@@ -454,6 +519,35 @@ class FormBuilderController extends Controller
                         $additional_config = ['type' => 'time'];
                         break;
 
+                    case 'number':
+                        $field_id = $fields['number'] ?? $fields['input'] ?? 0;
+                        $numberConfig = $question['number_config'] ?? [];
+                        $additional_config = [
+                            'type' => 'number',
+                            'min'  => $numberConfig['min']  ?? '',
+                            'max'  => $numberConfig['max']  ?? '',
+                            'step' => $numberConfig['step'] ?? '',
+                        ];
+                        break;
+
+                    case 'email':
+                        $field_id = $fields['input'] ?? 0;
+                        $emailConfig = $question['email_config'] ?? [];
+                        $additional_config = [
+                            'type'    => 'email',
+                            'confirm' => !empty($emailConfig['confirm']),
+                        ];
+                        break;
+
+                    case 'url':
+                        $field_id = $fields['input'] ?? 0;
+                        $urlConfig = $question['url_config'] ?? [];
+                        $additional_config = [
+                            'type'            => 'url',
+                            'allowed_domains' => $urlConfig['allowed_domains'] ?? '',
+                        ];
+                        break;
+
                     case 'file':
                         $field_id = $fields['file'] ?? 0;
                         $additional_config = ['type' => 'file'];
@@ -484,6 +578,7 @@ class FormBuilderController extends Controller
         });
 
         $save_success = true;
+        $error_message = null;
 
         try {
             DB::transaction(function () use ($config, $id) {
@@ -496,14 +591,18 @@ class FormBuilderController extends Controller
                     ]);
                 });
             });
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $save_success = false;
+            $error_message = $e->getMessage();
+            report($e);
         }
-        
+
         return response()->json([
-            'success' => $save_success,
-            'id' => $id,
+            'success'         => $save_success,
+            'id'              => $id,
             'organization_id' => $form_data['organization_id'],
+            'action'          => $is_edit ? 'updated' : 'created',
+            'message'         => $error_message,
         ]);
 
     }

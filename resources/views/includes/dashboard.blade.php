@@ -405,11 +405,28 @@
 												<td>
 													@if( $step->stype == 1 || $step->stype == 5 )
 													@if( $step->status_flag == 'ongoing' )
-														<a href="/dashboard/cycles/my/{{ $step->id }}" class="btn btn-sm btn-primary"
-															title="{{ __('admin.Submit') }}"> 
-															{{ __('admin.Submit') }} 
-															<i class="ti ti-send ms-2 ti-16px"></i>
-														</a>
+														@php
+															// GV-2134: show "View" instead of "Submit" on steps
+															// the founder has already submitted, so the CTA
+															// matches the page that actually opens.
+															$alreadySubmitted = \DB::table('form_data')
+																->where('user_id', auth()->id())
+																->where('step_id', $step->id)
+																->exists();
+														@endphp
+														@if($alreadySubmitted)
+															<a href="/dashboard/cycles/my/{{ $step->id }}" class="btn btn-sm btn-label-primary"
+																title="{{ __('admin.View') }}">
+																{{ __('admin.View') }}
+																<i class="ti ti-eye ms-2 ti-16px"></i>
+															</a>
+														@else
+															<a href="/dashboard/cycles/my/{{ $step->id }}" class="btn btn-sm btn-primary"
+																title="{{ __('admin.Submit') }}">
+																{{ __('admin.Submit') }}
+																<i class="ti ti-send ms-2 ti-16px"></i>
+															</a>
+														@endif
 													@endif
 													@endif
 													 @if($step->stype == 1 && isset($step->form) && $step->form)
