@@ -1,23 +1,9 @@
 @extends('layouts.admin')
 
-{{-- @php
-$cycles = [
-  ['id' => 1,  'title' => 'Cycle 1',  'completed' => 3,  'pending' => 2],
-  ['id' => 2,  'title' => 'Cycle 2',  'completed' => 5,  'pending' => 1],
-  ['id' => 3,  'title' => 'Cycle 3',  'completed' => 2,  'pending' => 4],
-  ['id' => 4,  'title' => 'Cycle 4',  'completed' => 7,  'pending' => 0],
-  ['id' => 5,  'title' => 'Cycle 5',  'completed' => 1,  'pending' => 6],
-  ['id' => 6,  'title' => 'Cycle 6',  'completed' => 4,  'pending' => 3],
-  ['id' => 7,  'title' => 'Cycle 7',  'completed' => 6,  'pending' => 2],
-  ['id' => 8,  'title' => 'Cycle 8',  'completed' => 0,  'pending' => 5],
-  ['id' => 9,  'title' => 'Cycle 9',  'completed' => 8,  'pending' => 1],
-  ['id' => 10, 'title' => 'Cycle 10', 'completed' => 2,  'pending' => 2],
-  ['id' => 11, 'title' => 'Cycle 11', 'completed' => 9,  'pending' => 0],
-  ['id' => 12, 'title' => 'Cycle 12', 'completed' => 3,  'pending' => 4],
-];
-@endphp --}}
-
 @section('content')
+
+@include('admin.tasks.partials.tasks-count-cards')
+
 <div class="card">
   <div class="card-header d-flex justify-content-between align-items-center border-bottom">
     <h5 class="card-title mb-0">{{ __('admin.tasks') }}</h5>
@@ -68,9 +54,9 @@ $cycles = [
             <td class="text-center">
               <a
                 href="{{ route('mentorshipTasks.index', ['cycle_id' => $cycle['id']]) }}"
-                class="btn btn-sm btn-primary"
+                class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill"
               >
-                <i class="ti ti-eye me-1"></i> {{ __('admin.view_tasks') }}
+                <i class="ti ti-eye ti-md"></i>
               </a>
             </td>
           </tr>
