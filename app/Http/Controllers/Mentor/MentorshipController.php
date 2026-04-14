@@ -170,13 +170,13 @@ class MentorshipController extends Controller
         // Calculate real stats
         $stats = [
             'total_tasks' => $tasks->count(),
-            'pending' => $tasks->where('status', 'pending')->count(),
-            'active' => [
-                'in_progress_count' => $tasks->where('status', 'progress')->count(),
-                'in_review_count' => $tasks->where('status', 'review')->count(),
+            'pending'     => $tasks->where('overallStatus', 'pending')->count(),
+            'active'      => [
+                'in_progress_count' => $tasks->where('overallStatus', 'progress')->count(),
+                'in_review_count'   => $tasks->where('overallStatus', 'review')->count(),
             ],
-            'completed' => $tasks->where('status', 'completed')->count(),
-            'archived' => $tasks->where('status', 'archived')->count(),
+            'completed' => $tasks->where('overallStatus', 'completed')->count(),
+            'archived'  => $tasks->where('overallStatus', 'archived')->count(),
         ];
 
         if (auth()->user() && auth()->user()->hasRole('Mentor')) {
