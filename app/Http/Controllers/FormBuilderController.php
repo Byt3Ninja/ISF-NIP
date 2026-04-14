@@ -131,7 +131,7 @@ class FormBuilderController extends Controller
 
         $fields = Field::all()->mapWithKeys(fn($field) => [$field->field_type => $field->id]);
 
-        $builder_fields = BuilderField::where('builder_form_id', $id)->orderBy('id', 'asc');
+        $builder_fields = BuilderField::where('builder_form_id', $id)->orderBy('sort_order', 'asc');
 
         if ($builder_fields->exists()) {
             $field_data = $builder_fields->get()->map(function ($field) use ($fields) {
@@ -234,7 +234,7 @@ class FormBuilderController extends Controller
 
         $fields = $the_form->fields()
             ->withPivot('options')
-            ->orderBy('builder_fields.id', 'asc')
+            ->orderBy('builder_fields.sort_order', 'asc')
             ->get();
 
         $structured = $fields->map(function ($field) {
@@ -585,9 +585,10 @@ class FormBuilderController extends Controller
                 $builderForm = BuilderForm::findOrFail($id);
                 $builderForm->fields()->detach();
 
-                $config->each(function ($item) use ($builderForm) {
+                $config->values()->each(function ($item, $index) use ($builderForm) {
                     $builderForm->fields()->attach($item['field'], [
-                        'options' => json_encode($item['options'])
+                        'options' => json_encode($item['options']),
+                        'sort_order' => $index + 1
                     ]);
                 });
             });
