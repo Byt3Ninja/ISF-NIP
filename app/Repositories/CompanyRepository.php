@@ -19,6 +19,15 @@ class CompanyRepository
         $nameField = $locale == 'ar' ? 'name_ar' : 'name_en';
 
         $query = Company::query()->with(['teamMembers', 'country', 'state', 'city', 'cycleRelation.organization', 'sectoR', 'stagE']);
+
+        // Only show companies linked to 'registered' users and exclude admins/managers
+        $query->whereHas('user', function ($q) {
+            $q->whereHas('roles', function ($rq) {
+                $rq->where('default_for', 'registered');
+            })->whereDoesntHave('roles', function ($rq) {
+                $rq->whereIn('default_for', ['admin', 'organizationmanager', 'subadmin']);
+            });
+        });
         $user = auth()->user();
 
         if ($user && !$user->hasRole('admin')) {
