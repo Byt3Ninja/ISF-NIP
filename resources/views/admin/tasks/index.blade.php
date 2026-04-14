@@ -183,7 +183,7 @@ $(function () {
       { data: 'creator' },
       { data: 'program' },
       { data: 'priority' },
-      { data: 'overallStatus' },
+      // { data: 'overallStatus' },
       { data: 'dueDate' },
       { data: 'id' },
       { data: 'createdAt' }
@@ -194,7 +194,7 @@ $(function () {
         responsivePriority: 2, render: () => ''
       },
       {
-        targets: 8, visible: false, searchable: false
+        targets: 7, visible: false, searchable: false
       },
       {
         targets: 1, responsivePriority: 4,
@@ -227,20 +227,20 @@ $(function () {
           return `<span class="badge ${p.class}">${p.title}</span>`;
         }
       },
+      // {
+      //   targets: 5,
+      //   render: (_, __, full) => {
+      //     const s = statusObj[full.overallStatus] || { class: 'bg-label-secondary', title: 'Unknown' };
+      //     return `<span class="badge ${s.class}">${s.title}</span>`;
+      //   }
+      // },
       {
         targets: 5,
-        render: (_, __, full) => {
-          const s = statusObj[full.overallStatus] || { class: 'bg-label-secondary', title: 'Unknown' };
-          return `<span class="badge ${s.class}">${s.title}</span>`;
-        }
-      },
-      {
-        targets: 6,
         render: (_, __, full) =>
           `<span class="text-heading">${full.dueDate !== 'N/A' ? moment(full.dueDate, 'YYYY-MM-DD').format('YYYY-MM-DD') : 'N/A'}</span>`
       },
       {
-        targets: 7, searchable: false, orderable: false,
+        targets: 6, searchable: false, orderable: false,
         render: () => `
           <div class="d-flex align-items-center">
             <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill task-view"><i class="ti ti-eye ti-md"></i></a>
@@ -250,7 +250,7 @@ $(function () {
           </div>`
       }
     ],
-    order: [[8, 'desc']],
+    order: [[7, 'desc']],
     dom: '<"row"<"col-12 col-lg-9 d-flex flex-wrap align-items-center ps-0 ps-lg-3"l><"col-12 col-lg-3 dt-action-buttons text-xl-end text-lg-start text-md-end text-start d-flex align-items-center justify-content-end flex-md-row flex-column mb-6 mb-md-0 pe-0 pe-lg-2"fB>>t<"row px-6"<"col-sm-12 col-lg-6"i><"col-sm-12 col-lg-6 d-flex justify-content-end"p>>',
     language: {
       url: document.dir === 'rtl'

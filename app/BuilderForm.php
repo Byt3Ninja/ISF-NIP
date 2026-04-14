@@ -14,7 +14,7 @@ class BuilderForm extends Model
 
     public function fields()
     {
-        return ( $this->belongsToMany('App\Field', 'builder_fields')->withPivot('id', 'options'));
+        return ( $this->belongsToMany('App\Field', 'builder_fields')->withPivot('id', 'options', 'sort_order'));
     }
 
     /**

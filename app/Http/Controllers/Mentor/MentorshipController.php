@@ -77,424 +77,110 @@ class MentorshipController extends Controller
             ];
         });
 
-        $tasks = [
-            [
-                'id' => 1,
-                'title' => 'Build Landing Page',
-                'description' => 'Design and develop the landing page for the startup pitch event.',
-                'program' => [
-                    'id' => 3,
-                    'title' => 'Spring Accelerator 2025',
-                ],
-                'assignees' => [
-                    [
-                        'id' => 101,
-                        'name' => 'TechNova',
-                        'status' => 'progress',
-                        'lastUpdated' => '2025-03-10',
-                        'logo' => 'logos/technova.png',
-                        'profile_url' => 'https://example.com/dashboard/companyProfile/101',
-                    ],
-                    [
-                        'id' => 102,
-                        'name' => 'GreenSpark',
-                        'status' => 'pending',
-                        'lastUpdated' => '2025-03-08',
-                        'logo' => null,
-                        'profile_url' => 'https://example.com/dashboard/companyProfile/102',
-                    ],
-                ],
-                'priority' => 'High',
-                'overallStatus' => 'progress',
-                'dueDate' => '2025-04-01',
-                'tags' => ['Design', 'Frontend'],
-                'attachments' => [
-                    [
-                        'id' => md5('tasks/attachments/wireframe_v1.pdf'),
-                        'name' => 'wireframe_v1.pdf',
-                        'url' => 'https://example.com/storage/tasks/attachments/wireframe_v1.pdf',
-                        'size' => 204800,
-                    ],
-                ],
-                'submissions' => [],
-                'creator' => [
-                    'id' => 5,
-                    'name' => 'Sara Ahmed',
-                    'role' => 'admin',
-                    'avatar' => 'https://example.com/storage/avatars/sara.jpg',
-                    'profile_url' => 'https://example.com/dashboard/users/5',
-                ],
-                'feedbacks' => [],
-                'activities' => [
-                    [
-                        'user' => 'Sara Ahmed',
-                        'user_id' => 5,
-                        'img_url' => 'https://example.com/storage/avatars/sara.jpg',
-                        'action' => 'created this task',
-                        'time' => '3 days ago',
-                    ],
-                    [
-                        'user' => 'Omar Khaled',
-                        'user_id' => 8,
-                        'img_url' => null,
-                        'action' => 'updated status from "pending" to "progress"',
-                        'time' => '1 day ago',
-                    ],
-                ],
-                'activities_count' => 2,
-                'feedbacks_count' => 0,
-                'createdAt' => 1741737600,
-            ],
-            [
-                'id' => 2,
-                'title' => 'Submit Financial Report',
-                'description' => 'Prepare and submit Q1 financial projections for review.',
-                'program' => [
-                    'id' => 3,
-                    'title' => 'Spring Accelerator 2025',
-                ],
-                'assignees' => [
-                    [
-                        'id' => 103,
-                        'name' => 'FinPath',
-                        'status' => 'completed',
-                        'lastUpdated' => '2025-03-15',
-                        'logo' => 'logos/finpath.png',
-                        'profile_url' => 'https://example.com/dashboard/companyProfile/103',
-                    ],
-                ],
-                'priority' => 'Medium',
-                'overallStatus' => 'review',
-                'dueDate' => '2025-03-20',
-                'tags' => ['Finance', 'Reporting'],
-                'attachments' => [],
-                'submissions' => [
-                    [
-                        'user' => 'Karim Mansour',
-                        'user_id' => 12,
-                        'img_url' => null,
-                        'status' => 'pending_review',
-                        'time' => '2 days ago',
-                        'note' => null,
-                        'files' => [
-                            [
-                                'name' => 'q1_report.xlsx',
-                                'url' => 'https://example.com/storage/tasks/attachments/q1_report.xlsx',
-                                'size_bytes' => 512000,
-                            ],
-                        ],
-                    ],
-                ],
-                'creator' => [
-                    'id' => 5,
-                    'name' => 'Sara Ahmed',
-                    'role' => 'admin',
-                    'avatar' => 'https://example.com/storage/avatars/sara.jpg',
-                    'profile_url' => 'https://example.com/dashboard/users/5',
-                ],
-                'feedbacks' => [
-                    [
-                        'id' => 1,
-                        'user' => 'Sara Ahmed',
-                        'user_id' => 5,
-                        'img_url' => 'https://example.com/storage/avatars/sara.jpg',
-                        'decision' => 'revision',
-                        'text' => 'Please include last year\'s comparison figures.',
-                        'time' => '2 days ago',
-                    ],
-                ],
-                'activities' => [
-                    [
-                        'user' => 'Sara Ahmed',
-                        'user_id' => 5,
-                        'img_url' => 'https://example.com/storage/avatars/sara.jpg',
-                        'action' => 'created this task',
-                        'time' => '5 days ago',
-                    ],
-                    [
-                        'user' => 'Karim Mansour',
-                        'user_id' => 12,
-                        'img_url' => null,
-                        'action' => 'added a comment',
-                        'time' => '3 days ago',
-                    ],
-                    [
-                        'user' => 'Sara Ahmed',
-                        'user_id' => 5,
-                        'img_url' => 'https://example.com/storage/avatars/sara.jpg',
-                        'action' => 'submitted feedback',
-                        'time' => '2 days ago',
-                    ],
-                ],
-                'activities_count' => 3,
-                'feedbacks_count' => 1,
-                'createdAt' => 1741564800,
-            ],
-            [
-                'id' => 3,
-                'title' => 'Pitch Deck Preparation',
-                'description' => 'Create a compelling 10-slide pitch deck for demo day.',
-                'program' => [
-                    'id' => 4,
-                    'title' => 'Winter Cohort 2024',
-                ],
-                'assignees' => [
-                    [
-                        'id' => 104,
-                        'name' => 'EduBridge',
-                        'status' => 'pending',
-                        'lastUpdated' => '2025-03-05',
-                        'logo' => null,
-                        'profile_url' => 'https://example.com/dashboard/companyProfile/104',
-                    ],
-                    [
-                        'id' => 105,
-                        'name' => 'AgroSmart',
-                        'status' => 'pending',
-                        'lastUpdated' => '2025-03-05',
-                        'logo' => 'logos/agrosmart.png',
-                        'profile_url' => 'https://example.com/dashboard/companyProfile/105',
-                    ],
-                ],
-                'priority' => 'High',
-                'overallStatus' => 'pending',
-                'dueDate' => '2025-04-10',
-                'tags' => ['Pitch', 'Presentation'],
-                'attachments' => [],
-                'submissions' => [],
-                'creator' => [
-                    'id' => 7,
-                    'name' => 'Lina Haddad',
-                    'role' => 'mentor',
-                    'avatar' => null,
-                    'profile_url' => 'https://example.com/dashboard/users/7',
-                ],
-                'feedbacks' => [],
-                'activities' => [
-                    [
-                        'user' => 'Lina Haddad',
-                        'user_id' => 7,
-                        'img_url' => null,
-                        'action' => 'created this task',
-                        'time' => '1 week ago',
-                    ],
-                ],
-                'activities_count' => 1,
-                'feedbacks_count' => 0,
-                'createdAt' => 1741132800,
-            ],
-            [
-                'id' => 4,
-                'title' => 'Market Research Survey',
-                'description' => 'Conduct a 50-response survey to validate product-market fit.',
-                'program' => [
-                    'id' => 4,
-                    'title' => 'Winter Cohort 2024',
-                ],
-                'assignees' => [
-                    [
-                        'id' => 106,
-                        'name' => 'MediLink',
-                        'status' => 'completed',
-                        'lastUpdated' => '2025-02-28',
-                        'logo' => 'logos/medilink.png',
-                        'profile_url' => 'https://example.com/dashboard/companyProfile/106',
-                    ],
-                ],
-                'priority' => 'Low',
-                'overallStatus' => 'completed',
-                'dueDate' => '2025-02-28',
-                'tags' => ['Research', 'Marketing'],
-                'attachments' => [
-                    [
-                        'id' => md5('tasks/attachments/survey_template.pdf'),
-                        'name' => 'survey_template.pdf',
-                        'url' => 'https://example.com/storage/tasks/attachments/survey_template.pdf',
-                        'size' => 102400,
-                    ],
-                ],
-                'submissions' => [
-                    [
-                        'user' => 'Nour El-Din',
-                        'user_id' => 15,
-                        'img_url' => null,
-                        'status' => 'pending_review',
-                        'time' => '6 days ago',
-                        'note' => null,
-                        'files' => [
-                            [
-                                'name' => 'survey_results.pdf',
-                                'url' => 'https://example.com/storage/tasks/attachments/survey_results.pdf',
-                                'size_bytes' => 307200,
-                            ],
-                        ],
-                    ],
-                    [
-                        'user' => 'Hana Youssef',
-                        'user_id' => 16,
-                        'img_url' => null,
-                        'status' => 'pending_review',
-                        'time' => '5 days ago',
-                        'note' => null,
-                        'files' => [
-                            [
-                                'name' => 'survey_analysis.xlsx',
-                                'url' => 'https://example.com/storage/tasks/attachments/survey_analysis.xlsx',
-                                'size_bytes' => 204800,
-                            ],
-                        ],
-                    ],
-                ],
-                'creator' => [
-                    'id' => 5,
-                    'name' => 'Sara Ahmed',
-                    'role' => 'admin',
-                    'avatar' => 'https://example.com/storage/avatars/sara.jpg',
-                    'profile_url' => 'https://example.com/dashboard/users/5',
-                ],
-                'feedbacks' => [
-                    [
-                        'id' => 2,
-                        'user' => 'Sara Ahmed',
-                        'user_id' => 5,
-                        'img_url' => 'https://example.com/storage/avatars/sara.jpg',
-                        'decision' => 'revision',
-                        'text' => 'Please expand on the demographic breakdown section.',
-                        'time' => '6 days ago',
-                    ],
-                    [
-                        'id' => 3,
-                        'user' => 'Sara Ahmed',
-                        'user_id' => 5,
-                        'img_url' => 'https://example.com/storage/avatars/sara.jpg',
-                        'decision' => 'pass',
-                        'text' => 'Great work! Survey data is thorough and well-presented.',
-                        'time' => '5 days ago',
-                    ],
-                ],
-                'activities' => [
-                    [
-                        'user' => 'Sara Ahmed',
-                        'user_id' => 5,
-                        'img_url' => 'https://example.com/storage/avatars/sara.jpg',
-                        'action' => 'created this task',
-                        'time' => '2 weeks ago',
-                    ],
-                    [
-                        'user' => 'Nour El-Din',
-                        'user_id' => 15,
-                        'img_url' => null,
-                        'action' => 'moved task from "pending" to "review"',
-                        'time' => '6 days ago',
-                    ],
-                    [
-                        'user' => 'Sara Ahmed',
-                        'user_id' => 5,
-                        'img_url' => 'https://example.com/storage/avatars/sara.jpg',
-                        'action' => 'submitted feedback',
-                        'time' => '6 days ago',
-                    ],
-                    [
-                        'user' => 'Hana Youssef',
-                        'user_id' => 16,
-                        'img_url' => null,
-                        'action' => 'added a comment',
-                        'time' => '5 days ago',
-                    ],
-                    [
-                        'user' => 'Sara Ahmed',
-                        'user_id' => 5,
-                        'img_url' => 'https://example.com/storage/avatars/sara.jpg',
-                        'action' => 'submitted feedback',
-                        'time' => '5 days ago',
-                    ],
-                    [
-                        'user' => 'Sara Ahmed',
-                        'user_id' => 5,
-                        'img_url' => 'https://example.com/storage/avatars/sara.jpg',
-                        'action' => 'updated status from "review" to "completed"',
-                        'time' => '5 days ago',
-                    ],
-                ],
-                'activities_count' => 6,
-                'feedbacks_count' => 2,
-                'createdAt' => 1740528000,
-            ],
-            [
-                'id' => 5,
-                'title' => 'Legal Documentation Review',
-                'description' => 'Review and sign the incorporation documents and IP assignment agreements.',
-                'program' => [
-                    'id' => 3,
-                    'title' => 'Spring Accelerator 2025',
-                ],
-                'assignees' => [
-                    [
-                        'id' => 107,
-                        'name' => 'LawTech',
-                        'status' => 'pending',
-                        'lastUpdated' => '2025-03-18',
-                        'logo' => null,
-                        'profile_url' => 'https://example.com/dashboard/companyProfile/107',
-                    ],
-                ],
-                'priority' => 'High',
-                'overallStatus' => 'archived',
-                'dueDate' => 'N/A',
-                'tags' => ['Legal'],
-                'attachments' => [],
-                'submissions' => [],
-                'creator' => [
-                    'id' => 7,
-                    'name' => 'Lina Haddad',
-                    'role' => 'mentor',
-                    'avatar' => null,
-                    'profile_url' => 'https://example.com/dashboard/users/7',
-                ],
-                'feedbacks' => [],
-                'activities' => [
-                    [
-                        'user' => 'Lina Haddad',
-                        'user_id' => 7,
-                        'img_url' => null,
-                        'action' => 'created this task',
-                        'time' => '3 weeks ago',
-                    ],
-                    [
-                        'user' => 'Omar Khaled',
-                        'user_id' => 8,
-                        'img_url' => null,
-                        'action' => 'moved task from "pending" to "archived"',
-                        'time' => '1 week ago',
-                    ],
-                ],
-                'activities_count' => 2,
-                'feedbacks_count' => 0,
-                'createdAt' => 1740182400,
-            ],
-        ];
+        $tasksData = ProgramTask::with(['program', 'assignees', 'creator', 'feedbacks.user', 'activities.user'])
+            ->where('created_by', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        $programs = [
-            (object)['id' => 3, 'title' => 'Spring Accelerator 2025'],
-            (object)['id' => 4, 'title' => 'Winter Cohort 2024'],
-            (object)['id' => 5, 'title' => 'Summer Bootcamp 2024'],
-        ];
+        $tasks = $tasksData->map(function ($task) {
+            return [
+                'id'          => $task->id,
+                'title'       => $task->title,
+                'description' => $task->description,
+                'program'     => [
+                    'id'    => $task->program_id,
+                    'title' => $task->program->title ?? 'N/A',
+                ],
+                'assignees' => $task->assignees->map(function ($assignee) {
+                    return [
+                        'id'          => $assignee->id,
+                        'name'        => $assignee->name ?? $assignee->name_en ?? 'N/A',
+                        'status'      => $assignee->pivot->status,
+                        'lastUpdated' => $assignee->pivot->last_updated
+                            ? (is_string($assignee->pivot->last_updated)
+                                ? $assignee->pivot->last_updated
+                                : $assignee->pivot->last_updated->format('Y-m-d'))
+                            : 'N/A',
+                        'logo'        => $assignee->logo ?? null,
+                        'profile_url' => url('/dashboard/companyProfile/' . $assignee->id),
+                    ];
+                })->toArray(),
+                'priority'      => $task->priority,
+                'overallStatus' => $task->status,
+                'dueDate'       => $task->due_date ? $task->due_date->format('Y-m-d') : 'N/A',
+                'tags'          => $task->tags ?? [],
+                'attachments'   => $task->attachments ?? [],
+                'submissions'   => [],
+                'creator'       => $task->creator ? [
+                    'id'          => $task->creator->id,
+                    'name'        => $task->creator->name,
+                    'role'        => $task->creator->roles->first()->name ?? 'N/A',
+                    'avatar'      => $task->creator->image_url,
+                    'profile_url' => url('/dashboard/users/' . $task->creator->id),
+                ] : null,
+                'feedbacks' => $task->feedbacks->map(function ($fb) {
+                    return [
+                        'id'       => $fb->id,
+                        'user'     => $fb->user->name ?? 'N/A',
+                        'user_id'  => $fb->user_id,
+                        'img_url'  => $fb->user ? User::image_handler($fb->user->img_url) : null,
+                        'decision' => $fb->decision,
+                        'text'     => $fb->note,
+                        'time'     => $fb->created_at->diffForHumans(),
+                    ];
+                })->toArray(),
+                'activities' => $task->activities->map(function ($act) {
+                    $action = match ($act->action) {
+                        'create'   => 'created this task',
+                        'update'   => 'updated ' . $act->column . ($act->was && $act->new ? ' from "' . $act->was . '" to "' . $act->new . '"' : ''),
+                        'move'     => 'moved task' . ($act->was && $act->new ? ' from "' . $act->was . '" to "' . $act->new . '"' : ''),
+                        'comment'  => 'added a comment',
+                        'feedback' => 'submitted feedback',
+                        'delete'   => 'deleted this task',
+                        default    => $act->action,
+                    };
+                    return [
+                        'user'    => $act->user->name ?? 'N/A',
+                        'user_id' => $act->user_id,
+                        'img_url' => $act->user ? User::image_handler($act->user->img_url) : null,
+                        'action'  => $action,
+                        'time'    => $act->created_at->diffForHumans(),
+                    ];
+                })->toArray(),
+                'activities_count' => $task->activities->count(),
+                'feedbacks_count'  => $task->feedbacks->count(),
+                'createdAt'        => $task->created_at->timestamp,
+            ];
+        });
 
-        $startups = [
-            ['id' => 101, 'name' => 'TechNova',   'cycle' => 3, 'logo' => 'logos/technova.png'],
-            ['id' => 102, 'name' => 'GreenSpark', 'cycle' => 3, 'logo' => null],
-            ['id' => 103, 'name' => 'FinPath',    'cycle' => 3, 'logo' => 'logos/finpath.png'],
-            ['id' => 107, 'name' => 'LawTech',    'cycle' => 3, 'logo' => null],
-            ['id' => 104, 'name' => 'EduBridge',  'cycle' => 4, 'logo' => null],
-            ['id' => 105, 'name' => 'AgroSmart',  'cycle' => 4, 'logo' => 'logos/agrosmart.png'],
-            ['id' => 106, 'name' => 'MediLink',   'cycle' => 4, 'logo' => 'logos/medilink.png'],
-            ['id' => 108, 'name' => 'HealthSync', 'cycle' => 5, 'logo' => 'logos/healthsync.png'],
-            ['id' => 109, 'name' => 'CloudNine',  'cycle' => 5, 'logo' => null],
-            ['id' => 110, 'name' => 'PayFlow',    'cycle' => 5, 'logo' => 'logos/payflow.png'],
+        $programs = $cycles->map(fn($c) => (object)['id' => $c['id'], 'title' => $c['title']]);
+
+        $cycleIds = $cycles->pluck('id');
+
+        $startups = Company::with('cycledata')
+            ->whereHas('cycledata', fn($q) => $q->whereIn('id', $cycleIds))
+            ->get()
+            ->map(fn($startup) => [
+                'id'    => $startup->id,
+                'name'  => $startup->name ?? $startup->name_en,
+                'cycle' => $startup->cycledata?->id,
+                'logo'  => $startup->logo ?? null,
+            ]);
+
+        // Calculate real stats
+        $stats = [
+            'total_tasks' => $tasks->count(),
+            'pending' => $tasks->where('status', 'pending')->count(),
+            'active' => [
+                'in_progress_count' => $tasks->where('status', 'progress')->count(),
+                'in_review_count' => $tasks->where('status', 'review')->count(),
+            ],
+            'completed' => $tasks->where('status', 'completed')->count(),
+            'archived' => $tasks->where('status', 'archived')->count(),
         ];
 
         if (auth()->user() && auth()->user()->hasRole('Mentor')) {
-            return view('admin.tasks.index',compact('tasks', 'programs', 'startups'));
+            return view('admin.tasks.index',compact('tasks', 'programs', 'startups', 'stats'));
         }
         
         return view('mentor.mentorshipSessions.index',compact('sessions','available_surveys','cycles'));

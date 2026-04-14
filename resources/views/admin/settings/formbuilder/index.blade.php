@@ -11,7 +11,8 @@
   }
   .section-questions {
     border-left: 3px solid var(--bs-primary);
-    min-height: 4px; /* keeps drop-zone alive even when empty */
+    min-height: 48px; /* ensures empty sections can be drop targets */
+    transition: background-color 0.2s ease;
   }
 
   /* ── Drag states ── */

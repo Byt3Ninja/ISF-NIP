@@ -304,14 +304,10 @@ function reorderSections() {
   _reorderTimers.sections = setTimeout(() => {
     const elements = [...document.querySelectorAll('#itemsContainer > .section-wrapper')];
 
-    const ids = elements.map(el => {
-      return el.dataset.dbId || `temp-${el.dataset.itemId}`;
-    });
-
-    const idsNums = ids.map(id => parseInt(id.replace('temp-', ''), 10) + 1);
+    const ids = elements.map(el => el.dataset.dbId || el.dataset.itemId);
 
     _reorderPost(FB_CONFIG.routes.reorderSections, {
-      section_ids: idsNums,
+      section_ids: ids,
     });
   }, 400);
 }
@@ -330,15 +326,13 @@ function reorderQuestions(targetSection = null) {
       const sectionIdNum  = parseInt(sectionId.replace('temp-', ''), 10) + 1;
 
       const ids = [...section.querySelectorAll('.question-card')]
-        .map(el => el.dataset.dbId || `temp-${el.dataset.itemId}`);
-
-      const idsNums = ids.map(id => parseInt(id.replace('temp-', ''), 10));
+        .map(el => el.dataset.dbId || el.dataset.itemId);
 
       if (!ids.length) return;
 
       _reorderPost(FB_CONFIG.routes.reorderQuestions, {
-        section_db_id: sectionIdNum,
-        question_ids: idsNums,
+        section_id: sectionId,
+        question_ids: ids,
       });
     });
   }, 400);
