@@ -1331,6 +1331,7 @@ class ClientCompanyController extends Controller
                     'business_type' => 'nullable',
                     'generate_revenue' => 'required|in:yes,no',
                     'average_annual_revenues' => 'required_if:generate_revenue,yes|nullable|integer|min:0|max:999999999999',
+                    'financial_plan' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx|max:10240',
                 ], [
                     'pre_money_valuation.numeric' => __('admin.Pre-money valuation must be a number'),
                     'pre_money_valuation.min' => __('admin.Pre-money valuation must be a positive number'),
@@ -1342,6 +1343,9 @@ class ClientCompanyController extends Controller
                     'average_annual_revenues.integer' => __('admin.please_enter_a_valid_number'),
                     'average_annual_revenues.min' => __('admin.value_cannot_be_less_than_zero'),
                     'average_annual_revenues.max' => __('admin.please_enter_a_valid_number'),
+                    'financial_plan.file' => __('admin.financial_plan_invalid_type'),
+                    'financial_plan.mimes' => __('admin.financial_plan_invalid_type'),
+                    'financial_plan.max' => __('admin.financial_plan_too_large'),
                 ]);
 
                 $data['Funding_Target'] = $data['Funding_Target'] == null ? 0 : $data['Funding_Target'];

@@ -1315,6 +1315,8 @@ return [
 	'Select Gender' => 'اختر النوع',
 	'Confirm Password' => 'تأكيد كلمة المرور',
 	'Financial plan attachment' => 'مرفق خطة العمل المالية',
+	'financial_plan_too_large' => 'يجب ألا يتجاوز حجم الملف 10 ميجابايت.',
+	'financial_plan_invalid_type' => 'أنواع الملفات المدعومة هي Word وExcel وPowerPoint وPDF.',
 	'Final_Session' => 'جلسة نهاية',
 	'View_Pitch_Deck_Video' => 'عرض فيديو Pitch Deck',
 	'An unexpected error occurred, please try again later' => 'حدث خطاء غير متوقع، يرجى المحاولة في وقت لاحق',

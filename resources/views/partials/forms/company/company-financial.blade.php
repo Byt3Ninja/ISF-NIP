@@ -227,7 +227,15 @@
 
           <div class="col-12 mb-3">
             <label for="financial_plan" class="form-label fw-medium">{{ __('admin.Financial plan attachment') }}</label>
-            <input id="financial_plan" class="form-control" type="file" name="financial_plan">
+            <input
+              id="financial_plan"
+              class="form-control @error('financial_plan') is-invalid @enderror"
+              type="file"
+              name="financial_plan"
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
+            @error('financial_plan')
+              <div class="invalid-feedback d-block">{{ $message }}</div>
+            @enderror
           </div>
 
           @if(optional($client->company)->financial_plan != null)
