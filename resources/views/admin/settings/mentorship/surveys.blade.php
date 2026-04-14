@@ -470,7 +470,7 @@
 																	<label class="form-label">
 																			<i class="ti ti-settings me-1"></i>{{ __('admin.Survey Triggers') }}
 																	</label>
-																	<div class="card bg-light">
+																	<div class="card bg-light-subtle shadow-none border">
 																			<div class="card-body p-3">
 																					<div class="form-check mb-2">
 																							<input class="form-check-input" type="checkbox" id="triggerBySession" name="trigger_by_session" />
@@ -500,8 +500,10 @@
 											<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
 													<i class="ti ti-circle-x me-1"></i>{{ __('admin.Cancel') }}
 											</button>
-											<button type="submit" form="createSurveyForm" class="btn btn-primary">
-													<i class="ti ti-circle-check me-1"></i>{{ __('admin.Add Survey') }}
+											<button type="submit" form="createSurveyForm" class="btn btn-primary" id="createSurveySubmitBtn">
+													<span id="createSurveyBtnIcon"><i class="ti ti-circle-check me-2"></i></span>
+													<span id="createSurveyBtnSpinner" class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
+													{{ __('admin.Add Survey') }}
 											</button>
 									</div>
 							</div>
@@ -674,6 +676,12 @@
                 });
                 return false;
             }
+
+            // Show spinner and disable submit button
+            var $btn = $('#createSurveySubmitBtn');
+            $btn.prop('disabled', true);
+            $('#createSurveyBtnIcon').addClass('d-none');
+            $('#createSurveyBtnSpinner').removeClass('d-none');
         });
     </script>
 @endsection
