@@ -1317,11 +1317,19 @@ class ClientCompanyController extends Controller
                     'development_stage' => 'nullable',
                     'targeted_market.*' => 'nullable',
                     'business_type' => 'nullable',
+                    'generate_revenue' => 'required|in:yes,no',
+                    'average_annual_revenues' => 'required_if:generate_revenue,yes|nullable|integer|min:0|max:999999999999',
                 ], [
                     'pre_money_valuation.numeric' => __('admin.Pre-money valuation must be a number'),
                     'pre_money_valuation.min' => __('admin.Pre-money valuation must be a positive number'),
                     'raised_fund.numeric' => __('admin.Raised fund must be a number'),
                     'raised_fund.min' => __('admin.Raised fund must be a positive number'),
+                    'generate_revenue.required' => __('admin.this_field_is_required'),
+                    'generate_revenue.in' => __('admin.this_field_is_required'),
+                    'average_annual_revenues.required_if' => __('admin.this_field_is_required'),
+                    'average_annual_revenues.integer' => __('admin.please_enter_a_valid_number'),
+                    'average_annual_revenues.min' => __('admin.value_cannot_be_less_than_zero'),
+                    'average_annual_revenues.max' => __('admin.please_enter_a_valid_number'),
                 ]);
 
                 $data['Funding_Target'] = $data['Funding_Target'] == null ? 0 : $data['Funding_Target'];
@@ -1362,6 +1370,10 @@ class ClientCompanyController extends Controller
                 $result->business_type = $data['business_type'];
                 $result->financial_plan = $uploadedFile;
                 $result->financial_plan_description = $data['financial_plan_description'];
+                $result->generate_revenue = $data['generate_revenue'];
+                $result->average_annual_revenues = $data['generate_revenue'] === 'yes'
+                    ? $data['average_annual_revenues']
+                    : null;
             }
             if ($data['CompanyN'] == 5) {
                 $request->validate([

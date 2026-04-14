@@ -120,7 +120,9 @@
               value="{{ $client->company ? $client->company->average_annual_revenues : old('average_annual_revenues') }}"
               name="average_annual_revenues"
               min="0"
-              oninput="this.value = this.value.slice(0, 12)"
+              step="1"
+              inputmode="numeric"
+              oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12)"
               autocomplete="average_annual_revenues"
             >
           </div>

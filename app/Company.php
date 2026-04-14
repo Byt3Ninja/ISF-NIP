@@ -82,6 +82,8 @@ class Company extends Model
         'institutions',
         'development_stage',
         'revenue_generating',
+        'generate_revenue',
+        'average_annual_revenues',
         'currently_fundraising',
         'desired_funding_amount',
         'business_model',
