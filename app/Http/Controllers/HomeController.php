@@ -2658,7 +2658,7 @@ class HomeController extends Controller
             ],
         ];
 
-        $dateRate = date("Y-m-d 17:00:00");
+        $dateRate = date("Y-m-d 00:00:00");
         $notRated_men = "SELECT
                 *, 
                 CONCAT(TRIM(COALESCE(u.first_name_en, '')), ' ', TRIM(COALESCE(u.last_name_en, ''))) AS MentorName_en,
