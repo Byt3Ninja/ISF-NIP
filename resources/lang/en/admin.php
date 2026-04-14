@@ -823,7 +823,7 @@ return [
 	'HomePageSetting' => ' Home Page Settings ',
 	'empty' => ' Empty ',
 	'Experties_Search' => ' Experties Search ',
-	'Sustainable_development' => ' Sustainable_development ',
+	'Sustainable_development' => ' Sustainable Development ',
 	'no_poverty' => 'No Poverty',
 	'zero_hunger' => 'Zero Hunger',
 	'good_health' => 'Good Health and Well-being',

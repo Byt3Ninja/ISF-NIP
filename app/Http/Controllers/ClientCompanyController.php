@@ -1205,6 +1205,10 @@ class ClientCompanyController extends Controller
                     'about_competitors' => 'nullable',
                     'about_monetize' => 'nullable',
                     'about_challenges' => 'nullable',
+                    'achievements' => 'nullable|string|max:1000',
+                    'mission' => 'nullable|string|max:1000',
+                    'why_this_startup' => 'nullable|string|max:1000',
+                    'startup_expertise' => 'nullable|string|max:1000',
                 ]);
                 if (isset($data['Sustainable_development'])) {
                     $result->Sustainable_development = json_encode($data['Sustainable_development']);
@@ -1219,6 +1223,10 @@ class ClientCompanyController extends Controller
                 $result->about_competitors = $data['about_competitors'];
                 $result->about_monetize = $data['about_monetize'];
                 $result->about_challenges = $data['about_challenges'];
+                $result->achievements = $data['achievements'] ?? null;
+                $result->mission = $data['mission'] ?? null;
+                $result->why_this_startup = $data['why_this_startup'] ?? null;
+                $result->startup_expertise = $data['startup_expertise'] ?? null;
             }
             if ($data['CompanyN'] == 4) {
                 $request->validate([

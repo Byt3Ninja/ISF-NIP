@@ -3708,7 +3708,7 @@ return [
 	'product_service_description' => 'وصف المنتج / الخدمة',
 	'product_service_description_placeholder' => 'وصف المنتج / الخدمة',
 	'Governorate_State' => 'الولاية / المحافظة',
-	'Sustainable_development' => 'التنمية المستدامة',
+	'sustainable_development' => 'التنمية المستدامة',
 	'select_categories' => 'حدد الفئات',
 	'Not registered yet' => 'لم يتم التسجيل بعد',
 	'Individual (Sole Proprietorship)' => 'فرد (ملاك فرد)',

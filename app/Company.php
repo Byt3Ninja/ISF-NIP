@@ -111,6 +111,10 @@ class Company extends Model
         'previous_incubator',
         'company_registration_type',
         'products_services_description',
+        'achievements',
+        'mission',
+        'why_this_startup',
+        'startup_expertise',
     ];
 
 
