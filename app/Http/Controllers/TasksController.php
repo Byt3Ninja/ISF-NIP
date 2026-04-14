@@ -301,9 +301,117 @@ class TasksController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Tags $tags)
+    public function show($id)
     {
-        //
+        $task = ProgramTask::with([
+            'program', 'creator.roles',
+            'assignees',
+            'comments.user', 'feedbacks.user', 'activities.user'
+        ])->findOrFail($id);
+
+        $allAtt  = $task->attachments ?? [];
+
+        $fmtAtt = collect($allAtt)
+            ->filter(fn($a) => ($a['status'] ?? 'attachment') !== 'submission')
+            ->map(fn($a) => [
+                'id'   => md5($a['path']),
+                'name' => $a['name'],
+                'url'  => asset('storage/' . $a['path']),
+                'size' => $a['size'] ?? null,
+                'created_at' => $a['created_at'] ?? '',
+            ])->values();
+
+        $fmtSubs = collect($allAtt)
+            ->filter(fn($a) => ($a['status'] ?? '') === 'submission')
+            ->map(fn($a) => [
+                'user' => null, 'img_url' => null, 'user_id' => null,
+                'status' => 'pending_review', 'time' => '', 'note' => null,
+                'files' => [[
+                    'name'       => $a['name'],
+                    'url'        => asset('storage/' . $a['path']),
+                    'size_bytes' => $a['size'] ?? null,
+                ]],
+            ])->values();
+
+        $assignees = $task->assignees->map(function ($company) {
+            $founder = $company->resolveUser();
+            return [
+                'id'          => $company->id,
+                'name'        => $company->name ?? $company->name_en,
+                'logo'        => $company->logo ? asset('storage/' . $company->logo) : null,
+                'profile_url' => url('/dashboard/companyProfile/' . $company->id),
+                'status'      => $company->pivot->status,
+                'founder'     => $founder ? [
+                    'id'          => $founder->id,
+                    'name'        => $founder->name,
+                    'avatar'      => User::image_handler($founder->img_url),
+                    'profile_url' => url('/dashboard/show/UserProfile/' . $founder->id),
+                ] : null,
+            ];
+        });
+
+        $creator = $task->creator ? [
+            'id'          => $task->creator->id,
+            'name'        => $task->creator->name,
+            'role'        => $task->creator->roles->first()->name ?? 'N/A',
+            'avatar'      => User::image_handler($task->creator->img_url),
+            'profile_url' => url('/dashboard/users/' . $task->creator->id),
+        ] : null;
+
+        $comments = $task->comments->map(fn($c) => [
+            'user'    => $c->user->name ?? 'N/A',
+            'user_id' => $c->user_id,
+            'img_url' => $c->user ? User::image_handler($c->user->img_url) : null,
+            'text'    => $c->comment,
+            'time'    => $c->created_at->diffForHumans(),
+        ]);
+
+        $feedbacks = $task->feedbacks->map(fn($fb) => [
+            'user'     => $fb->user->name ?? 'N/A',
+            'user_id'  => $fb->user_id,
+            'img_url'  => $fb->user ? User::image_handler($fb->user->img_url) : null,
+            'decision' => $fb->decision,
+            'text'     => $fb->note,
+            'time'     => $fb->created_at->diffForHumans(),
+        ]);
+
+        $activities = $task->activities->map(function ($act) {
+            $action = match($act->action) {
+                'create'   => 'created this task',
+                'update'   => 'updated ' . $act->column . ($act->was && $act->new ? ' from "' . $act->was . '" to "' . $act->new . '"' : ''),
+                'move'     => 'moved task' . ($act->was && $act->new ? ' from "' . $act->was . '" to "' . $act->new . '"' : ''),
+                'comment'  => 'added a comment',
+                'feedback' => 'submitted feedback',
+                'delete'   => 'deleted this task',
+                default    => $act->action,
+            };
+            return [
+                'user'    => $act->user->name ?? 'N/A',
+                'user_id' => $act->user_id,
+                'img_url' => $act->user ? User::image_handler($act->user->img_url) : null,
+                'action'  => $action,
+                'time'    => $act->created_at->diffForHumans(),
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data'    => [
+                'id'          => $task->id,
+                'title'       => $task->title,
+                'description' => $task->description,
+                'due_date'    => $task->due_date?->format('Y-m-d'),
+                'priority'    => $task->priority,
+                'status'      => $task->status,
+                'creator'     => $creator,
+                'assignees'   => $assignees,
+                'attachments' => $fmtAtt,
+                'submissions' => $fmtSubs,
+                'comments'    => $comments,
+                'feedbacks'   => $feedbacks,
+                'activities'  => $activities,
+            ],
+        ]);
     }
 
     /**

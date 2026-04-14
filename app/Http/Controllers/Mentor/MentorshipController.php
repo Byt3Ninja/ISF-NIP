@@ -77,7 +77,83 @@ class MentorshipController extends Controller
             ];
         });
 
-        $tasks = [
+        $tasksData = ProgramTask::with(['program', 'assignees', 'creator', 'feedbacks.user', 'activities.user'])
+            ->where('created_by', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $tasks = $tasksData->map(function ($task) {
+            return [
+                'id'          => $task->id,
+                'title'       => $task->title,
+                'description' => $task->description,
+                'program'     => [
+                    'id'    => $task->program_id,
+                    'title' => $task->program->title ?? 'N/A',
+                ],
+                'assignees' => $task->assignees->map(function ($assignee) {
+                    return [
+                        'id'          => $assignee->id,
+                        'name'        => $assignee->name ?? $assignee->name_en ?? 'N/A',
+                        'status'      => $assignee->pivot->status,
+                        'lastUpdated' => $assignee->pivot->last_updated
+                            ? (is_string($assignee->pivot->last_updated)
+                                ? $assignee->pivot->last_updated
+                                : $assignee->pivot->last_updated->format('Y-m-d'))
+                            : 'N/A',
+                        'logo'        => $assignee->logo ?? null,
+                        'profile_url' => url('/dashboard/companyProfile/' . $assignee->id),
+                    ];
+                })->toArray(),
+                'priority'      => $task->priority,
+                'overallStatus' => $task->status,
+                'dueDate'       => $task->due_date ? $task->due_date->format('Y-m-d') : 'N/A',
+                'tags'          => $task->tags ?? [],
+                'attachments'   => $task->attachments ?? [],
+                'submissions'   => [],
+                'creator'       => $task->creator ? [
+                    'id'          => $task->creator->id,
+                    'name'        => $task->creator->name,
+                    'role'        => $task->creator->roles->first()->name ?? 'N/A',
+                    'avatar'      => $task->creator->image_url,
+                    'profile_url' => url('/dashboard/users/' . $task->creator->id),
+                ] : null,
+                'feedbacks' => $task->feedbacks->map(function ($fb) {
+                    return [
+                        'id'       => $fb->id,
+                        'user'     => $fb->user->name ?? 'N/A',
+                        'user_id'  => $fb->user_id,
+                        'img_url'  => $fb->user ? User::image_handler($fb->user->img_url) : null,
+                        'decision' => $fb->decision,
+                        'text'     => $fb->note,
+                        'time'     => $fb->created_at->diffForHumans(),
+                    ];
+                })->toArray(),
+                'activities' => $task->activities->map(function ($act) {
+                    $action = match ($act->action) {
+                        'create'   => 'created this task',
+                        'update'   => 'updated ' . $act->column . ($act->was && $act->new ? ' from "' . $act->was . '" to "' . $act->new . '"' : ''),
+                        'move'     => 'moved task' . ($act->was && $act->new ? ' from "' . $act->was . '" to "' . $act->new . '"' : ''),
+                        'comment'  => 'added a comment',
+                        'feedback' => 'submitted feedback',
+                        'delete'   => 'deleted this task',
+                        default    => $act->action,
+                    };
+                    return [
+                        'user'    => $act->user->name ?? 'N/A',
+                        'user_id' => $act->user_id,
+                        'img_url' => $act->user ? User::image_handler($act->user->img_url) : null,
+                        'action'  => $action,
+                        'time'    => $act->created_at->diffForHumans(),
+                    ];
+                })->toArray(),
+                'activities_count' => $task->activities->count(),
+                'feedbacks_count'  => $task->feedbacks->count(),
+                'createdAt'        => $task->created_at->timestamp,
+            ];
+        });
+
+        $_unsen = [
             [
                 'id' => 1,
                 'title' => 'Build Landing Page',
@@ -474,24 +550,19 @@ class MentorshipController extends Controller
             ],
         ];
 
-        $programs = [
-            (object)['id' => 3, 'title' => 'Spring Accelerator 2025'],
-            (object)['id' => 4, 'title' => 'Winter Cohort 2024'],
-            (object)['id' => 5, 'title' => 'Summer Bootcamp 2024'],
-        ];
+        $programs = $cycles->map(fn($c) => (object)['id' => $c['id'], 'title' => $c['title']]);
 
-        $startups = [
-            ['id' => 101, 'name' => 'TechNova',   'cycle' => 3, 'logo' => 'logos/technova.png'],
-            ['id' => 102, 'name' => 'GreenSpark', 'cycle' => 3, 'logo' => null],
-            ['id' => 103, 'name' => 'FinPath',    'cycle' => 3, 'logo' => 'logos/finpath.png'],
-            ['id' => 107, 'name' => 'LawTech',    'cycle' => 3, 'logo' => null],
-            ['id' => 104, 'name' => 'EduBridge',  'cycle' => 4, 'logo' => null],
-            ['id' => 105, 'name' => 'AgroSmart',  'cycle' => 4, 'logo' => 'logos/agrosmart.png'],
-            ['id' => 106, 'name' => 'MediLink',   'cycle' => 4, 'logo' => 'logos/medilink.png'],
-            ['id' => 108, 'name' => 'HealthSync', 'cycle' => 5, 'logo' => 'logos/healthsync.png'],
-            ['id' => 109, 'name' => 'CloudNine',  'cycle' => 5, 'logo' => null],
-            ['id' => 110, 'name' => 'PayFlow',    'cycle' => 5, 'logo' => 'logos/payflow.png'],
-        ];
+        $cycleIds = $cycles->pluck('id');
+
+        $startups = Company::with('cycledata')
+            ->whereHas('cycledata', fn($q) => $q->whereIn('id', $cycleIds))
+            ->get()
+            ->map(fn($startup) => [
+                'id'    => $startup->id,
+                'name'  => $startup->name ?? $startup->name_en,
+                'cycle' => $startup->cycledata?->id,
+                'logo'  => $startup->logo ?? null,
+            ]);
 
         if (auth()->user() && auth()->user()->hasRole('Mentor')) {
             return view('admin.tasks.index',compact('tasks', 'programs', 'startups'));
