@@ -3717,6 +3717,7 @@ return [
 	'Partnership' => 'شراكة',
 	'Shareholding' => 'ملكية',
 	'startup_profile_updated' => 'تم تحديث ملف تعريف الشركة الناشئة بنجاح',
+	'support_area_already_selected' => 'تم اختيار مجال الدعم هذا بالفعل.',
 	'business_profile' => 'ملف تعريف الشركة',
 	'financial_overview' => 'نظرة مالية عامة',
 	'generate_revenue' => 'هل يحقق عملك إيرادات؟',

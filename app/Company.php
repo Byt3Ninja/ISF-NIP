@@ -416,4 +416,14 @@ class Company extends Model
     {
         return $this->hasMany(CompanyRelation::class, 'company_id', 'id');
     }
+
+    public function expertises()
+    {
+        return $this->belongsToMany(
+            \App\Expertise::class,
+            'company_expertise',
+            'company_id',
+            'expertise_id'
+        )->withTimestamps();
+    }
 }

@@ -554,8 +554,9 @@ return [
 	'change_valuation_date_warning' => 'Are you sure you want to change the valuation date?',
   'You cannot add this startup to alumni because it has no country' => 'You cannot add this startup to alumni because it has no country',
 
-  'support_and_mentorship" => "Support & Mentorship',
+  'support_and_mentorship' => 'Support & Mentorship',
   'support_mentorship_title' => 'Support & Mentorship Needs',
+  'support_mentorship_subtitle' => 'Search and choose one or more active areas of expertise.',
   'support_and_mentorship_subtitle' => 'Search and choose one or more active areas of expertise.',
   'support_and_mentorship_label' => 'Required support areas of expertise',
   'support_and_mentorship_validation' => 'Please select at least one support area of expertise.',

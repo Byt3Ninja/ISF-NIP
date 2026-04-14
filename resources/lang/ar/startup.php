@@ -558,6 +558,7 @@ return [
   'support_and_mentorship' => 'الدعم الإرشاد',
   'support_mentorship_title' => 'متطلبات الدعم الإرشاد',
   'support_mentorship_subtitle' => 'ابحث واختر مجالاً أو أكثر من مجالات الخبرة النشطة.',
+  'support_and_mentorship_subtitle' => 'ابحث واختر مجالاً أو أكثر من مجالات الخبرة النشطة.',
   'support_and_mentorship_label' => 'مجالات الخبرة المطلوبة للدعم',
   'support_and_mentorship_validation' => 'يرجى اختيار مجال واحد على الأقل من مجالات الخبرة.',
   'support_and_mentorship_success' => 'تم حفظ متطلبات الدعم والارشاد بنجاح',

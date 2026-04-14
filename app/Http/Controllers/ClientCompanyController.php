@@ -18,6 +18,7 @@ use App\Service;
 use App\Surveys;
 use App\Currency;
 use App\Employee;
+use App\Expertise;
 use App\Formdata;
 use App\Settings;
 use App\Training;
@@ -46,6 +47,7 @@ use Illuminate\Validation\Rule;
 use App\Services\CompanyService;
 use App\ScreeningEvaluationResults;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use App\ScreeningEvaluationCriteria;
 use Illuminate\Support\Facades\Auth;
 use Google\Service\PolyService\Format;
@@ -855,6 +857,28 @@ class ClientCompanyController extends Controller
             ];
                 // dd($financialprojection);
             $company = $company_instance; // For backward compatibility in the view
+
+            $areasOfExpertiseQuery = Expertise::whereNull('parent_id');
+            if (Schema::hasColumn('expertises', 'status')) {
+                $areasOfExpertiseQuery->where('status', 'active');
+            }
+            $areasOfExpertise = $areasOfExpertiseQuery
+                ->orderBy('title')
+                ->get()
+                ->map(function ($experty) use ( $l ) {
+                    
+                    $output = new stdClass;
+                    $output->id = $experty->id;
+                    $output->name = $l === 'en' ? $experty->title : ( $experty->title_ar ?? $experty->title);
+                    return $output;
+                })
+                ->values()
+                ->toArray();
+            $hasAreasOfExpertise = count($areasOfExpertise) > 0;
+            $companyExpertiseIds = $company_instance
+                ? $company_instance->expertises()->pluck('expertises.id')->map(fn($v) => (int) $v)->values()->toArray()
+                : [];
+
             return view('admin/clients/company', compact(
                 'client',
                 '_countries',
@@ -887,6 +911,9 @@ class ClientCompanyController extends Controller
                 'growthMetrics',
                 'company',
                 'is_currency_disabled',
+                'areasOfExpertise',
+                'companyExpertiseIds',
+                'hasAreasOfExpertise',
             ));
         } catch (Exception $e) {
             //log what happend
@@ -1478,7 +1505,58 @@ class ClientCompanyController extends Controller
             }
             $result->save();
 
-            
+            if ($data['CompanyN'] == 16) {
+                $rawTags = $request->input('expertise_tags');
+                if (is_string($rawTags)) {
+                    $decoded = json_decode($rawTags, true);
+                    $rawTags = is_array($decoded) ? $decoded : [];
+                }
+                if (!is_array($rawTags)) {
+                    $rawTags = [];
+                }
+                $expertiseIds = array_values(array_unique(array_filter(array_map('intval', $rawTags))));
+                $request->merge(['expertise_tags' => $expertiseIds]);
+
+                $validator = \Validator::make($request->all(), [
+                    'expertise_tags'   => 'required|array|min:1',
+                    'expertise_tags.*' => 'integer|exists:expertises,id',
+                ], [
+                    'expertise_tags.required' => __('admin.this_field_is_required'),
+                    'expertise_tags.array'    => __('admin.this_field_is_required'),
+                    'expertise_tags.min'      => __('admin.this_field_is_required'),
+                    'expertise_tags.*.exists' => __('admin.this_field_is_required'),
+                ]);
+
+                if ($validator->fails()) {
+                    if ($request->ajax()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => $validator->errors()->first(),
+                            'errors'  => $validator->errors(),
+                        ], 422);
+                    }
+                    return redirect()->back()->withErrors($validator)->withInput();
+                }
+
+                $activeIdsQuery = Expertise::whereNull('parent_id')->whereIn('id', $expertiseIds);
+                if (Schema::hasColumn('expertises', 'status')) {
+                    $activeIdsQuery->where('status', 'active');
+                }
+                $activeIds = $activeIdsQuery->pluck('id')->map(fn($v) => (int) $v)->toArray();
+
+                $result->expertises()->sync($activeIds);
+
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => __('admin.startup_profile_updated'),
+                    ]);
+                }
+
+                return redirect()->route('company.profile_view_mine', $result->id)
+                    ->with(['msg' => 'startup_profile_updated', 'class' => 'success']);
+            }
+
             if ($data['CompanyN'] == 14) {
                 // Set up debug logging using Laravel's Log facade
                 Log::debug('Starting company update process', [

@@ -3661,6 +3661,7 @@ return [
 	'Partnership' => 'Partnership',
 	'Shareholding' => 'Shareholding',
 	'startup_profile_updated' => 'Startup profile updated successfully',
+	'support_area_already_selected' => 'This support area has already been selected.',
 	'business_profile' => 'Business Profile',
 	'financial_overview' => 'Financial Overview',
 	'generate_revenue' => 'Does your business generate revenue?',
