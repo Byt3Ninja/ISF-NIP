@@ -24,43 +24,26 @@
       <thead class="table-light">
         <tr>
           <th>{{ __('admin.Program') }}</th>
-          <th>{{ __('admin.Completed') }}</th>
+          <th>{{ __('admin.Total') }}</th>
           <th>{{ __('admin.Pending') }}</th>
-          <th>{{ __('admin.Total')  }}</th>
-          <th>{{ __('admin.overall_status') }}</th>
+          <th>{{ __('admin.In_Progress') }}</th>
+          <th>{{ __('admin.In_Review') }}</th>
+          <th>{{ __('admin.Completed') }}</th>
           <th class="text-center">{{ __('admin.actions') }}</th>
         </tr>
       </thead>
       <tbody>
         @foreach($cycles as $cycle)
           @php
-            $total    = $cycle['completed'] + $cycle['pending'];
-            $progress = $total > 0 ? round(($cycle['completed'] / $total) * 100) : 0;
+            $total      = ($cycle['pending'] ?? 0) + ($cycle['inprogress'] ?? 0) + ($cycle['inreview'] ?? 0) + ($cycle['completed'] ?? 0);
           @endphp
           <tr>
             <td><strong>{{ $cycle['title'] }}</strong></td>
-            <td><span class="badge bg-label-success fw-bold">{{ $cycle['completed'] }}</span></td>
-            <td><span class="badge bg-label-warning fw-bold">{{ $cycle['pending'] }}</span></td>
             <td><span class="badge bg-label-info fw-bold">{{ $total }}</span></td>
-            <td>
-              @if($cycle['pending'] == 0 && $total > 0)
-                <span class="badge bg-label-success">{{ __('admin.Completed') }}</span>
-              @elseif($cycle['completed'] == 0)
-                <span class="badge bg-label-secondary">{{ __('admin.NotStarted') }}</span>
-              @else
-                <div class="progress" style="height: 8px;">
-                  <div
-                    class="progress-bar bg-primary"
-                    role="progressbar"
-                    style="width: {{ $progress }}%"
-                    aria-valuenow="{{ $progress }}"
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                  ></div>
-                </div>
-                <small>{{ $progress }}% {{ __('admin.Done') }}</small>
-              @endif
-            </td>
+            <td><span class="badge bg-label-info fw-bold">{{ $cycle['pending'] ?? 0 }}</span></td>
+            <td><span class="badge bg-label-info fw-bold">{{ $cycle['in_progress'] ?? 0 }}</span></td>
+            <td><span class="badge bg-label-info fw-bold">{{ $cycle['in_review'] ?? 0 }}</span></td>
+            <td><span class="badge bg-label-info fw-bold">{{ $cycle['completed'] ?? 0 }}</span></td>
             <td class="text-center">
               <a
                 href="{{ route('mentorshipTasks.index', ['cycle_id' => $cycle['id']]) }}"
@@ -87,7 +70,7 @@
 $(document).ready(function () {
 
   const table = $('#cyclesTable').DataTable({
-    ...getSharedDataTableConfig({ title: 'Session_Tasks', actionsIndex: 5 }),
+    ...getSharedDataTableConfig({ title: 'Session_Tasks', actionsIndex: 6 }),
     dom: '<"row"<"col-12 col-md-9 d-flex flex-wrap flex-md-nowrap align-items-center"l><"col-12 col-md-3 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6 d-flex justify-content-end"p>>',
     initComplete: function () {
       const api = this.api();
