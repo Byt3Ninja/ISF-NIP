@@ -47,6 +47,7 @@
                     placeholder="0"
                     min="0"
                     maxlength="6"
+                    value="{{ $client->company->total_employees ?? '' }}"
                     oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,6)"
                   />
                 </div>
@@ -70,6 +71,7 @@
                     placeholder="0"
                     min="0"
                     maxlength="6"
+                    value="{{ $client->company->male_employees ?? '' }}"
                     oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,6)"
                   />
                 </div>
@@ -93,6 +95,7 @@
                     placeholder="0"
                     min="0"
                     maxlength="6"
+                    value="{{ $client->company->female_employees ?? '' }}"
                     oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,6)"
                   />
                 </div>

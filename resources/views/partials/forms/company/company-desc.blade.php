@@ -85,13 +85,13 @@
         @foreach($fields as $field)
           <div class="col-md-6">
             <label class="form-label fw-semibold">
-              {{ __('admin.' . $field) }} *
+              {{ __('admin.' . $field) }}
             </label>
             <textarea
               class="form-control"
               name="{{ $field }}"
               rows="4"
-              placeholder="{{ __('admin.' . $field) }} *"
+              placeholder="{{ __('admin.' . $field) }}"
               oninput="this.value = this.value.trimStart()"
             >{{ optional($client->company)->$field ?? old($field) }}</textarea>
           </div>

@@ -109,7 +109,7 @@
       'id'      => 'tab-why-startup',
       'title'   => __('startup.why_this_startup'),
       'heading' => __('startup.what_makes_us_different'),
-      'value'   => $whyThisStartup ?: __('admin.N/A'),
+      'value'   => $whyThisStartup,
       'icon'    => 'ti-sparkles',
       'color'   => 'success',
     ],
@@ -122,6 +122,7 @@
       'color'   => 'info',
       'badge'   => $businessModelBadge,
       'link'    => $co->mvp_prototype_link ?? null,
+      'always'  => true,
     ],
     [
       'id'      => 'tab-challenges',
@@ -130,6 +131,7 @@
       'value'   => $co->about_problem ?: __('admin.N/A'),
       'icon'    => 'ti-alert-triangle',
       'color'   => 'danger',
+      'always'  => true,
     ],
     [
       'id'      => 'tab-market-opportunity',
@@ -138,6 +140,7 @@
       'value'   => $co->about_market_opportunity ?: __('admin.N/A'),
       'icon'    => 'ti-chart-arcs',
       'color'   => 'primary',
+      'always'  => true,
     ],
     [
       'id'      => 'tab-competitors',
@@ -146,6 +149,7 @@
       'value'   => $co->about_competitors ?: __('admin.N/A'),
       'icon'    => 'ti-sword',
       'color'   => 'warning',
+      'always'  => true,
     ],
     [
       'id'      => 'tab-monetization',
@@ -154,24 +158,53 @@
       'value'   => $co->about_monetize ?: __('admin.N/A'),
       'icon'    => 'ti-coins',
       'color'   => 'success',
+      'always'  => true,
     ],
     [
       'id'      => 'tab-mission',
       'title'   => __('startup.mission'),
       'heading' => __('startup.our_mission'),
-      'value'   => $co->mission ?: __('admin.N/A'),
+      'value'   => $co->mission,
       'icon'    => 'ti-target',
       'color'   => 'primary',
     ],
+    [
+      'id'      => 'tab-achievements',
+      'title'   => __('startup.achievements'),
+      'heading' => __('startup.achievements_and_progress'),
+      'value'   => $co->achievements,
+      'icon'    => 'ti-award',
+      'color'   => 'warning',
+    ],
+    [
+      'id'      => 'tab-startup-expertise',
+      'title'   => __('startup.startup_expertise'),
+      'heading' => __('startup.areas_of_expertise'),
+      'value'   => $co->startup_expertise,
+      'icon'    => 'ti-bulb',
+      'color'   => 'info',
+    ],
   ];
 
-  // --- Registration & Offering Logic ---
-  $regType          = trim($co->company_registration_type ?? '');
-  $offeringType     = trim($co->offering_type ?? '');
-  $productsDesc     = trim($co->products_services_description ?? '');
+  // GV-2052: Hide description tabs (why_this_startup, mission, achievements,
+  // startup_expertise) when their underlying column is empty / whitespace.
+  // Legacy tabs are marked 'always' => true and remain visible with N/A fallback.
+  $strategyTabs = array_values(array_filter($strategyTabs, function ($tab) {
+    if (!empty($tab['always'])) {
+      return true;
+    }
+    return isset($tab['value']) && trim((string) $tab['value']) !== '';
+  }));
+
+  // --- Registration & Offering Logic (GV-2063) ---
+  // Display-ready array is computed in ClientCompanyController::show().
+  $regType        = $registrationOfferingDetails['registration_type'] ?? null;
+  $offeringType   = $registrationOfferingDetails['offering_type'] ?? null;
+  $productsDesc   = $registrationOfferingDetails['products_desc'] ?? null;
+  $hasRegOffering = (bool) ($registrationOfferingDetails['has_any'] ?? false);
+
   $generatesRevenue = (bool) ($co->generates_revenue ?? false);
   $revenueAmount    = (float) ($co->revenue_amount ?? 0);
-  $hasRegOffering   = $regType || $offeringType || $productsDesc || $generatesRevenue;
 
   // --- Locale-aware helpers ---
   $isEn          = $l === 'en';
@@ -396,7 +429,7 @@
                 </div>
               @endif
               <h6 class="fw-bold">{{ $tab['heading'] }}</h6>
-              <p class="{{ empty($tab['link']) ? 'mb-0' : '' }}">{{ $tab['value'] }}</p>
+              <p class="text-break {{ empty($tab['link']) ? 'mb-0' : '' }}" style="white-space: pre-line; word-break: break-word;">{{ $tab['value'] }}</p>
               @if (!empty($tab['link']))
                 <a href="{{ $tab['link'] }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary">
                   <i class="ti ti-link me-1"></i>
@@ -565,12 +598,8 @@
     <div class="card border-0 shadow-sm">
       <div class="card-header border-bottom">
         <div>
-          <h5 class="mb-0">
-            {{ $isEn ? 'Registration & Offering Details' : 'تفاصيل التسجيل ونوع التقديم' }}
-          </h5>
-          <small class="text-muted">
-            {{ $isEn ? 'Company structure and business model' : 'هيكل الشركة ونموذج الأعمال' }}
-          </small>
+          <h5 class="mb-0">{{ __('startup.registration_offering_details_title') }}</h5>
+          <small class="text-muted">{{ __('startup.registration_offering_details_subtitle') }}</small>
         </div>
       </div>
       <div class="card-body p-4">
@@ -582,9 +611,7 @@
               </div>
             </div>
             <p class="text-muted mb-0">
-              {{ $isEn
-                ? 'No registration and offering details added yet.'
-                : 'لم تتم إضافة تفاصيل التسجيل ونوع التقديم بعد.' }}
+              {{ __('startup.no_registration_offering_details_added_yet') }}
             </p>
           </div>
         @else
@@ -598,7 +625,7 @@
                   <div class="min-w-0">
                     <small class="d-block text-muted text-uppercase fw-semibold mb-1"
                       style="font-size: 0.7rem; letter-spacing: 0.05em;">
-                      {{ $isEn ? 'Registration Type' : 'نوع التسجيل' }}
+                      {{ __('startup.registration_type') }}
                     </small>
                     <span class="fw-semibold">{{ $regType }}</span>
                   </div>
@@ -615,7 +642,7 @@
                   <div class="min-w-0">
                     <small class="d-block text-muted text-uppercase fw-semibold mb-1"
                       style="font-size: 0.7rem; letter-spacing: 0.05em;">
-                      {{ $isEn ? 'Offering Type' : 'نوع التقديم' }}
+                      {{ __('startup.offering_type') }}
                     </small>
                     <span class="fw-semibold">{{ $offeringType }}</span>
                   </div>
@@ -661,9 +688,9 @@
                   <div class="min-w-0 flex-grow-1">
                     <small class="d-block text-muted text-uppercase fw-semibold mb-2"
                       style="font-size: 0.7rem; letter-spacing: 0.05em;">
-                      {{ $isEn ? 'Products / Services Description' : 'وصف المنتجات / الخدمات' }}
+                      {{ __('startup.products_services_description') }}
                     </small>
-                    <p class="mb-0" style="word-break: break-word; overflow-wrap: break-word; white-space: pre-line; line-height: 1.6;">
+                    <p class="mb-0 text-break" style="word-break: break-word; overflow-wrap: break-word; white-space: pre-line; line-height: 1.6;">
                       {{ $productsDesc }}
                     </p>
                   </div>
@@ -889,7 +916,7 @@
                   @endif
                 </div>
                 <p class="text-muted small mb-2">{{ $detail['heading'] }}</p>
-                <p class="mb-0" style="white-space: pre-line;">{{ $detail['value'] }}</p>
+                <p class="text-break mb-0" style="white-space: pre-line; word-break: break-word;">{{ $detail['value'] }}</p>
                 @if (!empty($detail['link']))
                   <a href="{{ $detail['link'] }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary mt-3">
                     <i class="ti ti-link me-1"></i>
