@@ -91,38 +91,40 @@
         <hr class="my-4">
 
         {{-- Program & Assignees --}}
-        <div class="mb-4">
-          <p class="text-uppercase small fw-bold text-muted mb-3">{{ __('admin.assignment') }}</p>
+        @if (isset($programs))
           <div class="mb-4">
-            <label class="form-label fw-semibold" for="task-program">
-              {{ __('admin.program') }} <span class="text-danger">*</span>
-            </label>
-            <select id="task-program" class="select2 form-select" name="taskProgram" data-placeholder="{{ __('admin.Select Program') }}">
-              <option value="">{{ __('admin.Select Program') }}</option>
-              @foreach ($programs as $program)
-                <option value="{{ $program->id }}">{{ $program->title }}</option>
-              @endforeach
-            </select>
-          </div>
-          <div id="assignees-container" style="display: none;">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <label class="form-label fw-semibold mb-0" for="task-assignees">
-                {{ __('admin.assignees') }} <span class="text-danger">*</span>
+            <p class="text-uppercase small fw-bold text-muted mb-3">{{ __('admin.assignment') }}</p>
+            <div class="mb-4">
+              <label class="form-label fw-semibold" for="task-program">
+                {{ __('admin.program') }} <span class="text-danger">*</span>
               </label>
-              <a href="javascript:void(0);" class="select-all-toggle small fw-medium text-primary">{{ __('admin.select_all') }}</a>
+              <select id="task-program" class="select2 form-select" name="taskProgram" data-placeholder="{{ __('admin.Select Program') }}">
+                <option value="">{{ __('admin.Select Program') }}</option>
+                @foreach ($programs as $program)
+                  <option value="{{ $program->id }}">{{ $program->title }}</option>
+                @endforeach
+              </select>
             </div>
-            <select
-              class="select2 form-select"
-              id="task-assignees"
-              name="taskAssignees[]"
-              multiple
-              data-placeholder="{{ __('admin.select_assignees') }}">
-              @foreach ($startups as $startup)
-                <option value="{{ $startup['id'] }}">{{ $startup['name'] }}</option>
-              @endforeach
-            </select>
+            <div id="assignees-container" style="display: none;">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="form-label fw-semibold mb-0" for="task-assignees">
+                  {{ __('admin.assignees') }} <span class="text-danger">*</span>
+                </label>
+                <a href="javascript:void(0);" class="select-all-toggle small fw-medium text-primary">{{ __('admin.select_all') }}</a>
+              </div>
+              <select
+                class="select2 form-select"
+                id="task-assignees"
+                name="taskAssignees[]"
+                multiple
+                data-placeholder="{{ __('admin.select_assignees') }}">
+                @foreach ($startups as $startup)
+                  <option value="{{ $startup['id'] }}">{{ $startup['name'] }}</option>
+                @endforeach
+              </select>
+            </div>
           </div>
-        </div>
+        @endif
 
         {{-- Divider --}}
         <hr class="my-4">

@@ -1025,7 +1025,7 @@ return [
 	'Country_Register' => 'Where you registered ?',
 	'organizationmanager' => 'Organization Manager',
 	'boardTitlePending' => 'Pending',
-	'boardTitleProgress' => 'In progress',
+	'boardTitleProgress' => 'In Progress',
 	'boardTitleReview' => 'In Review',
 	'boardTitleCompleted' => 'Completed',
 	'priorityLow' => 'Low',

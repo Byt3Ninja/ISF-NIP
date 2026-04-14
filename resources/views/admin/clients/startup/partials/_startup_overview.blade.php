@@ -190,7 +190,7 @@
   {{-- 1. HERO SUMMARY WIDGET --}}
   <div class="col-lg-8">
     <div class="card h-100 overflow-hidden border-0 bg-primary bg-gradient shadow-none">
-      <div class="card-body p-5">
+      <div class="card-body d-flex flex-column h-100 p-5">
         <div class="row align-items-center">
           <div class="col-md-8 text-white">
             <div class="mb-2 d-flex align-items-center gap-3">
@@ -225,7 +225,7 @@
               </div>
             @endif
 
-            <div class="row g-4">
+            <div class="row g-4 mt-auto">
               <div class="col-sm-6">
                 <div class="mb-4 d-flex align-items-center">
                   <div class="badge me-3 rounded bg-card bg-opacity-20 p-2">
@@ -284,7 +284,7 @@
   {{-- 2. FUNDING PROGRESS WIDGET --}}
   <div class="col-lg-4 col-md-6">
     <div class="card h-100 border-0 shadow-sm">
-      <div class="card-header d-flex align-items-center justify-content-between border-bottom">
+      <div class="card-header d-flex align-items-center justify-content-between border-bottom py-4">
         <h5 class="card-title mb-0">{{ __('admin.Funding Overview') }}</h5>
         <div class="d-flex align-items-center gap-2">
           <span class="badge rounded-pill bg-label-success">{{ $fundingProgress }}%</span>
@@ -299,17 +299,17 @@
           @endif
         </div>
       </div>
-      <div class="card-body pt-4">
+      <div class="card-body pt-3">
         <div class="mb-4 d-flex align-items-center">
           <div class="badge me-3 rounded bg-label-success p-2">
             <i class="ti ti-currency-dollar ti-lg"></i>
           </div>
           <div>
-            <h4 class="mb-0 fw-bold">{{ number_format($raised) }} {{ $currencyCode }}</h4>
-            <small class="text-muted">{{ __('admin.raised_fund_egp') }}</small>
+            <h5 class="mb-0 fw-bold">{{ number_format($raised) }} {{ $currencyCode }}</h5>
+            <small class="text-muted mb-0">{{ __('admin.raised_fund_egp') }}</small>
           </div>
         </div>
-        <div class="progress mb-4" style="height: 10px">
+        <div class="progress mb-4" style="height: 8px">
           <div
             class="progress-bar bg-success"
             role="progressbar"
