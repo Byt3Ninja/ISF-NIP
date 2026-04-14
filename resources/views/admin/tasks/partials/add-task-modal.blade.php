@@ -91,6 +91,7 @@
         <hr class="my-4">
 
         {{-- Program & Assignees --}}
+        @if (isset($programs))
         <div class="mb-4">
           <p class="text-uppercase small fw-bold text-muted mb-3">{{ __('admin.assignment') }}</p>
           <div class="mb-4">
@@ -123,6 +124,7 @@
             </select>
           </div>
         </div>
+        @endif
 
         {{-- Divider --}}
         <hr class="my-4">
