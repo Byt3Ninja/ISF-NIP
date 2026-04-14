@@ -2,9 +2,23 @@
 
 @section('vendorstyle')
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
 @stop
 
-@php $authUser = auth()->user(); @endphp
+@php
+$authUser    = auth()->user();
+$_user       = $authUser;
+$permissions = [];
+$offcanvasTabs = [
+    ['target'=>'#vt-details',     'icon'=>'ti-info-circle', 'label'=>__('admin.Details'),     'active'=>true,  'show'=>true],
+    ['target'=>'#vt-submissions', 'icon'=>'ti-paperclip',   'label'=>__('admin.Submissions'), 'badge'=>['id'=>'vt-submissions-count','class'=>'bg-label-warning'], 'active'=>false, 'show'=>$authUser->hasAnyRole(['admin','sub-admin','organizationManager','mentor'])],
+    ['target'=>'#vt-feedback',    'icon'=>'ti-star',        'label'=>__('admin.feedback'),    'badge'=>['id'=>'vt-feedback-count',   'class'=>'bg-label-primary'], 'active'=>false, 'show'=>true],
+    ['target'=>'#vt-comments',    'icon'=>'ti-message',     'label'=>__('admin.Comments'),    'badge'=>['id'=>'vt-comment-count',    'class'=>'bg-label-danger bg-glow'], 'active'=>false, 'show'=>true],
+    ['target'=>'#vt-activity',    'icon'=>'ti-activity',    'label'=>__('admin.Activities'),  'badge'=>['id'=>'vt-activity-count',   'class'=>'bg-label-info bg-glow'],   'active'=>false, 'show'=>true],
+];
+@endphp
 
 @section('content')
 <div>
@@ -12,13 +26,17 @@
   @include('admin.tasks.partials.tasks-table')
   @include('admin.tasks.partials.add-task-modal')
   @include('admin.tasks.partials.view-task-modal')
+  @include('kanban.partials.kanban-vt-offcanvas')
 </div>
 @stop
 
 @section('scripts')
+<script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+<script src="/js/kanban/kanban-utils.js"></script>
+<script src="/js/kanban/kanban-renderers.js"></script>
 @stop
 
 @section('pagescripts')
@@ -26,6 +44,36 @@
 // ─── Global Data ────────────────────────────────────────────────────────────
 window.tasks    = @json($tasks);
 window.startups = @json($startups);
+window.authUser = {
+  id:          {{ $authUser->id }},
+  name:        @json($authUser->name ?? trim($authUser->first_name_en . ' ' . $authUser->last_name_en)),
+  role:        @json($authUser->roles->first()->name ?? 'N/A'),
+  avatar:      @json($authUser->image_url ?? '/images/placeholder.jpg'),
+  profile_url: '/dashboard/show/UserProfile/{{ $authUser->id }}'
+};
+
+window.KanbanConfig = {
+  profileBaseUrl: '/dashboard/users',
+  labels: {
+    noAttachments: '{{ __("admin.no_attachments") }}',
+    noActivities:  '{{ __("admin.no_activities") }}',
+    noComments:    '{{ __("admin.no_comments") }}',
+    noFeedback:    '{{ __("admin.no_feedback") }}',
+    noSubmissions: '{{ __("admin.no_submissions") }}',
+    passTask:      '{{ __("admin.pass_task") }}',
+    needsRevision: '{{ __("admin.needs_revision") }}',
+    pendingReview: '{{ __("admin.pending_review") }}',
+    approved:      '{{ __("admin.approved") }}',
+    rejected:      '{{ __("admin.rejected") }}',
+    remove:        '{{ __("admin.Remove") }}',
+    download:      '{{ __("admin.Download") }}',
+  },
+  priorityMap: {
+    Low:    { cls: 'bg-label-info',    dot: 'bg-info',    label: '{{ __("admin.priorityLow") }}'    },
+    Medium: { cls: 'bg-label-warning', dot: 'bg-warning', label: '{{ __("admin.priorityMedium") }}' },
+    High:   { cls: 'bg-label-danger',  dot: 'bg-danger',  label: '{{ __("admin.priorityHigh") }}'   },
+  },
+};
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const showAlert = (title, text, icon, confirmBtnText = 'Yes', showCancel = true) =>
@@ -136,12 +184,16 @@ $(function () {
       { data: 'priority' },
       { data: 'overallStatus' },
       { data: 'dueDate' },
-      { data: 'id' }
+      { data: 'id' },
+      { data: 'createdAt' }
     ],
     columnDefs: [
       {
         targets: 0, className: 'control', orderable: false, searchable: false,
         responsivePriority: 2, render: () => ''
+      },
+      {
+        targets: 8, visible: false, searchable: false
       },
       {
         targets: 1, responsivePriority: 4,
@@ -187,7 +239,7 @@ $(function () {
           `<span class="text-heading">${full.dueDate !== 'N/A' ? moment(full.dueDate, 'YYYY-MM-DD').format('YYYY-MM-DD') : 'N/A'}</span>`
       },
       {
-        targets: -1, searchable: false, orderable: false,
+        targets: 7, searchable: false, orderable: false,
         render: () => `
           <div class="d-flex align-items-center">
             <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill task-view"><i class="ti ti-eye ti-md"></i></a>
@@ -197,7 +249,7 @@ $(function () {
           </div>`
       }
     ],
-    order: [[5, 'desc']],
+    order: [[8, 'desc']],
     dom: '<"row"<"col-12 col-lg-9 d-flex flex-wrap align-items-center ps-0 ps-lg-3"l><"col-12 col-lg-3 dt-action-buttons text-xl-end text-lg-start text-md-end text-start d-flex align-items-center justify-content-end flex-md-row flex-column mb-6 mb-md-0 pe-0 pe-lg-2"fB>>t<"row px-6"<"col-sm-12 col-lg-6"i><"col-sm-12 col-lg-6 d-flex justify-content-end"p>>',
     language: {
       url: document.dir === 'rtl'
@@ -384,20 +436,24 @@ $(function () {
             : `<span class="avatar-initial rounded-circle bg-label-primary d-flex align-items-center justify-content-center fw-semibold" style="width:38px;height:38px;font-size:13px;">${initials}</span>`;
           return `
             <div class="d-flex align-items-center justify-content-between p-3 mb-2 rounded-3 border bg-light-subtle">
-              <div class="d-flex align-items-center gap-3">
+              <div class="d-flex align-items-center gap-3 me-4">
                 <a href="${a.profile_url}" target="_blank" class="flex-shrink-0 text-decoration-none">${avatarEl}</a>
                 <div>
                   <a href="${a.profile_url}" target="_blank" class="fw-semibold small text-body text-decoration-none d-flex align-items-center gap-1">
                     ${a.name}<i class="ti ti-external-link ti-xs text-muted"></i>
                   </a>
-                  <small class="text-muted"><i class="ti ti-clock ti-xs me-1"></i>{{ __('admin.last_updated') }}: ${a.lastUpdated}</small>
+                  <small class="text-muted"><i class="ti ti-clock ti-xs me-1"></i>{{ __('admin.last_updated') }}: ${moment(a.lastUpdated).format('YYYY-MM-DD')}</small>
                 </div>
               </div>
               <div class="d-flex align-items-center gap-2 flex-shrink-0">
                 <span class="badge ${aStatus.class}">${aStatus.title}</span>
-                <a href="${a.profile_url}" target="_blank" class="btn btn-sm btn-icon btn-outline-primary rounded-circle" title="{{ __('admin.Manage') }}">
-                  <i class="ti ti-settings ti-xs"></i>
-                </a>
+                @if ($_user->ableTo('tasks.show', $permissions))
+                  <button type="button"
+                    class="btn btn-sm btn-outline-primary task-review-btn"
+                    data-task-id="${data.id}">
+                    {{ __('admin.Review') }} <i class="ti ti-settings ti-xs ms-1"></i>
+                  </button>
+                @endif
               </div>
             </div>`;
         }).join('')
@@ -487,6 +543,158 @@ $(function () {
     `);
 
     $('#viewTaskModal').data('taskId', data.id).offcanvas('show');
+  });
+
+  const vtCommentQ = new Quill('#vt-comment-editor', { theme: 'snow', modules: { toolbar: '#vt-comment-toolbar' } });
+
+  // ─── Review Task (open kanban-vt-offcanvas) ───────────────────────────────
+  $(document).on('click', '.task-review-btn', function () {
+    const taskId = $(this).data('task-id');
+    $('#viewTaskModal').offcanvas('hide');
+
+    $.ajax({
+      url: `/dashboard/tasks/${taskId}`,
+      method: 'GET',
+      headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+      success: function (res) {
+        if (!res.success) return toastr.error('{{ __("admin.unexpected_error") }}');
+        const td   = res.data;
+        const p    = window.KanbanConfig.priorityMap[td.priority] ?? window.KanbanConfig.priorityMap['Medium'];
+        const sObj = statusObj[td.status] ?? { class: 'bg-label-secondary', title: td.status };
+
+        $('#vt-title').text(td.title);
+        $('#vt-description').html(td.description || '');
+        $('#vt-due-date').text(td.due_date || 'N/A');
+        $('#vt-priority').html(`<span class="badge ${p.cls} rounded-pill"><span class="d-inline-block rounded-circle me-1 ${p.dot}" style="width:6px;height:6px;"></span>${p.label}</span>`);
+        $('#vt-status').html(`<span class="badge ${sObj.class} rounded-pill">${sObj.title}</span>`);
+
+        // ── Creator ─────────────────────────────────────────────────────
+        $('#vt-creator-section').remove();
+        const c = td.creator;
+        if (c) {
+          const cAvatar = c.avatar
+            ? `<img src="${c.avatar}" class="rounded-circle" style="width:32px;height:32px;object-fit:cover;" alt="${c.name}">`
+            : `<span class="avatar-initial bg-label-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:12px;">${c.name.substring(0,2).toUpperCase()}</span>`;
+          $('#vt-description').after(`
+            <div id="vt-creator-section" class="mb-4 mt-3">
+              <span class="text-muted small d-block mb-2">{{ __('admin.Created_By') }}</span>
+              <div class="d-flex align-items-center gap-2 border rounded p-2 bg-body">
+                <a href="${c.profile_url}" target="_blank">${cAvatar}</a>
+                <div>
+                  <a href="${c.profile_url}" target="_blank" class="fw-semibold small text-body text-decoration-none">${c.name}</a>
+                  <small class="text-muted d-block text-uppercase">${roleObj[c.role] || c.role}</small>
+                </div>
+              </div>
+            </div>`);
+        }
+
+        // ── Assignees: startup + founder ─────────────────────────────────
+        const $list = $('#vt-assignees-list').empty();
+        if (td.assignees?.length) {
+          $list.closest('.mb-4').removeClass('d-none');
+          td.assignees.forEach((a, i) => {
+            const logoEl = a.logo
+              ? `<img src="${a.logo}" class="rounded-circle object-fit-cover" style="width:36px;height:36px;" alt="${a.name}">`
+              : `<span class="avatar-initial bg-label-info rounded-circle d-flex align-items-center justify-content-center fw-semibold" style="width:36px;height:36px;font-size:12px;">${(a.name||'?').substring(0,2).toUpperCase()}</span>`;
+            const founderHtml = a.founder
+              ? `<div class="d-flex align-items-center gap-2 mt-2 ps-1 border-start ms-2">
+                   ${a.founder.avatar
+                     ? `<img src="${a.founder.avatar}" class="rounded-circle" style="width:26px;height:26px;object-fit:cover;" alt="${a.founder.name}">`
+                     : `<span class="avatar-initial bg-label-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:26px;height:26px;font-size:10px;">${a.founder.name.substring(0,2).toUpperCase()}</span>`}
+                   <a href="${a.founder.profile_url}" target="_blank" class="small text-body text-decoration-none">${a.founder.name}</a>
+                   <span class="badge bg-label-primary" style="font-size:.65rem;">{{ __('admin.Founder') }}</span>
+                 </div>`
+              : '';
+            $list.append(`
+              <div class="${i > 0 ? 'border-top pt-3 mt-1' : ''}">
+                <div class="d-flex align-items-center justify-content-between">
+                  <div class="d-flex align-items-center gap-2">
+                    <a href="${a.profile_url}" target="_blank">${logoEl}</a>
+                    <a href="${a.profile_url}" target="_blank" class="fw-semibold small text-body text-decoration-none">${a.name}</a>
+                  </div>
+                  <span class="badge ${statusObj[a.status]?.class ?? 'bg-label-secondary'}">${statusObj[a.status]?.title ?? a.status}</span>
+                </div>
+                ${founderHtml}
+              </div>`);
+          });
+        } else {
+          $list.closest('.mb-4').addClass('d-none');
+        }
+
+        renderAttachmentsList(td.attachments, td.id, '#vt-attachments-list', false);
+        renderActivitiesList(td.activities,            '#vt-activities-list');
+        renderCommentsList(td.comments,                '#vt-comments-list');
+        renderFeedbackList(td.feedbacks,               '#vt-feedback-list');
+        renderSubmissionsList(td.submissions,           '#vt-submissions-list');
+
+        $('#vt-comment-count').text(td.comments?.length ?? 0);
+        $('#vt-feedback-count').text(td.feedbacks?.length ?? 0);
+        $('#vt-submissions-count').text(td.submissions?.length ?? 0);
+        $('#vt-activity-count').text(td.activities?.length ?? 0);
+
+        $('#vt-upload-btn-task-id').val(td.id);
+        $('#vt-send-comment-btn').data('task-id', td.id);
+        $('#vt-edit-trigger-btn').data('task-id', td.id);
+
+        bootstrap.Tab.getOrCreateInstance(
+          document.querySelector('#viewTaskOffcanvas .nav-tabs .nav-link')
+        ).show();
+        bootstrap.Offcanvas.getOrCreateInstance(
+          document.getElementById('viewTaskOffcanvas')
+        ).show();
+      },
+      error: () => toastr.error('{{ __("admin.unexpected_error") }}')
+    });
+  });
+
+  // ─── Send Comment (kanban-vt-offcanvas) ───────────────────────────────────
+  $(document).on('click', '#vt-send-comment-btn', function () {
+    const taskId  = $(this).data('task-id');
+    const $editor = document.querySelector('#vt-comment-editor .ql-editor');
+    const text    = $editor?.innerHTML?.trim();
+    if (!text || text === '<p><br></p>') return;
+
+    $.ajax({
+      url: `/dashboard/tasks/${taskId}/add-comment`,
+      method: 'POST',
+      data: { comment: text },
+      headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+      success: function (res) {
+        const c       = res.comment;
+        const isBlank = !$('#vt-comments-list').children().length ||
+                        $('#vt-comments-list').text().includes(window.KanbanConfig.labels.noComments);
+        if (isBlank) $('#vt-comments-list').html('');
+        $('#vt-comments-list').append(`
+          <div class="d-flex align-items-start gap-3 mb-3">
+            <div class="flex-shrink-0 mt-1">${buildAvatar(c.user, c.img_url, c.user_id)}</div>
+            <div class="flex-grow-1 bg-lighter rounded p-3">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="fw-semibold text-dark">${c.user}</span>
+                <span class="text-muted" style="font-size:.7rem;">${c.time}</span>
+              </div>
+              <div class="ql-editor p-0 small text-body" style="min-height:auto;">${c.text}</div>
+            </div>
+          </div>`);
+        $('#vt-comment-count').text(parseInt($('#vt-comment-count').text() || '0') + 1);
+        if ($editor) $editor.innerHTML = '';
+      },
+      error: () => toastr.error('{{ __("admin.unexpected_error") }}')
+    });
+  });
+
+  // ─── Submit Feedback (kanban-vt-offcanvas) ────────────────────────────────
+  $(document).on('click', '#vt-submit-feedback-btn', function () {
+    const taskId   = $('#vt-upload-btn-task-id').val();
+    const decision = $('input[name="vt_feedback_decision"]:checked').val();
+    const note     = $('#vt-fb-note').val().trim();
+    $.ajax({
+      url: `/dashboard/tasks/${taskId}/add-feedback`,
+      method: 'POST',
+      data: { decision, note },
+      headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+      success: res => toastr.success(res.message || '{{ __("admin.feedback_submitted") }}'),
+      error:   ()  => toastr.error('{{ __("admin.unexpected_error") }}')
+    });
   });
 
   // ─── Edit Task ────────────────────────────────────────────────────────────
@@ -633,11 +841,11 @@ $(function () {
             description:   rd.description,
             creator:       rd.creator ? {
               id:          rd.creator.id,
-              name:        rd.creator.name,
-              role:        rd.creator.roles?.[0]?.name ?? 'N/A',
-              avatar:      rd.creator.image_url ?? '/images/placeholder.jpg',
+              name:        rd.creator.name || ((rd.creator.first_name_en ?? '') + ' ' + (rd.creator.last_name_en ?? '')).trim() || window.authUser.name,
+              role:        rd.creator.roles?.[0]?.name ?? window.authUser.role,
+              avatar:      rd.creator.image_url ?? window.authUser.avatar,
               profile_url: `/dashboard/users/${rd.creator.id}`
-            } : null,
+            } : window.authUser,
             program:       { id: rd.program.id, title: rd.program.title },
             assignees:     rd.assignees.map(a => ({
               id:          a.id,
@@ -650,14 +858,16 @@ $(function () {
             priority:      rd.priority,
             overallStatus: rd.status,
             dueDate:       rd.due_date ? moment(rd.due_date, 'YYYY-MM-DD').format('YYYY-MM-DD') : 'N/A',
-            attachments:   rd.attachments || []
+            attachments:   rd.attachments || [],
+            createdAt:     rd.created_at ? Math.floor(new Date(rd.created_at).getTime() / 1000) : Math.floor(Date.now() / 1000)
           };
 
           if (isEdit) {
             window.dt_task.row($editRow).data(taskObj).draw(false);
             toastr.success('{{ __('admin.Task_updated_successfully.') }}');
           } else {
-            window.dt_task.row.add(taskObj).draw(false);
+            window.dt_task.row.add(taskObj);
+            window.dt_task.order([[8, 'desc']]).draw();
             toastr.success('{{ __('admin.Task_added_successfully.') }}');
           }
 
@@ -729,14 +939,14 @@ $(function () {
 
   // ── Select-all toggle ────────────────────────────────────────────────────
   const updateSelectAllText = ($select) => {
-    const $link   = $select.closest('.col-12').find('.select-all-toggle');
+    const $link   = $select.closest('#assignees-container, .col-12').find('.select-all-toggle');
     const total   = $select.find('option').length;
     const selected = ($select.val() || []).length;
     $link.text(selected === total && total > 0 ? '{{ __("admin.deselect_all") }}' : '{{ __("admin.select_all") }}');
   };
 
   $(document).on('click', '.select-all-toggle', function () {
-    const $select = $(this).closest('.col-12').find('select');
+    const $select = $(this).closest('#assignees-container, .col-12').find('select');
     const allOpts = $select.find('option').map((_, el) => el.value).get();
     $select.val(($select.val() || []).length === allOpts.length ? null : allOpts).trigger('change');
   });
