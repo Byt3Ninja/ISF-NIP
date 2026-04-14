@@ -511,7 +511,59 @@ class ClientCompanyController extends Controller
                 'count' => $company->user?->mentorship?->whereNotNull('rating')->where('done', 1)->count() ?? 0, // Count of mentorship sessions
             ],
         ];
+        $totalEmployees  = $company?->total_employees;
+        $maleEmployees   = $company?->male_employees;
+        $femaleEmployees = $company?->female_employees;
+
+        $hasTotal  = is_int($totalEmployees) && $totalEmployees > 0;
+        $hasMale   = is_int($maleEmployees);
+        $hasFemale = is_int($femaleEmployees);
+
+        $malePct   = ($hasTotal && $hasMale)   ? (int) round(($maleEmployees   / $totalEmployees) * 100) : 0;
+        $femalePct = ($hasTotal && $hasFemale) ? (int) round(($femaleEmployees / $totalEmployees) * 100) : 0;
+
+        $showDistributionBar = $hasTotal && ($hasMale || $hasFemale);
+
+        $naLabel = __('admin.N/A');
+
+        $employeesKpis = [
+            [
+                'title'       => __('startup.total_employees'),
+                'value'       => $hasTotal ? (string) $totalEmployees : $naLabel,
+                'na'          => !$hasTotal,
+                'icon'        => 'ti-users-group',
+                'color'       => 'success',
+                'type'        => 'split',
+                'has_male'    => $hasTotal && $hasMale,
+                'has_female'  => $hasTotal && $hasFemale,
+                'male_value'  => $maleEmployees,
+                'female_value'=> $femaleEmployees,
+                'male_pct'    => $malePct,
+                'female_pct'  => $femalePct,
+                'show_bar'    => $showDistributionBar,
+            ],
+            [
+                'title' => __('startup.male_employees'),
+                'value' => ($hasTotal && $hasMale) ? (string) $maleEmployees : $naLabel,
+                'na'    => !($hasTotal && $hasMale),
+                'icon'  => 'ti-gender-male',
+                'color' => 'primary',
+                'type'  => 'pct',
+                'pct'   => $malePct,
+            ],
+            [
+                'title' => __('startup.female_employees'),
+                'value' => ($hasTotal && $hasFemale) ? (string) $femaleEmployees : $naLabel,
+                'na'    => !($hasTotal && $hasFemale),
+                'icon'  => 'ti-gender-female',
+                'color' => 'info',
+                'type'  => 'pct',
+                'pct'   => $femalePct,
+            ],
+        ];
+
         return view('admin/clients/startup/company_profile', compact('company',
+        'employeesKpis',
         'formTitle',
         'formData',
         'evaluationForm', 
