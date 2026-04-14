@@ -77,8 +77,12 @@
         </div>
 
         <div class="mb-4">
-          <span class="text-muted small d-block mb-1">{{ $_user->ableTo('tasks.update', $permissions) ? __('admin.provided_resources') : __('admin.Attachments') }}</span>
-          <div id="vt-attachments-list" class="d-flex flex-column gap-2 small mb-3"></div>
+          <div className="w-100 align-items-center">
+            <span class="text-muted small">{{ $_user->ableTo('tasks.update', $permissions) ? __('admin.provided_resources') : __('admin.Attachments') }}</span>
+            <span id="vt-attachments-count" class="badge badge-center bg-glow bg-label-secondary text-dark rounded-pill ms-3"></span>
+          </div>
+
+          <div id="vt-attachments-list" class="d-flex flex-column gap-2 small my-3"></div>
 
           {{-- Dropzone Upload --}}
           <div class="border-top pt-3">

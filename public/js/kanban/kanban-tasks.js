@@ -151,6 +151,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
     }
 
     renderAttachmentsList(taskData.attachments, taskId, '#vt-attachments-list');
+    $('#vt-attachments-count').text(taskData.attachments.length ?? 0);
     renderActivitiesList(taskData.activities, '#vt-activities-list');
     renderCommentsList(taskData.comments, '#vt-comments-list');
     renderFeedbackList(taskData.feedbacks || [], '#vt-feedback-list');

@@ -27,6 +27,7 @@ $offcanvasTabs = [
   @include('admin.tasks.partials.add-task-modal')
   @include('admin.tasks.partials.view-task-modal')
   @include('kanban.partials.kanban-vt-offcanvas')
+  @include('kanban.partials.kanban-archived-offcanvas')
 </div>
 @stop
 
@@ -622,6 +623,7 @@ $(function () {
         }
 
         renderAttachmentsList(td.attachments, td.id, '#vt-attachments-list', false);
+        $('#vt-attachments-count').text(td.attachments.length ?? 0);
         renderActivitiesList(td.activities,            '#vt-activities-list');
         renderCommentsList(td.comments,                '#vt-comments-list');
         renderFeedbackList(td.feedbacks,               '#vt-feedback-list');
