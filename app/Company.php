@@ -116,12 +116,18 @@ class Company extends Model
         'mission',
         'why_this_startup',
         'startup_expertise',
+        'total_employees',
+        'male_employees',
+        'female_employees',
     ];
 
 
     protected $casts = [
         'business_categories' => 'array',
         'product_photo' => 'array',
+        'total_employees' => 'integer',
+        'male_employees' => 'integer',
+        'female_employees' => 'integer',
     ];
     public static function logo_handler( $img )
     {

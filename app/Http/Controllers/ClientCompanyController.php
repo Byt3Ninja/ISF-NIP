@@ -4723,13 +4723,87 @@ class ClientCompanyController extends Controller
         }
     }
 
-    public function saveStatistics (Request $request, $id)
+    public function saveStatistics(Request $request, $id = null)
     {
-        // $company = Company::where('id', $id)->first();
-        // $female_employees = $request->female_employees;
-        // $male_employees = $request->male_employees;
-        // $total_employees = $request->total_employees;
-        // $company->save();
-        return response()->json(['status' => 'success']);
+        if (isset($id) && !is_null($id)) {
+            $user = User::where('company_id', $id)->first();
+        } else {
+            $user = auth()->user();
+        }
+
+        $companyId = $user->company_id ?? null;
+        if (!$companyId) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('admin.no_company_associated'),
+                ], 404);
+            }
+            return redirect()->back()->with(['msg' => 'NoHaveCompany', 'class' => 'danger']);
+        }
+
+        $company = Company::find($companyId);
+        if (!$company) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('admin.no_company_associated'),
+                ], 404);
+            }
+            return redirect()->back()->with(['msg' => 'NoHaveCompany', 'class' => 'danger']);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'total_employees'  => 'required|integer|min:0|max:999999',
+            'male_employees'   => 'nullable|integer|min:0|max:999999',
+            'female_employees' => 'nullable|integer|min:0|max:999999',
+        ], [
+            'total_employees.required' => __('admin.this_field_is_required'),
+            'total_employees.integer'  => __('admin.please_enter_a_valid_number'),
+            'total_employees.min'      => __('admin.value_cannot_be_less_than_zero'),
+            'total_employees.max'      => __('admin.please_enter_a_valid_number'),
+            'male_employees.integer'   => __('admin.please_enter_a_valid_number'),
+            'male_employees.min'       => __('admin.value_cannot_be_less_than_zero'),
+            'male_employees.max'       => __('admin.please_enter_a_valid_number'),
+            'female_employees.integer' => __('admin.please_enter_a_valid_number'),
+            'female_employees.min'     => __('admin.value_cannot_be_less_than_zero'),
+            'female_employees.max'     => __('admin.please_enter_a_valid_number'),
+        ]);
+
+        $validator->after(function ($v) use ($request) {
+            $male   = $request->input('male_employees');
+            $female = $request->input('female_employees');
+            $total  = $request->input('total_employees');
+
+            if ($male !== null && $male !== '' && $female !== null && $female !== '' && $total !== null && $total !== '') {
+                if (((int) $male + (int) $female) !== (int) $total) {
+                    $v->errors()->add('female_employees', __('admin.employee_gender_sum_mismatch'));
+                }
+            }
+        });
+
+        if ($validator->fails()) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'errors'  => $validator->errors(),
+                ], 422);
+            }
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $company->total_employees  = $request->input('total_employees');
+        $company->male_employees   = $request->input('male_employees');
+        $company->female_employees = $request->input('female_employees');
+        $company->save();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('admin.employee_statistics_updated'),
+            ]);
+        }
+
+        return redirect()->back()->with(['msg' => __('admin.employee_statistics_updated'), 'class' => 'success']);
     }
 }
