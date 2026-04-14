@@ -89,6 +89,7 @@ class Company extends Model
         'pitch_deck',
         'financial_plan',
         'business_model_description',
+        'mvp_prototype_link',
         'business_plan_description',
         'country_code',
         'pitch_deck_description',

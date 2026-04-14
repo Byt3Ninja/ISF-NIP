@@ -563,6 +563,7 @@ return [
   'support_and_mentorship_success' => 'Support & Mentorship needs saved successfully.',
   
   'mvp_prototype_link' => 'MVP / Prototype Link',
+  'mvp_prototype_link_invalid_url' => 'Enter a valid URL.',
   'view_prototype' => 'View Prototype',
 
   'additional_info' => 'Additional Info',

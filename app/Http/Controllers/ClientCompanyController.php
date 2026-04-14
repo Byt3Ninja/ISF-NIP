@@ -1469,9 +1469,12 @@ class ClientCompanyController extends Controller
                     'business_model' => 'required',
                     'business_model_description' => 'required|string|max:255',
                     'business_plan' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx|max:20480', // max limit to be defined later from admin panel settings
+                    'mvp_prototype_link' => 'nullable|url|max:500',
                 ], [
                     'business_model.required' => __('admin.business_model is required'),
                     'business_model_description.required' => __('admin.business_model_description is required'),
+                    'mvp_prototype_link.url' => __('startup.mvp_prototype_link_invalid_url'),
+                    'mvp_prototype_link.max' => __('startup.mvp_prototype_link_invalid_url'),
                 ]);
 
                 if ($request->hasFile('business_plan')) {
@@ -1499,6 +1502,7 @@ class ClientCompanyController extends Controller
                 $result->other_business_model = $data['other_business_model'];
                 $result->business_model_description = $data['business_model_description'];
                 $result->business_plan = $uploadedFile;
+                $result->mvp_prototype_link = $request->input('mvp_prototype_link');
             }
             if($result->name_en == null){
                 return redirect()->back()->with(['msg' => 'name_is_required', 'class' => 'danger']);
