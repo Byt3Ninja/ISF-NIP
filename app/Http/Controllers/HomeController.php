@@ -2715,7 +2715,7 @@ class HomeController extends Controller
         $filtration = ScreeningEvaluation::getMyEvaluationStatus( $filtration, $getNotEvaluatedCompanies, $established_evaluations );
         $evaluation = ScreeningEvaluation::getMyEvaluationStatus( $evaluation, $getNotEvaluatedCompanies, $established_evaluations );
 
-        $notRated_men = DB::select($notRated_men, [$dateRate, Auth::id()]);
+        $notRated_men = DB::select($notRated_men, [ Auth::id()]);
         dd($notRated_men);
         $notRated_men = collect($notRated_men);
         // check for rating services
