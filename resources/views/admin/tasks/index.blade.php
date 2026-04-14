@@ -27,6 +27,7 @@ $offcanvasTabs = [
   @include('admin.tasks.partials.add-task-modal')
   @include('admin.tasks.partials.view-task-modal')
   @include('kanban.partials.kanban-vt-offcanvas')
+  @include('kanban.partials.kanban-archived-offcanvas')
 </div>
 @stop
 
@@ -306,15 +307,15 @@ $(function () {
       );
 
       // Status dropdown — triggers raw-data custom search
-      const $statusSel = $(`<select id="taskStatus" class="form-select text-capitalize" style="min-width:150px;">
-                              <option value="">{{ __('admin.All_statuses') }}</option>
-                            </select>`)
-        .appendTo($filterWrap)
-        .on('change', () => api.draw());
+      // const $statusSel = $(`<select id="taskStatus" class="form-select text-capitalize" style="min-width:150px;">
+      //                         <option value="">{{ __('admin.All_statuses') }}</option>
+      //                       </select>`)
+      //   .appendTo($filterWrap)
+      //   .on('change', () => api.draw());
 
-      Object.entries(statusObj).forEach(([key, val]) =>
-        $statusSel.append(`<option value="${key}">${val.title}</option>`)
-      );
+      // Object.entries(statusObj).forEach(([key, val]) =>
+      //   $statusSel.append(`<option value="${key}">${val.title}</option>`)
+      // );
 
       // Fix select/input sizes injected by DataTables
       setTimeout(() => {
@@ -622,6 +623,7 @@ $(function () {
         }
 
         renderAttachmentsList(td.attachments, td.id, '#vt-attachments-list', false);
+        $('#vt-attachments-count').text(td.attachments.length ?? 0);
         renderActivitiesList(td.activities,            '#vt-activities-list');
         renderCommentsList(td.comments,                '#vt-comments-list');
         renderFeedbackList(td.feedbacks,               '#vt-feedback-list');

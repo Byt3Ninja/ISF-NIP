@@ -1,76 +1,55 @@
 @extends('layouts.admin')
 
-{{-- @php
-$cycles = [
-  ['id' => 1,  'title' => 'Cycle 1',  'completed' => 3,  'pending' => 2],
-  ['id' => 2,  'title' => 'Cycle 2',  'completed' => 5,  'pending' => 1],
-  ['id' => 3,  'title' => 'Cycle 3',  'completed' => 2,  'pending' => 4],
-  ['id' => 4,  'title' => 'Cycle 4',  'completed' => 7,  'pending' => 0],
-  ['id' => 5,  'title' => 'Cycle 5',  'completed' => 1,  'pending' => 6],
-  ['id' => 6,  'title' => 'Cycle 6',  'completed' => 4,  'pending' => 3],
-  ['id' => 7,  'title' => 'Cycle 7',  'completed' => 6,  'pending' => 2],
-  ['id' => 8,  'title' => 'Cycle 8',  'completed' => 0,  'pending' => 5],
-  ['id' => 9,  'title' => 'Cycle 9',  'completed' => 8,  'pending' => 1],
-  ['id' => 10, 'title' => 'Cycle 10', 'completed' => 2,  'pending' => 2],
-  ['id' => 11, 'title' => 'Cycle 11', 'completed' => 9,  'pending' => 0],
-  ['id' => 12, 'title' => 'Cycle 12', 'completed' => 3,  'pending' => 4],
-];
-@endphp --}}
+@section('vendorstyle')
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+@stop
 
 @section('content')
+
+@include('admin.tasks.partials.tasks-count-cards')
+
 <div class="card">
   <div class="card-header d-flex justify-content-between align-items-center border-bottom">
     <h5 class="card-title mb-0">{{ __('admin.tasks') }}</h5>
-    <x-export-dropdown callback="exportCycles" />
+    <div class="d-flex align-items-center gap-2">
+      <x-export-dropdown callback="exportCycles" />
+      <button class="btn btn-primary ms-2" data-bs-toggle="offcanvas" data-bs-target="#addTaskModal">
+        <i class="ti ti-plus"></i>
+        <span class="d-none d-md-inline ms-md-2">{{ __('admin.add_new_task') }}</span>
+      </button>
+    </div>
   </div>
   <div class="card-datatable table-responsive p-0">
     <table id="cyclesTable" class="table align-middle mb-0" style="width:100%">
       <thead class="table-light">
         <tr>
           <th>{{ __('admin.Program') }}</th>
-          <th>{{ __('admin.Completed') }}</th>
+          <th>{{ __('admin.Total') }}</th>
           <th>{{ __('admin.Pending') }}</th>
-          <th>{{ __('admin.Total')  }}</th>
-          <th>{{ __('admin.overall_status') }}</th>
+          <th>{{ __('admin.In_Progress') }}</th>
+          <th>{{ __('admin.In_Review') }}</th>
+          <th>{{ __('admin.Completed') }}</th>
           <th class="text-center">{{ __('admin.actions') }}</th>
         </tr>
       </thead>
       <tbody>
         @foreach($cycles as $cycle)
           @php
-            $total    = $cycle['completed'] + $cycle['pending'];
-            $progress = $total > 0 ? round(($cycle['completed'] / $total) * 100) : 0;
+            $total      = ($cycle['pending'] ?? 0) + ($cycle['inprogress'] ?? 0) + ($cycle['inreview'] ?? 0) + ($cycle['completed'] ?? 0);
           @endphp
           <tr>
             <td><strong>{{ $cycle['title'] }}</strong></td>
-            <td><span class="badge bg-label-success fw-bold">{{ $cycle['completed'] }}</span></td>
-            <td><span class="badge bg-label-warning fw-bold">{{ $cycle['pending'] }}</span></td>
             <td><span class="badge bg-label-info fw-bold">{{ $total }}</span></td>
-            <td>
-              @if($cycle['pending'] == 0 && $total > 0)
-                <span class="badge bg-label-success">{{ __('admin.Completed') }}</span>
-              @elseif($cycle['completed'] == 0)
-                <span class="badge bg-label-secondary">{{ __('admin.NotStarted') }}</span>
-              @else
-                <div class="progress" style="height: 8px;">
-                  <div
-                    class="progress-bar bg-primary"
-                    role="progressbar"
-                    style="width: {{ $progress }}%"
-                    aria-valuenow="{{ $progress }}"
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                  ></div>
-                </div>
-                <small>{{ $progress }}% {{ __('admin.Done') }}</small>
-              @endif
-            </td>
+            <td><span class="badge bg-label-info fw-bold">{{ $cycle['pending'] ?? 0 }}</span></td>
+            <td><span class="badge bg-label-info fw-bold">{{ $cycle['in_progress'] ?? 0 }}</span></td>
+            <td><span class="badge bg-label-info fw-bold">{{ $cycle['in_review'] ?? 0 }}</span></td>
+            <td><span class="badge bg-label-info fw-bold">{{ $cycle['completed'] ?? 0 }}</span></td>
             <td class="text-center">
               <a
                 href="{{ route('mentorshipTasks.index', ['cycle_id' => $cycle['id']]) }}"
                 class="btn btn-sm btn-primary"
               >
-                <i class="ti ti-eye me-1"></i> {{ __('admin.view_tasks') }}
+                <i class="ti ti-eye me-2"></i> {{ __('admin.view_tasks') }}
               </a>
             </td>
           </tr>
@@ -79,14 +58,19 @@ $cycles = [
     </table>
   </div>
 </div>
+
+@include('admin.tasks.partials.add-task-modal')
 @endsection
 
 @section('scripts')
+<script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
+<script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
+<script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
 <script>
 $(document).ready(function () {
 
   const table = $('#cyclesTable').DataTable({
-    ...getSharedDataTableConfig({ title: 'Session_Tasks', actionsIndex: 5 }),
+    ...getSharedDataTableConfig({ title: 'Session_Tasks', actionsIndex: 6 }),
     dom: '<"row"<"col-12 col-md-9 d-flex flex-wrap flex-md-nowrap align-items-center"l><"col-12 col-md-3 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6 d-flex justify-content-end"p>>',
     initComplete: function () {
       const api = this.api();
@@ -159,8 +143,238 @@ $(document).ready(function () {
     if (selector) {
       table.button(selector).trigger();
     }
+  };  
+});
+
+// ─── Validation & Form Logic ──────────────────────────────────────────────────
+(function () {
+  const form = document.getElementById('addNewTaskForm');
+
+  const fv = FormValidation.formValidation(form, {
+    fields: {
+      taskTitle:       { validators: { notEmpty: { message: '{{ __('admin.please_enter_task_title') }}' }, stringLength: { max: 200, message: '{{ __('admin.task_title_max_length') }}' } } },
+      taskDescription: { validators: { stringLength: { max: 2000, message: '{{ __('admin.task_description_max_length') }}' } } },
+      taskProgram:     { validators: { notEmpty: { message: '{{ __('admin.please_select_program') }}' } } },
+      taskPriority:    { validators: { notEmpty: { message: '{{ __('admin.please_select_priority') }}' } } },
+      taskStatus:      { validators: { notEmpty: { message: '{{ __('admin.please_select_status') }}' } } },
+      'taskAssignees[]': { validators: { notEmpty: { message: '{{ __('admin.please_select_assignee') }}' } } }
+    },
+    plugins: {
+      trigger:    new FormValidation.plugins.Trigger(),
+      bootstrap5: new FormValidation.plugins.Bootstrap5({ eleValidClass: '', rowSelector: '.mb-4' }),
+      autoFocus:  new FormValidation.plugins.AutoFocus()
+    }
+  });
+
+  const resetForm = () => {
+    fv.resetForm(true);
+    $('.data-submit').prop('disabled', false);
+    form.reset();
+    $('#task-due-date').val('');
+    ['#task-program', '#task-priority', '#task-status', '#task-assignees'].forEach(sel =>
+      $(sel).val('').trigger('change')
+    );
+    setTimeout(() => fv.resetForm(true), 10);
+    $(form).removeData('edit-row');
+    $('#existing-attachments-list').empty();
+    $('#existing-attachments').hide();
+    $('#addTaskModalLabel').text('{{ __('admin.add_new_task') }}');
+    $('.data-submit').text('{{ __('admin.Submit') }}');
   };
 
-});
+  // ── Submit ──────────────────────────────────────────────────────────────
+  let isSubmitting = false;
+  $('.data-submit').on('click', function (e) {
+    e.preventDefault();
+    if (isSubmitting) return;
+
+    fv.validate().then(status => {
+      if (status !== 'Valid') return;
+
+      isSubmitting = true;
+      const $btn = $('.data-submit');
+      $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>{{ __('admin.submit') }}');
+
+      const formData = new FormData(form);
+
+      // Append normalised field names
+      formData.set('title',       formData.get('taskTitle'));
+      formData.set('description', formData.get('taskDescription'));
+      formData.set('program_id',  formData.get('taskProgram') ? Number(formData.get('taskProgram')) : null);
+      formData.set('priority',    formData.get('taskPriority'));
+      formData.set('status',      formData.get('taskStatus'));
+      formData.set('due_date',    formData.get('taskDueDate'));
+      ['taskTitle','taskDescription','taskProgram','taskPriority','taskStatus','taskDueDate'].forEach(k => formData.delete(k));
+
+      // Assignees — delete the form field name and re-append as 'assignees[]'
+      formData.delete('taskAssignees[]');
+      ($('#task-assignees').val() || []).forEach(id => formData.append('assignees[]', id));
+
+      if (!window.dt_task) return Swal.fire('{{ __('admin.error') }}', '{{ __('admin.table_not_initialized') }}', 'error');
+
+      const $editRow = $(form).data('edit-row');
+      const taskId   = $editRow ? window.dt_task.row($editRow).data().id : null;
+      const isEdit   = !!$editRow;
+      const url      = isEdit ? `/dashboard/tasks/${taskId}` : '/dashboard/tasks';
+
+      if (isEdit) formData.append('_method', 'PUT');
+
+      $.ajax({
+        url,
+        method: 'POST',
+        dataType: 'json',
+        processData: false,
+        contentType: false,
+        data: formData,
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+        success: function (response) {
+          const rd = response.data;
+          const taskObj = {
+            id:            rd.id,
+            title:         rd.title,
+            description:   rd.description,
+            creator:       rd.creator ? {
+              id:          rd.creator.id,
+              name:        rd.creator.name || ((rd.creator.first_name_en ?? '') + ' ' + (rd.creator.last_name_en ?? '')).trim() || window.authUser.name,
+              role:        rd.creator.roles?.[0]?.name ?? window.authUser.role,
+              avatar:      rd.creator.image_url ?? window.authUser.avatar,
+              profile_url: `/dashboard/users/${rd.creator.id}`
+            } : window.authUser,
+            program:       { id: rd.program.id, title: rd.program.title },
+            assignees:     rd.assignees.map(a => ({
+              id:          a.id,
+              name:        a.name || a.name_en || a.name_ar || 'Unknown',
+              status:      a.pivot?.status?.toLowerCase() || 'pending',
+              lastUpdated: a.pivot?.last_updated ? a.pivot.last_updated.split(' ')[0] : 'N/A',
+              logo:        a.logo || null,
+              profile_url: `/dashboard/companyProfile/${a.id}`
+            })),
+            priority:      rd.priority,
+            overallStatus: rd.status,
+            dueDate:       rd.due_date ? moment(rd.due_date, 'YYYY-MM-DD').format('YYYY-MM-DD') : 'N/A',
+            attachments:   rd.attachments || [],
+            createdAt:     rd.created_at ? Math.floor(new Date(rd.created_at).getTime() / 1000) : Math.floor(Date.now() / 1000)
+          };
+
+          if (isEdit) {
+            window.dt_task.row($editRow).data(taskObj).draw(false);
+            toastr.success('{{ __('admin.Task_updated_successfully.') }}');
+          } else {
+            window.dt_task.row.add(taskObj);
+            window.dt_task.order([[8, 'desc']]).draw();
+            toastr.success('{{ __('admin.Task_added_successfully.') }}');
+          }
+
+          $('#addTaskModal').offcanvas('hide');
+          resetForm();
+        },
+        error: xhr => toastr.error(xhr.responseJSON?.message || '{{ __('admin.unexpected_error') }}'),
+        complete: () => {
+          isSubmitting = false;
+          $('.data-submit').prop('disabled', false).text('{{ __('admin.submit') }}');
+        }
+      });
+    });
+  });
+
+  // ── Modal events ────────────────────────────────────────────────────────
+  $('#addTaskModal').on('hidden.bs.offcanvas', resetForm);
+    form.addEventListener('submit', e => e.preventDefault());
+    document.querySelector('#task-due-date')?.flatpickr({ enableTime: false, dateFormat: 'Y-m-d', minDate: 'today' });
+
+    // ── Select2 validation triggers ─────────────────────────────────────────
+    $('#task-program, #task-priority, #task-status').on('select2:select select2:unselect change', function () {
+      fv.revalidateField(this.name);
+    });
+    $('#task-assignees').on('select2:select select2:unselect change', function () {
+      fv.revalidateField(this.name);
+    });
+
+    // ── Filter assignees by program (add mode) / show all (edit mode) ────────
+    $('#task-program').on('select2:select change', function () {
+      const programId  = $(this).val();
+      const $sel       = $('#task-assignees');
+      const currValues = $sel.val() || [];
+      const isEditMode = $('#addNewTaskForm').data('edit-row') !== undefined;
+
+      const assignees = isEditMode
+        ? (startups || [])
+        : (startups || []).filter(s => s.cycle === +programId);
+
+      $sel.empty();
+      assignees.forEach(a => $sel.append(`<option value="${a.id}">${a.name ?? a.name_en}</option>`));
+      $sel.val(currValues.filter(v => assignees.some(a => a.id == v))).trigger('change');
+      fv.revalidateField('taskAssignees[]');
+      $('#assignees-container').show();
+    });
+
+    // ── File upload ──────────────────────────────────────────────────────────
+    $('#task-upload').on('change', function () {
+      const files      = Array.from(this.files);
+      if (!files.length) return;
+
+      const maxSize    = 10 * 1024 * 1024;
+      const errors     = [];
+      const validFiles = files.filter(file => {
+        if (file.size > maxSize) { errors.push(`{{ __('admin.file_exceeds_10_limit') }} (${file.name})`); return false; }
+        return true;
+      });
+
+      if (errors.length) {
+        $('#fileError').html(errors.join('<br>')).show();
+        $('#fileName').hide();
+        $(this).val('');
+        return;
+      }
+
+      $('#fileError').hide();
+      $('#fileName').html(validFiles.map(f => `<div><i class="ti ti-paperclip me-1"></i>${f.name}</div>`).join('')).show();
+    });
+
+    // ── Select-all toggle ────────────────────────────────────────────────────
+    const updateSelectAllText = ($select) => {
+      const $link   = $select.closest('#assignees-container, .col-12').find('.select-all-toggle');
+      const total   = $select.find('option').length;
+      const selected = ($select.val() || []).length;
+      $link.text(selected === total && total > 0 ? '{{ __("admin.deselect_all") }}' : '{{ __("admin.select_all") }}');
+    };
+
+    $(document).on('click', '.select-all-toggle', function () {
+      const $select = $(this).closest('#assignees-container, .col-12').find('select');
+      const allOpts = $select.find('option').map((_, el) => el.value).get();
+      $select.val(($select.val() || []).length === allOpts.length ? null : allOpts).trigger('change');
+    });
+
+    $(document).on('change', '.select2', function () { updateSelectAllText($(this)); });
+
+    // ── Remove existing attachment ───────────────────────────────────────────
+    $(document).on('click', '.remove-existing-attachment', function () {
+      const $btn     = $(this);
+      const filename = $btn.data('filename');
+      const taskId   = $btn.data('task-id');
+
+      $.ajax({
+        url: `/dashboard/tasks/${taskId}/attachments/${encodeURIComponent(filename)}`,
+        method: 'DELETE',
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+        success: function (response) {
+          $btn.closest('[data-filename]').remove();
+          if (!$('#existing-attachments-list').children().length) $('#existing-attachments').hide();
+
+          // Sync DataTable row data
+          const $row = $('#addNewTaskForm').data('edit-row');
+          if ($row && window.dt_task) {
+            const rowData = window.dt_task.row($row).data();
+            if (rowData) {
+              rowData.attachments = (rowData.attachments || []).filter(a => a.name !== filename);
+              window.dt_task.row($row).data(rowData).draw(false);
+            }
+          }
+          toastr.success(response.message || '{{ __('admin.attachment_removed') }}');
+        },
+        error: xhr => toastr.error(xhr.responseJSON?.message || '{{ __('admin.unexpected_error') }}')
+      });
+    });
+})();
 </script>
 @endsection

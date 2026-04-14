@@ -15,21 +15,34 @@ function buildAttachmentItem(att, taskId, canDelete) {
          <i class="ti ti-trash ti-xs"></i>
        </button>`
     : '';
+
+  const createdAt = att.created_at
+    ? moment(att.created_at).format('YYYY-MM-DD h:mm')
+    : '';
+
   return `
-    <div class="d-flex align-items-center justify-content-between border rounded p-2 bg-lighter attachment-item" id="att-row-${att.id}">
-      <a href="${att.url}" target="_blank"
-         class="text-body fw-medium text-truncate d-flex align-items-center gap-1 flex-grow-1" style="min-width:0;">
-        <i class="ti ti-paperclip ti-xs flex-shrink-0 text-primary"></i>
-        <span class="text-truncate">${att.name}</span>
-      </a>
-      <div class="d-flex align-items-center gap-1 flex-shrink-0 ms-2">
-        <a href="${att.url}" download="${att.name}"
-           class="btn btn-icon btn-sm btn-text-secondary rounded-circle"
-           title="${window.KanbanConfig.labels.download}">
-          <i class="ti ti-download ti-xs"></i>
+    <div class="d-flex flex-column border rounded p-2 bg-lighter attachment-item" id="att-row-${att.id}">
+      
+      <div class="d-flex align-items-center justify-content-between">
+        <a href="${att.url}" target="_blank"
+           class="text-body fw-medium text-truncate d-flex align-items-center gap-1 flex-grow-1" style="min-width:0;">
+          <i class="ti ti-paperclip ti-xs flex-shrink-0 text-primary"></i>
+          <span class="text-truncate">${att.name}</span>
         </a>
-        ${deleteBtn}
+        <div class="d-flex align-items-center gap-1 flex-shrink-0 ms-2">
+          <a href="${att.url}" download="${att.name}"
+             class="btn btn-icon btn-sm btn-text-secondary rounded-circle"
+             title="${window.KanbanConfig.labels.download}">
+            <i class="ti ti-download ti-xs"></i>
+          </a>
+          ${deleteBtn}
+        </div>
       </div>
+
+      <small class="text-muted mt-1">
+        ${createdAt}
+      </small>
+
     </div>`;
 }
 
