@@ -385,7 +385,7 @@ return [
   'other_op_expenses' => 'مصاريف تشغيلية أخرى',
   'ebitda' => 'EBITDA (الربح قبل الفوائد والضرائب والإهلاك والإطفاء)',
   'depreciation_and_amortization' => 'الإهلاك والإطفاء',
-  'ebit' => 'EBIT (الربح قبل الفوائد والضرائب)',
+  'ebit' => 'EBIT (الدخل التشغيلي)',
   'interest' => 'الفوائد',
   'taxes' => 'الضرائب',
   'net_profit' => 'صافي الربح',
