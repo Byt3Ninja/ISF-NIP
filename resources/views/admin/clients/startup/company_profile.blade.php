@@ -200,10 +200,9 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
             {{ __('admin.Contact') }} <i class="ti ti-message ms-2"></i>
           </button>
         @endif
-        <!-- Replace href with mvp_prototype_link (remove after integration)  -->
-        <!-- Prototype Link -->
-        @if (isset($company->mvp_prototype_link))
-        <a href="https://www.google.com" class="btn btn-primary shadow-sm border">
+        @php $mvpLink = trim((string) ($company->mvp_prototype_link ?? '')); @endphp
+        @if ($mvpLink !== '')
+        <a href="{{ $mvpLink }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary shadow-sm border">
           {{ __('startup.view_prototype') }} <i class="ti ti-eye ms-2"></i>
         </a>
         @endif
