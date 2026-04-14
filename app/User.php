@@ -40,7 +40,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $fillable = [
         'first_name_en', 'last_name_en', 'first_name_ar', 'last_name_ar', 'guardian', 'gender', 'age', 'country_code', 'phone', 'country_code_w_a', 'whatsapp', 'email', 'new_email', 'title_ar', 'title_en', 'HaveCompany', 'company_id','country_id', 'state_id', 'city_id', 'password', 'provider', 'provider_id', 'google_id','email_verified_at','img_url',
-        'PageId','dob','academic_stat','university','faculty','employer','expertise', 'language','currency','timezone','houre_rate','zip_code','address', 'google2fa_secret', 'accept_email', 'accept_whatsapp', 'accept_pusher'];
+        'PageId','dob','academic_stat','national_id','university','faculty','employer','expertise', 'language','currency','timezone','houre_rate','zip_code','address', 'google2fa_secret', 'accept_email', 'accept_whatsapp', 'accept_pusher'];
     /**
      * The attributes that should be hidden for arrays.
      *

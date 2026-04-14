@@ -26,7 +26,7 @@ class UpdateClientProfileRequest extends FormRequest
     {
        $id = Auth::user()->id;
 
-        return [
+        $rules = [
             'first_name_en' => 'required|string|max:255',
             'last_name_en' => 'required|string|max:255',
             'img_url' => 'nullable|mimes:jpeg,png,jpg',
@@ -37,9 +37,32 @@ class UpdateClientProfileRequest extends FormRequest
                             'unique:users,email,' . $id,
                             'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/'
                         ],
+            'country_id' => 'required|integer|exists:countries,id',
             'HaveCompany' => 'nullable|max:1',
             'technologies_used' => 'nullable|array',
             'technologies_used.*' => 'nullable|string|max:50',
+        ];
+
+        if (Auth::user()->hasAnyRole(['Registered', 'registered'])) {
+            $rules['academic_stat'] = 'required|in:Graduate,Student';
+            $rules['dob']           = 'required|date|before:today';
+            $rules['national_id']   = 'nullable|alpha_num|max:50';
+        }
+
+        return $rules;
+    }
+
+    public function messages()
+    {
+        return [
+            'country_id.required'   => __('admin.this_field_is_required'),
+            'academic_stat.required'=> __('admin.this_field_is_required'),
+            'academic_stat.in'      => __('admin.this_field_is_required'),
+            'dob.required'          => __('admin.this_field_is_required'),
+            'dob.date'              => __('admin.dob_future_not_allowed'),
+            'dob.before'            => __('admin.dob_future_not_allowed'),
+            'national_id.alpha_num' => __('admin.invalid_national_id'),
+            'national_id.max'       => __('admin.invalid_national_id'),
         ];
     }
 }
