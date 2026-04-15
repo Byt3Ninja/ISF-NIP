@@ -326,27 +326,38 @@
 
   function buildCard(type, item) {
     if (type === 'founder') {
+      const rows = [];
+      if (item.email) {
+        rows.push(`<div class="small mb-2"><i class="ti ti-mail me-2"></i>${escapeHtml(item.email)}</div>`);
+      }
+      if (item.phone) {
+        rows.push(`<div class="small mb-2"><i class="ti ti-phone me-2"></i>${escapeHtml(item.phone)}</div>`);
+      }
+      if (item.join_date) {
+        rows.push(`<div class="small mb-2"><i class="ti ti-calendar me-2"></i>${escapeHtml(item.join_date)}</div>`);
+      }
+      const commitmentBadge = item.commitment
+        ? `<span class="badge bg-label-secondary text-dark">${escapeHtml(item.commitment)}</span>`
+        : '';
+      const linkedinIcon = item.linkedin
+        ? `<a href="${escapeHtml(item.linkedin)}" target="_blank" rel="noopener noreferrer" class="btn btn-icon btn-text-secondary rounded-pill" title="LinkedIn" aria-label="LinkedIn"><i class="ti ti-brand-linkedin"></i></a>`
+        : '';
+      const footer = (commitmentBadge || linkedinIcon)
+        ? `<div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top"><div>${commitmentBadge}</div><div>${linkedinIcon}</div></div>`
+        : '';
       return `
       <div class="col-12 col-md-6 col-xl-4">
         <div class="card item-card h-100 shadow-none border">
           <div class="card-body">
             <div class="d-flex align-items-center mb-3">
               <div class="flex-grow-1">
-                <h6 class="mb-0 fw-bold">${escapeHtml(item.name)}</h6>
-                <small class="text-muted">${escapeHtml(item.type)}</small>
+                <h6 class="mb-0 fw-bold">${escapeHtml(item.name || '')}</h6>
+                ${item.type ? `<small class="text-muted">${escapeHtml(item.type)}</small>` : ''}
               </div>
               ${buildDropdown('founder', item.id)}
             </div>
-            <div class="small mb-2">
-              <i class="ti ti-mail me-2"></i>${escapeHtml(item.email)}
-            </div>
-            <div class="small mb-2">
-              <i class="ti ti-phone me-2"></i>${escapeHtml(item.phone || 'N/A')}
-            </div>
-            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-              <span class="badge bg-label-secondary text-dark">${escapeHtml(item.commitment || '')}</span>
-              <small class="text-muted">${escapeHtml(item.join_date || 'N/A')}</small>
-            </div>
+            ${rows.join('')}
+            ${footer}
           </div>
         </div>
       </div>`;
