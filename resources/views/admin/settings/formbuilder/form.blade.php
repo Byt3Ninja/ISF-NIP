@@ -410,7 +410,7 @@
                 </div>
               @endforeach
 
-              <div class="card border shadow-none">
+              <div class="card border shadow-none" id="submit-step">
                 <div class="card-body p-4 p-lg-5">
                   <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
                     <div>
@@ -516,6 +516,11 @@
       validators.callback = {
         message: t.required,
         callback: function () {
+          const section = field.closest('.section-wrapper');
+          if (section && section.style.display === 'none') {
+            return true;
+          }
+
           const group = form.querySelectorAll(`[name="${field.name.replace(/"/g, '\\"')}"]`);
 
           if (field.type === 'radio') {
@@ -700,73 +705,90 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     const sections = document.querySelectorAll(".section-wrapper");
-    const form = document.querySelector("form");
-    const submitBtn = form?.querySelector('.btn[type="submit"]');
-    const submitCard = submitBtn?.closest('.card');
+    const submitStep = document.getElementById("submit-step");
     const logicInputs = document.querySelectorAll(".question-logic");
 
-    sections.forEach(section => {
-      section.style.display = "block";
-    });
+    function updateFormVisibility() {
+      // 1. Hide everything initially
+      sections.forEach(s => s.style.display = "none");
+      if (submitStep) submitStep.style.display = "none";
 
-    function handleLogic(element) {
-      if (!element) return;
-      let logic = "continue";
+      // 2. Start from Section 1 (index 0)
+      let currentPath = [0];
+      let reachedEnd = false;
 
-      if (element.tagName === "SELECT") {
-        const selectedOption = element.options[element.selectedIndex];
-        logic = selectedOption ? selectedOption.dataset.logic : "continue";
-      } else if (element.type === "radio") {
-        logic = element.dataset.logic || "continue";
-      } else if (element.type === "checkbox") {
-        const optionsGroup = element.closest(".options-group");
-        if (optionsGroup) {
-          const checkedBoxes = optionsGroup.querySelectorAll("input[type='checkbox']:checked");
-          for (const box of checkedBoxes) {
-            if (box.dataset.logic === "submit") {
-              logic = "submit";
-              break;
-            } else if (box.dataset.logic.startsWith("section-")) {
-              logic = box.dataset.logic;
-              break;
+      // 3. Follow the logic
+      for (let i = 0; i < currentPath.length; i++) {
+        const idx = currentPath[i];
+        const section = sections[idx];
+        if (!section) continue;
+
+        section.style.display = "block";
+
+        // Determine next step based on question logic within this section
+        let logic = "continue";
+        const inputs = section.querySelectorAll(".question-logic");
+        
+        // Strategy: The last logical jump found in the section's selected options wins.
+        // If no question-level logic is found, we fall back to the section's own logic.
+        inputs.forEach(input => {
+          let questionLogic = "continue";
+          if (input.tagName === "SELECT") {
+            const selectedOption = input.options[input.selectedIndex];
+            questionLogic = selectedOption ? (selectedOption.dataset.logic || "continue") : "continue";
+          } else if (input.type === "radio" && input.checked) {
+            questionLogic = input.dataset.logic || "continue";
+          } else if (input.type === "checkbox" && input.checked) {
+            const jumpLogic = input.dataset.logic || "continue";
+            if (jumpLogic !== "continue") questionLogic = jumpLogic;
+          }
+          
+          if (questionLogic !== "continue") {
+            logic = questionLogic;
+          }
+        });
+
+        if (logic === "continue") {
+          logic = section.dataset.sectionLogic || "continue";
+        }
+
+        if (logic === "submit") {
+          reachedEnd = true;
+          break;
+        } else if (logic.startsWith("section-")) {
+          const targetId = parseInt(logic.replace("section-", ""));
+          // To avoid loops and ensure forward progress
+          if (!currentPath.includes(targetId) && targetId > idx && sections[targetId]) {
+            currentPath.push(targetId);
+          } else {
+            // Fallback: if invalid/backward jump, just continue to next or end
+            if (sections[idx + 1]) {
+              currentPath.push(idx + 1);
+            } else {
+              reachedEnd = true;
             }
+          }
+        } else {
+          // continue logic
+          if (sections[idx + 1]) {
+            currentPath.push(idx + 1);
+          } else {
+            reachedEnd = true;
           }
         }
       }
 
-      const currentSection = element.closest(".section-wrapper");
-      if (!currentSection) return;
-      const currentIndex = Array.from(sections).indexOf(currentSection);
-
-      const sectionLogic = currentSection.dataset.sectionLogic || "continue";
-      if (sectionLogic === "submit" && logic === "continue") {
-        logic = "submit";
-      }
-
-      if (logic === "continue") {
-        const nextSection = sections[currentIndex + 1];
-        if (nextSection) {
-          nextSection.scrollIntoView({ behavior: "smooth", block: "start" });
-        } else if (submitCard) {
-          submitCard.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-      } else if (logic.startsWith("section-")) {
-        const targetId = parseInt(logic.replace("section-", ""));
-        if (sections[targetId]) {
-          sections[targetId].scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      } else if (logic === "submit") {
-        if (submitCard) {
-          submitCard.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
+      if (reachedEnd && submitStep) {
+        submitStep.style.display = "block";
       }
     }
 
     logicInputs.forEach(input => {
-      input.addEventListener("change", function () {
-        handleLogic(this);
-      });
+      input.addEventListener("change", updateFormVisibility);
     });
+
+    // Initial run to respect values from old() or defaults
+    updateFormVisibility();
   });
 </script>
 @stop

@@ -121,4 +121,7 @@ return [
     'Confirm_submit_message' => 'Once you submit, uploaded files cannot be recovered automatically if a server-side error occurs. You will need to re-attach them. Continue?',
     'Confirm_yes_submit' => 'Yes, submit',
     'Confirm_cancel' => 'Cancel',
+    'New_Form' => 'New Form',
+    'Discard_Create' => 'Discard & Create New',
+    'Unsaved_Changes_New_Form' => 'You have unsaved changes. Creating a new form will discard them.',
 ];
