@@ -59,7 +59,8 @@
   const TRANSLATIONS = {
     en: {
       noResults: (term) => `No results for "${term}"`,
-      noFounders: "No Founders Yet",
+      noFounders: "No founders added yet",
+      foundersEmptyDesc: "Add your founding team to showcase the people behind your startup.",
       noInvestors: "No Investors Listed",
       noShareholders: "No Shareholders",
       addFounder: "Add Founder",
@@ -89,7 +90,8 @@
     },
     ar: {
       noResults: (term) => `لا توجد نتائج لـ "${term}"`,
-      noFounders: "لا يوجد مؤسسون بعد",
+      noFounders: "لم تتم إضافة مؤسسين بعد",
+      foundersEmptyDesc: "أضف فريق المؤسسين لعرض الأشخاص الذين يقفون خلف شركتك الناشئة.",
       noInvestors: "لم يتم إضافة مستثمرين",
       noShareholders: "لا يوجد مساهمون",
       addFounder: "إضافة مؤسس",
@@ -288,11 +290,11 @@
           </div>
           <h5 class="mb-2 fw-semibold">${titles[type]}</h5>
           <p class="text-secondary mb-4">
-            ${type === 'founder' ? 'Your founding team is the heart of your startup. Add your core team members to showcase leadership' :
+            ${type === 'founder' ? t.foundersEmptyDesc :
               type === 'investor' ? 'Showcase your funding and investor network to build credibility' :
               'Define your ownership structure and equity distribution.'}
           </p>
-          <button type="button" class="btn btn-primary waves-effect waves-light" onclick="openModal('${type}')">
+          <button type="button" class="btn btn-primary waves-effect waves-light" onclick="${type === 'founder' ? 'TeamInfo.openFounderDrawer()' : `openModal('${type}')`}">
             <i class="ti ti-plus me-1"></i>${addTexts[type]}
           </button>
           <div class="text-muted small mt-3 opacity-75">${t.tip}</div>
