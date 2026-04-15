@@ -154,7 +154,7 @@ $menuItems = [
     ],
 
     // Tasks
-    [
+    /* [
         'label' => $l == 'en' ? 'Tasks' : 'المهام',
         'icon' => 'ti ti-layout-kanban ti-md me-2 me-lg-4 ti-lg',
         'route' => '/dashboard/mentor/mentorshipSessions',
@@ -169,7 +169,7 @@ $menuItems = [
             'isVisible' => $_user->ableTo('mentorships.sessions_list_detailed', $permissions)
           ]
         ]
-    ],
+    ], */
 
     // Mentorship Tasks (for Mentors)
     [
@@ -293,7 +293,7 @@ $menuItems = [
         'isVisible' => $_user->hasAnyRole("Registered|Mentor") || $_user->ableToAny(['services.index', 'service_requests.list_all', 'serviceCategories.index'], $permissions),
         'subItems' => [
           [
-            'label' => __('admin.Services'),
+            'label' => $_user->hasAnyRole('Admin|OrganizationManager|SubAdmin') ? __('admin.All Services') : __('admin.Services'),
             'icon' => 'ti ti-arrows-move',
             'route' => '/dashboard/services',
             'permission' => $_user->ableTo('services.index', $permissions),
@@ -899,22 +899,22 @@ $menuItems = [
                 'label' => $l == 'en' ? 'Create Template' : 'إنشاء قالب',
                 'icon' => 'ti ti-plus',
                 'route' => 'notification-templates.create',
-                'permission' => 'notification-templates.create',
-                'isVisible' => true
+                'permission' => $_user->ableTo('notification-templates.create', $permissions),
+                'isVisible' => $_user->ableTo('notification-templates.create', $permissions)
             ],
             [
                 'label' => $l == 'en' ? 'Manage Templates' : 'إدارة القوالب',
                 'icon' => 'ti ti-template',
                 'route' => 'notification-templates.index',
-                'permission' => null,
-                'isVisible' => true
+                'permission' => $_user->ableTo('notification-templates.index', $permissions),
+                'isVisible' => $_user->ableTo('notification-templates.index', $permissions)
             ],
             [
                 'label' => $l == 'en' ? 'Manage Triggers' : 'إدارة المشغلات',
                 'icon' => 'ti ti-bolt',
                 'route' => 'notification-triggers.index',
-                'permission' => null,
-                'isVisible' => true
+                'permission' => $_user->ableTo('notification-triggers.index', $permissions),
+                'isVisible' => $_user->ableTo('notification-triggers.index', $permissions)
             ]
         ]
     ],
