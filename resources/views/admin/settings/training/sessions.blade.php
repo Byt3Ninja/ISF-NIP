@@ -972,8 +972,10 @@ $(function () {
     $('#sessionSid').val(response.id);
 
     // Pre-select Program & Step dropdowns
-    $('#step').val(response.step_id || '');
+    // Set program first — trigger('change') calls filterSteps() synchronously,
+    // which rebuilds the step options for this cycle. Then set step.
     $('#program').val(response.cycle_id || '').trigger('change');
+    $('#step').val(response.step_id || '').trigger('change.select2');
 
     // Visible fields — type is fixed on edit (disable to prevent accidental change)
     $('#sessionType').val(type).prop('disabled', true);
