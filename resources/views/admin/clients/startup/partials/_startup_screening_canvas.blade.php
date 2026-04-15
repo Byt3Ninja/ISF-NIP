@@ -329,11 +329,11 @@
               </div>
               <div class="form-group">
                 <label for="final_comments" class="form-label">{{ __('admin.Final Comments')}}</label>
-                <textarea 
-                  oninput="this.value = this.value.replace(/^\s+/g, '')"
-                  class="form-control" 
-                  id="final_comments" 
-                  name="final_comments" 
+                <textarea
+                  oninput="this.value = this.value.replace(/^\s+/g, ''); if (this.value.trim() !== '') { this.classList.remove('is-invalid'); }"
+                  class="form-control"
+                  id="final_comments"
+                  name="final_comments"
                   rows="16"
                   placeholder="{{ __('admin.Enter your comments here...')}}"
                   >{{ $evaluationForm->final_comment ?? '' }}</textarea>
@@ -452,7 +452,9 @@
     });
 
     $('.next-btn').on('click', function () {
-      const $nextTab = $('.nav-tabs .active')
+      const $currentContent = $(this).closest('.content');
+      const $nextTab = $currentContent
+        .find('.subcriteria-tabs .nav-link.active')
         .parent()
         .next('li')
         .find('button[data-bs-toggle="tab"]');
