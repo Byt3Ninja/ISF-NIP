@@ -90,7 +90,44 @@ class ClientCompanyController extends Controller
             $icons = '';
         }
         $team = $this->companyService->getTeamMember($id);
-        $founders = $team->where('TeamMember', 'Founder');
+
+        // Build virtual owner card (first card on read-only profile — see GV-1981).
+        // Owner is the User whose company_id == $company->id. The card is not editable.
+        $ownerCard = null;
+        $owner = $company->resolveUser();
+        if ($owner) {
+            $ownerCard = [
+                'id'                 => null,
+                'virtual'            => true,
+                'name'               => trim((string) ($owner->name ?? '')) !== '' ? $owner->name : $owner->email,
+                'email'              => $owner->email,
+                'phone'              => $owner->phone ?? null,
+                'linkedin'           => null, // owner User has no linkedin column
+                'join_date'          => optional($company->created_at)->format('Y-m-d'),
+                'founder_type'       => 'Founder',
+                'working_commitment' => null,
+            ];
+        }
+
+        // Real team_members rows, mapped to the shape the blade expects (array-based).
+        $realFounders = $team
+            ->where('TeamMember', 'Founder')
+            ->map(fn($f) => [
+                'id'                 => $f->id,
+                'virtual'            => false,
+                'name'               => $f->Name,
+                'email'              => $f->Email,
+                'phone'              => $f->phone ?? null,
+                'linkedin'           => $f->LinkedIn,
+                'join_date'          => $f->join_date ? \Illuminate\Support\Carbon::parse($f->join_date)->format('Y-m-d') : null,
+                'founder_type'       => $f->founder_type,
+                'working_commitment' => $f->working_commitment,
+            ])
+            ->values();
+
+        // Merge: virtual owner always appears first (if resolvable).
+        $founders = collect($ownerCard ? [$ownerCard] : [])->merge($realFounders)->values();
+
         $Shareholders = $team->where('TeamMember', 'Shareholder');
         $Investors = $team->where('TeamMember', 'Investor');
 
