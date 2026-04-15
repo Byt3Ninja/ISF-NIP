@@ -693,12 +693,15 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
           }
 
           if (finalComments && finalComments.value.trim() === '') {
+            finalComments.classList.add('is-invalid');
             releaseWarningAlert({
               title: '{{ __("admin.required_evaluation_comment_message") }}',
             });
             // Navigate to the final comments tab
             document.getElementById('pills-final-comments-tab').click();
             return;
+          } else if (finalComments) {
+            finalComments.classList.remove('is-invalid');
           }
         }
 
@@ -721,40 +724,43 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
           url: url,
           data: result,
           success: function(response) {
-            // Reset buttons
+            // Reset buttons only on draft; on successful publish keep disabled until reload
             if (type === 'draft') {
               saveBtn.innerHTML = originalSaveBtnHtml;
               saveBtn.disabled = false;
-            } else {
+            } else if (!response.status) {
               publishBtn.innerHTML = originalPublishBtnHtml;
               publishBtn.disabled = false;
             }
-            
+
             // Update evaluation view with latest data
             if (typeof updateEvaluationView === 'function') {
               updateEvaluationView();
             }
-            
+
             // Navigate to the evaluation tab to show the results
             document.getElementById('pills-view-evaluation-tab').click();
-            
+
             // Show success message
-            const successMsg = type === 'publish' 
-              ? '{{ __("admin.Evaluation published successfully") }}' 
+            const successMsg = type === 'publish'
+              ? '{{ __("admin.Evaluation published successfully") }}'
               : '{{ __("admin.Evaluation saved successfully") }}';
 
-            if (!response.status) {
+            if( response.status ) {
+              releaseSuccessAlert({
+                title: '{{ __("admin.Success") }}',
+                message: successMsg,
+              });
+              if (type === 'publish') {
+                setTimeout(function() { window.location.reload(); }, 2500);
+              }
+            } else {
               releaseFailureAlert({
                 title: '{{ __("admin.Error") }}',
                 message: response.message || '{{ __("admin.unexpected_error") }}',
               });
               return;
             }
-            
-            releaseSuccessAlert({
-              title: '{{ __("admin.Success") }}',
-              message: successMsg,
-            });
           },
           error: function(xhr, status, error) {
             const errorMsg = xhr?.responseJSON?.message || error?.message || '{{ __("admin.unexpected_error") }}';
@@ -776,521 +782,6 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
         });
       }
     </script>
-
-    <script>
-      // document.addEventListener('DOMContentLoaded', function() {
-      //   // Handle dropdown selection for sub-criteria
-      //   const subcriteriaSelects = document.querySelectorAll('.subcriteria-select');
-      //   subcriteriaSelects.forEach(select => {
-      //     select.addEventListener('change', function() {
-      //       const target = this.value;
-      //       const tabElement = document.querySelector(target);
-      //       const tabLink = document.querySelector(`[data-bs-target="${target}"]`);
-            
-      //       if (tabElement && tabLink) {
-      //         // Deactivate all tabs
-      //         const allTabs = document.querySelectorAll(`.subcriteria-tabs .nav-link[data-bs-target^="#tab${select.dataset.criteriaKey}_"]`);
-      //         allTabs.forEach(tab => {
-      //           tab.classList.remove('active');
-      //           tab.setAttribute('aria-selected', 'false');
-      //         });
-              
-      //         // Deactivate all panes
-      //         const allPanes = document.querySelectorAll(`.tab-pane[id^="tab${select.dataset.criteriaKey}_"]`);
-      //         allPanes.forEach(pane => {
-      //           pane.classList.remove('show', 'active');
-      //         });
-              
-      //         // Activate the selected tab
-      //         tabLink.classList.add('active');
-      //         tabLink.setAttribute('aria-selected', 'true');
-              
-      //         // Activate the selected pane
-      //         tabElement.classList.add('show', 'active');
-      //       }
-      //     });
-      //   });
-        
-      //   // Auto-switch to dropdown mode when there are more than 4 sub-criteria
-      //   document.querySelectorAll('.subcriteria-container').forEach(container => {
-      //     const tabs = container.querySelectorAll('.nav-item');
-      //     if (tabs.length > 4) {
-      //       // Add class for many criteria to apply specific styles
-      //       container.classList.add('many-criteria');
-            
-      //       const dropdownContainer = container.querySelector('.subcriteria-dropdown');
-      //       const tabsContainer = container.querySelector('.subcriteria-tabs');
-            
-      //       // On mobile, show the dropdown (handled by CSS)
-            
-      //       // On desktop, make tabs scrollable
-      //       if (window.innerWidth > 992) {
-      //         // Add visual indicator if there are more tabs to scroll
-      //         const tabsNav = container.querySelector('.nav-tabs');
-      //         if (tabsNav) {
-      //           tabsNav.addEventListener('scroll', function() {
-      //             checkScrollIndicators(tabsNav);
-      //           });
-                
-      //           // Initial check
-      //           setTimeout(() => checkScrollIndicators(tabsNav), 100);
-      //         }
-      //       }
-      //     }
-      //   });
-        
-      //   // Helper function to check if scroll indicators are needed
-      //   function checkScrollIndicators(element) {
-      //     const isScrollable = element.scrollWidth > element.clientWidth;
-      //     const isScrolledToEnd = element.scrollLeft + element.clientWidth >= element.scrollWidth - 10;
-      //     const isScrolledToStart = element.scrollLeft <= 10;
-          
-      //     element.classList.toggle('has-more-right', isScrollable && !isScrolledToEnd);
-      //     element.classList.toggle('has-more-left', isScrollable && !isScrolledToStart);
-      //   }
-        
-      //   // Sync tab changes with dropdown
-      //   document.querySelectorAll('.subcriteria-tabs .nav-link').forEach(tab => {
-      //     tab.addEventListener('shown.bs.tab', function(event) {
-      //       const targetId = event.target.dataset.bsTarget;
-      //       const criteriaKey = targetId.split('_')[0].replace('#tab', '');
-      //       const dropdown = document.getElementById('subcriteria-select-' + criteriaKey);
-            
-      //       if (dropdown) {
-      //         dropdown.value = targetId;
-      //       }
-      //     });
-      //   });
-
-      //   // Initialize real-time evaluation tab update
-      //   initializeEvaluationUpdater();
-      // });
-
-      // Initialize real-time evaluation update functionality
-      // function initializeEvaluationUpdater() {
-      //   // Get all form elements that need to be monitored
-      //   const scoreSelects = document.querySelectorAll('.score-select');
-      //   const commentTextareas = document.querySelectorAll('textarea[id^="comment_"]');
-      //   const finalCommentsTextarea = document.getElementById('final_comments');
-
-      //   // Add event listeners for real-time updates
-      //   scoreSelects.forEach(select => {
-      //     select.addEventListener('change', updateEvaluationTab);
-      //   });
-
-      //   commentTextareas.forEach(textarea => {
-      //     textarea.addEventListener('input', debounce(updateEvaluationTab, 500));
-      //     textarea.addEventListener('blur', updateEvaluationTab);
-      //   });
-
-      //   if (finalCommentsTextarea) {
-      //     finalCommentsTextarea.addEventListener('input', debounce(updateEvaluationTab, 500));
-      //     finalCommentsTextarea.addEventListener('blur', updateEvaluationTab);
-      //   }
-
-      //   // Initial update of evaluation tab
-      //   updateEvaluationTab();
-      // }
-
-      // Debounce function to prevent excessive updates while typing
-      // function debounce(func, wait) {
-      //   let timeout;
-      //   return function executedFunction(...args) {
-      //     const later = () => {
-      //       clearTimeout(timeout);
-      //       func(...args);
-      //     };
-      //     clearTimeout(timeout);
-      //     timeout = setTimeout(later, wait);
-      //   };
-      // }
-
-      // Main function to update the evaluation tab
-      // function updateEvaluationTab() {
-      //   updateCategoryPercentages();
-      //   updateEvaluationComments();
-      //   updateFinalCommentsDisplay();
-      // }
-
-      // Update category percentage scores in real-time
-      // function updateCategoryPercentages() {
-      //   // Get all categories from the evaluation form
-      //   const evaluationCategories = document.querySelectorAll('#pills-view-evaluation .row.mb-6 .col-3');
-        
-      //   evaluationCategories.forEach((categoryElement, categoryIndex) => {
-      //     const categoryTitle = categoryElement.querySelector('h6');
-      //     if (!categoryTitle) return;
-          
-      //     const categoryName = categoryTitle.textContent.trim();
-          
-      //     // Find all score inputs for this category
-      //     let totalScore = 0;
-      //     let scoreCount = 0;
-          
-      //     // Get all criteria containers
-      //     const criteriaContainers = document.querySelectorAll('.content');
-          
-      //     criteriaContainers.forEach(container => {
-      //       const containerCategoryName = container.querySelector('.content-header h6');
-      //       if (containerCategoryName && containerCategoryName.textContent.trim() === categoryName) {
-      //         // Find all score selects within this criteria container
-      //         const scoreSelects = container.querySelectorAll('.score-select');
-      //         scoreSelects.forEach(select => {
-      //           if (select.value && select.value !== '') {
-      //             totalScore += parseInt(select.value);
-      //             scoreCount++;
-      //           }
-      //         });
-      //       }
-      //     });
-          
-      //     // Calculate percentage
-      //     const percentage = scoreCount > 0 ? ((totalScore / (scoreCount * 5)) * 100) : 0;
-          
-      //     // Update the display
-      //     const percentageDisplay = categoryElement.querySelector('.fs-5.fw-bold.text-dark');
-      //     if (percentageDisplay) {
-      //       percentageDisplay.textContent = percentage.toFixed(2);
-      //     }
-      //   });
-      // }
-
-      // // Update evaluation comments section in real-time
-      // function updateEvaluationComments() {
-      //   const commentSections = document.querySelectorAll('#pills-view-evaluation .col-12.mb-5.border-bottom');
-        
-      //   commentSections.forEach(section => {
-      //     const categoryHeader = section.querySelector('h5');
-      //     if (!categoryHeader) return;
-          
-      //     const categoryName = categoryHeader.textContent.replace(' {{ __("admin.Comments") }}', '').trim();
-      //     const commentItems = section.querySelectorAll('.d-flex.flex-column.mb-4');
-          
-      //     commentItems.forEach((item, index) => {
-      //       const subcriteriaNameElement = item.querySelector('.fs-5.mb-0.text-dark');
-      //       if (!subcriteriaNameElement) return;
-            
-      //       const subcriteriaName = subcriteriaNameElement.textContent.trim();
-            
-      //       // Find the corresponding comment textarea
-      //       let matchingComment = '{{ __("admin.No comment provided") }}';
-            
-      //       // Look through all criteria containers
-      //       const criteriaContainers = document.querySelectorAll('.content');
-            
-      //       criteriaContainers.forEach(container => {
-      //         const containerCategoryName = container.querySelector('.content-header h6');
-      //         if (containerCategoryName && containerCategoryName.textContent.trim() === categoryName) {
-      //           // Find the subcriteria tabs
-      //           const subcriteriaButtons = container.querySelectorAll('.nav-link');
-      //           subcriteriaButtons.forEach(button => {
-      //             const buttonText = button.textContent.trim();
-      //             if (buttonText === subcriteriaName) {
-      //               // Get the target tab ID
-      //               const targetId = button.getAttribute('data-bs-target');
-      //               if (targetId) {
-      //                 const targetTab = document.querySelector(targetId);
-      //                 if (targetTab) {
-      //                   const textarea = targetTab.querySelector('textarea[id^="comment_"]');
-      //                   if (textarea && textarea.value.trim()) {
-      //                     matchingComment = textarea.value.trim();
-      //                   }
-      //                 }
-      //               }
-      //             }
-      //           });
-      //         }
-      //       });
-            
-      //       // Update the comment display
-      //       const commentDisplay = item.querySelector('.text-light.line-clamp-3');
-      //       if (commentDisplay) {
-      //         commentDisplay.textContent = matchingComment;
-      //       }
-      //     });
-      //   });
-      // }
-
-      // Update final comments display in real-time
-      // function updateFinalCommentsDisplay() {
-      //   return;
-      //   const finalCommentsTextarea = document.getElementById('final_comments');
-      //   const finalCommentsDisplay = document.querySelector('#pills-view-evaluation .col-12:last-child .text-light.line-clamp-3');
-        
-      //   if (finalCommentsTextarea && finalCommentsDisplay) {
-      //     const finalCommentText = finalCommentsTextarea.value.trim() || '{{ __("admin.No final comments provided") }}';
-      //     finalCommentsDisplay.textContent = finalCommentText;
-      //   }
-        
-      //   // Alternative selector in case the first one doesn't work
-      //   if (finalCommentsTextarea && !finalCommentsDisplay) {
-      //     const alternativeDisplay = document.querySelector('#pills-view-evaluation h5:contains("{{ __("admin.Final Comments")}}") + small');
-      //     if (alternativeDisplay) {
-      //       const finalCommentText = finalCommentsTextarea.value.trim() || '{{ __("admin.No final comments provided") }}';
-      //       alternativeDisplay.textContent = finalCommentText;
-      //     }
-      //   }
-        
-      //   // Most reliable approach - find by the heading text
-      //   if (finalCommentsTextarea) {
-      //     const headings = document.querySelectorAll('#pills-view-evaluation h5');
-      //     headings.forEach(heading => {
-      //       if (heading.textContent.includes('{{ __("admin.Final Comments") }}')) {
-      //         const commentDisplay = heading.nextElementSibling;
-      //         if (commentDisplay && commentDisplay.tagName === 'SMALL') {
-      //           const finalCommentText = finalCommentsTextarea.value.trim() || '{{ __("admin.No final comments provided") }}';
-      //           commentDisplay.textContent = finalCommentText;
-      //         }
-      //       }
-      //     });
-      //   }
-      // }
-    </script>
-
-    <script>
-      // function saveScreening() {
-      //   // Go back
-      //   window.history.back();
-      // }
-    </script>
-
-    {{-- <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        // Initial update of the evaluation view with existing data
-        updateEvaluationView();
-        
-        // Update evaluation view when score or comment changes
-        const scoreSelects = document.querySelectorAll('.score-select');
-        const commentAreas = document.querySelectorAll('textarea[id^="comment_"]');
-        const finalCommentArea = document.getElementById('final_comments');
-        const nextButtons = document.querySelectorAll('.btn-next');
-        const tabLinks = document.querySelectorAll('[data-bs-toggle="pill"]');
-        
-        // Add event listeners
-        scoreSelects.forEach(select => {
-          select.addEventListener('change', updateEvaluationView);
-        });
-        
-        commentAreas.forEach(textarea => {
-          textarea.addEventListener('blur', updateEvaluationView);
-        });
-        
-        if (finalCommentArea) {
-          finalCommentArea.addEventListener('blur', updateEvaluationView);
-        }
-        
-        nextButtons.forEach(button => {
-          button.addEventListener('click', updateEvaluationView);
-        });
-        
-        // Previous buttons should also update the view
-        const prevButtons = document.querySelectorAll('.btn-prev');
-        prevButtons.forEach(button => {
-          button.addEventListener('click', updateEvaluationView);
-        });
-        
-        // View Evaluation button in wizard
-        const viewEvalButtons = document.querySelectorAll('.view-evaluation-btn');
-        viewEvalButtons.forEach(button => {
-          button.addEventListener('click', function() {
-            updateEvaluationView();
-            document.getElementById('pills-view-evaluation-tab').click();
-          });
-        });
-        
-        tabLinks.forEach(tab => {
-          tab.addEventListener('click', function(e) {
-            if (e.target.getAttribute('data-bs-target') === '#pills-view-evaluation') {
-              updateEvaluationView();
-            }
-          });
-        });
-        
-        // Save and Publish buttons trigger evaluation update
-        const saveBtn = document.getElementById('save_screening_btn');
-        const publishBtn = document.getElementById('publish_screening_btn');
-        
-        if (saveBtn) {
-          saveBtn.addEventListener('click', updateEvaluationView);
-        }
-        
-        if (publishBtn) {
-          publishBtn.addEventListener('click', updateEvaluationView);
-        }
-      });
-                                
-      function updateEvaluationView() {
-        // Collect all evaluation data
-        const scoreSelects = document.querySelectorAll('.score-select');
-        const commentAreas = document.querySelectorAll('textarea[id^="comment_"]');
-        const finalCommentArea = document.getElementById('final_comments');
-        
-        // Get container elements
-        const evaluationSummaryContainer = document.getElementById('evaluation-summary-container');
-        const finalCommentsDisplay = document.getElementById('final-comments-display');
-        const noEvaluationsMessage = document.getElementById('no-evaluations-message');
-        const noFinalComment = document.getElementById('no-final-comment');
-        
-        // Summary statistics
-        const totalScoreElement = document.getElementById('total-score');
-        const totalCategoriesElement = document.getElementById('total-categories');
-        const totalCriteriaElement = document.getElementById('total-criteria');
-        
-        // Collect data from the form
-        let hasEvaluations = false;
-        let totalScore = 0;
-        let scoredCriteria = 0;
-        
-        // Create a comprehensive data structure for evaluations
-        const evaluationsData = {};
-        const categories = new Set();
-        
-        // Process scores and comments together to build a combined data structure
-        scoreSelects.forEach(select => {
-          const criteriaId = select.id.split('_')[1];
-          const criteriaName = select.closest('.tab-pane').querySelector('.nav-link.active').textContent.trim();
-          const categoryName = select.closest('.content').querySelector('.content-header h6').textContent.trim();
-          
-          // Initialize category and criteria in the data structure if they don't exist
-          if (!evaluationsData[categoryName]) {
-            evaluationsData[categoryName] = {};
-          }
-          
-          if (!evaluationsData[categoryName][criteriaName]) {
-            evaluationsData[categoryName][criteriaName] = {
-              criteriaId,
-              score: '',
-              comment: ''
-            };
-          }
-          
-          // Add score if it exists
-          if (select.value) {
-            hasEvaluations = true;
-            totalScore += parseInt(select.value);
-            scoredCriteria++;
-            categories.add(categoryName);
-            evaluationsData[categoryName][criteriaName].score = select.value;
-          }
-        });
-        
-        // Process comments
-        commentAreas.forEach(textarea => {
-          const criteriaId = textarea.id.split('_')[1];
-          const criteriaName = textarea.closest('.tab-pane').querySelector('.nav-link.active').textContent.trim();
-          const categoryName = textarea.closest('.content').querySelector('.content-header h6').textContent.trim();
-          
-          // Initialize category and criteria in the data structure if they don't exist
-          if (!evaluationsData[categoryName]) {
-            evaluationsData[categoryName] = {};
-          }
-          
-          if (!evaluationsData[categoryName][criteriaName]) {
-            evaluationsData[categoryName][criteriaName] = {
-              criteriaId,
-              score: '',
-              comment: ''
-            };
-          }
-          
-          // Add comment if it exists
-          if (textarea.value.trim()) {
-            hasEvaluations = true;
-            evaluationsData[categoryName][criteriaName].comment = textarea.value.trim();
-          }
-        });
-        
-        // Update evaluation summary section - combined scores and comments
-        if (hasEvaluations) {
-          if (noEvaluationsMessage) noEvaluationsMessage.style.display = 'none';
-          let evalHTML = '';
-          
-          // For each category
-          Object.keys(evaluationsData).forEach(categoryName => {
-            // Calculate category total score
-            let categoryTotalScore = 0;
-            let categoryScoreCount = 0;
-            Object.values(evaluationsData[categoryName]).forEach(criteria => {
-              if (criteria.score) {
-                categoryTotalScore += parseInt(criteria.score);
-                categoryScoreCount++;
-              }
-            });
-            
-            // Create category header with total score
-            evalHTML += `
-              <div class="card mb-4">
-                <div class="card-header bg-light">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 text-primary">${categoryName}</h5>
-                    ${categoryScoreCount > 0 ? 
-                      `<div class="d-flex align-items-center gap-2">
-                        <span class="text-secondary">{{ __('admin.Category Score') }}:</span>
-                        <span class="badge bg-primary rounded-pill fs-6">${categoryTotalScore}/${categoryScoreCount * 5}</span>
-                      </div>` : ''}
-                  </div>
-                </div>
-                <div class="card-body">
-            `;
-            
-            // For each criteria in this category
-            Object.keys(evaluationsData[categoryName]).forEach(criteriaName => {
-              const criteria = evaluationsData[categoryName][criteriaName];
-              
-              evalHTML += `
-                <div class="border-bottom pb-3 mb-3">
-                  <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h6 class="mb-0 fw-bold">${criteriaName}</h6>
-                    ${criteria.score ? 
-                      `<span class="badge bg-primary rounded-pill">${criteria.score}/5</span>` : 
-                      `<span class="badge bg-label-secondary">{{ __('admin.No Score') }}</span>`}
-                  </div>
-              `;
-              
-              // Add comment if it exists
-              if (criteria.comment) {
-                evalHTML += `
-                  <div class="mt-2">
-                    <p class="mb-0 text-dark">${criteria.comment}</p>
-                  </div>
-                `;
-              } else {
-                evalHTML += `
-                  <div class="mt-2">
-                    <em class="text-muted">{{ __('admin.No comment provided') }}</em>
-                  </div>
-                `;
-              }
-              
-              evalHTML += `</div>`;
-            });
-            
-            evalHTML += `
-                </div>
-              </div>
-            `;
-          });
-          
-          evaluationSummaryContainer.innerHTML = evalHTML;
-        } else {
-          if (noEvaluationsMessage) noEvaluationsMessage.style.display = 'block';
-        }
-        
-        // Update final comments
-        if (finalCommentArea && finalCommentArea.value.trim()) {
-          if (noFinalComment) noFinalComment.style.display = 'none';
-          finalCommentsDisplay.innerHTML = finalCommentArea.value.trim();
-        } else {
-          if (noFinalComment) noFinalComment.style.display = 'block';
-        }
-        
-        // Update summary statistics
-        if (totalScoreElement) totalScoreElement.textContent = totalScore;
-        if (totalCategoriesElement) totalCategoriesElement.textContent = categories.size;
-        if (totalCriteriaElement) totalCriteriaElement.textContent = scoredCriteria;
-      }
-    </script> --}}
-
   @endif
 
   <script>

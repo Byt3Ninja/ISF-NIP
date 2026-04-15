@@ -196,6 +196,8 @@ class JudgerScreeningController extends Controller
     {
         $user = auth()->user();
         $user_id = $user->id;
+
+        $successMsg = $type === 'publish' ? __('admin.Evaluation published successfully') : __('admin.Evaluation saved successfully');
         if( $type == $request->type )
         {
             $company = Company::find( $request->program );
@@ -278,7 +280,7 @@ class JudgerScreeningController extends Controller
                         }
                         if( count( $toCreate ) ) { ScreeningEvaluationResults::insert( $toCreate ); }
                         if( count( $commentToCreate ) ) { FormDataJudgesComments::insert( $commentToCreate ); }
-                        return response()->json(['status' => true, 'title' => 'Success', 'message' => 'Evaluation form saved successfully'], 200);
+                        return response()->json(['status' => true, 'title' => __('admin.success'), 'message' => $successMsg], 200);
                     }
                 } else { return response()->json(['status' => false, 'title' => 'Error', 'message' => 'Evaluation form is not published'], 200); }
             } else { return response()->json(['status' => false, 'title' => 'Error', 'message' => 'Unsupported evaluation form detected'], 200); }
