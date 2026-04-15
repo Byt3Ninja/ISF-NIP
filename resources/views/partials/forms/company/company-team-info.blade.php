@@ -2,19 +2,6 @@
 /**
  * STATIC DATA DEFINITIONS
  */
-$founders = [
-  [
-    'id' => 1,
-    'name' => 'Alex Rivera',
-    'email' => 'alex@startup.io',
-    'phone' => '+1 555 0123',
-    'linkedin' => 'https://linkedin.com/in/alexrivera',
-    'join_date' => '2024-01-10',
-    'type' => 'Founder',
-    'commitment' => 'Full-time',
-  ],
-];
-
 $investors = [
     [
       'id' => 1,
@@ -37,6 +24,27 @@ $tabs = [
   ['id' => 'investors', 'label' => 'investors', 'icon' => 'building-bank'],
   ['id' => 'shareholders', 'label' => 'shareholders', 'icon' => 'chart-pie'],
 ];
+
+$foundersPayload = [];
+if (isset($founders) && is_iterable($founders)) {
+    foreach ($founders as $f) {
+        if (is_array($f)) {
+            $foundersPayload[] = $f;
+            continue;
+        }
+        $foundersPayload[] = [
+            'id' => $f->id,
+            'name' => $f->Name,
+            'email' => $f->Email,
+            'phone' => $f->phone ?? null,
+            'linkedin' => $f->LinkedIn,
+            'join_date' => isset($f->join_date) && $f->join_date ? \Illuminate\Support\Carbon::parse($f->join_date)->format('Y-m-d') : null,
+            'type' => $f->founder_type ?? null,
+            'commitment' => $f->working_commitment ?? null,
+        ];
+    }
+}
+$foundersCount = count($foundersPayload);
 @endphp
 
 <div class="container p-0">
@@ -69,7 +77,7 @@ $tabs = [
     <div class="tab-pane fade show active" id="founders-pane" role="tabpanel">
       <div class="row align-items-center mb-8">
         <div class="col-md-4">
-          <h5 class="mb-4 mb-md-0">{{ __('admin.Founders') }} (<span id="count-founders">{{count($founders)}}</span>)</h5>
+          <h5 class="mb-4 mb-md-0">{{ __('admin.Founders') }} (<span id="count-founders">{{ $foundersCount }}</span>)</h5>
         </div>
         <div class="col-md-5">
           <div class="input-group input-group-merge">
@@ -78,7 +86,7 @@ $tabs = [
           </div>
         </div>
         <div class="col-md-3 text-md-end mt-3 mt-md-0">
-          <button class="btn btn-primary w-100 w-md-auto shadow-sm" onclick="openModal('founder')">
+          <button class="btn btn-primary w-100 w-md-auto shadow-sm" onclick="TeamInfo.openFounderDrawer()">
             <i class="ti ti-plus me-1"></i> {{ __('admin.Add') }} {{ __('admin.Founder') }}
           </button>
         </div>
@@ -134,63 +142,71 @@ $tabs = [
      MODALS
      ============================================ -->
 
-<!-- Founder Modal -->
-<div class="modal fade" id="modal-founder" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-md">
-    <form id="form-founder" class="modal-content" novalidate>
-      <div class="modal-header border-bottom-0">
-        <h5 class="modal-title mb-0">{{ __('admin.Founder Details') }}</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <input type="hidden" name="id" />
-        <div class="row g-3">
-          <div class="col-12">
-            <label class="form-label">{{ __('admin.Name') }} <span class="text-danger">*</span></label>
-            <input type="text" name="name" class="form-control" placeholder="e.g. john doe" maxlength="100" required />
-            <div class="invalid-feedback" id="error-name">{{ __('admin.Required_Field') }}</div>
-          </div>
-          <div class="col-12">
-            <label class="form-label">{{ __('admin.Email') }} <span class="text-danger">*</span></label>
-            <input type="email" name="email" class="form-control" placeholder="e.g. john@example.com" maxlength="254" required />
-            <div class="invalid-feedback" id="error-email">{{ __('admin.please_enter_valid_email') }}</div>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">{{ __('admin.Phone') }}</label>
-            <input type="tel" name="phone" class="form-control" />
-            <div class="invalid-feedback" id="error-phone">{{ __('admin.Phone must be a valid number') }}</div>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">{{ __('admin.Type') }} <span class="text-danger">*</span></label>
-            <select name="type" class="form-select" required>
-              <option value="Founder">{{ __('admin.Founder') }}</option>
-              <option value="Co-founder">{{ __('admin.cofounder') }}</option>
-            </select>
-            <div class="invalid-feedback" id="error-type">{{ __('admin.Required_Field') }}</div>
-          </div>
-          <div class="col-12">
-            <label class="form-label">{{ __('admin.Linkedin_URL') }}</label>
-            <input type="url" name="linkedin" class="form-control" placeholder="e.g. https://www.linkedin.com/in/username" maxlength="500" />
-            <div class="invalid-feedback" id="error-linkedin">{{ __('admin.please_enter_valid_linkedin') }}</div>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">{{ __('admin.Join_Date') }}</label>
-            <input type="text" name="join_date" class="form-control" id="join_date" placeholder="YYYY-MM-DD" />
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">{{ __('admin.commitment') }}</label>
-            <select name="commitment" class="form-select">
-              <option value="Full-time">{{ __('admin.full_time') }}</option>
-              <option value="Part-time">{{ __('admin.part_time') }}</option>
-            </select>
-          </div>
+<!-- Founder Offcanvas Drawer -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvas-founder" aria-labelledby="offcanvasFounderLabel" style="width: 480px;">
+  <div class="offcanvas-header border-bottom">
+    <h5 class="offcanvas-title" id="offcanvasFounderLabel">{{ __('admin.Add_Founder') }}</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <form id="form-founder" novalidate>
+      <input type="hidden" name="id" />
+      <div class="row g-3">
+        <!-- Name -->
+        <div class="col-12">
+          <label class="form-label">{{ __('admin.founder_name_label') }} <span class="text-danger">*</span></label>
+          <input type="text" name="name" class="form-control" maxlength="100" required />
+          <div class="invalid-feedback" id="error-name"></div>
+        </div>
+        <!-- Email -->
+        <div class="col-12">
+          <label class="form-label">{{ __('admin.founder_email_label') }} <span class="text-danger">*</span></label>
+          <input type="email" name="email" class="form-control" maxlength="254" required />
+          <div class="invalid-feedback" id="error-email"></div>
+        </div>
+        <!-- Phone -->
+        <div class="col-12">
+          <label class="form-label">{{ __('admin.founder_phone_label') }}</label>
+          <input type="tel" name="phone" class="form-control" maxlength="20" />
+          <div class="invalid-feedback" id="error-phone"></div>
+        </div>
+        <!-- LinkedIn -->
+        <div class="col-12">
+          <label class="form-label">{{ __('admin.founder_linkedin_label') }}</label>
+          <input type="url" name="linkedin" class="form-control" maxlength="500" placeholder="https://linkedin.com/in/..." />
+          <div class="invalid-feedback" id="error-linkedin"></div>
+        </div>
+        <!-- Join Date -->
+        <div class="col-12">
+          <label class="form-label">{{ __('admin.founder_join_date_label') }}</label>
+          <input type="text" name="join_date" class="form-control" id="founder_join_date" placeholder="YYYY-MM-DD" />
+          <div class="invalid-feedback" id="error-join_date"></div>
+        </div>
+        <!-- Type (required) -->
+        <div class="col-12">
+          <label class="form-label">{{ __('admin.founder_type_label') }} <span class="text-danger">*</span></label>
+          <select name="type" class="form-select" required>
+            <option value="">{{ __('admin.select_option') }}</option>
+            <option value="Founder">{{ __('admin.Founder') }}</option>
+            <option value="Co-founder">{{ __('admin.Co_founder') }}</option>
+          </select>
+          <div class="invalid-feedback" id="error-type"></div>
+        </div>
+        <!-- Commitment -->
+        <div class="col-12">
+          <label class="form-label">{{ __('admin.founder_commitment_label') }}</label>
+          <select name="commitment" class="form-select">
+            <option value="">{{ __('admin.select_option') }}</option>
+            <option value="Full-time">{{ __('admin.full_time') }}</option>
+            <option value="Part-time">{{ __('admin.part_time') }}</option>
+          </select>
         </div>
       </div>
-      <div class="modal-footer border-top-0">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ __('admin.Cancel') }}</button>
-        <button type="submit" class="btn btn-primary">{{ __('admin.Save') }}</button>
-      </div>
     </form>
+  </div>
+  <div class="offcanvas-footer border-top p-3 d-flex justify-content-end gap-2">
+    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">{{ __('admin.Cancel') }}</button>
+    <button type="submit" form="form-founder" class="btn btn-primary" id="btn-save-founder">{{ __('admin.Save_Founder') }}</button>
   </div>
 </div>
 
@@ -271,7 +287,7 @@ $tabs = [
 <script>
   window.TEAM_INFO_CONFIG = {
     companyId: {{ isset($client) && $client->company ? $client->company->id : auth()->user()->id }},
-    founders:     @json($founders),
+    founders: @json($foundersPayload),
     investors:    @json($investors),
     shareholders: @json($shareholders),
     routes: {

@@ -27,8 +27,12 @@ class StoreFounderRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:100',
-            'email' => 'required|email|unique:team_members,email',
-            'linkedin' => 'required|url',
+            'email' => 'required|email|max:254',
+            'phone' => 'nullable|string|max:20',
+            'linkedin' => 'nullable|url|max:500',
+            'join_date' => 'nullable|date|before_or_equal:today',
+            'founder_type' => 'required|in:Founder,Co-founder',
+            'working_commitment' => 'nullable|in:Full-time,Part-time',
         ];
     }
       protected function failedValidation(Validator $validator)

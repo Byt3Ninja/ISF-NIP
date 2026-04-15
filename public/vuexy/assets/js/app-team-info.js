@@ -21,7 +21,7 @@
   };
 
   const VALIDATION_RULES = {
-    founder: { name: { required: true }, email: { required: true, email: true }, type: { required: true }, phone: { intlTel: true }, linkedin: { url: true } },
+    founder: { name: { required: true }, email: { required: true, email: true }, type: { required: true }, phone: { intlTel: true }, linkedin: { url: true }, join_date: { pastOrToday: true } },
     investor: { name: { required: true, errorId: 'name-investor' }, type: { errorId: 'type-investor' } },
     shareholder: { name: { required: true, errorId: 'name-shareholder' }, role: {}, percentage: { min: 0, max: 100 } }
   };
@@ -29,7 +29,11 @@
   const SERVER_ERROR_MAP = {
     founder_name: { errorId: 'name', fieldName: 'name' },
     founder_email: { errorId: 'email', fieldName: 'email' },
+    founder_phone: { errorId: 'phone', fieldName: 'phone' },
     founder_linkedin: { errorId: 'linkedin', fieldName: 'linkedin' },
+    founder_type: { errorId: 'type', fieldName: 'type' },
+    founder_join_date: { errorId: 'join_date', fieldName: 'join_date' },
+    founder_commitment: { errorId: 'commitment', fieldName: 'commitment' },
     investor_name: { errorId: 'name-investor', fieldName: 'name' },
     investment_type: { errorId: 'type-investor', fieldName: 'type' },
     shareholder_name: { errorId: 'name-shareholder', fieldName: 'name' },
@@ -157,14 +161,14 @@
         itiInstances[type] = window.intlTelInput(input, {
           initialCountry: 'eg',
           separateDialCode: true,
-          utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@18/build/js/utils.js',
+          utilsScript: '/vuexy/assets/vendor/libs/intl-tel-input/js/utils.js',
         });
       }
     });
   }
 
   function initFlatpickr() {
-    const el = document.getElementById('join_date');
+    const el = document.getElementById('founder_join_date');
     if (el && typeof flatpickr === 'function') {
       flatpickr(el, { dateFormat: 'Y-m-d', maxDate: 'today' });
     }
@@ -185,17 +189,28 @@
       debouncedRenderList(type, value);
     });
 
-    // Form submission & Modal resets
+    // Form submission & Modal/Offcanvas resets
     Object.keys(PLURAL).forEach(type => {
       $(`#form-${type}`).on('submit', function (e) {
         e.preventDefault();
         if (validateForm(type)) saveItem(type, this);
       });
 
-      $(`#modal-${type}`).on('hidden.bs.modal', function () {
-        this.querySelector('form').reset();
-        clearAllErrors(type);
-      });
+      if (type === 'founder') {
+        // Founder uses offcanvas drawer
+        const offcanvasEl = document.getElementById('offcanvas-founder');
+        if (offcanvasEl) {
+          offcanvasEl.addEventListener('hidden.bs.offcanvas', function () {
+            document.getElementById('form-founder').reset();
+            clearAllErrors('founder');
+          });
+        }
+      } else {
+        $(`#modal-${type}`).on('hidden.bs.modal', function () {
+          this.querySelector('form').reset();
+          clearAllErrors(type);
+        });
+      }
     });
 
     // Real-time validation
@@ -418,7 +433,41 @@
      CRUD & MODALS
   ───────────────────────────────────────────── */
 
+  function openFounderDrawer(row) {
+    const formEl = document.getElementById('form-founder');
+    formEl.reset();
+    clearAllErrors('founder');
+    if (itiInstances.founder) itiInstances.founder.setNumber('');
+    const titleEl = document.getElementById('offcanvasFounderLabel');
+    const btnSave = document.getElementById('btn-save-founder');
+
+    if (row) {
+      // Edit mode
+      if (titleEl) titleEl.textContent = (LANG === 'ar') ? 'تعديل المؤسس' : 'Edit Founder';
+      if (btnSave) btnSave.textContent = (LANG === 'ar') ? 'حفظ التغييرات' : 'Save Changes';
+      const $f = $('#form-founder');
+      Object.entries(row).forEach(([k, v]) => {
+        if (k === 'phone' && itiInstances.founder) {
+          itiInstances.founder.setNumber(v || '');
+        } else {
+          $f.find(`[name="${k}"]`).val(v);
+        }
+      });
+    } else {
+      // Add mode
+      if (titleEl) titleEl.textContent = (LANG === 'ar') ? 'إضافة مؤسس' : 'Add Founder';
+      if (btnSave) btnSave.textContent = (LANG === 'ar') ? 'حفظ المؤسس' : 'Save Founder';
+      $('#form-founder [name="id"]').val('');
+    }
+
+    bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('offcanvas-founder')).show();
+  }
+
   function openModal(type) {
+    if (type === 'founder') {
+      openFounderDrawer();
+      return;
+    }
     const $m = $(`#modal-${type}`);
     $m.find('form')[0].reset();
     $m.find('[name="id"]').val('');
@@ -429,6 +478,11 @@
   function editItem(type, id) {
     const item = appData[PLURAL[type]].find(i => String(i.id) === String(id));
     if (!item) return;
+
+    if (type === 'founder') {
+      openFounderDrawer(item);
+      return;
+    }
 
     const $f = $(`#form-${type}`);
     clearAllErrors(type);
@@ -446,7 +500,20 @@
 
   function saveItem(type, formEl) {
     const formData = Object.fromEntries(new FormData(formEl).entries());
-    if (itiInstances[type]) formData.phone = itiInstances[type].getNumber();
+    if (itiInstances[type]) {
+      // getNumber() returns '' until utils.js loads — fall back to dial code + raw input.
+      const iti = itiInstances[type];
+      const e164 = iti.getNumber();
+      if (e164) {
+        formData.phone = e164;
+      } else {
+        const raw = (formData.phone || '').trim();
+        if (raw) {
+          const dialCode = iti.getSelectedCountryData().dialCode;
+          formData.phone = dialCode ? `+${dialCode}${raw}` : raw;
+        }
+      }
+    }
 
     const isEdit = !!formData.id;
     const payload = { ...buildPayload(type, formData), id: formData.id };
@@ -457,14 +524,37 @@
       headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
       success(res) {
         toastr.success(res.state || 'Success');
+        const mapFounder = (f) => ({
+          id: f.id,
+          name: f.name,
+          email: f.email,
+          phone: f.phone || '',
+          linkedin: f.linkedin || '',
+          join_date: f.join_date || '',
+          type: f.founder_type || '',
+          commitment: f.working_commitment || '',
+        });
         if (isEdit) {
-          const idx = appData[PLURAL[type]].findIndex(i => String(i.id) === String(formData.id));
-          if (idx !== -1) appData[PLURAL[type]][idx] = { ...appData[PLURAL[type]][idx], ...formData };
+          if (type === 'founder' && res.founder) {
+            const idx = appData.founders.findIndex(i => String(i.id) === String(formData.id));
+            if (idx !== -1) appData.founders[idx] = mapFounder(res.founder);
+          } else {
+            const idx = appData[PLURAL[type]].findIndex(i => String(i.id) === String(formData.id));
+            if (idx !== -1) appData[PLURAL[type]][idx] = { ...appData[PLURAL[type]][idx], ...formData };
+          }
         } else {
-          formData.id = Date.now();
-          appData[PLURAL[type]].push(formData);
+          if (type === 'founder' && res.founder) {
+            appData.founders.push(mapFounder(res.founder));
+          } else {
+            formData.id = Date.now();
+            appData[PLURAL[type]].push(formData);
+          }
         }
-        $(`#modal-${type}`).modal('hide');
+        if (type === 'founder') {
+          bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('offcanvas-founder')).hide();
+        } else {
+          $(`#modal-${type}`).modal('hide');
+        }
         renderList(type);
       },
       error(xhr) {
@@ -580,9 +670,22 @@
         showFieldError(type, eid, field);
         return false;
       }
-      if (rule.intlTel && itiInstances[type] && !itiInstances[type].isValidNumber()) {
-        showFieldError(type, eid, field);
-        return false;
+      if (rule.intlTel && itiInstances[type]) {
+        // Only run library validation when utils.js has finished loading.
+        // Until then, accept anything non-empty — the server has its own max-length rule.
+        if (typeof window.intlTelInputUtils !== 'undefined' && !itiInstances[type].isValidNumber()) {
+          showFieldError(type, eid, field);
+          return false;
+        }
+      }
+      if (rule.pastOrToday) {
+        const d = new Date(val);
+        const today = new Date();
+        today.setHours(23, 59, 59, 999);
+        if (isNaN(d.getTime()) || d > today) {
+          showFieldError(type, eid, field);
+          return false;
+        }
       }
     }
 
@@ -595,16 +698,18 @@
   }
 
   // ===================== EXPORTS =====================
+  window.TeamInfo = {
+    openModal,
+    openFounderDrawer,
+    editItem,
+    deleteItem,
+    renderList
+  };
+
+  // Back-compat: investor/shareholder blade buttons still call these bare globals.
   window.openModal = openModal;
   window.editItem = editItem;
   window.deleteItem = deleteItem;
-
-  window.TeamInfo = {
-    openModal,
-    editItem,
-    deleteItem,
-    renderList   // ← Fixed: Now accessible from onclick
-  };
 
   $(function () { init(); });
 
