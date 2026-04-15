@@ -55,6 +55,7 @@ use App\ScreeningEvaluationCustomFields;
 use Illuminate\Support\Facades\Validator;
 use \Illuminate\Validation\ValidationException;
 use Intervention\Image\ImageManagerStatic as Image;
+use App\Http\Resources\FounderResource;
 use App\Http\Requests\StoreUpdateClientCompanyRequest;
 use URL, File, DB, Exception, Session, Storage, stdClass;
 
@@ -89,7 +90,44 @@ class ClientCompanyController extends Controller
             $icons = '';
         }
         $team = $this->companyService->getTeamMember($id);
-        $founders = $team->where('TeamMember', 'Founder');
+
+        // Build virtual owner card (first card on read-only profile — see GV-1981).
+        // Owner is the User whose company_id == $company->id. The card is not editable.
+        $ownerCard = null;
+        $owner = $company->resolveUser();
+        if ($owner) {
+            $ownerCard = [
+                'id'                 => null,
+                'virtual'            => true,
+                'name'               => trim((string) ($owner->name ?? '')) !== '' ? $owner->name : $owner->email,
+                'email'              => $owner->email,
+                'phone'              => $owner->phone ?? null,
+                'linkedin'           => null, // owner User has no linkedin column
+                'join_date'          => optional($company->created_at)->format('Y-m-d'),
+                'founder_type'       => 'Founder',
+                'working_commitment' => null,
+            ];
+        }
+
+        // Real team_members rows, mapped to the shape the blade expects (array-based).
+        $realFounders = $team
+            ->where('TeamMember', 'Founder')
+            ->map(fn($f) => [
+                'id'                 => $f->id,
+                'virtual'            => false,
+                'name'               => $f->Name,
+                'email'              => $f->Email,
+                'phone'              => $f->phone ?? null,
+                'linkedin'           => $f->LinkedIn,
+                'join_date'          => $f->join_date ? \Illuminate\Support\Carbon::parse($f->join_date)->format('Y-m-d') : null,
+                'founder_type'       => $f->founder_type,
+                'working_commitment' => $f->working_commitment,
+            ])
+            ->values();
+
+        // Merge: virtual owner always appears first (if resolvable).
+        $founders = collect($ownerCard ? [$ownerCard] : [])->merge($realFounders)->values();
+
         $Shareholders = $team->where('TeamMember', 'Shareholder');
         $Investors = $team->where('TeamMember', 'Investor');
 
@@ -2306,60 +2344,78 @@ class ClientCompanyController extends Controller
         // $user = Auth::user();
         $companyId = $user->company_id;
         if ($request->TeamsNo == "Founders") {
-            // تحقق من صحة البيانات
             $validator = Validator::make($request->all(), [
-                'founder_name' => 'required|string|max:255',
-                'founder_email' => 'required|email|max:255',
-                'founder_linkedin' => 'nullable|url|max:255',
+                'founder_name'       => 'required|string|max:100',
+                'founder_email'      => 'required|email|max:254',
+                'founder_phone'      => 'nullable|string|max:20',
+                'founder_linkedin'   => 'nullable|url|max:500',
+                'founder_join_date'  => 'nullable|date|before_or_equal:today',
+                'founder_type'       => 'required|in:Founder,Co-founder',
+                'founder_commitment' => 'nullable|in:Full-time,Part-time',
             ], [
-                'founder_name.required' => __('admin.Name is Required founder'),
-                'founder_email.required' => __('admin.Email is Required founder'),
-                'founder_email.email' => __('admin.Email is Not Correct founder'),
-                'founder_linkedin.url' => __('admin.Linkedin URL is Not Correct founder'),
+                'founder_name.required'            => __('admin.founder_name_required'),
+                'founder_email.required'           => __('admin.founder_email_required'),
+                'founder_email.email'              => __('admin.founder_email_invalid'),
+                'founder_phone.max'                => __('admin.founder_phone_invalid'),
+                'founder_linkedin.url'             => __('admin.founder_linkedin_invalid'),
+                'founder_join_date.before_or_equal'=> __('admin.founder_join_date_future'),
+                'founder_type.required'            => __('admin.founder_type_required'),
+                'founder_type.in'                  => __('admin.founder_type_required'),
             ]);
 
-            // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
             if ($validator->fails()) {
                 if ($request->ajax()) {
-                    return response()->json([
-                        'errors' => $validator->errors(),
-                    ], 422); // حالة الخطأ 422
+                    return response()->json(['errors' => $validator->errors()], 422);
                 } else {
                     return redirect()->back()->with('error', 'inputs error')->withErrors($validator)->withInput();
                 }
             }
 
             $email = $request->input('founder_email');
-            $mail = Team_member::where('Email', $email)->where('Company_id', $companyId)->where('TeamMember', 'Founder')->first();
+            $phone = $request->input('founder_phone');
 
-            if ($mail != null) {
-                if ($request->ajax()) {
-                    return response()->json(['state' => __('admin.founder_email_exist'),]);
-                } else {
-                    return redirect()->back()->with('error', __('admin.founder_email_exist'));
+            $result = DB::transaction(function () use ($request, $email, $phone, $companyId) {
+                $baseQuery = Team_member::where('Company_id', $companyId)
+                    ->where('TeamMember', 'Founder')
+                    ->lockForUpdate();
+
+                if ((clone $baseQuery)->where('Email', $email)->exists()) {
+                    return ['dup' => 'founder_email', 'key' => 'admin.founder_email_exist'];
                 }
+
+                if (!empty($phone) && (clone $baseQuery)->where('phone', $phone)->exists()) {
+                    return ['dup' => 'founder_phone', 'key' => 'admin.founder_phone_exist'];
+                }
+
+                $teamMember = new Team_member();
+                $teamMember->Name               = $request->input('founder_name');
+                $teamMember->Email              = $email;
+                $teamMember->phone              = $phone;
+                $teamMember->LinkedIn           = $request->input('founder_linkedin');
+                $teamMember->join_date          = $request->input('founder_join_date');
+                $teamMember->founder_type       = $request->input('founder_type');
+                $teamMember->working_commitment = $request->input('founder_commitment');
+                $teamMember->Company_id         = $companyId;
+                $teamMember->TeamMember         = 'Founder';
+                $teamMember->save();
+
+                return ['teamMember' => $teamMember];
+            });
+
+            if (isset($result['dup'])) {
+                if ($request->ajax()) {
+                    return response()->json(['errors' => [$result['dup'] => [__($result['key'])]]], 422);
+                }
+                return redirect()->back()->with('error', __($result['key']));
             }
-            // $linkedin = $request->input('founder_linkedin');
-            // $linked = Team_member::where('LinkedIn', $linkedin)->where('Company_id', $companyId)->where('TeamMember', 'Founder')->first();
-            // if ($linked != null) 
-            // {
-            //     if( $request->ajax() ) { return response()->json(data: ['state' => __('admin.founder_linkedin_exist'),]); }
-            //     else { return redirect()->back()->with('error', __('admin.founder_linkedin_exist')); }
-            // }
 
-            $founder = 'Founder';
-            // إنشاء وحفظ بيانات العضو في قاعدة البيانات
-            $teamMember = new Team_member(); // افترض أن لديك موديل اسمه TeamMember
-            $teamMember->TeamMember = $founder;
-            $teamMember->Name = $request->input('founder_name');
-            $teamMember->Email = $request->input('founder_email');
-            $teamMember->LinkedIn = $request->input('founder_linkedin');
-            $teamMember->Company_id = $companyId;
-            $teamMember->save();
+            $teamMember = $result['teamMember'];
 
-            // استجابة بعد الحفظ
             if ($request->ajax()) {
-                return response()->json(['state' => __('admin.founder_added'),]);
+                return response()->json([
+                    'state'   => __('admin.founder_added'),
+                    'founder' => new FounderResource($teamMember),
+                ]);
             } else {
                 return redirect()->back()->with('success', __('admin.founder_added'));
             }
@@ -2472,36 +2528,71 @@ class ClientCompanyController extends Controller
         // إنشاء وحفظ بيانات العضو في قاعدة البيانات
         $teamMember = Team_member::where('id', $request->id)->first(); // افترض أن لديك موديل اسمه TeamMember
         if ($teamMember->TeamMember == "Founder") {
-
-            // تحقق من صحة البيانات
-            $validator = Validator::make($request->all(), [
-                'founder_name' => 'required|string|max:255',
-                'founder_email' => 'required|email|max:255',
-                'founder_linkedin' => 'nullable|url|max:255',
-
-            ], [
-                'founder_name.required' => __('admin.Name is Required founder'),
-                'founder_email.required' => __('admin.Email is Required founder'),
-                'founder_email.email' => __('admin.Email is Not Correct founder'),
-                'founder_linkedin.url' => __('admin.Linkedin URL is Not Correct founder'),
-
-            ]);
-
-            // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
-            if ($validator->fails()) {
-                return response()->json([
-                    'errors' => $validator->errors(),
-                ], 422); // حالة الخطأ 422
+            // Company-scope guard: prevent cross-company tampering.
+            if ((int) $teamMember->Company_id !== (int) $companyId) {
+                return response()->json(['errors' => ['founder_email' => [__('admin.founder_email_exist')]]], 422);
             }
 
-            $teamMember->Name = $request->input('founder_name');
-            $teamMember->Email = $request->input('founder_email');
-            $teamMember->LinkedIn = $request->input('founder_linkedin');
-            $teamMember->save();
+            $validator = Validator::make($request->all(), [
+                'founder_name'       => 'required|string|max:100',
+                'founder_email'      => 'required|email|max:254',
+                'founder_phone'      => 'nullable|string|max:20',
+                'founder_linkedin'   => 'nullable|url|max:500',
+                'founder_join_date'  => 'nullable|date|before_or_equal:today',
+                'founder_type'       => 'required|in:Founder,Co-founder',
+                'founder_commitment' => 'nullable|in:Full-time,Part-time',
+            ], [
+                'founder_name.required'             => __('admin.founder_name_required'),
+                'founder_email.required'            => __('admin.founder_email_required'),
+                'founder_email.email'               => __('admin.founder_email_invalid'),
+                'founder_phone.max'                 => __('admin.founder_phone_invalid'),
+                'founder_linkedin.url'              => __('admin.founder_linkedin_invalid'),
+                'founder_join_date.before_or_equal' => __('admin.founder_join_date_future'),
+                'founder_type.required'             => __('admin.founder_type_required'),
+                'founder_type.in'                   => __('admin.founder_type_required'),
+            ]);
 
-            // استجابة بعد الحفظ
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+            $email = $request->input('founder_email');
+            $phone = $request->input('founder_phone');
+            $founderId = $teamMember->id;
+
+            $result = DB::transaction(function () use ($request, $teamMember, $email, $phone, $companyId, $founderId) {
+                $baseQuery = Team_member::where('Company_id', $companyId)
+                    ->where('TeamMember', 'Founder')
+                    ->where('id', '!=', $founderId)
+                    ->lockForUpdate();
+
+                if ((clone $baseQuery)->where('Email', $email)->exists()) {
+                    return ['dup' => 'founder_email', 'key' => 'admin.founder_email_exist'];
+                }
+
+                if (!empty($phone) && (clone $baseQuery)->where('phone', $phone)->exists()) {
+                    return ['dup' => 'founder_phone', 'key' => 'admin.founder_phone_exist'];
+                }
+
+                $teamMember->Name               = $request->input('founder_name');
+                $teamMember->Email              = $email;
+                $teamMember->phone              = $phone;
+                $teamMember->LinkedIn           = $request->input('founder_linkedin');
+                $teamMember->join_date          = $request->input('founder_join_date');
+                $teamMember->founder_type       = $request->input('founder_type');
+                $teamMember->working_commitment = $request->input('founder_commitment');
+                $teamMember->save();
+
+                return ['teamMember' => $teamMember];
+            });
+
+            if (isset($result['dup'])) {
+                return response()->json(['errors' => [$result['dup'] => [__($result['key'])]]], 422);
+            }
+
             return response()->json([
-                'state' => __('admin.founder_Edited'),
+                'state'   => __('admin.founder_updated'),
+                'founder' => new FounderResource($result['teamMember']),
             ]);
         } elseif ($teamMember->TeamMember == "Shareholder") {
 
@@ -2585,12 +2676,24 @@ class ClientCompanyController extends Controller
 
     public function DeleteTeams(Request $request, $id = null)
     {
-        $user = User::where('company_id', $id)->first();
-        // $user = Auth::user();
+        if (isset($id) && !is_null($id)) {
+            $user = User::where('company_id', $id)->first();
+        } else {
+            $user = auth()->user();
+        }
+
+        if (!$user) {
+            return response()->json([
+                'state' => false,
+                'message' => __('admin.no_Team_member')
+            ], 403);
+        }
+
         $companyId = $user->company_id;
 
-        // إنشاء وحفظ بيانات العضو في قاعدة البيانات
-        $teamMember = Team_member::where('id', $request->id)->first(); // افترض أن لديك موديل اسمه TeamMember
+        $teamMember = Team_member::where('id', $request->id)
+            ->where('Company_id', $companyId)
+            ->first();
 
         if (!$teamMember) {
             return response()->json([
@@ -2599,12 +2702,15 @@ class ClientCompanyController extends Controller
             ], 404);
         }
 
+        $isFounder = $teamMember->TeamMember === 'Founder';
+
         $teamMember->delete();
 
-        // استجابة بعد الحفظ
         return response()->json([
             'state' => true,
-            'message' => __('admin.DeletedSuccessfully')
+            'message' => $isFounder
+                ? __('admin.founder_deleted')
+                : __('admin.DeletedSuccessfully')
         ]);
     }
 
