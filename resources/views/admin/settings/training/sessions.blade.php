@@ -323,6 +323,7 @@
             $selectedStep = $steps->firstWhere('id', request('id'));
             $selectedCycleId = $selectedStep?->cycle_id;
           @endphp
+
           <label class="form-label">{{ __('admin.Program') }} <span class="text-danger">*</span></label>
           <select name="cycle_id" id="program" class="form-select select2">
             <option value="">{{ __('admin.Select Program') }}</option>
@@ -334,7 +335,7 @@
             @endforeach
           </select>
         </div>
-
+        
         {{-- Step --}}
         <div class="col-12 mb-4">
           <label class="form-label">{{ __('cycles.Step') }} <span class="text-danger">*</span></label>
@@ -969,6 +970,10 @@ $(function () {
     $('#sessionForm').attr('action', ROUTES.update(response.id));
     $('#sessionStepId').val(response.step_id);
     $('#sessionSid').val(response.id);
+
+    // Pre-select Program & Step dropdowns
+    $('#step').val(response.step_id || '');
+    $('#program').val(response.cycle_id || '').trigger('change');
 
     // Visible fields — type is fixed on edit (disable to prevent accidental change)
     $('#sessionType').val(type).prop('disabled', true);

@@ -626,6 +626,7 @@ class TrainingController extends Controller
 			// }
 
 			// dd($sessions->toArray());
+			
 			$program_steps = $steps->where('cycle_id', $current_step->cycle->id)->values();
 			return view('admin/settings/training/sessions', compact('steps', 'program_steps', 'id', 'sessions', 'cycles', 'online', 'current_step'));
 		} catch (\Throwable $e) {
@@ -1006,6 +1007,7 @@ class TrainingController extends Controller
 			$session['join_url'] = $sessionData->join_url;
 			$session['created_at'] = $sessionData->created_at;
 			$session['step_id'] = $sessionData->step_id;
+			$session['cycle_id'] = $sessionData->step?->cycle_id;
 
 			return response()->json($session);
 		} else {
