@@ -2639,12 +2639,24 @@ class ClientCompanyController extends Controller
 
     public function DeleteTeams(Request $request, $id = null)
     {
-        $user = User::where('company_id', $id)->first();
-        // $user = Auth::user();
+        if (isset($id) && !is_null($id)) {
+            $user = User::where('company_id', $id)->first();
+        } else {
+            $user = auth()->user();
+        }
+
+        if (!$user) {
+            return response()->json([
+                'state' => false,
+                'message' => __('admin.no_Team_member')
+            ], 403);
+        }
+
         $companyId = $user->company_id;
 
-        // إنشاء وحفظ بيانات العضو في قاعدة البيانات
-        $teamMember = Team_member::where('id', $request->id)->first(); // افترض أن لديك موديل اسمه TeamMember
+        $teamMember = Team_member::where('id', $request->id)
+            ->where('Company_id', $companyId)
+            ->first();
 
         if (!$teamMember) {
             return response()->json([
@@ -2653,12 +2665,15 @@ class ClientCompanyController extends Controller
             ], 404);
         }
 
+        $isFounder = $teamMember->TeamMember === 'Founder';
+
         $teamMember->delete();
 
-        // استجابة بعد الحفظ
         return response()->json([
             'state' => true,
-            'message' => __('admin.DeletedSuccessfully')
+            'message' => $isFounder
+                ? __('admin.founder_deleted')
+                : __('admin.DeletedSuccessfully')
         ]);
     }
 

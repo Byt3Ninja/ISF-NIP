@@ -76,6 +76,8 @@
       investor: "Investor",
       shareholder: "Shareholder",
       delete: "Delete",
+      founderDeletedToast: "Founder deleted successfully.",
+      founderDeleteError: "Something went wrong. Please try again.",
        investmentTypes: {
         Angel_Investor:      'Angel Investor',
         Angel_Group:         'Angel Group',
@@ -106,6 +108,8 @@
       founder: "المؤسس",
       investor: "المستثمر",
       shareholder: "المساهم",
+      founderDeletedToast: "تم حذف المؤسس بنجاح.",
+      founderDeleteError: "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
        investmentTypes: {
         Angel_Investor:      'مستثمر ملاك',
         Angel_Group:         'مجموعة ملاك',
@@ -581,30 +585,73 @@
   }
 
   function deleteItem(type, id) {
-    // if (!confirm(LANG === 'ar' ? 'تأكيد الحذف؟' : 'Confirm deletion?')) return;
-
     const name = appData[PLURAL[type]].find(i => String(i.id) === String(id)).name;
 
-    releaseWarningAlert({
-      title: `${t.delete} ${t[type]}`,
-      message: `${t.deleteMsg.replace('${name}', escapeHtml(name))}`,
-      confirmText: `${t.yesDelete}`,
-      cancelText: `${t.noCancel}`,
-      confirmColor: 'danger',
-      onConfirm: () => {
-        $.ajax({
-          url: TEAM_INFO_CONFIG.routes.delete,
-          method: 'POST',
-          data: { id },
-          headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-          success() {
-            appData[PLURAL[type]] = appData[PLURAL[type]].filter(i => String(i.id) !== String(id));
-            renderList(type);
-            toastr.success(LANG === 'ar' ? 'تم الحذف' : 'Deleted');
-          }
-        });
-      }
-    });
+    if (type === 'founder') {
+      const deleteTitle = `${t.delete} ${t[type]}`;
+      const deleteMsg   = `Are you sure you want to delete ${escapeHtml(name)}?`;
+      const errorMsg    = t.founderDeleteError;
+      const successMsg  = t.founderDeletedToast;
+
+      Swal.fire({
+        icon: 'warning',
+        title: deleteTitle,
+        text: deleteMsg,
+        showCancelButton: true,
+        confirmButtonText: t.yesDelete,
+        cancelButtonText: t.noCancel,
+        customClass: {
+          confirmButton: 'btn btn-danger ms-3',
+          cancelButton: 'btn btn-label-secondary',
+        },
+        buttonsStyling: false,
+        reverseButtons: true,
+        showLoaderOnConfirm: true,
+        preConfirm: () => {
+          return new Promise((resolve) => {
+            $.ajax({
+              url: TEAM_INFO_CONFIG.routes.delete,
+              method: 'POST',
+              data: { id },
+              headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+              success: (res) => {
+                if (res && res.state === true) resolve(res);
+                else { Swal.showValidationMessage(errorMsg); resolve(false); }
+              },
+              error: () => { Swal.showValidationMessage(errorMsg); resolve(false); }
+            });
+          });
+        },
+        allowOutsideClick: () => !Swal.isLoading(),
+      }).then((result) => {
+        if (result.isConfirmed && result.value) {
+          appData[PLURAL[type]] = appData[PLURAL[type]].filter(i => String(i.id) !== String(id));
+          renderList(type);
+          toastr.success(successMsg);
+        }
+      });
+    } else {
+      releaseWarningAlert({
+        title: `${t.delete} ${t[type]}`,
+        message: `${t.deleteMsg.replace('${name}', escapeHtml(name))}`,
+        confirmText: `${t.yesDelete}`,
+        cancelText: `${t.noCancel}`,
+        confirmColor: 'danger',
+        onConfirm: () => {
+          $.ajax({
+            url: TEAM_INFO_CONFIG.routes.delete,
+            method: 'POST',
+            data: { id },
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+            success() {
+              appData[PLURAL[type]] = appData[PLURAL[type]].filter(i => String(i.id) !== String(id));
+              renderList(type);
+              toastr.success(LANG === 'ar' ? 'تم الحذف' : 'Deleted');
+            }
+          });
+        }
+      });
+    }
   }
 
   /* ─────────────────────────────────────────────
