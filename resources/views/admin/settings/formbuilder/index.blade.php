@@ -83,12 +83,10 @@
           <div class="text-muted">{{ __('builder.Build_custom_forms') }}</div>
         </div>
         <div class="d-flex align-items-center gap-3">
-          @if (request()->has('org_id') || request()->has('form_id'))
-          <button class="btn btn-outline-secondary" onclick="location.href='/dashboard/show-builder'">
-            <i class="ti ti-refresh"></i>
-            <span class="ms-2">{{ __('admin.Reset') }}</span>
+          <button class="btn btn-outline-primary" id="new-form-btn">
+            <i class="ti ti-plus"></i>
+            <span class="ms-2">{{ __('builder.New_Form') }}</span>
           </button>
-          @endif
           <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#filterModal">
             <i class="ti ti-switch-horizontal"></i>
             <span class="ms-2">{{ __('builder.switch_form') }}</span>
@@ -400,8 +398,11 @@
       deleting_form:                '{{ __("builder.deleting form") }}',
       yes:                          '{{ __("admin.DYes") }}',
       no:                           '{{ __("admin.DNo") }}',
-      confirm_switch:                '{{ __("builder.confirm_switch") }}',
-      confirm_switch_message:                '{{ __("builder.confirm_switch_message") }}'
+      confirm_switch:               '{{ __("builder.confirm_switch") }}',
+      confirm_switch_message:       '{{ __("builder.confirm_switch_message") }}',
+      unsaved_changes_msg:          '{{ __("builder.Unsaved_Changes_New_Form") }}',
+      discard_create:               '{{ __("builder.Discard_Create") }}',
+      cancel:                       '{{ __("builder.Confirm_cancel") }}'
     }
   };
 </script>

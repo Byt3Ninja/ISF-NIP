@@ -128,6 +128,24 @@ let t;   // = FB_CONFIG.translations
     location.href = url;
   });
 
+  $('#new-form-btn').on('click', function (e) {
+    e.preventDefault();
+    const url = '/dashboard/show-builder';
+
+    if (isBuilderFormDirty) {
+      releaseWarningAlert({
+        title:             t.are_you_sure,
+        message:           t.unsaved_changes_msg,
+        confirmButtonText: t.discard_create,
+        cancelButtonText:  t.cancel,
+        onConfirm:         () => location.href = url,
+      });
+      return;
+    }
+
+    location.href = url;
+  });
+
 })(jQuery);
 
 /* ═══════════════════════════════════════════════════════════════════
