@@ -6,7 +6,7 @@
 @stop
 
 @section('style')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/intl-tel-input/css/intlTelInput.css">
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
 <style>
 	.flatpickr-monthSelect-month.selected {
@@ -201,7 +201,7 @@
 {{-- Monthly Date Picker CDN ( For Financial Projection Form ) --}}
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+<script src="/vuexy/assets/vendor/libs/intl-tel-input/js/intlTelInput.min.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>

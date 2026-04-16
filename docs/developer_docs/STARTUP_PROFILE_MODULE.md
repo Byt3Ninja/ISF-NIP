@@ -304,7 +304,10 @@ fillable.
 | `TeamMember`          | string    | no       | creation                                                              | Discriminator. One of `Founder`, `Shareholder`, `Investor`. |
 | `Name`                | string    | no       | creation                                                              | Display name. |
 | `Email`               | string    | yes      | creation                                                              | Email (founders only). |
-| `phone`               | string(20)| yes      | `2026_04_02_170927_add_phone_column_to_team_memebers_table.php`       | Committed alongside GV-1953 founder-identity additions. |
+| `phone`               | string(20)| yes      | `2026_04_02_170927_add_phone_column_to_team_memebers_table.php`       | Added by GV-1956 (Startup Team epic) to back founder phone numbers. |
+| `join_date`           | date      | yes      | `2026_04_15_214852_add_founder_fields_to_team_members_table.php`      | Founder join date (GV-1956). Cast to date on the model. |
+| `founder_type`        | string(20)| yes      | `2026_04_15_214852_add_founder_fields_to_team_members_table.php`      | Founder type discriminator. GV-1956. One of `Founder`, `Co-founder`. |
+| `working_commitment`  | string(20)| yes      | `2026_04_15_214852_add_founder_fields_to_team_members_table.php`      | Founder working commitment. GV-1956. One of `Full-time`, `Part-time`. |
 | `LinkedIn`            | string    | yes      | creation                                                              | LinkedIn URL (founders only). |
 | `RoleShereholder`     | string    | yes      | creation                                                              | Role label (shareholders only, misspelled column name preserved). |
 | `PresentagShereholder`| integer   | no (def 0)| creation                                                              | Ownership percentage (shareholders only, misspelled column name preserved). |
@@ -688,16 +691,19 @@ The full per-branch matrix is documented in section 3.4.
 - Shareholder path enforces the total-ownership-percentage <= 100 constraint.
 - Uses `new Team_member()` + `->save()`. The per-type column writes are
   exactly what `company-team-info.blade.php` + `app-team-info.js` expect.
+- **GV-1956 (GV-1954):** the Founders branch now validates 7 fields (name/email/phone/linkedin/join_date/founder_type/working_commitment), enforces company-scoped email + phone duplicate checks inside a `DB::transaction` with `lockForUpdate`, and returns the saved row wrapped in `FounderResource` for in-place card rendering.
 
 #### `EditTeams(Request $request, $id = null)` — `ClientCompanyController.php:2462`
 
 - Loads the target `Team_member` by `$request->id`, branches on its
   discriminator column (`TeamMember`), re-runs validation, and persists.
 - JSON-only (no HTML redirect branch).
+- **GV-1956 (GV-1979):** the Founders branch was rewritten to mirror `AddTeams` — same validator, duplicate checks that exclude the current founder id, company-scope guard, and `FounderResource` response.
 
 #### `DeleteTeams(Request $request, $id = null)` — `ClientCompanyController.php:2586`
 
 - Soft-deletes a single team member by id.
+- **GV-1956 (GV-1980):** added `auth()->user()` fallback when no route id is provided, company-scope guard on the `Team_member` lookup (prevents cross-company deletion), and differentiated response messages — `admin.founder_deleted` when the target is a founder, `admin.DeletedSuccessfully` otherwise.
 
 #### `AddMileStone`, `EditMileStone`, `DeleteMileStone` — `ClientCompanyController.php:2612`, `2716`, `2930`
 
@@ -875,7 +881,7 @@ lines). It composes the following partials from
 | `_startup_overview.blade.php`           | Overview tab                      | Strategy tabs (why / mission / achievements / expertise, GV-2052), Registration & Offering Details card (GV-2063), business profile summary, SDG icons, profile-completion meter. |
 | `_startup_about.blade.php`              | Overview / legacy                 | Legacy about section. |
 | `_startup_milestones.blade.php`         | Milestones tab                    | Milestones timeline. |
-| `_startup_founders.blade.php`           | Overview / Team                   | Founders thumbnails. |
+| `_startup_founders.blade.php`           | Overview / Team                   | Founders thumbnails. GV-1956 (GV-1981) rewrote this partial to consume the real `$founders` collection from the controller, prepended a virtual owner card (first position, read-only), renders DD-MM-YYYY join dates, hides optional fields when empty, and shows a LinkedIn icon that opens in a new tab. |
 | `_startup_shareholders.blade.php`       | Overview / Team                   | Shareholders thumbnails. |
 | `_startup_investors.blade.php`          | Overview / Team                   | Investors thumbnails. |
 | `_working_team.blade.php`               | Team                              | Legacy working-team summary block. |
@@ -980,29 +986,42 @@ templates, exactly the same pattern used by the forms module.
 
 ### 4.4 Team management widget — `company-team-info.blade.php` + `app-team-info.js`
 
-`resources/views/partials/forms/company/company-team-info.blade.php`
-renders a single shared modal with three tabs (Founders / Shareholders /
-Investors). `public/vuexy/assets/js/app-team-info.js` (610 lines) owns the
-CRUD flow with a type-driven config:
+`resources/views/partials/forms/company/company-team-info.blade.php` renders three tabs (Founders / Shareholders / Investors). **GV-1956 replaced the founder modal with a right-side Bootstrap offcanvas drawer** (`#offcanvas-founder`) and wired it to the new fields added in Ticket 1. Shareholder and Investor still use the original centred modals. `public/vuexy/assets/js/app-team-info.js` owns the CRUD flow with a type-driven config:
 
 ```js
-const TEAM_INFO_CONFIG = {
-  founder:    { teamsNo: 'Founders',     fieldMap: { name, email, linkedin, phone, type, join_date, commitment } },
-  investor:   { teamsNo: 'Investors',    fieldMap: { name: 'investor_name', type: 'investment_type' } },
-  shareholder:{ teamsNo: 'Shareholders', fieldMap: { name, role, percentage } },
+const TYPE_CONFIG = {
+  founder: { teamsNo: 'Founders', fieldMap: { 
+    name: 'founder_name', 
+    email: 'founder_email', 
+    linkedin: 'founder_linkedin',
+    phone: 'founder_phone',
+    type: 'founder_type',
+    join_date: 'founder_join_date',
+    commitment: 'founder_commitment'
+  } },
+  investor: { teamsNo: 'Investors', fieldMap: { name: 'investor_name', type: 'investment_type' } },
+  shareholder: { teamsNo: 'Shareholders', fieldMap: { name: 'shareholder_name', role: 'shareholder_role', percentage: 'shareholder_ownership_percentage' } }
 };
 
 const VALIDATION_RULES = {
-  founder:    { name: { required: true }, email: { required: true, email: true }, type: { required: true }, phone: { intlTel: true }, linkedin: { url: true } },
-  investor:   { name: { required: true, errorId: 'name-investor' }, type: { errorId: 'type-investor' } },
-  shareholder:{ name: { required: true, errorId: 'name-shareholder' }, role: {}, percentage: { min: 0, max: 100 } },
+  founder: { name: { required: true }, email: { required: true, email: true }, type: { required: true }, phone: { intlTel: true }, linkedin: { url: true }, join_date: { pastOrToday: true } },
+  investor: { name: { required: true, errorId: 'name-investor' }, type: { errorId: 'type-investor' } },
+  shareholder: { name: { required: true, errorId: 'name-shareholder' }, role: {}, percentage: { min: 0, max: 100 } }
 };
 
 const SERVER_ERROR_MAP = {
-  founder_name:     { errorId: 'name',       fieldName: 'name' },
-  founder_email:    { errorId: 'email',      fieldName: 'email' },
-  founder_linkedin: { errorId: 'linkedin',   fieldName: 'linkedin' },
-  // …
+  founder_name: { errorId: 'name', fieldName: 'name' },
+  founder_email: { errorId: 'email', fieldName: 'email' },
+  founder_phone: { errorId: 'phone', fieldName: 'phone' },
+  founder_linkedin: { errorId: 'linkedin', fieldName: 'linkedin' },
+  founder_type: { errorId: 'type', fieldName: 'type' },
+  founder_join_date: { errorId: 'join_date', fieldName: 'join_date' },
+  founder_commitment: { errorId: 'commitment', fieldName: 'commitment' },
+  investor_name: { errorId: 'name-investor', fieldName: 'name' },
+  investment_type: { errorId: 'type-investor', fieldName: 'type' },
+  shareholder_name: { errorId: 'name-shareholder', fieldName: 'name' },
+  shareholder_role: { errorId: 'role', fieldName: 'role' },
+  shareholder_ownership_percentage: { errorId: 'percentage', fieldName: 'percentage' }
 };
 ```
 
@@ -1014,6 +1033,7 @@ const SERVER_ERROR_MAP = {
 - This flow is **entirely separate** from the `CompanyN` switcher — team
   CRUD goes to the `company.profile_teams_{add,edit,delete}` routes, not
   `company.profile_update_mine`.
+- **GV-1956**: `intl-tel-input` v17.0.8 is now self-hosted at `public/vuexy/assets/vendor/libs/intl-tel-input/` (no CDN dependency). The drawer initialises flatpickr on `#founder_join_date` with `maxDate: 'today'`. Delete uses SweetAlert2 with `preConfirm` so failures keep the modal open with an inline validation message.
 
 ### 4.5 Support & mentorship widget — `company-support.blade.php`
 
@@ -1260,21 +1280,22 @@ Post-save, the branch returns JSON when AJAX and redirects to
 ### 5.8 Team (founders, shareholders, investors)
 
 Blade: `resources/views/partials/forms/company/company-team-info.blade.php`
-plus the three modal partials `_founder_team.blade.php`,
-`_shareholder_team.blade.php`, `_investor_team.blade.php`. Writes go
+plus the two shareholder/investor modal partials `_shareholder_team.blade.php` and `_investor_team.blade.php` (the legacy `_founder_team.blade.php` was removed by GV-1956; founder CRUD now lives entirely in the `#offcanvas-founder` drawer inside `company-team-info.blade.php`). Writes go
 through the dedicated `company.profile_teams_add` /
 `company.profile_teams_edit` / `company.profile_teams_delete` routes
 (`AddTeams`, `EditTeams`, `DeleteTeams` — section 3.3).
 
 #### Founders (`TeamsNo == 'Founders'`)
 
-| Label (EN)      | Label (AR)    | DB column    | Type    | Nullable | Validation rule                        | UI element           | Ticket   |
-| --------------- | ------------- | ------------ | ------- | -------- | --------------------------------------- | -------------------- | -------- |
-| Full Name       | الاسم الكامل  | `Name`       | string  | no       | `required\|string\|max:255`            | `<input type="text">`| pre-epic |
-| Email           | البريد        | `Email`      | string  | no       | `required\|email\|max:255`             | `<input type="email">`| pre-epic |
-| Phone           | الهاتف        | `phone`      | string(20) | yes   | `intlTel` (client-side)                | intlTelInput         | pre-epic (column: `2026_04_02_170927_add_phone_column_to_team_memebers_table.php`) |
-| LinkedIn        | لينكد إن      | `LinkedIn`   | string  | yes      | `nullable\|url\|max:255`               | `<input type="url">` | pre-epic |
-| Type            | النوع         | `TeamMember` (always `'Founder'`) | enum | no | `required`                         | hidden               | pre-epic |
+| Label (EN)          | Label (AR)            | DB column           | Type       | Nullable        | Validation rule                                                                                          | UI element                         | Ticket              |
+| ------------------- | --------------------- | ------------------- | ---------- | --------------- | -------------------------------------------------------------------------------------------------------- | ---------------------------------- | ------------------- |
+| Founder Name        | اسم المؤسس            | `Name`              | string     | no              | `required\|string\|max:100`                                                                              | `<input type="text">`              | GV-1956 (GV-1954)   |
+| Founder Email       | البريد الإلكتروني     | `Email`             | string     | no              | `required\|email\|max:254` (company-scoped uniqueness via controller)                                    | `<input type="email">`             | GV-1956 (GV-1954)   |
+| Founder Phone       | رقم الهاتف            | `phone`             | string(20) | yes             | `nullable\|string\|max:20` (company-scoped uniqueness via controller; `intl-tel-input` client-side)      | `<input type="tel">` + intlTelInput| GV-1956 (GV-1954)   |
+| LinkedIn Profile    | رابط LinkedIn         | `LinkedIn`          | string     | yes             | `nullable\|url\|max:500`                                                                                 | `<input type="url">`               | GV-1956 (GV-1954)   |
+| Join Date           | تاريخ الانضمام        | `join_date`         | date       | yes             | `nullable\|date\|before_or_equal:today`                                                                  | `<input type="text">` + flatpickr  | GV-1956 (GV-1954)   |
+| Founder Type        | نوع المؤسس            | `founder_type`      | string(20) | no (business rule) | `required\|in:Founder,Co-founder`                                                                     | `<select>`                         | GV-1956 (GV-1954)   |
+| Working Commitment  | نوع الالتزام          | `working_commitment`| string(20) | yes             | `nullable\|in:Full-time,Part-time`                                                                       | `<select>`                         | GV-1956 (GV-1954)   |
 
 > **GV-1953** initially added `national_id`, `date_of_birth`, and
 > `education_status` fields to this modal. The persistence target landed
@@ -1696,3 +1717,32 @@ The Team tab's Employee Statistics KPI cards (GV-2057) live in
   (see the Employees statistics card: `$l == 'ar' ? 'إحصائيات …' : …`).
   These should move into `resources/lang/ar/startup.php` for
   consistency.
+
+### 6.14 GV-1956 — Startup Team
+
+Full founder CRUD upgrade for the Edit Startup Profile → Team → Founders tab, replacing the legacy `_founder_team.blade.php` modal with a right-side drawer, self-hosted `intl-tel-input`, and a richer data model. Shipped across 6 commits.
+
+**Tickets:**
+- **GV-1954** (Add new founder) + **GV-1979** (Edit founder) — merged commit. Schema additions (`phone`, `join_date`, `founder_type`, `working_commitment`). `ClientCompanyController::AddTeams` and `EditTeams` Founders branches rewritten with widened validator, company-scoped duplicate checks inside `DB::transaction` with `lockForUpdate`, and `FounderResource` responses. Drawer UI replaces the modal; intl-tel-input self-hosted at `public/vuexy/assets/vendor/libs/intl-tel-input/`.
+- **GV-1955** (Empty state) — bilingual empty-state copy (`No founders added yet` / `لم تتم إضافة مؤسسين بعد`) with an "Add Founder" action routed through `TeamInfo.openFounderDrawer()`.
+- **GV-1978** (Display added founders) — rewrote `buildCard('founder')` in `app-team-info.js`: conditional rows (no "N/A" placeholders), LinkedIn icon with `target="_blank" rel="noopener"`, commitment badge, collapsing footer when both commitment and LinkedIn are empty.
+- **GV-1980** (Delete founder) — `DeleteTeams` gained an `auth()->user()` fallback, company-scope guard, and differentiated success message. JS `deleteItem` for founders uses `Swal.fire` with `preConfirm` + `showValidationMessage` so failures keep the modal open with an inline error.
+- **GV-1981** (View founders on profile) — `_startup_founders.blade.php` now consumes the real `$founders` collection, prepends a virtual owner card (first position, no Edit/Delete, join date = company `created_at`), formats join date as DD-MM-YYYY, and hides optional fields when empty. LinkedIn icon opens in a new tab.
+
+**Files touched:**
+- Migrations: `2026_04_02_170927_add_phone_column_to_team_memebers_table.php`, `2026_04_15_214852_add_founder_fields_to_team_members_table.php`
+- Controller: `app/Http/Controllers/ClientCompanyController.php` (AddTeams, EditTeams, DeleteTeams; read-only profile show method for virtual owner card)
+- Model: `app/Team_member.php` (`join_date` cast, `scopeFounders`)
+- Requests: `app/Http/Requests/StoreFounderRequest.php`
+- Resource: `app/Http/Resources/FounderResource.php`
+- Repository: `app/Repositories/CompanyRepository.php` (`createFounder`)
+- Blade (edit): `resources/views/partials/forms/company/company-team-info.blade.php`
+- Blade (profile): `resources/views/admin/clients/startup/partials/_startup_founders.blade.php`
+- JS: `public/vuexy/assets/js/app-team-info.js`
+- i18n: `resources/lang/en/admin.php`, `resources/lang/ar/admin.php`
+- Assets: self-hosted `public/vuexy/assets/vendor/libs/intl-tel-input/` (v17.0.8)
+- Removed: `resources/views/partials/forms/company/_founder_team.blade.php`
+
+**Virtual owner card.** On the read-only profile (`GET /dashboard/companyProfile/{id}`), the first Founders card is always built from `$company->resolveUser()` — name from the User accessor, email from the User row, phone from `users.phone`, join date from `companies.created_at`, type hardcoded to `Founder`. It is not editable, has no LinkedIn icon (the `users` table has no linkedin column), and does not hit the database for a `team_members` row. Real founders follow the virtual card in creation order.
+
+**Duplicate-detection contract.** Email and phone uniqueness are enforced per-company and per-type (`TeamMember='Founder'`) via direct queries inside a `DB::transaction` that holds a `lockForUpdate` on the founders rows of the company. This narrows the TOCTOU window but does not eliminate it — a unique index on `(Company_id, phone)` scoped to founders would need a partial index, which MySQL 8 supports only via a generated column. Deferred as a follow-up.

@@ -146,7 +146,11 @@ class CompanyRepository
         return $company->teamMembers()->create([
             'Name' => $data['name'],
             'Email' => $data['email'] ?? null,
+            'phone' => $data['phone'] ?? null,
             'LinkedIn' => $data['linkedin'] ?? null,
+            'join_date' => $data['join_date'] ?? null,
+            'founder_type' => $data['founder_type'] ?? null,
+            'working_commitment' => $data['working_commitment'] ?? null,
             'TeamMember' => 'Founder',
         ]);
     }
