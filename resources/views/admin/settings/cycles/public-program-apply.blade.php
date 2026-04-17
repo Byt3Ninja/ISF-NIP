@@ -299,6 +299,16 @@ $endDateForCountdown = trim($month . ' ' . $endDatePart);
 												<span class="bs-stepper-label">{{ $l == 'ar' ? 'الطلب' : 'Application' }}</span>
 											</button>
 										</div>
+										@if($VFEmail)
+										<div class="line"></div>
+										<!-- Verification Step -->
+										<div class="step" data-target="#verification-step-pane">
+											<button type="button" class="step-trigger" role="tab" id="verification-step-trigger" aria-controls="verification-step-pane" aria-selected="false">
+												<span class="bs-stepper-circle"><i class="bi bi-shield-check"></i></span>
+												<span class="bs-stepper-label">{{ $l == 'ar' ? 'التحقق' : 'Verification' }}</span>
+											</button>
+										</div>
+										@endif
 									</div>
 
 									<!-- Wizard Content -->
@@ -350,6 +360,28 @@ $endDateForCountdown = trim($month . ' ' . $endDatePart);
 												<div id="register-fields" class="row"></div>
 											</form>
 										</div>
+
+										@if($VFEmail)
+										<!-- Verification Pane -->
+										<div id="verification-step-pane" class="content" role="tabpanel" aria-labelledby="verification-step-trigger">
+											<div class="text-center p-5">
+												<div class="mb-4">
+													<i class="bi bi-envelope-paper-pulse text-primary" style="font-size: 4rem;"></i>
+												</div>
+												<h3 class="mb-3">{{ $l == 'ar' ? 'تحقق من بريدك الإلكتروني' : 'Verify Your Email' }}</h3>
+												<p class="text-muted mb-4 fs-5">
+													{{ $l == 'ar' 
+														? 'لقد أرسلنا رابط تحقق إلى بريدك الإلكتروني. يرجى التحقق من بريدك وتفعيل حسابك للمتابعة.' 
+														: 'We have sent a verification link to your email. Please check your inbox and verify your account to continue.' }}
+												</p>
+												<div class="d-flex justify-content-center gap-3">
+													<button type="button" class="btn btn-primary btn-lg px-5" onclick="window.location.href='/dashboard'">
+														{{ $l == 'ar' ? 'انتقل إلى لوحة التحكم' : 'Go to Dashboard' }}
+													</button>
+												</div>
+											</div>
+										</div>
+										@endif
 									</div>
 								</div>
 							</div>
@@ -433,7 +465,7 @@ $endDateForCountdown = trim($month . ' ' . $endDatePart);
 			e.preventDefault();
 			let email = $('#initial-email').val();
 			if (email.trim() == '') {
-				$('#initial-email-feedback').html('{{ $l == "ar" ? "يرجى إدخال بريد إلكتروني صالح." : "Please enter a valid email." }}');
+				$('#initial-email-feedback').html('{{ $l == "ar" ? "يرجى إدخال بريد إلكتروني صحيح." : "Please enter a valid email address." }}');
 				$('#initial-email').addClass('is-invalid');
 				return;
 			} else {
@@ -665,7 +697,7 @@ $endDateForCountdown = trim($month . ' ' . $endDatePart);
 						}
 					});
 				} else {
-					$('#initial-email-feedback').html('{{ $l == "ar" ? "بريد إلكتروني غير صالح." : "Invalid email." }}');
+					$('#initial-email-feedback').html('{{ $l == "ar" ? "يرجى إدخال بريد إلكتروني صحيح." : "Please enter a valid email address." }}');
 					$('#initial-email').addClass('is-invalid');
 					return;
 				}
@@ -736,6 +768,11 @@ $endDateForCountdown = trim($month . ' ' . $endDatePart);
 			$('#initial-email-feedback').html('');
 		});
 
+		function validateEmail(email) {
+			const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+			return re.test(String(email).toLowerCase());
+		}
+
 		$(document).on('click', '#join_btn', function(e) {
 			e.preventDefault();
 			let $form = $('#register-form');
@@ -796,7 +833,11 @@ $endDateForCountdown = trim($month . ' ' . $endDatePart);
 				processData: false,
 				success: function(response) {
 					if (response.status) {
-						window.location.href = response.url;
+						@if($VFEmail)
+							stepper.next();
+						@else
+							window.location.href = response.url;
+						@endif
 					} else {
 						Swal.fire({ 
 							title: '{{ $l == "ar" ? "خطأ في التسجيل" : "Registration Error" }}',
@@ -830,10 +871,7 @@ $endDateForCountdown = trim($month . ' ' . $endDatePart);
 			});
 		});
 
-		validateEmail = (email) => {
-			var re = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
-			return re.test(email);
-		};
+
 
 		function datePicker() {
 			$('.datepicker').flatpickr({
