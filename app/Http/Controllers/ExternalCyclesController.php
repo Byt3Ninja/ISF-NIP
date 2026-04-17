@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\{Cycle, User, Step, Company, Formfield, Formdata, TeamFormation};
+use App\{Cycle, User, Step, Company, Formfield, Formdata, TeamFormation, Settings};
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Events\StartupJoining;
@@ -106,7 +106,9 @@ class ExternalCyclesController extends Controller
 			}
 			else
 			{
-				return view('admin.settings.cycles.public-program-apply', compact('program', 'org_slug', 'program_slug'));
+				$app_settings = Settings::find(1);
+				$VFEmail = $app_settings?->VFEmail ?? 1;
+				return view('admin.settings.cycles.public-program-apply', compact('program', 'org_slug', 'program_slug', 'VFEmail'));
 			}
 		}
 	}
@@ -121,7 +123,10 @@ class ExternalCyclesController extends Controller
 			if( $program->is_public == 1 )
 			{
 				$request->validate([
-					'email' => 'required|email:dns',
+					'email' => 'required|email',
+				], [
+					'email.email' => app()->getLocale() == 'ar' ? 'يرجى إدخال بريد إلكتروني صحيح.' : 'Please enter a valid email address.',
+					'email.required' => app()->getLocale() == 'ar' ? 'يرجى إدخال بريد إلكتروني صحيح.' : 'Please enter a valid email address.',
 				]);
 				$checkForUser = User::where('email', $request->email)->first();
 				$_step = $checkForUser ? 'login' : 'register';
@@ -252,8 +257,8 @@ class ExternalCyclesController extends Controller
 						} else { return ['field_' . $id => 'nullable']; }
 					});
 					$dynamic_validator = Validator::make($request->all(), $field_required_rules->toArray(), [
-						'required' => "field can't be left blank",
-						'email' => 'field must be a valid email address'
+						'required' => app()->getLocale() == 'ar' ? "هذا الحقل مطلوب." : "field can't be left blank",
+						'email' => app()->getLocale() == 'ar' ? 'يرجى إدخال بريد إلكتروني صحيح.' : 'Please enter a valid email address.'
 					]);
 					if( $dynamic_validator->fails() )
 					{
