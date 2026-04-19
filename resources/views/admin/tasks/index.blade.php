@@ -869,17 +869,16 @@ $(function () {
             toastr.success('{{ __('admin.Task_updated_successfully.') }}');
           } else {
             window.dt_task.row.add(taskObj);
-            window.dt_task.order([[8, 'desc']]).draw();
+            window.dt_task.order([[7, 'desc']]).draw();
             toastr.success('{{ __('admin.Task_added_successfully.') }}');
           }
 
-          $('#addTaskModal').offcanvas('hide');
-          resetForm();
+          bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('addTaskModal')).hide();
         },
         error: xhr => toastr.error(xhr.responseJSON?.message || '{{ __('admin.unexpected_error') }}'),
         complete: () => {
           isSubmitting = false;
-          $('.data-submit').prop('disabled', false).text('{{ __('admin.submit') }}');
+          $('.data-submit').prop('disabled', false).html('{{ __('admin.Submit') }}');
         }
       });
     });
