@@ -897,8 +897,8 @@ class TasksController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => app()->getLocale() == 'ar'
-                        ? 'لا يمكن نقل المهمة إلى مكتملة لانها في مرحلة المراجعة'
-                        : 'Task can only be moved to completed from review stage.'
+                        ? 'لا يمكنك وضع المهمة كمكتملة. يجب أن يقوم مُسند المهمة بإكمالها.'
+                        : 'You can’t mark this task as completed. It must be completed by the assigner.'
                 ], 400);
             }
 
@@ -917,6 +917,15 @@ class TasksController extends Controller
                     'new'             => $status,
                 ]);
                 
+            }
+
+            if($task->status == 'review') {
+                return response()->json([
+                    'success' => true,
+                    'message' => app()->getLocale() == 'ar'
+                        ? 'تم إرسالها للمراجعة. سيتم مراجعة هذه المهمة بواسطة مُسند المهمة.'
+                        : 'Sent for review. This task will be reviewed by the assigner.'
+                ]);
             }
 
             return response()->json([
