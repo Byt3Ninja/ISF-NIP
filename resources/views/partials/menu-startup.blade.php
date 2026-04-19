@@ -35,7 +35,7 @@ $navigationIcons = [
         : "/images/background/logo.png");
   
   $countSurvey = 0;
-  $countSurvey = App\SurveyResponses::where('user_id', auth()->id())->where('triggered_on', 'mentorship')->whereNull('responses')->count();
+  $countSurvey = App\SurveyResponses::where('user_id', auth()->id())->where('triggered_on', 'mentorship')->whereHas('survey')->whereNull('responses')->count();
 
   $pendingServicesRequestsCount = 0;
 @endphp
