@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 // use App\Hackathon;
 
 use Str;
+use App\BuilderForm;
 use App\Step;
 use App\User;
 use stdClass;
@@ -530,7 +531,7 @@ class HackathonController extends Controller
     {
         $user = Auth::user();
         $l = app()->getLocale();
-        $step = Step::where('cycle_id', $id)->get();
+        $allSteps = Step::where('cycle_id', $id)->get();
         $pages = DB::table('cycle_custom_pages')
             ->where('cycle_id', $id)
             ->where('is_active', 1)
@@ -543,7 +544,7 @@ class HackathonController extends Controller
             return $page;
         });
         
-        if( !$step )
+        if( $allSteps->isEmpty() )
         {
             if($user->hasRole('admin') || $user->hasRole('organizationmanager'))
             {
@@ -598,6 +599,7 @@ class HackathonController extends Controller
         $hackathons_query .= " ORDER BY c.created_at DESC";
         $hackathons_raw = collect(DB::select($hackathons_query, [$id]));
 
+        $currentHackathon = null;
         if( $hackathons_raw->isNotEmpty() )
         {
             $item = $hackathons_raw->first();
@@ -615,7 +617,7 @@ class HackathonController extends Controller
                 'Finished' => 'منتهي',
                 default => '',
             };
-            $step = Step::where('cycle_id', $item->Com_cycle)->get();
+            $hackathonSteps = Step::where('cycle_id', $item->Com_cycle)->get();
             $currentHackathon = [
                 'title' => $item->c_title,
                 'title_ar' => $item->c_title_ar ?? '',
@@ -630,16 +632,18 @@ class HackathonController extends Controller
                 'description_ar' => $item->c_description_ar ?? '',
                 'tags' => [],      // أضف التاجز هنا إذا عندك جدول مرتبط
                 'tags_ar' => [],   // نفس الشيء
-                'step_id' => $step->where('id', $item->Com_step)->first()?->id ?? null,
-                'step_name' => $step->where('id', $item->Com_step)->first()?->title ?? 'N/A',
-                'step_stype' => $step->where('id', $item->Com_step)->first()?->stype ?? null,
-                'step_start' => $step->where('id', $item->Com_step)->first()?->from?->format('Y-m-d') ?? null,
-                'step_end' => $step->where('id', $item->Com_step)->first()?->to?->format('Y-m-d') ?? null,
+                'step_id' => $hackathonSteps->where('id', $item->Com_step)->first()?->id ?? null,
+                'step_name' => $hackathonSteps->where('id', $item->Com_step)->first()?->title ?? 'N/A',
+                'step_stype' => $hackathonSteps->where('id', $item->Com_step)->first()?->stype ?? null,
+                'step_start' => $hackathonSteps->where('id', $item->Com_step)->first()?->from?->format('Y-m-d') ?? null,
+                'step_end' => $hackathonSteps->where('id', $item->Com_step)->first()?->to?->format('Y-m-d') ?? null,
                 'cycle_id' => $id,
                 'Company_id' => $item->Com_id,
-                'max_team' => $step->where('id', $item->Com_step)->first()?->count_team_number ?? 0,
+                'max_team' => $hackathonSteps->where('id', $item->Com_step)->first()?->count_team_number ?? 0,
                 'announcement' => $item->c_winners_announcement == 1 ? true : false,
             ];
+        } else {
+            return redirect()->back()->with(['class' => 'danger', 'msg' => 'Hackathon not found.']);
         }
 
         $data = [];
@@ -772,7 +776,7 @@ class HackathonController extends Controller
             
         $teams = $teams->groupBy('tm_team_formation_id');
 
-        $teams = $teams->map(function ($group, $teamFormationId) use ($id, $step, $user) {
+        $teams = $teams->map(function ($group, $teamFormationId) use ($id, $allSteps, $user) {
             $first = $group->first();
 
             $team = new stdClass;
@@ -782,9 +786,9 @@ class HackathonController extends Controller
             $team->cycle_id = $first->tf_cycle_id;
             $team->step_id = $first->tf_step_id;
             $team->photo = $first->tf_img_team ?? null;
-            $team->max_members = $step->where('stype', 6)->where('cycle_id', $id)->first()?->count_team_number ?? 0;
+            $team->max_members = $allSteps->where('stype', 6)->where('cycle_id', $id)->first()?->count_team_number ?? 0;
             $team->your_team = $group->where('tm_user_id', $user->id)->where('tm_isTeamLeader', 1)->where('tm_acceptInvition', 'accepted')->first()? true : false;
-            $team->request_sent = $group->where('tm_user_id', $user->id)->whereIn('tm_acceptInvition', 'join')->first()? true : false; //is_user_requested
+            $team->request_sent = $group->where('tm_user_id', $user->id)->whereIn('tm_acceptInvition', ['join'])->first()? true : false; //is_user_requested
             $team->already_joined = $group->where('tm_user_id', $user->id)->where('tm_acceptInvition', 'accepted')->first() ? true : false; //is_user_member
             $team->is_full = $group->where('tm_acceptInvition', 'accepted')->count() >= $team->max_members; //members_count
             $team->status = $group->where('tm_user_id', $user->id)->where('tm_acceptInvition', 'accepted')->first() ? 'Accepted' : 'join';
@@ -849,8 +853,7 @@ class HackathonController extends Controller
             ];
         });
 
-        $step = Step::where('cycle_id', $id)->get();
-        $count_team = $step ? $step->where('stype', '6')->first()?->count_team_number : 0;
+        $count_team = $allSteps ? $allSteps->where('stype', '6')->first()?->count_team_number : 0;
        
         $companyStep = null;
         if( Auth::user()->company?->step != null ) { $companyStep = Step::where('id', Auth::user()->company->step)->first(); }
@@ -911,8 +914,8 @@ class HackathonController extends Controller
         }
 
         $id_evi = $user->company?->step;
-        $step_evi = $step->where('id', $id_evi)->first();
-        $step_evi_next = $step->where('cycle_id', $id)->where('stype', 5)->first();
+        $step_evi = $allSteps->where('id', $id_evi)->first();
+        $step_evi_next = $allSteps->where('cycle_id', $id)->where('stype', 5)->first();
 
         $field_map_ids = Formfield::where('step_id', $id_evi)->where('builder_forms_id', $step_evi?->data)->select('id')->pluck('id')->toArray();
         $answers = [];
@@ -1074,23 +1077,23 @@ class HackathonController extends Controller
 
         // return view('admin.hackathon.show', compact('hackathon'));
         $winners = collect([]);
-        if( $currentHackathon['announcement'] == true )
+        if( !empty($currentHackathon) && $currentHackathon['announcement'] == true )
         {
             $teams = TeamFormation::teams( $id );
             $winners = TeamFormation::winnersMapping( $teams );
         }
         
         $finishedHackathon = [];
-        $hackthonCycle = Cycle::find($id);
+        $hackathonCycle = Cycle::find($id);
 
-        if($hackthonCycle->end < now()){
-            $finishedHackathon['id'] = $hackthonCycle->id;
-            $finishedHackathon['title'] = $hackthonCycle->title;
-            $finishedHackathon['description'] = $hackthonCycle->description;
-            $finishedHackathon['start'] = $hackthonCycle->start->format('Y-m-d');
-            $finishedHackathon['end'] = $hackthonCycle->end->format('Y-m-d');
-            $finishedHackathon['img'] = $hackthonCycle->img_url;
-            $finishedHackathon['teams'] = TeamFormation::teams($hackthonCycle->id);
+        if($hackathonCycle && $hackathonCycle->end && $hackathonCycle->end < now()){
+            $finishedHackathon['id'] = $hackathonCycle->id;
+            $finishedHackathon['title'] = $hackathonCycle->title;
+            $finishedHackathon['description'] = $hackathonCycle->description;
+            $finishedHackathon['start'] = $hackathonCycle->start ? $hackathonCycle->start->format('Y-m-d') : null;
+            $finishedHackathon['end'] = $hackathonCycle->end ? $hackathonCycle->end->format('Y-m-d') : null;
+            $finishedHackathon['img'] = $hackathonCycle->img_url;
+            $finishedHackathon['teams'] = TeamFormation::teams($hackathonCycle->id);
             $finishedHackathon['winners']= TeamFormation::winnersMapping($finishedHackathon['teams']);
         }
 
@@ -1144,18 +1147,65 @@ class HackathonController extends Controller
         }
         //        if ($step->to < now()->format('Y-m-d')){return redirect()->back()->with(['msg' => 'Error can\'t open form, step timed out.', 'class' => 'danger']);}
         $id = $step->id;
-        $field_map_ids = Formfield::where('step_id', $id)->where('builder_forms_id', $step->data)->select('id')->pluck('id')->toArray();
-        $answers = [];
+
+        $the_form = BuilderForm::findOrFail( $step->data );
+        $fields = $the_form->fields()
+            ->withPivot('options')
+            ->orderBy('builder_fields.id', 'asc')
+            ->get();
+
+        $field_map_ids = $fields->pluck('pivot.id')->toArray();
+        // تجهيز البيانات بشكل منسق
+        $structured = $fields->map(function ($field) {
+            $options = json_decode($field->pivot->options ?? '{}', true) ?? [];
+
+            return [
+                'id'          => $field->pivot->id,
+                'label'       => $options['label'] ?? '',
+                'description' => $options['description'] ?? '',
+                'section'     => $options['section'] ?? 'N/A',
+                'type'        => $options['type'] ?? null,
+                'is_required' => (bool)($options['validation']['required'] ?? 0),
+                'options'     => isset($options['values'])
+                    ? (is_array($options['values']) ? $options['values'] : explode(',', $options['values']))
+                    : [],
+                'logic'       => $options['logic'] ?? 'continue',
+            ];
+        })
+        ->groupBy('section')
+        ->map(function ($questions, $section_title) {
+            $first = $questions->first();
+
+            return [
+                'title'       => $section_title,
+                'description' => $first['description'] ?? '',
+                'logic'       => is_array($first['logic']) ? ($first['logic']['section'] ?? 'continue') : ($first['logic'] ?? 'continue'),
+                'questions'   => $questions->values()->map(function ($q) {
+                    return [
+                        'id'          => $q['id'],
+                        'label'       => $q['label'],
+                        'is_required' => $q['is_required'],
+                        'type'        => $q['type'],
+                        'options'     => $q['options'],
+                        'logic'       => $q['logic'],
+                    ];
+                })->toArray(),
+            ];
+        })
+        ->values()
+        ->toArray();
+
         $data = [
-            'title' => $step->title,
-            'fields' => $step->fields()->where('builder_forms_id', $step->data)->orderBy('form_fields.id', 'asc')->get(),
-            'form_id' => $step->id,
+            'id'          => $step->id,
+            'title'       => $step->title,
+            'description' => $step->description,
+            'build_data'  => $structured,
             'field_ids' => implode(",", $field_map_ids)
         ];
-        //        if (Auth::user()->company->step==$id) {
-        $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->whereIn('form_data.field_id', $field_map_ids)->orderBy('id', 'ASC')->get();
-        //        }
-        return view('admin.settings.cycles.form', $data)->with('step', $step)->with('c', $step->cycle_id)->with('answers', $answers);
+
+        $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->whereIn('form_data.field_id', $field_map_ids)->orderBy('form_fields.id', 'ASC')->get();
+
+        return view('admin.settings.cycles.form', $data)->with('data', $data)->with('step', $step)->with('c', $step->cycle_id)->with('answers', $answers);
     }
 
     public function hackathonSubmissions($id) 
