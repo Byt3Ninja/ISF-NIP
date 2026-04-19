@@ -110,6 +110,21 @@ class CompanyRepository
         if (!empty($filters['programId'])) {
             $query->where('cycle', $filters['programId']);
         }
+    
+        if(!empty($filters['status'])){
+            if($filters['status'] == 'alumni') {
+                $query->whereIn('id', function ($q) {
+                    $q->select('company_id')
+                    ->from('alumni')
+                    ->whereNotNull('company_id');
+                });
+            } elseif($filters['status'] == 'incubated') {
+                $query->whereNotNull('cycle')->whereHas('stepdata', function ($q) {
+                    $q->where('stype', '!=', 1);
+                });
+            } 
+
+        }
 
         if (!empty($filters['search'])) {
             $search = $filters['search'];

@@ -3169,8 +3169,13 @@ class ClientCompanyController extends Controller
                 $filters['is_alumni'] = $alumni;
             }
         }
+        if($request->filled('status')){
+            $filters['status'] = $request->get('status');
+        }
 
         $companies = $this->companyService->getCompanies($filters, isApi: false);
+
+       
 
         // Pass the language variable
         $l = app()->getLocale();
