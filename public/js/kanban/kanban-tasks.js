@@ -346,6 +346,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
                 $(this).remove();
                 const $board = $(`.kanban-board[data-board="${oldStatus}"] .kanban-drag`);
                 if ($board.find('.kanban-item:not(.d-none)').length === 0) {
+                  $board.find('[data-empty-board]').remove();
                   $board.append(`<p class="text-muted small text-center py-3 m-0" data-empty-board>${lbl.noTasks}</p>`);
                 }
                 $('.kanban-board').each(function () {
