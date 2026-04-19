@@ -201,7 +201,10 @@ $(function () {
         render: (_, __, full) => `
           <div class="d-flex justify-content-start align-items-start task-title" style="max-width:200px;">
             <div class="d-flex flex-column overflow-y-hidden" style="width:100%;min-width:0;max-height:80px;">
-              <a href="javascript:;" class="text-heading fw-medium line-clamp-1"><span>${full.title}</span></a>
+              <div class="d-flex align-items-center gap-1 flex-wrap">
+                <a href="javascript:;" class="text-heading fw-medium line-clamp-1"><span>${full.title}</span></a>
+                ${full.overallStatus === 'archived' ? '<span class="badge bg-label-secondary"><i class="ti ti-archive ti-xs me-1"></i>Archived</span>' : ''}
+              </div>
               <small class="text-muted line-clamp-3">${full.description}</small>
             </div>
           </div>`
@@ -241,12 +244,14 @@ $(function () {
       },
       {
         targets: 6, searchable: false, orderable: false,
-        render: () => `
+        render: (_, __, full) => `
           <div class="d-flex align-items-center">
             <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill task-view"><i class="ti ti-eye ti-md"></i></a>
             <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill task-edit"><i class="ti ti-pencil ti-md"></i></a>
-            <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill task-archive"><i class="ti ti-archive ti-md"></i></a>
-            <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill delete-record"><i class="ti ti-trash ti-md"></i></a>
+            <a href="javascript:;" class="btn btn-icon ${full.overallStatus === 'archived' ? 'btn-text-warning' : 'btn-text-secondary'} waves-effect waves-light rounded-pill task-archive">
+              <i class="ti ${full.overallStatus === 'archived' ? 'ti-rotate' : 'ti-archive'} ti-md"></i>
+            </a>
+            ${window.authUser.role !== 'Mentor' ? '<a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill delete-record"><i class="ti ti-trash ti-md"></i></a>' : ''}
           </div>`
       }
     ],
