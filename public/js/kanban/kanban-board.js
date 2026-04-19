@@ -77,6 +77,7 @@ function syncTaskToBoard(task, oldStatus) {
       const $oldDrag = $(`.kanban-board[data-board="${oldStatus}"] .kanban-drag`);
       $existing.remove();
       if ($oldDrag.find('.kanban-item:not(.d-none)').length === 0) {
+        $oldDrag.find('[data-empty-board]').remove();
         $oldDrag.append(`<p class="text-muted small text-center py-3 m-0" data-empty-board>${cfg.labels.noTasks}</p>`);
       }
       $targetDrag.find('[data-empty-board]').remove();
@@ -120,6 +121,7 @@ function initKanbanDragDrop(tasks) {
 
         $(evt.to).find('[data-empty-board]').remove();
         if ($(evt.from).find('.kanban-item:not(.d-none)').length === 0) {
+          $(evt.from).find('[data-empty-board]').remove();
           $(evt.from).append(`<p class="text-muted small text-center py-3 m-0" data-empty-board>${cfg.labels.noTasks}</p>`);
         }
         _updateBoardCounts();
@@ -131,9 +133,11 @@ function initKanbanDragDrop(tasks) {
           data: JSON.stringify({ status: newStatus }),
           error: function () {
             if (task) task.status = oldStatus;
+            $(evt.from).find('[data-empty-board]').remove();
             $(evt.from).append(evt.item);
             $(evt.to).find('[data-empty-board]').remove();
             if ($(evt.to).find('.kanban-item:not(.d-none)').length === 0) {
+              $(evt.to).find('[data-empty-board]').remove();
               $(evt.to).append(`<p class="text-muted small text-center py-3 m-0" data-empty-board>${cfg.labels.noTasks}</p>`);
             }
             _updateBoardCounts();
