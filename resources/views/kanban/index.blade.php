@@ -109,7 +109,7 @@
       send:               @json(__('admin.send')),
       remove:             @json(__('admin.Remove')),
       download:           @json(__('admin.Download')),
-      yes:                @json(__('admin.DYes')),
+      yes:                @json(__('admin.archive_task')),
       no:                 @json(__('admin.DNo')),
       // Tasks
       reporter:           @json(__('admin.Reporter')),

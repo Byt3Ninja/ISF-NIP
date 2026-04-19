@@ -872,6 +872,7 @@ class TasksController extends Controller
     public function moveTask($taskId, $status)
     {
         try {
+            $user = auth()->user();
             $task = ProgramTask::find($taskId) ?? MentorshipTask::find($taskId);
 
             if (!$task) {
@@ -881,6 +882,24 @@ class TasksController extends Controller
                         ? 'المهمة غير موجودة'
                         : 'Task not found.'
                 ], 404);
+            }
+            if($user->hasRole('registered')) {
+                if($task->status == 'completed') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => app()->getLocale() == 'ar'
+                            ? 'لا يمكنك نقل مهمة لانها مكتملة'
+                            : 'You cannot move a task that is already completed.'
+                    ], 400);
+                }
+            }
+            if($status == 'completed') {
+                return response()->json([
+                    'success' => false,
+                    'message' => app()->getLocale() == 'ar'
+                        ? 'لا يمكن نقل المهمة إلى مكتملة لانها في مرحلة المراجعة'
+                        : 'Task can only be moved to completed from review stage.'
+                ], 400);
             }
 
             $oldStatus = $task->status;
