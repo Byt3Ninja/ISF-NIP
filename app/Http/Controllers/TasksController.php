@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Cycle;
 use App\Company;
-use App\Tags;
-use App\ProgramTask;
-use App\ProgramTaskComment;
-use App\ProgramTaskActivity;
+use App\Cycle;
+use App\Jobs\SendTaskNotificationJob;
 use App\MentorshipTask;
+use App\ProgramTask;
+use App\ProgramTaskActivity;
+use App\ProgramTaskComment;
+use App\Tags;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -169,7 +170,7 @@ class TasksController extends Controller
             'status' => 'required|in:pending,progress,review,completed,archived',
             'tags' => 'nullable|array',
             'attachments' => 'nullable|array|max:10',
-            'attachments.*' => 'file|max:10240',
+            'attachments.*' => 'file|max:10240|mimes:jpeg,jpg,png,pdf,docx,xlsx,pptx',
         ]);
      
 
@@ -278,6 +279,21 @@ class TasksController extends Controller
                 'user_id'         => auth()->id(),
                 'action'          => 'create',
             ]);
+
+            $assignees_company = $task->assignees()->pluck('company_id')->toArray();
+            $assignees = User::whereIn('company_id', $assignees_company)->get();
+            $mentor = User::find($task->created_by);
+
+            // Send Notification To Mentor & Startups
+            $message = "New Task: " . $task->title;
+            $data = [
+                'task' => $task,
+                'message' => $message,
+                'action' => 'add'
+            ];
+            foreach ($assignees as $startup) {
+                SendTaskNotificationJob::dispatch($mentor, $startup, $task, $data);
+            }
 
             return response()->json([
                 'success' => true,
@@ -449,6 +465,8 @@ class TasksController extends Controller
             'status' => 'sometimes|required|in:pending,progress,review,completed,archived',
             'due_date' => 'nullable|date',
             'tags' => 'nullable|array',
+            'attachments' => 'nullable|array|max:10',
+            'attachments.*' => 'file|max:10240|mimes:jpeg,jpg,png,pdf,docx,xlsx,pptx',
         ]);
 
         if ($validator->fails()) {
@@ -657,7 +675,7 @@ class TasksController extends Controller
             }
 
             $request->validate([
-                'attachment' => 'required|file|max:5120|mimes:jpeg,png,gif,pdf',
+                'attachment' => 'required|file|max:5120|mimes:jpeg,jpg,png,pdf,doc,docx,xls,xlsx,ppt,pptx',
             ]);
 
             /** @var \App\User $uploader */
