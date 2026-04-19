@@ -314,13 +314,15 @@ class CyclesController extends Controller
                 'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'program_step_type' => ['required', 'in:cycle,time'],
                 'cohort' => 'required|string|max:250',
+                'offline_location_address' => 'nullable|string|max:250',
+                'offline_location_map' => 'nullable|string|max:500',
             ], [
                 'public_slug.required_if' => __('cycles.Public URL required'),
                 'public_slug.unique' => __('cycles.Public URL already exist'),
                 'public_slug.regex' => __('cycles.Public URL must be alphanumeric'),
                 'program_step_type.required' => __('cycles.please_select_program_step_type'),
             ]);
-
+                
             $cycle = Cycle::find($id);
 
             $organization_id = $cycle->organization_id;
@@ -365,6 +367,9 @@ class CyclesController extends Controller
             $cycle->cohort = $request->cohort;
             $cycle->allow_non_company = $request->has('allow_non_company') ? 1 : 0;
             $cycle->step_type = $request->program_step_type;
+            $cycle->offline_location_address = $request->offline_location_address;
+            $cycle->offline_location_map = $request->offline_location_map;
+
 
             $cycle->program_guideline = $request->program_guideline;
             if ($request->hasFile('program-guideline-pdf')) {
@@ -761,13 +766,18 @@ class CyclesController extends Controller
                 'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'program_type' => ['required', 'in:General_Program,Hackathon'],
                 'program_step_type' => ['required', 'in:cycle,time'],
+                'offline_location_address' => 'nullable|string|max:250',
+                'offline_location_map' => 'nullable|string|max:500',
+
             ], [
                 'public_slug.required_if' => __('cycles.Public URL required'),
                 'public_slug.unique' => __('cycles.Public URL already exist'),
                 'public_slug.regex' => __('cycles.Public URL must be alphanumeric'),
                 'program_step_type.required' => __('cycles.please_select_program_step_type'),
+                'offline_location_address.max' => __('cycles.offline_location_address_max'),
+                'offline_location_map.max' => __('cycles.offline_location_map_max'),
             ]);
-
+            
             $cycles = Cycle::where('organization_id', $request->organization_id2)->get();
             $slugs = $cycles->pluck('public_slug')->unique()->filter(function( $value ) { return !empty( $value ); })->values()->toArray();
 
@@ -818,6 +828,8 @@ class CyclesController extends Controller
                 $cycle->cohort = $request->cohort;
                 $cycle->allow_non_company = $request->has('allow_non_company') ? 1 : 0;
                 $cycle->auto_approve_mentorship_requests = $request->has('auto_approve_mentorship_requests') ? 1 : 0;
+                $cycle->offline_location_address = $request->offline_location_address;
+                $cycle->offline_location_map = $request->offline_location_map;
                 // Check if file is uploaded
 
                 $cycle->program_guideline = $request->program_guideline;
