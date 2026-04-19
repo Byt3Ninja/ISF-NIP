@@ -41,7 +41,8 @@ $navigationIcons = [
     ->where(function($q) {
         $q->whereNull('responses')
           ->orWhere('responses', '[]')
-          ->orWhere('responses', '');
+          ->orWhere('responses', '')
+          ->orWhereRaw('JSON_LENGTH(responses) < (SELECT COUNT(*) FROM survey_questions WHERE survey_questions.survey_id = survey_responses.survey_id)');
     })
     ->count();
 
