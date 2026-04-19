@@ -2077,7 +2077,7 @@ class HomeController extends Controller
         ];
         $data['countCards'][] = [
             'color' => 'info',
-            'href' => '/dashboard/companies',
+            'href' => '/dashboard/companies?status=alumni',
             'icon' => 'ti-building',
             'text' => 'Alumni_Startups',
             'permissions' => ['users.view_companies', 'dashboard.widgets_cards_startups_view'],
@@ -2086,7 +2086,7 @@ class HomeController extends Controller
         ];
         $data['countCards'][] = [
             'color' => 'info',
-            'href' => '/dashboard/companies',
+            'href' => '/dashboard/companies?status=incubated',
             'icon' => 'ti-building',
             'text' => 'Incubated_Startups',
             'permissions' => ['users.view_companies', 'dashboard.widgets_cards_startups_view'],

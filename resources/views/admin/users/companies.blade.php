@@ -356,9 +356,9 @@
               <option value="alumni" {{ request('status') == 'alumni' ? 'selected' : '' }}>
                 {{ __('startup.alumni') ?? 'Alumni Startups' }}
               </option>
-              <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>
+              {{-- <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>
                 {{ __('admin.Rejected') ?? 'Rejected Startups' }}
-              </option>
+              </option> --}}
             </select>
           </div>
           
