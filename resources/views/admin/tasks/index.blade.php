@@ -251,7 +251,7 @@ $(function () {
             <a href="javascript:;" class="btn btn-icon ${full.overallStatus === 'archived' ? 'btn-text-warning' : 'btn-text-secondary'} waves-effect waves-light rounded-pill task-archive">
               <i class="ti ${full.overallStatus === 'archived' ? 'ti-rotate' : 'ti-archive'} ti-md"></i>
             </a>
-            ${window.authUser.role !== 'Mentor' ? '<a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill delete-record"><i class="ti ti-trash ti-md"></i></a>' : ''}
+            
           </div>`
       }
     ],
