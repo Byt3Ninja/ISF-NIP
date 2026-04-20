@@ -8,7 +8,7 @@
   <div class="d-flex align-items-center justify-content-between px-4 py-2 border-bottom flex-shrink-0">
     <div class="d-flex align-items-center gap-2">
       <div class="avatar avatar-sm flex-shrink-0">
-        <span class="avatar-initial rounded bg-light-primary">
+        <span class="avatar-initial rounded bg-label-primary">
           <i class="ti ti-clipboard-check ti-xs"></i>
         </span>
       </div>
