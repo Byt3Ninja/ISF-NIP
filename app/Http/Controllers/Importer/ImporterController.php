@@ -248,9 +248,52 @@ class ImporterController extends Controller
         ]);
     }
 
-    public function detectConflicts(Request $request, string $uuid): JsonResponse
-    {
-        return $this->notImplemented();
+    public function detectConflicts(
+        \App\Http\Requests\Importer\DetectConflictsRequest $request,
+        string $uuid,
+        ImporterSessionService $svc,
+        CsvParser $parser,
+        \App\Services\Importer\ConflictDetector $detector
+    ): JsonResponse {
+        $session = $svc->findForUserByUuid($uuid, $request->user()->id);
+
+        if ($session->status !== ImporterSession::STATUS_VALIDATED
+            && $session->status !== ImporterSession::STATUS_CONFLICTS_REVIEWED) {
+            return response()->json([
+                'success' => false,
+                'errors'  => [[
+                    'code'       => 'invalid_state_transition',
+                    'message_en' => __('importer.errors.invalid_state_transition', [], 'en'),
+                    'message_ar' => __('importer.errors.invalid_state_transition', [], 'ar'),
+                ]],
+            ], 409);
+        }
+
+        $orgId  = (int) $request->input('organization_id');
+        $accept = (bool) $request->input('accept', false);
+
+        $absPath = Storage::disk('importer')->path($session->file_path);
+        $parsed  = $parser->parse($absPath);
+
+        $warnings      = $detector->detect($parsed['rows'], $session->mappings ?? [], $orgId);
+        $warningArrays = array_map(fn($w) => $w->toArray(), $warnings);
+
+        if ($accept) {
+            $session->organization_id   = $orgId;
+            $session->conflict_warnings = $warningArrays;
+            $session->save();
+            if ($session->status === ImporterSession::STATUS_VALIDATED) {
+                $svc->transitionTo($session, ImporterSession::STATUS_CONFLICTS_REVIEWED);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'data'    => [
+                'warnings' => $warningArrays,
+                'total'    => count($warningArrays),
+            ],
+        ]);
     }
 
     public function preview(Request $request, string $uuid): JsonResponse

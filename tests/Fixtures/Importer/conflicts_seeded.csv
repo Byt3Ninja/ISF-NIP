@@ -1,0 +1,4 @@
+Program Name,Program Type,Program Start Date,Program End Date,Founder First Name,Founder Last Name,Founder Email,Founder Gender,Founder Phone,Country Code,Startup Name,Country
+Accelerator A,General_Program,4/1/2026,7/31/2026,Alice,Duplicate,alice.duplicate@example.com,Female,1100000001,20,Alpha,Egypt
+Accelerator A,General_Program,4/1/2026,7/31/2026,BobDifferent,Name,bob.exists@example.com,Male,1100000002,20,Beta,Egypt
+OldProgram,General_Program,1/1/2025,6/1/2025,Charlie,New,charlie.new@example.com,Male,1100000003,20,Gamma,Egypt
