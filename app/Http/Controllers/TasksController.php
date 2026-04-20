@@ -130,7 +130,7 @@ class TasksController extends Controller
                 'createdAt'        => $task->created_at->timestamp,
             ];
         });
-
+        $archivedTasks = $tasksData->where('status', 'archived');
         // Calculate real stats
         $stats = [
             'total_tasks' => $tasksData->count(),
@@ -143,7 +143,8 @@ class TasksController extends Controller
             'archived' => $tasksData->where('status', 'archived')->count(),
         ];
 
-        return view("admin.tasks.index", compact("programs", "startups", "tags", "stats", "tasks"));
+        
+        return view("admin.tasks.index", compact("programs", "startups", "tags", "stats", "tasks", "archivedTasks"));
     }
 
     /**
