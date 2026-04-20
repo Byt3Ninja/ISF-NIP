@@ -8,6 +8,7 @@ use App\Jobs\SendTaskNotificationJob;
 use App\MentorshipTask;
 use App\ProgramTask;
 use App\ProgramTaskActivity;
+use App\ProgramTaskAssignee;
 use App\ProgramTaskComment;
 use App\Tags;
 use App\User;
@@ -84,6 +85,7 @@ class TasksController extends Controller
                         'profile_url' => url('/dashboard/companyProfile/' . $assignee->id),
                     ];
                 })->toArray(),
+                'inReviewCount' => $task->assignees->filter(fn($a) => $a->pivot->status === 'review')->count(),
                 'priority' => $task->priority,
                 'overallStatus' => $task->status,
                 'dueDate' => $task->due_date ? $task->due_date->format('Y-m-d') : 'N/A',
@@ -125,11 +127,13 @@ class TasksController extends Controller
                         'time'    => $act->created_at->diffForHumans(),
                     ];
                 })->toArray(),
+                'in_review_count'  => $task->assignees->filter(fn($a) => $a->pivot->status === 'review')->count(),
                 'activities_count' => $task->activities->count(),
                 'feedbacks_count'  => $task->feedbacks->count(),
                 'createdAt'        => $task->created_at->timestamp,
             ];
         });
+        
         $archivedTasks = $tasksData->where('status', 'archived');
         // Calculate real stats
         $stats = [
@@ -906,6 +910,10 @@ class TasksController extends Controller
             $oldStatus = $task->status;
             $task->status = $status;
             $task->save();
+
+            ProgramTaskAssignee::where('program_task_id', $task->id)
+                ->where('company_id', $user->company_id)
+                ->update(['status' => $status, 'last_updated' => now()]);
            
             if ($task instanceof ProgramTask) {
                 
