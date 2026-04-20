@@ -210,12 +210,17 @@ $(document).ready(function () {
       formData.delete('taskAssignees[]');
       ($('#task-assignees').val() || []).forEach(id => formData.append('assignees[]', id));
 
-      if (!window.dt_task) return Swal.fire('{{ __('admin.error') }}', '{{ __('admin.table_not_initialized') }}', 'error');
-
       const $editRow = $(form).data('edit-row');
-      const taskId   = $editRow ? window.dt_task.row($editRow).data().id : null;
       const isEdit   = !!$editRow;
-      const url      = isEdit ? `/dashboard/tasks/${taskId}` : '/dashboard/tasks';
+
+      if (isEdit && !window.dt_task) {
+        isSubmitting = false;
+        $btn.prop('disabled', false).html('{{ __('admin.Submit') }}');
+        return Swal.fire('{{ __('admin.error') }}', '{{ __('admin.table_not_initialized') }}', 'error');
+      }
+
+      const taskId = isEdit ? window.dt_task.row($editRow).data().id : null;
+      const url    = isEdit ? `/dashboard/tasks/${taskId}` : '/dashboard/tasks';
 
       if (isEdit) formData.append('_method', 'PUT');
 
@@ -228,44 +233,42 @@ $(document).ready(function () {
         data: formData,
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
         success: function (response) {
-          const rd = response.data;
-          const taskObj = {
-            id:            rd.id,
-            title:         rd.title,
-            description:   rd.description,
-            creator:       rd.creator ? {
-              id:          rd.creator.id,
-              name:        rd.creator.name || ((rd.creator.first_name_en ?? '') + ' ' + (rd.creator.last_name_en ?? '')).trim() || window.authUser.name,
-              role:        rd.creator.roles?.[0]?.name ?? window.authUser.role,
-              avatar:      rd.creator.image_url ?? window.authUser.avatar,
-              profile_url: `/dashboard/users/${rd.creator.id}`
-            } : window.authUser,
-            program:       { id: rd.program.id, title: rd.program.title },
-            assignees:     rd.assignees.map(a => ({
-              id:          a.id,
-              name:        a.name || a.name_en || a.name_ar || 'Unknown',
-              status:      a.pivot?.status?.toLowerCase() || 'pending',
-              lastUpdated: a.pivot?.last_updated ? a.pivot.last_updated.split(' ')[0] : 'N/A',
-              logo:        a.logo || null,
-              profile_url: `/dashboard/companyProfile/${a.id}`
-            })),
-            priority:      rd.priority,
-            overallStatus: rd.status,
-            dueDate:       rd.due_date ? moment(rd.due_date, 'YYYY-MM-DD').format('YYYY-MM-DD') : 'N/A',
-            attachments:   rd.attachments || [],
-            createdAt:     rd.created_at ? Math.floor(new Date(rd.created_at).getTime() / 1000) : Math.floor(Date.now() / 1000)
-          };
-
           if (isEdit) {
+            const rd = response.data;
+            const taskObj = {
+              id:            rd.id,
+              title:         rd.title,
+              description:   rd.description,
+              creator:       rd.creator ? {
+                id:          rd.creator.id,
+                name:        rd.creator.name || ((rd.creator.first_name_en ?? '') + ' ' + (rd.creator.last_name_en ?? '')).trim() || window.authUser.name,
+                role:        rd.creator.roles?.[0]?.name ?? window.authUser.role,
+                avatar:      rd.creator.image_url ?? window.authUser.avatar,
+                profile_url: `/dashboard/users/${rd.creator.id}`
+              } : window.authUser,
+              program:       { id: rd.program.id, title: rd.program.title },
+              assignees:     rd.assignees.map(a => ({
+                id:          a.id,
+                name:        a.name || a.name_en || a.name_ar || 'Unknown',
+                status:      a.pivot?.status?.toLowerCase() || 'pending',
+                lastUpdated: a.pivot?.last_updated ? a.pivot.last_updated.split(' ')[0] : 'N/A',
+                logo:        a.logo || null,
+                profile_url: `/dashboard/companyProfile/${a.id}`
+              })),
+              priority:      rd.priority,
+              overallStatus: rd.status,
+              dueDate:       rd.due_date ? moment(rd.due_date, 'YYYY-MM-DD').format('YYYY-MM-DD') : 'N/A',
+              attachments:   rd.attachments || [],
+              createdAt:     rd.created_at ? Math.floor(new Date(rd.created_at).getTime() / 1000) : Math.floor(Date.now() / 1000)
+            };
             window.dt_task.row($editRow).data(taskObj).draw(false);
             toastr.success('{{ __('admin.Task_updated_successfully.') }}');
+            bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('addTaskModal')).hide();
           } else {
-            window.dt_task.row.add(taskObj);
-            window.dt_task.order([[7, 'desc']]).draw();
             toastr.success('{{ __('admin.Task_added_successfully.') }}');
+            bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('addTaskModal')).hide();
+            // setTimeout(() => window.location.reload(), 1500);
           }
-
-          bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('addTaskModal')).hide();
         },
         error: xhr => toastr.error(xhr.responseJSON?.message || '{{ __('admin.unexpected_error') }}'),
         complete: () => {
