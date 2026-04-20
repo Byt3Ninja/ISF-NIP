@@ -127,4 +127,21 @@
             '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
         })[c]);
     }
+
+    const nextToMapping = document.getElementById('importer-next-to-mapping');
+    if (nextToMapping) {
+        nextToMapping.addEventListener('click', () => {
+            const uuid = state.getActive();
+            if (!uuid) return;
+            const saved = state.load(uuid);
+            if (!saved) return;
+
+            document.getElementById('importer-step-upload').classList.add('d-none');
+            document.getElementById('importer-step-mapping').classList.remove('d-none');
+
+            if (window.importerMapping && window.importerMapping.renderFor) {
+                window.importerMapping.renderFor(saved);
+            }
+        });
+    }
 })();

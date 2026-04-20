@@ -24,3 +24,13 @@
         flex-direction: column;
     }
 }
+
+.importer-v2 .importer-field-row.importer-field-warned select {
+    border-color: #f0ad4e;
+}
+.importer-v2 .importer-field-row label {
+    font-weight: 500;
+}
+.importer-v2 .accordion-button:not(.collapsed) {
+    background: #eef5ff;
+}
