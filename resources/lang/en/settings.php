@@ -260,7 +260,7 @@ return [
 	'settings_general_label' => 'Manage platform identity and basic configuration.',
 	'settings_roles_permissions_label' => 'Configure user roles and access permissions.',
 	'settings_importer_tool_label' => 'Import data from external sources.',
-	'settings_organization_types_label' => 'Define and manage organization types.',
+	'settings_organization_types_label' => 'Create and manage organization types.',
 	'settings_currencies_label' => 'Add and manage supported currencies.',
 	'settings_tags_label' => 'Create and manage tags for organizing content.',
 	'settings_categories_label' => 'Organize items into primary categories.',
