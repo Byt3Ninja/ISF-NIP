@@ -170,9 +170,42 @@ class ImporterController extends Controller
         return response()->json(['success' => true, 'data' => ['status' => $session->fresh()->status]]);
     }
 
-    public function autoMap(Request $request, string $uuid): JsonResponse
-    {
-        return $this->notImplemented();
+    public function autoMap(
+        Request $request,
+        string $uuid,
+        ImporterSessionService $svc,
+        \App\Services\Importer\HeaderAutoMapper $mapper
+    ): JsonResponse {
+        $session = $svc->findForUserByUuid($uuid, $request->user()->id);
+
+        if (empty($session->headers)) {
+            return response()->json([
+                'success' => false,
+                'errors'  => [[
+                    'code'       => 'invalid_state_transition',
+                    'message_en' => __('importer.errors.invalid_state_transition', [], 'en'),
+                    'message_ar' => __('importer.errors.invalid_state_transition', [], 'ar'),
+                ]],
+            ], 409);
+        }
+
+        $result = $mapper->match($session->headers);
+
+        $msgKey = $result['matched_count'] > 0
+            ? 'importer.ui.automap_messages.matched'
+            : 'importer.ui.automap_messages.unmatched';
+
+        return response()->json([
+            'success' => true,
+            'data'    => [
+                'mappings'           => $result['mappings'],
+                'matched_count'      => $result['matched_count'],
+                'unmatched_required' => $result['unmatched_required'],
+                'unmatched_optional' => $result['unmatched_optional'],
+                'message_en'         => __($msgKey, [], 'en'),
+                'message_ar'         => __($msgKey, [], 'ar'),
+            ],
+        ]);
     }
 
     public function validateRows(Request $request, string $uuid): JsonResponse
