@@ -91,6 +91,7 @@
         <hr class="my-4">
 
         {{-- Program & Assignees --}}
+        @if (isset($programs) && count($programs) > 0)
           <div class="mb-4">
             <p class="text-uppercase small fw-bold text-muted mb-3">{{ __('admin.assignment') }}</p>
             <div class="mb-4">
@@ -104,7 +105,7 @@
                 @endforeach
               </select>
             </div>
-            <div id="assignees-container">
+            <div id="assignees-container" style="display: none;">
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <label class="form-label fw-semibold mb-0" for="task-assignees">
                   {{ __('admin.assignees') }} <span class="text-danger">*</span>
@@ -123,6 +124,7 @@
               </select>
             </div>
           </div>
+        @endif
 
         {{-- Divider --}}
         <hr class="my-4">
@@ -143,9 +145,9 @@
             style="border-style: dashed !important;">
             <i class="ti ti-cloud-upload fs-3 text-primary mb-2 d-block"></i>
             <p class="fw-semibold mb-1">{{ __('admin.click_to_upload') }}</p>
-            <p class="small text-muted mb-0">JPG, PNG, PDF, DOCX, XLSX, PPTX &mdash; max 10 MB</p>
+            <p class="small text-muted mb-0">{{ __('admin.all_files_allowed') }} &mdash; max 10 MB</p>
           </div>
-          <input type="file" name="attachments[]" id="task-upload" class="d-none" multiple accept=".jpeg,.jpg,.png,.pdf,.docx,.xlsx,.pptx">
+          <input type="file" name="attachments[]" id="task-upload" class="d-none" multiple>
           <div id="fileError" class="invalid-feedback mt-2" style="display: none;"></div>
           <div id="fileName" class="small mt-2 text-muted" style="display: none;"></div>
         </div>
