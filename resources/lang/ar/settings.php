@@ -269,7 +269,7 @@ return [
 	'settings_categories_label' => 'تنظيم العناصر ضمن تصنيفات رئيسية.',
 	'settings_subcategories_label' => 'إدارة التصنيفات الفرعية لمزيد من التحكم.',
 	'settings_stages_label' => 'تحديد مراحل سير العمل للعمليات.',
-	'settings_countries_label' => 'إدارة البلدان',
+	'settings_countries_label' => 'إدارة قائمة الدول المدعومة.',
 	'settings_labels_label' => 'إدارة التسميات المخصصة للحالة والتعريف.',
 	'settings_queue_jobs_label' => 'مراقبة وإدارة مهام المعالجة في الخلفية.',
 	'settings_industry_label' => 'إعداد الخيارات والإعدادات الافتراضية حسب المجال.',
