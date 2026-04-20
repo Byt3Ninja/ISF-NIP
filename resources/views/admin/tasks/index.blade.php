@@ -925,22 +925,37 @@ $(function () {
     const files      = Array.from(this.files);
     if (!files.length) return;
 
-    const maxSize    = 10 * 1024 * 1024;
-    const errors     = [];
-    const validFiles = files.filter(file => {
-      if (file.size > maxSize) { errors.push(`{{ __('admin.file_exceeds_10_limit') }} (${file.name})`); return false; }
+    const maxSize     = 10 * 1024 * 1024;
+    const allowedExts = ['jpeg', 'jpg', 'png', 'pdf', 'docx', 'xlsx', 'pptx'];
+    const errors      = [];
+    const validFiles  = files.filter(file => {
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (!allowedExts.includes(ext)) {
+        errors.push(`{{ __('admin.unsupported_file_type') }} (${file.name})`);
+        return false;
+      }
+      if (file.size > maxSize) {
+        errors.push(`{{ __('admin.file_exceeds_10_limit') }} (${file.name})`);
+        return false;
+      }
       return true;
     });
 
     if (errors.length) {
       $('#fileError').html(errors.join('<br>')).show();
-      $('#fileName').hide();
-      $(this).val('');
-      return;
+    } else {
+      $('#fileError').hide();
     }
 
-    $('#fileError').hide();
-    $('#fileName').html(validFiles.map(f => `<div><i class="ti ti-paperclip me-1"></i>${f.name}</div>`).join('')).show();
+    if (validFiles.length) {
+      const dt = new DataTransfer();
+      validFiles.forEach(f => dt.items.add(f));
+      this.files = dt.files;
+      $('#fileName').html(validFiles.map(f => `<div><i class="ti ti-paperclip me-1"></i>${f.name}</div>`).join('')).show();
+    } else {
+      $(this).val('');
+      $('#fileName').hide();
+    }
   });
 
   // ── Select-all toggle ────────────────────────────────────────────────────
