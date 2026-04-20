@@ -191,6 +191,18 @@ class ImporterFieldSchema
                 'template_sample' => 'Full-time',
                 'notes' => null,
             ],
+            'founder_national_id' => [
+                'key' => 'founder_national_id',
+                'label_en' => 'Founder National ID',
+                'label_ar' => 'الرقم القومي للمؤسس',
+                'section' => self::SECTION_FOUNDERS,
+                'required' => false,
+                'auto_map_aliases' => ['Founder National ID', 'National ID'],
+                'validator' => 'string',
+                'target' => ['table' => 'team_members', 'column' => 'national_id', 'team_member' => 'Founder'],
+                'template_sample' => '29001011234567',
+                'notes' => 'Column added in PR 7 migration if not already present.',
+            ],
             'founder_educational_status' => [
                 'key' => 'founder_educational_status',
                 'label_en' => 'Founder Educational Status',

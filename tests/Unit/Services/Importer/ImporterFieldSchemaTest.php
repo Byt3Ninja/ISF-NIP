@@ -24,13 +24,13 @@ class ImporterFieldSchemaTest extends TestCase
         $grouped = ImporterFieldSchema::bySection();
 
         $this->assertCount(4, $grouped[ImporterFieldSchema::SECTION_PROGRAM],     'program section');
-        $this->assertCount(10, $grouped[ImporterFieldSchema::SECTION_FOUNDERS],   'founders section');
+        $this->assertCount(11, $grouped[ImporterFieldSchema::SECTION_FOUNDERS],   'founders section');
         $this->assertCount(5, $grouped[ImporterFieldSchema::SECTION_CO_FOUNDERS],'co_founders section');
         $this->assertCount(24, $grouped[ImporterFieldSchema::SECTION_COMPANY],   'company section');
         $this->assertCount(3, $grouped[ImporterFieldSchema::SECTION_EMPLOYEES],  'employees section');
         $this->assertCount(11, $grouped[ImporterFieldSchema::SECTION_FINANCIALS],'financials section');
 
-        $this->assertCount(57, ImporterFieldSchema::all(), 'total field count');
+        $this->assertCount(58, ImporterFieldSchema::all(), 'total field count');
     }
 
     public function test_every_field_has_required_keys(): void
@@ -59,7 +59,7 @@ class ImporterFieldSchemaTest extends TestCase
         $aliases = ImporterFieldSchema::allAliases();
         $fieldKeys = array_unique(array_values($aliases));
         $this->assertGreaterThan(100, count($aliases), 'alias map should cover many terms');
-        $this->assertSame(57, count($fieldKeys), 'every field contributes at least one unique alias');
+        $this->assertSame(58, count($fieldKeys), 'every field contributes at least one unique alias');
     }
 
     public function test_required_fields_match_spec(): void
