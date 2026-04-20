@@ -25,7 +25,7 @@
             @include('admin.importer.v2._step_upload')
         </div>
         <div id="importer-step-mapping" class="d-none">
-            <!-- PR 3 fills this -->
+            @include('admin.importer.v2._step_mapping')
         </div>
         <div id="importer-step-review" class="d-none">
             <!-- PR 6 fills this -->
@@ -44,9 +44,11 @@
         uploadFile:     "{{ url('/dashboard/importer/v2/sessions') }}",    // + /{uuid}/file
         deleteFile:     "{{ url('/dashboard/importer/v2/sessions') }}",    // + /{uuid}/file
         discardSession: "{{ url('/dashboard/importer/v2/sessions') }}",    // + /{uuid}
+        automap:        "{{ url('/dashboard/importer/v2/sessions') }}",    // + /{uuid}/automap
     };
 </script>
 <script src="{{ asset('js/importer/importer-i18n.js') }}?v={{ filemtime(public_path('js/importer/importer-i18n.js')) }}"></script>
 <script src="{{ asset('js/importer/importer-state.js') }}?v={{ filemtime(public_path('js/importer/importer-state.js')) }}"></script>
 <script src="{{ asset('js/importer/importer-upload.js') }}?v={{ filemtime(public_path('js/importer/importer-upload.js')) }}"></script>
+<script src="{{ asset('js/importer/importer-mapping.js') }}?v={{ filemtime(public_path('js/importer/importer-mapping.js')) }}"></script>
 @endsection
