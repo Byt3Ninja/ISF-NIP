@@ -19,6 +19,7 @@ class ImporterRouteScaffoldTest extends TestCase
     public function test_authenticated_get_returns_placeholder_json(): void
     {
         $user = User::factory()->create();
+        $user->allotRole('Admin');
         $resp = $this->actingAs($user)->getJson('/dashboard/importer/v2');
         $resp->assertStatus(200)
              ->assertJsonPath('data.message', 'importer_v2_placeholder');
@@ -27,6 +28,7 @@ class ImporterRouteScaffoldTest extends TestCase
     public function test_placeholder_endpoints_return_501(): void
     {
         $user = User::factory()->create();
+        $user->allotRole('Admin');
         $resp = $this->actingAs($user)
             ->postJson('/dashboard/importer/v2/sessions');
         $resp->assertStatus(501)
