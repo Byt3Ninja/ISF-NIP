@@ -236,3 +236,25 @@ Route::prefix('mentorship')->group(function () {
 });
 
 });
+
+Route::middleware(['auth:sanctum'])->prefix('v1/importer')->name('api.v1.importer.')->group(function () {
+    Route::get('/template',                               [\App\Http\Controllers\Importer\ImporterController::class, 'downloadTemplate']);
+    Route::get('/schema',                                 [\App\Http\Controllers\Importer\ImporterController::class, 'schema']);
+    Route::get('/organizations',                          [\App\Http\Controllers\Importer\ImporterController::class, 'organizations']);
+
+    Route::middleware('throttle:importer-general')->group(function () {
+        Route::post('/sessions',                          [\App\Http\Controllers\Importer\ImporterController::class, 'createSession']);
+        Route::get('/sessions/{uuid}',                    [\App\Http\Controllers\Importer\ImporterController::class, 'showSession']);
+        Route::delete('/sessions/{uuid}',                 [\App\Http\Controllers\Importer\ImporterController::class, 'discardSession']);
+        Route::delete('/sessions/{uuid}/file',            [\App\Http\Controllers\Importer\ImporterController::class, 'deleteFile']);
+        Route::post('/sessions/{uuid}/automap',           [\App\Http\Controllers\Importer\ImporterController::class, 'autoMap']);
+        Route::post('/sessions/{uuid}/validate',          [\App\Http\Controllers\Importer\ImporterController::class, 'validateRows']);
+        Route::post('/sessions/{uuid}/conflicts',         [\App\Http\Controllers\Importer\ImporterController::class, 'detectConflicts']);
+        Route::get('/sessions/{uuid}/preview',            [\App\Http\Controllers\Importer\ImporterController::class, 'preview']);
+        Route::post('/sessions/{uuid}/execute',           [\App\Http\Controllers\Importer\ImporterController::class, 'execute']);
+    });
+
+    Route::middleware('throttle:importer-upload')->group(function () {
+        Route::post('/sessions/{uuid}/file',              [\App\Http\Controllers\Importer\ImporterController::class, 'uploadFile']);
+    });
+});

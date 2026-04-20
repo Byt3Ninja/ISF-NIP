@@ -67,6 +67,7 @@ class Permissions
         'screening.update_step_form',
         'services_providers.edit_profile',
         'services_providers.clients.*',
+        'importer.v2.*',
     ];
 
     public $exceptControllers = [

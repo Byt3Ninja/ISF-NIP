@@ -1012,6 +1012,30 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
         }
     });
 });
+
+Route::middleware(['auth'])->prefix('dashboard/importer/v2')->name('importer.v2.')->group(function () {
+    Route::get('/',                                       [\App\Http\Controllers\Importer\ImporterController::class, 'showWizard'])->name('wizard');
+    Route::get('/template',                               [\App\Http\Controllers\Importer\ImporterController::class, 'downloadTemplate'])->name('template');
+    Route::get('/schema',                                 [\App\Http\Controllers\Importer\ImporterController::class, 'schema'])->name('schema');
+    Route::get('/organizations',                          [\App\Http\Controllers\Importer\ImporterController::class, 'organizations'])->name('organizations');
+
+    Route::middleware('throttle:importer-general')->group(function () {
+        Route::post('/sessions',                          [\App\Http\Controllers\Importer\ImporterController::class, 'createSession'])->name('sessions.create');
+        Route::get('/sessions/{uuid}',                    [\App\Http\Controllers\Importer\ImporterController::class, 'showSession'])->name('sessions.show');
+        Route::delete('/sessions/{uuid}',                 [\App\Http\Controllers\Importer\ImporterController::class, 'discardSession'])->name('sessions.discard');
+        Route::delete('/sessions/{uuid}/file',            [\App\Http\Controllers\Importer\ImporterController::class, 'deleteFile'])->name('sessions.file.delete');
+        Route::post('/sessions/{uuid}/automap',           [\App\Http\Controllers\Importer\ImporterController::class, 'autoMap'])->name('sessions.automap');
+        Route::post('/sessions/{uuid}/validate',          [\App\Http\Controllers\Importer\ImporterController::class, 'validateRows'])->name('sessions.validate');
+        Route::post('/sessions/{uuid}/conflicts',         [\App\Http\Controllers\Importer\ImporterController::class, 'detectConflicts'])->name('sessions.conflicts');
+        Route::get('/sessions/{uuid}/preview',            [\App\Http\Controllers\Importer\ImporterController::class, 'preview'])->name('sessions.preview');
+        Route::post('/sessions/{uuid}/execute',           [\App\Http\Controllers\Importer\ImporterController::class, 'execute'])->name('sessions.execute');
+    });
+
+    Route::middleware('throttle:importer-upload')->group(function () {
+        Route::post('/sessions/{uuid}/file',              [\App\Http\Controllers\Importer\ImporterController::class, 'uploadFile'])->name('sessions.file.upload');
+    });
+});
+
 Route::get('cycle-custom-pages/{cycle_id}/{filename}', 'CycleCustomPagesController@serveImage')->name('cycle.custom_pages.image');
 
 // Organization Logo from Storage
