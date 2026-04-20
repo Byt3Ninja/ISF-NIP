@@ -100,7 +100,7 @@
               <select id="task-program" class="select2 form-select" name="taskProgram" data-placeholder="{{ __('admin.Select Program') }}">
                 <option value="">{{ __('admin.Select Program') }}</option>
                 @foreach ($programs as $program)
-                  <option value="{{ $program->id }}">{{ $program->title }}</option>
+                  <option value="{{ $program?->id }}">{{ $program?->title }}</option>
                 @endforeach
               </select>
             </div>

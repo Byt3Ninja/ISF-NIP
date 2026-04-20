@@ -5,9 +5,10 @@
       <h5 class="card-title mb-0">{{ __('admin.tasks_management') }}</h5>
       <div class="d-flex align-items-center gap-3">
         @if (isset($archivedTasks) && count($archivedTasks) > 0)
-          <button class="btn btn-outline-secondary text-nowrap" type="button" data-bs-toggle="offcanvas" data-bs-target="#archivedTasksOffcanvas">
+         <!-- <button class="btn btn-outline-secondary text-nowrap" type="button" data-bs-toggle="offcanvas" data-bs-target="#archivedTasksOffcanvas">
             <i class="ti ti-archive me-2"></i> {{ __('admin.View_Archived') }}
           </button>
+        -->
         @endif
         <button class="btn btn-primary ms-2" data-bs-toggle="offcanvas" data-bs-target="#addTaskModal">
           <i class="ti ti-plus"></i>
