@@ -45,6 +45,7 @@
         deleteFile:     "{{ url('/dashboard/importer/v2/sessions') }}",    // + /{uuid}/file
         discardSession: "{{ url('/dashboard/importer/v2/sessions') }}",    // + /{uuid}
         automap:        "{{ url('/dashboard/importer/v2/sessions') }}",    // + /{uuid}/automap
+        validate:       "{{ url('/dashboard/importer/v2/sessions') }}",    // + /{uuid}/validate
     };
 </script>
 <script src="{{ asset('js/importer/importer-i18n.js') }}?v={{ filemtime(public_path('js/importer/importer-i18n.js')) }}"></script>

@@ -187,7 +187,11 @@
     }
 
     if (nextBtn) {
-        nextBtn.addEventListener('click', () => {
+        nextBtn.addEventListener('click', async () => {
+            clearRowErrors();
+            const uuid = state.getActive();
+            if (!uuid) return;
+
             const mappings = getCurrentMappings();
             const missingRequired = Object.entries(schema)
                 .filter(([_, f]) => f.required)
@@ -198,8 +202,64 @@
                 missingRequired.forEach((k) => setWarningFor(k, 'ui.automap_messages.required_missing'));
                 return;
             }
-            alert('Server-side row validation will be wired in PR 4.');
+
+            nextBtn.disabled = true;
+            try {
+                const r = await fetch(`${routes.validate}/${uuid}/validate`, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mappings }),
+                });
+                const body = await r.json();
+                if (!r.ok || !body.success) {
+                    renderRowErrors([{ row: 0, field_key: null, message_en: 'Validation failed', message_ar: 'فشل التحقق' }]);
+                    return;
+                }
+                if (!body.data.valid) {
+                    renderRowErrors(body.data.row_errors, body.data.totals);
+                    return;
+                }
+
+                const saved = state.load(uuid) || {};
+                saved.status   = 'validated';
+                saved.mappings = mappings;
+                state.save(uuid, saved);
+
+                alert('Row validation passed. Conflict detection + Step 3 wire-up arrives in PR 5/6.');
+            } finally {
+                nextBtn.disabled = false;
+            }
         });
+    }
+
+    function clearRowErrors() {
+        const box = document.getElementById('importer-row-errors');
+        if (!box) return;
+        document.getElementById('importer-row-errors-body').innerHTML = '';
+        document.getElementById('importer-row-errors-summary').textContent = '';
+        box.classList.add('d-none');
+    }
+
+    function renderRowErrors(errors, totals) {
+        const box  = document.getElementById('importer-row-errors');
+        const body = document.getElementById('importer-row-errors-body');
+        const summary = document.getElementById('importer-row-errors-summary');
+        if (!box || !body) return;
+        body.innerHTML = '';
+        errors.forEach((e) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${e.row || ''}</td>
+                <td>${e.field_key ? escapeHtml(e.field_key) : ''}</td>
+                <td>${escapeHtml(t.pickLocalised(e))}</td>
+            `;
+            body.appendChild(tr);
+        });
+        if (totals && summary) {
+            summary.textContent = `${totals.blocking} blocking / ${totals.warning} warning across ${totals.rows} rows`;
+        }
+        box.classList.remove('d-none');
+        box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     function escapeHtml(s) {

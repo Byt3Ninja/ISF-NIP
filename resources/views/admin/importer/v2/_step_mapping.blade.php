@@ -20,6 +20,23 @@
     <!-- Sections rendered by importer-mapping.js from window.importerSections -->
     <div id="importer-mapping-sections" class="accordion"></div>
 
+    <div id="importer-row-errors" class="alert alert-danger d-none mt-4" role="alert">
+        <h6 class="fw-bold mb-2" id="importer-row-errors-title">Validation errors</h6>
+        <div class="small text-muted mb-2" id="importer-row-errors-summary"></div>
+        <div class="table-responsive">
+            <table class="table table-sm importer-error-table mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 5rem;">Row</th>
+                        <th>Field</th>
+                        <th>Error</th>
+                    </tr>
+                </thead>
+                <tbody id="importer-row-errors-body"></tbody>
+            </table>
+        </div>
+    </div>
+
     <div class="d-flex justify-content-between align-items-center mt-4">
         <button type="button" id="importer-mapping-back" class="btn btn-outline-secondary">
             {{ __('importer.ui.actions.back') }}

@@ -34,3 +34,14 @@
 .importer-v2 .accordion-button:not(.collapsed) {
     background: #eef5ff;
 }
+
+.importer-v2 .importer-error-table tr td {
+    vertical-align: top;
+}
+.importer-v2 .importer-error-table tr:not(:last-child) td {
+    border-bottom: 1px solid #f1d7d9;
+}
+.importer-v2 #importer-row-errors {
+    max-height: 420px;
+    overflow-y: auto;
+}
