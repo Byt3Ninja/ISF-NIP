@@ -25,11 +25,18 @@ function buildTaskCard(task) {
          <i class="ti ti-edit ti-md text-dark"></i>
        </button>`
     : '';
+    
+  const archiveBtn = cfg.isAbleToEdit
+    ? ` <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle archive-task-btn"
+        type="button" data-task-id="${task.id}" title="${cfg.labels.archiveTask}">
+        <i class="ti ti-archive ti-md text-dark"></i>
+      </button>`
+    : '';
 
   return `
     <div class="card shadow-sm border-0 cursor-grab kanban-item"
          data-task-id="${task.id}"
-         data-search-text="${(task.title || '').toLowerCase()}">
+         data-search-text="${(task.title || "").toLowerCase()}">
       <div class="card-body p-3">
         <div class="d-flex align-items-center justify-content-between mb-2">
           <span class="badge ${p.cls} rounded-pill" style="font-size:.7rem;">
@@ -41,10 +48,7 @@ function buildTaskCard(task) {
               <i class="ti ti-eye ti-md text-dark"></i>
             </button>
             ${editBtn}
-            <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle archive-task-btn"
-              type="button" data-task-id="${task.id}" title="${cfg.labels.archiveTask}">
-              <i class="ti ti-archive ti-md text-dark"></i>
-            </button>
+            ${archiveBtn}
           </div>
         </div>
         <h6 class="mb-1 text-truncate">${$('<div>').text(task.title).html()}</h6>
