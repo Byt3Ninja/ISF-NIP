@@ -14,11 +14,13 @@ class ImporterPurgeExpired extends Command
     public function handle(ImporterSessionService $svc): int
     {
         $count = 0;
+        // chunkById (not chunk) — discard() mutates status, shifting rows out of
+        // the WHERE set. OFFSET-based chunk() would skip rows; id-based cursor
+        // pagination is stable under concurrent-set mutation.
         ImporterSession::query()
             ->where('expires_at', '<', now())
             ->whereNotIn('status', ImporterSession::TERMINAL_STATUSES)
-            ->orderBy('id')
-            ->chunk(200, function ($sessions) use ($svc, &$count) {
+            ->chunkById(200, function ($sessions) use ($svc, &$count) {
                 foreach ($sessions as $session) {
                     $svc->discard($session);
                     $count++;
