@@ -208,9 +208,44 @@ class ImporterController extends Controller
         ]);
     }
 
-    public function validateRows(Request $request, string $uuid): JsonResponse
-    {
-        return $this->notImplemented();
+    public function validateRows(
+        \App\Http\Requests\Importer\ValidateRowsRequest $request,
+        string $uuid,
+        ImporterSessionService $svc,
+        CsvParser $parser,
+        \App\Services\Importer\RowValidator $validator
+    ): JsonResponse {
+        $session = $svc->findForUserByUuid($uuid, $request->user()->id);
+
+        if (!$session->file_path) {
+            return response()->json([
+                'success' => false,
+                'errors' => [[
+                    'code'       => 'invalid_state_transition',
+                    'message_en' => __('importer.errors.invalid_state_transition', [], 'en'),
+                    'message_ar' => __('importer.errors.invalid_state_transition', [], 'ar'),
+                ]],
+            ], 409);
+        }
+
+        $absPath  = Storage::disk('importer')->path($session->file_path);
+        $parsed   = $parser->parse($absPath);
+        $mappings = $request->input('mappings', []);
+
+        $result = $validator->validateRows($parsed['rows'], $mappings);
+
+        if ($result->isValid()) {
+            $session->mappings = $mappings;
+            $session->save();
+            if ($session->status === ImporterSession::STATUS_UPLOADED) {
+                $svc->transitionTo($session, ImporterSession::STATUS_VALIDATED);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'data'    => $result->toResponseArray(),
+        ]);
     }
 
     public function detectConflicts(Request $request, string $uuid): JsonResponse

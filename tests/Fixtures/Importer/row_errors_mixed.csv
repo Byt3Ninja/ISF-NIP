@@ -1,0 +1,11 @@
+Program Name,Program Type,Program Start Date,Program End Date,Founder First Name,Founder Last Name,Founder Email,Founder Gender,Founder Phone,Country Code,Startup Name,Country
+,General_Program,4/1/2026,7/31/2026,Alex,Morgan,alex@example.com,Male,1188376532,20,Acme,Egypt
+Good,INVALID_TYPE,4/1/2026,7/31/2026,Alex,Morgan,alex@example.com,Male,1188376532,20,Acme,Egypt
+Good,General_Program,not-a-date,7/31/2026,Alex,Morgan,alex@example.com,Male,1188376532,20,Acme,Egypt
+Good,General_Program,4/1/2026,7/31/2026,Alex,Morgan,not-an-email,Male,1188376532,20,Acme,Egypt
+Good,General_Program,8/1/2026,7/31/2026,Alex,Morgan,alex@example.com,Male,1188376532,20,Acme,Egypt
+Good,General_Program,4/1/2026,7/31/2026,Alex,Morgan,alex@example.com,X,1188376532,20,Acme,Egypt
+Good,General_Program,4/1/2026,7/31/2026,Alex,Morgan,alex@example.com,Male,abc,20,Acme,Egypt
+Good,General_Program,4/1/2026,7/31/2026,Alex,Morgan,alex@example.com,Male,1188376532,abc,Acme,Egypt
+Good,General_Program,4/1/2026,7/31/2026,Alex,Morgan,alex@example.com,Male,1188376532,20,,Egypt
+Good,General_Program,4/1/2026,7/31/2026,Alex,Morgan,alex@example.com,Male,1188376532,20,Acme,Atlantis
