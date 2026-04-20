@@ -194,8 +194,8 @@ return [
 
         'importer' => [
             'driver' => 'local',
-            'root'   => storage_path('app/private/importer'),
-            'throw'  => false,
+            'root' => storage_path('app/private/importer'),
+            'throw' => false,
         ],
     ],
 
