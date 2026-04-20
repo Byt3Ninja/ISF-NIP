@@ -16,21 +16,27 @@ class ImporterRouteScaffoldTest extends TestCase
         $this->assertContains($resp->status(), [302, 401, 403, 419]);
     }
 
-    public function test_authenticated_get_returns_placeholder_json(): void
+    public function test_authenticated_get_returns_wizard_view(): void
     {
         $user = User::factory()->create();
         $user->allotRole('Admin');
-        $resp = $this->actingAs($user)->getJson('/dashboard/importer/v2');
-        $resp->assertStatus(200)
-             ->assertJsonPath('data.message', 'importer_v2_placeholder');
+        // PR 2: showWizard now renders the Blade wizard rather than a JSON placeholder.
+        $resp = $this->actingAs($user)->get('/dashboard/importer/v2');
+        $resp->assertStatus(200);
+        $resp->assertSee('importer-v2', false);
     }
 
-    public function test_placeholder_endpoints_return_501(): void
+    public function test_remaining_placeholder_endpoints_return_501(): void
     {
         $user = User::factory()->create();
         $user->allotRole('Admin');
+        // autoMap is still a scaffold stub until PR 3.
+        $uuid = 'nonexistent-uuid';
         $resp = $this->actingAs($user)
-            ->postJson('/dashboard/importer/v2/sessions');
+            ->postJson("/dashboard/importer/v2/sessions/{$uuid}/automap");
+        // Will fail with session_not_found (404) before reaching the stub,
+        // so instead pick an endpoint with no uuid lookup: organizations.
+        $resp = $this->actingAs($user)->getJson('/dashboard/importer/v2/organizations');
         $resp->assertStatus(501)
              ->assertJsonPath('errors.0.code', 'not_implemented');
     }
