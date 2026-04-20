@@ -182,8 +182,8 @@ class MentorshipController extends Controller
         if (auth()->user() && auth()->user()->hasRole('Mentor')) {
             return view('admin.tasks.index',compact('tasks', 'programs', 'startups', 'stats'));
         }
-        
-        return view('mentor.mentorshipSessions.index',compact('sessions','available_surveys','cycles'));
+        $programs = [];
+        return view('mentor.mentorshipSessions.index',compact('sessions', 'programs', 'available_surveys','cycles'));
     }
 
 
