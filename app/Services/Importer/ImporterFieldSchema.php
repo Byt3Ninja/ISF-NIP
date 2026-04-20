@@ -884,7 +884,7 @@ class ImporterFieldSchema
     /** @return string[] ordered CSV header row for the downloadable template */
     public static function templateHeaders(): array
     {
-        return array_map(fn($f) => $f['label_en'], self::all());
+        return array_values(array_map(fn($f) => $f['label_en'], self::all()));
     }
 
     /** @return array<int, array<int, string>> two example data rows */
