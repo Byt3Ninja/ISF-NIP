@@ -21,7 +21,8 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         User::class => \App\Policies\UserPolicy::class,
         Organization::class => \App\Policies\OrganizationPolicy::class,
-        Currency::class => \App\Policies\CurrencyPolicy::class
+        Currency::class => \App\Policies\CurrencyPolicy::class,
+        \App\Services\Importer\ImporterSession::class => \App\Policies\ImporterSessionPolicy::class,
 
     ];
 
