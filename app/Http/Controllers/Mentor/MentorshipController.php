@@ -105,6 +105,7 @@ class MentorshipController extends Controller
                         'profile_url' => url('/dashboard/companyProfile/' . $assignee->id),
                     ];
                 })->toArray(),
+                'inReviewCount' => $task->assignees->filter(fn($a) => $a->pivot->status === 'review')->count(),
                 'priority'      => $task->priority,
                 'overallStatus' => $task->status,
                 'dueDate'       => $task->due_date ? $task->due_date->format('Y-m-d') : 'N/A',
@@ -152,7 +153,7 @@ class MentorshipController extends Controller
                 'createdAt'        => $task->created_at->timestamp,
             ];
         });
-
+    
         $programs = $cycles->map(fn($c) => (object)['id' => $c['id'], 'title' => $c['title']]);
 
         $cycleIds = $cycles->pluck('id');
