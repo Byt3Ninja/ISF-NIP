@@ -653,6 +653,75 @@ $(function () {
       error: () => toastr.error('{{ __("admin.unexpected_error") }}')
     });
   });
+  
+  // ─── Edit Task from VT Offcanvas ────────────────────────────────────────
+  $(document).on('click', '#vt-edit-trigger-btn', function () {
+    const taskId = $(this).data('task-id');
+    if (!taskId) return toastr.error('Could not identify the task.');
+
+    // Close the view offcanvas
+    bootstrap.Offcanvas.getOrCreateInstance(
+      document.getElementById('viewTaskOffcanvas')
+    ).hide();
+
+    // Find the matching row in the DataTable
+    let targetRow = null;
+    window.dt_task.rows().every(function () {
+      if (this.data()?.id == taskId) {
+        targetRow = this;
+        return false;
+      }
+    });
+
+    if (!targetRow) return toastr.error('Could not find task in table.');
+
+    const data = targetRow.data();
+    const $row = targetRow.node() ? $(targetRow.node()) : null;
+
+    // Populate the edit form (same logic as .task-edit)
+    $('#task-title').val(data.title);
+    $('#task-description').val(data.description);
+    $('#task-priority').val(data.priority).trigger('change');
+    $('#task-status').val(data.overallStatus).trigger('change');
+    $('#task-due-date').val(data.dueDate !== 'N/A' ? data.dueDate : '');
+    $('#addNewTaskForm').data('edit-row', $row);
+
+    $('#task-program').val(data.program.id).trigger('change');
+
+    const $assigneeSelect = $('#task-assignees');
+    const assigneeIds     = data.assignees.map(a => a.id).filter(id => id != null);
+    $assigneeSelect.empty();
+    (startups || []).forEach(s =>
+      $assigneeSelect.append(`<option value="${s.id}">${s.name ?? s.name_en}</option>`)
+    );
+    if (assigneeIds.length) $assigneeSelect.val(assigneeIds).trigger('change');
+
+    const $existingWrap = $('#existing-attachments');
+    const $existingList = $('#existing-attachments-list').empty();
+    if (data.attachments?.length) {
+      data.attachments.forEach(file => {
+        const iconClass = getAttachmentIcon(file.type);
+        const sizeKb    = file.size ? (file.size / 1024).toFixed(1) + ' KB' : '';
+        $existingList.append(`
+          <div class="d-flex align-items-center gap-1 border rounded-2 px-2 py-1 bg-light-subtle" data-filename="${file.name}">
+            <i class="ti ${iconClass} ti-sm"></i>
+            <a href="/storage/${file.path}" target="_blank" class="small text-body text-decoration-none text-truncate" style="max-width:140px;">${file.name}</a>
+            ${sizeKb ? `<small class="text-muted">(${sizeKb})</small>` : ''}
+            <button type="button" class="btn btn-xs btn-icon text-danger ms-1 remove-existing-attachment p-0"
+              data-filename="${file.name}" data-task-id="${data.id}">
+              <i class="ti ti-x ti-xs"></i>
+            </button>
+          </div>`);
+      });
+      $existingWrap.show();
+    } else {
+      $existingWrap.hide();
+    }
+
+    $('#addTaskModalLabel').text('{{ __('admin.edit_task') }}');
+    $('.data-submit').text('{{ __('admin.Update') }}');
+    $('#addTaskModal').offcanvas('show');
+  });
 
   // ─── Send Comment (kanban-vt-offcanvas) ───────────────────────────────────
   $(document).on('click', '#vt-send-comment-btn', function () {
@@ -699,7 +768,7 @@ $(function () {
       method: 'POST',
       data: { decision, note },
       headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-      success: res => toastr.success(res.message || '{{ __("admin.feedback_submitted") }}'),
+      success: res => toastr.success(res.message || '{{ __("admin.feedback_added_success") }}'),
       error:   ()  => toastr.error('{{ __("admin.unexpected_error") }}')
     });
   });

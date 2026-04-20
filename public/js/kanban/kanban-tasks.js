@@ -90,6 +90,11 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
     const p = cfg.priorityMap[taskData.priority] ?? cfg.priorityMap['Medium'];
     const sLabel = cfg.statusMap[taskData.status] ?? taskData.status;
 
+    // Priority colour strip
+    const colorMatch = (p.cls || '').match(/bg-(?:label-)?(\w+)/);
+    const colorName = colorMatch ? colorMatch[1] : 'secondary';
+    $('#vt-priority-bar').css('background', `rgba(var(--bs-${colorName}-rgb), 0.85)`);
+
     $('#vt-title').text(taskData.title);
     $('#vt-description').html(taskData.description);
     $('#vt-due-date').text(taskData.due_date || 'N/A');
@@ -126,24 +131,19 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
     // } else {
     //   $('#vt-assignee-wrapper').addClass('d-none');
     // }
-    // ── New multi-assignee display ──────────────────────────────────────────
+    // ── Assignee chips in hero area ─────────────────────────────────────────
     const assignees = taskData.assignees || [];
-    // if (assignees.length && (cfg.isAdmin || cfg.isSubAdmin || cfg.isOrgManager)) {
     if (assignees.length) {
       const $list = $('#vt-assignees-list').empty();
-      assignees.forEach((a, i) => {
+      assignees.forEach(a => {
         const ri = (a.name || '?').substring(0, 2).toUpperCase();
-        const avatar = a.img_url
-          ? `<img src="${a.img_url}" alt="${a.name}" class="rounded-circle object-fit-cover" style="width:40px;height:40px;">`
-          : `<span class="avatar-initial bg-label-info rounded-circle d-flex align-items-center justify-content-center fw-semibold" style="width:40px;height:40px;font-size:13px;">${ri}</span>`;
-        const nameHtml = a.profile_url
-          ? `<a href="${a.profile_url}" target="_blank" class="text-body fw-semibold">${a.name}</a>`
-          : `<span class="fw-semibold text-dark">${a.name}</span>`;
-        $list.append(`
-          <div class="d-flex align-items-center gap-3 ${i > 0 ? 'border-top pt-3' : ''}">
-            ${a.profile_url ? `<a href="${a.profile_url}" target="_blank">${avatar}</a>` : avatar}
-            <div>${nameHtml}</div>
-          </div>`);
+        const avatarInner = a.img_url
+          ? `<img src="${a.img_url}" alt="${a.name}" class="rounded-circle object-fit-cover flex-shrink-0" style="width:18px;height:18px;">`
+          : `<span class="avatar-initial bg-label-info rounded-circle d-inline-flex align-items-center justify-content-center fw-semibold flex-shrink-0" style="width:18px;height:18px;font-size:9px;">${ri}</span>`;
+        const chip = a.profile_url
+          ? `<a href="${a.profile_url}" target="_blank" class="d-inline-flex align-items-center gap-1 badge bg-label-secondary rounded-pill fw-normal text-decoration-none text-body" style="font-size:.75rem;padding:.3rem .6rem;">${avatarInner}<span>${a.name}</span></a>`
+          : `<span class="d-inline-flex align-items-center gap-1 badge bg-label-secondary rounded-pill fw-normal text-body" style="font-size:.75rem;padding:.3rem .6rem;">${avatarInner}<span>${a.name}</span></span>`;
+        $list.append(chip);
       });
       $('#vt-assignee-wrapper').removeClass('d-none');
     } else {
@@ -174,10 +174,17 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
     bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('viewTaskOffcanvas')).show();
   });
 
-  $('#vt-edit-trigger-btn').on('click', function () {
+  $(document).on('click', '#vt-edit-trigger-btn', function () {
     const taskId = $(this).data('task-id');
-    bootstrap.Offcanvas.getInstance(document.getElementById('viewTaskOffcanvas')).hide();
-    setTimeout(() => $(`.edit-task-btn[data-task-id="${taskId}"]`).trigger('click'), 350);
+    const ocEl   = document.getElementById('viewTaskOffcanvas');
+    const oc     = bootstrap.Offcanvas.getInstance(ocEl);
+
+    if (oc) {
+      $(ocEl).one('hidden.bs.offcanvas', () => openEditTask(taskId));
+      oc.hide();
+    } else {
+      openEditTask(taskId);
+    }
   });
 
   // ─── Add Task ──────────────────────────────────────────────────────────────
@@ -243,9 +250,8 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
 
   // ─── Edit Task ─────────────────────────────────────────────────────────────
 
-  $(document).on('click', '.edit-task-btn', function () {
-    const taskId = $(this).data('task-id');
-    const taskData = tasks.find(t => t.id === taskId);
+  function openEditTask(taskId) {
+    const taskData = tasks.find(t => t.id == taskId);
     if (!taskData) return;
 
     $('#et-id').val(taskData.id);
@@ -261,11 +267,15 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
 
     if (taskData.attachments && taskData.attachments.length) {
       $('#et-current-attachments-wrapper').removeClass('d-none');
-      renderAttachmentsList(taskData.attachments, taskId, '#et-current-attachments-list');
+      renderAttachmentsList(taskData.attachments, taskData.id, '#et-current-attachments-list');
     } else {
       $('#et-current-attachments-wrapper').addClass('d-none');
     }
     bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('editTaskOffcanvas')).show();
+  }
+
+  $(document).on('click', '.edit-task-btn', function () {
+    openEditTask($(this).data('task-id'));
   });
 
   $('#editTaskForm').on('submit', function (e) {

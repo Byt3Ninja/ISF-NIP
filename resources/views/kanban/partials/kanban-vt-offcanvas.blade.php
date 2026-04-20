@@ -1,18 +1,59 @@
 {{-- VIEW TASK OFFCANVAS --}}
-<div class="offcanvas offcanvas-end w-px-{{ $_user->ableTo('tasks.update', $permissions) ? '700' : '600' }}" tabindex="-1" id="viewTaskOffcanvas">
-  <div class="offcanvas-header border-bottom">
-    <h5 class="offcanvas-title"><i class="ti ti-eye me-1 text-primary"></i> {{ __('admin.View_Task') }}</h5>
+<div class="offcanvas offcanvas-end w-px-{{ $_user->ableTo('tasks.update', $permissions) ? '800' : '600' }}" tabindex="-1" id="viewTaskOffcanvas">
+
+  {{-- Priority colour strip --}}
+  <div id="vt-priority-bar" style="height:4px;flex-shrink:0;transition:background .3s;"></div>
+
+  {{-- Slim top bar --}}
+  <div class="d-flex align-items-center justify-content-between px-4 py-2 border-bottom flex-shrink-0">
+    <div class="d-flex align-items-center gap-2">
+      <div class="avatar avatar-sm flex-shrink-0">
+        <span class="avatar-initial rounded bg-light-primary">
+          <i class="ti ti-clipboard-check ti-xs"></i>
+        </span>
+      </div>
+      <span class="fw-semibold" style="font-size:.7rem;letter-spacing:.07em;text-transform:uppercase;color:var(--bs-secondary-color);">
+        {{ __('admin.View_Task') }}
+      </span>
+    </div>
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
   </div>
-  <div class="offcanvas-body pt-0 d-flex flex-column">
-    
-    {{-- TAB NAVIGATION GENERATED DYNAMICALLY --}}
-    <ul class="nav nav-tabs pb-6 mb-4 rounded-0 mt-3" role="tablist">
+
+  {{-- Hero: title + meta chips (always visible, no scroll) --}}
+  <div class="px-4 py-3 border-bottom flex-shrink-0 bg-light-subtle">
+
+    {{-- Title --}}
+    <h5 id="vt-title" class="fw-bold mb-3 lh-sm text-heading"></h5>
+
+    {{-- Meta chips --}}
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+      <span class="d-inline-flex align-items-center gap-1 badge bg-label-secondary rounded-pill fw-normal px-2" style="font-size:.75rem;">
+        <i class="ti ti-calendar-event ti-xs"></i>
+        <span id="vt-due-date"></span>
+      </span>
+      <div id="vt-priority"></div>
+      <div id="vt-status"></div>
+    </div>
+
+    {{-- Assignees (chip row, hidden until populated) --}}
+    <div class="d-none mt-2" id="vt-assignee-wrapper">
+      <div class="d-flex align-items-center gap-2 flex-wrap" id="vt-assignees-list"></div>
+    </div>
+
+  </div>
+
+  <div class="offcanvas-body pt-0 d-flex flex-column overflow-hidden">
+
+    {{-- TAB NAVIGATION --}}
+    <ul class="nav nav-tabs border-bottom mb-0 flex-nowrap flex-shrink-0" role="tablist"
+        style="overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none;">
       @foreach($offcanvasTabs as $tab)
         @if($tab['show'])
-          <li class="nav-item">
-            <button class="nav-link {{ $tab['active'] ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="{{ $tab['target'] }}" role="tab">
-              <i class="ti {{ $tab['icon'] }} ti-xs me-1"></i> {{ $tab['label'] }}
+          <li class="nav-item flex-shrink-0">
+            <button class="nav-link {{ $tab['active'] ? 'active' : '' }} d-flex align-items-center gap-1 text-nowrap"
+                    data-bs-toggle="tab" data-bs-target="{{ $tab['target'] }}" role="tab">
+              <i class="ti {{ $tab['icon'] }} ti-xs"></i>
+              <span>{{ $tab['label'] }}</span>
               @if(isset($tab['badge']))
                 <span class="badge badge-center {{ $tab['badge']['class'] }} rounded-pill ms-1" id="{{ $tab['badge']['id'] }}">0</span>
               @endif
@@ -22,181 +63,177 @@
       @endforeach
     </ul>
 
-    <div class="tab-content p-0 flex-grow-1 overflow-auto">
+    {{-- TAB CONTENT --}}
+    <div class="tab-content flex-grow-1 overflow-auto" style="min-height:0;">
+
       {{-- DETAILS TAB --}}
       <div class="tab-pane fade show active" id="vt-details" role="tabpanel">
-        <div class="mb-3">
-          <span class="text-muted d-block mb-1">{{ __('admin.Title') }}</span>
-          <h6 id="vt-title" class="mb-0 text-dark"></h6>
-        </div>
-        <div class="mb-3">
-          <span class="text-muted d-block mb-1">{{ __('admin.Description') }}</span>
-          <div id="vt-description" class="text-dark bg-body border rounded p-3" style="min-height: 80px;"></div>
-        </div>
-        <div class="row g-3 mb-4">
-          <div class="col-6">
-            <span class="text-muted d-block mb-1">{{ __('admin.Due_Date') }}</span>
-            <p id="vt-due-date" class="mb-0 text-dark"></p>
-          </div>
-          <div class="col-6">
-            <span class="text-muted d-block mb-1">{{ __('admin.Priority') }}</span>
-            <div id="vt-priority"></div>
-          </div>
-          <div class="col-6">
-            <span class="text-muted d-block mb-1">{{ __('admin.Status') }}</span>
-            <div id="vt-status"></div>
-          </div>
-        </div>
+        <div>
 
-        {{--
-        @if ($_user->hasAnyRole('admin|subadmin|organizationManager'))
-        <div class="mb-4 d-none" id="vt-assignee-wrapper">
-          <span class="text-muted small d-block mb-2">{{ __('admin.Assignee') ?? 'Assignee' }}</span>
-          <div class="border rounded p-3 bg-body d-flex flex-column gap-3">
-            <div class="d-flex align-items-center gap-3" id="vt-assignee-startup">
-              <div id="vt-assignee-startup-avatar"></div>
-              <div>
-                <span class="small">{{ __('admin.Startup') ?? 'Startup' }}</span>
-                <div id="vt-assignee-startup-name" class="fw-semibold text-dark"></div>
+          {{-- Description --}}
+          <div class="mb-4">
+            <p class="text-muted fw-medium mb-2 d-flex align-items-center gap-1" style="font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;">
+              <i class="ti ti-align-left ti-xs"></i>{{ __('admin.Description') }}
+            </p>
+            <div id="vt-description"
+                 class="border rounded-2 p-3 bg-light-subtle text-body"
+                 style="min-height:80px;font-size:.875rem;line-height:1.6;word-break:break-word;"></div>
+          </div>
+
+          {{-- Attachments --}}
+          <div>
+            <p class="text-muted fw-medium mb-2 d-flex align-items-center gap-2" style="font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;">
+              <span class="d-flex align-items-center gap-1">
+                <i class="ti ti-paperclip ti-xs"></i>
+                {{ $_user->ableTo('tasks.update', $permissions) ? __('admin.provided_resources') : __('admin.Attachments') }}
+              </span>
+              <span id="vt-attachments-count" class="badge bg-label-secondary rounded-pill fw-normal"></span>
+            </p>
+
+            <div id="vt-attachments-list" class="d-flex flex-column gap-2 mb-3"></div>
+
+            {{-- Upload zone --}}
+            <div class="border rounded-2 p-3 bg-lighter">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="small fw-medium text-body">
+                  {{ $_user->ableTo('tasks.update', $permissions) ? __('admin.upload_attachments') : __('admin.your_submission') }}
+                </span>
+                <span class="text-muted" style="font-size:.7rem;">
+                  {{ __('admin.max') }} 5 {{ __('admin.files') ?? 'files' }} · 10MB {{ __('admin.each') }}
+                </span>
               </div>
-            </div>
-            <div class="d-flex align-items-center gap-3 border-top pt-3" id="vt-assignee-founder">
-              <div id="vt-assignee-founder-avatar"></div>
-              <div>
-                <span class="small">{{ __('admin.Founder') ?? 'Founder' }}</span>
-                <div id="vt-assignee-founder-name" class="fw-semibold text-dark"></div>
+
+              <div id="vt-dropzone"
+                   class="border border-dashed rounded-2 p-3 text-center position-relative"
+                   style="cursor:pointer;transition:border-color .2s,background .2s;">
+                <input type="file" id="vt-dropzone-input"
+                  class="position-absolute top-0 start-0 w-100 h-100 opacity-0" style="cursor:pointer;"
+                  accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-zip-compressed,text/plain,text/csv"
+                  multiple />
+                <i class="ti ti-cloud-upload ti-md text-primary mb-1 d-block"></i>
+                <p class="mb-1 small fw-medium">{{ __('admin.dropzone') }}</p>
+                <p class="mb-0 text-muted" style="font-size:.7rem;">{{ __('admin.max_5_files') }}</p>
               </div>
+
+              <div id="vt-dropzone-queue" class="d-flex flex-column gap-2 mt-2"></div>
+
+              <div class="d-flex align-items-center justify-content-between mt-2">
+                <div class="invalid-feedback d-block small" id="vt-upload-error"></div>
+                <button type="button" class="btn btn-sm btn-primary text-nowrap ms-auto d-none" id="vt-dropzone-upload-btn">
+                  <i class="ti ti-upload ti-xs me-1"></i>{{ __('admin.upload_all') }}
+                </button>
+              </div>
+              <input type="hidden" id="vt-upload-btn-task-id" value="" />
             </div>
           </div>
-        </div>
-        @endif
-        --}}
-        <div class="mb-4 d-none" id="vt-assignee-wrapper">
-          <span class="text-muted small d-block mb-2">{{ __('admin.assignees') }}</span>
-          <div class="border rounded p-3 bg-body d-flex flex-column gap-3" id="vt-assignees-list"></div>
-        </div>
 
-        <div class="mb-4">
-          <div className="w-100 align-items-center">
-            <span class="text-muted small">{{ $_user->ableTo('tasks.update', $permissions) ? __('admin.provided_resources') : __('admin.Attachments') }}</span>
-            <span id="vt-attachments-count" class="badge badge-center bg-glow bg-label-secondary text-dark rounded-pill ms-3"></span>
-          </div>
-
-          <div id="vt-attachments-list" class="d-flex flex-column gap-2 small my-3"></div>
-
-          {{-- Dropzone Upload --}}
-          <div class="border-top pt-3">
-            <label class="form-label small mb-2">
-              {{ $_user->ableTo('tasks.update', $permissions) ? __('admin.upload_attachments') : __('admin.your_submission') }}
-              <span class="text-muted">({{ __('admin.max') }} 5 {{ __('admin.files') ?? 'files' }}, 10MB {{ __('admin.each') }})</span>
-            </label>
-
-            <div id="vt-dropzone"
-              class="bg-light-subtle border border-dashed rounded p-4 text-center position-relative"
-              style="cursor:pointer; border-color: var(--bs-border-color) !important; transition: border-color .2s, background .2s;">
-              <input type="file" id="vt-dropzone-input" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" style="cursor:pointer;"
-                accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-zip-compressed,text/plain,text/csv"
-                multiple />
-              <i class="ti ti-cloud-upload ti-lg text-primary mb-2 d-block"></i>
-              <p class="mb-0 small">{{ __('admin.dropzone') }}</p>
-              <p class="mb-0 text-muted small">{{ __('admin.max_5_files') }}</p>
-            </div>
-
-            <div id="vt-dropzone-queue" class="d-flex flex-column gap-2 mt-2"></div>
-
-            <div class="d-flex justify-content-between align-items-center mt-2">
-              <div class="invalid-feedback d-block" id="vt-upload-error"></div>
-              <button type="button" class="btn btn-sm btn-primary text-nowrap ms-auto d-none" id="vt-dropzone-upload-btn">
-                <i class="ti ti-upload ti-xs me-1"></i>{{ __('admin.upload_all') }}
-              </button>
-            </div>
-            <input type="hidden" id="vt-upload-btn-task-id" value="" />
-          </div>
         </div>
       </div>
 
       {{-- SUBMISSIONS TAB --}}
       <div class="tab-pane fade" id="vt-submissions" role="tabpanel">
-        <div id="vt-submissions-list" class="small pe-2"></div>
+        <div class="p-4">
+          <div id="vt-submissions-list"></div>
+        </div>
       </div>
 
-        {{-- FEEDBACK TAB --}}
+      {{-- FEEDBACK TAB --}}
       <div class="tab-pane fade" id="vt-feedback" role="tabpanel">
-        <div id="vt-feedback-list" class="small pe-2"></div>
+        <div class="p-4">
+          <div id="vt-feedback-list"></div>
 
-        @if ($_user->ableTo('tasks.add_feedback', $permissions))
-        <div class="mt-3" id="vt-feedback-form-wrapper">
-          <h5 class="fw-semibold small mb-3">{{ __('admin.add_feedback') }}</h5>
+          @if ($_user->ableTo('tasks.add_feedback', $permissions))
+          <div class="mt-4 border-top pt-4" id="vt-feedback-form-wrapper">
+            <h6 class="fw-semibold mb-3 d-flex align-items-center gap-2">
+              <i class="ti ti-message-report ti-sm text-primary"></i>
+              {{ __('admin.add_feedback') }}
+            </h6>
 
-          <div class="mb-3">
-            <label class="form-label small">{{ __('admin.feedback_decision') }} <span class="text-danger">*</span></label>
-            <div class="row g-3">
-              <div class="col-6">
-                <div class="form-check custom-option custom-option-basic checked" id="vt-fb-pass-wrapper">
-                  <label class="form-check-label custom-option-content" for="vt-fb-pass">
-                    <input name="vt_feedback_decision" class="form-check-input" type="radio" value="pass" id="vt-fb-pass" checked>
-                    <span class="custom-option-header"><span class="h6 mb-0">{{ __('admin.pass_task') }}</span></span>
-                    <span class="custom-option-body"><small>{{ __('admin.mark_as_completed') }}</small></span>
-                  </label>
+            <div class="mb-3">
+              <label class="form-label small">{{ __('admin.feedback_decision') }} <span class="text-danger">*</span></label>
+              <div class="row g-3">
+                <div class="col-6">
+                  <div class="form-check custom-option custom-option-basic checked" id="vt-fb-pass-wrapper">
+                    <label class="form-check-label custom-option-content" for="vt-fb-pass">
+                      <input name="vt_feedback_decision" class="form-check-input" type="radio" value="pass" id="vt-fb-pass" checked>
+                      <span class="custom-option-header"><span class="h6 mb-0">{{ __('admin.pass_task') }}</span></span>
+                      <span class="custom-option-body"><small>{{ __('admin.mark_as_completed') }}</small></span>
+                    </label>
+                  </div>
                 </div>
-              </div>
-              <div class="col-6">
-                <div class="form-check custom-option custom-option-basic" id="vt-fb-revision-wrapper">
-                  <label class="form-check-label custom-option-content" for="vt-fb-revision">
-                    <input name="vt_feedback_decision" class="form-check-input" type="radio" value="revision" id="vt-fb-revision">
-                    <span class="custom-option-header"><span class="h6 mb-0">{{ __('admin.needs_revision') }}</span></span>
-                    <span class="custom-option-body"><small>{{ __('admin.request_changes') }}</small></span>
-                  </label>
+                <div class="col-6">
+                  <div class="form-check custom-option custom-option-basic" id="vt-fb-revision-wrapper">
+                    <label class="form-check-label custom-option-content" for="vt-fb-revision">
+                      <input name="vt_feedback_decision" class="form-check-input" type="radio" value="revision" id="vt-fb-revision">
+                      <span class="custom-option-header"><span class="h6 mb-0">{{ __('admin.needs_revision') }}</span></span>
+                      <span class="custom-option-body"><small>{{ __('admin.request_changes') }}</small></span>
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div class="mb-3">
-            <label class="form-label small" for="vt-fb-note">{{ __('admin.feedback_note') }}</label>
-            <textarea id="vt-fb-note" class="form-control" rows="3" placeholder="{{ __('admin.feedback_note_placeholder') }}"></textarea>
-          </div>
+            <div class="mb-3">
+              <label class="form-label small" for="vt-fb-note">{{ __('admin.feedback_note') }}</label>
+              <textarea id="vt-fb-note" class="form-control" rows="3"
+                placeholder="{{ __('admin.feedback_note_placeholder') }}"></textarea>
+            </div>
 
-          <button type="button" class="btn btn-primary" id="vt-submit-feedback-btn">
-            <i class="ti ti-send ti-xs me-1"></i> {{ __('admin.submit_feedback') }}
-          </button>
+            <button type="button" class="btn btn-primary btn-sm" id="vt-submit-feedback-btn">
+              <i class="ti ti-send ti-xs me-1"></i>{{ __('admin.submit_feedback') }}
+            </button>
+          </div>
+          @endif
         </div>
-        @endif
       </div>
-      
+
       {{-- COMMENTS TAB --}}
       <div class="tab-pane fade" id="vt-comments" role="tabpanel">
-        <div id="vt-comments-list" class="small mb-4 pe-2"></div>
-        
-        <div class="border-top pt-3 mt-auto">
-          <label class="form-label small fw-medium">{{ __('admin.Add comment') }}</label>
-          <div id="vt-comment-editor" class="border rounded-top"></div>
-          <div class="border border-top-0 rounded-bottom p-1 d-flex justify-content-between align-items-center">
-            <div id="vt-comment-toolbar">
-              <span class="ql-formats m-0">
-                <button class="ql-bold"></button>
-                <button class="ql-italic"></button>
-                <button class="ql-underline"></button>
-              </span>
+        <div class="p-4 d-flex flex-column" style="min-height:100%;">
+          <div id="vt-comments-list" class="mb-4"></div>
+
+          <div class="border rounded-2 mt-auto">
+            <div class="px-3 py-2 border-bottom bg-lighter rounded-top-2">
+              <span class="small fw-medium text-body">{{ __('admin.Add comment') }}</span>
             </div>
-            <button class="btn btn-sm btn-primary" type="button" id="vt-send-comment-btn">{{ __('admin.send') }}</button>
+            <div id="vt-comment-editor" style="min-height:80px;"></div>
+            <div class="border-top px-2 py-1 d-flex justify-content-between align-items-center">
+              <div id="vt-comment-toolbar">
+                <span class="ql-formats m-0">
+                  <button class="ql-bold" title="Bold"></button>
+                  <button class="ql-italic" title="Italic"></button>
+                  <button class="ql-underline" title="Underline"></button>
+                </span>
+              </div>
+              <button class="btn btn-sm btn-primary d-flex align-items-center gap-1" type="button" id="vt-send-comment-btn">
+                <i class="ti ti-send ti-xs"></i>
+                <span>{{ __('admin.send') }}</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {{-- ACTIVITY TAB --}}
       <div class="tab-pane fade" id="vt-activity" role="tabpanel">
-        <div id="vt-activities-list" class="small pe-2"></div>
+        <div class="p-4">
+          <div id="vt-activities-list"></div>
+        </div>
       </div>
+
     </div>
 
-    <div class="d-flex gap-2 pt-3 border-top mt-3">
+    {{-- FOOTER ACTIONS --}}
+    <div class="d-flex align-items-center gap-2 px-4 py-3 border-top flex-shrink-0">
       @if ($_user->ableTo('tasks.update', $permissions))
-      <button type="button" class="btn btn-outline-primary" id="vt-edit-trigger-btn">
-        <i class="ti ti-edit ti-xs me-1"></i> {{ __('admin.Edit_Task') }}
+      <button type="button" class="btn btn-primary btn-sm" id="vt-edit-trigger-btn">
+        <i class="ti ti-edit ti-xs me-1"></i>{{ __('admin.Edit_Task') }}
       </button>
       @endif
-      <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">{{ __('admin.Close') }}</button>
+      <button type="button" class="btn btn-label-secondary btn-sm ms-auto" data-bs-dismiss="offcanvas">
+        {{ __('admin.Close') }}
+      </button>
     </div>
+
   </div>
 </div>
