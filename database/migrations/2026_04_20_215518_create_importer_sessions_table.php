@@ -15,15 +15,7 @@ return new class extends Migration
             $table->id();
             $table->uuid('uuid')->unique();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->enum('status', [
-                'uploaded',
-                'validated',
-                'conflicts_reviewed',
-                'importing',
-                'completed',
-                'failed',
-                'discarded',
-            ])->default('uploaded');
+            $table->string('status', 32)->default('uploaded');
             $table->string('original_filename');
             $table->string('file_path')->nullable();
             $table->unsignedBigInteger('file_size')->default(0);
@@ -36,8 +28,6 @@ return new class extends Migration
             $table->json('import_result')->nullable();
             $table->timestamp('expires_at')->index();
             $table->timestamps();
-
-            $table->index(['user_id', 'status', 'expires_at'], 'importer_sessions_cleanup_idx');
         });
     }
 
