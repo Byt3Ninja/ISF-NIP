@@ -143,9 +143,9 @@
             style="border-style: dashed !important;">
             <i class="ti ti-cloud-upload fs-3 text-primary mb-2 d-block"></i>
             <p class="fw-semibold mb-1">{{ __('admin.click_to_upload') }}</p>
-            <p class="small text-muted mb-0">{{ __('admin.all_files_allowed') }} &mdash; max 10 MB</p>
+            <p class="small text-muted mb-0">JPG, PNG, PDF, DOCX, XLSX, PPTX &mdash; max 10 MB</p>
           </div>
-          <input type="file" name="attachments[]" id="task-upload" class="d-none" multiple>
+          <input type="file" name="attachments[]" id="task-upload" class="d-none" multiple accept=".jpeg,.jpg,.png,.pdf,.docx,.xlsx,.pptx">
           <div id="fileError" class="invalid-feedback mt-2" style="display: none;"></div>
           <div id="fileName" class="small mt-2 text-muted" style="display: none;"></div>
         </div>
