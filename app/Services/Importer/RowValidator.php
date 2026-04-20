@@ -51,6 +51,145 @@ class RowValidator
         };
     }
 
+    /**
+     * Runs full validation over a dataset.
+     * $rows: positional rows (string[] each, aligned to $headers)
+     * $mappings: field_key => header_index|null
+     */
+    public function validateRows(array $rows, array $mappings): RowValidationResult
+    {
+        $errors   = [];
+        $warnings = [];
+
+        foreach (ImporterFieldSchema::required() as $key => $field) {
+            if (!array_key_exists($key, $mappings) || $mappings[$key] === null) {
+                $errors[] = new RowError(0, $key, 'field_required', ['field' => $field['label_en']]);
+            }
+        }
+        if (!empty($errors)) {
+            return new RowValidationResult($errors, [], count($rows));
+        }
+
+        foreach ($rows as $idx => $row) {
+            $rowNumber = $idx + 2; // header is row 1
+            $resolved  = $this->resolveRow($row, $mappings);
+
+            foreach ($resolved as $fieldKey => $value) {
+                $field = ImporterFieldSchema::find($fieldKey);
+                if (!$field) continue;
+
+                $valueStr = trim((string) $value);
+
+                if (($field['required'] ?? false) && $valueStr === '') {
+                    $errors[] = new RowError(
+                        $rowNumber,
+                        $fieldKey,
+                        $this->requiredCodeFor($fieldKey),
+                        ['field' => $field['label_en']]
+                    );
+                    continue;
+                }
+
+                $rule = $field['validator'] ?? null;
+                if ($rule === 'string' || $rule === null) continue;
+
+                $errorCode = $this->errorCodeFor($fieldKey, $rule);
+                $opts = [
+                    'allowed_values' => $field['allowed_values'] ?? null,
+                    'error_code'     => $errorCode,
+                ];
+                $err = $this->validateField($rule, $valueStr, $opts);
+                if ($err !== null) {
+                    $errors[] = new RowError($rowNumber, $fieldKey, $err, ['field' => $field['label_en']]);
+                }
+            }
+
+            foreach ($this->validateCrossFields($resolved) as $xerr) {
+                $errors[] = new RowError($rowNumber, $xerr['field_key'], $xerr['code']);
+            }
+        }
+
+        return new RowValidationResult($errors, $warnings, count($rows));
+    }
+
+    private function resolveRow(array $row, array $mappings): array
+    {
+        $out = [];
+        foreach ($mappings as $fieldKey => $idx) {
+            if ($idx === null) continue;
+            $out[$fieldKey] = $row[$idx] ?? '';
+        }
+        return $out;
+    }
+
+    private function requiredCodeFor(string $fieldKey): string
+    {
+        static $map = [
+            'program_name'         => 'program_name_required',
+            'program_type'         => 'program_type_required',
+            'program_start_date'   => 'program_start_date_required',
+            'program_end_date'     => 'program_end_date_required',
+            'founder_first_name'   => 'founder_first_name_required',
+            'founder_last_name'    => 'founder_last_name_required',
+            'founder_email'        => 'founder_email_required',
+            'founder_gender'       => 'founder_gender_required',
+            'founder_phone'        => 'founder_phone_required',
+            'founder_country_code' => 'founder_country_code_required',
+            'startup_name'         => 'startup_name_required',
+            'country'              => 'country_required',
+        ];
+        return $map[$fieldKey] ?? 'field_required';
+    }
+
+    private function errorCodeFor(string $fieldKey, string $rule): string
+    {
+        static $map = [
+            'founder_email'    => 'founder_email_invalid',
+            'company_email'    => 'company_email_invalid',
+            'cofounder_email'  => 'cofounder_email_invalid',
+            'founder_phone'    => 'founder_phone_invalid',
+            'cofounder_phone'  => 'cofounder_phone_invalid',
+            'program_start_date' => 'program_start_date_invalid',
+            'program_end_date'   => 'program_end_date_invalid',
+            'founder_date_of_birth' => 'founder_dob_invalid',
+            'founder_join_date'  => 'founder_join_date_invalid',
+            'establishment_date' => 'establishment_date_invalid',
+            'program_name'       => 'program_name_required',
+            'founder_first_name' => 'founder_first_name_required',
+            'founder_last_name'  => 'founder_last_name_required',
+            'startup_name'       => 'startup_name_required',
+            'program_type'       => 'program_type_enum',
+            'founder_gender'     => 'founder_gender_enum',
+            'founder_working_commitment'   => 'founder_working_commitment_enum',
+            'founder_educational_status'   => 'founder_educational_status_enum',
+            'cofounder_working_commitment' => 'cofounder_working_commitment_enum',
+            'is_previously_incubated'      => 'is_previously_incubated_enum',
+            'generate_revenue'             => 'generate_revenue_enum',
+            'product_or_service'           => 'product_or_service_enum',
+            'company_website'  => 'company_website_invalid',
+            'company_facebook' => 'company_facebook_invalid',
+            'company_logo'     => 'company_logo_invalid',
+            'mvp_link'         => 'mvp_link_invalid',
+            'country'          => 'country_required',
+            'currency'         => 'currency_invalid',
+            'target_markets'   => 'target_markets_invalid',
+            'founder_country_code' => 'founder_country_code_invalid',
+            'total_employees'  => 'employees_non_numeric',
+            'male_employees'   => 'employees_non_numeric',
+            'female_employees' => 'employees_non_numeric',
+            'average_annual_revenue'        => 'numeric_required',
+            'current_operating_income'      => 'numeric_required',
+            'forecast_operating_income_y1'  => 'numeric_required',
+            'forecast_operating_income_y2'  => 'numeric_required',
+            'forecast_operating_income_y3'  => 'numeric_required',
+            'current_revenue'               => 'numeric_required',
+            'forecast_revenue_y1'           => 'numeric_required',
+            'forecast_revenue_y2'           => 'numeric_required',
+            'forecast_revenue_y3'           => 'numeric_required',
+        ];
+        return $map[$fieldKey] ?? $rule;
+    }
+
     public function validateTargetMarkets(string $value): bool
     {
         foreach (array_map('trim', explode(',', $value)) as $m) {
