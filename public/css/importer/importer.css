@@ -1,0 +1,26 @@
+.importer-v2 .importer-steps li {
+    border-bottom: 2px solid #dee2e6;
+    padding: 0.5rem 0.75rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+.importer-v2 .importer-steps li.active {
+    border-bottom-color: #0d6efd;
+    color: #0d6efd;
+}
+.importer-v2 .importer-drop-zone {
+    cursor: pointer;
+    border-style: dashed !important;
+    transition: background-color .15s;
+}
+.importer-v2 .importer-drop-zone.drag-over {
+    background-color: #eef5ff;
+}
+.importer-v2 #importer-upload-errors ul {
+    margin: 0;
+}
+@media (max-width: 576px) {
+    .importer-v2 .importer-steps {
+        flex-direction: column;
+    }
+}
