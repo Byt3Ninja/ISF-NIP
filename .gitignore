@@ -1,6 +1,7 @@
 .DS_Store
 /node_modules
 # /public
+/docs/tickets/*
 /docs/superpowers/*
 /public/storage
 /public/pitch_decks
