@@ -266,7 +266,7 @@ return [
 	'settings_categories_label' => 'Organize items into primary categories.',
 	'settings_subcategories_label' => 'Manage nested categories for finer control.',
 	'settings_stages_label' => 'Define workflow stages for your processes.',
-	'settings_countries_label' => 'Manage countries',
+	'settings_countries_label' => 'Manage the list of supported countries',
 	'settings_labels_label' => 'Manage custom labels for status and identification.',
 	'settings_queue_jobs_label' => 'Monitor and manage background processing jobs.',
 	'settings_industry_label' => 'Configure industry-specific options and defaults.',
