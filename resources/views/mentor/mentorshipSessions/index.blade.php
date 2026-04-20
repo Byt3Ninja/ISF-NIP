@@ -267,7 +267,7 @@ $(document).ready(function () {
           } else {
             toastr.success('{{ __('admin.Task_added_successfully.') }}');
             bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('addTaskModal')).hide();
-            // setTimeout(() => window.location.reload(), 1500);
+            setTimeout(() => window.location.reload(), 1500);
           }
         },
         error: xhr => toastr.error(xhr.responseJSON?.message || '{{ __('admin.unexpected_error') }}'),
