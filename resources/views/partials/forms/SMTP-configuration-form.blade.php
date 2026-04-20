@@ -57,3 +57,5 @@
     <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
   </div>
 </form>
+  </div>
+</div>
