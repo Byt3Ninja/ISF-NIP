@@ -131,7 +131,7 @@ function initKanbanDragDrop(tasks) {
           type: 'PATCH',
           contentType: 'application/json',
           data: JSON.stringify({ status: newStatus }),
-          error: function () {
+          error: function (xhr) {
             if (task) task.status = oldStatus;
             $(evt.from).find('[data-empty-board]').remove();
             $(evt.from).append(evt.item);
@@ -141,7 +141,7 @@ function initKanbanDragDrop(tasks) {
               $(evt.to).append(`<p class="text-muted small text-center py-3 m-0" data-empty-board>${cfg.labels.noTasks}</p>`);
             }
             _updateBoardCounts();
-            toastr.error(cfg.labels.moveTaskFailed);
+            toastr.error(xhr?.responseJSON?.message || cfg.labels.moveTaskFailed);
           }
         });
       }
