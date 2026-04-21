@@ -296,9 +296,61 @@ class ImporterController extends Controller
         ]);
     }
 
-    public function preview(Request $request, string $uuid): JsonResponse
-    {
-        return $this->notImplemented();
+    public function preview(
+        Request $request,
+        string $uuid,
+        ImporterSessionService $svc,
+        CsvParser $parser
+    ): JsonResponse {
+        $session = $svc->findForUserByUuid($uuid, $request->user()->id);
+
+        if (!in_array($session->status, [
+            ImporterSession::STATUS_VALIDATED,
+            ImporterSession::STATUS_CONFLICTS_REVIEWED,
+        ], true)) {
+            return response()->json([
+                'success' => false,
+                'errors' => [['code' => 'invalid_state_transition', 'message_en' => __('importer.errors.invalid_state_transition', [], 'en'), 'message_ar' => __('importer.errors.invalid_state_transition', [], 'ar')]],
+            ], 409);
+        }
+
+        $rowsLimit = (int) $request->input('rows', 3);
+        $rowsLimit = max(1, min(20, $rowsLimit));
+
+        $absPath = Storage::disk('importer')->path($session->file_path);
+        $parsed  = $parser->parse($absPath);
+
+        $mappings = $session->mappings ?? [];
+
+        $columns = [];
+        foreach (ImporterFieldSchema::all() as $key => $field) {
+            if (!array_key_exists($key, $mappings) || $mappings[$key] === null) continue;
+            $columns[] = [
+                'field_key' => $key,
+                'label_en'  => $field['label_en'],
+                'label_ar'  => $field['label_ar'],
+                'section'   => $field['section'],
+                'header_index' => $mappings[$key],
+            ];
+        }
+
+        $sliced = array_slice($parsed['rows'], 0, $rowsLimit);
+        $rowsOut = [];
+        foreach ($sliced as $r) {
+            $assoc = [];
+            foreach ($columns as $col) {
+                $assoc[$col['field_key']] = $r[$col['header_index']] ?? '';
+            }
+            $rowsOut[] = $assoc;
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'columns' => $columns,
+                'rows'    => $rowsOut,
+            ],
+        ]);
     }
 
     public function execute(Request $request, string $uuid): JsonResponse
