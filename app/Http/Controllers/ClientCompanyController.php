@@ -3748,51 +3748,145 @@ class ClientCompanyController extends Controller
         }
     }
 
+    /**
+     * Mark multiple startups as alumni in bulk.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function addCompanyAlumniBulk(Request $request)
+    {
+        $request->validate([
+            'company_ids' => 'required|array',
+            'company_ids.*' => 'required|integer|exists:companies,id',
+        ]);
+
+        $companyIds = $request->input('company_ids');
+        $processedCount = 0;
+        $errors = [];
+
+        DB::beginTransaction();
+        try {
+            foreach ($companyIds as $id) {
+                $company = Company::find($id);
+                if (!$company) continue;
+
+                // Validation: Must have country
+                if ($company->country_id == null) {
+                    $errors[] = $company->name_en . ': ' . __('startup.You cannot add this startup to alumni because it has no country');
+                    continue;
+                }
+
+                // Validation: Must be on Final Screening step (stype=5)
+                $step = Step::where('id', $company->step)->first();
+                if (!$step || $step->stype != 5) {
+                    $errors[] = $company->name_en . ': ' . __('startup.You cannot add this startup to alumni because it not finale screening step');
+                    continue;
+                }
+
+                // Skip if already alumni in this cycle
+                $isAlreadyAlumni = Almuni::where('company_id', $id)->where('cycle_id', $company->cycle)->exists();
+                if ($isAlreadyAlumni) {
+                    continue;
+                }
+
+                $this->performMarkAsAlumni($company);
+                $processedCount++;
+            }
+
+            if ($processedCount === 0 && !empty($errors)) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => implode("\n", $errors)
+                ], 422);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => __('startup.mark_alumni_success')
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Bulk Alumni Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => __('admin.unexpected_error') . ' (Error: ' . $e->getMessage() . ')'
+            ], 500);
+        }
+    }
+
     public function addCompanyAlumni(Request $request, $id)
     {
         try {
-            $user = Auth::user();
             $company = Company::findOrFail($id);
-           if($company->country_id == null ){
-            return response()->json([
-                'success' => false,
-                'message' => __('startup.You cannot add this startup to alumni because it has no country')
-            ], 422);
-           }
-            $company_relations = CompanyRelation::where('company_id', $id)->where('user_id', $company?->user?->id)->get();
-            $step = Step::where('id', $company->step)->first();
-            //dd($step, $company->step);
-            // If the cycle has a Final Evaluation step (stype=5), verify the company has passed it
-            if ($company->step == $step->id && $step->stype != 5) {
-            return response()->json([
-                                'success' => false,
-                                'message' => __('startup.You cannot add this startup to alumni because it not finale screening step')
-                            ], 422);
-                $finalEvalStep = Step::where('cycle_id', $company->cycle)
-                    ->where('stype', 5)
-                    ->first();
-                
-                //if ($finalEvalStep) {
-                  //  $evaluation = ScreeningEvaluation::where('step_id', $finalEvalStep->id)->first();
-                    //$hasPassed = false;
-                    //if ($evaluation) {
-                      //  $hasPassed = ScreeningEvaluationResults::where('evaluation_id', $evaluation->id)
-                        //    ->where('company_id', $company->id)
-                          //  ->where('status', '!=', 0)
-                            //->exists();
-                    //}
-                   // if (!$hasPassed) {
-                     //   if ($request->ajax()) {
-                       //     return response()->json([
-                         //       'success' => false,
-                           //     'message' => __('startup.The selected startups have not passed the final screening yet')
-                            //], 422);
-                        //}
-                        //return redirect()->back()->with('warning', __('startup.The selected startups have not passed the final screening yet'));
-                    //}
-                //}
+
+            // Validation: Must have country
+            if ($company->country_id == null) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('startup.You cannot add this startup to alumni because it has no country')
+                ], 422);
             }
 
+            // Validation: Must be on Final Screening step (stype=5)
+            $step = Step::where('id', $company->step)->first();
+            if (!$step || $step->stype != 5) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('startup.You cannot add this startup to alumni because it not finale screening step')
+                ], 422);
+            }
+
+            // Skip if already alumni in this cycle
+            $isAlreadyAlumni = Almuni::where('company_id', $id)->where('cycle_id', $company->cycle)->exists();
+            if ($isAlreadyAlumni) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('startup.already_alumni')
+                ], 422);
+            }
+
+            DB::beginTransaction();
+            $this->performMarkAsAlumni($company);
+            DB::commit();
+
+            // Check if AJAX request
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => __('startup.mark_alumni_success')
+                ], 200);
+            }
+
+            return redirect()->back()->with('success', __('startup.mark_alumni_success'));
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Single Alumni Error: ' . $e->getMessage());
+            
+            // Check if AJAX request
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('startup.mark_alumni_error') . ' (' . __('admin.Error') . ': ' . $e->getMessage() . ')'
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', __('startup.mark_alumni_error'));
+        }
+    }
+
+    /**
+     * Internal logic to mark a company as alumni and create snapshots.
+     */
+    private function performMarkAsAlumni(Company $company)
+    {
+        $id = $company->id;
+        try {
+            $company_relations = CompanyRelation::where('company_id', $id)->where('user_id', $company?->user?->id)->get();
             
             $almuni = new Almuni();
             $almuni->user_id = $company?->user?->id;
@@ -3838,7 +3932,6 @@ class ClientCompanyController extends Controller
             $jTechnologies = json_encode($technologies);
             
             //Relations Data
-           
             $relations_data = $company_relations->map(function ($relation) {
                                     return [
                                         'industry'    => $relation->industry?->name_en,
@@ -3846,7 +3939,7 @@ class ClientCompanyController extends Controller
                                         'technologies'  => $relation->technology?->name_en,
                                     ];
                                 })->values();
-                               
+                                
             $basic_startup_information = [
                     'ID' => $company->id,
                     'Startup_Name' => $company->name_en,
@@ -4073,10 +4166,6 @@ class ClientCompanyController extends Controller
                 ->orderBy('arr');
                 
             $_stepsScreening = $step->where('stype', 2)->get();
-            // $metadata = collect([]);
-            // foreach($_steps as $step) {
-            //     $metadata->push(ScreeningEvaluationResults::metadata($step->id));
-            // }
 
             $screeningsEvaluations = ScreeningEvaluation::whereIn(
                     'step_id',
@@ -4135,12 +4224,11 @@ class ClientCompanyController extends Controller
             });
             $screeningData = $stepsData;
 
-        // return or view
                 $almuni->screening = json_encode($screeningData);
 
                     //Final Screening
                 $cycle_id = $company->cycle;
-                $_stepFinal = $step->where('stype', 5)->get();
+                $_stepFinal = Step::where('cycle_id', $cycle_id)->where('stype', 5)->get();
                $screeningsEvaluations = ScreeningEvaluation::whereIn(
                     'step_id',
                     $_stepFinal->pluck('id')
@@ -4202,7 +4290,7 @@ class ClientCompanyController extends Controller
 
 
                  // Training
-                 $steps = Step::where('cycle_id', $company->cycledata->id)->get();
+                 $steps = Step::where('cycle_id', $company->cycle)->get();
 
                 $startup_training = TrainingSession::whereIn('step_id', $steps->pluck('id'))
                     ->get();
@@ -4224,8 +4312,7 @@ class ClientCompanyController extends Controller
 
                 $almuni->training = json_encode($trainings);
 
-                // $steps = Step::where('cycle_id', $company->cycledata->id)->get();
-                $startup_mentorship = MentorshipRequest::where('cycle_id', $company->cycledata->id)
+                $startup_mentorship = MentorshipRequest::where('cycle_id', $company->cycle)
                 ->where('approved', 'Yes')
                 ->where('user_id', $company?->user?->id)
                 ->get();
@@ -4257,7 +4344,6 @@ class ClientCompanyController extends Controller
                 }
 
                 $almuni->mentorship = json_encode($mentorships);
-
 
 
                 $startup_milestones = Milestone::where('company_id', $company->id)
@@ -4411,9 +4497,7 @@ class ClientCompanyController extends Controller
 
                 $almuni->services = json_encode($services);
 
-                // $startup_formSubmissions= Formdata::where('user_id', $company->user->id)->get();
                 $formSubmissions = [];
-                $user = $company->user;
                 $l =  app()->getLocale();
                 $forms = DB::table('form_data as FD')
                 ->select([
@@ -4492,58 +4576,54 @@ class ClientCompanyController extends Controller
                     return $item;
                 })->values();
 
-                        foreach ($data as $item) {
+                foreach ($data as $item) {
+                    $answers = $item->answers->collapse(); 
 
-                            // كل answers عبارة عن Collection جوا Collection
-                            $answers = $item->answers->collapse(); // ده بيفك الـ nesting
+                    foreach ($answers as $answer) {
+                        $fieldType = is_array($answer->value) ? 'file' : 'text';
 
-                            foreach ($answers as $answer) {
+                        $formSubmissions[] = [
+                            'Form_Title'      => $item->step_name,
+                            'ID'              => $item->submission_id,
+                            'step_title'      => $item->step_name,
+                            'Step_ID'         => $item->step_id,
+                            'Submission_Date' => $item->created_at,
 
-                                // تجهيز الفيلد
-                                $fieldType = is_array($answer->value) ? 'file' : 'text';
+                            'Field_Name'      => $answer->label,
+                            'Field_Type'      => $fieldType,
+                            'Submitted_Value' => is_array($answer->value) ? $answer->value['file_name'] : $answer->value,
+                            'Attachment_Link' => is_array($answer->value) ? $answer->value['file_url'] : null,
 
-                                $formSubmissions[] = [
-                                    'Form_Title'      => $item->step_name,
-                                    'ID'              => $item->submission_id,
-                                    'step_title'      => $item->step_name,
-                                    'Step_ID'         => $item->step_id,
-                                    'Submission_Date' => $item->created_at,
+                            'Form_Inputs' => [
+                                'Field_Name'      => $answer->label,
+                                'Field_Type'      => $fieldType,
+                                'Submitted_Value' => is_array($answer->value) ? $answer->value['file_name'] : $answer->value,
+                                'Attachment_Link' => is_array($answer->value) ? $answer->value['file_url'] : null,
+                            ],
+                        ];
+                    }
+                }
+                if(empty($formSubmissions)) {
+                    $formSubmissions[] = [
+                        'Form_Title'      => null,
+                        'ID'              => null,
+                        'step_title'      => null,
+                        'Step_ID'         => null,
+                        'Submission_Date' => null,
 
-                                    'Field_Name'      => $answer->label,
-                                    'Field_Type'      => $fieldType,
-                                    'Submitted_Value' => is_array($answer->value) ? $answer->value['file_name'] : $answer->value,
-                                    'Attachment_Link' => is_array($answer->value) ? $answer->value['file_url'] : null,
+                        'Field_Name'      => null,
+                        'Field_Type'      => null,
+                        'Submitted_Value' => null,
+                        'Attachment_Link' => null,
 
-                                    'Form_Inputs' => [
-                                        'Field_Name'      => $answer->label,
-                                        'Field_Type'      => $fieldType,
-                                        'Submitted_Value' => is_array($answer->value) ? $answer->value['file_name'] : $answer->value,
-                                        'Attachment_Link' => is_array($answer->value) ? $answer->value['file_url'] : null,
-                                    ],
-                                ];
-                            }
-                        }
-                        if(empty($formSubmissions)) {
-                            $formSubmissions[] = [
-                                'Form_Title'      => null,
-                                'ID'              => null,
-                                'step_title'      => null,
-                                'Step_ID'         => null,
-                                'Submission_Date' => null,
-
-                                'Field_Name'      => null,
-                                'Field_Type'      => null,
-                                'Submitted_Value' => null,
-                                'Attachment_Link' => null,
-
-                                'Form_Inputs' => [
-                                    'Field_Name'      => null,
-                                    'Field_Type'      => null,
-                                    'Submitted_Value' => null,
-                                    'Attachment_Link' => null,
-                                ],
-                            ];
-                        }
+                        'Form_Inputs' => [
+                            'Field_Name'      => null,
+                            'Field_Type'      => null,
+                            'Submitted_Value' => null,
+                            'Attachment_Link' => null,
+                        ],
+                    ];
+                }
 
                 $almuni->submitted_forms = json_encode($formSubmissions);
 
@@ -4552,31 +4632,11 @@ class ClientCompanyController extends Controller
             $company->step = null;
             $company->cycle = null;
             $company->save();
-
-            // Check if AJAX request
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => __('startup.mark_alumni_success')
-                ], 200);
-            }
-
-            return redirect()->back()->with('success', __('startup.mark_alumni_success'));
-        } catch (Exception $e) {
-            Log::error('Error adding company to alumni: ' . $e->getMessage());
-
-            // Check if AJAX request
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => __('startup.mark_alumni_error') . ' (' . __('admin.Error') . ': ' . $e->getMessage() . ')'
-                ], 500);
-            }
-
-            return redirect()->back()->with('error', __('startup.mark_alumni_error'));
+        } catch (\Exception $e) {
+            throw $e;
         }
-
     }
+
 
     public function companyPerks()
     {

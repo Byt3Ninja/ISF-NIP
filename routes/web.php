@@ -18,16 +18,16 @@ use App\Http\Controllers\Judger\JudgerScreeningController;
 use App\Http\Controllers\AdvancedExportController;
 use App\Http\Controllers\TasksController;
 /* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
-Route::get('def-permission', function() {
+Route::get('def-permission', function () {
     $jsonRole = File::get(base_path('database/dbFiles/rolesWithDefaultPermissions.json'));
     $dataRole = json_decode($jsonRole, true);
-    $dataRole = collect( $dataRole )->flatMap(function($role) {
+    $dataRole = collect($dataRole)->flatMap(function ($role) {
         return $role['permissions'];
     });
-    $judges = $dataRole->filter(function($permission) {
+    $judges = $dataRole->filter(function ($permission) {
         return in_array('judger', $permission['default_for']);
     })->values();
-    dd( $judges->pluck('name')->toArray() );
+    dd($judges->pluck('name')->toArray());
 });
 Route::get('test', function () {
     $user = User::find(1);
@@ -351,7 +351,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     //services categories Manager routes
     Route::resource('serviceCategories', 'ServiceCategoryController');
     //Services Manager routes
-    
+
     Route::resource('services', 'ServiceController');
     Route::get('/export-services-excel', 'ServiceController@exportExcel')->name('services.export_excel');
     Route::get('/import-services-csv', 'ServiceController@exportCSV')->name('services.export_csv');
@@ -399,7 +399,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
         Route::post('File_Upload', 'InvitationController@updateFile')->name('invitations.upload');
         Route::post('DeleteFile_Upload', 'InvitationController@deleteFile')->name('invitations.DeleteAttachment');
     });
-    
+
     // lowercase alias for backward-compatibility / ease of testing
     Route::get('/confirm-email/{token}', 'ClientProfileController@confirmEmailUpdate')->name('user.profile_email_confirm');
 
@@ -494,7 +494,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     // Almuni 
     Route::post('/AddCompanyalumni/{id}', 'ClientCompanyController@addCompanyAlumni')->name('company.addCompanyAlumni');
-    
+    Route::post('/AddCompanyalumniBulk', 'ClientCompanyController@addCompanyAlumniBulk')->name('company.addCompanyAlumniBulk');
+
 
 
     //Industry
@@ -858,7 +859,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('programlist/edit/{id}', 'ProgramController@edit')->name('programs.edit');
     Route::get('programlist/show/{id}', 'ProgramController@show')->name('programs.view');
     Route::get('programlist/{id}/custom-pages', 'ProgramController@customPages');
-    
+
     Route::post('programlist/Email', 'ProgramController@SentEmail')->name('programs.send_email');
     Route::get('/export-Prog', 'ProgramController@exportProg')->name('programs.export');
     Route::get('programlist/report/{id}', 'ProgramController@programReport')->name('programs.report');
