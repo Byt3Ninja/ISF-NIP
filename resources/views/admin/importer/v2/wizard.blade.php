@@ -28,7 +28,7 @@
             @include('admin.importer.v2._step_mapping')
         </div>
         <div id="importer-step-review" class="d-none">
-            <!-- PR 6 fills this -->
+            @include('admin.importer.v2._step_review')
         </div>
     </div>
 </div>
@@ -48,10 +48,13 @@
         validate:       "{{ url('/dashboard/importer/v2/sessions') }}",    // + /{uuid}/validate
         conflicts:      "{{ url('/dashboard/importer/v2/sessions') }}",    // + /{uuid}/conflicts
         organizations:  "{{ route('importer.v2.organizations') }}",
+        preview:        "{{ url('/dashboard/importer/v2/sessions') }}",    // + /{uuid}/preview
+        execute:        "{{ url('/dashboard/importer/v2/sessions') }}",    // + /{uuid}/execute (PR 7)
     };
 </script>
 <script src="{{ asset('js/importer/importer-i18n.js') }}?v={{ filemtime(public_path('js/importer/importer-i18n.js')) }}"></script>
 <script src="{{ asset('js/importer/importer-state.js') }}?v={{ filemtime(public_path('js/importer/importer-state.js')) }}"></script>
 <script src="{{ asset('js/importer/importer-upload.js') }}?v={{ filemtime(public_path('js/importer/importer-upload.js')) }}"></script>
 <script src="{{ asset('js/importer/importer-mapping.js') }}?v={{ filemtime(public_path('js/importer/importer-mapping.js')) }}"></script>
+<script src="{{ asset('js/importer/importer-review.js') }}?v={{ filemtime(public_path('js/importer/importer-review.js')) }}"></script>
 @endsection
