@@ -8464,56 +8464,6 @@
         ]
     },
     {
-        "name": "Importer Tool",
-        "description": null,
-        "permissions": [
-            {
-                "name": "importer.index",
-                "description": "View Importer Page",
-                "guard_name": "web",
-                "is_core": 0,
-                "default_for": [
-                    "admin",
-                    "organizationmanager",
-                    "subadmin"
-                ]
-            },
-            {
-                "name": "importer.upload",
-                "description": "Upload Importer File",
-                "guard_name": "web",
-                "is_core": 0,
-                "default_for": [
-                    "admin",
-                    "organizationmanager",
-                    "subadmin"
-                ]
-            },
-            {
-                "name": "importer.import",
-                "description": "Importer Parsing",
-                "guard_name": "web",
-                "is_core": 0,
-                "default_for": [
-                    "admin",
-                    "organizationmanager",
-                    "subadmin"
-                ]
-            },
-            {
-                "name": "importer.organizations",
-                "description": "Fetch Organizations",
-                "guard_name": "web",
-                "is_core": 0,
-                "default_for": [
-                    "admin",
-                    "organizationmanager",
-                    "subadmin"
-                ]
-            }
-        ]
-    },
-    {
         "name": "Activity Log",
         "description": null,
         "permissions": [
@@ -9598,6 +9548,166 @@
             {
                 "name": "invite_mentor.attachment",
                 "description": " Show attachment for invitation ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Importer",
+        "description": "Bulk data importer (v2)",
+        "permissions": [
+            {
+                "name": "importer.index",
+                "description": "Open importer wizard",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "importer.template",
+                "description": "Download importer template",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "importer.schema",
+                "description": "Fetch importer schema",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "importer.organizations",
+                "description": "List organizations available to importer",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "importer.sessions.create",
+                "description": "Create importer session",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "importer.sessions.show",
+                "description": "View importer session",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "importer.sessions.discard",
+                "description": "Discard importer session",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "importer.sessions.file.delete",
+                "description": "Delete importer session file",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "importer.sessions.file.upload",
+                "description": "Upload importer session file",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "importer.sessions.automap",
+                "description": "Auto-map importer columns",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "importer.sessions.validate",
+                "description": "Validate importer session data",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "importer.sessions.conflicts",
+                "description": "Review importer session conflicts",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "importer.sessions.preview",
+                "description": "Preview importer session results",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "importer.sessions.execute",
+                "description": "Execute importer session",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [

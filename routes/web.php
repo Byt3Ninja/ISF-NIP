@@ -8,7 +8,6 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\GeminiController;
 use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\ProjectController;
-use App\Http\Controllers\ImporterController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\ClientCompanyController;
 use App\Http\Controllers\HackathonController;
@@ -988,10 +987,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('reports/show-survey/{id}', 'ReportController@surveyReport');
     //================> End Reports <============
 
-    Route::get('/importer', [ImporterController::class, 'index'])->name('importer.index');
-    Route::post('/importer/upload', [ImporterController::class, 'upload'])->name('importer.upload');
-    Route::post('/importer/import', [ImporterController::class, 'import'])->name('importer.import');
-    Route::get('/importer/organizations', [ImporterController::class, 'getOrganizations'])->name('importer.organizations');
+    // Legacy importer routes removed in PR 7 cutover. New routes live below
+    // under prefix dashboard/importer (see Importer\ImporterController group).
 
 
     Route::post('/notifications/mark-all-read', function () {
@@ -1012,6 +1009,30 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
         }
     });
 });
+
+Route::middleware(['auth'])->prefix('dashboard/importer')->name('importer.')->group(function () {
+    Route::get('/',                                       [\App\Http\Controllers\Importer\ImporterController::class, 'showWizard'])->name('index');
+    Route::get('/template',                               [\App\Http\Controllers\Importer\ImporterController::class, 'downloadTemplate'])->name('template');
+    Route::get('/schema',                                 [\App\Http\Controllers\Importer\ImporterController::class, 'schema'])->name('schema');
+    Route::get('/organizations',                          [\App\Http\Controllers\Importer\ImporterController::class, 'organizations'])->name('organizations');
+
+    Route::middleware('throttle:importer-general')->group(function () {
+        Route::post('/sessions',                          [\App\Http\Controllers\Importer\ImporterController::class, 'createSession'])->name('sessions.create');
+        Route::get('/sessions/{uuid}',                    [\App\Http\Controllers\Importer\ImporterController::class, 'showSession'])->name('sessions.show');
+        Route::delete('/sessions/{uuid}',                 [\App\Http\Controllers\Importer\ImporterController::class, 'discardSession'])->name('sessions.discard');
+        Route::delete('/sessions/{uuid}/file',            [\App\Http\Controllers\Importer\ImporterController::class, 'deleteFile'])->name('sessions.file.delete');
+        Route::post('/sessions/{uuid}/automap',           [\App\Http\Controllers\Importer\ImporterController::class, 'autoMap'])->name('sessions.automap');
+        Route::post('/sessions/{uuid}/validate',          [\App\Http\Controllers\Importer\ImporterController::class, 'validateRows'])->name('sessions.validate');
+        Route::post('/sessions/{uuid}/conflicts',         [\App\Http\Controllers\Importer\ImporterController::class, 'detectConflicts'])->name('sessions.conflicts');
+        Route::get('/sessions/{uuid}/preview',            [\App\Http\Controllers\Importer\ImporterController::class, 'preview'])->name('sessions.preview');
+        Route::post('/sessions/{uuid}/execute',           [\App\Http\Controllers\Importer\ImporterController::class, 'execute'])->name('sessions.execute');
+    });
+
+    Route::middleware('throttle:importer-upload')->group(function () {
+        Route::post('/sessions/{uuid}/file',              [\App\Http\Controllers\Importer\ImporterController::class, 'uploadFile'])->name('sessions.file.upload');
+    });
+});
+
 Route::get('cycle-custom-pages/{cycle_id}/{filename}', 'CycleCustomPagesController@serveImage')->name('cycle.custom_pages.image');
 
 // Organization Logo from Storage

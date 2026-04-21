@@ -305,4 +305,64 @@ public function findCompanyRelation($companyId)
     return $companyRelation;
 }
 
+    /**
+     * Upsert the Founder team_members row attached to $company, matched by user_id.
+     */
+    public function upsertFounderFromImport(Company $company, array $data, int $userId): Team_member
+    {
+        $existing = $company->teamMembers()
+            ->where('TeamMember', 'Founder')
+            ->where('user_id', $userId)
+            ->first();
+
+        $attrs = [
+            'user_id'            => $userId,
+            'Name'               => trim(($data['first_name'] ?? '') . ' ' . ($data['last_name'] ?? '')),
+            'Email'              => $data['email']  ?? null,
+            'phone'              => $data['phone']  ?? null,
+            'join_date'          => $data['join_date']          ?? null,
+            'founder_type'       => $data['founder_type']       ?? null,
+            'working_commitment' => $data['working_commitment'] ?? null,
+            'national_id'        => $data['national_id']        ?? null,
+            'educational_status' => $data['educational_status'] ?? null,
+            'date_of_birth'      => $data['date_of_birth']      ?? null,
+            'TeamMember'         => 'Founder',
+        ];
+
+        if ($existing) {
+            $existing->update($attrs);
+            return $existing->fresh();
+        }
+        return $company->teamMembers()->create($attrs);
+    }
+
+    /**
+     * Upsert the Co-founder team_members row attached to $company, matched by Email (case-insensitive).
+     * No User account is created — co-founders do not log in per spec.
+     */
+    public function upsertCoFounderFromImport(Company $company, array $data): Team_member
+    {
+        $emailLc = mb_strtolower(trim($data['email'] ?? ''), 'UTF-8');
+
+        $existing = $company->teamMembers()
+            ->where('TeamMember', 'Co-founder')
+            ->whereRaw('LOWER(COALESCE(Email, "")) = ?', [$emailLc])
+            ->first();
+
+        $attrs = [
+            'Name'               => $data['name']  ?? null,
+            'Email'              => $data['email'] ?? null,
+            'phone'              => $data['phone'] ?? null,
+            'working_commitment' => $data['working_commitment'] ?? null,
+            'educational_status' => $data['educational_status'] ?? null,
+            'TeamMember'         => 'Co-founder',
+        ];
+
+        if ($existing) {
+            $existing->update($attrs);
+            return $existing->fresh();
+        }
+        return $company->teamMembers()->create($attrs);
+    }
+
 }

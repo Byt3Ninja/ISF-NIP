@@ -2976,6 +2976,7 @@ return [
 	'enter_invitation_subject' => 'أدخل موضوع الدعوة',
 	'no_replies_yet' => 'لا توجد ردود بعد',
 	'no_attachments' => 'لا تحتوي الدعوة على مرفقات',
+  'no_activities' => 'لا توجد انشطه بعد',
 	'enter_invitee_name' => 'أدخل اسم المدعو',
 	'enter_invitee_email' => 'أدخل البريد الإلكتروني للمدعو',
 	'compose_your_invitation_message' => 'اكتب رسالة الدعوة',

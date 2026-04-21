@@ -45,6 +45,32 @@ class Handler extends ExceptionHandler
 //            }
 //            parent::report($e);
         });
+
+        $this->renderable(function (\App\Services\Importer\Exceptions\SessionNotFoundException $e, $request) {
+            if ($request->expectsJson() || $request->is('api/*') || $request->is('dashboard/importer/*')) {
+                return response()->json([
+                    'success' => false,
+                    'errors'  => [[
+                        'code'       => 'session_not_found',
+                        'message_en' => __('importer.errors.session_not_found', [], 'en'),
+                        'message_ar' => __('importer.errors.session_not_found', [], 'ar'),
+                    ]],
+                ], 404);
+            }
+        });
+
+        $this->renderable(function (\App\Services\Importer\Exceptions\InvalidStateTransitionException $e, $request) {
+            if ($request->expectsJson() || $request->is('api/*') || $request->is('dashboard/importer/*')) {
+                return response()->json([
+                    'success' => false,
+                    'errors'  => [[
+                        'code'       => 'invalid_state_transition',
+                        'message_en' => __('importer.errors.invalid_state_transition', [], 'en'),
+                        'message_ar' => __('importer.errors.invalid_state_transition', [], 'ar'),
+                    ]],
+                ], 409);
+            }
+        });
     }
 
     public function render($request, Throwable $exception)
