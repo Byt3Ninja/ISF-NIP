@@ -43,14 +43,18 @@ class RowImporter
      * @param int                   $rowNumber 1-based CSV row number (incl. header offset = +2)
      * @param Cycle                 $cycle pre-created by orchestrator
      * @param Organization          $org
-     * @param array<int,array>      $acceptedWarnings rows to skip for conflict reasons
+     * @param array<int,array>      $warnings conflict warnings (row-keyed)
+     * @param bool                  $acceptedWarnings when true, proceed despite warnings;
+     *                                                 when false, skip any row with conflict warnings.
      * @return array
      */
-    public function import(array $row, int $rowNumber, Cycle $cycle, Organization $org, array $acceptedWarnings): array
+    public function import(array $row, int $rowNumber, Cycle $cycle, Organization $org, array $warnings, bool $acceptedWarnings = false): array
     {
-        $skipReason = $this->skipReasonFromWarnings($rowNumber, $acceptedWarnings);
-        if ($skipReason !== null) {
-            return ['imported' => false, 'reason' => $skipReason];
+        if (!$acceptedWarnings) {
+            $skipReason = $this->skipReasonFromWarnings($rowNumber, $warnings);
+            if ($skipReason !== null) {
+                return ['imported' => false, 'reason' => $skipReason];
+            }
         }
 
         // --- lookups ---
@@ -92,14 +96,14 @@ class RowImporter
         }
 
         // --- company ---
-        $companyData = array_filter([
+        $companyDataRaw = [
             'name_en'                => trim($row['startup_name'] ?? ''),
             'name_ar'                => trim($row['startup_name'] ?? ''),
             'country_id'             => $countryId,
             'state_id'               => $stateId,
             'sector'                 => $sectorId,
-            'address_en'             => $row['address'] ?? null,
-            'address_ar'             => $row['address'] ?? null,
+            'address_en'             => ($row['address'] ?? '') !== '' ? $row['address'] : ' ',
+            'address_ar'             => ($row['address'] ?? '') !== '' ? $row['address'] : ' ',
             'targeted_market'        => $targeted,
             'est_date'               => $this->parseMdy($row['establishment_date'] ?? null),
             'email'                  => $row['company_email'] ?? null,
@@ -112,7 +116,14 @@ class RowImporter
             'male_employees'         => $this->intOrNull($row['male_employees']   ?? null),
             'female_employees'       => $this->intOrNull($row['female_employees'] ?? null),
             'cycle'                  => $cycle->id,
-        ], fn($v) => $v !== null && $v !== '');
+        ];
+
+        // Drop null values (preserve empty strings for NOT NULL DB columns).
+        $companyData = array_filter($companyDataRaw, fn($v) => $v !== null);
+
+        // Ensure NOT NULL columns without DB defaults are present.
+        $companyData['address_en'] = $companyData['address_en'] ?? ' ';
+        $companyData['address_ar'] = $companyData['address_ar'] ?? ' ';
 
         $company = $this->companyService->upsertFromImport($companyData);
 

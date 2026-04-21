@@ -4,9 +4,11 @@ namespace App\Services;
 
 use App\Company;
 use App\Cycle;
+use App\Step;
 use App\TeamFormation;
 use App\Team_member;
 use App\User;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Encapsulates writes for hackathon team formations used by the importer.
@@ -35,11 +37,13 @@ class HackathonEnrollmentService
             ->first();
 
         if (!$formation) {
+            $stepId = $this->resolveStepId($cycle);
+
             $formation = new TeamFormation();
             $formation->name        = $this->uniqueName($teamName);
             $formation->description = null;
             $formation->cycle_id    = $cycle->id;
-            $formation->step_id     = 0;
+            $formation->step_id     = $stepId;
             $formation->user_id     = $user->id;
             $formation->target_track   = 0;
             $formation->project_status = 0;
@@ -102,6 +106,23 @@ class HackathonEnrollmentService
         }
 
         return TeamFormation::findOrFail($formationId);
+    }
+
+    /**
+     * Pick a step linked to the cycle (preferring the first by id) — falls back
+     * to the lowest step id in the table if none are linked.
+     */
+    private function resolveStepId(Cycle $cycle): int
+    {
+        $step = DB::table('steps')->where('cycle_id', $cycle->id)->orderBy('id')->first();
+        if ($step) {
+            return (int) $step->id;
+        }
+        $any = DB::table('steps')->orderBy('id')->first();
+        if ($any) {
+            return (int) $any->id;
+        }
+        throw new \RuntimeException('No steps available to attach hackathon team formation');
     }
 
     private function uniqueName(string $base): string

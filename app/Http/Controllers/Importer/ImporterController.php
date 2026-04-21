@@ -392,7 +392,8 @@ class ImporterController extends Controller
         }
 
         try {
-            $result = $orchestrator->run($session, $orgId);
+            $acceptedWarnings = (bool) $request->input('accepted_warnings', false);
+            $result = $orchestrator->run($session, $orgId, $acceptedWarnings);
 
             $session->refresh();
             $session->import_result = $result->toArray();

@@ -36,7 +36,7 @@ class ImportOrchestrator
         $this->emailDispatcher  = $emailDispatcher;
     }
 
-    public function run(ImporterSession $session, int $orgId): ImporterResult
+    public function run(ImporterSession $session, int $orgId, bool $acceptedWarnings = false): ImporterResult
     {
         $this->svc->transitionTo($session, ImporterSession::STATUS_IMPORTING);
 
@@ -99,8 +99,8 @@ class ImportOrchestrator
             }
 
             try {
-                $result = DB::transaction(function () use ($resolved, $rowNumber, $cycle, $org, $warnings) {
-                    return $this->rowImporter->import($resolved, $rowNumber, $cycle, $org, $warnings);
+                $result = DB::transaction(function () use ($resolved, $rowNumber, $cycle, $org, $warnings, $acceptedWarnings) {
+                    return $this->rowImporter->import($resolved, $rowNumber, $cycle, $org, $warnings, $acceptedWarnings);
                 });
             } catch (\Throwable $e) {
                 Log::error('Importer row transaction failed', [

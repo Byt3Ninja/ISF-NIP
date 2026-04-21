@@ -26,19 +26,21 @@ class ImporterRouteScaffoldTest extends TestCase
         $resp->assertSee('importer-v2', false);
     }
 
-    public function test_remaining_placeholder_endpoints_return_501(): void
+    public function test_execute_requires_validated_state(): void
     {
         $user = User::factory()->create();
         $user->allotRole('Admin');
-        // execute() is still a scaffold stub until PR 7. We need a real session for
-        // it to reach the stub; create one via the create endpoint.
         $create = $this->actingAs($user)->postJson('/dashboard/importer/v2/sessions');
         $uuid = $create->json('data.session_id');
 
+        // A freshly-created session is in 'uploaded' state — not valid for execute.
+        $org = \App\Organization::create(['name_en' => 'X', 'name_ar' => 'س', 'user_id' => $user->id]);
         $resp = $this->actingAs($user)
-            ->postJson("/dashboard/importer/v2/sessions/{$uuid}/execute");
-        $resp->assertStatus(501)
-             ->assertJsonPath('errors.0.code', 'not_implemented');
+            ->postJson("/dashboard/importer/v2/sessions/{$uuid}/execute", [
+                'organization_id' => $org->id,
+            ]);
+        $resp->assertStatus(409)
+             ->assertJsonPath('errors.0.code', 'invalid_state_transition');
     }
 
     public function test_api_route_exists_with_sanctum_guard(): void
