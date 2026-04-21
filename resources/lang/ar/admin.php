@@ -3820,5 +3820,5 @@ return [
 	'No_Founders_Empty' => 'لم تتم إضافة مؤسسين بعد',
 	'offline_location_address_max' => 'يجب ألا يتجاوز عنوان الموقع 255 حرفًا.',
 	'offline_location_map_max' => 'يجب ألا يتجاوز رابط تقريب الموقع 500 حرفًا.',
-
+  'view_submission' => 'عرض التقديم',
 ];

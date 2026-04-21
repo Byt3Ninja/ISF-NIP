@@ -26,7 +26,7 @@ function buildAttachmentItem(att, taskId, canDelete) {
       <div class="d-flex align-items-center justify-content-between">
         <a href="${att.url}" target="_blank"
            class="text-body fw-medium text-truncate d-flex align-items-center gap-1 flex-grow-1" style="min-width:0;">
-          <i class="ti ti-paperclip ti-xs flex-shrink-0 text-primary"></i>
+          <i class="ti ${fileIcon(att.name)} ti-sm flex-shrink-0"></i>
           <span class="text-truncate">${att.name}</span>
         </a>
         <div class="d-flex align-items-center gap-1 flex-shrink-0 ms-2">

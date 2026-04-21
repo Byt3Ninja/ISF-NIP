@@ -465,7 +465,7 @@ $(function () {
                   <button type="button"
                     class="btn btn-sm btn-outline-primary task-review-btn"
                     data-task-id="${data.id}">
-                    {{ __('admin.Review') }} <i class="ti ti-settings ti-xs ms-1"></i>
+                    {{ __('admin.view_submission') }} <i class="ti ti-settings ti-xs ms-1"></i>
                   </button>
                 @endif
               </div>
@@ -478,16 +478,21 @@ $(function () {
            <p class="text-uppercase small fw-bold text-muted mb-3 d-flex align-items-center gap-2">
              <i class="ti ti-paperclip"></i>{{ __('admin.attachments') }}
            </p>
-           <div class="d-flex flex-wrap gap-2">
+           <div class="d-flex flex-column gap-2">
              ${data.attachments.map(file => {
-               const iconClass = getAttachmentIcon(file.type);
-               const sizeKb    = file.size ? (file.size / 1024).toFixed(1) + ' KB' : '';
-               return `<a href="/storage/${file.path}" target="_blank"
-                         class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 waves-effect">
-                         <i class="ti ${iconClass}"></i>
-                         <span>${file.name}</span>
-                         ${sizeKb ? `<small class="text-muted">(${sizeKb})</small>` : ''}
-                       </a>`;
+               const iconClass  = getAttachmentIcon(file.type);
+               const uploadDate = file.created_at ? moment(file.created_at).format('YYYY-MM-DD') : '';
+               return `
+                 <div class="d-flex align-items-center gap-2 border rounded p-2 bg-lighter">
+                   <i class="ti ${iconClass} ti-sm flex-shrink-0"></i>
+                   <span class="text-truncate flex-grow-1 small fw-medium" title="${file.name}">${file.name}</span>
+                   ${uploadDate ? `<small class="text-muted flex-shrink-0">${uploadDate}</small>` : ''}
+                   <a href="/storage/${file.path}" download="${file.name}"
+                      class="btn btn-icon btn-sm btn-text-secondary rounded-circle flex-shrink-0"
+                      title="{{ __('admin.Download') }}">
+                     <i class="ti ti-download ti-xs"></i>
+                   </a>
+                 </div>`;
              }).join('')}
            </div>
          </div>`
