@@ -202,6 +202,14 @@ noted.
 | `UserProvisioner` | Founder user upsert + password generation | `upsertFromImport(array $founderData, int $companyId): array` |
 | `ImporterEmailDispatcher` | Post-commit email dispatch | Credentials vs. Enrolled |
 | `FinancialProjectionService` | Per-year financial row upsert | `upsertYearSeriesFromImport(Company $company, array $data, int $userId)` — `user_id` is required |
+| `HackathonEnrollmentService` | Founder → team-leader enrollment for `Hackathon`-type cycles | `resolveStepId` requires the cycle to have at least one step, otherwise the row fails with a clear message (no cross-cycle fallback) |
+
+**Company address handling.** `companies.address_en` and
+`companies.address_ar` are nullable as of migration
+`2026_04_21_042923_make_companies_address_nullable.php`. When the CSV
+`address` cell is blank, `RowImporter` writes `NULL` rather than a
+placeholder string. Downstream consumers should treat the columns as
+optional.
 
 Canonical (non-importer) services extended during the epic:
 
