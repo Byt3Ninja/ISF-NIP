@@ -5001,6 +5001,17 @@
                 ]
             },
             {
+                "name": "company.addCompanyAlumniBulk",
+                "description": " Add Bulk Alumni to Company",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
                 "name": "company.alumni_view",
                 "description": " View company program details (alumni)",
                 "guard_name": "web",
@@ -6371,7 +6382,7 @@
                     "subadmin",
                     "registered"
                 ]
-             }
+            }
         ]
     },
     {
