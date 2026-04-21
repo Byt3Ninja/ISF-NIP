@@ -222,6 +222,10 @@
                 max: 64,
                 message: @json(__('settings.api_key_too_long')),
               },
+              regexp: {
+                regexp: /^re_[a-zA-Z0-9_]{10,}$/,
+                message: @json(__('settings.invalid_resend_api_key_format') ?? 'Invalid API key format. Resend API keys must start with "re_" followed by at least 10 alphanumeric characters.'),
+              },
             },
           },
         },

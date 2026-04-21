@@ -94,34 +94,69 @@
   </div>
 </div>
 
+@push('scripts')
 <script>
 function toggleOrgEmailProvider(value) {
   document.getElementById('org-smtp-fields').style.display = value === 'smtp' ? '' : 'none';
   document.getElementById('org-resend-fields').style.display = value === 'resend' ? '' : 'none';
 }
 
+function validateResendApiKey(apiKey) {
+  if (!apiKey) {
+    return @json(__('settings.api_key_required'));
+  }
+
+  if (!apiKey.startsWith('re_')) {
+    return @json(__('settings.invalid_resend_api_key_format') ?? 'Invalid API key format. Resend API keys must start with "re_".');
+  }
+
+  const keyBody = apiKey.substring(3);
+
+  if (keyBody.length < 10) {
+    return @json(__('settings.resend_api_key_too_short') ?? 'API key is too short. Please enter a valid Resend API key.');
+  }
+
+  if (!/^[a-zA-Z0-9_]+$/.test(keyBody)) {
+    return @json(__('settings.resend_api_key_invalid_chars') ?? 'API key contains invalid characters. Only letters, numbers, and underscores are allowed after "re_".');
+  }
+
+  return null;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   const resendForm = document.getElementById('orgResendForm');
   if (!resendForm) return;
 
+  // Live validation: clear error state as the user types a valid key
+  const apiKeyInput = document.getElementById('org_resend_api_key');
+  const errorDiv = document.getElementById('orgResendApiKeyError');
+
+  apiKeyInput.addEventListener('input', function() {
+    const validationError = validateResendApiKey(this.value.trim());
+    if (!validationError) {
+      this.classList.remove('is-invalid');
+      errorDiv.textContent = '';
+    }
+  });
+
   resendForm.addEventListener('submit', function(e) {
     e.preventDefault();
 
-    const apiKeyInput = document.getElementById('org_resend_api_key');
     const apiKey = apiKeyInput.value.trim();
     const btn = document.getElementById('orgResendSaveBtn');
     const btnSpinner = document.getElementById('orgResendBtnSpinner');
     const statusMsg = document.getElementById('orgResendStatusMessage');
-    const errorDiv = document.getElementById('orgResendApiKeyError');
 
     // Reset
     apiKeyInput.classList.remove('is-invalid');
     errorDiv.textContent = '';
     statusMsg.style.display = 'none';
 
-    if (!apiKey) {
+    // Client-side validation — prevent server request if key is invalid
+    const validationError = validateResendApiKey(apiKey);
+    if (validationError) {
       apiKeyInput.classList.add('is-invalid');
-      errorDiv.textContent = @json(__('settings.api_key_required'));
+      errorDiv.textContent = validationError;
       return;
     }
 
@@ -171,3 +206,4 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
+@endpush
