@@ -30,7 +30,7 @@ class RouteServiceProvider extends ServiceProvider
         });
 
         RateLimiter::for('importer-upload', function (Request $request) {
-            return Limit::perHour(10)->by(optional($request->user())->id ?: $request->ip());
+            return Limit::perHour(60)->by(optional($request->user())->id ?: $request->ip());
         });
 
         RateLimiter::for('importer-general', function (Request $request) {
