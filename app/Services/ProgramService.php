@@ -3,7 +3,9 @@ namespace App\Services;
 
 use App\User;
 use App\Company;
+use App\Cycle;
 use App\Traits\ApiResponder;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\ProgramRepository;
 use Illuminate\Support\Facades\Storage;
@@ -160,5 +162,46 @@ public function getProgramStartups($programId, $search = null, $page = 1, $limit
 
     return $query->paginate($limit, ['*'], 'page', $page);
 }
+
+    /**
+     * Idempotent program resolver for the importer.
+     *
+     * Match rules (spec GV-2081):
+     *   - Same (title ci, type, organization_id) with same start+end → reuse.
+     *   - Same (title ci, type, organization_id) with different dates → create a new cycle
+     *     (accepted conflict warning path; the existing one is NOT mutated).
+     *   - Not found → create.
+     *
+     * $data: ['title'=>string,'type'=>string,'start'=>'Y-m-d','end'=>'Y-m-d']
+     */
+    public function findOrCreateForImport(int $orgId, array $data): Cycle
+    {
+        $title = trim($data['title']);
+        $type  = trim($data['type']);
+        $start = $data['start'];
+        $end   = $data['end'];
+
+        $existing = Cycle::query()
+            ->whereRaw('LOWER(title) = ?', [mb_strtolower($title, 'UTF-8')])
+            ->where('type', $type)
+            ->where('organization_id', $orgId)
+            ->get();
+
+        foreach ($existing as $cyc) {
+            $cs = $cyc->start ? Carbon::parse($cyc->start)->toDateString() : null;
+            $ce = $cyc->end   ? Carbon::parse($cyc->end)->toDateString()   : null;
+            if ($cs === $start && $ce === $end) {
+                return $cyc;
+            }
+        }
+
+        return Cycle::create([
+            'title'           => $title,
+            'type'            => $type,
+            'start'           => $start,
+            'end'             => $end,
+            'organization_id' => $orgId,
+        ]);
+    }
 
 }
