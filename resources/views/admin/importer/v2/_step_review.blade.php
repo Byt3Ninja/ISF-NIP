@@ -42,4 +42,39 @@
             {{ __('importer.ui.actions.start_import') }}
         </button>
     </div>
+
+    <div id="importer-result" class="mt-4 d-none">
+        <div class="alert" role="status" id="importer-result-banner"></div>
+        <div class="card">
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-3">
+                        <div class="small text-muted">Processed</div>
+                        <div id="importer-result-processed" class="h5"></div>
+                    </div>
+                    <div class="col-3">
+                        <div class="small text-muted">Imported</div>
+                        <div id="importer-result-imported" class="h5 text-success"></div>
+                    </div>
+                    <div class="col-3">
+                        <div class="small text-muted">Skipped</div>
+                        <div id="importer-result-skipped" class="h5 text-warning"></div>
+                    </div>
+                    <div class="col-3">
+                        <div class="small text-muted">Failed</div>
+                        <div id="importer-result-failed" class="h5 text-danger"></div>
+                    </div>
+                </div>
+                <details class="mt-3">
+                    <summary>Details</summary>
+                    <ul id="importer-result-list" class="mt-2 small"></ul>
+                </details>
+                <div class="mt-3">
+                    <button type="button" id="importer-start-new" class="btn btn-outline-primary">
+                        {{ __('importer.ui.actions.start_new') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>

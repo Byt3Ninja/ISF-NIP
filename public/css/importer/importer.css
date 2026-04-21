@@ -68,3 +68,8 @@
 .importer-v2 .is-invalid ~ .invalid-feedback.d-block {
     display: block !important;
 }
+
+/* PR 7 — result panel */
+.importer-v2 #importer-result .card-body .h5 {
+    margin-bottom: 0;
+}

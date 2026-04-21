@@ -121,8 +121,78 @@
             }
             orgSelect.classList.remove('is-invalid');
 
-            // PR 7 will call the execute endpoint here.
-            alert('Start Import hooks the execute endpoint in PR 7.');
+            const uuid = state.getActive();
+            if (!uuid) return;
+
+            startBtn.disabled = true;
+            try {
+                const resp = await fetch(routes.execute + '/' + uuid + '/execute', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrf,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ organization_id: orgId, accepted_warnings: true })
+                });
+                const body = await resp.json();
+                if (!resp.ok || !body.success) {
+                    const msg = (body && body.errors && body.errors[0])
+                        ? (t.locale === 'ar' ? body.errors[0].message_ar : body.errors[0].message_en)
+                        : 'Error';
+                    alert(msg);
+                    return;
+                }
+                renderResult(body.data);
+            } catch (e) {
+                alert(e.message || 'Import failed');
+            } finally {
+                startBtn.disabled = false;
+            }
+        });
+    }
+
+    function renderResult(data) {
+        const panel = document.getElementById('importer-result');
+        if (!panel) return;
+        panel.classList.remove('d-none');
+
+        const banner = document.getElementById('importer-result-banner');
+        const totals = data.totals || {};
+        const cls = (totals.failed === 0 && totals.skipped === 0)
+            ? 'alert-success'
+            : (totals.imported === 0 ? 'alert-danger' : 'alert-warning');
+        banner.className = 'alert ' + cls;
+        banner.textContent = t.locale === 'ar' ? data.status_message_ar : data.status_message_en;
+
+        document.getElementById('importer-result-processed').textContent = totals.processed || 0;
+        document.getElementById('importer-result-imported').textContent  = totals.imported  || 0;
+        document.getElementById('importer-result-skipped').textContent   = totals.skipped   || 0;
+        document.getElementById('importer-result-failed').textContent    = totals.failed    || 0;
+
+        const list = document.getElementById('importer-result-list');
+        const rows = [].concat(data.failed_rows || [], data.skipped_rows || []);
+        list.innerHTML = rows.map(function (r) {
+            const msg = t.locale === 'ar' ? r.reason_ar : r.reason_en;
+            return '<li>Row ' + r.row + ': ' + escapeHtml(msg) + '</li>';
+        }).join('');
+    }
+
+    const startNewBtn = document.getElementById('importer-start-new');
+    if (startNewBtn) {
+        startNewBtn.addEventListener('click', async function () {
+            const uuid = state.getActive();
+            if (uuid) {
+                try {
+                    await fetch(routes.discardSession + '/' + uuid, {
+                        method: 'DELETE',
+                        headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' }
+                    });
+                } catch (e) { /* ignore */ }
+                state.clear && state.clear(uuid);
+                state.clearActive && state.clearActive();
+            }
+            window.location.reload();
         });
     }
 
