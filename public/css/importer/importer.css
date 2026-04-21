@@ -52,3 +52,19 @@
 .importer-v2 .modal-dialog-scrollable .modal-body {
     max-height: 60vh;
 }
+
+.importer-v2 .importer-review-groups .card-header {
+    background: #f8f9fa;
+    text-transform: capitalize;
+}
+.importer-v2 .importer-preview-table th {
+    background: #eef5ff;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.importer-v2 .importer-preview-table td {
+    vertical-align: top;
+}
+.importer-v2 .is-invalid ~ .invalid-feedback.d-block {
+    display: block !important;
+}

@@ -309,7 +309,13 @@
         state.save(uuid, saved);
 
         if (window.jQuery) { window.jQuery('#importer-conflicts-modal').modal('hide'); }
-        alert('Conflicts accepted. Review step arrives in PR 6.');
+
+        // Advance to Step 3
+        document.getElementById('importer-step-mapping').classList.add('d-none');
+        document.getElementById('importer-step-review').classList.remove('d-none');
+        if (window.importerReview && window.importerReview.enter) {
+            await window.importerReview.enter();
+        }
     }
 
     function clearRowErrors() {
