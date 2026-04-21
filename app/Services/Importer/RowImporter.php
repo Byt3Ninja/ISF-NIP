@@ -193,7 +193,7 @@ class RowImporter
             'forecast_revenue_y1'          => $row['forecast_revenue_y1']          ?? null,
             'forecast_revenue_y2'          => $row['forecast_revenue_y2']          ?? null,
             'forecast_revenue_y3'          => $row['forecast_revenue_y3']          ?? null,
-        ]);
+        ], $prov['user']->id);
 
         return [
             'imported'       => true,

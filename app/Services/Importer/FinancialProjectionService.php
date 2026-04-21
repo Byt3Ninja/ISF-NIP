@@ -11,7 +11,7 @@ use Carbon\Carbon;
  */
 class FinancialProjectionService
 {
-    public function upsertYearSeriesFromImport(Company $company, array $data): void
+    public function upsertYearSeriesFromImport(Company $company, array $data, int $userId): void
     {
         $currency = $this->resolveCurrency($data);
         if ($currency === null) {
@@ -39,6 +39,7 @@ class FinancialProjectionService
             FinancialProjection::updateOrCreate(
                 ['company_id' => $company->id, 'year' => $year],
                 [
+                    'user_id'        => $userId,
                     'currency'       => $currency,
                     'ebit'           => $ebit ?? 0,
                     'revenues'       => $rev  ?? 0,
