@@ -64,8 +64,8 @@ window.KanbanConfig = {
     passTask:      '{{ __("admin.pass_task") }}',
     needsRevision: '{{ __("admin.needs_revision") }}',
     pendingReview: '{{ __("admin.pending_review") }}',
-    approved:      '{{ __("admin.approved") }}',
-    rejected:      '{{ __("admin.rejected") }}',
+    approved:      '{{ __("admin.Approved") }}',
+    rejected:      '{{ __("admin.Rejected") }}',
     remove:        '{{ __("admin.Remove") }}',
     download:      '{{ __("admin.Download") }}',
   },
@@ -949,6 +949,7 @@ $(function () {
             window.dt_task.row.add(taskObj);
             window.dt_task.order([[7, 'desc']]).draw();
             toastr.success('{{ __('admin.Task_added_successfully.') }}');
+            setTimeout(() => window.location.reload(), 1500);
           }
 
           bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('addTaskModal')).hide();
