@@ -42,30 +42,52 @@
         resetUi();
     });
 
+    async function ensureSession() {
+        if (activeUuid) return;
+        const r = await fetch(routes.createSession, {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+        });
+        const body = await r.json();
+        if (!r.ok || !body.success) throw body;
+        activeUuid = body.data.session_id;
+        state.setActive(activeUuid);
+    }
+
+    async function uploadTo(uuid, file) {
+        const form = new FormData();
+        form.append('file', file);
+        const up = await fetch(`${routes.uploadFile}/${uuid}/file`, {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+            body: form,
+        });
+        return { status: up.status, body: await up.json() };
+    }
+
+    function isStaleSession(status, body) {
+        if (status !== 409 && status !== 404) return false;
+        const errs = body && body.errors ? body.errors : [];
+        return errs.some(e => e.code === 'invalid_state_transition' || e.code === 'session_not_found');
+    }
+
     async function handleFile(file) {
         clearErrors();
         try {
-            if (!activeUuid) {
-                const r = await fetch(routes.createSession, {
-                    method: 'POST',
-                    headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
-                });
-                const body = await r.json();
-                if (!r.ok || !body.success) throw body;
-                activeUuid = body.data.session_id;
-                state.setActive(activeUuid);
+            await ensureSession();
+
+            let { status, body } = await uploadTo(activeUuid, file);
+
+            // If the cached session is terminal/missing, drop it and retry once with a fresh session.
+            if (isStaleSession(status, body)) {
+                state.clear(activeUuid);
+                state.clearActive();
+                activeUuid = null;
+                await ensureSession();
+                ({ status, body } = await uploadTo(activeUuid, file));
             }
 
-            const form = new FormData();
-            form.append('file', file);
-            const up = await fetch(`${routes.uploadFile}/${activeUuid}/file`, {
-                method: 'POST',
-                headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
-                body: form,
-            });
-            const body = await up.json();
-
-            if (!up.ok || !body.success) {
+            if (status < 200 || status >= 300 || !body.success) {
                 renderErrors(body.errors || [], body.data || {});
                 return;
             }
