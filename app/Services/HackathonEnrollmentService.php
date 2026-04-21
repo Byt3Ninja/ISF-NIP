@@ -109,8 +109,9 @@ class HackathonEnrollmentService
     }
 
     /**
-     * Pick a step linked to the cycle (preferring the first by id) — falls back
-     * to the lowest step id in the table if none are linked.
+     * Pick the lowest-id step linked to the cycle. Refuses to enroll when the
+     * cycle has no steps of its own — attaching a hackathon team to a step
+     * that belongs to a different cycle is always wrong.
      */
     private function resolveStepId(Cycle $cycle): int
     {
@@ -118,11 +119,9 @@ class HackathonEnrollmentService
         if ($step) {
             return (int) $step->id;
         }
-        $any = DB::table('steps')->orderBy('id')->first();
-        if ($any) {
-            return (int) $any->id;
-        }
-        throw new \RuntimeException('No steps available to attach hackathon team formation');
+        throw new \RuntimeException(
+            "Hackathon cycle #{$cycle->id} has no steps; cannot enroll founders via importer"
+        );
     }
 
     private function uniqueName(string $base): string

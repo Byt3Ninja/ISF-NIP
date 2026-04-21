@@ -102,8 +102,8 @@ class RowImporter
             'country_id'             => $countryId,
             'state_id'               => $stateId,
             'sector'                 => $sectorId,
-            'address_en'             => ($row['address'] ?? '') !== '' ? $row['address'] : ' ',
-            'address_ar'             => ($row['address'] ?? '') !== '' ? $row['address'] : ' ',
+            'address_en'             => trim($row['address'] ?? '') !== '' ? $row['address'] : null,
+            'address_ar'             => trim($row['address'] ?? '') !== '' ? $row['address'] : null,
             'targeted_market'        => $targeted,
             'est_date'               => $this->parseMdy($row['establishment_date'] ?? null),
             'email'                  => $row['company_email'] ?? null,
@@ -120,10 +120,6 @@ class RowImporter
 
         // Drop null values (preserve empty strings for NOT NULL DB columns).
         $companyData = array_filter($companyDataRaw, fn($v) => $v !== null);
-
-        // Ensure NOT NULL columns without DB defaults are present.
-        $companyData['address_en'] = $companyData['address_en'] ?? ' ';
-        $companyData['address_ar'] = $companyData['address_ar'] ?? ' ';
 
         $company = $this->companyService->upsertFromImport($companyData);
 

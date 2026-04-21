@@ -8,6 +8,7 @@ use App\Organization;
 use App\Services\HackathonEnrollmentService;
 use App\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class HackathonEnrollmentServiceTest extends TestCase
@@ -31,11 +32,20 @@ class HackathonEnrollmentServiceTest extends TestCase
             'organization_id' => $org->id,
         ]);
 
+        // Hackathon cycles must have at least one step for the importer to enroll into.
+        DB::table('steps')->insert([
+            'cycle_id'   => $cycle->id,
+            'title'      => 'Idea Submission',
+            'stype'      => 0,
+            'arr'        => 0,
+            'is_public'  => 0,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
         $company = new Company();
         $company->name_en = 'Team Acme ' . uniqid();
         $company->name_ar = $company->name_en;
-        $company->address_en = ' ';
-        $company->address_ar = ' ';
         $company->save();
 
         $user = User::factory()->create();
