@@ -36,11 +36,17 @@ class ImportOrchestrator
         $this->emailDispatcher  = $emailDispatcher;
     }
 
-    public function run(ImporterSession $session, int $orgId, bool $acceptedWarnings = false): ImporterResult
+    /**
+     * @param int|null $orgId Fallback org from the Step-3 dropdown. Used only for rows
+     *                        whose program can't self-resolve to an existing cycle.
+     * @param array<int>|null $reachableOrgIds Org IDs the user is allowed to write to
+     *                        (Admin = null → no scoping). Used to scope program lookup.
+     */
+    public function run(ImporterSession $session, int $orgId, bool $acceptedWarnings = false, ?array $reachableOrgIds = null): ImporterResult
     {
         $this->svc->transitionTo($session, ImporterSession::STATUS_IMPORTING);
 
-        $org = Organization::findOrFail($orgId);
+        $fallbackOrg = Organization::findOrFail($orgId);
 
         // 1. Re-parse from disk (never trust cached rows).
         $absPath = Storage::disk('importer')->path($session->file_path);
@@ -60,14 +66,15 @@ class ImportOrchestrator
             return $this->emptyResult($rows, 'Re-validation failed at execute time');
         }
 
-        // 3. Re-detect conflicts.
+        // 3. Re-detect conflicts (scoped to fallback org for now; conflicts are advisory).
         $warnings = array_map(
             fn($w) => is_array($w) ? $w : $w->toArray(),
             $this->conflictDetector->detect($rows, $mappings, $orgId)
         );
 
-        // 4. Pre-create unique programs.
+        // 4. Pre-resolve unique programs (per row, may resolve to org other than fallback).
         $programCache = [];
+        $orgCache = [$fallbackOrg->id => $fallbackOrg];
         foreach ($rows as $row) {
             $resolved = $this->resolveRow($row, $mappings);
             $key = strtolower(($resolved['program_name'] ?? '') . ':' . ($resolved['program_type'] ?? ''));
@@ -77,7 +84,7 @@ class ImportOrchestrator
                     'type'  => $resolved['program_type'] ?? '',
                     'start' => $this->mdyToYmd($resolved['program_start_date'] ?? ''),
                     'end'   => $this->mdyToYmd($resolved['program_end_date']   ?? ''),
-                ]);
+                ], $reachableOrgIds);
             }
         }
 
@@ -98,9 +105,12 @@ class ImportOrchestrator
                 continue;
             }
 
+            $rowOrgId = (int) $cycle->organization_id;
+            $rowOrg = $orgCache[$rowOrgId] ?? ($orgCache[$rowOrgId] = Organization::findOrFail($rowOrgId));
+
             try {
-                $result = DB::transaction(function () use ($resolved, $rowNumber, $cycle, $org, $warnings, $acceptedWarnings) {
-                    return $this->rowImporter->import($resolved, $rowNumber, $cycle, $org, $warnings, $acceptedWarnings);
+                $result = DB::transaction(function () use ($resolved, $rowNumber, $cycle, $rowOrg, $warnings, $acceptedWarnings) {
+                    return $this->rowImporter->import($resolved, $rowNumber, $cycle, $rowOrg, $warnings, $acceptedWarnings);
                 });
             } catch (\Throwable $e) {
                 Log::error('Importer row transaction failed', [
@@ -124,6 +134,7 @@ class ImportOrchestrator
                 'was_created' => $result['was_created'],
                 'user'        => $result['user'],
                 'cycle'       => $cycle,
+                'org'         => $rowOrg,
                 'password'    => $result['plain_password'],
             ];
             $imported++;
@@ -135,7 +146,7 @@ class ImportOrchestrator
                 $p['was_created'],
                 $p['user'],
                 $p['cycle'],
-                $org,
+                $p['org'],
                 $p['password']
             );
             if ($mail['status'] !== 'sent') {

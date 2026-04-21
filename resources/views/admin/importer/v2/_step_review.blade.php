@@ -3,16 +3,17 @@
         3. {{ __('importer.ui.step3') }}
     </h5>
 
-    <div class="row g-3">
-        <!-- Organization selector -->
+    <div class="row g-3" id="importer-review-org-row">
+        <!-- Organization selector. Hidden when user has exactly 1 reachable org. -->
         <div class="col-md-6">
             <label for="importer-review-org" class="form-label fw-semibold">
-                {{ __('importer.ui.step3') }}
+                {{ __('importer.ui.org_label') }}
                 <span class="text-danger">*</span>
             </label>
             <select id="importer-review-org" class="form-select">
                 <option value="">—</option>
             </select>
+            <small class="form-text text-muted">{{ __('importer.ui.org_help') }}</small>
             <div id="importer-review-org-error" class="invalid-feedback d-block d-none"></div>
         </div>
     </div>

@@ -89,10 +89,11 @@ class ImportExecutionTest extends TestCase
 
         $this->assertDatabaseHas('companies', ['name_en' => 'Acme Robotics']);
         $this->assertDatabaseHas('users', ['email' => 'alex@example.com']);
+        // The cycle either reuses an exact-match cycle in any reachable org, or is
+        // newly created in the fallback (dropdown) org. Just assert it exists.
         $this->assertDatabaseHas('cycles', [
             'title' => 'Accelerator A',
             'type' => 'General_Program',
-            'organization_id' => $this->org->id,
         ]);
 
         $session = ImporterSession::where('uuid', $uuid)->firstOrFail();

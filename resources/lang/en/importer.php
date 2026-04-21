@@ -102,6 +102,8 @@ return [
         'step1'      => 'Upload CSV File',
         'step2'      => 'Map Columns',
         'step3'      => 'Review & Import',
+        'org_label'  => 'Default Organization',
+        'org_help'   => 'Used only for rows whose program does not match an existing one. If a row\'s program already exists, that program\'s organization is used.',
         'actions'    => [
             'back'         => 'Back',
             'next'         => 'Next',

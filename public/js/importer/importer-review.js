@@ -34,11 +34,14 @@
 
         // Preselect from localStorage if available
         const saved = state.load(uuid) || {};
-        if (saved.organization_id) {
-            orgSelect.value = String(saved.organization_id);
-        } else if (orgs.length === 1) {
+        if (orgs.length === 1) {
+            // Single-org user (e.g., Org Manager): auto-select and hide the dropdown row.
             orgSelect.value = String(orgs[0].id);
             orgSelect.disabled = true;
+            const orgRow = document.getElementById('importer-review-org-row');
+            if (orgRow) orgRow.classList.add('d-none');
+        } else if (saved.organization_id) {
+            orgSelect.value = String(saved.organization_id);
         }
 
         // 2. Render mapping summary

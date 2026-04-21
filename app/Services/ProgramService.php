@@ -166,27 +166,39 @@ public function getProgramStartups($programId, $search = null, $page = 1, $limit
     /**
      * Idempotent program resolver for the importer.
      *
-     * Match rules (spec GV-2081):
-     *   - Same (title ci, type, organization_id) with same start+end → reuse.
-     *   - Same (title ci, type, organization_id) with different dates → create a new cycle
-     *     (accepted conflict warning path; the existing one is NOT mutated).
-     *   - Not found → create.
+     * Resolution rules:
+     *   1. Search cycles by (title ci, type) across ALL orgs reachable to the user.
+     *   2. Exact match (same title+type+start+end) in any reachable org → reuse it
+     *      (the row's program implicitly determines the target org).
+     *   3. Title+type match exists but different dates:
+     *      - one match in a reachable org → create new cycle in that match's org
+     *        (treats the match as the org-anchor; new cohort, same program family).
+     *      - multiple matches across reachable orgs → create new cycle in $fallbackOrgId.
+     *   4. No match anywhere → create new cycle in $fallbackOrgId.
      *
      * $data: ['title'=>string,'type'=>string,'start'=>'Y-m-d','end'=>'Y-m-d']
+     * $fallbackOrgId: dropdown selection — used only when row can't self-resolve.
+     * $reachableOrgIds: orgs the user is allowed to write to (Admin: all → null/[]).
      */
-    public function findOrCreateForImport(int $orgId, array $data): Cycle
+    public function findOrCreateForImport(int $fallbackOrgId, array $data, ?array $reachableOrgIds = null): Cycle
     {
         $title = trim($data['title']);
         $type  = trim($data['type']);
         $start = $data['start'];
         $end   = $data['end'];
 
-        $existing = Cycle::query()
+        $q = Cycle::query()
             ->whereRaw('LOWER(title) = ?', [mb_strtolower($title, 'UTF-8')])
-            ->where('type', $type)
-            ->where('organization_id', $orgId)
-            ->get();
+            ->where('type', $type);
 
+        // null = no scoping (Admin); [] would match nothing → don't apply.
+        if (is_array($reachableOrgIds) && !empty($reachableOrgIds)) {
+            $q->whereIn('organization_id', $reachableOrgIds);
+        }
+
+        $existing = $q->get();
+
+        // Exact-date reuse first.
         foreach ($existing as $cyc) {
             $cs = $cyc->start ? Carbon::parse($cyc->start)->toDateString() : null;
             $ce = $cyc->end   ? Carbon::parse($cyc->end)->toDateString()   : null;
@@ -195,12 +207,15 @@ public function getProgramStartups($programId, $search = null, $page = 1, $limit
             }
         }
 
+        // No exact match → create new cycle in the fallback (dropdown-selected) org.
+        // Different-dates matches in other orgs are treated as different cohorts,
+        // not as anchors for org resolution (they're a different program family).
         return Cycle::create([
             'title'           => $title,
             'type'            => $type,
             'start'           => $start,
             'end'             => $end,
-            'organization_id' => $orgId,
+            'organization_id' => $fallbackOrgId,
         ]);
     }
 

@@ -393,7 +393,9 @@ class ImporterController extends Controller
 
         try {
             $acceptedWarnings = (bool) $request->input('accepted_warnings', false);
-            $result = $orchestrator->run($session, $orgId, $acceptedWarnings);
+            // Admin = no scoping (null); others scoped to their reachable org IDs.
+            $reachableOrgIds = $user->hasRole('Admin') ? null : ($user->organizations_ids ?? []);
+            $result = $orchestrator->run($session, $orgId, $acceptedWarnings, $reachableOrgIds);
 
             $session->refresh();
             $session->import_result = $result->toArray();
