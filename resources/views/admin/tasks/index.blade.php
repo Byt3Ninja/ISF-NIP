@@ -64,8 +64,8 @@ window.KanbanConfig = {
     passTask:      '{{ __("admin.pass_task") }}',
     needsRevision: '{{ __("admin.needs_revision") }}',
     pendingReview: '{{ __("admin.pending_review") }}',
-    approved:      '{{ __("admin.approved") }}',
-    rejected:      '{{ __("admin.rejected") }}',
+    approved:      '{{ __("admin.Approved") }}',
+    rejected:      '{{ __("admin.Rejected") }}',
     remove:        '{{ __("admin.Remove") }}',
     download:      '{{ __("admin.Download") }}',
   },
@@ -244,15 +244,19 @@ $(function () {
       },
       {
         targets: 6, searchable: false, orderable: false,
-        render: (_, __, full) => `
-          <div class="d-flex align-items-center">
-            <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill task-view"><i class="ti ti-eye ti-md"></i></a>
-            <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill task-edit"><i class="ti ti-pencil ti-md"></i></a>
-            <a href="javascript:;" class="btn btn-icon ${full.overallStatus === 'archived' ? 'btn-text-warning' : 'btn-text-secondary'} waves-effect waves-light rounded-pill task-archive">
-              <i class="ti ${full.overallStatus === 'archived' ? 'ti-rotate' : 'ti-archive'} ti-md"></i>
-            </a>
-            ${window.authUser.role != 'Mentor' ? '<a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill delete-record"><i class="ti ti-trash ti-md"></i></a>' : ''}
-          </div>`
+        render: (_, __, full) => {
+          const isArchived = full.overallStatus === 'archived';
+          const canModify = !isArchived || !['Admin', 'Sub-Admin', 'Mentor', 'organizationManager'].includes(window.authUser.role);
+          return `
+            <div class="d-flex align-items-center">
+              <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill task-view"><i class="ti ti-eye ti-md"></i></a>
+              ${canModify ? '<a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill task-edit"><i class="ti ti-pencil ti-md"></i></a>' : ''}
+              <a href="javascript:;" class="btn btn-icon ${full.overallStatus === 'archived' ? 'btn-text-warning' : 'btn-text-secondary'} waves-effect waves-light rounded-pill task-archive">
+                <i class="ti ${full.overallStatus === 'archived' ? 'ti-rotate' : 'ti-archive'} ti-md"></i>
+              </a>
+              ${canModify && window.authUser.role !== 'Mentor' ? '<a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill delete-record"><i class="ti ti-trash ti-md"></i></a>' : ''}
+            </div>`;
+        }
       }
     ],
     order: [[7, 'desc']],
@@ -945,6 +949,7 @@ $(function () {
             window.dt_task.row.add(taskObj);
             window.dt_task.order([[7, 'desc']]).draw();
             toastr.success('{{ __('admin.Task_added_successfully.') }}');
+            setTimeout(() => window.location.reload(), 1500);
           }
 
           bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('addTaskModal')).hide();
