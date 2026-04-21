@@ -30,13 +30,13 @@ class ImporterRouteScaffoldTest extends TestCase
     {
         $user = User::factory()->create();
         $user->allotRole('Admin');
-        // autoMap is still a scaffold stub until PR 3.
-        $uuid = 'nonexistent-uuid';
+        // execute() is still a scaffold stub until PR 7. We need a real session for
+        // it to reach the stub; create one via the create endpoint.
+        $create = $this->actingAs($user)->postJson('/dashboard/importer/v2/sessions');
+        $uuid = $create->json('data.session_id');
+
         $resp = $this->actingAs($user)
-            ->postJson("/dashboard/importer/v2/sessions/{$uuid}/automap");
-        // Will fail with session_not_found (404) before reaching the stub,
-        // so instead pick an endpoint with no uuid lookup: organizations.
-        $resp = $this->actingAs($user)->getJson('/dashboard/importer/v2/organizations');
+            ->postJson("/dashboard/importer/v2/sessions/{$uuid}/execute");
         $resp->assertStatus(501)
              ->assertJsonPath('errors.0.code', 'not_implemented');
     }
