@@ -308,7 +308,30 @@ class ImporterController extends Controller
 
     public function organizations(Request $request): JsonResponse
     {
-        return $this->notImplemented();
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
+        $organizations = collect();
+        if ($user->hasRole('Admin')) {
+            $organizations = \App\Organization::query()->select('id', 'name_en', 'name_ar')->get();
+        } else {
+            $orgIds = $user->organizations_ids ?? [];
+            if (!empty($orgIds)) {
+                $organizations = \App\Organization::query()
+                    ->select('id', 'name_en', 'name_ar')
+                    ->whereIn('id', $orgIds)
+                    ->get();
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'organizations' => $organizations,
+            ],
+        ]);
     }
 
     private function serializeSession(ImporterSession $s): array
