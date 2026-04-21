@@ -191,6 +191,12 @@ return [
             'root' => storage_path('app/service_messages'),
             'visibility' => 'private',
         ],
+
+        'importer' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/importer'),
+            'throw' => false,
+        ],
     ],
 
 ];

@@ -1,0 +1,75 @@
+.importer-v2 .importer-steps li {
+    border-bottom: 2px solid #dee2e6;
+    padding: 0.5rem 0.75rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+.importer-v2 .importer-steps li.active {
+    border-bottom-color: #0d6efd;
+    color: #0d6efd;
+}
+.importer-v2 .importer-drop-zone {
+    cursor: pointer;
+    border-style: dashed !important;
+    transition: background-color .15s;
+}
+.importer-v2 .importer-drop-zone.drag-over {
+    background-color: #eef5ff;
+}
+.importer-v2 #importer-upload-errors ul {
+    margin: 0;
+}
+@media (max-width: 576px) {
+    .importer-v2 .importer-steps {
+        flex-direction: column;
+    }
+}
+
+.importer-v2 .importer-field-row.importer-field-warned select {
+    border-color: #f0ad4e;
+}
+.importer-v2 .importer-field-row label {
+    font-weight: 500;
+}
+.importer-v2 .accordion-button:not(.collapsed) {
+    background: #eef5ff;
+}
+
+.importer-v2 .importer-error-table tr td {
+    vertical-align: top;
+}
+.importer-v2 .importer-error-table tr:not(:last-child) td {
+    border-bottom: 1px solid #f1d7d9;
+}
+.importer-v2 #importer-row-errors {
+    max-height: 420px;
+    overflow-y: auto;
+}
+
+.importer-v2 #importer-conflicts ul li {
+    padding: 0.25rem 0;
+}
+.importer-v2 .modal-dialog-scrollable .modal-body {
+    max-height: 60vh;
+}
+
+.importer-v2 .importer-review-groups .card-header {
+    background: #f8f9fa;
+    text-transform: capitalize;
+}
+.importer-v2 .importer-preview-table th {
+    background: #eef5ff;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.importer-v2 .importer-preview-table td {
+    vertical-align: top;
+}
+.importer-v2 .is-invalid ~ .invalid-feedback.d-block {
+    display: block !important;
+}
+
+/* PR 7 — result panel */
+.importer-v2 #importer-result .card-body .h5 {
+    margin-bottom: 0;
+}

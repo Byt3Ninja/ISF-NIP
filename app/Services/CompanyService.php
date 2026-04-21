@@ -341,5 +341,36 @@ public function findCompanyRelation($companyId)
     return $companyRelationRet;
 }
 
+    /**
+     * Pure persistence path for importer — no HTTP/Request/Auth coupling.
+     * Matches by name_en (case-insensitive).
+     */
+    public function upsertFromImport(array $data, ?int $existingCompanyId = null): Company
+    {
+        if ($existingCompanyId) {
+            $company = Company::findOrFail($existingCompanyId);
+            $this->companyRepository->update($company, $data);
+            return $company->fresh();
+        }
+
+        $nameEn = trim($data['name_en'] ?? '');
+        if ($nameEn === '') {
+            throw new \InvalidArgumentException('upsertFromImport requires name_en');
+        }
+
+        $company = Company::query()
+            ->whereRaw('LOWER(name_en) = ?', [mb_strtolower($nameEn, 'UTF-8')])
+            ->first();
+
+        if ($company) {
+            $this->companyRepository->update($company, $data);
+            return $company->fresh();
+        }
+
+        $new = new Company($data);
+        $this->companyRepository->save($new);
+        return $new->fresh();
+    }
+
 }
 
