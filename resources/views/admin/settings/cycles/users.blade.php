@@ -485,6 +485,7 @@
         exportNotSuccess:         '{{ __("cycles.export_Notsuccess") }}',
         markAlumniConfirmation:   '{{ __("startup.mark_alumni_confirmation") }}',
         markAlumniConfirmBulk:    '{{ __("startup.mark_alumni_confirmation_bulk") }}',
+        notOnFinalScreeningTooltip: '{{ __("startup.not_on_final_screening_tooltip") }}',
         deleteProgram: '{{ __("cycles.delete_program") }}',
         programDeleted: '{{ __("cycles.program_delete_success") }}',
         yesDelete: '{{ __("admin.DYes") }}',

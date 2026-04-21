@@ -60,9 +60,12 @@ function initDataTable() {
    Selection / Tags
 ───────────────────────────────────────────── */
 function updateSelectedTags() {
-  const count = Object.keys(selectedStartups).length;
+  const selectedValues = Object.values(selectedStartups);
+  const count = selectedValues.length;
   const tagsEl = $('#selectedStartupsTags');
-  const bulkAlumniOk = Object.values(selectedStartups).some(d => d.atAlumniStep && !d.isAlumni);
+  
+  // Requirement: enabled only when ALL selected are on Final Screening step
+  const allEligible = count > 0 && selectedValues.every(d => d.atAlumniStep && !d.isAlumni);
 
   $('#selected-count').text(count);
   $('#selectedCount').text(count);
@@ -82,7 +85,22 @@ function updateSelectedTags() {
     });
 
     $('#bulkChangeStepBtn').prop('disabled', false);
-    $('#bulkMarkAlumniBtn').prop('disabled', !bulkAlumniOk);
+    
+    const alumniBtn = $('#bulkMarkAlumniBtn');
+    alumniBtn.prop('disabled', !allEligible);
+    
+    // Tooltip logic
+    if (count > 0 && !allEligible) {
+      alumniBtn.attr('title', i18n.notOnFinalScreeningTooltip || 'Only startups on Final Screening step can be graduated.');
+      if (typeof $.fn.tooltip === 'function') {
+        alumniBtn.tooltip('dispose').tooltip();
+      }
+    } else {
+      alumniBtn.removeAttr('title');
+      if (typeof $.fn.tooltip === 'function') {
+        alumniBtn.tooltip('dispose');
+      }
+    }
   } else {
     $('#clearAllSelections').addClass('d-none');
     tagsEl.empty().append(
@@ -94,9 +112,27 @@ function updateSelectedTags() {
 }
 
 function bindSelectionEvents() {
-  // Select-all
+  // Select-all (Across pages)
   $('.checkAll').on('change', function () {
-    $('.chboxcyclesReg').prop('checked', $(this).prop('checked')).trigger('change');
+    const isChecked = $(this).prop('checked');
+    const allCheckboxes = table.$('.chboxcyclesReg', { search: 'applied' });
+    allCheckboxes.prop('checked', isChecked);
+    
+    allCheckboxes.each(function() {
+      const $chk = $(this);
+      const id = $chk.data('company-id');
+      if (isChecked) {
+        selectedStartups[id] = {
+          name: $chk.data('company-name'),
+          userId: $chk.data('user-id'),
+          atAlumniStep: $chk.data('at-alumni-step') == '1',
+          isAlumni: $chk.data('is-alumni') == '1'
+        };
+      } else {
+        delete selectedStartups[id];
+      }
+    });
+    updateSelectedTags();
   });
 
   // Individual rows
@@ -247,6 +283,24 @@ function bindMarkAlumniBulk() {
 function doMarkAlumni(companyIds, companyName, isBulk) {
   const fire = (ids) => {
     ajaxSetup();
+    if (isBulk) {
+      $.ajax({
+        type: 'POST',
+        url: '/dashboard/AddCompanyalumniBulk',
+        data: { company_ids: ids }
+      }).done(res => {
+        releaseSuccess(res.message || i18n.markAlumniSuccess);
+        setTimeout(() => location.reload(), 1000);
+      }).fail(xhr => {
+        if (xhr.status === 422 && xhr.responseJSON?.message) {
+          releaseWarningAlert({ title: i18n.warning, message: xhr.responseJSON.message });
+        } else {
+          releaseFailure(i18n.markAlumniError);
+        }
+      });
+      return;
+    }
+
     const requests = ids.map(id =>
       $.ajax({ type: 'POST', url: `/dashboard/AddCompanyalumni/${id}` })
         .then(() => ({ id, ok: true }), xhr => ({ id, ok: false, xhr }))
@@ -260,12 +314,12 @@ function doMarkAlumni(companyIds, companyName, isBulk) {
         const firstFail = failed[0];
 
         if (firstFail.xhr.status === 422 && firstFail.xhr.responseJSON?.message) {
-          releaseWarningAlert({ title: i18n.warning, message: firstFail.xhr.responseJSON.message});
+          releaseWarningAlert({ title: i18n.warning, message: firstFail.xhr.responseJSON.message });
           if (results.some(r => r.ok)) location.reload();
         } else {
           releaseFailure(i18n.markAlumniError);
           if (results.some(r => r.ok)) {
-            setTimeout(location.reload(), 1000);
+            setTimeout(() => location.reload(), 1000);
           }
         }
       }
@@ -273,12 +327,10 @@ function doMarkAlumni(companyIds, companyName, isBulk) {
   };
 
   if (isBulk) {
-    // Confirmation already shown in bindMarkAlumniBulk — fire directly
     fire(companyIds);
     return;
   }
 
-  // Single-row: show confirmation Swal first
   releaseWarningAlert({
     title: i18n.markAlumniTitle,
     message: i18n.markAlumniConfirmation,
