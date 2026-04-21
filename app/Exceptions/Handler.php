@@ -47,7 +47,7 @@ class Handler extends ExceptionHandler
         });
 
         $this->renderable(function (\App\Services\Importer\Exceptions\SessionNotFoundException $e, $request) {
-            if ($request->expectsJson() || $request->is('api/*') || $request->is('dashboard/importer/v2/*')) {
+            if ($request->expectsJson() || $request->is('api/*') || $request->is('dashboard/importer/*')) {
                 return response()->json([
                     'success' => false,
                     'errors'  => [[
@@ -60,7 +60,7 @@ class Handler extends ExceptionHandler
         });
 
         $this->renderable(function (\App\Services\Importer\Exceptions\InvalidStateTransitionException $e, $request) {
-            if ($request->expectsJson() || $request->is('api/*') || $request->is('dashboard/importer/v2/*')) {
+            if ($request->expectsJson() || $request->is('api/*') || $request->is('dashboard/importer/*')) {
                 return response()->json([
                     'success' => false,
                     'errors'  => [[

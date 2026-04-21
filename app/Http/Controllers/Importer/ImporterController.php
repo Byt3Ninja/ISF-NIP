@@ -18,8 +18,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * New importer controller. Methods are stubs in PR 1; they are filled in
- * PR 2–7. Legacy App\Http\Controllers\ImporterController remains untouched.
+ * Importer v2 controller. Owns every importer endpoint as of PR 7 cutover.
+ * Previously routed behind /dashboard/importer/v2; now primary.
  */
 class ImporterController extends Controller
 {

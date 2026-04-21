@@ -8,7 +8,7 @@
         <div class="mb-3">
             <h4 class="fw-bold mb-1">{{ __('importer.ui.title') }}</h4>
             <div class="small text-secondary">
-                <a href="{{ route('importer.v2.template') }}" class="text-primary fw-medium text-decoration-none">
+                <a href="{{ route('importer.template') }}" class="text-primary fw-medium text-decoration-none">
                     {{ __('importer.ui.actions.download') }}
                 </a>
             </div>
@@ -39,17 +39,17 @@
     window.importerI18n     = {!! $i18nJson !!};
     window.importerCsrf     = "{{ csrf_token() }}";
     window.importerRoutes   = {
-        createSession:  "{{ route('importer.v2.sessions.create') }}",
-        showSession:    "{{ url('/dashboard/importer/v2/sessions') }}",    // + /{uuid}
-        uploadFile:     "{{ url('/dashboard/importer/v2/sessions') }}",    // + /{uuid}/file
-        deleteFile:     "{{ url('/dashboard/importer/v2/sessions') }}",    // + /{uuid}/file
-        discardSession: "{{ url('/dashboard/importer/v2/sessions') }}",    // + /{uuid}
-        automap:        "{{ url('/dashboard/importer/v2/sessions') }}",    // + /{uuid}/automap
-        validate:       "{{ url('/dashboard/importer/v2/sessions') }}",    // + /{uuid}/validate
-        conflicts:      "{{ url('/dashboard/importer/v2/sessions') }}",    // + /{uuid}/conflicts
-        organizations:  "{{ route('importer.v2.organizations') }}",
-        preview:        "{{ url('/dashboard/importer/v2/sessions') }}",    // + /{uuid}/preview
-        execute:        "{{ url('/dashboard/importer/v2/sessions') }}",    // + /{uuid}/execute (PR 7)
+        createSession:  "{{ route('importer.sessions.create') }}",
+        showSession:    "{{ url('/dashboard/importer/sessions') }}",    // + /{uuid}
+        uploadFile:     "{{ url('/dashboard/importer/sessions') }}",    // + /{uuid}/file
+        deleteFile:     "{{ url('/dashboard/importer/sessions') }}",    // + /{uuid}/file
+        discardSession: "{{ url('/dashboard/importer/sessions') }}",    // + /{uuid}
+        automap:        "{{ url('/dashboard/importer/sessions') }}",    // + /{uuid}/automap
+        validate:       "{{ url('/dashboard/importer/sessions') }}",    // + /{uuid}/validate
+        conflicts:      "{{ url('/dashboard/importer/sessions') }}",    // + /{uuid}/conflicts
+        organizations:  "{{ route('importer.organizations') }}",
+        preview:        "{{ url('/dashboard/importer/sessions') }}",    // + /{uuid}/preview
+        execute:        "{{ url('/dashboard/importer/sessions') }}",    // + /{uuid}/execute
     };
 </script>
 <script src="{{ asset('js/importer/importer-i18n.js') }}?v={{ filemtime(public_path('js/importer/importer-i18n.js')) }}"></script>

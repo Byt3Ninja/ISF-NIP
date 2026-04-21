@@ -8,7 +8,6 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\GeminiController;
 use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\ProjectController;
-use App\Http\Controllers\ImporterController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\ClientCompanyController;
 use App\Http\Controllers\HackathonController;
@@ -988,10 +987,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('reports/show-survey/{id}', 'ReportController@surveyReport');
     //================> End Reports <============
 
-    Route::get('/importer', [ImporterController::class, 'index'])->name('importer.index');
-    Route::post('/importer/upload', [ImporterController::class, 'upload'])->name('importer.upload');
-    Route::post('/importer/import', [ImporterController::class, 'import'])->name('importer.import');
-    Route::get('/importer/organizations', [ImporterController::class, 'getOrganizations'])->name('importer.organizations');
+    // Legacy importer routes removed in PR 7 cutover. New routes live below
+    // under prefix dashboard/importer (see Importer\ImporterController group).
 
 
     Route::post('/notifications/mark-all-read', function () {
@@ -1013,8 +1010,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     });
 });
 
-Route::middleware(['auth'])->prefix('dashboard/importer/v2')->name('importer.v2.')->group(function () {
-    Route::get('/',                                       [\App\Http\Controllers\Importer\ImporterController::class, 'showWizard'])->name('wizard');
+Route::middleware(['auth'])->prefix('dashboard/importer')->name('importer.')->group(function () {
+    Route::get('/',                                       [\App\Http\Controllers\Importer\ImporterController::class, 'showWizard'])->name('index');
     Route::get('/template',                               [\App\Http\Controllers\Importer\ImporterController::class, 'downloadTemplate'])->name('template');
     Route::get('/schema',                                 [\App\Http\Controllers\Importer\ImporterController::class, 'schema'])->name('schema');
     Route::get('/organizations',                          [\App\Http\Controllers\Importer\ImporterController::class, 'organizations'])->name('organizations');

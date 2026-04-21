@@ -29,14 +29,14 @@ class ReviewEndpointsTest extends TestCase
 
     private function completeUpToStep3(User $user): string
     {
-        $create = $this->actingAs($user)->postJson('/dashboard/importer/v2/sessions');
+        $create = $this->actingAs($user)->postJson('/dashboard/importer/sessions');
         $uuid   = $create->json('data.session_id');
         $path   = __DIR__ . '/../../Fixtures/Importer/valid_minimal.csv';
         $file   = new UploadedFile($path, 'valid_minimal.csv', 'text/csv', null, true);
-        $this->actingAs($user)->post("/dashboard/importer/v2/sessions/{$uuid}/file", ['file' => $file], ['Accept' => 'application/json'])->assertStatus(200);
+        $this->actingAs($user)->post("/dashboard/importer/sessions/{$uuid}/file", ['file' => $file], ['Accept' => 'application/json'])->assertStatus(200);
 
-        $maps = $this->actingAs($user)->postJson("/dashboard/importer/v2/sessions/{$uuid}/automap")->json('data.mappings');
-        $this->actingAs($user)->postJson("/dashboard/importer/v2/sessions/{$uuid}/validate", ['mappings' => $maps])->assertJsonPath('data.valid', true);
+        $maps = $this->actingAs($user)->postJson("/dashboard/importer/sessions/{$uuid}/automap")->json('data.mappings');
+        $this->actingAs($user)->postJson("/dashboard/importer/sessions/{$uuid}/validate", ['mappings' => $maps])->assertJsonPath('data.valid', true);
         return $uuid;
     }
 
@@ -47,7 +47,7 @@ class ReviewEndpointsTest extends TestCase
         Organization::create(['name_en' => 'Alpha', 'name_ar' => 'ألفا', 'user_id' => $admin->id]);
         Organization::create(['name_en' => 'Beta',  'name_ar' => 'بيتا', 'user_id' => $admin->id]);
 
-        $resp = $this->actingAs($admin)->getJson('/dashboard/importer/v2/organizations');
+        $resp = $this->actingAs($admin)->getJson('/dashboard/importer/organizations');
         $resp->assertStatus(200)->assertJsonPath('success', true);
         $orgs = $resp->json('data.organizations');
         $this->assertGreaterThanOrEqual(2, count($orgs));
@@ -58,7 +58,7 @@ class ReviewEndpointsTest extends TestCase
         $user = $this->makeAdmin();
         $uuid = $this->completeUpToStep3($user);
 
-        $resp = $this->actingAs($user)->getJson("/dashboard/importer/v2/sessions/{$uuid}/preview?rows=3");
+        $resp = $this->actingAs($user)->getJson("/dashboard/importer/sessions/{$uuid}/preview?rows=3");
         $resp->assertStatus(200)
              ->assertJsonPath('success', true);
 
@@ -75,10 +75,10 @@ class ReviewEndpointsTest extends TestCase
     public function test_preview_requires_validated_or_later(): void
     {
         $user = $this->makeAdmin();
-        $create = $this->actingAs($user)->postJson('/dashboard/importer/v2/sessions');
+        $create = $this->actingAs($user)->postJson('/dashboard/importer/sessions');
         $uuid   = $create->json('data.session_id');
 
-        $resp = $this->actingAs($user)->getJson("/dashboard/importer/v2/sessions/{$uuid}/preview");
+        $resp = $this->actingAs($user)->getJson("/dashboard/importer/sessions/{$uuid}/preview");
         $resp->assertStatus(409);
     }
 
@@ -88,7 +88,7 @@ class ReviewEndpointsTest extends TestCase
         $intruder = $this->makeAdmin();
         $uuid = $this->completeUpToStep3($owner);
 
-        $resp = $this->actingAs($intruder)->getJson("/dashboard/importer/v2/sessions/{$uuid}/preview");
+        $resp = $this->actingAs($intruder)->getJson("/dashboard/importer/sessions/{$uuid}/preview");
         $resp->assertStatus(404);
     }
 }

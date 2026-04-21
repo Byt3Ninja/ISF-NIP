@@ -43,26 +43,26 @@ class ImportExecutionTest extends TestCase
 
     private function runFullFlow(string $fixture = 'valid_minimal.csv'): string
     {
-        $create = $this->actingAs($this->admin)->postJson('/dashboard/importer/v2/sessions');
+        $create = $this->actingAs($this->admin)->postJson('/dashboard/importer/sessions');
         $uuid = $create->json('data.session_id');
 
         $this->actingAs($this->admin)->post(
-            "/dashboard/importer/v2/sessions/{$uuid}/file",
+            "/dashboard/importer/sessions/{$uuid}/file",
             ['file' => $this->fixture($fixture)],
             ['Accept' => 'application/json']
         )->assertStatus(200);
 
         $maps = $this->actingAs($this->admin)
-            ->postJson("/dashboard/importer/v2/sessions/{$uuid}/automap")
+            ->postJson("/dashboard/importer/sessions/{$uuid}/automap")
             ->json('data.mappings');
 
         $this->actingAs($this->admin)
-            ->postJson("/dashboard/importer/v2/sessions/{$uuid}/validate", ['mappings' => $maps])
+            ->postJson("/dashboard/importer/sessions/{$uuid}/validate", ['mappings' => $maps])
             ->assertJsonPath('data.valid', true);
 
         // Conflicts check (may auto-transition to conflicts_reviewed)
         $this->actingAs($this->admin)
-            ->postJson("/dashboard/importer/v2/sessions/{$uuid}/conflicts", [
+            ->postJson("/dashboard/importer/sessions/{$uuid}/conflicts", [
                 'organization_id' => $this->org->id,
                 'accept' => true,
             ])->assertStatus(200);
@@ -75,7 +75,7 @@ class ImportExecutionTest extends TestCase
         $uuid = $this->runFullFlow();
 
         $resp = $this->actingAs($this->admin)
-            ->postJson("/dashboard/importer/v2/sessions/{$uuid}/execute", [
+            ->postJson("/dashboard/importer/sessions/{$uuid}/execute", [
                 'organization_id'   => $this->org->id,
                 'accepted_warnings' => true,
             ]);
@@ -104,7 +104,7 @@ class ImportExecutionTest extends TestCase
     {
         $mgr = User::factory()->create();
         $mgr->allotRole('organizationManager');
-        $create = $this->actingAs($mgr)->postJson('/dashboard/importer/v2/sessions');
+        $create = $this->actingAs($mgr)->postJson('/dashboard/importer/sessions');
         $uuid = $create->json('data.session_id');
 
         // If the user lacks even the ability to create sessions, that's a 401 —
@@ -115,7 +115,7 @@ class ImportExecutionTest extends TestCase
         }
 
         $resp = $this->actingAs($mgr)
-            ->postJson("/dashboard/importer/v2/sessions/{$uuid}/execute", [
+            ->postJson("/dashboard/importer/sessions/{$uuid}/execute", [
                 'organization_id' => $this->org->id,
             ]);
         $this->assertContains($resp->status(), [401, 403, 409]);
@@ -123,11 +123,11 @@ class ImportExecutionTest extends TestCase
 
     public function test_execute_requires_validated_state(): void
     {
-        $create = $this->actingAs($this->admin)->postJson('/dashboard/importer/v2/sessions');
+        $create = $this->actingAs($this->admin)->postJson('/dashboard/importer/sessions');
         $uuid = $create->json('data.session_id');
 
         $resp = $this->actingAs($this->admin)
-            ->postJson("/dashboard/importer/v2/sessions/{$uuid}/execute", [
+            ->postJson("/dashboard/importer/sessions/{$uuid}/execute", [
                 'organization_id' => $this->org->id,
             ]);
         $resp->assertStatus(409);

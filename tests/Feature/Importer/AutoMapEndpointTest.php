@@ -27,12 +27,12 @@ class AutoMapEndpointTest extends TestCase
 
     private function uploadAndGetUuid(User $user, string $fixture = 'valid_minimal.csv'): string
     {
-        $create = $this->actingAs($user)->postJson('/dashboard/importer/v2/sessions');
+        $create = $this->actingAs($user)->postJson('/dashboard/importer/sessions');
         $uuid   = $create->json('data.session_id');
         $path   = __DIR__ . '/../../Fixtures/Importer/' . $fixture;
         $file   = new UploadedFile($path, $fixture, 'text/csv', null, true);
         $this->actingAs($user)->post(
-            "/dashboard/importer/v2/sessions/{$uuid}/file",
+            "/dashboard/importer/sessions/{$uuid}/file",
             ['file' => $file],
             ['Accept' => 'application/json']
         )->assertStatus(200);
@@ -44,7 +44,7 @@ class AutoMapEndpointTest extends TestCase
         $user = $this->makeUser();
         $uuid = $this->uploadAndGetUuid($user);
 
-        $resp = $this->actingAs($user)->postJson("/dashboard/importer/v2/sessions/{$uuid}/automap");
+        $resp = $this->actingAs($user)->postJson("/dashboard/importer/sessions/{$uuid}/automap");
 
         $resp->assertStatus(200)
              ->assertJsonPath('success', true)
@@ -68,16 +68,16 @@ class AutoMapEndpointTest extends TestCase
         $tmp = $tmp . '.csv';
         file_put_contents($tmp, "Widget,Gadget,Gizmo\n1,2,3\n");
 
-        $create = $this->actingAs($user)->postJson('/dashboard/importer/v2/sessions');
+        $create = $this->actingAs($user)->postJson('/dashboard/importer/sessions');
         $uuid   = $create->json('data.session_id');
         $file   = new UploadedFile($tmp, 'nomatch.csv', 'text/csv', null, true);
         $this->actingAs($user)->post(
-            "/dashboard/importer/v2/sessions/{$uuid}/file",
+            "/dashboard/importer/sessions/{$uuid}/file",
             ['file' => $file],
             ['Accept' => 'application/json']
         )->assertStatus(200);
 
-        $resp = $this->actingAs($user)->postJson("/dashboard/importer/v2/sessions/{$uuid}/automap");
+        $resp = $this->actingAs($user)->postJson("/dashboard/importer/sessions/{$uuid}/automap");
         $resp->assertStatus(200)
              ->assertJsonPath('data.matched_count', 0)
              ->assertJsonPath('data.message_en', __('importer.ui.automap_messages.unmatched', [], 'en'));
@@ -88,10 +88,10 @@ class AutoMapEndpointTest extends TestCase
     public function test_requires_uploaded_file(): void
     {
         $user = $this->makeUser();
-        $create = $this->actingAs($user)->postJson('/dashboard/importer/v2/sessions');
+        $create = $this->actingAs($user)->postJson('/dashboard/importer/sessions');
         $uuid   = $create->json('data.session_id');
 
-        $resp = $this->actingAs($user)->postJson("/dashboard/importer/v2/sessions/{$uuid}/automap");
+        $resp = $this->actingAs($user)->postJson("/dashboard/importer/sessions/{$uuid}/automap");
         $resp->assertStatus(409);
     }
 
@@ -101,7 +101,7 @@ class AutoMapEndpointTest extends TestCase
         $intruder = $this->makeUser();
         $uuid = $this->uploadAndGetUuid($owner);
 
-        $resp = $this->actingAs($intruder)->postJson("/dashboard/importer/v2/sessions/{$uuid}/automap");
+        $resp = $this->actingAs($intruder)->postJson("/dashboard/importer/sessions/{$uuid}/automap");
         $resp->assertStatus(404);
     }
 }

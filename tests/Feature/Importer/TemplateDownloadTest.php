@@ -15,7 +15,7 @@ class TemplateDownloadTest extends TestCase
         $user = User::factory()->create();
         $user->allotRole('Admin');
 
-        $resp = $this->actingAs($user)->get('/dashboard/importer/v2/template');
+        $resp = $this->actingAs($user)->get('/dashboard/importer/template');
 
         $resp->assertStatus(200);
         $this->assertSame('text/csv; charset=UTF-8', $resp->headers->get('content-type'));

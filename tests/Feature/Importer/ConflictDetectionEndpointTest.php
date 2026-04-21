@@ -79,21 +79,21 @@ class ConflictDetectionEndpointTest extends TestCase
 
     private function uploadAndValidate(): string
     {
-        $create = $this->actingAs($this->admin)->postJson('/dashboard/importer/v2/sessions');
+        $create = $this->actingAs($this->admin)->postJson('/dashboard/importer/sessions');
         $uuid   = $create->json('data.session_id');
         $path   = __DIR__ . '/../../Fixtures/Importer/conflicts_seeded.csv';
         $file   = new UploadedFile($path, 'conflicts_seeded.csv', 'text/csv', null, true);
         $this->actingAs($this->admin)->post(
-            "/dashboard/importer/v2/sessions/{$uuid}/file",
+            "/dashboard/importer/sessions/{$uuid}/file",
             ['file' => $file],
             ['Accept' => 'application/json']
         )->assertStatus(200);
 
         $maps = $this->actingAs($this->admin)
-            ->postJson("/dashboard/importer/v2/sessions/{$uuid}/automap")
+            ->postJson("/dashboard/importer/sessions/{$uuid}/automap")
             ->json('data.mappings');
         $this->actingAs($this->admin)
-            ->postJson("/dashboard/importer/v2/sessions/{$uuid}/validate", ['mappings' => $maps])
+            ->postJson("/dashboard/importer/sessions/{$uuid}/validate", ['mappings' => $maps])
             ->assertJsonPath('data.valid', true);
 
         return $uuid;
@@ -103,7 +103,7 @@ class ConflictDetectionEndpointTest extends TestCase
     {
         $uuid = $this->uploadAndValidate();
         $resp = $this->actingAs($this->admin)->postJson(
-            "/dashboard/importer/v2/sessions/{$uuid}/conflicts",
+            "/dashboard/importer/sessions/{$uuid}/conflicts",
             ['organization_id' => $this->org->id]
         );
 
@@ -124,7 +124,7 @@ class ConflictDetectionEndpointTest extends TestCase
         ]);
         $uuid  = $this->uploadAndValidate();
         $resp  = $this->actingAs($this->admin)->postJson(
-            "/dashboard/importer/v2/sessions/{$uuid}/conflicts",
+            "/dashboard/importer/sessions/{$uuid}/conflicts",
             ['organization_id' => $other->id]
         );
         $resp->assertStatus(200)->assertJsonPath('success', true);
@@ -141,7 +141,7 @@ class ConflictDetectionEndpointTest extends TestCase
         $uuid = $this->uploadAndValidate();
 
         $this->actingAs($this->admin)->postJson(
-            "/dashboard/importer/v2/sessions/{$uuid}/conflicts",
+            "/dashboard/importer/sessions/{$uuid}/conflicts",
             ['organization_id' => $this->org->id, 'accept' => true]
         )->assertStatus(200);
 
@@ -153,12 +153,12 @@ class ConflictDetectionEndpointTest extends TestCase
 
     public function test_requires_validated_status(): void
     {
-        $create = $this->actingAs($this->admin)->postJson('/dashboard/importer/v2/sessions');
+        $create = $this->actingAs($this->admin)->postJson('/dashboard/importer/sessions');
         $uuid   = $create->json('data.session_id');
 
         // No upload / no validate: still in 'uploaded' status and missing row data
         $resp = $this->actingAs($this->admin)->postJson(
-            "/dashboard/importer/v2/sessions/{$uuid}/conflicts",
+            "/dashboard/importer/sessions/{$uuid}/conflicts",
             ['organization_id' => $this->org->id]
         );
         $resp->assertStatus(409);

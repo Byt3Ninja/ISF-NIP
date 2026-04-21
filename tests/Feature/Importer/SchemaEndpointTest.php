@@ -15,7 +15,7 @@ class SchemaEndpointTest extends TestCase
         $user = User::factory()->create();
         $user->allotRole('Admin');
 
-        $resp = $this->actingAs($user)->getJson('/dashboard/importer/v2/schema');
+        $resp = $this->actingAs($user)->getJson('/dashboard/importer/schema');
 
         $resp->assertStatus(200)
              ->assertJsonPath('success', true)

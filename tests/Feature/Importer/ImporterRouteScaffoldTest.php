@@ -12,7 +12,7 @@ class ImporterRouteScaffoldTest extends TestCase
 
     public function test_unauthenticated_get_to_importer_v2_is_redirected_or_401(): void
     {
-        $resp = $this->getJson('/dashboard/importer/v2');
+        $resp = $this->getJson('/dashboard/importer');
         $this->assertContains($resp->status(), [302, 401, 403, 419]);
     }
 
@@ -21,7 +21,7 @@ class ImporterRouteScaffoldTest extends TestCase
         $user = User::factory()->create();
         $user->allotRole('Admin');
         // PR 2: showWizard now renders the Blade wizard rather than a JSON placeholder.
-        $resp = $this->actingAs($user)->get('/dashboard/importer/v2');
+        $resp = $this->actingAs($user)->get('/dashboard/importer');
         $resp->assertStatus(200);
         $resp->assertSee('importer-v2', false);
     }
@@ -30,13 +30,13 @@ class ImporterRouteScaffoldTest extends TestCase
     {
         $user = User::factory()->create();
         $user->allotRole('Admin');
-        $create = $this->actingAs($user)->postJson('/dashboard/importer/v2/sessions');
+        $create = $this->actingAs($user)->postJson('/dashboard/importer/sessions');
         $uuid = $create->json('data.session_id');
 
         // A freshly-created session is in 'uploaded' state — not valid for execute.
         $org = \App\Organization::create(['name_en' => 'X', 'name_ar' => 'س', 'user_id' => $user->id]);
         $resp = $this->actingAs($user)
-            ->postJson("/dashboard/importer/v2/sessions/{$uuid}/execute", [
+            ->postJson("/dashboard/importer/sessions/{$uuid}/execute", [
                 'organization_id' => $org->id,
             ]);
         $resp->assertStatus(409)

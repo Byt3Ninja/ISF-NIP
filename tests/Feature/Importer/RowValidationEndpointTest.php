@@ -28,12 +28,12 @@ class RowValidationEndpointTest extends TestCase
 
     private function upload(User $user, string $fixture): string
     {
-        $create = $this->actingAs($user)->postJson('/dashboard/importer/v2/sessions');
+        $create = $this->actingAs($user)->postJson('/dashboard/importer/sessions');
         $uuid   = $create->json('data.session_id');
         $path   = __DIR__ . '/../../Fixtures/Importer/' . $fixture;
         $file   = new UploadedFile($path, $fixture, 'text/csv', null, true);
         $this->actingAs($user)->post(
-            "/dashboard/importer/v2/sessions/{$uuid}/file",
+            "/dashboard/importer/sessions/{$uuid}/file",
             ['file' => $file],
             ['Accept' => 'application/json']
         )->assertStatus(200);
@@ -42,7 +42,7 @@ class RowValidationEndpointTest extends TestCase
 
     private function automapMappings(User $user, string $uuid): array
     {
-        $resp = $this->actingAs($user)->postJson("/dashboard/importer/v2/sessions/{$uuid}/automap");
+        $resp = $this->actingAs($user)->postJson("/dashboard/importer/sessions/{$uuid}/automap");
         return $resp->json('data.mappings');
     }
 
@@ -52,7 +52,7 @@ class RowValidationEndpointTest extends TestCase
         $uuid = $this->upload($user, 'valid_minimal.csv');
         $maps = $this->automapMappings($user, $uuid);
 
-        $resp = $this->actingAs($user)->postJson("/dashboard/importer/v2/sessions/{$uuid}/validate", [
+        $resp = $this->actingAs($user)->postJson("/dashboard/importer/sessions/{$uuid}/validate", [
             'mappings' => $maps,
         ]);
 
@@ -71,7 +71,7 @@ class RowValidationEndpointTest extends TestCase
         $uuid = $this->upload($user, 'row_errors_mixed.csv');
         $maps = $this->automapMappings($user, $uuid);
 
-        $resp = $this->actingAs($user)->postJson("/dashboard/importer/v2/sessions/{$uuid}/validate", [
+        $resp = $this->actingAs($user)->postJson("/dashboard/importer/sessions/{$uuid}/validate", [
             'mappings' => $maps,
         ]);
 
@@ -101,7 +101,7 @@ class RowValidationEndpointTest extends TestCase
         $maps = $this->automapMappings($user, $uuid);
         $maps['founder_email'] = null; // unmap a required field
 
-        $resp = $this->actingAs($user)->postJson("/dashboard/importer/v2/sessions/{$uuid}/validate", [
+        $resp = $this->actingAs($user)->postJson("/dashboard/importer/sessions/{$uuid}/validate", [
             'mappings' => $maps,
         ]);
 

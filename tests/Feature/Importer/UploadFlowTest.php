@@ -34,7 +34,7 @@ class UploadFlowTest extends TestCase
 
     private function createSession(User $user): string
     {
-        $resp = $this->actingAs($user)->postJson('/dashboard/importer/v2/sessions');
+        $resp = $this->actingAs($user)->postJson('/dashboard/importer/sessions');
         return $resp->json('data.session_id');
     }
 
@@ -44,7 +44,7 @@ class UploadFlowTest extends TestCase
         $uuid = $this->createSession($user);
 
         $resp = $this->actingAs($user)->post(
-            "/dashboard/importer/v2/sessions/{$uuid}/file",
+            "/dashboard/importer/sessions/{$uuid}/file",
             ['file' => $this->fixture('valid_minimal.csv')],
             ['Accept' => 'application/json']
         );
@@ -68,7 +68,7 @@ class UploadFlowTest extends TestCase
         $uuid = $this->createSession($user);
 
         $resp = $this->actingAs($user)->post(
-            "/dashboard/importer/v2/sessions/{$uuid}/file",
+            "/dashboard/importer/sessions/{$uuid}/file",
             ['file' => $this->fixture('invalid_duplicate_headers.csv')],
             ['Accept' => 'application/json']
         );
@@ -90,7 +90,7 @@ class UploadFlowTest extends TestCase
         $uuid = $this->createSession($owner);
 
         $resp = $this->actingAs($intruder)->post(
-            "/dashboard/importer/v2/sessions/{$uuid}/file",
+            "/dashboard/importer/sessions/{$uuid}/file",
             ['file' => $this->fixture('valid_minimal.csv')],
             ['Accept' => 'application/json']
         );
@@ -104,12 +104,12 @@ class UploadFlowTest extends TestCase
         $uuid = $this->createSession($user);
 
         $this->actingAs($user)->post(
-            "/dashboard/importer/v2/sessions/{$uuid}/file",
+            "/dashboard/importer/sessions/{$uuid}/file",
             ['file' => $this->fixture('valid_minimal.csv')],
             ['Accept' => 'application/json']
         )->assertStatus(200);
 
-        $resp = $this->actingAs($user)->deleteJson("/dashboard/importer/v2/sessions/{$uuid}/file");
+        $resp = $this->actingAs($user)->deleteJson("/dashboard/importer/sessions/{$uuid}/file");
         $resp->assertStatus(200)->assertJsonPath('success', true);
 
         $session = ImporterSession::where('uuid', $uuid)->firstOrFail();
@@ -122,12 +122,12 @@ class UploadFlowTest extends TestCase
         $user = $this->makeUser();
         $uuid = $this->createSession($user);
         $this->actingAs($user)->post(
-            "/dashboard/importer/v2/sessions/{$uuid}/file",
+            "/dashboard/importer/sessions/{$uuid}/file",
             ['file' => $this->fixture('valid_minimal.csv')],
             ['Accept' => 'application/json']
         );
 
-        $resp = $this->actingAs($user)->getJson("/dashboard/importer/v2/sessions/{$uuid}");
+        $resp = $this->actingAs($user)->getJson("/dashboard/importer/sessions/{$uuid}");
         $resp->assertStatus(200)
              ->assertJsonPath('data.status', ImporterSession::STATUS_UPLOADED)
              ->assertJsonPath('data.row_count', 1);
@@ -138,12 +138,12 @@ class UploadFlowTest extends TestCase
         $user = $this->makeUser();
         $uuid = $this->createSession($user);
         $this->actingAs($user)->post(
-            "/dashboard/importer/v2/sessions/{$uuid}/file",
+            "/dashboard/importer/sessions/{$uuid}/file",
             ['file' => $this->fixture('valid_minimal.csv')],
             ['Accept' => 'application/json']
         );
 
-        $resp = $this->actingAs($user)->deleteJson("/dashboard/importer/v2/sessions/{$uuid}");
+        $resp = $this->actingAs($user)->deleteJson("/dashboard/importer/sessions/{$uuid}");
         $resp->assertStatus(200);
 
         $session = ImporterSession::where('uuid', $uuid)->firstOrFail();
