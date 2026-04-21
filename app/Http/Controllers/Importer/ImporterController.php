@@ -353,9 +353,63 @@ class ImporterController extends Controller
         ]);
     }
 
-    public function execute(Request $request, string $uuid): JsonResponse
-    {
-        return $this->notImplemented();
+    public function execute(
+        \App\Http\Requests\Importer\ExecuteImportRequest $request,
+        string $uuid,
+        ImporterSessionService $svc,
+        \App\Services\Importer\ImportOrchestrator $orchestrator
+    ): JsonResponse {
+        $session = $svc->findForUserByUuid($uuid, $request->user()->id);
+
+        $orgId = (int) $request->input('organization_id');
+        $user  = $request->user();
+        if (!$user->hasRole('Admin')) {
+            $allowed = $user->organizations_ids ?? [];
+            if (!in_array($orgId, $allowed, true)) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => [[
+                        'code' => 'organization_forbidden',
+                        'message_en' => __('importer.errors.organization_required', [], 'en'),
+                        'message_ar' => __('importer.errors.organization_required', [], 'ar'),
+                    ]],
+                ], 403);
+            }
+        }
+
+        if (!in_array($session->status, [
+            ImporterSession::STATUS_VALIDATED,
+            ImporterSession::STATUS_CONFLICTS_REVIEWED,
+        ], true)) {
+            return response()->json([
+                'success' => false,
+                'errors' => [[
+                    'code' => 'invalid_state_transition',
+                    'message_en' => __('importer.errors.invalid_state_transition', [], 'en'),
+                    'message_ar' => __('importer.errors.invalid_state_transition', [], 'ar'),
+                ]],
+            ], 409);
+        }
+
+        try {
+            $result = $orchestrator->run($session, $orgId);
+
+            $session->refresh();
+            $session->import_result = $result->toArray();
+            $session->save();
+
+            return response()->json(['success' => true, 'data' => $result->toArray()]);
+        } catch (\Throwable $e) {
+            \Log::error('Importer execute failed', ['uuid' => $uuid, 'e' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json([
+                'success' => false,
+                'errors' => [[
+                    'code' => 'fatal',
+                    'message_en' => __('importer.ui.results.fatal', [], 'en'),
+                    'message_ar' => __('importer.ui.results.fatal', [], 'ar'),
+                ]],
+            ], 500);
+        }
     }
 
     public function organizations(Request $request): JsonResponse
