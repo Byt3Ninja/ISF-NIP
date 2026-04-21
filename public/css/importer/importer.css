@@ -45,3 +45,10 @@
     max-height: 420px;
     overflow-y: auto;
 }
+
+.importer-v2 #importer-conflicts ul li {
+    padding: 0.25rem 0;
+}
+.importer-v2 .modal-dialog-scrollable .modal-body {
+    max-height: 60vh;
+}

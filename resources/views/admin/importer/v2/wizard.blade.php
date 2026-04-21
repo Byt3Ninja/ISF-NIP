@@ -46,6 +46,8 @@
         discardSession: "{{ url('/dashboard/importer/v2/sessions') }}",    // + /{uuid}
         automap:        "{{ url('/dashboard/importer/v2/sessions') }}",    // + /{uuid}/automap
         validate:       "{{ url('/dashboard/importer/v2/sessions') }}",    // + /{uuid}/validate
+        conflicts:      "{{ url('/dashboard/importer/v2/sessions') }}",    // + /{uuid}/conflicts
+        organizations:  "{{ route('importer.v2.organizations') }}",
     };
 </script>
 <script src="{{ asset('js/importer/importer-i18n.js') }}?v={{ filemtime(public_path('js/importer/importer-i18n.js')) }}"></script>

@@ -189,6 +189,7 @@
     if (nextBtn) {
         nextBtn.addEventListener('click', async () => {
             clearRowErrors();
+            clearConflicts();
             const uuid = state.getActive();
             if (!uuid) return;
 
@@ -205,18 +206,19 @@
 
             nextBtn.disabled = true;
             try {
-                const r = await fetch(`${routes.validate}/${uuid}/validate`, {
+                // Step A: row validation
+                const vr = await fetch(`${routes.validate}/${uuid}/validate`, {
                     method: 'POST',
                     headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json', 'Content-Type': 'application/json' },
                     body: JSON.stringify({ mappings }),
                 });
-                const body = await r.json();
-                if (!r.ok || !body.success) {
+                const vbody = await vr.json();
+                if (!vr.ok || !vbody.success) {
                     renderRowErrors([{ row: 0, field_key: null, message_en: 'Validation failed', message_ar: 'فشل التحقق' }]);
                     return;
                 }
-                if (!body.data.valid) {
-                    renderRowErrors(body.data.row_errors, body.data.totals);
+                if (!vbody.data.valid) {
+                    renderRowErrors(vbody.data.row_errors, vbody.data.totals);
                     return;
                 }
 
@@ -225,11 +227,89 @@
                 saved.mappings = mappings;
                 state.save(uuid, saved);
 
-                alert('Row validation passed. Conflict detection + Step 3 wire-up arrives in PR 5/6.');
+                // Step B: conflict detection requires organization_id.
+                // Minimal approach for PR 5: fetch /organizations and use the first.
+                let orgId = null;
+                try {
+                    const orgResp = await fetch(routes.organizations, { headers: { 'Accept': 'application/json' } });
+                    if (orgResp.ok) {
+                        const orgBody = await orgResp.json();
+                        const orgs = (orgBody && orgBody.data && orgBody.data.organizations) || (orgBody && orgBody.organizations) || [];
+                        orgId = orgs.length ? orgs[0].id : null;
+                    }
+                } catch (_) { /* noop */ }
+
+                if (!orgId) {
+                    alert(t.get('errors.organization_required'));
+                    return;
+                }
+
+                const cr = await fetch(`${routes.conflicts}/${uuid}/conflicts`, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ organization_id: orgId }),
+                });
+                const cbody = await cr.json();
+                if (!cr.ok || !cbody.success) return;
+
+                if ((cbody.data.total || 0) === 0) {
+                    await acceptAndAdvance(uuid, orgId);
+                    return;
+                }
+
+                renderConflicts(cbody.data.warnings);
+                showConflictsModal(cbody.data.warnings, uuid, orgId);
             } finally {
                 nextBtn.disabled = false;
             }
         });
+    }
+
+    function clearConflicts() {
+        const box = document.getElementById('importer-conflicts');
+        const list = document.getElementById('importer-conflicts-list');
+        if (box) box.classList.add('d-none');
+        if (list) list.innerHTML = '';
+    }
+
+    function renderConflicts(warnings) {
+        const box = document.getElementById('importer-conflicts');
+        const list = document.getElementById('importer-conflicts-list');
+        if (!box || !list) return;
+        list.innerHTML = warnings.map((w) => `<li>${escapeHtml(t.pickLocalised(w))}</li>`).join('');
+        box.classList.remove('d-none');
+    }
+
+    function showConflictsModal(warnings, uuid, orgId) {
+        const modalList = document.getElementById('importer-conflicts-modal-list');
+        if (modalList) {
+            modalList.innerHTML = warnings.map((w) => `<li>${escapeHtml(t.pickLocalised(w))}</li>`).join('');
+        }
+        const acceptBtn = document.getElementById('importer-conflicts-accept');
+        if (acceptBtn) {
+            acceptBtn.onclick = async () => { await acceptAndAdvance(uuid, orgId); };
+        }
+        if (window.jQuery) {
+            window.jQuery('#importer-conflicts-modal').modal('show');
+        } else {
+            const m = document.getElementById('importer-conflicts-modal');
+            if (m) { m.classList.add('show'); m.style.display = 'block'; }
+        }
+    }
+
+    async function acceptAndAdvance(uuid, orgId) {
+        await fetch(`${routes.conflicts}/${uuid}/conflicts`, {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json', 'Content-Type': 'application/json' },
+            body: JSON.stringify({ organization_id: orgId, accept: true }),
+        });
+        const saved = state.load(uuid) || {};
+        saved.status = 'conflicts_reviewed';
+        saved.organization_id = orgId;
+        state.save(uuid, saved);
+
+        if (window.jQuery) { window.jQuery('#importer-conflicts-modal').modal('hide'); }
+        alert('Conflicts accepted. Review step arrives in PR 6.');
     }
 
     function clearRowErrors() {
