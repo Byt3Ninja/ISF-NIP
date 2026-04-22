@@ -9,7 +9,6 @@
 
 @php
 $authUser    = auth()->user();
-$_user       = $authUser;
 $permissions = [];
 $offcanvasTabs = [
     ['target'=>'#vt-details',     'icon'=>'ti-info-circle', 'label'=>__('admin.Details'),     'active'=>true,  'show'=>true],
@@ -24,8 +23,8 @@ $offcanvasTabs = [
 <div>
   @include('admin.tasks.partials.tasks-count-cards')
   @include('admin.tasks.partials.tasks-table')
-  @include('admin.tasks.partials.add-task-modal')
-  @include('admin.tasks.partials.view-task-modal')
+  @include('admin.tasks.partials.add-task-offcanvas')
+  @include('admin.tasks.partials.view-task-offcanvas')
   @include('kanban.partials.kanban-vt-offcanvas')
   @include('kanban.partials.kanban-archived-offcanvas')
 </div>
@@ -256,7 +255,7 @@ $(function () {
               <a href="javascript:;" class="btn btn-icon ${full.overallStatus === 'archived' ? 'btn-text-warning' : 'btn-text-secondary'} waves-effect waves-light rounded-pill task-archive">
                 <i class="ti ${full.overallStatus === 'archived' ? 'ti-rotate' : 'ti-archive'} ti-md"></i>
               </a>
-              @if ($_user->ableTo('tasks.destory', $permissions))
+              @if ($_user->ableTo('tasks.destroy', $permissions))
                 <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill delete-record"><i class="ti ti-trash ti-md"></i></a>
               @endif
             </div>`;
@@ -476,14 +475,14 @@ $(function () {
     const attachmentsHtml = data.attachments?.length
       ? `<div class="mb-2">
            <p class="text-uppercase small fw-bold text-muted mb-3 d-flex align-items-center gap-2">
-             <i class="ti ti-paperclip"></i>{{ __('admin.attachments') }}
+             <i class="ti ti-paperclip ti-md"></i>{{ __('admin.attachments') }}
            </p>
            <div class="d-flex flex-column gap-2">
              ${data.attachments.map(file => {
                const iconClass  = getAttachmentIcon(file.type);
                const uploadDate = file.created_at ? moment(file.created_at).format('YYYY-MM-DD') : '';
                return `
-                 <div class="d-flex align-items-center gap-2 border rounded p-2 bg-lighter">
+                 <div class="d-flex align-items-center gap-2 border rounded p-2 bg-light-subtle">
                    <i class="ti ${iconClass} ti-sm flex-shrink-0"></i>
                    <span class="text-truncate flex-grow-1 small fw-medium" title="${file.name}">${file.name}</span>
                    ${uploadDate ? `<small class="text-muted flex-shrink-0">${uploadDate}</small>` : ''}
@@ -501,12 +500,9 @@ $(function () {
     const priorityInfo = priorityObj[data.priority]      || { class: 'bg-label-secondary', title: data.priority };
     const statusInfo   = statusObj[data.overallStatus]   || { class: 'bg-label-secondary', title: data.overallStatus };
 
-    $('#task-details-content').html(`
-      <div class="mb-5">
-        <h5 class="fw-bold mb-1">${data.title}</h5>
-        <p class="text-muted small mb-0">${data.description || '<em>{{ __('admin.no_description') }}</em>'}</p>
-      </div>
-
+    $('#vto-overview-content').html(`
+      <h5 className="offcanvas-title mb-0">${data.title}</h5>
+      
       <div class="d-flex flex-wrap gap-2 mb-5">
         <span class="badge ${priorityInfo.class} d-flex align-items-center gap-1 px-2 py-1">
           <i class="ti ti-flag ti-xs"></i>${priorityInfo.title}
@@ -515,7 +511,7 @@ $(function () {
           <i class="ti ti-circle-dot ti-xs"></i>${statusInfo.title}
         </span>
         <span class="badge bg-label-secondary d-flex align-items-center gap-1 px-2 py-1">
-          <i class="ti ti-calendar ti-xs"></i>${data.dueDate}
+          <i class="ti ti-calendar ti-xs"></i> {{ __('admin.due') }} ${data.dueDate}
         </span>
       </div>
 
@@ -550,18 +546,32 @@ $(function () {
           </div>
         </div>
       </div>
-
+      
       <div class="mb-5">
         <p class="text-uppercase small fw-bold text-muted mb-3 d-flex align-items-center gap-2">
-          <i class="ti ti-building-skyscraper"></i>{{ __('admin.assignee_startups_statuses') }}
+          <i class="ti ti-list-details ti-md"></i>{{ __('admin.description') }}
         </p>
-        ${assigneesHtml}
+        <div class="p-2 border bg-light-subtle rounded">
+          <p class="text-muted small mb-0 text-break">
+            ${data.description || '<em>{{ __('admin.no_description') }}</em>'}
+          </p>
+        </div>
       </div>
 
       ${attachmentsHtml}
     `);
 
-    $('#viewTaskModal').data('taskId', data.id).offcanvas('show');
+    $('#vto-assignees-content').html(`
+      <div class="mb-2">
+        <p class="text-uppercase small fw-bold text-muted mb-3 d-flex align-items-center gap-2">
+          <i class="ti ti-building-skyscraper"></i>{{ __('admin.assignee_startups_statuses') }}
+        </p>
+        ${assigneesHtml}
+      </div>
+    `);
+
+    bootstrap.Tab.getOrCreateInstance(document.getElementById('vto-overview-tab')).show();
+    $('#viewTaskOffcanavas').data('taskId', data.id).offcanvas('show');
   });
 
   const vtCommentQ = new Quill('#vt-comment-editor', { theme: 'snow', modules: { toolbar: '#vt-comment-toolbar' } });
@@ -569,7 +579,7 @@ $(function () {
   // ─── Review Task (open kanban-vt-offcanvas) ───────────────────────────────
   $(document).on('click', '.task-review-btn', function () {
     const taskId = $(this).data('task-id');
-    $('#viewTaskModal').offcanvas('hide');
+    $('#viewTaskOffcanavas').offcanvas('hide');
 
     $.ajax({
       url: `/dashboard/tasks/${taskId}`,
@@ -756,7 +766,7 @@ $(function () {
         $('#vt-comments-list').append(`
           <div class="d-flex align-items-start gap-3 mb-3">
             <div class="flex-shrink-0 mt-1">${buildAvatar(c.user, c.img_url, c.user_id)}</div>
-            <div class="flex-grow-1 bg-lighter rounded p-3">
+            <div class="flex-grow-1 bg-light-subtle rounded p-3">
               <div class="d-flex justify-content-between align-items-center mb-1">
                 <span class="fw-semibold text-dark">${c.user}</span>
                 <span class="text-muted" style="font-size:.7rem;">${c.time}</span>
