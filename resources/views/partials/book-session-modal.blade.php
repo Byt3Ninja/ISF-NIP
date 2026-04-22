@@ -390,7 +390,7 @@ $(document).ready(function () {
 
     const duration = calcDuration(slot.start_time, slot.end_time);
     $('#detailDate').text(formatDate(state.selectedDate));
-    $('#detailType').text(slot.session_type === 'Online' ? '{{ __('mentor.online_video_call') }}' : slot.session_type);
+    $('#detailType').text(slot.session_type === 'Online' ? '{{ __('mentor.online_video_call') }}' : SESSION_TYPES[slot.session_type]);
     $('#displayStartTime').text(formatTime12(slot.start_time));
     $('#displayEndTime').text(formatTime12(slot.end_time));
     $('#detailDuration').text(`${duration} @lang('admin.min')`);
