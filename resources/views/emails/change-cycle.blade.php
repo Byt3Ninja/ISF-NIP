@@ -2,7 +2,7 @@
 <html dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>{{ __('emails.change_cycle_subject') }}</title>
+    <title>{{ __('email.change_cycle_subject') }}</title>
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -16,26 +16,26 @@
 <body>
     <div class="container">
         <div class="header">
-            <h2>{{ __('emails.change_cycle_heading') }}</h2>
+            <h2>{{ __('email.change_cycle_heading') }}</h2>
         </div>
         
         <div class="content {{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
-            <p>{{ __('emails.hello') }} {{ $data['owner_name_'.app()->getLocale()] ?? __('emails.user') }},</p>
+            <p>{{ __('email.hello') }} {{ $data['owner_name_'.app()->getLocale()] ?? __('email.user') }},</p>
             
             @if(isset($data['new_step']) && isset($data['last_step']))
-                <p>{!! __('emails.cycle_changed', [
+                <p>{!! __('email.cycle_changed', [
                     'from' => '<strong>'.$data['last_step'].'</strong>',
                     'to' => '<strong>'.$data['new_step'].'</strong>'
                 ]) !!}</p>
             @endif
             
             @if(isset($data['organization_name_'.app()->getLocale()]))
-                <p><strong>{{ __('emails.organization') }}:</strong> {{ $data['organization_name_'.app()->getLocale()] }}</p>
+                <p><strong>{{ __('email.organization') }}:</strong> {{ $data['organization_name_'.app()->getLocale()] }}</p>
             @endif
         </div>
         
         <div class="footer">
-            <p>{{ __('emails.thank_you') }}</p>
+            <p>{{ __('email.thank_you') }}</p>
             <p>{{ $data['organization_name_'.app()->getLocale()] ?? config('app.name') }}</p>
             <p>{{ config('app.name') }} &copy; {{ date('Y') }}</p>
         </div>

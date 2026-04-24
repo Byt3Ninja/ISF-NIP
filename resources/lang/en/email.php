@@ -57,4 +57,12 @@ return [
         'if_trouble' => 'If you have trouble clicking the button, please copy and paste the URL below into your web browser:',
     ],
 
+    'change_cycle_subject' => 'Cycle Change Subject',
+    'change_cycle_heading' => 'Cycle Change Heading',
+    'hello' => 'Hello',
+    'user' => 'User',
+    'cycle_changed' => 'Your mentoring cycle has changed from :from to :to',
+    'organization' => 'Organization',
+    'thank_you' => 'Thank you for using our platform',
+
 ];
