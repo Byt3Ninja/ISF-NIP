@@ -43,9 +43,9 @@ return [
     ],
 
     'task' => [
-        'broadcast' => 'Task update: :message',
-        'whatsapp'  => 'Task update: :message',
-        'subject'   => 'Task Update',
+        'broadcast' => 'Task added: :message',
+        'whatsapp'  => 'Task added: :message',
+        'subject'   => 'Task Added',
     ],
 
     'mentorship_session' => [
