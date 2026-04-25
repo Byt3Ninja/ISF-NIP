@@ -58,8 +58,9 @@
     </table>
   </div>
 </div>
-
+@if(!auth()->user()->hasRole('registered'))
 @include('admin.tasks.partials.add-task-modal')
+@endif
 @endsection
 
 @section('scripts')

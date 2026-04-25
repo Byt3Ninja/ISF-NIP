@@ -107,7 +107,7 @@ class TaskNotification extends Notification implements ShouldQueue
         $orgData = $this->buildEmailOrganizationData($org);
 
         return (new MailMessage)
-            ->subject(__('notifications.task.subject'))
+            ->subject($this->getSubject())
             ->markdown('emails.mentor-task', array_merge([
                 'data' => $this->data,
                 'notifiable' => $notifiable,
@@ -145,7 +145,7 @@ class TaskNotification extends Notification implements ShouldQueue
     public function toBroadcast(object $notifiable): BroadcastMessage
     {
         return new BroadcastMessage([
-            'subject' => __('notifications.task.subject'),
+            'subject' => $this->getSubject(),
             'message' => __('notifications.task.broadcast', ['message' => $this->data['message'] ?? '']),
             'time' => now()->toDateTimeString(),
         ]);
@@ -187,6 +187,14 @@ class TaskNotification extends Notification implements ShouldQueue
             'title'   => $taskTitle,
             'message' => $message,
         ];
+    }
+
+    private function getSubject(): string
+    {
+        $action = $this->data['action'] ?? 'add';
+        $key = "notifications.task.subject_{$action}";
+        $translated = __($key);
+        return $translated !== $key ? $translated : __('notifications.task.subject');
     }
 
     /**

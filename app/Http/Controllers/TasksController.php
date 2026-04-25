@@ -569,10 +569,18 @@ class TasksController extends Controller
             $updateMentor           = User::find($task->created_by);
             $updateStartupNames     = $task->assignees->pluck('name')->filter()->values()->toArray();
 
+            $newStatus = $task->status;
+            $oldStatus = $oldValues['status'] ?? null;
+            $notifAction = match(true) {
+                $newStatus === 'archived'                          => 'archive',
+                $oldStatus === 'archived' && $newStatus !== 'archived' => 'reopen',
+                default                                            => 'update',
+            };
+
             $updateNotifData = [
                 'task'         => $task,
                 'message'      => "Task Updated: " . $task->title,
-                'action'       => 'update',
+                'action'       => $notifAction,
                 'mentor'       => $updateMentor,
                 'startupNames' => $updateStartupNames,
             ];
