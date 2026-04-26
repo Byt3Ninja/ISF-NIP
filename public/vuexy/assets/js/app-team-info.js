@@ -2,55 +2,89 @@
  * app-team-info.js - Fixed Clear Search + Arabic Support
  */
 (function ($) {
-  'use strict';
+  "use strict";
 
-  const PLURAL = { founder: 'founders', investor: 'investors', shareholder: 'shareholders' };
+  const PLURAL = {
+    founder: "founders",
+    investor: "investors",
+    shareholder: "shareholders",
+  };
 
   const TYPE_CONFIG = {
-    founder: { teamsNo: 'Founders', fieldMap: { 
-      name: 'founder_name', 
-      email: 'founder_email', 
-      linkedin: 'founder_linkedin',
-      phone: 'founder_phone',
-      type: 'founder_type',
-      join_date: 'founder_join_date',
-      commitment: 'founder_commitment'
-    } },
-    investor: { teamsNo: 'Investors', fieldMap: { name: 'investor_name', type: 'investment_type' } },
-    shareholder: { teamsNo: 'Shareholders', fieldMap: { name: 'shareholder_name', role: 'shareholder_role', percentage: 'shareholder_ownership_percentage' } }
+    founder: {
+      teamsNo: "Founders",
+      fieldMap: {
+        name: "founder_name",
+        email: "founder_email",
+        linkedin: "founder_linkedin",
+        phone: "founder_phone",
+        type: "founder_type",
+        join_date: "founder_join_date",
+        commitment: "founder_commitment",
+      },
+    },
+    investor: {
+      teamsNo: "Investors",
+      fieldMap: { name: "investor_name", type: "investment_type" },
+    },
+    shareholder: {
+      teamsNo: "Shareholders",
+      fieldMap: {
+        name: "shareholder_name",
+        role: "shareholder_role",
+        percentage: "shareholder_ownership_percentage",
+      },
+    },
   };
 
   const VALIDATION_RULES = {
-    founder: { name: { required: true }, email: { required: true, email: true }, type: { required: true }, phone: { intlTel: true }, linkedin: { url: true }, join_date: { pastOrToday: true } },
-    investor: { name: { required: true, errorId: 'name-investor' }, type: { errorId: 'type-investor' } },
-    shareholder: { name: { required: true, errorId: 'name-shareholder' }, role: {}, percentage: { min: 0, max: 100 } }
+    founder: {
+      name: { required: true },
+      email: { required: true, email: true },
+      type: { required: true },
+      phone: { intlTel: true },
+      linkedin: { url: true },
+      join_date: { pastOrToday: true },
+    },
+    investor: {
+      name: { required: true, errorId: "name-investor" },
+      type: { errorId: "type-investor" },
+    },
+    shareholder: {
+      name: { required: true, errorId: "name-shareholder" },
+      role: {},
+      percentage: { min: 0, max: 100 },
+    },
   };
 
   const SERVER_ERROR_MAP = {
-    founder_name: { errorId: 'name', fieldName: 'name' },
-    founder_email: { errorId: 'email', fieldName: 'email' },
-    founder_phone: { errorId: 'phone', fieldName: 'phone' },
-    founder_linkedin: { errorId: 'linkedin', fieldName: 'linkedin' },
-    founder_type: { errorId: 'type', fieldName: 'type' },
-    founder_join_date: { errorId: 'join_date', fieldName: 'join_date' },
-    founder_commitment: { errorId: 'commitment', fieldName: 'commitment' },
-    investor_name: { errorId: 'name-investor', fieldName: 'name' },
-    investment_type: { errorId: 'type-investor', fieldName: 'type' },
-    shareholder_name: { errorId: 'name-shareholder', fieldName: 'name' },
-    shareholder_role: { errorId: 'role', fieldName: 'role' },
-    shareholder_ownership_percentage: { errorId: 'percentage', fieldName: 'percentage' }
+    founder_name: { errorId: "name", fieldName: "name" },
+    founder_email: { errorId: "email", fieldName: "email" },
+    founder_phone: { errorId: "phone", fieldName: "phone" },
+    founder_linkedin: { errorId: "linkedin", fieldName: "linkedin" },
+    founder_type: { errorId: "type", fieldName: "type" },
+    founder_join_date: { errorId: "join_date", fieldName: "join_date" },
+    founder_commitment: { errorId: "commitment", fieldName: "commitment" },
+    investor_name: { errorId: "name-investor", fieldName: "name" },
+    investment_type: { errorId: "type-investor", fieldName: "type" },
+    shareholder_name: { errorId: "name-shareholder", fieldName: "name" },
+    shareholder_role: { errorId: "role", fieldName: "role" },
+    shareholder_ownership_percentage: {
+      errorId: "percentage",
+      fieldName: "percentage",
+    },
   };
 
   const appData = {
     founders: [...TEAM_INFO_CONFIG.founders],
     investors: [...TEAM_INFO_CONFIG.investors],
-    shareholders: [...TEAM_INFO_CONFIG.shareholders]
+    shareholders: [...TEAM_INFO_CONFIG.shareholders],
   };
 
   const itiInstances = {};
 
   // Detect current language
-  const LANG = document.documentElement.lang || 'en';
+  const LANG = document.documentElement.lang || "en";
 
   /* ─────────────────────────────────────────────
      TRANSLATIONS
@@ -60,7 +94,8 @@
     en: {
       noResults: (term) => `No results for "${term}"`,
       noFounders: "No founders added yet",
-      foundersEmptyDesc: "Add your founding team to showcase the people behind your startup.",
+      foundersEmptyDesc:
+        "Add your founding team to showcase the people behind your startup.",
       noInvestors: "No Investors Listed",
       noShareholders: "No Shareholders",
       addFounder: "Add Founder",
@@ -76,24 +111,30 @@
       investor: "Investor",
       shareholder: "Shareholder",
       delete: "Delete",
+      edit: "Edit",
       founderDeletedToast: "Founder deleted successfully.",
       founderDeleteError: "Something went wrong. Please try again.",
-       investmentTypes: {
-        Angel_Investor:      'Angel Investor',
-        Angel_Group:         'Angel Group',
-        Venture_Capital_Firm:'Venture Capital Firm',
-        Accelerator:         'Accelerator',
-        Incubator:           'Incubator',
-        Corporate_Investor:  'Corporate Investor',
-        Family_Office:       'Family Office',
-        Family:              'Family',
-        Friends:             'Friends',
-      }
+      founderType: "Founder",
+      cofounderType: "Co-Founder",
+      fullTime: "Full-Time",
+      partTime: "Part-Time",
+      investmentTypes: {
+        Angel_Investor: "Angel Investor",
+        Angel_Group: "Angel Group",
+        Venture_Capital_Firm: "Venture Capital Firm",
+        Accelerator: "Accelerator",
+        Incubator: "Incubator",
+        Corporate_Investor: "Corporate Investor",
+        Family_Office: "Family Office",
+        Family: "Family",
+        Friends: "Friends",
+      },
     },
     ar: {
       noResults: (term) => `لا توجد نتائج لـ "${term}"`,
       noFounders: "لم تتم إضافة مؤسسين بعد",
-      foundersEmptyDesc: "أضف فريق المؤسسين لعرض الأشخاص الذين يقفون خلف شركتك الناشئة.",
+      foundersEmptyDesc:
+        "أضف فريق المؤسسين لعرض الأشخاص الذين يقفون خلف شركتك الناشئة.",
       noInvestors: "لم يتم إضافة مستثمرين",
       noShareholders: "لا يوجد مساهمون",
       addFounder: "إضافة مؤسس",
@@ -108,26 +149,32 @@
       founder: "المؤسس",
       investor: "المستثمر",
       shareholder: "المساهم",
+      delete: "حذف",
+      edit: "تعديل",
       founderDeletedToast: "تم حذف المؤسس بنجاح.",
       founderDeleteError: "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
-       investmentTypes: {
-        Angel_Investor:      'مستثمر ملاك',
-        Angel_Group:         'مجموعة ملاك',
-        Venture_Capital_Firm:'شركة رأس مال مخاطر',
-        Accelerator:         'مسرّع أعمال',
-        Incubator:           'حاضنة أعمال',
-        Corporate_Investor:  'مستثمر مؤسسي',
-        Family_Office:       'مكتب عائلي',
-        Family:              'عائلة',
-        Friends:             'أصدقاء',
-      }
-    }
+      founderType: "مؤسس",
+      cofounderType: "مؤسس شريك",
+      fullTime: "دوام كامل",
+      partTime: "دوام جزئي",
+      investmentTypes: {
+        Angel_Investor: "مستثمر ملاك",
+        Angel_Group: "مجموعة ملاك",
+        Venture_Capital_Firm: "شركة رأس مال مخاطر",
+        Accelerator: "مسرّع أعمال",
+        Incubator: "حاضنة أعمال",
+        Corporate_Investor: "مستثمر مؤسسي",
+        Family_Office: "مكتب عائلي",
+        Family: "عائلة",
+        Friends: "أصدقاء",
+      },
+    },
   };
 
   const t = TRANSLATIONS[LANG] || TRANSLATIONS.en;
 
   function translateInvestmentType(raw) {
-    if (!raw) return '';
+    if (!raw) return "";
     return (t.investmentTypes && t.investmentTypes[raw]) || raw;
   }
 
@@ -144,9 +191,19 @@
   }
 
   function escapeHtml(s) {
-    return s ? String(s).replace(/[&<>"']/g, m => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
-    }[m])) : '';
+    return s
+      ? String(s).replace(
+          /[&<>"']/g,
+          (m) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#039;",
+            })[m],
+        )
+      : "";
   }
 
   /* ─────────────────────────────────────────────
@@ -161,22 +218,22 @@
   }
 
   function initIntlInputs() {
-    Object.keys(PLURAL).forEach(type => {
+    Object.keys(PLURAL).forEach((type) => {
       const input = document.querySelector(`#form-${type} input[name="phone"]`);
       if (input && !itiInstances[type]) {
         itiInstances[type] = window.intlTelInput(input, {
-          initialCountry: 'eg',
+          initialCountry: "eg",
           separateDialCode: true,
-          utilsScript: '/vuexy/assets/vendor/libs/intl-tel-input/js/utils.js',
+          utilsScript: "/vuexy/assets/vendor/libs/intl-tel-input/js/utils.js",
         });
       }
     });
   }
 
   function initFlatpickr() {
-    const el = document.getElementById('founder_join_date');
-    if (el && typeof flatpickr === 'function') {
-      flatpickr(el, { dateFormat: 'Y-m-d', maxDate: 'today' });
+    const el = document.getElementById("founder_join_date");
+    if (el && typeof flatpickr === "function") {
+      flatpickr(el, { dateFormat: "Y-m-d", maxDate: "today" });
     }
   }
 
@@ -189,49 +246,53 @@
       renderList(type, value);
     }, 180);
 
-    $('.search-input').on('input', function () {
-      const type = $(this).data('type');
+    $(".search-input").on("input", function () {
+      const type = $(this).data("type");
       const value = $(this).val();
       debouncedRenderList(type, value);
     });
 
     // Form submission & Modal/Offcanvas resets
-    Object.keys(PLURAL).forEach(type => {
-      $(`#form-${type}`).on('submit', function (e) {
+    Object.keys(PLURAL).forEach((type) => {
+      $(`#form-${type}`).on("submit", function (e) {
         e.preventDefault();
         if (validateForm(type)) saveItem(type, this);
       });
 
-      if (type === 'founder') {
+      if (type === "founder") {
         // Founder uses offcanvas drawer
-        const offcanvasEl = document.getElementById('offcanvas-founder');
+        const offcanvasEl = document.getElementById("offcanvas-founder");
         if (offcanvasEl) {
-          offcanvasEl.addEventListener('hidden.bs.offcanvas', function () {
-            document.getElementById('form-founder').reset();
-            clearAllErrors('founder');
+          offcanvasEl.addEventListener("hidden.bs.offcanvas", function () {
+            document.getElementById("form-founder").reset();
+            clearAllErrors("founder");
           });
         }
       } else {
-        $(`#modal-${type}`).on('hidden.bs.modal', function () {
-          this.querySelector('form').reset();
+        $(`#modal-${type}`).on("hidden.bs.modal", function () {
+          this.querySelector("form").reset();
           clearAllErrors(type);
         });
       }
     });
 
     // Real-time validation
-    $(document).on('input change blur', '.form-control, .form-select', function () {
-      const $form = $(this).closest('form');
-      const formId = $form.attr('id');
-      if (!formId) return;
+    $(document).on(
+      "input change blur",
+      ".form-control, .form-select",
+      function () {
+        const $form = $(this).closest("form");
+        const formId = $form.attr("id");
+        if (!formId) return;
 
-      const type = formId.replace('form-', '');
-      const fieldName = $(this).attr('name');
+        const type = formId.replace("form-", "");
+        const fieldName = $(this).attr("name");
 
-      if (VALIDATION_RULES[type] && VALIDATION_RULES[type][fieldName]) {
-        validateSingleField(type, fieldName);
-      }
-    });
+        if (VALIDATION_RULES[type] && VALIDATION_RULES[type][fieldName]) {
+          validateSingleField(type, fieldName);
+        }
+      },
+    );
   }
 
   /* ─────────────────────────────────────────────
@@ -239,11 +300,11 @@
   ───────────────────────────────────────────── */
 
   function renderAll() {
-    Object.keys(PLURAL).forEach(type => renderList(type));
+    Object.keys(PLURAL).forEach((type) => renderList(type));
   }
 
-  function getEmptyState(type, searchTerm = '') {
-    const term = (searchTerm || '').trim();
+  function getEmptyState(type, searchTerm = "") {
+    const term = (searchTerm || "").trim();
 
     if (term) {
       // No results when searching
@@ -269,19 +330,19 @@
     const titles = {
       founder: t.noFounders,
       investor: t.noInvestors,
-      shareholder: t.noShareholders
+      shareholder: t.noShareholders,
     };
 
     const addTexts = {
       founder: t.addFounder,
       investor: t.addInvestor,
-      shareholder: t.addShareholder
+      shareholder: t.addShareholder,
     };
 
     const icons = {
-      founder: 'ti-users',
-      investor: 'ti-building-bank',
-      shareholder: 'ti-users-group'
+      founder: "ti-users",
+      investor: "ti-building-bank",
+      shareholder: "ti-users-group",
     };
 
     return `
@@ -294,11 +355,15 @@
           </div>
           <h5 class="mb-2 fw-semibold">${titles[type]}</h5>
           <p class="text-secondary mb-4">
-            ${type === 'founder' ? t.foundersEmptyDesc :
-              type === 'investor' ? 'Showcase your funding and investor network to build credibility' :
-              'Define your ownership structure and equity distribution.'}
+            ${
+              type === "founder"
+                ? t.foundersEmptyDesc
+                : type === "investor"
+                  ? "Showcase your funding and investor network to build credibility"
+                  : "Define your ownership structure and equity distribution."
+            }
           </p>
-          <button type="button" class="btn btn-primary waves-effect waves-light" onclick="${type === 'founder' ? 'TeamInfo.openFounderDrawer()' : `openModal('${type}')`}">
+          <button type="button" class="btn btn-primary waves-effect waves-light" onclick="${type === "founder" ? "TeamInfo.openFounderDrawer()" : `openModal('${type}')`}">
             <i class="ti ti-plus me-1"></i>${addTexts[type]}
           </button>
           <div class="text-muted small mt-3 opacity-75">${t.tip}</div>
@@ -306,22 +371,24 @@
       </div>`;
   }
 
-  function renderList(type, searchTerm = '') {
+  function renderList(type, searchTerm = "") {
     const plural = PLURAL[type];
     const $container = $(`#list-${plural}`);
-    const term = (searchTerm || '').toLowerCase().trim();
+    const term = (searchTerm || "").toLowerCase().trim();
 
-    const filteredData = appData[plural].filter(item =>
-      !term || (item.name && item.name.toLowerCase().includes(term))
+    const filteredData = appData[plural].filter(
+      (item) => !term || (item.name && item.name.toLowerCase().includes(term)),
     );
 
     $container.empty();
 
     if (!filteredData.length) {
       $container.html(getEmptyState(type, searchTerm));
-      $container.find('.empty-state').hide().fadeIn(400);
+      $container.find(".empty-state").hide().fadeIn(400);
     } else {
-      const cardsHtml = filteredData.map(item => buildCard(type, item)).join('');
+      const cardsHtml = filteredData
+        .map((item) => buildCard(type, item))
+        .join("");
       $container.html(cardsHtml);
     }
 
@@ -329,45 +396,52 @@
   }
 
   function buildCard(type, item) {
-    if (type === 'founder') {
+    if (type === "founder") {
       const rows = [];
       if (item.email) {
-        rows.push(`<div class="small mb-2"><i class="ti ti-mail me-2"></i>${escapeHtml(item.email)}</div>`);
+        rows.push(
+          `<div class="small mb-2"><i class="ti ti-mail me-2"></i>${escapeHtml(item.email)}</div>`,
+        );
       }
       if (item.phone) {
-        rows.push(`<div class="small mb-2"><i class="ti ti-phone me-2"></i>${escapeHtml(item.phone)}</div>`);
+        rows.push(
+          `<div class="small mb-2"><i class="ti ti-phone me-2"></i>${escapeHtml(item.phone)}</div>`,
+        );
       }
       if (item.join_date) {
-        rows.push(`<div class="small mb-2"><i class="ti ti-calendar me-2"></i>${escapeHtml(item.join_date)}</div>`);
+        rows.push(
+          `<div class="small mb-2"><i class="ti ti-calendar me-2"></i>${escapeHtml(item.join_date)}</div>`,
+        );
       }
       const commitmentBadge = item.commitment
-        ? `<span class="badge bg-label-secondary text-dark">${escapeHtml(item.commitment)}</span>`
-        : '';
+        ? `<span class="badge bg-label-secondary text-dark">${escapeHtml(item.commitment == 'Full-time' ? t['fullTime'] : t['partTime'])}</span>`
+        : "";
       const linkedinIcon = item.linkedin
         ? `<a href="${escapeHtml(item.linkedin)}" target="_blank" rel="noopener noreferrer" class="btn btn-icon btn-text-secondary rounded-pill" title="LinkedIn" aria-label="LinkedIn"><i class="ti ti-brand-linkedin"></i></a>`
-        : '';
-      const footer = (commitmentBadge || linkedinIcon)
-        ? `<div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top"><div>${commitmentBadge}</div><div>${linkedinIcon}</div></div>`
-        : '';
+        : "";
+      const footer =
+        commitmentBadge || linkedinIcon
+          ? `<div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top"><div>${commitmentBadge}</div><div>${linkedinIcon}</div></div>`
+          : "";
       return `
       <div class="col-12 col-md-6 col-xl-4">
         <div class="card item-card h-100 shadow-none border">
           <div class="card-body">
             <div class="d-flex align-items-center mb-3">
               <div class="flex-grow-1">
-                <h6 class="mb-0 fw-bold">${escapeHtml(item.name || '')}</h6>
-                ${item.type ? `<small class="text-muted">${escapeHtml(item.type)}</small>` : ''}
+                <h6 class="mb-0 fw-bold">${escapeHtml(item.name || "")}</h6>
+                ${item.type ? `<small class="text-muted">${escapeHtml(item.type == 'Founder' ? t['founderType'] : t['cofounderType'])}</small>` : ""}
               </div>
-              ${buildDropdown('founder', item.id)}
+              ${buildDropdown("founder", item.id)}
             </div>
-            ${rows.join('')}
+            ${rows.join("")}
             ${footer}
           </div>
         </div>
       </div>`;
     }
 
-    if (type === 'investor') {
+    if (type === "investor") {
       return `
       <div class="col-12 col-md-6 col-xl-4">
         <div class="card item-card h-100 shadow-none border">
@@ -380,17 +454,17 @@
             <div class="flex-grow-1 ms-3">
               <h6 class="mb-0 fw-bold">${escapeHtml(item.name)}</h6>
               <small class="text-secondary d-block mb-1">
-                ${escapeHtml(translateInvestmentType(item.type) || 'Standard')}
+                ${escapeHtml(translateInvestmentType(item.type) || "Standard")}
               </small>
-              <small class="text-success fw-bold">${escapeHtml(item.investment_amount || '')}</small>
+              <small class="text-success fw-bold">${escapeHtml(item.investment_amount || "")}</small>
             </div>
-            ${buildDropdown('investor', item.id)}
+            ${buildDropdown("investor", item.id)}
           </div>
         </div>
       </div>`;
     }
 
-    if (type === 'shareholder') {
+    if (type === "shareholder") {
       const pct = parseFloat(item.percentage) || 0;
       return `
       <div class="col-12 col-md-6 col-xl-4">
@@ -399,9 +473,9 @@
             <div class="d-flex justify-content-between align-items-start mb-2">
               <div>
                 <h6 class="mb-1 fw-bold">${escapeHtml(item.name)}</h6>
-                <small class="text-muted">${escapeHtml(item.role || 'Shareholder')}</small>
+                <small class="text-muted">${escapeHtml(item.role || "Shareholder")}</small>
               </div>
-              ${buildDropdown('shareholder', item.id)}
+              ${buildDropdown("shareholder", item.id)}
             </div>
             <div class="d-flex justify-content-between align-items-center mb-1">
               <small class="text-muted">Ownership</small>
@@ -418,7 +492,7 @@
       </div>`;
     }
 
-    return '';
+    return "";
   }
 
   function buildDropdown(type, id) {
@@ -432,14 +506,14 @@
           <li>
             <a class="dropdown-item" href="javascript:void(0)"
               onclick="TeamInfo.editItem('${type}', ${id})">
-              <i class="ti ti-pencil me-1"></i> Edit
+              <i class="ti ti-pencil me-1"></i> ${t.edit}
             </a>
           </li>
           <li><hr class="dropdown-divider"></li>
           <li>
             <a class="dropdown-item text-danger" href="javascript:void(0)"
               onclick="TeamInfo.deleteItem('${type}', ${id})">
-              <i class="ti ti-trash me-1"></i> Delete
+              <i class="ti ti-trash me-1"></i> ${t.delete}
             </a>
           </li>
         </ul>
@@ -451,55 +525,61 @@
   ───────────────────────────────────────────── */
 
   function openFounderDrawer(row) {
-    const formEl = document.getElementById('form-founder');
+    const formEl = document.getElementById("form-founder");
     formEl.reset();
-    clearAllErrors('founder');
-    if (itiInstances.founder) itiInstances.founder.setNumber('');
-    const titleEl = document.getElementById('offcanvasFounderLabel');
-    const btnSave = document.getElementById('btn-save-founder');
+    clearAllErrors("founder");
+    if (itiInstances.founder) itiInstances.founder.setNumber("");
+    const titleEl = document.getElementById("offcanvasFounderLabel");
+    const btnSave = document.getElementById("btn-save-founder");
 
     if (row) {
-      console.log('row', row);
+      console.log("row", row);
       // Edit mode
-      if (titleEl) titleEl.textContent = (LANG === 'ar') ? 'تعديل المؤسس' : 'Edit Founder';
-      if (btnSave) btnSave.textContent = (LANG === 'ar') ? 'حفظ التغييرات' : 'Save Changes';
-      const $f = $('#form-founder');
+      if (titleEl)
+        titleEl.textContent = LANG === "ar" ? "تعديل المؤسس" : "Edit Founder";
+      if (btnSave)
+        btnSave.textContent = LANG === "ar" ? "حفظ التغييرات" : "Save Changes";
+      const $f = $("#form-founder");
       Object.entries(row).forEach(([k, v]) => {
-        if (k === 'phone' && itiInstances.founder) {
-          itiInstances.founder.setNumber(v || '');
+        if (k === "phone" && itiInstances.founder) {
+          itiInstances.founder.setNumber(v || "");
         } else if (k === "type" || k === "commitment") {
-          $f.find(`[name="${k}"]`).select2().val(v).trigger("change");
+          $f.find(`[name="${k}"]`).val(v).trigger("change");
         } else {
           $f.find(`[name="${k}"]`).val(v);
         }
       });
     } else {
       // Add mode
-      if (titleEl) titleEl.textContent = (LANG === 'ar') ? 'إضافة مؤسس' : 'Add Founder';
-      if (btnSave) btnSave.textContent = (LANG === 'ar') ? 'حفظ المؤسس' : 'Save Founder';
-      $('#form-founder [name="id"]').val('');
+      if (titleEl)
+        titleEl.textContent = LANG === "ar" ? "إضافة مؤسس" : "Add Founder";
+      if (btnSave)
+        btnSave.textContent = LANG === "ar" ? "حفظ المؤسس" : "Save Founder";
+      $('#form-founder [name="id"]').val("");
     }
 
-    bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('offcanvas-founder')).show();
+    bootstrap.Offcanvas.getOrCreateInstance(
+      document.getElementById("offcanvas-founder"),
+    ).show();
   }
 
   function openModal(type) {
-    if (type === 'founder') {
+    if (type === "founder") {
       openFounderDrawer();
       return;
     }
     const $m = $(`#modal-${type}`);
-    $m.find('form')[0].reset();
-    $m.find('[name="id"]').val('');
+    $m.find("form")[0].reset();
+    $m.find('[name="id"]').val("");
     clearAllErrors(type);
-    $m.modal('show');
+    $m.modal("show");
   }
 
   function editItem(type, id) {
-    const item = appData[PLURAL[type]].find(i => String(i.id) === String(id));
+    const item = appData[PLURAL[type]].find((i) => String(i.id) === String(id));
     if (!item) return;
 
-    if (type === 'founder') {
+    if (type === "founder") {
       openFounderDrawer(item);
       return;
     }
@@ -508,14 +588,14 @@
     clearAllErrors(type);
 
     Object.entries(item).forEach(([k, v]) => {
-      if (k === 'phone' && itiInstances[type]) {
-        itiInstances[type].setNumber(v || '');
+      if (k === "phone" && itiInstances[type]) {
+        itiInstances[type].setNumber(v || "");
       } else {
         $f.find(`[name="${k}"]`).val(v);
       }
     });
 
-    $(`#modal-${type}`).modal('show');
+    $(`#modal-${type}`).modal("show");
   }
 
   function saveItem(type, formEl) {
@@ -527,7 +607,7 @@
       if (e164) {
         formData.phone = e164;
       } else {
-        const raw = (formData.phone || '').trim();
+        const raw = (formData.phone || "").trim();
         if (raw) {
           const dialCode = iti.getSelectedCountryData().dialCode;
           formData.phone = dialCode ? `+${dialCode}${raw}` : raw;
@@ -537,43 +617,57 @@
 
     const isEdit = !!formData.id;
     const payload = { ...buildPayload(type, formData), id: formData.id };
-    const url = isEdit ? TEAM_INFO_CONFIG.routes.edit : TEAM_INFO_CONFIG.routes.add;
+    const url = isEdit
+      ? TEAM_INFO_CONFIG.routes.edit
+      : TEAM_INFO_CONFIG.routes.add;
 
     $.ajax({
-      url, method: 'POST', data: payload,
-      headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+      url,
+      method: "POST",
+      data: payload,
+      headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
       success(res) {
-        toastr.success(res.state || 'Success');
+        toastr.success(res.state || "Success");
         const mapFounder = (f) => ({
           id: f.id,
           name: f.name,
           email: f.email,
-          phone: f.phone || '',
-          linkedin: f.linkedin || '',
-          join_date: f.join_date || '',
-          type: f.founder_type || '',
-          commitment: f.working_commitment || '',
+          phone: f.phone || "",
+          linkedin: f.linkedin || "",
+          join_date: f.join_date || "",
+          type: f.founder_type || "",
+          commitment: f.working_commitment || "",
         });
         if (isEdit) {
-          if (type === 'founder' && res.founder) {
-            const idx = appData.founders.findIndex(i => String(i.id) === String(formData.id));
+          if (type === "founder" && res.founder) {
+            const idx = appData.founders.findIndex(
+              (i) => String(i.id) === String(formData.id),
+            );
             if (idx !== -1) appData.founders[idx] = mapFounder(res.founder);
           } else {
-            const idx = appData[PLURAL[type]].findIndex(i => String(i.id) === String(formData.id));
-            if (idx !== -1) appData[PLURAL[type]][idx] = { ...appData[PLURAL[type]][idx], ...formData };
+            const idx = appData[PLURAL[type]].findIndex(
+              (i) => String(i.id) === String(formData.id),
+            );
+            if (idx !== -1)
+              appData[PLURAL[type]][idx] = {
+                ...appData[PLURAL[type]][idx],
+                ...formData,
+              };
           }
         } else {
-          if (type === 'founder' && res.founder) {
+          if (type === "founder" && res.founder) {
             appData.founders.push(mapFounder(res.founder));
           } else {
             formData.id = Date.now();
             appData[PLURAL[type]].push(formData);
           }
         }
-        if (type === 'founder') {
-          bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('offcanvas-founder')).hide();
+        if (type === "founder") {
+          bootstrap.Offcanvas.getOrCreateInstance(
+            document.getElementById("offcanvas-founder"),
+          ).hide();
         } else {
-          $(`#modal-${type}`).modal('hide');
+          $(`#modal-${type}`).modal("hide");
         }
         renderList(type);
       },
@@ -581,31 +675,33 @@
         if (xhr.status === 422 && xhr.responseJSON.errors) {
           applyServerErrors(type, xhr.responseJSON.errors);
         } else {
-          toastr.error('Error saving data');
+          toastr.error("Error saving data");
         }
-      }
+      },
     });
   }
 
   function deleteItem(type, id) {
-    const name = appData[PLURAL[type]].find(i => String(i.id) === String(id)).name;
+    const name = appData[PLURAL[type]].find(
+      (i) => String(i.id) === String(id),
+    ).name;
 
-    if (type === 'founder') {
+    if (type === "founder") {
       const deleteTitle = `${t.delete} ${t[type]}`;
-      const deleteMsg   = `Are you sure you want to delete ${escapeHtml(name)}?`;
-      const errorMsg    = t.founderDeleteError;
-      const successMsg  = t.founderDeletedToast;
+      const deleteMsg = `Are you sure you want to delete ${escapeHtml(name)}?`;
+      const errorMsg = t.founderDeleteError;
+      const successMsg = t.founderDeletedToast;
 
       Swal.fire({
-        icon: 'warning',
+        icon: "warning",
         title: deleteTitle,
         text: deleteMsg,
         showCancelButton: true,
         confirmButtonText: t.yesDelete,
         cancelButtonText: t.noCancel,
         customClass: {
-          confirmButton: 'btn btn-danger ms-3',
-          cancelButton: 'btn btn-label-secondary',
+          confirmButton: "btn btn-danger ms-3",
+          cancelButton: "btn btn-label-secondary",
         },
         buttonsStyling: false,
         reverseButtons: true,
@@ -614,21 +710,31 @@
           return new Promise((resolve) => {
             $.ajax({
               url: TEAM_INFO_CONFIG.routes.delete,
-              method: 'POST',
+              method: "POST",
               data: { id },
-              headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+              headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+              },
               success: (res) => {
                 if (res && res.state === true) resolve(res);
-                else { Swal.showValidationMessage(errorMsg); resolve(false); }
+                else {
+                  Swal.showValidationMessage(errorMsg);
+                  resolve(false);
+                }
               },
-              error: () => { Swal.showValidationMessage(errorMsg); resolve(false); }
+              error: () => {
+                Swal.showValidationMessage(errorMsg);
+                resolve(false);
+              },
             });
           });
         },
         allowOutsideClick: () => !Swal.isLoading(),
       }).then((result) => {
         if (result.isConfirmed && result.value) {
-          appData[PLURAL[type]] = appData[PLURAL[type]].filter(i => String(i.id) !== String(id));
+          appData[PLURAL[type]] = appData[PLURAL[type]].filter(
+            (i) => String(i.id) !== String(id),
+          );
           renderList(type);
           toastr.success(successMsg);
         }
@@ -636,23 +742,27 @@
     } else {
       releaseWarningAlert({
         title: `${t.delete} ${t[type]}`,
-        message: `${t.deleteMsg.replace('${name}', escapeHtml(name))}`,
+        message: `${t.deleteMsg.replace("${name}", escapeHtml(name))}`,
         confirmText: `${t.yesDelete}`,
         cancelText: `${t.noCancel}`,
-        confirmColor: 'danger',
+        confirmColor: "danger",
         onConfirm: () => {
           $.ajax({
             url: TEAM_INFO_CONFIG.routes.delete,
-            method: 'POST',
+            method: "POST",
             data: { id },
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+            headers: {
+              "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
             success() {
-              appData[PLURAL[type]] = appData[PLURAL[type]].filter(i => String(i.id) !== String(id));
+              appData[PLURAL[type]] = appData[PLURAL[type]].filter(
+                (i) => String(i.id) !== String(id),
+              );
               renderList(type);
-              toastr.success(LANG === 'ar' ? 'تم الحذف' : 'Deleted');
-            }
+              toastr.success(LANG === "ar" ? "تم الحذف" : "Deleted");
+            },
           });
-        }
+        },
       });
     }
   }
@@ -673,32 +783,38 @@
   function applyServerErrors(type, errors) {
     Object.entries(errors).forEach(([k, v]) => {
       const m = SERVER_ERROR_MAP[k];
-      if (m) showFieldError(type, m.errorId, m.fieldName, Array.isArray(v) ? v[0] : v);
+      if (m)
+        showFieldError(
+          type,
+          m.errorId,
+          m.fieldName,
+          Array.isArray(v) ? v[0] : v,
+        );
     });
   }
 
   function clearAllErrors(type) {
     const $f = $(`#form-${type}`);
-    $f.find('.invalid-feedback').hide();
-    $f.find('.is-invalid').removeClass('is-invalid');
+    $f.find(".invalid-feedback").hide();
+    $f.find(".is-invalid").removeClass("is-invalid");
   }
 
   function showFieldError(type, eid, fname, msg = null) {
     const $err = $(`#error-${eid}`);
     if (msg) $err.text(msg);
     $err.show();
-    $(`#form-${type} [name="${fname}"]`).addClass('is-invalid');
+    $(`#form-${type} [name="${fname}"]`).addClass("is-invalid");
   }
 
   function clearFieldError(type, eid, fname) {
     $(`#error-${eid}`).hide();
-    $(`#form-${type} [name="${fname}"]`).removeClass('is-invalid');
+    $(`#form-${type} [name="${fname}"]`).removeClass("is-invalid");
   }
 
   function validateForm(type) {
     let valid = true;
     const rules = VALIDATION_RULES[type];
-    Object.keys(rules).forEach(f => {
+    Object.keys(rules).forEach((f) => {
       if (!validateSingleField(type, f)) valid = false;
     });
     return valid;
@@ -709,7 +825,7 @@
     if (!rule) return true;
 
     const eid = rule.errorId || field;
-    const val = ($(`#form-${type} [name="${field}"]`).val() || '').trim();
+    const val = ($(`#form-${type} [name="${field}"]`).val() || "").trim();
 
     if (rule.required && !val) {
       showFieldError(type, eid, field);
@@ -736,7 +852,10 @@
       if (rule.intlTel && itiInstances[type]) {
         // Only run library validation when utils.js has finished loading.
         // Until then, accept anything non-empty — the server has its own max-length rule.
-        if (typeof window.intlTelInputUtils !== 'undefined' && !itiInstances[type].isValidNumber()) {
+        if (
+          typeof window.intlTelInputUtils !== "undefined" &&
+          !itiInstances[type].isValidNumber()
+        ) {
           showFieldError(type, eid, field);
           return false;
         }
@@ -757,7 +876,12 @@
   }
 
   function isValidUrl(s) {
-    try { new URL(s); return true; } catch { return false; }
+    try {
+      new URL(s);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   // ===================== EXPORTS =====================
@@ -766,7 +890,7 @@
     openFounderDrawer,
     editItem,
     deleteItem,
-    renderList
+    renderList,
   };
 
   // Back-compat: investor/shareholder blade buttons still call these bare globals.
@@ -774,6 +898,7 @@
   window.editItem = editItem;
   window.deleteItem = deleteItem;
 
-  $(function () { init(); });
-
-}(jQuery));
+  $(function () {
+    init();
+  });
+})(jQuery);

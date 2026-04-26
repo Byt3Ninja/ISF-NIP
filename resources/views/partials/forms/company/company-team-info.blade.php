@@ -202,11 +202,11 @@ $foundersCount = count($foundersPayload);
           </select>
         </div>
       </div>
+      <div class="offcanvas-footer border-top mt-6 pt-3 d-flex align-items-center gap-3">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">{{ __('admin.Cancel') }}</button>
+        <button type="submit" form="form-founder" class="btn btn-primary" id="btn-save-founder">{{ __('admin.Save_Founder') }}</button>
+      </div>
     </form>
-  </div>
-  <div class="offcanvas-footer border-top p-6 d-flex align-items-center gap-3">
-    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">{{ __('admin.Cancel') }}</button>
-    <button type="submit" form="form-founder" class="btn btn-primary" id="btn-save-founder">{{ __('admin.Save_Founder') }}</button>
   </div>
 </div>
 
