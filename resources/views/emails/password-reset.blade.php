@@ -1,3 +1,8 @@
+@php
+    $setting = App\Settings::first();
+    $platformName = $setting ? ( $setting->Platform_Name ?? config('app.name') ) : config('app.name');
+@endphp
+
 @extends('emails.layout.master')
 
 @section('content')
@@ -35,7 +40,7 @@
             </p>
             <p style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; line-height: 1.6; margin: 0 0 10px; padding: 0;">
                 Thank you,<br>
-                {{ config('app.name') }}
+                {{ $platformName }}
             </p>
         </td>
     </tr>
