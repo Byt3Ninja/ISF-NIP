@@ -42,7 +42,7 @@ class AppServiceProvider extends ServiceProvider
                 $settings = Settings::find(1);
 
                 if ($settings) {
-                    Config::set('mail.default', 'gmail');
+                    Config::set('mail.default', env('MAIL_MAILER', 'gmail'));
                         Config::set('mail.mailers.smtp.host', $settings->host ?? env('MAIL_HOST'));
                         Config::set('mail.mailers.smtp.port', $settings->Port ?? env('MAIL_PORT'));
                         Config::set('mail.mailers.smtp.username', $settings->Mail ?? env('MAIL_USERNAME'));
