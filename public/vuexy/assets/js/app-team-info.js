@@ -459,6 +459,7 @@
     const btnSave = document.getElementById('btn-save-founder');
 
     if (row) {
+      console.log('row', row);
       // Edit mode
       if (titleEl) titleEl.textContent = (LANG === 'ar') ? 'تعديل المؤسس' : 'Edit Founder';
       if (btnSave) btnSave.textContent = (LANG === 'ar') ? 'حفظ التغييرات' : 'Save Changes';
@@ -466,6 +467,8 @@
       Object.entries(row).forEach(([k, v]) => {
         if (k === 'phone' && itiInstances.founder) {
           itiInstances.founder.setNumber(v || '');
+        } else if (k === "type" || k === "commitment") {
+          $f.find(`[name="${k}"]`).select2().val(v).trigger("change");
         } else {
           $f.find(`[name="${k}"]`).val(v);
         }

@@ -155,17 +155,17 @@ $foundersCount = count($foundersPayload);
         <!-- Name -->
         <div class="col-12">
           <label class="form-label">{{ __('admin.founder_name_label') }} <span class="text-danger">*</span></label>
-          <input type="text" name="name" class="form-control" maxlength="100" required />
-          <div class="invalid-feedback" id="error-name"></div>
+          <input type="text" name="name" class="form-control" maxlength="100" placeholder="{{ __('admin.founder_name_label') }}" required />
+          <div class="invalid-feedback" id="error-name">{{ __('admin.Required_Field') }}</div>
         </div>
         <!-- Email -->
         <div class="col-12">
           <label class="form-label">{{ __('admin.founder_email_label') }} <span class="text-danger">*</span></label>
-          <input type="email" name="email" class="form-control" maxlength="254" required />
-          <div class="invalid-feedback" id="error-email"></div>
+          <input type="email" name="email" class="form-control" maxlength="254" placeholder="{{ __('admin.founder_email_label') }}" required />
+          <div class="invalid-feedback" id="error-email">{{ __('admin.Required_Field') }}</div>
         </div>
         <!-- Phone -->
-        <div class="col-12">
+        <div class="col-12 d-grid">
           <label class="form-label">{{ __('admin.founder_phone_label') }}</label>
           <input type="tel" name="phone" class="form-control" maxlength="20" />
           <div class="invalid-feedback" id="error-phone"></div>
@@ -185,17 +185,17 @@ $foundersCount = count($foundersPayload);
         <!-- Type (required) -->
         <div class="col-12">
           <label class="form-label">{{ __('admin.founder_type_label') }} <span class="text-danger">*</span></label>
-          <select name="type" class="form-select" required>
+          <select name="type" class="form-select select2" required>
             <option value="">{{ __('admin.select_option') }}</option>
             <option value="Founder">{{ __('admin.Founder') }}</option>
             <option value="Co-founder">{{ __('admin.Co_founder') }}</option>
           </select>
-          <div class="invalid-feedback" id="error-type"></div>
+          <div class="invalid-feedback" id="error-type">{{ __('admin.Required_Field') }}</div>
         </div>
         <!-- Commitment -->
         <div class="col-12">
           <label class="form-label">{{ __('admin.founder_commitment_label') }}</label>
-          <select name="commitment" class="form-select">
+          <select name="commitment" class="form-select select2">
             <option value="">{{ __('admin.select_option') }}</option>
             <option value="Full-time">{{ __('admin.full_time') }}</option>
             <option value="Part-time">{{ __('admin.part_time') }}</option>
@@ -204,7 +204,7 @@ $foundersCount = count($foundersPayload);
       </div>
     </form>
   </div>
-  <div class="offcanvas-footer border-top p-3 d-flex justify-content-end gap-2">
+  <div class="offcanvas-footer border-top p-6 d-flex align-items-center gap-3">
     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">{{ __('admin.Cancel') }}</button>
     <button type="submit" form="form-founder" class="btn btn-primary" id="btn-save-founder">{{ __('admin.Save_Founder') }}</button>
   </div>
