@@ -2714,6 +2714,8 @@ return [
 		'schedule_session' => 'Schedule Session',
 		'no_panels_added' => 'No panels added yet.',
 		'add_first_panel' => 'Add your first panel',
+		'panel_judges_required' => 'Please assign at least one judge to panel #:panel.',
+		'panel_companies_required' => 'Please assign at least one startup to panel #:panel.',
 	],
 	'training_sessions' => 'Training Sessions',
 	'training_courses' => 'Training Courses',
