@@ -651,7 +651,7 @@
               </div>
             @endif
 
-            <div class="col-md-6 col-lg-4">
+            {{-- <div class="col-md-6 col-lg-4">
               <div class="d-flex align-items-start gap-3">
                 <div class="badge rounded bg-label-{{ $generatesRevenue ? 'success' : 'secondary' }} p-2 flex-shrink-0">
                   <i class="ti ti-{{ $generatesRevenue ? 'trending-up' : 'trending-down' }} ti-md"></i>
@@ -677,20 +677,22 @@
                   @endif
                 </div>
               </div>
-            </div>
+            </div> --}}
 
             @if ($productsDesc)
               <div class="col-12">
                 <hr class="my-2 opacity-25">
-                <div class="d-flex align-items-start gap-3">
-                  <div class="badge rounded bg-label-warning p-2 flex-shrink-0 mt-1">
-                    <i class="ti ti-list-details ti-md"></i>
-                  </div>
-                  <div class="min-w-0 flex-grow-1">
-                    <small class="d-block text-muted text-uppercase fw-semibold mb-2"
+                <div class="d-flex flex-column">
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="badge rounded bg-label-warning p-2 flex-shrink-0">
+                      <i class="ti ti-list-details ti-md"></i>
+                    </div>
+                    <small class="d-block text-muted text-uppercase fw-semibold"
                       style="font-size: 0.7rem; letter-spacing: 0.05em;">
                       {{ __('startup.products_services_description') }}
                     </small>
+                  </div>
+                  <div class="min-w-0 flex-grow-1">
                     <p class="mb-0 text-break" style="word-break: break-word; overflow-wrap: break-word; white-space: pre-line; line-height: 1.6;">
                       {{ $productsDesc }}
                     </p>
