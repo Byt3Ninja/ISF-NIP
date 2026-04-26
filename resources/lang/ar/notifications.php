@@ -43,9 +43,13 @@ return [
     ],
 
     'task' => [
-        'broadcast' => 'تحديث مهمة: :message',
-        'whatsapp'  => 'تحديث مهمة: :message',
-        'subject'   => 'تحديث مهمة',
+        'broadcast'       => 'تحديث مهمة: :message',
+        'whatsapp'        => 'تحديث مهمة: :message',
+        'subject'         => 'تحديث مهمة',
+        'subject_add'     => 'تمت إضافة مهمة',
+        'subject_update'  => 'تم تحديث المهمة',
+        'subject_archive' => 'تمت أرشفة المهمة',
+        'subject_reopen'  => 'تمت إعادة فتح المهمة',
     ],
 
     'mentorship_session' => [

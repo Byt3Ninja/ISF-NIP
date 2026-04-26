@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Company;
 use App\Cycle;
-use App\Jobs\SendTaskNotificationJob;
 use App\MentorshipTask;
 use App\ProgramTask;
 use App\ProgramTaskActivity;
@@ -19,6 +18,7 @@ use Illuminate\Support\Facades\Validator;
 
 class TasksController extends Controller
 {
+    use \App\Traits\NotifiesAdmins;
     /**
      * Display a listing of the resource.
      */
@@ -288,16 +288,25 @@ class TasksController extends Controller
             $assignees_company = $task->assignees()->pluck('company_id')->toArray();
             $assignees = User::whereIn('company_id', $assignees_company)->get();
             $mentor = User::find($task->created_by);
+            $startupNames = $task->assignees->pluck('name')->filter()->values()->toArray();
 
-            // Send Notification To Mentor & Startups
+            // Send Notification To Mentor (once) & each Startup
             $message = "New Task: " . $task->title;
             $data = [
-                'task' => $task,
-                'message' => $message,
-                'action' => 'add'
+                'task'         => $task,
+                'message'      => $message,
+                'action'       => 'add',
+                'mentor'       => $mentor,
+                'startupNames' => $startupNames,
             ];
+            if ($mentor && $assignees->isNotEmpty()) {
+                \Illuminate\Support\Facades\Notification::send([$mentor], new \App\Notifications\TaskNotification($data));
+            }
             foreach ($assignees as $startup) {
-                SendTaskNotificationJob::dispatch($mentor, $startup, $task, $data);
+                \Illuminate\Support\Facades\Notification::send([$startup], new \App\Notifications\TaskNotification($data));
+            }
+            if ($mentor) {
+                $this->notifyAdmins($mentor, $data);
             }
 
             return response()->json([
@@ -556,6 +565,37 @@ class TasksController extends Controller
                     ];
                 }
                 $task->update(['attachments' => $attachments]);
+            }
+
+            $task->load('assignees');
+            $updateAssigneesCompany = $task->assignees()->pluck('company_id')->toArray();
+            $updateAssignees        = User::whereIn('company_id', $updateAssigneesCompany)->get();
+            $updateMentor           = User::find($task->created_by);
+            $updateStartupNames     = $task->assignees->pluck('name')->filter()->values()->toArray();
+
+            $newStatus = $task->status;
+            $oldStatus = $oldValues['status'] ?? null;
+            $notifAction = match(true) {
+                $newStatus === 'archived'                          => 'archive',
+                $oldStatus === 'archived' && $newStatus !== 'archived' => 'reopen',
+                default                                            => 'update',
+            };
+
+            $updateNotifData = [
+                'task'         => $task,
+                'message'      => "Task Updated: " . $task->title,
+                'action'       => $notifAction,
+                'mentor'       => $updateMentor,
+                'startupNames' => $updateStartupNames,
+            ];
+            if ($updateMentor && $updateAssignees->isNotEmpty()) {
+                \Illuminate\Support\Facades\Notification::send([$updateMentor], new \App\Notifications\TaskNotification($updateNotifData));
+            }
+            foreach ($updateAssignees as $startup) {
+                \Illuminate\Support\Facades\Notification::send([$startup], new \App\Notifications\TaskNotification($updateNotifData));
+            }
+            if ($updateMentor) {
+                $this->notifyAdmins($updateMentor, $updateNotifData);
             }
 
             return response()->json([
@@ -916,7 +956,6 @@ class TasksController extends Controller
                 ->update(['status' => $status, 'last_updated' => now()]);
            
             if ($task instanceof ProgramTask) {
-                
                 ProgramTaskActivity::create([
                     'program_task_id' => $task->id,
                     'user_id'         => auth()->id(),
@@ -925,7 +964,38 @@ class TasksController extends Controller
                     'was'             => $oldStatus,
                     'new'             => $status,
                 ]);
-                
+
+                $moveNotifAction = null;
+                if ($status === 'archived') {
+                    $moveNotifAction = 'archive';
+                } elseif ($oldStatus === 'archived') {
+                    $moveNotifAction = 'reopen';
+                }
+
+                if ($moveNotifAction) {
+                    $task->load('assignees');
+                    $moveAssigneesCompany = $task->assignees()->pluck('company_id')->toArray();
+                    $moveAssignees        = User::whereIn('company_id', $moveAssigneesCompany)->get();
+                    $moveMentor           = User::find($task->created_by);
+                    $moveStartupNames     = $task->assignees->pluck('name')->filter()->values()->toArray();
+
+                    $moveNotifData = [
+                        'task'         => $task,
+                        'message'      => ($moveNotifAction === 'archive' ? "Task Archived: " : "Task Reopened: ") . $task->title,
+                        'action'       => $moveNotifAction,
+                        'mentor'       => $moveMentor,
+                        'startupNames' => $moveStartupNames,
+                    ];
+                    if ($moveMentor && $moveAssignees->isNotEmpty()) {
+                        \Illuminate\Support\Facades\Notification::send([$moveMentor], new \App\Notifications\TaskNotification($moveNotifData));
+                    }
+                    foreach ($moveAssignees as $assignee) {
+                        \Illuminate\Support\Facades\Notification::send([$assignee], new \App\Notifications\TaskNotification($moveNotifData));
+                    }
+                    if ($moveMentor) {
+                        $this->notifyAdmins($moveMentor, $moveNotifData);
+                    }
+                }
             }
 
             if($task->status == 'review') {

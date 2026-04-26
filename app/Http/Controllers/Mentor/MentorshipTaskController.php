@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Storage;
 
 class MentorshipTaskController extends Controller
 {
+    use \App\Traits\NotifiesAdmins;
 
 
 
@@ -516,12 +517,15 @@ class MentorshipTaskController extends Controller
 			// Send Notification To Mentor & Startup
 			$message = "New Task: " . $task->title;
 			$data = [
-				'task' => $task,
-				'message' => $message,
-				'action' => 'add'
+				'task'         => $task,
+				'message'      => $message,
+				'action'       => 'add',
+				'mentor'       => $mentor,
+				'startupNames' => [$startup->name ?? ''],
 			];
 
 			SendTaskNotificationJob::dispatch($mentor, $startup, $task, $data);
+			$this->notifyAdmins($mentor, $data);
 			// try {
 			// 	Notification::send([$mentor, $startup], new TaskNotification($data));
 			// } catch (\Throwable $th) {
@@ -640,11 +644,22 @@ class MentorshipTaskController extends Controller
 
 			$message = "Task Status Updated: " . $task->title;
 			$data = [
-				'task' => $task,
-				'message' => $message,
-				'action' => 'move'
+				'task'         => $task,
+				'message'      => $message,
+				'action'       => 'move',
+				'mentor'       => $mentor,
+				'startupNames' => [$startup->name ?? ''],
 			];
 			Notification::send([$mentor, $startup], new TaskNotification($data));
+
+			$adminAction = match(true) {
+				$status === 'archived'    => 'archive',
+				$old_status === 'archived' => 'reopen',
+				default                   => null,
+			};
+			if ($adminAction && $mentor) {
+				$this->notifyAdmins($mentor, array_merge($data, ['action' => $adminAction]));
+			}
 
 			if ($task->user->country_code_w_a && $task->user->whatsapp) {
 				$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
@@ -801,11 +816,14 @@ class MentorshipTaskController extends Controller
 			}
 			$message = "Task Updated: " . $task->title;
 			$data = [
-    			'task' => $task,
-    			'message' => $message,
-    			'action' => 'update'
+				'task'         => $task,
+				'message'      => $message,
+				'action'       => 'update',
+				'mentor'       => $task->mentor,
+				'startupNames' => [$task->user->name ?? ''],
 			];
 			Notification::send([$task->mentor, $task->user], new TaskNotification($data));
+			$this->notifyAdmins($task->mentor, $data);
 
 			if ($task->user->country_code_w_a && $task->user->whatsapp) {
 				$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
