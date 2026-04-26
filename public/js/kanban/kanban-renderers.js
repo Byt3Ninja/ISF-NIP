@@ -10,7 +10,7 @@
 function buildAttachmentItem(att, taskId, canDelete) {
   const deleteBtn = canDelete
     ? `<button type="button" class="btn btn-icon btn-sm btn-text-danger rounded-circle delete-attachment-btn"
-         data-task-id="${taskId}" data-attachment-id="${att.id}"
+         data-task-id="${taskId}" data-attachment-id="${att.id}" data-attachment-name="${att.name}"
          title="${window.KanbanConfig.labels.remove}">
          <i class="ti ti-trash ti-xs"></i>
        </button>`

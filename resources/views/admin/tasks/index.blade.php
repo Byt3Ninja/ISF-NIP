@@ -1079,7 +1079,7 @@ $(function () {
       method: 'DELETE',
       headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
       success: function (response) {
-        $btn.closest('[data-filename]').remove();
+        $btn.closest('div[data-filename]').remove();
         if (!$('#existing-attachments-list').children().length) $('#existing-attachments').hide();
 
         // Sync DataTable row data

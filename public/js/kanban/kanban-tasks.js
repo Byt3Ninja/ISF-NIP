@@ -380,6 +380,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
     const $btn = $(this);
     const taskId = $btn.data('task-id');
     const attachmentId = $btn.data('attachment-id');
+    const attachmentName = $btn.data('attachment-name');
 
     releaseWarningAlert({
       title: lbl.deleteAttachment + '?', message: lbl.recover,
@@ -387,14 +388,16 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
       onConfirm: () => {
         $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
         $.ajax({
-          url: cfg.routes.deleteAttachment.replace(':taskId', taskId).replace(':filename', attachmentId),
+          url: cfg.routes.deleteAttachment.replace(':taskId', taskId).replace(':filename', encodeURIComponent(attachmentName || attachmentId)),
           type: 'DELETE',
           success: function () {
             $(`#att-row-${attachmentId}`).fadeOut(300, function () {
               $(this).remove();
               toastr.success(lbl.attachmentDeletedSuccess);
               const task = tasks.find(t => t.id == taskId);
-              if (task && task.attachments) task.attachments = task.attachments.filter(a => a.id != attachmentId);
+              if (task && task.attachments) {
+                task.attachments = task.attachments.filter(a => a.name !== attachmentName && a.id != attachmentId);
+              }
               if ($('#vt-attachments-list .attachment-item').length === 0) {
                 $('#vt-attachments-list').html(`<span class="text-muted small">${lbl.noAttachments}</span>`);
               }
