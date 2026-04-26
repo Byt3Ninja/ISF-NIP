@@ -105,7 +105,7 @@
                 @endforeach
               </select>
             </div>
-            <div id="assignees-container" style="display: none;">
+            <div id="assignees-container">
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <label class="form-label fw-semibold mb-0" for="task-assignees">
                   {{ __('admin.assignees') }} <span class="text-danger">*</span>
