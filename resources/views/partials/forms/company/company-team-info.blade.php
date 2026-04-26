@@ -2,22 +2,6 @@
 /**
  * STATIC DATA DEFINITIONS
  */
-$investors = [
-    [
-      'id' => 1,
-      'name' => 'Blue Chip Ventures',
-      'type' => 'Venture Capital',
-    ],
-  ];
-
-$shareholders = [
-    [
-      'id' => 1,
-      'name' => 'Jordan Smith',
-      'role' => 'CTO',
-      'percentage' => 12.5,
-    ],
-  ];
 
 $tabs = [
   ['id' => 'founders', 'label' => 'Founders', 'icon' => 'users'],
@@ -98,7 +82,7 @@ $foundersCount = count($foundersPayload);
     <div class="tab-pane fade" id="investors-pane" role="tabpanel">
       <div class="row align-items-center mb-8">
         <div class="col-md-4">
-          <h5 class="mb-4 mb-md-0">{{ __('admin.investors') }} (<span id="count-investors">{{count($investors)}}</span>)</h5>
+          <h5 class="mb-4 mb-md-0">{{ __('admin.investors') }} (<span id="count-investors">{{count($investors ?? [])}}</span>)</h5>
         </div>
         <div class="col-md-5">
           <div class="input-group input-group-merge">
@@ -119,7 +103,7 @@ $foundersCount = count($foundersPayload);
     <div class="tab-pane fade" id="shareholders-pane" role="tabpanel">
       <div class="row align-items-center mb-8">
         <div class="col-md-4">
-          <h5 class="mb-4 mb-md-0">{{ __('admin.shareholders') }} (<span id="count-shareholders">{{count($shareholders)}}</span>)</h5>
+          <h5 class="mb-4 mb-md-0">{{ __('admin.shareholders') }} (<span id="count-shareholders">{{count($shareholders ?? [])}}</span>)</h5>
         </div>
         <div class="col-md-5">
           <div class="input-group input-group-merge">
@@ -202,11 +186,11 @@ $foundersCount = count($foundersPayload);
           </select>
         </div>
       </div>
+      <div class="offcanvas-footer border-top mt-6 pt-3 d-flex align-items-center gap-3">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">{{ __('admin.Cancel') }}</button>
+        <button type="submit" form="form-founder" class="btn btn-primary" id="btn-save-founder">{{ __('admin.Save_Founder') }}</button>
+      </div>
     </form>
-  </div>
-  <div class="offcanvas-footer border-top p-6 d-flex align-items-center gap-3">
-    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">{{ __('admin.Cancel') }}</button>
-    <button type="submit" form="form-founder" class="btn btn-primary" id="btn-save-founder">{{ __('admin.Save_Founder') }}</button>
   </div>
 </div>
 
@@ -288,8 +272,8 @@ $foundersCount = count($foundersPayload);
   window.TEAM_INFO_CONFIG = {
     companyId: {{ isset($client) && $client->company ? $client->company->id : auth()->user()->id }},
     founders: @json($foundersPayload),
-    investors:    @json($investors),
-    shareholders: @json($shareholders),
+    investors:    @json($investors ?? []),
+    shareholders: @json($shareholders ?? []),
     routes: {
       add:    '{{ route('company.profile_teams_add',    ['id' => isset($client) && $client->company ? $client->company->id : auth()->user()->id]) }}',
       edit:   '{{ route('company.profile_teams_edit',   ['id' => isset($client) && $client->company ? $client->company->id : auth()->user()->id]) }}',
