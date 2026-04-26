@@ -191,7 +191,35 @@ class ScreeningEvaluationResults extends Model
 				$judges[$index]->startups = $get_companies->pluck('id');
 			}
 		}
-		else { foreach( $judges as $index => $judge ) { $judges[$index]->startups = $companies->pluck('id'); } }
+		else
+		{
+			// Panel-based screening (addJudgingPanels) stores assigned company IDs in screenings.users.
+			// If any panel assignment exists for this step, scope each judge to only their assigned companies.
+			// Otherwise fall back to legacy behavior where every judge evaluates every company.
+			$hasPanelAssignments = $getUsers->contains(function( $s ) {
+				$u = $s->users;
+				if( is_string( $u ) ) { $u = json_decode( $u, true ); }
+				return is_array( $u ) && count( $u ) > 0;
+			});
+
+			if( $hasPanelAssignments )
+			{
+				foreach( $judges as $index => $judge )
+				{
+					$assignedCompanyIds = $getUsers->where('user_id', $judge->id)->flatMap(function( $s ) {
+						$u = $s->users;
+						if( is_string( $u ) ) { $u = json_decode( $u, true ); }
+						return is_array( $u ) ? $u : [];
+					})->map(fn($id) => intval($id))->unique()->values();
+
+					$judges[$index]->startups = $companies->whereIn('id', $assignedCompanyIds->toArray())->pluck('id')->values();
+				}
+			}
+			else
+			{
+				foreach( $judges as $index => $judge ) { $judges[$index]->startups = $companies->pluck('id'); }
+			}
+		}
 
 		$scoped_comments = $comments->where('evaluation_id', $evaluation?->id)->values();
 		foreach( $judges as $index => $judge )

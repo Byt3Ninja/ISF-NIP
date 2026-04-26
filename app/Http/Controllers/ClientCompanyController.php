@@ -2242,6 +2242,7 @@ class ClientCompanyController extends Controller
 
                 // Use the result's ID if $id is null (new company creation)
                 $redirectId = $id ?: $result->id;
+                if( !trim( $redirectId ) ) { $redirectId = $result->id; }
 
                 // Return JSON response for AJAX requests (CompanyN == 14 is classification form)
                 if ($data['CompanyN'] == 14 && $request->ajax()) {
@@ -2251,7 +2252,7 @@ class ClientCompanyController extends Controller
                     ]);
                 }
 
-                return redirect()->route('company.profile_view_mine', $redirectId)->with(['msg' => __('startup_info_updated'), 'class' => 'success']);
+                return redirect()->route('company.profile_view_mine', ['id' => $redirectId])->with(['msg' => __('startup_info_updated'), 'class' => 'success']);
             } else {
                 if ($data['CompanyN'] == 14 && $request->ajax()) {
                     return response()->json([
