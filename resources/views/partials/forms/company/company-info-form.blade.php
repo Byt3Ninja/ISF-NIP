@@ -241,7 +241,7 @@
         <div class="col-md-6 col-12 mb-4">
           <div class="form-group w-100">
             <label class="form-label fs-6 fw-semibold mb-2" for="years_of_operations">{{ __('admin.Years of Operations') }} *</label>
-            <select class="form-select" id="years_of_operations" name="years_of_operations" required
+            <select class="form-select select2" id="years_of_operations" name="years_of_operations" required
               data-placeholder="{{ __('admin.Select Years of Operations') }}">
               <option value="">{{ __('admin.Select Years of Operations') }}</option>
               @foreach (['0-2','2-5','5-10','10+'] as $range)
@@ -255,7 +255,7 @@
         <div class="col-md-6 col-12 mb-4">
           <div class="form-group">
             <label class="form-label fs-6 fw-semibold mb-2" for="product_or_service">{{ __('admin.Product or Service') }} *</label>
-            <select class="form-select" id="product_or_service" name="product_or_service"
+            <select class="form-select select2" id="product_or_service" name="product_or_service"
               data-placeholder="{{ __('admin.Select Product or Service') }}" required>
               <option value="">{{ __('admin.Select Product or Service') }}</option>
               @foreach (['Product','Service','Product + Service'] as $opt)
@@ -275,7 +275,7 @@
             <label class="form-label fs-6 fw-semibold mb-2" for="company_registration_type">
               {{ __('admin.company_registration_type') }} *
             </label>
-            <select class="form-select" id="company_registration_type" name="company_registration_type" required
+            <select class="form-select select2" id="company_registration_type" name="company_registration_type" required
               data-placeholder="{{ __('admin.company_registration_type_placeholder') }}">
               <option value="">{{ __('admin.company_registration_type_placeholder') }}</option>
               @foreach ([
@@ -301,7 +301,7 @@
             <label class="form-label fs-6 fw-semibold mb-2" for="previous_incubation">
               {{ __('admin.previous_incubation') }} *
             </label>
-            <select class="form-select" id="previous_incubation" name="previous_incubation" required
+            <select class="form-select select2" id="previous_incubation" name="previous_incubation" required
               data-placeholder="{{ __('admin.Select') }}">
               <option value="">{{ __('admin.Select') }}</option>
               <option value="1" {{ optional($client->company)->previous_incubation == '1' ? 'selected' : '' }}>
