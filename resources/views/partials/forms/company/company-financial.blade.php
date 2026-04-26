@@ -28,7 +28,7 @@
 
           <div class="col-md-6 mb-3">
             <label for="Currency" class="form-label fw-medium">{{ __('settings.Currency') }}</label>
-            <select class="form-select" name="Currency" id="Currency">
+            <select class="form-select select2" name="Currency" id="Currency">
               <option value="">{{ __('settings.Currency') }}</option>
               @foreach ($Currencies as $Currency)
               <option value="{{ $Currency->currency_code }}"
@@ -89,7 +89,7 @@
             <label for="generate_revenue" class="form-label fw-medium">
               {{ __('admin.generate_revenue') }}
             </label>
-            <select class="form-select" required id="generate_revenue" name="generate_revenue">
+            <select class="form-select select2" required id="generate_revenue" name="generate_revenue">
               <option value="" disabled>{{ __('admin.generate_revenue') }}</option>
               <option value="yes"
                 {{ !empty($client->company) && $client->company->generate_revenue === 'yes' ? 'selected' : '' }}>
@@ -139,7 +139,7 @@
 
           <div class="col-md-6 mb-3">
             <label for="stage" class="form-label fw-medium">{{ __('admin.development_stage') }}</label>
-            <select class="form-select" required id="stage" name="stage">
+            <select class="form-select select2" required id="stage" name="stage">
               <option value="" disabled>{{ __('admin.development_stage') }}</option>
               @foreach ($Stages as $Stage)
               <option value="{{ $Stage->id }}"
@@ -152,7 +152,7 @@
 
           <div class="col-md-6 mb-3">
             <label for="development_stage" class="form-label fw-medium">{{ __('admin.Funding_Stage') }}</label>
-            <select class="form-select" required id="development_stage" name="development_stage">
+            <select class="form-select select2" required id="development_stage" name="development_stage">
               <option value="" disabled>{{ __('admin.Funding_Stage') }}</option>
               <option value="Pre_seed_funding_stage" {{ !empty($client->company) && $client->company->development_stage == 'Pre_seed_funding_stage' ? 'selected' : '' }}>
                 {{ __('admin.Pre_seed_funding_stage') }}
@@ -174,7 +174,7 @@
 
           <div class="col-md-6 mb-3">
             <label for="business_type" class="form-label fw-medium">{{ __('admin.Business Type') }}</label>
-            <select class="form-select" required id="business_type" name="business_type">
+            <select class="form-select select2" required id="business_type" name="business_type">
               <option value="">{{ __('admin.Business Type') }}</option>
               @foreach (['B2C', 'B2B', 'B2B2C', 'C2C', 'B2G', 'Platform'] as $type)
               <option value="{{ $type }}"
