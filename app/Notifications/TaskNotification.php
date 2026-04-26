@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\BroadcastMessage;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use App\Broadcasting\WhatsAppChannel;
 use Throwable;
@@ -52,6 +53,15 @@ class TaskNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
+        $taskId = $this->data['task']->id ?? null;
+        $action = $this->data['action'] ?? 'add';
+        if ($taskId) {
+            $dedupKey = "task_notif_{$taskId}_{$action}_{$notifiable->id}";
+            if (!Cache::add($dedupKey, 1, now()->addHour())) {
+                return [];
+            }
+        }
+
         $org = $notifiable->organization;
         $smtpSettings = $org?->organizationSettings;
         
@@ -192,9 +202,11 @@ class TaskNotification extends Notification implements ShouldQueue
     private function getSubject(): string
     {
         $action = $this->data['action'] ?? 'add';
-        $key = "notifications.task.subject_{$action}";
+        $title  = $this->data['task']->title ?? '';
+        $key    = "notifications.task.subject_{$action}";
         $translated = __($key);
-        return $translated !== $key ? $translated : __('notifications.task.subject');
+        $base   = $translated !== $key ? $translated : __('notifications.task.subject');
+        return $title ? "{$base}: {$title}" : $base;
     }
 
     /**

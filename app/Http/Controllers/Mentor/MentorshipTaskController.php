@@ -27,8 +27,6 @@ use Illuminate\Support\Facades\Storage;
 
 class MentorshipTaskController extends Controller
 {
-    use \App\Traits\NotifiesAdmins;
-
 
 
 	protected $whatsAppService;
@@ -524,8 +522,23 @@ class MentorshipTaskController extends Controller
 				'startupNames' => [$startup->name ?? ''],
 			];
 
-			SendTaskNotificationJob::dispatch($mentor, $startup, $task, $data);
-			$this->notifyAdmins($mentor, $data);
+			if ($startup) {
+				\Illuminate\Support\Facades\Notification::send([$startup], new TaskNotification($data));
+			}
+			$_adminOrgId = $mentor?->organization_id ?? $task->company?->cycledata?->organization_id;
+			if ($_adminOrgId) {
+				$_adminSkip = array_values(array_filter(array_unique([$startup?->id, $mentor?->id])));
+				$_admins = User::whereHas('roles', fn($q) => $q->whereIn('default_for', ['admin', 'subadmin', 'organizationManager', 'organizationmanager']))
+					->where(fn($q) => $q
+						->where('organization_id', $_adminOrgId)
+						->orWhereHas('organizations', fn($pq) => $pq->where('organizations.id', $_adminOrgId))
+						->orWhereHas('roles', fn($rq) => $rq->where('default_for', 'admin')))
+					->when(!empty($_adminSkip), fn($q) => $q->whereNotIn('id', $_adminSkip))
+					->get();
+				if ($_admins->isNotEmpty()) {
+					Notification::send($_admins->all(), new TaskNotification($data));
+				}
+			}
 			// try {
 			// 	Notification::send([$mentor, $startup], new TaskNotification($data));
 			// } catch (\Throwable $th) {
@@ -650,7 +663,9 @@ class MentorshipTaskController extends Controller
 				'mentor'       => $mentor,
 				'startupNames' => [$startup->name ?? ''],
 			];
-			Notification::send([$mentor, $startup], new TaskNotification($data));
+			if ($startup) {
+				Notification::send([$startup], new TaskNotification($data));
+			}
 
 			$adminAction = match(true) {
 				$status === 'archived'    => 'archive',
@@ -658,7 +673,21 @@ class MentorshipTaskController extends Controller
 				default                   => null,
 			};
 			if ($adminAction && $mentor) {
-				$this->notifyAdmins($mentor, array_merge($data, ['action' => $adminAction]));
+				$_moveAdminOrgId = $mentor?->organization_id ?? $task->company?->cycledata?->organization_id;
+				if ($_moveAdminOrgId) {
+					$_moveAdminData = array_merge($data, ['action' => $adminAction]);
+					$_moveAdminSkip = array_values(array_filter(array_unique([$startup?->id, $mentor?->id])));
+					$_moveAdmins = User::whereHas('roles', fn($q) => $q->whereIn('default_for', ['admin', 'subadmin', 'organizationManager', 'organizationmanager']))
+						->where(fn($q) => $q
+							->where('organization_id', $_moveAdminOrgId)
+							->orWhereHas('organizations', fn($pq) => $pq->where('organizations.id', $_moveAdminOrgId))
+							->orWhereHas('roles', fn($rq) => $rq->where('default_for', 'admin')))
+						->when(!empty($_moveAdminSkip), fn($q) => $q->whereNotIn('id', $_moveAdminSkip))
+						->get();
+					if ($_moveAdmins->isNotEmpty()) {
+						Notification::send($_moveAdmins->all(), new TaskNotification($_moveAdminData));
+					}
+				}
 			}
 
 			if ($task->user->country_code_w_a && $task->user->whatsapp) {
@@ -822,8 +851,23 @@ class MentorshipTaskController extends Controller
 				'mentor'       => $task->mentor,
 				'startupNames' => [$task->user->name ?? ''],
 			];
-			Notification::send([$task->mentor, $task->user], new TaskNotification($data));
-			$this->notifyAdmins($task->mentor, $data);
+			if ($task->user) {
+				Notification::send([$task->user], new TaskNotification($data));
+			}
+			$_updateAdminOrgId = $task->mentor?->organization_id ?? $task->company?->cycledata?->organization_id;
+			if ($_updateAdminOrgId) {
+				$_updateAdminSkip = array_values(array_filter(array_unique([$task->user?->id, $task->mentor?->id])));
+				$_updateAdmins = User::whereHas('roles', fn($q) => $q->whereIn('default_for', ['admin', 'subadmin', 'organizationManager', 'organizationmanager']))
+					->where(fn($q) => $q
+						->where('organization_id', $_updateAdminOrgId)
+						->orWhereHas('organizations', fn($pq) => $pq->where('organizations.id', $_updateAdminOrgId))
+						->orWhereHas('roles', fn($rq) => $rq->where('default_for', 'admin')))
+					->when(!empty($_updateAdminSkip), fn($q) => $q->whereNotIn('id', $_updateAdminSkip))
+					->get();
+				if ($_updateAdmins->isNotEmpty()) {
+					Notification::send($_updateAdmins->all(), new TaskNotification($data));
+				}
+			}
 
 			if ($task->user->country_code_w_a && $task->user->whatsapp) {
 				$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
