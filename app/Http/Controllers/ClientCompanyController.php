@@ -4904,10 +4904,8 @@ class ClientCompanyController extends Controller
                 $rows[$i] = $record;
             }
 
-            DB::commit();
-
             // ----------------------------------------------------------
-            // 5. Server-side recalculation
+            // 5. Server-side recalculation + persist calculated fields
             // ----------------------------------------------------------
             $recalculated = [];
             $prevWC       = 0.0;
@@ -4935,6 +4933,15 @@ class ClientCompanyController extends Controller
                 $debtChg   = ($i === 0) ? 0.0 : $debt - $prevDebt;
                 $fcf       = $netProfit + $da - $capex - $deltaWC;
 
+                $r->ebitda           = round($ebitda, 2);
+                $r->ebit             = round($ebit, 2);
+                $r->net_profit       = round($netProfit, 2);
+                $r->working_capital  = round($wc, 2);
+                $r->change_in_wc     = ($i === 0) ? null : round($deltaWC, 2);
+                $r->debt_change      = ($i === 0) ? null : round($debtChg, 2);
+                $r->free_cash_flow   = round($fcf, 2);
+                $r->save();
+
                 $recalculated["ebitda_{$i}"] = round($ebitda, 2);
                 $recalculated["ebit_{$i}"]   = round($ebit, 2);
                 $recalculated["np_{$i}"]     = round($netProfit, 2);
@@ -4946,6 +4953,8 @@ class ClientCompanyController extends Controller
                 $prevWC   = $wc;
                 $prevDebt = $debt;
             }
+
+            DB::commit();
 
             return response()->json([
                 'success'      => true,
