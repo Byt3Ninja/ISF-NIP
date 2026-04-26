@@ -32,6 +32,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use stdClass;
 
@@ -474,15 +475,34 @@ class ScreeningController extends Controller
 
 	public function addJudgingPanels(Request $request)
 	{
-		$request->validate([
+		$panelsInput = $request->input('panels', []) ?? [];
+
+		$messages = [];
+		foreach ($panelsInput as $index => $_panel) {
+			$panelNumber = $index + 1;
+			foreach (['required', 'array', 'min'] as $rule) {
+				$messages["panels.{$index}.judges.{$rule}"] = __('admin.screening.panel_judges_required', ['panel' => $panelNumber]);
+				$messages["panels.{$index}.companies.{$rule}"] = __('admin.screening.panel_companies_required', ['panel' => $panelNumber]);
+			}
+		}
+
+		$validator = Validator::make($request->all(), [
 			'step' => 'required|exists:steps,id',
 			'panels' => 'nullable|array',
-			'panels.*.judges' => 'required|array',
-			'panels.*.companies' => 'required|array',
+			'panels.*.judges' => 'required|array|min:1',
+			'panels.*.companies' => 'required|array|min:1',
 			'panels.*.session_date' => 'nullable|date',
 			'panels.*.start_time' => 'nullable',
 			'panels.*.end_time' => 'nullable',
-		]);
+		], $messages);
+
+		if ($validator->fails()) {
+			return response()->json([
+				'success' => false,
+				'message' => $validator->errors()->first(),
+				'errors' => $validator->errors(),
+			], 422);
+		}
 
 		$stepId = $request->step;
 		$panels = $request->panels ?? [];
