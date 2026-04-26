@@ -114,6 +114,9 @@
       edit: "Edit",
       founderDeletedToast: "Founder deleted successfully.",
       founderDeleteError: "Something went wrong. Please try again.",
+      deletedToast: "Deleted successfully.",
+      ownership: "Ownership",
+      standard: "Standard",
       founderType: "Founder",
       cofounderType: "Co-Founder",
       fullTime: "Full-Time",
@@ -153,6 +156,9 @@
       edit: "تعديل",
       founderDeletedToast: "تم حذف المؤسس بنجاح.",
       founderDeleteError: "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+      deletedToast: "تم الحذف بنجاح.",
+      ownership: "الملكية",
+      standard: "غير محدد",
       founderType: "مؤسس",
       cofounderType: "مؤسس شريك",
       fullTime: "دوام كامل",
@@ -175,7 +181,10 @@
 
   function translateInvestmentType(raw) {
     if (!raw) return "";
-    return (t.investmentTypes && t.investmentTypes[raw]) || raw;
+    const direct = t.investmentTypes && t.investmentTypes[raw];
+    if (direct) return direct;
+    const normalized = raw.replace(/\s+/g, "_");
+    return (t.investmentTypes && t.investmentTypes[normalized]) || raw;
   }
 
   /* ─────────────────────────────────────────────
@@ -454,7 +463,7 @@
             <div class="flex-grow-1 ms-3">
               <h6 class="mb-0 fw-bold">${escapeHtml(item.name)}</h6>
               <small class="text-secondary d-block mb-1">
-                ${escapeHtml(translateInvestmentType(item.type) || "Standard")}
+                ${escapeHtml(translateInvestmentType(item.type) || t.standard)}
               </small>
               <small class="text-success fw-bold">${escapeHtml(item.investment_amount || "")}</small>
             </div>
@@ -478,7 +487,7 @@
               ${buildDropdown("shareholder", item.id)}
             </div>
             <div class="d-flex justify-content-between align-items-center mb-1">
-              <small class="text-muted">Ownership</small>
+              <small class="text-muted">${t.ownership}</small>
               <span class="fw-semibold">${pct}%</span>
             </div>
             <div class="position-relative mb-3">
@@ -688,7 +697,7 @@
 
     if (type === "founder") {
       const deleteTitle = `${t.delete} ${t[type]}`;
-      const deleteMsg = `Are you sure you want to delete ${escapeHtml(name)}?`;
+      const deleteMsg = t.deleteMsg.replace("${name}", escapeHtml(name));
       const errorMsg = t.founderDeleteError;
       const successMsg = t.founderDeletedToast;
 
@@ -759,7 +768,7 @@
                 (i) => String(i.id) !== String(id),
               );
               renderList(type);
-              toastr.success(LANG === "ar" ? "تم الحذف" : "Deleted");
+              toastr.success(t.deletedToast);
             },
           });
         },

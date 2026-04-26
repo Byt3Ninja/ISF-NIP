@@ -402,14 +402,15 @@
         </div>
       </div>
       <div class="card-body">
-        <ul class="nav widget-nav-tabs d-flex gap-2 border-0 pb-4 nav-tabs" role="tablist">
+        <ul class="nav widget-nav-tabs d-flex gap-2 border-0 pb-4 nav-tabs flex-nowrap overflow-auto" role="tablist">
           @foreach ($strategyTabs as $tab)
-            <li class="nav-item">
+            <li class="nav-item flex-grow-1">
               <a
                 href="javascript:void(0);"
                 class="nav-link {{ $loop->first ? 'active' : '' }} d-flex flex-column align-items-center border"
                 data-bs-toggle="tab"
                 data-bs-target="#{{ $tab['id'] }}"
+                style="min-width: 150px;"
               >
                 <div class="badge rounded bg-label-{{ $tab['color'] }} p-2">
                   <i class="ti {{ $tab['icon'] }} ti-md"></i>
