@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Validator;
 
 class TasksController extends Controller
 {
+    use \App\Traits\NotifiesAdmins;
     /**
      * Display a listing of the resource.
      */
@@ -304,6 +305,9 @@ class TasksController extends Controller
             foreach ($assignees as $startup) {
                 \Illuminate\Support\Facades\Notification::send([$startup], new \App\Notifications\TaskNotification($data));
             }
+            if ($mentor) {
+                $this->notifyAdmins($mentor, $data);
+            }
 
             return response()->json([
                 'success' => true,
@@ -589,6 +593,9 @@ class TasksController extends Controller
             }
             foreach ($updateAssignees as $startup) {
                 \Illuminate\Support\Facades\Notification::send([$startup], new \App\Notifications\TaskNotification($updateNotifData));
+            }
+            if ($updateMentor) {
+                $this->notifyAdmins($updateMentor, $updateNotifData);
             }
 
             return response()->json([
@@ -984,6 +991,9 @@ class TasksController extends Controller
                     }
                     foreach ($moveAssignees as $assignee) {
                         \Illuminate\Support\Facades\Notification::send([$assignee], new \App\Notifications\TaskNotification($moveNotifData));
+                    }
+                    if ($moveMentor) {
+                        $this->notifyAdmins($moveMentor, $moveNotifData);
                     }
                 }
             }
