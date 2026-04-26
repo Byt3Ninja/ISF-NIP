@@ -107,7 +107,7 @@ class TaskNotification extends Notification implements ShouldQueue
         $orgData = $this->buildEmailOrganizationData($org);
 
         return (new MailMessage)
-            ->subject(__('notifications.task.subject'))
+            ->subject($this->getSubject())
             ->markdown('emails.mentor-task', array_merge([
                 'data' => $this->data,
                 'notifiable' => $notifiable,
@@ -145,10 +145,56 @@ class TaskNotification extends Notification implements ShouldQueue
     public function toBroadcast(object $notifiable): BroadcastMessage
     {
         return new BroadcastMessage([
-            'subject' => __('notifications.task.subject'),
+            'subject' => $this->getSubject(),
             'message' => __('notifications.task.broadcast', ['message' => $this->data['message'] ?? '']),
             'time' => now()->toDateTimeString(),
         ]);
+    }
+
+    /**
+     * Get the array representation of the notification.
+     *
+     * @return array<string, mixed>
+     */
+    public function toDatabase(object $notifiable): array
+    {
+        $mentorName = $this->data['mentor']->name ?? null;
+        $taskTitle  = $this->data['task']->title;
+        $isAr       = app()->getLocale() === 'ar';
+        $action     = $this->data['action'] ?? 'add';
+
+        if ($notifiable->hasRole('registered')) {
+            $message = match($action) {
+                'add'     => $isAr ? "تم إضافة مهمة جديدة: {$taskTitle} - بواسطة المينتور: {$mentorName}"   : "New task added: {$taskTitle} - By mentor: {$mentorName}",
+                'update'  => $isAr ? "تم تحديث المهمة: {$taskTitle} - بواسطة المينتور: {$mentorName}"        : "Task updated: {$taskTitle} - By mentor: {$mentorName}",
+                'archive' => $isAr ? "تمت أرشفة المهمة: {$taskTitle} - بواسطة المينتور: {$mentorName}"       : "Task archived: {$taskTitle} - By mentor: {$mentorName}",
+                'reopen'  => $isAr ? "تمت إعادة فتح المهمة: {$taskTitle} - بواسطة المينتور: {$mentorName}"   : "Task reopened: {$taskTitle} - By mentor: {$mentorName}",
+                default   => $isAr ? "تحديث على المهمة: {$taskTitle}" : "Task update: {$taskTitle}",
+            };
+        } else {
+            $startupList = implode('، ', $this->data['startupNames'] ?? []);
+            $message = match($action) {
+                'add'     => $isAr ? "تم إضافة المهمة: {$taskTitle} إلى: {$startupList}"           : "Task added: {$taskTitle} to: {$startupList}",
+                'update'  => $isAr ? "تم تحديث المهمة: {$taskTitle} للشركات: {$startupList}"        : "Task updated: {$taskTitle} for: {$startupList}",
+                'archive' => $isAr ? "تمت أرشفة المهمة: {$taskTitle} - الشركات: {$startupList}"     : "Task archived: {$taskTitle} - Startups: {$startupList}",
+                'reopen'  => $isAr ? "تمت إعادة فتح المهمة: {$taskTitle} - الشركات: {$startupList}" : "Task reopened: {$taskTitle} - Startups: {$startupList}",
+                default   => $isAr ? "تحديث على المهمة: {$taskTitle}" : "Task update: {$taskTitle}",
+            };
+        }
+
+        return [
+            'task_id' => $this->data['task']->id,
+            'title'   => $taskTitle,
+            'message' => $message,
+        ];
+    }
+
+    private function getSubject(): string
+    {
+        $action = $this->data['action'] ?? 'add';
+        $key = "notifications.task.subject_{$action}";
+        $translated = __($key);
+        return $translated !== $key ? $translated : __('notifications.task.subject');
     }
 
     /**
