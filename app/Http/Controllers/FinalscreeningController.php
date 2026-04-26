@@ -10,6 +10,7 @@ use App\Finalscreening;
 use App\Formfield;
 use App\Notifications\TemplateEmail;
 use App\Notifications\WelcomeJudgerNotification;
+use App\Screening;
 use App\ScreeningEvaluation;
 use App\ScreeningEvaluationResults;
 use App\Step;
@@ -112,9 +113,28 @@ class FinalscreeningController extends Controller
 				->get()
 				->groupBy('step_id');
 
-		$companies = Company::whereIn('step', $stepIds)
-				->get()
-				->groupBy('step');
+		// Source of truth for "Assigned Startups" matches the details page (FinalscreeningController::show):
+		// company IDs in screenings.users (written by addJudgingPanels).
+		$panelAssignmentsByStep = Screening::whereIn('step_id', $stepIds)
+			->whereNull('deleted_at')
+			->get(['step_id', 'users'])
+			->groupBy('step_id')
+			->map(function ($rows) {
+				return $rows->flatMap(function ($r) {
+					$u = $r->users;
+					if (is_string($u)) { $u = json_decode($u, true); }
+					return is_array($u) ? $u : [];
+				})->map(fn ($id) => intval($id))->unique()->values();
+			});
+
+		$allAssignedIds = $panelAssignmentsByStep->flatten()->unique()->values()->all();
+		$assignedCompaniesById = !empty($allAssignedIds)
+			? Company::whereIn('id', $allAssignedIds)->get()->keyBy('id')
+			: collect();
+
+		$companies = $panelAssignmentsByStep->map(function ($ids) use ($assignedCompaniesById) {
+			return $ids->map(fn ($id) => $assignedCompaniesById->get($id))->filter()->values();
+		});
 
 		$forms = Step::whereIn('cycle_id', $cycleIds)
 				->where('stype', 1)

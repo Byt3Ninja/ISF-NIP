@@ -530,6 +530,10 @@ class HomeController extends Controller
         if (array_intersect(['dashboard.widgets_cards_filtration_view'], $permissions)) {
             $today = date("Y-m-d");
             $inputs = [$today];
+            $isJudgeOnly = !$user->hasAnyRole(['admin', 'organizationmanager']);
+            $screeningJoinUserClause = $isJudgeOnly ? ' AND sc.user_id = ?' : '';
+            if ($isJudgeOnly) { array_unshift($inputs, $user->id); }
+
             $filtration_q = "SELECT
                     s.id,
                     s.arr,
@@ -562,14 +566,20 @@ class HomeController extends Controller
                 LEFT JOIN
                     cycles c ON c.id = s.cycle_id
                 LEFT JOIN
-                    screenings sc ON sc.step_id = s.id
+                    screenings sc ON sc.step_id = s.id $screeningJoinUserClause
                 LEFT JOIN
                     companies cp ON cp.step = sc.step_id
+                        AND (
+                            sc.users IS NULL
+                            OR JSON_LENGTH(sc.users) = 0
+                            OR JSON_CONTAINS(sc.users, CAST(cp.id AS CHAR))
+                        )
                 LEFT JOIN
                     users u ON u.company_id = cp.id AND u.HaveCompany = 1
                 WHERE
                     ? BETWEEN s.from AND s.to
                     AND s.deleted_at IS NULL
+                    AND s.stype = 2
                     AND s.id IN (
                         SELECT
                             step_id
@@ -578,7 +588,7 @@ class HomeController extends Controller
                         WHERE
                             deleted_at IS NULL
             ";
-            if (!$user->hasAnyRole(['admin', 'organizationmanager'])) {
+            if ($isJudgeOnly) {
                 $filtration_q .= " AND user_id = ? ";
                 $inputs[] = $user->id;
             }
@@ -689,16 +699,29 @@ class HomeController extends Controller
                     fs.deleted_at IS NULL
             ";
             if (!$user->hasAnyRole(['admin', 'organizationmanager'])) {
-                $evaluation_q .= " AND fs.judges LIKE '%\"{$user->id}\"%'";
+                // judges may be stored either as a JSON array of string IDs (legacy: ["15","16"])
+                // or as a double-encoded JSON string of int IDs ("[15,16]") from older addJudgingPanels.
+                // Normalize via JSON_UNQUOTE when STRING, then check both string and int membership.
+                $uid = (int) $user->id;
+                $evaluation_q .= " AND (
+                    JSON_CONTAINS(
+                        CASE WHEN JSON_TYPE(fs.judges) = 'STRING' THEN JSON_UNQUOTE(fs.judges) ELSE fs.judges END,
+                        JSON_QUOTE('{$uid}')
+                    ) = 1
+                    OR JSON_CONTAINS(
+                        CASE WHEN JSON_TYPE(fs.judges) = 'STRING' THEN JSON_UNQUOTE(fs.judges) ELSE fs.judges END,
+                        '{$uid}'
+                    ) = 1
+                )";
             }
             if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
                 $evaluation_q .= " AND cy.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
             }
             $evaluation = collect(DB::select($evaluation_q))->map(function ($e) {
                 $judges = json_decode($e->judges, true);
-                if (!is_array($judges)) {
-                    $judges = [];
-                }
+                // Handle double-encoded values like "\"[1,2]\"" by decoding once more.
+                if (is_string($judges)) { $judges = json_decode($judges, true); }
+                if (!is_array($judges)) { $judges = []; }
                 $e->judges = array_map('intval', $judges);
                 return $e;
             });
