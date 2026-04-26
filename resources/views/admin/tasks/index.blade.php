@@ -250,7 +250,7 @@ $(function () {
             <div class="d-flex align-items-center">
               <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill task-view"><i class="ti ti-eye ti-md"></i></a>
               @if ($_user->ableTo('tasks.update', $permissions))
-                <a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill task-edit"><i class="ti ti-pencil ti-md"></i></a>
+                ${!isArchived ? '<a href="javascript:;" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill task-edit"><i class="ti ti-pencil ti-md"></i></a>' : ''}
               @endif
               <a href="javascript:;" class="btn btn-icon ${full.overallStatus === 'archived' ? 'btn-text-warning' : 'btn-text-secondary'} waves-effect waves-light rounded-pill task-archive">
                 <i class="ti ${full.overallStatus === 'archived' ? 'ti-rotate' : 'ti-archive'} ti-md"></i>
@@ -968,8 +968,9 @@ $(function () {
             window.dt_task.row.add(taskObj);
             window.dt_task.order([[7, 'desc']]).draw();
             toastr.success('{{ __('admin.Task_added_successfully.') }}');
-            setTimeout(() => window.location.reload(), 1500);
           }
+          
+          setTimeout(() => window.location.reload(), 1500);
 
           bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('addTaskModal')).hide();
         },
@@ -1078,7 +1079,7 @@ $(function () {
       method: 'DELETE',
       headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
       success: function (response) {
-        $btn.closest('[data-filename]').remove();
+        $btn.closest('div[data-filename]').remove();
         if (!$('#existing-attachments-list').children().length) $('#existing-attachments').hide();
 
         // Sync DataTable row data

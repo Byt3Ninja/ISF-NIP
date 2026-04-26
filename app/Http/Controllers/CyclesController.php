@@ -1233,7 +1233,7 @@ class CyclesController extends Controller
 
 
         $inputs = [];
-        $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', $user->id)->whereIn('form_data.field_id', $field_map_ids)->orderBy('form_data.id', 'ASC')->get();
+        $answers = Formfield::rightJoin('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', $user->id)->whereIn('form_data.field_id', $field_map_ids)->orderBy('form_data.id', 'ASC')->get();
         foreach ($answers as $answer) {
             $inputs[ 'field_' . $answer->field_id] = $answer->answer;
         };
@@ -1246,6 +1246,7 @@ class CyclesController extends Controller
     {
 
         $id = $request->id;
+        $user = auth()->user();
         $step = Step::where('id', $id)->first();
 
         $validator = Validator::make($request->all(), [
@@ -1319,8 +1320,15 @@ class CyclesController extends Controller
         $rules_array = [];
         $custom_messages = [];
 
-        foreach ($field_map_ids as $fid) {
-            $field_options = Formfield::findOrFail($fid)->options;
+        $uid = $user->id;
+        $company = $user->company;
+        $cid = $company->id;
+        $get_fields_data = Formfield::whereIn('id', $field_map_ids)->get();
+        /* foreach ($field_map_ids as $fid)
+        {
+            $checkExistance = $get_fields_data->where('id', $fid)->first();
+            if( !$checkExistance ) { continue; }
+            $field_options = $checkExistance->options;
             $field_name = 'field_' . $fid;
             $type = $field_options->type ?? 'text';
             $required = intval($field_options->validation->required ?? 0) === 1;
@@ -1364,23 +1372,67 @@ class CyclesController extends Controller
 
             $rules_array[$field_name] = implode('|', $rules);
             $custom_messages[$field_name . '.required'] = $L['required'];
+        } */
+
+        foreach( $field_mapper as $field )
+        {
+            $field_name = 'field_' . $field['id'];
+            $type = $field['type'] ?? 'text';
+            $required = intval($field['validation']['required'] ?? 0) === 1;
+
+            $rules = [];
+            $rules[] = $required ? 'required' : 'nullable';
+            switch ($type) {
+                case 'email':
+                    $rules[] = 'email';
+                    $custom_messages[$field_name . '.email'] = $L['email'];
+                    break;
+                case 'number':
+                case 'linear_scale':
+                    $rules[] = 'numeric';
+                    $custom_messages[$field_name . '.numeric'] = $L['numeric'];
+                    break;
+                case 'time':
+                    $rules[] = 'date_format:H:i';
+                    $custom_messages[$field_name . '.date_format'] = $L['time'];
+                    break;
+                case 'date':
+                    $rules[] = 'date';
+                    $custom_messages[$field_name . '.date'] = $L['time'];
+                    break;
+                case 'file':
+                    // Only enforce file/max/mimes on a fresh upload. The
+                    // hydrated previously-submitted path is a string, so
+                    // Laravel's `file` rule would reject it — we skip the
+                    // type/size checks when no new file was attached.
+                    if ($request->hasFile($field_name)) {
+                        $rules[] = 'file';
+                        $rules[] = 'max:' . $max_file_size_kb;
+                        $rules[] = 'mimes:' . implode(',', $allowed_file_extensions);
+                        $custom_messages[$field_name . '.file']  = $L['file_type'];
+                        $custom_messages[$field_name . '.max']   = $L['file_size'];
+                        $custom_messages[$field_name . '.mimes'] = $L['file_type'];
+                    }
+                    break;
+            }
+
+            $rules_array[$field_name] = implode('|', $rules);
+            $custom_messages[$field_name . '.required'] = $L['required'];
         }
 
         $dynamic_validator = Validator::make($request->all(), $rules_array, $custom_messages);
+        if( $dynamic_validator->fails() ) { return redirect()->back()->withErrors($dynamic_validator)->withInput(); }
 
-        if ($dynamic_validator->fails()) {
-            return redirect()->back()
-                ->withErrors($dynamic_validator)
-                ->withInput();
-        }
+        // update cycle & step
+        $company->update(['cycle' => $request->cycle, 'step' => $request->id]);
+
         // gather the form data as field_name => [ label, data ]
-        foreach ($field_map_ids as $fid)
+        /* foreach ($field_map_ids as $fid)
         {
-            $field_options = Formfield::findOrFail($fid)->options;
+            $checkExistance = $get_fields_data->where('id', $fid)->first();
+            if( !$checkExistance ) { continue; }
+            $field_options = $checkExistance->options;
             $field_name = 'field_' . $fid;
-
-            $uid = Auth::id();
-            $cid = Auth::user()->company->id;
 
             $verifyInput = $field_mapper->where('id', $fid)->first();
 
@@ -1407,9 +1459,6 @@ class CyclesController extends Controller
                 $request->{$field_name} = json_encode($request->{$field_name});
             }
 
-            // update cycle & step
-            Auth::user()->company->update(['cycle' => $request->cycle, 'step' => $request->id]);
-
             Formdata::where('field_id', $fid)->where('company_id', $cid)->delete();
             Formdata::updateOrInsert([
                 'field_id' => $fid,
@@ -1424,17 +1473,56 @@ class CyclesController extends Controller
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
+        } */
+
+        foreach( $field_mapper as $field )
+        {
+            $field_name = 'field_' . $field['id'];
+            if( $field['type'] == 'file' )
+            {
+                if ($request->hasFile($field_name))
+                {
+                    $file = $request->file($field_name);
+                    $imageName = $file->getClientOriginalName() . '.' . $file->getClientOriginalExtension();
+                    $file->move(public_path('formsubmissions/'), $imageName);
+                    $request->{$field_name} = 'formsubmissions/' . $imageName;
+                }
+                else
+                {
+                    $request->{$field_name} = $my_submissions->where('field_id', $field['id'])->first()?->answer ?? null;
+                }
+            }
+            if( $field['type'] == 'checkboxes' && is_array($request->{$field_name}) )
+            {
+                $request->{$field_name} = json_encode($request->{$field_name});
+            }
+
+            Formdata::where('field_id', $field['id'])->where('company_id', $cid)->delete();
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+            Formdata::updateOrInsert([
+                'field_id' => $field['id'],
+                'company_id' => $cid,
+                'user_id' => $uid,
+                'form_id' => $id,
+                'step_id' => $company->step,
+                'question' => $field['label'],
+                'answer' => $request->{$field_name},
+                'screening' => '{}',
+                'comments' => '{}',
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
         }
 
         $data = [];
-        $user = Auth::user();
         $name = $user->first_name_en . ' ' . $user->last_name_en;
 
         $data = [
             'name' => $name,
             'email' => $user->email,
-            'step' => $user->company->stepdata->title,
-            'cycle' => $user->company->cycledata->title,
+            'step' => $company->stepdata->title,
+            'cycle' => $company->cycledata->title,
         ];
 
         // إرسال الإشعار

@@ -2766,6 +2766,8 @@ return [
 		'schedule_session' => 'جدولة الجلسة',
 		'no_panels_added' => 'لم يتم إضافة لجان بعد.',
 		'add_first_panel' => 'أضف لجنتك الأولى',
+		'panel_judges_required' => 'يرجى تعيين محكم واحد على الأقل للجنة رقم :panel.',
+		'panel_companies_required' => 'يرجى تعيين شركة ناشئة واحدة على الأقل للجنة رقم :panel.',
 	],
 	'training_sessions' => 'جلسات التدريب',
 	'training_courses' => 'دورات التدريب',

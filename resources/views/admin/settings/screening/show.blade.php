@@ -204,7 +204,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
                       >
                         <div class="avatar avatar-xs me-2">
                           @if ($judge->img_url)
-                            <img src="{{ $judge->img_url }}" alt="img" class="rounded-circle object-fit-cover">
+                            <img src="/191014/{{ $judge->img_url }}" alt="img" class="rounded-circle object-fit-cover">
                           @else
                             <div class="avatar-initial rounded-circle bg-label-secondary">
                               <i class="ti ti-user ti-xs"></i>
