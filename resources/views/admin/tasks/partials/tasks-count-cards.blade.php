@@ -8,10 +8,10 @@
       'color'    => 'primary',
     ],
     [
-      'title'    => __('admin.boardTitleProgress'),
-      'count'    => $stats['active']['in_progress_count'] ?? 0,
-      'subtitle' => __('admin.tasks') . ' ' .  __('admin.boardTitleProgress'),
-      'icon'     => 'ti-refresh',
+      'title'    => __('admin.boardTitlePending'),
+      'count'    => $stats['active']['pending_count'] ?? 0,
+      'subtitle' => __('admin.tasks') . ' ' .  __('admin.boardTitlePending'),
+      'icon'     => 'ti-trending-up',
       'color'    => 'warning',
     ],
     [
