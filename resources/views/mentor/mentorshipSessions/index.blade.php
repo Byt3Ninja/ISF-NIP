@@ -13,10 +13,12 @@
     <h5 class="card-title mb-0">{{ __('admin.tasks') }}</h5>
     <div class="d-flex align-items-center gap-2">
       <x-export-dropdown callback="exportCycles" />
-      <button class="btn btn-primary ms-2" data-bs-toggle="offcanvas" data-bs-target="#addTaskModal">
-        <i class="ti ti-plus"></i>
-        <span class="d-none d-md-inline ms-md-2">{{ __('admin.add_new_task') }}</span>
-      </button>
+      @if(!auth()->user()->hasRole('registered'))
+        <button class="btn btn-primary ms-2" data-bs-toggle="offcanvas" data-bs-target="#addTaskModal">
+          <i class="ti ti-plus"></i>
+          <span class="d-none d-md-inline ms-md-2">{{ __('admin.add_new_task') }}</span>
+        </button>
+      @endif
     </div>
   </div>
   <div class="card-datatable table-responsive p-0">
@@ -59,7 +61,7 @@
   </div>
 </div>
 @if(!auth()->user()->hasRole('registered'))
-@include('admin.tasks.partials.add-task-modal')
+@include('admin.tasks.partials.add-task-offcanvas')
 @endif
 @endsection
 
@@ -163,7 +165,14 @@ $(document).ready(function () {
     plugins: {
       trigger:    new FormValidation.plugins.Trigger(),
       bootstrap5: new FormValidation.plugins.Bootstrap5({ eleValidClass: '', rowSelector: '.mb-4' }),
-      autoFocus:  new FormValidation.plugins.AutoFocus()
+      autoFocus:  new FormValidation.plugins.AutoFocus(),
+    },
+    init: instance => {
+      instance.on('plugins.message.placed', function (e) {
+        if (e.element.parentElement.classList.contains('input-group')) {
+          e.element.parentElement.insertAdjacentElement('afterend', e.messageElement);
+        }
+      });
     }
   });
 
