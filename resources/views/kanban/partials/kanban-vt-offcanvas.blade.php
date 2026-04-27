@@ -45,7 +45,7 @@
   <div class="offcanvas-body pt-0 d-flex flex-column overflow-hidden">
 
     {{-- TAB NAVIGATION --}}
-    <ul class="nav nav-tabs mb-0 flex-nowrap flex-shrink-0" role="tablist"
+    <ul class="nav nav-tabs border-bottom mb-0 flex-nowrap flex-shrink-0" role="tablist"
         style="overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none;">
       @foreach($offcanvasTabs as $tab)
         @if($tab['show'])
@@ -137,13 +137,20 @@
         </div>
       </div>
 
-      {{-- FEEDBACK TAB --}}
-      <div class="tab-pane fade" id="vt-feedback" role="tabpanel">
+      {{-- FEEDBACK HISTORY TAB --}}
+      <div class="tab-pane fade" id="vt-feedback-history" role="tabpanel">
         <div class="p-4">
-          <div id="vt-feedback-list"></div>
+          <div id="vt-feedback-list">
+            <p class="text-muted text-center py-4 mb-0">{{ __('admin.no_feedback') }}</p>
+          </div>
+        </div>
+      </div>
 
+      {{-- ADD FEEDBACK TAB --}}
+      <div class="tab-pane fade" id="vt-add-feedback" role="tabpanel">
+        <div class="p-4">
           @if ($_user->ableTo('tasks.add_feedback', $permissions))
-          <div class="mt-4 border-top pt-4" id="vt-feedback-form-wrapper">
+          <div id="vt-feedback-form-wrapper">
             <h6 class="fw-semibold mb-3 d-flex align-items-center gap-2">
               <i class="ti ti-message-report ti-sm text-primary"></i>
               {{ __('admin.add_feedback') }}

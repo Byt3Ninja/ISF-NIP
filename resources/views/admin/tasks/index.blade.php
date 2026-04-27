@@ -13,8 +13,9 @@ $permissions = [];
 $offcanvasTabs = [
     ['target'=>'#vt-details',     'icon'=>'ti-info-circle', 'label'=>__('admin.Details'),     'active'=>true,  'show'=>true],
     ['target'=>'#vt-submissions', 'icon'=>'ti-paperclip',   'label'=>__('admin.Submissions'), 'badge'=>['id'=>'vt-submissions-count','class'=>'bg-label-warning'], 'active'=>false, 'show'=>$authUser->hasAnyRole(['admin','sub-admin','organizationManager','mentor'])],
-    ['target'=>'#vt-feedback',    'icon'=>'ti-star',        'label'=>__('admin.feedback'),    'badge'=>['id'=>'vt-feedback-count',   'class'=>'bg-label-primary'], 'active'=>false, 'show'=>true],
-    ['target'=>'#vt-comments',    'icon'=>'ti-message',     'label'=>__('admin.Comments'),    'badge'=>['id'=>'vt-comment-count',    'class'=>'bg-label-danger bg-glow'], 'active'=>false, 'show'=>true],
+    ['target'=>'#vt-feedback-history', 'icon'=>'ti-history',       'label'=>__('admin.feedback_history'), 'badge'=>['id'=>'vt-feedback-count','class'=>'bg-label-primary'], 'active'=>false, 'show'=>true],
+    ['target'=>'#vt-add-feedback',     'icon'=>'ti-message-report', 'label'=>__('admin.add_feedback'),     'active'=>false, 'show'=>$authUser->ableTo('tasks.add_feedback', $permissions)],
+    ['target'=>'#vt-comments',    'icon'=>'ti-message',     'label'=>__('admin.Comments'),    'badge'=>['id'=>'vt-comment-count',    'class'=>'bg-label-danger bg-glow'], 'active'=>false, 'show' => !auth()->user()->ableTo('tasks.show', $permissions),],
     ['target'=>'#vt-activity',    'icon'=>'ti-activity',    'label'=>__('admin.Activities'),  'badge'=>['id'=>'vt-activity-count',   'class'=>'bg-label-info bg-glow'],   'active'=>false, 'show'=>true],
 ];
 @endphp
@@ -592,7 +593,7 @@ $(function () {
         const sObj = statusObj[td.status] ?? { class: 'bg-label-secondary', title: td.status };
 
         $('#vt-title').text(td.title);
-        $('#vt-description').html(td.description || '');
+        $('#vt-description').html(td.description || '{{ __('admin.no_description') }}');
         $('#vt-due-date').text(td.due_date || 'N/A');
         $('#vt-priority').html(`<span class="badge ${p.cls} rounded-pill"><span class="d-inline-block rounded-circle me-1 ${p.dot}" style="width:6px;height:6px;"></span>${p.label}</span>`);
         $('#vt-status').html(`<span class="badge ${sObj.class} rounded-pill">${sObj.title}</span>`);
@@ -666,9 +667,16 @@ $(function () {
         $('#vt-send-comment-btn').data('task-id', td.id);
         $('#vt-edit-trigger-btn').data('task-id', td.id);
 
-        bootstrap.Tab.getOrCreateInstance(
-          document.querySelector('#viewTaskOffcanvas .nav-tabs .nav-link')
-        ).show();
+        const $detailsTabBtn     = $('#viewTaskOffcanvas .nav-tabs .nav-link[data-bs-target="#vt-details"]');
+        const $submissionsTabBtn = $('#viewTaskOffcanvas .nav-tabs .nav-link[data-bs-target="#vt-submissions"]');
+        $detailsTabBtn.addClass('d-none');
+        if ($submissionsTabBtn.length) {
+          bootstrap.Tab.getOrCreateInstance($submissionsTabBtn[0]).show();
+        } else {
+          bootstrap.Tab.getOrCreateInstance(
+            document.querySelector('#viewTaskOffcanvas .nav-tabs .nav-link')
+          ).show();
+        }
         bootstrap.Offcanvas.getOrCreateInstance(
           document.getElementById('viewTaskOffcanvas')
         ).show();
@@ -677,6 +685,11 @@ $(function () {
     });
   });
   
+  // Restore Details tab visibility whenever the offcanvas closes
+  document.getElementById('viewTaskOffcanvas').addEventListener('hidden.bs.offcanvas', function () {
+    $('#viewTaskOffcanvas .nav-tabs .nav-link[data-bs-target="#vt-details"]').removeClass('d-none');
+  });
+
   // ─── Edit Task from VT Offcanvas ────────────────────────────────────────
   $(document).on('click', '#vt-edit-trigger-btn', function () {
     const taskId = $(this).data('task-id');
@@ -791,8 +804,45 @@ $(function () {
       method: 'POST',
       data: { decision, note },
       headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-      success: res => toastr.success(res.message || '{{ __("admin.feedback_added_success") }}'),
-      error:   ()  => toastr.error('{{ __("admin.unexpected_error") }}')
+      success: function (res) {
+        toastr.success(res.message || '{{ __("admin.feedback_added_success") }}');
+
+        const fb   = res.feedback;
+        const lbl  = window.KanbanConfig.labels;
+        const $list = $('#vt-feedback-list');
+
+        // Clear empty-state placeholder if present
+        if (!$list.children('.d-flex').length) $list.html('');
+
+        const badge = fb.decision === 'pass'
+          ? `<span class="badge bg-label-success ms-1"><i class="ti ti-circle-check ti-xs me-1"></i>${lbl.passTask}</span>`
+          : `<span class="badge bg-label-warning ms-1"><i class="ti ti-refresh ti-xs me-1"></i>${lbl.needsRevision}</span>`;
+
+        $list.prepend(`
+          <div class="d-flex align-items-start gap-3 mb-3 pb-3 border-bottom">
+            <div class="flex-shrink-0 mt-1">${buildAvatar(fb.user, fb.img_url, fb.user_id)}</div>
+            <div class="flex-grow-1">
+              <div class="d-flex justify-content-between align-items-center mb-1 flex-wrap gap-1">
+                <span class="fw-semibold text-dark">${fb.user || ''}${badge}</span>
+                <span class="text-muted" style="font-size:.7rem;">${fb.time || ''}</span>
+              </div>
+              ${fb.text ? `<div class="small text-body bg-lighter rounded p-2">${fb.text}</div>` : ''}
+            </div>
+          </div>`);
+
+        $('#vt-feedback-count').text(parseInt($('#vt-feedback-count').text() || '0') + 1);
+
+        // Reset form
+        $('#vt-fb-note').val('');
+        $('#vt-fb-pass').prop('checked', true);
+        $('#vt-fb-pass-wrapper').addClass('checked');
+        $('#vt-fb-revision-wrapper').removeClass('checked');
+
+        // Switch to Feedback History tab
+        const $historyTab = $('#viewTaskOffcanvas .nav-tabs .nav-link[data-bs-target="#vt-feedback-history"]');
+        if ($historyTab.length) bootstrap.Tab.getOrCreateInstance($historyTab[0]).show();
+      },
+      error: (xhr) => toastr.error(xhr.responseJSON?.message || '{{ __("admin.unexpected_error") }}')
     });
   });
 

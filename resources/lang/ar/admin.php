@@ -3771,6 +3771,7 @@ return [
 	'feedback_note_placeholder' => 'اكتب ملاحظاتك...',
 	'submit_feedback' => 'إرسال الملاحظات',
 	'add_feedback' => 'إضافة ملاحظات',
+	'feedback_history' => 'سجل الملاحظات',
 	'feedback_decision' => 'قرار الملاحظات',
 	'feedback_added_success' => 'تم إضافة التقييم بنجاح',
 	'feedback_failed' => 'فشل في إضافة التقييم',
