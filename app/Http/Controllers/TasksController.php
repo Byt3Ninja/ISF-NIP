@@ -302,27 +302,27 @@ class TasksController extends Controller
                 \Illuminate\Support\Facades\Notification::send([$startup], new \App\Notifications\TaskNotification($data));
                 $notifiedIds[] = $startup->id;
             }
-            if ($mentor && !in_array($mentor->id, $notifiedIds)) {
-                \Illuminate\Support\Facades\Notification::send([$mentor], new \App\Notifications\TaskNotification($data));
-                $notifiedIds[] = $mentor->id;
-            }
-            if ($mentor) {
-                $_storeAdminOrgId = $mentor->organization_id ?? $task->program?->organization_id;
-                if ($_storeAdminOrgId) {
-                    $_storeAdminSkip = array_values(array_filter(array_unique(array_merge($notifiedIds, [$mentor->id]))));
-                    $_storeAdmins = User::whereHas('roles', fn($q) => $q->whereIn('default_for', ['admin', 'subadmin', 'organizationManager', 'organizationmanager']))
-                        ->where(fn($q) => $q
-                            ->where('organization_id', $_storeAdminOrgId)
-                            ->orWhereHas('organizations', fn($pq) => $pq->where('organizations.id', $_storeAdminOrgId))
-                            ->orWhereHas('roles', fn($rq) => $rq->where('default_for', 'admin')))
-                        ->when(!empty($_storeAdminSkip), fn($q) => $q->whereNotIn('id', $_storeAdminSkip))
-                        ->where(fn($q) => $q->whereNull('company_id')->orWhereNotIn('company_id', $assignees_company))
-                        ->get();
-                    if ($_storeAdmins->isNotEmpty()) {
-                        \Illuminate\Support\Facades\Notification::send($_storeAdmins->all(), new \App\Notifications\TaskNotification($data));
-                    }
-                }
-            }
+            // if ($mentor && !in_array($mentor->id, $notifiedIds)) {
+            //     \Illuminate\Support\Facades\Notification::send([$mentor], new \App\Notifications\TaskNotification($data));
+            //     $notifiedIds[] = $mentor->id;
+            // }
+            // if ($mentor) {
+            //     $_storeAdminOrgId = $mentor->organization_id ?? $task->program?->organization_id;
+            //     if ($_storeAdminOrgId) {
+            //         $_storeAdminSkip = array_values(array_filter(array_unique(array_merge($notifiedIds, [$mentor->id]))));
+            //         $_storeAdmins = User::whereHas('roles', fn($q) => $q->whereIn('default_for', ['admin', 'subadmin', 'organizationManager', 'organizationmanager']))
+            //             ->where(fn($q) => $q
+            //                 ->where('organization_id', $_storeAdminOrgId)
+            //                 ->orWhereHas('organizations', fn($pq) => $pq->where('organizations.id', $_storeAdminOrgId))
+            //                 ->orWhereHas('roles', fn($rq) => $rq->where('default_for', 'admin')))
+            //             ->when(!empty($_storeAdminSkip), fn($q) => $q->whereNotIn('id', $_storeAdminSkip))
+            //             ->where(fn($q) => $q->whereNull('company_id')->orWhereNotIn('company_id', $assignees_company))
+            //             ->get();
+            //         if ($_storeAdmins->isNotEmpty()) {
+            //             \Illuminate\Support\Facades\Notification::send($_storeAdmins->all(), new \App\Notifications\TaskNotification($data));
+            //         }
+            //     }
+            // }
 
             return response()->json([
                 'success' => true,
@@ -608,27 +608,27 @@ class TasksController extends Controller
                 \Illuminate\Support\Facades\Notification::send([$startup], new \App\Notifications\TaskNotification($updateNotifData));
                 $updateNotifiedIds[] = $startup->id;
             }
-            if ($updateMentor && !in_array($updateMentor->id, $updateNotifiedIds)) {
-                \Illuminate\Support\Facades\Notification::send([$updateMentor], new \App\Notifications\TaskNotification($updateNotifData));
-                $updateNotifiedIds[] = $updateMentor->id;
-            }
-            if ($updateMentor) {
-                $_updateAdminOrgId = $updateMentor->organization_id ?? $task->program?->organization_id;
-                if ($_updateAdminOrgId) {
-                    $_updateAdminSkip = array_values(array_filter(array_unique(array_merge($updateNotifiedIds, [$updateMentor->id]))));
-                    $_updateAdmins = User::whereHas('roles', fn($q) => $q->whereIn('default_for', ['admin', 'subadmin', 'organizationManager', 'organizationmanager']))
-                        ->where(fn($q) => $q
-                            ->where('organization_id', $_updateAdminOrgId)
-                            ->orWhereHas('organizations', fn($pq) => $pq->where('organizations.id', $_updateAdminOrgId))
-                            ->orWhereHas('roles', fn($rq) => $rq->where('default_for', 'admin')))
-                        ->when(!empty($_updateAdminSkip), fn($q) => $q->whereNotIn('id', $_updateAdminSkip))
-                        ->where(fn($q) => $q->whereNull('company_id')->orWhereNotIn('company_id', $updateAssigneesCompany))
-                        ->get();
-                    if ($_updateAdmins->isNotEmpty()) {
-                        \Illuminate\Support\Facades\Notification::send($_updateAdmins->all(), new \App\Notifications\TaskNotification($updateNotifData));
-                    }
-                }
-            }
+            // if ($updateMentor && !in_array($updateMentor->id, $updateNotifiedIds)) {
+            //     \Illuminate\Support\Facades\Notification::send([$updateMentor], new \App\Notifications\TaskNotification($updateNotifData));
+            //     $updateNotifiedIds[] = $updateMentor->id;
+            // }
+            // if ($updateMentor) {
+            //     $_updateAdminOrgId = $updateMentor->organization_id ?? $task->program?->organization_id;
+            //     if ($_updateAdminOrgId) {
+            //         $_updateAdminSkip = array_values(array_filter(array_unique(array_merge($updateNotifiedIds, [$updateMentor->id]))));
+            //         $_updateAdmins = User::whereHas('roles', fn($q) => $q->whereIn('default_for', ['admin', 'subadmin', 'organizationManager', 'organizationmanager']))
+            //             ->where(fn($q) => $q
+            //                 ->where('organization_id', $_updateAdminOrgId)
+            //                 ->orWhereHas('organizations', fn($pq) => $pq->where('organizations.id', $_updateAdminOrgId))
+            //                 ->orWhereHas('roles', fn($rq) => $rq->where('default_for', 'admin')))
+            //             ->when(!empty($_updateAdminSkip), fn($q) => $q->whereNotIn('id', $_updateAdminSkip))
+            //             ->where(fn($q) => $q->whereNull('company_id')->orWhereNotIn('company_id', $updateAssigneesCompany))
+            //             ->get();
+            //         if ($_updateAdmins->isNotEmpty()) {
+            //             \Illuminate\Support\Facades\Notification::send($_updateAdmins->all(), new \App\Notifications\TaskNotification($updateNotifData));
+            //         }
+            //     }
+            // }
 
             return response()->json([
                 'success' => true,
