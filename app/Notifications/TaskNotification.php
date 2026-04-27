@@ -172,14 +172,15 @@ class TaskNotification extends Notification implements ShouldQueue
         $taskTitle  = $this->data['task']->title;
         $isAr       = app()->getLocale() === 'ar';
         $action     = $this->data['action'] ?? 'add';
+        $programName = $this->data['program_name'] ?? null;
 
         if ($notifiable->hasRole('registered')) {
             $message = match($action) {
-                'add'     => $isAr ? "تم إضافة مهمة جديدة: {$taskTitle} - بواسطة المينتور: {$mentorName}"   : "New task added: {$taskTitle} - By mentor: {$mentorName}",
-                'update'  => $isAr ? "تم تحديث المهمة: {$taskTitle} - بواسطة المينتور: {$mentorName}"        : "Task updated: {$taskTitle} - By mentor: {$mentorName}",
-                'archive' => $isAr ? "تمت أرشفة المهمة: {$taskTitle} - بواسطة المينتور: {$mentorName}"       : "A task assigned to you has been archived: {$taskTitle}",
-                'reopen'  => $isAr ? "تمت إعادة فتح المهمة: {$taskTitle} - بواسطة المينتور: {$mentorName}"   : "Task reopened: {$taskTitle} - By mentor: {$mentorName}",
-                default   => $isAr ? "تحديث على المهمة: {$taskTitle}" : "Task update: {$taskTitle}",
+                'add'     => $isAr ? "تم إسناد مهمة جديدة إليك في برنامج : {$programName}"  : "You have been assigned a new task in program: {$programName}",
+                'update'  => $isAr ? "تم تحديث مهمة مسندة إليك: {$taskTitle}"      : "A task assigned to you has been updated: {$taskTitle}",
+                'archive' => $isAr ? "تمت أرشفة مهمة مسندة إليك: {$taskTitle}"     : "A task assigned to you has been archived: {$taskTitle}",
+                'reopen'  => $isAr ? "تمت إعادة فتح المهمة: {$taskTitle}"   : "Task reopened: {$taskTitle}",
+                default   => $isAr ? "تم تحديث المهمة: {$taskTitle}" : "Task update: {$taskTitle}",
             };
         } 
        // else {
