@@ -40,6 +40,7 @@
                                                             $isMentor    = !$notifiable->hasRole('registered');
                                                             $mentorName  = $data['mentor']->name ?? '';
                                                             $taskTitle   = $data['task']->title ?? '';
+                                                            $taskDescription = $data['task']->description ?? '';
                                                             $startups    = $data['startupNames'] ?? [];
                                                             $isRtl       = $isAr;
                                                             $taskStatus  = $data['task']->status ?? '';
@@ -103,12 +104,14 @@
                                                             <p style="margin: 0;"> </p>
                                                             <p style="margin: 0;"><strong>{{ $isAr ? 'تفاصيل المهمة:' : 'Task details:' }}</strong></p>
                                                             <p style="margin: 0;">{{ $isAr ? 'العنوان:' : 'Title:' }} {{ $taskTitle }}.</p>
+                                                            <p style="margin: 0;">{{ $isAr ? 'الوصف:' : 'Description:' }} {{ $taskDescription }}.</p>
                                                             @if($programName)
                                                             <p style="margin: 0;">{{ $isAr ? 'البرنامج:' : 'Program:' }} {{ $programName }}.</p>
                                                             @endif
+                                                            <p style="margin: 0;">{{ $isAr ? 'الموعد النهائي:' : 'Due Date:' }} {{ $data['task']->due_date ? \Carbon\Carbon::parse($data['task']->due_date)->translatedFormat('F j, Y') : ($isAr ? 'غير محدد' : 'Not specified') }}.</p>
                                                             <p style="margin: 0;">{{ $isAr ? 'الحالة:' : 'Status:' }} {{ $statusLabel }}.</p>
                                                             @if($mentorName)
-                                                            <p style="margin: 0;">{{ $isAr ? 'المينتور:' : 'Mentor:' }} {{ $mentorName }}.</p>
+                                                            <p style="margin: 0;">{{ $isAr ? 'المينتور:' : 'Assigned By:' }} {{ $mentorName }}.</p>
                                                             @endif
                                                             <p style="margin: 0;"> </p>
                                                             @php

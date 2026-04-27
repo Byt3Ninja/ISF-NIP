@@ -296,6 +296,7 @@ class TasksController extends Controller
                 'action'       => 'add',
                 'mentor'       => $mentor,
                 'startupNames' => $startupNames,
+                'program_name'      => $task->program ? $task->program->title : null,
             ];
             $notifiedIds = [];
             foreach ($assignees as $startup) {
