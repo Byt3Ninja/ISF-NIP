@@ -41,6 +41,13 @@
                                                             $mentorName  = $data['mentor']->name ?? '';
                                                             $taskTitle   = $data['task']->title ?? '';
                                                             $taskDescription = $data['task']->description ?? '';
+                                                            $taskPriority = $data['task']->priority ?? '';
+                                                            $Priority = match($taskPriority) {
+                                                                'low' => $isAr ? 'منخفضة' : 'Low',
+                                                                'medium' => $isAr ? 'متوسطة' : 'Medium',
+                                                                'high' => $isAr ? 'عالية' : 'High',
+                                                                default => $taskPriority,
+                                                            };
                                                             $startups    = $data['startupNames'] ?? [];
                                                             $isRtl       = $isAr;
                                                             $taskStatus  = $data['task']->status ?? '';
@@ -51,7 +58,7 @@
                                                             $statusLabels = [
                                                                 'pending'   => $isAr ? 'قيد الانتظار' : 'Pending',
                                                                 'progress'  => $isAr ? 'قيد التنفيذ'  : 'In Progress',
-                                                                'review'    => $isAr ? 'قيد المراجعة' : 'Under Review',
+                                                                'review'    => $isAr ? 'قيد المراجعة' : 'In Review',
                                                                 'completed' => $isAr ? 'مكتملة'        : 'Completed',
                                                                 'archived'  => $isAr ? 'مؤرشفة'        : 'Archived',
                                                             ];
@@ -110,6 +117,7 @@
                                                             @endif
                                                             <p style="margin: 0;">{{ $isAr ? 'الموعد النهائي:' : 'Due Date:' }} {{ $data['task']->due_date ? \Carbon\Carbon::parse($data['task']->due_date)->translatedFormat('F j, Y') : ($isAr ? 'غير محدد' : 'Not specified') }}.</p>
                                                             <p style="margin: 0;">{{ $isAr ? 'الحالة:' : 'Status:' }} {{ $statusLabel }}.</p>
+                                                            <p style="margin: 0;">{{ $isAr ? 'الأولوية:' : 'Priority:' }} {{ $Priority }}.</p>
                                                             @if($mentorName)
                                                             <p style="margin: 0;">{{ $isAr ? 'المينتور:' : 'Assigned By:' }} {{ $mentorName }}.</p>
                                                             @endif
@@ -117,7 +125,7 @@
                                                             @php
                                                                 $taskUrl = $data['task'] instanceof \App\MentorshipTask
                                                                     ? route('mentorships.sessions_list_detailed') . '?nav=menu'
-                                                                    : route('tasks.show', $data['task']->id);
+                                                                    : route('tasks.index') . '?nav=menu';
                                                             @endphp
                                                             <p style="margin: 0; text-align: center;">
                                                                 <a href="{{ $taskUrl }}"
