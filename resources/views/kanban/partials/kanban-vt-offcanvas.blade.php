@@ -140,7 +140,9 @@
       {{-- FEEDBACK HISTORY TAB --}}
       <div class="tab-pane fade" id="vt-feedback-history" role="tabpanel">
         <div class="p-4">
-          <div id="vt-feedback-list"></div>
+          <div id="vt-feedback-list">
+            <p class="text-muted text-center py-4 mb-0">{{ __('admin.no_feedback') }}</p>
+          </div>
         </div>
       </div>
 
