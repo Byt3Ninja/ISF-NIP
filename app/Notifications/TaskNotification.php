@@ -177,20 +177,21 @@ class TaskNotification extends Notification implements ShouldQueue
             $message = match($action) {
                 'add'     => $isAr ? "تم إضافة مهمة جديدة: {$taskTitle} - بواسطة المينتور: {$mentorName}"   : "New task added: {$taskTitle} - By mentor: {$mentorName}",
                 'update'  => $isAr ? "تم تحديث المهمة: {$taskTitle} - بواسطة المينتور: {$mentorName}"        : "Task updated: {$taskTitle} - By mentor: {$mentorName}",
-                'archive' => $isAr ? "تمت أرشفة المهمة: {$taskTitle} - بواسطة المينتور: {$mentorName}"       : "Task archived: {$taskTitle} - By mentor: {$mentorName}",
+                'archive' => $isAr ? "تمت أرشفة المهمة: {$taskTitle} - بواسطة المينتور: {$mentorName}"       : "A task assigned to you has been archived: {$taskTitle}",
                 'reopen'  => $isAr ? "تمت إعادة فتح المهمة: {$taskTitle} - بواسطة المينتور: {$mentorName}"   : "Task reopened: {$taskTitle} - By mentor: {$mentorName}",
                 default   => $isAr ? "تحديث على المهمة: {$taskTitle}" : "Task update: {$taskTitle}",
             };
-        } else {
-            $startupList = implode('، ', $this->data['startupNames'] ?? []);
-            $message = match($action) {
-                'add'     => $isAr ? "تم إضافة المهمة: {$taskTitle} إلى: {$startupList}"           : "Task added: {$taskTitle} to: {$startupList}",
-                'update'  => $isAr ? "تم تحديث المهمة: {$taskTitle} للشركات: {$startupList}"        : "Task updated: {$taskTitle} for: {$startupList}",
-                'archive' => $isAr ? "تمت أرشفة المهمة: {$taskTitle} - الشركات: {$startupList}"     : "Task archived: {$taskTitle} - Startups: {$startupList}",
-                'reopen'  => $isAr ? "تمت إعادة فتح المهمة: {$taskTitle} - الشركات: {$startupList}" : "Task reopened: {$taskTitle} - Startups: {$startupList}",
-                default   => $isAr ? "تحديث على المهمة: {$taskTitle}" : "Task update: {$taskTitle}",
-            };
-        }
+        } 
+       // else {
+         //   $startupList = implode('، ', $this->data['startupNames'] ?? []);
+           // $message = match($action) {
+             //   'add'     => $isAr ? "تم إضافة المهمة: {$taskTitle} إلى: {$startupList}"           : "Task added: {$taskTitle} to: {$startupList}",
+               // 'update'  => $isAr ? "تم تحديث المهمة: {$taskTitle} للشركات: {$startupList}"        : "Task updated: {$taskTitle} for: {$startupList}",
+               // 'archive' => $isAr ? "تمت أرشفة المهمة: {$taskTitle} - الشركات: {$startupList}"     : "A task assigned to {$startupList} has been archived: {$taskTitle}",
+               // 'reopen'  => $isAr ? "تمت إعادة فتح المهمة: {$taskTitle} - الشركات: {$startupList}" : "Task reopened: {$taskTitle} - Startups: {$startupList}",
+               // default   => $isAr ? "تحديث على المهمة: {$taskTitle}" : "Task update: {$taskTitle}",
+        //    };
+       // }
 
         return [
             'task_id' => $this->data['task']->id,
