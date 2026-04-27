@@ -137,13 +137,18 @@
         </div>
       </div>
 
-      {{-- FEEDBACK TAB --}}
-      <div class="tab-pane fade" id="vt-feedback" role="tabpanel">
+      {{-- FEEDBACK HISTORY TAB --}}
+      <div class="tab-pane fade" id="vt-feedback-history" role="tabpanel">
         <div class="p-4">
           <div id="vt-feedback-list"></div>
+        </div>
+      </div>
 
+      {{-- ADD FEEDBACK TAB --}}
+      <div class="tab-pane fade" id="vt-add-feedback" role="tabpanel">
+        <div class="p-4">
           @if ($_user->ableTo('tasks.add_feedback', $permissions))
-          <div class="mt-4 border-top pt-4" id="vt-feedback-form-wrapper">
+          <div id="vt-feedback-form-wrapper">
             <h6 class="fw-semibold mb-3 d-flex align-items-center gap-2">
               <i class="ti ti-message-report ti-sm text-primary"></i>
               {{ __('admin.add_feedback') }}

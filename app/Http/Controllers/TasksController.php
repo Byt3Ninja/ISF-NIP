@@ -412,7 +412,7 @@ class TasksController extends Controller
             'time'    => $c->created_at->diffForHumans(),
         ]);
 
-        $feedbacks = $task->feedbacks->map(fn($fb) => [
+        $feedbacks = $task->feedbacks->sortByDesc('created_at')->values()->map(fn($fb) => [
             'user'     => $fb->user->name ?? 'N/A',
             'user_id'  => $fb->user_id,
             'img_url'  => $fb->user ? User::image_handler($fb->user->img_url) : null,

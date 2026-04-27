@@ -3715,6 +3715,7 @@ return [
 	'feedback_note_placeholder' => 'Write your feedback...',
 	'submit_feedback' => 'Submit Feedback',
 	'add_feedback' => 'Add Feedback',
+	'feedback_history' => 'Feedback History',
 	'feedback_decision' => 'Feedback Decision',
 	'feedback_added_success' => 'Feedback added successfully',
 	'feedback_failed' => 'Failed to add feedback',
