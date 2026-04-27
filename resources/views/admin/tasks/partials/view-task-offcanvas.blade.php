@@ -17,22 +17,24 @@
   </div>
 
   {{-- Tabs --}}
-  <ul class="nav nav-tabs border-bottom px-4 pt-2" id="viewTaskTabs" role="tablist">
-    <li class="nav-item" role="presentation">
-      <button class="nav-link active" id="vto-overview-tab" data-bs-toggle="tab"
+  <ul class="nav nav-tabs px-4 pb-0" id="viewTaskTabs" role="tablist" style="min-height: 50px;">
+    <li class="nav-item h-100" role="presentation">
+      <button class="nav-link active h-100" id="vto-overview-tab" data-bs-toggle="tab"
               data-bs-target="#vto-overview" type="button" role="tab"
               aria-controls="vto-overview" aria-selected="true">
         <i class="ti ti-layout-list ti-xs me-1"></i>{{ __('admin.overview') }}
       </button>
     </li>
-    <li class="nav-item" role="presentation">
-      <button class="nav-link" id="vto-assignees-tab" data-bs-toggle="tab"
+    <li class="nav-item h-100" role="presentation">
+      <button class="nav-link h-100" id="vto-assignees-tab" data-bs-toggle="tab"
               data-bs-target="#vto-assignees" type="button" role="tab"
               aria-controls="vto-assignees" aria-selected="false">
         <i class="ti ti-users ti-xs me-1"></i>{{ __('admin.assignees') }}
       </button>
     </li>
   </ul>
+  
+  <hr class="m-0" />
 
   {{-- Body --}}
   <div class="offcanvas-body p-0">

@@ -42,15 +42,15 @@
 
   </div>
 
-  <div class="offcanvas-body pt-0 d-flex flex-column overflow-hidden">
+  <div class="offcanvas-body p-0 d-flex flex-column overflow-hidden">
 
     {{-- TAB NAVIGATION --}}
-    <ul class="nav nav-tabs border-bottom mb-0 flex-nowrap flex-shrink-0" role="tablist"
-        style="overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none;">
+    <ul class="nav nav-tabs pb-0 flex-nowrap flex-shrink-0" role="tablist"
+        style="min-height: 50px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none;">
       @foreach($offcanvasTabs as $tab)
         @if($tab['show'])
-          <li class="nav-item flex-shrink-0 mb-0">
-            <button class="nav-link {{ $tab['active'] ? 'active' : '' }} d-flex align-items-center gap-1 text-nowrap"
+          <li class="nav-item h-100 flex-shrink-0 mb-0">
+            <button class="nav-link h-100 {{ $tab['active'] ? 'active' : '' }} d-flex align-items-center gap-1 text-nowrap"
                     data-bs-toggle="tab" data-bs-target="{{ $tab['target'] }}" role="tab">
               <i class="ti {{ $tab['icon'] }}"></i>
               <span>{{ $tab['label'] }}</span>
@@ -63,12 +63,14 @@
       @endforeach
     </ul>
     
+    <hr class="m-0" />
+    
     {{-- TAB CONTENT --}}
-    <div class="tab-content px-0 flex-grow-1 overflow-auto" style="min-height:0;">
+    <div class="tab-content p-0 flex-grow-1 overflow-auto" style="min-height:0;">
 
       {{-- DETAILS TAB --}}
-      <div class="tab-pane fade show active" id="vt-details" role="tabpanel">
-        <div>
+      <div class="tab-pane p-4 fade show active" id="vt-details" role="tabpanel">
+        <div class="p-2">
 
           {{-- Description --}}
           <div class="mb-4">
@@ -93,11 +95,58 @@
             <div id="vt-attachments-list" class="d-flex flex-column gap-2 mb-3"></div>
 
             {{-- Upload zone --}}
+            @if (!$_user->ableTo('tasks.update', $permissions))
+            {{-- ── Highlighted submission zone (registered users) ── --}}
+            <div class="rounded-2 overflow-hidden" style="border:2px solid var(--bs-primary);">
+
+              <div class="px-3 py-2 d-flex align-items-center justify-content-between bg-label-primary">
+                <span class="small fw-semibold text-primary d-flex align-items-center gap-1">
+                  <i class="ti ti-send ti-xs"></i>
+                  {{ __('admin.your_submission') }}
+                </span>
+                <span class="small text-dark">
+                  {{ __('admin.max') }} 5 {{ __('admin.files') ?? 'files' }} · 10MB {{ __('admin.each') }}
+                </span>
+              </div>
+
+              <div class="p-3">
+                <div class="mb-3" id="vt-submission-note-wrapper">
+                  <label class="form-label small fw-medium" for="vt-submission-note">{{ __('admin.submission_note') }}</label>
+                  <textarea id="vt-submission-note" class="form-control form-control-sm" rows="3"
+                    placeholder="{{ __('admin.submission_note_placeholder') }}"></textarea>
+                </div>
+
+                <div id="vt-dropzone"
+                     class="border border-dashed rounded-2 p-3 text-center position-relative"
+                     style="cursor:pointer;transition:border-color .2s,background .2s;">
+                  <input type="file" id="vt-dropzone-input"
+                    class="position-absolute top-0 start-0 w-100 h-100 opacity-0" style="cursor:pointer;"
+                    accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-zip-compressed,text/plain,text/csv"
+                    multiple />
+                  <i class="ti ti-cloud-upload ti-md text-primary mb-1 d-block"></i>
+                  <p class="mb-1 small fw-medium">{{ __('admin.dropzone') }}</p>
+                  <p class="mb-0 text-muted" style="font-size:.7rem;">{{ __('admin.max_5_files') }}</p>
+                </div>
+
+                <div id="vt-dropzone-queue" class="d-flex flex-column gap-2 mt-2"></div>
+
+                <div class="d-flex align-items-center justify-content-between mt-3">
+                  <div class="invalid-feedback d-block small" id="vt-upload-error"></div>
+                  <button type="button" class="btn btn-sm btn-primary text-nowrap px-8 ms-auto d-flex align-items-center gap-1"
+                          id="vt-dropzone-upload-btn" data-always-show="true">
+                    <i class="ti ti-send ti-xs"></i>
+                    {{ __('admin.send_submission') }}
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+            @else
+            {{-- ── Standard upload zone (admin / manager) ── --}}
             <div class="border rounded-2 p-3 bg-lighter">
               <div class="d-flex align-items-center justify-content-between mb-2">
-                <span class="small fw-medium text-body">
-                  {{ $_user->ableTo('tasks.update', $permissions) ? __('admin.upload_attachments') : __('admin.your_submission') }}
-                </span>
+                <span class="small fw-medium text-body">{{ __('admin.upload_attachments') }}</span>
                 <span class="text-muted" style="font-size:.7rem;">
                   {{ __('admin.max') }} 5 {{ __('admin.files') ?? 'files' }} · 10MB {{ __('admin.each') }}
                 </span>
@@ -123,22 +172,24 @@
                   <i class="ti ti-upload ti-xs me-1"></i>{{ __('admin.upload_all') }}
                 </button>
               </div>
-              <input type="hidden" id="vt-upload-btn-task-id" value="" />
             </div>
+            @endif
+
+            <input type="hidden" id="vt-upload-btn-task-id" value="" />
           </div>
 
         </div>
       </div>
 
       {{-- SUBMISSIONS TAB --}}
-      <div class="tab-pane fade" id="vt-submissions" role="tabpanel">
+      <div class="tab-pane fade p-4" id="vt-submissions" role="tabpanel">
         <div class="p-4">
           <div id="vt-submissions-list"></div>
         </div>
       </div>
 
       {{-- FEEDBACK HISTORY TAB --}}
-      <div class="tab-pane fade" id="vt-feedback-history" role="tabpanel">
+      <div class="tab-pane fade p-4" id="vt-feedback-history" role="tabpanel">
         <div class="p-4">
           <div id="vt-feedback-list">
             <p class="text-muted text-center py-4 mb-0">{{ __('admin.no_feedback') }}</p>
@@ -147,7 +198,7 @@
       </div>
 
       {{-- ADD FEEDBACK TAB --}}
-      <div class="tab-pane fade" id="vt-add-feedback" role="tabpanel">
+      <div class="tab-pane fade p-4" id="vt-add-feedback" role="tabpanel">
         <div class="p-4">
           @if ($_user->ableTo('tasks.add_feedback', $permissions))
           <div id="vt-feedback-form-wrapper">
@@ -195,7 +246,7 @@
       </div>
 
       {{-- COMMENTS TAB --}}
-      <div class="tab-pane fade" id="vt-comments" role="tabpanel">
+      <div class="tab-pane fade p-4" id="vt-comments" role="tabpanel">
         <div class="p-4 d-flex flex-column" style="min-height:100%;">
           <div id="vt-comments-list" class="mb-4"></div>
 

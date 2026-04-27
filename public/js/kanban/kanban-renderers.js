@@ -21,13 +21,13 @@ function buildAttachmentItem(att, taskId, canDelete) {
     : '';
 
   return `
-    <div class="d-flex flex-column border rounded p-2 bg-lighter attachment-item" id="att-row-${att.id}">
+    <div class="d-flex flex-column border rounded px-2 bg-light-subtle attachment-item" id="att-row-${att.id}">
       
       <div class="d-flex align-items-center justify-content-between">
         <a href="${att.url}" target="_blank"
            class="text-body fw-medium text-truncate d-flex align-items-center gap-1 flex-grow-1" style="min-width:0;">
-          <i class="ti ${fileIcon(att.name)} ti-sm flex-shrink-0"></i>
-          <span class="text-truncate">${att.name}</span>
+          <i class="ti ${fileIcon(att.name)} ti-xs flex-shrink-0"></i>
+          <span class="text-truncate small">${att.name}</span>
         </a>
         <div class="d-flex align-items-center gap-1 flex-shrink-0 ms-2">
           <a href="${att.url}" download="${att.name}"
@@ -84,7 +84,7 @@ function renderCommentsList(comments, containerSelector) {
   $c.html(comments.map(c => `
     <div class="d-flex align-items-start gap-3 mb-3">
       <div class="flex-shrink-0 mt-1">${buildAvatar(c.user, c.img_url, c.user_id)}</div>
-      <div class="flex-grow-1 bg-lighter rounded p-3">
+      <div class="flex-grow-1 bg-light-subtle rounded p-3">
         <div class="d-flex justify-content-between align-items-center mb-1">
           <span class="fw-semibold text-dark">${c.user}</span>
           <span class="text-muted" style="font-size:.7rem;">${c.time}</span>
@@ -115,7 +115,7 @@ function renderFeedbackList(feedbacks, containerSelector) {
             <span class="fw-semibold text-dark">${fb.user || ''}${badge}</span>
             <span class="text-muted" style="font-size:.7rem;">${fb.time || ''}</span>
           </div>
-          ${fb.text ? `<div class="small text-body bg-lighter rounded p-2">${fb.text}</div>` : ''}
+          ${fb.text ? `<div class="small text-body bg-light-subtle rounded p-2">${fb.text}</div>` : ''}
         </div>
       </div>`;
   }).join(''));

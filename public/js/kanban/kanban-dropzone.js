@@ -42,7 +42,9 @@ function dzRenderQueue() {
         </button>
       </div>`);
   });
-  $('#vt-dropzone-upload-btn').toggleClass('d-none', dzQueue.length === 0);
+  if (!$('#vt-dropzone-upload-btn').data('always-show')) {
+    $('#vt-dropzone-upload-btn').toggleClass('d-none', dzQueue.length === 0);
+  }
   $('#vt-upload-error').text('');
 }
 
@@ -106,12 +108,20 @@ function initDropzone(tasks) {
     dzRenderQueue();
   });
 
-  // Upload all
+  // Upload all / Send Submission
   $('#vt-dropzone-upload-btn').on('click', function () {
-    if (!dzQueue.length) return;
+    const lbl  = cfg.labels;
+    const $btn = $(this);
+    if (!dzQueue.length) {
+      if ($btn.data('always-show')) {
+        $('#vt-upload-error').text(lbl.pleaseAddFiles || 'Please add at least one file.');
+      }
+      return;
+    }
+    $('#vt-upload-error').text('');
     const taskId   = $('#vt-upload-btn-task-id').val();
-    const $btn     = $(this);
-    const lbl      = cfg.labels;
+    const note     = $('#vt-submission-note').val() || '';
+    const batchId  = Date.now().toString();
 
     $btn.prop('disabled', true).html(`<span class="spinner-border spinner-border-sm me-1"></span>${lbl.uploading}`);
 
@@ -122,6 +132,8 @@ function initDropzone(tasks) {
     snapshot.forEach(item => {
       const fd = new FormData();
       fd.append('attachment', item.file);
+      fd.append('note', note);
+      fd.append('batch_id', batchId);
       $(`#dzq-${item.id} .dz-progress-bar`).css('width', '60%');
 
       $.ajax({
@@ -156,7 +168,10 @@ function initDropzone(tasks) {
     function checkDone() {
       if (completed < total) return;
       if (failed > 0) toastr.warning(`${total - failed} ${lbl.uploaded}, ${failed} ${lbl.failed}.`);
-      else toastr.success(lbl.attachmentUploadedSuccess);
+      else {
+        toastr.success(lbl.attachmentUploadedSuccess);
+        $('#vt-submission-note').val('');
+      }
       dzRenderQueue();
       $btn.prop('disabled', false).html(`<i class="ti ti-upload ti-xs me-1"></i>${lbl.uploadAll}`);
     }
