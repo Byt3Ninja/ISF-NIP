@@ -36,23 +36,23 @@
     </div>
 
     {{-- Assignees (chip row, hidden until populated) --}}
-    <div class="d-none mt-2" id="vt-assignee-wrapper">
+    {{-- <div class="d-none mt-2" id="vt-assignee-wrapper">
       <div class="d-flex align-items-center gap-2 flex-wrap" id="vt-assignees-list"></div>
-    </div>
+    </div> --}}
 
   </div>
 
   <div class="offcanvas-body pt-0 d-flex flex-column overflow-hidden">
 
     {{-- TAB NAVIGATION --}}
-    <ul class="nav nav-tabs border-bottom mb-0 flex-nowrap flex-shrink-0" role="tablist"
+    <ul class="nav nav-tabs mb-0 flex-nowrap flex-shrink-0" role="tablist"
         style="overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none;">
       @foreach($offcanvasTabs as $tab)
         @if($tab['show'])
-          <li class="nav-item flex-shrink-0">
+          <li class="nav-item flex-shrink-0 mb-0">
             <button class="nav-link {{ $tab['active'] ? 'active' : '' }} d-flex align-items-center gap-1 text-nowrap"
                     data-bs-toggle="tab" data-bs-target="{{ $tab['target'] }}" role="tab">
-              <i class="ti {{ $tab['icon'] }} ti-xs"></i>
+              <i class="ti {{ $tab['icon'] }}"></i>
               <span>{{ $tab['label'] }}</span>
               @if(isset($tab['badge']))
                 <span class="badge badge-center {{ $tab['badge']['class'] }} rounded-pill ms-1" id="{{ $tab['badge']['id'] }}">0</span>
@@ -62,9 +62,9 @@
         @endif
       @endforeach
     </ul>
-
+    
     {{-- TAB CONTENT --}}
-    <div class="tab-content flex-grow-1 overflow-auto" style="min-height:0;">
+    <div class="tab-content px-0 flex-grow-1 overflow-auto" style="min-height:0;">
 
       {{-- DETAILS TAB --}}
       <div class="tab-pane fade show active" id="vt-details" role="tabpanel">
