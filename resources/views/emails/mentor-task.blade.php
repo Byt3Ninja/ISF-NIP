@@ -118,9 +118,9 @@
                                                             <p style="margin: 0;">{{ $isAr ? 'الموعد النهائي:' : 'Due Date:' }} {{ $data['task']->due_date ? \Carbon\Carbon::parse($data['task']->due_date)->translatedFormat('F j, Y') : ($isAr ? 'غير محدد' : 'Not specified') }}.</p>
                                                             <p style="margin: 0;">{{ $isAr ? 'الحالة:' : 'Status:' }} {{ $statusLabel }}.</p>
                                                             <p style="margin: 0;">{{ $isAr ? 'الأولوية:' : 'Priority:' }} {{ $Priority }}.</p>
-                                                            @if($mentorName)
+                                                            {{-- @if($mentorName)
                                                             <p style="margin: 0;">{{ $isAr ? 'المينتور:' : 'Assigned By:' }} {{ $mentorName }}.</p>
-                                                            @endif
+                                                            @endif --}}
                                                             <p style="margin: 0;"> </p>
                                                             @php
                                                                 $taskUrl = $data['task'] instanceof \App\MentorshipTask
