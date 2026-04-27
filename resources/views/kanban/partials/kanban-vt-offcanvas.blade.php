@@ -45,7 +45,7 @@
   <div class="offcanvas-body pt-0 d-flex flex-column overflow-hidden">
 
     {{-- TAB NAVIGATION --}}
-    <ul class="nav nav-tabs mb-0 flex-nowrap flex-shrink-0" role="tablist"
+    <ul class="nav nav-tabs border-bottom mb-0 flex-nowrap flex-shrink-0" role="tablist"
         style="overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none;">
       @foreach($offcanvasTabs as $tab)
         @if($tab['show'])
