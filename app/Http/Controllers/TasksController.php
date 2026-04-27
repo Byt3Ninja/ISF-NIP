@@ -603,6 +603,7 @@ class TasksController extends Controller
                 'action'       => $notifAction,
                 'mentor'       => $updateMentor,
                 'startupNames' => $updateStartupNames,
+                'program_name' => $task->program ? $task->program->title : null,
             ];
             $updateNotifiedIds = [];
             foreach ($updateAssignees as $startup) {
@@ -1018,6 +1019,7 @@ class TasksController extends Controller
                         'action'       => $moveNotifAction,
                         'mentor'       => $moveMentor,
                         'startupNames' => $moveStartupNames,
+                        'program_name' => $task->program ? $task->program->title : null,
                     ];
                     $moveNotifiedIds = [auth()->id()];
                     if ($moveMentor && $moveMentor->id !== auth()->id()) {
