@@ -1506,7 +1506,7 @@ class CyclesController extends Controller
                 'form_id' => $id,
                 'step_id' => $company->step,
                 'question' => $field['label'],
-                'answer' => is_array( $request->{$field_name} ) ? implode(',', $request->{$field_name}) : $request->{$field_name},
+                'answer' => is_array( $request->{$field_name} ) ? json_encode( $request->{$field_name} ) : $request->{$field_name},
                 'screening' => '{}',
                 'comments' => '{}',
                 'created_at' => now(),
