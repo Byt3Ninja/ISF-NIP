@@ -1077,6 +1077,7 @@ class TasksController extends Controller
     
     public function addFeedback(Request $request, $taskId)
     {
+        
         try {
             $task = ProgramTask::find($taskId);
 
@@ -1087,6 +1088,16 @@ class TasksController extends Controller
                         ? 'المهمة غير موجودة'
                         : 'Task not found.'
                 ], 404);
+            }
+
+
+            if($task->status !== 'review') {
+                return response()->json([
+                    'success' => false,
+                    'message' => app()->getLocale() == 'ar'
+                        ? 'لا يمكن تقديم ملاحظات إلا على المهام التي في حالة مراجعة'
+                        : 'Feedback can only be submitted for tasks in review status.'
+                ], 400);
             }
 
             $validator = Validator::make($request->all(), [
@@ -1111,13 +1122,50 @@ class TasksController extends Controller
             $task->status = $request->input('decision') === 'pass' ? 'completed' : 'pending';
             $task->save();
 
-            $user = auth()->user();
+            $user      = auth()->user();
+            $decision  = $request->input('decision');
+            $companyId = $request->input('company_id');
+
+            if ($companyId) {
+                ProgramTaskAssignee::where('program_task_id', $task->id)
+                    ->where('company_id', $companyId)
+                    ->update(['status' => $task->status, 'last_updated' => now()]);
+            }
 
             ProgramTaskActivity::create([
                 'program_task_id' => $task->id,
                 'user_id'         => auth()->id(),
                 'action'          => 'feedback',
             ]);
+
+            $targetCompanyIds = $companyId
+                ? [$companyId]
+                : $task->assignees()->pluck('company_id')->toArray();
+
+            $assignees    = User::whereIn('company_id', $targetCompanyIds)->get();
+            $startupNames = $task->assignees
+                ->when($companyId, fn($col) => $col->where('id', $companyId))
+                ->pluck('name')->filter()->values()->toArray();
+
+            $notifData = [
+                'task'         => $task,
+                'message'      => $decision === 'pass'
+                    ? ($task->title . ' passed.')
+                    : ('Revisions requested for ' . $task->title . '.'),
+                'action'       => 'feedback',
+                'decision'     => $decision,
+                'feedbackNote' => $feedback->note,
+                'mentor'       => $user,
+                'startupNames' => $startupNames,
+                'program_name' => $task->program ? $task->program->title : null,
+            ];
+            
+            foreach ($assignees as $assignee) {
+                \Illuminate\Support\Facades\Notification::send(
+                    [$assignee],
+                    new \App\Notifications\TaskNotification($notifData)
+                );
+            }
 
             return response()->json([
                 'success'  => true,
