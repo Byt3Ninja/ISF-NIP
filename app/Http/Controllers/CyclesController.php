@@ -1258,7 +1258,7 @@ class CyclesController extends Controller
                 'form_id' => $id,
                 'step_id' => Auth::user()->company->step,
                 'question' => $field_options->label,
-                'answer' => $request->{$field_name},
+                'answer' => is_array( $request->{$field_name} ) ? implode(',', $request->{$field_name}) : $request->{$field_name},
                 'screening' => '{}',
                 'comments' => '{}',
                 'created_at' => now(),
