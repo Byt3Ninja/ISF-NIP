@@ -172,6 +172,8 @@
                   <i class="ti ti-upload ti-xs me-1"></i>{{ __('admin.upload_all') }}
                 </button>
               </div>
+              <input type="hidden" id="vt-upload-btn-task-id" value="" />
+              <input type="hidden" id="vt-fb-company-id" value="" />
             </div>
             @endif
 
@@ -196,7 +198,6 @@
           </div>
         </div>
       </div>
-
       {{-- ADD FEEDBACK TAB --}}
       <div class="tab-pane fade p-4" id="vt-add-feedback" role="tabpanel">
         <div class="p-4">

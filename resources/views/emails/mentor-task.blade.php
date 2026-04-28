@@ -9,12 +9,15 @@
                                                     @php
                                                     $isArH = app()->getLocale() === 'ar';
                                                     $actionMessages = [
-                                                        'add'     => $isArH ? 'تمت إضافة مهمة جديدة'        : 'A New Task Has Been Added',
-                                                        'update'  => $isArH ? 'تم تحديث المهمة'             : 'Task Has Been Updated',
-                                                        'archive' => $isArH ? 'تمت أرشفة المهمة'            : 'Task Has Been Archived',
-                                                        'reopen'  => $isArH ? 'تمت إعادة فتح المهمة'        : 'Task Has Been Reopened',
-                                                        'move'    => $isArH ? 'تم نقل المهمة'               : 'A Task Has Been Moved',
-                                                        'comment' => $isArH ? 'تم إضافة تعليق جديد على مهمتك' : 'A New Comment Has Been Added to Your Task',
+                                                        'add'      => $isArH ? 'تمت إضافة مهمة جديدة'        : 'A New Task Has Been Added',
+                                                        'update'   => $isArH ? 'تم تحديث المهمة'             : 'Task Has Been Updated',
+                                                        'archive'  => $isArH ? 'تمت أرشفة المهمة'            : 'Task Has Been Archived',
+                                                        'reopen'   => $isArH ? 'تمت إعادة فتح المهمة'        : 'Task Has Been Reopened',
+                                                        'move'     => $isArH ? 'تم نقل المهمة'               : 'A Task Has Been Moved',
+                                                        'comment'  => $isArH ? 'تم إضافة تعليق جديد على مهمتك' : 'A New Comment Has Been Added to Your Task',
+                                                        'feedback' => $isArH
+                                                            ? (($data['decision'] ?? '') === 'pass' ? 'تم اجتياز المهمة' : 'مطلوب تعديلات على المهمة')
+                                                            : (($data['decision'] ?? '') === 'pass' ? 'Task Passed'      : 'Revisions Requested'),
                                                     ];
                                                    @endphp
                                                     <td class="pad"
@@ -121,6 +124,21 @@
                                                             {{-- @if($mentorName)
                                                             <p style="margin: 0;">{{ $isAr ? 'المينتور:' : 'Assigned By:' }} {{ $mentorName }}.</p>
                                                             @endif --}}
+                                                            @if($action === 'feedback')
+                                                            @php
+                                                                $reviewStatusEn = ($data['decision'] ?? '') === 'pass' ? 'Passed' : 'Needs Revision';
+                                                                $reviewStatusAr = ($data['decision'] ?? '') === 'pass' ? 'تم الاجتياز' : 'يحتاج إلى تعديل';
+                                                                $closingEn = ($data['decision'] ?? '') === 'pass'
+                                                                    ? 'Your submission has been approved.'
+                                                                    : 'Please review the feedback and update your submission.';
+                                                                $closingAr = ($data['decision'] ?? '') === 'pass'
+                                                                    ? 'تم اعتماد التسليم الخاص بك.'
+                                                                    : 'يرجى مراجعة الملاحظات وتحديث التسليم.';
+                                                            @endphp
+                                                            <p style="margin: 0;">{{ $isAr ? 'حالة المراجعة:' : 'Review status:' }} {{ $isAr ? $reviewStatusAr : $reviewStatusEn }}.</p>
+                                                            <p style="margin: 0;">{{ $isAr ? 'الملاحظات:' : 'Feedback:' }} {{ $data['feedbackNote'] ?? '' }}.</p>
+                                                            <p style="margin: 0;">{{ $isAr ? $closingAr : $closingEn }}</p>
+                                                            @endif
                                                             <p style="margin: 0;"> </p>
                                                             @php
                                                                 $taskUrl = $data['task'] instanceof \App\MentorshipTask

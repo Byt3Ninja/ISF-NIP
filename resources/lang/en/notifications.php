@@ -43,13 +43,14 @@ return [
     ],
 
     'task' => [
-        'broadcast'       => 'Task added: :message',
-        'whatsapp'        => 'Task added: :message',
-        'subject'         => 'Task Added',
-        'subject_add'     => 'Task Added',
-        'subject_update'  => 'Task Updated',
-        'subject_archive' => 'Task Archived',
-        'subject_reopen'  => 'Task Reopened',
+        'broadcast'          => 'Task added: :message',
+        'whatsapp'           => 'Task added: :message',
+        'subject'            => 'Task Added',
+        'subject_add'        => 'Task Added',
+        'subject_update'     => 'Task Updated',
+        'subject_archive'    => 'Task Archived',
+        'subject_reopen'     => 'Task Reopened',
+        'subject_feedback'   => 'Task Review Update',
     ],
 
     'mentorship_session' => [
