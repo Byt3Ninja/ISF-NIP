@@ -60,6 +60,8 @@
                           @php
                             $field_name = 'field_' . $question['id'];
                             $id_for = 'input-fld-' . $question['id'];
+                            $checkboxAnswers = collect($answers)->where('field_id', $question['id'])->first()?->answer ?? '[]';
+                            $checkboxAnswers = json_decode($checkboxAnswers, true);
                           @endphp
 
                           <div class="col-12">
@@ -135,6 +137,7 @@
                                         name="{{ $field_name }}[]" 
                                         id="{{ $id_for }}_{{ $optionIndex }}" 
                                         value="{{ $option }}"
+                                        {{ is_array($checkboxAnswers) && in_array($option, $checkboxAnswers, true) ? 'checked' : '' }}
                                         data-logic="{{ $question['logic'][$option] ?? 'continue' }}"
                                       />
                                       <label class="form-check-label" for="{{ $id_for }}_{{ $optionIndex }}">
