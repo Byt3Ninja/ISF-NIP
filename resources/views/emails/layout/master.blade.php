@@ -2,7 +2,6 @@
 
 @php
     $setting = \App\Settings::find(1);
-    $org_name = $org_name ?? config('app.name', 'GrowthLabs');
     $org_logo_url = $org_logo_url ?? null;
     $org_address = $org_address ?? null;
     $org_website = $org_website ?? null;
@@ -10,6 +9,8 @@
     $org_twitter = $org_twitter ?? null;
     $org_facebook = $org_facebook ?? null;
     $org_instagram = $org_instagram ?? null;
+    $platformName = $setting ? ( $setting->Platform_Name ?? config('app.name', 'GrowthLabs') ) : config('app.name', 'GrowthLabs');
+    $org_name = $org_name ?? $platformName;
 @endphp
 <body style="background-color: #f8f8f9; margin: 0; padding: 0; -webkit-text-size-adjust: none; text-size-adjust: none;">
         <table border="0" cellpadding="0" cellspacing="0" class="nl-container" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #f8f8f9;" width="100%">
