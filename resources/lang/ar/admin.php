@@ -3828,4 +3828,5 @@ return [
 	'offline_location_map_max' => 'يجب ألا يتجاوز رابط تقريب الموقع 500 حرفًا.',
   'view_submission' => 'عرض التقديم',
   'due' => 'حتى',
+  'in_review_count' => 'تحت المراجعة',
 ];

@@ -25,6 +25,7 @@
           <th class="text-nowrap">{{ __('admin.task') }}</th>
           <th class="text-nowrap">{{ __('admin.created_by') }}</th>
           <th class="text-nowrap">{{ __('admin.Program') }}</th>
+          <th class="text-nowrap">{{ __('admin.In_Review') }}</th>
           {{-- <th class="text-nowrap">{{ __('admin.assignees') }}</th> --}}
           <th class="text-nowrap">{{ __('admin.Priority') }}</th>
           {{-- <th class="text-nowrap">{{ __('admin.Status') }}</th> --}}
