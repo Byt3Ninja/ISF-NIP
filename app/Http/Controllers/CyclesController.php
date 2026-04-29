@@ -1185,7 +1185,7 @@ class CyclesController extends Controller
 
 
         $inputs = [];
-        $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', $user->id)->whereIn('form_data.field_id', $field_map_ids)->orderBy('form_data.id', 'ASC')->get();
+        $answers = Formfield::rightJoin('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', $user->id)->whereIn('form_data.field_id', $field_map_ids)->orderBy('form_data.id', 'ASC')->get();
         foreach ($answers as $answer) {
             $inputs[ 'field_' . $answer->field_id] = $answer->answer;
         };
