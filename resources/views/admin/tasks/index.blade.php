@@ -200,7 +200,7 @@ $(function () {
       {
         targets: 1, responsivePriority: 4,
         render: (_, __, full) => `
-          <div class="d-flex justify-content-start align-items-start task-title" style="max-width:200px;">
+          <div class="d-flex justify-content-start align-items-start task-title" style="min-width:150px; max-width:200px;">
             <div class="d-flex flex-column overflow-y-hidden" style="width:100%;min-width:0;max-height:80px;">
               <div class="d-flex align-items-center gap-1 flex-wrap">
                 <a href="javascript:;" class="text-heading fw-medium line-clamp-1"><span>${full.title}</span></a>
