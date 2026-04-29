@@ -1,8 +1,3 @@
-@php
-    $setting = App\Settings::first();
-    $platformName = $setting ? ( $setting->Platform_Name ?? config('app.name') ) : config('app.name');
-@endphp
-
 @extends('emails.layout.master')
 
 @section('content')
