@@ -205,7 +205,7 @@ $(function () {
                 <a href="javascript:;" class="text-heading fw-medium line-clamp-1"><span>${full.title}</span></a>
                 ${full.overallStatus === 'archived' ? '<span class="badge bg-label-secondary"><i class="ti ti-archive ti-xs me-1"></i>Archived</span>' : ''}
               </div>
-              <small class="text-muted line-clamp-3">${full.description}</small>
+              <!-- <small class="text-muted line-clamp-3">${full.description}</small> -->
             </div>
           </div>`
       },
@@ -464,7 +464,8 @@ $(function () {
                 @if ($_user->ableTo('tasks.show', $permissions))
                   <button type="button"
                     class="btn btn-sm btn-outline-primary task-review-btn"
-                    data-task-id="${data.id}">
+                    data-task-id="${data.id}"
+                    data-company-id="${a.id}">
                     {{ __('admin.view_submission') }} <i class="ti ti-settings ti-xs ms-1"></i>
                   </button>
                 @endif
@@ -579,14 +580,19 @@ $(function () {
 
   // ─── Review Task (open kanban-vt-offcanvas) ───────────────────────────────
   $(document).on('click', '.task-review-btn', function () {
-    const taskId = $(this).data('task-id');
-    $('#viewTaskOffcanavas').offcanvas('hide');
+    const taskId    = $(this).data('task-id');
+    const companyId = $(this).data('company-id');
+    $('#vt-fb-company-id').val(companyId ?? '');
 
-    $.ajax({
-      url: `/dashboard/tasks/${taskId}`,
-      method: 'GET',
-      headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-      success: function (res) {
+    const vtOcEl = document.getElementById('viewTaskOffcanvas');
+    const vtOc   = bootstrap.Offcanvas.getOrCreateInstance(vtOcEl);
+
+    function loadAndOpen() {
+      $.ajax({
+        url: `/dashboard/tasks/${taskId}`,
+        method: 'GET',
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+        success: function (res) {
         if (!res.success) return toastr.error('{{ __("admin.unexpected_error") }}');
         const td   = res.data;
         const p    = window.KanbanConfig.priorityMap[td.priority] ?? window.KanbanConfig.priorityMap['Medium'];
@@ -677,14 +683,20 @@ $(function () {
             document.querySelector('#viewTaskOffcanvas .nav-tabs .nav-link')
           ).show();
         }
-        bootstrap.Offcanvas.getOrCreateInstance(
-          document.getElementById('viewTaskOffcanvas')
-        ).show();
+        vtOc.show();
       },
       error: () => toastr.error('{{ __("admin.unexpected_error") }}')
     });
+    }
+
+    if (vtOcEl.classList.contains('show')) {
+      $(vtOcEl).one('hidden.bs.offcanvas', loadAndOpen);
+      vtOc.hide();
+    } else {
+      loadAndOpen();
+    }
   });
-  
+
   // Restore Details tab visibility whenever the offcanvas closes
   document.getElementById('viewTaskOffcanvas').addEventListener('hidden.bs.offcanvas', function () {
     $('#viewTaskOffcanvas .nav-tabs .nav-link[data-bs-target="#vt-details"]').removeClass('d-none');
@@ -796,13 +808,14 @@ $(function () {
 
   // ─── Submit Feedback (kanban-vt-offcanvas) ────────────────────────────────
   $(document).on('click', '#vt-submit-feedback-btn', function () {
-    const taskId   = $('#vt-upload-btn-task-id').val();
-    const decision = $('input[name="vt_feedback_decision"]:checked').val();
-    const note     = $('#vt-fb-note').val().trim();
+    const taskId    = $('#vt-upload-btn-task-id').val();
+    const companyId = $('#vt-fb-company-id').val();
+    const decision  = $('input[name="vt_feedback_decision"]:checked').val();
+    const note      = $('#vt-fb-note').val().trim();
     $.ajax({
       url: `/dashboard/tasks/${taskId}/add-feedback`,
       method: 'POST',
-      data: { decision, note },
+      data: { decision, note, company_id: companyId },
       headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
       success: function (res) {
         toastr.success(res.message || '{{ __("admin.feedback_added_success") }}');

@@ -94,7 +94,7 @@
 
     <!-- Main JS -->
     <script src="/vuexy/assets/js/main.js"></script>
-    <script src="/vuexy/assets/js/form-page-close.js"></script>
+    {{-- <script src="/vuexy/assets/js/form-page-close.js"></script> --}}
 
     <!-- Custom JS -->
     

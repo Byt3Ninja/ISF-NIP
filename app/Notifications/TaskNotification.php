@@ -55,7 +55,7 @@ class TaskNotification extends Notification implements ShouldQueue
     {
         $taskId = $this->data['task']->id ?? null;
         $action = $this->data['action'] ?? 'add';
-        if ($taskId) {
+        if ($taskId && $action !== 'feedback') {
             $dedupKey = "task_notif_{$taskId}_{$action}_{$notifiable->id}";
             if (!Cache::add($dedupKey, 1, now()->addHour())) {
                 return [];
@@ -174,13 +174,22 @@ class TaskNotification extends Notification implements ShouldQueue
         $action     = $this->data['action'] ?? 'add';
         $programName = $this->data['program_name'] ?? null;
 
+        $message = $isAr ? "تم تحديث المهمة: {$taskTitle}" : "Task update: {$taskTitle}";
+
         if ($notifiable->hasRole('registered')) {
             $message = match($action) {
-                'add'     => $isAr ? "تم إسناد مهمة جديدة إليك في برنامج : {$programName}"  : "You have been assigned a new task in program: {$programName}",
-                'update'  => $isAr ? "تم تحديث مهمة مسندة إليك: {$taskTitle}"      : "A task assigned to you has been updated: {$taskTitle}",
-                'archive' => $isAr ? "تمت أرشفة مهمة مسندة إليك: {$taskTitle}"     : "A task assigned to you has been archived: {$taskTitle}",
-                'reopen'  => $isAr ? "تمت إعادة فتح المهمة: {$taskTitle}"   : "Task reopened: {$taskTitle}",
-                default   => $isAr ? "تم تحديث المهمة: {$taskTitle}" : "Task update: {$taskTitle}",
+                'add'      => $isAr ? "تم إسناد مهمة جديدة إليك في برنامج : {$programName}"  : "You have been assigned a new task in program: {$programName}",
+                'update'   => $isAr ? "تم تحديث مهمة مسندة إليك: {$taskTitle}"      : "A task assigned to you has been updated: {$taskTitle}",
+                'archive'  => $isAr ? "تمت أرشفة مهمة مسندة إليك: {$taskTitle}"     : "A task assigned to you has been archived: {$taskTitle}",
+                'reopen'   => $isAr ? "تمت إعادة فتح المهمة: {$taskTitle}"           : "Task reopened: {$taskTitle}",
+                'feedback' => $isAr
+                    ? ($this->data['decision'] === 'pass'
+                        ? "تم اجتياز {$taskTitle}."
+                        : "مطلوب تعديلات على {$taskTitle}.")
+                    : ($this->data['decision'] === 'pass'
+                        ? "{$taskTitle} passed."
+                        : "Revisions requested for : {$taskTitle}."),
+                default    => $isAr ? "تم تحديث المهمة: {$taskTitle}" : "Task update: {$taskTitle}",
             };
         } 
        // else {
@@ -205,6 +214,19 @@ class TaskNotification extends Notification implements ShouldQueue
     {
         $action = $this->data['action'] ?? 'add';
         $title  = $this->data['task']->title ?? '';
+
+        if ($action === 'feedback' && isset($this->data['decision'])) {
+            $isAr = app()->getLocale() === 'ar';
+            if ($this->data['decision'] === 'pass') {
+                return $isAr
+                    ? "تحديث مراجعة المهمة: تم اجتياز {$title}."
+                    : "Task review update: {$title} passed.";
+            }
+            return $isAr
+                ? "تحديث مراجعة المهمة: مطلوب تعديلات على {$title}."
+                : "Task review update: Revisions requested for {$title}.";
+        }
+
         $key    = "notifications.task.subject_{$action}";
         $translated = __($key);
         $base   = $translated !== $key ? $translated : __('notifications.task.subject');
