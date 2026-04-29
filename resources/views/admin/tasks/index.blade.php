@@ -205,7 +205,7 @@ $(function () {
                 <a href="javascript:;" class="text-heading fw-medium line-clamp-1"><span>${full.title}</span></a>
                 ${full.overallStatus === 'archived' ? '<span class="badge bg-label-secondary"><i class="ti ti-archive ti-xs me-1"></i>Archived</span>' : ''}
               </div>
-              <small class="text-muted line-clamp-3">${full.description}</small>
+              <!-- <small class="text-muted line-clamp-3">${full.description}</small> -->
             </div>
           </div>`
       },
