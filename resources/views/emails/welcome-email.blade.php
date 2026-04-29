@@ -10,7 +10,7 @@
                     <p style="margin: 0;"> {{__('email.welcome_email.m2')}} <strong>{{ $user->email }}</strong></p>
                     <p style="margin: 0 0 10px;">{{__('email.welcome_email.m3')}}</p>
                     <p style="margin: 0;">{{__('email.welcome_email.best_regards')}}</p>
-                    <p style="margin: 0;">{{ $platformName }}</p>
+                    <p style="margin: 0;">{{ $org_name ?? config('app.name', 'GrowthLabs') }}</p>
                     </div>
             </td>
         </tr>
