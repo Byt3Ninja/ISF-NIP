@@ -1,3 +1,8 @@
+@php
+    $setting = App\Settings::first();
+    $platformName = $setting ? ( $setting->Platform_Name ?? config('app.name') ) : config('app.name');
+@endphp
+
 @extends('layouts.admin')
 
 @section('title', __('notification_templates.example_title', [], 'Example Notification Template'))
@@ -247,7 +252,7 @@ $notificationService = new NotificationTemplateService();
 $notificationService->send('welcome-email', [
     'user' => $user,
     'app' => [
-        'name' => config('app.name'),
+        'name' => $platformName,
         'url' => config('app.url'),
     ],
     'company' => [
