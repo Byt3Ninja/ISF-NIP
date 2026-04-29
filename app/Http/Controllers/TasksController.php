@@ -53,14 +53,17 @@ class TasksController extends Controller
 
         // Fetch real tasks from database
         $tasksData = ProgramTask::with(['program', 'assignees', 'creator', 'feedbacks.user', 'activities.user'])
-            ->when(!$user->hasRole('admin') && !empty($orgIds), function ($q) use ($orgIds) {
+            ->when($user->hasRole('mentor'), function ($q) use ($user) {
+                $mentorCycleIds = $user->cycles()->pluck('cycles.id');
+                $q->whereIn('program_id', $mentorCycleIds);
+            })
+            ->when(!$user->hasRole('admin') && !$user->hasRole('mentor') && !empty($orgIds), function ($q) use ($orgIds) {
                 $q->whereHas('program', function($pq) use ($orgIds) {
                     $pq->whereIn('organization_id', $orgIds);
                 });
             })
             ->orderBy('created_at', 'desc')
             ->get();
-        
         $tasks = $tasksData->map(function($task) {
             return [
                 'id' => $task->id,
@@ -134,13 +137,14 @@ class TasksController extends Controller
         });
         
         $archivedTasks = $tasksData->where('status', 'archived');
+        $taskIds = $tasksData->pluck('id');
         // Calculate real stats
         $stats = [
             'total_tasks' => $tasksData->count(),
             'pending' => $tasksData->where('status', 'pending')->count(),
             'active' => [
                 'in_progress_count' => $tasksData->where('status', 'progress')->count(),
-                'in_review_count' => $tasksData->where('status', 'review')->count(),
+                'in_review_count' => ProgramTaskAssignee::whereIn('program_task_id', $taskIds)->where('status', 'review')->count(),
             ],
             'completed' => $tasksData->where('status', 'completed')->count(),
             'archived' => $tasksData->where('status', 'archived')->count(),
