@@ -9,7 +9,7 @@
     ],
     [
       'title'    => __('admin.boardTitlePending'),
-      'count'    => $stats['active']['pending_count'] ?? 0,
+      'count'    => $stats['pending'] ?? 0,
       'subtitle' => __('admin.tasks') . ' ' .  __('admin.boardTitlePending'),
       'icon'     => 'ti-trending-up',
       'color'    => 'warning',
