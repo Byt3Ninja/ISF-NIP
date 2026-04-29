@@ -1,3 +1,8 @@
+@php
+    $setting = App\Settings::first();
+    $platformName = $setting ? ( $setting->Platform_Name ?? config('app.name') ) : config('app.name');
+@endphp
+
 @component('mail::message')
 {{-- Greeting --}}
 @if (! empty($greeting))
@@ -44,7 +49,7 @@
 {{ $salutation }}
 @else
 @lang('Regards'),<br>
-{{ config('app.name') }}
+{{ $platformName }}
 @endif
 
 {{-- Subcopy --}}

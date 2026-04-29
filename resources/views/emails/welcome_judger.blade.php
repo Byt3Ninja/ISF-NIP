@@ -1,3 +1,8 @@
+@php
+    $setting = App\Settings::first();
+    $platformName = $setting ? ( $setting->Platform_Name ?? config('app.name') ) : config('app.name');
+@endphp
+
 @extends('emails.layout.master')
 
 @section('content')
@@ -31,7 +36,7 @@
 
     <div class="welcome-footer">
         <p>{{ __('email.welcome_email.best_regards') }}</p>
-        <p>{{ config('app.name') }}</p>
+        <p>{{ $platformName }}</p>
                                                 </div>
 
     <div class="action-buttons">
