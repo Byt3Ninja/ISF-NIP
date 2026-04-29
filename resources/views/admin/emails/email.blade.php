@@ -1,3 +1,8 @@
+@php
+    $setting = App\Settings::first();
+    $platformName = $setting ? ( $setting->Platform_Name ?? config('app.name') ) : config('app.name');
+@endphp
+
 <!DOCTYPE html>
 
 <html lang="en" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:v="urn:schemas-microsoft-com:vml">
@@ -277,7 +282,7 @@ $setting = \App\settings::where('id', 1)->first();
 <tr>
 <td class="pad" style="padding-bottom:30px;padding-left:40px;padding-right:40px;padding-top:20px;">
 <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:12px;line-height:120%;text-align:left;mso-line-height-alt:14.399999999999999px;">
-<p style="margin: 0; word-break: break-word;"><span style="color: #95979c;">Growthlabs Copyright © 2024</span></p>
+<p style="margin: 0; word-break: break-word;"><span style="color: #95979c;">{{ $platformName }} Copyright © 2024</span></p>
 </div>
 </td>
 </tr>
