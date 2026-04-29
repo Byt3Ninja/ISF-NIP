@@ -377,12 +377,12 @@
 
     document.addEventListener('DOMContentLoaded', function() {
       // الاستماع لتغيير التبويبات
-      document.querySelectorAll('.nav-link').forEach(tab => {
+      document.querySelectorAll('#company-tab, #mobile-company-tab').forEach(tab => {
         tab.addEventListener('shown.bs.tab', function(e) {
           // تحديد التبويب النشط
           const activeTab = e.target.getAttribute('href');
           // تعطيل الحقول المطلوبة للتبويبات غير النشطة
-          document.querySelectorAll('.tab-pane').forEach(pane => {
+          document.querySelectorAll('#company-tab-content > .tab-pane').forEach(pane => {
             if (pane.getAttribute('id') === activeTab.substring(
               1)) {
               pane.querySelectorAll('input').forEach(input =>
