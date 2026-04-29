@@ -3772,4 +3772,5 @@ return [
 	'offline_location_map_max' => 'The offline location map URL may not be greater than 500 characters.',
   'view_submission' => 'View Submission',
   'due' => 'Due',
+  'in_review_count' => 'In Review Count',
 ];

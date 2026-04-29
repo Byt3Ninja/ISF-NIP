@@ -182,6 +182,7 @@ $(function () {
       { data: 'title' },
       { data: 'creator' },
       { data: 'program' },
+      { data: 'in_review_count' },
       { data: 'priority' },
       // { data: 'overallStatus' },
       { data: 'dueDate' },
@@ -194,7 +195,7 @@ $(function () {
         responsivePriority: 2, render: () => ''
       },
       {
-        targets: 7, visible: false, searchable: false
+        targets: 8, visible: false, searchable: false
       },
       {
         targets: 1, responsivePriority: 4,
@@ -223,7 +224,14 @@ $(function () {
           `<a href="/dashboard/programlist/${full.program.id}" target="_blank" class="text-heading text-decoration-none">${full.program.title}</a>`
       },
       {
-        targets: 4,
+        targets: 4, orderable: true,
+        render: (_, __, full) =>
+          full.in_review_count > 0
+            ? `<span class="badge bg-label-warning">${full.in_review_count}</span>`
+            : `<span class="badge bg-label-secondary">0</span>`
+      },
+      {
+        targets: 5,
         // Render badge for display; raw data used by custom search
         render: (_, __, full) => {
           const p = priorityObj[full.priority] || { class: 'bg-label-secondary', title: 'Unknown' };
@@ -231,19 +239,19 @@ $(function () {
         }
       },
       // {
-      //   targets: 5,
+      //   targets: 6,
       //   render: (_, __, full) => {
       //     const s = statusObj[full.overallStatus] || { class: 'bg-label-secondary', title: 'Unknown' };
       //     return `<span class="badge ${s.class}">${s.title}</span>`;
       //   }
       // },
       {
-        targets: 5,
+        targets: 6,
         render: (_, __, full) =>
           `<span class="text-heading">${full.dueDate !== 'N/A' ? moment(full.dueDate, 'YYYY-MM-DD').format('YYYY-MM-DD') : 'N/A'}</span>`
       },
       {
-        targets: 6, searchable: false, orderable: false,
+        targets: 7, searchable: false, orderable: false,
         render: (_, __, full) => {
           const isArchived = full.overallStatus === 'archived';
           const canModify = !isArchived || !['Admin', 'Sub-Admin', 'Mentor', 'organizationManager'].includes(window.authUser.role);
@@ -263,7 +271,7 @@ $(function () {
         }
       }
     ],
-    order: [[7, 'desc']],
+    order: [[8, 'desc']],
     dom: '<"row"<"col-12 col-lg-9 d-flex flex-wrap align-items-center ps-0 ps-lg-3"l><"col-12 col-lg-3 dt-action-buttons text-xl-end text-lg-start text-md-end text-start d-flex align-items-center justify-content-end flex-md-row flex-column mb-6 mb-md-0 pe-0 pe-lg-2"fB>>t<"row px-6"<"col-sm-12 col-lg-6"i><"col-sm-12 col-lg-6 d-flex justify-content-end"p>>',
     language: {
       url: document.dir === 'rtl'
@@ -278,8 +286,8 @@ $(function () {
       className: 'btn btn-label-secondary dropdown-toggle mx-4 waves-effect waves-light',
       text: '<i class="ti ti-file-export me-2 ti-xs"></i> {{ __('admin.Export') }}',
       buttons: [
-        { extend: 'csv',   text: '<i class="ti ti-file-text me-2"></i>Csv',         className: 'dropdown-item', exportOptions: { columns: [1,2,3,4,5,6,7], format: { body: exportFormat } } },
-        { extend: 'excel', text: '<i class="ti ti-file-spreadsheet me-2"></i>Excel', className: 'dropdown-item', exportOptions: { columns: [1,2,3,4,5,6,7], format: { body: exportFormat } } }
+        { extend: 'csv',   text: '<i class="ti ti-file-text me-2"></i>Csv',         className: 'dropdown-item', exportOptions: { columns: [1,2,3,4,5,6,7,8], format: { body: exportFormat } } },
+        { extend: 'excel', text: '<i class="ti ti-file-spreadsheet me-2"></i>Excel', className: 'dropdown-item', exportOptions: { columns: [1,2,3,4,5,6,7,8], format: { body: exportFormat } } }
       ]
     }],
     initComplete: function () {
