@@ -5,6 +5,7 @@
 /public/pitch_decks
 /public/191014
 /public/documents
+/public/images/logo/*
 /storage/*.key
 /vendor
 /docker_volumes
