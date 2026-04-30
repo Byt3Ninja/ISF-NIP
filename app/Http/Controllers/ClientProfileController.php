@@ -579,10 +579,17 @@ class ClientProfileController extends Controller
                     }
                     // If linkedin is empty string (''), show all (no filter applied)
                 }
-                // Program filter - filter by specific program/cycle
-                if (!empty($programFilter)) {
-                    $mentors = $mentors->whereHas('mentorCycles', function ($query) use ($programFilter) {
-                        $query->where('cycle_id', $programFilter);
+                /** @var \App\User $user */
+                $user = Auth::user();
+                $orgIds = $user->organizations_ids;
+
+                // Program filter: apply only when explicitly sent by user, or for Registered users (auto-set to their company cycle)
+                $explicitProgramFilter = $request->input('programFilter');
+                $filterCycleId = $explicitProgramFilter
+                    ?: ($user->hasRole('Registered') ? $programFilter : null);
+                if (!empty($filterCycleId)) {
+                    $mentors = $mentors->whereHas('mentorCycles', function ($query) use ($filterCycleId) {
+                        $query->where('cycle_id', $filterCycleId);
                     });
                 }
                 // Enrolled in program filter - All/Yes/No options
@@ -596,16 +603,6 @@ class ClientProfileController extends Controller
                     }
                     // If enrolledInProgramFilter is empty string (''), show all (no filter applied)
                 }
-                // if (Auth::user()->company && !empty(Auth::user()->company->cycle)) {
-                //     $cycleId = Auth::user()->company->cycle;
-                //     $mentorIds = CyclesMentors::where('cycle_id', $cycleId)
-                //         ->pluck('user_id')
-                //         ->toArray();
-                //     $mentors = $mentors->whereIn('id', $mentorIds);
-                // }
-
-                $user = Auth::user();
-                $orgIds = $user->organizations_ids;
 
                 if (!empty($scopeFilter) && $scopeFilter !== 'all') {
                     if ($scopeFilter === 'public') {
@@ -746,12 +743,12 @@ class ClientProfileController extends Controller
                     // If linkedin is empty string (''), show all (no filter applied)
                 }
                 // Program filter - filter by specific program/cycle
-                if (!empty($programFilter)) {
-                   $mentors = $mentors->whereHas('mentorCycles', function ($query) use ($programFilter) {
-                    $query->when(!is_null($programFilter), function ($q) use ($programFilter) {
-                        $q->where('cycle_id', $programFilter);
-                     });
-                });
+                // Only apply programFilter if explicitly sent by the user (not the auto-set value)
+                $explicitProgramFilter = $request->input('programFilter');
+                if (!empty($explicitProgramFilter)) {
+                    $mentors = $mentors->whereHas('mentorCycles', function ($query) use ($explicitProgramFilter) {
+                        $query->where('cycle_id', $explicitProgramFilter);
+                    });
                 }
                 // Enrolled in program filter - All/Yes/No options
                 if ($enrolledInProgramFilter !== null && $enrolledInProgramFilter !== '') {
@@ -764,6 +761,10 @@ class ClientProfileController extends Controller
                     }
                     // If enrolledInProgramFilter is empty string (''), show all (no filter applied)
                 }
+                /** @var \App\User $user */
+                $user = Auth::user();
+                $orgIds = $user->organizations_ids;
+
                 if (!empty($scopeFilter) && $scopeFilter !== 'all') {
                     if ($scopeFilter === 'public') {
                         $mentors = $mentors->where(function ($q) {
@@ -778,13 +779,28 @@ class ClientProfileController extends Controller
                                   ->whereJsonContains('organization_ids', (string) $scopeFilter);
                         });
                     }
+                } else {
+                    // scopeFilter = all: show public mentors + mentors belonging to this org
+                    if (!$user->hasRole('Admin') && !empty($orgIds)) {
+                        $mentors = $mentors->where(function ($q) use ($orgIds) {
+                            // Public: no invitations at all, or has accepted public-scope invitation
+                            $q->whereDoesntHave('inviteMentors')
+                              ->orWhereHas('inviteMentors', function ($q2) {
+                                  $q2->where('scope', 'Public')->where('status', 'accepted');
+                              });
+                            // OR belongs to this org
+                            foreach ($orgIds as $orgId) {
+                                $q->orWhereHas('inviteMentors', function ($q2) use ($orgId) {
+                                    $q2->where('scope', 'Organization')
+                                       ->where('status', 'accepted')
+                                       ->whereJsonContains('organization_ids', (string) $orgId);
+                                });
+                            }
+                        });
+                    }
                 }
                 $mentors = $mentors->with('mentorExpertises');
                 $mentors = $mentors->get();
-               
-
-                $user = Auth::user();
-                $orgIds = $user->organizations_ids;
 
                 if (!$user->hasRole('Admin') && !empty($orgIds)) {
                     $cycles = Cycle::whereIn('organization_id', $orgIds)->get();
