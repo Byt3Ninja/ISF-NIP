@@ -193,7 +193,7 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                         @if($org->assignedUsers->isNotEmpty())
                           @foreach($org->assignedUsers->take(3) as $manager)
                             <div class="avatar" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $manager->name }}">
-                              <img src="{{ $manager->img_url }}" alt="Avatar" class="rounded-circle pull-up">
+                              <img src="{{ $manager->image_url }}" alt="Avatar" class="rounded-circle pull-up">
                             </div>
                           @endforeach
                           @if($org->assignedUsers->count() > 3)
