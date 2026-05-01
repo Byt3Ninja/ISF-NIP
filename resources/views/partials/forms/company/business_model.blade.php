@@ -83,8 +83,8 @@ $models = ['Marketplace_model', 'On_demand_model', 'Disintermediation_model', 'S
                               <span>{{ basename($client->company->business_plan) }}</span>
                             </div>
                             <a class="btn btn-transparent"
-                              href="{{ $client->company->business_plan }}" target="_blank"
-                              download="{{ basename($client->company->business_plan) }}">
+                              href="{{ URL::to( $client->company->business_plan ) }}" target="_blank"
+                              download>
                               <i class="ti ti-download text-primary"></i>
                             </a>
                           </div>

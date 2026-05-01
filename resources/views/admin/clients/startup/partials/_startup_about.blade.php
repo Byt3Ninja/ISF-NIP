@@ -100,7 +100,7 @@
 
             @if ($company->business_plan)
               <h6 class="text-muted mb-1">{{ __('startup.business_plan_attachment') }}</h6>
-              <a class="btn btn-sm btn-label-secondary" href="{{ $company->business_plan }}" target="_blank" download>
+              <a class="btn btn-sm btn-label-secondary" href="{{ URL::to( $company->business_plan ) }}" target="_blank" download>
                 <i class="ti ti-file text-warning me-2"></i>
                 <span class="me-3">{{ basename($company->business_plan) }}</span>
                 <i class="ti ti-download"></i>
@@ -126,7 +126,7 @@
 
             @if ($company->financial_plan)
               <h6 class="text-muted mb-1">{{ __('startup.financial_plan_attachment') }}</h6>
-              <a class="btn btn-sm btn-label-secondary" href="{{ $company->financial_plan }}" target="_blank" download>
+              <a class="btn btn-sm btn-label-secondary" href="{{ URL::to( $company->financial_plan ) }}" target="_blank" download>
                 <i class="ti ti-file text-warning me-2"></i>
                 <span class="me-3">{{ basename($company->financial_plan) }}</span>
                 <i class="ti ti-download"></i>

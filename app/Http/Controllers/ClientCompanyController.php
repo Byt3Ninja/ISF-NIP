@@ -1218,7 +1218,7 @@ class ClientCompanyController extends Controller
                         $file->storeAs($path, $originalName, [
                             'disk' => 'pitch_deck'
                         ]);
-                        $uploadedFile = 'financial_plan/' . $path . $originalName;
+                        $uploadedFile = 'pitch_decks/' . $path . $originalName;
                     }
                 } else {
                     $uploadedFile = $company->financial_plan;
@@ -1415,7 +1415,7 @@ class ClientCompanyController extends Controller
                         $file->storeAs($path, $originalName, [
                             'disk' => 'pitch_deck'
                         ]);
-                        $uploadedFile = 'business_plan/' . $path . $originalName;
+                        $uploadedFile = 'pitch_decks/' . $path . $originalName;
                     }
                 } else {
                     return redirect()->back()->with(['msg' => 'Business Plan file not selected', 'class' => 'danger'])->withInput();
