@@ -218,8 +218,8 @@
                               <span>{{ basename($client->company->financial_plan) }}</span>
                             </div>
                             <a class="btn btn-transparent"
-                              href="{{ $client->company->financial_plan }}" target="_blank"
-                              download="{{ basename($client->company->financial_plan) }}">
+                              href="{{ URL::to( $client->company->financial_plan ) }}" target="_blank"
+                              download>
                               <i class="ti ti-download text-primary"></i>
                             </a>
                           </div>
