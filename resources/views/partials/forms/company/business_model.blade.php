@@ -94,7 +94,7 @@
           <div class="position-relative mt-2">
             @if (optional($client->company)->business_plan != null)
             <a 
-              href="{{ $client->company->business_plan }}"
+              href="{{ URL::to( $client->company->business_plan ) }}"
               target="_blank" 
               download
               class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2">
