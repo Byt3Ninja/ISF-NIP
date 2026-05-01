@@ -164,7 +164,7 @@
 
           @if ($company->business_plan)
             <h6 class="text-muted text-uppercase small fw-semibold mb-2">{{ __('startup.business_plan') }}</h6>
-            <a href="{{ $company->business_plan }}" target="_blank" download
+            <a href="{{ URL::to( $company->business_plan ) }}" target="_blank" download
               class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2">
               <i class="ti ti-file text-warning"></i>
               {{ basename($company->business_plan) }}
@@ -195,7 +195,7 @@
 
           @if ($company->financial_plan)
             <h6 class="text-muted text-uppercase small fw-semibold mb-2">{{ __('startup.financial_plan') }}</h6>
-            <a href="{{ $company->financial_plan }}" target="_blank" download
+            <a href="{{ URL::to( $company->financial_plan ) }}" target="_blank" download
               class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2">
               <i class="ti ti-file text-warning"></i>
               {{ basename($company->financial_plan) }}

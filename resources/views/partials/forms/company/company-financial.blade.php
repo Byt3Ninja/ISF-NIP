@@ -241,7 +241,7 @@
           @if(optional($client->company)->financial_plan != null)
           <div class="col-12 mb-3">
             <a
-              href="{{ $client->company->financial_plan }}"
+              href="{{ URL::to( $client->company->financial_plan ) }}"
               target="_blank"
               download
               class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2">
