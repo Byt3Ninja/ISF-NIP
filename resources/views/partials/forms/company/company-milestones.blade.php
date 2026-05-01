@@ -42,7 +42,7 @@ $programs = $programs
     <template id="milestone-card-template">
       <div class="card shadow-sm border mb-3 milestone-card">
         <div class="card-body">
-          <!-- Card Header - Using Bootstrap's flex utilities for alignment -->
+          <!-- Card Header - Using Bootstrap flex utilities for alignment -->
           <h6 class="border-bottom d-flex pb-2 align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-2 flex-grow-1 w-100">
               <div 
@@ -108,16 +108,16 @@ $programs = $programs
               </label>
               @php
                 $categories = [
-                  ['id' => 1, 'name' => 'Finance'],
-                  ['id' => 2, 'name' => 'Planning'],
-                  ['id' => 3, 'name' => 'Design'],
-                  ['id' => 4, 'name' => 'Development'],
-                  ['id' => 5, 'name' => 'Testing'],
-                  ['id' => 6, 'name' => 'Delivery'],
+                  ['id' => 1, 'name' => $l == 'ar' ? 'التمويل' : 'Finance'],
+                  ['id' => 2, 'name' => $l == 'ar' ? 'التخطيط' : 'Planning'],
+                  ['id' => 3, 'name' => $l == 'ar' ? 'التصميم' : 'Design'],
+                  ['id' => 4, 'name' => $l == 'ar' ? 'التطوير' : 'Development'],
+                  ['id' => 5, 'name' => $l == 'ar' ? 'الاختبار' : 'Testing'],
+                  ['id' => 6, 'name' => $l == 'ar' ? 'التسليم' : 'Delivery'],
                 ]
               @endphp
               <select class="form-select milestone-category" id="milestone-category-select" required data-placeholder="{{ __('admin.select_category') }}">
-                <option value="">{{ __('admin.select_category') }}</option>
+                <option value="" disabled selected>{{ __('admin.select_category') }}</option>
                 @foreach ($categories as $category)
                   <option value="{{ $category['id'] }}">
                     {{ $category['name'] }}
@@ -132,11 +132,11 @@ $programs = $programs
                 {{ __('admin.Status') }}
               </label>
               <select class="form-select milestone-status" id="milestone-status-select" required data-placeholder="{{ __('admin.Select Status') }}">
-                <option value="">{{ __('admin.Select Status') }}</option>
+                <option value="" disabled selected>{{ __('admin.Select Status') }}</option>
                 <option value="not_started"> {{ __('startup.not_started') }} </option>
                 <option value="in_progress">{{ __('startup.in_progress') }}</option>
                 <option value="completed">{{ __('startup.completed') }}</option>
-                <option value="pending">{{ __('startup.pending') }}</option>
+                <option value="on_hold">{{ __('startup.on_hold') }}</option>
               </select>
               <div class="invalid-feedback milestone-status-error"></div>
             </div>
@@ -154,7 +154,7 @@ $programs = $programs
                 {{ __('cycles.visibility') }}
               </label>
               <select class="form-select milestone-visibility" id="milestone-visibility-select" required>
-                <option value="">{{ __('startup.select_visibility') }}</option>
+                <option value="" disabled selected>{{ __('startup.select_visibility') }}</option>
                 <option value="public"> {{ __('startup.public') }} </option>
                 <option value="private">{{ __('startup.private') }}</option>
               </select>
@@ -166,7 +166,7 @@ $programs = $programs
                 {{ __('startup.program_cohort') }}
               </label>
               <select class="form-select milestone-cohort" id="milestone-cohort-select">
-                <option value="">{{ __('startup.select_program_cohort') }}</option>
+                <option value="" disabled selected>{{ __('startup.select_program_cohort') }}</option>
                 @foreach ($programs as $cycle)
                   <option value="{{ $cycle->id }}">{{ $cycle->name ." - ". $cycle->cohort }}</option>
                 @endforeach
@@ -276,7 +276,15 @@ document.addEventListener('DOMContentLoaded', function () {
     deleteError: "{{ __('startup.milestone_delete_failed') }}"
   };
 
-  const ALLOWED_FILE_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+  const ALLOWED_FILE_TYPES = [
+    'application/pdf', 
+    'image/jpeg', 
+    'image/png', 
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+    'application/vnd.ms-powerpoint', // .ppt
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation' // .pptx
+  ];
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
   function loadExistingMilestones() {
@@ -308,17 +316,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function getFileIcon(fileName) {
     const extension = fileName.split('.').pop().toLowerCase();
-    const iconMap = {
-      pdf: 'ti ti-file-type-pdf text-danger',
-      jpg: 'ti ti-photo text-info',
-      jpeg: 'ti ti-photo text-info',
-      png: 'ti ti-photo text-info',
-      docx: 'ti ti-file-type-docx text-primary',
-      doc: 'ti ti-file-type-docx text-primary',
-      xlsx: 'ti ti-file-type-xls text-success',
-      xls: 'ti ti-file-type-xls text-success'
-    };
-    return iconMap[extension] || 'ti ti-file';
+
+    if (extension === 'pdf') return 'fa-solid fa-file-pdf text-danger';
+    if (['doc', 'docx'].includes(extension)) return 'fa-solid fa-file-word text-primary';
+    if (['xls', 'xlsx'].includes(extension)) return 'fa-solid fa-file-excel text-success';
+    if (['ppt', 'pptx'].includes(extension)) return 'fa-solid fa-file-powerpoint text-warning';
+    if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(extension))
+      return 'fa-solid fa-file-image text-info';
+    return 'fa-solid fa-file text-secondary';
   }
 
   function populateMilestoneCard(card, milestone) {
@@ -373,7 +378,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function createMilestoneCard(isInitialCard = false, existingData = null) {
     const newCard = milestoneCardTemplate.content.cloneNode(true).querySelector('.milestone-card');
-    
+
     const currentMilestoneId = existingData ? existingData.id : `temp_${nextMilestoneId++}`;
     Object.assign(newCard.dataset, {
       milestoneId: currentMilestoneId,
@@ -389,7 +394,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const milestoneText = '{{ $l == 'ar' ? 'إنجاز' : 'Milestone' }}';
     const milestoneNumber = milestonesContainer.children.length + 1;
     const milestoneTitle = `${milestoneText} ${milestoneNumber}`;
-    
+
     newCard.querySelector('.milestone-number').textContent = milestoneNumber;
     newCard.querySelector('.milestone-title').placeholder = `{{ __('admin.Milestone_Name') }}`;
     newCard.querySelector('.milestone-title-display').textContent = milestoneTitle;
@@ -397,14 +402,24 @@ document.addEventListener('DOMContentLoaded', function () {
     // Button visibility
     const removeBtn = newCard.querySelector('.remove-unsaved-milestone-btn');
     const deleteBtn = newCard.querySelector('.delete-milestone-btn');
-    
+
     removeBtn.classList.toggle('d-none', isInitialCard);
     deleteBtn.classList.add('d-none');
+
+    // Make date input ID unique
+    const dateInput = newCard.querySelector('.milestone-date');
+    const dateLabel = newCard.querySelector('label[for="milestone-date-input"]');
+    if (dateInput && dateLabel) {
+      const uniqueId = `milestone-date-input-${currentMilestoneId}`;
+      dateInput.id = uniqueId;
+      dateLabel.setAttribute('for', uniqueId);
+    }
 
     milestonesContainer.appendChild(newCard);
     updateMilestoneNumbers();
     addValidationClearListeners(newCard);
-    
+    initializeDatePicker(newCard);
+
     return newCard;
   }
 
@@ -498,7 +513,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Update card state
     card.dataset.isNew = false;
     if (data.milestone?.id) card.dataset.milestoneId = data.milestone.id;
-    
+
     // Update milestone data for future edits
     if (data.milestone) {
       card.milestoneData = data.milestone;
@@ -512,19 +527,29 @@ document.addEventListener('DOMContentLoaded', function () {
     card.querySelector('.milestone-description-display').textContent = descriptionInput.value;
     const titleDisplayPreview = card.querySelector('.milestone-title-display-preview');
     if (titleDisplayPreview) titleDisplayPreview.textContent = titleInput.value;
-    
+
     const completionPercentage = parseInt(completionInput.value);
     card.querySelector('.milestone-completion-display').textContent = `${completionPercentage}%`;
+
+    // Clear file input and uploaded documents container
+    const documentsInput = card.querySelector('.milestone-documents');
+    if (documentsInput) {
+      documentsInput.value = '';
+    }
+    const uploadedDocumentsContainer = card.querySelector('.uploaded-documents');
+    if (uploadedDocumentsContainer) {
+      uploadedDocumentsContainer.innerHTML = '';
+    }
 
     // Update documents list
     const documents = data.milestone?.documents ? parseDocuments(data.milestone.documents) : [];
     const uploadedFilesList = card.querySelector('.uploaded-files-list');
     const documentsCount = card.querySelector('.milestone-documents-count');
     const noDocumentsDiv = card.querySelector('.milestone-no-documents');
-    
+
     uploadedFilesList.innerHTML = '';
     documentsCount.textContent = documents.length;
-    
+
     if (documents.length > 0) {
       noDocumentsDiv.classList.add('d-none');
       documents.forEach(doc => {
@@ -685,6 +710,17 @@ document.addEventListener('DOMContentLoaded', function () {
     restoreBtn.title = '';
   }
 
+  function initializeDatePicker(card) {
+    const dateInput = card.querySelector('.milestone-date');
+    if (dateInput) {
+      $(dateInput).flatpickr({
+        enableTime: false,
+        dateFormat: 'Y-m-d',
+        minDate: 'today',
+      });
+    }
+  }
+
   function handleEditMode(card) {
     // Toggle sections
     card.querySelector('.milestone-form-section').classList.remove('d-none');
@@ -702,6 +738,11 @@ document.addEventListener('DOMContentLoaded', function () {
     card.querySelector('.milestone-title').value = savedTitle;
     card.querySelector('.milestone-description').value = card.querySelector('.milestone-description-display').textContent;
     card.querySelector('.milestone-completion').value = parseInt(card.querySelector('.milestone-completion-display').textContent);
+    card.querySelector('.milestone-category').value = card.milestoneData.category || '';
+    card.querySelector('.milestone-status').value = card.milestoneData.status || '';
+    card.querySelector('.milestone-date').value = card.milestoneData.milestone_date || card.milestoneData.date || '';
+    card.querySelector('.milestone-visibility').value = card.milestoneData.visibility || '';
+    card.querySelector('.milestone-cohort').value = card.milestoneData.cohort || '';
 
     populateExistingDocumentsInForm(card);
     clearValidation(card);
@@ -937,12 +978,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  // Initialize Flatpickr for milestone date
-  $('#milestone-date-input').flatpickr({ 
-    enableTime: false,
-    dateFormat: 'Y-m-d',
-    minDate: 'today',
-  });
 });
 </script>
 @endpush
