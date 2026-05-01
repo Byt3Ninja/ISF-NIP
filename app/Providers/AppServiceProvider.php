@@ -109,7 +109,13 @@ class AppServiceProvider extends ServiceProvider
                     $organization_ids = $organization_id ? [$organization_id] : [];
                 }
             }
-            $view->with(['l' => $l, 'organization_id' => $organization_id, 'organization_ids' => $organization_ids, '_user' => $_user, 'permissions' => $permissions, '_settings' => $settings]);
+            $platformName = config('app.name');
+            if( $settings )
+            {
+                $platformName = $l == 'ar' ? $settings->ar_title : $settings->title;
+                $platformName = $platformName ?? config('app.name');
+            }
+            $view->with(['l' => $l, 'organization_id' => $organization_id, 'organization_ids' => $organization_ids, '_user' => $_user, 'permissions' => $permissions, '_settings' => $settings, 'platformName' => $platformName]);
         });
 
         view()->composer('partials.menu', function ($view) {
