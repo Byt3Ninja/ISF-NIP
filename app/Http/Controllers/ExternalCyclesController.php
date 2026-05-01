@@ -357,6 +357,13 @@ class ExternalCyclesController extends Controller
 				'p.winners_visibility AS visibility',
 				'o.name_en AS en_org_name',
 				'o.name_ar AS ar_org_name',
+				'o.bio AS bio',
+				'o.linkedin_company_url AS linkedin',
+				'o.twitter_handle AS twitter',
+				'o.facebook_page_url AS facebook',
+				'o.instagram_profile_url AS instagram',
+				'o.youtube_channel_url AS youtube',
+				'o.tiktok_url AS tiktok',
 			])
 			->leftJoin('organizations AS o', 'p.organization_id', '=', 'o.id')
 			->where('p.public_slug', $program_slug)

@@ -11,6 +11,15 @@
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 
 	<style>
+		body {
+			display: flex;
+			flex-direction: column;
+			min-height: 100vh;
+			margin: 0;
+		}
+		.page-container {
+			flex: 1;
+		}
 		.hackathon-banner {
 			background: linear-gradient(45deg, #7367f0, #9c88ff);
 			padding: 40px 20px;
@@ -417,28 +426,45 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 			<div class="row text-center text-md-start">
 				<div class="col-md-4 col-lg-5 mt-3">
 					<h5 class="text-white text-uppercase mb-4 fw-bold">{{ $l == 'en' ? 'About Us' : 'معلومات عنا' }}</h5>
-					<p>{{ $l == 'en' ? 'We are dedicated to fostering innovation and creativity through our hackathon events. Join
-						us to build, learn, and connect with like-minded individuals.' : 'نحن ملتزمون بتعزيز الابتكار والإبداع من
-						خلال
-						فعاليات الهاكاثون التي ننظمها. انضم إلينا للبناء والتعلم والتواصل مع الأفراد ذوي التفكير المماثل.' }}</p>
+					<p>{{ $program?->bio ?: '' }}</p>
 				</div>
 
 				<div class="col-md-4 col-lg-2 mx-auto mt-3">
+					@if( $program?->facebook || $program?->twitter || $program?->linkedin || $program?->instagram || $program?->youtube || $program?->tiktok )
 					<h5 class="text-white text-uppercase mb-4 fw-bold">{{ $l == 'en' ? 'Follow Us' : 'تابعنا' }}</h5>
 					<div class="d-flex justify-content-center justify-content-md-start">
-						<a href="#" class="text-white me-3">
+						@if( $program?->facebook )
+						<a href="{{ $program?->facebook ?: '#' }}" class="text-white me-3">
 							<i class="bi bi-facebook fs-4"></i>
 						</a>
-						<a href="#" class="text-white me-3">
+						@endif
+						@if( $program?->twitter )
+						<a href="{{ $program?->twitter ?: '#' }}" class="text-white me-3">
 							<i class="bi bi-twitter fs-4"></i>
 						</a>
-						<a href="#" class="text-white me-3">
+						@endif
+						@if( $program?->linkedin )
+						<a href="{{ $program?->linkedin ?: '#' }}" class="text-white me-3">
 							<i class="bi bi-linkedin fs-4"></i>
 						</a>
-						<a href="#" class="text-white">
+						@endif
+						@if( $program?->instagram )
+						<a href="{{ $program?->instagram ?: '#' }}" class="text-white">
 							<i class="bi bi-instagram fs-4"></i>
 						</a>
+						@endif
+						@if( $program?->youtube )
+						<a href="{{ $program?->youtube ?: '#' }}" class="text-white">
+							<i class="bi bi-youtube fs-4"></i>
+						</a>
+						@endif
+						@if( $program?->tiktok )
+						<a href="{{ $program?->tiktok ?: '#' }}" class="text-white">
+							<i class="bi bi-tiktok fs-4"></i>
+						</a>
+						@endif
 					</div>
+					@endif
 				</div>
 			</div>
 
@@ -447,8 +473,7 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 			<div class="row align-items-center">
 				<div class="col-md-7 col-lg-8">
 					<p class="text-center text-md-start mb-3 mb-md-0">
-						© 2025 {{ $l == 'en' ? 'Incubator Hackathon Platform. All rights reserved.' : 'منصة المسرعة للهاكثونات. جميع
-						الحقوق محفوظة.' }}
+						© {{ date('Y') }} {{ $platformName }} {{ $l == 'en' ? '. All rights reserved.' : '. جميع الحقوق محفوظة.' }}
 					</p>
 				</div>
 			</div>
