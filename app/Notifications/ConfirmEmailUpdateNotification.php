@@ -31,7 +31,7 @@ class ConfirmEmailUpdateNotification extends Notification implements ShouldQueue
      */
     public $backoff = 60;
 
-    public function __construct(private string $url)
+    public function __construct(private string $url, private ?\App\User $user = null)
     {
     }
 
@@ -42,11 +42,15 @@ class ConfirmEmailUpdateNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        $org = $notifiable->organization;
+        $org = $this->user?->organization;
         $smtpSettings = $org?->organizationSettings;
         
         // Configure SMTP if settings exist
         $this->configureSmtp($smtpSettings);
+
+        // This notification is sent to a new email via AnonymousNotifiable,
+        // so only the mail channel is applicable.
+        return ['mail'];
         
         // Organization channel toggles (default to true when not configured)
         $orgAcceptEmail = $smtpSettings?->accept_email ?? true;
@@ -89,7 +93,7 @@ class ConfirmEmailUpdateNotification extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
-        $org = $notifiable->organization;
+        $org = $this->user?->organization;
         $smtpSettings = $org?->organizationSettings;
         
         // Get from address and name
