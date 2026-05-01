@@ -20,7 +20,7 @@
           <div class="p-3 shadow-sm border overflow-hidden">
             <div class="d-flex align-items-center">
               <div class="border d-flex radius-15 d-flex flex-shrink-0" style="width: 80px; height: 80px;">
-                <img src="/images/background/logo.png" class="img-fluid m-auto" alt="logo" />
+                <img src="/images/placeholder.jpg" class="img-fluid m-auto" alt="logo" />
               </div>
               <div class="mx-3 d-flex flex-column justify-content-center gap-1" style="height: 76px;">
                 <div class="text-black fs-6">{{ $fonder->Name }}</div>
