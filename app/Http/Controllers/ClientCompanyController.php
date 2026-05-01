@@ -560,6 +560,17 @@ class ClientCompanyController extends Controller
         
         $user = auth()->user();
         try {
+
+            if( $id == null )
+            {
+                if( !$user->hasRole('registered') )
+                {
+                    return redirect()->route('user.profile_view')->with(['msg' => 'NoHaveCompany', 'class' => 'danger']);
+                }
+                $client = User::where('HaveCompany', 1)->with('company')->with('company.city')->find($user->id);
+                $id = $client?->company?->id ?? null;
+            }
+            
             if( $id == null )
             {
                 $client = User::where('HaveCompany', 1)->with('company')->with('company.city')->find($user->id);
@@ -2414,7 +2425,7 @@ class ClientCompanyController extends Controller
             $milestone->category = $request->category;
             $milestone->status = $request->status ?? 'Not Started';
             $milestone->completed = $request->status == 'Completed' ? 1 : 0;
-            $milestone->milestone_date = $request->milestone_date;
+            $milestone->milestone_date = $request->date;
             $milestone->visibility = $request->visibility;
             $milestone->cohort = $request->cohort;
             $milestone->Company_id = $id;
@@ -2447,6 +2458,11 @@ class ClientCompanyController extends Controller
                     'name' => $milestone->name,
                     'description' => $milestone->description,
                     'completion_percentage' => $milestone->completion_percentage,
+                    'category' => $milestone->category,
+                    'status' => $milestone->status,
+                    'visibility' => $milestone->visibility,
+                    'cohort' => $milestone->cohort,
+                    'milestone_date' => $milestone->milestone_date,
                     'documents' => $documents,
                 ],
             ]);
@@ -2525,7 +2541,7 @@ class ClientCompanyController extends Controller
             $milestone->category = $request->category;
             $milestone->status = $request->status ?? 'Not Started';
             $milestone->completed = $request->status == 'Completed' ? 1 : 0;
-            $milestone->milestone_date = $request->milestone_date;
+            $milestone->milestone_date = $request->date;
             $milestone->visibility = $request->visibility;
             $milestone->cohort = $request->cohort;
             $milestone->save();
@@ -2657,6 +2673,11 @@ class ClientCompanyController extends Controller
                     'name' => $milestone->name,
                     'description' => $milestone->description,
                     'completion_percentage' => $milestone->completion_percentage,
+                    'category' => $milestone->category,
+                    'status' => $milestone->status,
+                    'visibility' => $milestone->visibility,
+                    'cohort' => $milestone->cohort,
+                    'milestone_date' => $milestone->milestone_date,
                     'documents' => $finalDocuments,
                 ],
             ]);

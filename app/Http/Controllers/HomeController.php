@@ -23,6 +23,7 @@ use App\BuilderForm;
 use App\Organization;
 use App\SurveyScopes;
 use App\ScreeningEvaluation;
+use App\Milestone;
 
 use App\Documentation;
 use App\Finalscreening;
@@ -2545,6 +2546,16 @@ class HomeController extends Controller
         $data['pollingNeeded'] = !$profileComplete || !$startupComplete;
         $settings = Settings::where('id', 1)->first();
 		$data['offline_allowed'] = $settings->allow_offline_sessions == 1 ? true : false;
+
+        // Fetch Startup Milestones
+        $milestones = collect();
+        if ($user->company_id) {
+            $milestones = Milestone::where('Company_id', $user->company_id)
+                ->orderBy('milestone_date', 'asc')
+                ->get();
+        }
+        $data['milestones'] = $milestones;
+
         return view('includes.dashboard', $data);
     }
     protected function adminDashboard()

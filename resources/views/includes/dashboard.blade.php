@@ -1423,43 +1423,6 @@
 			</div>
 			@endif
 
-			<!-- Startup Milestones -->
-			@php
-				$milestones = [
-					[
-						'title' => 'MVP Launch',
-						'description' => 'Launch the first version',
-						'category' => 'Technical',
-						'status' => 'completed',
-						'visibility' => 'public',
-						'date' => '2024-03-01',
-					],
-					[
-						'title' => 'First Paying Customer',
-						'description' => 'Get your first paying customer',
-						'category' => 'Marketing',
-						'status' => 'completed',
-						'visibility' => 'public',
-						'date' => '2024-04-15',
-					],
-					[
-						'title' => 'Seed Round Funding',
-						'description' => 'Closing $2M seed round',
-						'category' => 'Finance',
-						'status' => 'in_progress',
-						'visibility' => 'public',
-						'date' => '2024-05-01',
-					],
-					[
-						'title' => 'Seeding State',
-						'description' => 'Closing $4k seed round',
-						'category' => 'Software Development',
-						'status' => 'pending',
-						'visibility' => 'public',
-						'date' => '2024-05-01',
-					]
-				];
-			@endphp
 			@if ($_user->hasRole('Registered'))
 				<div class="col-12">
 					<div class="card">
@@ -1492,21 +1455,21 @@
 									<!-- Vertical line -->
 									<div class="bg-light ms-2" style="position:absolute; top:0; bottom:0; start:10px; width:2px;"></div>
 									@foreach ($milestones as $milestone)
-										<div class="d-{{ $milestone['visibility'] === 'private' ? 'none' : 'flex' }} mb-4 position-relative ps-8">
+										<div class="d-{{ $milestone->visibility === 'private' ? 'none' : 'flex' }} mb-4 position-relative ps-8">
 											<div class="position-absolute top-0 start-0 me-3">
 												<div class="rounded-circle w-px-20 h-px-20 d-flex justify-content-center align-items-center
 														{{
-															$milestone['status'] === 'completed'
+															$milestone->status === 'completed'
 																? 'badge bg-success'
 																: (
-																		$milestone['status'] === 'in_progress'
+																		$milestone->status === 'in_progress'
 																				? 'badge bg-primary'
 																				: 'bg-white border border-2 border-warning'
 																	)
 														}}">
-														@if ($milestone['status'] === 'completed')
+														@if ($milestone->status === 'completed')
 															<i class="ti ti-circle-check ti-xs"></i>
-														@elseif ($milestone['status'] === 'in_progress')
+														@elseif ($milestone->status === 'in_progress')
 															<i class="ti ti-progress-bolt ti-xs"></i>
 														@else
 															<i></i>
@@ -1516,18 +1479,18 @@
 
 											<div class="flex-grow-1">
 												<div class="d-flex justify-content-between">
-													<h6 class="fw-semibold mb-1">{{ $milestone['title'] }}</h6>
-													<span class="text-muted">{{ $milestone['date'] }}</span>
+													<h6 class="fw-semibold mb-1">{{ $milestone->name }}</h6>
+													<span class="text-muted">{{ $milestone->milestone_date }}</span>
 												</div>
 				
 												<div class="mb-2">
 													<span class="badge bg-label-secondary me-2">
-														{{ $milestone['category'] }}
+														{{ $milestone->category }}
 													</span>
-													<span class="badge bg-label-{{ $milestone['status'] === 'completed' ? 'success' : ( $milestone['status'] === 'in_progress' ? 'primary' : 'warning') }}">
-														@if ($milestone['status'] === 'completed')
+													<span class="badge bg-label-{{ $milestone->status === 'completed' ? 'success' : ( $milestone->status === 'in_progress' ? 'primary' : 'warning') }}">
+														@if ($milestone->status === 'completed')
 															{{ __('startup.completed') }}
-														@elseif ($milestone['status'] === 'in_progress')
+														@elseif ($milestone->status === 'in_progress')
 															{{ __('startup.in_progress') }}
 														@else
 															{{ __('startup.pending') }}
@@ -1535,7 +1498,7 @@
 													</span>
 												</div>
 												<div class="w-75">
-													<small class="text-muted line-clamp-2">{{ $milestone['description'] }}</small>
+													<small class="text-muted line-clamp-2">{{ $milestone->description }}</small>
 												</div>
 											</div>
 										</div>
