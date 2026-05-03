@@ -148,7 +148,7 @@ class SlotController extends Controller
 	}
 
 	public function getSlots(Request $request, $id = null)
-	{
+	{	
 		
 		$settings = Settings::where('id', 1)->first();
 		$offline_allowed = $settings ? ($settings->allow_offline_sessions == 1 ? true : false) : false;
@@ -218,7 +218,9 @@ class SlotController extends Controller
 
 			if($item->session_type == 'Offline'){
 					$user = auth()->user();
-					$location = $user->company?->cycledata?->organization?->google_map_url;
+					$location =  $user->company?->cycledata?->offline_location_map ?? $user->company?->cycledata?->organization?->google_map_url 
+								?? null;
+					$address = $user->company?->cycledata?->offline_location_address ?? null;
 				}
 
 			if ($isWeekly) {
@@ -235,6 +237,7 @@ class SlotController extends Controller
 						'session_type' => $item->session_type,
 						'weekly'       => true,
 						'location'     => $location ?? null,
+						'Address'      => $address ?? null,
 						'starts_from'  => $item->dfrom ? $item->dfrom->format('Y-m-d') : null,
 					]);
 				}
@@ -250,6 +253,7 @@ class SlotController extends Controller
 					'session_type' => $item->session_type,
 					'weekly'       => false,
 					'location'     => $location ?? null,
+					'Address'      => $address ?? null,
 				]);
 			}
 			
