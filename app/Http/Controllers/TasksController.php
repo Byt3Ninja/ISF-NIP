@@ -53,11 +53,7 @@ class TasksController extends Controller
 
         // Fetch real tasks from database
         $tasksData = ProgramTask::with(['program', 'assignees', 'creator', 'feedbacks.user', 'activities.user'])
-            ->when($user->hasRole('mentor'), function ($q) use ($user) {
-                $mentorCycleIds = $user->cycles()->pluck('cycles.id');
-                $q->whereIn('program_id', $mentorCycleIds);
-            })
-            ->when(!$user->hasRole('admin') && !$user->hasRole('mentor') && !empty($orgIds), function ($q) use ($orgIds) {
+            ->when(!$user->hasRole('admin') && !empty($orgIds), function ($q) use ($orgIds) {
                 $q->whereHas('program', function($pq) use ($orgIds) {
                     $pq->whereIn('organization_id', $orgIds);
                 });
