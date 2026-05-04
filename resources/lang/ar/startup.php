@@ -629,4 +629,6 @@ return [
   'registration_type'                        => 'نوع التسجيل',
   'offering_type'                            => 'نوع التقديم',
   'products_services_description'            => 'وصف المنتجات / الخدمات',
+  'general_program'                          => 'برنامج عام',
+  'Hackathon'                                => ' هاكاثون',
 ];

@@ -241,12 +241,16 @@ class ClientCompanyController extends Controller
             $programs->push((object)[
                 'id' => $cycle->id,
                 'name' => $cycle->title,
+                'img_url' => $cycle->img_url ?? null,
+                'type' => strtolower($cycle->type ?? ''),
                 'organization' => (object)[
                     'name' => is_object($cycle->organization) ? ($cycle->organization->name ?? null) : $cycle->organization
                 ],
                 'cohort' => (object)[ 'name' => $cycle->cohort ?? null ],
                 'start_date' => Carbon::parse($cycle->start),
                 'completion_date' => Carbon::parse($cycle->end),
+                'screening_score' => null,
+                'rank' => null,
                 'final_screening_score' => null,
                 'status' => 'upcoming',
             ]);
@@ -275,19 +279,45 @@ class ClientCompanyController extends Controller
                 $finalScreenAvg = $finalScreenAvg->merge($finalScreenData ?? []);
             }
 
-            $programsRaw = json_decode($almuni->program ?? '[]');
+            // Primary source: load cycle directly from DB via cycle_id
+            if ($almuni->cycle_id) {
+                $almuniCycle = Cycle::with('organization')->find($almuni->cycle_id);
+                if ($almuniCycle) {
+                    $programs->push((object)[
+                        'id'                    => $almuniCycle->id,
+                        'name'                  => $almuniCycle->title,
+                        'img_url'               => $almuniCycle->img_url ?? null,
+                        'type'                  => strtolower($almuniCycle->type ?? ''),
+                        'organization'          => (object)['name' => is_object($almuniCycle->organization) ? ($almuniCycle->organization->name ?? null) : $almuniCycle->organization],
+                        'cohort'                => (object)['name' => $almuniCycle->cohort ?? null],
+                        'start_date'            => $almuniCycle->start ? Carbon::parse($almuniCycle->start) : null,
+                        'completion_date'       => $almuniCycle->end ? Carbon::parse($almuniCycle->end) : null,
+                        'screening_score'       => null,
+                        'rank'                  => null,
+                        'final_screening_score' => null,
+                        'status'                => 'completed',
+                    ]);
+                    continue;
+                }
+            }
+
+            // Fallback: parse from program JSON column (legacy/external programs)
+            $programsRaw = $almuni->program ?? [];
             if (!is_array($programsRaw)) continue;
             foreach ($programsRaw as $p) {
                 if (is_array($p)) $p = (object)$p;
                 $orgObj = null;
                 if (isset($p->Organization)) {
-                    if (is_object($p->Organization)) {
+                    if (is_array($p->Organization)) {
+                        $l = app()->getLocale();
+                        $org = (object)$p->Organization;
+                        $orgObj = (object)[ 'name' => $org->{'name_' . $l} ?? $org->name_en ?? $org->name_ar ?? null ];
+                    } elseif (is_object($p->Organization)) {
                         $l = app()->getLocale();
                         $orgObj = (object)[ 'name' => $p->Organization->{'name_' . $l} ?? $p->Organization->name_en ?? $p->Organization->name_ar ?? null ];
                     } else {
                         $orgObj = (object)[ 'name' => $p->Organization ];
                     }
-
                 } elseif (isset($p->{'Organization_Name'})) {
                     if (is_object($p->{'Organization Name'})) {
                         $orgObj = (object)[ 'name' => $p->{'Organization_Name'}->name ?? null ];
@@ -298,14 +328,18 @@ class ClientCompanyController extends Controller
                     $orgObj = (object)[ 'name' => null ];
                 }
                 $programs->push((object)[
-                    'id' => $p->ID ?? ($programs->count() + 1),
-                    'name' => $p->{'Program_Name'} ?? $p->Program_Name ?? $p->title ?? null,
-                    'organization' => $orgObj,
-                    'cohort' => (object)[ 'name' => $p->Cohort ?? $p->{'Cohort_Name'} ?? null ],
-                    'start_date' => !empty($p->Start_Date) ? Carbon::parse($p->Start_Date) : null,
-                    'completion_date' => !empty($p->Completion_Date) ? Carbon::parse($p->Completion_Date) : null,
+                    'id'                    => $p->ID ?? ($programs->count() + 1),
+                    'name'                  => $p->{'Program_Name'} ?? $p->Program_Name ?? $p->title ?? null,
+                    'img_url'               => $p->img_url ?? null,
+                    'type'                  => strtolower($p->Type ?? $p->type ?? ''),
+                    'organization'          => $orgObj,
+                    'cohort'                => (object)[ 'name' => $p->Cohort ?? $p->{'Cohort_Name'} ?? null ],
+                    'start_date'            => !empty($p->Start_Date) ? Carbon::parse($p->Start_Date) : null,
+                    'completion_date'       => !empty($p->Completion_Date) ? Carbon::parse($p->Completion_Date) : null,
+                    'screening_score'       => $p->Screening_Score ?? null,
+                    'rank'                  => $p->Rank ?? null,
                     'final_screening_score' => $p->Final_Screening_Score ?? null,
-                    'status' => $p->Status ?? 'completed',
+                    'status'                => $p->Status ?? 'completed',
                 ]);
             }
         }
