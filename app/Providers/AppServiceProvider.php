@@ -49,11 +49,18 @@ class AppServiceProvider extends ServiceProvider
                         Config::set('mail.mailers.smtp.password', $settings->Mailpassword ?? env('MAIL_PASSWORD'));
                         Config::set('mail.mailers.smtp.encryption', $settings->encryption ?? env('MAIL_ENCRYPTION'));
                         Config::set('mail.from.address',
-                            (!empty($settings->Mail) && filter_var($settings->Mail, FILTER_VALIDATE_EMAIL))
+                            ( !empty( $settings->mail_from_address ) && filter_var($settings->Mail, FILTER_VALIDATE_EMAIL ) )
+                            ? $settings->mail_from_address
+                            : (
+                                !empty($settings->Mail) && filter_var($settings->Mail, FILTER_VALIDATE_EMAIL)
                                 ? $settings->Mail
                                 : env('MAIL_FROM_ADDRESS')
+                            )
                         );
-                        Config::set('mail.from.name', $settings->title ?? env('MAIL_FROM_NAME', config('app.name')));
+                        Config::set('mail.from.name', 
+                            $settings->mail_from_name ?? ( $settings->title ?? env('MAIL_FROM_NAME', config('app.name')) )
+                        );
+                    // }
                 }
             } catch (\Exception $e) {
                 $settings = null;

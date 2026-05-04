@@ -38,8 +38,9 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array
      */
     protected $fillable = [
-        'organization_id', 'first_name_en', 'last_name_en', 'first_name_ar', 'last_name_ar', 'guardian', 'gender', 'age', 'country_code', 'phone', 'country_code_w_a', 'whatsapp', 'email', 'new_email', 'title_ar', 'title_en', 'HaveCompany', 'company_id','country_id', 'state_id', 'city_id', 'password', 'api_token', 'provider', 'provider_id', 'google_id','email_verified_at','img_url',
-        'PageId','dob','academic_stat','university','faculty','employer','expertise', 'language','currency','timezone','houre_rate','zip_code','address', 'google2fa_secret', 'accept_email', 'accept_whatsapp', 'accept_pusher'];
+        'first_name_en', 'last_name_en', 'first_name_ar', 'last_name_ar', 'guardian', 'gender', 'age', 'country_code', 'phone', 'country_code_w_a', 'whatsapp', 'email', 'new_email', 'title_ar', 'title_en', 'HaveCompany', 'company_id','country_id', 'state_id', 'city_id', 'password', 'provider', 'provider_id', 'google_id','email_verified_at','img_url',
+        'PageId','dob','academic_stat','national_id','university','faculty','employer','expertise', 'language','currency','timezone','houre_rate','zip_code','address', 'google2fa_secret', 'accept_email', 'accept_whatsapp', 'accept_pusher',
+        'magic_login_token', 'magic_login_sent_at', 'must_change_password'];
     /**
      * The attributes that should be hidden for arrays.
      *
@@ -107,7 +108,31 @@ class User extends Authenticatable implements MustVerifyEmail
         'accept_email' => 'boolean',
         'accept_whatsapp' => 'boolean',
         'accept_pusher' => 'boolean',
+        'magic_login_sent_at' => 'datetime',
+        'must_change_password' => 'boolean',
     ];
+
+    /**
+     * Generate a fresh single-use magic-login nonce, mark this user as needing
+     * a password change, persist, and return a signed 24h URL pointing at the
+     * magic-login route. Each call rotates the nonce, invalidating any link
+     * previously emailed to the same user.
+     */
+    public function generateMagicLoginUrl(): string
+    {
+        $token = Str::random(64);
+        $this->magic_login_token = $token;
+        $this->magic_login_sent_at = now();
+        $this->must_change_password = true;
+        $this->save();
+
+        return \Illuminate\Support\Facades\URL::temporarySignedRoute(
+            'auth.magic-login',
+            now()->addHours(24),
+            ['user' => $this->id, 'token' => $token]
+        );
+    }
+
     public static function image_handler( $img )
     {
         if( !$img ) { return "/images/placeholder.jpg"; }

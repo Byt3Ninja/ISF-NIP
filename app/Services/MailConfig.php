@@ -4,12 +4,12 @@ namespace App\Services;
 use Illuminate\Support\Facades\Config;
 class MailConfig
 {
-       /**
-        * Updfate the mail configuration at runtime.
-        * @param array $smtp
-        * @return void
-        */
-       public static function set(array $smtp)
+    /**
+    * Update the mail configuration at runtime.
+    * @param array $smtp
+    * @return void
+    */
+    public static function set(array $smtp)
     {
         Config::set('mail.mailers.smtp.transport', 'smtp');
         Config::set('mail.mailers.smtp.host', $smtp['host']);

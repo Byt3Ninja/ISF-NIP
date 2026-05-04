@@ -102,6 +102,8 @@ return [
 	'Mail'=>'البريد الاليكترونى',
 	'Mailpassword'=>'كلمة المرور',
 	'Port'=>'Port',
+	'mailSenderName' => 'اسم المرسل',
+	'mailSenderAddress' => 'بريد المرسل',
 	'Push Notification Settings'=>'اعدادات الاشعارات',
 	'Select BroadCast'=>'اختر البث',
 	'PUSHER_APP_SECRET'=>' PUSHER APP SECRET ',

@@ -65,14 +65,22 @@ class WelcomeUserNotification extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-       
-        return (new MailMessage)->subject(__('email.welcome_email.subject'))
-            ->view('emails.welcome-email',[
-                'user'     => $this->user,
-                'password' => $this->password,  
-            ]);
+        $org = $this->user->organization ?? $notifiable->organization;
+        $smtpSettings = $org?->organizationSettings;
 
-                    
+        $from = $this->getFromAddress($smtpSettings);
+        $orgData = $this->buildEmailOrganizationData($org);
+        
+        $this->configureSmtp($smtpSettings);
+        $magicLoginUrl = $notifiable->generateMagicLoginUrl();
+
+        return (new MailMessage)
+            ->from(config('mail.from.address'), config('mail.from.name'))
+            ->subject(__('email.welcome_email.subject'))
+            ->view('emails.welcome-email', array_merge([
+                'user'          => $this->user,
+                'magicLoginUrl' => $magicLoginUrl,
+            ], $orgData));
     }
 
     /**

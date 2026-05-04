@@ -7,6 +7,8 @@ return [
         'm1' => 'We are excited to have you on board. Here are your login details:',
         'm2' => 'Your email address is:',
         'm3' => 'You can log in to the platform using the button below.',
+        'login_button' => 'Log in to the Platform',
+        'login_link_note' => 'For your security, this link expires in 24 hours and can be used only once.',
         'best_regards' => 'Best regards,',
     ],
     'custom_mail' => [

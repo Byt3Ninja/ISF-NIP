@@ -12,6 +12,7 @@ use Spatie\Permission\PermissionRegistrar;
 class Permissions
 {
     public $exceptNames = [
+        'auth.magic-login',
         'core.dashboard_view',
         'cycle.custom_pages.image',
         'cycle.custom_pages.upload_image',
