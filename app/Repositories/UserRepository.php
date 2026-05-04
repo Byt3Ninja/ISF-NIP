@@ -377,7 +377,11 @@ class UserRepository
     {
         try {
             $password = Hash::make($data['password']);
-            $user->where('id', $user->id)->update(['password' => $password]);
+            $user->where('id', $user->id)->update([
+                'password' => $password,
+                'must_change_password' => false,
+                'magic_login_token' => null,
+            ]);
 
             return [
                 'success' => true,

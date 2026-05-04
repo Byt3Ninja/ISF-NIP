@@ -392,7 +392,11 @@ class ClientProfileController extends Controller
             $user = Auth::user();
             $password = Hash::make($request->password);
             $result = $user->where('id', $user->id)
-                ->update(['password' => $password]);
+                ->update([
+                    'password' => $password,
+                    'must_change_password' => false,
+                    'magic_login_token' => null,
+                ]);
             if ($result)
                 return redirect()->route('user.profile_view')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
             else

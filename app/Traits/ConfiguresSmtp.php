@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Settings;
 use App\Services\MailConfig;
 use Illuminate\Support\Facades\Log;
 
@@ -43,7 +44,24 @@ trait ConfiguresSmtp
                 ]);
             }
         }
-        
+        else
+        {
+            $setting = Settings::first();
+            // get platform settings
+            $mailConfig = [
+                'transport' => 'smtp',
+                'host' => $setting->host,
+                'port' => $setting->Port,
+                'encryption' => $setting->encryption,
+                'username' => $setting->Mail,
+                'password' => $setting->Mailpassword,
+                'timeout' => 30,
+                'auth_mode' => null,
+                'from_name' => $setting->mail_from_name,
+                'from_address' => $setting->mail_from_address,
+            ];
+            MailConfig::set($mailConfig);
+        }
         return $mailConfig;
     }
     
@@ -122,13 +140,42 @@ trait ConfiguresSmtp
      * @param mixed $smtpSettings
      * @return array [fromAddress, fromName]
      */
+    /**
+     * Build the organization data array for email template branding.
+     * Returns an array of variables that email views can use for org identity.
+     *
+     * @param mixed $organization
+     * @return array
+     */
+    protected function buildEmailOrganizationData($organization): array
+    {
+        $setting = Settings::first();
+        $defaultName = $setting ? ( $setting->Platform_Name ?? config('app.name') ) : config('app.name');
+
+        return [
+            'org_name'      => $organization?->name ?? $defaultName,
+            'org_logo_url'  => $organization?->image_url ?? null,
+            'org_address'   => $organization?->address ?? null,
+            'org_website'   => $organization?->website_url ?? null,
+            'org_linkedin'  => $organization?->linkedin_company_url ?? null,
+            'org_twitter'   => $organization?->twitter_handle ?? null,
+            'org_facebook'  => $organization?->facebook_page_url ?? null,
+            'org_instagram' => $organization?->instagram_profile_url ?? null,
+        ];
+    }
+
     protected function getFromAddress($smtpSettings): array
     {
+        $setting = Settings::first();
+        $app_name = config('mail.from.name', config('app.name'));
+        $app_address = config('mail.from.address', 'noreply@trsana.net');
+        $fromName = $setting ? ( $setting->mail_from_name ?? ( $setting->Platform_Name ?? $app_name ) ) : $app_name;
+        
         // Default values from config
-        $fromAddress = config('mail.from.address', 'noreply@trsana.net');
-        $fromName = config('mail.from.name', config('app.name'));
+        $fromAddress = $setting ? ( $setting->mail_from_address ?? $app_address ) : $app_address;
+        
 
-        // If we have valid SMTP settings, use them
+        // If we have valid settings, use them
         if ($smtpSettings) {
             // Use SMTP username as from address to ensure authentication compatibility
             // Only use custom from_address if it matches the username domain
