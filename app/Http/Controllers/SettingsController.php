@@ -506,7 +506,7 @@ class SettingsController extends Controller
 	{
 		$id = $request->input('id');
 		$emailProvider = $request->input('email_provider', 'smtp');
-		$updateSittings = Settings::where('id', $id)->first();
+		$updateSetting = Settings::where('id', $id)->first();
 
 		if ($emailProvider === 'resend') {
 			$request->validate([
@@ -522,9 +522,9 @@ class SettingsController extends Controller
 				return redirect()->back()->with('message2', __('settings.invalid_api_key'));
 			}
 
-			$updateSittings->email_provider = 'resend';
-			$updateSittings->resend_api_key = $request->input('resend_api_key');
-			$updateSittings->save();
+			$updateSetting->email_provider = 'resend';
+			$updateSetting->resend_api_key = $request->input('resend_api_key');
+			$updateSetting->save();
 
 			if ($request->expectsJson()) {
 				return response()->json(['message' => __('settings.email_config_saved')]);
@@ -533,13 +533,15 @@ class SettingsController extends Controller
 		}
 
 		// SMTP provider (existing logic)
-		$updateSittings->email_provider = $request->input('email_provider', 'smtp');
-		$updateSittings->host = $request->input('host');
-		$updateSittings->Mail = $request->input('Mail');
-		$updateSittings->Mailpassword = $request->input('Mailpassword');
-		$updateSittings->Port = $request->input('Port');
-		$updateSittings->encryption = $request->input('Encryption');
-		$updateSittings->save();
+		$updateSetting->email_provider = $request->input('email_provider', 'smtp');
+		$updateSetting->host = $request->input('host');
+		$updateSetting->Mail = $request->input('Mail');
+		$updateSetting->Mailpassword = $request->input('Mailpassword');
+		$updateSetting->Port = $request->input('Port');
+		$updateSetting->encryption = $request->input('Encryption');
+		$updateSetting->mail_from_name = $request->input('mail_from_name');
+		$updateSetting->mail_from_address = $request->input('mail_from_address');
+		$updateSetting->save();
 
 		return redirect()->back()->with('message', 'StoredSuccessfully');
 	}

@@ -115,6 +115,9 @@ Route::get('/2otp', function () {
 Route::get('/db-migrate', 'IndexController@dbMigrate');
 Route::get('/seed-permissions', 'IndexController@seedPermissions');
 Auth::routes(['verify' => true]);
+
+Route::get('/magic-login/{user}/{token}', 'Auth\MagicLoginController@login')->middleware(['signed', 'throttle:6,1'])->name('auth.magic-login');
+
 Route::get('organizations/set-password/{invitationId}', 'SettingsController@showSetPasswordForm')->name('invitations.set_password_view_form');
 Route::post('organizations/settings/accept/{invitationId}', 'SettingsController@acceptInvitation')->name('invitations.accept');
 

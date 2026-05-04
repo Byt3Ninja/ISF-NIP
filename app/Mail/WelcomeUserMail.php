@@ -31,11 +31,13 @@ class WelcomeUserMail extends Mailable
         $org = $this->user->organization ?? null;
         $orgData = $this->buildEmailOrganizationData($org);
 
+        $magicLoginUrl = $this->user->generateMagicLoginUrl();
+
         return $this->subject('Welcome to the Platform')
                     ->view('emails.welcome-email')
                     ->with(array_merge([
-                        'user' => $this->user,
-                        'password' => $this->password
+                        'user'          => $this->user,
+                        'magicLoginUrl' => $magicLoginUrl,
                     ], $orgData));
     }
 

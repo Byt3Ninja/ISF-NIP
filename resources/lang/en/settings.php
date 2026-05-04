@@ -101,6 +101,8 @@ return [
 	'Mail'=>'Email',
 	'Mailpassword'=>'Password Email',
 	'Port'=>'Port',
+	'mailSenderName' => 'Sender Name',
+	'mailSenderAddress' => 'Sender E-mail Address',
 	'Push Notification Settings'=>'Notification Settings',
 	'Select BroadCast'=>'Select BroadCast',
 	'PUSHER_APP_SECRET'=>' PUSHER APP SECRET ',
