@@ -74,11 +74,24 @@ class ClientCompanyController extends Controller
         $this->middleware('auth');
         $this->companyService = $companyService;
     }
-    public function show(Request $request, $id)
+    public function show(Request $request, $id = null)
     {
         // try {
         $user = auth()->user();
         $user_id = $user->id;
+        if( empty( $id ) && $user->hasRole('registered') )
+        {
+            if( empty( $user->company_id ) )
+            {
+                return redirect()->route('company.profile_view_mine');
+            }
+            $id = $user->company_id;
+        }
+        else
+        {
+            if( empty( $id ) ) { return abort(404); }
+        }
+
         $company = $this->companyService->getCompanyRelation($id);
         if($company['type'] == 'not_found'){
             return redirect()->back()->with('message2', 'Company Not Found');
