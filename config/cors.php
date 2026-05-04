@@ -29,6 +29,9 @@ return [
         'http://localhost:5173',
         'http://localhost:4173',
 
+        // React Native Development (Metro Bundler)
+        'http://localhost:8081',
+
         // Android Emulator / Release edge cases
         'null',
     ],
