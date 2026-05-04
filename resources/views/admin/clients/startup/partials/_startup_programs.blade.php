@@ -94,18 +94,20 @@ $cycles = [
 ];
 @endphp
 
+
+
 <div class="row g-4">
   <div class="card">
     <div class="card-header">
       <h5 class="card-title mb-1">{{ __('admin.Programs') }}</h5>
       <div class="small text-secondary">
-        <span class="mb-0">8 {{ __('admin.Programs') }}</span>
+        <span class="mb-0">{{ count($programs) }} {{ __('admin.Programs') }}</span>
         <i class="ti ti-point-filled text-dark"></i>
-        <span class="mb-0">4 {{ __('admin.Active') }}</span>
+        <span class="mb-0">{{ collect($programs)->where('status', '!=', 'completed')->count() }} {{ __('admin.Active') }}</span>
       </div>
     </div>
     <div class="card-body">
-      @foreach ($cycles as $program)
+      @foreach ($programs as $program)
         <div class="col-12">
           <div class="card shadow-none border overflow-hidden program-card mb-4">
     
@@ -218,11 +220,12 @@ $cycles = [
                     {{ __('startup.cohort') }}
                   </small>
                   <span class="badge bg-info bg-opacity-10 text-info border border-info px-3 py-1 fw-medium">
-                    {{ $program->cohort ?? '—' }}
+                    {{ $program->cohort->name ?? '—' }}
                   </span>
                 </div>
                 
                 <!-- Action -->
+                @if($program->status !== 'upcoming')
                 <div class="col-6 col-md-2 col-lg-2">
                   <div class="text-end">
                     <a href="{{ route('company.alumni_view', ['id' => $company->id, 'cycle_id' => $program->id]) }}"
@@ -232,6 +235,7 @@ $cycles = [
                     </a>
                   </div>
                 </div>
+                @endif
     
               </div>
             </div>
