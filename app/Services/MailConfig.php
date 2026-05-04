@@ -6,12 +6,12 @@ use Illuminate\Support\Facades\Mail;
 
 class MailConfig
 {
-       /**
-        * Update the mail configuration at runtime.
-        * @param array $smtp
-        * @return void
-        */
-       public static function set(array $smtp)
+    /**
+    * Update the mail configuration at runtime.
+    * @param array $smtp
+    * @return void
+    */
+    public static function set(array $smtp)
     {
         if (($smtp['transport'] ?? 'smtp') === 'resend') {
             Config::set('mail.driver', 'resend');

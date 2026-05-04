@@ -113,6 +113,12 @@
             <x-alert type="danger" message="{{ $error }}" />
           @endforeach
         @endif
+        @if (session('must_change_password') || (auth()->check() && auth()->user()->must_change_password))
+          <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
+            <i class="ti ti-alert-triangle me-2"></i>
+          <div>{{ __('admin.Please_change_your_password_after_first_login') }}</div>
+        </div>
+        @endif
         <!-- /Alerts -->
 
         <!-- Tab Content -->

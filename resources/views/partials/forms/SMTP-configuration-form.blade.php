@@ -86,6 +86,30 @@
         </div>
       </div>
 
+        <div class="form-group mb-3">
+          <label class="form-label mb-1" for="mail_from_name">{{ __('settings.mailSenderName') }}</label>
+          <input
+            id="mail_from_name"
+            type="text"
+            class="form-control"
+            name="mail_from_name"
+            value="{{ $Title->mail_from_name }}"
+            placeholder="Platform Name by default"
+          />
+        </div>
+
+        <div class="form-group mb-3">
+          <label class="form-label mb-1" for="mail_from_address">{{ __('settings.mailSenderAddress') }}</label>
+          <input
+            id="mail_from_address"
+            type="text"
+            class="form-control"
+            name="mail_from_address"
+            value="{{ $Title->mail_from_address }}"
+            placeholder="e.g. no-reply@example.com"
+          />
+        </div>
+
       <div class="form-group d-flex justify-content-end mt-auto">
         <button type="submit" class="btn btn-primary mr-1 mb-1">
           {{ __('settings.Submit') }}
@@ -171,7 +195,7 @@
           Mail: {
             validators: {
               notEmpty: { message: @json(__('admin.Required_Field')) },
-              emailAddress: { message: @json(__('admin.please_enter_valid_email')) },
+              // emailAddress: { message: @json(__('admin.please_enter_valid_email')) },
             },
           },
           Mailpassword: {

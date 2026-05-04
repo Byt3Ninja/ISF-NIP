@@ -3770,7 +3770,8 @@ return [
 	'No_Founders_Empty' => 'No founders added yet',
 	'offline_location_address_max' => 'The offline location address may not be greater than 250 characters.',
 	'offline_location_map_max' => 'The offline location map URL may not be greater than 500 characters.',
-  'view_submission' => 'View Submission',
-  'due' => 'Due',
-  'in_review_count' => 'In Review Count',
+  	'view_submission' => 'View Submission',
+  	'due' => 'Due',
+  	'in_review_count' => 'In Review Count',
+	'Please_change_your_password_after_first_login' => 'Please change your password after your first login.',
 ];
