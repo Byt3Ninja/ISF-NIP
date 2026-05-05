@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use App\Notifications\WelcomeUserNotification;
+use App\Notifications\WelcomeMentorNotification;
 
 class AuthService
 {
@@ -85,9 +87,11 @@ class AuthService
 
                     DB::table('mentor_expertise')->insert($expertiseInsert);
                 }
+                $user->notify(new WelcomeMentorNotification($user, $data['password']));
             }
-
-            $user->notify(new WelcomeUserNotification($user, $data['password']));
+            else {
+                $user->notify(new WelcomeUserNotification($user, $data['password']));
+            }
             DB::commit();
 
             $token = $user->createToken('auth-register')->plainTextToken;
