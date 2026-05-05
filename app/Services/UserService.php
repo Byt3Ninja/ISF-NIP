@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Database\Eloquent\Builder;
 use App\Notifications\WelcomeUserNotification;
+use App\Notifications\WelcomeMentorNotification;
 use App\Notifications\WelcomeJudgerNotification;
 
 
@@ -105,29 +106,20 @@ class UserService
 		Storage::disk('UsersLFM')->makeDirectory("$user->id/Shared");
 		Storage::disk('UsersLFM')->makeDirectory("$user->id/Others");
 
-
-        if($user->hasRole('Judger')){
-               $user->notify(new WelcomeJudgerNotification($user));
-        }else{
-             $user->notify(new WelcomeUserNotification($user, $data['password']));
-        }
-
-        return $result;
-        }
-
-
-
-
-
-        } catch (\Throwable $e) {
-            return [
-            'success' => false,
-            'message' => 'Failed to create user',
-            'data'    => null,
-            'errors'  => [$e->getMessage()]
-            ];
-        }
-    }
+				if($user->hasRole('Judger')) { $user->notify(new WelcomeJudgerNotification($user)); }
+				elseif($user->hasRole('mentor')) { $user->notify(new WelcomeMentorNotification($user, $data['password'])); }
+				else { $user->notify(new WelcomeUserNotification($user, $data['password'])); }
+			}
+			return $result;
+		} catch (\Throwable $e) {
+			return [
+				'success' => false,
+				'message' => 'Failed to create user',
+				'data'    => null,
+				'errors'  => [$e->getMessage()]
+			];
+		}
+	}
 
     /**
      * Summary of update
