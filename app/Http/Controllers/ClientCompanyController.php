@@ -510,10 +510,10 @@ class ClientCompanyController extends Controller
                 'title'   => 'Global Hack Week',
                 'date' => '20-11-2022', // Winning date
             ],
-            'profile_complete' => [
-                'locked'  => $profile_page,
-                'subtitle'=> '100% Completed',
-            ],
+            // 'profile_complete' => [
+            //     'locked'  => $profile_page,
+            //     'subtitle'=> '100% Completed',
+            // ],
             'team_builder' => [
                 'locked'  => $profile->employees != null ? false : true,
                 'count' => $profile->employees?->count() ?? 0, // Count of team members
