@@ -177,7 +177,7 @@ class TasksController extends Controller
             'attachments.*' => 'file|max:10240|mimes:jpeg,jpg,png,pdf,docx,xlsx,pptx',
         ]);
      
-
+        
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
@@ -277,6 +277,9 @@ class TasksController extends Controller
                 ];
             }
             $task->assignees()->sync($assigneeData);
+
+            ProgramTaskAssignee::where('program_task_id', $task->id)
+                ->update(['status' => $request->status, 'last_updated' => now()]);
 
             ProgramTaskActivity::create([
                 'program_task_id' => $task->id,
@@ -554,7 +557,7 @@ class TasksController extends Controller
                 $assigneeData = [];
                 foreach ($request->assignees as $companyId) {
                     $assigneeData[$companyId] = [
-                        'status' => $existingStatuses[$companyId] ?? 'pending',
+                        'status' => $existingStatuses[$companyId] ?? $task->status,
                         'last_updated' => now(),
                     ];
                 }
