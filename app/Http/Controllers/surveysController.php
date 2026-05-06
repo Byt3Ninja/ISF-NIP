@@ -40,11 +40,15 @@ class surveysController extends Controller
 			})
 			->get();
 		}
+		
 			if($user->hasAnyRole('Mentor|Registered')){
 				$availableSurveys = SurveyResponses::where('user_id', $user->id)
 					->where('triggered_on', 'mentorship')
 					->with('survey_scope')
 					->orderBy('created_at', 'desc')
+					->when($user->hasRole('Registered'), function ($query) use ($user) {
+						$query->where('cycle_id', $user->company?->cycle);
+					})
 					->get();
 						$surveyQuestionsCount = SurveyQuestions::whereIn(
 						'survey_id',
@@ -65,7 +69,7 @@ class surveysController extends Controller
 					->orderBy('zoom_date', 'desc')
 					->get();
 					}
-
+					
 						//dd($mentorshipRequests[0], $availableSurveys[0], $surveyQuestionsCount);
 					$surveys = $availableSurveys->map(function ($survey) use (
 					$mentorshipRequests,
