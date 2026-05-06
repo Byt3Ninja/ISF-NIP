@@ -26,9 +26,13 @@
                 <div class="d-flex align-items-center gap-1">
                   <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle view-task-btn" type="button" data-task-id="{{ $task['id'] }}" title="{{ __('admin.View') }}"><i class="ti ti-eye ti-md text-dark"></i></button>
                   @if ($_user->ableTo('tasks.update', $permissions))
-                  <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle edit-task-btn" type="button" data-task-id="{{ $task['id'] }}" title="{{ __('admin.Edit') }}"><i class="ti ti-edit ti-md text-dark"></i></button>
+                    <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle edit-task-btn" type="button" data-task-id="{{ $task['id'] }}" title="{{ __('admin.Edit') }}">
+                      <i class="ti ti-edit ti-md text-dark"></i>
+                    </button>
+                    <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle archive-task-btn" type="button" data-task-id="{{ $task['id'] }}" title="{{ __('admin.archive_task') }}">
+                      <i class="ti ti-archive ti-md text-dark"></i>
+                    </button>
                   @endif
-                  <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle archive-task-btn" type="button" data-task-id="{{ $task['id'] }}" title="{{ __('admin.archive_task') }}"><i class="ti ti-archive ti-md text-dark"></i></button>
                 </div>
               </div>
               <h6 class="mb-1 text-truncate">{{ $task['title'] }}</h6>
