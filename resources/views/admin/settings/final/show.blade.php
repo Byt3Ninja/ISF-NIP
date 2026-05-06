@@ -33,8 +33,8 @@ $maxVisible = 10;
 
 $pills = [
   ['title' => 'judging_panels', 'icon' => 'user-check'],
-  ['title' => 'screening_guidelines' , 'icon' => 'help-circle'],
-  ['title' => 'evaluation_model' , 'icon' => 'chart-dots'],
+  ['title' => 'screening_guidelines', 'icon' => 'help-circle'],
+  ['title' => 'evaluation_model', 'icon' => 'chart-dots'],
 ];
 
 $companiesById = $companies instanceof \Illuminate\Support\Collection ? $companies->keyBy('id') : collect($companies)->keyBy('id');
@@ -42,16 +42,16 @@ $companiesById = $companies instanceof \Illuminate\Support\Collection ? $compani
 $visibleJudgeIds = $assignedJudgeIds->take($maxVisible);
 $hiddenJudgeIds = $assignedJudgeIds->slice($maxVisible);
 $hiddenJudgeNames = $hiddenJudgeIds->map(fn($jid) => $judges->find($jid))
-    ->filter()
-    ->map(fn($j) => $j->{'first_name_'.$l} . ' ' . $j->{'last_name_'.$l})
-    ->implode("\n");
+  ->filter()
+  ->map(fn($j) => $j->{'first_name_' . $l} . ' ' . $j->{'last_name_' . $l})
+  ->implode("\n");
 
 $visibleCompanyIds = $assignedCompanyIds->take($maxVisible);
 $hiddenCompanyIds = $assignedCompanyIds->slice($maxVisible);
 $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ?? null)
-    ->filter()
-    ->map(fn($c) => $c->{'name_'.$l})
-    ->implode("\n");
+  ->filter()
+  ->map(fn($c) => $c->{'name_' . $l})
+  ->implode("\n");
 @endphp
 
 @section('content')
@@ -172,7 +172,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
                   </div>
                   <div class="flex-grow-1">
                     <div class="text-secondary small mb-1">{{ __('builder.Form') }}</div>
-                    <select id="step-form-select" class="form-select" data-step-id="{{ $cstep->id }}">
+                      <select id="step-form-select" class="form-select select2" data-step-id="{{ $cstep->id }}" data-placeholder="{{ __('admin.select_form') }}" data-allow-clear="true">
                       <option value="">{{ __('admin.select_form') }}</option>
                       @foreach($forms as $f)
                         <option value="{{ $f->id }}" @selected($form && $form->id == $f->id)>
@@ -346,7 +346,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
 
         <!-- Evaluation Model Tab -->
         <div class="tab-pane fade" id="evaluation_model" role="tabpanel" aria-labelledby="evaluation_model_tab">
-          @if( $_user->ableTo('screening.evaluation_show', $permissions) )
+          @if($_user->ableTo('screening.evaluation_show', $permissions))
             @include('admin.settings.screening-evaluation')
           @endif
         </div>
