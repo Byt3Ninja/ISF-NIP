@@ -628,4 +628,6 @@ return [
   'registration_type'                        => 'Registration Type',
   'offering_type'                            => 'Offering Type',
   'products_services_description'            => 'Products / Services Description',
+  'Hackathon' => 'Hackathon',
+  'general_program' => 'General Program',
 ];
