@@ -4,25 +4,19 @@
 <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
 <style>
-/* Center Summernote modals */
-.note-modal .modal-dialog {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    margin: 0;
-}
+  .note-modal {
+    margin-top: 100px !important;
+  }
 
-/* Center buttons in Summernote modals */
-.note-modal .modal-footer {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-}
+  div.checkbox label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
 
-.note-modal .modal-footer .btn {
-    min-width: 100px;
-}
+  div.note-modal-footer input[type="button"] {
+    margin-top: -20px !important;
+  }
 </style>
 @stop
 
