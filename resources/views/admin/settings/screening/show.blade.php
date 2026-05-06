@@ -33,8 +33,8 @@ $maxVisible = 10;
 
 $pills = [
   ['title' => 'judging_panels', 'icon' => 'user-check'],
-  ['title' => 'screening_guidelines' , 'icon' => 'help-circle'],
-  ['title' => 'evaluation_model' , 'icon' => 'chart-dots'],
+  ['title' => 'screening_guidelines', 'icon' => 'help-circle'],
+  ['title' => 'evaluation_model', 'icon' => 'chart-dots'],
 ];
 
 $companiesById = $companies instanceof \Illuminate\Support\Collection ? $companies->keyBy('id') : collect($companies)->keyBy('id');
@@ -42,16 +42,16 @@ $companiesById = $companies instanceof \Illuminate\Support\Collection ? $compani
 $visibleJudgeIds = $assignedJudgeIds->take($maxVisible);
 $hiddenJudgeIds = $assignedJudgeIds->slice($maxVisible);
 $hiddenJudgeNames = $hiddenJudgeIds->map(fn($jid) => $judges->find($jid))
-    ->filter()
-    ->map(fn($j) => $j->{'first_name_'.$l} . ' ' . $j->{'last_name_'.$l})
-    ->implode("\n");
+  ->filter()
+  ->map(fn($j) => $j->{'first_name_' . $l} . ' ' . $j->{'last_name_' . $l})
+  ->implode("\n");
 
 $visibleCompanyIds = $assignedCompanyIds->take($maxVisible);
 $hiddenCompanyIds = $assignedCompanyIds->slice($maxVisible);
 $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ?? null)
-    ->filter()
-    ->map(fn($c) => $c->{'name_'.$l})
-    ->implode("\n");
+  ->filter()
+  ->map(fn($c) => $c->{'name_' . $l})
+  ->implode("\n");
 @endphp
 
 @section('content')
@@ -107,9 +107,9 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
               </div>
             </div>
           </div>
-          
+
           <hr class="my-4">
-          
+
           <div class="w-75">
             <p class="text-muted">{{ $cstep->description }}</p>
           </div>
@@ -118,7 +118,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
             <!-- Program / Organization -->
             <div class="col-md-6">
               <div class="mb-3 px-3 py-2 bg-card rounded-2 border border-primary">
-                <a href="{{ '/dashboard/programlist/'.$cstep->cycle->id }}" class="d-flex align-items-start gap-3">
+                <a href="{{ '/dashboard/programlist/' . $cstep->cycle->id }}" class="d-flex align-items-start gap-3">
                   <div class="avatar">
                     <div class="avatar-initial rounded-circle bg-label-primary">
                       <i class="ti ti-rocket"></i>
@@ -145,7 +145,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
                 </a>
               </div>
             </div>
-           
+
             <div class="col-md-6">
               <div class="mb-3 px-3 py-2 bg-card rounded-2 border border-info">
                 <div class="d-flex align-items-start gap-3">
@@ -162,7 +162,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
                   </div>
                 </div>
               </div>
-              
+
               <div class="mb-3 px-3 py-2 bg-card rounded-2 border border-warning">
                 <div class="d-flex align-items-start gap-3">
                   <div class="avatar">
@@ -172,7 +172,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
                   </div>
                   <div class="flex-grow-1">
                     <div class="text-secondary small mb-1">{{ __('builder.Form') }}</div>
-                    <select id="step-form-select" class="form-select" data-step-id="{{ $cstep->id }}">
+                    <select id="step-form-select" class="form-select select2" data-step-id="{{ $cstep->id }}" data-placeholder="{{ __('admin.select_form') }}" data-allow-clear="true">
                       <option value="">{{ __('admin.select_form') }}</option>
                       @foreach($forms as $f)
                         <option value="{{ $f->id }}" @selected($form && $form->id == $f->id)>
@@ -317,7 +317,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
           @include('partials.judging-panels', ['id' => $id])
         </div>
         <!--/ Judging Panels Tab -->
-        
+
         <!-- Screening Guidelines Tab -->
         <div class="tab-pane fade" id="screening_guidelines" role="tabpanel" aria-labelledby="screening_guidelines-tab">
           <div class="d-flex flex-column">
@@ -346,7 +346,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
 
         <!-- Evaluation Model Tab -->
         <div class="tab-pane fade" id="evaluation_model" role="tabpanel" aria-labelledby="evaluation_model_tab">
-          @if( $_user->ableTo('screening.evaluation_show', $permissions) )
+          @if($_user->ableTo('screening.evaluation_show', $permissions))
             @include('admin.settings.screening-evaluation')
           @endif
         </div>
