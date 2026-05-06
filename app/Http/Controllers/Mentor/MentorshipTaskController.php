@@ -182,7 +182,7 @@ class MentorshipTaskController extends Controller
 					'img_url'     => Company::logo_handler($a->logo),
 					'profile_url' => '/dashboard/companyProfile/' . $a->id,
 				])->toArray(),
-				'inReviewCount' => $task->assignees->filter(fn($a) => $a->pivot->status === 'review')->count(),
+				'in_review_count' => $task->assignees->filter(fn($a) => $a->pivot->status === 'review')->count(),
 				'attachments' => $attachments->map(fn($a, $i) => [
 					'id'          => $i + 1,
 					'name'        => $a['name'] ?? basename($a['path'] ?? ''),

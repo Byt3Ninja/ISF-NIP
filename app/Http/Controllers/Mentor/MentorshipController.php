@@ -105,7 +105,7 @@ class MentorshipController extends Controller
                         'profile_url' => url('/dashboard/companyProfile/' . $assignee->id),
                     ];
                 })->toArray(),
-                'inReviewCount' => $task->assignees->filter(fn($a) => $a->pivot->status === 'review')->count(),
+                'in_review_count' => $task->assignees->filter(fn($a) => $a->pivot->status === 'review')->count(),
                 'priority'      => $task->priority,
                 'overallStatus' => $task->status,
                 'dueDate'       => $task->due_date ? $task->due_date->format('Y-m-d') : 'N/A',
