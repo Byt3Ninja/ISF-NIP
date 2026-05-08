@@ -486,7 +486,7 @@ return [
     'make_mentorships_count' => ':count جلسة إرشاد',
     'not_graduated_yet' => 'لم يتخرج بعد',
     'participate_in_hackathon_to_unlock' => 'شارك في هاكاثون لفتح الميزة',
-    'complete_profile_to_unlock' => 'أكمل ملفك الشخصي لفتح الميزة',
+    'complete_profile_to_unlock' => 'أكمل جميع الحقول في ملف الشركة الناشئة لفتح هذه الشارة.',
     'create_join_team' => 'أنشئ فريقًا أو انضم إلى فريق',
     'reach_growth_milestones' => 'حقق مراحل النمو',
     'no_mentorhip_sessions' => 'لا توجد جلسات إرشاد',

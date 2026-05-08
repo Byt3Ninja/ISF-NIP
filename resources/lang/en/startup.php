@@ -484,7 +484,7 @@ return [
     'make_mentorships_count' => ':count Mentorship session',
     'not_graduated_yet' => 'Not graduated yet',
     'participate_in_hackathon_to_unlock' => 'Participate in a hackathon to unlock',
-    'complete_profile_to_unlock' => 'Complete your profile to unlock',
+    'complete_profile_to_unlock' => 'Complete all startup profile fields to unlock this badge.',
     'create_join_team' => 'Create or join a team',
     'reach_growth_milestones' => 'Reach growth milestones',
     'no_mentorhip_sessions' => 'No mentorhip sessions',
