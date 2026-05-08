@@ -581,11 +581,12 @@ class ClientCompanyController extends Controller
             'hackathon' => [
                 'locked'  => true,
                 'title'   => 'Global Hack Week',
-                'date' => '20-11-2022', // Winning date
+                'date' => null, // Winning date
             ],
             'profile_complete' => [
                 'locked'  =>   $profile_page,
                 'subtitle'=> '100% Completed',
+                'date' => $profile->created_at->format('d-m-Y'), // Profile completion date
             ],
             'team_builder' => [
                 'locked'  => $profile->employees != null ? false : true,
