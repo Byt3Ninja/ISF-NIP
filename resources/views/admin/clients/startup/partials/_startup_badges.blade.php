@@ -46,6 +46,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
               'criteriaMet' => !$item['locked'] ? ($key === 'alumni' ? __('startup.badges.graduated_from_program', ['program' => isset($item['title']) ? $item['title'] : __('startup.badges.incubator_program')]) : (isset($item['count']) ? __($achievemenLabels[$key], ['count' => $item['count']]) : ($key === 'profile_complete' ? __('startup.badges.100_profile_complete') : ''))) : '',
             ];
           @endphp
+          
           <div class="card h-100 border-2 border-{{ $item['locked'] ? 'light' : $badgeColors[$loop->index] }} opacity-{{ $item['locked'] ? '50' : '100' }} shadow-sm badge-card"
             {{-- Tooltip Logic: Only show tooltip if locked --}}
             @if($item['locked'])
