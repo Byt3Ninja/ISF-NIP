@@ -553,7 +553,6 @@ class ClientCompanyController extends Controller
             $profile->name_ar,
             $profile->country_id,
             $profile->state_id,
-            $profile->city_id,
             $profile->business_categories,
             $profile->address_en,
             $profile->address_ar,
@@ -567,7 +566,12 @@ class ClientCompanyController extends Controller
             $profile->business_model,
             $profile->business_model_description,
         ])->every(fn ($value) => !is_null($value));
-
+        
+        if($profile_page == false){
+            $profile_page = true;
+        }else{
+            $profile_page = false;
+        }
         $achievements = [
             'alumni' => [
                 'locked'  => $almunies->count() > 0 ? false : true,
@@ -580,7 +584,7 @@ class ClientCompanyController extends Controller
                 'date' => '20-11-2022', // Winning date
             ],
             'profile_complete' => [
-                'locked'  => $profile_page,
+                'locked'  =>   $profile_page,
                 'subtitle'=> '100% Completed',
             ],
             'team_builder' => [
