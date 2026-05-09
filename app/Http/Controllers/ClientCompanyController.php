@@ -632,10 +632,12 @@ class ClientCompanyController extends Controller
             'growth_achiever' => [
                 'locked'  => $profile->milestones->count() > 0 ? false : true,
                 'count' => $profile->milestones?->count() ?? 0, // Count of milestones
+                'date' => $profile->milestones->sortByDesc('created_at')->first()?->created_at->format('d-m-Y') ?? null, // Milestone achievement date
             ],
             'mentor_connect' => [
                 'locked'  => $company->user?->mentorship?->whereNotNull('rating')->where('done', 1)->count() > 0 ? false : true,
                 'count' => $company->user?->mentorship?->whereNotNull('rating')->where('done', 1)->count() ?? 0, // Count of mentorship sessions
+                'date' => $company->user?->mentorship?->whereNotNull('rating')->where('done', 1)->sortByDesc('created_at')->first()?->created_at->format('d-m-Y') ?? null, // Date of first completed mentorship session with rating
             ],
         ];
         $totalEmployees  = $company?->total_employees;
