@@ -38,6 +38,9 @@ $navigationIcons = [
   $countSurvey = App\SurveyResponses::where('user_id', auth()->id())
     ->where('triggered_on', 'mentorship')
     ->whereHas('survey')
+    ->when($_user->hasRole('Registered'), function ($query) use ($_user) {
+						$query->where('cycle_id', $_user->company?->cycle);
+					})
     ->where(function($q) {
         $q->whereNull('responses')
           ->orWhere('responses', '[]')
