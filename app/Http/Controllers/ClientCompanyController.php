@@ -554,7 +554,6 @@ class ClientCompanyController extends Controller
             $profile->country_id,
             $profile->state_id,
             $profile->business_categories,
-            $profile->team_num,
             $profile->est_date,
             $profile->address_en,
             $profile->address_ar,
@@ -580,13 +579,11 @@ class ClientCompanyController extends Controller
             $profile->generate_revenue,
             $profile->development_stage,
             $profile->business_type,
-            $profile->financial_plan,
-            $profile->working_team_summary,
-            $profile->pitch_deck_description,
-            $profile->pitch_deck_summary,
             $profile->pitch_deck,
-            $profile->pitch_deck_video,
-            $profile->business_plan,
+            $profile->documents,
+            $profile->total_employees,
+            $profile->male_employees,
+            $profile->female_employees,
             $profile->mvp_prototype_link,
             $profile->logo,
             $profile->Currency,
@@ -594,10 +591,6 @@ class ClientCompanyController extends Controller
             $profile->raised_fund,
             $profile->Funding_Target,
             $profile->stage,
-            $profile->problem,
-            $profile->solution,
-            $profile->product_photo,
-            $profile->product_video,
             $profile->website,
             $profile->facebook,
             $profile->twitter,
@@ -611,7 +604,6 @@ class ClientCompanyController extends Controller
             $profile->Tax_Card,
             $profile->documents,
         ])->every(fn ($value) => !is_null($value));
-        
         if($profile_page == false){
             $profile_page = true;
         }else{
