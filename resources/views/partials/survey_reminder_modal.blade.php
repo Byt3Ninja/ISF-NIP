@@ -9,12 +9,18 @@
    
       $completed_survey_ids = \App\SurveyResponses::where('user_id', $user_id)
         ->whereNotNull('responses')
+        ->when($_user->hasRole('Registered'), function ($query) use ($_user) {
+						$query->where('cycle_id', $_user->company?->cycle);
+					})
         ->pluck('survey_id')
         ->toArray();
       
       
       $incomplete_responses = \App\SurveyResponses::where('user_id', $user_id)
         ->whereNull('responses')
+        ->when($_user->hasRole('Registered'), function ($query) use ($_user) {
+						$query->where('cycle_id', $_user->company?->cycle);
+					})
         ->whereHas('survey', function($query) {
           $query->where('is_required', 1);
         })
