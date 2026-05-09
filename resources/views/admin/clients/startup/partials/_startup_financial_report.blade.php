@@ -512,8 +512,8 @@
 
       // Update additional KPIs
       const operatingProfit = d.revenue - d.cogs - d.salaries - d.opex - d.da;
-      const netProfit = d.netProfit;
       const totalExpenses = d.cogs + d.salaries + d.opex + d.da + d.interest + d.taxes;
+      const netProfit = d.revenue - totalExpenses;
       update('kpi-operating-profit', fmt.currency(operatingProfit));
       update('kpi-net-profit', fmt.currency(netProfit));
       update('kpi-total-expenses', fmt.currency(totalExpenses));

@@ -5024,7 +5024,8 @@ class ClientCompanyController extends Controller
 
                 $ebitda    = $rev - $cogs - $sal - $opex;
                 $ebit      = $ebitda - $da;
-                $netProfit = $ebit - $int - $tax;
+                $totalExpenses = $cogs + $sal + $opex + $da + $int + $tax;
+                $netProfit = $rev - $totalExpenses;
                 $wc        = $rec + $inv - $pay;
                 $deltaWC   = ($i === 0) ? 0.0 : $wc - $prevWC;
                 $debtChg   = ($i === 0) ? 0.0 : $debt - $prevDebt;
