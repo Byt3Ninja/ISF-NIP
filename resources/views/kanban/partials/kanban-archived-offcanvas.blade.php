@@ -17,6 +17,9 @@
         @foreach($archivedTasks as $task)
           <div class="card border shadow-none mb-0">
             <div class="card-body p-4">
+              @if(!empty($task['program']))
+                <div class="text-muted small mb-1">{{ $task['program'] }}</div>
+              @endif
               <h6 class="mb-2">{{ $task['title'] }}</h6>
               <div class="text-muted small mb-3">{!! \Illuminate\Support\Str::limit(strip_tags($task['description']), 120) !!}</div>
               <div class="d-flex flex-wrap gap-2 align-items-center">

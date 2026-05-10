@@ -428,7 +428,8 @@ class MentorshipTaskController extends Controller
 			],
 		];
 
-		$archivedTasks = ProgramTask::where('program_id', $cycleId)
+		$archivedTasks = ProgramTask::with('program')
+			->where('program_id', $cycleId)
 			->where('status', 'archived')
 			->orderBy('updated_at', 'desc')
 			->get()
@@ -436,6 +437,7 @@ class MentorshipTaskController extends Controller
 				'id'          => $task->id,
 				'title'       => $task->title,
 				'description' => $task->description,
+				'program'     => $task->program->title ?? null,
 				'status'      => 'archived',
 				'archived_at' => $task->updated_at,
 			])->values()->toArray();
