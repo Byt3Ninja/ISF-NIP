@@ -60,7 +60,6 @@ class MentorshipController extends Controller
 
         $cycles = $cycles->map(function ($cycle) use ($user, $isRegistered, $userCompanyId) {
             $baseQuery = fn() => ProgramTask::where('program_id', $cycle->id)
-                ->where('status', '!=', 'archived')
                 ->when($isRegistered,
                     fn($q) => $q->whereHas('assignees', fn($q2) => $q2->where('companies.id', $userCompanyId)),
                     fn($q) => $q->where('created_by', $user->id)
@@ -70,6 +69,7 @@ class MentorshipController extends Controller
             $inProgress = (clone $baseQuery())->where('status', 'progress')->count();
             $inReview   = (clone $baseQuery())->where('status', 'review')->count();
             $completed  = (clone $baseQuery())->where('status', 'completed')->count();
+            $archived   = (clone $baseQuery())->where('status', 'archived')->count();
 
             return [
                 'id'          => $cycle->id,
@@ -78,6 +78,7 @@ class MentorshipController extends Controller
                 'in_progress' => $inProgress,
                 'in_review'   => $inReview,
                 'completed'   => $completed,
+                'archived'    => $archived,
             ];
         });
 
@@ -189,14 +190,14 @@ class MentorshipController extends Controller
         }
         $programs = [];
         $stats = [
-            'total_tasks' => $cycles->sum(fn($c) => ($c['pending'] ?? 0) + ($c['in_progress'] ?? 0) + ($c['in_review'] ?? 0) + ($c['completed'] ?? 0)),
+            'total_tasks' => $cycles->sum(fn($c) => ($c['pending'] ?? 0) + ($c['in_progress'] ?? 0) + ($c['in_review'] ?? 0) + ($c['completed'] ?? 0) + ($c['archived'] ?? 0)),
             'pending'     => $cycles->sum('pending'),
             'active'      => [
                 'in_progress_count' => $cycles->sum('in_progress'),
                 'in_review_count'   => $cycles->sum('in_review'),
             ],
             'completed' => $cycles->sum('completed'),
-            'archived'  => 0,
+            'archived'  => $cycles->sum('archived'),
         ];
         return view('mentor.mentorshipSessions.index', compact('sessions', 'programs', 'available_surveys', 'cycles', 'stats'));
     }
