@@ -61,8 +61,7 @@ class MentorshipController extends Controller
         $cycles = $cycles->map(function ($cycle) use ($user, $isRegistered, $userCompanyId) {
             $baseQuery = fn() => ProgramTask::where('program_id', $cycle->id)
                 ->when($isRegistered,
-                    fn($q) => $q->whereHas('assignees', fn($q2) => $q2->where('companies.id', $userCompanyId)),
-                    fn($q) => $q->where('created_by', $user->id)
+                    fn($q) => $q->whereHas('assignees', fn($q2) => $q2->where('companies.id', $userCompanyId))
                 );
 
             $pending    = (clone $baseQuery())->where('status', 'pending')->count();
