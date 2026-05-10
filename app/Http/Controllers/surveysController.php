@@ -141,8 +141,6 @@ class surveysController extends Controller
 				});
 
 				$surveys = collect($surveys)->sortByDesc('created_at')->values();
-
-				$surveys = $surveys->filter(fn($s) => $s->user !== null)->values();
 			}
 		
 		return view('admin.surveys.index', compact('surveys'));
