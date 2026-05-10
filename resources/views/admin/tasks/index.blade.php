@@ -746,10 +746,6 @@ $(function () {
 
     const $assigneeSelect = $('#task-assignees');
     const assigneeIds     = data.assignees.map(a => a.id).filter(id => id != null);
-    $assigneeSelect.empty();
-    (startups || []).forEach(s =>
-      $assigneeSelect.append(`<option value="${s.id}">${s.name ?? s.name_en}</option>`)
-    );
     if (assigneeIds.length) $assigneeSelect.val(assigneeIds).trigger('change');
 
     const $existingWrap = $('#existing-attachments');
@@ -884,13 +880,9 @@ $(function () {
     // Set program (triggers program-change handler which populates assignees in edit mode)
     $('#task-program').val(data.program.id).trigger('change');
 
-    // Populate all startups and select current assignees
+    // Select current assignees (options already populated by program change handler)
     const $assigneeSelect  = $('#task-assignees');
     const assigneeIds      = data.assignees.map(a => a.id).filter(id => id != null);
-    $assigneeSelect.empty();
-    (startups || []).forEach(s =>
-      $assigneeSelect.append(`<option value="${s.id}">${s.name ?? s.name_en}</option>`)
-    );
     if (assigneeIds.length) $assigneeSelect.val(assigneeIds).trigger('change');
 
     // Existing attachments
@@ -1067,16 +1059,13 @@ $(function () {
     fv.revalidateField(this.name);
   });
 
-  // ── Filter assignees by program (add mode) / show all (edit mode) ────────
+  // ── Filter assignees by selected program ────────────────────────────────
   $('#task-program').on('select2:select change', function () {
     const programId  = $(this).val();
     const $sel       = $('#task-assignees');
     const currValues = $sel.val() || [];
-    const isEditMode = $('#addNewTaskForm').data('edit-row') !== undefined;
 
-    const assignees = isEditMode
-      ? (startups || [])
-      : (startups || []).filter(s => s.cycle === +programId);
+    const assignees = (startups || []).filter(s => s.cycle === +programId);
 
     $sel.empty();
     assignees.forEach(a => $sel.append(`<option value="${a.id}">${a.name ?? a.name_en}</option>`));
