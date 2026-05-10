@@ -66,14 +66,18 @@ class MentorshipController extends Controller
                     fn($q) => $q->where('created_by', $user->id)
                 );
 
-            $completed = (clone $baseQuery())->where('status', 'completed')->count();
-            $pending   = (clone $baseQuery())->where('status', '!=', 'completed')->count();
+            $pending    = (clone $baseQuery())->where('status', 'pending')->count();
+            $inProgress = (clone $baseQuery())->where('status', 'progress')->count();
+            $inReview   = (clone $baseQuery())->where('status', 'review')->count();
+            $completed  = (clone $baseQuery())->where('status', 'completed')->count();
 
             return [
-                'id'        => $cycle->id,
-                'title'     => $cycle->title,
-                'completed' => $completed,
-                'pending'   => $pending,
+                'id'          => $cycle->id,
+                'title'       => $cycle->title,
+                'pending'     => $pending,
+                'in_progress' => $inProgress,
+                'in_review'   => $inReview,
+                'completed'   => $completed,
             ];
         });
 
@@ -184,7 +188,17 @@ class MentorshipController extends Controller
             return view('admin.tasks.index',compact('tasks', 'programs', 'startups', 'stats'));
         }
         $programs = [];
-        return view('mentor.mentorshipSessions.index',compact('sessions', 'programs', 'available_surveys','cycles'));
+        $stats = [
+            'total_tasks' => $cycles->sum(fn($c) => ($c['pending'] ?? 0) + ($c['in_progress'] ?? 0) + ($c['in_review'] ?? 0) + ($c['completed'] ?? 0)),
+            'pending'     => $cycles->sum('pending'),
+            'active'      => [
+                'in_progress_count' => $cycles->sum('in_progress'),
+                'in_review_count'   => $cycles->sum('in_review'),
+            ],
+            'completed' => $cycles->sum('completed'),
+            'archived'  => 0,
+        ];
+        return view('mentor.mentorshipSessions.index', compact('sessions', 'programs', 'available_surveys', 'cycles', 'stats'));
     }
 
 
