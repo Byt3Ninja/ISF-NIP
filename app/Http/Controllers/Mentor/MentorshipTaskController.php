@@ -430,6 +430,7 @@ class MentorshipTaskController extends Controller
 
 		$archivedTasks = ProgramTask::where('program_id', $cycleId)
 			->where('status', 'archived')
+			->orderBy('updated_at', 'desc')
 			->get()
 			->map(fn($task) => [
 				'id'          => $task->id,
