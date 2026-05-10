@@ -178,7 +178,7 @@ class MentorshipController extends Controller
             'pending'     => $tasks->where('overallStatus', 'pending')->count(),
             'active'      => [
                 'in_progress_count' => $tasks->where('overallStatus', 'progress')->count(),
-                'in_review_count'   => $tasks->where('overallStatus', 'review')->count(),
+                'in_review_count'   => $tasks->filter(fn($t) => ($t['in_review_count'] ?? 0) > 0)->count(),
             ],
             'completed' => $tasks->where('overallStatus', 'completed')->count(),
             'archived'  => $tasks->where('overallStatus', 'archived')->count(),
