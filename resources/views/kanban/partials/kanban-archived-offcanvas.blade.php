@@ -18,7 +18,7 @@
           <div class="card border shadow-none mb-0">
             <div class="card-body p-4">
               @if(!empty($task['program']))
-                <div class="text-muted small mb-1">{{ $task['program'] }}</div>
+                <div class="mb-1"><strong><u style="font-size:1rem;">{{ $task['program'] }}</u></strong></div>
               @endif
               <h6 class="mb-2">{{ $task['title'] }}</h6>
               <div class="text-muted small mb-3">{!! \Illuminate\Support\Str::limit(strip_tags($task['description']), 120) !!}</div>
