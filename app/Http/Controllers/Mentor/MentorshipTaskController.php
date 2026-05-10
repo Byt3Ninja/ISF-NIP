@@ -428,9 +428,15 @@ class MentorshipTaskController extends Controller
 			],
 		];
 
-		$archivedTasks = ProgramTask::with('program')
+		$archivedQuery = ProgramTask::with('program')
 			->where('program_id', $cycleId)
-			->where('status', 'archived')
+			->where('status', 'archived');
+
+		if ($user->hasRole('registered')) {
+			$archivedQuery->whereHas('assignees', fn($q) => $q->where('companies.id', $user->company_id));
+		}
+
+		$archivedTasks = $archivedQuery
 			->orderBy('updated_at', 'desc')
 			->get()
 			->map(fn($task) => [
