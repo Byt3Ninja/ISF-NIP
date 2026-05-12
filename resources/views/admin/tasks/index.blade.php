@@ -580,6 +580,9 @@ $(function () {
       </div>
     `);
 
+    const assigneeCount = data.assignees?.length ?? 0;
+    $('#vto-assignees-count').text(assigneeCount > 0 ? assigneeCount : '');
+
     bootstrap.Tab.getOrCreateInstance(document.getElementById('vto-overview-tab')).show();
     $('#viewTaskOffcanavas').data('taskId', data.id).offcanvas('show');
   });
