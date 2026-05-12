@@ -154,9 +154,9 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
     const c = taskData.creator;
     if (c) {
       const roleLabel = cfg.roleMap[String(c.role || '').toLowerCase()] || c.role || '';
-      const avatarEl  = c.img_url
-        ? `<img src="${c.img_url}" alt="${c.name}" class="rounded-circle" style="width:28px;height:28px;object-fit:cover;" onerror="this.src='/images/placeholder.jpg'">`
-        : `<span class="avatar-initial rounded-circle bg-label-secondary d-flex align-items-center justify-content-center fw-semibold" style="width:28px;height:28px;font-size:11px;">${(c.name||'?').substring(0,2).toUpperCase()}</span>`;
+      const avatarEl = c.img_url
+        ? `<img src="${c.img_url}" alt="${c.name}" class="rounded-circle" style="width:28px;height:28px;object-fit:cover;" onerror="this.onerror=null; this.src='/images/placeholder.jpg'">`
+        : `<span class="avatar-initial rounded-circle bg-label-secondary d-flex align-items-center justify-content-center fw-semibold" style="width:28px;height:28px;font-size:11px;">${(c.name || "?").substring(0, 2).toUpperCase()}</span>`;
       $('#vt-reporter').html(`
         <a href="${c.profile_url}" target="_blank" class="d-flex align-items-center gap-2 text-decoration-none text-body">
           ${avatarEl}
