@@ -72,6 +72,30 @@
       <div class="tab-pane p-4 fade show active" id="vt-details" role="tabpanel">
         <div class="p-2">
 
+          {{-- Reporter / created_at / program --}}
+          <div class="card border shadow-none mb-4" id="vt-meta-card">
+            <div class="card-body p-0">
+              <div class="d-flex align-items-center justify-content-between px-4 py-3 border-bottom">
+                <span class="small text-muted d-flex align-items-center gap-2">
+                  <i class="ti ti-user text-info"></i>{{ __('admin.Reporter') }}
+                </span>
+                <div id="vt-reporter"></div>
+              </div>
+              <div class="d-flex align-items-center justify-content-between px-4 py-3 border-bottom">
+                <span class="small text-muted d-flex align-items-center gap-2">
+                  <i class="ti ti-calendar ti-xs text-info"></i>{{ __('admin.Created_At') }}
+                </span>
+                <span id="vt-created-at" class="small fw-semibold text-body"></span>
+              </div>
+              <div class="d-flex align-items-center justify-content-between px-4 py-3">
+                <span class="small text-muted d-flex align-items-center gap-2">
+                  <i class="ti ti-rocket text-success"></i>{{ __('admin.Program') }}
+                </span>
+                <div id="vt-program"></div>
+              </div>
+            </div>
+          </div>
+
           {{-- Description --}}
           <div class="mb-4">
             <p class="text-muted fw-medium mb-2 d-flex align-items-center gap-1" style="font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;">
