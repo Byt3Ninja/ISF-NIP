@@ -1017,6 +1017,7 @@ $(function () {
               logo:        a.logo || null,
               profile_url: `/dashboard/companyProfile/${a.id}`
             })),
+            in_review_count: rd.assignees.filter(a => (a.pivot?.status?.toLowerCase() || '') === 'review').length,
             priority:      rd.priority,
             overallStatus: rd.status,
             dueDate:       rd.due_date ? moment(rd.due_date, 'YYYY-MM-DD').format('YYYY-MM-DD') : 'N/A',
