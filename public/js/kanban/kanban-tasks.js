@@ -96,7 +96,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
     $('#vt-priority-bar').css('background', `rgba(var(--bs-${colorName}-rgb), 0.85)`);
 
     $('#vt-title').text(taskData.title);
-    $('#vt-description').html(taskData.description);
+    $('#vt-description').html(taskData.description ? taskData.description : lbl.noDescription);
     $('#vt-due-date').text(taskData.due_date || 'N/A');
     $('#vt-priority').html(`<span class="badge ${p.cls} rounded-pill"><span class="d-inline-block rounded-circle me-1 ${p.dot}" style="width:6px;height:6px;"></span>${p.label}</span>`);
     $('#vt-status').html(`<span class="badge bg-label-secondary rounded-pill">${sLabel}</span>`);

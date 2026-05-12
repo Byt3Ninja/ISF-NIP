@@ -132,6 +132,7 @@
       taskArchived:       @json(__('admin.task_archived')),
       taskReopened:       @json(__('admin.task_reopened')),
       moveTaskFailed:     @json(__('admin.move_task_failed')),
+      noDescription:      @json(__('admin.no_description')),
       // Attachments
       noAttachments:            @json(__('admin.no_attachments')),
       deleteAttachment:         @json(__('admin.delete_attachment')),
