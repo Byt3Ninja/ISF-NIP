@@ -201,7 +201,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
     $('#vt-send-comment-btn').data('task-id', taskId);
 
     dzReset();
-    vtCommentQ.setContents([]);
+    if (vtCommentQ) vtCommentQ.setContents([]);
 
     // Reset to first tab
     bootstrap.Tab.getOrCreateInstance(document.querySelector('#viewTaskOffcanvas .nav-tabs .nav-link')).show();
@@ -452,6 +452,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
   // ─── Add Comment ───────────────────────────────────────────────────────────
 
   $('#vt-send-comment-btn').on('click', function () {
+    if (!vtCommentQ) return;
     const taskId = $(this).data('task-id');
     const html = vtCommentQ.root.innerHTML;
     const plainText = vtCommentQ.getText().trim();
@@ -485,7 +486,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
         $('#vt-comment-count').text((parseInt($('#vt-comment-count').text()) || 0) + 1);
         const task = tasks.find(t => t.id == taskId);
         if (task) { if (!task.comments) task.comments = []; task.comments.push(c); }
-        vtCommentQ.setContents([]);
+        if (vtCommentQ) vtCommentQ.setContents([]);
         $btn.prop('disabled', false).text(lbl.send);
       },
       error: function () {

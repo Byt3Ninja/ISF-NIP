@@ -417,14 +417,14 @@ class MentorshipTaskController extends Controller
 				'active' => false,
 				'show'   => true,
 			],
-			[
-				'target' => '#vt-comments',
-				'icon'   => 'ti-message',
-				'label'  => __('admin.Comments'),
-				'badge'  => ['id' => 'vt-comment-count', 'class' => 'bg-label-danger bg-glow'],
-				'active' => false,
-				'show'   => true,
-			],
+			// [
+			// 	'target' => '#vt-comments',
+			// 	'icon'   => 'ti-message',
+			// 	'label'  => __('admin.Comments'),
+			// 	'badge'  => ['id' => 'vt-comment-count', 'class' => 'bg-label-danger bg-glow'],
+			// 	'active' => false,
+			// 	'show'   => true,
+			// ],
 			[
 				'target' => '#vt-activity',
 				'icon'   => 'ti-activity',
