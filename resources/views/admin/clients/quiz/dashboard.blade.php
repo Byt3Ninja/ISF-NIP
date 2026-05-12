@@ -45,7 +45,11 @@
           </div>
 				@endif
 			</div>
-			
+			<!-- message if Cycles not found -->
+
+			@if(!auth()->user()->HaveCompany)
+					<div class="alert alert-danger">{{ __('admin.You_dont_have_cycle') }}</div>
+			@endif
 			<div class="content-body">
 				<section class="organizations-list-wrapper">
 					<div class="organizations-list-table">
