@@ -8,15 +8,15 @@
 @stop
 
 @php
-$authUser    = auth()->user();
+$authUser = auth()->user();
 $permissions = [];
 $offcanvasTabs = [
-    ['target'=>'#vt-details',     'icon'=>'ti-info-circle', 'label'=>__('admin.Details'),     'active'=>true,  'show'=>true],
-    ['target'=>'#vt-submissions', 'icon'=>'ti-paperclip',   'label'=>__('admin.Submissions'), 'badge'=>['id'=>'vt-submissions-count','class'=>'bg-label-warning'], 'active'=>false, 'show'=>$authUser->hasAnyRole(['admin','sub-admin','organizationManager','mentor'])],
-    ['target'=>'#vt-feedback-history', 'icon'=>'ti-history',       'label'=>__('admin.feedback_history'), 'badge'=>['id'=>'vt-feedback-count','class'=>'bg-label-primary'], 'active'=>false, 'show'=>true],
-    ['target'=>'#vt-add-feedback',     'icon'=>'ti-message-report', 'label'=>__('admin.add_feedback'),     'active'=>false, 'show'=>$authUser->ableTo('tasks.add_feedback', $permissions)],
-    ['target'=>'#vt-comments',    'icon'=>'ti-message',     'label'=>__('admin.Comments'),    'badge'=>['id'=>'vt-comment-count',    'class'=>'bg-label-danger bg-glow'], 'active'=>false, 'show' => !auth()->user()->ableTo('tasks.show', $permissions),],
-    ['target'=>'#vt-activity',    'icon'=>'ti-activity',    'label'=>__('admin.Activities'),  'badge'=>['id'=>'vt-activity-count',   'class'=>'bg-label-info bg-glow'],   'active'=>false, 'show'=>true],
+  ['target' => '#vt-details', 'icon' => 'ti-info-circle', 'label' => __('admin.Details'), 'active' => true, 'show' => true],
+  ['target' => '#vt-submissions', 'icon' => 'ti-paperclip', 'label' => __('admin.Submissions'), 'badge' => ['id' => 'vt-submissions-count', 'class' => 'bg-label-warning'], 'active' => false, 'show' => $authUser->hasAnyRole(['admin', 'sub-admin', 'organizationManager', 'mentor'])],
+  ['target' => '#vt-feedback-history', 'icon' => 'ti-history', 'label' => __('admin.feedback_history'), 'badge' => ['id' => 'vt-feedback-count', 'class' => 'bg-label-primary'], 'active' => false, 'show' => true],
+  ['target' => '#vt-add-feedback', 'icon' => 'ti-message-report', 'label' => __('admin.add_feedback'), 'active' => false, 'show' => $authUser->ableTo('tasks.add_feedback', $permissions)],
+  ['target' => '#vt-comments', 'icon' => 'ti-message', 'label' => __('admin.Comments'), 'badge' => ['id' => 'vt-comment-count', 'class' => 'bg-label-danger bg-glow'], 'active' => false, 'show' => !auth()->user()->ableTo('tasks.show', $permissions),],
+  ['target' => '#vt-activity', 'icon' => 'ti-activity', 'label' => __('admin.Activities'), 'badge' => ['id' => 'vt-activity-count', 'class' => 'bg-label-info bg-glow'], 'active' => false, 'show' => true],
 ];
 @endphp
 
@@ -675,8 +675,10 @@ $(function () {
         } else {
           $list.closest('.mb-4').addClass('d-none');
         }
-
-        renderAttachmentsList(td.attachments, td.id, '#vt-attachments-list', false);
+        
+        const isAbleToDeleteAttachment = @json($_user->ableTo('tasks.delete_attachment', $permissions));
+        
+        renderAttachmentsList(td.attachments, td.id, '#vt-attachments-list', isAbleToDeleteAttachment);
         $('#vt-attachments-count').text(td.attachments.length ?? 0);
         renderActivitiesList(td.activities,            '#vt-activities-list');
         renderCommentsList(td.comments,                '#vt-comments-list');

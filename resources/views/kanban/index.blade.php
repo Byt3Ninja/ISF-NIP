@@ -71,6 +71,7 @@
   // ─── Server-side config injected into JS ────────────────────────────────
   window.KanbanConfig = {
     isAbleToEdit:    @json($_user->ableTo('tasks.store', $permissions)),
+    isAbleToDeleteAttachment:  @json($_user->ableTo('tasks.delete_attachment', $permissions)),
     isAdmin:         @json(auth()->user()->hasRole('Admin')),
     isSubAdmin:         @json(auth()->user()->hasRole('subadmin')),
     isOrgManager:         @json(auth()->user()->hasRole('OrganizationManager')),
