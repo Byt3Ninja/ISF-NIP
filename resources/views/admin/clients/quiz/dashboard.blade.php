@@ -29,7 +29,8 @@
 	<div class="">
 		<div class="">
 			<div class="content-overlay"></div>
-			@if (!empty($quizzes))
+			{{-- @dd($quizzes) --}}
+			@if ($quizzes->isNotEmpty())
 			<div class="content-header row">
 				@if( session()->has('msg'))
           <div class="row">
@@ -45,7 +46,6 @@
           </div>
 				@endif
 			</div>
-			
 			<div class="content-body">
 				<section class="organizations-list-wrapper">
 					<div class="organizations-list-table">
