@@ -308,11 +308,11 @@
 
     {{-- FOOTER ACTIONS --}}
     <div class="d-flex align-items-center gap-2 px-4 py-3 border-top flex-shrink-0">
-      @if ($_user->ableTo('tasks.update', $permissions))
+      {{-- @if ($_user->ableTo('tasks.update', $permissions))
       <button type="button" class="btn btn-primary btn-sm" id="vt-edit-trigger-btn">
         <i class="ti ti-edit ti-xs me-1"></i>{{ __('admin.Edit_Task') }}
       </button>
-      @endif
+      @endif --}}
       <button type="button" class="btn btn-label-secondary btn-sm ms-auto" data-bs-dismiss="offcanvas">
         {{ __('admin.Close') }}
       </button>
