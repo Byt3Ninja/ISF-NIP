@@ -533,25 +533,27 @@ $(function () {
 
       <div class="card border shadow-none mb-5">
         <div class="card-body p-0">
-          <div class="d-flex align-items-center justify-content-between px-4 py-3 border-bottom">
-            <span class="small text-muted d-flex align-items-center gap-2">
-              <i class="ti ti-user text-info"></i>{{ __('admin.Created_By') }}
-            </span>
-            ${data.creator ? `
-            <a href="${data.creator.profile_url}" target="_blank" class="d-flex align-items-center gap-2 text-decoration-none text-body">
-              <div class="avatar avatar-xs">
-                <img src="${data.creator.avatar}" alt="${data.creator.name}" class="rounded-circle" onerror="this.src='/images/placeholder.jpg'" />
-              </div>
-              <span class="fw-semibold small">${data.creator.name}</span>
-              <i class="ti ti-external-link ti-xs text-muted"></i>
-            </a>` : `<span class="small text-muted fst-italic">{{ __('admin.unknown') }}</span>`}
-          </div>
-          <div class="d-flex align-items-center justify-content-between px-4 py-3 border-bottom">
-            <span class="small text-muted d-flex align-items-center gap-2">
-              <i class="ti ti-shield-check text-info"></i>{{ __('admin.Creator_Role') }}
-            </span>
-            <span class="small fw-semibold text-uppercase">${data.creator ? (roleObj[data.creator.role] || data.creator.role) : '—'}</span>
-          </div>
+          @if ($_user->hasAnyRole(['admin', 'subadmin', 'organizationManager']))
+            <div class="d-flex align-items-center justify-content-between px-4 py-3 border-bottom">
+              <span class="small text-muted d-flex align-items-center gap-2">
+                <i class="ti ti-user text-info"></i>{{ __('admin.Created_By') }}
+              </span>
+              ${data.creator ? `
+              <a href="${data.creator.profile_url}" target="_blank" class="d-flex align-items-center gap-2 text-decoration-none text-body">
+                <div class="avatar avatar-xs">
+                  <img src="${data.creator.avatar}" alt="${data.creator.name}" class="rounded-circle" onerror="this.src='/images/placeholder.jpg'" />
+                </div>
+                <span class="fw-semibold small">${data.creator.name}</span>
+                <i class="ti ti-external-link ti-xs text-muted"></i>
+              </a>` : `<span class="small text-muted fst-italic">{{ __('admin.unknown') }}</span>`}
+            </div>
+            <div class="d-flex align-items-center justify-content-between px-4 py-3 border-bottom">
+              <span class="small text-muted d-flex align-items-center gap-2">
+                <i class="ti ti-shield-check text-info"></i>{{ __('admin.Creator_Role') }}
+              </span>
+              <span class="small fw-semibold text-uppercase">${data.creator ? (roleObj[data.creator.role] || data.creator.role) : '—'}</span>
+            </div>
+          @endif
           <div class="d-flex align-items-center justify-content-between px-4 py-3">
             <span class="small text-muted d-flex align-items-center gap-2">
               <i class="ti ti-rocket text-success"></i>{{ __('admin.Program') }}
