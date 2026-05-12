@@ -457,25 +457,29 @@ $(function () {
                 onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'avatar-initial rounded-circle bg-label-primary d-flex align-items-center justify-content-center fw-semibold',style:'width:38px;height:38px;font-size:13px',textContent:'${initials}'}))"/>`
             : `<span class="avatar-initial rounded-circle bg-label-primary d-flex align-items-center justify-content-center fw-semibold" style="width:38px;height:38px;font-size:13px;">${initials}</span>`;
           return `
-            <div class="d-flex align-items-center justify-content-between p-3 mb-2 rounded-3 border bg-light-subtle">
-              <div class="d-flex align-items-center gap-3 me-4">
-                <a href="${a.profile_url}" target="_blank" class="flex-shrink-0 text-decoration-none">${avatarEl}</a>
-                <div>
-                  <a href="${a.profile_url}" target="_blank" class="fw-semibold small text-body text-decoration-none d-flex align-items-center gap-1">
-                    ${a.name}<i class="ti ti-external-link ti-xs text-muted"></i>
-                  </a>
-                  <small class="text-muted"><i class="ti ti-clock ti-xs me-1"></i>{{ __('admin.last_updated') }}: ${moment(a.lastUpdated).format('YYYY-MM-DD')}</small>
+            <div class="p-3 mb-2 rounded-3 border bg-light-subtle">
+              <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
+                <div class="d-flex align-items-center gap-3">
+                  <a href="${a.profile_url}" target="_blank" class="flex-shrink-0 text-decoration-none">${avatarEl}</a>
+                  <div>
+                    <div class="d-flex align-items-center gap-1 flex-wrap mb-1">
+                      <a href="${a.profile_url}" target="_blank" class="fw-semibold small text-body text-decoration-none d-flex align-items-center gap-1">
+                        ${a.name}<i class="ti ti-external-link ti-xs text-muted"></i>
+                      </a>
+                      <span class="badge ${aStatus.class}">${aStatus.title}</span>
+                    </div>
+                    <small class="text-muted d-block"><i class="ti ti-clock ti-xs me-1"></i>{{ __('admin.last_updated') }}: ${moment(a.lastUpdated).format('YYYY-MM-DD')}</small>
+                  </div>
                 </div>
-              </div>
-              <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                <span class="badge ${aStatus.class}">${aStatus.title}</span>
                 @if ($_user->ableTo('tasks.show', $permissions))
-                  <button type="button"
-                    class="btn btn-sm btn-outline-primary task-review-btn"
-                    data-task-id="${data.id}"
-                    data-company-id="${a.id}">
-                    {{ __('admin.view_submission') }} <i class="ti ti-settings ti-xs ms-1"></i>
-                  </button>
+                  <div class="flex-shrink-0">
+                    <button type="button"
+                      class="btn btn-sm btn-outline-primary task-review-btn"
+                      data-task-id="${data.id}"
+                      data-company-id="${a.id}">
+                      {{ __('admin.view_submission') }} <i class="ti ti-settings ti-xs ms-1"></i>
+                    </button>
+                  </div>
                 @endif
               </div>
             </div>`;
