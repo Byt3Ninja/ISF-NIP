@@ -463,7 +463,7 @@ $(function () {
                   <a href="${a.profile_url}" target="_blank" class="flex-shrink-0 text-decoration-none">${avatarEl}</a>
                   <div>
                     <div class="d-flex align-items-center gap-1 flex-wrap mb-1">
-                      <a href="${a.profile_url}" target="_blank" class="fw-semibold small text-body text-decoration-none d-flex align-items-center gap-1">
+                      <a href="${a.profile_url}" target="_blank" class="fw-semibold small text-body text-decoration-none d-flex align-items-center gap-1 w-px-100">
                         ${a.name}<i class="ti ti-external-link ti-xs text-muted"></i>
                       </a>
                       <span class="badge ${aStatus.class}">${aStatus.title}</span>
@@ -472,14 +472,12 @@ $(function () {
                   </div>
                 </div>
                 @if ($_user->ableTo('tasks.show', $permissions))
-                  <div class="flex-shrink-0">
-                    <button type="button"
-                      class="btn btn-sm btn-outline-primary task-review-btn"
-                      data-task-id="${data.id}"
-                      data-company-id="${a.id}">
-                      {{ __('admin.view_submission') }} <i class="ti ti-settings ti-xs ms-1"></i>
-                    </button>
-                  </div>
+                  <button type="button"
+                    class="btn btn-sm btn-outline-primary task-review-btn"
+                    data-task-id="${data.id}"
+                    data-company-id="${a.id}">
+                    {{ __('admin.view_submission') }} <i class="ti ti-settings ti-xs ms-1"></i>
+                  </button>
                 @endif
               </div>
             </div>`;
