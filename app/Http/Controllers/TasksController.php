@@ -94,7 +94,7 @@ class TasksController extends Controller
                     'name' => $task->creator->name,
                     'role' => $task->creator->roles->first()->name ?? 'N/A',
                     'avatar' => $task->creator->image_url,
-                    'profile_url' => url('/dashboard/users/' . $task->creator->id),
+                    'profile_url' => url('/dashboard/show/UserProfile/' . $task->creator->id),
                 ] : null,
                 'feedbacks' => $task->feedbacks->map(function($fb) {
                     return [
@@ -404,7 +404,7 @@ class TasksController extends Controller
             'name'        => $task->creator->name,
             'role'        => $task->creator->roles->first()->name ?? 'N/A',
             'avatar'      => User::image_handler($task->creator->img_url),
-            'profile_url' => url('/dashboard/users/' . $task->creator->id),
+            'profile_url' => url('/dashboard/show/UserProfile/' . $task->creator->id),
         ] : null;
 
         $comments = $task->comments->map(fn($c) => [
