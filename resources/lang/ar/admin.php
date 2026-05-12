@@ -3753,6 +3753,7 @@ return [
 	'attachment_uploaded_success' => 'تم رفع المرفق بنجاح.',
 	'attachment_deleted_success' => 'تم حذف المرفق بنجاح.',
 	'no_attachments' => 'لا توجد مرفقات حتى الآن',
+	'no_attachments_available' => 'لا توجد مرفقات متاحة.',
 	'no_comments' => 'لا توجد تعليقات حتى الآن',
 	'max' => 'الحد الأقصى',
 	'Max_Each_5_Image_Pdf' => 'الحد الأقصى 5 ميجابايت لكل ملف (صور، ملف PDF)',

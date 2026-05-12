@@ -482,30 +482,32 @@ $(function () {
         }).join('')
       : `<p class="text-muted small fst-italic">{{ __('admin.no_assignees') }}</p>`;
 
-    const attachmentsHtml = data.attachments?.length
-      ? `<div class="mb-2">
-           <p class="text-uppercase small fw-bold text-muted mb-3 d-flex align-items-center gap-2">
-             <i class="ti ti-paperclip ti-md"></i>{{ __('admin.attachments') }}
-           </p>
-           <div class="d-flex flex-column gap-2">
-             ${data.attachments.map(file => {
-               const iconClass  = getAttachmentIcon(file.type);
-               const uploadDate = file.created_at ? moment(file.created_at).format('YYYY-MM-DD') : '';
-               return `
-                 <div class="d-flex align-items-center gap-2 border rounded p-2 bg-light-subtle">
-                   <i class="ti ${iconClass} ti-sm flex-shrink-0"></i>
-                   <span class="text-truncate flex-grow-1 small fw-medium" title="${file.name}">${file.name}</span>
-                   ${uploadDate ? `<small class="text-muted flex-shrink-0">${uploadDate}</small>` : ''}
-                   <a href="/storage/${file.path}" download="${file.name}"
-                      class="btn btn-icon btn-sm btn-text-secondary rounded-circle flex-shrink-0"
-                      title="{{ __('admin.Download') }}">
-                     <i class="ti ti-download ti-xs"></i>
-                   </a>
-                 </div>`;
-             }).join('')}
-           </div>
-         </div>`
-      : '';
+    const attachmentsHtml = `
+      <div class="mb-2">
+        <p class="text-uppercase small fw-bold text-muted mb-3 d-flex align-items-center gap-2">
+          <i class="ti ti-paperclip ti-md"></i>{{ __('admin.attachments') }}
+        </p>
+        ${data.attachments?.length
+          ? `<div class="d-flex flex-column gap-2">
+               ${data.attachments.map(file => {
+                 const iconClass  = getAttachmentIcon(file.type);
+                 const uploadDate = file.created_at ? moment(file.created_at).format('YYYY-MM-DD') : '';
+                 return `
+                   <div class="d-flex align-items-center gap-2 border rounded p-2 bg-light-subtle">
+                     <i class="ti ${iconClass} ti-sm flex-shrink-0"></i>
+                     <span class="text-truncate flex-grow-1 small fw-medium" title="${file.name}">${file.name}</span>
+                     ${uploadDate ? `<small class="text-muted flex-shrink-0">${uploadDate}</small>` : ''}
+                     <a href="/storage/${file.path}" download="${file.name}"
+                        class="btn btn-icon btn-sm btn-text-secondary rounded-circle flex-shrink-0"
+                        title="{{ __('admin.Download') }}">
+                       <i class="ti ti-download ti-xs"></i>
+                     </a>
+                   </div>`;
+               }).join('')}
+             </div>`
+          : `<p class="text-muted small fst-italic mb-0">{{ __('admin.no_attachments_available') }}</p>`
+        }
+      </div>`;
 
     const priorityInfo = priorityObj[data.priority]      || { class: 'bg-label-secondary', title: data.priority };
     const statusInfo   = statusObj[data.overallStatus]   || { class: 'bg-label-secondary', title: data.overallStatus };
