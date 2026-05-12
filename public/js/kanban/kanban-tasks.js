@@ -150,6 +150,40 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
       $('#vt-assignee-wrapper').addClass('d-none');
     }
 
+    // ── Reporter ────────────────────────────────────────────────────────────
+    const c = taskData.creator;
+    if (c) {
+      const roleLabel = cfg.roleMap[String(c.role || '').toLowerCase()] || c.role || '';
+      const avatarEl  = c.img_url
+        ? `<img src="${c.img_url}" alt="${c.name}" class="rounded-circle" style="width:28px;height:28px;object-fit:cover;" onerror="this.src='/images/placeholder.jpg'">`
+        : `<span class="avatar-initial rounded-circle bg-label-secondary d-flex align-items-center justify-content-center fw-semibold" style="width:28px;height:28px;font-size:11px;">${(c.name||'?').substring(0,2).toUpperCase()}</span>`;
+      $('#vt-reporter').html(`
+        <a href="${c.profile_url}" target="_blank" class="d-flex align-items-center gap-2 text-decoration-none text-body">
+          ${avatarEl}
+          <div class="text-start">
+            <div class="fw-semibold small">${c.name}</div>
+            ${roleLabel ? `<small class="text-muted text-uppercase" style="font-size:.65rem;">${roleLabel}</small>` : ''}
+          </div>
+          <i class="ti ti-external-link ti-xs text-muted"></i>
+        </a>`);
+    } else {
+      $('#vt-reporter').html('<span class="small text-muted fst-italic">—</span>');
+    }
+
+    // ── Created At ──────────────────────────────────────────────────────────
+    $('#vt-created-at').text(taskData.created_at ? moment(taskData.created_at).format('YYYY-MM-DD') : '—');
+
+    // ── Program ─────────────────────────────────────────────────────────────
+    const prog = taskData.program;
+    if (prog) {
+      $('#vt-program').html(`
+        <a href="${prog.url}" target="_blank" class="small fw-semibold text-body text-decoration-none d-flex align-items-center gap-1">
+          ${prog.title}<i class="ti ti-external-link ti-xs text-muted"></i>
+        </a>`);
+    } else {
+      $('#vt-program').html('<span class="small text-muted fst-italic">—</span>');
+    }
+
     renderAttachmentsList(taskData.attachments, taskId, '#vt-attachments-list');
     $('#vt-attachments-count').text(taskData.attachments.length ?? 0);
     renderActivitiesList(taskData.activities, '#vt-activities-list');

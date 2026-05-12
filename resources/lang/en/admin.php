@@ -264,6 +264,7 @@ return [
 	'Price in EGP' => 'Price in $',
 	'Search' => 'Search',
 	'Created_By' => 'Created By',
+	'Created_At' => 'Created At',
 	'Creator_Role' => 'Creator Role',
 	'Priority' => 'Priority',
 	'overall_status' => 'Overall Status',

@@ -90,6 +90,18 @@
       addFeedback:      '{{ route("tasks.add_feedback", ":id") }}',
     },
 
+    roleMap: {
+      admin:               @json(__('admin.Admin')),
+      'sub-admin':         @json(__('admin.Sub-Admin')),
+      subadmin:            @json(__('admin.Sub-Admin')),
+      mentor:              @json(__('admin.Mentor')),
+      manager:             @json(__('admin.Manager')),
+      organizationmanager: @json(__('admin.organizationManager')),
+      editor:              @json(__('admin.Editor')),
+      judger:              @json(__('admin.Judger')),
+      startup:             @json(__('admin.Startup')),
+    },
+
     labels: {
       // General
       processing:         @json(__('admin.processing')),
