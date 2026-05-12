@@ -550,7 +550,7 @@ $(function () {
             <span class="small text-muted d-flex align-items-center gap-2">
               <i class="ti ti-rocket text-success"></i>{{ __('admin.Program') }}
             </span>
-            <a href="/dashboard/cycles/${data.program.id}" target="_blank" class="small fw-semibold text-body text-decoration-none d-flex align-items-center gap-1">
+            <a href="/dashboard/programlist/${data.program.id}" target="_blank" class="small fw-semibold text-body text-decoration-none d-flex align-items-center gap-1">
               ${data.program.title}<i class="ti ti-external-link ti-xs text-muted"></i>
             </a>
           </div>
