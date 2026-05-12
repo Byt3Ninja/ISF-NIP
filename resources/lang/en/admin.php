@@ -3696,6 +3696,7 @@ return [
 	'attachment_uploaded_success' => 'Attachment uploaded successfully.',
 	'attachment_deleted_success' => 'Attachment deleted successfully.',
 	'no_attachments' => 'No Attachments yet',
+	'no_attachments_available' => 'No attachments available.',
   'no_activities' => 'No activities found',
 	'no_comments' => 'No Comments yet',
 	'max' => 'Max',
