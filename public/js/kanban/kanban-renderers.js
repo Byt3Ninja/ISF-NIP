@@ -57,23 +57,75 @@ function renderAttachmentsList(attachments, taskId, containerSelector, canDelete
 
 // ─── Activities ───────────────────────────────────────────────────────────────
 
+const ACTIVITY_META = {
+  created:  { icon: 'ti-plus',               color: 'success'   },
+  updated:  { icon: 'ti-pencil',             color: 'info'      },
+  moved:    { icon: 'ti-arrows-right-left',  color: 'warning'   },
+  comment:  { icon: 'ti-message-circle',     color: 'primary'   },
+  feedback: { icon: 'ti-star',               color: 'warning'   },
+  deleted:  { icon: 'ti-trash',              color: 'danger'    },
+};
+
+function getActivityMeta(action) {
+  if (!action) return { icon: 'ti-activity', color: 'secondary' };
+  const a = action.toLowerCase();
+  for (const [key, meta] of Object.entries(ACTIVITY_META)) {
+    if (a.startsWith(key) || a.includes(key)) return meta;
+  }
+  return { icon: 'ti-activity', color: 'secondary' };
+}
+
 function renderActivitiesList(activities, containerSelector) {
   const $c = $(containerSelector);
   if (!activities || !activities.length) {
-    $c.html(`<p class="text-muted text-center py-4 mb-0">${window.KanbanConfig.labels.noActivities}</p>`);
+    $c.html(`
+      <div class="text-center py-5">
+        <div class="avatar avatar-md mb-3 mx-auto">
+          <span class="avatar-initial rounded-circle bg-label-secondary">
+            <i class="ti ti-activity ti-md"></i>
+          </span>
+        </div>
+        <p class="text-muted mb-0 small">${window.KanbanConfig.labels.noActivities}</p>
+      </div>`);
     return;
   }
-  $c.html(activities.map(act => `
-    <div class="d-flex align-items-start gap-3 mb-3 pb-2 border-bottom">
-      <div class="flex-shrink-0 mt-1">${buildAvatar(act.user, act.img_url, act.user_id)}</div>
-      <div class="flex-grow-1">
-        <p class="mb-1"><span class="fw-semibold text-dark">${act.user}</span> ${act.action}</p>
-        <div class="d-flex align-items-center gap-2 flex-wrap">
-          ${act.created_at ? `<span class="text-muted" style="font-size:.75rem;"><i class="ti ti-calendar ti-xs me-1"></i>${act.created_at}</span>` : ''}
-          <span class="text-muted" style="font-size:.75rem;">(${act.time})</span>
+
+  const items = activities.map((act, i) => {
+    const isLast  = i === activities.length - 1;
+    const { icon, color } = getActivityMeta(act.action);
+    return `
+      <li class="timeline-item timeline-item-transparent${isLast ? ' pb-1' : ''}">
+        <span class="timeline-indicator timeline-indicator-${color}">
+          <i class="ti ${icon}" style="font-size:.85rem;"></i>
+        </span>
+        <div class="timeline-event pb-${isLast ? '0' : '3'}">
+          <div class="rounded-2 p-3 bg-light-subtle" style="border-left:3px solid var(--bs-${color});">
+
+            <div class="d-flex align-items-center justify-content-between gap-2 mb-2 flex-wrap">
+              <div class="d-flex align-items-center gap-2">
+                ${buildAvatar(act.user, act.img_url, act.user_id)}
+                <span class="fw-semibold small text-dark">${act.user}</span>
+              </div>
+              <span class="badge bg-label-${color}" style="font-size:.65rem;">
+                <i class="ti ti-clock ti-xs me-1"></i>${act.time}
+              </span>
+            </div>
+
+            <p class="mb-0 small text-body lh-sm">${act.action}</p>
+
+            ${act.created_at ? `
+            <div class="mt-2 pt-2 border-top">
+              <span class="text-muted" style="font-size:.68rem;">
+                <i class="ti ti-calendar ti-xs me-1"></i>${act.created_at}
+              </span>
+            </div>` : ''}
+
+          </div>
         </div>
-      </div>
-    </div>`).join(''));
+      </li>`;
+  }).join('');
+
+  $c.html(`<ul class="timeline pt-1 ps-1">${items}</ul>`);
 }
 
 // ─── Comments ─────────────────────────────────────────────────────────────────

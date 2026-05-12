@@ -7,6 +7,42 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
 @stop
 
+@section('style')
+<style>
+  /* Horizontal scroll for the table body */
+  .card-datatable .dataTables_scrollBody {
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+  }
+  .card-datatable .dataTables_scrollHead {
+    overflow: hidden;
+  }
+  /* Prevent the scroll wrapper from collapsing */
+  .card-datatable .dataTables_scroll {
+    width: 100%;
+  }
+
+  /* Responsive pagination */
+  .datatables-tasks-wrapper .dataTables_paginate .pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  /* Mobile: show only Prev / Next */
+  .datatables-tasks-wrapper .dataTables_paginate .paginate_button:not(.previous):not(.next) {
+    display: none;
+  }
+  @media (min-width: 992px) {
+    /* Large screens: restore all page-number buttons */
+    .datatables-tasks-wrapper .dataTables_paginate .paginate_button:not(.previous):not(.next) {
+      display: list-item;
+    }
+    .datatables-tasks-wrapper .dataTables_paginate .pagination {
+      justify-content: flex-end;
+    }
+  }
+</style>
+@stop
+
 @php
 $authUser = auth()->user();
 $permissions = [];
@@ -272,7 +308,7 @@ $(function () {
       }
     ],
     order: [[8, 'desc']],
-    dom: '<"row"<"col-12 col-lg-9 d-flex flex-wrap align-items-center ps-0 ps-lg-3"l><"col-12 col-lg-3 dt-action-buttons text-xl-end text-lg-start text-md-end text-start d-flex align-items-center justify-content-end flex-md-row flex-column mb-6 mb-md-0 pe-0 pe-lg-2"fB>>t<"row px-6"<"col-sm-12 col-lg-6"i><"col-sm-12 col-lg-6 d-flex justify-content-end"p>>',
+    dom: '<"row"<"col-12 col-lg-9 d-flex flex-wrap align-items-center ps-0 ps-lg-3"l><"col-12 col-lg-3 dt-action-buttons text-xl-end text-lg-start text-md-end text-start d-flex align-items-center justify-content-end flex-md-row flex-column mb-6 mb-md-0 pe-0 pe-lg-2"fB>>t<"datatables-tasks-wrapper row px-6 gy-3 mt-1"<"col-12 col-lg-6 d-flex align-items-center justify-content-center justify-content-lg-start"i><"col-12 col-lg-6"p>>',
     language: {
       url: document.dir === 'rtl'
         ? 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json'
@@ -463,7 +499,7 @@ $(function () {
                   <a href="${a.profile_url}" target="_blank" class="flex-shrink-0 text-decoration-none">${avatarEl}</a>
                   <div>
                     <div class="d-flex align-items-center gap-1 flex-wrap mb-1">
-                      <a href="${a.profile_url}" target="_blank" class="fw-semibold small text-body text-decoration-none d-flex align-items-center gap-1">
+                      <a href="${a.profile_url}" target="_blank" class="fw-semibold small text-body text-decoration-none d-flex align-items-center gap-1 w-px-100">
                         ${a.name}<i class="ti ti-external-link ti-xs text-muted"></i>
                       </a>
                       <span class="badge ${aStatus.class}">${aStatus.title}</span>
@@ -472,14 +508,12 @@ $(function () {
                   </div>
                 </div>
                 @if ($_user->ableTo('tasks.show', $permissions))
-                  <div class="flex-shrink-0">
-                    <button type="button"
-                      class="btn btn-sm btn-outline-primary task-review-btn"
-                      data-task-id="${data.id}"
-                      data-company-id="${a.id}">
-                      {{ __('admin.view_submission') }} <i class="ti ti-settings ti-xs ms-1"></i>
-                    </button>
-                  </div>
+                  <button type="button"
+                    class="btn btn-sm btn-outline-primary task-review-btn"
+                    data-task-id="${data.id}"
+                    data-company-id="${a.id}">
+                    {{ __('admin.view_submission') }} <i class="ti ti-settings ti-xs ms-1"></i>
+                  </button>
                 @endif
               </div>
             </div>`;
