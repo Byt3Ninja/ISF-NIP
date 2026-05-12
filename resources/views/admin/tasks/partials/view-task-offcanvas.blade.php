@@ -30,6 +30,7 @@
               data-bs-target="#vto-assignees" type="button" role="tab"
               aria-controls="vto-assignees" aria-selected="false">
         <i class="ti ti-users ti-xs me-1"></i>{{ __('admin.assignees') }}
+        <span id="vto-assignees-count" class="badge badge-center bg-label-secondary bg-glow rounded-pill ms-1"></span>
       </button>
     </li>
   </ul>
