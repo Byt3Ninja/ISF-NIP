@@ -8,7 +8,7 @@
 function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, etFv) {
   const cfg = window.KanbanConfig;
   const lbl = cfg.labels;
-
+  
   // ─── Inline Dropzone (Add / Edit) ──────────────────────────────────────────
 
   function makeInlineDz(dzId, inputId, queueId, errorId) {
@@ -184,7 +184,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
       $('#vt-program').html('<span class="small text-muted fst-italic">—</span>');
     }
 
-    renderAttachmentsList(taskData.attachments, taskId, '#vt-attachments-list');
+    renderAttachmentsList(taskData.attachments, taskId, '#vt-attachments-list', cfg.isAbleToDeleteAttachment);
     $('#vt-attachments-count').text(taskData.attachments.length ?? 0);
     renderActivitiesList(taskData.activities, '#vt-activities-list');
     renderCommentsList(taskData.comments, '#vt-comments-list');
@@ -301,7 +301,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
 
     if (taskData.attachments && taskData.attachments.length) {
       $('#et-current-attachments-wrapper').removeClass('d-none');
-      renderAttachmentsList(taskData.attachments, taskData.id, '#et-current-attachments-list');
+      renderAttachmentsList(taskData.attachments, taskData.id, '#et-current-attachments-list', cfg.isAbleToDeleteAttachment);
     } else {
       $('#et-current-attachments-wrapper').addClass('d-none');
     }
