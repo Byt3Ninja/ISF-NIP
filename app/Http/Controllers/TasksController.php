@@ -107,7 +107,7 @@ class TasksController extends Controller
                         'time'     => $fb->created_at->diffForHumans(),
                     ];
                 })->toArray(),
-                'activities' => $task->activities->map(function($act) {
+                'activities' => $task->activities->sortByDesc('created_at')->map(function($act) {
                     $action = match($act->action) {
                         'create' => 'created this task',
                         'update' => 'updated ' . $act->column . ($act->was && $act->new ? ' from "' . $act->was . '" to "' . $act->new . '"' : ''),
@@ -118,13 +118,14 @@ class TasksController extends Controller
                         default    => $act->action,
                     };
                     return [
-                        'user'    => $act->user->name ?? 'N/A',
-                        'user_id' => $act->user_id,
-                        'img_url' => $act->user ? User::image_handler($act->user->img_url) : null,
-                        'action'  => $action,
-                        'time'    => $act->created_at->diffForHumans(),
+                        'user'       => $act->user->name ?? 'N/A',
+                        'user_id'    => $act->user_id,
+                        'img_url'    => $act->user ? User::image_handler($act->user->img_url) : null,
+                        'action'     => $action,
+                        'time'       => $act->created_at->diffForHumans(),
+                        'created_at' => $act->created_at->format('Y-m-d H:i'),
                     ];
-                })->toArray(),
+                })->values()->toArray(),
                 'in_review_count'  => $task->assignees->filter(fn($a) => $a->pivot->status === 'review')->count(),
                 'activities_count' => $task->activities->count(),
                 'feedbacks_count'  => $task->feedbacks->count(),
@@ -424,7 +425,7 @@ class TasksController extends Controller
             'time'     => $fb->created_at->diffForHumans(),
         ]);
 
-        $activities = $task->activities->map(function ($act) {
+        $activities = $task->activities->sortByDesc('created_at')->map(function ($act) {
             $action = match($act->action) {
                 'create'   => 'created this task',
                 'update'   => 'updated ' . $act->column . ($act->was && $act->new ? ' from "' . $act->was . '" to "' . $act->new . '"' : ''),
@@ -435,13 +436,14 @@ class TasksController extends Controller
                 default    => $act->action,
             };
             return [
-                'user'    => $act->user->name ?? 'N/A',
-                'user_id' => $act->user_id,
-                'img_url' => $act->user ? User::image_handler($act->user->img_url) : null,
-                'action'  => $action,
-                'time'    => $act->created_at->diffForHumans(),
+                'user'       => $act->user->name ?? 'N/A',
+                'user_id'    => $act->user_id,
+                'img_url'    => $act->user ? User::image_handler($act->user->img_url) : null,
+                'action'     => $action,
+                'time'       => $act->created_at->diffForHumans(),
+                'created_at' => $act->created_at->format('Y-m-d H:i'),
             ];
-        });
+        })->values();
 
         return response()->json([
             'success' => true,

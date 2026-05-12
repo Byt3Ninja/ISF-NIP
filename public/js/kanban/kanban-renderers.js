@@ -66,9 +66,12 @@ function renderActivitiesList(activities, containerSelector) {
   $c.html(activities.map(act => `
     <div class="d-flex align-items-start gap-3 mb-3 pb-2 border-bottom">
       <div class="flex-shrink-0 mt-1">${buildAvatar(act.user, act.img_url, act.user_id)}</div>
-      <div>
+      <div class="flex-grow-1">
         <p class="mb-1"><span class="fw-semibold text-dark">${act.user}</span> ${act.action}</p>
-        <span class="text-muted" style="font-size:.75rem;">${act.time}</span>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          ${act.created_at ? `<span class="text-muted" style="font-size:.75rem;"><i class="ti ti-calendar ti-xs me-1"></i>${act.created_at}</span>` : ''}
+          <span class="text-muted" style="font-size:.75rem;">(${act.time})</span>
+        </div>
       </div>
     </div>`).join(''));
 }

@@ -136,7 +136,9 @@ class MentorshipTaskController extends Controller
 
 		$user = auth()->user();
 		$tasksQuery = ProgramTask::where('program_id', $cycleId)
-			->with(['creator.roles', 'assignees', 'feedbacks.user', 'activities.user', 'program']);
+			->with(['creator.roles', 'assignees', 'feedbacks.user', 'program',
+				'activities' => fn($q) => $q->with('user')->orderBy('created_at', 'desc'),
+			]);
 
 		if ($user->hasRole('registered')) {
 			$tasksQuery->whereHas('assignees', fn($q) => $q->where('companies.id', $user->company_id));
@@ -229,11 +231,12 @@ class MentorshipTaskController extends Controller
                         default    => $act->action,
                     };
 					return [
-                        'user'    => $act->user->name ?? 'N/A',
-                        'user_id' => $act->user_id,
-                        'img_url' => $act->user ? User::image_handler($act->user->img_url) : null,
-                        'action'  => $action,
-                        'time'    => $act->created_at->diffForHumans(),
+                        'user'       => $act->user->name ?? 'N/A',
+                        'user_id'    => $act->user_id,
+                        'img_url'    => $act->user ? User::image_handler($act->user->img_url) : null,
+                        'action'     => $action,
+                        'time'       => $act->created_at->diffForHumans(),
+                        'created_at' => $act->created_at->format('Y-m-d H:i'),
                     ];
                 })->toArray(),
 				'submissions'       => [],
