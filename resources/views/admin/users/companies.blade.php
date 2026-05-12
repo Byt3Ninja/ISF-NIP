@@ -454,7 +454,7 @@
           </div>
 
           <!-- Alumni Status Filter -->
-          <div class="form-group mb-4">
+          {{-- <div class="form-group mb-4">
             <label for="alumniFilter" class="form-label">{{ __('startup.alumni_status') }}</label>
             <select name="alumni" id="alumniFilter" class="form-select select2" data-value="all" data-placeholder="{{ __('admin.Select Status') }}">
               <option value="all">{{ __('startup.all_startups') }}</option>
@@ -465,7 +465,7 @@
                 {{ __('startup.non_alumni') }}
               </option>
             </select>
-          </div>
+          </div> --}}
         </div>
         
         <div class="modal-footer">
