@@ -3837,5 +3837,6 @@ return [
   	'in_review_count' => 'تحت المراجعة',
 	'Please_change_your_password_after_first_login' => 'يرجى تغيير كلمة المرور بعد تسجيل الدخول الاول.',
 	'You_dont_have_cycle' => 'ليس لديك دورة.',
-  'add_feedback_message' => 'يمكنك تقديم الملاحظات فقط عندما تكون حالة المهمة قيد المراجعة.'
+  'add_feedback_message' => 'يمكنك تقديم الملاحظات فقط عندما تكون حالة المهمة قيد المراجعة.',
+  'uploaded_attachments' => 'المرفقات المرفوعة',
 ];

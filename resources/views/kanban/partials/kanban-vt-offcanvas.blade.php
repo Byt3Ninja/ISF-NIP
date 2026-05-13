@@ -219,6 +219,33 @@
                   placeholder="{{ __('admin.feedback_note_placeholder') }}"></textarea>
               </div>
 
+              {{-- Upload attachments --}}
+              <div class="mb-3">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <label class="form-label small mb-0">{{ __('admin.attachments') }}</label>
+                  <span class="text-muted" style="font-size:.7rem;">{{ __('admin.max') }} 5 {{ __('admin.files') ?? 'files' }} · 10MB {{ __('admin.each') }}</span>
+                </div>
+                <div id="vt-fb-dropzone"
+                     class="border border-dashed rounded-2 p-3 text-center position-relative"
+                     style="cursor:pointer;transition:border-color .2s,background .2s;">
+                  <input type="file" id="vt-fb-dropzone-input"
+                    class="position-absolute top-0 start-0 w-100 h-100 opacity-0" style="cursor:pointer;"
+                    accept=".pdf,.png,.jpg,.jpeg,.svg,.zip,.rar,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                    multiple />
+                  <i class="ti ti-cloud-upload ti-md text-primary mb-1 d-block"></i>
+                  <p class="mb-1 small fw-medium">{{ __('admin.dropzone') }}</p>
+                  <p class="mb-0 text-muted" style="font-size:.7rem;">{{ __('admin.max_5_files') }}</p>
+                </div>
+                <div id="vt-fb-dropzone-queue" class="d-flex flex-column gap-2 mt-2"></div>
+                <div class="invalid-feedback d-block small" id="vt-fb-upload-error"></div>
+              </div>
+
+              {{-- Uploaded attachments list --}}
+              <div id="vt-fb-attachments-wrapper" class="mb-3" style="display:none;">
+                <label class="form-label small mb-2">{{ __('admin.uploaded_attachments') }}</label>
+                <div id="vt-fb-attachments-list" class="d-flex flex-column gap-2"></div>
+              </div>
+
               <button type="button" class="btn btn-primary btn-sm" id="vt-submit-feedback-btn">
                 <i class="ti ti-send ti-xs me-1"></i>{{ __('admin.submit_feedback') }}
               </button>
