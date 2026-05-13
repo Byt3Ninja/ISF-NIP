@@ -1447,13 +1447,19 @@ class MentorsController extends Controller
 			$_sesssion->id = $session->id;
 			$_sesssion->zoom_date = $session->zoom_date;
 			$_sesssion->period = $session->period;
-			$_sesssion->status = $session->zoom_date > now() ? 'Upcoming' : ($session->zoom_date->addMinutes($session->period) < now() ? 'Completed' : 'In-progress');
+			if ($session->zoom_date) {
+				$_sesssion->status = $session->zoom_date > now() ? 'Upcoming' : ($session->zoom_date->addMinutes($session->period) < now() ? 'Completed' : 'In-progress');
+				$_sesssion->start_time = date('Y-m-d H:i', strtotime($session->zoom_date . ' -30 minutes'));
+				$_sesssion->end_time   = date('Y-m-d H:i', strtotime($session->zoom_date . ' +' . $session->period . ' minutes'));
+			} else {
+				$_sesssion->status     = 'Upcoming';
+				$_sesssion->start_time = null;
+				$_sesssion->end_time   = null;
+			}
 			$_sesssion->session_type = $session->session_type;
 			$_sesssion->approved = $session->approved;
 			$_sesssion->start_url = $session->start_url;
 			$_sesssion->comment = $session->comment;
-			$_sesssion->start_time = date('Y-m-d H:i', strtotime($session->zoom_date . ' -30 minutes'));
-            $_sesssion->end_time = date('Y-m-d H:i', strtotime($session->zoom_date . ' +' . $session->period .' minutes'));
 			$_sesssion->location_address = $session->cycle->offline_location_address
 				?? optional($session->orgnization)->address
 				?? null;
