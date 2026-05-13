@@ -553,17 +553,20 @@ class TasksController extends Controller
                 }
             }
 
-            // Update assignees if provided — preserve existing statuses
+            // Update assignees if provided — always sync status to task status on edit
             if ($request->has('assignees')) {
-                $existingStatuses = $task->assignees()->pluck('status', 'company_id')->toArray();
                 $assigneeData = [];
                 foreach ($request->assignees as $companyId) {
                     $assigneeData[$companyId] = [
-                        'status' => $existingStatuses[$companyId] ?? $task->status,
+                        'status' => $task->status,
                         'last_updated' => now(),
                     ];
                 }
                 $task->assignees()->sync($assigneeData);
+            } else {
+                // No assignees in request — still update all existing assignees' status
+                ProgramTaskAssignee::where('program_task_id', $task->id)
+                    ->update(['status' => $task->status, 'last_updated' => now()]);
             }
 
             // Handle file attachments
