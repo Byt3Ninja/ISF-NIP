@@ -41,11 +41,13 @@ function formatFileSize(bytes) {
 function buildAvatar(name, imgUrl, userId) {
   const cfg  = window.KanbanConfig;
   const ri   = (name || 'U').substring(0, 2).toUpperCase();
-  const href = userId ? `${cfg.profileBaseUrl}/${userId}` : '#';
   const inner = imgUrl
     ? `<img src="${imgUrl}" alt="${name}" class="rounded-circle" style="width:32px;height:32px;object-fit:cover;">`
     : `<span class="avatar-initial bg-label-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:12px;">${ri}</span>`;
-  return `<a href="${href}" target="_blank" class="d-inline-flex" title="${name}">${inner}</a>`;
+  if (!userId) {
+    return `<span class="d-inline-flex" title="${name}">${inner}</span>`;
+  }
+  return `<a href="${cfg.profileBaseUrl}/${userId}" target="_blank" class="d-inline-flex" title="${name}">${inner}</a>`;
 }
 
 /**

@@ -193,7 +193,8 @@ function renderSubmissionsList(submissions, containerSelector) {
   };
 
   $c.html(submissions.map(sub => {
-    const statusBadge = STATUS_BADGE[sub.status] || '';
+    const hasUser = !!(sub.user || sub.user_id);
+    const statusBadge = hasUser ? (STATUS_BADGE[sub.status] || '') : '';
     const filesHtml = (sub.files || []).length
       ? sub.files.map(f => {
           const sz = f.size_bytes ? formatFileSize(f.size_bytes) : '';
@@ -208,15 +209,21 @@ function renderSubmissionsList(submissions, containerSelector) {
         }).join('')
       : `<span class="text-muted small">${lbl.noAttachments}</span>`;
 
+    const avatarHtml = hasUser
+      ? buildAvatar(sub.user, sub.img_url, sub.user_id)
+      : `<span class="d-inline-flex rounded-circle bg-label-secondary" style="width:32px;height:32px;"><span class="d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:12px;"><i class="ti ti-file-text ti-xs"></i></span></span>`;
+
     return `
       <div class="mb-4 pb-3 border-bottom">
+        ${hasUser ? `
         <div class="d-flex align-items-center gap-2 mb-2">
-          ${buildAvatar(sub.user, sub.img_url, sub.user_id)}
+          ${avatarHtml}
           <div>
             <span class="fw-semibold text-dark d-block">${sub.user || ''}${statusBadge}</span>
             <span class="text-muted" style="font-size:.7rem;">${sub.time || ''}</span>
           </div>
         </div>
+        ` : ''}
         ${sub.note ? `<p class="small text-muted mb-2">${sub.note}</p>` : ''}
         <div>${filesHtml}</div>
       </div>`;
