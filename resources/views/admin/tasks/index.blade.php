@@ -649,7 +649,10 @@ $(function () {
         if (!res.success) return toastr.error('{{ __("admin.unexpected_error") }}');
         const td   = res.data;
         const p    = window.KanbanConfig.priorityMap[td.priority] ?? window.KanbanConfig.priorityMap['Medium'];
-        const sObj = statusObj[td.status] ?? { class: 'bg-label-secondary', title: td.status };
+        const displayedStatus = companyId
+            ? (td.assignees?.find(a => String(a.id) === String(companyId))?.status ?? td.status)
+            : td.status;
+        const sObj = statusObj[displayedStatus] ?? { class: 'bg-label-secondary', title: displayedStatus };
 
         $('#vt-title').text(td.title);
         $('#vt-description').html(td.description || '{{ __('admin.no_description') }}');
