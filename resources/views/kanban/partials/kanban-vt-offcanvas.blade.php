@@ -179,46 +179,50 @@
       <div class="tab-pane fade p-4" id="vt-add-feedback" role="tabpanel">
         <div class="p-4">
           @if ($_user->ableTo('tasks.add_feedback', $permissions))
-          <div id="vt-feedback-form-wrapper">
-            <h6 class="fw-semibold mb-3 d-flex align-items-center gap-2">
-              <i class="ti ti-message-report ti-sm text-primary"></i>
-              {{ __('admin.add_feedback') }}
-            </h6>
+            <div id="vt-feedback-status-message" class="alert alert-warning d-flex align-items-center gap-2 mb-0" role="alert" style="display:none;">
+              <i class="ti ti-alert-triangle ti-xs flex-shrink-0"></i>
+              <span>{{ __('admin.add_feedback_message') }}</span>
+            </div>
+            <div id="vt-feedback-form-wrapper">
+              <h6 class="fw-semibold mb-3 d-flex align-items-center gap-2">
+                <i class="ti ti-message-report ti-sm text-primary"></i>
+                {{ __('admin.add_feedback') }}
+              </h6>
 
-            <div class="mb-3">
-              <label class="form-label small">{{ __('admin.feedback_decision') }} <span class="text-danger">*</span></label>
-              <div class="row g-3">
-                <div class="col-6">
-                  <div class="form-check custom-option custom-option-basic checked" id="vt-fb-pass-wrapper">
-                    <label class="form-check-label custom-option-content" for="vt-fb-pass">
-                      <input name="vt_feedback_decision" class="form-check-input" type="radio" value="pass" id="vt-fb-pass" checked>
-                      <span class="custom-option-header"><span class="h6 mb-0">{{ __('admin.pass_task') }}</span></span>
-                      <span class="custom-option-body"><small>{{ __('admin.mark_as_completed') }}</small></span>
-                    </label>
+              <div class="mb-3">
+                <label class="form-label small">{{ __('admin.feedback_decision') }} <span class="text-danger">*</span></label>
+                <div class="row g-3">
+                  <div class="col-6">
+                    <div class="form-check custom-option custom-option-basic checked" id="vt-fb-pass-wrapper">
+                      <label class="form-check-label custom-option-content" for="vt-fb-pass">
+                        <input name="vt_feedback_decision" class="form-check-input" type="radio" value="pass" id="vt-fb-pass" checked>
+                        <span class="custom-option-header"><span class="h6 mb-0">{{ __('admin.pass_task') }}</span></span>
+                        <span class="custom-option-body"><small>{{ __('admin.mark_as_completed') }}</small></span>
+                      </label>
+                    </div>
                   </div>
-                </div>
-                <div class="col-6">
-                  <div class="form-check custom-option custom-option-basic" id="vt-fb-revision-wrapper">
-                    <label class="form-check-label custom-option-content" for="vt-fb-revision">
-                      <input name="vt_feedback_decision" class="form-check-input" type="radio" value="revision" id="vt-fb-revision">
-                      <span class="custom-option-header"><span class="h6 mb-0">{{ __('admin.needs_revision') }}</span></span>
-                      <span class="custom-option-body"><small>{{ __('admin.request_changes') }}</small></span>
-                    </label>
+                  <div class="col-6">
+                    <div class="form-check custom-option custom-option-basic" id="vt-fb-revision-wrapper">
+                      <label class="form-check-label custom-option-content" for="vt-fb-revision">
+                        <input name="vt_feedback_decision" class="form-check-input" type="radio" value="revision" id="vt-fb-revision">
+                        <span class="custom-option-header"><span class="h6 mb-0">{{ __('admin.needs_revision') }}</span></span>
+                        <span class="custom-option-body"><small>{{ __('admin.request_changes') }}</small></span>
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div class="mb-3">
-              <label class="form-label small" for="vt-fb-note">{{ __('admin.feedback_note') }}</label>
-              <textarea id="vt-fb-note" class="form-control" rows="3"
-                placeholder="{{ __('admin.feedback_note_placeholder') }}"></textarea>
-            </div>
+              <div class="mb-3">
+                <label class="form-label small" for="vt-fb-note">{{ __('admin.feedback_note') }}</label>
+                <textarea id="vt-fb-note" class="form-control" rows="3"
+                  placeholder="{{ __('admin.feedback_note_placeholder') }}"></textarea>
+              </div>
 
-            <button type="button" class="btn btn-primary btn-sm" id="vt-submit-feedback-btn">
-              <i class="ti ti-send ti-xs me-1"></i>{{ __('admin.submit_feedback') }}
-            </button>
-          </div>
+              <button type="button" class="btn btn-primary btn-sm" id="vt-submit-feedback-btn">
+                <i class="ti ti-send ti-xs me-1"></i>{{ __('admin.submit_feedback') }}
+              </button>
+            </div>
           @endif
         </div>
       </div>
