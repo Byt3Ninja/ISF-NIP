@@ -608,7 +608,6 @@ $(document).ready(function() {
     });
 
     $('#bookingModal').modal('hide');
-    resetForm();
 
     this.submit();
   });

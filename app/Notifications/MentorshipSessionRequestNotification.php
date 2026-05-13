@@ -42,6 +42,8 @@ class MentorshipSessionRequestNotification extends Notification implements Shoul
      */
     public function via(object $notifiable): array
     {
+        $this->locale($notifiable->language ?: 'en');
+
         $channels = [];
         // Always store in database
         $channels[] = 'database';
@@ -76,9 +78,8 @@ class MentorshipSessionRequestNotification extends Notification implements Shoul
 
         $from = $this->getFromAddress($smtpSettings);
         $orgData = $this->buildEmailOrganizationData($org);
-        
+
         $this->configureSmtp($smtpSettings);
-        $magicLoginUrl = $notifiable->generateMagicLoginUrl();
 
         return (new MailMessage)
             ->from(config('mail.from.address'), config('mail.from.name'))
@@ -125,7 +126,7 @@ class MentorshipSessionRequestNotification extends Notification implements Shoul
      */
     public function toDatabase(object $notifiable): array
     {
-       return [
+        return [
             'message' => __('notifications.mentorship_request.database', [
                 'startup_name' => $this->startupName,
                 'mentor_name' => $this->requestedMentor,
