@@ -56,6 +56,7 @@
                     href="javascript:void(0)"
                   @endif
                 >
+                
                   <img 
                     class="rounded-circle me-2 border bg-label-light flex-shrink-0"
                     src="{{ $session->user->image_url }}"
