@@ -1437,7 +1437,7 @@ class MentorsController extends Controller
 
 		$mentorshipRequests = MentorshipRequest::when($user->hasRole('mentor'), function($query) use ($user) {
 			$query->where('mentor_id', $user->id);
-		})->with(['mentor', 'user', 'user.company'])->orderBy('created_at', 'DESC')->get();
+		})->with(['mentor', 'user', 'user.company', 'cycle', 'orgnization'])->orderBy('created_at', 'DESC')->get();
 		$surveys = SurveyResponses::where('user_id', $user->id)->where('triggered_on', 'mentorship')->get();
 			
 		$now = date('Y-m-d H:i');
@@ -1449,12 +1449,17 @@ class MentorsController extends Controller
 			$_sesssion->period = $session->period;
 			$_sesssion->status = $session->zoom_date > now() ? 'Upcoming' : ($session->zoom_date->addMinutes($session->period) < now() ? 'Completed' : 'In-progress');
 			$_sesssion->session_type = $session->session_type;
-			$_sesssion->location = $session->session_type === 'Offline' ? $session->location : null;
+			$_sesssion->approved = $session->approved;
 			$_sesssion->start_url = $session->start_url;
-			$_sesssion->passcode = $session->zoom_passcode;
 			$_sesssion->comment = $session->comment;
-			$_sesssion->start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
-            $_sesssion->end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+' . $session->period .' minutes'));
+			$_sesssion->start_time = date('Y-m-d H:i', strtotime($session->zoom_date . ' -30 minutes'));
+            $_sesssion->end_time = date('Y-m-d H:i', strtotime($session->zoom_date . ' +' . $session->period .' minutes'));
+			$_sesssion->location_address = $session->cycle->offline_location_address
+				?? optional($session->orgnization)->address
+				?? null;
+			$_sesssion->google_map_url = $session->cycle->offline_location_map
+				?? optional($session->orgnization)->google_map_url
+				?? null;
 
 			$_sesssion->mentor = new stdClass;
 			$_sesssion->mentor->id = $session->mentor->id;
