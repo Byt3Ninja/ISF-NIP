@@ -1099,7 +1099,12 @@ class TasksController extends Controller
             }
 
 
-            if($task->status !== 'review') {
+            $companyIdForCheck = $request->input('company_id');
+            $assigneeStatus = ProgramTaskAssignee::where('program_task_id', $task->id)
+                ->when($companyIdForCheck, fn($q) => $q->where('company_id', $companyIdForCheck))
+                ->value('status');
+
+            if ($assigneeStatus !== 'review') {
                 return response()->json([
                     'success' => false,
                     'message' => app()->getLocale() == 'ar'
@@ -1128,12 +1133,12 @@ class TasksController extends Controller
                 'decision' => $request->input('decision'),
                 'note'     => $request->input('note'),
             ]);
-
             $uploadedAttachments = [];
             if ($request->hasFile('attachments')) {
                 $existingAttachments = $task->attachments ?? [];
                 $files = $request->file('attachments');
-                if (count($files) + count($existingAttachments) > 5) {
+                
+                if (count($files) > 5) {
                     return response()->json([
                         'success' => false,
                         'message' => app()->getLocale() == 'ar'

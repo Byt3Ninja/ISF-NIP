@@ -530,10 +530,13 @@ $(function () {
                ${data.attachments.map(file => {
                  const iconClass  = getAttachmentIcon(file.type);
                  const uploadDate = file.created_at ? moment(file.created_at).format('YYYY-MM-DD') : '';
+                 const attStatusMap = { feedback: ['warning','Feedback'], submission: ['info','Submission'], attachment: ['secondary','Attachment'] };
+                 const [attColor, attLabel] = attStatusMap[file.status] || attStatusMap['attachment'];
                  return `
                    <div class="d-flex align-items-center gap-2 border rounded p-2 bg-light-subtle">
                      <i class="ti ${iconClass} ti-sm flex-shrink-0"></i>
                      <span class="text-truncate flex-grow-1 small fw-medium" title="${file.name}">${file.name}</span>
+                     <span class="badge bg-label-${attColor}" style="font-size:.65rem;">${attLabel}</span>
                      ${uploadDate ? `<small class="text-muted flex-shrink-0">${uploadDate}</small>` : ''}
                      <a href="/storage/${file.path}" download="${file.name}"
                         class="btn btn-icon btn-sm btn-text-secondary rounded-circle flex-shrink-0"
