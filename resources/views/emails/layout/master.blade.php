@@ -102,7 +102,7 @@
                                                                     <td class="divider_inner" style="font-size: 1px; line-height: 1px; border-top: 0px solid #BBBBBB;"><span> </span></td>
                                                                 </tr>
                                                             </table>
-                                                        </div>+
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             </table>

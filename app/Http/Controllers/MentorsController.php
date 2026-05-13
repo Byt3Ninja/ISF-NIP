@@ -368,7 +368,7 @@ class MentorsController extends Controller
 		$user = auth()->user();
 		$getMentor = User::find($request->mentorid);
 		$requestedMentor = $getMentor->name;
-		$requestNotes = $request->has('notes') ? ( trim( $request->notes ) != '' ? $request->notes : null ) : null;
+		$requestNotes = $request->transform('notes', fn($value) => trim($value));
 		$requestDate = $request->date;
 		$requestTimeFrom = $request->timeFrom;
 		$requestTimeTo = $request->timeTo;
