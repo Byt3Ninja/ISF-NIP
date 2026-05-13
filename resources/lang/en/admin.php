@@ -1621,6 +1621,10 @@ return [
 	'Program Details' => 'Program Details',
 	'Upcoming Sessions' => 'Upcoming Sessions',
 	'Join Meeting' => 'Join Meeting',
+	'join_session' => 'Join Session',
+	'pending_approval' => 'Pending Approval',
+	'map_link' => 'Map Link',
+	'no_mentorship_sessions' => 'No mentorship sessions found.',
 	'Financial Policy' => 'Financial Policy',
 	'Program Guideline' => 'Program Guideline',
 	'Hour' => 'Hour',
@@ -3776,5 +3780,6 @@ return [
   	'due' => 'Due',
   	'in_review_count' => 'In Review Count',
 	'Please_change_your_password_after_first_login' => 'Please change your password after your first login.',
-	'You_dont_have_cycle' => 'You don\'t have any cycle.'
+	'You_dont_have_cycle' => 'You don\'t have any cycle.',
+  'add_feedback_message' => 'You can provide feedback only when the task status is In Review.'
 ];

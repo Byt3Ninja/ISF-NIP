@@ -724,6 +724,10 @@ $(function () {
         $('#vt-submissions-count').text(td.submissions?.length ?? 0);
         $('#vt-activity-count').text(td.activities?.length ?? 0);
 
+        const isInReview = displayedStatus === 'review';
+        $('#vt-feedback-form-wrapper').toggle(isInReview);
+        $('#vt-feedback-status-message').toggle(!isInReview);
+
         $('#vt-upload-btn-task-id').val(td.id);
         $('#vt-send-comment-btn').data('task-id', td.id);
         $('#vt-edit-trigger-btn').data('task-id', td.id);
