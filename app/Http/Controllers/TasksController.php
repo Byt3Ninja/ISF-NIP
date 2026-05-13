@@ -1109,8 +1109,10 @@ class TasksController extends Controller
             }
 
             $validator = Validator::make($request->all(), [
-                'decision' => 'required|in:pass,revision',
-                'note'     => 'required|string',
+                'decision'    => 'required|in:pass,revision',
+                'note'        => 'required|string',
+                'attachments' => 'nullable|array',
+                'attachments.*' => 'file|max:10240|mimes:jpeg,jpg,png,svg,pdf,zip,rar,doc,docx,xls,xlsx,ppt,pptx',
             ]);
 
             if ($validator->fails()) {
@@ -1126,6 +1128,34 @@ class TasksController extends Controller
                 'decision' => $request->input('decision'),
                 'note'     => $request->input('note'),
             ]);
+
+            $uploadedAttachments = [];
+            if ($request->hasFile('attachments')) {
+                $existingAttachments = $task->attachments ?? [];
+                $files = $request->file('attachments');
+                if (count($files) + count($existingAttachments) > 5) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => app()->getLocale() == 'ar'
+                            ? 'الحد الأقصى للمرفقات هو 5 ملفات.'
+                            : 'Maximum 5 attachments allowed.',
+                    ], 422);
+                }
+                foreach ($files as $file) {
+                    $path = $file->store('tasks/attachments', 'public');
+                    $newAtt = [
+                        'name'       => $file->getClientOriginalName(),
+                        'path'       => $path,
+                        'size'       => $file->getSize(),
+                        'type'       => $file->getMimeType(),
+                        'status'     => 'feedback',
+                        'created_at' => now()->toDateTimeString(),
+                    ];
+                    $existingAttachments[] = $newAtt;
+                    $uploadedAttachments[] = $newAtt;
+                }
+                $task->update(['attachments' => $existingAttachments]);
+            }
 
             $task->status = $request->input('decision') === 'pass' ? 'completed' : 'pending';
             $task->save();
@@ -1176,9 +1206,9 @@ class TasksController extends Controller
             }
 
             return response()->json([
-                'success'  => true,
-                'message'  => __('admin.feedback_added_success'),
-                'feedback' => [
+                'success'     => true,
+                'message'     => __('admin.feedback_added_success'),
+                'feedback'    => [
                     'id'       => $feedback->id,
                     'user'     => $user->name,
                     'user_id'  => $user->id,
@@ -1187,6 +1217,7 @@ class TasksController extends Controller
                     'text'     => $feedback->note,
                     'time'     => $feedback->created_at->diffForHumans(),
                 ],
+                'attachments' => $uploadedAttachments,
             ]);
 
         } catch (\Exception $e) {

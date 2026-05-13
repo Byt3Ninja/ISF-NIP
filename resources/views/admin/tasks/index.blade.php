@@ -728,6 +728,9 @@ $(function () {
         $('#vt-feedback-form-wrapper').toggle(isInReview);
         $('#vt-feedback-status-message').toggle(!isInReview);
 
+        const fbAttachments = (td.attachments || []).filter(a => a.status === 'feedback');
+        renderVtFeedbackAttachments(fbAttachments);
+
         $('#vt-upload-btn-task-id').val(td.id);
         $('#vt-send-comment-btn').data('task-id', td.id);
         $('#vt-edit-trigger-btn').data('task-id', td.id);
@@ -861,16 +864,98 @@ $(function () {
     });
   });
 
+  // ─── Feedback Attachments Queue ──────────────────────────────────────────
+  let vtFeedbackFiles = [];
+
+  const resetVtFeedbackQueue = () => {
+    vtFeedbackFiles = [];
+    $('#vt-fb-dropzone-queue').empty();
+    $('#vt-fb-upload-error').hide().text('');
+  };
+
+  const renderVtFeedbackQueue = () => {
+    const $queue = $('#vt-fb-dropzone-queue').empty();
+    vtFeedbackFiles.forEach((file, i) => {
+      const size = (file.size / 1024).toFixed(1);
+      $queue.append(`
+        <div class="d-flex align-items-center gap-2 border rounded-2 px-3 py-2 bg-light-subtle">
+          <i class="ti ti-file-text ti-sm text-secondary flex-shrink-0"></i>
+          <span class="small flex-grow-1 text-truncate">${file.name}</span>
+          <small class="text-muted flex-shrink-0">${size} KB</small>
+          <button type="button" class="btn btn-icon btn-sm btn-text-danger rounded-circle flex-shrink-0 vt-fb-remove-file" data-index="${i}">
+            <i class="ti ti-x ti-xs"></i>
+          </button>
+        </div>`);
+    });
+  };
+
+  // Remove file from queue
+  $(document).on('click', '.vt-fb-remove-file', function () {
+    const idx = $(this).data('index');
+    vtFeedbackFiles.splice(idx, 1);
+    renderVtFeedbackQueue();
+  });
+
+  // Feedback dropzone change
+  $(document).on('change', '#vt-fb-dropzone-input', function () {
+    const allowedTypes = ['pdf','png','jpg','jpeg','svg','zip','rar','doc','docx','xls','xlsx','ppt','pptx'];
+    const maxSize      = 10 * 1024 * 1024;
+    const files        = Array.from(this.files);
+    const errors       = [];
+
+    const remaining = 5 - vtFeedbackFiles.length;
+    if (files.length > remaining) {
+      errors.push(`{{ __("admin.max") }} 5 files allowed. You can add ${remaining} more.`);
+    }
+
+    const validFiles = files.slice(0, remaining).filter(file => {
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (!allowedTypes.includes(ext)) {
+        errors.push(`{{ __("admin.unsupported_file_type") }} (${file.name})`);
+        return false;
+      }
+      if (file.size > maxSize) {
+        errors.push(`{{ __("admin.file_exceeds_10_limit") }} (${file.name})`);
+        return false;
+      }
+      return true;
+    });
+
+    if (errors.length) {
+      $('#vt-fb-upload-error').html(errors.join('<br>')).show();
+    } else {
+      $('#vt-fb-upload-error').hide();
+    }
+
+    validFiles.forEach(f => vtFeedbackFiles.push(f));
+    renderVtFeedbackQueue();
+    $(this).val('');
+  });
+
   // ─── Submit Feedback (kanban-vt-offcanvas) ────────────────────────────────
   $(document).on('click', '#vt-submit-feedback-btn', function () {
     const taskId    = $('#vt-upload-btn-task-id').val();
     const companyId = $('#vt-fb-company-id').val();
     const decision  = $('input[name="vt_feedback_decision"]:checked').val();
     const note      = $('#vt-fb-note').val().trim();
+
+    if (!note) {
+      toastr.error('{{ __("admin.feedback_note_required") ?? "Feedback note is required." }}');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('decision', decision);
+    formData.append('note', note);
+    formData.append('company_id', companyId ?? '');
+    vtFeedbackFiles.forEach(f => formData.append('attachments[]', f));
+
     $.ajax({
       url: `/dashboard/tasks/${taskId}/add-feedback`,
       method: 'POST',
-      data: { decision, note, company_id: companyId },
+      data: formData,
+      processData: false,
+      contentType: false,
       headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
       success: function (res) {
         toastr.success(res.message || '{{ __("admin.feedback_added_success") }}');
@@ -900,15 +985,67 @@ $(function () {
 
         $('#vt-feedback-count').text(parseInt($('#vt-feedback-count').text() || '0') + 1);
 
+        // Show uploaded attachments list
+        if (res.attachments?.length) {
+          renderVtFeedbackAttachments(res.attachments);
+        }
+
         // Reset form
         $('#vt-fb-note').val('');
         $('#vt-fb-pass').prop('checked', true);
         $('#vt-fb-pass-wrapper').addClass('checked');
         $('#vt-fb-revision-wrapper').removeClass('checked');
+        resetVtFeedbackQueue();
 
         // Switch to Feedback History tab
         const $historyTab = $('#viewTaskOffcanvas .nav-tabs .nav-link[data-bs-target="#vt-feedback-history"]');
         if ($historyTab.length) bootstrap.Tab.getOrCreateInstance($historyTab[0]).show();
+      },
+      error: (xhr) => toastr.error(xhr.responseJSON?.message || '{{ __("admin.unexpected_error") }}')
+    });
+  });
+
+  // ─── Render Feedback Attachments List ─────────────────────────────────────
+  const renderVtFeedbackAttachments = (attachments) => {
+    const $wrapper = $('#vt-fb-attachments-wrapper');
+    const $list    = $('#vt-fb-attachments-list').empty();
+    if (!attachments?.length) { $wrapper.hide(); return; }
+
+    attachments.forEach((att, i) => {
+      const uploadDate = att.created_at
+        ? moment(att.created_at).format('YYYY-MM-DD hh:mm A')
+        : moment().format('YYYY-MM-DD hh:mm A');
+      const iconClass  = getAttachmentIcon(att.type);
+      $list.append(`
+        <div class="d-flex align-items-center gap-2 border rounded-2 px-3 py-2 bg-light-subtle" data-fb-att-index="${i}">
+          <i class="ti ${iconClass} ti-sm flex-shrink-0"></i>
+          <span class="small flex-grow-1 text-truncate" title="${att.name}">${att.name}</span>
+          <small class="text-muted flex-shrink-0">${uploadDate}</small>
+          <a href="javascript:;" class="btn btn-icon btn-sm btn-text-danger rounded-circle flex-shrink-0 vt-fb-remove-attachment"
+             data-filename="${att.name}">
+            <i class="ti ti-trash ti-xs"></i>
+          </a>
+        </div>`);
+    });
+    $wrapper.show();
+  };
+
+  // ─── Remove Feedback Attachment ─────────────────────────────────────────
+  $(document).on('click', '.vt-fb-remove-attachment', function () {
+    const taskId   = $('#vt-upload-btn-task-id').val();
+    const filename = $(this).data('filename');
+    const $item    = $(this).closest('[data-fb-att-index]');
+
+    $.ajax({
+      url: `/dashboard/tasks/${taskId}/attachments/${encodeURIComponent(filename)}`,
+      method: 'DELETE',
+      headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+      success: function () {
+        $item.remove();
+        if (!$('#vt-fb-attachments-list').children().length) {
+          $('#vt-fb-attachments-wrapper').hide();
+        }
+        toastr.success('{{ __("admin.attachment_removed") }}');
       },
       error: (xhr) => toastr.error(xhr.responseJSON?.message || '{{ __("admin.unexpected_error") }}')
     });
