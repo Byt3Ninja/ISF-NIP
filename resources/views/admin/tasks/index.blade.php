@@ -49,8 +49,8 @@ $permissions = [];
 $offcanvasTabs = [
   ['target' => '#vt-details', 'icon' => 'ti-info-circle', 'label' => __('admin.Details'), 'active' => true, 'show' => true],
   ['target' => '#vt-submissions', 'icon' => 'ti-paperclip', 'label' => __('admin.Submissions'), 'badge' => ['id' => 'vt-submissions-count', 'class' => 'bg-label-warning'], 'active' => false, 'show' => $authUser->hasAnyRole(['admin', 'sub-admin', 'organizationManager', 'mentor'])],
-  ['target' => '#vt-feedback-history', 'icon' => 'ti-history', 'label' => __('admin.feedback_history'), 'badge' => ['id' => 'vt-feedback-count', 'class' => 'bg-label-primary'], 'active' => false, 'show' => true],
   ['target' => '#vt-add-feedback', 'icon' => 'ti-message-report', 'label' => __('admin.add_feedback'), 'active' => false, 'show' => $authUser->ableTo('tasks.add_feedback', $permissions)],
+  ['target' => '#vt-feedback-history', 'icon' => 'ti-history', 'label' => __('admin.feedback_history'), 'badge' => ['id' => 'vt-feedback-count', 'class' => 'bg-label-primary'], 'active' => false, 'show' => true],
   ['target' => '#vt-comments', 'icon' => 'ti-message', 'label' => __('admin.Comments'), 'badge' => ['id' => 'vt-comment-count', 'class' => 'bg-label-danger bg-glow'], 'active' => false, 'show' => !auth()->user()->ableTo('tasks.show', $permissions),],
   ['target' => '#vt-activity', 'icon' => 'ti-activity', 'label' => __('admin.Activities'), 'badge' => ['id' => 'vt-activity-count', 'class' => 'bg-label-info bg-glow'], 'active' => false, 'show' => true],
 ];

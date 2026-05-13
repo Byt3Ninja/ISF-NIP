@@ -175,14 +175,6 @@
         </div>
       </div>
 
-      {{-- FEEDBACK HISTORY TAB --}}
-      <div class="tab-pane fade p-4" id="vt-feedback-history" role="tabpanel">
-        <div class="p-4">
-          <div id="vt-feedback-list">
-            <p class="text-muted text-center py-4 mb-0">{{ __('admin.no_feedback') }}</p>
-          </div>
-        </div>
-      </div>
       {{-- ADD FEEDBACK TAB --}}
       <div class="tab-pane fade p-4" id="vt-add-feedback" role="tabpanel">
         <div class="p-4">
@@ -228,6 +220,15 @@
             </button>
           </div>
           @endif
+        </div>
+      </div>
+
+      {{-- FEEDBACK HISTORY TAB --}}
+      <div class="tab-pane fade p-4" id="vt-feedback-history" role="tabpanel">
+        <div class="p-4">
+          <div id="vt-feedback-list">
+            <p class="text-muted text-center py-4 mb-0">{{ __('admin.no_feedback') }}</p>
+          </div>
         </div>
       </div>
 
