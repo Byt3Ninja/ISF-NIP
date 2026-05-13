@@ -28,6 +28,7 @@ return [
     'mentorship_request' => [
         'whatsapp'  => 'You have a new mentorship request from :startup.',
         'broadcast' => 'New mentorship request received from :startup.',
+        'database' => ':startup_name has requested a new mentorship session with :mentor_name on :session_date from :start_time – :end_time . Please approve or reject this request.',
     ],
 
     'change_cycle' => [

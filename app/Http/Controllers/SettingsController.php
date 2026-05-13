@@ -504,7 +504,7 @@ class SettingsController extends Controller
 	{
 		$id = $request->input('id');
 		$updateSetting = Settings::where('id', $id)->first();
-		$updateSetting->host = $request->input('email_provider', 'smtp');
+		$updateSetting->host = $request->input('host', 'smtp');
 		$updateSetting->Mail = $request->input('Mail');
 		$updateSetting->Mailpassword = $request->input('Mailpassword');
 		$updateSetting->Port = $request->input('Port');
