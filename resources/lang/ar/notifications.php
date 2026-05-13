@@ -28,6 +28,7 @@ return [
     'mentorship_request' => [
         'whatsapp'  => 'لديك طلب إرشاد جديد من :startup.',
         'broadcast' => 'تم استلام طلب إرشاد جديد من :startup.',
+        'database' => 'طلب :startup_name جلسة إرشاد جديدة مع :mentor_name بتاريخ :session_date من :start_time إلى :end_time. يرجى الموافقة على هذا الطلب أو رفضه.'
     ],
 
     'change_cycle' => [

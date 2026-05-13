@@ -29,6 +29,7 @@ use App\Events\MentorshipSessionUpdated;
 use App\Jobs\SendMentorshipNotification;
 use App\Notifications\MentorshipSession;
 use App\Notifications\MentorshipRequestNotification;
+use App\Notifications\MentorshipSessionRequestNotification;
 
 class MentorsController extends Controller
 {
@@ -359,13 +360,36 @@ class MentorsController extends Controller
 	public function addWait(Request $request)
 	{
 		$settings = Settings::where('id', 1)->first();
-
-		
+		$cycle = Cycle::find($request->cycle_id);
 		
 		$request->validate([
 			'notes' => 'nullable|string|max:255',
 		]);
 		$user = auth()->user();
+		$getMentor = User::find($request->mentorid);
+		$requestedMentor = $getMentor->name;
+		$requestNotes = $request->has('notes') ? ( trim( $request->notes ) != '' ? $request->notes : null ) : null;
+		$requestDate = $request->date;
+		$requestTimeFrom = $request->timeFrom;
+		$requestTimeTo = $request->timeTo;
+		$diffInMinutes = Carbon::parse($requestDate . ' ' . $requestTimeFrom)->diffInMinutes(Carbon::parse($requestDate . ' ' . $requestTimeTo));
+		$request_date = Carbon::parse( $requestDate )->translatedFormat('Y-m-d');
+		$request_start_time = Carbon::parse($requestTimeFrom)->translatedFormat('H:i');
+		$request_end_time = Carbon::parse($requestTimeTo)->translatedFormat('H:i');
+		$requestDateTime = __('email.mentorship_request_email.date_time_formatted', [
+			'date' => $request_date,
+			'start_time' => $request_start_time,
+			'end_time' => $request_end_time,
+			'duration' => $diffInMinutes,
+		]);
+
+		$dateTimePayload = [
+			'date' => $request_date,
+			'start_time' => $request_start_time,
+			'end_time' => $request_end_time,
+			'message' => $requestDateTime,
+		];
+
 		if($user->hasAnyRole(['admin', 'organizationManager', 'subadmin'])){
 			
 			if ($request->has('selected_dates')) {
@@ -426,7 +450,6 @@ class MentorsController extends Controller
 					$fileName = $request->file('file_url')->store($request->user_id, ['disk' => 'PrivateDisk']);
 				}
 
-				$cycle = Cycle::find($request->cycle_id);
 				
 				$autoApprove = $cycle->auto_approve_mentorship_requests;
 				$approved = 'Yes';
@@ -479,8 +502,13 @@ class MentorsController extends Controller
 			}
 
 		}else{
-			// dd($request->all());
-			
+			$startupName = $user?->company?->name ?: $user->name;
+			$parties = $cycle->organization->assignedUsers;
+			$platform_admins = User::role('admin')->get()->filter(function ($admin) {
+				return $admin->hasRole('admin');
+			})->values();
+			$parties = $parties->merge($platform_admins)->unique('id');
+
 				$this->meetingService = OnlineMeetingFactory::create();
 				$datefrom = $request->date . ' ' . $request->session_start_time;
 				$dateto = $request->date . ' ' . $request->session_end_time;
@@ -580,8 +608,12 @@ class MentorsController extends Controller
 						]);
 					}
 					if (!in_array(env('APP_ENV', 'local'), ['local'])) {
-						SendMentorshipRequestJob::dispatch($request->mentorid, $request->date, $request->period, auth()->id(), null, null, 'addwait');
+						// SendMentorshipRequestJob::dispatch($request->mentorid, $request->date, $request->period, auth()->id(), null, null, 'addwait');
 						// 
+						foreach( $parties as $party )
+						{
+							$party->notify( new MentorshipSessionRequestNotification( $startupName, $requestedMentor, $dateTimePayload, $requestNotes ) );
+						}
 					}
 
 					return back()->with(['msg' => 'Request_successfully_added_Startup', 'class' => 'success']);
