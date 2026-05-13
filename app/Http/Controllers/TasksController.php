@@ -987,8 +987,8 @@ class TasksController extends Controller
             }
 
             $oldStatus = $task->status;
-            $task->status = $status;
-            $task->save();
+            //$task->status = $status;
+            //$task->save();
 
             ProgramTaskAssignee::where('program_task_id', $task->id)
                 ->where('company_id', $user->company_id)
