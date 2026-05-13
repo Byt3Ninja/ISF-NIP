@@ -1,4 +1,5 @@
-<html lang="en" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:v="urn:schemas-microsoft-com:vml">
+@php $__emailLocale = app()->getLocale(); $__emailDir = $__emailLocale === 'ar' ? 'rtl' : 'ltr'; $__emailAlign = $__emailLocale === 'ar' ? 'right' : 'left'; @endphp
+<html lang="{{ $__emailLocale }}" dir="{{ $__emailDir }}" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:v="urn:schemas-microsoft-com:vml">
 <head>
     <title></title>
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
