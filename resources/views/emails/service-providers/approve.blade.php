@@ -382,7 +382,7 @@
 															style="padding-bottom:30px;padding-left:40px;padding-right:40px;padding-top:20px;">
 															<div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:12px;line-height:120%;text-align:left;mso-line-height-alt:14.399999999999999px;">
 																<p style="margin: 0; word-break: break-word;">
-																	<span style="word-break: break-word; color: #95979c;">Growthlabs Copyright © {{date('Y')}}</span>
+																	<span style="word-break: break-word; color: #95979c;">{{ $platformName }} &copy; {{ date('Y') }}</span>
 																</p>
 															</div>
 														</td>
