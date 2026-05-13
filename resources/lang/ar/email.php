@@ -1,7 +1,7 @@
 <?php
 
 return [
-"welcome_email"=> [
+'welcome_email' => [
     'subject'=> 'مرحبا بك في منصتنا',
     'dear'=> 'عزيزي',
     'm1'=>'يسعدنا انضمامك إلينا. إليك تفاصيل تسجيل الدخول الخاصة بك:',
@@ -70,4 +70,28 @@ return [
     'organization' => 'المنظمة',
     'thank_you' => 'شكراً لاستخدامك منصتنا',
 
+    'mentorship_request_email' => [
+        'subject' => 'طلب جلسة إرشاد جديدة – ',
+        'informing' => 'نود إعلامك بأنه تم تقديم طلب جلسة إرشاد جديدة على المنصة.',
+        'startup_name' => 'اسم الشركة الناشئة',
+        'requested_mentor' => 'المدرب المطلوب',
+        'session_notes' => 'ملاحظات الجلسة',
+        'preferred_date_time' => 'التاريخ والوقت المفضلين',
+        'date_time_formatted' => ':date من :start_time إلى :end_time ( :duration دقيقة )',
+        'review_request' => 'يرجى مراجعة الطلب واتخاذ الإجراءات اللازمة لتأكيد الجلسة وتحديد موعدها.',
+        'ensure_parties_notified' => 'يرجى التأكد من إعلام كل من المرشد والشركة الناشئة بمجرد تأكيد الجلسة.',
+        'support_offer' => 'إذا كنت بحاجة إلى أي معلومات أو دعم إضافي، فلا تتردد في التواصل معنا في أي وقت.',
+    ],
+    'dear_male' => 'عزيزي السيد',
+    'dear_female' => 'عزيزتي السيدة',
+    'regards' => 'أطيب التحيات،',
+    'team' => 'فريق :platform_name',
+
+    'change_cycle_subject' => 'إشعار تغيير دورة الإرشاد',
+    'change_cycle_heading' => 'إشعار تغيير الدورة',
+    'hello' => 'مرحباً',
+    'user' => 'المستخدم',
+    'cycle_changed' => 'لقد تغيرت دورة الإرشاد من :from إلى :to',
+    'organization' => 'المنظمة',
+    'thank_you' => 'شكراً لاستخدامك منصتنا',
 ];

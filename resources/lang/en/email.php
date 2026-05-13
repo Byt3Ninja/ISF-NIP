@@ -101,5 +101,21 @@ return [
     'cycle_changed' => 'Your startup cycle has changed from :from to :to',
     'organization' => 'Organization',
     'thank_you' => 'Thank You',
+    'mentorship_request_email' => [
+        'subject' => 'New Mentorship Session Request – ',
+        'informing' => 'We would like to inform you that a new mentorship session request has been submitted on the platform.',
+        'startup_name' => 'Startup Name',
+        'requested_mentor' => 'Requested Mentor',
+        'session_notes' => 'Session Notes',
+        'preferred_date_time' => 'Preferred Date/Time',
+        'date_time_formatted' => ':date From :start_time to :end_time ( :duration minutes )',
+        'review_request' => 'Kindly review the request and proceed with the necessary actions to confirm and schedule the session.',
+        'ensure_parties_notified' => 'Please ensure that both the mentor and the startup are notified once the session is confirmed.',
+        'support_offer' => 'If you need any additional information or support, please feel free to reach out at any time.',
+    ],
+    'dear_male' => 'Dear Mr. ',
+    'dear_female' => 'Dear Ms. ',
+    'regards' => 'Best regards,',
+    'team' => ':platform_name Team',
 
 ];
