@@ -557,9 +557,6 @@ $(function () {
         <span class="badge ${priorityInfo.class} d-flex align-items-center gap-1 px-2 py-1">
           <i class="ti ti-flag ti-xs"></i>${priorityInfo.title}
         </span>
-        <span class="badge ${statusInfo.class} d-flex align-items-center gap-1 px-2 py-1">
-          <i class="ti ti-circle-dot ti-xs"></i>${statusInfo.title}
-        </span>
         <span class="badge bg-label-secondary d-flex align-items-center gap-1 px-2 py-1">
           <i class="ti ti-calendar ti-xs"></i> {{ __('admin.due') }} ${data.dueDate}
         </span>
