@@ -1427,12 +1427,12 @@ class MentorsController extends Controller
 			$_sesssion->mentor = new stdClass;
 			$_sesssion->mentor->id = $session->mentor->id;
 			$_sesssion->mentor->name = trim( $session->mentor->first_name_en . ' ' . $session->mentor->last_name_en );
-			$_sesssion->mentor->image_url = $session->mentor->img_url ? asset($session->mentor->img_url) : '/icons/avatar.svg';
+			$_sesssion->mentor->image_url = User::image_handler($session->mentor->img_url);
 
 			$_sesssion->user = new stdClass;
 			$_sesssion->user->id = $session->user->id;
 			$_sesssion->user->name = trim( $session->user->first_name_en . ' ' . $session->user->last_name_en );
-			$_sesssion->user->image_url = $session->user->img_url ? asset($session->user->img_url) : '/icons/avatar.svg';
+			$_sesssion->user->image_url = User::image_handler($session->user->img_url);
 			$_sesssion->user->company = new stdClass;
 			$_sesssion->user->company->id = optional($session->user->company)->id;
 			$_sesssion->user->company->name = optional($session->user->company)->name_en;
