@@ -20,14 +20,23 @@ function buildAttachmentItem(att, taskId, canDelete) {
     ? moment(att.created_at).format('YYYY-MM-DD h:mm')
     : '';
 
+  const statusMap = {
+    feedback:   { label: 'Feedback',   color: 'warning'  },
+    submission: { label: 'Submission', color: 'info'     },
+    attachment: { label: 'Attachment', color: 'secondary' },
+  };
+  const statusInfo = statusMap[att.status] || statusMap['attachment'];
+  const statusBadge = `<span class="badge bg-label-${statusInfo.color} ms-1" style="font-size:.65rem;">${statusInfo.label}</span>`;
+
   return `
     <div class="d-flex flex-column border rounded px-2 bg-light-subtle attachment-item" id="att-row-${att.id}">
-      
+
       <div class="d-flex align-items-center justify-content-between">
         <a href="${att.url}" target="_blank"
            class="text-body fw-medium text-truncate d-flex align-items-center gap-1 flex-grow-1" style="min-width:0;">
           <i class="ti ${fileIcon(att.name)} ti-xs flex-shrink-0"></i>
           <span class="text-truncate small">${att.name}</span>
+          ${statusBadge}
         </a>
         <div class="d-flex align-items-center gap-1 flex-shrink-0 ms-2">
           <a href="${att.url}" download="${att.name}"
