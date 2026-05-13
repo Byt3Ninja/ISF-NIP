@@ -11,7 +11,7 @@
                     <p style="margin: 15px 0px;"></p>
                     <p style="margin: 0;"> {{ __('email.mentorship_request_email.startup_name') }} : {{ $startupName }}</p>
                     <p style="margin: 0;"> {{ __('email.mentorship_request_email.requested_mentor') }} : {{ $requestedMentor }} </p>
-                    @if( $sessionNotes ) <p style="margin: 0;"> {{ __('email.mentorship_request_email.session_notes') }} : {{ $sessionNotes }}</p> @endif
+                    @if( trim( $sessionNotes ) ) <p style="margin: 0;"> {{ __('email.mentorship_request_email.session_notes') }} : {{ $sessionNotes }}</p> @endif
                     <p style="margin: 0;"> {{ __('email.mentorship_request_email.preferred_date_time') }} : {{ $sessionDateTime }} </p>
                     <p style="margin: 15px 0px;"></p>
                     <p style="margin: 0;"> {{ __('email.mentorship_request_email.review_request') }}</p>
