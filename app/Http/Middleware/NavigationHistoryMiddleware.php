@@ -302,7 +302,7 @@ private function finalizeTitle($title, $ignoredTitles, $ignoredContains): ?strin
     }
 
     $cleanTitle = strtolower(trim($title));
-    dd($cleanTitle);
+    //dd($cleanTitle);
     $customReplacements = [
         'index_slot'      => app()->getLocale() == 'en' ? 'Slots' : 'المواعيد',
         'sessions_list_detailed_mentorship' => 'Tasks_List',
@@ -312,6 +312,7 @@ private function finalizeTitle($title, $ignoredTitles, $ignoredContains): ?strin
         'index_organization-type' => app()->getLocale() == 'en' ? 'Organization Types' : 'أنواع المؤسسات',
         'index_country-management' => app()->getLocale() == 'en' ? 'Manage Countries' : 'الدول المتاحة',
         'view_overview_mine_quizze' => app()->getLocale() == 'en' ? 'Quiz Details' : 'تفاصيل الاختبار',
+        'view_response_mine_quizze' => app()->getLocale() == 'en' ? 'Quiz Responses' : 'إجابات الاختبار',
         
     ];
     if (isset($customReplacements[$cleanTitle])) {
