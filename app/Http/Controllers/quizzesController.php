@@ -360,6 +360,7 @@ class quizzesController extends Controller
 					->whereIn('training_id', $training_ids)
 					->with(['training', 'myAttempts', 'questions'])
 					->get();
+					dd($organization_id, $training_ids, $get_step, $quizzes);
 			} else {
 				$quizzes = collect([]);
 			}
