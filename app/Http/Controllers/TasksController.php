@@ -94,7 +94,7 @@ class TasksController extends Controller
                     ->groupBy(fn($a) => $a['batch_id'] ?? md5($a['path'] ?? $a['name']))
                     ->map(fn($group) => [
                         'user' => null, 'img_url' => null, 'user_id' => null,
-                        'status' => 'pending_review', 'time' => $group->first()['created_at']
+                        'status' => 'pending_review', 'time' => isset( $group->first()['created_at'] )
                             ? \Carbon\Carbon::parse($group->first()['created_at'])->diffForHumans()
                             : '',
                         'note' => $group->first()['note'] ?? null,
@@ -238,6 +238,7 @@ class TasksController extends Controller
                         'size'   => $file->getSize(),
                         'type'   => $file->getMimeType(),
                         'status' => $uploader->hasRole('registered') ? 'submission' : 'attachment',
+                        'created_at' => now()->toDateTimeString(),
                     ];
                 }
             }
@@ -391,7 +392,7 @@ class TasksController extends Controller
             ->groupBy(fn($a) => $a['batch_id'] ?? md5($a['path'] ?? $a['name']))
             ->map(fn($group) => [
                 'user' => null, 'img_url' => null, 'user_id' => null,
-                'status' => 'pending_review', 'time' => $group->first()['created_at']
+                'status' => 'pending_review', 'time' => isset( $group->first()['created_at'] )
                     ? \Carbon\Carbon::parse($group->first()['created_at'])->diffForHumans()
                     : '',
                 'note' => $group->first()['note'] ?? null,
@@ -605,6 +606,7 @@ class TasksController extends Controller
                         'size'   => $file->getSize(),
                         'type'   => $file->getMimeType(),
                         'status' => $uploader->hasRole('registered') ? 'submission' : 'attachment',
+                        'created_at' => now()->toDateTimeString(),
                     ];
                 }
                 $task->update(['attachments' => $attachments]);
