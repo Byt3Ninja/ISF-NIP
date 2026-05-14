@@ -7,7 +7,7 @@
  */
 
 const DZ_MAX_FILES   = 5;
-const DZ_MAX_SIZE_MB = 10;
+const DZ_MAX_SIZE_MB = 5;
 const DZ_ACCEPT_TYPES = [
   'image/jpeg','image/jpg','image/png','image/gif','image/webp','image/svg+xml',
   'application/pdf',
