@@ -173,7 +173,9 @@ function initDropzone(tasks) {
         $('#vt-submission-note').val('');
       }
       dzRenderQueue();
-      $btn.prop('disabled', false).html(`<i class="ti ti-upload ti-xs me-1"></i>${lbl.uploadAll}`);
+      $btn
+        .prop("disabled", false)
+        .html(`<i class="ti ti-send ti-xs me-1"></i>${lbl.send_submission}`);
     }
   });
 }
