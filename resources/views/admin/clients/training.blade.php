@@ -150,7 +150,7 @@
                       {{ $ccontent->desc }}
                     </p>
                   @endif
-                  <div id="instructorsContainer">
+                  {{-- <div id="instructorsContainer">
                     <hr class="my-6" />
                     <h5>{{ $l == 'en' ? 'Trainer' : 'المدرب' }}</h5>
                     <div class="d-flex justify-content-start align-items-center user-name">
@@ -164,7 +164,7 @@
                         <small>{{ $training->email }}</small>
                       </div>
                     </div>
-                  </div>
+                  </div> --}}
                 </div>
               </div>
             </div>
