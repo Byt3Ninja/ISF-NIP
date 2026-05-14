@@ -712,7 +712,8 @@ return [
 	'quizAlreadyCompleted' => 'الاختبار مكتمل بالفعل',
 	'quizTimesUp' => 'انتهى الوقت',
 	'quizNotYetAvailable' => 'غير متاح بعد',
-	'quizNextQuestion' => 'السؤال التالي',
+  'quizNextQuestion' => 'السؤال التالي',
+  'quizComplete' => 'إكمال',
 	'quizSubmitNoAnswer' => 'الرجاء تحديد الإجابة قبل المتابعة',
 	'quizViewResults' => 'عرض النتائج',
 	'quizOk' => 'حسنا',
@@ -3839,4 +3840,8 @@ return [
 	'You_dont_have_cycle' => 'ليس لديك دورة.',
   'add_feedback_message' => 'يمكنك تقديم الملاحظات فقط عندما تكون حالة المهمة قيد المراجعة.',
   'uploaded_attachments' => 'المرفقات المرفوعة',
+  'invalid_file_type' => 'نوع الملف غير صالح.',
+  'exceeds_size_limit' => 'حجم الملف يتجاوز الحد الأقصى 10 ميجابايت.',
+  'please_add_files' => 'يرجى إضافة ملف واحد على الأقل.',
+  'failed' => 'فشل',
 ];
