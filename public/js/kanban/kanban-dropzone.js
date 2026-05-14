@@ -79,9 +79,9 @@ function initDropzone(tasks) {
 
   // Click to browse
   $('#vt-dropzone').on('click', function (e) {
-    if (!$(e.target).hasClass('dz-remove-btn') && !$(e.target).closest('.dz-remove-btn').length) {
-      $('#vt-dropzone-input').val('').trigger('click');
-    }
+    if ($(e.target).is('#vt-dropzone-input, .dz-remove-btn, .dz-remove-btn *')) return;
+    $('#vt-dropzone-input').val('');
+    $('#vt-dropzone-input')[0].click();
   });
 
   // File input change
@@ -113,6 +113,7 @@ function initDropzone(tasks) {
   $('#vt-dropzone-upload-btn').on('click', function () {
     const lbl  = cfg.labels;
     const $btn = $(this);
+    const originalHtml = $btn.html();
     if (!dzQueue.length) {
       if ($btn.data('always-show')) {
         $('#vt-upload-error').text(lbl.pleaseAddFiles || 'Please add at least one file.');
@@ -174,9 +175,7 @@ function initDropzone(tasks) {
         $('#vt-submission-note').val('');
       }
       dzRenderQueue();
-      $btn
-        .prop("disabled", false)
-        .html(`<i class="ti ti-send ti-xs me-1"></i>${lbl.sendSubmission}`);
+      $btn.prop("disabled", false).html(originalHtml);
     }
   });
 }
