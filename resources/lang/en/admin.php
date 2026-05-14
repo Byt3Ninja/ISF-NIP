@@ -740,7 +740,8 @@ return [
 	'quizAlreadyCompleted' => 'Quiz already completed',
 	'quizTimesUp' => 'Times up',
 	'quizNotYetAvailable' => 'Not yet available',
-	'quizNextQuestion' => 'Next question',
+  'quizNextQuestion' => 'Next question',
+  'quizComplete' => 'Complete',
 	'quizSubmitNoAnswer' => 'Please select answer before proceed',
 	'quizViewResults' => 'View Results',
 	'quizOk' => 'Ok',
@@ -3783,4 +3784,8 @@ return [
 	'You_dont_have_cycle' => 'You don\'t have any cycle.',
   'add_feedback_message' => 'You can provide feedback only when the task status is In Review.',
   'uploaded_attachments' => 'Uploaded Attachments',
+  'invalid_file_type' => 'Invalid file type.',
+  'exceeds_size_limit' => 'File exceeds 10MB size limit.',
+  'please_add_files' => 'Please add at least one file.',
+  'failed' => 'Failed',
 ];
