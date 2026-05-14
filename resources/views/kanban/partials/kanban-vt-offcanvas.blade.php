@@ -133,7 +133,7 @@
               <div class="d-flex align-items-center justify-content-between mb-2">
                 <span class="small fw-medium text-body">{{ __('admin.upload_attachments') }}</span>
                 <span class="text-muted" style="font-size:.7rem;">
-                  {{ __('admin.max') }} 5 {{ __('admin.files') ?? 'files' }} · 10MB {{ __('admin.each') }}
+                  {{ __('admin.max') }} 5 {{ __('admin.files') ?? 'files' }} · 5MB {{ __('admin.each') }}
                 </span>
               </div>
 
@@ -223,7 +223,7 @@
               <div class="mb-3">
                 <div class="d-flex align-items-center justify-content-between mb-2">
                   <label class="form-label small mb-0">{{ __('admin.attachments') }}</label>
-                  <span class="text-muted" style="font-size:.7rem;">{{ __('admin.max') }} 5 {{ __('admin.files') ?? 'files' }} · 10MB {{ __('admin.each') }}</span>
+                  <span class="text-muted" style="font-size:.7rem;">{{ __('admin.max') }} 5 {{ __('admin.files') ?? 'files' }} · 5MB {{ __('admin.each') }}</span>
                 </div>
                 <div id="vt-fb-dropzone"
                      class="border border-dashed rounded-2 p-3 text-center position-relative"
@@ -274,7 +274,7 @@
               {{ __('admin.your_submission') }}
             </span>
             <span class="small text-dark">
-              {{ __('admin.max') }} 5 {{ __('admin.files') ?? 'files' }} · 10MB {{ __('admin.each') }}
+              {{ __('admin.max') }} 5 {{ __('admin.files') ?? 'files' }} · 5MB {{ __('admin.each') }}
             </span>
           </div>
 
