@@ -94,7 +94,9 @@ class TasksController extends Controller
                     ->groupBy(fn($a) => $a['batch_id'] ?? md5($a['path'] ?? $a['name']))
                     ->map(fn($group) => [
                         'user' => null, 'img_url' => null, 'user_id' => null,
-                        'status' => 'pending_review', 'time' => '',
+                        'status' => 'pending_review', 'time' => $group->first()['created_at']
+                            ? \Carbon\Carbon::parse($group->first()['created_at'])->diffForHumans()
+                            : '',
                         'note' => $group->first()['note'] ?? null,
                         'files' => $group->map(fn($a) => [
                             'name'       => $a['name'],
@@ -389,7 +391,9 @@ class TasksController extends Controller
             ->groupBy(fn($a) => $a['batch_id'] ?? md5($a['path'] ?? $a['name']))
             ->map(fn($group) => [
                 'user' => null, 'img_url' => null, 'user_id' => null,
-                'status' => 'pending_review', 'time' => '',
+                'status' => 'pending_review', 'time' => $group->first()['created_at']
+                    ? \Carbon\Carbon::parse($group->first()['created_at'])->diffForHumans()
+                    : '',
                 'note' => $group->first()['note'] ?? null,
                 'files' => $group->map(fn($a) => [
                     'name'       => $a['name'],
