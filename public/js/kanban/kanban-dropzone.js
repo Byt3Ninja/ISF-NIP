@@ -45,12 +45,12 @@ function dzRenderQueue() {
   if (!$('#vt-dropzone-upload-btn').data('always-show')) {
     $('#vt-dropzone-upload-btn').toggleClass('d-none', dzQueue.length === 0);
   }
-  $('#vt-upload-error').text('');
 }
 
 function dzAddFiles(files) {
   const lbl    = window.KanbanConfig.labels;
   const $error = $('#vt-upload-error');
+  $error.text('');
 
   Array.from(files).forEach(file => {
     if (dzQueue.length >= DZ_MAX_FILES) {
@@ -105,6 +105,7 @@ function initDropzone(tasks) {
     e.stopPropagation();
     const id = $(this).data('dz-id');
     dzQueue = dzQueue.filter(i => i.id != id);
+    $('#vt-upload-error').text('');
     dzRenderQueue();
   });
 
@@ -175,7 +176,7 @@ function initDropzone(tasks) {
       dzRenderQueue();
       $btn
         .prop("disabled", false)
-        .html(`<i class="ti ti-send ti-xs me-1"></i>${lbl.send_submission}`);
+        .html(`<i class="ti ti-send ti-xs me-1"></i>${lbl.sendSubmission}`);
     }
   });
 }
