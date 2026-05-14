@@ -360,7 +360,6 @@ class quizzesController extends Controller
 					->whereIn('training_id', $training_ids)
 					->with(['training', 'myAttempts', 'questions'])
 					->get();
-					//dd($organization_id, $training_ids, $get_step, $quizzes);
 			} else {
 				$quizzes = collect([]);
 			}
@@ -370,8 +369,9 @@ class quizzesController extends Controller
 				$quiz->in_progress = $in_progress;
 				$quiz->questions = $quiz->questions;
 				return $quiz;
+			})->filter(function( $quiz ) {
+				return $quiz->questions->count() > 0;
 			})->values();
-			// dd($quizzes);
 			return view('admin/clients/quiz/dashboard', compact('quizzes'));
 		} else {
 			return abort(401);
