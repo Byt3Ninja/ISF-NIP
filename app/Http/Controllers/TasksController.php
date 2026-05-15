@@ -89,6 +89,21 @@ class TasksController extends Controller
                 'dueDate' => $task->due_date ? $task->due_date->format('Y-m-d') : 'N/A',
                 'tags' => $task->tags ?? [],
                 'attachments' => $task->attachments ?? [],
+                'submissions' => collect($task->attachments ?? [])
+                    ->filter(fn($a) => ($a['status'] ?? '') === 'submission')
+                    ->groupBy(fn($a) => $a['batch_id'] ?? md5($a['path'] ?? $a['name']))
+                    ->map(fn($group) => [
+                        'user' => null, 'img_url' => null, 'user_id' => null,
+                        'status' => 'pending_review', 'time' => isset( $group->first()['created_at'] )
+                            ? \Carbon\Carbon::parse($group->first()['created_at'])->diffForHumans()
+                            : '',
+                        'note' => $group->first()['note'] ?? null,
+                        'files' => $group->map(fn($a) => [
+                            'name'       => $a['name'],
+                            'url'        => asset('storage/' . $a['path']),
+                            'size_bytes' => $a['size'] ?? null,
+                        ])->values()->toArray(),
+                    ])->values()->toArray(),
                 'creator' => $task->creator ? [
                     'id' => $task->creator->id,
                     'name' => $task->creator->name,
@@ -223,6 +238,7 @@ class TasksController extends Controller
                         'size'   => $file->getSize(),
                         'type'   => $file->getMimeType(),
                         'status' => $uploader->hasRole('registered') ? 'submission' : 'attachment',
+                        'created_at' => now()->toDateTimeString(),
                     ];
                 }
             }
@@ -373,14 +389,18 @@ class TasksController extends Controller
 
         $fmtSubs = collect($allAtt)
             ->filter(fn($a) => ($a['status'] ?? '') === 'submission')
-            ->map(fn($a) => [
+            ->groupBy(fn($a) => $a['batch_id'] ?? md5($a['path'] ?? $a['name']))
+            ->map(fn($group) => [
                 'user' => null, 'img_url' => null, 'user_id' => null,
-                'status' => 'pending_review', 'time' => '', 'note' => null,
-                'files' => [[
+                'status' => 'pending_review', 'time' => isset( $group->first()['created_at'] )
+                    ? \Carbon\Carbon::parse($group->first()['created_at'])->diffForHumans()
+                    : '',
+                'note' => $group->first()['note'] ?? null,
+                'files' => $group->map(fn($a) => [
                     'name'       => $a['name'],
                     'url'        => asset('storage/' . $a['path']),
                     'size_bytes' => $a['size'] ?? null,
-                ]],
+                ])->values()->toArray(),
             ])->values();
 
         $assignees = $task->assignees->map(function ($company) {
@@ -586,6 +606,7 @@ class TasksController extends Controller
                         'size'   => $file->getSize(),
                         'type'   => $file->getMimeType(),
                         'status' => $uploader->hasRole('registered') ? 'submission' : 'attachment',
+                        'created_at' => now()->toDateTimeString(),
                     ];
                 }
                 $task->update(['attachments' => $attachments]);
@@ -771,11 +792,14 @@ class TasksController extends Controller
             $path = $file->store('tasks/attachments', 'public');
 
             $newAtt = [
-                'name'   => $file->getClientOriginalName(),
-                'path'   => $path,
-                'size'   => $file->getSize(),
-                'type'   => $file->getMimeType(),
-                'status' => $uploader->hasRole('registered') ? 'submission' : 'attachment',
+                'name'       => $file->getClientOriginalName(),
+                'path'       => $path,
+                'size'       => $file->getSize(),
+                'type'       => $file->getMimeType(),
+                'status'     => $uploader->hasRole('registered') ? 'submission' : 'attachment',
+                'note'       => $request->input('note', ''),
+                'batch_id'   => $request->input('batch_id', ''),
+                'created_at' => now()->toDateTimeString(),
             ];
 
             $attachments = $task->attachments ?? [];

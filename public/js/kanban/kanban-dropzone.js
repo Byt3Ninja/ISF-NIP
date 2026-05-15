@@ -7,7 +7,7 @@
  */
 
 const DZ_MAX_FILES   = 5;
-const DZ_MAX_SIZE_MB = 10;
+const DZ_MAX_SIZE_MB = 5;
 const DZ_ACCEPT_TYPES = [
   'image/jpeg','image/jpg','image/png','image/gif','image/webp','image/svg+xml',
   'application/pdf',
@@ -45,12 +45,12 @@ function dzRenderQueue() {
   if (!$('#vt-dropzone-upload-btn').data('always-show')) {
     $('#vt-dropzone-upload-btn').toggleClass('d-none', dzQueue.length === 0);
   }
-  $('#vt-upload-error').text('');
 }
 
 function dzAddFiles(files) {
   const lbl    = window.KanbanConfig.labels;
   const $error = $('#vt-upload-error');
+  $error.text('');
 
   Array.from(files).forEach(file => {
     if (dzQueue.length >= DZ_MAX_FILES) {
@@ -79,9 +79,9 @@ function initDropzone(tasks) {
 
   // Click to browse
   $('#vt-dropzone').on('click', function (e) {
-    if (!$(e.target).hasClass('dz-remove-btn') && !$(e.target).closest('.dz-remove-btn').length) {
-      $('#vt-dropzone-input').val('').trigger('click');
-    }
+    if ($(e.target).is('#vt-dropzone-input, .dz-remove-btn, .dz-remove-btn *')) return;
+    $('#vt-dropzone-input').val('');
+    $('#vt-dropzone-input')[0].click();
   });
 
   // File input change
@@ -105,6 +105,7 @@ function initDropzone(tasks) {
     e.stopPropagation();
     const id = $(this).data('dz-id');
     dzQueue = dzQueue.filter(i => i.id != id);
+    $('#vt-upload-error').text('');
     dzRenderQueue();
   });
 
@@ -112,6 +113,7 @@ function initDropzone(tasks) {
   $('#vt-dropzone-upload-btn').on('click', function () {
     const lbl  = cfg.labels;
     const $btn = $(this);
+    const originalHtml = $btn.html();
     if (!dzQueue.length) {
       if ($btn.data('always-show')) {
         $('#vt-upload-error').text(lbl.pleaseAddFiles || 'Please add at least one file.');
@@ -173,7 +175,7 @@ function initDropzone(tasks) {
         $('#vt-submission-note').val('');
       }
       dzRenderQueue();
-      $btn.prop('disabled', false).html(`<i class="ti ti-upload ti-xs me-1"></i>${lbl.uploadAll}`);
+      $btn.prop("disabled", false).html(originalHtml);
     }
   });
 }

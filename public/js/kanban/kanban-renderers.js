@@ -229,10 +229,10 @@ function renderSubmissionsList(submissions, containerSelector) {
           ${avatarHtml}
           <div>
             <span class="fw-semibold text-dark d-block">${sub.user || ''}${statusBadge}</span>
-            <span class="text-muted" style="font-size:.7rem;">${sub.time || ''}</span>
           </div>
         </div>
         ` : ''}
+        ${sub.time ? `<small class="text-muted d-block mb-1">${sub.time}</small>` : ''}
         ${sub.note ? `<p class="small text-muted mb-2">${sub.note}</p>` : ''}
         <div>${filesHtml}</div>
       </div>`;

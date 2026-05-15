@@ -140,7 +140,7 @@
       recover:                  @json(__('admin.Recover')),
       attachmentDeletedSuccess: @json(__('admin.attachment_deleted_success')),
       attachmentUploadedSuccess:@json(__('admin.attachment_uploaded_success')),
-      uploading:                @json(__('admin.Uploading')),
+      uploading:                @json(__('admin.uploading')),
       uploadAll:                @json(__('admin.upload_all')),
       uploaded:                 @json(__('admin.uploaded')),
       failed:                   @json(__('admin.Failed')),
@@ -166,6 +166,7 @@
       rejected:       @json(__('admin.Rejected')),
       // Activities
       noActivities:   @json(__('admin.no_recent_activities')),
+      send_submission: @json(__('admin.send_submission')),
     },
   };
 
