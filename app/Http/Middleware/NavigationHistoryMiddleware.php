@@ -152,6 +152,8 @@ class NavigationHistoryMiddleware
             if ($existingIndex !== false) {
                 // User going back - truncate trail
                 $trail = array_slice($trail, 0, $existingIndex + 1);
+                // Re-translate title in case locale changed since last visit
+                $trail[$existingIndex]['title'] = $title;
             } else {
                 // Check for duplicate title (prevent same page twice)
                 $lastItem = end($trail);
@@ -302,7 +304,8 @@ private function finalizeTitle($title, $ignoredTitles, $ignoredContains): ?strin
     }
 
     $cleanTitle = strtolower(trim($title));
-    //dd($cleanTitle);
+    $l = app()->getLocale();
+    //dd($cleanTitle , $l);
     $customReplacements = [
         'index_slot'      => app()->getLocale() == 'en' ? 'Slots' : 'المواعيد',
         'sessions_list_detailed_mentorship' => 'Tasks_List',
