@@ -104,6 +104,7 @@ return [
         'step3'      => 'Review & Import',
         'org_label'  => 'Default Organization',
         'org_help'   => 'Used only for rows whose program does not match an existing one. If a row\'s program already exists, that program\'s organization is used.',
+        'mapped'     => 'fields mapped',
         'actions'    => [
             'back'         => 'Back',
             'next'         => 'Next',

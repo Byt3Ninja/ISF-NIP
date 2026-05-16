@@ -28,11 +28,21 @@
         financials:  'Revenue & Financials',
     };
 
+    const sectionLabelsAr = {
+        program:     'تفاصيل البرنامج',
+        founders:    'تفاصيل المؤسسين',
+        co_founders: 'تفاصيل الشركاء المؤسسين',
+        company:     'تفاصيل الشركة',
+        employees:   'إحصائيات الموظفين',
+        financials:  'الإيرادات والمالية',
+    };
+
     window.importerMapping = { renderFor, getCurrentMappings };
 
     function renderFor(sessionState) {
         if (!sessionState || !sessionState.headers) return;
 
+        var used_labels = $('html').attr('lang') === 'ar' ? sectionLabelsAr : sectionLabels;
         sectionsEl.innerHTML = '';
         const sectionOrder = Object.keys(sections);
         sectionOrder.forEach((section, sIdx) => {
@@ -45,7 +55,7 @@
                 <h2 class="accordion-header">
                     <button class="accordion-button ${sIdx === 0 ? '' : 'collapsed'}" type="button"
                             data-bs-toggle="collapse" data-bs-target="#importer-section-${section}">
-                        ${escapeHtml(sectionLabels[section] || section)}
+                        ${escapeHtml(used_labels[section] || section)}
                     </button>
                 </h2>
                 <div id="importer-section-${section}" class="accordion-collapse collapse ${sIdx === 0 ? 'show' : ''}">

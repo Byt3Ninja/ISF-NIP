@@ -6,7 +6,7 @@
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <div class="small text-muted">
             <span id="importer-mapping-count">0</span> / <span id="importer-mapping-total">57</span>
-            fields mapped
+            {{ __('importer.ui.mapped') }}
         </div>
         <div>
             <button type="button" id="importer-automap-btn" class="btn btn-outline-primary btn-sm">
