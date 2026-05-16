@@ -5,7 +5,7 @@ return [
     'errors' => [
         'ext_unsupported'    => 'صيغة الملف غير مدعومة. يرجى رفع ملف CSV صحيح.',
         'empty_file'         => 'الملف المرفوع فارغ.',
-        'empty_headers_row'  => 'صف الرؤوس فارغ.',
+        'empty_headers_row'  => 'صف الرؤوس الرئيسية فارغ.',
         'missing_headers'    => 'الأعمدة المطلوبة مفقودة: :headers.',
         'duplicate_headers'  => 'تم العثور على أسماء أعمدة مكررة: :headers.',
         'too_large'          => 'حجم الملف كبير جدًا. الحد الأقصى هو 10 ميغابايت.',

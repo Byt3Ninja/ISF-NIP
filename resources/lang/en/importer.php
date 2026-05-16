@@ -5,7 +5,7 @@ return [
     'errors' => [
         'ext_unsupported'    => 'Unsupported file format. Please upload a valid CSV file.',
         'empty_file'         => 'The uploaded file is empty.',
-        'empty_headers_row'  => 'Header row is empty.',
+        'empty_headers_row'  => 'Main Header row is empty.',
         'missing_headers'    => 'Missing required column(s): :headers.',
         'duplicate_headers'  => 'Duplicate column name(s) found: :headers.',
         'too_large'          => 'File is too large. Maximum size is 10 MB.',
